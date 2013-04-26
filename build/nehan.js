@@ -5961,9 +5961,6 @@ var RubyStream = (function(){
   }
 
   RubyStream.prototype = {
-    isFirst : function(){
-      return this.pos === 0;
-    },
     backup : function(){
       this.backupPos = this.pos;
     },
@@ -6386,9 +6383,6 @@ var RubyGenerator = (function(){
   }
 
   RubyGenerator.prototype = {
-    isFirst : function(){
-      return this.stream.isFirst();
-    },
     backup : function(){
       this.stream.backup();
     },

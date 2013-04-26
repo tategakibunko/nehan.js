@@ -1,5 +1,5 @@
 {
-  "name": "nehan.js",
+  "name": "nehan",
   "version": "4.0.0",
   "description": "dynamic layout engine writtein in javascript",
   "main": "nehan.js",

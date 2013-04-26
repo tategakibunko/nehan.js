@@ -5,9 +5,6 @@ var RubyGenerator = (function(){
   }
 
   RubyGenerator.prototype = {
-    isFirst : function(){
-      return this.stream.isFirst();
-    },
     backup : function(){
       this.stream.backup();
     },
