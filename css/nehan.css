@@ -1,0 +1,178 @@
+@charset "utf-8";
+
+/*
+   Important Notice of 'nehan-' prefix classes.
+
+   You can't define 'sizing' value that affect 'size' of target in css class starts with 'nehan-' prefix.
+   Because in nehan.js, all the layouting values associated with box sizes are under control of nehan layout engine.
+   So you can define only color, font-family or some styles that doesn't affect size of box in classes started with 'nehan-' prefix.
+ */
+
+/* reset */
+div, span{
+  vertical-align:baseline;
+  font:inherit;
+  font-size:100%;
+  margin:0;
+  padding:0;
+  border:0;
+}
+
+/* block elements */
+.nehan-body{
+  float:left;
+}
+.nehan-box{
+  font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック',monospace;
+}
+.nehan-ruby-line{
+  position:relative;
+}
+.nehan-ruby-line-vert,
+.nehan-text-line-vert{
+  text-align:center;
+  line-height:1em;
+  font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho',monospace;
+}
+.nehan-text-line-hori{
+  overflow:visible;
+}
+.nehan-text-line-vert a{
+  text-decoration:none;
+}
+.nehan-table{
+  background-color:white;
+}
+.nehan-table,
+.nehan-tr,
+.nehan-thead,
+.nehan-tfoot,
+.nehan-td,
+.nehan-th,
+.nehan-fieldset{
+  border-color:#a8a8a8;
+  border-style:solid;
+}
+.nehan-th{
+  background-color:transparent;
+}
+.nehan-thead{
+  font-weight:bold;
+  background-color:#c3d9ff;
+}
+.nehan-tfoot{
+  font-style:italic;
+}
+.nehan-legend,
+.nehan-dt{
+  font-weight:bold;
+}
+.nehan-hr{
+  border-color:#b8b8b8;
+  border-style:solid;
+}
+.nehan-pb-after, .nehan-pb-before{
+  border-color:transparent;
+  border-style:none !important;
+}
+.nehan-header{
+  border-style:solid;
+  border-color:#6a6a6a; 
+}
+.nehan-header .nehan-text-line,
+.nehan-header .nehan-vert-alpha{
+  font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック',monospace !important;
+}
+.nehan-inside-marker,
+.nehan-li-marker .nehan-text-line-vert{
+  font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック',monospace !important;
+}
+
+/* inline elements */
+.nehan-body a{
+  word-wrap:normal !important;
+}
+.nehan-img img{
+  vertical-align:bottom;
+}
+.nehan-img-char{
+  display:block;
+}
+.nehan-empha-char{
+  font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace;
+}
+.nehan-ruby-line-hori .nehan-empha-char{
+  top:0.2em;
+}
+.nehan-text-line-hori .nehan-char-kakko-start{
+  margin-left:-0.5em;
+}
+.nehan-text-line-hori .nehan-char-kakko-end{
+  margin-right:-0.5em;
+}
+.nehan-text-line-hori .nehan-char-kuto{
+  margin-right:-0.5em;
+}
+.nehan-b, .nehan-strong{
+  font-weight:bold;
+}
+.nehan-vert-rl{
+  -webkit-writing-mode:vertical-rl;
+}
+.nehan-vert-half{
+  height:0.5em;
+}
+.nehan-vert-kern-start{
+  margin-top:-0.5em;
+}
+.nehan-vert-space-end{
+  padding-bottom:0.5em;
+}
+.nehan-vert-alpha{
+  -webkit-transform : rotate(90deg);
+  -webkit-transform-origin : 50% 50%;
+  -moz-transform : rotate(90deg);
+  -moz-transform-origin : 50% 50%;
+  -o-transform : rotate(90deg);
+  -o-transform-origin : 50% 50%;
+  transform : rotate(90deg);
+  transform-origin : 50% 50%;
+}
+
+/* tip utils */
+.nehan-tip{
+  border-style:solid;
+}
+.nehan-error, .nehan-alert {
+  background:#fbe3e4;
+  color:#8a1f11;
+  border-color:#fbc2c4;
+}
+.nehan-notice {
+  background:#fff6bf;
+  color:#514721;
+  border-color:#ffd324;
+}
+.nehan-success {
+  background:#e6efc2;
+  color:#264409;
+  border-color:#c6d880;
+}
+.nehan-info {
+  background:#d5edf8;
+  color:#205791;
+  border-color:#92cae4;
+}
+.nehan-error a, .nehan-alert a {
+  color:#8a1f11;
+}
+.nehan-notice a {
+  color:#514721;
+}
+.nehan-success a {
+  color:#264409;
+}
+.nehan-info a {
+  color:#205791;
+}
+

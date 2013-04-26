@@ -1,0 +1,68 @@
+body{
+  font-family:"Helvetica Neue", Arial, Helvetica, sans-serif;
+  margin:1em 2em;
+}
+textarea{
+  margin-bottom:1em;
+}
+.container{
+  width: 980px;
+}
+.main{
+  width:710px;
+  float:left;
+}
+#menu{
+  float:left;
+  width:230px;
+  list-style:none;
+}
+#menu a{
+  display:block;
+  width:200px;
+  height:1.2em;
+}
+#menu a.clicked{
+  font-weight:bold;
+  color:red;
+}
+#menu li:hover{
+  background-color:wheat;
+}
+#source{
+  width:700px; height:150px;
+}
+#hori-result, #vert-result{
+  width:350px;
+  float:left;
+}
+.nehan-body{
+  background-color:pink;
+
+  /* caution!
+     here we set margin to .nehan-body, but notice that you can only edit 'outer' world of .nehan-body(root class of page layout).
+     because inner size of .nehan-body is completely under control of nehan layout engine.
+     */
+  margin-bottom:1em;
+}
+.nehan-figure{
+  background-color:#8ae;
+}
+.nehan-p{
+  background-color:#d1de4c;
+}
+.nehan-fieldset{
+  background-color:wheat;
+}
+.nehan-blockquote{
+  background-color:skyblue;
+}
+.nehan-ibox{
+  background-color:yellow;
+}
+.nehan-ipage{
+  background-color:orange;
+}
+.nehan-ul, .nehan-dl, .nehan-ol{
+  background-color:lightsteelblue;
+}

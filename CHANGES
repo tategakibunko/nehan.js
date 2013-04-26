@@ -1,0 +1,11 @@
+===============================================================================
+Preliminary notes:
+------------------
+Mark "o": new feature
+Mark "*": bug fixed.
+Mark "!": change that can break compatibility with older version
+===============================================================================
+
+version 4.0.0, 2013/04/27
+==========================
+o first release
