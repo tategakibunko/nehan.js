@@ -25,10 +25,8 @@ and to make nehan.min.js,
 
 Include css, js in the ``<head>``
 
-    ```html
 	<link href="/path/to/nehan.css" type="text/css" rel="stylesheet">
 	<script src="/path/to/nehan.js" type="text/javascript"></script>
-	```
 
 ## Usage
 
