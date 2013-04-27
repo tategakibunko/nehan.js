@@ -36,7 +36,9 @@ Quick start document is [nehan.js introduction](http://tategakibunko.mydns.jp/do
 
 Markup reference is [nehan.js markup reference](http://tategakibunko.mydns.jp/docs/nehan/markup/).
 
-If you want quick tool, check out [jquery.nehan](https://github.com/jquery.nehan).
+Style guide is [nehan.js style guide](http://tategakibunko.mydns.jp/docs/nehan/style/).
+
+Want a quick tool? check out [jquery.nehan](https://github.com/tategakibunko/jquery.nehan).
 
 ## License
 
