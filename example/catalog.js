@@ -1,14 +1,11 @@
 var Catalog = (function(){
   function Catalog(direction, width, height){
     this.engine = Nehan.setup({
-      /*
-      env:{
-	isVerticalGlyphEnable:false
-      },*/
       layout:{
 	direction:direction,
-	//vert:"tb-rl",
-	vert:"tb-lr",
+	hori:"lr-tb",
+	vert:"tb-rl",
+	//vert:"tb-lr",
 	width:width,
 	height:height
       }
