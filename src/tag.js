@@ -12,7 +12,6 @@ var Tag = (function (){
     this.classes = this._parseClasses();
     this.cssKeys = this._parseCssKeys(this.classes);
     this.cssAttrStatic = this._parseCssAttrStatic(this.cssKeys);
-    //this.size = this._parseStaticSize(this.cssKeys);
     this.parent = null;
     this.content = this._parseContent(content || "");
   }
