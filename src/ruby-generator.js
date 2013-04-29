@@ -1,6 +1,5 @@
 var RubyGenerator = (function(){
-  function RubyGenerator(content, font_size){
-    this.fontSize = font_size;
+  function RubyGenerator(content){
     this.stream = new RubyStream(content);
   }
 
@@ -14,17 +13,18 @@ var RubyGenerator = (function(){
     hasNext : function(){
       return this.stream.hasNext();
     },
-    yield : function(parent, start_pos, letter_spacing){
+    // ctx : LineContext
+    yield : function(ctx){
       this.backup();
       var ruby = this.stream.get();
       if(ruby === null){
 	return null;
       }
-      ruby.setStartPos(start_pos);
+      ruby.setStartPos(ctx.curMeasure);
 
       // avoid overwriting metrics.
       if(!ruby.hasMetrics()){
-	ruby.setMetrics(parent.flow, this.fontSize, letter_spacing);
+	ruby.setMetrics(ctx.getParentFlow(), ctx.getInlineFontSize(), ctx.letterSpacing);
       }
       return ruby;
     }

@@ -27,10 +27,7 @@ var InlineGenerator = (function(){
       if(!this._hasNext){
 	return false;
       }
-      if(this._hasNextInlineBlock()){
-	return true;
-      }
-      if(this._hasNextRuby()){
+      if(this.generator && this.generator.hasNext()){
 	return true;
       }
       return this.stream.hasNext();
@@ -42,7 +39,7 @@ var InlineGenerator = (function(){
     // so do not call this from this generator.
     rollback : function(){
       this.stream.rollback();
-      this.rubyGenerator = null;
+      this.generator = null;
     },
     yield : function(parent){
       var ctx = new LineContext(parent, this.stream, this.context);
@@ -80,10 +77,8 @@ var InlineGenerator = (function(){
 
 	// if overflow inline max, break loop
 	if(!ctx.canContain(advance, extent)){
-	  if(element._type === "inline-block"){
-	    this.inlineBlockGenerator.rollback();
-	  } else if(element instanceof Ruby){
-	    this.rubyGenerator.rollback();
+	  if(this.generator){
+	    this.generator.rollback();
 	  } else {
 	    ctx.pushBackToken();
 	  }
@@ -130,19 +125,11 @@ var InlineGenerator = (function(){
       }
       return element.getBoxMeasure(ctx.getParentFlow());
     },
-    _hasNextRuby : function(){
-      return this.rubyGenerator && this.rubyGenerator.hasNext();
-    },
-    _hasNextInlineBlock : function(){
-      return this.inlineBlockGenerator && this.inlineBlockGenerator.hasNext();
-    },
     _yieldElement : function(ctx){
-      if(this._hasNextInlineBlock()){
-	return this._yieldDynamicInlineBlock(ctx);
+      if(this.generator && this.generator.hasNext()){
+	return this.generator.yield(ctx);
       }
-      if(this._hasNextRuby()){
-	return this._yieldRuby(ctx);
-      }
+      this.generator = null;
       var token = ctx.getNextToken();
       return this._yieldToken(ctx, token);
     },
@@ -183,17 +170,11 @@ var InlineGenerator = (function(){
       }
       // token is inline-block tag
       if(token.isInlineBlock()){
-	this.inlineBlockGenerator = new InlineBlockGenerator(token, ctx.createInlineRoot());
-	return this._yieldDynamicInlineBlock(ctx);
+	this.generator = new InlineBlockGenerator(token, ctx.createInlineRoot());
+	return this.generator.yield(ctx);
       }
       // token is other inline tag
       return this._yieldInlineTag(ctx, token);
-    },
-    _yieldRuby : function(ctx){
-      return this.rubyGenerator.yield(ctx.parent, ctx.curMeasure, ctx.letterSpacing);
-    },
-    _yieldDynamicInlineBlock : function(ctx){
-      return this.inlineBlockGenerator.yield(ctx.parent, ctx.getRestMeasure());
     },
     _yieldStaticInlineBlock : function(ctx, tag){
       var element = PageGenerator.prototype._yieldStaticElement.call(this, ctx.parent, tag, this.context);
@@ -224,16 +205,8 @@ var InlineGenerator = (function(){
 	return IGNORE;
 
       case "ruby":
-
-	// check whether tag.tagFontSize is already set, and avoid overwriting it.
-	if(typeof tag.baseFontSize == "undefined"){
-	  // set the context font size where <ruby> is first appeared.
-	  tag.baseFontSize = ctx.getInlineFontSize();
-	}
-	// sometimes <ruby> has more than two <rt> tags,
-	// so we treat ruby tag as stream data.
-	this.rubyGenerator = new RubyGenerator(tag.content, tag.baseFontSize);
-	return this._yieldRuby(ctx);
+	this.generator = new RubyGenerator(tag.content);
+	return this.generator.yield(ctx);
 
       case "a":
 	var anchor_name = tag.getTagAttr("name");
