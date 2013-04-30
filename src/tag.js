@@ -10,8 +10,8 @@ var Tag = (function (){
     this.dataset = {};
     this.tagAttr = this._parseTagAttr(this.src);
     this.classes = this._parseClasses();
-    this.cssKeys = this._parseCssKeys(this.classes);
-    this.cssAttrStatic = this._parseCssAttrStatic(this.cssKeys);
+    this.selectors = get_enable_selectors(this._parseSelectors(this.classes));
+    this.cssAttrStatic = this._parseCssAttrStatic(this.selectors);
     this.parent = null;
     this.content = this._parseContent(content || "");
   }
@@ -42,6 +42,17 @@ var Tag = (function (){
     return is_style_enable(name, "section-root");
   };
 
+  var get_enable_selectors = function(keys){
+    return List.filter(keys, function(key){
+      for(var prop in Style){
+	if(prop.indexOf(key) >= 0){
+	  return true;
+	}
+      }
+      return false;
+    });
+  };
+
   Tag.prototype = {
     // copy parent settings in 'markup' level
     inherit : function(parent_tag){
@@ -56,9 +67,11 @@ var Tag = (function (){
 	}
       });
       if(parent_tag.getName() != "body"){
-	this.cssKeys = this._getContextualCssKeys(this.cssKeys, parent_tag);
-	List.iter(this.cssKeys, function(ctx_key){
-	  Args.copy(self.cssAttrStatic, Style[ctx_key] || {});
+	var parent_selectors = parent_tag.getSelectors();
+	var ctx_selectors = this._parseContextSelectors(this.selectors, parent_selectors);
+	this.selectors = get_enable_selectors(ctx_selectors);
+	List.iter(this.selectors, function(key){
+	  Args.copy(self.cssAttrStatic, Style[key]);
 	});
       }
       this._inherited = true;
@@ -130,8 +143,8 @@ var Tag = (function (){
     getAttr : function(name, def_value){
       return this.getTagAttr(name) || this.getCssAttr(name) || def_value || null;
     },
-    getCssKeys : function(){
-      return this.cssKeys;
+    getSelectors : function(){
+      return this.selectors;
     },
     getCssClasses : function(){
       return this.classes.join(" ");
@@ -307,15 +320,6 @@ var Tag = (function (){
       var name = this.getName();
       return name === "end-page" || name === "page-break";
     },
-    // get '2 level' contextual selector(so parent of parent_tag is ignored).
-    // this restriction is for performance.
-    _getContextualCssKeys : function(css_keys, parent_tag){
-      return List.fold(parent_tag.getCssKeys(), [], function(ret1, parent_key){
-	return ret1.concat(List.fold(css_keys, [], function(ret2, child_key){
-	  return ret2.concat([parent_key + " " + child_key]);
-	}));
-      }).concat(css_keys);
-    },
     _preprocess : function(src){
       return src.replace(/\s*=\s*/g, "=");
     },
@@ -353,9 +357,20 @@ var Tag = (function (){
     },
     // <p class='hi hey'>
     // => ["p", ".hi", ".hey", "p.hi", "p.hey"]
-    _parseCssKeys : function(classes){
+    _parseSelectors : function(classes){
       var tag_name = this.getName();
       return [tag_name].concat(this._parseCssClassesAll(tag_name, classes));
+    },
+    // get contextual selector(so parent of parent_tag is ignored).
+    // if parent_keys are ["div", "div.hoge"]
+    // and child_keys are ["p", "p.hige"]
+    // => ["p", "p.hige", "div p", "div.hoge p", "div.hoge p", "div.hoge p.hige"]
+    _parseContextSelectors : function(selectors, parent_selectors){
+      return selectors.concat(List.fold(parent_selectors, [], function(ret1, parent_key){
+	return ret1.concat(List.fold(selectors, [], function(ret2, child_key){
+	  return ret2.concat([parent_key + " " + child_key]);
+	}));
+      }));
     },
     // Style["div"].border = "1px"
     // => {border:"1px"}
@@ -367,10 +382,10 @@ var Tag = (function (){
       return attr;
     },
     // if pseudo_name is "before",
-    // and this.cssKeys is ["p", "p.hoge"]
+    // and this.selectors is ["p", "p.hoge"]
     // => ["p:before", "p.hoge:before"]
-    _parsePseudoCssKeys : function(pseudo_name){
-      return List.map(this.cssKeys, function(key){
+    _parsePseudoSelectors : function(pseudo_name){
+      return List.map(this.selectors, function(key){
 	return key + ":" + pseudo_name;
       });
     },
@@ -379,8 +394,8 @@ var Tag = (function (){
     // => {border:"1px"}
     _parsePseudoStyle : function(pseudo_name){
       var attr = {};
-      var pseudo_css_keys = this._parsePseudoCssKeys(pseudo_name);
-      List.iter(pseudo_css_keys, function(pseudo_key){
+      var pseudo_selectors = this._parsePseudoSelectors(pseudo_name);
+      List.iter(pseudo_selectors, function(pseudo_key){
 	Args.copy(attr, Style[pseudo_key] || {});
       });
       return attr;

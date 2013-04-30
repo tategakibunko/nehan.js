@@ -10,7 +10,7 @@ var TableGenerator = ChildPageGenerator.extend({
       }
     }
   },
-  _onCompleteBox : function(box, parent){
+  _onCreateBox : function(box, parent){
     box.partition = this.stream.getPartition(box);
   }
 });

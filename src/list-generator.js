@@ -1,5 +1,5 @@
 var ListGenerator = ChildPageGenerator.extend({
-  _onCompleteBox : function(box, parent){
+  _onCreateBox : function(box, parent){
     var item_count = this.stream.getTokenCount();
     var list_style_type = this.markup.getCssAttr("list-style-type", "none");
     var list_style_pos = this.markup.getCssAttr("list-style-position", "outside");

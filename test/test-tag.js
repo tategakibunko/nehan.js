@@ -38,8 +38,8 @@ test("tag5", function(){
   deepEqual(tag._parseClasses(), ["hi", "hey"]);
   deepEqual(tag._parseCssClasses(tag.classes), [".hi", ".hey"]);
   deepEqual(tag._parseCssClassesWithTag("p", tag.classes), ["p.hi", "p.hey"]);
-  deepEqual(tag.classes, ["hi", "hey"]);
-  deepEqual(tag.cssKeys, ["p", ".hi", ".hey", "p.hi", "p.hey"]);
+  deepEqual(tag._parseClasses(), ["hi", "hey"]);
+  deepEqual(tag._parseSelectors(tag._parseClasses()), ["p", ".hi", ".hey", "p.hi", "p.hey"]);
 
   equal(tag.hasClass("hi"), true);
   equal(tag.hasClass("hey"), true);
@@ -160,6 +160,7 @@ test("tag-is", function(){
 });
 
 test("tag-dataset", function(){
+  var tag;
   tag = new Tag("<div data-age='10'>");
   equal(tag.getDataset("age"), "10");
 
@@ -167,4 +168,17 @@ test("tag-dataset", function(){
   equal(tag.getDataset("familyName"), "yamada");
 });
 
-
+test("tag-contextual-keys", function(){
+  var tag1 = new Tag("<div class='hoge'>");
+  var tag2 = new Tag("<p class='hige'>");
+  var parent_selectors = tag1._parseSelectors(tag1._parseClasses());
+  var child_selectors = tag2._parseSelectors(tag2._parseClasses());
+  deepEqual(tag2._parseContextSelectors(child_selectors, parent_selectors), [
+    "p", ".hige", "p.hige",
+    "div p", "div .hige", "div p.hige",
+    ".hoge p", ".hoge .hige", ".hoge p.hige",
+    "div.hoge p", "div.hoge .hige", "div.hoge p.hige"
+  ]);
+  tag2.inherit(tag1);
+  deepEqual(tag2.getSelectors(), ["p"]); // "p" is only defined in this situation.
+});

@@ -19,31 +19,11 @@ var BlockGenerator = Class.extend({
     }
     return null;
   },
-  // called when markup is now no stack, parent is decided,
-  // but box size is not decided yet.
-  _onReadyMarkupEvent : function(parent){
-    if(Event.isEnable("onReadyMarkup")){
-      Event.callHandlers(this.markup.getCssKeys(), "onReadyMarkup", {
-	context:this.context,
-	markup:this.markup,
-	parent:parent
-      });
-    }
-  },
   // called when box is created, but no style is not loaded.
   _onReadyBox : function(box, parent){
   },
-  // called after onReadyBox, and call user defined hook if enabled.
-  _onReadyBoxEvent : function(box){
-    if(Event.isEnable("onReadyBox")){
-      Event.callHandlers(this.markup.getCssKeys(), "onReadyBox", {
-	context:this.context,
-	box:box
-      });
-    }
-  },
   // called when box is created, and std style is already loaded.
-  _onCompleteBox : function(box, parent){
+  _onCreateBox : function(box, parent){
   },
   _getBoxType : function(){
     return this.markup.getName();
@@ -148,13 +128,11 @@ var BlockGenerator = Class.extend({
     });
   },
   _createBox : function(size, parent){
-    this._onReadyMarkupEvent(parent);
     var box_type = this._getBoxType();
     var box = Layout.createBox(size, parent, box_type);
     this._onReadyBox(box, parent);
-    this._onReadyBoxEvent(box);
     this._setBoxStyle(box, parent);
-    this._onCompleteBox(box, parent);
+    this._onCreateBox(box, parent);
     return box;
   }
 });

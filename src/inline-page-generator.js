@@ -5,13 +5,11 @@ var InlinePageGenerator = PageGenerator.extend({
     return false;
   },
   yield : function(parent, size){
-    this._onReadyMarkupEvent(parent);
     var box_type = this._getBoxType();
     var box = Layout.createBox(size, parent, box_type);
     this._onReadyBox(box);
-    this._onReadyBoxEvent(box);
     this._setBoxStyle(box, parent);
-    this._onCompleteBox(box, parent);
+    this._onCreateBox(box, parent);
     return this._yieldPageTo(box);
   }
 });

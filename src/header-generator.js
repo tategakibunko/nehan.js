@@ -3,7 +3,7 @@ var HeaderGenerator = ChildPageGenerator.extend({
     this._super(page);
     page.id = Css.addNehanHeaderPrefix(this.context.logSectionHeader(this.markup));
   },
-  _onCompleteBox : function(box, parent){
+  _onCreateBox : function(box, parent){
     box.addClass("nehan-header");
   }
 });
