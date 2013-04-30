@@ -20,6 +20,28 @@ var Tag = (function (){
   var rex_nv_attr = /(?:\S+)=["']?(?:(?:.(?!["']?\s+(?:\S+)=|["']))+.)["']?/g;
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
   
+  // utility functions
+  var is_style_enable = function(name, prop){
+    var element = Style[name] || null;
+    return element? (element[prop] || false) : false;
+  };
+
+  var is_single_tag = function(name){
+    return is_style_enable(name, "single");
+  };
+
+  var is_child_content_tag = function(name){
+    return is_style_enable(name, "child-content");
+  };
+
+  var is_section_tag = function(name){
+    return is_style_enable(name, "section");
+  };
+
+  var is_section_root_tag = function(name){
+    return is_style_enable(name, "section-root");
+  };
+
   Tag.prototype = {
     // copy parent settings in 'markup' level
     inherit : function(parent_tag){
@@ -95,11 +117,6 @@ var Tag = (function (){
     iterAttr : function(fn){
       this.iterCssAttr(fn);
       this.iterTagAttr(fn); // inline attrs prior to css attrs.
-    },
-    // if vertical document, advance is height,
-    // if horizontal document, advance is width
-    getAdvance : function(flow){
-      return this.tagAttr[flow.getPropMeasure()] || 0;
     },
     getName : function(){
       return this.name;
@@ -223,7 +240,7 @@ var Tag = (function (){
       return (typeof this.tagAttr.pull != "undefined");
     },
     isOpen : function(){
-      if(this.isSingleTag()){
+      if(is_single_tag()){
 	return false;
       }
       return this.name.substring(0,1) !== "/";
@@ -260,22 +277,22 @@ var Tag = (function (){
       return this.getCssAttr("display", "inline") === "inline-block";
     },
     isSingleTag : function(){
-      return Style.isSingleTag(this.getName());
+      return is_single_tag(this.getName());
     },
     isChildContentTag : function(){
       if(this.isSingleTag()){
 	return false;
       }
-      return Style.isChildContentTag(this.getName());
+      return is_child_content_tag(this.getName());
     },
     isTcyTag : function(){
       return this.getCssAttr("text-combine", "") === "horizontal";
     },
     isSectionRootTag : function(){
-      return Style.isSectionRootTag(this.getName());
+      return is_section_root_tag(this.getName());
     },
     isSectionTag : function(){
-      return Style.isSectionTag(this.getName());
+      return is_section_tag(this.getName());
     },
     isBoldTag : function(){
       var name = this.getName();

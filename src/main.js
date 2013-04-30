@@ -107,5 +107,8 @@ __exports.createDocumentPageStream = function(text){
 __exports.createPageGroupStream = function(text, group_size){
   return new PageGroupStream(text, group_size);
 };
+__exports.addEventListener = function(key, name, fn){
+  Event.addEventListener(key, name, fn);
+};
 
 return __exports;

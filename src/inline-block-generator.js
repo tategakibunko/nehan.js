@@ -9,7 +9,7 @@ var InlineBlockGenerator = PageGenerator.extend({
   },
   // ctx : LineContext
   yield : function(ctx){
-    var rest_measure = ctx.getRestMeasure();
+    var rest_measure = ctx.restMeasure;
     var rest_extent = ctx.restExtent;
     var parent_flow = ctx.getParentFlow();
     var size = parent_flow.getBoxSize(rest_measure, rest_extent);

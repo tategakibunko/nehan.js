@@ -40,6 +40,7 @@ module.exports = function(grunt) {
 	    "src/layout.js",
 	    "src/env.js",
 	    "src/style.js",
+	    "src/event.js",
 	    "src/class.js",
 	    "src/list.js",
 	    "src/obj.js",

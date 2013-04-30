@@ -881,25 +881,6 @@ var Style = {
   },
   ".nehan-jisage":{
     "text-indent":"1em" // same as '.nehan-ti-1em'
-  },
-  //-------------------------------------------------------
-  // utility functions
-  //-------------------------------------------------------
-  isEnable : function(name, prop){
-    var element = this[name] || null;
-    return element? (element[prop] || false) : false;
-  },
-  isSingleTag : function(name){
-    return this.isEnable(name, "single");
-  },
-  isChildContentTag : function(name){
-    return this.isEnable(name, "child-content");
-  },
-  isSectionTag : function(name){
-    return this.isEnable(name, "section");
-  },
-  isSectionRootTag : function(name){
-    return this.isEnable(name, "section-root");
   }
 };
 

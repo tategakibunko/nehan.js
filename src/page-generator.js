@@ -5,6 +5,7 @@ var PageGenerator = BlockGenerator.extend({
     this.rollbackCount = 0;
     this.stream = this._createStream();
     this.localPageNo = 0;
+    this.pageBreakBefore = this._isPageBreakBefore();
   },
   hasNext : function(){
     if(this.generator && this.generator.hasNext()){
@@ -32,11 +33,13 @@ var PageGenerator = BlockGenerator.extend({
     if(this.stream.isEmpty()){
       return Exceptions.SKIP;
     }
-    if(this.pageBreakBefore){ // before page-break flag is enabled.
+    // let this generator yield PAGE_BREAK exception(only once).
+    if(this.pageBreakBefore){
       this.pageBreakBefore = false;
       return Exceptions.PAGE_BREAK;
     }
     this.context.pushBlock(this.markup);
+
     var page_box, page_size;
     page_size = size || (parent? parent.getRestSize() : null);
     page_box = this._createBox(page_size, parent);
@@ -48,6 +51,7 @@ var PageGenerator = BlockGenerator.extend({
   _yieldPageTo : function(page){
     var cur_extent = 0;
     var max_extent = page.getContentExtent();
+    var page_flow = page.flow;
 
     while(true){
       this.backup();
@@ -66,13 +70,14 @@ var PageGenerator = BlockGenerator.extend({
       } else if(element == Exceptions.IGNORE){
 	continue;
       }
-      var extent = element.getBoxExtent(page.flow);
+      var extent = element.getBoxExtent(page_flow);
       cur_extent += extent;
-      if(cur_extent > max_extent || this._isEmptyElement(page.flow, element)){
+      if(cur_extent > max_extent || this._isEmptyElement(page_flow, element)){
 	this.rollback();
 	break;
       }
       page.addChild(element);
+
       if(cur_extent == max_extent){
 	break;
       }
@@ -97,6 +102,9 @@ var PageGenerator = BlockGenerator.extend({
       this.localPageNo++;
     }
     return page;
+  },
+  _isPageBreakBefore : function(){
+    return this.markup.getCssAttr("page-break-before", "") === "always";
   },
   _isEmptyElement : function(flow, element){
     return (element instanceof Box) && (element.getContentExtent(flow) <= 0);

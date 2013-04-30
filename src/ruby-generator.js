@@ -1,6 +1,7 @@
 var RubyGenerator = (function(){
-  function RubyGenerator(content){
-    this.stream = new RubyStream(content);
+  function RubyGenerator(markup){
+    this.markup = markup;
+    this.stream = new RubyStream(markup.content);
   }
 
   RubyGenerator.prototype = {
@@ -24,7 +25,7 @@ var RubyGenerator = (function(){
 
       // avoid overwriting metrics.
       if(!ruby.hasMetrics()){
-	ruby.setMetrics(ctx.getParentFlow(), ctx.getInlineFontSize(), ctx.letterSpacing);
+	ruby.setMetrics(ctx.getParentFlow(), this.markup.fontSize, this.markup.letterSpacing);
       }
       return ruby;
     }

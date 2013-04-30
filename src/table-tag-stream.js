@@ -33,8 +33,6 @@ var TableTagStream = FilteredTagStream.extend({
     if(len > 0){
       target.firstChild = childs[0];
       target.lastChild = childs[len - 1];
-      childs[0].isFirstChild = true;
-      childs[len - 1].isLastChild = true;
     }
     return target;
   },

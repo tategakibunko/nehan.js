@@ -70,7 +70,8 @@ var Box = (function(){
       var space = Layout.fontSize; // this is space for tail NG.
 
       // if marker or :first-letter(pseudo-element), tail space is zero.
-      if(this._type === "li-marker" || this._type === ":first-letter"){
+      if(this._type === "li-marker" ||
+	 this._type === ":first-letter"){
 	return Math.max(space, measure);
       }
       return Math.max(space, measure - space);

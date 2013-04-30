@@ -42,7 +42,12 @@ var Config = {
   justify:true,
   maxRollbackCount : 10,
   minBlockScaleDownRate : 65,
-  lexingBufferLen : 2000
+  lexingBufferLen : 2000,
+  enableEvents:{
+    "onReadyMarkup":true,
+    "onReadyBox":true,
+    "onCreateBox":true
+  }
 };
 
 var Layout = {
@@ -1045,28 +1050,58 @@ var Style = {
   },
   ".nehan-jisage":{
     "text-indent":"1em" // same as '.nehan-ti-1em'
-  },
-  //-------------------------------------------------------
-  // utility functions
-  //-------------------------------------------------------
-  isEnable : function(name, prop){
-    var element = this[name] || null;
-    return element? (element[prop] || false) : false;
-  },
-  isSingleTag : function(name){
-    return this.isEnable(name, "single");
-  },
-  isChildContentTag : function(name){
-    return this.isEnable(name, "child-content");
-  },
-  isSectionTag : function(name){
-    return this.isEnable(name, "section");
-  },
-  isSectionRootTag : function(name){
-    return this.isEnable(name, "section-root");
   }
 };
 
+
+
+var Event = {
+  _sources:{
+    // if vertical, aligned to start direction,
+    // horizontal, aligned to end direction
+    ".nehan-aside":{
+      "onReadyBox": function(opt){
+	var box = opt.box;
+	box.blockAlign = box.isTextVertical()? "start" : "end";
+      }
+    }
+  },
+  _getSource : function(key){
+    return this._sources[key] || null;
+  },
+  _getHandler : function(key, name){
+    var source = this._sources[key] || null;
+    if(source){
+      return source[name] || null;
+    }
+    return null;
+  },
+  isEnable : function(name){
+    return Config.enableEvents[name] || false;
+  },
+  callHandlers : function(keys, name, opt){
+    var self = this;
+    List.iter(keys, function(key){
+      self.callHandler(key, name, opt);
+    });
+  },
+  callHandler : function(key, name, opt){
+    var handler = this._getHandler(key, name);
+    if(handler){
+      return handler(opt);
+    }
+  },
+  addEventListener : function(key, name, fn){
+    var source = this._getSource(key);
+    if(source === null){
+      source = {};
+      this._sources[key] = source;
+    }
+    if(typeof source[name] === "undefined"){
+      source[name] = fn;
+    }
+  }
+};
 
 
 /* Simple JavaScript Inheritance
@@ -1534,6 +1569,28 @@ var Tag = (function (){
   var rex_nv_attr = /(?:\S+)=["']?(?:(?:.(?!["']?\s+(?:\S+)=|["']))+.)["']?/g;
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
   
+  // utility functions
+  var is_style_enable = function(name, prop){
+    var element = Style[name] || null;
+    return element? (element[prop] || false) : false;
+  };
+
+  var is_single_tag = function(name){
+    return is_style_enable(name, "single");
+  };
+
+  var is_child_content_tag = function(name){
+    return is_style_enable(name, "child-content");
+  };
+
+  var is_section_tag = function(name){
+    return is_style_enable(name, "section");
+  };
+
+  var is_section_root_tag = function(name){
+    return is_style_enable(name, "section-root");
+  };
+
   Tag.prototype = {
     // copy parent settings in 'markup' level
     inherit : function(parent_tag){
@@ -1609,11 +1666,6 @@ var Tag = (function (){
     iterAttr : function(fn){
       this.iterCssAttr(fn);
       this.iterTagAttr(fn); // inline attrs prior to css attrs.
-    },
-    // if vertical document, advance is height,
-    // if horizontal document, advance is width
-    getAdvance : function(flow){
-      return this.tagAttr[flow.getPropMeasure()] || 0;
     },
     getName : function(){
       return this.name;
@@ -1737,7 +1789,7 @@ var Tag = (function (){
       return (typeof this.tagAttr.pull != "undefined");
     },
     isOpen : function(){
-      if(this.isSingleTag()){
+      if(is_single_tag()){
 	return false;
       }
       return this.name.substring(0,1) !== "/";
@@ -1774,22 +1826,22 @@ var Tag = (function (){
       return this.getCssAttr("display", "inline") === "inline-block";
     },
     isSingleTag : function(){
-      return Style.isSingleTag(this.getName());
+      return is_single_tag(this.getName());
     },
     isChildContentTag : function(){
       if(this.isSingleTag()){
 	return false;
       }
-      return Style.isChildContentTag(this.getName());
+      return is_child_content_tag(this.getName());
     },
     isTcyTag : function(){
       return this.getCssAttr("text-combine", "") === "horizontal";
     },
     isSectionRootTag : function(){
-      return Style.isSectionRootTag(this.getName());
+      return is_section_root_tag(this.getName());
     },
     isSectionTag : function(){
-      return Style.isSectionTag(this.getName());
+      return is_section_tag(this.getName());
     },
     isBoldTag : function(){
       var name = this.getName();
@@ -3916,7 +3968,8 @@ var Box = (function(){
       var space = Layout.fontSize; // this is space for tail NG.
 
       // if marker or :first-letter(pseudo-element), tail space is zero.
-      if(this._type === "li-marker" || this._type === ":first-letter"){
+      if(this._type === "li-marker" ||
+	 this._type === ":first-letter"){
 	return Math.max(space, measure);
       }
       return Math.max(space, measure - space);
@@ -5827,8 +5880,6 @@ var TableTagStream = FilteredTagStream.extend({
     if(len > 0){
       target.firstChild = childs[0];
       target.lastChild = childs[len - 1];
-      childs[0].isFirstChild = true;
-      childs[len - 1].isLastChild = true;
     }
     return target;
   },
@@ -6164,7 +6215,6 @@ var BlockGenerator = Class.extend({
   init : function(markup, context){
     this.markup = markup;
     this.context = context;
-    this._getPageBreakBefore();
   },
   hasNext : function(){
     return false;
@@ -6182,16 +6232,31 @@ var BlockGenerator = Class.extend({
     }
     return null;
   },
+  // called when markup is now no stack, parent is decided,
+  // but box size is not decided yet.
+  _onReadyMarkupEvent : function(parent){
+    if(Event.isEnable("onReadyMarkup")){
+      Event.callHandlers(this.markup.getCssKeys(), "onReadyMarkup", {
+	context:this.context,
+	markup:this.markup,
+	parent:parent
+      });
+    }
+  },
   // called when box is created, but no style is not loaded.
   _onReadyBox : function(box, parent){
   },
+  // called after onReadyBox, and call user defined hook if enabled.
+  _onReadyBoxEvent : function(box){
+    if(Event.isEnable("onReadyBox")){
+      Event.callHandlers(this.markup.getCssKeys(), "onReadyBox", {
+	context:this.context,
+	box:box
+      });
+    }
+  },
   // called when box is created, and std style is already loaded.
   _onCompleteBox : function(box, parent){
-  },
-  _getPageBreakBefore : function(){
-    if(this.markup.getCssAttr("page-break-before", "") === "always"){
-      this.pageBreakBefore = true; // let this generator yield PAGE_BREAK exception(only once).
-    }
   },
   _getBoxType : function(){
     return this.markup.getName();
@@ -6296,9 +6361,11 @@ var BlockGenerator = Class.extend({
     });
   },
   _createBox : function(size, parent){
+    this._onReadyMarkupEvent(parent);
     var box_type = this._getBoxType();
     var box = Layout.createBox(size, parent, box_type);
     this._onReadyBox(box, parent);
+    this._onReadyBoxEvent(box);
     this._setBoxStyle(box, parent);
     this._onCompleteBox(box, parent);
     return box;
@@ -6376,8 +6443,9 @@ var HorizontalRuleGenerator = StaticBlockGenerator.extend({
 });
 
 var RubyGenerator = (function(){
-  function RubyGenerator(content){
-    this.stream = new RubyStream(content);
+  function RubyGenerator(markup){
+    this.markup = markup;
+    this.stream = new RubyStream(markup.content);
   }
 
   RubyGenerator.prototype = {
@@ -6401,7 +6469,7 @@ var RubyGenerator = (function(){
 
       // avoid overwriting metrics.
       if(!ruby.hasMetrics()){
-	ruby.setMetrics(ctx.getParentFlow(), ctx.getInlineFontSize(), ctx.letterSpacing);
+	ruby.setMetrics(ctx.getParentFlow(), this.markup.fontSize, this.markup.letterSpacing);
       }
       return ruby;
     }
@@ -6889,8 +6957,7 @@ var InlineGenerator = (function(){
 	  ctx.setLineBreak();
 	  break;
 	} else if(element == SKIP){
-	  ctx.setLineBreak();
-	  break;
+	  return IGNORE;
 	} else if(element == LINE_BREAK){
 	  ctx.setLineBreak();
 	  break;
@@ -6991,7 +7058,7 @@ var InlineGenerator = (function(){
       if(token.isBlock()){
 	ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
 	this._hasNext = false; // force terminate
-	return LINE_BREAK;
+	return ctx.isEmptyText()? SKIP : LINE_BREAK;
       }
       // token is static size tag
       if(token.hasStaticSize()){
@@ -7034,7 +7101,12 @@ var InlineGenerator = (function(){
 	return IGNORE;
 
       case "ruby":
-	this.generator = new RubyGenerator(tag.content);
+	// assert metrics only once to avoid dup update by rollback
+	if(typeof tag.fontSize === "undefined"){
+	  tag.fontSize = ctx.getInlineFontSize();
+	  tag.letterSpacing = ctx.letterSpacing;
+	}
+	this.generator = new RubyGenerator(tag);
 	return this.generator.yield(ctx);
 
       case "a":
@@ -7092,6 +7164,7 @@ var PageGenerator = BlockGenerator.extend({
     this.rollbackCount = 0;
     this.stream = this._createStream();
     this.localPageNo = 0;
+    this.pageBreakBefore = this._isPageBreakBefore();
   },
   hasNext : function(){
     if(this.generator && this.generator.hasNext()){
@@ -7119,11 +7192,13 @@ var PageGenerator = BlockGenerator.extend({
     if(this.stream.isEmpty()){
       return Exceptions.SKIP;
     }
-    if(this.pageBreakBefore){ // before page-break flag is enabled.
+    // let this generator yield PAGE_BREAK exception(only once).
+    if(this.pageBreakBefore){
       this.pageBreakBefore = false;
       return Exceptions.PAGE_BREAK;
     }
     this.context.pushBlock(this.markup);
+
     var page_box, page_size;
     page_size = size || (parent? parent.getRestSize() : null);
     page_box = this._createBox(page_size, parent);
@@ -7135,6 +7210,7 @@ var PageGenerator = BlockGenerator.extend({
   _yieldPageTo : function(page){
     var cur_extent = 0;
     var max_extent = page.getContentExtent();
+    var page_flow = page.flow;
 
     while(true){
       this.backup();
@@ -7153,13 +7229,14 @@ var PageGenerator = BlockGenerator.extend({
       } else if(element == Exceptions.IGNORE){
 	continue;
       }
-      var extent = element.getBoxExtent(page.flow);
+      var extent = element.getBoxExtent(page_flow);
       cur_extent += extent;
-      if(cur_extent > max_extent || this._isEmptyElement(page.flow, element)){
+      if(cur_extent > max_extent || this._isEmptyElement(page_flow, element)){
 	this.rollback();
 	break;
       }
       page.addChild(element);
+
       if(cur_extent == max_extent){
 	break;
       }
@@ -7184,6 +7261,9 @@ var PageGenerator = BlockGenerator.extend({
       this.localPageNo++;
     }
     return page;
+  },
+  _isPageBreakBefore : function(){
+    return this.markup.getCssAttr("page-break-before", "") === "always";
   },
   _isEmptyElement : function(flow, element){
     return (element instanceof Box) && (element.getContentExtent(flow) <= 0);
@@ -7356,7 +7436,7 @@ var InlineBlockGenerator = PageGenerator.extend({
   },
   // ctx : LineContext
   yield : function(ctx){
-    var rest_measure = ctx.getRestMeasure();
+    var rest_measure = ctx.restMeasure;
     var rest_extent = ctx.restExtent;
     var parent_flow = ctx.getParentFlow();
     var size = parent_flow.getBoxSize(rest_measure, rest_extent);
@@ -7530,11 +7610,14 @@ var InlinePageGenerator = PageGenerator.extend({
     return false;
   },
   yield : function(parent, size){
-    var wrap = Layout.createBox(size, parent, "ipage");
-    var page = this._super(wrap); // yield page to wrap.
-    wrap.addChild(page);
-    wrap.blockAlign = page.blockAlign;
-    return wrap;
+    this._onReadyMarkupEvent(parent);
+    var box_type = this._getBoxType();
+    var box = Layout.createBox(size, parent, box_type);
+    this._onReadyBox(box);
+    this._onReadyBoxEvent(box);
+    this._setBoxStyle(box, parent);
+    this._onCompleteBox(box, parent);
+    return this._yieldPageTo(box);
   }
 });
 
@@ -8668,6 +8751,9 @@ __exports.createDocumentPageStream = function(text){
 };
 __exports.createPageGroupStream = function(text, group_size){
   return new PageGroupStream(text, group_size);
+};
+__exports.addEventListener = function(key, name, fn){
+  Event.addEventListener(key, name, fn);
 };
 
 return __exports;

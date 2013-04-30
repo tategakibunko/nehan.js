@@ -60,8 +60,7 @@ var InlineGenerator = (function(){
 	  ctx.setLineBreak();
 	  break;
 	} else if(element == SKIP){
-	  ctx.setLineBreak();
-	  break;
+	  return IGNORE;
 	} else if(element == LINE_BREAK){
 	  ctx.setLineBreak();
 	  break;
@@ -162,7 +161,7 @@ var InlineGenerator = (function(){
       if(token.isBlock()){
 	ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
 	this._hasNext = false; // force terminate
-	return LINE_BREAK;
+	return ctx.isEmptyText()? SKIP : LINE_BREAK;
       }
       // token is static size tag
       if(token.hasStaticSize()){
@@ -205,7 +204,12 @@ var InlineGenerator = (function(){
 	return IGNORE;
 
       case "ruby":
-	this.generator = new RubyGenerator(tag.content);
+	// assert metrics only once to avoid dup update by rollback
+	if(typeof tag.fontSize === "undefined"){
+	  tag.fontSize = ctx.getInlineFontSize();
+	  tag.letterSpacing = ctx.letterSpacing;
+	}
+	this.generator = new RubyGenerator(tag);
 	return this.generator.yield(ctx);
 
       case "a":
