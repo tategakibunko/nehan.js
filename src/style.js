@@ -260,13 +260,6 @@ var Style = {
     "child-content":true,
     "section":true
   },
-  /*
-  "hgroup":{
-    "display":"block",
-    "child-content":true,
-    "section":true
-  },
-  */
   "hr":{
     "display":"block",
     "single":true,
@@ -343,6 +336,10 @@ var Style = {
   //-------------------------------------------------------
   // tag / m
   //-------------------------------------------------------
+  "main":{
+    "display":"block",
+    "child-content":true
+  },
   "map":{
   },
   "mark":{
