@@ -169,16 +169,15 @@ test("tag-dataset", function(){
 });
 
 test("tag-contextual-keys", function(){
-  var tag1 = new Tag("<div class='hoge'>");
-  var tag2 = new Tag("<p class='hige'>");
+  var tag1 = new Tag("<div class='parent'>");
+  var tag2 = new Tag("<p class='child'>");
   var parent_selectors = tag1._parseSelectors(tag1._parseClasses());
   var child_selectors = tag2._parseSelectors(tag2._parseClasses());
-  deepEqual(tag2._parseContextSelectors(child_selectors, parent_selectors), [
-    "p", ".hige", "p.hige",
-    "div p", "div .hige", "div p.hige",
-    ".hoge p", ".hoge .hige", ".hoge p.hige",
-    "div.hoge p", "div.hoge .hige", "div.hoge p.hige"
+  deepEqual(parent_selectors, ["div", ".parent", "div.parent"]);
+  deepEqual(child_selectors, ["p", ".child", "p.child"]);
+  deepEqual(tag2._parseContextSelectors(parent_selectors), [
+    "div p", "div .child", "div p.child",
+    ".parent p", ".parent .child", ".parent p.child",
+    "div.parent p", "div.parent .child", "div.parent p.child"
   ]);
-  tag2.inherit(tag1);
-  deepEqual(tag2.getSelectors(), ["p"]); // "p" is only defined in this situation.
 });

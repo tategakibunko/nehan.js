@@ -6,12 +6,13 @@ var Tag = (function (){
     this.name = this._parseName(this.src);
     this.tagAttr = {};
     this.cssAttrStatic = {};
+    this.cssAttrContext = {};
     this.cssAttrDynamic = {}; // this object is updated by Tag::setCssAttr.
     this.dataset = {};
     this.tagAttr = this._parseTagAttr(this.src);
     this.classes = this._parseClasses();
-    this.selectors = get_enable_selectors(this._parseSelectors(this.classes));
-    this.cssAttrStatic = this._parseCssAttrStatic(this.selectors);
+    this.selectors = this._parseSelectors(this.classes);
+    this.cssAttrStatic = this._parseCssAttrWithCache(this.selectors, this.src);
     this.parent = null;
     this.content = this._parseContent(content || "");
   }
@@ -25,32 +26,24 @@ var Tag = (function (){
     var element = Style[name] || null;
     return element? (element[prop] || false) : false;
   };
-
   var is_single_tag = function(name){
     return is_style_enable(name, "single");
   };
-
   var is_child_content_tag = function(name){
     return is_style_enable(name, "child-content");
   };
-
   var is_section_tag = function(name){
     return is_style_enable(name, "section");
   };
-
   var is_section_root_tag = function(name){
     return is_style_enable(name, "section-root");
   };
-
-  var get_enable_selectors = function(keys){
-    return List.filter(keys, function(key){
-      for(var prop in Style){
-	if(prop.indexOf(key) >= 0){
-	  return true;
-	}
-      }
-      return false;
-    });
+  var css_attr_cache = {};
+  var add_css_attr_cache = function(key, value){
+    css_attr_cache[key] = value;
+  };
+  var get_css_attr_cache = function(key){
+    return css_attr_cache[key] || null;
   };
 
   Tag.prototype = {
@@ -68,11 +61,10 @@ var Tag = (function (){
       });
       if(parent_tag.getName() != "body"){
 	var parent_selectors = parent_tag.getSelectors();
-	var ctx_selectors = this._parseContextSelectors(this.selectors, parent_selectors);
-	this.selectors = get_enable_selectors(ctx_selectors);
-	List.iter(this.selectors, function(key){
-	  Args.copy(self.cssAttrStatic, Style[key]);
-	});
+	var ctx_selectors = this._parseContextSelectors(parent_selectors);
+	var ctx_selectors_key = ctx_selectors.join(",");
+	this.cssAttrContext = this._parseCssAttrWithCache(ctx_selectors, ctx_selectors_key);
+	this.selectors = this.selectors.concat(ctx_selectors);
       }
       this._inherited = true;
     },
@@ -96,9 +88,9 @@ var Tag = (function (){
       this.cssAttrDynamic[name] = value;
     },
     setFirstChild : function(){
-      // overwrite static attr by pseudo class style.
+      // add pseudo style of dynamic attr
       var pseudo_style = this._parsePseudoStyle("first-child");
-      Args.update(this.cssAttrStatic, pseudo_style);
+      Args.copy(this.cssAttrDynamic, pseudo_style);
     },
     setFontSizeUpdate : function(font_size){
       this.fontSize = font_size;
@@ -153,7 +145,7 @@ var Tag = (function (){
       return this.tagAttr[name] || def_value || null;
     },
     getCssAttr : function(name, def_value){
-      return this.cssAttrDynamic[name] || this.cssAttrStatic[name] || def_value || null;
+      return this.cssAttrDynamic[name] || this.cssAttrContext[name] || this.cssAttrStatic[name] || def_value || null;
     },
     getDataset : function(name, def_value){
       return this.dataset[name] || def_value || null;
@@ -362,24 +354,35 @@ var Tag = (function (){
       return [tag_name].concat(this._parseCssClassesAll(tag_name, classes));
     },
     // get contextual selector(so parent of parent_tag is ignored).
-    // if parent_keys are ["div", "div.hoge"]
-    // and child_keys are ["p", "p.hige"]
-    // => ["p", "p.hige", "div p", "div.hoge p", "div.hoge p", "div.hoge p.hige"]
-    _parseContextSelectors : function(selectors, parent_selectors){
-      return selectors.concat(List.fold(parent_selectors, [], function(ret1, parent_key){
-	return ret1.concat(List.fold(selectors, [], function(ret2, child_key){
+    // if parent_keys are ["div", ".parent", "div.parent"]
+    // and child_keys are ["p", , ".child", "p.child"]
+    // =>["div p", "div .child", "div p.child",
+    //    ".parent p", ".parent .child", ".parent p.child",
+    //    "div.parent p", "div.parent .child", "div.parent p.child"]
+    _parseContextSelectors : function(parent_selectors){
+      var child_selectors = this.selectors;
+      return List.fold(parent_selectors, [], function(ret1, parent_key){
+	return ret1.concat(List.fold(child_selectors, [], function(ret2, child_key){
 	  return ret2.concat([parent_key + " " + child_key]);
 	}));
-      }));
+      });
     },
     // Style["div"].border = "1px"
     // => {border:"1px"}
-    _parseCssAttrStatic : function(keys){
+    _parseCssAttr : function(selectors){
       var attr = {};
-      List.iter(keys, function(key){
-	Args.copy(attr, Style[key] || {});
+      List.iter(selectors, function(key){
+	Args.copy(attr, Selectors.getValue(key));
       });
       return attr;
+    },
+    _parseCssAttrWithCache : function(selectors, cache_key){
+      var cache = get_css_attr_cache(cache_key);
+      if(cache === null){
+	cache = this._parseCssAttr(selectors);
+	add_css_attr_cache(cache_key, cache);
+      }
+      return cache;
     },
     // if pseudo_name is "before",
     // and this.selectors is ["p", "p.hoge"]

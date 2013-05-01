@@ -880,5 +880,3 @@ var Style = {
     "text-indent":"1em" // same as '.nehan-ti-1em'
   }
 };
-
-

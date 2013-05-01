@@ -49,9 +49,9 @@ test("utils-args", function(){
   var obj = {hoge:10, hige:20};
   deepEqual(Args.copy({}, obj), obj);
   deepEqual(Args.copy({age:100}, obj), {hoge:10, hige:20, age:100});
+  deepEqual(Args.copy({hoge:10}, {hoge:20, hige:21}), {hoge:20, hige:21});
   deepEqual(Args.merge(obj, {age:100}, {}), {hoge:10, hige:20, age:100});
   deepEqual(Args.merge(obj, {age:100}, {age:200}), {hoge:10, hige:20, age:200});
   deepEqual(Args.merge(obj, {hoge:50}, {age:200}), {hoge:50, hige:20, age:200});
-  deepEqual(Args.update({hoge:10}, {hoge:20, hige:21}), {hoge:20, hige:21});
 });
 

@@ -10,38 +10,37 @@ var Catalog = (function(){
 	height:height
       }
     });
-    var style = this.engine.Style;
 
     // style to test pseudo class
-    style["dl.test-pc dt:first-child"] = {
+    this.engine.addRules("dl.test-pc dt:first-child", {
       "font-size":"2.0em"
-    };
+    });
     // style to test pseudo element before
-    style[".test-pe-before:before"] = {
+    this.engine.addRules(".test-pe-before:before", {
       "content":"this is content before",
       "font-size":"2em",
       "margin":{end:"1.0em"}
-    };
+    });
     // style to test pseudo element after
-    style[".test-pe-after:after"] = {
+    this.engine.addRules(".test-pe-after:after", {
       "content":"this is content after",
       "font-size":"2em",
       "margin":{start:"1.0em"}
-    };
+    });
     // style to test pseudo element first-letter
-    style[".test-pe-first-letter:first-letter"] = {
+    this.engine.addRules(".test-pe-first-letter:first-letter", {
       "font-size":"2em",
       "margin":{end:"0.1em"},
       "line-rate":1.0
-    };
+    });
     // style to test pseudo element first-line
-    style[".test-pe-first-line:first-line"] = {
+    this.engine.addRules(".test-pe-first-line:first-line", {
       "font-size":"1.6em"
-    };
+    });
     // style to test letter-spacing
-    style[".test-wide-letter-spacing"] = {
+    this.engine.addRules(".test-wide-letter-spacing", {
       "letter-spacing":"0.5em"
-    };
+    });
   }
 
   Catalog.prototype = {
@@ -455,7 +454,7 @@ var TestCode = {
 	"</p>"
       ].join("\n"),
 
-      "pseudo-class-test":[
+      "pseudo-first":[
 	"<dl class='test-pc'>",
 	"<dt>first term</dt>",
 	"<dd>desc1</dd>",

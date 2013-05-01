@@ -21,7 +21,7 @@
 var OutlineConverter = (function(){
   function OutlineConverter(tree, opt){
     this.tree = tree;
-    Args.update(this, opt || {});
+    Args.copy(this, opt || {});
   }
 
   OutlineConverter.prototype = {

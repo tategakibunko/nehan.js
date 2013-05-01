@@ -34,6 +34,7 @@ var LogicalSize = testEngine.LogicalSize;
 var BoxChild = testEngine.BoxChild;
 var Box = testEngine.Box;
 var Color = testEngine.Color;
+var Selector = testEngine.Selector;
 var Tag = testEngine.Tag;
 var Char = testEngine.Char;
 var Word = testEngine.Word;
