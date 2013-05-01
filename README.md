@@ -4,7 +4,7 @@
 
 nehan.js is dynamic layout engine written in javascript, enable to yield **paged media** in non blocking way.
 
-Almost all html5 tags, are supported, and further more, Japanese vertical layout(lr-tb) is supported.
+Almost all html5 tags are supported, and further more, vertical layout(lr-tb, rl-tb) supported.
 
 Available on IE8+, Firefox3.5+, Google Chrome4+, Safari3+, Opera10+ etc.
 
