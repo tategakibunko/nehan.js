@@ -8659,7 +8659,7 @@ var PageGroupStream = PageStream.extend({
   }
 });
 
-Nehan.version = "4.0.0";
+Nehan.version = "4.0.1";
 
 Args.copy(Env, __engine_args.env || {});
 Args.copy(Layout, __engine_args.layout || {});
