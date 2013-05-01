@@ -5,14 +5,13 @@ var Tag = (function (){
     this.src = this._preprocess(src);
     this.name = this._parseName(this.src);
     this.tagAttr = {};
-    this.cssAttrStatic = {};
-    this.cssAttrContext = {};
-    this.cssAttrDynamic = {}; // this object is updated by Tag::setCssAttr.
     this.dataset = {};
     this.tagAttr = this._parseTagAttr(this.src);
     this.classes = this._parseClasses();
     this.selectors = this._parseSelectors(this.classes);
     this.cssAttrStatic = this._parseCssAttrWithCache(this.selectors, this.src);
+    this.cssAttrContext = {};
+    this.cssAttrDynamic = {}; // this object is updated by Tag::setCssAttr.
     this.parent = null;
     this.content = this._parseContent(content || "");
   }
@@ -150,31 +149,12 @@ var Tag = (function (){
     getDataset : function(name, def_value){
       return this.dataset[name] || def_value || null;
     },
-    getMergedCssAttr : function(){
-      var ret = {};
-      this.iterCssAttr(function(prop, value){
-	ret[prop] = value;
-      });
-      return ret;
-    },
     getOpenTagName : function(){
       var name = this.getName();
       return this.isClose()? name.slice(1) : name;
     },
     getContent : function(){
       return this.content;
-    },
-    getContentOffset : function(){
-      if(this.content === ""){
-	return 0;
-      }
-      return this.src.length;
-    },
-    getCloseOffset : function(){
-      if(this.content === "" || this.isClose()){
-	return 0;
-      }
-      return this.src.length + this.content.length;
     },
     getCloseTag : function(){
       return new Tag(this.getCloseSrc());
