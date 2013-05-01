@@ -6,6 +6,13 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 4.0.1, 2013/05/01
+==========================
+o new class Slector, Selectors(selector.js, selectors.js) to handle more complex selector.
+o cache style object for each tag, to increase performance(tag.js).
+o new engine method addRule, addRules, getRule are now exported(native access to Style object is disabled).
+* remove useless line that is created when inline-generator is broken by block tag without any text tokens.
+
 version 4.0.0, 2013/04/27
 ==========================
 o first release

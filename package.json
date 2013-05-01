@@ -1,6 +1,6 @@
 {
   "name": "nehan",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "dynamic layout engine writtein in javascript",
   "main": "nehan.js",
   "directories": {
