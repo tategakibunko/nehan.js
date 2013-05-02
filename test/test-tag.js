@@ -26,8 +26,6 @@ test("tag4", function(){
   var tag = new Tag("<p>");
   tag.content = "hoge";
   equal(tag.name, "p");
-  equal(tag.getContentOffset(), "<p>".length);
-  equal(tag.getCloseOffset(), "<p>".length + "hoge".length);
   equal(tag.getWrapSrc(), "<p>" + tag.content + "</p>");
 });
 

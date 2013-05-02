@@ -10,19 +10,10 @@ var Selectors = (function(){
 	selectors[key] = new Selector(key, Style[key]);
       }
     },
-    getSelectors : function(key){
-      var ret = [];
-      Obj.iter(selectors, function(obj, prop, selector){
-	if(selector.match(key)){
-	  ret.push(selector);
-	}
-      });
-      return ret;
-    },
     getValue : function(key){
       var ret = {};
       Obj.iter(selectors, function(obj, prop, selector){
-	if(selector.match(key)){
+	if(selector.test(key)){
 	  Args.copy(ret, selector.getValue());
 	}
       });

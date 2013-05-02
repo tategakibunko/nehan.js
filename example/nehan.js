@@ -1512,7 +1512,7 @@ var Selector = (function(){
     getValue : function(){
       return this.val;
     },
-    match : function(key){
+    test : function(key){
       key = key.toLowerCase();
       if(this.rex === null){
 	return this.src === key;
@@ -1547,19 +1547,10 @@ var Selectors = (function(){
 	selectors[key] = new Selector(key, Style[key]);
       }
     },
-    getSelectors : function(key){
-      var ret = [];
-      Obj.iter(selectors, function(obj, prop, selector){
-	if(selector.match(key)){
-	  ret.push(selector);
-	}
-      });
-      return ret;
-    },
     getValue : function(key){
       var ret = {};
       Obj.iter(selectors, function(obj, prop, selector){
-	if(selector.match(key)){
+	if(selector.test(key)){
 	  Args.copy(ret, selector.getValue());
 	}
       });
@@ -1577,12 +1568,16 @@ var Tag = (function (){
     this.name = this._parseName(this.src);
     this.tagAttr = {};
     this.dataset = {};
+    this.cssAttrContext = {};
+
+    // this object is updated by Tag::setCssAttr.
+    // notice that this must be defined before this._parseTagAttr.
+    this.cssAttrDynamic = {};
+
     this.tagAttr = this._parseTagAttr(this.src);
     this.classes = this._parseClasses();
     this.selectors = this._parseSelectors(this.classes);
-    this.cssAttrStatic = this._parseCssAttrWithCache(this.selectors, this.src);
-    this.cssAttrContext = {};
-    this.cssAttrDynamic = {}; // this object is updated by Tag::setCssAttr.
+    this.cssAttrStatic = this._parseCssAttrWithCache(this.selectors);
     this.parent = null;
     this.content = this._parseContent(content || "");
   }
@@ -1632,21 +1627,10 @@ var Tag = (function (){
       if(parent_tag.getName() != "body"){
 	var parent_selectors = parent_tag.getSelectors();
 	var ctx_selectors = this._parseContextSelectors(parent_selectors);
-	var ctx_selectors_key = ctx_selectors.join(",");
-	this.cssAttrContext = this._parseCssAttrWithCache(ctx_selectors, ctx_selectors_key);
+	this.cssAttrContext = this._parseCssAttrWithCache(ctx_selectors);
 	this.selectors = this.selectors.concat(ctx_selectors);
       }
       this._inherited = true;
-    },
-    // copy original pseudo style to temporary pseudo tag(<:before> or <:after>) except content.
-    copyPseudoStyle : function(pseudo_name, dst){
-      var pseudo_style = this._parsePseudoStyle(pseudo_name);
-      for(var prop in pseudo_style){
-	if(prop !== "content"){
-	  dst.setCssAttr(prop, pseudo_style[prop]);
-	}
-      }
-      return dst;
     },
     setContent : function(content){
       this.content = this._parseContent(content);
@@ -1657,10 +1641,10 @@ var Tag = (function (){
     setCssAttr : function(name, value){
       this.cssAttrDynamic[name] = value;
     },
-    setFirstChild : function(){
-      // add pseudo style of dynamic attr
-      var pseudo_style = this._parsePseudoStyle("first-child");
-      Args.copy(this.cssAttrDynamic, pseudo_style);
+    setCssAttrs : function(obj){
+      for(var prop in obj){
+	this.setCssAttr(prop, obj[prop]);
+      }
     },
     setFontSizeUpdate : function(font_size){
       this.fontSize = font_size;
@@ -1696,14 +1680,18 @@ var Tag = (function (){
     getName : function(){
       return this.name;
     },
+    getAttr : function(name, def_value){
+      return this.getTagAttr(name) || this.getCssAttr(name) || def_value || null;
+    },
     getPseudoElementName : function(){
       if(this.isPseudoElementTag()){
 	return this.getName().substring(1);
       }
       return "";
     },
-    getAttr : function(name, def_value){
-      return this.getTagAttr(name) || this.getCssAttr(name) || def_value || null;
+    getPseudoCssAttr : function(pseudo_name){
+      var pseudo_selectors = this._parsePseudoSelectors(pseudo_name);
+      return this._parseCssAttrWithCache(pseudo_selectors);
     },
     getSelectors : function(){
       return this.selectors;
@@ -1811,8 +1799,12 @@ var Tag = (function (){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
-    isPseudoElementTag : function(){
+    isPseudoTag : function(){
       return this.getName().charAt(0) === ":";
+    },
+    isPseudoElementTag : function(){
+      var name = this.getName();
+      return (name === ":first-letter" || name === ":first-line");
     },
     isEmphaTag : function(){
       return this.getCssAttr("empha-mark") !== null;
@@ -1862,6 +1854,9 @@ var Tag = (function (){
     isPageBreakTag : function(){
       var name = this.getName();
       return name === "end-page" || name === "page-break";
+    },
+    _getCssCacheKey : function(selectors){
+      return selectors.join(",");
     },
     _preprocess : function(src){
       return src.replace(/\s*=\s*/g, "=");
@@ -1918,16 +1913,17 @@ var Tag = (function (){
 	}));
       });
     },
-    // Style["div"].border = "1px"
-    // => {border:"1px"}
     _parseCssAttr : function(selectors){
       var attr = {};
       List.iter(selectors, function(key){
-	Args.copy(attr, Selectors.getValue(key));
+	// Selectors.getValue still has some problem.
+	//Args.copy(attr, Selectors.getValue(key));
+	Args.copy(attr, Style[key] || {});
       });
       return attr;
     },
-    _parseCssAttrWithCache : function(selectors, cache_key){
+    _parseCssAttrWithCache : function(selectors){
+      var cache_key = this._getCssCacheKey(selectors);
       var cache = get_css_attr_cache(cache_key);
       if(cache === null){
 	cache = this._parseCssAttr(selectors);
@@ -1943,28 +1939,17 @@ var Tag = (function (){
 	return key + ":" + pseudo_name;
       });
     },
-    // if pseudo_name is "before"
-    // and Style.li[":before"] = {border: "1px"};
-    // => {border:"1px"}
-    _parsePseudoStyle : function(pseudo_name){
-      var attr = {};
-      var pseudo_selectors = this._parsePseudoSelectors(pseudo_name);
-      List.iter(pseudo_selectors, function(pseudo_key){
-	Args.copy(attr, Style[pseudo_key] || {});
-      });
-      return attr;
-    },
     _parsePseudoContent : function(pseudo_name){
-      var pseudo_style = this._parsePseudoStyle(pseudo_name);
-      var content = pseudo_style.content || "";
+      var pseudo_css_attr = this.getPseudoCssAttr(pseudo_name);
+      var content = pseudo_css_attr.content || "";
       if(content === ""){
 	return "";
       }
       return Html.tagWrap(":" + pseudo_name, Html.escape(content));
     },
     _parsePseudoFirstContent : function(content){
-      var first_letter_style = this._parsePseudoStyle("first-letter");
-      var first_line_style = this._parsePseudoStyle("first-line");
+      var first_letter_style = this.getPseudoCssAttr("first-letter");
+      var first_line_style = this.getPseudoCssAttr("first-line");
       var first_letter_enable = !Obj.isEmpty(first_letter_style);
       var first_line_enable = !Obj.isEmpty(first_line_style);
 
@@ -6280,9 +6265,11 @@ var BlockGenerator = Class.extend({
     return parent.isEmptyChild();
   },
   _setBoxStyle : function(box, parent){
-    // if box is first child of parent, enable first-child(pseudo class).
+    // if box is first child of parent,
+    // copy style of <this.markup.name>:first-child.
     if(parent && this._isFirstChild(box, parent)){
-      this.markup.setFirstChild();
+      var pseudo_css_attr = this.markup.getPseudoCssAttr("first-child");
+      this.markup.setCssAttrs(pseudo_css_attr);
     }
     // set font size
     var base_font_size = parent? parent.fontSize : Layout.fontSize;
@@ -7047,10 +7034,16 @@ var InlineGenerator = (function(){
       if(Token.isTag(token) && token.getName() === "br"){
 	return LINE_BREAK;
       }
-      // if pseudo-element tag, copy original css
+      // if pseudo-element tag,
+      // copy style of <this.markup.name>:<pseudo-name> dynamically.
       if(this.markup && token.isPseudoElementTag()){
 	var pseudo_name = token.getPseudoElementName();
-	this.markup.copyPseudoStyle(pseudo_name, token);
+	var pseudo_css_attr = this.markup.getPseudoCssAttr(pseudo_name);
+	for(var prop in pseudo_css_attr){
+	  if(prop !== "content"){
+	    token.setCssAttr(prop, pseudo_css_attr[prop]);
+	  }
+	}
       }
       // if block element, break line and force terminate generator
       if(token.isBlock()){

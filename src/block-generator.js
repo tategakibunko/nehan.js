@@ -47,9 +47,11 @@ var BlockGenerator = Class.extend({
     return parent.isEmptyChild();
   },
   _setBoxStyle : function(box, parent){
-    // if box is first child of parent, enable first-child(pseudo class).
+    // if box is first child of parent,
+    // copy style of <this.markup.name>:first-child.
     if(parent && this._isFirstChild(box, parent)){
-      this.markup.setFirstChild();
+      var pseudo_css_attr = this.markup.getPseudoCssAttr("first-child");
+      this.markup.setCssAttrs(pseudo_css_attr);
     }
     // set font size
     var base_font_size = parent? parent.fontSize : Layout.fontSize;

@@ -9,7 +9,7 @@ var Selector = (function(){
     getValue : function(){
       return this.val;
     },
-    match : function(key){
+    test : function(key){
       key = key.toLowerCase();
       if(this.rex === null){
 	return this.src === key;

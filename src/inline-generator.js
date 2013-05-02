@@ -152,10 +152,16 @@ var InlineGenerator = (function(){
       if(Token.isTag(token) && token.getName() === "br"){
 	return LINE_BREAK;
       }
-      // if pseudo-element tag, copy original css
+      // if pseudo-element tag,
+      // copy style of <this.markup.name>:<pseudo-name> dynamically.
       if(this.markup && token.isPseudoElementTag()){
 	var pseudo_name = token.getPseudoElementName();
-	this.markup.copyPseudoStyle(pseudo_name, token);
+	var pseudo_css_attr = this.markup.getPseudoCssAttr(pseudo_name);
+	for(var prop in pseudo_css_attr){
+	  if(prop !== "content"){
+	    token.setCssAttr(prop, pseudo_css_attr[prop]);
+	  }
+	}
       }
       // if block element, break line and force terminate generator
       if(token.isBlock()){
