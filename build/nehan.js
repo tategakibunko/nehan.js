@@ -7601,12 +7601,11 @@ var InlinePageGenerator = PageGenerator.extend({
     return false;
   },
   yield : function(parent, size){
-    var box_type = this._getBoxType();
-    var box = Layout.createBox(size, parent, box_type);
-    this._onReadyBox(box);
-    this._setBoxStyle(box, parent);
-    this._onCreateBox(box, parent);
-    return this._yieldPageTo(box);
+    var wrap = Layout.createBox(size, parent, "div");
+    var page = this._super(wrap); // yield page to wrap.
+    wrap.addChild(page);
+    wrap.blockAlign = page.blockAlign;
+    return wrap;
   }
 });
 
