@@ -1537,9 +1537,10 @@ var Selector = (function(){
 
 var Selectors = (function(){
   var selectors = {};
+  /* Selectors::getValue still has troubles, so disable this code.
   for(var key in Style){
     selectors[key] = new Selector(key, Style[key]);
-  }
+  }*/
   return {
     addSelector : function(key){
       var selector = selectors[key] || null;
@@ -2526,6 +2527,11 @@ var EmphaChar = (function(){
     getCss : function(flow){
       var css = {};
       css.position = "absolute";
+      if(flow.isTextHorizontal()){
+	css.display = "inline-block";
+	css.width = css.height = this.fontSize + "px";
+	css["text-align"] = "center";
+      }
       css[flow.getPropStart()] = this.startPos + "px";
       return css;
     },
@@ -6596,9 +6602,6 @@ var LineContext = (function(){
       if(opt.extent > this.maxExtent){
 	this._setMaxExtent(opt.extent);
       }
-      if(opt.advance > 0){
-	this._addAdvance(opt.advance);
-      }
       if(element instanceof Ruby){
 	this._addRuby(element);
       } else if(Token.isTag(element)){
@@ -6607,6 +6610,9 @@ var LineContext = (function(){
 	this._addInlineBlock(element);
       } else {
 	this._addText(element);
+      }
+      if(opt.advance > 0){
+	this._addAdvance(opt.advance);
       }
     },
     setAnchor : function(anchor_name){

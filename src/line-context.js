@@ -131,9 +131,6 @@ var LineContext = (function(){
       if(opt.extent > this.maxExtent){
 	this._setMaxExtent(opt.extent);
       }
-      if(opt.advance > 0){
-	this._addAdvance(opt.advance);
-      }
       if(element instanceof Ruby){
 	this._addRuby(element);
       } else if(Token.isTag(element)){
@@ -142,6 +139,9 @@ var LineContext = (function(){
 	this._addInlineBlock(element);
       } else {
 	this._addText(element);
+      }
+      if(opt.advance > 0){
+	this._addAdvance(opt.advance);
       }
     },
     setAnchor : function(anchor_name){

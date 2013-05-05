@@ -10,6 +10,11 @@ var EmphaChar = (function(){
     getCss : function(flow){
       var css = {};
       css.position = "absolute";
+      if(flow.isTextHorizontal()){
+	css.display = "inline-block";
+	css.width = css.height = this.fontSize + "px";
+	css["text-align"] = "center";
+      }
       css[flow.getPropStart()] = this.startPos + "px";
       return css;
     },
