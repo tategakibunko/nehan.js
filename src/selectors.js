@@ -1,9 +1,9 @@
 var Selectors = (function(){
   var selectors = {};
-  /* Selectors::getValue still has troubles, so disable this code.
+  // initialize default selectors
   for(var key in Style){
     selectors[key] = new Selector(key, Style[key]);
-  }*/
+  }
   return {
     addSelector : function(key){
       var selector = selectors[key] || null;

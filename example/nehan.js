@@ -1520,7 +1520,10 @@ var Selector = (function(){
       return this.rex.test(key);
     },
     _createPattern : function(src){
-      return src.toLowerCase().replace(/\s+/g, " ").replace(/\./g, ".*\\.").replace(/\s/g, ".+");
+      return src
+	.replace(/\s+/g, " ")
+	.replace(/([^\s\.\^]*)\.(\S+)/g, "$1\\.$2")
+	.replace(/\s/g, "(\\s|[a-z0-9-_=:\\[\\]])*") + "$";
     },
     _createRegExp : function(src){
       if(src.indexOf(".") < 0 && src.indexOf(" ") < 0){
@@ -1537,10 +1540,10 @@ var Selector = (function(){
 
 var Selectors = (function(){
   var selectors = {};
-  /* Selectors::getValue still has troubles, so disable this code.
+  // initialize default selectors
   for(var key in Style){
     selectors[key] = new Selector(key, Style[key]);
-  }*/
+  }
   return {
     addSelector : function(key){
       var selector = selectors[key] || null;
@@ -1882,30 +1885,17 @@ var Tag = (function (){
       });
     },
     // <p class='hi hey'>
-    // => ["p.hi", "p.hey"]
-    _parseCssClassesWithTag : function(tag_name, classes){
-      return List.map(classes, function(class_name){
-	return tag_name + "." + class_name;
-      });
-    },
-    // <p class='hi hey'>
-    // => [".hi", ".hey", "p.hi", "p.hey"]
-    _parseCssClassesAll : function(tag_name, classes){
-      var css_classes = this._parseCssClasses(classes);
-      return css_classes.concat(this._parseCssClassesWithTag(tag_name, classes));
-    },
-    // <p class='hi hey'>
-    // => ["p", ".hi", ".hey", "p.hi", "p.hey"]
+    // => ["p", "p.hi", "p.hey"]
     _parseSelectors : function(classes){
       var tag_name = this.getName();
-      return [tag_name].concat(this._parseCssClassesAll(tag_name, classes));
+      return [tag_name].concat(List.map(classes, function(class_name){
+	return tag_name + "." + class_name;
+      }));
     },
     // get contextual selector(so parent of parent_tag is ignored).
-    // if parent_keys are ["div", ".parent", "div.parent"]
-    // and child_keys are ["p", , ".child", "p.child"]
-    // =>["div p", "div .child", "div p.child",
-    //    ".parent p", ".parent .child", ".parent p.child",
-    //    "div.parent p", "div.parent .child", "div.parent p.child"]
+    // if parent_keys are ["div", "div.parent"]
+    // and child_keys are ["p", , "p.child"]
+    // =>["div p", "div p.child", "div.parent p", "div.parent p.child"]
     _parseContextSelectors : function(parent_selectors){
       var child_selectors = this.selectors;
       return List.fold(parent_selectors, [], function(ret1, parent_key){
@@ -1917,9 +1907,7 @@ var Tag = (function (){
     _parseCssAttr : function(selectors){
       var attr = {};
       List.iter(selectors, function(key){
-	// Selectors.getValue still has some problem.
-	//Args.copy(attr, Selectors.getValue(key));
-	Args.copy(attr, Style[key] || {});
+	Args.copy(attr, Selectors.getValue(key));
       });
       return attr;
     },
@@ -2527,11 +2515,9 @@ var EmphaChar = (function(){
     getCss : function(flow){
       var css = {};
       css.position = "absolute";
-      if(flow.isTextHorizontal()){
-	css.display = "inline-block";
-	css.width = css.height = this.fontSize + "px";
-	css["text-align"] = "center";
-      }
+      css["text-align"] = "center";
+      css.width = css.height = this.fontSize + "px";
+      css.display = flow.isTextVertical()? "block" : "inline-block";
       css[flow.getPropStart()] = this.startPos + "px";
       return css;
     },

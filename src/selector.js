@@ -17,7 +17,10 @@ var Selector = (function(){
       return this.rex.test(key);
     },
     _createPattern : function(src){
-      return src.toLowerCase().replace(/\s+/g, " ").replace(/\./g, ".*\\.").replace(/\s/g, ".+");
+      return src
+	.replace(/\s+/g, " ")
+	.replace(/([^\s\.\^]*)\.(\S+)/g, "$1\\.$2")
+	.replace(/\s/g, "(\\s|[a-z0-9-_=:\\[\\]])*") + "$";
     },
     _createRegExp : function(src){
       if(src.indexOf(".") < 0 && src.indexOf(" ") < 0){

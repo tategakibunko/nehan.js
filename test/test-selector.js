@@ -1,4 +1,4 @@
-test("test", function(){
+test("selector", function(){
   var selector;
   selector = new Selector("div", {border:1});
   equal(selector.test("div"), true);
@@ -18,4 +18,8 @@ test("test", function(){
   equal(selector.test(".hoge div"), true);
   equal(selector.test("p.hoge div"), true);
   equal(selector.test("p.hoge nav div"), true);
+
+  selector = new Selector("div .hoge");
+  equal(selector.test("div p.hoge"), true);
+  equal(selector.test("div ul li.hoge"), true);
 });
