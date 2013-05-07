@@ -6547,12 +6547,13 @@ var LineContext = (function(){
       this.stream.next();
     },
     getNextToken : function(){
+      var is_line_start = this.isLineStart();
       var token = this.stream.get();
 
       // skip head half space if 1 and 2.
       // 1. first token of line is a half space.
       // 2. next text token is a word.
-      if(token && this.isLineStart() && Token.isChar(token) && token.isHalfSpaceChar()){
+      if(token && is_line_start && Token.isChar(token) && token.isHalfSpaceChar()){
 	var next = this.findFirstText();
 	if(next && Token.isWord(next)){
 	  token = this.stream.get();
