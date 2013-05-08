@@ -858,12 +858,6 @@ var Style = {
   ".nehan-float-start":{
     "float":"start"
   },
-  ".nehan-ba-start":{
-    "float":"start"
-  },
-  ".nehan-ba-end":{
-    "float":"end"
-  },
   ".nehan-float-end":{
     "float":"end"
   },
