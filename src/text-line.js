@@ -23,6 +23,12 @@ var TextLine = (function(){
   }
 
   TextLine.prototype = {
+    // text-line object get to be parent other texts only when ruby is generated.
+    // so this function is called only from VerticalInlineEvaluator::evalRubyLabelLine,
+    // and ruby is not justify target.
+    canJustify : function(){
+      return false;
+    },
     isTextVertical : function(){
       return this.flow.isTextVertical();
     },
@@ -42,10 +48,7 @@ var TextLine = (function(){
       return this.textMeasure;
     },
     getTextRestMeasure : function(){
-      return this.getMaxTextMeasure() - this.textMeasure;
-    },
-    getMaxTextMeasure : function(){
-      return Box.prototype.getMaxTextMeasure.call(this);
+      return this.getContentMeasure() - this.textMeasure;
     },
     getContentMeasure : function(flow){
       return this.size.getMeasure(flow || this.flow);

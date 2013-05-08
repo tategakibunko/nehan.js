@@ -3960,17 +3960,6 @@ var Box = (function(){
     getContentExtent : function(flow){
       return this.size.getExtent(flow || this.flow);
     },
-    getMaxTextMeasure : function(flow){
-      var measure = this.getContentMeasure(flow || this.flow);
-      var space = Layout.fontSize; // this is space for tail NG.
-
-      // if marker or :first-letter(pseudo-element), tail space is zero.
-      if(this._type === "li-marker" ||
-	 this._type === ":first-letter"){
-	return Math.max(space, measure);
-      }
-      return Math.max(space, measure - space);
-    },
     getMaxChildMeasure : function(flow){
       var _flow = flow || this.flow;
       var max_measure = 0;
@@ -4156,6 +4145,12 @@ var Box = (function(){
     isValidSize : function(){
       return this.size.isValid();
     },
+    canJustify : function(){
+      if(this._type === "li-marker" || this._type === ":first-letter"){
+	return false;
+      }
+      return true;
+    },
     canInclude : function(size){
       return this.size.canInclude(size);
     },
@@ -4290,6 +4285,12 @@ var TextLine = (function(){
   }
 
   TextLine.prototype = {
+    // text-line object get to be parent other texts only when ruby is generated.
+    // so this function is called only from VerticalInlineEvaluator::evalRubyLabelLine,
+    // and ruby is not justify target.
+    canJustify : function(){
+      return false;
+    },
     isTextVertical : function(){
       return this.flow.isTextVertical();
     },
@@ -4309,10 +4310,7 @@ var TextLine = (function(){
       return this.textMeasure;
     },
     getTextRestMeasure : function(){
-      return this.getMaxTextMeasure() - this.textMeasure;
-    },
-    getMaxTextMeasure : function(){
-      return Box.prototype.getMaxTextMeasure.call(this);
+      return this.getContentMeasure() - this.textMeasure;
     },
     getContentMeasure : function(flow){
       return this.size.getMeasure(flow || this.flow);
@@ -6467,7 +6465,7 @@ var LineContext = (function(){
     this.textIndent = stream.isHead()? (parent.textIndent || 0) : 0;
     this.maxFontSize = parent.fontSize;
     this.maxExtent = 0;
-    this.maxMeasure = parent.getMaxTextMeasure() - this.textIndent;
+    this.maxMeasure = parent.getContentMeasure() - this.textIndent;
     this.curMeasure = 0;
     this.restMeasure = this.maxMeasure;
     this.restExtent = parent.getRestContentExtent();
@@ -6491,11 +6489,15 @@ var LineContext = (function(){
     canContainExtent : function(extent){
       return this.restExtent >= extent;
     },
-    canContainAdvance : function(advance){
-      return this.restMeasure >= advance;
+    canContainAdvance : function(element, advance){
+      if(element instanceof Box || !this.parent.canJustify()){
+	return this.restMeasure >= advance;
+      }
+      // justify target need space for tail fix.
+      return this.restMeasure - this.parent.fontSize >= advance;
     },
-    canContain : function(advance, extent){
-      return this.canContainAdvance(advance) && this.canContainExtent(extent);
+    canContain : function(element, advance, extent){
+      return this.canContainAdvance(element, advance) && this.canContainExtent(extent);
     },
     isPreLine : function(){
       return this.parent._type === "pre";
@@ -6950,7 +6952,7 @@ var InlineGenerator = (function(){
 	var font_size = this._getFontSize(ctx, element); // font size of element.
 
 	// if overflow inline max, break loop
-	if(!ctx.canContain(advance, extent)){
+	if(!ctx.canContain(element, advance, extent)){
 	  if(this.generator){
 	    this.generator.rollback();
 	  } else {

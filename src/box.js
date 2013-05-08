@@ -65,17 +65,6 @@ var Box = (function(){
     getContentExtent : function(flow){
       return this.size.getExtent(flow || this.flow);
     },
-    getMaxTextMeasure : function(flow){
-      var measure = this.getContentMeasure(flow || this.flow);
-      var space = Layout.fontSize; // this is space for tail NG.
-
-      // if marker or :first-letter(pseudo-element), tail space is zero.
-      if(this._type === "li-marker" ||
-	 this._type === ":first-letter"){
-	return Math.max(space, measure);
-      }
-      return Math.max(space, measure - space);
-    },
     getMaxChildMeasure : function(flow){
       var _flow = flow || this.flow;
       var max_measure = 0;
@@ -260,6 +249,12 @@ var Box = (function(){
     },
     isValidSize : function(){
       return this.size.isValid();
+    },
+    canJustify : function(){
+      if(this._type === "li-marker" || this._type === ":first-letter"){
+	return false;
+      }
+      return true;
     },
     canInclude : function(size){
       return this.size.canInclude(size);

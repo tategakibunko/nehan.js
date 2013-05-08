@@ -193,7 +193,7 @@ var TestCode = {
       ].join("\n"),
 
       "figure":[
-	"<figure width='148' height='150' class='nehan-float-start nehan-flow-lr-tb'>",
+	"<figure width='148' height='150' class='nehan-float-start nehan-gap-end nehan-flow-lr-tb'>",
 	"<figcaption class='nehan-line-no-ruby'>this is caption</figcaption>",
 	"<div class='nehan-ta-center nehan-line-no-ruby'>" + CatalogUtil.placeHolder(128,128) + "</div>",
 	//CatalogUtil.placeHolder(128,128),

@@ -75,7 +75,7 @@ var InlineGenerator = (function(){
 	var font_size = this._getFontSize(ctx, element); // font size of element.
 
 	// if overflow inline max, break loop
-	if(!ctx.canContain(advance, extent)){
+	if(!ctx.canContain(element, advance, extent)){
 	  if(this.generator){
 	    this.generator.rollback();
 	  } else {

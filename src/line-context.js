@@ -10,7 +10,7 @@ var LineContext = (function(){
     this.textIndent = stream.isHead()? (parent.textIndent || 0) : 0;
     this.maxFontSize = parent.fontSize;
     this.maxExtent = 0;
-    this.maxMeasure = parent.getMaxTextMeasure() - this.textIndent;
+    this.maxMeasure = parent.getContentMeasure() - this.textIndent;
     this.curMeasure = 0;
     this.restMeasure = this.maxMeasure;
     this.restExtent = parent.getRestContentExtent();
@@ -34,11 +34,15 @@ var LineContext = (function(){
     canContainExtent : function(extent){
       return this.restExtent >= extent;
     },
-    canContainAdvance : function(advance){
-      return this.restMeasure >= advance;
+    canContainAdvance : function(element, advance){
+      if(element instanceof Box || !this.parent.canJustify()){
+	return this.restMeasure >= advance;
+      }
+      // justify target need space for tail fix.
+      return this.restMeasure - this.parent.fontSize >= advance;
     },
-    canContain : function(advance, extent){
-      return this.canContainAdvance(advance) && this.canContainExtent(extent);
+    canContain : function(element, advance, extent){
+      return this.canContainAdvance(element, advance) && this.canContainExtent(extent);
     },
     isPreLine : function(){
       return this.parent._type === "pre";
