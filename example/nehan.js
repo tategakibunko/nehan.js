@@ -8132,13 +8132,16 @@ var InlineEvaluator = Class.extend({
 var VerticalInlineEvaluator = InlineEvaluator.extend({
   evalTextLine : function(line, ctx){
     var css = line.getCss();
+    if(line.parent && line.parent._type == "ruby-line"){
+      css["float"] = "none";
+    }
     return Html.tagWrap("div", this.evalTextLineBody(line, ctx), {
-      "style":Css.attr(line.getCss()),
+      "style":Css.attr(css),
       "class":line.getCssClasses()
     });
   },
   evalRubyLabel : function(line, label, ctx){
-    var label_line = this.evalRubyLabelLine(line, label, ctx);
+    var label_line = this._yieldRubyLabelLine(line, label, ctx);
     return Html.tagWrap("div", this.evalTextLine(label_line, ctx.createInlineRoot()), {
       "style": Css.attr(label.getCss(line)),
       "class": Css.addNehanPrefix(label._type)
@@ -8150,7 +8153,7 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       "style": Css.attr(text.getCss(line.flow))
     });
   },
-  evalRubyLabelLine : function(line, label, ctx){
+  _yieldRubyLabelLine : function(line, label, ctx){
     var text = label.getRtString();
     var font_size = label.getRtFontSize();
     var stream = new TokenStream(text);
