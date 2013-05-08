@@ -4285,8 +4285,7 @@ var TextLine = (function(){
   }
 
   TextLine.prototype = {
-    // text-line object get to be parent other texts only when ruby is generated.
-    // so this function is called only from VerticalInlineEvaluator::evalRubyLabelLine,
+    // this function is called only from VerticalInlineEvaluator::evalRubyLabelLine,
     // and ruby is not justify target.
     canJustify : function(){
       return false;
