@@ -129,6 +129,7 @@ div, span{
   padding-bottom:0.5em;
 }
 .nehan-vert-alpha{
+  word-break:normal !important;
   -webkit-transform : rotate(90deg);
   -webkit-transform-origin : 50% 50%;
   -moz-transform : rotate(90deg);
