@@ -173,16 +173,16 @@ var TestCode = {
       "dynamic-table":dyn_table,
 
       "img-align":[
-	"<img src='128x128.gif' width='128' height='128' class='nehan-ba-start'/>",
+	"<img src='128x128.gif' width='128' height='128' class='nehan-float-start nehan-gap-end'/>",
 	text_huge,
-	"<img src='256x256.gif' width='256' height='256' class='nehan-ba-end'/>",
+	"<img src='256x256.gif' width='256' height='256' class='nehan-float-end'/>",
 	text_huge
       ].join("\n"),
 
       "vert-and-hori":[
-	"<div width='100' height='150' class='nehan-ba-start nehan-flow-lr-tb'>" + text_large + "</div>",
+	"<div width='100' height='150' class='nehan-float-start nehan-flow-lr-tb'>" + text_large + "</div>",
 	text_huge,
-	"<div width='100' height='150' class='nehan-ba-end nehan-flow-tb-rl'>" + text_large + "</div>",
+	"<div width='100' height='150' class='nehan-float-end nehan-flow-tb-rl'>" + text_large + "</div>",
 	text_huge
       ].join("\n"),
 
@@ -193,7 +193,7 @@ var TestCode = {
       ].join("\n"),
 
       "figure":[
-	"<figure width='148' height='150' class='nehan-ba-start nehan-flow-lr-tb'>",
+	"<figure width='148' height='150' class='nehan-float-start nehan-flow-lr-tb'>",
 	"<figcaption class='nehan-line-no-ruby'>this is caption</figcaption>",
 	"<div class='nehan-ta-center nehan-line-no-ruby'>" + CatalogUtil.placeHolder(128,128) + "</div>",
 	//CatalogUtil.placeHolder(128,128),
@@ -209,9 +209,6 @@ var TestCode = {
 
       "paragraph":[
 	"<p>",
-	text_large,
-	"</p>",
-	"<p class='nehan-jisage'>",
 	text_large,
 	"</p>"
       ].join("\n"),
@@ -388,7 +385,7 @@ var TestCode = {
       ].join("\n"),
 
       "embed-html":[
-	"<div width='100' height='100' class='nehan-ba-end'>" + text_huge + "</div>",
+	"<div width='100' height='100' class='nehan-float-end'>" + text_huge + "</div>",
 	text_large
       ].join("\n"),
 

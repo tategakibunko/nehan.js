@@ -693,13 +693,19 @@ var Style = {
     "text-align":"end"
   },
   //-------------------------------------------------------
-  // block-align classes
+  // float classes
   //-------------------------------------------------------
+  ".nehan-float-start":{
+    "float":"start"
+  },
   ".nehan-ba-start":{
-    "block-align":"start"
+    "float":"start"
   },
   ".nehan-ba-end":{
-    "block-align":"end"
+    "float":"end"
+  },
+  ".nehan-float-end":{
+    "float":"end"
   },
   //-------------------------------------------------------
   // flow classes
@@ -856,27 +862,31 @@ var Style = {
     "flow":"inherit",
     "width":"4em",
     "height":"4em",
-    "block-align":"start",
+    "float":"start",
     "line-rate":1.0,
     "font-size":"4em"
   },
   ".nehan-line-no-ruby":{
     "line-rate":1.0
   },
-  ".nehan-append-after":{
+  ".nehan-gap-start":{
+    "margin":{
+      "start":"1em"
+    }
+  },
+  ".nehan-gap-end":{
+    "margin":{
+      "end":"1em"
+    }
+  },
+  ".nehan-gap-after":{
     "margin":{
       "after":"1em"
     }
   },
-  ".nehan-prepend-before":{
+  ".nehan-gap-before":{
     "margin":{
       "before":"1em"
     }
-  },
-  ".nehan-ti-1em":{
-    "text-indent":"1em"
-  },
-  ".nehan-jisage":{
-    "text-indent":"1em" // same as '.nehan-ti-1em'
   }
 };

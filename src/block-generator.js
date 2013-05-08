@@ -107,9 +107,9 @@ var BlockGenerator = Class.extend({
 	break;
       }
     }
-    var block_align = this.markup.getCssAttr("block-align", "none");
-    if(block_align != "none"){
-      box.blockAlign = block_align;
+    var logical_float = this.markup.getCssAttr("float", "none");
+    if(logical_float != "none"){
+      box.logicalFloat = logical_float;
     }
     var text_indent = this.markup.getCssAttr("text-indent", 0);
     if(text_indent){

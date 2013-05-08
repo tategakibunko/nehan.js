@@ -8,7 +8,7 @@ var InlinePageGenerator = PageGenerator.extend({
     var wrap = Layout.createBox(size, parent, "div");
     var page = this._super(wrap); // yield page to wrap.
     wrap.addChild(page);
-    wrap.blockAlign = page.blockAlign;
+    wrap.logicalFloat = page.logicalFloat;
     return wrap;
   }
 });

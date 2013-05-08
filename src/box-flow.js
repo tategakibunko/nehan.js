@@ -92,7 +92,7 @@ var BoxFlow = (function(){
     getFlipFlow : function(){
       return this.isTextVertical()? Layout.getStdHoriFlow() : Layout.getStdVertFlow();
     },
-    getAlignedWrapFlow : function(){
+    getFloatedWrapFlow : function(){
       if(this.isTextVertical()){
 	return this;
       }

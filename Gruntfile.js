@@ -130,7 +130,7 @@ module.exports = function(grunt) {
 	    "src/section-root-generator.js",
 	    "src/header-generator.js",
 	    "src/body-page-generator.js",
-	    "src/aligned-page-generator.js",
+	    "src/floated-block-generator.js",
 	    "src/inline-page-generator.js",
 	    "src/page-group-generator.js",
 	    "src/parallel-page-generator.js",

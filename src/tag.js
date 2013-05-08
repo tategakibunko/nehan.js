@@ -168,8 +168,8 @@ var Tag = (function (){
     getWrapSrc : function(){
       return this.src + this.content + this.getCloseSrc();
     },
-    getBlockAlign : function(){
-      return this.getCssAttr("block-align", "none");
+    getLogicalFloat : function(){
+      return this.getCssAttr("float", "none");
     },
     getHeaderRank : function(){
       if(this.getName().match(/h([1-6])/)){
@@ -212,8 +212,8 @@ var Tag = (function (){
     isClassAttrEnable : function(){
       return (typeof this.tagAttr["class"] != "undefined");
     },
-    isBlockAligned : function(){
-      return this.getBlockAlign() != "none";
+    isFloated : function(){
+      return this.getLogicalFloat() != "none";
     },
     isPush : function(){
       return (typeof this.tagAttr.push != "undefined");
@@ -251,7 +251,7 @@ var Tag = (function (){
       return this.getCssAttr("embeddable") === true;
     },
     isBlock : function(){
-      if(this.isBlockAligned() || this.isPush() || this.isPull()){
+      if(this.isFloated() || this.isPush() || this.isPull()){
 	return true;
       }
       return this.getCssAttr("display", "inline") === "block";

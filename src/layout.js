@@ -12,7 +12,6 @@ var Layout = {
   linkColor:"0000FF",
   fontImgRoot:"http://nehan.googlecode.com/hg/char-img",
   lineRate: 2.0,
-  alignedSpacingRate:0.5,
   listMarkerSpacingRate:0.5,
 
   createBox : function(size, parent, type){
@@ -47,9 +46,6 @@ var Layout = {
   },
   getStdHoriFlow : function(){
     return BoxFlows.getByName(this.hori);
-  },
-  getAlignedSpacingSize : function(){
-    return Math.floor(this.fontSize * this.alignedSpacingRate);
   },
   getListMarkerSpacingSize : function(font_size){
     return Math.floor(font_size * this.listMarkerSpacingRate);

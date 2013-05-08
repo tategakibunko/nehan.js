@@ -178,9 +178,9 @@ var PageGenerator = BlockGenerator.extend({
       return box;
     }
 
-    // aligned box is treated as a single block element(with rest spaces filled by other elements).
-    if(box instanceof Box && box.blockAlign){
-      return this._yieldAlignedBlock(parent, box, tag);
+    // floated box is treated as a single block element(with rest spaces filled by other elements).
+    if(box instanceof Box && box.logicalFloat){
+      return this._yieldFloatedBlock(parent, box, tag);
     }
 
     return box; // return as single block.
@@ -202,8 +202,8 @@ var PageGenerator = BlockGenerator.extend({
     }
     return generator.yield(parent, static_size);
   },
-  _yieldAlignedBlock : function(parent, aligned_box, tag){
-    var generator = new AlignedPageGenerator(this.stream, this.context, aligned_box);
+  _yieldFloatedBlock : function(parent, aligned_box, tag){
+    var generator = new FloatedBlockGenerator(this.stream, this.context, aligned_box);
     var block = generator.yield(parent);
     this.generator = generator.getCurGenerator(); // inherit generator of aligned area
     return block;

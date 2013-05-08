@@ -134,8 +134,8 @@ var Box = (function(){
       var rest_extent = this.getRestContentExtent();
       return this.flow.getBoxSize(rest_measure, rest_extent);
     },
-    getAlignedWrapFlow : function(){
-      return this.flow.getAlignedWrapFlow();
+    getFloatedWrapFlow : function(){
+      return this.flow.getFloatedWrapFlow();
     },
     getParentFlow : function(){
       return this.parent? this.parent.flow : null;
