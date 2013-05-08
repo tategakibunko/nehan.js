@@ -4501,7 +4501,12 @@ var Lexer = (function (){
       return new Tcy(content);
     },
     _parseChildContentTag : function(tag){
-      var content = this._getTagContent(tag.name);
+      try {
+	var content = this._getTagContent(tag.name);
+      } catch(e){
+	console.log("failed to get content of %s", tag.name);
+	content = "";
+      }
       tag.setContent(Utils.trimCRLF(content));
       this._stepBuff(content.length + tag.name.length + 3); // 3 = "</>".length
       return tag;

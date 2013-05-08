@@ -65,7 +65,7 @@ var Lexer = (function (){
     _getChar : function(){
       return this.buff.substring(0,1);
     },
-    _getTagContent : function(tag_name){
+    _getTagContentAux : function(tag_name){
       var start_tag = "<" + tag_name;
       var end_tag = "</" + tag_name;
       var get_end_pos = function(buff, offset){
@@ -83,6 +83,13 @@ var Lexer = (function (){
 	return this.buff; // tag not closed, so return whole rest buff.
       }
       return this.buff.substring(0, end_pos);
+    },
+    _getTagContent : function(tag_name){
+      try {
+	return this._getTagContentAux(tag_name);
+      } catch (e){
+	return "";
+      }
     },
     _parseTag : function(tagstr){
       var tag = new Tag(tagstr);
@@ -102,7 +109,12 @@ var Lexer = (function (){
       return new Tcy(content);
     },
     _parseChildContentTag : function(tag){
-      var content = this._getTagContent(tag.name);
+      try {
+	var content = this._getTagContent(tag.name);
+      } catch(e){
+	console.log("failed to get content of %s", tag.name);
+	content = "";
+      }
       tag.setContent(Utils.trimCRLF(content));
       this._stepBuff(content.length + tag.name.length + 3); // 3 = "</>".length
       return tag;
