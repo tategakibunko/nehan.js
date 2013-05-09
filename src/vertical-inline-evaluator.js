@@ -1,7 +1,7 @@
 var VerticalInlineEvaluator = InlineEvaluator.extend({
   evalTextLine : function(line, ctx){
     var css = line.getCss();
-    if(line.parent && line.parent._type == "ruby-line"){
+    if(line.parent && line.parent._type === "ruby-line"){
       css["float"] = "none";
     }
     return Html.tagWrap("div", this.evalTextLineBody(line, ctx), {
