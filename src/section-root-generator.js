@@ -3,10 +3,17 @@ var SectionRootGenerator = ChildPageGenerator.extend({
     this._super(markup, context);
     this.context.startSectionRoot(markup);
   },
-  getOutlineTree : function(root_name){
+  hasOutline : function(root_name){
+    var buffer = this.getOutlineBuffer(root_name);
+    return buffer.isEmpty() === false;
+  },
+  getOutlineBuffer : function(root_name){
     var name = root_name || this.markup.getName();
-    var logs = this.context.getOutlineLog(name);
-    var tree = (new OutlineGenerator(logs)).yield();
+    return this.context.getOutlineBuffer(name);
+  },
+  getOutlineTree : function(root_name){
+    var buffer = this.getOutlineBuffer(root_name);
+    var tree = (new OutlineParser(buffer)).getTree();
     return tree;
   },
   getAnchors : function(){

@@ -157,8 +157,8 @@ var DocumentContext = (function(){
       return this.blockContext.isTagEnable(fn);
     },
     // outline context
-    getOutlineLog : function(root_name){
-      return this.outlineContext.getRootLog(root_name);
+    getOutlineBuffer : function(root_name){
+      return this.outlineContext.getOutlineBuffer(root_name);
     },
     startSectionRoot : function(tag){
       var type = tag.getName();

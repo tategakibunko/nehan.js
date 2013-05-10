@@ -14,6 +14,9 @@ var PageStream = Class.extend({
   hasNext : function(){
     return this.generator.hasNext();
   },
+  hasOutline : function(root_name){
+    return this.generator.hasOutline(root_name);
+  },
   getNext : function(){
     if(!this.hasNext()){
       return null;

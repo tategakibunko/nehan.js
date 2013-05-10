@@ -1,31 +1,31 @@
 var OutlineContext = (function(){
   function OutlineContext(){
-    this.rootLogs = {};
-    this.rootStack = [];
-    this.curRootSection = "body";
+    this._buffers = {};
+    this._stack = [];
+    this._curSection = "body";
   }
 
   OutlineContext.prototype = {
     _addHeaderLog : function(log){
-      var root_log = this.getRootLog(this.curRootSection);
+      var root_log = this.getOutlineBuffer(this._curSection);
       root_log.addHeaderLog(log);
     },
     _addSectionLog : function(log){
-      var root_log = this.getRootLog(this.curRootSection);
+      var root_log = this.getOutlineBuffer(this._curSection);
       root_log.addSectionLog(log);
     },
-    getRootLog : function(root_name){
-      var logs = this.rootLogs[root_name] || new OutlineLog(root_name);
-      this.rootLogs[root_name] = logs;
-      return logs;
+    getOutlineBuffer : function(root_name){
+      var buffer = this._buffers[root_name] || new OutlineBuffer(root_name);
+      this._buffers[root_name] = buffer;
+      return buffer;
     },
     startSectionRoot : function(root_name){
-      this.rootStack.push(root_name);
-      this.curRootSection = root_name;
+      this._stack.push(root_name);
+      this._curSection = root_name;
     },
     endSectionRoot : function(root_name){
-      this.curRootSection = this.rootStack.pop() || "body";
-      return this.curRootSection;
+      this._curSection = this._stack.pop() || "body";
+      return this._curSection;
     },
     logStartSection : function(type, page_no){
       this._addSectionLog({

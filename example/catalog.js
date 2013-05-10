@@ -66,7 +66,10 @@ var Catalog = (function(){
       return html;
     },
     getOutline : function(){
-      return this.stream.getOutlineNode("body");
+      if(this.stream.hasOutline()){
+	return this.stream.getOutlineNode("body");
+      }
+      return null;
     },
     getAnchors : function(){
       var html = "", anchors = this.stream.getAnchors();
@@ -523,7 +526,10 @@ var CatalogApp = {
 	  source.val(src);
 	  hori_result.html(cata_hori.eval(src));
 	  vert_result.html(cata_vert.eval(src));
-	  outline.append($(cata_hori.getOutline("body")));
+	  var body_outline = cata_hori.getOutline("body");
+	  if(body_outline){
+	    outline.append($(body_outline));
+	  }
 	  return false;
 	})
     };

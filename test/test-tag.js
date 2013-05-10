@@ -92,7 +92,7 @@ test("tag-is", function(){
   equal(tag.isBlock(), false); // img is default inline!
   equal(tag.isInline(), true); // img is default inline!
 
-  tag = new Tag("<img class='nehan-ba-start'>");
+  tag = new Tag("<img class='nehan-float-start'>");
   equal(tag.isBlock(), true); // aligned img is block
 
   tag = new Tag("<div style='display:inline'>");

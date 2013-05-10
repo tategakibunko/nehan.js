@@ -4769,13 +4769,36 @@ var TocContext = (function(){
   return TocContext;
 })();
 
-var OutlineLog = (function(){
-  function OutlineLog(root_name){
+var OutlineBuffer = (function(){
+  function OutlineBuffer(root_name){
     this.rootName = root_name;
     this.logs = [];
   }
 
-  OutlineLog.prototype = {
+  OutlineBuffer.prototype = {
+    isEmpty : function(){
+      return this.logs.length === 0;
+    },
+    get : function(pos){
+      return this.logs[pos] || null;
+    },
+    getSectionRootName : function(){
+      return this.rootName;
+    },
+    addSectionLog : function(log){
+      this.logs.push(log);
+    },
+    addHeaderLog : function(log){
+      // if section tag can't be included in parent layout,
+      // it's added twice by rollback yielding.
+      // in such case, we have to update old one.
+      var pos = this._findLog(log);
+      if(pos >= 0){
+	this.logs[pos] = log; // update log
+	return;
+      }
+      this.logs.push(log);
+    },
     // find same log without page no.
     _isSameLog : function(log1, log2){
       for(var prop in log1){
@@ -4795,57 +4818,40 @@ var OutlineLog = (function(){
 	}
       }
       return -1;
-    },
-    addSectionLog : function(log){
-      this.logs.push(log);
-    },
-    addHeaderLog : function(log){
-      // if section tag can't be included in parent layout,
-      // it's added twice by rollback yielding.
-      // in such case, we have to update old one.
-      var pos = this._findLog(log);
-      if(pos >= 0){
-	this.logs[pos] = log; // update log
-	return;
-      }
-      this.logs.push(log);
-    },
-    get : function(pos){
-      return this.logs[pos] || null;
     }
   };
 
-  return OutlineLog;
+  return OutlineBuffer;
 })();
 
 var OutlineContext = (function(){
   function OutlineContext(){
-    this.rootLogs = {};
-    this.rootStack = [];
-    this.curRootSection = "body";
+    this._buffers = {};
+    this._stack = [];
+    this._curSection = "body";
   }
 
   OutlineContext.prototype = {
     _addHeaderLog : function(log){
-      var root_log = this.getRootLog(this.curRootSection);
+      var root_log = this.getOutlineBuffer(this._curSection);
       root_log.addHeaderLog(log);
     },
     _addSectionLog : function(log){
-      var root_log = this.getRootLog(this.curRootSection);
+      var root_log = this.getOutlineBuffer(this._curSection);
       root_log.addSectionLog(log);
     },
-    getRootLog : function(root_name){
-      var logs = this.rootLogs[root_name] || new OutlineLog(root_name);
-      this.rootLogs[root_name] = logs;
-      return logs;
+    getOutlineBuffer : function(root_name){
+      var buffer = this._buffers[root_name] || new OutlineBuffer(root_name);
+      this._buffers[root_name] = buffer;
+      return buffer;
     },
     startSectionRoot : function(root_name){
-      this.rootStack.push(root_name);
-      this.curRootSection = root_name;
+      this._stack.push(root_name);
+      this._curSection = root_name;
     },
     endSectionRoot : function(root_name){
-      this.curRootSection = this.rootStack.pop() || "body";
-      return this.curRootSection;
+      this._curSection = this._stack.pop() || "body";
+      return this._curSection;
     },
     logStartSection : function(type, page_no){
       this._addSectionLog({
@@ -4875,15 +4881,15 @@ var OutlineContext = (function(){
   return OutlineContext;
 })();
 
-var OutlineGenerator = (function(){
-  function OutlineGenerator(logs){
+var OutlineParser = (function(){
+  function OutlineParser(logs){
     this._ptr = 0;
     this._logs = logs;
     this._root = new Section("section", null, 0);
   }
 
-  OutlineGenerator.prototype = {
-    yield : function(){
+  OutlineParser.prototype = {
+    getTree : function(){
       this._parse(this._root, this);
       return this._root;
     },
@@ -4943,7 +4949,7 @@ var OutlineGenerator = (function(){
     }
   };
 
-  return OutlineGenerator;
+  return OutlineParser;
 })();
 
 /*
@@ -5407,8 +5413,8 @@ var DocumentContext = (function(){
       return this.blockContext.isTagEnable(fn);
     },
     // outline context
-    getOutlineLog : function(root_name){
-      return this.outlineContext.getRootLog(root_name);
+    getOutlineBuffer : function(root_name){
+      return this.outlineContext.getOutlineBuffer(root_name);
     },
     startSectionRoot : function(tag){
       var type = tag.getName();
@@ -7476,10 +7482,17 @@ var SectionRootGenerator = ChildPageGenerator.extend({
     this._super(markup, context);
     this.context.startSectionRoot(markup);
   },
-  getOutlineTree : function(root_name){
+  hasOutline : function(root_name){
+    var buffer = this.getOutlineBuffer(root_name);
+    return buffer.isEmpty() === false;
+  },
+  getOutlineBuffer : function(root_name){
     var name = root_name || this.markup.getName();
-    var logs = this.context.getOutlineLog(name);
-    var tree = (new OutlineGenerator(logs)).yield();
+    return this.context.getOutlineBuffer(name);
+  },
+  getOutlineTree : function(root_name){
+    var buffer = this.getOutlineBuffer(root_name);
+    var tree = (new OutlineParser(buffer)).getTree();
     return tree;
   },
   getAnchors : function(){
@@ -8429,6 +8442,9 @@ var PageStream = Class.extend({
   hasNext : function(){
     return this.generator.hasNext();
   },
+  hasOutline : function(root_name){
+    return this.generator.hasOutline(root_name);
+  },
   getNext : function(){
     if(!this.hasNext()){
       return null;
@@ -8690,9 +8706,9 @@ if(__engine_args.test){
   __exports.ListStyle = ListStyle;
 
   // outline
-  __exports.OutlineLog = OutlineLog;
+  __exports.OutlineBuffer = OutlineBuffer;
   __exports.OutlineContext = OutlineContext;
-  __exports.OutlineGenerator = OutlineGenerator;
+  __exports.OutlineParser = OutlineParser;
   __exports.OutlineConverter = OutlineConverter;
 
   // stream

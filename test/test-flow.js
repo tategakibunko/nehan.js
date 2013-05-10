@@ -38,17 +38,17 @@ test("flow-block", function(){
   equal(blockflow.reverse(), "tb");
 });
 
-test("flow-aligned-wrap", function(){
+test("flow-floated-wrap", function(){
   // horizontal
   var flow = new BoxFlow("lr", "tb");
-  var aligned_wrap_flow = flow.getAlignedWrapFlow();
+  var aligned_wrap_flow = flow.getFloatedWrapFlow();
   equal(aligned_wrap_flow.inflow.dir, "lr");
   equal(aligned_wrap_flow.blockflow.dir, "tb");
   equal(aligned_wrap_flow.blockflow.multicol, true);
 
   // vertical
   var flow = new BoxFlow("tb", "rl");
-  var aligned_wrap_flow = flow.getAlignedWrapFlow();
+  var aligned_wrap_flow = flow.getFloatedWrapFlow();
   equal(aligned_wrap_flow.inflow.dir, "tb");
   equal(aligned_wrap_flow.blockflow.dir, "rl");
   equal(aligned_wrap_flow.blockflow.multicol, false);

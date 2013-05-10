@@ -57,9 +57,9 @@ if(__engine_args.test){
   __exports.ListStyle = ListStyle;
 
   // outline
-  __exports.OutlineLog = OutlineLog;
+  __exports.OutlineBuffer = OutlineBuffer;
   __exports.OutlineContext = OutlineContext;
-  __exports.OutlineGenerator = OutlineGenerator;
+  __exports.OutlineParser = OutlineParser;
   __exports.OutlineConverter = OutlineConverter;
 
   // stream

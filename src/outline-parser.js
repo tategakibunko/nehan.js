@@ -1,12 +1,12 @@
-var OutlineGenerator = (function(){
-  function OutlineGenerator(logs){
+var OutlineParser = (function(){
+  function OutlineParser(logs){
     this._ptr = 0;
     this._logs = logs;
     this._root = new Section("section", null, 0);
   }
 
-  OutlineGenerator.prototype = {
-    yield : function(){
+  OutlineParser.prototype = {
+    getTree : function(){
       this._parse(this._root, this);
       return this._root;
     },
@@ -66,5 +66,5 @@ var OutlineGenerator = (function(){
     }
   };
 
-  return OutlineGenerator;
+  return OutlineParser;
 })();
