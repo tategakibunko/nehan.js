@@ -12,12 +12,10 @@ var EmphaChar = (function(){
       css.position = "absolute";
       css.width = css.height = this.fontSize + "px";
       css.display = flow.isTextVertical()? "block" : "inline-block";
+      css["text-align"] = "center";
       css[flow.getPropStart()] = this.startPos + "px";
-      if(flow.isTextHorizontal()){
-	css["text-align"] = "center";
-      }
       if(Env.isIE && flow.isTextVertical()){
-	css["left"] = "50%";
+	css.left = "50%";
 	css["margin-left"] = (-Math.floor(this.fontSize / 2)) + "px";
       }
       return css;
