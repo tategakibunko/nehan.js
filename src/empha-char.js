@@ -16,6 +16,10 @@ var EmphaChar = (function(){
       if(flow.isTextHorizontal()){
 	css["text-align"] = "center";
       }
+      if(Env.isIE && flow.isTextVertical()){
+	css["left"] = "50%";
+	css["margin-left"] = (-Math.floor(this.fontSize / 2)) + "px";
+      }
       return css;
     },
     getAdvance : function(flow){
