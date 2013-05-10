@@ -35,9 +35,15 @@ var TokenStream = Class.extend({
   setPos : function(pos){
     this.pos = pos;
   },
+  skipIf : function(fn){
+    var token = this.peek();
+    if(token && fn(token)){
+      this.next();
+    }
+  },
   skipUntil : function(fn){
-    while(true){
-      var token = this.peek();
+    while(this.hasNext()){
+      var token = this.get();
       if(token === null){
 	break;
       }
@@ -45,7 +51,6 @@ var TokenStream = Class.extend({
 	this.prev();
 	break;
       }
-      this.next();
     }
   },
   peek : function(off){

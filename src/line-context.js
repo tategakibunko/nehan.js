@@ -165,7 +165,7 @@ var LineContext = (function(){
 	this.popFirstLine();
       }
       // if overflow measure without line-break, try to justify.
-      if(this.isOverWithoutLineBreak()){
+      if(this.isOverWithoutLineBreak() && this.parent.canJustify()){
 	this.justify(this.lastToken);
       }
       var text_line = this._createTextLine();
@@ -176,20 +176,24 @@ var LineContext = (function(){
       return this._createLineBox(text_line, ruby_line);
     },
     justify : function(last_token){
-      var head = last_token;
-      var tail = this.stream.findTextPrev();
-      var before_len = this.getTextTokenLength();
+      var head_token = last_token;
+      var tail_token = this.stream.findTextPrev();
+      var backup_pos = this.stream.getPos();
       
       // head text of next line meets head-NG.
-      if(head && Token.isChar(head) && head.isHeadNg()){
-	this.bodyTokens = this._justifyHead(head);
-	if(this.getTextTokenLength() != before_len){ // some text is moved.
-	  tail = this.stream.findTextPrev(); // update tail pos
+      if(head_token && Token.isChar(head_token) && head_token.isHeadNg()){
+	this.bodyTokens = this._justifyHead(head_token);
+	if(this.stream.getPos() != backup_pos){ // some text is moved by head-NG.
+	  tail_token = this.stream.findTextPrev(); // search tail_token from new stream position pointing to new head pos.
+	  // if new head is single br, this must be included in current line, so skip it.
+	  this.stream.skipIf(function(token){
+	    return token && Token.isTag(token) && token.getName() === "br";
+	  });
 	}
       }
       // tail text of this line meets tail-NG.
-      if(tail && Token.isChar(tail) && tail.isTailNg()){
-	this.bodyTokens = this._justifyTail(tail);
+      if(tail_token && Token.isChar(tail_token) && tail_token.isTailNg()){
+	this.bodyTokens = this._justifyTail(tail_token);
       }
     },
     _addAdvance : function(advance){
