@@ -10,10 +10,12 @@ var EmphaChar = (function(){
     getCss : function(flow){
       var css = {};
       css.position = "absolute";
-      css["text-align"] = "center";
       css.width = css.height = this.fontSize + "px";
       css.display = flow.isTextVertical()? "block" : "inline-block";
       css[flow.getPropStart()] = this.startPos + "px";
+      if(flow.isTextHorizontal()){
+	css["text-align"] = "center";
+      }
       return css;
     },
     getAdvance : function(flow){
