@@ -1,8 +1,9 @@
 /*
  nehan.js
- Copyright (C) 2013-, Watanabe Masaki<lambda.watanabe[at]gmail.com>
+ Copyright (C) 2010 Watanabe Masaki<lambda.watanabe[at]gmail.com>
+ http://tategakibunko.mydns.jp/docs/nehan/
 
- licenced under MIT licence.
+ licensed under MIT licence.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
