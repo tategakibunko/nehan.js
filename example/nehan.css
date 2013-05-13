@@ -20,6 +20,7 @@ div, span{
 
 /* block elements */
 .nehan-body{
+  float:left;
 }
 .nehan-box{
   font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック',monospace;
