@@ -19,8 +19,6 @@ div, span{
 }
 
 /* block elements */
-.nehan-body{
-}
 .nehan-box{
   font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック',monospace;
 }
@@ -38,6 +36,10 @@ div, span{
 }
 .nehan-text-line-vert a{
   text-decoration:none;
+}
+.nehan-blockquote{
+  color:#666;
+  font-style:italic;
 }
 .nehan-table{
   background-color:white;
@@ -138,7 +140,15 @@ div, span{
   transform : rotate(90deg);
   transform-origin : 50% 50%;
 }
-
+.nehan-code{
+  font-family:'andale mono', 'lucida console', monospace;
+}
+.nehan-em, .nehan-dfn, .nehan-address{
+  font-style:italic;
+}
+.nehan-del{
+  color:#666;
+}
 /* tip utils */
 .nehan-tip{
   border-style:solid;

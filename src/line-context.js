@@ -169,7 +169,7 @@ var LineContext = (function(){
 	this.justify(this.lastToken);
       }
       var text_line = this._createTextLine();
-      if(this.isRubyLine){
+      if(this.isRubyLine || this.lineRate <= 1.0){
 	return text_line;
       }
       var ruby_line = this._createRubyLine(text_line);

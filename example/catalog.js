@@ -341,7 +341,15 @@ var TestCode = {
 	text_large,
 	"<img src='nl.gif' width='16' height='16' />",
 	text_middle
-      ].join(" "),
+      ].join(""),
+
+      "inline-tags":[
+	"this is <time>9:00</time>",
+	"this is <code>code</code>",
+	"this is <dfn>dfn</dfn>",
+	"this is <del>del</del>",
+	"this is <em>em</em>"
+      ].join("<br />"),
 
       "page-break":[
 	text_large,
