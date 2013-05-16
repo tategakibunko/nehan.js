@@ -7821,6 +7821,9 @@ var EvalResult = (function(){
     isGroup : function(){
       return this.groupLength > 1;
     },
+    getPercent : function(){
+      return this.percent;
+    },
     getPageNo : function(){
       return this.pageNo;
     },
