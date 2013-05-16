@@ -14,10 +14,10 @@ window.onload = function(){
   target.innerHTML = "";
   target.style.display = "block";
   stream.asyncGet({
-    onProgress:function(page_no, percent, seek_pos){
+    onProgress:function(caller){
       var page_node = document.createElement("div");
-      var result = stream.get(page_no);
-      page_node.innerHTML = result.html;
+      var page_result = caller.getSeekPageResult();
+      page_node.innerHTML = page_result.getHtml();
       target.appendChild(page_node);
     },
     onComplete:function(time){

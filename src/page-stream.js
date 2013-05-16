@@ -7,6 +7,8 @@ var PageStream = Class.extend({
     this._timeStart = null;
     this._timeElapsed = null;
     this._seekPageNo = 0;
+    this._seekPercent = 0;
+    this._seekPos = 0;
   },
   hasPage : function(page_no){
     return (typeof this.buffer[page_no] != "undefined");
@@ -21,10 +23,15 @@ var PageStream = Class.extend({
     if(!this.hasNext()){
       return null;
     }
-    if(!this.hasPage(this._seekPageNo)){
-      this._addBuffer(this._yield());
+    var cur_page_no = this._seekPageNo;
+    if(!this.hasPage(cur_page_no)){
+      var entry = this._yield();
+      this._addBuffer(entry);
+      this._seekPageNo++;
+      this._seekPercent = entry.percent;
+      this._seekPos = entry.seekPos;
     }
-    return this.get(this._seekPageNo++);
+    return this.get(cur_page_no);
   },
   // int -> EvalResult
   get : function(page_no){
@@ -54,6 +61,18 @@ var PageStream = Class.extend({
   getAnchorPageNo : function(anchor_name){
     return this.generator.getAnchorPageNo(anchor_name);
   },
+  getSeekPageResult : function(){
+    return this.get(this._seekPageNo);
+  },
+  getSeekPageNo : function(){
+    return this._seekPageNo;
+  },
+  getSeekPercent : function(){
+    return this._seekPercent;
+  },
+  getSeekPos : function(){
+    return this._seekPos;
+  },
   setAnchor : function(name, page_no){
     this.generator.setAnchor(name, page_no);
   },
@@ -70,10 +89,10 @@ var PageStream = Class.extend({
   asyncGet : function(opt){
     Args.merge(this, {
       onComplete : function(time){},
-      onProgress : function(page_no, percent, seek_pos){}
+      onProgress : function(self){}
     }, opt || {});
     this._setTimeStart();
-    this._asyncGet(0, opt.wait || 0);
+    this._asyncGet(opt.wait || 0);
   },
   _yield : function(){
     return this.generator.yield();
@@ -86,7 +105,7 @@ var PageStream = Class.extend({
     this._timeElapsed = (new Date()).getTime() - this._timeStart;
     return this._timeElapsed;
   },
-  _asyncGet : function(page_no, wait){
+  _asyncGet : function(wait){
     if(!this.generator.hasNext()){
       var time = this._setTimeElapsed();
       this.onComplete(time);
@@ -95,9 +114,12 @@ var PageStream = Class.extend({
     var self = this;
     var entry = this._yield();
     this._addBuffer(entry);
-    this.onProgress(page_no, entry.percent, entry.seekPos);
+    this.onProgress(this);
+    this._seekPageNo++;
+    this._seekPercent = entry.percent;
+    this._seekPos = entry.seekPos;
     setTimeout(function(){
-      self._asyncGet(page_no + 1, wait);
+      self._asyncGet(wait);
     }, wait);
   },
   _addBuffer : function(entry){
