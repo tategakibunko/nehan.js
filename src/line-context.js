@@ -123,6 +123,9 @@ var LineContext = (function(){
     getRestMeasure : function(){
       return this.parent.getContentMeasure() - this.curMeasure;
     },
+    getMaxMeasure : function(){
+      return this.maxMeasure;
+    },
     getParentFlow : function(){
       return this.parent.flow;
     },

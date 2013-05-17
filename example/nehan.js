@@ -6600,6 +6600,9 @@ var LineContext = (function(){
     getRestMeasure : function(){
       return this.parent.getContentMeasure() - this.curMeasure;
     },
+    getMaxMeasure : function(){
+      return this.maxMeasure;
+    },
     getParentFlow : function(){
       return this.parent.flow;
     },
@@ -6998,6 +7001,14 @@ var InlineGenerator = (function(){
       if(Token.isText(element)){
 	return element.fontSize;
       }
+      if(Token.isTag(element)){
+	if(element.edge){
+	  var font_size = ctx.getInlineFontSize();
+	  var edge_size = element.edge.getExtentSize(ctx.getParentFlow());
+	  return font_size + edge_size;
+	}
+	return 0;
+      }
       if(element instanceof Ruby){
 	return element.getExtent();
       }
@@ -7020,6 +7031,9 @@ var InlineGenerator = (function(){
 	return element.getAdvance(ctx.getParentFlow(), ctx.letterSpacing);
       }
       if(Token.isTag(element)){
+	if(element.edge){
+	  return element.edge.getMeasureSize(ctx.getParentFlow());
+	}
 	return 0;
       }
       if(element instanceof Ruby){
@@ -7135,6 +7149,10 @@ var InlineGenerator = (function(){
       // or if tag is already parsed, just return too.
       if(tag.isSingleTag() || tag.parsed){
 	return tag;
+      }
+      var edge = tag.getBoxEdge(ctx.getParentFlow(), ctx.getInlineFontSize(), ctx.getMaxMeasure());
+      if(edge){
+	tag.edge = edge;
       }
       if(tag.isOpen()){
 	ctx.pushTag(tag);
@@ -8086,6 +8104,9 @@ var InlineEvaluator = Class.extend({
     }
     if(tag.fontColor){
       css.color = tag.fontColor;
+    }
+    if(tag.edge){
+      Args.copy(css, tag.edge.getCss());
     }
     return css;
   },

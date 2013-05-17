@@ -114,6 +114,9 @@ var InlineEvaluator = Class.extend({
     if(tag.fontColor){
       css.color = tag.fontColor;
     }
+    if(tag.edge){
+      Args.copy(css, tag.edge.getCss());
+    }
     return css;
   },
   evalTagStart : function(line, tag, ctx, alias){

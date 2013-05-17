@@ -456,12 +456,6 @@ var TestCode = {
 	"<a href='#' class='test2'>hige</a>"
       ].join("\n"),
 
-      "text-indent":[
-	"<p class='nehan-ti-1em'>",
-	text_large + text_large,
-	"</p>"
-      ].join("\n"),
-
       "pseudo-first":[
 	"<dl class='test-pc'>",
 	"<dt>first term</dt>",
