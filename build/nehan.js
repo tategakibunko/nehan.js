@@ -1761,6 +1761,28 @@ var Tag = (function (){
       }
       return null;
     },
+    getBoxEdge : function(flow, font_size, max_measure){
+      var padding = this.getCssAttr("padding");
+      var margin = this.getCssAttr("margin");
+      var border = this.getCssAttr("border");
+      if(padding === null && margin === null && border === null){
+	return null;
+      }
+      var edge = new BoxEdge();
+      if(padding){
+	var padding_size = UnitSize.parseEdgeSize(padding, font_size, max_measure);
+	edge.setSize("padding", flow, padding_size);
+      }
+      if(margin){
+	var margin_size = UnitSize.parseEdgeSize(margin, font_size, max_measure);
+	edge.setSize("margin", flow, margin_size);
+      }
+      if(border){
+	var border_size = UnitSize.parseEdgeSize(border, font_size, max_measure);
+	edge.setSize("border", flow, border_size);
+      }
+      return edge;
+    },
     hasStaticSize : function(){
       return (this.getAttr("width") !== null && this.getAttr("height") !== null);
     },
@@ -4174,15 +4196,6 @@ var Box = (function(){
 	this.edge.clearBorderAfter(this.flow);
       }
     },
-    mapFontSize : function(val){
-      return UnitSize.mapFontSize(val, this.fontSize);
-    },
-    mapBoxSize : function(val){
-      return UnitSize.mapBoxSize(val, this.fontSize, this.getContentMeasure());
-    },
-    parseEdgeSize : function(obj){
-      return UnitSize.parseEdgeSize(obj, this.fontSize, this.getContentMeasure());
-    },
     shortenBox : function(flow){
       var _flow = flow || this.flow;
       this.shortenMeasure(_flow);
@@ -5559,7 +5572,7 @@ var Collapse = (function(){
     if(border === null){
       return null;
     }
-    var val = box.parseEdgeSize(border);
+    var val = UnitSize.parseEdgeSize(border, box.fontSize, box.getContentMeasure());
     if(typeof val == "number"){
       return {before:val, after:val, start:val, end:val};
     }
@@ -5969,7 +5982,10 @@ var TableTagStream = FilteredTagStream.extend({
   _parsePartition : function(childs, box){
     return List.map(childs, function(child){
       var size = child.getTagAttr("measure") || child.getTagAttr("width") || 0;
-      return size? box.mapBoxSize(size) : 0;
+      if(size){
+	return UnitSize.mapBoxSize(size, box.fontSize, box.getContentMeasure());
+      }
+      return 0;
     });
   },
   _parseRows : function(ctx, content){
@@ -6265,10 +6281,6 @@ var BlockGenerator = Class.extend({
     // while basic box model add them to 'outside' of box.
     box.setEdgeBySub(edge);
   },
-  _getEdgeSize : function(box, edge_type){
-    var edge_size = this.markup.getCssAttr(edge_type);
-    return edge_size? box.parseEdgeSize(edge_size) : null;
-  },
   _isFirstChild : function(box, parent){
     // li-marker and li-body are always first childs of 'li', so ignore them.
     if(box._type == "li-marker" || box._type == "li-body"){
@@ -6296,21 +6308,9 @@ var BlockGenerator = Class.extend({
       box.color = font_color;
     }
 
-    // get and set edge
-    var padding_size = this._getEdgeSize(box, "padding");
-    var margin_size = this._getEdgeSize(box, "margin");
-    var border_size = this._getEdgeSize(box, "border");
-    if(padding_size || margin_size || border_size){
-      var edge = new BoxEdge();
-      if(padding_size){
-	edge.setSize("padding", box.flow, padding_size);
-      }
-      if(margin_size){
-	edge.setSize("margin", box.flow, margin_size);
-      }
-      if(border_size){
-	edge.setSize("border", box.flow, border_size);
-      }
+    // set box edge
+    var edge = this.markup.getBoxEdge(box.flow, box.fontSize, box.getContentMeasure());
+    if(edge){
       this._setEdge(box, edge);
     }
 

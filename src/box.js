@@ -274,15 +274,6 @@ var Box = (function(){
 	this.edge.clearBorderAfter(this.flow);
       }
     },
-    mapFontSize : function(val){
-      return UnitSize.mapFontSize(val, this.fontSize);
-    },
-    mapBoxSize : function(val){
-      return UnitSize.mapBoxSize(val, this.fontSize, this.getContentMeasure());
-    },
-    parseEdgeSize : function(obj){
-      return UnitSize.parseEdgeSize(obj, this.fontSize, this.getContentMeasure());
-    },
     shortenBox : function(flow){
       var _flow = flow || this.flow;
       this.shortenMeasure(_flow);

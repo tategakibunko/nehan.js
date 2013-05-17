@@ -35,10 +35,6 @@ var BlockGenerator = Class.extend({
     // while basic box model add them to 'outside' of box.
     box.setEdgeBySub(edge);
   },
-  _getEdgeSize : function(box, edge_type){
-    var edge_size = this.markup.getCssAttr(edge_type);
-    return edge_size? box.parseEdgeSize(edge_size) : null;
-  },
   _isFirstChild : function(box, parent){
     // li-marker and li-body are always first childs of 'li', so ignore them.
     if(box._type == "li-marker" || box._type == "li-body"){
@@ -66,21 +62,9 @@ var BlockGenerator = Class.extend({
       box.color = font_color;
     }
 
-    // get and set edge
-    var padding_size = this._getEdgeSize(box, "padding");
-    var margin_size = this._getEdgeSize(box, "margin");
-    var border_size = this._getEdgeSize(box, "border");
-    if(padding_size || margin_size || border_size){
-      var edge = new BoxEdge();
-      if(padding_size){
-	edge.setSize("padding", box.flow, padding_size);
-      }
-      if(margin_size){
-	edge.setSize("margin", box.flow, margin_size);
-      }
-      if(border_size){
-	edge.setSize("border", box.flow, border_size);
-      }
+    // set box edge
+    var edge = this.markup.getBoxEdge(box.flow, box.fontSize, box.getContentMeasure());
+    if(edge){
       this._setEdge(box, edge);
     }
 

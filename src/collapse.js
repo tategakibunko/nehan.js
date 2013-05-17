@@ -4,7 +4,7 @@ var Collapse = (function(){
     if(border === null){
       return null;
     }
-    var val = box.parseEdgeSize(border);
+    var val = UnitSize.parseEdgeSize(border, box.fontSize, box.getContentMeasure());
     if(typeof val == "number"){
       return {before:val, after:val, start:val, end:val};
     }

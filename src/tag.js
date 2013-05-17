@@ -194,6 +194,28 @@ var Tag = (function (){
       }
       return null;
     },
+    getBoxEdge : function(flow, font_size, max_measure){
+      var padding = this.getCssAttr("padding");
+      var margin = this.getCssAttr("margin");
+      var border = this.getCssAttr("border");
+      if(padding === null && margin === null && border === null){
+	return null;
+      }
+      var edge = new BoxEdge();
+      if(padding){
+	var padding_size = UnitSize.parseEdgeSize(padding, font_size, max_measure);
+	edge.setSize("padding", flow, padding_size);
+      }
+      if(margin){
+	var margin_size = UnitSize.parseEdgeSize(margin, font_size, max_measure);
+	edge.setSize("margin", flow, margin_size);
+      }
+      if(border){
+	var border_size = UnitSize.parseEdgeSize(border, font_size, max_measure);
+	edge.setSize("border", flow, border_size);
+      }
+      return edge;
+    },
     hasStaticSize : function(){
       return (this.getAttr("width") !== null && this.getAttr("height") !== null);
     },
