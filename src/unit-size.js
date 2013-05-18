@@ -1,6 +1,10 @@
 var UnitSize = {
   mapFontSize : function(val, font_size){
     var str = (typeof val == "string")? val : String(val);
+    if(str.indexOf("rem") > 0){
+      var scale = parseFloat(str.replace("rem",""));
+      return Math.floor(Layout.fontSize * scale); // use root font-size
+    }
     if(str.indexOf("em") > 0){
       var scale = parseFloat(str.replace("em",""));
       return Math.floor(font_size * scale);
