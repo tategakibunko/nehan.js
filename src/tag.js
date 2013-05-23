@@ -322,7 +322,7 @@ var Tag = (function (){
       return src.replace(/\s*=\s*/g, "=");
     },
     _parseName : function(src){
-      return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0];
+      return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
     },
     // <p class='hi hey'>
     // => ["hi", "hey"]

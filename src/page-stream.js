@@ -131,16 +131,14 @@ var PageStream = Class.extend({
   },
   // common preprocessor
   _createSource : function(text){
-    return text.replace(/(<[^>]+>)/g, function(all, grp){
-	return grp.toLowerCase();
-      })
-      .replace(/(\/[a-z0-9\-]+>)[\s\n]+(<[^\/])/g, "$1$2") // discard space between close tag and open tag.
+    return text
+      .replace(/(\/[a-zA-Z0-9\-]+>)[\s\n]+(<[^\/])/g, "$1$2") // discard space between close tag and open tag.
       .replace(/\t/g, "") // discard TAB
       .replace(/<!--[\s\S]*?-->/g, "") // discard comment
-      .replace(/<rp>[^<]*<\/rp>/g, "") // discard rp
-      .replace(/<rb>/g, "") // discard rb
-      .replace(/<\/rb>/g, "") // discard /rb
-      .replace(/<rt><\/rt>/g, ""); // discard empty rt
+      .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
+      .replace(/<rb>/gi, "") // discard rb
+      .replace(/<\/rb>/gi, "") // discard /rb
+      .replace(/<rt><\/rt>/gi, ""); // discard empty rt
   },
   _createGenerator : function(text){
     return new BodyPageGenerator(text);
