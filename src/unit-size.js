@@ -2,12 +2,12 @@ var UnitSize = {
   mapFontSize : function(val, font_size){
     var str = (typeof val == "string")? val : String(val);
     if(str.indexOf("rem") > 0){
-      var scale = parseFloat(str.replace("rem",""));
-      return Math.floor(Layout.fontSize * scale); // use root font-size
+      var rem_scale = parseFloat(str.replace("rem",""));
+      return Math.floor(Layout.fontSize * rem_scale); // use root font-size
     }
     if(str.indexOf("em") > 0){
-      var scale = parseFloat(str.replace("em",""));
-      return Math.floor(font_size * scale);
+      var em_scale = parseFloat(str.replace("em",""));
+      return Math.floor(font_size * em_scale);
     }
     if(str.indexOf("pt") > 0){
       return Math.floor(parseInt(str, 10) * 4 / 3);

@@ -10,11 +10,14 @@ var TagAttrGenerator = (function(){
     yield : function(){
       return this.hasNext()? this._getAttr(this) : null;
     },
+    _isDelimiter : function(s1){
+      return s1 === "&#3000;" || s1.match(/[\s=]/);
+    },
     _getPhrase : function(){
       var i = 1;
       while(i < this.src.length){
 	var s1 = this.src.substring(i, i+1);
-	if(s1 === "&#x3000;" || s1.match(/[\s=]/)){
+	if(this._isDelimiter(s1)){
 	  return this.src.substring(0, i);
 	}
 	i++;
@@ -27,18 +30,19 @@ var TagAttrGenerator = (function(){
       }
       var callee = arguments.callee;
       var s1 = self.src.charAt(0);
-      if(s1 === "&#x3000;" || s1.match(/[\s=]/)){
+      var value;
+      if(self._isDelimiter(s1)){
 	self.src = self.src.substring(1);
 	return callee(self, left);
       } else if(s1 === "\"" || s1 === "'"){
 	var quote_pos = self.src.indexOf(s1, 1);
-	var value = self.src.substring(1, quote_pos);
+	value = self.src.substring(1, quote_pos);
 	self.src = self.src.substring(value.length + 2);
 	return left? {name:left, value:value} : callee(self, value);
       } else if(left){
-	return {name:left};
+	return {name:left}; // value empty attribute
       } else {
-	var value = self._getPhrase(self.src);
+	value = self._getPhrase(self.src);
 	self.src = self.src.substring(value.length);
 	return callee(self, value);
       }
