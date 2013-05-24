@@ -2,7 +2,7 @@ var Tag = (function (){
   function Tag(src, content){
     this._type = "tag";
     this._inherited = false; // flag to avoid duplicate inheritance
-    this.src = this._preprocess(src);
+    this.src = src;
     this.name = this._parseName(this.src);
     this.tagAttr = {};
     this.dataset = {};
@@ -318,9 +318,6 @@ var Tag = (function (){
     _getCssCacheKey : function(selectors){
       return selectors.join(",");
     },
-    _preprocess : function(src){
-      return src.replace(/\s*=\s*/g, "=");
-    },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
     },
@@ -422,33 +419,20 @@ var Tag = (function (){
     // <img src='/path/to/img' push>
     // => {src:'/path/to/img', push:true}
     _parseTagAttr : function(src){
-      var attr = this._parseTagAttrNv(src);
-      // single attr is registered as boolean true.
-      // if <img src="/path/to/img" push>, attr["push"] = true
-      List.iter(this._parseTagAttrSingle(src), function(prop){
-	attr[prop] = true;
-      });
-      return attr;
-    },
-    // parse (name)=(value) attr
-    // <a href="top">
-    // => {href:"top"}
-    _parseTagAttrNv : function(src){
-      var attr = {}, self = this;
-      var matches = src.match(rex_nv_attr);
-      if(matches === null){
-	return attr;
-      }
-      List.iter(matches, function(nv){
-	var parts = nv.split("=");
-	if(parts.length >= 2){
-	  var prop = parts[0];
-	  var val = parts[1];
-	  val = val.replace(/['"]/g, "");
-	  self._parseTagAttrNvValue(attr, prop, val);
+      var attr_src = src.substring(this.name.length + 1).replace("/>", "").replace(/\s+$/, "");
+      var generator = new TagAttrGenerator(attr_src);
+      var ret = {};
+      while(generator.hasNext()){
+	var attr = generator.yield();
+	if(attr){
+	  if(attr.value){
+	    this._parseTagAttrNvValue(ret, attr.name, attr.value);
+	  } else {
+	    ret[attr.name] = true; // empty attribute
+	  }
 	}
-      });
-      return attr;
+      }
+      return ret;
     },
     // parse value that has recursive nv value like "style='border:0'" etc.
     _parseTagAttrNvValue : function(attr, prop, val){
@@ -484,14 +468,6 @@ var Tag = (function (){
     _parseDatasetName : function(prop){
       var hyp_name = prop.slice(5); // 5 is "data-".length
       return Utils.getCamelName(hyp_name);
-    },
-    // <img src="/path/to/img" width="100" height="100" push>
-    // => ["push"]
-    _parseTagAttrSingle : function(src){
-      var parts = src.replace(/<\S+/g,"").replace(/\/?>/g, "").split(/\s+/);
-      return List.filter(parts, function(part){
-	return (part !== "" && part.indexOf("=") < 0);
-      });
     }
   };
 
