@@ -165,6 +165,13 @@ var Tag = (function (){
     getSrc : function(){
       return this.src;
     },
+    getAttrSrc : function(){
+      return this.src
+	.substring(this.name.length + 1) // "<tagname".length
+	.replace(/^\s+/, "")
+	.replace("/>", "")
+	.replace(/\s+$/, "");
+    },
     getWrapSrc : function(){
       return this.src + this.content + this.getCloseSrc();
     },
@@ -419,7 +426,10 @@ var Tag = (function (){
     // <img src='/path/to/img' push>
     // => {src:'/path/to/img', push:true}
     _parseTagAttr : function(src){
-      var attr_src = src.substring(this.name.length + 1).replace("/>", "").replace(/\s+$/, "");
+      var attr_src = this.getAttrSrc();
+      if(attr_src === ""){
+	return {};
+      }
       var generator = new TagAttrGenerator(attr_src);
       var ret = {};
       while(generator.hasNext()){
