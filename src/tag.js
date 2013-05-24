@@ -21,7 +21,6 @@ var Tag = (function (){
   }
 
   // name and value regexp
-  var rex_nv_attr = /(?:\S+)=["']?(?:(?:.(?!["']?\s+(?:\S+)=|["']))+.)["']?/g;
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
   
   // utility functions
