@@ -24,6 +24,7 @@ var PageGroupEvaluator = (function(){
 	groupLength:page_group.getSize(),
 	percent:first.percent,
 	seekPos:first.seekPos,
+	pageNo:first.pageNo,
 	charPos:first.charPos,
 	charCount:char_count
       });
