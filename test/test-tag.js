@@ -1,6 +1,13 @@
 test("tag1", function(){
-  var src = "<a href='http://google.com?id=10&gid=20' target = '_blank'>";
-  var tag = new Tag(src);
+  var tag;
+  tag = new Tag("<a href=\"http://google.com?id=10&gid=20\" target = '_blank'>");
+  equal(tag.name, "a");
+  equal(tag.getTagAttr("href"), "http://google.com?id=10&gid=20");
+  equal(tag.getTagAttr("target"), "_blank");
+  deepEqual(tag.getCloseTag(), new Tag("</a>"));
+  equal(tag.getCloseSrc(), "</a>");
+
+  tag = new Tag("<a href=http://google.com?id=10&gid=20 target = _blank   >");
   equal(tag.name, "a");
   equal(tag.getTagAttr("href"), "http://google.com?id=10&gid=20");
   equal(tag.getTagAttr("target"), "_blank");
