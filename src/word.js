@@ -1,8 +1,8 @@
 var Word = (function(){
-  function Word(word, part){
+  function Word(word, devided){
     this.data = word;
     this._type = "word";
-    this._part = part || false;
+    this._devided = devided || false;
   }
 
   Word.prototype = {
@@ -26,8 +26,11 @@ var Word = (function(){
     getLetterCount : function(){
       return this.data.length;
     },
-    isPartWord : function(){
-      return this._part;
+    setDevided : function(enable){
+      this._devided = enable;
+    },
+    isDevided : function(){
+      return this._devided;
     },
     cutMeasure : function(measure){
       var half_size = Math.floor(this.fontSize / 2);
@@ -39,6 +42,7 @@ var Word = (function(){
       var str_part = this.data.substring(0, measure_half_count);
       var word_part = new Word(str_part, true);
       this.data = this.data.slice(measure_half_count);
+      this.setDevided(true);
       return word_part;
     }
   };

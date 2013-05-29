@@ -1,8 +1,8 @@
 // TODO:
 // although it is quite rare situation, ruby disappears when
 // 1. line overflow by tail ruby and
-// 2. it is contained in head of next line but
-// 3. parent page can't contain the line and ends with overflow.
+// 2. it is placed at the head of next line but
+// 3. parent page can't contain the line because of block level overflow.
 // then after rollback and 2nd-yielding by parent generator,
 // ruby disappears because stream already steps to the next pos of ruby.
 // any good idea to solve this problem?
@@ -74,7 +74,7 @@ var InlineGenerator = (function(){
 	var extent = this._getExtent(ctx, element); // size of block flow.
 	var font_size = this._getFontSize(ctx, element); // font size of element.
 
-	// if overflow inline max, break loop
+	// if overflow inline max, line break.
 	if(!ctx.canContain(element, advance, extent)){
 	  if(this.generator){
 	    this.generator.rollback();
@@ -88,6 +88,12 @@ var InlineGenerator = (function(){
 	  extent:extent,
 	  fontSize:font_size
 	});
+
+	// if devided word, line break and parse same token again.
+	if(element instanceof Word && element.isDevided()){
+	  ctx.pushBackToken();
+	  break;
+	}
       }
       return ctx.createLine();
     },
@@ -263,6 +269,7 @@ var InlineGenerator = (function(){
 
       // if advance of this word is less than ctx.maxMeasure, just return.
       if(advance <= ctx.maxMeasure){
+	word.setDevided(false);
 	return word;
       }
       // if advance is lager than max_measure,
@@ -270,9 +277,9 @@ var InlineGenerator = (function(){
       var font_size = ctx.getInlineFontSize();
       var is_bold = ctx.isBoldEnable();
       var flow = ctx.getParentFlow();
-      var part = word.cutMeasure(ctx.maxMeasure);  // get sliced word
-      word.setMetrics(flow, font_size, is_bold);
-      part.setMetrics(flow, font_size, is_bold);
+      var part = word.cutMeasure(ctx.maxMeasure); // get sliced word
+      part.setMetrics(flow, font_size, is_bold); // metrics for first half
+      word.setMetrics(flow, font_size, is_bold); // metrics for second half
       return part;
     }
   };

@@ -38,6 +38,9 @@ var LineContext = (function(){
       if(element instanceof Box || !this.parent.canJustify()){
 	return this.restMeasure >= advance;
       }
+      if(element instanceof Word || element instanceof Tcy){
+	return this.restMeasure >= advance;
+      }
       // justify target need space for tail fix.
       return this.restMeasure - this.parent.fontSize >= advance;
     },
