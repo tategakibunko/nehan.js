@@ -1651,7 +1651,6 @@ var TagAttrParser = (function(){
   };
 
   return {
-    // src does not contain full-size space or CR/LF or tab space.
     parse : function(src){
       src = normalize(src);
       return parse(src, {});
