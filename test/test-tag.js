@@ -15,6 +15,16 @@ test("tag-normal", function(){
   equal(tag.getCloseSrc(), "</a>");
 });
 
+test("tag-empty-value", function(){
+  var tag = new Tag("<a href=''>");
+  equal(tag.getTagAttr("href", ""), "");
+});
+
+test("tag-zero-value", function(){
+  var tag = new Tag("<img width='0'>");
+  equal(tag.getTagAttr("width"), "0");
+});
+
 test("tag-empty-attrib", function(){
   var tag;
   tag = new Tag("<input type='checkbox' checked    />");

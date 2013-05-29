@@ -176,9 +176,9 @@ var TestCode = {
       "dynamic-table":dyn_table,
 
       "img-align":[
-	"<img src='128x128.gif' width='128' height='128' class='nehan-float-start nehan-gap-end'/>",
+	"<img src='128x128.gif' alt='' width='128' height='128' class='nehan-float-start nehan-gap-end'/>",
 	text_huge,
-	"<img src='256x256.gif' width='256' height='256' class='nehan-float-end'/>",
+	"<img src='256x256.gif' alt='' width='256' height='256' class='nehan-float-end'/>",
 	text_huge
       ].join("\n"),
 

@@ -118,7 +118,7 @@ var Tag = (function (){
       return this.name;
     },
     getAttr : function(name, def_value){
-      return this.getTagAttr(name) || this.getCssAttr(name) || def_value || null;
+      return this.getTagAttr(name) || this.getCssAttr(name) || ((typeof def_value !== "undefined")? def_value : null);
     },
     getPseudoElementName : function(){
       if(this.isPseudoElementTag()){
@@ -137,13 +137,13 @@ var Tag = (function (){
       return this.classes.join(" ");
     },
     getTagAttr : function(name, def_value){
-      return this.tagAttr[name] || def_value || null;
+      return this.tagAttr[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
     getCssAttr : function(name, def_value){
-      return this.cssAttrDynamic[name] || this.cssAttrContext[name] || this.cssAttrStatic[name] || def_value || null;
+      return this.cssAttrDynamic[name] || this.cssAttrContext[name] || this.cssAttrStatic[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
     getDataset : function(name, def_value){
-      return this.dataset[name] || def_value || null;
+      return this.dataset[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
     getOpenTagName : function(){
       var name = this.getName();

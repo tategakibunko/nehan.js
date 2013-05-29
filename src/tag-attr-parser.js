@@ -21,7 +21,7 @@ var TagAttrParser = (function(){
 
     var get_quoted_value = function(quote_str){
       var quote_pos = src.indexOf(quote_str, 1);
-      return (quote_pos > 1)? src.substring(1, quote_pos) : src;
+      return (quote_pos >= 1)? src.substring(1, quote_pos) : src;
     };
 
     var get_attr = function(left){
