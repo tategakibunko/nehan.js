@@ -1,4 +1,4 @@
-test("tag1", function(){
+test("tag-normal", function(){
   var tag;
   tag = new Tag("<a href=\"http://google.com?id=10&gid=20\" target = '_blank'>");
   equal(tag.name, "a");
@@ -15,28 +15,43 @@ test("tag1", function(){
   equal(tag.getCloseSrc(), "</a>");
 });
 
-
-test("tag2", function(){
-  var tag = new Tag("<input type='checkbox' checked />");
+test("tag-empty-attrib", function(){
+  var tag;
+  tag = new Tag("<input type='checkbox' checked    />");
   equal(tag.name, "input");
   equal(tag.getTagAttr("type"), "checkbox");
   equal(tag.getTagAttr("checked"), true);
+
+  tag = new Tag("<input checked type='checkbox'/>");
+  equal(tag.name, "input");
+  equal(tag.getTagAttr("type"), "checkbox");
+  equal(tag.getTagAttr("checked"), true);
+
+  tag = new Tag("<input type='checkbox' checked/>");
+  equal(tag.name, "input");
+  equal(tag.getTagAttr("type"), "checkbox");
+  equal(tag.getTagAttr("checked"), true);
+
+  // invalid syntax
+  tag = new Tag("<input type=/>");
+  equal(tag.name, "input");
+  equal(tag.getTagAttr("type"), null);
 });
 
-test("tag3", function(){
+test("tag-special-prop", function(){
   var tag = new Tag("<b special:prop='hoge'>");
   equal(tag.name, "b");
   equal(tag.getTagAttr("special:prop"), "hoge");
 });
 
-test("tag4", function(){
+test("tag-wrap-src", function(){
   var tag = new Tag("<p>");
   tag.content = "hoge";
   equal(tag.name, "p");
   equal(tag.getWrapSrc(), "<p>" + tag.content + "</p>");
 });
 
-test("tag5", function(){
+test("tag-selector", function(){
   var tag = new Tag("<p class='hi hey'>");
 
   equal(tag.getName(), "p");

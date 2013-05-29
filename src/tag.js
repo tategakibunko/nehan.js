@@ -164,13 +164,6 @@ var Tag = (function (){
     getSrc : function(){
       return this.src;
     },
-    getAttrSrc : function(){
-      return this.src
-	.substring(this.name.length + 1) // "<tagname".length
-	.replace(/^\s+/, "")
-	.replace("/>", "")
-	.replace(/\s+$/, "");
-    },
     getWrapSrc : function(){
       return this.src + this.content + this.getCloseSrc();
     },
@@ -425,41 +418,26 @@ var Tag = (function (){
     // <img src='/path/to/img' push>
     // => {src:'/path/to/img', push:true}
     _parseTagAttr : function(src){
-      var attr_src = this.getAttrSrc();
-      if(attr_src === ""){
-	return {};
-      }
-      var generator = new TagAttrGenerator(attr_src);
-      var ret = {};
-      while(generator.hasNext()){
-	var attr = generator.yield();
-	if(attr){
-	  if(attr.value){
-	    this._parseTagAttrNvValue(ret, attr.name, attr.value);
-	  } else {
-	    ret[attr.name] = true; // empty attribute
-	  }
+      var self = this;
+      var attr = TagAttrParser.parse(this.src);
+      for(var name in attr){
+	// inline style
+	if(name === "style"){
+	  // add to dynamic css
+	  var inline_css = this._parseInlineStyle(attr[name]);
+	  Args.copy(this.cssAttrDynamic, inline_css);
+	} else if(name.indexOf("data-") === 0){
+	  // <div data-name="john">
+	  // => {name:"john"}
+	  var dataset_name = this._parseDatasetName(name);
+	  this.dataset[dataset_name] = attr[name];
 	}
       }
-      return ret;
+      return attr;
     },
-    // parse value that has recursive nv value like "style='border:0'" etc.
-    _parseTagAttrNvValue : function(attr, prop, val){
-      if(prop === "style"){
-	var inline_css = this._parseTagAttrInlineStyle(val);
-	Args.copy(this.cssAttrDynamic, inline_css);
-      } else if(prop.indexOf("data-") === 0){
-	// <div data-name="john">
-	// => {name:"john"}
-	var dataset_name = this._parseDatasetName(prop);
-	this.dataset[dataset_name] = val;
-      } else {
-	attr[prop] = val;
-      }
-    },
-    // <div style='border:0'>
-    // => {border:0}
-    _parseTagAttrInlineStyle : function(src){
+    // "border:0; margin:0"
+    // => {border:0, margin:0}
+    _parseInlineStyle : function(src){
       var attr = {};
       var stmts = (src.indexOf(";") >= 0)? src.split(";") : [src];
       List.iter(stmts, function(stmt){

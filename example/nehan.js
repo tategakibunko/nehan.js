@@ -1569,86 +1569,94 @@ var Selectors = (function(){
 })();
 
 
-var TagAttrGenerator = (function(){
-  // assume that "<" or ">" or "/>" are not included in src.
-  function TagAttrGenerator(src){
-    this.src = src;
-  }
+var TagAttrParser = (function(){
+  var parse = function(src, attr){
+    var peek = function(){
+      return src.charAt(0);
+    };
 
-  TagAttrGenerator.prototype = {
-    hasNext : function(){
-      return this.src.length > 0;
-    },
-    yield : function(){
-      return this.hasNext()? this._getAttr(this) : null;
-    },
-    _isSpace : function(s1){
-      return s1 === "&#3000;" || s1.match(/\s/);
-    },
-    _getSymbol : function(self, fn_delimter){
-      var i = 1;
-      while(i < self.src.length){
-	var s1 = self.src.charAt(i);
-	if(fn_delimter(s1)){
-	  return self.src.substring(0, i); // cut until delimiter.
+    var step = function(count){
+      src = src.substring(count);
+    };
+
+    var get_symbol = function(delimiters){
+      var delim_pos = -1;
+      List.iter(delimiters, function(delim){
+	var pos = src.indexOf(delim, 1);
+	if(delim_pos < 0 || pos < delim_pos){
+	  delim_pos = pos;
 	}
-	i++;
-      }
-      return self.src;
-    },
-    _getValue : function(self){
-      var s1 = self.src.charAt(0);
-      var value;
-      if(self._isSpace(s1)){
-	self.src = self.src.substring(1);
-	return arguments.callee(self);
-      }
-      // quoted value is enclosed by next quote.
-      if(s1 === "\"" || s1 === "'"){
-	var quote_pos = self.src.indexOf(s1, 1);
-	value = self.src.substring(1, quote_pos);
-	self.src = self.src.substring(value.length + 2);
-	return value;
-      }
-      // unquoted value is enclosed by next delimiter.
-      value = self._getSymbol(self, function(str){
-	return self._isSpace(str);
       });
-      self.src = self.src.substring(value.length);
-      return value;
-    },
-    _getAttr : function(self, left){
-      if(!self.hasNext()){
-	return left? {name:left} : null;
-      }
-      var s1 = self.src.charAt(0);
-      var value;
+      return (delim_pos >= 0)? src.substring(0, delim_pos) : src;
+    };
 
-      // if space, just skip.
-      if(self._isSpace(s1)){
-	self.src = self.src.substring(1);
-	return arguments.callee(self, left);
+    var get_quoted_value = function(quote_str){
+      var quote_pos = src.indexOf(quote_str, 1);
+      return (quote_pos > 1)? src.substring(1, quote_pos) : src;
+    };
+
+    var get_attr = function(left){
+      if(src === ""){
+	if(left){
+	  attr[left] = true;
+	}
+	return;
       }
-      // if equal, search right value and return name and value attribute.
-      if(s1 === "="){
-	self.src = self.src.substring(1);
-	value = self._getValue(self);
-	return left? {name:left, value:value} : null;
+      var s1 = peek();
+      var value;
+      if(s1 === " "){
+	step(1);
+	arguments.callee(left);
+      } else if(s1 === "="){
+	step(1);
+	if(src.length > 0){
+	  var s2 = peek();
+	  if(s2 === "\"" || s2 === "'"){
+	    value = get_quoted_value(s2);
+	    step(value.length + 2);
+	  } else {
+	    value = get_symbol([" "]);
+	    step(value.length);
+	  }
+	  attr[left] = value;
+	}
+      } else if(left){
+	attr[left] = true; // value empty attribute
+      } else {
+	left = get_symbol([" ", "="]);
+	step(left.length);
+	arguments.callee(left);
       }
-      // if not equal but left val exists, return empty attribute(without value).
-      if(left){
-	return {name:left}; // value empty attribute
-      }
-      // search left value
-      value = self._getSymbol(self, function(str){
-	return self._isSpace(str) || str === "=";
-      });
-      self.src = self.src.substring(value.length);
-      return arguments.callee(self, value);
+    };
+
+    while(src !== ""){
+      get_attr();
     }
+    return attr;
   };
 
-  return TagAttrGenerator;
+  // <img src='/path/to/img' title='aaa' />
+  // => "src='/path/to/img title='aaa'"
+  var normalize = function(src){
+    return src
+      .replace(/<[\S]+/, "") // cut tag start
+      .replace(/^\s+/, "") // cut head space
+      .replace("/>", "") // cut tag tail(close tag)
+      .replace(">", "") // cut tag tail(open tag)
+      .replace(/\s+$/, "") // cut tail space
+      .replace(/\n/g, "") // conv from multi line to single line
+      .replace(/[　|\s]+/g, " ") // conv from multi space to single space
+      .replace(/\s+=/g, "=") // cut multi space before '='
+      .replace(/=\s+/g, "="); // cut multi space after '='
+  };
+
+  return {
+    // src does not contain full-size space or CR/LF or tab space.
+    parse : function(src){
+      src = normalize(src);
+      return parse(src, {});
+    }
+  };
 })();
 
 var Tag = (function (){
@@ -1816,13 +1824,6 @@ var Tag = (function (){
     },
     getSrc : function(){
       return this.src;
-    },
-    getAttrSrc : function(){
-      return this.src
-	.substring(this.name.length + 1) // "<tagname".length
-	.replace(/^\s+/, "")
-	.replace("/>", "")
-	.replace(/\s+$/, "");
     },
     getWrapSrc : function(){
       return this.src + this.content + this.getCloseSrc();
@@ -2078,41 +2079,26 @@ var Tag = (function (){
     // <img src='/path/to/img' push>
     // => {src:'/path/to/img', push:true}
     _parseTagAttr : function(src){
-      var attr_src = this.getAttrSrc();
-      if(attr_src === ""){
-	return {};
-      }
-      var generator = new TagAttrGenerator(attr_src);
-      var ret = {};
-      while(generator.hasNext()){
-	var attr = generator.yield();
-	if(attr){
-	  if(attr.value){
-	    this._parseTagAttrNvValue(ret, attr.name, attr.value);
-	  } else {
-	    ret[attr.name] = true; // empty attribute
-	  }
+      var self = this;
+      var attr = TagAttrParser.parse(this.src);
+      for(var name in attr){
+	// inline style
+	if(name === "style"){
+	  // add to dynamic css
+	  var inline_css = this._parseInlineStyle(attr[name]);
+	  Args.copy(this.cssAttrDynamic, inline_css);
+	} else if(name.indexOf("data-") === 0){
+	  // <div data-name="john">
+	  // => {name:"john"}
+	  var dataset_name = this._parseDatasetName(name);
+	  this.dataset[dataset_name] = attr[name];
 	}
       }
-      return ret;
+      return attr;
     },
-    // parse value that has recursive nv value like "style='border:0'" etc.
-    _parseTagAttrNvValue : function(attr, prop, val){
-      if(prop === "style"){
-	var inline_css = this._parseTagAttrInlineStyle(val);
-	Args.copy(this.cssAttrDynamic, inline_css);
-      } else if(prop.indexOf("data-") === 0){
-	// <div data-name="john">
-	// => {name:"john"}
-	var dataset_name = this._parseDatasetName(prop);
-	this.dataset[dataset_name] = val;
-      } else {
-	attr[prop] = val;
-      }
-    },
-    // <div style='border:0'>
-    // => {border:0}
-    _parseTagAttrInlineStyle : function(src){
+    // "border:0; margin:0"
+    // => {border:0, margin:0}
+    _parseInlineStyle : function(src){
       var attr = {};
       var stmts = (src.indexOf(";") >= 0)? src.split(";") : [src];
       List.iter(stmts, function(stmt){

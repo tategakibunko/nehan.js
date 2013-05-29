@@ -54,7 +54,7 @@ module.exports = function(grunt) {
 	    "src/exception.js",
 	    "src/selector.js",
 	    "src/selectors.js",
-	    "src/tag-attr-generator.js",
+	    "src/tag-attr-parser.js",
 	    "src/tag.js",
 	    "src/token.js",
 	    "src/char.js",
