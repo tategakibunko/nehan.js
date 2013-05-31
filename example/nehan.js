@@ -3552,30 +3552,20 @@ var EdgeParser = (function(){
   var parse_array = function(array){
     switch(array.length){
     case 1:
-      var val = array[0];
-      return {before:val, end:val, after:val, start:val};
+      return {before:array[0], end:array[0], after:array[0], start:array[0]};
     case 2:
-      var before_after = array[0];
-      var start_end = array[1];
-      return {before:before_after, end:start_end, after:before_after, start:start_end};
+      return {before:array[0], end:array[1], after:array[0], start:array[1]};
     case 3:
-      var before = array[0];
-      var start_end = array[1];
-      var after = array[2];
-      return {before:before, end:start_end, after:after, start:start_end};
+      return {before:array[0], end:array[1], after:array[2], start:array[1]};
     case 4:
-      var before = array[0];
-      var end = array[1];
-      var after = array[2];
-      var start = array[3];
-      return {before:before, end:end, after:after, start:start};
+      return {before:array[0], end:array[1], after:array[2], start:array[3]};
     default:
       return null;
     }
   };
 
   var normalize = function(src){
-    return src.replace(/\s+/g, " ").replace(/;/g, "");
+    return src.replace(/\s+/g, " ").replace(/\n/g, "").replace(/;/g, "");
   };
   
   var parse_string = function(str){
@@ -3595,7 +3585,6 @@ var EdgeParser = (function(){
     case "string": return parse_string(obj);
     case "number": return parse_array([obj]);
     default: return null;
-      return parse(src);
     }
   };
   return {
