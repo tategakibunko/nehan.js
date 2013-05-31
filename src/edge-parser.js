@@ -14,6 +14,10 @@ var EdgeParser = (function(){
     }
   };
 
+  var parse_object = function(obj){
+    return Args.merge({}, {before:"0", end:"0", after:"0", start:"0"}, obj);
+  };
+
   var normalize = function(src){
     return src.replace(/\s+/g, " ").replace(/\n/g, "").replace(/;/g, "");
   };
@@ -31,7 +35,7 @@ var EdgeParser = (function(){
       return parse_array(obj);
     }
     switch(typeof obj){
-    case "object": return obj;
+    case "object": return parse_object(obj);
     case "string": return parse_string(obj);
     case "number": return parse_array([obj]);
     default: return null;

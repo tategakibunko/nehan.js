@@ -305,7 +305,7 @@ var TestCode = {
 	text_short,
 	"<hr />",
 	text_short,
-	"<hr class='space'>",
+	"<hr class='nehan-space'>",
 	text_short
       ].join("\n"),
 
