@@ -74,6 +74,7 @@ module.exports = function(grunt) {
 	    "src/box-flow.js",
 	    "src/box-flows.js",
 	    "src/edge.js",
+	    "src/edge-parser.js",
 	    "src/radius-2d.js",
 	    "src/border-radius.js",
 	    "src/padding.js",

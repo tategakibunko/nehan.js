@@ -15,7 +15,7 @@ var Tag = (function (){
     this.tagAttr = this._parseTagAttr(this.src);
     this.classes = this._parseClasses();
     this.selectors = this._parseSelectors(this.classes);
-    this.cssAttrStatic = this._parseCssAttrWithCache(this.selectors);
+    this.cssAttrStatic = this._parseCssAttr(this.selectors);
     this.parent = null;
     this.content = this._parseContent(content || "");
   }
@@ -64,7 +64,7 @@ var Tag = (function (){
       if(parent_tag.getName() != "body"){
 	var parent_selectors = parent_tag.getSelectors();
 	var ctx_selectors = this._parseContextSelectors(parent_selectors);
-	this.cssAttrContext = this._parseCssAttrWithCache(ctx_selectors);
+	this.cssAttrContext = this._parseCssAttr(ctx_selectors);
 	this.selectors = this.selectors.concat(ctx_selectors);
       }
       this._inherited = true;
@@ -128,7 +128,7 @@ var Tag = (function (){
     },
     getPseudoCssAttr : function(pseudo_name){
       var pseudo_selectors = this._parsePseudoSelectors(pseudo_name);
-      return this._parseCssAttrWithCache(pseudo_selectors);
+      return this._parseCssAttr(pseudo_selectors);
     },
     getSelectors : function(){
       return this.selectors;
@@ -141,6 +141,18 @@ var Tag = (function (){
     },
     getCssAttr : function(name, def_value){
       return this.cssAttrDynamic[name] || this.cssAttrContext[name] || this.cssAttrStatic[name] || ((typeof def_value !== "undefined")? def_value : null);
+    },
+    // used for property that could be contructed with multiple values such as margin(start/end/before/after).
+    // for example, when we get "margin" of some target,
+    // we read style from default css, and context selector css, and inline style,
+    // and we must 'merge' them to get strict style settings.
+    getCssAttrs : function(name, def_value){
+      return List.fold([this.cssAttrStatic, this.cssAttrContext, this.cssAttrDynamic], [], function(ret, target){
+	if(typeof target[name] !== "undefined"){
+	  ret.push(target[name]);
+	}
+	return ret;
+      });
     },
     getDataset : function(name, def_value){
       return this.dataset[name] || ((typeof def_value !== "undefined")? def_value : null);
@@ -193,6 +205,37 @@ var Tag = (function (){
       }
       return null;
     },
+    /*
+    getMergedEdge : function(edge_type){
+      var edges = List.map(this.getCssAttrs(edge_type), function(style){
+	return EdgeParser.parse(style);
+      });
+      return List.fold(edges, null, function(ret, edge){
+	return ret? Args.merge(ret, ret, edge) : edge;
+      });
+    },
+    getBoxEdge : function(flow, font_size, max_measure){
+      var padding = this.getMergedEdge("padding");
+      var margin = this.getMergedEdge("margin");
+      var border = this.getMergedEdge("border");
+      if(padding === null && margin === null && border === null){
+	return null;
+      }
+      var edge = new BoxEdge();
+      if(padding){
+	var padding_size = UnitSize.parseEdgeSize(padding, font_size, max_measure);
+	edge.setSize("padding", flow, padding_size);
+      }
+      if(margin){
+	var margin_size = UnitSize.parseEdgeSize(margin, font_size, max_measure);
+	edge.setSize("margin", flow, margin_size);
+      }
+      if(border){
+	var border_size = UnitSize.parseEdgeSize(border, font_size, max_measure);
+	edge.setSize("border", flow, border_size);
+      }
+      return edge;
+    },*/
     getBoxEdge : function(flow, font_size, max_measure){
       var padding = this.getCssAttr("padding");
       var margin = this.getCssAttr("margin");
@@ -357,17 +400,10 @@ var Tag = (function (){
       });
     },
     _parseCssAttr : function(selectors){
-      var attr = {};
-      List.iter(selectors, function(key){
-	Args.copy(attr, Selectors.getValue(key));
-      });
-      return attr;
-    },
-    _parseCssAttrWithCache : function(selectors){
       var cache_key = this._getCssCacheKey(selectors);
       var cache = get_css_attr_cache(cache_key);
       if(cache === null){
-	cache = this._parseCssAttr(selectors);
+	cache = Selectors.getValue(selectors);
 	add_css_attr_cache(cache_key, cache);
       }
       return cache;

@@ -1188,6 +1188,15 @@ var List = {
     }
     return null;
   },
+  indexOf : function(lst, fn){
+    for(var i = 0, len = lst.length; i < len; i++){
+      var obj = lst[i];
+      if(fn(obj)){
+	return i;
+      }
+    }
+    return -1;
+  },
   exists : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       if(fn(lst[i])){
@@ -1265,6 +1274,15 @@ var Obj = {
       return false;
     }
     return true;
+  },
+  filter : function(obj, fn){
+    var ret = [];
+    for(var prop in obj){
+      if(fn(obj)){
+	ret.push(obj);
+      }
+    }
+    return ret;
   },
   iter : function(obj, fn){
     for(var prop in obj){
@@ -1507,34 +1525,37 @@ var Exceptions = (function(){
 
   
 var Selector = (function(){
-  function Selector(src, val){
-    this.src = src.toLowerCase();
-    this.rex = this._createRegExp(this.src);
+  function Selector(key, val){
+    this.key = key.toLowerCase();
+    this.rex = this._createRegExp(this.key);
     this.val = val;
   }
 
   Selector.prototype = {
+    getKey : function(){
+      return this.key;
+    },
     getValue : function(){
       return this.val;
     },
-    test : function(key){
-      key = key.toLowerCase();
+    test : function(dst_key){
+      dst_key = dst_key.toLowerCase();
       if(this.rex === null){
-	return this.src === key;
+	return this.key === dst_key;
       }
-      return this.rex.test(key);
+      return this.rex.test(dst_key);
     },
-    _createPattern : function(src){
-      return src
+    _createPattern : function(key){
+      return key
 	.replace(/\s+/g, " ")
 	.replace(/([^\s\.\^]*)\.(\S+)/g, "$1\\.$2")
 	.replace(/\s/g, "(\\s|[a-z0-9-_=:\\[\\]])*") + "$";
     },
-    _createRegExp : function(src){
-      if(src.indexOf(".") < 0 && src.indexOf(" ") < 0){
+    _createRegExp : function(key){
+      if(key.indexOf(".") < 0 && key.indexOf(" ") < 0){
 	return null;
       }
-      var pat = this._createPattern(src);
+      var pat = this._createPattern(key);
       return new RegExp(pat);
     }
   };
@@ -1544,30 +1565,57 @@ var Selector = (function(){
 
 
 var Selectors = (function(){
-  var selectors = {};
+  var selectors = [];
   // initialize default selectors
   for(var key in Style){
-    selectors[key] = new Selector(key, Style[key]);
+    selectors.push(new Selector(key, Style[key]));
   }
+
+  var merge_edge = function(edge1, edge2){
+    // conv both edge to standard edge format({before:x, end:x, after:x, start:x}).
+    var std_edge1 = EdgeParser.parse(edge1);
+    var std_edge2 = EdgeParser.parse(edge2);
+    return Args.copy(std_edge1, std_edge2);
+  };
+
+  var merge = function(dst, obj){
+    for(var prop in obj){
+      // edge value is constructed with multiple values, so need to merge.
+      if(prop === "margin" || prop === "border" || prop === "padding"){
+	dst[prop] = dst[prop]? merge_edge(dst[prop], obj[prop]) : obj[prop];
+      } else {
+	dst[prop] = obj[prop];
+      }
+    }
+    return dst;
+  };
+
   return {
-    addSelector : function(key){
-      var selector = selectors[key] || null;
-      if(selector === null){
-	selectors[key] = new Selector(key, Style[key]);
+    addSelector : function(selector_key){
+      if(!List.exists(selectors, function(selector){ return selector.getKey() === selector_key; })){
+	selectors.push(new Selector(selector_key, Style[selector_key]));
       }
     },
-    getValue : function(key){
-      var ret = {};
-      Obj.iter(selectors, function(obj, prop, selector){
-	if(selector.test(key)){
-	  Args.copy(ret, selector.getValue());
+    getSelectorValue : function(selector_key){
+      var ret = {}, self = this;
+      List.iter(selectors, function(selector){
+	if(selector.test(selector_key)){
+	  merge(ret, selector.getValue());
 	}
       });
       return ret;
+    },
+    getValue : function(selector_keys){
+      var self = this;
+      var values = List.map(selector_keys, function(selector_key){
+	return self.getSelectorValue(selector_key);
+      });
+      return List.fold(values, {}, function(ret, value){
+	return merge(ret, value);
+      });
     }
   };
 })();
-
 
 var TagAttrParser = (function(){
   var parse = function(src, attr){
@@ -1675,7 +1723,7 @@ var Tag = (function (){
     this.tagAttr = this._parseTagAttr(this.src);
     this.classes = this._parseClasses();
     this.selectors = this._parseSelectors(this.classes);
-    this.cssAttrStatic = this._parseCssAttrWithCache(this.selectors);
+    this.cssAttrStatic = this._parseCssAttr(this.selectors);
     this.parent = null;
     this.content = this._parseContent(content || "");
   }
@@ -1724,7 +1772,7 @@ var Tag = (function (){
       if(parent_tag.getName() != "body"){
 	var parent_selectors = parent_tag.getSelectors();
 	var ctx_selectors = this._parseContextSelectors(parent_selectors);
-	this.cssAttrContext = this._parseCssAttrWithCache(ctx_selectors);
+	this.cssAttrContext = this._parseCssAttr(ctx_selectors);
 	this.selectors = this.selectors.concat(ctx_selectors);
       }
       this._inherited = true;
@@ -1788,7 +1836,7 @@ var Tag = (function (){
     },
     getPseudoCssAttr : function(pseudo_name){
       var pseudo_selectors = this._parsePseudoSelectors(pseudo_name);
-      return this._parseCssAttrWithCache(pseudo_selectors);
+      return this._parseCssAttr(pseudo_selectors);
     },
     getSelectors : function(){
       return this.selectors;
@@ -1801,6 +1849,18 @@ var Tag = (function (){
     },
     getCssAttr : function(name, def_value){
       return this.cssAttrDynamic[name] || this.cssAttrContext[name] || this.cssAttrStatic[name] || ((typeof def_value !== "undefined")? def_value : null);
+    },
+    // used for property that could be contructed with multiple values such as margin(start/end/before/after).
+    // for example, when we get "margin" of some target,
+    // we read style from default css, and context selector css, and inline style,
+    // and we must 'merge' them to get strict style settings.
+    getCssAttrs : function(name, def_value){
+      return List.fold([this.cssAttrStatic, this.cssAttrContext, this.cssAttrDynamic], [], function(ret, target){
+	if(typeof target[name] !== "undefined"){
+	  ret.push(target[name]);
+	}
+	return ret;
+      });
     },
     getDataset : function(name, def_value){
       return this.dataset[name] || ((typeof def_value !== "undefined")? def_value : null);
@@ -1853,6 +1913,37 @@ var Tag = (function (){
       }
       return null;
     },
+    /*
+    getMergedEdge : function(edge_type){
+      var edges = List.map(this.getCssAttrs(edge_type), function(style){
+	return EdgeParser.parse(style);
+      });
+      return List.fold(edges, null, function(ret, edge){
+	return ret? Args.merge(ret, ret, edge) : edge;
+      });
+    },
+    getBoxEdge : function(flow, font_size, max_measure){
+      var padding = this.getMergedEdge("padding");
+      var margin = this.getMergedEdge("margin");
+      var border = this.getMergedEdge("border");
+      if(padding === null && margin === null && border === null){
+	return null;
+      }
+      var edge = new BoxEdge();
+      if(padding){
+	var padding_size = UnitSize.parseEdgeSize(padding, font_size, max_measure);
+	edge.setSize("padding", flow, padding_size);
+      }
+      if(margin){
+	var margin_size = UnitSize.parseEdgeSize(margin, font_size, max_measure);
+	edge.setSize("margin", flow, margin_size);
+      }
+      if(border){
+	var border_size = UnitSize.parseEdgeSize(border, font_size, max_measure);
+	edge.setSize("border", flow, border_size);
+      }
+      return edge;
+    },*/
     getBoxEdge : function(flow, font_size, max_measure){
       var padding = this.getCssAttr("padding");
       var margin = this.getCssAttr("margin");
@@ -2017,17 +2108,10 @@ var Tag = (function (){
       });
     },
     _parseCssAttr : function(selectors){
-      var attr = {};
-      List.iter(selectors, function(key){
-	Args.copy(attr, Selectors.getValue(key));
-      });
-      return attr;
-    },
-    _parseCssAttrWithCache : function(selectors){
       var cache_key = this._getCssCacheKey(selectors);
       var cache = get_css_attr_cache(cache_key);
       if(cache === null){
-	cache = this._parseCssAttr(selectors);
+	cache = Selectors.getValue(selectors);
 	add_css_attr_cache(cache_key, cache);
       }
       return cache;
@@ -3463,6 +3547,63 @@ var Edge = Class.extend({
     this[flow.getProp(dir)] = val;
   }
 });
+
+var EdgeParser = (function(){
+  var parse_array = function(array){
+    switch(array.length){
+    case 1:
+      var val = array[0];
+      return {before:val, end:val, after:val, start:val};
+    case 2:
+      var before_after = array[0];
+      var start_end = array[1];
+      return {before:before_after, end:start_end, after:before_after, start:start_end};
+    case 3:
+      var before = array[0];
+      var start_end = array[1];
+      var after = array[2];
+      return {before:before, end:start_end, after:after, start:start_end};
+    case 4:
+      var before = array[0];
+      var end = array[1];
+      var after = array[2];
+      var start = array[3];
+      return {before:before, end:end, after:after, start:start};
+    default:
+      return null;
+    }
+  };
+
+  var normalize = function(src){
+    return src.replace(/\s+/g, " ").replace(/;/g, "");
+  };
+  
+  var parse_string = function(str){
+    str = normalize(str);
+    if(str.indexOf(" ") < 0){
+      return parse([str]);
+    }
+    return parse(str.split(" "));
+  };
+
+  var parse = function(obj){
+    if(obj instanceof Array){
+      return parse_array(obj);
+    }
+    switch(typeof obj){
+    case "object": return obj;
+    case "string": return parse_string(obj);
+    case "number": return parse_array([obj]);
+    default: return null;
+      return parse(src);
+    }
+  };
+  return {
+    parse : function(obj){
+      return parse(obj);
+    }
+  };
+})();
 
 var Radius2d = (function(){
   function Radius2d(){
@@ -7219,6 +7360,9 @@ var InlineGenerator = (function(){
       if(tag.isSingleTag() || tag.parsed){
 	return tag;
       }
+      // if inline level edge is defined,
+      // get edge and set it to markup data because inline level does not create box.
+      // this edge(in markup data) is evaluated at InlineEvaluator::evalTagCss.
       var edge = tag.getBoxEdge(ctx.getParentFlow(), ctx.getInlineFontSize(), ctx.getMaxMeasure());
       if(edge){
 	tag.edge = edge;
@@ -8796,6 +8940,7 @@ if(__engine_args.test){
   __exports.BlockFlow = BlockFlow;
   __exports.BoxFlow = BoxFlow;
   __exports.Edge = Edge;
+  __exports.EdgeParser = EdgeParser;
   __exports.Padding = Padding;
   __exports.Margin = Margin;
   __exports.Border = Border;

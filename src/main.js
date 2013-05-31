@@ -24,6 +24,7 @@ if(__engine_args.test){
   __exports.BlockFlow = BlockFlow;
   __exports.BoxFlow = BoxFlow;
   __exports.Edge = Edge;
+  __exports.EdgeParser = EdgeParser;
   __exports.Padding = Padding;
   __exports.Margin = Margin;
   __exports.Border = Border;

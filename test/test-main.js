@@ -21,6 +21,7 @@ var InlineFlow = testEngine.InlineFlow;
 var BlockFlow = testEngine.BlockFlow;
 var BoxFlow = testEngine.BoxFlow;
 var Edge = testEngine.Edge;
+var EdgeParser = testEngine.EdgeParser;
 var Padding = testEngine.Padding;
 var Margin = testEngine.Margin;
 var Border = testEngine.Border;

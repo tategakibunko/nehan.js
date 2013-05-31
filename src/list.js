@@ -80,6 +80,15 @@ var List = {
     }
     return null;
   },
+  indexOf : function(lst, fn){
+    for(var i = 0, len = lst.length; i < len; i++){
+      var obj = lst[i];
+      if(fn(obj)){
+	return i;
+      }
+    }
+    return -1;
+  },
   exists : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       if(fn(lst[i])){

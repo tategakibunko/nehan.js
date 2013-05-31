@@ -250,6 +250,9 @@ var InlineGenerator = (function(){
       if(tag.isSingleTag() || tag.parsed){
 	return tag;
       }
+      // if inline level edge is defined,
+      // get edge and set it to markup data because inline level does not create box.
+      // this edge(in markup data) is evaluated at InlineEvaluator::evalTagCss.
       var edge = tag.getBoxEdge(ctx.getParentFlow(), ctx.getInlineFontSize(), ctx.getMaxMeasure());
       if(edge){
 	tag.edge = edge;
