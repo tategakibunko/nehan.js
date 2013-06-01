@@ -1,4 +1,4 @@
-test("selector", function(){
+test("selector-class", function(){
   var selector;
   selector = new Selector("div", {border:1});
   equal(selector.test("div"), true);
@@ -22,4 +22,31 @@ test("selector", function(){
   selector = new Selector("div .hoge");
   equal(selector.test("div p.hoge"), true);
   equal(selector.test("div ul li.hoge"), true);
+});
+
+test("selector-id", function(){
+  var selector;
+  selector = new Selector("#hoge", {border:1});
+  equal(selector.test("#hoge"), true);
+  equal(selector.test("p#hoge"), true);
+  equal(selector.test("p#hige"), false);
+
+  selector = new Selector("p#hoge", {border:1});
+  equal(selector.test("#hoge"), false);
+  equal(selector.test("p#hoge"), true);
+
+  selector = new Selector("#hoge div", {border:1});
+  equal(selector.test("#hoge"), false);
+  equal(selector.test("#hoge div"), true);
+  equal(selector.test("p#hoge div"), true);
+  equal(selector.test("p#hoge nav div"), true);
+
+  selector = new Selector("div #hoge");
+  equal(selector.test("div p#hoge"), true);
+  equal(selector.test("div ul li#hoge"), true);
+
+  selector = new Selector("div#hoge");
+  equal(selector.test("div#hoge"), true);
+  equal(selector.test("div p#hoge"), false);
+  equal(selector.test("div ul li#hoge"), false);
 });

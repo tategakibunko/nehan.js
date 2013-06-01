@@ -15,7 +15,7 @@ var EdgeParser = (function(){
   };
 
   var parse_object = function(obj){
-    return Args.merge({}, {before:"0", end:"0", after:"0", start:"0"}, obj);
+    return Args.merge({}, {before:0, end:0, after:0, start:0}, obj);
   };
 
   var normalize = function(src){

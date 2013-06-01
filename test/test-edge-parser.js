@@ -1,7 +1,7 @@
 test("edge-parser", function(){
   var ret;
   ret = EdgeParser.parse({start:0, after:1});
-  deepEqual(ret, {start:0, after:1});
+  deepEqual(ret, {before:0, end:0, after:1, start:0});
 
   ret = EdgeParser.parse([1]);
   deepEqual(ret, {before:1, end:1, after:1, start:1});

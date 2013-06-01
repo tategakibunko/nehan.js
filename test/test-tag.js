@@ -65,10 +65,9 @@ test("tag-selector", function(){
   var tag = new Tag("<p class='hi hey'>");
 
   equal(tag.getName(), "p");
-  deepEqual(tag._parseClasses(), ["hi", "hey"]);
   deepEqual(tag._parseCssClasses(tag.classes), [".hi", ".hey"]);
-  deepEqual(tag._parseClasses(), ["hi", "hey"]);
-  deepEqual(tag._parseSelectors(tag._parseClasses()), ["p", "p.hi", "p.hey"]);
+  deepEqual(tag.classes, ["hi", "hey"]);
+  deepEqual(tag.selectors, ["p", "p.hi", "p.hey"]);
 
   equal(tag.hasClass("hi"), true);
   equal(tag.hasClass("hey"), true);
@@ -200,11 +199,9 @@ test("tag-dataset", function(){
 test("tag-contextual-keys", function(){
   var tag1 = new Tag("<div class='parent level-1'>");
   var tag2 = new Tag("<p class='child level-2'>");
-  var parent_selectors = tag1._parseSelectors(tag1._parseClasses());
-  var child_selectors = tag2._parseSelectors(tag2._parseClasses());
-  deepEqual(parent_selectors, ["div", "div.parent", "div.level-1"]);
-  deepEqual(child_selectors, ["p", "p.child", "p.level-2"]);
-  deepEqual(tag2._parseContextSelectors(parent_selectors), [
+  deepEqual(tag1.selectors, ["div", "div.parent", "div.level-1"]);
+  deepEqual(tag2.selectors, ["p", "p.child", "p.level-2"]);
+  deepEqual(tag2._parseContextSelectors(tag1.selectors), [
     "div p",
     "div p.child",
     "div p.level-2",
@@ -214,5 +211,21 @@ test("tag-contextual-keys", function(){
     "div.level-1 p",
     "div.level-1 p.child",
     "div.level-1 p.level-2"
+  ]);
+});
+
+test("tag-contextual-keys2", function(){
+  var tag1 = new Tag("<div id='wrap' class='parent'>");
+  var tag2 = new Tag("<p class='child'>");
+  equal(tag1.id, "wrap");
+  deepEqual(tag1.selectors, ["div", "div#wrap", "div.parent"]);
+  deepEqual(tag2.selectors, ["p", "p.child"]);
+  deepEqual(tag2._parseContextSelectors(tag1.selectors), [
+    "div p",
+    "div p.child",
+    "div#wrap p",
+    "div#wrap p.child",
+    "div.parent p",
+    "div.parent p.child"
   ]);
 });

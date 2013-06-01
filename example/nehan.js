@@ -1526,7 +1526,7 @@ var Exceptions = (function(){
   
 var Selector = (function(){
   function Selector(key, val){
-    this.key = key.toLowerCase();
+    this.key = this._createKey(key);
     this.rex = this._createRegExp(this.key);
     this.val = val;
   }
@@ -1545,14 +1545,28 @@ var Selector = (function(){
       }
       return this.rex.test(dst_key);
     },
+    hasClass : function(){
+      return (/\.[^\.\s]+/).test(this.key);
+    },
+    hasId : function(){
+      return (/#[^#\s]+/).test(this.key);
+    },
+    hasContext : function(){
+      return (/[\S]+\s+[\S]+/).test(this.key);
+    },
+    _createKey : function(key){
+      return Utils.trim(key).toLowerCase()
+	.replace(/\s+/g, " ") // shorten space
+      ;
+    },
     _createPattern : function(key){
       return key
-	.replace(/\s+/g, " ")
+	.replace(/([^\s#\^]*)#(\S+)/g, "$1#$2")
 	.replace(/([^\s\.\^]*)\.(\S+)/g, "$1\\.$2")
 	.replace(/\s/g, "(\\s|[a-z0-9-_=:\\[\\]])*") + "$";
     },
     _createRegExp : function(key){
-      if(key.indexOf(".") < 0 && key.indexOf(" ") < 0){
+      if(!this.hasId() && !this.hasClass() && !this.hasContext()){
 	return null;
       }
       var pat = this._createPattern(key);
@@ -1590,28 +1604,21 @@ var Selectors = (function(){
     return dst;
   };
 
+  var get_selector_value = function(selector_key){
+    return List.fold(selectors, {}, function(ret, selector){
+      return selector.test(selector_key)? merge(ret, selector.getValue()) : ret;
+    });
+  };
+
   return {
     addSelector : function(selector_key){
       if(!List.exists(selectors, function(selector){ return selector.getKey() === selector_key; })){
 	selectors.push(new Selector(selector_key, Style[selector_key]));
       }
     },
-    getSelectorValue : function(selector_key){
-      var ret = {}, self = this;
-      List.iter(selectors, function(selector){
-	if(selector.test(selector_key)){
-	  merge(ret, selector.getValue());
-	}
-      });
-      return ret;
-    },
     getValue : function(selector_keys){
-      var self = this;
-      var values = List.map(selector_keys, function(selector_key){
-	return self.getSelectorValue(selector_key);
-      });
-      return List.fold(values, {}, function(ret, value){
-	return merge(ret, value);
+      return List.fold(selector_keys, {}, function(ret, selector_key){
+	return merge(ret, get_selector_value(selector_key));
       });
     }
   };
@@ -1721,8 +1728,9 @@ var Tag = (function (){
     this.cssAttrDynamic = {};
 
     this.tagAttr = this._parseTagAttr(this.src);
+    this.id = this._parseId();
     this.classes = this._parseClasses();
-    this.selectors = this._parseSelectors(this.classes);
+    this.selectors = this._parseSelectors(this.id, this.classes);
     this.cssAttrStatic = this._parseCssAttr(this.selectors);
     this.parent = null;
     this.content = this._parseContent(content || "");
@@ -2071,6 +2079,9 @@ var Tag = (function (){
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
     },
+    _parseId : function(){
+      return this.tagAttr["id"] || "";
+    },
     // <p class='hi hey'>
     // => ["hi", "hey"]
     _parseClasses : function(){
@@ -2087,17 +2098,17 @@ var Tag = (function (){
 	return "." + class_name;
       });
     },
-    // <p class='hi hey'>
-    // => ["p", "p.hi", "p.hey"]
-    _parseSelectors : function(classes){
+    // <p id='foo' class='hi hey'>
+    // => ["p", "p#foo", "p.hi", "p.hey"]
+    _parseSelectors : function(id, classes){
       var tag_name = this.getName();
-      return [tag_name].concat(List.map(classes, function(class_name){
+      var ret = id? [tag_name, tag_name + "#" + id] : [tag_name];
+      return ret.concat(List.map(classes, function(class_name){
 	return tag_name + "." + class_name;
       }));
     },
-    // get contextual selector(so parent of parent_tag is ignored).
-    // if parent_keys are ["div", "div.parent"]
-    // and child_keys are ["p", , "p.child"]
+    // parent_keys: ["div", "div.parent"]
+    // child_keys: ["p", "p.child"]
     // =>["div p", "div p.child", "div.parent p", "div.parent p.child"]
     _parseContextSelectors : function(parent_selectors){
       var child_selectors = this.selectors;
@@ -3565,7 +3576,7 @@ var EdgeParser = (function(){
   };
 
   var parse_object = function(obj){
-    return Args.merge({}, {before:"0", end:"0", after:"0", start:"0"}, obj);
+    return Args.merge({}, {before:0, end:0, after:0, start:0}, obj);
   };
 
   var normalize = function(src){

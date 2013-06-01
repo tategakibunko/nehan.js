@@ -13,8 +13,9 @@ var Tag = (function (){
     this.cssAttrDynamic = {};
 
     this.tagAttr = this._parseTagAttr(this.src);
+    this.id = this._parseId();
     this.classes = this._parseClasses();
-    this.selectors = this._parseSelectors(this.classes);
+    this.selectors = this._parseSelectors(this.id, this.classes);
     this.cssAttrStatic = this._parseCssAttr(this.selectors);
     this.parent = null;
     this.content = this._parseContent(content || "");
@@ -363,6 +364,9 @@ var Tag = (function (){
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
     },
+    _parseId : function(){
+      return this.tagAttr["id"] || "";
+    },
     // <p class='hi hey'>
     // => ["hi", "hey"]
     _parseClasses : function(){
@@ -379,17 +383,17 @@ var Tag = (function (){
 	return "." + class_name;
       });
     },
-    // <p class='hi hey'>
-    // => ["p", "p.hi", "p.hey"]
-    _parseSelectors : function(classes){
+    // <p id='foo' class='hi hey'>
+    // => ["p", "p#foo", "p.hi", "p.hey"]
+    _parseSelectors : function(id, classes){
       var tag_name = this.getName();
-      return [tag_name].concat(List.map(classes, function(class_name){
+      var ret = id? [tag_name, tag_name + "#" + id] : [tag_name];
+      return ret.concat(List.map(classes, function(class_name){
 	return tag_name + "." + class_name;
       }));
     },
-    // get contextual selector(so parent of parent_tag is ignored).
-    // if parent_keys are ["div", "div.parent"]
-    // and child_keys are ["p", , "p.child"]
+    // parent_keys: ["div", "div.parent"]
+    // child_keys: ["p", "p.child"]
     // =>["div p", "div p.child", "div.parent p", "div.parent p.child"]
     _parseContextSelectors : function(parent_selectors){
       var child_selectors = this.selectors;

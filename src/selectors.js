@@ -24,28 +24,21 @@ var Selectors = (function(){
     return dst;
   };
 
+  var get_selector_value = function(selector_key){
+    return List.fold(selectors, {}, function(ret, selector){
+      return selector.test(selector_key)? merge(ret, selector.getValue()) : ret;
+    });
+  };
+
   return {
     addSelector : function(selector_key){
       if(!List.exists(selectors, function(selector){ return selector.getKey() === selector_key; })){
 	selectors.push(new Selector(selector_key, Style[selector_key]));
       }
     },
-    getSelectorValue : function(selector_key){
-      var ret = {}, self = this;
-      List.iter(selectors, function(selector){
-	if(selector.test(selector_key)){
-	  merge(ret, selector.getValue());
-	}
-      });
-      return ret;
-    },
     getValue : function(selector_keys){
-      var self = this;
-      var values = List.map(selector_keys, function(selector_key){
-	return self.getSelectorValue(selector_key);
-      });
-      return List.fold(values, {}, function(ret, value){
-	return merge(ret, value);
+      return List.fold(selector_keys, {}, function(ret, selector_key){
+	return merge(ret, get_selector_value(selector_key));
       });
     }
   };
