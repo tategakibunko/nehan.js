@@ -365,7 +365,7 @@ var Tag = (function (){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
     },
     _parseId : function(){
-      return this.tagAttr["id"] || "";
+      return this.tagAttr.id || "";
     },
     // <p class='hi hey'>
     // => ["hi", "hey"]
