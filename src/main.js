@@ -1,4 +1,4 @@
-Nehan.version = "4.0.1";
+Nehan.version = "4.0.2";
 
 Args.copy(Env, __engine_args.env || {});
 Args.copy(Layout, __engine_args.layout || {});
@@ -99,7 +99,6 @@ if(__engine_args.test){
   __exports.Config = Config;
   __exports.Layout = Layout;
   __exports.Style = Style;
-  __exports.Styles = Styles;
   __exports.Selectors = Selectors;
 }
 
@@ -112,14 +111,11 @@ __exports.createDocumentPageStream = function(text){
 __exports.createPageGroupStream = function(text, group_size){
   return new PageGroupStream(text, group_size);
 };
-__exports.getRule = function(selector){
-  return Style[selector];
+__exports.getStyle = function(selector_key){
+  Selectors.getValue(selector_key);
 };
-__exports.addRule = function(selector, prop, value) {
-  Styles.addRule(selector, prop, value);
-};
-__exports.addRules = function(selector, obj) {
-  Styles.addRules(selector, obj);
+__exports.setStyle = function(selector_key, obj) {
+  Selectors.setValue(selector_key, obj);
 };
 
 return __exports;

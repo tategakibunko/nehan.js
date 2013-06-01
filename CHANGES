@@ -6,6 +6,11 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 4.0.2, 2013/xx/xx
+==========================
+! rename addRule to setStyle.
+! remove class Selectors.
+
 version 4.0.1, 2013/05/01
 ==========================
 o new class Slector, Selectors(selector.js, selectors.js) to handle more complex selector.

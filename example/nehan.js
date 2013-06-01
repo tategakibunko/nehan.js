@@ -1046,25 +1046,6 @@ var Style = {
   }
 };
 
-var Styles = {
-  addRule : function(key, prop, value){
-    var entry = Style[key] || null;
-    if(entry){
-      entry[prop] = value;
-    } else {
-      var obj = {};
-      obj[prop] = value;
-      Style[key] = obj;
-      Selectors.addSelector(key);
-    }
-  },
-  addRules : function(key, obj){
-    for(var prop in obj){
-      this.addRule(key, prop, obj[prop]);
-    }
-  }
-};
-
 /* Simple JavaScript Inheritance
  * By John Resig http://ejohn.org/
  * MIT Licensed.
@@ -1580,10 +1561,15 @@ var Selector = (function(){
 
 var Selectors = (function(){
   var selectors = [];
+
   // initialize default selectors
-  for(var key in Style){
-    selectors.push(new Selector(key, Style[key]));
+  for(var selector_key in Style){
+    selectors.push(new Selector(selector_key, Style[selector_key]));
   }
+
+  var is_edge_prop = function(prop){
+    return (prop === "margin" || prop === "border" || prop === "padding");
+  };
 
   var merge_edge = function(edge1, edge2){
     // conv both edge to standard edge format({before:x, end:x, after:x, start:x}).
@@ -1595,7 +1581,7 @@ var Selectors = (function(){
   var merge = function(dst, obj){
     for(var prop in obj){
       // edge value is constructed with multiple values, so need to merge.
-      if(prop === "margin" || prop === "border" || prop === "padding"){
+      if(is_edge_prop(prop)){
 	dst[prop] = dst[prop]? merge_edge(dst[prop], obj[prop]) : obj[prop];
       } else {
 	dst[prop] = obj[prop];
@@ -1604,21 +1590,25 @@ var Selectors = (function(){
     return dst;
   };
 
-  var get_selector_value = function(selector_key){
-    return List.fold(selectors, {}, function(ret, selector){
-      return selector.test(selector_key)? merge(ret, selector.getValue()) : ret;
-    });
-  };
-
   return {
-    addSelector : function(selector_key){
-      if(!List.exists(selectors, function(selector){ return selector.getKey() === selector_key; })){
-	selectors.push(new Selector(selector_key, Style[selector_key]));
+    setValue : function(selector_key, value){
+      var old_value = Style[selector_key] || null;
+      if(old_value){
+	merge(old_value, value);
+      } else {
+	Style[selector_key] = value;
+	selectors.push(new Selector(selector_key, value));
       }
     },
-    getValue : function(selector_keys){
+    getValue : function(selector_key){
+      return List.fold(selectors, {}, function(ret, selector){
+	return selector.test(selector_key)? merge(ret, selector.getValue()) : ret;
+      });
+    },
+    getMergedValue : function(selector_keys){
+      var self = this;
       return List.fold(selector_keys, {}, function(ret, selector_key){
-	return merge(ret, get_selector_value(selector_key));
+	return merge(ret, self.getValue(selector_key));
       });
     }
   };
@@ -2122,7 +2112,7 @@ var Tag = (function (){
       var cache_key = this._getCssCacheKey(selectors);
       var cache = get_css_attr_cache(cache_key);
       if(cache === null){
-	cache = Selectors.getValue(selectors);
+	cache = Selectors.getMergedValue(selectors);
 	add_css_attr_cache(cache_key, cache);
       }
       return cache;
@@ -8918,7 +8908,7 @@ var PageGroupStream = PageStream.extend({
   }
 });
 
-Nehan.version = "4.0.1";
+Nehan.version = "4.0.2";
 
 Args.copy(Env, __engine_args.env || {});
 Args.copy(Layout, __engine_args.layout || {});
@@ -9019,7 +9009,6 @@ if(__engine_args.test){
   __exports.Config = Config;
   __exports.Layout = Layout;
   __exports.Style = Style;
-  __exports.Styles = Styles;
   __exports.Selectors = Selectors;
 }
 
@@ -9032,14 +9021,11 @@ __exports.createDocumentPageStream = function(text){
 __exports.createPageGroupStream = function(text, group_size){
   return new PageGroupStream(text, group_size);
 };
-__exports.getRule = function(selector){
-  return Style[selector];
+__exports.getStyle = function(selector_key){
+  Selectors.getValue(selector_key);
 };
-__exports.addRule = function(selector, prop, value) {
-  Styles.addRule(selector, prop, value);
-};
-__exports.addRules = function(selector, obj) {
-  Styles.addRules(selector, obj);
+__exports.setStyle = function(selector_key, obj) {
+  Selectors.setValue(selector_key, obj);
 };
 
 return __exports;

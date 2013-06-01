@@ -407,7 +407,7 @@ var Tag = (function (){
       var cache_key = this._getCssCacheKey(selectors);
       var cache = get_css_attr_cache(cache_key);
       if(cache === null){
-	cache = Selectors.getValue(selectors);
+	cache = Selectors.getMergedValue(selectors);
 	add_css_attr_cache(cache_key, cache);
       }
       return cache;
