@@ -50,3 +50,18 @@ test("selector-id", function(){
   equal(selector.test("div p#hoge"), false);
   equal(selector.test("div ul li#hoge"), false);
 });
+
+test("test-selector-merged", function(){
+  var engine = Nehan.setup({
+    test:true
+  });
+  engine.setStyle(".hoge", {
+    "font-size":"16px"
+  });
+  engine.setStyle("#foo", {
+    "font-size":"18px"
+  });
+  var style = engine.Selectors.getMergedValue(["p.hoge", "p#foo"]);
+  equal(style["font-size"], "18px"); // id selector wins
+});
+

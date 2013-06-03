@@ -2089,13 +2089,15 @@ var Tag = (function (){
       });
     },
     // <p id='foo' class='hi hey'>
-    // => ["p", "p#foo", "p.hi", "p.hey"]
+    // => ["p", "p.hi", "p.hey", "p#foo"]
     _parseSelectors : function(id, classes){
       var tag_name = this.getName();
-      var ret = id? [tag_name, tag_name + "#" + id] : [tag_name];
-      return ret.concat(List.map(classes, function(class_name){
+      var basic_selector = [tag_name];
+      var class_selectors = List.map(classes, function(class_name){
 	return tag_name + "." + class_name;
-      }));
+      });
+      var id_selector = id? [tag_name + "#" + id] : [];
+      return basic_selector.concat(class_selectors).concat(id_selector);
     },
     // parent_keys: ["div", "div.parent"]
     // child_keys: ["p", "p.child"]

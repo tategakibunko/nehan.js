@@ -61,13 +61,25 @@ test("tag-wrap-src", function(){
   equal(tag.getWrapSrc(), "<p>" + tag.content + "</p>");
 });
 
-test("tag-selector", function(){
+test("tag-selector-class", function(){
   var tag = new Tag("<p class='hi hey'>");
 
   equal(tag.getName(), "p");
   deepEqual(tag._parseCssClasses(tag.classes), [".hi", ".hey"]);
   deepEqual(tag.classes, ["hi", "hey"]);
   deepEqual(tag.selectors, ["p", "p.hi", "p.hey"]);
+
+  equal(tag.hasClass("hi"), true);
+  equal(tag.hasClass("hey"), true);
+});
+
+test("tag-selector-id-class", function(){
+  var tag = new Tag("<p id='foo' class='hi hey'>");
+
+  equal(tag.getName(), "p");
+  deepEqual(tag.id, "foo");
+  deepEqual(tag.classes, ["hi", "hey"]);
+  deepEqual(tag.selectors, ["p", "p.hi", "p.hey", "p#foo"]);
 
   equal(tag.hasClass("hi"), true);
   equal(tag.hasClass("hey"), true);
@@ -218,14 +230,14 @@ test("tag-contextual-keys2", function(){
   var tag1 = new Tag("<div id='wrap' class='parent'>");
   var tag2 = new Tag("<p class='child'>");
   equal(tag1.id, "wrap");
-  deepEqual(tag1.selectors, ["div", "div#wrap", "div.parent"]);
+  deepEqual(tag1.selectors, ["div", "div.parent", "div#wrap"]);
   deepEqual(tag2.selectors, ["p", "p.child"]);
   deepEqual(tag2._parseContextSelectors(tag1.selectors), [
     "div p",
     "div p.child",
-    "div#wrap p",
-    "div#wrap p.child",
     "div.parent p",
-    "div.parent p.child"
+    "div.parent p.child",
+    "div#wrap p",
+    "div#wrap p.child"
   ]);
 });
