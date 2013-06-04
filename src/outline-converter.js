@@ -31,6 +31,8 @@ var OutlineConverter = (function(){
     },
     _createToc : function(tree, ctx){
       return {
+	title:tree.getTitle(),
+	pageNo:tree.getPageNo(),
 	tocId:ctx.getTocId(),
 	headerId:tree.getHeaderId()
       };
@@ -41,13 +43,17 @@ var OutlineConverter = (function(){
       }
       var toc = self._createToc(tree, ctx);
       var li = self.createChild(toc);
-      var page_no = tree.getPageNo();
-      var title = self.createTitle(tree.getTitle(), page_no, toc);
-      var link = self.createLink(title, page_no, toc);
-      link.onclick = function(){
-	return self.onClickLink(page_no, link, toc);
-      };
-      li.appendChild(link);
+      var link = self.createLink(toc);
+      if(link){
+	link.onclick = function(){
+	  return self.onClickLink(toc);
+	};
+	li.appendChild(link);
+      }
+      var page_no_item = self.createPageNoItem(toc);
+      if(page_no_item){
+	li.appendChild(page_no_item);
+      }
       parent.appendChild(li);
 
       var child = tree.getChild();
@@ -65,25 +71,30 @@ var OutlineConverter = (function(){
       }
       return parent;
     },
-    onClickLink : function(page_no, link, toc){
+    onClickLink : function(toc){
       return false;
     },
     createRoot: function(toc){
-      return document.createElement("ol");
+      var root = document.createElement("ol");
+      root.className = "nehan-toc-root";
+      return root;
     },
     createChild : function(toc){
-      return document.createElement("li");
+      var li = document.createElement("li");
+      li.className = "nehan-toc-item";
+      return li;
     },
-    createTitle : function(title, page_no, toc){
-      return title.replace(/<a[^>]+>/gi, "").replace(/<\/a>/gi, "");
-    },
-    createLink : function(title, page_no, toc){
+    createLink : function(toc){
       var link = document.createElement("a");
-      link.href = "#" + page_no;
+      var title = toc.title.replace(/<a[^>]+>/gi, "").replace(/<\/a>/gi, "");
+      link.href = "#" + toc.pageNo;
       link.innerHTML = title;
       link.className = "nehan-toc-link";
       link.id = Css.addNehanTocLinkPrefix(toc.tocId);
       return link;
+    },
+    createPageNoItem : function(toc){
+      return null;
     }
   };
 
