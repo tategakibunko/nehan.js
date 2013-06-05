@@ -129,6 +129,7 @@ div, span{
   padding-bottom:0.5em;
 }
 .nehan-vert-alpha{
+  font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'ＭＳ 明朝','MS Mincho',monospace;
   word-break:normal !important;
   -webkit-transform : rotate(90deg);
   -webkit-transform-origin : 50% 50%;
