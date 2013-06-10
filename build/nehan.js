@@ -1354,6 +1354,17 @@ var Utils = {
   }
 };
 
+var reqAnimationFrame = (function(){
+  return window.requestAnimationFrame  ||
+    window.webkitRequestAnimationFrame ||
+    window.mozRequestAnimationFrame    ||
+    function(callback, wait){
+      var _wait = (typeof wait === "undefined")? (1000 / 60) : wait;
+      window.setTimeout(callback, _wait);
+    };
+})();
+
+
 var Const = {
   cssVenderPrefixes:[
     "-moz",
@@ -8800,9 +8811,9 @@ var PageStream = Class.extend({
     this._seekPageNo++;
     this._seekPercent = entry.percent;
     this._seekPos = entry.seekPos;
-    setTimeout(function(){
+    reqAnimationFrame(function(){
       self._asyncGet(wait);
-    }, wait);
+    });
   },
   _addBuffer : function(entry){
     // if entry can't be lazy, eval immediately.

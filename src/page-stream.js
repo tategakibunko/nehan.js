@@ -118,9 +118,9 @@ var PageStream = Class.extend({
     this._seekPageNo++;
     this._seekPercent = entry.percent;
     this._seekPos = entry.seekPos;
-    setTimeout(function(){
+    reqAnimationFrame(function(){
       self._asyncGet(wait);
-    }, wait);
+    });
   },
   _addBuffer : function(entry){
     // if entry can't be lazy, eval immediately.

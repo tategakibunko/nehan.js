@@ -45,6 +45,7 @@ module.exports = function(grunt) {
 	    "src/obj.js",
 	    "src/unit-size.js",
 	    "src/utils.js",
+	    "src/anim.js",
 	    "src/const.js",
 	    "src/css.js",
 	    "src/html.js",
