@@ -8,6 +8,7 @@ Mark "!": change that can break compatibility with older version
 
 version 4.0.2, 2013/xx/xx
 ==========================
+o add anim.js to use requestAnimationFrame.
 ! rename addRule to setStyle.
 ! remove class Selectors.
 
