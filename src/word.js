@@ -32,6 +32,7 @@ var Word = (function(){
     isDevided : function(){
       return this._devided;
     },
+    // devide word by measure size and return first half of word.
     cutMeasure : function(measure){
       var half_size = Math.floor(this.fontSize / 2);
       var this_half_count = Math.floor(this.bodySize / half_size);

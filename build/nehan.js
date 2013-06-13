@@ -1503,17 +1503,15 @@ var Args = {
   }
 };
 
-var Exceptions = (function(){
-  return {
-    PAGE_BREAK:2,
-    LINE_BREAK:3,
-    BUFFER_END:4,
-    OVER_FLOW:5,
-    RETRY:6,
-    SKIP:7,
-    BREAK:8
-  };
-})();
+var Exceptions = {
+  PAGE_BREAK:2,
+  LINE_BREAK:3,
+  BUFFER_END:4,
+  OVER_FLOW:5,
+  RETRY:6,
+  SKIP:7,
+  BREAK:8
+};
 
 
   
@@ -1923,37 +1921,6 @@ var Tag = (function (){
       }
       return null;
     },
-    /*
-    getMergedEdge : function(edge_type){
-      var edges = List.map(this.getCssAttrs(edge_type), function(style){
-	return EdgeParser.parse(style);
-      });
-      return List.fold(edges, null, function(ret, edge){
-	return ret? Args.merge(ret, ret, edge) : edge;
-      });
-    },
-    getBoxEdge : function(flow, font_size, max_measure){
-      var padding = this.getMergedEdge("padding");
-      var margin = this.getMergedEdge("margin");
-      var border = this.getMergedEdge("border");
-      if(padding === null && margin === null && border === null){
-	return null;
-      }
-      var edge = new BoxEdge();
-      if(padding){
-	var padding_size = UnitSize.parseEdgeSize(padding, font_size, max_measure);
-	edge.setSize("padding", flow, padding_size);
-      }
-      if(margin){
-	var margin_size = UnitSize.parseEdgeSize(margin, font_size, max_measure);
-	edge.setSize("margin", flow, margin_size);
-      }
-      if(border){
-	var border_size = UnitSize.parseEdgeSize(border, font_size, max_measure);
-	edge.setSize("border", flow, border_size);
-      }
-      return edge;
-    },*/
     getBoxEdge : function(flow, font_size, max_measure){
       var padding = this.getCssAttr("padding");
       var margin = this.getCssAttr("margin");
@@ -2554,6 +2521,7 @@ var Word = (function(){
     isDevided : function(){
       return this._devided;
     },
+    // devide word by measure size and return first half of word.
     cutMeasure : function(measure){
       var half_size = Math.floor(this.fontSize / 2);
       var this_half_count = Math.floor(this.bodySize / half_size);
