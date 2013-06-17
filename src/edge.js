@@ -42,60 +42,7 @@ var Edge = Class.extend({
     return flow.isBlockflowVertical()? this.getHeight() : this.getWidth();
   },
   setSize : function(flow, size){
-    if(size instanceof Array){
-      this.setSizeByArray(flow, size);
-    } else if(typeof size == "object"){
-      this.setSizeByObj(flow, size);
-    } else {
-      this.setAll(flow, size);
-    }
-  },
-  setSizeByObj : function(flow, size){
-    if(typeof size.start != "undefined"){
-      this.setStart(flow, size.start);
-    }
-    if(typeof size.end != "undefined"){
-      this.setEnd(flow, size.end);
-    }
-    if(typeof size.before != "undefined"){
-      this.setBefore(flow, size.before);
-    }
-    if(typeof size.after != "undefined"){
-      this.setAfter(flow, size.after);
-    }
-  },
-  setSizeByArray : function(flow, size){
-    switch(size.length){
-    case 1:
-      this.setAll(flow, size[0]);
-      break;
-    case 2:
-      this.setBefore(flow, size[0]);
-      this.setAfter(flow, size[0]);
-      this.setStart(flow, size[1]);
-      this.setEnd(flow, size[1]);
-      break;
-    case 3:
-      this.setBefore(flow, size[0]);
-      this.setEnd(flow, size[1]);
-      this.setStart(flow, size[1]);
-      this.setAfter(flow, size[2]);
-      break;
-    case 4:
-      this.setBefore(flow, size[0]);
-      this.setEnd(flow, size[1]);
-      this.setAfter(flow, size[2]);
-      this.setStart(flow, size[3]);
-      break;
-    }
-  },
-  setAll : function(flow, value){
-    this.setSize(flow, {
-      start:value,
-      end:value,
-      before:value,
-      after:value
-    });
+    BoxRect.setValue(this, flow, size);
   },
   setStart : function(flow, value){
     this[flow.getPropStart()] = value;

@@ -1,6 +1,10 @@
 var Catalog = (function(){
   function Catalog(direction, width, height){
     this.engine = Nehan.setup({
+      /*
+      config:{
+	useVerticalGlyphIfEnable:false
+      },*/
       layout:{
 	direction:direction,
 	hori:"lr-tb",
@@ -40,6 +44,26 @@ var Catalog = (function(){
     // style to test letter-spacing
     this.engine.setStyle(".test-wide-letter-spacing", {
       "letter-spacing":"0.5em"
+    });
+    this.engine.setStyle(".bold-big-red-p", {
+      "font-size":"1.6em",
+      "font-weight":"bold",
+      "color":"red"
+    });
+    this.engine.setStyle(".various-border-color", {
+      "border-width":"2px",
+      "border-style":{
+	"before":"solid",
+	"after":"dotted",
+	"start":"dashed",
+	"end":"double"
+      },
+      "border-color":{
+	"before":"red",
+	"after":"green",
+	"start":"blue",
+	"end":"black"
+      }
     });
   }
 
@@ -212,6 +236,9 @@ var TestCode = {
 
       "paragraph":[
 	"<p>",
+	text_large,
+	"</p>",
+	"<p class='bold-big-red-p'>",
 	text_large,
 	"</p>"
       ].join("\n"),
@@ -495,6 +522,12 @@ var TestCode = {
       "wide-letter-spacing":[
 	"<p class='test-wide-letter-spacing'>",
 	text_large + " abcd",
+	"</p>"
+      ].join("\n"),
+
+      "various-border-color":[
+	"<p class='various-border-color'>",
+	text_large,
 	"</p>"
       ].join("\n")
     };

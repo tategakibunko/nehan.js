@@ -29,12 +29,6 @@ var Rgb = (function(){
     getPaletteValue : function(){
       return this.paletteValue;
     },
-    getPaletteValueLower : function(){
-      return this.paletteValue.toLowerCase();
-    },
-    getPaletteValueUpper : function(){
-      return this.paletteValue.toUpperCase();
-    },
     _makeHexStr : function(ival){
       var str = ival.toString(16);
       if(str.length <= 1){

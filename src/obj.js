@@ -5,12 +5,10 @@ var Obj = {
     }
     return true;
   },
-  filter : function(obj, fn){
-    var ret = [];
+  map : function(obj, fn){
+    var ret = {};
     for(var prop in obj){
-      if(fn(obj)){
-	ret.push(obj);
-      }
+      ret[prop] = fn(obj[prop]);
     }
     return ret;
   },

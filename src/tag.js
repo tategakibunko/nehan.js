@@ -209,8 +209,14 @@ var Tag = (function (){
     getBoxEdge : function(flow, font_size, max_measure){
       var padding = this.getCssAttr("padding");
       var margin = this.getCssAttr("margin");
-      var border = this.getCssAttr("border");
-      if(padding === null && margin === null && border === null){
+      var border_width = this.getCssAttr("border-width");
+      var border_color = this.getCssAttr("border-color");
+      var border_style = this.getCssAttr("border-style");
+      var border_radius = this.getCssAttr("border-radius");
+      if(padding === null &&
+	 margin === null &&
+	 border_width === null &&
+	 border_radius === null){
 	return null;
       }
       var edge = new BoxEdge();
@@ -222,9 +228,19 @@ var Tag = (function (){
 	var margin_size = UnitSize.parseEdgeSize(margin, font_size, max_measure);
 	edge.setSize("margin", flow, margin_size);
       }
-      if(border){
-	var border_size = UnitSize.parseEdgeSize(border, font_size, max_measure);
-	edge.setSize("border", flow, border_size);
+      if(border_width){
+	border_width = UnitSize.parseEdgeSize(border_width, font_size, max_measure);
+	edge.setSize("border", flow, border_width);
+      }
+      if(border_radius){
+	border_radius = UnitSize.parseEdgeSize(border_radius, font_size, max_measure);
+	edge.setBorderRadius(flow, border_radius);
+      }
+      if(border_color){
+	edge.setBorderColor(flow, border_color);
+      }
+      if(border_style){
+	edge.setBorderStyle(flow, border_style);
       }
       return edge;
     },

@@ -23,10 +23,11 @@ var Const = {
     "bottom",
     "left"
   ],
-  boxEdgeNames:[
-    "padding",
-    "margin",
-    "border"
+  cssBoxDirsLogical:[
+    "before",
+    "end",
+    "after",
+    "start"
   ],
   space:"&nbsp;",
   clearFix:"<div style='clear:both'></div>"

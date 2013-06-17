@@ -176,7 +176,7 @@ var Style = {
     "margin":{
       "after":"1.5em"
     },
-    "border":"1px"
+    "border-width":"1px"
   },
   "figure":{
     "display":"block",
@@ -266,12 +266,12 @@ var Style = {
     "margin":{
       "after":"1em"
     },
-    "border":{
+    "border-width":{
       "after":"1px"
     }
   },
   "hr.nehan-space":{
-    "border":0
+    "border-width":"0px"
   },
   "html":{
     "display":"block",
@@ -497,7 +497,7 @@ var Style = {
     "table-layout":"fixed", // 'auto' not supported yet.
     "border-collapse":"collapse", // 'separate' not supported yet.
     "border-spacing":"5px", // TODO: support batch style like "5px 10px".
-    "border":"1px",
+    "border-width":"1px",
     "margin":{
       "start":"0.5em",
       "end":"0.5em",
@@ -514,7 +514,7 @@ var Style = {
     "border-collapse":"inherit",
     "child-content":true,
     "section-root":true,
-    "border":"1px",
+    "border-width":"1px",
     "padding":{
       "start":"0.8em",
       "end":"0.8em",
@@ -538,7 +538,7 @@ var Style = {
     "line-rate":1.4,
     "border-collapse":"inherit",
     "child-content":true,
-    "border":"1px",
+    "border-width":"1px",
     "padding":{
       "start":"0.8em",
       "end":"0.8em",
@@ -625,9 +625,7 @@ var Style = {
   //-------------------------------------------------------
   ".nehan-rounded":{
     "padding":["1.6em", "1.0em", "1.6em", "1.0em"],
-    "border":{
-      "radius":"10px"
-    }
+    "border-radius":"10px"
   },
   //-------------------------------------------------------
   // font-size classes
@@ -846,7 +844,7 @@ var Style = {
     "margin":{
       "after":"1em"
     },
-    "border":"2px"
+    "border-width":"2px"
   },
   //-------------------------------------------------------
   // other utility classes

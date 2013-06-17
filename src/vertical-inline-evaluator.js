@@ -78,7 +78,9 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   },
   evalChar : function(line, chr, ctx){
     if(chr.isImgChar()){
-      if(Env.isVerticalGlyphEnable && !chr.isTenten()){
+      if(Config.useVerticalGlyphIfEnable &&
+	 Env.isVerticalGlyphEnable &&
+	 !chr.isTenten()){
 	return this.evalVerticalGlyph(line, chr, ctx);
       } else {
 	return this.evalImgChar(line, chr, ctx);
@@ -117,14 +119,14 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
     if(chr.isPaddingEnable()){
       Args.copy(css, chr.getCssPadding(line.flow));
     }
-    var palette_color = Layout.fontColor.toUpperCase();
+    var palette_color_value = Layout.fontColor.toUpperCase();
     var font_color = ctx.getInlineFontColor(line);
-    if(font_color != Layout.fontColor){
-      palette_color = (new Color(font_color)).getPaletteValueUpper();
+    if(font_color.getValue().toLowerCase() != Layout.fontColor.toLowerCase()){
+      palette_color_value = font_color.getPaletteValue().toUpperCase();
     }
     return Html.tagSingle("img", {
       "class":"nehan-img-char",
-      src:chr.getImgSrc(palette_color),
+      src:chr.getImgSrc(palette_color_value),
       style:Css.attr(css),
       width:width,
       height:height

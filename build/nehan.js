@@ -43,6 +43,7 @@ var Config = {
   justify:true,
   maxRollbackCount : 10,
   minBlockScaleDownRate : 65,
+  useVerticalGlyphIfEnable: true,
   lexingBufferLen : 2000
 };
 
@@ -79,7 +80,7 @@ var Layout = {
     box.lineRate = this.lineRate;
     box.textAlign = "start";
     box.fontSize = this.fontSize;
-    box.color = this.fontColor;
+    box.color = new Color(this.fontColor);
     return box;
   },
   getStdPageSize : function(){
@@ -337,7 +338,7 @@ var Style = {
     "margin":{
       "after":"1.5em"
     },
-    "border":"1px"
+    "border-width":"1px"
   },
   "figure":{
     "display":"block",
@@ -427,12 +428,12 @@ var Style = {
     "margin":{
       "after":"1em"
     },
-    "border":{
+    "border-width":{
       "after":"1px"
     }
   },
   "hr.nehan-space":{
-    "border":0
+    "border-width":"0px"
   },
   "html":{
     "display":"block",
@@ -658,7 +659,7 @@ var Style = {
     "table-layout":"fixed", // 'auto' not supported yet.
     "border-collapse":"collapse", // 'separate' not supported yet.
     "border-spacing":"5px", // TODO: support batch style like "5px 10px".
-    "border":"1px",
+    "border-width":"1px",
     "margin":{
       "start":"0.5em",
       "end":"0.5em",
@@ -675,7 +676,7 @@ var Style = {
     "border-collapse":"inherit",
     "child-content":true,
     "section-root":true,
-    "border":"1px",
+    "border-width":"1px",
     "padding":{
       "start":"0.8em",
       "end":"0.8em",
@@ -699,7 +700,7 @@ var Style = {
     "line-rate":1.4,
     "border-collapse":"inherit",
     "child-content":true,
-    "border":"1px",
+    "border-width":"1px",
     "padding":{
       "start":"0.8em",
       "end":"0.8em",
@@ -786,9 +787,7 @@ var Style = {
   //-------------------------------------------------------
   ".nehan-rounded":{
     "padding":["1.6em", "1.0em", "1.6em", "1.0em"],
-    "border":{
-      "radius":"10px"
-    }
+    "border-radius":"10px"
   },
   //-------------------------------------------------------
   // font-size classes
@@ -1007,7 +1006,7 @@ var Style = {
     "margin":{
       "after":"1em"
     },
-    "border":"2px"
+    "border-width":"2px"
   },
   //-------------------------------------------------------
   // other utility classes
@@ -1256,12 +1255,10 @@ var Obj = {
     }
     return true;
   },
-  filter : function(obj, fn){
-    var ret = [];
+  map : function(obj, fn){
+    var ret = {};
     for(var prop in obj){
-      if(fn(obj)){
-	ret.push(obj);
-      }
+      ret[prop] = fn(obj[prop]);
     }
     return ret;
   },
@@ -1391,10 +1388,11 @@ var Const = {
     "bottom",
     "left"
   ],
-  boxEdgeNames:[
-    "padding",
-    "margin",
-    "border"
+  cssBoxDirsLogical:[
+    "before",
+    "end",
+    "after",
+    "start"
   ],
   space:"&nbsp;",
   clearFix:"<div style='clear:both'></div>"
@@ -1578,7 +1576,10 @@ var Selectors = (function(){
   }
 
   var is_edge_prop = function(prop){
-    return (prop === "margin" || prop === "border" || prop === "padding");
+    return (prop === "margin" ||
+	    prop === "padding" ||
+	    prop === "border-width" ||
+	    prop === "border-radius");
   };
 
   var merge_edge = function(edge1, edge2){
@@ -1924,8 +1925,14 @@ var Tag = (function (){
     getBoxEdge : function(flow, font_size, max_measure){
       var padding = this.getCssAttr("padding");
       var margin = this.getCssAttr("margin");
-      var border = this.getCssAttr("border");
-      if(padding === null && margin === null && border === null){
+      var border_width = this.getCssAttr("border-width");
+      var border_color = this.getCssAttr("border-color");
+      var border_style = this.getCssAttr("border-style");
+      var border_radius = this.getCssAttr("border-radius");
+      if(padding === null &&
+	 margin === null &&
+	 border_width === null &&
+	 border_radius === null){
 	return null;
       }
       var edge = new BoxEdge();
@@ -1937,9 +1944,19 @@ var Tag = (function (){
 	var margin_size = UnitSize.parseEdgeSize(margin, font_size, max_measure);
 	edge.setSize("margin", flow, margin_size);
       }
-      if(border){
-	var border_size = UnitSize.parseEdgeSize(border, font_size, max_measure);
-	edge.setSize("border", flow, border_size);
+      if(border_width){
+	border_width = UnitSize.parseEdgeSize(border_width, font_size, max_measure);
+	edge.setSize("border", flow, border_width);
+      }
+      if(border_radius){
+	border_radius = UnitSize.parseEdgeSize(border_radius, font_size, max_measure);
+	edge.setBorderRadius(flow, border_radius);
+      }
+      if(border_color){
+	edge.setBorderColor(flow, border_color);
+      }
+      if(border_style){
+	edge.setBorderStyle(flow, border_style);
       }
       return edge;
     },
@@ -2715,12 +2732,6 @@ var Rgb = (function(){
     getPaletteValue : function(){
       return this.paletteValue;
     },
-    getPaletteValueLower : function(){
-      return this.paletteValue.toLowerCase();
-    },
-    getPaletteValueUpper : function(){
-      return this.paletteValue.toUpperCase();
-    },
     _makeHexStr : function(ival){
       var str = ival.toString(16);
       if(str.length <= 1){
@@ -2743,11 +2754,31 @@ var Rgb = (function(){
 
 var Color = (function(){
   function Color(value){
-    this.value = this._parseColorValue(value);
-    this.rgb = new Rgb(this.value);
+    this.value = Colors.get(value);
   }
 
-  var colorNames = {
+  Color.prototype = {
+    getCss : function(){
+      var css = {};
+      css.color = this.getCssValue();
+      return css;
+    },
+    getValue : function(){
+      return this.value;
+    },
+    getPaletteValue : function(){
+      return (new Rgb(this.value)).getPaletteValue();
+    },
+    getCssValue : function(){
+      return (this.value === "transparent")? this.value : "#" + this.value;
+    }
+  };
+
+  return Color;
+})();
+
+var Colors = (function(){
+  var color_names = {
     "aliceblue":"f0f8ff",
     "antiquewhite":"faebd7",
     "aqua":"00ffff",
@@ -2886,53 +2917,26 @@ var Color = (function(){
     "white":"ffffff",
     "whitesmoke":"f5f5f5",
     "yellow":"ffff00",
-    "yellowgreen":"9acd32"
+    "yellowgreen":"9acd32",
+    "transparent":"transparent"
   };
 
-  Color.prototype = {
-    getValue : function(){
-      return this.value;
-    },
-    getValueLower : function(){
-      return this.value.toLowerCase();
-    },
-    getValueUpper : function(){
-      return this.value.toUpperCase();
-    },
-    getPaletteValue : function(){
-      return this.rgb.getPaletteValue();
-    },
-    getPaletteValueLower : function(){
-      return this.rgb.getPaletteValueLower();
-    },
-    getPaletteValueUpper : function(){
-      return this.rgb.getPaletteValueUpper();
-    },
-    getCssValue : function(){
-      return "#" + this.value;
-    },
-    _parseColorValue : function(str){
-      var ret = str.replace("#", "");
-      if(!this._checkValidColor(ret)){
-	ret = this._getColorByName(ret);
-      } else if(ret.length === 3){
-	ret = this._regulateColor(ret);
+  var rex_hex_color = /^(?:[0-9a-f]{3}){1,2}$/;
+
+  return {
+    get : function(value){
+      value = value.replace(/#/g, "").toLowerCase();
+      if(!rex_hex_color.test(value)){
+	return color_names[value] || value;
       }
-      return ret;
-    },
-    _checkValidColor : function(value){
-      return (/^(?:[0-9a-fA-F]{3}){1,2}$/).test(value);
-    },
-    _getColorByName : function(value){
-      return colorNames[value];
-    },
-    _regulateColor : function(value){
-      return value[0] + value[0] + value[1] + value[1] + value[2] + value[2];
+      if(value.length === 3){
+	return value[0] + value[0] + value[1] + value[1] + value[2] + value[2];
+      }
+      return value;
     }
   };
-
-  return Color;
 })();
+
 
 var CardinalString = (function(){
   // table : character table starts from the character equivalent to 'one'.
@@ -3400,6 +3404,92 @@ var BoxFlows = {
   }
 };
 
+var BoxRect = {
+  iter : function(obj, fn){
+    List.iter(Const.cssBoxDirs, function(dir){
+      if(obj[dir]){
+	fn(dir, obj[dir]);
+      }
+    });
+  },
+  map : function(obj, fn){
+    if(obj instanceof Array){
+      return List.map(obj, fn);
+    }
+    if(typeof obj === "object"){
+      return Obj.map(obj, fn);
+    }
+    return fn(obj);
+  },
+  setValue : function(dst, flow, value){
+    if(value instanceof Array){
+      this.setByArray(dst, flow, value);
+    } else if(typeof value === "object"){
+      this.setByObject(dst, flow, value);
+    } else {
+      this.setAll(dst, value);
+    }
+    return dst;
+  },
+  setBefore : function(dst, flow, value){
+    dst[flow.getPropBefore()] = value;
+  },
+  setAfter : function(dst, flow, value){
+    dst[flow.getPropAfter()] = value;
+  },
+  setStart : function(dst, flow, value){
+    dst[flow.getPropStart()] = value;
+  },
+  setEnd : function(dst, flow, value){
+    dst[flow.getPropEnd()] = value;
+  },
+  setByArray : function(dst, flow, value){
+    switch(value.length){
+    case 1:
+      this.setAll(dst, value[0]);
+      break;
+    case 2:
+      this.setBefore(dst, flow, value[0]);
+      this.setAfter(dst, flow, value[0]);
+      this.setStart(dst, flow, value[1]);
+      this.setEnd(dst, flow, value[1]);
+      break;
+    case 3:
+      this.setBefore(dst, flow, value[0]);
+      this.setEnd(dst, flow, value[1]);
+      this.setStart(dst, flow, value[1]);
+      this.setAfter(dst, flow, value[2]);
+      break;
+    case 4:
+      this.setBefore(dst, flow, value[0]);
+      this.setEnd(dst, flow, value[1]);
+      this.setAfter(dst, flow, value[2]);
+      this.setStart(dst, flow, value[3]);
+      break;
+    }
+  },
+  setByObject : function(dst, flow, value){
+    if(typeof value.start != "undefined"){
+      this.setStart(dst, flow, value.start);
+    }
+    if(typeof value.end != "undefined"){
+      this.setEnd(dst, flow, value.end);
+    }
+    if(typeof value.before != "undefined"){
+      this.setBefore(dst, flow, value.before);
+    }
+    if(typeof value.after != "undefined"){
+      this.setAfter(dst, flow, value.after);
+    }
+  },
+  setAll : function(dst, value){
+    List.iter(Const.cssBoxDirs, function(dir){
+      dst[dir] = value;
+    });
+  }
+};
+
+
 var Edge = Class.extend({
   init : function(type){
     this._type = type;
@@ -3444,60 +3534,7 @@ var Edge = Class.extend({
     return flow.isBlockflowVertical()? this.getHeight() : this.getWidth();
   },
   setSize : function(flow, size){
-    if(size instanceof Array){
-      this.setSizeByArray(flow, size);
-    } else if(typeof size == "object"){
-      this.setSizeByObj(flow, size);
-    } else {
-      this.setAll(flow, size);
-    }
-  },
-  setSizeByObj : function(flow, size){
-    if(typeof size.start != "undefined"){
-      this.setStart(flow, size.start);
-    }
-    if(typeof size.end != "undefined"){
-      this.setEnd(flow, size.end);
-    }
-    if(typeof size.before != "undefined"){
-      this.setBefore(flow, size.before);
-    }
-    if(typeof size.after != "undefined"){
-      this.setAfter(flow, size.after);
-    }
-  },
-  setSizeByArray : function(flow, size){
-    switch(size.length){
-    case 1:
-      this.setAll(flow, size[0]);
-      break;
-    case 2:
-      this.setBefore(flow, size[0]);
-      this.setAfter(flow, size[0]);
-      this.setStart(flow, size[1]);
-      this.setEnd(flow, size[1]);
-      break;
-    case 3:
-      this.setBefore(flow, size[0]);
-      this.setEnd(flow, size[1]);
-      this.setStart(flow, size[1]);
-      this.setAfter(flow, size[2]);
-      break;
-    case 4:
-      this.setBefore(flow, size[0]);
-      this.setEnd(flow, size[1]);
-      this.setAfter(flow, size[2]);
-      this.setStart(flow, size[3]);
-      break;
-    }
-  },
-  setAll : function(flow, value){
-    this.setSize(flow, {
-      start:value,
-      end:value,
-      before:value,
-      after:value
-    });
+    BoxRect.setValue(this, flow, size);
   },
   setStart : function(flow, value){
     this[flow.getPropStart()] = value;
@@ -3750,6 +3787,56 @@ var BorderRadius = (function(){
   return BorderRadius;
 })();
 
+var BorderColor = (function(){
+  function BorderColor(){
+  }
+
+  BorderColor.prototype = {
+    setColor : function(flow, value){
+      var self = this;
+
+      // first, set as it is(obj, array, string).
+      BoxRect.setValue(this, flow, value);
+
+      // second, map as color class.
+      BoxRect.iter(this, function(dir, val){
+	self[dir] = new Color(val);
+      });
+    },
+    getCss : function(){
+      var css = {};
+      BoxRect.iter(this, function(dir, color){
+	var prop = ["border", dir, "color"].join("-");
+	css[prop] = color.getCssValue();
+      });
+      return css;
+    }
+  };
+
+  return BorderColor;
+})();
+
+var BorderStyle = (function(){
+  function BorderStyle(){
+  }
+
+  BorderStyle.prototype = {
+    setStyle : function(flow, value){
+      BoxRect.setValue(this, flow, value);
+    },
+    getCss : function(){
+      var css = {};
+      BoxRect.iter(this, function(dir, style){
+	var prop = ["border", dir, "style"].join("-");
+	css[prop] = style;
+      });
+      return css;
+    }
+  };
+
+  return BorderStyle;
+})();
+
 var Padding = Edge.extend({
   init : function(){
     this._super("padding");
@@ -3765,43 +3852,46 @@ var Margin = Edge.extend({
 var Border = Edge.extend({
   init : function(){
     this._super("border");
-    this.borderRadius = new BorderRadius();
-  },
-  setRadius : function(value){
-    this.borderRadius.setAll(value);
-  },
-  setRadiusStartBefore : function(flow, hori, vert){
-    this.borderRadius.setStartBefore(flow, hori, vert);
-  },
-  setRadiusStartAfter : function(flow, hori, vert){
-    this.borderRadius.setStartAfter(flow, hori, vert);
-  },
-  setRadiusEndBefore : function(flow, hori, vert){
-    this.borderRadius.setEndBefore(flow, hori, vert);
-  },
-  setRadiusEndAfter : function(flow, hori, vert){
-    this.borderRadius.setEndAfter(flow, hori, vert);
   },
   clearBefore : function(flow){
     this.setBefore(flow, 0);
-    this.borderRadius.clearBefore(flow);
+    if(this.radius){
+      this.radius.clearBefore(flow);
+    }
   },
   clearAfter : function(flow){
     this.setAfter(flow, 0);
-    this.borderRadius.clearAfter(flow);
+    if(this.radius){
+      this.radius.clearAfter(flow);
+    }
   },
   getDirProp : function(dir){
     return ["border", dir, "width"].join("-");
   },
-  setSize : function(flow, size){
-    this._super(flow, size);
-    if(size.radius){
-      this.borderRadius.setSize(flow, size.radius);
-    }
+  setRadius : function(flow, radius){
+    this.radius = new BorderRadius();
+    this.radius.setSize(flow, radius);
+  },
+  setColor : function(flow, color){
+    this.color = new BorderColor();
+    this.color.setColor(flow, color);
+  },
+  setStyle : function(flow, style){
+    this.style = new BorderStyle();
+    this.style.setStyle(flow, style);
   },
   getCss : function(){
     var css = this._super();
-    return Args.copy(css, this.borderRadius.getCss());
+    if(this.radius){
+      Args.copy(css, this.radius.getCss());
+    }
+    if(this.color){
+      Args.copy(css, this.color.getCss());
+    }
+    if(this.style){
+      Args.copy(css, this.style.getCss());
+    }
+    return css;
   }
 });
 
@@ -3879,8 +3969,14 @@ var BoxEdge = (function (){
     setEdgeAfter : function(prop, flow, value){
       this[prop].setAfter(flow, value);
     },
-    setRadius : function(value){
-      this.border.setRadius(value);
+    setBorderRadius : function(flow, value){
+      this.border.setRadius(flow, value);
+    },
+    setBorderColor : function(flow, value){
+      this.border.setColor(flow, value);
+    },
+    setBorderStyle : function(flow, value){
+      this.border.setStyle(flow, value);
     },
     clearBorderStart : function(flow){
       this.border.clearStart(flow);
@@ -4118,6 +4214,9 @@ var Box = (function(){
       if(this.parent){
 	Args.copy(css, this.parent.flow.getCss());
       }
+      if(this.color){
+	Args.copy(css, this.color.getCss());
+      }
       if(this.fontSize){
 	css["font-size"] = this.fontSize + "px";
       }
@@ -4270,6 +4369,9 @@ var Box = (function(){
     },
     addMeasure : function(measure){
       this.size.addMeasure(this.flow, measure);
+    },
+    setCss : function(prop, value){
+      this.css[prop] = value;
     },
     setType : function(type){
       this._type = type;
@@ -5399,9 +5501,11 @@ var InlineContext = (function(){
 	tag.setFontSizeUpdate(new_font_size);
 	this.fontSizeStack.push(new_font_size);
       }
-      var font_color = tag.getCssAttr("color");
-      if(font_color){
-	var cur_font_color = this.getFontColor(parent);
+      var font_color = tag.getCssAttr("color", "inherit");
+      if(font_color !== "inherit"){
+	font_color = new Color(font_color);
+
+	// store inline color update info in markup object.
 	tag.setFontColorUpdate(font_color);
 	this.fontColorStack.push(font_color);
       }
@@ -5443,11 +5547,13 @@ var StyleContext = (function(){
   StyleContext.prototype = {
     addLocalStyle : function(markup, page_no){
       var styles = this.localStyles[page_no] || [];
-      styles.push(markup);
+      var css_content = markup.getContent();
+      styles.push(css_content);
       this.localStyles[page_no] = styles;
     },
     addGlobalStyle : function(markup){
-      this.globalStyles.push(markup);
+      var css_content = markup.getContent();
+      this.globalStyles.push(css_content);
     },
     getLocalStyles : function(page_no){
       return this.localStyles[page_no] || [];
@@ -5756,7 +5862,7 @@ var BorderMap = (function(){
 
 var Collapse = (function(){
   var getBorder = function(box, markup){
-    var border = markup.getCssAttr("border");
+    var border = markup.getCssAttr("border-width");
     if(border === null){
       return null;
     }
@@ -5802,11 +5908,11 @@ var Collapse = (function(){
     var callee = arguments.callee;
     switch(markup.name){
     case "table": case "thead": case "tbody": case "tfoot": case "tr":
-      markup.setCssAttr("border", "0px");
+      markup.setCssAttr("border-width", "0px");
       break;
     case "td": case "th":
       var border = map.getAsStyle(markup.row, markup.col);
-      markup.setCssAttr("border", border);
+      markup.setCssAttr("border-width", border);
       break;
     }
     List.iter(markup.childs || [], function(child){
@@ -6493,7 +6599,7 @@ var BlockGenerator = Class.extend({
     // set font color
     var font_color = this.markup.getCssAttr("color", "inherit");
     if(font_color != "inherit"){
-      box.color = font_color;
+      box.color = new Color(font_color);
     }
 
     // set box edge
@@ -6542,7 +6648,29 @@ var BlockGenerator = Class.extend({
       box.letterSpacing = UnitSize.mapFontSize(letter_spacing, base_font_size);
     }
 
-    // copy classes from markup.
+    // read other optional styles not affect layouting issue.
+    var markup = this.markup;
+    List.iter([
+      "background",
+      "background-color",
+      "background-image",
+      "background-repeat",
+      "background-position",
+      "cursor",
+      "font",
+      "font-family",
+      "font-style",
+      "font-weight",
+      "opacity",
+      "z-index"
+    ], function(prop){
+      var value = markup.getCssAttr(prop);
+      if(value){
+	box.setCss(prop, value);
+      }
+    });
+
+    // copy classes from markup to box object.
     List.iter(this.markup.classes, function(klass){
       box.addClass(klass);
     });
@@ -8075,11 +8203,10 @@ var PageEvaluator = (function(){
   PageEvaluator.prototype = {
     evaluate : function(box){
       var html = this.blockEvaluator.evaluate(box, this.ctx);
-      var style = List.fold(box.styles, "", function(ret, markup){
-	return ret + markup.getWrapSrc();
-      });
+      var css_content = box.styles.join("\n");
+      var style = Html.tagWrap("style", css_content, {"type":"text/css"});
       return new EvalResult({
-	html:[style, html].join(""),
+	html:[style, html].join("\n"),
 	percent:box.percent,
 	seekPos:box.seekPos,
 	pageNo:box.pageNo,
@@ -8304,7 +8431,7 @@ var InlineEvaluator = Class.extend({
       css["line-height"] = "1em";
     }
     if(tag.fontColor){
-      css.color = tag.fontColor;
+      Args.copy(css, tag.fontColor.getCss());
     }
     if(tag.edge){
       Args.copy(css, tag.edge.getCss());
@@ -8464,7 +8591,9 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   },
   evalChar : function(line, chr, ctx){
     if(chr.isImgChar()){
-      if(Env.isVerticalGlyphEnable && !chr.isTenten()){
+      if(Config.useVerticalGlyphIfEnable &&
+	 Env.isVerticalGlyphEnable &&
+	 !chr.isTenten()){
 	return this.evalVerticalGlyph(line, chr, ctx);
       } else {
 	return this.evalImgChar(line, chr, ctx);
@@ -8503,14 +8632,14 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
     if(chr.isPaddingEnable()){
       Args.copy(css, chr.getCssPadding(line.flow));
     }
-    var palette_color = Layout.fontColor.toUpperCase();
+    var palette_color_value = Layout.fontColor.toUpperCase();
     var font_color = ctx.getInlineFontColor(line);
-    if(font_color != Layout.fontColor){
-      palette_color = (new Color(font_color)).getPaletteValueUpper();
+    if(font_color.getValue().toLowerCase() != Layout.fontColor.toLowerCase()){
+      palette_color_value = font_color.getPaletteValue().toUpperCase();
     }
     return Html.tagSingle("img", {
       "class":"nehan-img-char",
-      src:chr.getImgSrc(palette_color),
+      src:chr.getImgSrc(palette_color_value),
       style:Css.attr(css),
       width:width,
       height:height
@@ -8922,15 +9051,18 @@ if(__engine_args.test){
   __exports.Args = Args;
   __exports.List = List;
   __exports.Color = Color;
+  __exports.Colors = Colors;
   __exports.Flow = Flow;
   __exports.InlineFlow = InlineFlow;
   __exports.BlockFlow = BlockFlow;
   __exports.BoxFlow = BoxFlow;
+  __exports.BoxFlows = BoxFlows;
   __exports.Edge = Edge;
   __exports.EdgeParser = EdgeParser;
   __exports.Padding = Padding;
   __exports.Margin = Margin;
   __exports.Border = Border;
+  __exports.BorderColor = BorderColor;
   __exports.BorderRadius = BorderRadius;
   __exports.Radius2d = Radius2d;
   __exports.BoxEdge = BoxEdge;

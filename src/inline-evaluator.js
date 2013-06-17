@@ -112,7 +112,7 @@ var InlineEvaluator = Class.extend({
       css["line-height"] = "1em";
     }
     if(tag.fontColor){
-      css.color = tag.fontColor;
+      Args.copy(css, tag.fontColor.getCss());
     }
     if(tag.edge){
       Args.copy(css, tag.edge.getCss());

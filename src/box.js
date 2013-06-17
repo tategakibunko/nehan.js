@@ -19,6 +19,9 @@ var Box = (function(){
       if(this.parent){
 	Args.copy(css, this.parent.flow.getCss());
       }
+      if(this.color){
+	Args.copy(css, this.color.getCss());
+      }
       if(this.fontSize){
 	css["font-size"] = this.fontSize + "px";
       }
@@ -171,6 +174,9 @@ var Box = (function(){
     },
     addMeasure : function(measure){
       this.size.addMeasure(this.flow, measure);
+    },
+    setCss : function(prop, value){
+      this.css[prop] = value;
     },
     setType : function(type){
       this._type = type;

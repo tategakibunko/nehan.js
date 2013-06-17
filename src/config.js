@@ -5,5 +5,6 @@ var Config = {
   justify:true,
   maxRollbackCount : 10,
   minBlockScaleDownRate : 65,
+  useVerticalGlyphIfEnable: true,
   lexingBufferLen : 2000
 };

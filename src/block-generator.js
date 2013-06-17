@@ -59,7 +59,7 @@ var BlockGenerator = Class.extend({
     // set font color
     var font_color = this.markup.getCssAttr("color", "inherit");
     if(font_color != "inherit"){
-      box.color = font_color;
+      box.color = new Color(font_color);
     }
 
     // set box edge
@@ -108,7 +108,29 @@ var BlockGenerator = Class.extend({
       box.letterSpacing = UnitSize.mapFontSize(letter_spacing, base_font_size);
     }
 
-    // copy classes from markup.
+    // read other optional styles not affect layouting issue.
+    var markup = this.markup;
+    List.iter([
+      "background",
+      "background-color",
+      "background-image",
+      "background-repeat",
+      "background-position",
+      "cursor",
+      "font",
+      "font-family",
+      "font-style",
+      "font-weight",
+      "opacity",
+      "z-index"
+    ], function(prop){
+      var value = markup.getCssAttr(prop);
+      if(value){
+	box.setCss(prop, value);
+      }
+    });
+
+    // copy classes from markup to box object.
     List.iter(this.markup.classes, function(klass){
       box.addClass(klass);
     });

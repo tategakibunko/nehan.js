@@ -1,42 +1,45 @@
 var Border = Edge.extend({
   init : function(){
     this._super("border");
-    this.borderRadius = new BorderRadius();
-  },
-  setRadius : function(value){
-    this.borderRadius.setAll(value);
-  },
-  setRadiusStartBefore : function(flow, hori, vert){
-    this.borderRadius.setStartBefore(flow, hori, vert);
-  },
-  setRadiusStartAfter : function(flow, hori, vert){
-    this.borderRadius.setStartAfter(flow, hori, vert);
-  },
-  setRadiusEndBefore : function(flow, hori, vert){
-    this.borderRadius.setEndBefore(flow, hori, vert);
-  },
-  setRadiusEndAfter : function(flow, hori, vert){
-    this.borderRadius.setEndAfter(flow, hori, vert);
   },
   clearBefore : function(flow){
     this.setBefore(flow, 0);
-    this.borderRadius.clearBefore(flow);
+    if(this.radius){
+      this.radius.clearBefore(flow);
+    }
   },
   clearAfter : function(flow){
     this.setAfter(flow, 0);
-    this.borderRadius.clearAfter(flow);
+    if(this.radius){
+      this.radius.clearAfter(flow);
+    }
   },
   getDirProp : function(dir){
     return ["border", dir, "width"].join("-");
   },
-  setSize : function(flow, size){
-    this._super(flow, size);
-    if(size.radius){
-      this.borderRadius.setSize(flow, size.radius);
-    }
+  setRadius : function(flow, radius){
+    this.radius = new BorderRadius();
+    this.radius.setSize(flow, radius);
+  },
+  setColor : function(flow, color){
+    this.color = new BorderColor();
+    this.color.setColor(flow, color);
+  },
+  setStyle : function(flow, style){
+    this.style = new BorderStyle();
+    this.style.setStyle(flow, style);
   },
   getCss : function(){
     var css = this._super();
-    return Args.copy(css, this.borderRadius.getCss());
+    if(this.radius){
+      Args.copy(css, this.radius.getCss());
+    }
+    if(this.color){
+      Args.copy(css, this.color.getCss());
+    }
+    if(this.style){
+      Args.copy(css, this.style.getCss());
+    }
+    return css;
   }
 });

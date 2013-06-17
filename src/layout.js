@@ -31,7 +31,7 @@ var Layout = {
     box.lineRate = this.lineRate;
     box.textAlign = "start";
     box.fontSize = this.fontSize;
-    box.color = this.fontColor;
+    box.color = new Color(this.fontColor);
     return box;
   },
   getStdPageSize : function(){

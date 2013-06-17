@@ -7,7 +7,10 @@ var Selectors = (function(){
   }
 
   var is_edge_prop = function(prop){
-    return (prop === "margin" || prop === "border" || prop === "padding");
+    return (prop === "margin" ||
+	    prop === "padding" ||
+	    prop === "border-width" ||
+	    prop === "border-radius");
   };
 
   var merge_edge = function(edge1, edge2){

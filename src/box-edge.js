@@ -72,8 +72,14 @@ var BoxEdge = (function (){
     setEdgeAfter : function(prop, flow, value){
       this[prop].setAfter(flow, value);
     },
-    setRadius : function(value){
-      this.border.setRadius(value);
+    setBorderRadius : function(flow, value){
+      this.border.setRadius(flow, value);
+    },
+    setBorderColor : function(flow, value){
+      this.border.setColor(flow, value);
+    },
+    setBorderStyle : function(flow, value){
+      this.border.setStyle(flow, value);
     },
     clearBorderStart : function(flow){
       this.border.clearStart(flow);

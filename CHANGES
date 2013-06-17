@@ -8,7 +8,9 @@ Mark "!": change that can break compatibility with older version
 
 version 4.0.2, 2013/xx/xx
 ==========================
-o add anim.js to use requestAnimationFrame.
+o use requestAnimationFrame if enable.
+o new css property border-style, border-color supported.
+! rename style property "border" to "border-width".
 ! rename addRule to setStyle.
 ! remove class Selectors.
 

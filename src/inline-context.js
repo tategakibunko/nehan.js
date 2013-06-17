@@ -66,9 +66,11 @@ var InlineContext = (function(){
 	tag.setFontSizeUpdate(new_font_size);
 	this.fontSizeStack.push(new_font_size);
       }
-      var font_color = tag.getCssAttr("color");
-      if(font_color){
-	var cur_font_color = this.getFontColor(parent);
+      var font_color = tag.getCssAttr("color", "inherit");
+      if(font_color !== "inherit"){
+	font_color = new Color(font_color);
+
+	// store inline color update info in markup object.
 	tag.setFontColorUpdate(font_color);
 	this.fontColorStack.push(font_color);
       }

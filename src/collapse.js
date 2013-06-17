@@ -1,6 +1,6 @@
 var Collapse = (function(){
   var getBorder = function(box, markup){
-    var border = markup.getCssAttr("border");
+    var border = markup.getCssAttr("border-width");
     if(border === null){
       return null;
     }
@@ -46,11 +46,11 @@ var Collapse = (function(){
     var callee = arguments.callee;
     switch(markup.name){
     case "table": case "thead": case "tbody": case "tfoot": case "tr":
-      markup.setCssAttr("border", "0px");
+      markup.setCssAttr("border-width", "0px");
       break;
     case "td": case "th":
       var border = map.getAsStyle(markup.row, markup.col);
-      markup.setCssAttr("border", border);
+      markup.setCssAttr("border-width", border);
       break;
     }
     List.iter(markup.childs || [], function(child){
