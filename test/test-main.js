@@ -63,7 +63,5 @@ var DefListTagStream = testEngine.DefListTagStream;
 var TocContext = testEngine.TocContext;
 var PageGroup = testEngine.PageGroup;
 var Partition = testEngine.Partition;
-var CardinalString = testEngine.CardinalString;
-var CardinalStrings = testEngine.CardinalStrings;
-var CardinalCounter = testEngine.CardinalCounter;
+var Cardinal = testEngine.Cardinal;
 

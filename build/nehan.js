@@ -1351,6 +1351,20 @@ var Utils = {
   }
 };
 
+var MathUtils = {
+  convBase : function(decimal, base){
+   if(decimal === 0){
+      return [0];
+    }
+    var ret = [];
+    var work = decimal;
+    while(work > 0){
+      ret.unshift(work % base);
+      work = Math.floor(work / base);
+    }
+    return ret;
+  }
+};
 var reqAnimationFrame = (function(){
   var default_wait = 1000 / 60;
   return window.requestAnimationFrame  ||
@@ -2938,67 +2952,41 @@ var Colors = (function(){
 })();
 
 
-var CardinalString = (function(){
-  // table : character table starts from the character equivalent to 'one'.
-  // for example, ['1','2','3','4','5','6','7','8','9','0'] when normal decimal.
-  function CardinalString(table, is_zenkaku){
-    this.table = table;
-    this._isZenkaku = is_zenkaku;
-  }
-
-  CardinalString.prototype = {
-    isZenkaku : function(){
-      return this._isZenkaku;
-    },
-    getBase : function(){
-      return this.table.length;
-    },
-    getChar : function(index){
-      return this.table[index] || "";
-    },
-    getTable : function(){
-      return this.table;
-    }
-  };
-
-  return CardinalString;
-})();
-
-var CardinalStrings = (function(){
-  var entries = {
-    "lower-alpha":(new CardinalString([
-      "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"
-    ], false)),
-    "upper-alpha":(new CardinalString([
-      "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"
-    ], false)),
-    "lower-roman":(new CardinalString([
-      "i","ii","iii","iv","v","vi","vii","viii","ix","x","xi","xii","xiii","xiv","xv","xvi","xvii","xviii","xix","xx"
-    ], false)),
-    "upper-roman":(new CardinalString([
-      "I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX"
-    ], false)),
-    "lower-greek":(new CardinalString([
-      "\u03b1","\u03b2","\u03b3","\u03b4","\u03b5","\u03b6","\u03b7","\u03b8","\u03b9","\u03ba","\u03bb","\u03bc","\u03bd","\u03be","\u03bf","\u03c0","\u03c1","\u03c3","\u03c4","\u03c5","\u03c6","\u03c7","\u03c8","\u03c9"
-    ], true)),
-    "upper-greek":(new CardinalString([
-      "\u0391","\u0392","\u0393","\u0394","\u0395","\u0396","\u0397","\u0398","\u0399","\u039a","\u039b","\u039c","\u039d","\u039e","\u039f","\u03a0","\u03a1","\u03a3","\u03a4","\u03a5","\u03a6","\u03a7","\u03a8","\u03a9"
-    ], true)),
-    "cjk-ideographic":(new CardinalString([
-      "\u4E00","\u4E8C","\u4E09","\u56DB","\u4E94","\u516D","\u4E03","\u516B","\u4E5D","\u5341"
-    ], true)),
-    "hiragana":(new CardinalString([
-      "\u3042","\u3044","\u3046","\u3048","\u304A","\u304B","\u304D","\u304F","\u3051","\u3053","\u3055","\u3057","\u3059","\u305B","\u305D","\u305F","\u3061","\u3064","\u3066","\u3068","\u306A","\u306B","\u306C","\u306D","\u306E","\u306F","\u3072","\u3075","\u3078","\u307B","\u307E","\u307F","\u3080","\u3081","\u3082","\u3084","\u3086","\u3088","\u3089","\u308A","\u308B","\u308C","\u308D","\u308F","\u3090","\u3091","\u3092","\u3093"
-    ], true)),
-    "hiragana-iroha":(new CardinalString([
-      "\u3044","\u308D","\u306F","\u306B","\u307B","\u3078","\u3068","\u3061","\u308A","\u306C","\u308B","\u3092","\u308F","\u304B","\u3088","\u305F","\u308C","\u305D","\u3064","\u306D","\u306A","\u3089","\u3080","\u3046","\u3090","\u306E","\u304A","\u304F","\u3084","\u307E","\u3051","\u3075","\u3053","\u3048","\u3066","\u3042","\u3055","\u304D","\u3086","\u3081","\u307F","\u3057","\u3091","\u3072","\u3082","\u305B","\u3059"
-    ], true)),
-    "katakana":(new CardinalString([
-      "\u30A2","\u30A4","\u30A6","\u30A8","\u30AA","\u30AB","\u30AD","\u30AF","\u30B1","\u30B3","\u30B5","\u30B7","\u30B9","\u30BB","\u30BD","\u30BF","\u30C1","\u30C4","\u30C6","\u30C8","\u30CA","\u30CB","\u30CC","\u30CD","\u30CE","\u30CF","\u30D2","\u30D5","\u30D8","\u30DB","\u30DE","\u30DF","\u30E0","\u30E1","\u30E2","\u30E4","\u30E6","\u30E8","\u30E9","\u30EA","\u30EB","\u30EC","\u30ED","\u30EF","\u30F0","\u30F1","\u30F2","\u30F3"
-    ], true)),
-    "katakana-iroha":(new CardinalString([
-      "\u30A4","\u30ED","\u30CF","\u30CB","\u30DB","\u30D8","\u30C8","\u30C1","\u30EA","\u30CC","\u30EB","\u30F2","\u30EF","\u30AB","\u30E8","\u30BF","\u30EC","\u30BD","\u30C4","\u30CD","\u30CA","\u30E9","\u30E0","\u30A6","\u30F0","\u30CE","\u30AA","\u30AF","\u30E4","\u30DE","\u30B1","\u30D5","\u30B3","\u30A8","\u30C6","\u30A2","\u30B5","\u30AD","\u30E6","\u30E1","\u30DF","\u30B7","\u30F1","\u30D2","\u30E2","\u30BB","\u30B9"
-    ], true))
+var Cardinal = (function(){
+  var table = {
+    "lower-alpha":[
+      "a","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"
+    ],
+    "upper-alpha":[
+      "A","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"
+    ],
+    "lower-roman":[
+      "i","i","ii","iii","iv","v","vi","vii","viii","ix","x","xi","xii","xiii","xiv","xv","xvi","xvii","xviii","xix","xx"
+    ],
+    "upper-roman":[
+      "I","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX"
+    ],
+    "lower-greek":[
+      "\u03b1","\u03b1","\u03b2","\u03b3","\u03b4","\u03b5","\u03b6","\u03b7","\u03b8","\u03b9","\u03ba","\u03bb","\u03bc","\u03bd","\u03be","\u03bf","\u03c0","\u03c1","\u03c3","\u03c4","\u03c5","\u03c6","\u03c7","\u03c8","\u03c9"
+    ],
+    "upper-greek":[
+      "\u0391","\u0391","\u0392","\u0393","\u0394","\u0395","\u0396","\u0397","\u0398","\u0399","\u039a","\u039b","\u039c","\u039d","\u039e","\u039f","\u03a0","\u03a1","\u03a3","\u03a4","\u03a5","\u03a6","\u03a7","\u03a8","\u03a9"
+    ],
+    "cjk-ideographic":[
+      "\u3007","\u4E00","\u4E8C","\u4E09","\u56DB","\u4E94","\u516D","\u4E03","\u516B","\u4E5D","\u5341"
+    ],
+    "hiragana":[
+      "\u3042","\u3042","\u3044","\u3046","\u3048","\u304A","\u304B","\u304D","\u304F","\u3051","\u3053","\u3055","\u3057","\u3059","\u305B","\u305D","\u305F","\u3061","\u3064","\u3066","\u3068","\u306A","\u306B","\u306C","\u306D","\u306E","\u306F","\u3072","\u3075","\u3078","\u307B","\u307E","\u307F","\u3080","\u3081","\u3082","\u3084","\u3086","\u3088","\u3089","\u308A","\u308B","\u308C","\u308D","\u308F","\u3090","\u3091","\u3092","\u3093"
+    ],
+    "hiragana-iroha":[
+      "\u3044","\u3044","\u308D","\u306F","\u306B","\u307B","\u3078","\u3068","\u3061","\u308A","\u306C","\u308B","\u3092","\u308F","\u304B","\u3088","\u305F","\u308C","\u305D","\u3064","\u306D","\u306A","\u3089","\u3080","\u3046","\u3090","\u306E","\u304A","\u304F","\u3084","\u307E","\u3051","\u3075","\u3053","\u3048","\u3066","\u3042","\u3055","\u304D","\u3086","\u3081","\u307F","\u3057","\u3091","\u3072","\u3082","\u305B","\u3059"
+    ],
+    "katakana":[
+      "\u30A2","\u30A2","\u30A4","\u30A6","\u30A8","\u30AA","\u30AB","\u30AD","\u30AF","\u30B1","\u30B3","\u30B5","\u30B7","\u30B9","\u30BB","\u30BD","\u30BF","\u30C1","\u30C4","\u30C6","\u30C8","\u30CA","\u30CB","\u30CC","\u30CD","\u30CE","\u30CF","\u30D2","\u30D5","\u30D8","\u30DB","\u30DE","\u30DF","\u30E0","\u30E1","\u30E2","\u30E4","\u30E6","\u30E8","\u30E9","\u30EA","\u30EB","\u30EC","\u30ED","\u30EF","\u30F0","\u30F1","\u30F2","\u30F3"
+    ],
+    "katakana-iroha":[
+      "\u30A4","\u30A4","\u30ED","\u30CF","\u30CB","\u30DB","\u30D8","\u30C8","\u30C1","\u30EA","\u30CC","\u30EB","\u30F2","\u30EF","\u30AB","\u30E8","\u30BF","\u30EC","\u30BD","\u30C4","\u30CD","\u30CA","\u30E9","\u30E0","\u30A6","\u30F0","\u30CE","\u30AA","\u30AF","\u30E4","\u30DE","\u30B1","\u30D5","\u30B3","\u30A8","\u30C6","\u30A2","\u30B5","\u30AD","\u30E6","\u30E1","\u30DF","\u30B7","\u30F1","\u30D2","\u30E2","\u30BB","\u30B9"
+    ]
   };
 
   var aliases = {
@@ -3007,173 +2995,185 @@ var CardinalStrings = (function(){
   };
 
   return {
-    get: function(name){
-      return entries[aliases[name] || name];
-    }
-  };
-})();
-
-var CardinalCounter = (function(){
-  function CardinalCounter(cardinal_string){
-    this.cardinalString = cardinal_string;
-  }
-
-  var conv_base = function(dec_num, base){
-    var dec_str = dec_num.toString(10);
-    var ret = [];
-    var work = dec_num;
-    while(work > 0){
-      ret.push(work % base);
-      work = Math.floor(work / base);
-    }
-    return (ret.length > 0)? ret : [0];
-  };
-
-  CardinalCounter.prototype = {
-    isZenkaku : function(){
-      return this.cardinalString.isZenkaku();
+    getTableByName : function(name){
+      return table[aliases[name] || name];
     },
-    getBase : function(){
-      return this.cardinalString.getBase();
+    getBaseByName : function(name){
+      var table = this.getTableByName(name);
+      return table.length;
     },
-    getChar : function(index){
-      return this.cardinalString.getChar(index);
-    },
-    getString : function(dec_num){
-      var base_list = conv_base(dec_num, this.getBase());
+    getStringByName : function(name, decimal){
+      var table = this.getTableByName(name);
+      var base = table.length;
+      var digits = MathUtils.convBase(decimal, base);
       var ret = "";
-      for(var i = base_list.length - 1; i >= 0; i--){
-	var digit = base_list[i];
-	// when it is most significant digit,
-	// num 1 refers to index 0, num 2 refers to index 1, ... and so on.
-	// for example, if base 26(alphabetical order) is used, '10' is decoded to 'aa'.
-	// MSD '1' not means 'b' but 'a'.
-	var index = (i == base_list.length - 1 && i > 0)? digit - 1 : digit;
-	ret += this.getChar(index);
+      for(var i = 0; i < digits.length; i++){
+	var digit = digits[i];
+	var index = (i === 0)? digits[i] : Math.min(digit + 1, base - 1);
+	ret += table[index] || "";
       }
+      //console.log("get %d(%s) -> %s(base %d)", decimal, digits.join("-"), ret, base);
       return ret;
     }
   };
-
-  return CardinalCounter;
 })();
 
 
-var ListStyle = (function(){
-  function ListStyle(opt){
-    this.type = opt.type || "none";
-    this.position = opt.position || "outside";
-    this.imageURL = opt.imageURL || "none";
-    this.counter = this._getCounter();
+var ListStyleType = (function(){
+  function ListStyleType(type){
+    this.type = type;
   }
 
-  ListStyle.prototype = {
-    isInside : function(){
-      return this.position === "inside";
-    },
-    isImageList : function(){
-      return this.imageURL !== "none";
-    },
-    isSimpleDecimalList : function(){
-      return this.type === "decimal";
-    },
-    isArithmeticDecimalList : function(){
-      return this.type === "decimal-leading-zero";
-    },
+  var marker_text = {
+    "disc": "&#x2022;",
+    "circle":"&#x25CB;",
+    "square":"&#x25A0;"
+  };
+
+  ListStyleType.prototype = {
     isDecimalList : function(){
-      return this.isSimpleDecimalList() || this.isArithmeticDecimalList();
+      return (this.type === "decimal" || this.type === "decimal-leading-zero");
     },
-    isUnitList : function(){
+    isNoneList : function(){
       return this.type === "none";
+    },
+    isMarkList : function(){
+      return (this.type === "disc" ||
+	      this.type === "circle" ||
+	      this.type === "square");
+    },
+    isCountableList : function(){
+      return (!this.isNoneList() && !this.isMarkList());
+    },
+    isHankaku : function(){
+      return (this.type === "lower-alpha" || this.type === "upper-alpha" ||
+	      this.type === "lower-roman" || this.type === "upper-roman" ||
+	      this.isDecimalList());
+    },
+    isZenkaku : function(){
+      return !this.isHankaku();
+    },
+    _getMarkerDigitString : function(decimal){
+      if(this.type === "decimal"){
+	return decimal.toString(10);
+      }
+      if(this.type === "decimal-leading-zero"){
+	if(decimal < 10){
+	  return "0" + decimal.toString(10);
+	}
+	return decimal.toString(10);
+      }
+      return Cardinal.getStringByName(this.type, decimal);
+    },
+    getMarker : function(count){
+      var text = this.getMarkerText(count);
+      if(this.isZenkaku()){
+	return Html.tagWrap("span", text, {"class":"nehan-tcy"});
+      }
+      return text;
+    },
+    getMarkerText : function(count){
+      if(this.isNoneList()){
+	return Const.space;
+      }
+      if(this.isMarkList()){
+	return marker_text[this.type] || "";
+      }
+      var digit = this._getMarkerDigitString(count);
+      return digit + "."; // add period as postfix.
     },
     getMarkerAdvance : function(font_size, item_count){
       var font_size_half = Math.floor(font_size / 2);
       var period_size = font_size_half;
       var marker_space_size = Layout.getListMarkerSpacingSize(font_size);
-      var marker_font_size = font_size_half;
-      var max_marker_text = "";
-      if(this.isInside()){
+      var marker_font_size = this.isZenkaku()? font_size : font_size_half;
+      var max_marker_text = this.getMarkerText(item_count);
+      if(this.isNoneList()){
+	return font_size;
+      }
+      if(this.isMarkList()){
 	return font_size + marker_space_size;
       }
-      if(this.isImageList()){
-	return Layout.fontSize;
+      if(this.isZenkaku()){
+	return font_size + font_size; // zenkaku order is displayed as tcy.
       }
-      if(this.isDecimalList()){
-	max_marker_text = this._getMarkerText(item_count - 1);
-	return max_marker_text.length * marker_font_size + period_size + marker_space_size;
-      }
-      if(this.counter){
-	marker_font_size = this.counter.isZenkaku()? font_size : font_size_half;
-	max_marker_text = this._getMarkerText(item_count - 1);
-	return max_marker_text.length * marker_font_size + period_size + marker_space_size;
-      }
-      return font_size + marker_space_size;
+      return (max_marker_text.length - 1) * marker_font_size + period_size + font_size;
+    }
+  };
+
+  return ListStyleType;
+})();
+
+
+var ListStylePos = (function(){
+  function ListStylePos(pos){
+    this.pos = pos;
+  }
+
+  ListStylePos.prototype = {
+    isOutside : function(){
+      return this.pos === "outside";
     },
-    getMarker : function(order){
-      var body = this._getMarkerBody(order);
-      if(this.isInside()){
-	return Html.tagWrap("span", body, {
-	  "class":"nehan-inside-marker"
-	});
-      }
-      return body;
+    isInside : function(){
+      return this.pos === "inside";
+    }
+  };
+
+  return ListStylePos;
+})();
+
+
+var ListStyleImage = (function(){
+  function ListStyleImage(image){
+    this.image = image;
+  }
+
+  ListStyleImage.prototype = {
+    getMarkerAdvance : function(){
+      return Layout.fontSize;
     },
-    _getMarkerBody : function(order){
-      if(this.isImageList()){
-	return this._getImageMarker();
-      }
-      if(this.isDecimalList()){
-	return this._getMarkerText(order) + ".";
-      }
-      if(this.counter){
-	var text = this._getMarkerText(order) + ".";
-	return this.counter.isZenkaku()? Html.tagWrap("span", text, {"class":"nehan-tcy"}) : text;
-      }
-      return this._getMarkerText(order);
-    },
-    _getMarkerText : function(order){
-      if(this.isUnitList()){
-	return Const.space;
-      }
-      if(this.isSimpleDecimalList()){
-	return (order + 1).toString(10);
-      }
-      if(this.isArithmeticDecimalList()){
-	if(order + 1 < 10){
-	  return "0" + (order + 1).toString(10);
-	}
-	return (order + 1).toString(10);
-      }
-      if(this.counter){
-	return this._getCounterMarker(order);
-      }
-      return this._getSingleMarker();
-    },
-    _getCounter : function(){
-      var cardinal_string = CardinalStrings.get(this.type);
-      if(cardinal_string){
-	return new CardinalCounter(cardinal_string);
-      }
-      return null;
-    },
-    _getCounterMarker : function(order){
-      return this.counter.getString(order);
-    },
-    _getSingleMarker : function(){
-      switch(this.type){
-      case "disc": return "&#x2022;"; // disc black(bullet)
-      case "circle": return "&#x25CB;"; // circle white
-      case "square": return "&#x25A0;"; // square black
-      }
-      return "";
-    },
-    _getImageMarker : function(){
+    getMarker : function(){
       var font_size = Layout.fontSize;
       return Html.tagSingle("img", {
 	"src":this.imageURL,
 	"width":font_size,
 	"height":font_size
       });
+    }
+  };
+
+  return ListStyleImage;
+})();
+
+
+var ListStyle = (function(){
+  function ListStyle(opt){
+    this.type = new ListStyleType(opt.type || "none");
+    this.position = new ListStylePos(opt.position || "outside");
+    this.image = (opt.image !== "none")? new ListStyleImage(opt.image) : null;
+  }
+
+  ListStyle.prototype = {
+    isMultiCol : function(){
+      return this.position.isOutside();
+    },
+    isInside : function(){
+      return this.position.isInside();
+    },
+    isImageList : function(){
+      return (this.image !== null);
+    },
+    getMarker : function(count){
+      if(this.image !== null){
+	return this.image.getMarker();
+      }
+      return this.type.getMarker(count);
+    },
+    getMarkerAdvance : function(font_size, item_count){
+      if(this.image){
+	return this.image.getMarkerAdvance();
+      }
+      return this.type.getMarkerAdvance(font_size, item_count);
     }
   };
 
@@ -7768,7 +7768,14 @@ var PageGenerator = BlockGenerator.extend({
     return new ListGenerator(tag, this.context);
   },
   _getListItemGenerator : function(parent, tag){
-    return new ListItemGenerator(tag, parent, this.context);
+    var list_style = parent.listStyle || null;
+    if(list_style === null){
+      return new ChildPageGenerator(tag, this.context);
+    }
+    if(list_style.isInside()){
+      return new InsideListItemGenerator(tag, parent, this.context);
+    }
+    return new OutsideListItemGenerator(tag, parent, this.context);
   },
   _getDefListGenerator : function(parent, tag){
     return new DefListGenerator(tag, this.context);
@@ -8103,7 +8110,7 @@ var ListGenerator = ChildPageGenerator.extend({
     var list_style = new ListStyle({
       type:list_style_type,
       position:list_style_pos,
-      imageURL:list_style_image
+      image:list_style_image
     });
     var marker_advance = list_style.getMarkerAdvance(parent.fontSize, item_count);
     box.listStyle = list_style;
@@ -8114,15 +8121,17 @@ var ListGenerator = ChildPageGenerator.extend({
   }
 });
 
-var ListItemGenerator = ParallelPageGenerator.extend({
+var InsideListItemGenerator = ChildPageGenerator.extend({
   init : function(markup, parent, context){
-    var list_style = parent.listStyle;
-    markup.marker = list_style.getMarker(markup.order);
-    if(list_style.isInside()){
-      // move to marker text to marker body.
-      markup.content = markup.marker + Const.space + markup.content;
-      markup.marker = Const.space;
-    }
+    var marker = parent.listStyle.getMarker(markup.order + 1);
+    markup.content = marker + Const.space + markup.content;
+    this._super(markup, context);
+  }
+});
+
+var OutsideListItemGenerator = ParallelPageGenerator.extend({
+  init : function(markup, parent, context){
+    markup.marker = parent.listStyle.getMarker(markup.order + 1);
     this._super([
       new ListItemMarkGenerator(markup, context),
       new ListItemBodyGenerator(markup, context)
@@ -9044,6 +9053,7 @@ if(__engine_args.test){
   // basics
   __exports.Class = Class;
   __exports.Utils = Utils;
+  __exports.MathUtils = MathUtils;
   __exports.Obj = Obj;
   __exports.Css = Css;
   __exports.Html = Html;
@@ -9087,10 +9097,11 @@ if(__engine_args.test){
   __exports.EvalResult = EvalResult;
   __exports.PageGroup = PageGroup;
   __exports.Partition = Partition;
-  __exports.CardinalString = CardinalString;
-  __exports.CardinalStrings = CardinalStrings;
-  __exports.CardinalCounter = CardinalCounter;
+  __exports.Cardinal = Cardinal;
   __exports.ListStyle = ListStyle;
+  __exports.ListStyleType = ListStyleType;
+  __exports.ListStylePos = ListStylePos;
+  __exports.ListStyleImage = ListStyleImage;
 
   // outline
   __exports.OutlineBuffer = OutlineBuffer;

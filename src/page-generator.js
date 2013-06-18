@@ -250,7 +250,14 @@ var PageGenerator = BlockGenerator.extend({
     return new ListGenerator(tag, this.context);
   },
   _getListItemGenerator : function(parent, tag){
-    return new ListItemGenerator(tag, parent, this.context);
+    var list_style = parent.listStyle || null;
+    if(list_style === null){
+      return new ChildPageGenerator(tag, this.context);
+    }
+    if(list_style.isInside()){
+      return new InsideListItemGenerator(tag, parent, this.context);
+    }
+    return new OutsideListItemGenerator(tag, parent, this.context);
   },
   _getDefListGenerator : function(parent, tag){
     return new DefListGenerator(tag, this.context);

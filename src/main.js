@@ -12,6 +12,7 @@ if(__engine_args.test){
   // basics
   __exports.Class = Class;
   __exports.Utils = Utils;
+  __exports.MathUtils = MathUtils;
   __exports.Obj = Obj;
   __exports.Css = Css;
   __exports.Html = Html;
@@ -55,10 +56,11 @@ if(__engine_args.test){
   __exports.EvalResult = EvalResult;
   __exports.PageGroup = PageGroup;
   __exports.Partition = Partition;
-  __exports.CardinalString = CardinalString;
-  __exports.CardinalStrings = CardinalStrings;
-  __exports.CardinalCounter = CardinalCounter;
+  __exports.Cardinal = Cardinal;
   __exports.ListStyle = ListStyle;
+  __exports.ListStyleType = ListStyleType;
+  __exports.ListStylePos = ListStylePos;
+  __exports.ListStyleImage = ListStyleImage;
 
   // outline
   __exports.OutlineBuffer = OutlineBuffer;

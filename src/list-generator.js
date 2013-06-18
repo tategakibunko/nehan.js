@@ -7,7 +7,7 @@ var ListGenerator = ChildPageGenerator.extend({
     var list_style = new ListStyle({
       type:list_style_type,
       position:list_style_pos,
-      imageURL:list_style_image
+      image:list_style_image
     });
     var marker_advance = list_style.getMarkerAdvance(parent.fontSize, item_count);
     box.listStyle = list_style;

@@ -260,7 +260,10 @@ var TestCode = {
 	"<ul>",
 	list_items,
 	"</ul>",
-	"<ul class='nehan-ls-none'>",
+	"<ul class='nehan-lst-none'>",
+	list_items,
+	"</ul>",
+	"<ul class='nehan-lsp-inside'>",
 	list_items,
 	"</ul>"
       ].join("\n"),
