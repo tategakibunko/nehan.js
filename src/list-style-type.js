@@ -44,10 +44,12 @@ var ListStyleType = (function(){
       }
       return Cardinal.getStringByName(this.type, decimal);
     },
-    getMarker : function(count){
+    getMarkerHtml : function(count){
       var text = this.getMarkerText(count);
       if(this.isZenkaku()){
-	return Html.tagWrap("span", text, {"class":"nehan-tcy"});
+	return Html.tagWrap("span", text, {
+	  "class":"nehan-tcy"
+	});
       }
       return text;
     },

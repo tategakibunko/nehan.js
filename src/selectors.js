@@ -6,27 +6,28 @@ var Selectors = (function(){
     selectors.push(new Selector(selector_key, Style[selector_key]));
   }
 
-  var is_edge_prop = function(prop){
-    return (prop === "margin" ||
-	    prop === "padding" ||
-	    prop === "border-width" ||
-	    prop === "border-radius");
-  };
-
-  var merge_edge = function(edge1, edge2){
+  var merge_edge = function(edge1, edge2, prop){
     // conv both edge to standard edge format({before:x, end:x, after:x, start:x}).
-    var std_edge1 = EdgeParser.normalize(edge1);
-    var std_edge2 = EdgeParser.normalize(edge2);
+    var std_edge1 = EdgeParser.normalize(edge1, prop);
+    var std_edge2 = EdgeParser.normalize(edge2, prop);
     return Args.copy(std_edge1, std_edge2);
   };
 
   var merge = function(dst, obj){
     for(var prop in obj){
-      // edge value is constructed with multiple values, so need to merge.
-      if(is_edge_prop(prop)){
-	dst[prop] = dst[prop]? merge_edge(dst[prop], obj[prop]) : obj[prop];
-      } else {
+      switch(prop){
+      case "margin":
+      case "padding":
+      case "border-width":
+      case "border-radius":
+      case "border-style":
+      case "border-color":
+	//dst[prop] = dst[prop]? merge_edge(dst[prop], obj[prop], prop) : obj[prop];
+	dst[prop] = merge_edge(dst[prop] || {}, obj[prop], prop);
+	break;
+      default:
 	dst[prop] = obj[prop];
+	break;
       }
     }
     return dst;

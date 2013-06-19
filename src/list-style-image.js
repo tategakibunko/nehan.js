@@ -7,7 +7,7 @@ var ListStyleImage = (function(){
     getMarkerAdvance : function(){
       return Layout.fontSize;
     },
-    getMarker : function(){
+    getMarkerHtml : function(count){
       var font_size = Layout.fontSize;
       return Html.tagSingle("img", {
 	"src":this.imageURL,

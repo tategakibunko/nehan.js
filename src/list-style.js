@@ -15,11 +15,11 @@ var ListStyle = (function(){
     isImageList : function(){
       return (this.image !== null);
     },
-    getMarker : function(count){
+    getMarkerHtml : function(count){
       if(this.image !== null){
-	return this.image.getMarker();
+	return this.image.getMarkerHtml(count);
       }
-      return this.type.getMarker(count);
+      return this.type.getMarkerHtml(count);
     },
     getMarkerAdvance : function(font_size, item_count){
       if(this.image){

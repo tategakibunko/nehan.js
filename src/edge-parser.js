@@ -14,8 +14,13 @@ var EdgeParser = (function(){
     }
   };
 
-  var parse_object = function(obj){
-    return Args.merge({}, {before:0, end:0, after:0, start:0}, obj);
+  var parse_object = function(obj, def_value){
+    return Args.merge({}, {
+      before:def_value,
+      end:def_value,
+      after:def_value,
+      start:def_value
+    }, obj);
   };
 
   var parse_oneliner = function(str){
@@ -26,20 +31,30 @@ var EdgeParser = (function(){
     return parse_array(str.split(" "));
   };
 
-  var parse = function(obj){
+  var parse = function(obj, def_value){
     if(obj instanceof Array){
       return parse_array(obj);
     }
     switch(typeof obj){
-    case "object": return parse_object(obj);
+    case "object": return parse_object(obj, def_value);
     case "string": return parse_oneliner(obj); // one-liner source
     case "number": return parse_array([obj]);
     default: return null;
     }
   };
+
+  var defaults = {
+    "border-width":0,
+    "margin":0,
+    "padding":0,
+    "border-radius":0,
+    "border-style":"none",
+    "border-color":"black"
+  };
+
   return {
-    normalize : function(obj){
-      return parse(obj);
+    normalize : function(obj, prop){
+      return parse(obj, defaults[prop]);
     }
   };
 })();

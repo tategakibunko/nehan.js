@@ -1589,27 +1589,28 @@ var Selectors = (function(){
     selectors.push(new Selector(selector_key, Style[selector_key]));
   }
 
-  var is_edge_prop = function(prop){
-    return (prop === "margin" ||
-	    prop === "padding" ||
-	    prop === "border-width" ||
-	    prop === "border-radius");
-  };
-
-  var merge_edge = function(edge1, edge2){
+  var merge_edge = function(edge1, edge2, prop){
     // conv both edge to standard edge format({before:x, end:x, after:x, start:x}).
-    var std_edge1 = EdgeParser.normalize(edge1);
-    var std_edge2 = EdgeParser.normalize(edge2);
+    var std_edge1 = EdgeParser.normalize(edge1, prop);
+    var std_edge2 = EdgeParser.normalize(edge2, prop);
     return Args.copy(std_edge1, std_edge2);
   };
 
   var merge = function(dst, obj){
     for(var prop in obj){
-      // edge value is constructed with multiple values, so need to merge.
-      if(is_edge_prop(prop)){
-	dst[prop] = dst[prop]? merge_edge(dst[prop], obj[prop]) : obj[prop];
-      } else {
+      switch(prop){
+      case "margin":
+      case "padding":
+      case "border-width":
+      case "border-radius":
+      case "border-style":
+      case "border-color":
+	//dst[prop] = dst[prop]? merge_edge(dst[prop], obj[prop], prop) : obj[prop];
+	dst[prop] = merge_edge(dst[prop] || {}, obj[prop], prop);
+	break;
+      default:
 	dst[prop] = obj[prop];
+	break;
       }
     }
     return dst;
@@ -3065,10 +3066,12 @@ var ListStyleType = (function(){
       }
       return Cardinal.getStringByName(this.type, decimal);
     },
-    getMarker : function(count){
+    getMarkerHtml : function(count){
       var text = this.getMarkerText(count);
       if(this.isZenkaku()){
-	return Html.tagWrap("span", text, {"class":"nehan-tcy"});
+	return Html.tagWrap("span", text, {
+	  "class":"nehan-tcy"
+	});
       }
       return text;
     },
@@ -3132,7 +3135,7 @@ var ListStyleImage = (function(){
     getMarkerAdvance : function(){
       return Layout.fontSize;
     },
-    getMarker : function(){
+    getMarkerHtml : function(count){
       var font_size = Layout.fontSize;
       return Html.tagSingle("img", {
 	"src":this.imageURL,
@@ -3163,11 +3166,11 @@ var ListStyle = (function(){
     isImageList : function(){
       return (this.image !== null);
     },
-    getMarker : function(count){
+    getMarkerHtml : function(count){
       if(this.image !== null){
-	return this.image.getMarker();
+	return this.image.getMarkerHtml(count);
       }
-      return this.type.getMarker(count);
+      return this.type.getMarkerHtml(count);
     },
     getMarkerAdvance : function(font_size, item_count){
       if(this.image){
@@ -3584,8 +3587,13 @@ var EdgeParser = (function(){
     }
   };
 
-  var parse_object = function(obj){
-    return Args.merge({}, {before:0, end:0, after:0, start:0}, obj);
+  var parse_object = function(obj, def_value){
+    return Args.merge({}, {
+      before:def_value,
+      end:def_value,
+      after:def_value,
+      start:def_value
+    }, obj);
   };
 
   var parse_oneliner = function(str){
@@ -3596,20 +3604,30 @@ var EdgeParser = (function(){
     return parse_array(str.split(" "));
   };
 
-  var parse = function(obj){
+  var parse = function(obj, def_value){
     if(obj instanceof Array){
       return parse_array(obj);
     }
     switch(typeof obj){
-    case "object": return parse_object(obj);
+    case "object": return parse_object(obj, def_value);
     case "string": return parse_oneliner(obj); // one-liner source
     case "number": return parse_array([obj]);
     default: return null;
     }
   };
+
+  var defaults = {
+    "border-width":0,
+    "margin":0,
+    "padding":0,
+    "border-radius":0,
+    "border-style":"none",
+    "border-color":"black"
+  };
+
   return {
-    normalize : function(obj){
-      return parse(obj);
+    normalize : function(obj, prop){
+      return parse(obj, defaults[prop]);
     }
   };
 })();
@@ -8119,15 +8137,18 @@ var ListGenerator = ChildPageGenerator.extend({
 
 var InsideListItemGenerator = ChildPageGenerator.extend({
   init : function(markup, parent, context){
-    var marker = parent.listStyle.getMarker(markup.order + 1);
-    markup.content = marker + Const.space + markup.content;
+    var marker = parent.listStyle.getMarkerHtml(markup.order + 1);
+    var marker_html = Html.tagWrap("span", marker, {
+      "class":"nehan-li-marker"
+    });
+    markup.content = marker_html + Const.space + markup.content;
     this._super(markup, context);
   }
 });
 
 var OutsideListItemGenerator = ParallelPageGenerator.extend({
   init : function(markup, parent, context){
-    markup.marker = parent.listStyle.getMarker(markup.order + 1);
+    markup.marker = parent.listStyle.getMarkerHtml(markup.order + 1);
     this._super([
       new ListItemMarkGenerator(markup, context),
       new ListItemBodyGenerator(markup, context)
