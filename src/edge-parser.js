@@ -18,16 +18,12 @@ var EdgeParser = (function(){
     return Args.merge({}, {before:0, end:0, after:0, start:0}, obj);
   };
 
-  var normalize = function(src){
-    return src.replace(/\s+/g, " ").replace(/\n/g, "").replace(/;/g, "");
-  };
-  
-  var parse_string = function(str){
-    str = normalize(str);
+  var parse_oneliner = function(str){
+    str = str.replace(/\s+/g, " ").replace(/\n/g, "").replace(/;/g, "");
     if(str.indexOf(" ") < 0){
       return parse([str]);
     }
-    return parse(str.split(" "));
+    return parse_array(str.split(" "));
   };
 
   var parse = function(obj){
@@ -36,13 +32,13 @@ var EdgeParser = (function(){
     }
     switch(typeof obj){
     case "object": return parse_object(obj);
-    case "string": return parse_string(obj);
+    case "string": return parse_oneliner(obj); // one-liner source
     case "number": return parse_array([obj]);
     default: return null;
     }
   };
   return {
-    parse : function(obj){
+    normalize : function(obj){
       return parse(obj);
     }
   };

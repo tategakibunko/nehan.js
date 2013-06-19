@@ -62,7 +62,7 @@ var InlineContext = (function(){
       var font_size = tag.getCssAttr("font-size");
       if(font_size){
 	var cur_font_size = this.getFontSize(parent);
-	var new_font_size = UnitSize.mapFontSize(font_size, cur_font_size);
+	var new_font_size = UnitSize.getUnitSize(font_size, cur_font_size);
 	tag.setFontSizeUpdate(new_font_size);
 	this.fontSizeStack.push(new_font_size);
       }

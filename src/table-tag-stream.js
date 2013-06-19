@@ -106,7 +106,7 @@ var TableTagStream = FilteredTagStream.extend({
     return List.map(childs, function(child){
       var size = child.getTagAttr("measure") || child.getTagAttr("width") || 0;
       if(size){
-	return UnitSize.mapBoxSize(size, box.fontSize, box.getContentMeasure());
+	return UnitSize.getBoxSize(size, box.fontSize, box.getContentMeasure());
       }
       return 0;
     });

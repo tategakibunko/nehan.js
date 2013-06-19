@@ -193,8 +193,8 @@ var Tag = (function (){
       var width = this.getAttr("width");
       var height = this.getAttr("height");
       if(width && height){
-	width = UnitSize.mapBoxSize(width, font_size, max_size);
-	height = UnitSize.mapBoxSize(height, font_size, max_size);
+	width = UnitSize.getBoxSize(width, font_size, max_size);
+	height = UnitSize.getBoxSize(height, font_size, max_size);
 	return new BoxSize(width, height);
       }
       // if img tag size not defined, treat it as character size icon.
@@ -221,19 +221,19 @@ var Tag = (function (){
       }
       var edge = new BoxEdge();
       if(padding){
-	var padding_size = UnitSize.parseEdgeSize(padding, font_size, max_measure);
+	var padding_size = UnitSize.getEdgeSize(padding, font_size, max_measure);
 	edge.setSize("padding", flow, padding_size);
       }
       if(margin){
-	var margin_size = UnitSize.parseEdgeSize(margin, font_size, max_measure);
+	var margin_size = UnitSize.getEdgeSize(margin, font_size, max_measure);
 	edge.setSize("margin", flow, margin_size);
       }
       if(border_width){
-	border_width = UnitSize.parseEdgeSize(border_width, font_size, max_measure);
+	border_width = UnitSize.getEdgeSize(border_width, font_size, max_measure);
 	edge.setSize("border", flow, border_width);
       }
       if(border_radius){
-	border_radius = UnitSize.parseEdgeSize(border_radius, font_size, max_measure);
+	border_radius = UnitSize.getEdgeSize(border_radius, font_size, max_measure);
 	edge.setBorderRadius(flow, border_radius);
       }
       if(border_color){

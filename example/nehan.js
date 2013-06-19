@@ -1270,48 +1270,48 @@ var Obj = {
 };
 
 var UnitSize = {
-  mapFontSize : function(val, font_size){
-    var str = (typeof val == "string")? val : String(val);
+  getUnitSize : function(val, unit_size){
+    var str = (typeof val === "string")? val : String(val);
     if(str.indexOf("rem") > 0){
       var rem_scale = parseFloat(str.replace("rem",""));
       return Math.floor(Layout.fontSize * rem_scale); // use root font-size
     }
     if(str.indexOf("em") > 0){
       var em_scale = parseFloat(str.replace("em",""));
-      return Math.floor(font_size * em_scale);
+      return Math.floor(unit_size * em_scale);
     }
     if(str.indexOf("pt") > 0){
       return Math.floor(parseInt(str, 10) * 4 / 3);
     }
     if(str.indexOf("%") > 0){
-      return Math.floor(font_size * parseInt(str, 10) / 100);
+      return Math.floor(unit_size * parseInt(str, 10) / 100);
     }
     var px = parseInt(str, 10);
     return isNaN(px)? 0 : px;
   },
-  mapBoxSize : function(val, font_size, max_size){
-    var str = (typeof val == "string")? val : String(val);
+  getBoxSize : function(val, unit_size, max_size){
+    var str = (typeof val === "string")? val : String(val);
     if(str.indexOf("%") > 0){
       var scaled_size = Math.floor(max_size * parseInt(str, 10) / 100);
       return Math.min(max_size, scaled_size); // restrict less than maxMeasure
     }
-    return this.mapFontSize(val, font_size);
+    return this.getUnitSize(val, unit_size);
   },
-  parseEdgeSize : function(obj, font_size, max_size){
+  getEdgeSize : function(obj, unit_size, max_size){
     if(obj instanceof Array){
       return List.map(obj, function(val){
-	return UnitSize.mapBoxSize(val, font_size, max_size);
+	return UnitSize.getBoxSize(val, unit_size, max_size);
       });
     }
-    if(typeof obj == "object"){
+    if(typeof obj === "object"){
       var ret = {};
       var callee = arguments.callee;
       for(var prop in obj){
-	ret[prop] = callee(obj[prop], font_size, max_size);
+	ret[prop] = callee(obj[prop], unit_size, max_size);
       }
       return ret;
     }
-    return UnitSize.mapBoxSize(obj, font_size, max_size);
+    return UnitSize.getBoxSize(obj, unit_size, max_size);
   }
 };
 
@@ -1598,8 +1598,8 @@ var Selectors = (function(){
 
   var merge_edge = function(edge1, edge2){
     // conv both edge to standard edge format({before:x, end:x, after:x, start:x}).
-    var std_edge1 = EdgeParser.parse(edge1);
-    var std_edge2 = EdgeParser.parse(edge2);
+    var std_edge1 = EdgeParser.normalize(edge1);
+    var std_edge2 = EdgeParser.normalize(edge2);
     return Args.copy(std_edge1, std_edge2);
   };
 
@@ -1923,8 +1923,8 @@ var Tag = (function (){
       var width = this.getAttr("width");
       var height = this.getAttr("height");
       if(width && height){
-	width = UnitSize.mapBoxSize(width, font_size, max_size);
-	height = UnitSize.mapBoxSize(height, font_size, max_size);
+	width = UnitSize.getBoxSize(width, font_size, max_size);
+	height = UnitSize.getBoxSize(height, font_size, max_size);
 	return new BoxSize(width, height);
       }
       // if img tag size not defined, treat it as character size icon.
@@ -1951,19 +1951,19 @@ var Tag = (function (){
       }
       var edge = new BoxEdge();
       if(padding){
-	var padding_size = UnitSize.parseEdgeSize(padding, font_size, max_measure);
+	var padding_size = UnitSize.getEdgeSize(padding, font_size, max_measure);
 	edge.setSize("padding", flow, padding_size);
       }
       if(margin){
-	var margin_size = UnitSize.parseEdgeSize(margin, font_size, max_measure);
+	var margin_size = UnitSize.getEdgeSize(margin, font_size, max_measure);
 	edge.setSize("margin", flow, margin_size);
       }
       if(border_width){
-	border_width = UnitSize.parseEdgeSize(border_width, font_size, max_measure);
+	border_width = UnitSize.getEdgeSize(border_width, font_size, max_measure);
 	edge.setSize("border", flow, border_width);
       }
       if(border_radius){
-	border_radius = UnitSize.parseEdgeSize(border_radius, font_size, max_measure);
+	border_radius = UnitSize.getEdgeSize(border_radius, font_size, max_measure);
 	edge.setBorderRadius(flow, border_radius);
       }
       if(border_color){
@@ -3588,16 +3588,12 @@ var EdgeParser = (function(){
     return Args.merge({}, {before:0, end:0, after:0, start:0}, obj);
   };
 
-  var normalize = function(src){
-    return src.replace(/\s+/g, " ").replace(/\n/g, "").replace(/;/g, "");
-  };
-  
-  var parse_string = function(str){
-    str = normalize(str);
+  var parse_oneliner = function(str){
+    str = str.replace(/\s+/g, " ").replace(/\n/g, "").replace(/;/g, "");
     if(str.indexOf(" ") < 0){
       return parse([str]);
     }
-    return parse(str.split(" "));
+    return parse_array(str.split(" "));
   };
 
   var parse = function(obj){
@@ -3606,13 +3602,13 @@ var EdgeParser = (function(){
     }
     switch(typeof obj){
     case "object": return parse_object(obj);
-    case "string": return parse_string(obj);
+    case "string": return parse_oneliner(obj); // one-liner source
     case "number": return parse_array([obj]);
     default: return null;
     }
   };
   return {
-    parse : function(obj){
+    normalize : function(obj){
       return parse(obj);
     }
   };
@@ -5497,7 +5493,7 @@ var InlineContext = (function(){
       var font_size = tag.getCssAttr("font-size");
       if(font_size){
 	var cur_font_size = this.getFontSize(parent);
-	var new_font_size = UnitSize.mapFontSize(font_size, cur_font_size);
+	var new_font_size = UnitSize.getUnitSize(font_size, cur_font_size);
 	tag.setFontSizeUpdate(new_font_size);
 	this.fontSizeStack.push(new_font_size);
       }
@@ -5866,7 +5862,7 @@ var Collapse = (function(){
     if(border === null){
       return null;
     }
-    var val = UnitSize.parseEdgeSize(border, box.fontSize, box.getContentMeasure());
+    var val = UnitSize.getEdgeSize(border, box.fontSize, box.getContentMeasure());
     if(typeof val == "number"){
       return {before:val, after:val, start:val, end:val};
     }
@@ -6277,7 +6273,7 @@ var TableTagStream = FilteredTagStream.extend({
     return List.map(childs, function(child){
       var size = child.getTagAttr("measure") || child.getTagAttr("width") || 0;
       if(size){
-	return UnitSize.mapBoxSize(size, box.fontSize, box.getContentMeasure());
+	return UnitSize.getBoxSize(size, box.fontSize, box.getContentMeasure());
       }
       return 0;
     });
@@ -6593,7 +6589,7 @@ var BlockGenerator = Class.extend({
     var base_font_size = parent? parent.fontSize : Layout.fontSize;
     var font_size = this.markup.getCssAttr("font-size", "inherit");
     if(font_size != "inherit"){
-      box.fontSize = UnitSize.mapFontSize(font_size, base_font_size);
+      box.fontSize = UnitSize.getUnitSize(font_size, base_font_size);
     }
 
     // set font color
@@ -6645,7 +6641,7 @@ var BlockGenerator = Class.extend({
     }
     var letter_spacing = this.markup.getCssAttr("letter-spacing");
     if(letter_spacing){
-      box.letterSpacing = UnitSize.mapFontSize(letter_spacing, base_font_size);
+      box.letterSpacing = UnitSize.getUnitSize(letter_spacing, base_font_size);
     }
 
     // read other optional styles not affect layouting issue.

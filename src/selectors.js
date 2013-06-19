@@ -15,8 +15,8 @@ var Selectors = (function(){
 
   var merge_edge = function(edge1, edge2){
     // conv both edge to standard edge format({before:x, end:x, after:x, start:x}).
-    var std_edge1 = EdgeParser.parse(edge1);
-    var std_edge2 = EdgeParser.parse(edge2);
+    var std_edge1 = EdgeParser.normalize(edge1);
+    var std_edge2 = EdgeParser.normalize(edge2);
     return Args.copy(std_edge1, std_edge2);
   };
 

@@ -53,7 +53,7 @@ var BlockGenerator = Class.extend({
     var base_font_size = parent? parent.fontSize : Layout.fontSize;
     var font_size = this.markup.getCssAttr("font-size", "inherit");
     if(font_size != "inherit"){
-      box.fontSize = UnitSize.mapFontSize(font_size, base_font_size);
+      box.fontSize = UnitSize.getUnitSize(font_size, base_font_size);
     }
 
     // set font color
@@ -105,7 +105,7 @@ var BlockGenerator = Class.extend({
     }
     var letter_spacing = this.markup.getCssAttr("letter-spacing");
     if(letter_spacing){
-      box.letterSpacing = UnitSize.mapFontSize(letter_spacing, base_font_size);
+      box.letterSpacing = UnitSize.getUnitSize(letter_spacing, base_font_size);
     }
 
     // read other optional styles not affect layouting issue.
