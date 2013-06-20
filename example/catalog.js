@@ -72,14 +72,6 @@ var Catalog = (function(){
 	height:16
       }
     });
-    this.engine.setStyle(".test-list-style-img img", {
-      "margin":{
-	start:0,
-	end:5,
-	before:0,
-	after:0
-      }
-    });
   }
 
   Catalog.prototype = {
