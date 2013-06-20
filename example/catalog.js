@@ -67,10 +67,13 @@ var Catalog = (function(){
     });
     this.engine.setStyle(".test-list-style-img", {
       "list-style-image":{
-	url:"/static/image/noimg.png",
+	url:"icon.png",
 	width:16,
 	height:16
       }
+    });
+    this.engine.setStyle(".test-list-style-img img", {
+      margin:0
     });
   }
 
