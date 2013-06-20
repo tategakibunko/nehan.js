@@ -73,7 +73,12 @@ var Catalog = (function(){
       }
     });
     this.engine.setStyle(".test-list-style-img img", {
-      "margin":0
+      "margin":{
+	start:0,
+	end:5,
+	before:0,
+	after:0
+      }
     });
   }
 

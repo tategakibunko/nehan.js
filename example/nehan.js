@@ -56,12 +56,11 @@ var Layout = {
   fontSize:16,
   rubyRate:0.5,
   boldRate:0.2,
-  listMarkSpacingRate:0.2,
   fontColor:"000000",
   linkColor:"0000FF",
   fontImgRoot:"http://nehan.googlecode.com/hg/char-img",
   lineRate: 2.0,
-  listMarkerSpacingRate:0.5,
+  listMarkerSpacingRate:0.4,
 
   createBox : function(size, parent, type){
     var box = new Box(size, parent, type);
@@ -97,6 +96,7 @@ var Layout = {
     return BoxFlows.getByName(this.hori);
   },
   getListMarkerSpacingSize : function(font_size){
+    font_size = font_size || this.fontSize;
     return Math.floor(font_size * this.listMarkerSpacingRate);
   },
   getVertBlockDir : function(){
@@ -3080,22 +3080,24 @@ var ListStyleType = (function(){
       var digit = this._getMarkerDigitString(count);
       return digit + "."; // add period as postfix.
     },
-    getMarkerAdvance : function(font_size, item_count){
+    getMarkerAdvance : function(flow, font_size, item_count){
       var font_size_half = Math.floor(font_size / 2);
       var period_size = font_size_half;
-      var marker_space_size = Layout.getListMarkerSpacingSize(font_size);
+      var marker_spacing_size = Layout.getListMarkerSpacingSize(font_size);
       var marker_font_size = this.isZenkaku()? font_size : font_size_half;
       var max_marker_text = this.getMarkerText(item_count);
       if(this.isNoneList()){
 	return font_size;
       }
       if(this.isMarkList()){
-	return font_size + marker_space_size;
+	return font_size + marker_spacing_size;
       }
-      if(this.isZenkaku()){
-	return font_size + font_size; // zenkaku order is displayed as tcy.
+      // zenkaku order is displayed as tcy.
+      // so advance is 'single' font-size plus spacing-size.
+      if(this.isZenkaku() && flow.isTextVertical()){
+	return font_size + marker_spacing_size;
       }
-      return (max_marker_text.length - 1) * marker_font_size + period_size + font_size;
+      return (max_marker_text.length - 1) * marker_font_size + period_size + marker_spacing_size;
     }
   };
 
@@ -3127,14 +3129,15 @@ var ListStyleImage = (function(){
   }
 
   ListStyleImage.prototype = {
-    getMarkerAdvance : function(){
-      return this.image.width || Layout.fontSize;
+    getMarkerAdvance : function(flow, font_size){
+      var marker_size = this.image[flow.getPropMeasure()] || font_size;
+      var spacing_size = Layout.getMarkerSpacingSize(font_size);
+      return marker_size + spacing_size;
     },
     getMarkerHtml : function(count){
-      var font_size = Layout.fontSize;
       var url = this.image.url;
-      var width = this.image.width || font_size;
-      var height = this.image.height || font_size;
+      var width = this.image.width || Layout.fontSize;
+      var height = this.image.height || Layout.fontSize;
       return Html.tagSingle("img", {
 	"src":url,
 	"class":"nehan-list-image",
@@ -3171,11 +3174,11 @@ var ListStyle = (function(){
       }
       return this.type.getMarkerHtml(count);
     },
-    getMarkerAdvance : function(font_size, item_count){
+    getMarkerAdvance : function(flow, font_size, item_count){
       if(this.image){
-	return this.image.getMarkerAdvance();
+	return this.image.getMarkerAdvance(flow, font_size);
       }
-      return this.type.getMarkerAdvance(font_size, item_count);
+      return this.type.getMarkerAdvance(flow, font_size, item_count);
     }
   };
 
@@ -8124,7 +8127,7 @@ var ListGenerator = ChildPageGenerator.extend({
       position:list_style_pos,
       image:list_style_image
     });
-    var marker_advance = list_style.getMarkerAdvance(parent.fontSize, item_count);
+    var marker_advance = list_style.getMarkerAdvance(parent.flow, parent.fontSize, item_count);
     box.listStyle = list_style;
     box.partition = new Partition([marker_advance, box.getContentMeasure() - marker_advance]);
   },

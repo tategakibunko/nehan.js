@@ -7,12 +7,11 @@ var Layout = {
   fontSize:16,
   rubyRate:0.5,
   boldRate:0.2,
-  listMarkSpacingRate:0.2,
   fontColor:"000000",
   linkColor:"0000FF",
   fontImgRoot:"http://nehan.googlecode.com/hg/char-img",
   lineRate: 2.0,
-  listMarkerSpacingRate:0.5,
+  listMarkerSpacingRate:0.4,
 
   createBox : function(size, parent, type){
     var box = new Box(size, parent, type);
@@ -48,6 +47,7 @@ var Layout = {
     return BoxFlows.getByName(this.hori);
   },
   getListMarkerSpacingSize : function(font_size){
+    font_size = font_size || this.fontSize;
     return Math.floor(font_size * this.listMarkerSpacingRate);
   },
   getVertBlockDir : function(){

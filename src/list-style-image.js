@@ -4,14 +4,15 @@ var ListStyleImage = (function(){
   }
 
   ListStyleImage.prototype = {
-    getMarkerAdvance : function(){
-      return this.image.width || Layout.fontSize;
+    getMarkerAdvance : function(flow, font_size){
+      var marker_size = this.image[flow.getPropMeasure()] || font_size;
+      var spacing_size = Layout.getMarkerSpacingSize(font_size);
+      return marker_size + spacing_size;
     },
     getMarkerHtml : function(count){
-      var font_size = Layout.fontSize;
       var url = this.image.url;
-      var width = this.image.width || font_size;
-      var height = this.image.height || font_size;
+      var width = this.image.width || Layout.fontSize;
+      var height = this.image.height || Layout.fontSize;
       return Html.tagSingle("img", {
 	"src":url,
 	"class":"nehan-list-image",
