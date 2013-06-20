@@ -1,48 +1,47 @@
 var BorderRadius = (function(){
   function BorderRadius(){
-    this.borderTopLeftRadius = new Radius2d();
-    this.borderTopRightRadius = new Radius2d();
-    this.borderBottomLeftRadius = new Radius2d();
-    this.borderBottomRightRadius = new Radius2d();
+    this.topLeft = new Radius2d();
+    this.topRight = new Radius2d();
+    this.bottomRight = new Radius2d();
+    this.bottomLeft = new Radius2d();
   }
 
   BorderRadius.prototype = {
+    getArray : function(){
+      return [
+	this.topLeft,
+	this.topRight,
+	this.bottomRight,
+	this.bottomLeft
+      ];
+    },
+    getCssValueHori : function(){
+      return List.map(this.getArray(), function(radius){
+	return radius.getCssValueHori();
+      }).join(" ");
+    },
+    getCssValueVert : function(){
+      return List.map(this.getArray(), function(radius){
+	return radius.getCssValueVert();
+      }).join(" ");
+    },
+    getCssValue : function(){
+      return [this.getCssValueHori(), this.getCssValueVert()].join("/");
+    },
     getCss : function(){
-      var self = this;
       var css = {};
-      List.iter(Const.cssBorderRadius, function(css_radius_prop){
-	var radius = self[Css.toClassProp(css_radius_prop)];
-	if(radius.isEnable()){
-	  var radius_css_value = radius.getCssValue();
-	  List.iter(Css.toVenderizedList(css_radius_prop), function(css_vender_radius_prop){
-	    css[css_vender_radius_prop] = radius_css_value;
-	  });
-	}
+      var css_value = this.getCssValue();
+      List.iter(Const.cssVenderPrefixes, function(prefix){
+	var prop = [prefix, "border-radius"].join("-");
+	css[prop] = css_value;
       });
       return css;
     },
-    getRadius : function(dir1, dir2){
-      var corner = Css.sortCorner(dir1, dir2).join("-");
-      var prop = ["border", corner, "radius"].join("-");
-      var class_prop = Css.toClassProp(prop);
-      return this[class_prop];
-    },
-    setAll : function(value){
-      this.borderTopLeftRadius.setSize(value);
-      this.borderTopRightRadius.setSize(value);
-      this.borderBottomLeftRadius.setSize(value);
-      this.borderBottomRightRadius.setSize(value);
+    getCorner : function(dir1, dir2){
+      var name = BoxCorner.getCornerName(dir1, dir2);
+      return this[name];
     },
     setSize : function(flow, size){
-      if(size instanceof Array){
-	this.setSizeByArray(flow, size);
-      } else if(typeof size == "object"){
-	this.setSizeByObj(flow, size);
-      } else {
-	this.setAll(size);
-      }
-    },
-    setSizeByObj : function(flow, size){
       if(typeof size["start-before"] != "undefined"){
 	this.setStartBefore(flow, size["start-before"]);
       }
@@ -56,53 +55,29 @@ var BorderRadius = (function(){
 	this.setEndAfter(flow, size["end-after"]);
       }
     },
-    setSizeByArray : function(flow, size){
-      switch(size.length){
-      case 1:
-	this.setAll(size[0]);
-	break;
-      case 2:
-	this.setStartBefore(flow, size[0]);
-	this.setEndAfter(flow, size[0]);
-	this.setStartAfter(flow, size[1]);
-	this.setEndBefore(flow, size[1]);
-	break;
-      case 3:
-	// 0, 2 is discarded.
-	this.setStartAfter(flow, size[1]);
-	this.setEndBefore(flow, size[1]);
-	break;
-      case 4:
-	this.setStartBefore(flow, size[0]);
-	this.setEndBefore(flow, size[1]);
-	this.setEndAfter(flow, size[2]);
-	this.setStartAfter(flow, size[3]);
-	break;
-      }
-    },
     setStartBefore : function(flow, value){
-      var radius = this.getRadius(flow.getPropStart(), flow.getPropBefore());
+      var radius = this.getCorner(flow.getPropStart(), flow.getPropBefore());
       radius.setSize(value);
     },
     setStartAfter : function(flow, value){
-      var radius = this.getRadius(flow.getPropStart(), flow.getPropAfter());
+      var radius = this.getCorner(flow.getPropStart(), flow.getPropAfter());
       radius.setSize(value);
     },
     setEndBefore : function(flow, value){
-      var radius = this.getRadius(flow.getPropEnd(), flow.getPropBefore());
+      var radius = this.getCorner(flow.getPropEnd(), flow.getPropBefore());
       radius.setSize(value);
     },
     setEndAfter :  function(flow, value){
-      var radius = this.getRadius(flow.getPropEnd(), flow.getPropAfter());
+      var radius = this.getCorner(flow.getPropEnd(), flow.getPropAfter());
       radius.setSize(value);
     },
     clearBefore : function(flow){
-      this.setStartBefore(flow, 0);
-      this.setEndBefore(flow, 0);
+      this.setStartBefore(flow, [0, 0]);
+      this.setEndBefore(flow, [0, 0]);
     },
     clearAfter : function(flow){
-      this.setStartAfter(flow, 0);
-      this.setEndAfter(flow, 0);
+      this.setStartAfter(flow, [0, 0]);
+      this.setEndAfter(flow, [0, 0]);
     }
   };
 

@@ -92,9 +92,10 @@ div, span{
 .nehan-body a{
   word-wrap:normal !important;
 }
+/*
 .nehan-img img{
   vertical-align:bottom;
-}
+}*/
 .nehan-img-char{
   display:block;
 }

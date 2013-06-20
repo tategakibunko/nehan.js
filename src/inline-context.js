@@ -30,9 +30,6 @@ var InlineContext = (function(){
       }
       return parent.color;
     },
-    getHead : function(){
-      return this.tagStack.getHead();
-    },
     getTagDepth : function(){
       return this.tagStack.getDepth();
     },

@@ -26,20 +26,20 @@ var UnitSize = {
     }
     return this.getUnitSize(val, unit_size);
   },
-  getEdgeSize : function(obj, unit_size, max_size){
-    if(obj instanceof Array){
-      return List.map(obj, function(val){
-	return UnitSize.getBoxSize(val, unit_size, max_size);
-      });
+  getCornerSize : function(val, unit_size){
+    var ret = {};
+    for(var prop in val){
+      ret[prop] = [0, 0];
+      ret[prop][0] = this.getUnitSize(val[prop][0], unit_size);
+      ret[prop][1] = this.getUnitSize(val[prop][1], unit_size);
     }
-    if(typeof obj === "object"){
-      var ret = {};
-      var callee = arguments.callee;
-      for(var prop in obj){
-	ret[prop] = callee(obj[prop], unit_size, max_size);
-      }
-      return ret;
+    return ret;
+  },
+  getEdgeSize : function(val, unit_size){
+    var ret = {};
+    for(var prop in val){
+      ret[prop] = this.getUnitSize(val[prop], unit_size);
     }
-    return UnitSize.getBoxSize(obj, unit_size, max_size);
+    return ret;
   }
 };

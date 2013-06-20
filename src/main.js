@@ -117,7 +117,7 @@ __exports.createPageGroupStream = function(text, group_size){
   return new PageGroupStream(text, group_size);
 };
 __exports.getStyle = function(selector_key){
-  Selectors.getValue(selector_key);
+  return Selectors.getValue(selector_key);
 };
 __exports.setStyle = function(selector_key, obj) {
   Selectors.setValue(selector_key, obj);

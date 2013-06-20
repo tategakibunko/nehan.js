@@ -5,14 +5,18 @@ var ListStyleImage = (function(){
 
   ListStyleImage.prototype = {
     getMarkerAdvance : function(){
-      return Layout.fontSize;
+      return this.image.width || Layout.fontSize;
     },
     getMarkerHtml : function(count){
       var font_size = Layout.fontSize;
+      var url = this.image.url;
+      var width = this.image.width || font_size;
+      var height = this.image.height || font_size;
       return Html.tagSingle("img", {
-	"src":this.imageURL,
-	"width":font_size,
-	"height":font_size
+	"src":url,
+	"class":"nehan-list-image",
+	"width":width,
+	"height":height
       });
     }
   };

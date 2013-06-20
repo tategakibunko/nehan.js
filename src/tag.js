@@ -221,20 +221,20 @@ var Tag = (function (){
       }
       var edge = new BoxEdge();
       if(padding){
-	var padding_size = UnitSize.getEdgeSize(padding, font_size, max_measure);
+	var padding_size = UnitSize.getEdgeSize(padding, font_size);
 	edge.setSize("padding", flow, padding_size);
       }
       if(margin){
-	var margin_size = UnitSize.getEdgeSize(margin, font_size, max_measure);
+	var margin_size = UnitSize.getEdgeSize(margin, font_size);
 	edge.setSize("margin", flow, margin_size);
       }
       if(border_width){
-	border_width = UnitSize.getEdgeSize(border_width, font_size, max_measure);
-	edge.setSize("border", flow, border_width);
+	var border_width_size = UnitSize.getEdgeSize(border_width, font_size);
+	edge.setSize("border", flow, border_width_size);
       }
       if(border_radius){
-	border_radius = UnitSize.getEdgeSize(border_radius, font_size, max_measure);
-	edge.setBorderRadius(flow, border_radius);
+	var border_radius_size = UnitSize.getCornerSize(border_radius, font_size);
+	edge.setBorderRadius(flow, border_radius_size);
       }
       if(border_color){
 	edge.setBorderColor(flow, border_color);

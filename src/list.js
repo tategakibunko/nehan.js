@@ -156,6 +156,13 @@ var List = {
       }
     }
     return ret;
+  },
+  zip : function(lst1, lst2){
+    var ret = [];
+    for(var i = 0, len1=lst1.length, len2=lst2.length; i < len1 && i < len2; i++){
+      ret[i] = [lst1[i], lst2[i]];
+    }
+    return ret;
   }
 };
 

@@ -13,17 +13,24 @@ var Selectors = (function(){
     return Args.copy(std_edge1, std_edge2);
   };
 
+  var merge_corner = function(corner1, corner2, prop){
+    var std_corner1 = CornerParser.normalize(corner1, prop);
+    var std_corner2 = CornerParser.normalize(corner2, prop);
+    return Args.copy(std_corner1, std_corner2);
+  };
+
   var merge = function(dst, obj){
     for(var prop in obj){
       switch(prop){
       case "margin":
       case "padding":
       case "border-width":
-      case "border-radius":
-      case "border-style":
       case "border-color":
-	//dst[prop] = dst[prop]? merge_edge(dst[prop], obj[prop], prop) : obj[prop];
+      case "border-style":
 	dst[prop] = merge_edge(dst[prop] || {}, obj[prop], prop);
+	break;
+      case "border-radius":
+	dst[prop] = merge_corner(dst[prop] || {}, obj[prop], prop);
 	break;
       default:
 	dst[prop] = obj[prop];

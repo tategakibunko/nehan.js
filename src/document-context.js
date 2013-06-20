@@ -138,8 +138,8 @@ var DocumentContext = (function(){
     getBlockTagStack : function(){
       return this.blockContext.getTagStack();
     },
-    getCurBlock : function(){
-      return this.blockContext.getHead();
+    getCurBlockTag : function(){
+      return this.blockContext.getHeadTag();
     },
     getBlockDepth : function(){
       return this.blockContext.getDepth();

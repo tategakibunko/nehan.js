@@ -54,7 +54,7 @@ var EdgeParser = (function(){
 
   return {
     normalize : function(obj, prop){
-      return parse(obj, defaults[prop]);
+      return parse(obj, defaults[prop] || 0);
     }
   };
 })();

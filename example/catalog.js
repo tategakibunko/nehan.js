@@ -65,6 +65,16 @@ var Catalog = (function(){
 	"end":"black"
       }
     });
+    this.engine.setStyle(".test-list-style-img", {
+      "list-style-image":{
+	url:"/static/image/noimg.png",
+	width:16,
+	height:16
+      }
+    });
+    this.engine.setStyle(".test-list-style-img img", {
+      "margin":0
+    });
   }
 
   Catalog.prototype = {
@@ -308,6 +318,12 @@ var TestCode = {
 	"<ol class='nehan-lst-lower-roman'>",
 	list_items,
 	"</ol>"
+      ].join("\n"),
+
+      "list-style-image":[
+	"<ul class='test-list-style-img'>",
+	list_items,
+	"</ul>"
       ].join("\n"),
 
       "dl":[

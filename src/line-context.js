@@ -71,6 +71,12 @@ var LineContext = (function(){
     isFirstLine : function(){
       return this.lineStartPos === 0;
     },
+    inheritParentTag : function(tag){
+      var parent_tag = this.context.getCurBlockTag();
+      if(parent_tag){
+	tag.inherit(parent_tag);
+      }
+    },
     pushTag : function(tag){
       this.context.pushInlineTag(tag, this.parent);
     },

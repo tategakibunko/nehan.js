@@ -188,7 +188,7 @@ var InlineGenerator = (function(){
       }
       // token is static size tag
       if(token.hasStaticSize()){
-	return this._yieldStaticInlineBlock(ctx, token);
+	return this._yieldStaticElement(ctx, token);
       }
       // token is inline-block tag
       if(token.isInlineBlock()){
@@ -198,7 +198,8 @@ var InlineGenerator = (function(){
       // token is other inline tag
       return this._yieldInlineTag(ctx, token);
     },
-    _yieldStaticInlineBlock : function(ctx, tag){
+    _yieldStaticElement : function(ctx, tag){
+      ctx.inheritParentTag(tag);
       var element = PageGenerator.prototype._yieldStaticElement.call(this, ctx.parent, tag, this.context);
       if(element instanceof Box){
 	element.display = "inline-block";
@@ -248,6 +249,7 @@ var InlineGenerator = (function(){
       // single tag does not update tag stack of inline, so just return it.
       // or if tag is already parsed, just return too.
       if(tag.isSingleTag() || tag.parsed){
+	ctx.inheritParentTag(tag);
 	return tag;
       }
       // if inline level edge is defined,
