@@ -58,14 +58,6 @@ test("padding", function(){
   css["padding-bottom"] = "10px";
   equal(padding.getHeight(), 20);
   deepEqual(padding.getCss(), css);
-
-  padding = new Padding();
-  flow = new BoxFlow("lr", "tb");
-  padding.setSize(flow, [1, 2, 3, 4]);
-  equal(padding.top, 1);
-  equal(padding.right, 2);
-  equal(padding.bottom, 3);
-  equal(padding.left, 4);
 });
 
 test("border", function(){
@@ -97,120 +89,6 @@ test("border", function(){
   css["border-bottom-width"] = "10px";
   equal(border.getHeight(), 20);
   deepEqual(border.getCss(), css);
-});
-
-test("edge-radius", function(){
-  var radius = new Radius2d();
-  equal(radius.hori, 0);
-  equal(radius.vert, 0);
-  equal(radius.getCssValue(), "0px");
-
-  radius.setSize(10, 0);
-  equal(radius.hori, 10);
-  equal(radius.vert, 0);
-  equal(radius.getCssValue(), "10px 0px");
-
-  radius.setSize(10);
-  equal(radius.hori, 10);
-  equal(radius.vert, 10);
-  equal(radius.getCssValue(), "10px");
-
-  var radius = new Radius2d();
-  radius.setSize({hori:10, vert:20});
-  equal(radius.hori, 10);
-  equal(radius.vert, 20);
-  radius.setSize([20,10]);
-
-  equal(radius.hori, 20);
-  equal(radius.vert, 10);
-
-  radius.setSize([5]);
-  equal(radius.hori, 5);
-  equal(radius.vert, 5);
-
-  radius.setSize(10, 5);
-  equal(radius.hori, 10);
-  equal(radius.vert, 5);
-  equal(radius.getCssValue(), "10px 5px");
-});
-
-test("border-radius", function(){
-  var borderRadius = new BorderRadius();
-  deepEqual(borderRadius.getCss(), {});
-
-  borderRadius.borderTopLeftRadius.setSize(10);
-  deepEqual(borderRadius.getCss(), {
-    "-moz-border-top-left-radius":"10px",
-    "-webkit-border-top-left-radius":"10px",
-    "-o-border-top-left-radius":"10px",
-    "-ms-border-top-left-radius":"10px",
-    "border-top-left-radius":"10px"
-  });
-
-  borderRadius.setAll(10);
-  deepEqual(borderRadius.getCss(), {
-    "-moz-border-bottom-left-radius": "10px",
-    "-moz-border-bottom-right-radius": "10px",
-    "-moz-border-top-left-radius": "10px",
-    "-moz-border-top-right-radius": "10px",
-    "-ms-border-bottom-left-radius": "10px",
-    "-ms-border-bottom-right-radius": "10px",
-    "-ms-border-top-left-radius": "10px",
-    "-ms-border-top-right-radius": "10px",
-    "-o-border-bottom-left-radius": "10px",
-    "-o-border-bottom-right-radius": "10px",
-    "-o-border-top-left-radius": "10px",
-    "-o-border-top-right-radius": "10px",
-    "-webkit-border-bottom-left-radius": "10px",
-    "-webkit-border-bottom-right-radius": "10px",
-    "-webkit-border-top-left-radius": "10px",
-    "-webkit-border-top-right-radius": "10px",
-    "border-bottom-left-radius": "10px",
-    "border-bottom-right-radius": "10px",
-    "border-top-left-radius": "10px",
-    "border-top-right-radius": "10px"
-  });
-
-  var flow = new BoxFlow("lr", "tb");
-  borderRadius.setAll(0);
-  borderRadius.setStartBefore(flow, 10);
-  deepEqual(borderRadius.getCss(), {
-    "-moz-border-top-left-radius": "10px",
-    "-webkit-border-top-left-radius": "10px",
-    "-o-border-top-left-radius": "10px",
-    "-ms-border-top-left-radius": "10px",
-    "border-top-left-radius": "10px"
-  });
-
-  borderRadius.setAll(0);
-  borderRadius.setStartAfter(flow, 10);
-  deepEqual(borderRadius.getCss(), {
-    "-moz-border-bottom-left-radius": "10px",
-    "-webkit-border-bottom-left-radius": "10px",
-    "-o-border-bottom-left-radius": "10px",
-    "-ms-border-bottom-left-radius": "10px",
-    "border-bottom-left-radius": "10px"
-  });
-
-  borderRadius.setAll(0);
-  borderRadius.setEndBefore(flow, 10);
-  deepEqual(borderRadius.getCss(), {
-    "-moz-border-top-right-radius": "10px",
-    "-webkit-border-top-right-radius": "10px",
-    "-o-border-top-right-radius": "10px",
-    "-ms-border-top-right-radius": "10px",
-    "border-top-right-radius": "10px"
-  });
-
-  borderRadius.setAll(0);
-  borderRadius.setEndAfter(flow, 10);
-  deepEqual(borderRadius.getCss(), {
-    "-moz-border-bottom-right-radius": "10px",
-    "-webkit-border-bottom-right-radius": "10px",
-    "-o-border-bottom-right-radius": "10px",
-    "-ms-border-bottom-right-radius": "10px",
-    "border-bottom-right-radius": "10px"
-  });
 });
 
 test("box-edge", function(){

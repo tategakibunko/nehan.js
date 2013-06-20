@@ -20,12 +20,12 @@ test("document-context", function(){
 
   ctx.pushBlock(new Tag("<p>"));
   equal(ctx.getBlockDepth(), 1);
-  equal(ctx.getCurBlock().getName(), "p");
+  equal(ctx.getCurBlockTag().getName(), "p");
 
   var tag = ctx.popBlock();
   equal(tag.name, "p");
   equal(ctx.getBlockDepth(), 0);
-  equal(ctx.getCurBlock(), null);
+  equal(ctx.getCurBlockTag(), null);
 });
 
 test("document-context-font-size", function(){

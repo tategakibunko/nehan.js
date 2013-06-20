@@ -6,7 +6,7 @@ test("block-context", function(){
   equal(ctx.getDepth(), 2);
   equal(ctx.getDepthByName("p"), 1);
   equal(ctx.getDepthByName("div"), 1);
-  equal(ctx.getHead().getName(), "div");
+  equal(ctx.getHeadTag().getName(), "div");
   ctx.popBlock();
   equal(ctx.getDepth(), 1);
   equal(ctx.isTagNameEnable("div"), false);

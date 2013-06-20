@@ -9,16 +9,7 @@ test("utils-obj", function(){
 });
 
 test("utils-css", function(){
-  deepEqual(Css.toVenderizedList("border"), [
-    "-moz-border", "-webkit-border", "-o-border", "-ms-border", "border"
-  ]);
-  equal(Css.toClassProp("top-left"), "topLeft");
-  equal(Css.toClassProp("top-left-border"), "topLeftBorder");
   equal(Css.attr({"width":"100px", "height":"200px"}), "width:100px;height:200px");
-  deepEqual(Css.sortCorner("left", "top"), ["top", "left"]);
-  deepEqual(Css.sortCorner("right", "top"), ["top", "right"]);
-  deepEqual(Css.sortCorner("left", "bottom"), ["bottom", "left"]);
-  deepEqual(Css.sortCorner("right", "bottom"), ["bottom", "right"]);
 });
 
 test("utils-camel-name", function(){

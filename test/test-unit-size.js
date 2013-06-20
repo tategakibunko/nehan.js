@@ -41,14 +41,17 @@ test("unit-size-edge", function(){
       before:"3.0em",
       after:"3.0em"
     },
-    padding:[0.5, 1, 2, 3],
-    border:{
-      radius:{
-	"start-before":"5px",
-	"end-before":"10px",
-	"end-after":"15px",
-	"start-after":"20px"
-      }
+    padding:{
+      start:0,
+      end:1,
+      before:2,
+      after:3
+    },
+    "border-width":{
+      start:"5px",
+      end:"10px",
+      before:"15px",
+      after:"20px"
     }
   };
   
@@ -59,15 +62,15 @@ test("unit-size-edge", function(){
   equal(margin.after, 48);
 
   var padding = UnitSize.getEdgeSize(tmp_metrics.padding, font_size, max_size);
-  equal(padding[0], 0);
-  equal(padding[1], 1);
-  equal(padding[2], 2);
-  equal(padding[3], 3);
+  equal(padding.start, 0);
+  equal(padding.end, 1);
+  equal(padding.before, 2);
+  equal(padding.after, 3);
 
-  var border = UnitSize.getEdgeSize(tmp_metrics.border, font_size, max_size);
-  equal(border.radius["start-before"], 5);
-  equal(border.radius["end-before"], 10);
-  equal(border.radius["end-after"], 15);
-  equal(border.radius["start-after"], 20);
+  var border_width = UnitSize.getEdgeSize(tmp_metrics["border-width"], font_size, max_size);
+  equal(border_width.start, 5);
+  equal(border_width.end, 10);
+  equal(border_width.before, 15);
+  equal(border_width.after, 20);
 });
 
