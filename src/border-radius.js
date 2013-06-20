@@ -31,8 +31,9 @@ var BorderRadius = (function(){
     getCss : function(){
       var css = {};
       var css_value = this.getCssValue();
+      css["border-radius"] = css_value; // without vender prefix
       List.iter(Const.cssVenderPrefixes, function(prefix){
-	var prop = [prefix, "border-radius"].join("-");
+	var prop = [prefix, "border-radius"].join("-"); // with vender prefix
 	css[prop] = css_value;
       });
       return css;

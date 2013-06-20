@@ -1247,7 +1247,7 @@ var List = {
   },
   zip : function(lst1, lst2){
     var ret = [];
-    for(var i = 0, len1=lst1.length, len2=lst2.length; i < len1 && i < len2; i++){
+    for(var i = 0, len = Math.min(lst1.length, lst2.length); i < len; i++){
       ret[i] = [lst1[i], lst2[i]];
     }
     return ret;
@@ -1372,6 +1372,8 @@ var MathUtils = {
     return ret;
   }
 };
+
+
 var reqAnimationFrame = (function(){
   var default_wait = 1000 / 60;
   return window.requestAnimationFrame  ||
@@ -3744,8 +3746,9 @@ var BorderRadius = (function(){
     getCss : function(){
       var css = {};
       var css_value = this.getCssValue();
+      css["border-radius"] = css_value; // without vender prefix
       List.iter(Const.cssVenderPrefixes, function(prefix){
-	var prop = [prefix, "border-radius"].join("-");
+	var prop = [prefix, "border-radius"].join("-"); // with vender prefix
 	css[prop] = css_value;
       });
       return css;
