@@ -120,8 +120,8 @@ __exports.createPageGroupStream = function(text, group_size){
 __exports.getStyle = function(selector_key){
   return Selectors.getValue(selector_key);
 };
-__exports.setStyle = function(selector_key, obj) {
-  Selectors.setValue(selector_key, obj);
+__exports.setStyle = function(selector_key, value){
+  Selectors.setValue(selector_key, value);
 };
 
 return __exports;

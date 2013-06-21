@@ -8,12 +8,6 @@ var SectionHeader = (function(){
   SectionHeader.prototype = {
     getId : function(){
       return this._id;
-    },
-    debug : function(){
-      return [
-	"title:" + this.title,
-	"rank:" + this.rank
-      ].join(", ");
     }
   };
 

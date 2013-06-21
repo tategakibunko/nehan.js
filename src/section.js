@@ -80,12 +80,6 @@ var Section = (function(){
       } else {
 	this._next.addNext(section);
       }
-    },
-    debug : function(){
-      if(this._header){
-	return this._header.debug();
-      }
-      return "no header";
     }
   };
 

@@ -38,7 +38,6 @@ var __engine_args = _engine_args || {};
 
 var Config = {
   lang:"ja-JP",
-  debug:true,
   kerning:true,
   justify:true,
   maxRollbackCount : 10,
@@ -4940,12 +4939,6 @@ var SectionHeader = (function(){
   SectionHeader.prototype = {
     getId : function(){
       return this._id;
-    },
-    debug : function(){
-      return [
-	"title:" + this.title,
-	"rank:" + this.rank
-      ].join(", ");
     }
   };
 
@@ -5034,12 +5027,6 @@ var Section = (function(){
       } else {
 	this._next.addNext(section);
       }
-    },
-    debug : function(){
-      if(this._header){
-	return this._header.debug();
-      }
-      return "no header";
     }
   };
 
@@ -7273,7 +7260,7 @@ var InlineGenerator = (function(){
       }
       return this.stream.hasNext();
     },
-    backup : function(debug){
+    backup : function(){
       this.stream.backup();
     },
     // caution! : this rollback function is to be ALWAYS called from parent generator.
@@ -9182,8 +9169,8 @@ __exports.createPageGroupStream = function(text, group_size){
 __exports.getStyle = function(selector_key){
   return Selectors.getValue(selector_key);
 };
-__exports.setStyle = function(selector_key, obj) {
-  Selectors.setValue(selector_key, obj);
+__exports.setStyle = function(selector_key, value){
+  Selectors.setValue(selector_key, value);
 };
 
 return __exports;

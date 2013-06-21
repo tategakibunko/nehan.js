@@ -32,7 +32,7 @@ var InlineGenerator = (function(){
       }
       return this.stream.hasNext();
     },
-    backup : function(debug){
+    backup : function(){
       this.stream.backup();
     },
     // caution! : this rollback function is to be ALWAYS called from parent generator.
