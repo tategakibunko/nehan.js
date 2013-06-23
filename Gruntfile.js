@@ -122,6 +122,7 @@ module.exports = function(grunt) {
 	    "src/head-tag-stream.js",
 	    "src/table-tag-stream.js",
 	    "src/list-tag-stream.js",
+	    "src/def-list-tag-stream.js",
 	    "src/ruby-stream.js",
 	    "src/document-generator.js",
 	    "src/html-generator.js",

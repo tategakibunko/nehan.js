@@ -4,10 +4,12 @@ var ListGenerator = ChildPageGenerator.extend({
     var list_style_type = this.markup.getCssAttr("list-style-type", "none");
     var list_style_pos = this.markup.getCssAttr("list-style-position", "outside");
     var list_style_image = this.markup.getCssAttr("list-style-image", "none");
+    var list_style_format = this.markup.getCssAttr("list-style-format");
     var list_style = new ListStyle({
       type:list_style_type,
       position:list_style_pos,
-      image:list_style_image
+      image:list_style_image,
+      format:list_style_format
     });
     var marker_advance = list_style.getMarkerAdvance(parent.flow, parent.fontSize, item_count);
     box.listStyle = list_style;

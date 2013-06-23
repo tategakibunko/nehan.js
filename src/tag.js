@@ -90,6 +90,10 @@ var Tag = (function (){
     setFontColorUpdate : function(font_color){
       this.fontColor = font_color;
     },
+    setFirstChild : function(){
+      var css = this.getPseudoCssAttr("first-child");
+      this.setCssAttrs(css);
+    },
     addClass : function(klass){
       this.classes.push(klass);
     },

@@ -129,11 +129,11 @@ var DocumentContext = (function(){
     isHeaderEnable : function(){
       return this.blockContext.isHeaderEnable();
     },
-    pushBlock : function(tag){
-      this.blockContext.pushBlock(tag);
+    pushBlockTag : function(tag){
+      this.blockContext.pushTag(tag);
     },
-    popBlock : function(){
-      return this.blockContext.popBlock();
+    popBlockTag : function(){
+      return this.blockContext.popTag();
     },
     getBlockTagStack : function(){
       return this.blockContext.getTagStack();

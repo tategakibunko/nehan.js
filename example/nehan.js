@@ -1817,6 +1817,10 @@ var Tag = (function (){
     setFontColorUpdate : function(font_color){
       this.fontColor = font_color;
     },
+    setFirstChild : function(){
+      var css = this.getPseudoCssAttr("first-child");
+      this.setCssAttrs(css);
+    },
     addClass : function(klass){
       this.classes.push(klass);
     },
@@ -3157,6 +3161,7 @@ var ListStyle = (function(){
     this.type = new ListStyleType(opt.type || "none");
     this.position = new ListStylePos(opt.position || "outside");
     this.image = (opt.image !== "none")? new ListStyleImage(opt.image) : null;
+    this.format = opt.format || null;
   }
 
   ListStyle.prototype = {
@@ -3170,6 +3175,9 @@ var ListStyle = (function(){
       return (this.image !== null);
     },
     getMarkerHtml : function(count){
+      if(this.format !== null){
+	return (typeof this.format === "function")? this.format(count) : this.format;
+      }
       if(this.image !== null){
 	return this.image.getMarkerHtml(count);
       }
@@ -5388,7 +5396,7 @@ var BlockContext = (function(){
   }
 
   BlockContext.prototype = {
-    pushBlock : function(tag){
+    pushTag : function(tag){
       var parent_tag = this.getHeadTag();
       if(parent_tag){
 	// copy 'inherit' value from parent in 'markup' level.
@@ -5396,7 +5404,7 @@ var BlockContext = (function(){
       }
       this.tagStack.push(tag);
     },
-    popBlock : function(){
+    popTag : function(){
       return this.tagStack.pop();
     },
     getHeadTag : function(){
@@ -5694,11 +5702,11 @@ var DocumentContext = (function(){
     isHeaderEnable : function(){
       return this.blockContext.isHeaderEnable();
     },
-    pushBlock : function(tag){
-      this.blockContext.pushBlock(tag);
+    pushBlockTag : function(tag){
+      this.blockContext.pushTag(tag);
     },
-    popBlock : function(){
-      return this.blockContext.popBlock();
+    popBlockTag : function(){
+      return this.blockContext.popTag();
     },
     getBlockTagStack : function(){
       return this.blockContext.getTagStack();
@@ -6319,6 +6327,7 @@ var ListTagStream = FilteredTagStream.extend({
   }
 });
 
+
 var DefListTagStream = FilteredTagStream.extend({
   init : function(src, font_size, max_size){
     this._super(src, function(tag){
@@ -6583,8 +6592,7 @@ var BlockGenerator = Class.extend({
     // if box is first child of parent,
     // copy style of <this.markup.name>:first-child.
     if(parent && this._isFirstChild(box, parent)){
-      var pseudo_css_attr = this.markup.getPseudoCssAttr("first-child");
-      this.markup.setCssAttrs(pseudo_css_attr);
+      this.markup.setFirstChild();
     }
     // set font size
     var base_font_size = parent? parent.fontSize : Layout.fontSize;
@@ -7529,6 +7537,7 @@ var PageGenerator = BlockGenerator.extend({
     this.stream = this._createStream();
     this.localPageNo = 0;
     this.pageBreakBefore = this._isPageBreakBefore();
+    this.context.pushBlockTag(this.markup);
   },
   hasNext : function(){
     if(this.generator && this.generator.hasNext()){
@@ -7561,13 +7570,11 @@ var PageGenerator = BlockGenerator.extend({
       this.pageBreakBefore = false;
       return Exceptions.PAGE_BREAK;
     }
-    this.context.pushBlock(this.markup);
-
     var page_box, page_size;
     page_size = size || (parent? parent.getRestSize() : null);
     page_box = this._createBox(page_size, parent);
     var ret = this._yieldPageTo(page_box);
-    this.context.popBlock();
+    this.context.popBlockTag();
     return ret;
   },
   // fill page with child page elements.
@@ -8112,10 +8119,12 @@ var ListGenerator = ChildPageGenerator.extend({
     var list_style_type = this.markup.getCssAttr("list-style-type", "none");
     var list_style_pos = this.markup.getCssAttr("list-style-position", "outside");
     var list_style_image = this.markup.getCssAttr("list-style-image", "none");
+    var list_style_format = this.markup.getCssAttr("list-style-format");
     var list_style = new ListStyle({
       type:list_style_type,
       position:list_style_pos,
-      image:list_style_image
+      image:list_style_image,
+      format:list_style_format
     });
     var marker_advance = list_style.getMarkerAdvance(parent.flow, parent.fontSize, item_count);
     box.listStyle = list_style;

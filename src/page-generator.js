@@ -6,6 +6,7 @@ var PageGenerator = BlockGenerator.extend({
     this.stream = this._createStream();
     this.localPageNo = 0;
     this.pageBreakBefore = this._isPageBreakBefore();
+    this.context.pushBlockTag(this.markup);
   },
   hasNext : function(){
     if(this.generator && this.generator.hasNext()){
@@ -38,13 +39,11 @@ var PageGenerator = BlockGenerator.extend({
       this.pageBreakBefore = false;
       return Exceptions.PAGE_BREAK;
     }
-    this.context.pushBlock(this.markup);
-
     var page_box, page_size;
     page_size = size || (parent? parent.getRestSize() : null);
     page_box = this._createBox(page_size, parent);
     var ret = this._yieldPageTo(page_box);
-    this.context.popBlock();
+    this.context.popBlockTag();
     return ret;
   },
   // fill page with child page elements.

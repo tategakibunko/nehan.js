@@ -4,7 +4,7 @@ var BlockContext = (function(){
   }
 
   BlockContext.prototype = {
-    pushBlock : function(tag){
+    pushTag : function(tag){
       var parent_tag = this.getHeadTag();
       if(parent_tag){
 	// copy 'inherit' value from parent in 'markup' level.
@@ -12,7 +12,7 @@ var BlockContext = (function(){
       }
       this.tagStack.push(tag);
     },
-    popBlock : function(){
+    popTag : function(){
       return this.tagStack.pop();
     },
     getHeadTag : function(){
