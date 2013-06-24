@@ -131,6 +131,10 @@ var DocumentContext = (function(){
     },
     pushBlockTag : function(tag){
       this.blockContext.pushTag(tag);
+      var when = tag.getCssAttr("when");
+      if(when){
+	when(this, tag);
+      }
     },
     popBlockTag : function(){
       return this.blockContext.popTag();
