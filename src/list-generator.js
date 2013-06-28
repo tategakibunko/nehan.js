@@ -1,4 +1,4 @@
-var ListGenerator = ChildPageGenerator.extend({
+var ListGenerator = ChildBlockTreeGenerator.extend({
   _onCreateBox : function(box, parent){
     var item_count = this.stream.getTokenCount();
     var list_style_type = this.markup.getCssAttr("list-style-type", "none");

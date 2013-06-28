@@ -99,6 +99,10 @@ var DocumentContext = (function(){
       return this.inlineContext.getTagDepth();
     },
     pushInlineTag : function(tag, parent){
+      var parent_tag = this.getCurBlockTag();
+      if(parent_tag){
+	tag.inherit(parent_tag);
+      }
       this.inlineContext.pushTag(tag, parent);
     },
     popInlineTag : function(){

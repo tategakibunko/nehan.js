@@ -28,12 +28,10 @@ var Style = {
   },
   "article":{
     "display":"block",
-    "child-content":true,
     "section":true
   },
   "aside":{
     "display":"block",
-    "child-content":true,
     "section":true
   },
   "audio":{
@@ -54,7 +52,6 @@ var Style = {
   },
   "blockquote":{
     "display":"block",
-    "child-content":true,
     "section-root":true,
     "margin":{
       "start":"1.5em",
@@ -65,7 +62,6 @@ var Style = {
   },
   "body":{
     "display":"block",
-    "child-content":true,
     "section-root":true
   },
   "br":{
@@ -86,7 +82,6 @@ var Style = {
   "caption":{
     "display":"block",
     "text-align":"center",
-    "child-content":true,
     "margin":{
       "after":"0.5em"
     }
@@ -110,7 +105,6 @@ var Style = {
   },
   "dd":{
     "display":"block",
-    "child-content":true,
     "margin":{
       "start":"1em",
       "end":"1em",
@@ -122,7 +116,6 @@ var Style = {
   },
   "details":{
     "display":"block",
-    "child-content":true,
     "section-root":true
   },
   "dfn":{
@@ -133,16 +126,13 @@ var Style = {
 
     // using div tag with static size, inline html can be embeded.
     //  <div width="100" height="100">embed html</div>
-    "embeddable":true,
-    "child-content":true
+    "embeddable":true
   },
   "dl":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   "dt":{
     "display":"block",
-    "child-content":true,
     "margin":{
       "after":"0.2em"
     }
@@ -165,7 +155,6 @@ var Style = {
   //-------------------------------------------------------
   "fieldset":{
     "display":"block",
-    "child-content":true,
     "section-root":true,
     "padding":{
       "start":"1em",
@@ -180,23 +169,19 @@ var Style = {
   },
   "figure":{
     "display":"block",
-    "child-content":true,
     "section-root":true
   },
   "figcaption":{
     "display":"block",
-    "child-content":true,
     "text-align":"center",
     "font-size": "0.8em"
   },
   "footer":{
     "display":"block",
-    "child-content":true,
     "section":true
   },
   "form":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   //-------------------------------------------------------
   // tag / h
@@ -204,7 +189,6 @@ var Style = {
   "h1":{
     "display":"block",
     "line-rate":1.4,
-    "child-content":true,
     "font-size":"2.4em",
     "margin":{
       "after":"0.5em"
@@ -213,7 +197,6 @@ var Style = {
   "h2":{
     "display":"block",
     "line-rate":1.4,
-    "child-content":true,
     "font-size":"2.0em",
     "margin":{
       "after":"0.75em"
@@ -222,7 +205,6 @@ var Style = {
   "h3":{
     "display":"block",
     "line-rate":1.4,
-    "child-content":true,
     "font-size":"1.6em",
     "margin":{
       "after":"1em"
@@ -231,7 +213,6 @@ var Style = {
   "h4":{
     "display":"block",
     "line-rate":1.4,
-    "child-content":true,
     "font-size":"1.4em",
     "margin":{
       "after":"1.25em"
@@ -240,7 +221,6 @@ var Style = {
   "h5":{
     "display":"block",
     "line-rate":1.4,
-    "child-content":true,
     "font-size":"1.0em",
     "margin":{
       "after":"1.5em"
@@ -249,15 +229,12 @@ var Style = {
   "h6":{
     "display":"block",
     "line-rate":1.4,
-    "child-content":true,
     "font-size":"1.0em"
   },
   "head":{
-    "child-content":true
   },
   "header":{
     "display":"block",
-    "child-content":true,
     "section":true
   },
   "hr":{
@@ -274,8 +251,7 @@ var Style = {
     "border-width":"0px"
   },
   "html":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   //-------------------------------------------------------
   // tag / i
@@ -285,7 +261,6 @@ var Style = {
   },
   "iframe":{
     "display":"block",
-    "child-content":true,
     "embeddable":true
   },
   "ins":{
@@ -319,12 +294,10 @@ var Style = {
   },
   "legend":{
     "display":"block",
-    "line-rate":1.5,
-    "child-content":true
+    "line-rate":1.5
   },
   "li":{
     "display":"block",
-    "child-content":true,
     "margin":{
       "after":"0.6em"
     }
@@ -337,8 +310,7 @@ var Style = {
   // tag / m
   //-------------------------------------------------------
   "main":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   "map":{
   },
@@ -346,8 +318,7 @@ var Style = {
     "display":"inline"
   },
   "menu":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   "meta":{
     "meta":true,
@@ -361,7 +332,6 @@ var Style = {
   //-------------------------------------------------------
   "nav":{
     "display":"block",
-    "child-content":true,
     "section":true
   },
   "noscript":{
@@ -375,7 +345,6 @@ var Style = {
   },
   "ol":{
     "display":"block",
-    "child-content":true,
     "list-style-image":"none",
     "list-style-position": "outside",
     "list-style-type": "decimal",
@@ -394,7 +363,6 @@ var Style = {
   //-------------------------------------------------------
   "p":{
     "display":"block",
-    "child-content":true,
     "margin":{
       "after":"1.5em"
     }
@@ -409,8 +377,7 @@ var Style = {
   "param":{
   },
   "pre":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   "progress":{
     "display":"inline"
@@ -419,8 +386,7 @@ var Style = {
   // tag / q
   //-------------------------------------------------------
   "q":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   //-------------------------------------------------------
   // tag / r
@@ -432,13 +398,11 @@ var Style = {
     "display":"inline"
   },
   "ruby":{
-    "child-content":true,
     "font-size":"0.5em",
     "display":"inline"
   },
   "rt":{
-    "display":"inline",
-    "child-content":true
+    "display":"inline"
   },
   //-------------------------------------------------------
   // tag / s
@@ -451,12 +415,10 @@ var Style = {
   },
   "script":{
     "display":"inline",
-    "child-content":true,
     "meta":true
   },
   "section":{
     "display":"block",
-    "child-content":true,
     "section":true
   },
   "select":{
@@ -475,8 +437,7 @@ var Style = {
   },
   "style":{
     "display":"inline",
-    "meta":true,
-    "child-content":true
+    "meta":true
   },
   "sub":{
     "display":"inine"
@@ -492,7 +453,6 @@ var Style = {
   //-------------------------------------------------------
   "table":{
     "display":"block",
-    "child-content":true,
     "embeddable":true,
     "table-layout":"fixed", // 'auto' not supported yet.
     "border-collapse":"collapse", // 'separate' not supported yet.
@@ -506,13 +466,11 @@ var Style = {
   },
   "tbody":{
     "display":"block",
-    "border-collapse":"inherit",
-    "child-content":true
+    "border-collapse":"inherit"
   },
   "td":{
     "display":"block",
     "border-collapse":"inherit",
-    "child-content":true,
     "section-root":true,
     "border-width":"1px",
     "padding":{
@@ -524,20 +482,17 @@ var Style = {
   },
   "textarea":{
     "display":"inline",
-    "child-content":true,
     "embeddable":true,
     "interactive":true
   },
   "tfoot":{
     "display":"block",
-    "border-collapse":"inherit",
-    "child-content":true
+    "border-collapse":"inherit"
   },
   "th":{
     "display":"block",
     "line-rate":1.4,
     "border-collapse":"inherit",
-    "child-content":true,
     "border-width":"1px",
     "padding":{
       "start":"0.8em",
@@ -548,19 +503,16 @@ var Style = {
   },
   "thead":{
     "display":"block",
-    "border-collapse":"inherit",
-    "child-content":true
+    "border-collapse":"inherit"
   },
   "time":{
     "display":"inline"
   },
   "title":{
-    "meta":true,
-    "child-content":true
+    "meta":true
   },
   "tr":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   "track":{
   },
@@ -572,7 +524,6 @@ var Style = {
   },
   "ul":{
     "display":"block",
-    "child-content":true,
     "list-style-image":"none",
     "list-style-type":"disc",
     "list-style-position":"outside",
@@ -602,7 +553,6 @@ var Style = {
   //-------------------------------------------------------
   ":before":{
     "display":"inline-block",
-    "child-content":true,
     // content of pseudo elements are all escaped,
     // that is, ruby is also escaped. there are no rubies in pseudo element.
     // so line-rate is set to 1(text-line only).
@@ -610,12 +560,10 @@ var Style = {
   },
   ":after":{
     "display":"inline-block",
-    "child-content":true,
     "line-rate":1
   },
   ":first-letter":{
-    "display":"inline-block",
-    "child-content":true
+    "display":"inline-block"
   },
   ":first-line":{
     "display":"inline"

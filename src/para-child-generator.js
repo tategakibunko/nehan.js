@@ -1,4 +1,4 @@
-var ParaChildPageGenerator = ChildPageGenerator.extend({
+var ParaChildGenerator = ChildBlockTreeGenerator.extend({
   _onReadyBox : function(box, parent){
     // wrap box(parent) has parallel flow, so flip it to get original one.
     var flow = parent.getParallelFlipFlow();

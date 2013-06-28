@@ -32,9 +32,6 @@ var Tag = (function (){
   var is_single_tag = function(name){
     return is_style_enable(name, "single");
   };
-  var is_child_content_tag = function(name){
-    return is_style_enable(name, "child-content");
-  };
   var is_section_tag = function(name){
     return is_style_enable(name, "section");
   };
@@ -323,7 +320,7 @@ var Tag = (function (){
       if(this.isSingleTag()){
 	return false;
       }
-      return is_child_content_tag(this.getName());
+      return true;
     },
     isTcyTag : function(){
       return this.getCssAttr("text-combine", "") === "horizontal";

@@ -1,9 +1,9 @@
-var SectionContentGenerator = ChildPageGenerator.extend({
+var SectionContentGenerator = ChildBlockTreeGenerator.extend({
   init : function(markup, context){
     this._super(markup, context);
     this.context.logStartSection(markup);
   },
-  _onLastPage : function(page){
+  _onLastTree : function(page){
     this.context.logEndSection(this.markup);
   }
 });

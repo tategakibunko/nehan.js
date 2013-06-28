@@ -1,4 +1,4 @@
-var InlineBlockGenerator = PageGenerator.extend({
+var InlineBlockGenerator = BlockTreeGenerator.extend({
   init : function(markup, context){
     this.markup = markup;
     this.context = context;

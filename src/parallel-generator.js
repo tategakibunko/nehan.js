@@ -1,4 +1,4 @@
-var ParallelPageGenerator = ChildPageGenerator.extend({
+var ParallelGenerator = ChildBlockTreeGenerator.extend({
   init : function(generators, markup, context, partition){
     this.generators = generators;
     this.markup = markup;

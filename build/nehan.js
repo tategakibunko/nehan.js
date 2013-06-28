@@ -189,12 +189,10 @@ var Style = {
   },
   "article":{
     "display":"block",
-    "child-content":true,
     "section":true
   },
   "aside":{
     "display":"block",
-    "child-content":true,
     "section":true
   },
   "audio":{
@@ -215,7 +213,6 @@ var Style = {
   },
   "blockquote":{
     "display":"block",
-    "child-content":true,
     "section-root":true,
     "margin":{
       "start":"1.5em",
@@ -226,7 +223,6 @@ var Style = {
   },
   "body":{
     "display":"block",
-    "child-content":true,
     "section-root":true
   },
   "br":{
@@ -247,7 +243,6 @@ var Style = {
   "caption":{
     "display":"block",
     "text-align":"center",
-    "child-content":true,
     "margin":{
       "after":"0.5em"
     }
@@ -271,7 +266,6 @@ var Style = {
   },
   "dd":{
     "display":"block",
-    "child-content":true,
     "margin":{
       "start":"1em",
       "end":"1em",
@@ -283,7 +277,6 @@ var Style = {
   },
   "details":{
     "display":"block",
-    "child-content":true,
     "section-root":true
   },
   "dfn":{
@@ -294,16 +287,13 @@ var Style = {
 
     // using div tag with static size, inline html can be embeded.
     //  <div width="100" height="100">embed html</div>
-    "embeddable":true,
-    "child-content":true
+    "embeddable":true
   },
   "dl":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   "dt":{
     "display":"block",
-    "child-content":true,
     "margin":{
       "after":"0.2em"
     }
@@ -326,7 +316,6 @@ var Style = {
   //-------------------------------------------------------
   "fieldset":{
     "display":"block",
-    "child-content":true,
     "section-root":true,
     "padding":{
       "start":"1em",
@@ -341,23 +330,19 @@ var Style = {
   },
   "figure":{
     "display":"block",
-    "child-content":true,
     "section-root":true
   },
   "figcaption":{
     "display":"block",
-    "child-content":true,
     "text-align":"center",
     "font-size": "0.8em"
   },
   "footer":{
     "display":"block",
-    "child-content":true,
     "section":true
   },
   "form":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   //-------------------------------------------------------
   // tag / h
@@ -365,7 +350,6 @@ var Style = {
   "h1":{
     "display":"block",
     "line-rate":1.4,
-    "child-content":true,
     "font-size":"2.4em",
     "margin":{
       "after":"0.5em"
@@ -374,7 +358,6 @@ var Style = {
   "h2":{
     "display":"block",
     "line-rate":1.4,
-    "child-content":true,
     "font-size":"2.0em",
     "margin":{
       "after":"0.75em"
@@ -383,7 +366,6 @@ var Style = {
   "h3":{
     "display":"block",
     "line-rate":1.4,
-    "child-content":true,
     "font-size":"1.6em",
     "margin":{
       "after":"1em"
@@ -392,7 +374,6 @@ var Style = {
   "h4":{
     "display":"block",
     "line-rate":1.4,
-    "child-content":true,
     "font-size":"1.4em",
     "margin":{
       "after":"1.25em"
@@ -401,7 +382,6 @@ var Style = {
   "h5":{
     "display":"block",
     "line-rate":1.4,
-    "child-content":true,
     "font-size":"1.0em",
     "margin":{
       "after":"1.5em"
@@ -410,15 +390,12 @@ var Style = {
   "h6":{
     "display":"block",
     "line-rate":1.4,
-    "child-content":true,
     "font-size":"1.0em"
   },
   "head":{
-    "child-content":true
   },
   "header":{
     "display":"block",
-    "child-content":true,
     "section":true
   },
   "hr":{
@@ -435,8 +412,7 @@ var Style = {
     "border-width":"0px"
   },
   "html":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   //-------------------------------------------------------
   // tag / i
@@ -446,7 +422,6 @@ var Style = {
   },
   "iframe":{
     "display":"block",
-    "child-content":true,
     "embeddable":true
   },
   "ins":{
@@ -480,12 +455,10 @@ var Style = {
   },
   "legend":{
     "display":"block",
-    "line-rate":1.5,
-    "child-content":true
+    "line-rate":1.5
   },
   "li":{
     "display":"block",
-    "child-content":true,
     "margin":{
       "after":"0.6em"
     }
@@ -498,8 +471,7 @@ var Style = {
   // tag / m
   //-------------------------------------------------------
   "main":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   "map":{
   },
@@ -507,8 +479,7 @@ var Style = {
     "display":"inline"
   },
   "menu":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   "meta":{
     "meta":true,
@@ -522,7 +493,6 @@ var Style = {
   //-------------------------------------------------------
   "nav":{
     "display":"block",
-    "child-content":true,
     "section":true
   },
   "noscript":{
@@ -536,7 +506,6 @@ var Style = {
   },
   "ol":{
     "display":"block",
-    "child-content":true,
     "list-style-image":"none",
     "list-style-position": "outside",
     "list-style-type": "decimal",
@@ -555,7 +524,6 @@ var Style = {
   //-------------------------------------------------------
   "p":{
     "display":"block",
-    "child-content":true,
     "margin":{
       "after":"1.5em"
     }
@@ -570,8 +538,7 @@ var Style = {
   "param":{
   },
   "pre":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   "progress":{
     "display":"inline"
@@ -580,8 +547,7 @@ var Style = {
   // tag / q
   //-------------------------------------------------------
   "q":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   //-------------------------------------------------------
   // tag / r
@@ -593,13 +559,11 @@ var Style = {
     "display":"inline"
   },
   "ruby":{
-    "child-content":true,
     "font-size":"0.5em",
     "display":"inline"
   },
   "rt":{
-    "display":"inline",
-    "child-content":true
+    "display":"inline"
   },
   //-------------------------------------------------------
   // tag / s
@@ -612,12 +576,10 @@ var Style = {
   },
   "script":{
     "display":"inline",
-    "child-content":true,
     "meta":true
   },
   "section":{
     "display":"block",
-    "child-content":true,
     "section":true
   },
   "select":{
@@ -636,8 +598,7 @@ var Style = {
   },
   "style":{
     "display":"inline",
-    "meta":true,
-    "child-content":true
+    "meta":true
   },
   "sub":{
     "display":"inine"
@@ -653,7 +614,6 @@ var Style = {
   //-------------------------------------------------------
   "table":{
     "display":"block",
-    "child-content":true,
     "embeddable":true,
     "table-layout":"fixed", // 'auto' not supported yet.
     "border-collapse":"collapse", // 'separate' not supported yet.
@@ -667,13 +627,11 @@ var Style = {
   },
   "tbody":{
     "display":"block",
-    "border-collapse":"inherit",
-    "child-content":true
+    "border-collapse":"inherit"
   },
   "td":{
     "display":"block",
     "border-collapse":"inherit",
-    "child-content":true,
     "section-root":true,
     "border-width":"1px",
     "padding":{
@@ -685,20 +643,17 @@ var Style = {
   },
   "textarea":{
     "display":"inline",
-    "child-content":true,
     "embeddable":true,
     "interactive":true
   },
   "tfoot":{
     "display":"block",
-    "border-collapse":"inherit",
-    "child-content":true
+    "border-collapse":"inherit"
   },
   "th":{
     "display":"block",
     "line-rate":1.4,
     "border-collapse":"inherit",
-    "child-content":true,
     "border-width":"1px",
     "padding":{
       "start":"0.8em",
@@ -709,19 +664,16 @@ var Style = {
   },
   "thead":{
     "display":"block",
-    "border-collapse":"inherit",
-    "child-content":true
+    "border-collapse":"inherit"
   },
   "time":{
     "display":"inline"
   },
   "title":{
-    "meta":true,
-    "child-content":true
+    "meta":true
   },
   "tr":{
-    "display":"block",
-    "child-content":true
+    "display":"block"
   },
   "track":{
   },
@@ -733,7 +685,6 @@ var Style = {
   },
   "ul":{
     "display":"block",
-    "child-content":true,
     "list-style-image":"none",
     "list-style-type":"disc",
     "list-style-position":"outside",
@@ -763,7 +714,6 @@ var Style = {
   //-------------------------------------------------------
   ":before":{
     "display":"inline-block",
-    "child-content":true,
     // content of pseudo elements are all escaped,
     // that is, ruby is also escaped. there are no rubies in pseudo element.
     // so line-rate is set to 1(text-line only).
@@ -771,12 +721,10 @@ var Style = {
   },
   ":after":{
     "display":"inline-block",
-    "child-content":true,
     "line-rate":1
   },
   ":first-letter":{
-    "display":"inline-block",
-    "child-content":true
+    "display":"inline-block"
   },
   ":first-line":{
     "display":"inline"
@@ -1759,9 +1707,6 @@ var Tag = (function (){
   var is_single_tag = function(name){
     return is_style_enable(name, "single");
   };
-  var is_child_content_tag = function(name){
-    return is_style_enable(name, "child-content");
-  };
   var is_section_tag = function(name){
     return is_style_enable(name, "section");
   };
@@ -2050,7 +1995,7 @@ var Tag = (function (){
       if(this.isSingleTag()){
 	return false;
       }
-      return is_child_content_tag(this.getName());
+      return true;
     },
     isTcyTag : function(){
       return this.getCssAttr("text-combine", "") === "horizontal";
@@ -5672,6 +5617,10 @@ var DocumentContext = (function(){
       return this.inlineContext.getTagDepth();
     },
     pushInlineTag : function(tag, parent){
+      var parent_tag = this.getCurBlockTag();
+      if(parent_tag){
+	tag.inherit(parent_tag);
+      }
       this.inlineContext.pushTag(tag, parent);
     },
     popInlineTag : function(){
@@ -6495,7 +6444,7 @@ var HtmlGenerator = (function(){
 	  this._parseHead(tag.content);
 	  break;
 	case "body":
-	  generator = new BodyPageGenerator(tag, this.context);
+	  generator = new BodyBlockTreeGenerator(tag, this.context);
 	  break;
 	}
       }
@@ -6548,7 +6497,7 @@ var HtmlGenerator = (function(){
 })();
 
 
-var BlockGenerator = Class.extend({
+var ElementGenerator = Class.extend({
   init : function(markup, context){
     this.markup = markup;
     this.context = context;
@@ -6560,20 +6509,28 @@ var BlockGenerator = Class.extend({
   },
   rollback : function(){
   },
-  yield : function(parent){
-    throw "BlockGenerator::yield not impletented";
-  },
-  getCurGenerator : function(){
-    if(this.generator && this.generator.hasNext()){
-      return this.generator;
-    }
-    return null;
-  },
   // called when box is created, but no style is not loaded.
   _onReadyBox : function(box, parent){
   },
   // called when box is created, and std style is already loaded.
   _onCreateBox : function(box, parent){
+  },
+  // this function is also called from InlineTreeGenerator via 'call' to yield an inline block element.
+  // so to give a clear scope, we accept 'context' as last argument,
+  // although it is same as 'this.context' in this generator.
+  _yieldStaticElement : function(parent, tag, context){
+    var generator;
+    var static_size = tag.getStaticSize(parent.fontSize || Layout.fontSize, parent.getContentMeasure());
+    if(tag.getName() === "img"){
+      generator = new ImageGenerator(tag, context);
+    } else if(tag.hasFlow()){
+      // if original flow defined, yield as inline page
+      generator = new InlinePageGenerator(tag, context.createInlineRoot());
+    } else {
+      // if static size is simply defined, treat as just an embed html with static size.
+      generator = new InlineBoxGenerator(tag, context);
+    }
+    return generator.yield(parent, static_size);
   },
   _getBoxType : function(){
     return this.markup.getName();
@@ -6695,7 +6652,7 @@ var BlockGenerator = Class.extend({
 });
 
 
-var StaticBlockGenerator = BlockGenerator.extend({
+var StaticBlockGenerator = ElementGenerator.extend({
   yield : function(parent, size){
     var box = this._createBox(size, parent);
     if(this.markup.isPush()){
@@ -6872,12 +6829,6 @@ var LineContext = (function(){
     },
     isFirstLine : function(){
       return this.lineStartPos === 0;
-    },
-    inheritParentTag : function(tag){
-      var parent_tag = this.context.getCurBlockTag();
-      if(parent_tag){
-	tag.inherit(parent_tag);
-      }
     },
     pushTag : function(tag){
       this.context.pushInlineTag(tag, this.parent);
@@ -7246,294 +7197,320 @@ var LineContext = (function(){
 // then after rollback and 2nd-yielding by parent generator,
 // ruby disappears because stream already steps to the next pos of ruby.
 // any good idea to solve this problem?
-var InlineGenerator = (function(){
-  function InlineGenerator(markup, stream, context){
+var InlineTreeGenerator = ElementGenerator.extend({
+  init : function(markup, stream, context){
     this.markup = markup;
     this.stream = stream;
     this.context = context;
+    this.parentMarkup = context.getCurBlockTag();
     this._hasNext = this.stream.hasNext();
-  }
-
-  // shortcut exception code
-  var BUFFER_END = Exceptions.BUFFER_END;
-  var SKIP = Exceptions.SKIP;
-  var LINE_BREAK = Exceptions.LINE_BREAK;
-  var RETRY = Exceptions.RETRY;
-  var IGNORE = Exceptions.IGNORE;
-  var BREAK = Exceptions.BREAK;
-
-  InlineGenerator.prototype = {
-    hasNext : function(){
-      if(!this._hasNext){
-	return false;
-      }
-      if(this.generator && this.generator.hasNext()){
-	return true;
-      }
-      return this.stream.hasNext();
-    },
-    backup : function(){
-      this.stream.backup();
-    },
-    // caution! : this rollback function is to be ALWAYS called from parent generator.
-    // so do not call this from this generator.
-    rollback : function(){
-      this.stream.rollback();
-      this.generator = null;
-    },
-    yield : function(parent){
-      var ctx = new LineContext(parent, this.stream, this.context);
-
-      // even if extent for basic line is not left,
-      // just break and let parent generator break page.
-      if(!ctx.canContainBasicLine()){
-	return BREAK;
-      }
-
-      // backup inline head position.
-      this.backup();
-
-      while(true){
-	var element = this._yieldElement(ctx);
-
-	if(element == BUFFER_END){
-	  ctx.setLineBreak();
-	  break;
-	} else if(element == SKIP){
-	  return IGNORE;
-	} else if(element == LINE_BREAK){
-	  ctx.setLineBreak();
-	  break;
-	} else if(element == RETRY){
-	  ctx.setLineBreak();
-	  break;
-	} else if(element == IGNORE){
-	  continue;
-	}
-	var advance = this._getAdvance(ctx, element); // size of inline flow.
-	var extent = this._getExtent(ctx, element); // size of block flow.
-	var font_size = this._getFontSize(ctx, element); // font size of element.
-
-	// if overflow inline max, line break.
-	if(!ctx.canContain(element, advance, extent)){
-	  if(this.generator){
-	    this.generator.rollback();
-	  } else {
-	    ctx.pushBackToken();
-	  }
-	  break;
-	}
-	ctx.addElement(element, {
-	  advance:advance,
-	  extent:extent,
-	  fontSize:font_size
-	});
-
-	// if devided word, line break and parse same token again.
-	if(element instanceof Word && element.isDevided()){
-	  ctx.pushBackToken();
-	  break;
-	}
-      }
-      return ctx.createLine();
-    },
-    _getExtent : function(ctx, element){
-      if(Token.isText(element)){
-	return element.fontSize;
-      }
-      if(Token.isTag(element)){
-	if(element.edge){
-	  var font_size = ctx.getInlineFontSize();
-	  var edge_size = element.edge.getExtentSize(ctx.getParentFlow());
-	  return font_size + edge_size;
-	}
-	return 0;
-      }
-      if(element instanceof Ruby){
-	return element.getExtent();
-      }
-      if(element instanceof Box){
-	return element.getBoxExtent(ctx.getParentFlow());
-      }
-      return 0;
-    },
-    _getFontSize : function(ctx, element){
-      if(Token.isText(element)){
-	return element.fontSize;
-      }
-      if(element instanceof Ruby){
-	return element.getFontSize();
-      }
-      return 0;
-    },
-    _getAdvance : function(ctx, element){
-      if(Token.isText(element)){
-	return element.getAdvance(ctx.getParentFlow(), ctx.letterSpacing);
-      }
-      if(Token.isTag(element)){
-	if(element.edge){
-	  return element.edge.getMeasureSize(ctx.getParentFlow());
-	}
-	return 0;
-      }
-      if(element instanceof Ruby){
-	return element.getAdvance(ctx.getParentFlow());
-      }
-      return element.getBoxMeasure(ctx.getParentFlow());
-    },
-    _yieldElement : function(ctx){
-      if(this.generator && this.generator.hasNext()){
-	return this.generator.yield(ctx);
-      }
-      this.generator = null;
-      var token = ctx.getNextToken();
-      return this._yieldToken(ctx, token);
-    },
-    _yieldToken : function(ctx, token){
-      if(token === null){
-	return BUFFER_END;
-      }
-      // CRLF
-      if(Token.isChar(token) && token.isNewLineChar()){
-
-	// if pre, treat CRLF as line break
-	if(ctx.isPreLine()){
-	  return LINE_BREAK;
-	}
-	// others, just ignore
-	return IGNORE;
-      }
-      if(Token.isText(token)){
-	return this._yieldText(ctx, token);
-      }
-      if(Token.isTag(token) && token.getName() === "br"){
-	return LINE_BREAK;
-      }
-      // if pseudo-element tag,
-      // copy style of <this.markup.name>:<pseudo-name> dynamically.
-      if(this.markup && token.isPseudoElementTag()){
-	var pseudo_name = token.getPseudoElementName();
-	var pseudo_css_attr = this.markup.getPseudoCssAttr(pseudo_name);
-	for(var prop in pseudo_css_attr){
-	  if(prop !== "content"){
-	    token.setCssAttr(prop, pseudo_css_attr[prop]);
-	  }
-	}
-      }
-      // if block element, break line and force terminate generator
-      if(token.isBlock()){
-	ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
-	this._hasNext = false; // force terminate
-	return ctx.isEmptyText()? SKIP : LINE_BREAK;
-      }
-      // token is static size tag
-      if(token.hasStaticSize()){
-	return this._yieldStaticElement(ctx, token);
-      }
-      // token is inline-block tag
-      if(token.isInlineBlock()){
-	this.generator = new InlineBlockGenerator(token, ctx.createInlineRoot());
-	return this.generator.yield(ctx);
-      }
-      // token is other inline tag
-      return this._yieldInlineTag(ctx, token);
-    },
-    _yieldStaticElement : function(ctx, tag){
-      ctx.inheritParentTag(tag);
-      var element = PageGenerator.prototype._yieldStaticElement.call(this, ctx.parent, tag, this.context);
-      if(element instanceof Box){
-	element.display = "inline-block";
-      }
-      return element;
-    },
-    _yieldText : function(ctx, text){
-      if(!text.hasMetrics()){
-	text.setMetrics(ctx.getParentFlow(), ctx.getInlineFontSize(), ctx.isBoldEnable());
-      }
-      switch(text._type){
-      case "char":
-      case "tcy":
-	return text;
-      case "word":
-	return this._yieldWord(ctx, text);
-      }
-    },
-    _yieldInlineTag : function(ctx, tag){
-      switch(tag.getName()){
-      case "script":
-	return IGNORE;
-
-      case "style":
-	ctx.addStyle(tag);
-	return IGNORE;
-
-      case "ruby":
-	// assert metrics only once to avoid dup update by rollback
-	if(typeof tag.fontSize === "undefined"){
-	  tag.fontSize = ctx.getInlineFontSize();
-	  tag.letterSpacing = ctx.letterSpacing;
-	}
-	this.generator = new RubyGenerator(tag);
-	return this.generator.yield(ctx);
-
-      case "a":
-	var anchor_name = tag.getTagAttr("name");
-	if(anchor_name){
-	  ctx.setAnchor(anchor_name);
-	}
-	break;
-
-      default:
-	break;
-      }
-      // single tag does not update tag stack of inline, so just return it.
-      // or if tag is already parsed, just return too.
-      if(tag.isSingleTag() || tag.parsed){
-	ctx.inheritParentTag(tag);
-	return tag;
-      }
-      // if inline level edge is defined,
-      // get edge and set it to markup data because inline level does not create box.
-      // this edge(in markup data) is evaluated at InlineEvaluator::evalTagCss.
-      var edge = tag.getBoxEdge(ctx.getParentFlow(), ctx.getInlineFontSize(), ctx.getMaxMeasure());
-      if(edge){
-	tag.edge = edge;
-      }
-      if(tag.isOpen()){
-	ctx.pushTag(tag);
-      } else {
-	ctx.popTagByName(tag.getOpenTagName());
-      }
-      // to avoid duplicate parsing by parent rollback,
-      // we set parsed flag to this tag object.
-      tag.parsed = true;
-      return tag;
-    },
-    _yieldWord : function(ctx, word){
-      var advance = word.getAdvance(ctx.getParentFlow(), ctx.letterSpacing);
-
-      // if advance of this word is less than ctx.maxMeasure, just return.
-      if(advance <= ctx.maxMeasure){
-	word.setDevided(false);
-	return word;
-      }
-      // if advance is lager than max_measure,
-      // we must cut this word into some parts.
-      var font_size = ctx.getInlineFontSize();
-      var is_bold = ctx.isBoldEnable();
-      var flow = ctx.getParentFlow();
-      var part = word.cutMeasure(ctx.maxMeasure); // get sliced word
-      part.setMetrics(flow, font_size, is_bold); // metrics for first half
-      word.setMetrics(flow, font_size, is_bold); // metrics for second half
-      return part;
+    if(this.markup){
+      this.context.pushInlineTag(this.markup);
     }
-  };
+  },
+  hasNext : function(){
+    if(!this._hasNext){
+      return false;
+    }
+    if(this.generator && this.generator.hasNext()){
+      return true;
+    }
+    return this.stream.hasNext();
+  },
+  backup : function(){
+    this.stream.backup();
+  },
+  // caution! : this rollback function is to be ALWAYS called from parent generator.
+  // so do not call this from this generator.
+  rollback : function(){
+    this.stream.rollback();
+    if(this.generator){
+      this.generator.rollback();
+    } else {
+      this.generator = null;
+    }
+  },
+  yield : function(parent){
+    var ctx = new LineContext(parent, this.stream, this.context);
 
-  return InlineGenerator;
-})();
+    // even if extent for basic line is not left,
+    // just break and let parent generator break page.
+    if(!ctx.canContainBasicLine()){
+      return Exceptions.BREAK;
+    }
+
+    // backup inline head position.
+    this.backup();
+
+    while(true){
+      var element = this._yieldElement(ctx);
+
+      if(element == Exceptions.BUFFER_END){
+	ctx.setLineBreak();
+	break;
+      } else if(element == Exceptions.SKIP){
+	return Exceptions.IGNORE;
+      } else if(element == Exceptions.LINE_BREAK){
+	ctx.setLineBreak();
+	break;
+      } else if(element == Exceptions.RETRY){
+	ctx.setLineBreak();
+	break;
+      } else if(element == Exceptions.IGNORE){
+	continue;
+      }
+      var advance = this._getAdvance(ctx, element); // size of inline flow.
+      var extent = this._getExtent(ctx, element); // size of block flow.
+      var font_size = this._getFontSize(ctx, element); // font size of element.
+
+      // if overflow inline max, line break.
+      if(!ctx.canContain(element, advance, extent)){
+	if(this.generator){
+	  this.generator.rollback();
+	} else {
+	  ctx.pushBackToken();
+	}
+	break;
+      }
+      ctx.addElement(element, {
+	advance:advance,
+	extent:extent,
+	fontSize:font_size
+      });
+
+      // if devided word, line break and parse same token again.
+      if(element instanceof Word && element.isDevided()){
+	ctx.pushBackToken();
+	break;
+      }
+    }
+    var line = ctx.createLine();
+    if(!this.hasNext()){
+      this._onLastTree(line);
+    }
+    this._onCompleteTree(line);
+    return line;
+  },
+  _onLastTree : function(line){
+    if(this.markup){
+      this.context.popInlineTagByName(this.markup.getName());
+    }
+  },
+  _onCompleteTree : function(line){
+  },
+  _getExtent : function(ctx, element){
+    if(Token.isText(element)){
+      return element.fontSize;
+    }
+    if(Token.isTag(element)){
+      if(element.edge){
+	var font_size = ctx.getInlineFontSize();
+	var edge_size = element.edge.getExtentSize(ctx.getParentFlow());
+	return font_size + edge_size;
+      }
+      return 0;
+    }
+    if(element instanceof Ruby){
+      return element.getExtent();
+    }
+    if(element instanceof Box){
+      return element.getBoxExtent(ctx.getParentFlow());
+    }
+    return 0;
+  },
+  _getFontSize : function(ctx, element){
+    if(Token.isText(element)){
+      return element.fontSize;
+    }
+    if(element instanceof Ruby){
+      return element.getFontSize();
+    }
+    return 0;
+  },
+  _getAdvance : function(ctx, element){
+    if(Token.isText(element)){
+      return element.getAdvance(ctx.getParentFlow(), ctx.letterSpacing);
+    }
+    if(Token.isTag(element)){
+      if(element.edge){
+	return element.edge.getMeasureSize(ctx.getParentFlow());
+      }
+      return 0;
+    }
+    if(element instanceof Ruby){
+      return element.getAdvance(ctx.getParentFlow());
+    }
+    return element.getBoxMeasure(ctx.getParentFlow());
+  },
+  _yieldElement : function(ctx){
+    if(this.generator && this.generator.hasNext()){
+      return this.generator.yield(ctx);
+    }
+    this.generator = null;
+    var token = ctx.getNextToken();
+    return this._yieldToken(ctx, token);
+  },
+  _yieldToken : function(ctx, token){
+    if(token === null){
+      return Exceptions.BUFFER_END;
+    }
+    // CRLF
+    if(Token.isChar(token) && token.isNewLineChar()){
+
+      // if pre, treat CRLF as line break
+      if(ctx.isPreLine()){
+	return Exceptions.LINE_BREAK;
+      }
+      // others, just ignore
+      return Exceptions.IGNORE;
+    }
+    if(Token.isText(token)){
+      return this._yieldText(ctx, token);
+    }
+    if(Token.isTag(token) && token.getName() === "br"){
+      return Exceptions.LINE_BREAK;
+    }
+    // if pseudo-element tag,
+    // copy style of <this.parentMarkup.name>:<pseudo-name> dynamically.
+    if(this.parentMarkup && token.isPseudoElementTag()){
+      var pseudo_name = token.getPseudoElementName();
+      var pseudo_css_attr = this.parentMarkup.getPseudoCssAttr(pseudo_name);
+      for(var prop in pseudo_css_attr){
+	if(prop !== "content"){
+	  token.setCssAttr(prop, pseudo_css_attr[prop]);
+	}
+      }
+    }
+    // if block element, break line and force terminate generator
+    if(token.isBlock()){
+      ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
+      this._hasNext = false; // force terminate
+      return ctx.isEmptyText()? Exceptions.SKIP : Exceptions.LINE_BREAK;
+    }
+    // token is static size tag
+    if(token.hasStaticSize()){
+      return this._yieldStaticElement(ctx.parent, token, this.context);
+    }
+    // token is inline-block tag
+    if(token.isInlineBlock()){
+      this.generator = new InlineBlockGenerator(token, ctx.createInlineRoot());
+      return this.generator.yield(ctx);
+    }
+    // token is other inline tag
+    return this._yieldInlineTag(ctx, token);
+  },
+  _yieldStaticElement : function(parent, tag, context){
+    var element = this._super(parent, tag, context);
+    if(element instanceof Box){
+      element.display = "inline-block";
+    }
+    return element;
+  },
+  /*
+  _yieldStaticElement : function(ctx, tag){
+    ctx.inheritParentTag(tag);
+    //var element = BlockTreeGenerator.prototype._yieldStaticElement.call(this, ctx.parent, tag, this.context);
+    var element = this._yieldStaticElement.call(ctx.parent, tag, this.context);
+    if(element instanceof Box){
+      element.display = "inline-block";
+    }
+    return element;
+  },*/
+  _yieldText : function(ctx, text){
+    if(!text.hasMetrics()){
+      text.setMetrics(ctx.getParentFlow(), ctx.getInlineFontSize(), ctx.isBoldEnable());
+    }
+    switch(text._type){
+    case "char":
+    case "tcy":
+      return text;
+    case "word":
+      return this._yieldWord(ctx, text);
+    }
+  },
+  _yieldInlineTag : function(ctx, tag){
+    switch(tag.getName()){
+    case "script":
+      return Exceptions.IGNORE;
+
+    case "style":
+      ctx.addStyle(tag);
+      return Exceptions.IGNORE;
+
+    case "ruby":
+      // assert metrics only once to avoid dup update by rollback
+      if(typeof tag.fontSize === "undefined"){
+	tag.fontSize = ctx.getInlineFontSize();
+	tag.letterSpacing = ctx.letterSpacing;
+      }
+      this.generator = new RubyGenerator(tag);
+      return this.generator.yield(ctx);
+
+    case "a":
+      var anchor_name = tag.getTagAttr("name");
+      if(anchor_name){
+	ctx.setAnchor(anchor_name);
+      }
+      break;
+
+    default:
+      break;
+    }
+    // single tag does not update tag stack of inline, so just return it.
+    // or if tag is already parsed, just return too.
+    if(tag.isSingleTag() || tag.parsed){
+      ctx.inheritParentTag(tag);
+      return tag;
+    }
+    // if inline level edge is defined,
+    // get edge and set it to markup data because inline level does not create box.
+    // this edge(in markup data) is evaluated at InlineEvaluator::evalTagCss.
+    var edge = tag.getBoxEdge(ctx.getParentFlow(), ctx.getInlineFontSize(), ctx.getMaxMeasure());
+    if(edge){
+      tag.edge = edge;
+    }
+    if(tag.isOpen()){
+      ctx.pushTag(tag);
+    } else {
+      ctx.popTagByName(tag.getOpenTagName());
+    }
+    // to avoid duplicate parsing by parent rollback,
+    // we set parsed flag to this tag object.
+    tag.parsed = true;
+    return tag;
+  },
+  _yieldWord : function(ctx, word){
+    var advance = word.getAdvance(ctx.getParentFlow(), ctx.letterSpacing);
+
+    // if advance of this word is less than ctx.maxMeasure, just return.
+    if(advance <= ctx.maxMeasure){
+      word.setDevided(false);
+      return word;
+    }
+    // if advance is lager than max_measure,
+    // we must cut this word into some parts.
+    var font_size = ctx.getInlineFontSize();
+    var is_bold = ctx.isBoldEnable();
+    var flow = ctx.getParentFlow();
+    var part = word.cutMeasure(ctx.maxMeasure); // get sliced word
+    part.setMetrics(flow, font_size, is_bold); // metrics for first half
+    word.setMetrics(flow, font_size, is_bold); // metrics for second half
+    return part;
+  }
+});
 
 
-var PageGenerator = BlockGenerator.extend({
+var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
+});
+
+
+var LinkGenerator = ChildInlineTreeGenerator.extend({
+  init : function(markup, context){
+    this._super(markup, new TokenStream(markup.getContent()), context);
+  }
+});
+
+var BlockTreeGenerator = ElementGenerator.extend({
   init : function(markup, context){
     this._super(markup, context);
     this.generator = null;
@@ -7563,6 +7540,12 @@ var PageGenerator = BlockGenerator.extend({
       this.generator.rollback();
     }
   },
+  getCurGenerator : function(){
+    if(this.generator && this.generator.hasNext()){
+      return this.generator;
+    }
+    return null;
+  },
   // if size is not defined, rest size of parent is used.
   // if parent is null, root page is generated.
   yield : function(parent, size){
@@ -7578,7 +7561,6 @@ var PageGenerator = BlockGenerator.extend({
     page_size = size || (parent? parent.getRestSize() : null);
     page_box = this._createBox(page_size, parent);
     var ret = this._yieldPageTo(page_box);
-    this.context.popBlockTag();
     return ret;
   },
   // fill page with child page elements.
@@ -7624,12 +7606,12 @@ var PageGenerator = BlockGenerator.extend({
       page.clearBorderBefore();
     }
     if(!this.hasNext()){
-      this._onLastPage(page);
+      this._onLastTree(page);
     } else {
       page.clearBorderAfter();
     }
     this.rollbackCount = 0;
-    this._onCompletePage(page);
+    this._onCompleteTree(page);
 
     // if content is not empty, increment localPageNo.
     if(cur_extent > 0){
@@ -7657,10 +7639,11 @@ var PageGenerator = BlockGenerator.extend({
       .replace(/\s+$/, "") // discard tail space
       .replace(/\r/g, ""); // discard CR
   },
-  _onLastPage : function(page){
+  _onLastTree : function(page){
+    this.context.popBlockTag();
   },
   // called when page box is fully filled by blocks.
-  _onCompletePage : function(page){
+  _onCompleteTree : function(page){
   },
   _yieldPageElement : function(parent){
     if(this.generator && this.generator.hasNext()){
@@ -7679,9 +7662,9 @@ var PageGenerator = BlockGenerator.extend({
     }
     if(Token.isInline(token)){
       // this is not block level element, so we push back this token,
-      // and delegate this stream to InlineGenerator from the head of this inline element.
+      // and delegate this stream to InlineTreeGenerator from the head of this inline element.
       this.stream.prev();
-      this.generator = new InlineGenerator(this.markup, this.stream, this.context);
+      this.generator = new InlineTreeGenerator(null, this.stream, this.context);
       return this.generator.yield(parent);
     }
     return this._yieldBlockElement(parent, token);
@@ -7698,7 +7681,7 @@ var PageGenerator = BlockGenerator.extend({
       var generator = new InlinePageGenerator(tag, this.context.createInlineRoot());
       return generator.yield(parent, inline_size);
     }
-    this.generator = this._createChildPageGenerator(parent, tag);
+    this.generator = this._createChildBlockTreeGenerator(parent, tag);
     return this.generator.yield(parent);
   },
   _yieldStaticTag : function(parent, tag){
@@ -7719,30 +7702,13 @@ var PageGenerator = BlockGenerator.extend({
 
     return box; // return as single block.
   },
-  // this function is also called from InlineGenerator via 'call' to yield an inline block element.
-  // so to give a clear scope, we accept 'context' as last argument,
-  // although it is same as 'this.context' in this generator.
-  _yieldStaticElement : function(parent, tag, context){
-    var generator;
-    var static_size = tag.getStaticSize(parent.fontSize || Layout.fontSize, parent.getContentMeasure());
-    if(tag.getName() === "img"){
-      generator = new ImageGenerator(tag, context);
-    } else if(tag.hasFlow()){
-      // if original flow defined, yield as inline page
-      generator = new InlinePageGenerator(tag, context.createInlineRoot());
-    } else {
-      // if static size is simply defined, treat as just an embed html with static size.
-      generator = new InlineBoxGenerator(tag, context);
-    }
-    return generator.yield(parent, static_size);
-  },
   _yieldFloatedBlock : function(parent, aligned_box, tag){
-    var generator = new FloatedBlockGenerator(this.stream, this.context, aligned_box);
+    var generator = new FloatedBlockTreeGenerator(this.stream, this.context, aligned_box);
     var block = generator.yield(parent);
     this.generator = generator.getCurGenerator(); // inherit generator of aligned area
     return block;
   },
-  _createChildPageGenerator : function(parent, tag){
+  _createChildBlockTreeGenerator : function(parent, tag){
     switch(tag.getName()){
     case "h1": case "h2": case "h3": case "h4": case "h5": case "h6":
       return this._getHeaderLineGenerator(parent, tag);
@@ -7765,7 +7731,7 @@ var PageGenerator = BlockGenerator.extend({
     case "hr":
       return this._getHorizontalRuleGenerator(parent, tag);
     default:
-      return new ChildPageGenerator(tag, this.context);
+      return new ChildBlockTreeGenerator(tag, this.context);
     }
   },
   _getSectionContentGenerator : function(parent, tag){
@@ -7786,7 +7752,7 @@ var PageGenerator = BlockGenerator.extend({
   _getListItemGenerator : function(parent, tag){
     var list_style = parent.listStyle || null;
     if(list_style === null){
-      return new ChildPageGenerator(tag, this.context);
+      return new ChildBlockTreeGenerator(tag, this.context);
     }
     if(list_style.isInside()){
       return new InsideListItemGenerator(tag, parent, this.context);
@@ -7807,7 +7773,7 @@ var PageGenerator = BlockGenerator.extend({
   }
 });
 
-var InlineBlockGenerator = PageGenerator.extend({
+var InlineBlockGenerator = BlockTreeGenerator.extend({
   init : function(markup, context){
     this.markup = markup;
     this.context = context;
@@ -7835,24 +7801,24 @@ var InlineBlockGenerator = PageGenerator.extend({
   }
 });
 
-var ChildPageGenerator = PageGenerator.extend({
+var ChildBlockTreeGenerator = BlockTreeGenerator.extend({
   // resize page to sum of total child size.
-  _onCompletePage : function(page){
+  _onCompleteTree : function(page){
     page.shortenExtent(page.getParentFlow());
   }
 });
 
-var SectionContentGenerator = ChildPageGenerator.extend({
+var SectionContentGenerator = ChildBlockTreeGenerator.extend({
   init : function(markup, context){
     this._super(markup, context);
     this.context.logStartSection(markup);
   },
-  _onLastPage : function(page){
+  _onLastTree : function(page){
     this.context.logEndSection(this.markup);
   }
 });
 
-var SectionRootGenerator = ChildPageGenerator.extend({
+var SectionRootGenerator = ChildBlockTreeGenerator.extend({
   init : function(markup, context){
     this._super(markup, context);
     this.context.startSectionRoot(markup);
@@ -7879,13 +7845,13 @@ var SectionRootGenerator = ChildPageGenerator.extend({
   setAnchor : function(name, page_no){
     this.context.setAnchor(name, page_no);
   },
-  _onLastPage : function(page){
+  _onLastTree : function(page){
     this.context.endSectionRoot(this.markup);
   }
 });
 
-var HeaderGenerator = ChildPageGenerator.extend({
-  _onCompletePage : function(page){
+var HeaderGenerator = ChildBlockTreeGenerator.extend({
+  _onCompleteTree : function(page){
     this._super(page);
     page.id = Css.addNehanHeaderPrefix(this.context.logSectionHeader(this.markup));
   },
@@ -7894,7 +7860,7 @@ var HeaderGenerator = ChildPageGenerator.extend({
   }
 });
 
-var BodyPageGenerator = SectionRootGenerator.extend({
+var BodyBlockTreeGenerator = SectionRootGenerator.extend({
   init : function(data, ctx){
     var context = ctx || new DocumentContext();
     var markup = data;
@@ -7916,18 +7882,18 @@ var BodyPageGenerator = SectionRootGenerator.extend({
     // box.lazy is a flag to see whether this box can be evaluated later.
     // when lazy is enabled, we can evaluate the box at any time, it always yields same html.
     // but this lazy flag at this time is not confirmed, it's temporary.
-    // this flag is confirmed when _onCompletePage.
+    // this flag is confirmed when _onCompleteTree.
     // if context is 'also' empty when page is completed, lazy flag is confirmed.
     box.lazy = this.context.isEmptyMarkupContext();
     box.css["font-size"] = Layout.fontSize + "px";
     return box;
   },
-  _onCompletePage : function(page){
+  _onCompleteTree : function(page){
     page.styles = this.context.getPageStyles(page.pageNo);
 
     // lazy is confirmed when
     // 1. inline level of context is empty when _createBox.
-    // 2. inline level of context is 'also' empty when _onCompletePage.
+    // 2. inline level of context is 'also' empty when _onCompleteTree.
     // in short, if both head and tail are context free, lazy evaluation is enabled.
     page.lazy = page.lazy && this.context.isEmptyMarkupContext();
 
@@ -7937,7 +7903,7 @@ var BodyPageGenerator = SectionRootGenerator.extend({
   }
 });
 
-var FloatedBlockGenerator = PageGenerator.extend({
+var FloatedBlockTreeGenerator = BlockTreeGenerator.extend({
   init : function(stream, context, floated_box){
     this.context = context;
     this.stream = stream;
@@ -7981,7 +7947,7 @@ var FloatedBlockGenerator = PageGenerator.extend({
 
 // InlinePageGenerator yield the first page only,
 // because size of first page can be defined, but continuous pages are not.
-var InlinePageGenerator = PageGenerator.extend({
+var InlinePageGenerator = BlockTreeGenerator.extend({
   hasNext : function(){
     return false;
   },
@@ -7994,7 +7960,7 @@ var InlinePageGenerator = PageGenerator.extend({
   }
 });
 
-var ParallelPageGenerator = ChildPageGenerator.extend({
+var ParallelGenerator = ChildBlockTreeGenerator.extend({
   init : function(generators, markup, context, partition){
     this.generators = generators;
     this.markup = markup;
@@ -8073,7 +8039,7 @@ var ParallelPageGenerator = ChildPageGenerator.extend({
   }
 });
 
-var ParaChildPageGenerator = ChildPageGenerator.extend({
+var ParaChildGenerator = ChildBlockTreeGenerator.extend({
   _onReadyBox : function(box, parent){
     // wrap box(parent) has parallel flow, so flip it to get original one.
     var flow = parent.getParallelFlipFlow();
@@ -8081,7 +8047,7 @@ var ParaChildPageGenerator = ChildPageGenerator.extend({
   }
 });
 
-var TableGenerator = ChildPageGenerator.extend({
+var TableGenerator = ChildBlockTreeGenerator.extend({
   _createStream : function(){
     return new TableTagStream(this.markup);
   },
@@ -8098,7 +8064,7 @@ var TableGenerator = ChildPageGenerator.extend({
   }
 });
 
-var TableRowGroupGenerator = ChildPageGenerator.extend({
+var TableRowGroupGenerator = ChildBlockTreeGenerator.extend({
   _onCreateBox : function(box, parent){
     box.partition = parent.partition;
   },
@@ -8107,17 +8073,17 @@ var TableRowGroupGenerator = ChildPageGenerator.extend({
   }
 });
 
-var TableRowGenerator = ParallelPageGenerator.extend({
+var TableRowGenerator = ParallelGenerator.extend({
   init : function(markup, parent, context){
     var partition = parent.partition.getPartition(markup.childs.length);
     var generators = List.map(markup.childs, function(td){
-      return new ParaChildPageGenerator(td, context.createInlineRoot());
+      return new ParaChildGenerator(td, context.createInlineRoot());
     });
     this._super(generators, markup, context, partition);
   }
 });
 
-var ListGenerator = ChildPageGenerator.extend({
+var ListGenerator = ChildBlockTreeGenerator.extend({
   _onCreateBox : function(box, parent){
     var item_count = this.stream.getTokenCount();
     var list_style_type = this.markup.getCssAttr("list-style-type", "none");
@@ -8139,7 +8105,7 @@ var ListGenerator = ChildPageGenerator.extend({
   }
 });
 
-var InsideListItemGenerator = ChildPageGenerator.extend({
+var InsideListItemGenerator = ChildBlockTreeGenerator.extend({
   init : function(markup, parent, context){
     var marker = parent.listStyle.getMarkerHtml(markup.order + 1);
     var marker_html = Html.tagWrap("span", marker, {
@@ -8150,7 +8116,7 @@ var InsideListItemGenerator = ChildPageGenerator.extend({
   }
 });
 
-var OutsideListItemGenerator = ParallelPageGenerator.extend({
+var OutsideListItemGenerator = ParallelGenerator.extend({
   init : function(markup, parent, context){
     markup.marker = parent.listStyle.getMarkerHtml(markup.order + 1);
     this._super([
@@ -8160,7 +8126,7 @@ var OutsideListItemGenerator = ParallelPageGenerator.extend({
   }
 });
 
-var ListItemMarkGenerator = ParaChildPageGenerator.extend({
+var ListItemMarkGenerator = ParaChildGenerator.extend({
   _getBoxType : function(){
     return "li-marker";
   },
@@ -8169,13 +8135,13 @@ var ListItemMarkGenerator = ParaChildPageGenerator.extend({
   }
 });
 
-var ListItemBodyGenerator = ParaChildPageGenerator.extend({
+var ListItemBodyGenerator = ParaChildGenerator.extend({
   _getBoxType : function(){
     return "li-body";
   }
 });
 
-var DefListGenerator = ChildPageGenerator.extend({
+var DefListGenerator = ChildBlockTreeGenerator.extend({
   _createStream : function(){
     return new DefListTagStream(this.markup.content);
   }
@@ -8571,7 +8537,7 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
     var stream = new TokenStream(text);
     var ctx2 = ctx.createInlineRoot();
     ctx2.setFixedFontSize(font_size);
-    var generator = new InlineGenerator(null, stream, ctx2);
+    var generator = new InlineTreeGenerator(null, stream, ctx2);
     return generator.yield(line);
   },
   evalTagStart : function(line, tag, ctx){
@@ -8962,7 +8928,7 @@ var PageStream = Class.extend({
       .replace(/<rt><\/rt>/gi, ""); // discard empty rt
   },
   _createGenerator : function(text){
-    return new BodyPageGenerator(text);
+    return new BodyBlockTreeGenerator(text);
   },
   _createEvaluator : function(){
     return new PageEvaluator();
@@ -9142,12 +9108,12 @@ if(__engine_args.test){
   __exports.RubyStream = RubyStream;
 
   // generator
-  __exports.BlockGenerator = BlockGenerator;
-  __exports.InlineGenerator = InlineGenerator;
-  __exports.PageGenerator = PageGenerator;
-  __exports.BodyPageGenerator = BodyPageGenerator;
-  __exports.ParallelPageGenerator = ParallelPageGenerator;
-  __exports.ParaChildPageGenerator = ParaChildPageGenerator;
+  __exports.ElementGenerator = ElementGenerator;
+  __exports.InlineTreeGenerator = InlineTreeGenerator;
+  __exports.BlockTreeGenerator = BlockTreeGenerator;
+  __exports.BodyBlockTreeGenerator = BodyBlockTreeGenerator;
+  __exports.ParallelGenerator = ParallelGenerator;
+  __exports.ParaChildGenerator = ParaChildGenerator;
   __exports.HtmlGenerator = HtmlGenerator;
   __exports.DocumentGenerator = DocumentGenerator;
 

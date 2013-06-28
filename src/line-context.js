@@ -1,33 +1,35 @@
 var LineContext = (function(){
-  function LineContext(parent, stream, context){
-    this.parent = parent;
-    this.stream = stream;
-    this.context = context;
-    this.isRubyLine = parent._type === "ruby-line";
-    this.lineStartPos = this.stream.getPos();
-    this.lineRate = parent.lineRate;
-    this.letterSpacing = parent.letterSpacing || 0;
-    this.textIndent = stream.isHead()? (parent.textIndent || 0) : 0;
-    this.maxFontSize = parent.fontSize;
-    this.maxExtent = 0;
-    this.maxMeasure = parent.getContentMeasure() - this.textIndent;
-    this.curMeasure = 0;
-    this.restMeasure = this.maxMeasure;
-    this.restExtent = parent.getRestContentExtent();
-    this.lineMeasure = parent.getContentMeasure() - this.textIndent;
-    this.rubyLineRate = Math.max(0, this.lineRate - 1);
-    this.rubyLineExtent = this.isRubyLine? 0 : Math.floor(parent.fontSize * this.rubyLineRate);
-    this.bodyTokens = [];
-    this.rubyTokens = [];
-    this.emphaChars = [];
-    this.lineBreak = false;
-    this.charCount = 0;
-    this.lastToken = null;
-    this.prevText = null;
-    this.lastText = null;
+  function LineContext(){
   }
 
   LineContext.prototype = {
+    setNewLine : function(parent, stream, context){
+      this.parent = parent;
+      this.stream = stream;
+      this.context = context;
+      this.isRubyLine = parent._type === "ruby-line";
+      this.lineStartPos = this.stream.getPos();
+      this.lineRate = parent.lineRate;
+      this.letterSpacing = parent.letterSpacing || 0;
+      this.textIndent = stream.isHead()? (parent.textIndent || 0) : 0;
+      this.maxFontSize = parent.fontSize;
+      this.maxExtent = 0;
+      this.maxMeasure = parent.getContentMeasure() - this.textIndent;
+      this.curMeasure = 0;
+      this.restMeasure = this.maxMeasure;
+      this.restExtent = parent.getRestContentExtent();
+      this.lineMeasure = parent.getContentMeasure() - this.textIndent;
+      this.rubyLineRate = Math.max(0, this.lineRate - 1);
+      this.rubyLineExtent = this.isRubyLine? 0 : Math.floor(parent.fontSize * this.rubyLineRate);
+      this.bodyTokens = [];
+      this.rubyTokens = [];
+      this.emphaChars = [];
+      this.lineBreak = false;
+      this.charCount = 0;
+      this.lastToken = null;
+      this.prevText = null;
+      this.lastText = null;
+    },
     canContainBasicLine : function(){
       return this.restExtent >= Math.floor(this.parent.fontSize * this.lineRate);
     },
@@ -70,12 +72,6 @@ var LineContext = (function(){
     },
     isFirstLine : function(){
       return this.lineStartPos === 0;
-    },
-    inheritParentTag : function(tag){
-      var parent_tag = this.context.getCurBlockTag();
-      if(parent_tag){
-	tag.inherit(parent_tag);
-      }
     },
     pushTag : function(tag){
       this.context.pushInlineTag(tag, this.parent);

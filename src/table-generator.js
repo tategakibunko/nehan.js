@@ -1,4 +1,4 @@
-var TableGenerator = ChildPageGenerator.extend({
+var TableGenerator = ChildBlockTreeGenerator.extend({
   _createStream : function(){
     return new TableTagStream(this.markup);
   },

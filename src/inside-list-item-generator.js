@@ -1,4 +1,4 @@
-var InsideListItemGenerator = ChildPageGenerator.extend({
+var InsideListItemGenerator = ChildBlockTreeGenerator.extend({
   init : function(markup, parent, context){
     var marker = parent.listStyle.getMarkerHtml(markup.order + 1);
     var marker_html = Html.tagWrap("span", marker, {

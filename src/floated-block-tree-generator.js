@@ -1,4 +1,4 @@
-var FloatedBlockGenerator = PageGenerator.extend({
+var FloatedBlockTreeGenerator = BlockTreeGenerator.extend({
   init : function(stream, context, floated_box){
     this.context = context;
     this.stream = stream;

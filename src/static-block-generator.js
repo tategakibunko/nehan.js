@@ -1,4 +1,4 @@
-var StaticBlockGenerator = BlockGenerator.extend({
+var StaticBlockGenerator = ElementGenerator.extend({
   yield : function(parent, size){
     var box = this._createBox(size, parent);
     if(this.markup.isPush()){

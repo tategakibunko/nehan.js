@@ -1,4 +1,4 @@
-var BlockGenerator = Class.extend({
+var ElementGenerator = Class.extend({
   init : function(markup, context){
     this.markup = markup;
     this.context = context;
@@ -10,20 +10,28 @@ var BlockGenerator = Class.extend({
   },
   rollback : function(){
   },
-  yield : function(parent){
-    throw "BlockGenerator::yield not impletented";
-  },
-  getCurGenerator : function(){
-    if(this.generator && this.generator.hasNext()){
-      return this.generator;
-    }
-    return null;
-  },
   // called when box is created, but no style is not loaded.
   _onReadyBox : function(box, parent){
   },
   // called when box is created, and std style is already loaded.
   _onCreateBox : function(box, parent){
+  },
+  // this function is also called from InlineTreeGenerator via 'call' to yield an inline block element.
+  // so to give a clear scope, we accept 'context' as last argument,
+  // although it is same as 'this.context' in this generator.
+  _yieldStaticElement : function(parent, tag, context){
+    var generator;
+    var static_size = tag.getStaticSize(parent.fontSize || Layout.fontSize, parent.getContentMeasure());
+    if(tag.getName() === "img"){
+      generator = new ImageGenerator(tag, context);
+    } else if(tag.hasFlow()){
+      // if original flow defined, yield as inline page
+      generator = new InlinePageGenerator(tag, context.createInlineRoot());
+    } else {
+      // if static size is simply defined, treat as just an embed html with static size.
+      generator = new InlineBoxGenerator(tag, context);
+    }
+    return generator.yield(parent, static_size);
   },
   _getBoxType : function(){
     return this.markup.getName();

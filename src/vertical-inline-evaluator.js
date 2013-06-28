@@ -28,7 +28,7 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
     var stream = new TokenStream(text);
     var ctx2 = ctx.createInlineRoot();
     ctx2.setFixedFontSize(font_size);
-    var generator = new InlineGenerator(null, stream, ctx2);
+    var generator = new InlineTreeGenerator(null, stream, ctx2);
     return generator.yield(line);
   },
   evalTagStart : function(line, tag, ctx){

@@ -37,7 +37,7 @@ var HtmlGenerator = (function(){
 	  this._parseHead(tag.content);
 	  break;
 	case "body":
-	  generator = new BodyPageGenerator(tag, this.context);
+	  generator = new BodyBlockTreeGenerator(tag, this.context);
 	  break;
 	}
       }

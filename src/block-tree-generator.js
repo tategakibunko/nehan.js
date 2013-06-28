@@ -1,4 +1,4 @@
-var PageGenerator = BlockGenerator.extend({
+var BlockTreeGenerator = ElementGenerator.extend({
   init : function(markup, context){
     this._super(markup, context);
     this.generator = null;
@@ -28,6 +28,12 @@ var PageGenerator = BlockGenerator.extend({
       this.generator.rollback();
     }
   },
+  getCurGenerator : function(){
+    if(this.generator && this.generator.hasNext()){
+      return this.generator;
+    }
+    return null;
+  },
   // if size is not defined, rest size of parent is used.
   // if parent is null, root page is generated.
   yield : function(parent, size){
@@ -43,7 +49,6 @@ var PageGenerator = BlockGenerator.extend({
     page_size = size || (parent? parent.getRestSize() : null);
     page_box = this._createBox(page_size, parent);
     var ret = this._yieldPageTo(page_box);
-    this.context.popBlockTag();
     return ret;
   },
   // fill page with child page elements.
@@ -89,12 +94,12 @@ var PageGenerator = BlockGenerator.extend({
       page.clearBorderBefore();
     }
     if(!this.hasNext()){
-      this._onLastPage(page);
+      this._onLastTree(page);
     } else {
       page.clearBorderAfter();
     }
     this.rollbackCount = 0;
-    this._onCompletePage(page);
+    this._onCompleteTree(page);
 
     // if content is not empty, increment localPageNo.
     if(cur_extent > 0){
@@ -122,10 +127,11 @@ var PageGenerator = BlockGenerator.extend({
       .replace(/\s+$/, "") // discard tail space
       .replace(/\r/g, ""); // discard CR
   },
-  _onLastPage : function(page){
+  _onLastTree : function(page){
+    this.context.popBlockTag();
   },
   // called when page box is fully filled by blocks.
-  _onCompletePage : function(page){
+  _onCompleteTree : function(page){
   },
   _yieldPageElement : function(parent){
     if(this.generator && this.generator.hasNext()){
@@ -144,9 +150,9 @@ var PageGenerator = BlockGenerator.extend({
     }
     if(Token.isInline(token)){
       // this is not block level element, so we push back this token,
-      // and delegate this stream to InlineGenerator from the head of this inline element.
+      // and delegate this stream to InlineTreeGenerator from the head of this inline element.
       this.stream.prev();
-      this.generator = new InlineGenerator(this.markup, this.stream, this.context);
+      this.generator = new InlineTreeGenerator(null, this.stream, this.context);
       return this.generator.yield(parent);
     }
     return this._yieldBlockElement(parent, token);
@@ -163,7 +169,7 @@ var PageGenerator = BlockGenerator.extend({
       var generator = new InlinePageGenerator(tag, this.context.createInlineRoot());
       return generator.yield(parent, inline_size);
     }
-    this.generator = this._createChildPageGenerator(parent, tag);
+    this.generator = this._createChildBlockTreeGenerator(parent, tag);
     return this.generator.yield(parent);
   },
   _yieldStaticTag : function(parent, tag){
@@ -184,30 +190,13 @@ var PageGenerator = BlockGenerator.extend({
 
     return box; // return as single block.
   },
-  // this function is also called from InlineGenerator via 'call' to yield an inline block element.
-  // so to give a clear scope, we accept 'context' as last argument,
-  // although it is same as 'this.context' in this generator.
-  _yieldStaticElement : function(parent, tag, context){
-    var generator;
-    var static_size = tag.getStaticSize(parent.fontSize || Layout.fontSize, parent.getContentMeasure());
-    if(tag.getName() === "img"){
-      generator = new ImageGenerator(tag, context);
-    } else if(tag.hasFlow()){
-      // if original flow defined, yield as inline page
-      generator = new InlinePageGenerator(tag, context.createInlineRoot());
-    } else {
-      // if static size is simply defined, treat as just an embed html with static size.
-      generator = new InlineBoxGenerator(tag, context);
-    }
-    return generator.yield(parent, static_size);
-  },
   _yieldFloatedBlock : function(parent, aligned_box, tag){
-    var generator = new FloatedBlockGenerator(this.stream, this.context, aligned_box);
+    var generator = new FloatedBlockTreeGenerator(this.stream, this.context, aligned_box);
     var block = generator.yield(parent);
     this.generator = generator.getCurGenerator(); // inherit generator of aligned area
     return block;
   },
-  _createChildPageGenerator : function(parent, tag){
+  _createChildBlockTreeGenerator : function(parent, tag){
     switch(tag.getName()){
     case "h1": case "h2": case "h3": case "h4": case "h5": case "h6":
       return this._getHeaderLineGenerator(parent, tag);
@@ -230,7 +219,7 @@ var PageGenerator = BlockGenerator.extend({
     case "hr":
       return this._getHorizontalRuleGenerator(parent, tag);
     default:
-      return new ChildPageGenerator(tag, this.context);
+      return new ChildBlockTreeGenerator(tag, this.context);
     }
   },
   _getSectionContentGenerator : function(parent, tag){
@@ -251,7 +240,7 @@ var PageGenerator = BlockGenerator.extend({
   _getListItemGenerator : function(parent, tag){
     var list_style = parent.listStyle || null;
     if(list_style === null){
-      return new ChildPageGenerator(tag, this.context);
+      return new ChildBlockTreeGenerator(tag, this.context);
     }
     if(list_style.isInside()){
       return new InsideListItemGenerator(tag, parent, this.context);

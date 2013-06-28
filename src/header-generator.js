@@ -1,5 +1,5 @@
-var HeaderGenerator = ChildPageGenerator.extend({
-  _onCompletePage : function(page){
+var HeaderGenerator = ChildBlockTreeGenerator.extend({
+  _onCompleteTree : function(page){
     this._super(page);
     page.id = Css.addNehanHeaderPrefix(this.context.logSectionHeader(this.markup));
   },

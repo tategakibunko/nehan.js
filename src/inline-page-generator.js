@@ -1,6 +1,6 @@
 // InlinePageGenerator yield the first page only,
 // because size of first page can be defined, but continuous pages are not.
-var InlinePageGenerator = PageGenerator.extend({
+var InlinePageGenerator = BlockTreeGenerator.extend({
   hasNext : function(){
     return false;
   },

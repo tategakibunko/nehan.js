@@ -1,0 +1,3 @@
+var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
+});
+

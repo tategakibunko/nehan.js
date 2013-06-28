@@ -1,4 +1,4 @@
-var ListItemBodyGenerator = ParaChildPageGenerator.extend({
+var ListItemBodyGenerator = ParaChildGenerator.extend({
   _getBoxType : function(){
     return "li-body";
   }

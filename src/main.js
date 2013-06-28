@@ -80,12 +80,12 @@ if(__engine_args.test){
   __exports.RubyStream = RubyStream;
 
   // generator
-  __exports.BlockGenerator = BlockGenerator;
-  __exports.InlineGenerator = InlineGenerator;
-  __exports.PageGenerator = PageGenerator;
-  __exports.BodyPageGenerator = BodyPageGenerator;
-  __exports.ParallelPageGenerator = ParallelPageGenerator;
-  __exports.ParaChildPageGenerator = ParaChildPageGenerator;
+  __exports.ElementGenerator = ElementGenerator;
+  __exports.InlineTreeGenerator = InlineTreeGenerator;
+  __exports.BlockTreeGenerator = BlockTreeGenerator;
+  __exports.BodyBlockTreeGenerator = BodyBlockTreeGenerator;
+  __exports.ParallelGenerator = ParallelGenerator;
+  __exports.ParaChildGenerator = ParaChildGenerator;
   __exports.HtmlGenerator = HtmlGenerator;
   __exports.DocumentGenerator = DocumentGenerator;
 
