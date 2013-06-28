@@ -28,6 +28,15 @@ var RubyStream = (function(){
       this.pos++;
       return ruby;
     },
+    getPos : function(){
+      return this.pos;
+    },
+    isHead : function(){
+      return this.pos === 0;
+    },
+    prev : function(){
+      this.pos = Math.max(0, this.pos - 1);
+    },
     _parseAll : function(stream){
       var ret = [];
       while(stream.hasNext()){

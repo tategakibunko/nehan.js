@@ -1,35 +1,17 @@
-var RubyGenerator = (function(){
-  function RubyGenerator(markup){
-    this.markup = markup;
-    this.stream = new RubyStream(markup.content);
-  }
+var RubyGenerator = ChildInlineTreeGenerator.extend({
+  _createStream : function(){
+    return new RubyStream(this.markup.getContent());
+  },
+  _yieldElement : function(ctx){
+    var ruby = this._super(ctx);
+    ruby.setStartPos(ctx.curMeasure);
 
-  RubyGenerator.prototype = {
-    backup : function(){
-      this.stream.backup();
-    },
-    rollback : function(){
-      this.stream.rollback();
-    },
-    hasNext : function(){
-      return this.stream.hasNext();
-    },
-    // ctx : LineContext
-    yield : function(ctx){
-      this.backup();
-      var ruby = this.stream.get();
-      if(ruby === null){
-	return null;
-      }
-      ruby.setStartPos(ctx.curMeasure);
-
-      // avoid overwriting metrics.
-      if(!ruby.hasMetrics()){
-	ruby.setMetrics(ctx.getParentFlow(), this.markup.fontSize, this.markup.letterSpacing);
-      }
-      return ruby;
+    // avoid overwriting metrics.
+    if(!ruby.hasMetrics()){
+      ruby.setMetrics(ctx.getParentFlow(), this.markup.fontSize, this.markup.letterSpacing);
     }
-  };
+    console.log("yielded ruby! : %o", ruby);
+    return ruby;
+  }
+});
 
-  return RubyGenerator;
-})();

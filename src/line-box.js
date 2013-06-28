@@ -2,6 +2,7 @@ var LineBox = (function(){
   function LineBox(opt){
     this._type = "line-box";
     this.parent = opt.parent;
+    this.measure = opt.measure || 0;
     this.extent = opt.extent || 0;
     this.rubyLine = opt.rubyLine || null;
     this.textLine = opt.textLine || null;
@@ -49,6 +50,9 @@ var LineBox = (function(){
     },
     getContentMeasure : function(){
       return this.textLine.getContentMeasure();
+    },
+    getBoxMeasure : function(){
+      return this.measure;
     },
     getBoxExtent : function(){
       return this.extent;

@@ -3,13 +3,9 @@ var InlineContext = (function(){
     this.tagStack = new TagStack();
     this.fontSizeStack = [];
     this.fontColorStack = [];
-    this.lineContext = new LineContext();
   }
 
   InlineContext.prototype = {
-    setNewLine : function(parent, stream, context){
-      this.lineContext.setNewLine(parent, stream, context);
-    },
     // this func is used when we want temporary context and temporary font size.
     // mainly used from ruby label generator.
     setFixedFontSize : function(font_size){

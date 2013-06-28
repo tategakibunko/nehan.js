@@ -7,15 +7,11 @@
 // ruby disappears because stream already steps to the next pos of ruby.
 // any good idea to solve this problem?
 var InlineTreeGenerator = ElementGenerator.extend({
-  init : function(markup, stream, context){
-    this.markup = markup;
+  init : function(stream, context){
     this.stream = stream;
     this.context = context;
     this.parentMarkup = context.getCurBlockTag();
     this._hasNext = this.stream.hasNext();
-    if(this.markup){
-      this.context.pushInlineTag(this.markup);
-    }
   },
   hasNext : function(){
     if(!this._hasNext){
@@ -40,14 +36,14 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
   },
   yield : function(parent){
-    //var ctx = new LineContext(parent, this.stream, this.context);
-    this.context.setNewLine(parent, this.stream);
+    var ctx = new LineContext(parent, this.stream, this.context);
 
     // even if extent for basic line is not left,
     // just break and let parent generator break page.
+    /*
     if(!ctx.canContainBasicLine()){
       return Exceptions.BREAK;
-    }
+    }*/
 
     // backup inline head position.
     this.backup();
@@ -107,6 +103,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
   },
   _onCompleteTree : function(line){
+    //line.shortenMeasure();
   },
   _getExtent : function(ctx, element){
     if(Token.isText(element)){
@@ -150,11 +147,12 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(element instanceof Ruby){
       return element.getAdvance(ctx.getParentFlow());
     }
+    console.log("getAdvance:%o", element);
     return element.getBoxMeasure(ctx.getParentFlow());
   },
   _yieldElement : function(ctx){
     if(this.generator && this.generator.hasNext()){
-      return this.generator.yield(ctx);
+      return this.generator.yield(ctx.getRestBox());
     }
     this.generator = null;
     var token = ctx.getNextToken();
@@ -163,6 +161,9 @@ var InlineTreeGenerator = ElementGenerator.extend({
   _yieldToken : function(ctx, token){
     if(token === null){
       return Exceptions.BUFFER_END;
+    }
+    if(token instanceof Ruby){
+      return token;
     }
     // CRLF
     if(Token.isChar(token) && token.isNewLineChar()){
@@ -204,7 +205,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     // token is inline-block tag
     if(token.isInlineBlock()){
       this.generator = new InlineBlockGenerator(token, ctx.createInlineRoot());
-      return this.generator.yield(ctx);
+      return this.generator.yield(ctx.getRestBox());
     }
     // token is other inline tag
     return this._yieldInlineTag(ctx, token);
@@ -228,50 +229,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
       return this._yieldWord(ctx, text);
     }
   },
-  _createChildInlineTreeGenerator : function(ctx, tag){
-    switch(tag.getName()){
-    case "a":
-      return new LinkGenerator(tag, this.context);
-    default:
-      break;
-    }
-  },
-  _yieldInlineTag : function(ctx, tag){
-    if(tag.isSingleTag()){
-      ctx.inheritParentTag(tag);
-      return tag;
-    }
-    // if inline level edge is defined,
-    // get edge and set it to markup data because inline level does not create box.
-    // this edge(in markup data) is evaluated at InlineEvaluator::evalTagCss.
-    /*
-      TODO: we should get/set edge in _createBox.
-    var edge = tag.getBoxEdge(ctx.getParentFlow(), ctx.getInlineFontSize(), ctx.getMaxMeasure());
-    if(edge){
-      tag.edge = edge;
-    }*/
-    switch(tag.getName()){
-    case "script":
-      return Exceptions.IGNORE;
-
-    case "style":
-      ctx.addStyle(tag);
-      return Exceptions.IGNORE;
-
-    case "ruby":
-      // assert metrics only once to avoid dup update by rollback
-      if(typeof tag.fontSize === "undefined"){
-	tag.fontSize = ctx.getInlineFontSize();
-	tag.letterSpacing = ctx.letterSpacing;
-      }
-      this.generator = new RubyGenerator(tag);
-      return this.generator.yield(ctx);
-
-    default:
-      this.generator = this._createChildInlineTreeGenerator(ctx, tag);
-      return this.generator.yield(ctx);
-    }
-  },
   _yieldWord : function(ctx, word){
     var advance = word.getAdvance(ctx.getParentFlow(), ctx.letterSpacing);
 
@@ -289,6 +246,44 @@ var InlineTreeGenerator = ElementGenerator.extend({
     part.setMetrics(flow, font_size, is_bold); // metrics for first half
     word.setMetrics(flow, font_size, is_bold); // metrics for second half
     return part;
+  },
+  _yieldInlineTag : function(ctx, tag){
+    if(tag.isSingleTag()){
+      ctx.inheritParentTag(tag);
+      return tag;
+    }
+    switch(tag.getName()){
+    case "script":
+      return Exceptions.IGNORE;
+
+    case "style":
+      ctx.addStyle(tag);
+      return Exceptions.IGNORE;
+
+    default:
+      this.generator = this._createChildInlineTreeGenerator(ctx, tag);
+      console.log("generator of %s is %o", tag.getName(), this.generator);
+      if(this.generator){
+	return this.generator.yield(ctx.getRestBox());
+      }
+      return Exceptions.IGNORE;
+    }
+  },
+  _createChildInlineTreeGenerator : function(ctx, tag){
+    switch(tag.getName()){
+    case "ruby":
+      // check if metrics is already set.
+      if(typeof tag.fontSize === "undefined"){
+	tag.fontSize = ctx.getInlineFontSize();
+	tag.letterSpacing = ctx.letterSpacing;
+      }
+      return new RubyGenerator(tag, this.context, ctx.parent);
+
+    case "a":
+      return new LinkGenerator(tag, this.context, ctx.parent);
+    default:
+      break;
+    }
   }
 });
 
