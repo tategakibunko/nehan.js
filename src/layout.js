@@ -22,6 +22,15 @@ var Layout = {
     box.color = parent.color;
     return box;
   },
+  createTextLine : function(size, parent){
+    var box = new TextLine(size, parent);
+    box.flow = parent.flow;
+    box.lineRate = parent.lineRate;
+    box.textAlign = parent.textAlign;
+    box.fontSize = parent.fontSize;
+    box.color = parent.color;
+    return box;
+  },
   createStdBox : function(type){
     var flow = this.getStdBoxFlow();
     var size = this.getStdPageSize();
@@ -31,6 +40,7 @@ var Layout = {
     box.textAlign = "start";
     box.fontSize = this.fontSize;
     box.color = new Color(this.fontColor);
+    box.letterSpacing = 0;
     return box;
   },
   getStdPageSize : function(){

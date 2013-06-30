@@ -1,41 +1,40 @@
 var VerticalInlineEvaluator = InlineEvaluator.extend({
-  evalTextLine : function(line, ctx){
-    var css = line.getCss();
-    if(line.parent && line.parent._type === "ruby-line"){
-      css["float"] = "none";
-    }
-    return Html.tagWrap("div", this.evalTextLineBody(line, ctx), {
-      "style":Css.attr(css),
-      "class":line.getCssClasses()
+  evalRuby : function(line, ruby, ctx){
+    var body = this.evalRb(line, ruby, ctx) + this.evalRt(line, ruby, ctx);
+    return Html.tagWrap("div", body, {
+      "style":Css.attr(ruby.getCssRuby(line)),
+      "class":"nehan-ruby"
     });
   },
-  evalRubyLabel : function(line, label, ctx){
-    var label_line = this._yieldRubyLabelLine(line, label, ctx);
-    return Html.tagWrap("div", this.evalTextLine(label_line, ctx.createInlineRoot()), {
-      "style": Css.attr(label.getCss(line)),
-      "class": Css.addNehanPrefix(label._type)
+  evalRb : function(line, ruby, ctx){
+    var body = this.evalTextLineBody(line, ruby.getRbs(), ctx);
+    return Html.tagWrap("div", body, {
+      "style":Css.attr(ruby.getCssRb(line)),
+      "class": "nehan-rb"
     });
   },
-  evalEmphaChar : function(line, text, ctx){
+  evalRt : function(line, ruby, ctx){
+    var rt_body = this.evalRtLine(line, ruby, ctx);
+    return Html.tagWrap("div", rt_body, {
+      "style":Css.attr(ruby.getCssRt(line)),
+      "class": "nehan-rt"
+    });
+  },
+  evalRtLine : function(line, ruby, ctx){
+    var text = ruby.getRtString();
+    var font_size = ruby.getRtFontSize();
+    var stream = new TokenStream(text);
+    var ctx2 = ctx.createInlineRoot();
+    ctx2.setFixedFontSize(font_size);
+    var generator = new InlineTreeGenerator(ruby.rt, stream, ctx2);
+    var rt_line = generator.yield(line);
+    return this.evaluate(rt_line, ctx);
+  },
+  evalEmpha : function(line, text, ctx){
     return Html.tagWrap("div", text.data, {
       "class": "nehan-empha-char",
       "style": Css.attr(text.getCss(line.flow))
     });
-  },
-  _yieldRubyLabelLine : function(line, label, ctx){
-    var text = label.getRtString();
-    var font_size = label.getRtFontSize();
-    var stream = new TokenStream(text);
-    var ctx2 = ctx.createInlineRoot();
-    ctx2.setFixedFontSize(font_size);
-    var generator = new InlineTreeGenerator(stream, ctx2);
-    return generator.yield(line);
-  },
-  evalTagStart : function(line, tag, ctx){
-    return this._super(line, tag, ctx, "div");
-  },
-  evalTagEnd : function(line, tag, ctx){
-    return "</div>";
   },
   evalWord : function(line, word, ctx){
     if(Env.isTransformEnable){

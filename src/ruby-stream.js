@@ -24,8 +24,10 @@ var RubyStream = (function(){
     },
     get : function(){
       var ruby = this.peek();
-      ruby.index = this.pos;
-      this.pos++;
+      if(ruby){
+	ruby.index = this.pos;
+	this.pos++;
+      }
       return ruby;
     },
     getPos : function(){

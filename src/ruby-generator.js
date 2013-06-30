@@ -4,13 +4,13 @@ var RubyGenerator = ChildInlineTreeGenerator.extend({
   },
   _yieldElement : function(ctx){
     var ruby = this._super(ctx);
-    ruby.setStartPos(ctx.curMeasure);
-
+    if(typeof ruby === "number"){
+      return ruby; // exception
+    }
     // avoid overwriting metrics.
     if(!ruby.hasMetrics()){
-      ruby.setMetrics(ctx.getParentFlow(), this.markup.fontSize, this.markup.letterSpacing);
+      ruby.setMetrics(ctx.getLineFlow(), ctx.getFontSize(), ctx.getLetterSpacing());
     }
-    console.log("yielded ruby! : %o", ruby);
     return ruby;
   }
 });

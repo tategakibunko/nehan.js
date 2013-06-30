@@ -45,7 +45,10 @@ var ElementGenerator = Class.extend({
   },
   _isFirstChild : function(box, parent){
     // li-marker and li-body are always first childs of 'li', so ignore them.
-    if(box._type == "li-marker" || box._type == "li-body"){
+    if(box._type === "li-marker" || box._type === "li-body"){
+      return false;
+    }
+    if(box._type === "text-line"){
       return false;
     }
     return parent.isEmptyChild();
@@ -145,6 +148,7 @@ var ElementGenerator = Class.extend({
   _createBox : function(size, parent){
     var box_type = this._getBoxType();
     var box = Layout.createBox(size, parent, box_type);
+    box.markup = this.markup;
     this._onReadyBox(box, parent);
     this._setBoxStyle(box, parent);
     this._onCreateBox(box, parent);

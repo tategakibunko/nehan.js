@@ -41,6 +41,9 @@ var Char = (function(){
     hasMetrics : function(){
       return (typeof this.bodySize != "undefined") && (typeof this.fontSize != "undefined");
     },
+    hasEmpha : function(){
+      return (typeof this.empha !== "undefined") && (this.empha !== "");
+    },
     getAdvance : function(flow, letter_spacing){
       return this.bodySize + this.getPaddingSize() + letter_spacing;
     },
@@ -70,6 +73,9 @@ var Char = (function(){
       if(!is_vert && !this.isRef && this.isHankaku()){
 	this.bodySize = Math.floor(font_size / 2);
       }
+    },
+    setEmpha : function(empha){
+      this.empha = empha;
     },
     _setImg : function(img, vscale, hscale){
       this.img = img;

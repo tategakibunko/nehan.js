@@ -3,6 +3,7 @@ var Ruby = (function(){
     this._type = "ruby";
     this.rbs = rbs;
     this.rt = rt;
+    this.padding = new Padding();
   }
 
   Ruby.prototype = {
@@ -25,18 +26,27 @@ var Ruby = (function(){
       return this.rubyFontSize;
     },
     getRtString : function(){
-      return this.rt? this.rt.content : "";
+      return this.rt? this.rt.getContent() : "";
     },
-    getCss : function(ruby_line){
+    getCssRuby : function(line){
       var css = {};
-      css.position = "absolute";
-      css["font-size"] = this.rubyFontSize + "px";
-      css[ruby_line.getPropStart()] = this.startPos + "px";
-      css[ruby_line.getTextSide()] = this._getBaseLineOffset(ruby_line) + "px";
       return css;
     },
-    setStartPos : function(start_pos){
-      this.startPos = start_pos;
+    getCssRt : function(line){
+      var css = {};
+      css["font-size"] = this.rubyFontSize + "px";
+      if(line.isTextVertical()){
+	css["float"] = "left";
+      }
+      return css;
+    },
+    getCssRb : function(line){
+      var css = {};
+      if(line.isTextVertical()){
+	css["float"] = "left";
+      }
+      Args.copy(css, this.padding.getCss());
+      return css;
     },
     setMetrics : function(flow, font_size, letter_spacing){
       this.baseFontSize = font_size;
@@ -50,33 +60,11 @@ var Ruby = (function(){
       if(advance_rt > advance_rbs){
 	var ctx_space = Math.ceil((advance_rt - advance_rbs) / 2);
 	if(this.rbs.length > 0){
-	  this.rbs[0].paddingStart = ctx_space;
-	  this.rbs[this.rbs.length - 1].paddingEnd = ctx_space;
+	  this.padding.setStart(flow, ctx_space);
+	  this.padding.setEnd(flow, ctx_space);
 	}
 	this.advanceSize += ctx_space + ctx_space;
       }
-    },
-    // calc baseline offset of this ruby,
-    // bacause sometimes size of each ruby are different.
-    _getBaseLineOffset : function(ruby_line){
-      if(ruby_line.isTextVertical()){
-	return this._getBaseLineOffsetVert(ruby_line);
-      }
-      return this._getBaseLineOffsetHori(ruby_line);
-    },
-    _getBaseLineOffsetVert : function(ruby_line){
-      var line_space = ruby_line.getBodyLineContentExtent() - this.baseFontSize;
-      var total_rate = 1.0 + ruby_line.lineRate;
-      var offset = Math.floor(total_rate * Layout.rubyRate * line_space / 2);
-      if(offset > 0){
-	return -offset;
-      }
-      return 0;
-    },
-    _getBaseLineOffsetHori : function(ruby_line){
-      var line_height = ruby_line.getContentExtent();
-      var line_space = line_height - this.rubyFontSize;
-      return -Math.floor(line_space / 2);
     }
   };
 

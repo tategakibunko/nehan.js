@@ -86,6 +86,12 @@ var DocumentContext = (function(){
       return this.anchors[anchor_name];
     },
     // inline context
+    getCurInlineTag : function(){
+      return this.inlineContext.getHeadTag();
+    },
+    getCurEmpha : function(){
+      return this.inlineContext.getCurEmpha();
+    },
     getInlineFontSize : function(parent){
       return this.inlineContext.getFontSize(parent);
     },
@@ -98,12 +104,12 @@ var DocumentContext = (function(){
     getInlineTagDepth : function(){
       return this.inlineContext.getTagDepth();
     },
-    pushInlineTag : function(tag, parent){
+    pushInlineTag : function(tag){
       var parent_tag = this.getCurBlockTag();
       if(parent_tag){
 	tag.inherit(parent_tag);
       }
-      this.inlineContext.pushTag(tag, parent);
+      this.inlineContext.pushTag(tag);
     },
     popInlineTag : function(){
       return this.inlineContext.popTag();

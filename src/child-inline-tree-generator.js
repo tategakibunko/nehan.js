@@ -1,15 +1,21 @@
 var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
-  init : function(markup, context, parent){
+  init : function(markup, context){
     this.markup = markup;
     this.context = context;
     this.stream = this._createStream();
-    this.context.pushInlineTag(this.markup, parent);
+    this.context.pushInlineTag(this.markup);
   },
   _createStream : function(){
     return new TokenStream(this.markup.getContent());
   },
-  _onCompleteTree : function(line){
+  _getLineSize : function(parent){
+    var measure = (parent instanceof TextLine)? parent.getTextRestMeasure() : parent.getContentMeasure();
+    var extent = parent.getContentExtent();
+    return parent.flow.getBoxSize(measure, extent);
+  },
+  _onCompleteTree : function(ctx, line){
     this.context.popInlineTagByName(this.markup.getName());
+    line.shortenMeasure();
   }
 });
 

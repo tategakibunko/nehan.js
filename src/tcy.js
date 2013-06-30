@@ -14,9 +14,15 @@ var Tcy = (function(){
     hasMetrics : function(){
       return (typeof this.bodySize != "undefined") && (typeof this.fontSize != "undefined");
     },
+    hasEmpha : function(){
+      return (typeof this.empha !== "undefined") && (this.empha !== "");
+    },
     setMetrics : function(flow, font_size, is_bold){
       this.fontSize = font_size;
       this.bodySize = font_size;
+    },
+    setEmpha : function(empha){
+      this.empha = empha;
     }
   };
 

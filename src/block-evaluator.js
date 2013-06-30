@@ -19,10 +19,8 @@ var BlockEvaluator = (function(){
 	return this.evalImage(box, ctx);
       case "table":
 	return this.evalTable(box, ctx);
-      case "line-box":
-	return this.evalLineBox(box, ctx);
-      case "text-line": case "ruby-line":
-	return this.evalLine(box, ctx);
+      case "text-line":
+	return this.evalTextLine(box, ctx);
       default:
 	return this.evalBox(box, ctx);
       }
@@ -43,13 +41,7 @@ var BlockEvaluator = (function(){
 	return [ret, self.evaluate(box, ctx)].join("\n");
       });
     },
-    evalLineBox : function(box, ctx){
-      var self = this;
-      return List.fold(box.getLines(), "", function(ret, line){
-	return ret + self.evalLine(line, ctx);
-      });
-    },
-    evalLine : function(box, ctx){
+    evalTextLine : function(box, ctx){
       if(box.isTextVertical()){
 	return this.inlineEvaluatorV.evaluate(box, ctx);
       }

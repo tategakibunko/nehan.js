@@ -1,25 +1,19 @@
 var LineContext = (function(){
-  function LineContext(parent, stream, context){
-    this.parent = parent;
+  function LineContext(line, stream, context){
+    this.line = line;
     this.stream = stream;
     this.context = context;
-    this.isRubyLine = parent._type === "ruby-line";
+    this.markup = this.context.getCurInlineTag() || null;
     this.lineStartPos = this.stream.getPos();
-    this.lineRate = parent.lineRate;
-    this.letterSpacing = parent.letterSpacing || 0;
-    this.textIndent = stream.isHead()? (parent.textIndent || 0) : 0;
-    this.maxFontSize = parent.fontSize;
+    this.textIndent = stream.isHead()? (line.textIndent || 0) : 0;
+    this.maxFontSize = line.fontSize;
     this.maxExtent = 0;
-    this.maxMeasure = parent.getContentMeasure() - this.textIndent;
+    this.maxMeasure = line.getContentMeasure() - this.textIndent;
     this.curMeasure = 0;
     this.restMeasure = this.maxMeasure;
-    this.restExtent = parent.getRestContentExtent();
-    this.lineMeasure = parent.getContentMeasure() - this.textIndent;
-    this.rubyLineRate = Math.max(0, this.lineRate - 1);
-    this.rubyLineExtent = this.isRubyLine? 0 : Math.floor(parent.fontSize * this.rubyLineRate);
-    this.bodyTokens = [];
-    this.rubyTokens = [];
-    this.emphaChars = [];
+    this.restExtent = line.getRestContentExtent();
+    this.lineMeasure = line.getContentMeasure() - this.textIndent;
+    this.lineTokens = [];
     this.lineBreak = false;
     this.charCount = 0;
     this.lastToken = null;
@@ -28,36 +22,69 @@ var LineContext = (function(){
   }
 
   LineContext.prototype = {
-    getRestBox : function(){
-      var parent_flow = this.parent.flow;
-      var measure = this.restMeasure;
-      var extent = this.parent.getContentExtent();
-      var size = parent_flow.getBoxSize(measure, extent);
-      var box = new Box(size, this.parent);
-      box.flow = this.parent.flow;
-      return box;
+    getElementExtent : function(element){
+      if(Token.isText(element)){
+	return element.fontSize;
+      }
+      if(element instanceof Ruby){
+	return element.getExtent();
+      }
+      return element.getBoxExtent(this.getLineFlow());
+    },
+    getElementFontSize : function(element){
+      if(Token.isText(element)){
+	return element.fontSize;
+      }
+      if(element instanceof Ruby){
+	return element.getFontSize();
+      }
+      return element.fontSize || 0;
+    },
+    getElementAdvance : function(element){
+      if(Token.isText(element)){
+	return element.getAdvance(this.getLineFlow(), this.getLetterSpacing());
+      }
+      if(element instanceof Ruby){
+	return element.getAdvance(this.getLineFlow());
+      }
+      return element.getBoxMeasure(this.getLineFlow());
+    },
+    getFontSize : function(){
+      return this.line.fontSize;
+    },
+    getMaxFontSize : function(){
+      return this.maxFontSize;
+    },
+    getMaxExtent : function(){
+      return this.maxExtent;
+    },
+    getLineFlow : function(){
+      return this.line.flow;
+    },
+    getLetterSpacing : function(){
+      return this.line.letterSpacing || 0;
     },
     canContainBasicLine : function(){
-      return this.restExtent >= Math.floor(this.parent.fontSize * this.lineRate);
+      return this.restExtent >= Math.floor(this.line.fontSize * this.line.lineRate);
     },
     canContainExtent : function(extent){
       return this.restExtent >= extent;
     },
     canContainAdvance : function(element, advance){
-      if(element instanceof Box || !this.parent.canJustify()){
+      if(element instanceof Box || !this.line.canJustify()){
 	return this.restMeasure >= advance;
       }
       if(element instanceof Word || element instanceof Tcy){
 	return this.restMeasure >= advance;
       }
       // justify target need space for tail fix.
-      return this.restMeasure - this.parent.fontSize >= advance;
+      return this.restMeasure - this.line.fontSize >= advance;
     },
     canContain : function(element, advance, extent){
       return this.canContainAdvance(element, advance) && this.canContainExtent(extent);
     },
     isPreLine : function(){
-      return this.parent._type === "pre";
+      return this.line._type === "pre";
     },
     isEmptySpace : function(){
       return this.restMeasure <= 0;
@@ -66,13 +93,13 @@ var LineContext = (function(){
       return this.context.isBoldEnable();
     },
     isEmptyText : function(){
-      return this.bodyTokens.length === 0;
+      return this.lineTokens.length === 0;
     },
     isInlineTagEmpty : function(){
       return this.context.getInlineTagDepth() <= 0;
     },
     isOverWithoutLineBreak : function(){
-      return !this.lineBreak && (this.bodyTokens.length > 0);
+      return !this.lineBreak && (this.lineTokens.length > 0);
     },
     isLineStart : function(){
       return this.stream.pos == this.lineStartPos;
@@ -81,7 +108,7 @@ var LineContext = (function(){
       return this.lineStartPos === 0;
     },
     pushTag : function(tag){
-      this.context.pushInlineTag(tag, this.parent);
+      this.context.pushInlineTag(tag, this.line);
     },
     pushBackToken : function(){
       this.stream.prev();
@@ -127,29 +154,30 @@ var LineContext = (function(){
       return token;
     },
     getTextTokenLength : function(){
-      return this.bodyTokens.length;
-    },
-    getInlineFontSize : function(){
-      return this.context.getInlineFontSize(this.parent);
+      return this.lineTokens.length;
     },
     getRestMeasure : function(){
-      return this.parent.getContentMeasure() - this.curMeasure;
+      return this.line.getContentMeasure() - this.curMeasure;
     },
     getMaxMeasure : function(){
       return this.maxMeasure;
     },
-    getParentFlow : function(){
-      return this.parent.flow;
-    },
     addStyle : function(tag){
       this.context.addStyle(tag);
     },
-    addElement : function(element, opt){
-      if(opt.fontSize > this.maxFontSize){
-	this._setMaxFontSize(opt.fontSize);
+    addElement : function(element){
+      var advance = this.getElementAdvance(element);
+      var extent = this.getElementExtent(element);
+      if(!this.canContain(element, advance, extent)){
+	throw "OverflowInline";
       }
-      if(opt.extent > this.maxExtent){
-	this._setMaxExtent(opt.extent);
+
+      var font_size = this.getElementFontSize(element);
+      if(font_size > this.maxFontSize){
+	this._setMaxFontSize(font_size);
+      }
+      if(extent > this.maxExtent){
+	this._setMaxExtent(extent);
       }
       if(element instanceof Ruby){
 	this._addRuby(element);
@@ -160,8 +188,8 @@ var LineContext = (function(){
       } else {
 	this._addText(element);
       }
-      if(opt.advance > 0){
-	this._addAdvance(opt.advance);
+      if(advance > 0){
+	this._addAdvance(advance);
       }
     },
     setAnchor : function(anchor_name){
@@ -180,15 +208,10 @@ var LineContext = (function(){
 	this.popFirstLine();
       }
       // if overflow measure without line-break, try to justify.
-      if(this.isOverWithoutLineBreak() && this.parent.canJustify()){
+      if(this.isOverWithoutLineBreak() && this.line.canJustify()){
 	this.justify(this.lastToken);
       }
-      var text_line = this._createTextLine();
-      if(this.isRubyLine || this.lineRate <= 1.0){
-	return text_line;
-      }
-      var ruby_line = this._createRubyLine(text_line);
-      return this._createLineBox(text_line, ruby_line);
+      return this._createTextLine();
     },
     justify : function(last_token){
       var head_token = last_token;
@@ -197,7 +220,7 @@ var LineContext = (function(){
       
       // head text of next line meets head-NG.
       if(head_token && Token.isChar(head_token) && head_token.isHeadNg()){
-	this.bodyTokens = this._justifyHead(head_token);
+	this.lineTokens = this._justifyHead(head_token);
 	if(this.stream.getPos() != backup_pos){ // some text is moved by head-NG.
 	  tail_token = this.stream.findTextPrev(); // search tail_token from new stream position pointing to new head pos.
 	  // if new head is single br, this must be included in current line, so skip it.
@@ -208,7 +231,7 @@ var LineContext = (function(){
       }
       // tail text of this line meets tail-NG.
       if(tail_token && Token.isChar(tail_token) && tail_token.isTailNg()){
-	this.bodyTokens = this._justifyTail(tail_token);
+	this.lineTokens = this._justifyTail(tail_token);
       }
     },
     _addAdvance : function(advance){
@@ -220,9 +243,6 @@ var LineContext = (function(){
     },
     _setMaxFontSize : function(max_font_size){
       this.maxFontSize = max_font_size;
-      if(!this.isRubyLine){
-	this.rubyLineExtent = Math.floor(max_font_size * this.rubyLineRate);
-      }
     },
     _setKerning : function(token){
       this.prevText = this.lastText;
@@ -267,36 +287,25 @@ var LineContext = (function(){
       return 0.5;
     },
     _addRuby : function(element){
-      this.bodyTokens = this.bodyTokens.concat(element.getRbs());
-      this.rubyTokens.push(element);
+      this.lineTokens.push(element);
     },
     _addTag : function(element){
-      this.bodyTokens.push(element);
+      this.lineTokens.push(element);
     },
     _addInlineBlock : function(element){
-      this.bodyTokens.push(element);
-    },
-    _addEmpha : function(empha, element){
-      var mark = empha.getCssAttr("empha-mark") || "&#x2022;";
-      this.emphaChars.push(new EmphaChar({
-	data:mark,
-	parent:element,
-	startPos:this.curMeasure
-      }));
+      this.lineTokens.push(element);
     },
     _addText : function(element){
       // text element
-      this.bodyTokens.push(element);
+      this.lineTokens.push(element);
 
       // count up char count of line
       this.charCount += element.getCharCount();
 
       // check empha tag is open.
-      var empha = this.context.findInlineTag(function(tag){ return tag.isEmphaTag(); });
-
-      // if emphasis tag is open, add emphasis-char to ruby line.
+      var empha = this.context.getCurEmpha();
       if(empha){
-	this._addEmpha(empha, element);
+	element.setEmpha(empha);
       }
     },
     // fix line that is started with wrong text.
@@ -311,13 +320,13 @@ var LineContext = (function(){
       });
       // no head NG, just return texts as they are.
       if(count <= 0){
-	return this.bodyTokens;
+	return this.lineTokens;
       }
       // if one head NG, push it into current line.
       if(count === 1){
-	this.bodyTokens.push(head_token);
+	this.lineTokens.push(head_token);
 	this.stream.setPos(head_token.pos + 1);
-	return this.bodyTokens;
+	return this.lineTokens;
       }
       // if more than two head NG, find non NG text from tail, and cut the line at the pos.
       var normal_pos = -1;
@@ -333,17 +342,17 @@ var LineContext = (function(){
       });
       // if no proper pos is found in current line, give up justifying.
       if(normal_pos < 0){
-	return this.bodyTokens;
+	return this.lineTokens;
       }
       // if normal pos is found, pop line until that pos.
       var ptr = head_token.pos;
       while(ptr > normal_pos){
-	this.bodyTokens.pop();
+	this.lineTokens.pop();
 	ptr--;
       }
       // set stream position at the normal pos.
       this.stream.setPos(normal_pos);
-      return this.bodyTokens;
+      return this.lineTokens;
     },
     // fix line that is ended with wrong text.
     _justifyTail : function(tail_token){
@@ -357,13 +366,13 @@ var LineContext = (function(){
       });
       // no tail NG, just return texts as they are.
       if(count <= 0){
-	return this.bodyTokens;
+	return this.lineTokens;
       }
       // if one tail NG, pop it(tail token is displayed in next line).
       if(count === 1){
-	this.bodyTokens.pop();
+	this.lineTokens.pop();
 	this.stream.setPos(tail_token.pos);
-	return this.bodyTokens;
+	return this.lineTokens;
       }
       // if more than two tail NG, find non NG text from tail, and cut the line at the pos.
       var normal_pos = -1;
@@ -379,60 +388,28 @@ var LineContext = (function(){
       });
       // if no proper pos is found in current line, give up justifying.
       if(normal_pos < 0){
-	return this.bodyTokens;
+	return this.lineTokens;
       }
       // if normal pos is found, pop line until that pos.
       var ptr = tail_token.pos;
       while(ptr > normal_pos){
-	this.bodyTokens.pop();
+	this.lineTokens.pop();
 	ptr--;
       }
       // set stream postion at the 'next' of normal pos.
       this.stream.setPos(normal_pos + 1);
-      return this.bodyTokens;
+      return this.lineTokens;
     },
     _createTextLine : function(){
-      var size = this.parent.flow.getBoxSize(this.lineMeasure, this.maxExtent);
-      return new TextLine({
-	type:"text-line",
-	parent:this.parent,
-	size:size,
-	charCount:this.charCount,
-	fontSize:this.parent.fontSize,
-	color:this.parent.color,
-	tokens:this.bodyTokens,
-	textMeasure:this.curMeasure,
-	textIndent:this.textIndent,
-	letterSpacing:this.letterSpacing,
-	lineRate:1.0
-      });
-    },
-    _createRubyLine : function(text_line){
-      var size = this.parent.flow.getBoxSize(this.lineMeasure, this.rubyLineExtent);
-      return new TextLine({
-	type:"ruby-line",
-	parent:this.parent,
-	size:size,
-	charCount:0,
-	fontSize:this.parent.fontSize,
-	color:this.parent.color,
-	tokens:this.rubyTokens,
-	emphaChars:this.emphaChars,
-	textMeasure:this.curMeasure,
-	textIndent:this.textIndent,
-	letterSpacing:this.letterSpacing,
-	lineRate:this.rubyLineRate,
-	bodyLine:text_line
-      });
-    },
-    _createLineBox : function(text_line, ruby_line){
-      return new LineBox({
-	measure:this.lineMeasure,
-	extent:(this.maxExtent + this.rubyLineExtent),
-	parent:this.parent,
-	rubyLine:ruby_line,
-	textLine:text_line
-      });
+      var ruby_extent = Math.floor(this.maxFontSize * (this.line.lineRate - 1));
+      var max_text_extent = this.maxFontSize + ruby_extent;
+      this.maxExtent = Math.max(this.maxExtent, max_text_extent);
+      this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxExtent);
+      this.line.charCount = this.charCount;
+      this.line.tokens = this.lineTokens;
+      this.line.textMeasure = this.curMeasure;
+      this.line.textIndent = this.textIndent;
+      return this.line;
     }
   };
 

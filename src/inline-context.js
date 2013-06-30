@@ -3,6 +3,7 @@ var InlineContext = (function(){
     this.tagStack = new TagStack();
     this.fontSizeStack = [];
     this.fontColorStack = [];
+    this.emphaStack = [];
   }
 
   InlineContext.prototype = {
@@ -11,23 +12,23 @@ var InlineContext = (function(){
     setFixedFontSize : function(font_size){
       this.fixedFontSize = font_size;
     },
+    getHeadTag : function(){
+      return this.tagStack.getHead();
+    },
+    getCurEmpha : function(){
+      return List.last(this.emphaStack, "");
+    },
     getTagStack : function(){
       return this.tagStack;
     },
-    getFontSize : function(parent){
+    getFontSize : function(){
       if(this.fixedFontSize){
 	return this.fixedFontSize;
       }
-      if(this.fontSizeStack.length > 0){
-	return this.fontSizeStack[this.fontSizeStack.length - 1];
-      }
-      return parent.fontSize;
+      return List.last(this.fontSizeStack, Layout.fontSize);
     },
     getFontColor : function(parent){
-      if(this.fontColorStack.length > 0){
-	return this.fontColorStack[this.fontColorStack.length - 1];
-      }
-      return parent.color;
+      return List.last(this.fontColorStack, parent.color);
     },
     getTagDepth : function(){
       return this.tagStack.getDepth();
@@ -54,7 +55,7 @@ var InlineContext = (function(){
 	return tag.getName() == name;
       });
     },
-    pushTag : function(tag, parent){
+    pushTag : function(tag){
       var font_size = tag.getCssAttr("font-size");
       if(font_size){
 	var cur_font_size = this.getFontSize(parent);
@@ -70,28 +71,35 @@ var InlineContext = (function(){
 	tag.setFontColorUpdate(font_color);
 	this.fontColorStack.push(font_color);
       }
+      var empha = tag.getCssAttr("empha-mark");
+      if(empha){
+	this.emphaStack.push(empha);
+      }
       this.tagStack.push(tag);
     },
     popTag : function(){
       var tag = this.tagStack.pop();
       if(tag){
-	this._updateStatus(tag);
+	this._onPopTag(tag);
       }
       return tag;
     },
     popTagByName : function(name){
       var tag = this.tagStack.popByName(name);
       if(tag){
-	this._updateStatus(tag);
+	this._onPopTag(tag);
       }
       return tag;
     },
-    _updateStatus : function(tag){
+    _onPopTag : function(tag){
       if(tag.fontSize && this.fontSizeStack.length > 0){
 	this.fontSizeStack.pop();
       }
       if(tag.color && this.fontColorStack.length > 0){
 	this.fontColorStack.pop();
+      }
+      if(tag.isEmphaTag()){
+	this.emphaStack.pop();
       }
     }
   };

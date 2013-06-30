@@ -157,6 +157,12 @@ var List = {
     }
     return ret;
   },
+  last : function(lst, def_val){
+    if(lst.length === 0){
+      return def_val;
+    }
+    return lst[lst.length - 1];
+  },
   zip : function(lst1, lst2){
     var ret = [];
     for(var i = 0, len = Math.min(lst1.length, lst2.length); i < len; i++){

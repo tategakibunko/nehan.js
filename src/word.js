@@ -13,7 +13,10 @@ var Word = (function(){
       return this.bodySize + letter_spacing * this.getLetterCount();
     },
     hasMetrics : function(){
-      return (typeof this.bodySize != "undefined") && (typeof this.fontSize != "undefined");
+      return (typeof this.bodySize !== "undefined") && (typeof this.fontSize != "undefined");
+    },
+    hasEmpha : function(){
+      return (typeof this.empha !== "undefined") && (this.empha !== "");
     },
     setMetrics : function(flow, font_size, is_bold){
       this.fontSize = font_size;
@@ -22,6 +25,9 @@ var Word = (function(){
 	var bold_rate = Layout.boldRate;
 	this.bodySize += Math.floor(bold_rate * this.bodySize);
       }
+    },
+    setEmpha : function(empha){
+      this.empha = empha;
     },
     getLetterCount : function(){
       return this.data.length;

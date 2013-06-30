@@ -398,10 +398,11 @@ var Style = {
     "display":"inline"
   },
   "ruby":{
-    "font-size":"0.5em",
     "display":"inline"
   },
   "rt":{
+    "font-size":"0.5em",
+    "line-rate":1.0,
     "display":"inline"
   },
   //-------------------------------------------------------

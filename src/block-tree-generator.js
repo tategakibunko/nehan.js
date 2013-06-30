@@ -152,7 +152,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
       // this is not block level element, so we push back this token,
       // and delegate this stream to InlineTreeGenerator from the head of this inline element.
       this.stream.prev();
-      this.generator = new InlineTreeGenerator(this.stream, this.context);
+      this.generator = new InlineTreeGenerator(this.markup, this.stream, this.context);
       return this.generator.yield(parent);
     }
     return this._yieldBlockElement(parent, token);

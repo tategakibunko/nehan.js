@@ -1,25 +1,20 @@
 // this class is almost same as 'Box',
 // but we isolate this class for performance reason.
 var TextLine = (function(){
-  function TextLine(opt){
+  function TextLine(size, parent){
     this.css = {};
-    this._type = opt.type || "text-line";
-    this.size = opt.size;
-    this.fontSize = opt.fontSize;
-    this.color = opt.color;
-    this.parent = opt.parent;
-    this.textMeasure = opt.textMeasure;
-    this.textIndent = opt.textIndent;
-    this.tokens = opt.tokens;
-    this.emphaChars = opt.emphaChars || null;
-    this.lineRate = opt.lineRate || 1.0;
-    this.bodyLine = opt.bodyLine || null;
-    this.charCount = opt.charCount || 0;
-    this.letterSpacing = opt.letterSpacing || 0;
-
-    // inherit parent properties
-    this.textAlign = this.parent.textAlign;
-    this.flow = this.parent.flow;
+    this._type = "text-line";
+    this.size = size;
+    this.parent = parent;
+    this.fontSize = parent.fontSize;
+    this.maxFontSize = parent.fontSize;
+    this.maxExtent = parent.fontSize;
+    this.color = parent.color;
+    this.lineRate = parent.lineRate;
+    this.textAlign = parent.textAlign;
+    this.textMeasure = 0;
+    this.flow = parent.flow;
+    this.tokens = [];
   }
 
   TextLine.prototype = {
@@ -31,14 +26,31 @@ var TextLine = (function(){
     isTextVertical : function(){
       return this.flow.isTextVertical();
     },
-    isTextLine : function(){
-      return this._type === "text-line";
-    },
-    isRubyLine : function(){
-      return this._type === "ruby-line";
-    },
     setEdge : function(edge){
       this.edge = edge;
+    },
+    setEdgeBySub : function(edge){
+    },
+    setMaxFontSize : function(max_font_size){
+      this.maxFontSize = max_font_size;
+      List.iter(this.tokens, function(token){
+	if(token instanceof TextLine){
+	  token.setMaxFontSize(max_font_size);
+	}
+      });
+    },
+    setMaxExtent : function(extent){
+      this.maxExtent = extent;
+      List.iter(this.tokens, function(token){
+	if(token instanceof TextLine){
+	  token.setMaxExtent(extent);
+	}
+      });
+    },
+    addClass : function(klass){
+      var classes = this.extraClasses || [];
+      classes.push(klass);
+      this.extraClasses = classes;
     },
     getCharCount : function(){
       return this.charCount;
@@ -58,8 +70,13 @@ var TextLine = (function(){
     getRestContentExtent : function(flow){
       return this.getContentExtent(flow || this.flow);
     },
-    getBodyLineContentExtent : function(){
-      return this.bodyLine.getContentExtent();
+    getBoxMeasure : function(flow){
+      var _flow = flow || this.flow;
+      var ret = this.size.getMeasure(_flow);
+      if(this.edge){
+	ret += this.edge.getMeasureSize(_flow);
+      }
+      return ret;
     },
     getBoxExtent : function(flow){
       var _flow = flow || this.flow;
@@ -91,10 +108,15 @@ var TextLine = (function(){
     },
     getCss : function(){
       var css = this.css;
+      css["font-size"] = this.fontSize + "px";
       Args.copy(css, this.size.getCss());
-      if(this.parent){
+
+      // top level line is displayed as block element,
+      // so need to follow parental blockflow.
+      if(this.parent instanceof Box){
 	Args.copy(css, this.flow.getCss());
       }
+      
       var start_offset = this.getStartOffset();
       if(start_offset){
 	this.edge = new Margin();
@@ -106,11 +128,6 @@ var TextLine = (function(){
       if(this.isTextVertical()){
 	if(Env.isIphoneFamily){
 	  css["letter-spacing"] = "-0.001em";
-	}
-      }
-      if(this._type === "ruby-line"){
-	if(this.flow.isTextHorizontal()){
-	  css["line-height"] = this.getContentExtent() + "px";
 	}
       }
       return css;
