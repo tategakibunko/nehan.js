@@ -5,7 +5,7 @@ var Layout = {
   width: 800,
   height: 580,
   fontSize:16,
-  rubyRate:0.5,
+  rubyRate:0.5, // used when Style.rt["font-size"] not defined.
   boldRate:0.2,
   fontColor:"000000",
   linkColor:"0000FF",
@@ -20,22 +20,15 @@ var Layout = {
     box.textAlign = parent.textAlign;
     box.fontSize = parent.fontSize;
     box.color = parent.color;
+    box.letterSpacing = parent.letterSpacing;
     return box;
   },
   createTextLine : function(size, parent){
-    var box = new TextLine(size, parent);
-    box.flow = parent.flow;
-    box.lineRate = parent.lineRate;
-    box.textAlign = parent.textAlign;
-    box.fontSize = parent.fontSize;
-    box.color = parent.color;
-    return box;
+    return this.createBox(size, parent, "text-line");
   },
   createStdBox : function(type){
-    var flow = this.getStdBoxFlow();
-    var size = this.getStdPageSize();
-    var box = new Box(size, null, type);
-    box.flow = flow;
+    var box = new Box(this.getStdPageSize(), null, type);
+    box.flow = this.getStdBoxFlow();
     box.lineRate = this.lineRate;
     box.textAlign = "start";
     box.fontSize = this.fontSize;
@@ -65,5 +58,13 @@ var Layout = {
   },
   getHoriIndir : function(){
     return this.hori.split("-")[0];
+  },
+  getRubyFontSize : function(base_font_size){
+    var rt = Style.rt || null;
+    var rt_font_size = rt? rt["font-size"] : null;
+    if(rt === null || rt_font_size === null){
+      return Math.floor(this.rubyRate * base_font_size);
+    }
+    return UnitSize.getUnitSize(rt_font_size, base_font_size);
   }
 };

@@ -2,6 +2,7 @@ var Box = (function(){
   function Box(size, parent, type){
     this._type = type || "div";
     this.childExtent = 0;
+    this.childMeasure = 0;
     this.size = size;
     this.childs = new BoxChild();
     this.css = {};
@@ -11,6 +12,9 @@ var Box = (function(){
 
   Box.prototype = {
     getCss : function(){
+      return (this._type === "text-line")? this._getCssInline() : this._getCssBlock();
+    },
+    _getCssBlock : function(){
       var css = this.css;
       Args.copy(css, this.size.getCss());
       if(this.edge){
@@ -31,13 +35,49 @@ var Box = (function(){
       css.display = this.display || "block";
       return css;
     },
+    _getCssInline : function(){
+      var css = this.css;
+      css["font-size"] = this.fontSize + "px";
+      Args.copy(css, this.size.getCss());
+
+      // top level line need to follow parent blockflow.
+      if(this.parent && this.parent.isBlock()){
+	Args.copy(css, this.flow.getCss());
+      }
+      
+      var start_offset = this.getStartOffset();
+      if(start_offset){
+	this.edge = new Margin();
+	this.edge.setStart(this.flow, start_offset);
+      }
+      if(this.edge){
+	Args.copy(css, this.edge.getCss());
+      }
+      if(this.isTextVertical()){
+	if(Env.isIphoneFamily){
+	  css["letter-spacing"] = "-0.001em";
+	}
+      }
+      return css;
+    },
     getCharCount : function(){
       return this.charCount;
     },
     getClasses : function(){
+      return this.isTextLine()? this._getClassesInline() : this._getClassesBlock();
+    },
+    _getClassesBlock : function(){
       var classes = ["nehan-box"];
       if(this._type != "box"){
 	classes.push(Css.addNehanPrefix(this._type));
+      }
+      return classes.concat(this.extraClasses || []);
+    },
+    _getClassesInline : function(){
+      var classes = ["nehan-text-line"];
+      classes.push("nehan-text-line-" + (this.isTextVertical()? "vert" : "hori"));
+      if(this.markup){
+	classes.push("nehan-" + this.markup.getName());
       }
       return classes.concat(this.extraClasses || []);
     },
@@ -53,14 +93,23 @@ var Box = (function(){
     getChildExtent : function(){
       return this.childExtent;
     },
+    getChildMeasure : function(){
+      return this.childMeasure;
+    },
     getFlowName : function(){
       return this.flow.getName();
     },
     getFlipFlow : function(){
       return this.flow.getFlipFlow();
     },
+    getTextMeasure : function(){
+      return this.childMeasure;
+    },
+    getTextRestMeasure : function(){
+      return this.getContentMeasure() - this.childMeasure;
+    },
     getRestContentExtent : function(){
-      return this.getContentExtent() - this.getChildExtent();
+      return this.getContentExtent() - this.childExtent;
     },
     getContentMeasure : function(flow){
       return this.size.getMeasure(flow || this.flow);
@@ -121,6 +170,14 @@ var Box = (function(){
     getBorder : function(){
       return this.edge? this.edge.border : null;
     },
+    getStartOffset : function(){
+      switch(this.textAlign){
+      case "start": return this.textIndent;
+      case "end": return this.textIndent + this.getTextRestMeasure();
+      case "center": return this.textIndent + Math.floor(this.getTextRestMeasure() / 2);
+      default: return this.textIndent;
+      }
+    },
     getRestSize : function(){
       var rest_measure = this.getContentMeasure();
       var rest_extent = this.getRestContentExtent();
@@ -164,10 +221,14 @@ var Box = (function(){
       classes.push(klass);
       this.extraClasses = classes;
     },
-    addChild : function(child){
+    addChildBlock : function(child){
       this.childs.add(child);
       this.childExtent += child.getBoxExtent(this.flow);
       this.charCount += child.getCharCount();
+    },
+    addChildInline : function(child, measure){
+      this.childs.add(child);
+      this.childMeasure += measure;
     },
     addExtent : function(extent){
       this.size.addExtent(this.flow, extent);
@@ -235,6 +296,22 @@ var Box = (function(){
 	this.setEdge(edge);
       }
     },
+    setMaxFontSize : function(max_font_size){
+      this.maxFontSize = max_font_size;
+      List.iter(this.getChilds(), function(element){
+	if(element instanceof Box && element._type === "text-line"){
+	  element.setMaxFontSize(max_font_size);
+	}
+      });
+    },
+    setMaxExtent : function(extent){
+      this.maxExtent = extent;
+      List.iter(this.getChilds(), function(element){
+	if(element instanceof Box && element._type === "text-line"){
+	  element.setMaxExtent(extent);
+	}
+      });
+    },
     subMeasure : function(measure){
       this.size.subMeasure(this.flow, measure);
     },
@@ -249,6 +326,18 @@ var Box = (function(){
     },
     isEmptyChild : function(){
       return this.childs.getLength() === 0;
+    },
+    isBlock : function(){
+      return !this.isTextLine();
+    },
+    isTextLine : function(){
+      return this._type === "text-line";
+    },
+    isInlineText : function(){
+      return this.isTextLine() && this.markup && this.markup.isInline();
+    },
+    isRubyTextLine : function(){
+      return this.isTextLine() && this.markup && (this.markup.getName() === "rt");
     },
     isTextVertical : function(){
       return this.flow.isTextVertical();
@@ -287,14 +376,13 @@ var Box = (function(){
       return this;
     },
     shortenMeasure : function(flow){
-      var _flow = flow || this.flow;
-      var max_measure = this.getMaxChildMeasure(_flow);
-      this.setContentMeasure(_flow, max_measure);
+      flow = flow || this.flow;
+      this.size.setMeasure(flow, this.childMeasure);
       return this;
     },
     shortenExtent : function(flow){
-      var _flow = flow || this.flow;
-      this.setContentExtent(_flow, this.getChildExtent());
+      flow = flow || this.flow;
+      this.setContentExtent(flow, this.childExtent);
       return this;
     }
   };

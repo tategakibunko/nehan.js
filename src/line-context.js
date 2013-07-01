@@ -36,7 +36,7 @@ var LineContext = (function(){
 	return element.fontSize;
       }
       if(element instanceof Ruby){
-	return element.getFontSize();
+	return element.getRbFontSize();
       }
       return element.fontSize || 0;
     },
@@ -71,12 +71,13 @@ var LineContext = (function(){
       return this.restExtent >= extent;
     },
     canContainAdvance : function(element, advance){
-      if(element instanceof Box || !this.line.canJustify()){
+      if(element instanceof Box ||
+	 element instanceof Word ||
+	 element instanceof Tcy ||
+	 this.line.isRubyTextLine()){
 	return this.restMeasure >= advance;
       }
-      if(element instanceof Word || element instanceof Tcy){
-	return this.restMeasure >= advance;
-      }
+      
       // justify target need space for tail fix.
       return this.restMeasure - this.line.fontSize >= advance;
     },
@@ -208,7 +209,7 @@ var LineContext = (function(){
 	this.popFirstLine();
       }
       // if overflow measure without line-break, try to justify.
-      if(this.isOverWithoutLineBreak() && this.line.canJustify()){
+      if(this.isOverWithoutLineBreak()){
 	this.justify(this.lastToken);
       }
       return this._createTextLine();
@@ -406,8 +407,10 @@ var LineContext = (function(){
       this.maxExtent = Math.max(this.maxExtent, max_text_extent);
       this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxExtent);
       this.line.charCount = this.charCount;
-      this.line.tokens = this.lineTokens;
-      this.line.textMeasure = this.curMeasure;
+      this.line.childs.normal = this.lineTokens;
+      this.line.childMeasure = this.curMeasure;
+      //this.line.tokens = this.lineTokens;
+      //this.line.textMeasure = this.curMeasure;
       this.line.textIndent = this.textIndent;
       return this.line;
     }

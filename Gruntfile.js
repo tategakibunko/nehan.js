@@ -95,8 +95,6 @@ module.exports = function(grunt) {
 	    "src/logical-size.js",
 	    "src/box-child.js",
 	    "src/box.js",
-	    "src/line-box.js",
-	    "src/text-line.js",
 	    "src/lexer.js",
 	    "src/tag-stack.js",
 	    "src/section-header.js",

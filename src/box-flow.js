@@ -16,9 +16,6 @@ var BoxFlow = (function(){
     isValid : function(){
       return this.inflow.isValid() && this.blockflow.isValid();
     },
-    isTextLineFirst : function(){
-      return !this.isRubyLineFirst();
-    },
     isRubyLineFirst : function(){
       // vertical-lr is text-line first.
       if(this.inflow.isVertical() && this.blockflow.isLeftToRight()){
@@ -52,12 +49,6 @@ var BoxFlow = (function(){
       case "after":
 	return this.getPropAfter();
       }
-    },
-    getTextSide : function(){
-      if(this.isTextLineFirst()){
-	return this.blockflow.getPropBefore();
-      }
-      return this.blockflow.getPropAfter();
     },
     getPropStart : function(){
       return this.inflow.getPropStart();

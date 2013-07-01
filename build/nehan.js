@@ -53,7 +53,7 @@ var Layout = {
   width: 800,
   height: 580,
   fontSize:16,
-  rubyRate:0.5,
+  rubyRate:0.5, // used when Style.rt["font-size"] not defined.
   boldRate:0.2,
   fontColor:"000000",
   linkColor:"0000FF",
@@ -68,22 +68,15 @@ var Layout = {
     box.textAlign = parent.textAlign;
     box.fontSize = parent.fontSize;
     box.color = parent.color;
+    box.letterSpacing = parent.letterSpacing;
     return box;
   },
   createTextLine : function(size, parent){
-    var box = new TextLine(size, parent);
-    box.flow = parent.flow;
-    box.lineRate = parent.lineRate;
-    box.textAlign = parent.textAlign;
-    box.fontSize = parent.fontSize;
-    box.color = parent.color;
-    return box;
+    return this.createBox(size, parent, "text-line");
   },
   createStdBox : function(type){
-    var flow = this.getStdBoxFlow();
-    var size = this.getStdPageSize();
-    var box = new Box(size, null, type);
-    box.flow = flow;
+    var box = new Box(this.getStdPageSize(), null, type);
+    box.flow = this.getStdBoxFlow();
     box.lineRate = this.lineRate;
     box.textAlign = "start";
     box.fontSize = this.fontSize;
@@ -113,6 +106,14 @@ var Layout = {
   },
   getHoriIndir : function(){
     return this.hori.split("-")[0];
+  },
+  getRubyFontSize : function(base_font_size){
+    var rt = Style.rt || null;
+    var rt_font_size = rt? rt["font-size"] : null;
+    if(rt === null || rt_font_size === null){
+      return Math.floor(this.rubyRate * base_font_size);
+    }
+    return UnitSize.getUnitSize(rt_font_size, base_font_size);
   }
 };
 
@@ -2595,19 +2596,19 @@ var Ruby = (function(){
       return this.advanceSize;
     },
     getExtent : function(){
-      return this.baseFontSize;
-    },
-    getFontSize : function(){
-      return this.baseFontSize;
+      return this.baseFontSize + this.rubyFontSize;
     },
     getRbs : function(){
       return this.rbs;
     },
-    getRtFontSize : function(){
-      return this.rubyFontSize;
-    },
     getRtString : function(){
       return this.rt? this.rt.getContent() : "";
+    },
+    getRbFontSize : function(){
+      return this.baseFontSize;
+    },
+    getRtFontSize : function(){
+      return this.rubyFontSize;
     },
     getCssRuby : function(line){
       var css = {};
@@ -2615,7 +2616,6 @@ var Ruby = (function(){
     },
     getCssRt : function(line){
       var css = {};
-      css["font-size"] = this.rubyFontSize + "px";
       if(line.isTextVertical()){
 	css["float"] = "left";
       }
@@ -2631,7 +2631,7 @@ var Ruby = (function(){
     },
     setMetrics : function(flow, font_size, letter_spacing){
       this.baseFontSize = font_size;
-      this.rubyFontSize = Math.floor(font_size * Layout.rubyRate);
+      this.rubyFontSize = Layout.getRubyFontSize(font_size);
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font_size);
 	return ret + rb.getAdvance(flow, letter_spacing);
@@ -3270,9 +3270,6 @@ var BoxFlow = (function(){
     isValid : function(){
       return this.inflow.isValid() && this.blockflow.isValid();
     },
-    isTextLineFirst : function(){
-      return !this.isRubyLineFirst();
-    },
     isRubyLineFirst : function(){
       // vertical-lr is text-line first.
       if(this.inflow.isVertical() && this.blockflow.isLeftToRight()){
@@ -3306,12 +3303,6 @@ var BoxFlow = (function(){
       case "after":
 	return this.getPropAfter();
       }
-    },
-    getTextSide : function(){
-      if(this.isTextLineFirst()){
-	return this.blockflow.getPropBefore();
-      }
-      return this.blockflow.getPropAfter();
     },
     getPropStart : function(){
       return this.inflow.getPropStart();
@@ -4185,6 +4176,7 @@ var Box = (function(){
   function Box(size, parent, type){
     this._type = type || "div";
     this.childExtent = 0;
+    this.childMeasure = 0;
     this.size = size;
     this.childs = new BoxChild();
     this.css = {};
@@ -4194,6 +4186,9 @@ var Box = (function(){
 
   Box.prototype = {
     getCss : function(){
+      return (this._type === "text-line")? this._getCssInline() : this._getCssBlock();
+    },
+    _getCssBlock : function(){
       var css = this.css;
       Args.copy(css, this.size.getCss());
       if(this.edge){
@@ -4214,13 +4209,49 @@ var Box = (function(){
       css.display = this.display || "block";
       return css;
     },
+    _getCssInline : function(){
+      var css = this.css;
+      css["font-size"] = this.fontSize + "px";
+      Args.copy(css, this.size.getCss());
+
+      // top level line need to follow parent blockflow.
+      if(this.parent && this.parent.isBlock()){
+	Args.copy(css, this.flow.getCss());
+      }
+      
+      var start_offset = this.getStartOffset();
+      if(start_offset){
+	this.edge = new Margin();
+	this.edge.setStart(this.flow, start_offset);
+      }
+      if(this.edge){
+	Args.copy(css, this.edge.getCss());
+      }
+      if(this.isTextVertical()){
+	if(Env.isIphoneFamily){
+	  css["letter-spacing"] = "-0.001em";
+	}
+      }
+      return css;
+    },
     getCharCount : function(){
       return this.charCount;
     },
     getClasses : function(){
+      return this.isTextLine()? this._getClassesInline() : this._getClassesBlock();
+    },
+    _getClassesBlock : function(){
       var classes = ["nehan-box"];
       if(this._type != "box"){
 	classes.push(Css.addNehanPrefix(this._type));
+      }
+      return classes.concat(this.extraClasses || []);
+    },
+    _getClassesInline : function(){
+      var classes = ["nehan-text-line"];
+      classes.push("nehan-text-line-" + (this.isTextVertical()? "vert" : "hori"));
+      if(this.markup){
+	classes.push("nehan-" + this.markup.getName());
       }
       return classes.concat(this.extraClasses || []);
     },
@@ -4236,14 +4267,23 @@ var Box = (function(){
     getChildExtent : function(){
       return this.childExtent;
     },
+    getChildMeasure : function(){
+      return this.childMeasure;
+    },
     getFlowName : function(){
       return this.flow.getName();
     },
     getFlipFlow : function(){
       return this.flow.getFlipFlow();
     },
+    getTextMeasure : function(){
+      return this.childMeasure;
+    },
+    getTextRestMeasure : function(){
+      return this.getContentMeasure() - this.childMeasure;
+    },
     getRestContentExtent : function(){
-      return this.getContentExtent() - this.getChildExtent();
+      return this.getContentExtent() - this.childExtent;
     },
     getContentMeasure : function(flow){
       return this.size.getMeasure(flow || this.flow);
@@ -4304,6 +4344,14 @@ var Box = (function(){
     getBorder : function(){
       return this.edge? this.edge.border : null;
     },
+    getStartOffset : function(){
+      switch(this.textAlign){
+      case "start": return this.textIndent;
+      case "end": return this.textIndent + this.getTextRestMeasure();
+      case "center": return this.textIndent + Math.floor(this.getTextRestMeasure() / 2);
+      default: return this.textIndent;
+      }
+    },
     getRestSize : function(){
       var rest_measure = this.getContentMeasure();
       var rest_extent = this.getRestContentExtent();
@@ -4347,10 +4395,14 @@ var Box = (function(){
       classes.push(klass);
       this.extraClasses = classes;
     },
-    addChild : function(child){
+    addChildBlock : function(child){
       this.childs.add(child);
       this.childExtent += child.getBoxExtent(this.flow);
       this.charCount += child.getCharCount();
+    },
+    addChildInline : function(child, measure){
+      this.childs.add(child);
+      this.childMeasure += measure;
     },
     addExtent : function(extent){
       this.size.addExtent(this.flow, extent);
@@ -4418,6 +4470,22 @@ var Box = (function(){
 	this.setEdge(edge);
       }
     },
+    setMaxFontSize : function(max_font_size){
+      this.maxFontSize = max_font_size;
+      List.iter(this.getChilds(), function(element){
+	if(element instanceof Box && element._type === "text-line"){
+	  element.setMaxFontSize(max_font_size);
+	}
+      });
+    },
+    setMaxExtent : function(extent){
+      this.maxExtent = extent;
+      List.iter(this.getChilds(), function(element){
+	if(element instanceof Box && element._type === "text-line"){
+	  element.setMaxExtent(extent);
+	}
+      });
+    },
     subMeasure : function(measure){
       this.size.subMeasure(this.flow, measure);
     },
@@ -4432,6 +4500,18 @@ var Box = (function(){
     },
     isEmptyChild : function(){
       return this.childs.getLength() === 0;
+    },
+    isBlock : function(){
+      return !this.isTextLine();
+    },
+    isTextLine : function(){
+      return this._type === "text-line";
+    },
+    isInlineText : function(){
+      return this.isTextLine() && this.markup && this.markup.isInline();
+    },
+    isRubyTextLine : function(){
+      return this.isTextLine() && this.markup && (this.markup.getName() === "rt");
     },
     isTextVertical : function(){
       return this.flow.isTextVertical();
@@ -4470,83 +4550,18 @@ var Box = (function(){
       return this;
     },
     shortenMeasure : function(flow){
-      var _flow = flow || this.flow;
-      var max_measure = this.getMaxChildMeasure(_flow);
-      this.setContentMeasure(_flow, max_measure);
+      flow = flow || this.flow;
+      this.size.setMeasure(flow, this.childMeasure);
       return this;
     },
     shortenExtent : function(flow){
-      var _flow = flow || this.flow;
-      this.setContentExtent(_flow, this.getChildExtent());
+      flow = flow || this.flow;
+      this.setContentExtent(flow, this.childExtent);
       return this;
     }
   };
 
   return Box;
-})();
-
-var LineBox = (function(){
-  function LineBox(opt){
-    this._type = "line-box";
-    this.parent = opt.parent;
-    this.measure = opt.measure || 0;
-    this.extent = opt.extent || 0;
-    this.rubyLine = opt.rubyLine || null;
-    this.textLine = opt.textLine || null;
-  }
-
-  LineBox.prototype = {
-    _getLinesRubyLineFirst : function(){
-      var ret = [];
-      if(this.rubyLine){
-	ret.push(this.rubyLine);
-      }
-      if(this.textLine){
-	ret.push(this.textLine);
-      }
-      return ret;
-    },
-    _getLinesTextLineFirst : function(){
-      var ret = [];
-      if(this.textLine){
-	ret.push(this.textLine);
-      }
-      if(this.rubyLine){
-	ret.push(this.rubyLine);
-      }
-      return ret;
-    },
-    getLines : function(){
-      var flow = this.parent.flow;
-      if(flow.isRubyLineFirst()){
-	return this._getLinesRubyLineFirst();
-      }
-      return this._getLinesTextLineFirst();
-    },
-    getCharCount : function(){
-      return this.textLine? this.textLine.getCharCount() : 0;
-    },
-    getTextLine : function(){
-      return this.textLine;
-    },
-    getRubyLine : function(){
-      return this.rubyLine;
-    },
-    getTextMeasure : function(){
-      return this.textLine.getTextMeasure();
-    },
-    getContentMeasure : function(){
-      return this.textLine.getContentMeasure();
-    },
-    getBoxMeasure : function(){
-      return this.measure;
-    },
-    getBoxExtent : function(){
-      return this.extent;
-    }
-  };
-
-  return LineBox;
 })();
 
 // this class is almost same as 'Box',
@@ -4569,11 +4584,6 @@ var TextLine = (function(){
   }
 
   TextLine.prototype = {
-    // this function is called only from VerticalInlineEvaluator::evalRubyLabelLine,
-    // and ruby is not justify target.
-    canJustify : function(){
-      return false;
-    },
     isTextVertical : function(){
       return this.flow.isTextVertical();
     },
@@ -4636,9 +4646,6 @@ var TextLine = (function(){
 	ret += this.edge.getExtentSize(_flow);
       }
       return ret;
-    },
-    getTextSide : function(){
-      return this.flow.getTextSide();
     },
     getPropStart : function(){
       return this.flow.getPropStart();
@@ -6831,7 +6838,7 @@ var LineContext = (function(){
 	return element.fontSize;
       }
       if(element instanceof Ruby){
-	return element.getFontSize();
+	return element.getRbFontSize();
       }
       return element.fontSize || 0;
     },
@@ -6866,12 +6873,13 @@ var LineContext = (function(){
       return this.restExtent >= extent;
     },
     canContainAdvance : function(element, advance){
-      if(element instanceof Box || !this.line.canJustify()){
+      if(element instanceof Box ||
+	 element instanceof Word ||
+	 element instanceof Tcy ||
+	 this.line.isRubyTextLine()){
 	return this.restMeasure >= advance;
       }
-      if(element instanceof Word || element instanceof Tcy){
-	return this.restMeasure >= advance;
-      }
+      
       // justify target need space for tail fix.
       return this.restMeasure - this.line.fontSize >= advance;
     },
@@ -7003,7 +7011,7 @@ var LineContext = (function(){
 	this.popFirstLine();
       }
       // if overflow measure without line-break, try to justify.
-      if(this.isOverWithoutLineBreak() && this.line.canJustify()){
+      if(this.isOverWithoutLineBreak()){
 	this.justify(this.lastToken);
       }
       return this._createTextLine();
@@ -7201,8 +7209,10 @@ var LineContext = (function(){
       this.maxExtent = Math.max(this.maxExtent, max_text_extent);
       this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxExtent);
       this.line.charCount = this.charCount;
-      this.line.tokens = this.lineTokens;
-      this.line.textMeasure = this.curMeasure;
+      this.line.childs.normal = this.lineTokens;
+      this.line.childMeasure = this.curMeasure;
+      //this.line.tokens = this.lineTokens;
+      //this.line.textMeasure = this.curMeasure;
       this.line.textIndent = this.textIndent;
       return this.line;
     }
@@ -7600,7 +7610,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
 	this.rollback();
 	break;
       }
-      page.addChild(element);
+      page.addChildBlock(element);
 
       if(cur_extent == max_extent){
 	break;
@@ -7913,11 +7923,11 @@ var FloatedBlockTreeGenerator = BlockTreeGenerator.extend({
     var rest_box = this._getFloatedRestBox(parent, wrap_box, this.floatedBox);
     this._yieldPageTo(rest_box);
     if(this.floatedBox.logicalFloat === "start"){
-      wrap_box.addChild(this.floatedBox);
-      wrap_box.addChild(rest_box);
+      wrap_box.addChildBlock(this.floatedBox);
+      wrap_box.addChildBlock(rest_box);
     } else {
-      wrap_box.addChild(rest_box);
-      wrap_box.addChild(this.floatedBox);
+      wrap_box.addChildBlock(rest_box);
+      wrap_box.addChildBlock(this.floatedBox);
     }
     this.stream.backupPos = backupPos2; // restore backup pos
     return wrap_box;
@@ -7952,7 +7962,7 @@ var InlinePageGenerator = BlockTreeGenerator.extend({
   yield : function(parent, size){
     var wrap = Layout.createBox(size, parent, "div");
     var page = this._super(wrap); // yield page to wrap.
-    wrap.addChild(page);
+    wrap.addChildBlock(page);
     wrap.logicalFloat = page.logicalFloat;
     return wrap;
   }
@@ -8030,7 +8040,7 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     List.iter(child_pages, function(child_page){
       if(child_page){
 	child_page.setContentExtent(child_flow, max_content_extent);
-	wrap_page.addChild(child_page);
+	wrap_page.addChildBlock(child_page);
       }
     });
     return wrap_page;
@@ -8311,7 +8321,7 @@ var InlineEvaluator = Class.extend({
     return [markup.getSrc(), body, markup.getCloseSrc()].join("");
   },
   evaluate : function(line, ctx){
-    return Html.tagWrap("div", this.evalTextLineBody(line, line.tokens, ctx), {
+    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds(), ctx), {
       "style":Css.attr(line.getCss()),
       "class":line.getCssClasses()
     });
@@ -8321,7 +8331,7 @@ var InlineEvaluator = Class.extend({
     var body = List.fold(tokens, "", function(ret, element){
       return ret + self.evalInlineElement(line, element, ctx);
     });
-    return line.markup? this.wrapInlineTag(line.markup, body) : body;
+    return line.isInlineText()? this.wrapInlineTag(line.markup, body) : body;
   },
   evalInlineElement : function(line, element, ctx){
     if(element._type === "text-line"){
@@ -8388,17 +8398,13 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   evalRt : function(line, ruby, ctx){
     var rt_body = this.evalRtLine(line, ruby, ctx);
     return Html.tagWrap("div", rt_body, {
-      "style":Css.attr(ruby.getCssRt(line)),
-      "class": "nehan-rt"
+      "style":Css.attr(ruby.getCssRt(line))
     });
   },
   evalRtLine : function(line, ruby, ctx){
     var text = ruby.getRtString();
-    var font_size = ruby.getRtFontSize();
     var stream = new TokenStream(text);
-    var ctx2 = ctx.createInlineRoot();
-    ctx2.setFixedFontSize(font_size);
-    var generator = new InlineTreeGenerator(ruby.rt, stream, ctx2);
+    var generator = new InlineTreeGenerator(ruby.rt, stream, ctx.createInlineRoot());
     var rt_line = generator.yield(line);
     return this.evaluate(rt_line, ctx);
   },

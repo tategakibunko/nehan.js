@@ -80,7 +80,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
 	this.rollback();
 	break;
       }
-      page.addChild(element);
+      page.addChildBlock(element);
 
       if(cur_extent == max_extent){
 	break;

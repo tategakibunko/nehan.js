@@ -14,19 +14,19 @@ var Ruby = (function(){
       return this.advanceSize;
     },
     getExtent : function(){
-      return this.baseFontSize;
-    },
-    getFontSize : function(){
-      return this.baseFontSize;
+      return this.baseFontSize + this.rubyFontSize;
     },
     getRbs : function(){
       return this.rbs;
     },
-    getRtFontSize : function(){
-      return this.rubyFontSize;
-    },
     getRtString : function(){
       return this.rt? this.rt.getContent() : "";
+    },
+    getRbFontSize : function(){
+      return this.baseFontSize;
+    },
+    getRtFontSize : function(){
+      return this.rubyFontSize;
     },
     getCssRuby : function(line){
       var css = {};
@@ -34,7 +34,6 @@ var Ruby = (function(){
     },
     getCssRt : function(line){
       var css = {};
-      css["font-size"] = this.rubyFontSize + "px";
       if(line.isTextVertical()){
 	css["float"] = "left";
       }
@@ -50,7 +49,7 @@ var Ruby = (function(){
     },
     setMetrics : function(flow, font_size, letter_spacing){
       this.baseFontSize = font_size;
-      this.rubyFontSize = Math.floor(font_size * Layout.rubyRate);
+      this.rubyFontSize = Layout.getRubyFontSize(font_size);
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font_size);
 	return ret + rb.getAdvance(flow, letter_spacing);

@@ -10,11 +10,11 @@ var FloatedBlockTreeGenerator = BlockTreeGenerator.extend({
     var rest_box = this._getFloatedRestBox(parent, wrap_box, this.floatedBox);
     this._yieldPageTo(rest_box);
     if(this.floatedBox.logicalFloat === "start"){
-      wrap_box.addChild(this.floatedBox);
-      wrap_box.addChild(rest_box);
+      wrap_box.addChildBlock(this.floatedBox);
+      wrap_box.addChildBlock(rest_box);
     } else {
-      wrap_box.addChild(rest_box);
-      wrap_box.addChild(this.floatedBox);
+      wrap_box.addChildBlock(rest_box);
+      wrap_box.addChildBlock(this.floatedBox);
     }
     this.stream.backupPos = backupPos2; // restore backup pos
     return wrap_box;

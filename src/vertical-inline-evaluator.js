@@ -16,17 +16,13 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   evalRt : function(line, ruby, ctx){
     var rt_body = this.evalRtLine(line, ruby, ctx);
     return Html.tagWrap("div", rt_body, {
-      "style":Css.attr(ruby.getCssRt(line)),
-      "class": "nehan-rt"
+      "style":Css.attr(ruby.getCssRt(line))
     });
   },
   evalRtLine : function(line, ruby, ctx){
     var text = ruby.getRtString();
-    var font_size = ruby.getRtFontSize();
     var stream = new TokenStream(text);
-    var ctx2 = ctx.createInlineRoot();
-    ctx2.setFixedFontSize(font_size);
-    var generator = new InlineTreeGenerator(ruby.rt, stream, ctx2);
+    var generator = new InlineTreeGenerator(ruby.rt, stream, ctx.createInlineRoot());
     var rt_line = generator.yield(line);
     return this.evaluate(rt_line, ctx);
   },

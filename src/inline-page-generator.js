@@ -7,7 +7,7 @@ var InlinePageGenerator = BlockTreeGenerator.extend({
   yield : function(parent, size){
     var wrap = Layout.createBox(size, parent, "div");
     var page = this._super(wrap); // yield page to wrap.
-    wrap.addChild(page);
+    wrap.addChildBlock(page);
     wrap.logicalFloat = page.logicalFloat;
     return wrap;
   }
