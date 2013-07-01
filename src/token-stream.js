@@ -53,6 +53,9 @@ var TokenStream = Class.extend({
       }
     }
   },
+  rewind : function(){
+    this.pos = 0;
+  },
   peek : function(off){
     var offset = off || 0;
     var index = Math.max(0, this.pos + offset);

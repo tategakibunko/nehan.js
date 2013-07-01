@@ -8,8 +8,13 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   _createStream : function(){
     return new TokenStream(this.markup.getContent());
   },
+  _createLine : function(parent){
+    var line = this._super(parent);
+    this._setBoxStyle(line, parent);
+    return line;
+  },
   _getLineSize : function(parent){
-    var measure = (parent instanceof TextLine)? parent.getTextRestMeasure() : parent.getContentMeasure();
+    var measure = parent.getTextRestMeasure();
     var extent = parent.getContentExtent();
     return parent.flow.getBoxSize(measure, extent);
   },

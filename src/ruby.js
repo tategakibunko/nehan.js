@@ -30,12 +30,18 @@ var Ruby = (function(){
     },
     getCssRuby : function(line){
       var css = {};
+      if(line.isTextHorizontal()){
+	css.display = "inline-block";
+	css["text-align"] = "center";
+      }
       return css;
     },
     getCssRt : function(line){
       var css = {};
       if(line.isTextVertical()){
 	css["float"] = "left";
+      } else {
+	css["font-size"] = css["line-height"] = this.getRtFontSize() + "px";
       }
       return css;
     },

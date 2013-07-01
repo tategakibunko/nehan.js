@@ -77,7 +77,7 @@ if(__engine_args.test){
   __exports.ListTagStream = ListTagStream;
   __exports.DefListTagStream = DefListTagStream;
   __exports.TableTagStream = TableTagStream;
-  __exports.RubyStream = RubyStream;
+  __exports.RubyTagStream = RubyTagStream;
 
   // generator
   __exports.ElementGenerator = ElementGenerator;

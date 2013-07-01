@@ -74,7 +74,7 @@ var Layout = {
   createTextLine : function(size, parent){
     return this.createBox(size, parent, "text-line");
   },
-  createStdBox : function(type){
+  createRootBox : function(type){
     var box = new Box(this.getStdPageSize(), null, type);
     box.flow = this.getStdBoxFlow();
     box.lineRate = this.lineRate;
@@ -2612,12 +2612,18 @@ var Ruby = (function(){
     },
     getCssRuby : function(line){
       var css = {};
+      if(line.isTextHorizontal()){
+	css.display = "inline-block";
+	css["text-align"] = "center";
+      }
       return css;
     },
     getCssRt : function(line){
       var css = {};
       if(line.isTextVertical()){
 	css["float"] = "left";
+      } else {
+	css["font-size"] = css["line-height"] = this.getRtFontSize() + "px";
       }
       return css;
     },
@@ -2650,37 +2656,6 @@ var Ruby = (function(){
   };
 
   return Ruby;
-})();
-
-
-var EmphaChar = (function(){
-  function EmphaChar(opt){
-    this.data = opt.data || "&#x2022";
-    this.startPos = opt.startPos || 0;
-    this.parent = opt.parent;
-    this.fontSize = this.parent.fontSize;
-  }
-
-  EmphaChar.prototype = {
-    getCss : function(flow){
-      var css = {};
-      css.position = "absolute";
-      css.width = css.height = this.fontSize + "px";
-      css.display = flow.isTextVertical()? "block" : "inline-block";
-      css["text-align"] = "center";
-      css[flow.getPropStart()] = this.startPos + "px";
-      if(Env.isIE && flow.isTextVertical()){
-	css.left = "50%";
-	css["margin-left"] = (-Math.floor(this.fontSize / 2)) + "px";
-      }
-      return css;
-    },
-    getAdvance : function(flow){
-      return this.parent.getAdvance(flow);
-    }
-  };
-
-  return EmphaChar;
 })();
 
 
@@ -4516,6 +4491,9 @@ var Box = (function(){
     isTextVertical : function(){
       return this.flow.isTextVertical();
     },
+    isTextHorizontal : function(){
+      return this.flow.isTextHorizontal();
+    },
     isValidSize : function(){
       return this.size.isValid();
     },
@@ -4562,152 +4540,6 @@ var Box = (function(){
   };
 
   return Box;
-})();
-
-// this class is almost same as 'Box',
-// but we isolate this class for performance reason.
-var TextLine = (function(){
-  function TextLine(size, parent){
-    this.css = {};
-    this._type = "text-line";
-    this.size = size;
-    this.parent = parent;
-    this.fontSize = parent.fontSize;
-    this.maxFontSize = parent.fontSize;
-    this.maxExtent = parent.fontSize;
-    this.color = parent.color;
-    this.lineRate = parent.lineRate;
-    this.textAlign = parent.textAlign;
-    this.textMeasure = 0;
-    this.flow = parent.flow;
-    this.tokens = [];
-  }
-
-  TextLine.prototype = {
-    isTextVertical : function(){
-      return this.flow.isTextVertical();
-    },
-    setEdge : function(edge){
-      this.edge = edge;
-    },
-    setEdgeBySub : function(edge){
-    },
-    setMaxFontSize : function(max_font_size){
-      this.maxFontSize = max_font_size;
-      List.iter(this.tokens, function(token){
-	if(token instanceof TextLine){
-	  token.setMaxFontSize(max_font_size);
-	}
-      });
-    },
-    setMaxExtent : function(extent){
-      this.maxExtent = extent;
-      List.iter(this.tokens, function(token){
-	if(token instanceof TextLine){
-	  token.setMaxExtent(extent);
-	}
-      });
-    },
-    addClass : function(klass){
-      var classes = this.extraClasses || [];
-      classes.push(klass);
-      this.extraClasses = classes;
-    },
-    getCharCount : function(){
-      return this.charCount;
-    },
-    getTextMeasure : function(){
-      return this.textMeasure;
-    },
-    getTextRestMeasure : function(){
-      return this.getContentMeasure() - this.textMeasure;
-    },
-    getContentMeasure : function(flow){
-      return this.size.getMeasure(flow || this.flow);
-    },
-    getContentExtent : function(flow){
-      return this.size.getExtent(flow || this.flow);
-    },
-    getRestContentExtent : function(flow){
-      return this.getContentExtent(flow || this.flow);
-    },
-    getBoxMeasure : function(flow){
-      var _flow = flow || this.flow;
-      var ret = this.size.getMeasure(_flow);
-      if(this.edge){
-	ret += this.edge.getMeasureSize(_flow);
-      }
-      return ret;
-    },
-    getBoxExtent : function(flow){
-      var _flow = flow || this.flow;
-      var ret = this.size.getExtent(_flow);
-      if(this.edge){
-	ret += this.edge.getExtentSize(_flow);
-      }
-      return ret;
-    },
-    getPropStart : function(){
-      return this.flow.getPropStart();
-    },
-    getPropAfter : function(){
-      return this.flow.getPropAfter();
-    },
-    getPropBefore : function(){
-      return this.flow.getPropBefore();
-    },
-    getStartOffset : function(){
-      switch(this.textAlign){
-      case "start": return this.textIndent;
-      case "end": return this.textIndent + this.getTextRestMeasure();
-      case "center": return this.textIndent + Math.floor(this.getTextRestMeasure() / 2);
-      default: return this.textIndent;
-      }
-    },
-    getCss : function(){
-      var css = this.css;
-      css["font-size"] = this.fontSize + "px";
-      Args.copy(css, this.size.getCss());
-
-      // top level line is displayed as block element,
-      // so need to follow parental blockflow.
-      if(this.parent instanceof Box){
-	Args.copy(css, this.flow.getCss());
-      }
-      
-      var start_offset = this.getStartOffset();
-      if(start_offset){
-	this.edge = new Margin();
-	this.edge.setStart(this.flow, start_offset);
-      }
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
-      if(this.isTextVertical()){
-	if(Env.isIphoneFamily){
-	  css["letter-spacing"] = "-0.001em";
-	}
-      }
-      return css;
-    },
-    getCssClasses : function(){
-      return this.getClasses().join(" ");
-    },
-    getClasses : function(){
-      return [
-	["nehan", this._type].join("-"),
-	["nehan", this._type, (this.isTextVertical()? "vert" : "hori")].join("-")
-      ];
-    },
-    getTextHorizontalDir : function(){
-      return this.flow.getTextHorizontalDir();
-    },
-    shortenMeasure : function(){
-      this.size.setMeasure(this.flow, this.textMeasure);
-    }
-  };
-
-  return TextLine;
 })();
 
 var Lexer = (function (){
@@ -6008,6 +5840,9 @@ var TokenStream = Class.extend({
       }
     }
   },
+  rewind : function(){
+    this.pos = 0;
+  },
   peek : function(off){
     var offset = off || 0;
     var index = Math.max(0, this.pos + offset);
@@ -6354,76 +6189,40 @@ var DefListTagStream = FilteredTagStream.extend({
 });
 
 
-var RubyStream = (function(){
-  function RubyStream(content){
-    this.rubies = this._parseAll(new TokenStream(content));
-    this.pos = 0;
-  }
-
-  RubyStream.prototype = {
-    backup : function(){
-      this.backupPos = this.pos;
-    },
-    rollback : function(){
-      if(typeof this.backupPos != "undefined"){
-	this.pos = this.backupPos;
-      }
-    },
-    hasNext : function(){
-      return this.pos < this.rubies.length;
-    },
-    peek : function(){
-      if(!this.hasNext()){
-	return null;
-      }
-      return this.rubies[this.pos];
-    },
-    get : function(){
-      var ruby = this.peek();
-      if(ruby){
-	ruby.index = this.pos;
-	this.pos++;
-      }
-      return ruby;
-    },
-    getPos : function(){
-      return this.pos;
-    },
-    isHead : function(){
-      return this.pos === 0;
-    },
-    prev : function(){
-      this.pos = Math.max(0, this.pos - 1);
-    },
-    _parseAll : function(stream){
-      var ret = [];
-      while(stream.hasNext()){
-	ret.push(this._parseRuby(stream));
-      }
-      return ret;
-    },
-    _parseRuby : function(stream){
-      var rbs = [];
-      var rt = null;
-      while(true){
-	var token = stream.get();
-	if(token === null){
-	  break;
-	}
-	if(Token.isTag(token) && token.getName() === "rt"){
-	  rt = token;
-	  break;
-	}
-	if(Token.isText(token)){
-	  rbs.push(token);
-	}
-      }
-      return new Ruby(rbs, rt);
+var RubyTagStream = TokenStream.extend({
+  init : function(src){
+    this._super(src);
+    this.getAll();
+    this.tokens = this._parse();
+    this.rewind();
+  },
+  _parse : function(stream){
+    var ret = [];
+    while(this.hasNext()){
+      ret.push(this._parseRuby());
     }
-  };
+    return ret;
+  },
+  _parseRuby : function(stream){
+    var rbs = [];
+    var rt = null;
+    while(true){
+      var token = this.get();
+      if(token === null){
+	break;
+      }
+      if(Token.isTag(token) && token.getName() === "rt"){
+	rt = token;
+	break;
+      }
+      if(Token.isText(token)){
+	rbs.push(token);
+      }
+    }
+    return new Ruby(rbs, rt);
+  }
+});
 
-  return RubyStream;
-})();
 
 var DocumentGenerator = (function(){
   function DocumentGenerator(src){
@@ -6982,12 +6781,18 @@ var LineContext = (function(){
       if(extent > this.maxExtent){
 	this._setMaxExtent(extent);
       }
-      if(element instanceof Ruby){
-	this._addRuby(element);
-      } else if(Token.isTag(element)){
+      if(Token.isTag(element)){
 	this._addTag(element);
-      } else if (element._type === "inline-block"){
-	this._addInlineBlock(element);
+      } else if(element instanceof Ruby){
+	this._addRuby(element);
+      } else if (element instanceof Box){
+	if (element._type === "inline-block"){
+	  this._addInlineBlock(element);
+	} else if(element._type === "text-line"){	
+	  this._addTextLine(element);
+	} else {
+	  throw "undefined inline element found";
+	}
       } else {
 	this._addText(element);
       }
@@ -7097,6 +6902,10 @@ var LineContext = (function(){
     },
     _addInlineBlock : function(element){
       this.lineTokens.push(element);
+    },
+    _addTextLine : function(element){
+      this.lineTokens.push(element);
+      this.charCount += element.getCharCount();
     },
     _addText : function(element){
       // text element
@@ -7235,10 +7044,10 @@ var InlineTreeGenerator = ElementGenerator.extend({
     this.markup = markup;
     this.stream = stream;
     this.context = context;
-    this._hasNext = this.stream.hasNext();
+    this._terminate = false;
   },
   hasNext : function(){
-    if(!this._hasNext){
+    if(this._terminate){
       return false;
     }
     if(this.generator && this.generator.hasNext()){
@@ -7253,11 +7062,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
   // so do not call this from this generator.
   rollback : function(){
     this.stream.rollback();
-    if(this.generator){
-      this.generator.rollback();
-    } else {
-      this.generator = null;
-    }
+    this.generator = null;
   },
   _getLineSize : function(parent){
     var measure = parent.getContentMeasure();
@@ -7268,7 +7073,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     var size = this._getLineSize(parent);
     var line = Layout.createTextLine(size, parent);
     line.markup = this.markup;
-    this._setBoxStyle(line, parent);
     return line;
   },
   yield : function(parent){
@@ -7311,7 +7115,11 @@ var InlineTreeGenerator = ElementGenerator.extend({
       try {
 	ctx.addElement(element);
       } catch(e){
-	this.generator? this.generator.rollback() : ctx.pushBackToken();
+	if(this.generator){
+	  this.generator.rollback();
+	} else {
+	  ctx.pushBackToken();
+	}
 	break;
       }
 
@@ -7386,7 +7194,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     // if block element, break line and force terminate generator
     if(token.isBlock()){
       ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
-      this._hasNext = false; // force terminate
+      this._terminate = true; // force terminate
       return ctx.isEmptyText()? Exceptions.SKIP : Exceptions.LINE_BREAK;
     }
     // token is static size tag
@@ -7446,29 +7254,18 @@ var InlineTreeGenerator = ElementGenerator.extend({
     switch(tag.getName()){
     case "script":
       return Exceptions.IGNORE;
-
     case "style":
       ctx.addStyle(tag);
       return Exceptions.IGNORE;
-
     default:
       this.generator = this._createChildInlineTreeGenerator(ctx, tag);
-      if(this.generator){
-	return this.generator.yield(ctx.line);
-      }
-      return Exceptions.IGNORE;
+      return this.generator.yield(ctx.line);
     }
   },
   _createChildInlineTreeGenerator : function(ctx, tag){
     switch(tag.getName()){
     case "ruby":
-      // check if metrics is already set.
-      if(typeof tag.fontSize === "undefined"){
-	tag.fontSize = ctx.getFontSize();
-	tag.letterSpacing = ctx.getLetterSpacing();
-      }
       return new RubyGenerator(tag, this.context);
-
     case "a":
       return new LinkGenerator(tag, this.context);
     default:
@@ -7488,8 +7285,13 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   _createStream : function(){
     return new TokenStream(this.markup.getContent());
   },
+  _createLine : function(parent){
+    var line = this._super(parent);
+    this._setBoxStyle(line, parent);
+    return line;
+  },
   _getLineSize : function(parent){
-    var measure = (parent instanceof TextLine)? parent.getTextRestMeasure() : parent.getContentMeasure();
+    var measure = parent.getTextRestMeasure();
     var extent = parent.getContentExtent();
     return parent.flow.getBoxSize(measure, extent);
   },
@@ -7502,7 +7304,7 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
 
 var RubyGenerator = ChildInlineTreeGenerator.extend({
   _createStream : function(){
-    return new RubyStream(this.markup.getContent());
+    return new RubyTagStream(this.markup.getContent());
   },
   _yieldElement : function(ctx){
     var ruby = this._super(ctx);
@@ -7514,6 +7316,15 @@ var RubyGenerator = ChildInlineTreeGenerator.extend({
       ruby.setMetrics(ctx.getLineFlow(), ctx.getFontSize(), ctx.getLetterSpacing());
     }
     return ruby;
+  }
+});
+
+
+var RtGenerator = ChildInlineTreeGenerator.extend({
+  _getLineSize : function(parent){
+    var measure = parent.getContentMeasure();
+    var extent = parent.getContentExtent();
+    return parent.flow.getBoxSize(measure, extent);
   }
 });
 
@@ -7879,7 +7690,7 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
   },
   // create root page, __size and __parent are ignored.
   _createBox : function(__size, __parent){
-    var box = Layout.createStdBox("body");
+    var box = Layout.createRootBox("body");
     this._setBoxStyle(box);
     box.percent = this.stream.getSeekPercent();
     box.seekPos = this.stream.getSeekPos();
@@ -8321,17 +8132,15 @@ var InlineEvaluator = Class.extend({
     return [markup.getSrc(), body, markup.getCloseSrc()].join("");
   },
   evaluate : function(line, ctx){
-    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds(), ctx), {
-      "style":Css.attr(line.getCss()),
-      "class":line.getCssClasses()
-    });
+    throw "InlineEvaluator::evaluate not implemented";
   },
   evalTextLineBody : function(line, tokens, ctx){
     var self = this;
     var body = List.fold(tokens, "", function(ret, element){
       return ret + self.evalInlineElement(line, element, ctx);
     });
-    return line.isInlineText()? this.wrapInlineTag(line.markup, body) : body;
+    //return line.isInlineText()? this.wrapInlineTag(line.markup, body) : body;
+    return body;
   },
   evalInlineElement : function(line, element, ctx){
     if(element._type === "text-line"){
@@ -8381,6 +8190,12 @@ var InlineEvaluator = Class.extend({
 });
 
 var VerticalInlineEvaluator = InlineEvaluator.extend({
+  evaluate : function(line, ctx){
+    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds(), ctx), {
+      "style":Css.attr(line.getCss()),
+      "class":line.getCssClasses()
+    });
+  },
   evalRuby : function(line, ruby, ctx){
     var body = this.evalRb(line, ruby, ctx) + this.evalRt(line, ruby, ctx);
     return Html.tagWrap("div", body, {
@@ -8402,17 +8217,9 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
     });
   },
   evalRtLine : function(line, ruby, ctx){
-    var text = ruby.getRtString();
-    var stream = new TokenStream(text);
-    var generator = new InlineTreeGenerator(ruby.rt, stream, ctx.createInlineRoot());
+    var generator = new RtGenerator(ruby.rt, ctx.createInlineRoot());
     var rt_line = generator.yield(line);
     return this.evaluate(rt_line, ctx);
-  },
-  evalEmpha : function(line, text, ctx){
-    return Html.tagWrap("div", text.data, {
-      "class": "nehan-empha-char",
-      "style": Css.attr(text.getCss(line.flow))
-    });
   },
   evalWord : function(line, word, ctx){
     if(Env.isTransformEnable){
@@ -8556,23 +8363,32 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
 });
 
 var HorizontalInlineEvaluator = InlineEvaluator.extend({
-  evalRubyLabel : function(line, label, ctx){
-    return Html.tagWrap("span", label.getRtString(), {
-      "style": Css.attr(label.getCss(line)),
-      "class": Css.addNehanPrefix(label._type)
+  evaluate : function(line, ctx){
+    var tag_name = line.isInlineText()? "span" : "div";
+    return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), {
+      "style":Css.attr(line.getCss()),
+      "class":line.getCssClasses()
     });
   },
-  evalEmphaChar : function(line, text, ctx){
-    return Html.tagWrap("span", text.data, {
-      "class": "nehan-empha-char",
-      "style": Css.attr(text.getCss(line.flow))
+  evalRuby : function(line, ruby, ctx){
+    var body = this.evalRt(line, ruby, ctx) + this.evalRb(line, ruby, ctx);
+    return Html.tagWrap("span", body, {
+      "style":Css.attr(ruby.getCssRuby(line)),
+      "class":"nehan-ruby"
     });
   },
-  evalTagStart : function(line, tag, ctx, alias){
-    return this._super(line, tag, ctx, "span");
+  evalRb : function(line, ruby, ctx){
+    var body = this.evalTextLineBody(line, ruby.getRbs(), ctx);
+    return Html.tagWrap("div", body, {
+      "style":Css.attr(ruby.getCssRb(line)),
+      "class":"nehan-rb"
+    });
   },
-  evalTagEnd : function(line, tag, ctx){
-    return "</span>";
+  evalRt : function(line, ruby, ctx){
+    return Html.tagWrap("div", ruby.getRtString(), {
+      "style":Css.attr(ruby.getCssRt(line)),
+      "class":"nehan-rb"
+    });
   },
   evalWord : function(line, word, ctx){
     return word.data;
@@ -8973,7 +8789,7 @@ if(__engine_args.test){
   __exports.ListTagStream = ListTagStream;
   __exports.DefListTagStream = DefListTagStream;
   __exports.TableTagStream = TableTagStream;
-  __exports.RubyStream = RubyStream;
+  __exports.RubyTagStream = RubyTagStream;
 
   // generator
   __exports.ElementGenerator = ElementGenerator;

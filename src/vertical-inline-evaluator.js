@@ -1,4 +1,10 @@
 var VerticalInlineEvaluator = InlineEvaluator.extend({
+  evaluate : function(line, ctx){
+    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds(), ctx), {
+      "style":Css.attr(line.getCss()),
+      "class":line.getCssClasses()
+    });
+  },
   evalRuby : function(line, ruby, ctx){
     var body = this.evalRb(line, ruby, ctx) + this.evalRt(line, ruby, ctx);
     return Html.tagWrap("div", body, {
@@ -20,17 +26,9 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
     });
   },
   evalRtLine : function(line, ruby, ctx){
-    var text = ruby.getRtString();
-    var stream = new TokenStream(text);
-    var generator = new InlineTreeGenerator(ruby.rt, stream, ctx.createInlineRoot());
+    var generator = new RtGenerator(ruby.rt, ctx.createInlineRoot());
     var rt_line = generator.yield(line);
     return this.evaluate(rt_line, ctx);
-  },
-  evalEmpha : function(line, text, ctx){
-    return Html.tagWrap("div", text.data, {
-      "class": "nehan-empha-char",
-      "style": Css.attr(text.getCss(line.flow))
-    });
   },
   evalWord : function(line, word, ctx){
     if(Env.isTransformEnable){

@@ -26,7 +26,7 @@ var Layout = {
   createTextLine : function(size, parent){
     return this.createBox(size, parent, "text-line");
   },
-  createStdBox : function(type){
+  createRootBox : function(type){
     var box = new Box(this.getStdPageSize(), null, type);
     box.flow = this.getStdBoxFlow();
     box.lineRate = this.lineRate;

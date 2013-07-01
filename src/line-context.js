@@ -180,12 +180,18 @@ var LineContext = (function(){
       if(extent > this.maxExtent){
 	this._setMaxExtent(extent);
       }
-      if(element instanceof Ruby){
-	this._addRuby(element);
-      } else if(Token.isTag(element)){
+      if(Token.isTag(element)){
 	this._addTag(element);
-      } else if (element._type === "inline-block"){
-	this._addInlineBlock(element);
+      } else if(element instanceof Ruby){
+	this._addRuby(element);
+      } else if (element instanceof Box){
+	if (element._type === "inline-block"){
+	  this._addInlineBlock(element);
+	} else if(element._type === "text-line"){	
+	  this._addTextLine(element);
+	} else {
+	  throw "undefined inline element found";
+	}
       } else {
 	this._addText(element);
       }
@@ -295,6 +301,10 @@ var LineContext = (function(){
     },
     _addInlineBlock : function(element){
       this.lineTokens.push(element);
+    },
+    _addTextLine : function(element){
+      this.lineTokens.push(element);
+      this.charCount += element.getCharCount();
     },
     _addText : function(element){
       // text element

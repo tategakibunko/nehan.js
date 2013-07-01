@@ -6,17 +6,15 @@ var InlineEvaluator = Class.extend({
     return [markup.getSrc(), body, markup.getCloseSrc()].join("");
   },
   evaluate : function(line, ctx){
-    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds(), ctx), {
-      "style":Css.attr(line.getCss()),
-      "class":line.getCssClasses()
-    });
+    throw "InlineEvaluator::evaluate not implemented";
   },
   evalTextLineBody : function(line, tokens, ctx){
     var self = this;
     var body = List.fold(tokens, "", function(ret, element){
       return ret + self.evalInlineElement(line, element, ctx);
     });
-    return line.isInlineText()? this.wrapInlineTag(line.markup, body) : body;
+    //return line.isInlineText()? this.wrapInlineTag(line.markup, body) : body;
+    return body;
   },
   evalInlineElement : function(line, element, ctx){
     if(element._type === "text-line"){

@@ -342,6 +342,9 @@ var Box = (function(){
     isTextVertical : function(){
       return this.flow.isTextVertical();
     },
+    isTextHorizontal : function(){
+      return this.flow.isTextHorizontal();
+    },
     isValidSize : function(){
       return this.size.isValid();
     },

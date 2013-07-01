@@ -11,10 +11,10 @@ var InlineTreeGenerator = ElementGenerator.extend({
     this.markup = markup;
     this.stream = stream;
     this.context = context;
-    this._hasNext = this.stream.hasNext();
+    this._terminate = false;
   },
   hasNext : function(){
-    if(!this._hasNext){
+    if(this._terminate){
       return false;
     }
     if(this.generator && this.generator.hasNext()){
@@ -29,11 +29,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
   // so do not call this from this generator.
   rollback : function(){
     this.stream.rollback();
-    if(this.generator){
-      this.generator.rollback();
-    } else {
-      this.generator = null;
-    }
+    this.generator = null;
   },
   _getLineSize : function(parent){
     var measure = parent.getContentMeasure();
@@ -44,7 +40,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     var size = this._getLineSize(parent);
     var line = Layout.createTextLine(size, parent);
     line.markup = this.markup;
-    this._setBoxStyle(line, parent);
     return line;
   },
   yield : function(parent){
@@ -87,7 +82,11 @@ var InlineTreeGenerator = ElementGenerator.extend({
       try {
 	ctx.addElement(element);
       } catch(e){
-	this.generator? this.generator.rollback() : ctx.pushBackToken();
+	if(this.generator){
+	  this.generator.rollback();
+	} else {
+	  ctx.pushBackToken();
+	}
 	break;
       }
 
@@ -162,7 +161,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     // if block element, break line and force terminate generator
     if(token.isBlock()){
       ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
-      this._hasNext = false; // force terminate
+      this._terminate = true; // force terminate
       return ctx.isEmptyText()? Exceptions.SKIP : Exceptions.LINE_BREAK;
     }
     // token is static size tag
@@ -222,29 +221,18 @@ var InlineTreeGenerator = ElementGenerator.extend({
     switch(tag.getName()){
     case "script":
       return Exceptions.IGNORE;
-
     case "style":
       ctx.addStyle(tag);
       return Exceptions.IGNORE;
-
     default:
       this.generator = this._createChildInlineTreeGenerator(ctx, tag);
-      if(this.generator){
-	return this.generator.yield(ctx.line);
-      }
-      return Exceptions.IGNORE;
+      return this.generator.yield(ctx.line);
     }
   },
   _createChildInlineTreeGenerator : function(ctx, tag){
     switch(tag.getName()){
     case "ruby":
-      // check if metrics is already set.
-      if(typeof tag.fontSize === "undefined"){
-	tag.fontSize = ctx.getFontSize();
-	tag.letterSpacing = ctx.getLetterSpacing();
-      }
       return new RubyGenerator(tag, this.context);
-
     case "a":
       return new LinkGenerator(tag, this.context);
     default:

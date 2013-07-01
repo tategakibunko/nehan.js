@@ -1,21 +1,30 @@
 var HorizontalInlineEvaluator = InlineEvaluator.extend({
-  evalRubyLabel : function(line, label, ctx){
-    return Html.tagWrap("span", label.getRtString(), {
-      "style": Css.attr(label.getCss(line)),
-      "class": Css.addNehanPrefix(label._type)
+  evaluate : function(line, ctx){
+    var tag_name = line.isInlineText()? "span" : "div";
+    return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), {
+      "style":Css.attr(line.getCss()),
+      "class":line.getCssClasses()
     });
   },
-  evalEmphaChar : function(line, text, ctx){
-    return Html.tagWrap("span", text.data, {
-      "class": "nehan-empha-char",
-      "style": Css.attr(text.getCss(line.flow))
+  evalRuby : function(line, ruby, ctx){
+    var body = this.evalRt(line, ruby, ctx) + this.evalRb(line, ruby, ctx);
+    return Html.tagWrap("span", body, {
+      "style":Css.attr(ruby.getCssRuby(line)),
+      "class":"nehan-ruby"
     });
   },
-  evalTagStart : function(line, tag, ctx, alias){
-    return this._super(line, tag, ctx, "span");
+  evalRb : function(line, ruby, ctx){
+    var body = this.evalTextLineBody(line, ruby.getRbs(), ctx);
+    return Html.tagWrap("div", body, {
+      "style":Css.attr(ruby.getCssRb(line)),
+      "class":"nehan-rb"
+    });
   },
-  evalTagEnd : function(line, tag, ctx){
-    return "</span>";
+  evalRt : function(line, ruby, ctx){
+    return Html.tagWrap("div", ruby.getRtString(), {
+      "style":Css.attr(ruby.getCssRt(line)),
+      "class":"nehan-rb"
+    });
   },
   evalWord : function(line, word, ctx){
     return word.data;
