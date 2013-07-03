@@ -57,6 +57,10 @@ var Box = (function(){
 	if(Env.isIphoneFamily){
 	  css["letter-spacing"] = "-0.001em";
 	}
+	if(typeof this.markup === "undefined" || !this.isRubyLine()){
+	  css["margin-left"] = css["margin-right"] = "auto";
+	  css["text-align"] = "center";
+	}
       }
       return css;
     },
@@ -236,6 +240,10 @@ var Box = (function(){
     addMeasure : function(measure){
       this.size.addMeasure(this.flow, measure);
     },
+    setInlineElements : function(elements, measure){
+      this.childs.setNormal(elements);
+      this.childMeasure = measure;
+    },
     setCss : function(prop, value){
       this.css[prop] = value;
     },
@@ -336,7 +344,10 @@ var Box = (function(){
     isInlineText : function(){
       return this.isTextLine() && this.markup && this.markup.isInline();
     },
-    isRubyTextLine : function(){
+    isRubyLine : function(){
+      return this.isTextLine() && this.markup && (this.markup.getName() === "ruby");
+    },
+    isRtLine : function(){
       return this.isTextLine() && this.markup && (this.markup.getName() === "rt");
     },
     isTextVertical : function(){

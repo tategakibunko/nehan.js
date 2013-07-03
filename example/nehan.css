@@ -91,9 +91,6 @@ div, span{
 .nehan-body a{
   word-wrap:normal !important;
 }
-.nehan-img-char{
-  display:block;
-}
 .nehan-empha-char{
   font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace;
 }
@@ -112,6 +109,12 @@ div, span{
 .nehan-b, .nehan-strong{
   font-weight:bold;
 }
+/*
+.nehan-img-char{
+  display:block;
+  margin-left:auto;
+  margin-right:auto;
+}
 .nehan-vert-rl{
   -webkit-writing-mode:vertical-rl;
 }
@@ -124,6 +127,7 @@ div, span{
 .nehan-vert-space-end{
   padding-bottom:0.5em;
 }
+*/
 .nehan-vert-alpha{
   font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'ＭＳ 明朝','MS Mincho',monospace;
   word-break:normal !important;

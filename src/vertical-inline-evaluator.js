@@ -1,45 +1,43 @@
 var VerticalInlineEvaluator = InlineEvaluator.extend({
-  evaluate : function(line, ctx){
-    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds(), ctx), {
+  evaluate : function(line){
+    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), {
       "style":Css.attr(line.getCss()),
       "class":line.getCssClasses()
     });
   },
-  evalRuby : function(line, ruby, ctx){
-    var body = this.evalRb(line, ruby, ctx) + this.evalRt(line, ruby, ctx);
+  evalRuby : function(line, ruby){
+    var body = this.evalRb(line, ruby) + this.evalRt(line, ruby);
     return Html.tagWrap("div", body, {
       "style":Css.attr(ruby.getCssRuby(line)),
-      "class":"nehan-ruby"
+      "class":"nehan-ruby-body"
     });
   },
-  evalRb : function(line, ruby, ctx){
-    var body = this.evalTextLineBody(line, ruby.getRbs(), ctx);
+  evalRb : function(line, ruby){
+    var body = this.evalTextLineBody(line, ruby.getRbs());
     return Html.tagWrap("div", body, {
       "style":Css.attr(ruby.getCssRb(line)),
-      "class": "nehan-rb"
+      "class":"nehan-rb"
     });
   },
-  evalRt : function(line, ruby, ctx){
-    var rt_body = this.evalRtLine(line, ruby, ctx);
-    return Html.tagWrap("div", rt_body, {
-      "style":Css.attr(ruby.getCssRt(line))
-    });
-  },
-  evalRtLine : function(line, ruby, ctx){
-    var generator = new RtGenerator(ruby.rt, ctx.createInlineRoot());
+  evalRt : function(line, ruby){
+    var generator = new RtGenerator(ruby.rt, new DocumentContext());
     var rt_line = generator.yield(line);
-    return this.evaluate(rt_line, ctx);
+    var css = ruby.getCssRt(line);
+    for(var prop in css){
+      rt_line.setCss(prop, css[prop]);
+    }
+    return this.evaluate(rt_line);
   },
-  evalWord : function(line, word, ctx){
+  evalWord : function(line, word){
     if(Env.isTransformEnable){
-      return this.evalWordTransform(line, word, ctx);
+      return this.evalWordTransform(line, word);
     } else if(Env.isIE){
-      return this.evalWordIE(line, word, ctx);
+      return this.evalWordIE(line, word);
     } else {
       return "";
     }
   },
-  evalWordTransform : function(line, word, ctx){
+  evalWordTransform : function(line, word){
     var body = Html.tagWrap("div", word.data, {
       "class": "nehan-vert-alpha"
     });
@@ -53,43 +51,42 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       })
     });
   },
-  evalWordIE : function(line, word, ctx){
-    var css = {
-      "writing-mode": "tb-rl",
-      "letter-spacing":line.letterSpacing + "px",
-      "line-height": word.fontSize + "px",
-      "float": "left"
-    };
+  evalWordIE : function(line, word){
     return Html.tagWrap("div", word.data, {
-      "style": Css.attr(css)
+      "style": Css.attr({
+	"writing-mode": "tb-rl",
+	"letter-spacing":line.letterSpacing + "px",
+	"line-height": word.fontSize + "px",
+	"float": "left"
+      })
     });
   },
-  evalTcy : function(line, tcy, ctx){
+  evalTcy : function(line, tcy){
     return Html.tagWrap("div", tcy.data, {
       "class": "nehan-tcy"
     });
   },
-  evalChar : function(line, chr, ctx){
+  evalChar : function(line, chr){
     if(chr.isImgChar()){
       if(Config.useVerticalGlyphIfEnable &&
 	 Env.isVerticalGlyphEnable &&
 	 !chr.isTenten()){
-	return this.evalVerticalGlyph(line, chr, ctx);
+	return this.evalVerticalGlyph(line, chr);
       } else {
-	return this.evalImgChar(line, chr, ctx);
+	return this.evalImgChar(line, chr);
       }
-    } else if(chr.isHalfSpaceChar(chr, ctx)){
-      return this.evalHalfSpaceChar(line, chr, ctx);
+    } else if(chr.isHalfSpaceChar(chr)){
+      return this.evalHalfSpaceChar(line, chr);
     } else if(chr.isCnvChar()){
-      return this.evalCnvChar(line, chr, ctx);
+      return this.evalCnvChar(line, chr);
     } else if(chr.isSmallKana()){
-      return this.evalSmallKana(line, chr, ctx);
+      return this.evalSmallKana(line, chr);
     } else if(chr.isPaddingEnable()){
-      return this.evalPaddingChar(line, chr, ctx);
+      return this.evalPaddingChar(line, chr);
     }
-    return this.evalCharBr(line, chr, ctx);
+    return this.evalCharBr(line, chr);
   },
-  evalCharBr : function(line, chr, ctx){
+  evalCharBr : function(line, chr){
     if(line.letterSpacing){
       return Html.tagWrap("div", chr.data, {
 	"style":Css.attr({
@@ -99,24 +96,21 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
     }
     return chr.data + "<br />";
   },
-  evalPaddingChar : function(line, chr, ctx){
+  evalPaddingChar : function(line, chr){
     return Html.tagWrap("div", chr.data, {
       style:Css.attr(chr.getCssPadding(line.flow))
     });
   },
-  evalImgChar : function(line, chr, ctx){
-    var width = chr.fontSize;
+  evalImgChar : function(line, chr){
     var vscale = chr.getVertScale();
+    var width = chr.fontSize;
     var height = (vscale === 1)? width : Math.floor(width * vscale);
     var css = {};
     if(chr.isPaddingEnable()){
       Args.copy(css, chr.getCssPadding(line.flow));
     }
-    var palette_color_value = Layout.fontColor.toUpperCase();
-    var font_color = ctx.getInlineFontColor(line);
-    if(font_color.getValue().toLowerCase() != Layout.fontColor.toLowerCase()){
-      palette_color_value = font_color.getPaletteValue().toUpperCase();
-    }
+    Args.copy(css, chr.getCssVertImgChar());
+    var palette_color_value = Layout.getPaletteFontColor(line.color).toUpperCase();
     return Html.tagSingle("img", {
       "class":"nehan-img-char",
       src:chr.getImgSrc(palette_color_value),
@@ -125,28 +119,18 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       height:height
     }) + Const.clearFix;
   },
-  evalVerticalGlyph : function(line, chr, ctx){
-    var classes = ["nehan-vert-rl"];
-    if(chr.isKakkoStart()){
-      if(!chr.isPaddingEnable()){
-	classes.push("nehan-vert-kern-start");
-      }
-    } else {
-      if(chr.getVertScale() < 1){
-	classes.push("nehan-vert-half");
-      }
-      if(chr.isPaddingEnable()){
-	classes.push("nehan-vert-space-end");
-      }
-    }
+  evalVerticalGlyph : function(line, chr){
+    var css = {};
+    Args.copy(css, chr.getCssVertGlyph(line));
     return Html.tagWrap("div", chr.data, {
-      "class":classes.join(" ")
+      "style":Css.attr(css),
+      "class":"nehan-vert-rl"
     });
   },
-  evalCnvChar: function(line, chr, ctx){
+  evalCnvChar: function(line, chr){
     return chr.cnv + "<br />";
   },
-  evalSmallKana : function(line, chr, ctx){
+  evalSmallKana : function(line, chr){
     return Html.tagWrap("div", chr.data, {
       style:Css.attr({
 	"position": "relative",
@@ -157,7 +141,7 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       })
     });
   },
-  evalHalfSpaceChar : function(line, chr, ctx){
+  evalHalfSpaceChar : function(line, chr){
     var half = Math.floor(chr.fontSize / 2);
     return Html.tagWrap("div", "&nbsp;", {
       style:Css.attr({
@@ -166,7 +150,7 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       })
     });
   },
-  evalInlineBox : function(box, ctx){
-    return this._super(box, ctx) + Const.clearFix;
+  evalInlineBox : function(box){
+    return this._super(box) + Const.clearFix;
   }
 });

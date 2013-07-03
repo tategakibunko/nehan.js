@@ -114,6 +114,12 @@ var Layout = {
       return Math.floor(this.rubyRate * base_font_size);
     }
     return UnitSize.getUnitSize(rt_font_size, base_font_size);
+  },
+  getPaletteFontColor : function(color){
+    if(color.getValue().toLowerCase() !== this.fontColor.toLowerCase()){
+      return color.getPaletteValue();
+    }
+    return this.fontColor;
   }
 };
 
@@ -2242,6 +2248,37 @@ var Char = (function(){
       }
       return padding.getCss();
     },
+    getCssVertGlyph : function(line){
+      var css = {};
+      var padding_enable = this.isPaddingEnable();
+      css["-webkit-writing-mode"] = "vertical-rl";
+      if(line.maxFontSize - this.fontSize > 0){
+	var offset = Math.floor((line.maxFontSize + this.fontSize) / 2) + "px";
+	css["-webkit-transform"] = "translate(" + offset + ")";
+      } else {
+	css["-webkit-transform"] = "translate(50%)";
+      }
+      if(this.isKakkoStart()){
+	if(!padding_enable){
+	  css["padding-top"] = "-0.5em";
+	}
+      } else {
+	if(this.getVertScale() < 1){
+	  css["height"] = "0.5em";
+	}
+	if(padding_enable){
+	  css["padding-bottom"] = "0.5em";
+	}
+      }
+      return css;
+    },
+    getCssVertImgChar : function(){
+      var css = {};
+      css.display = "block";
+      css["margin-left"] = "auto";
+      css["margin-right"] = "auto";
+      return css;
+    },
     getHoriScale : function(){
       return this.hscale? this.hscale : 1;
     },
@@ -2615,6 +2652,13 @@ var Ruby = (function(){
       if(line.isTextHorizontal()){
 	css.display = "inline-block";
 	css["text-align"] = "center";
+      } else {
+	var ruby_extent = this.getExtent();
+	var line_extent = line.maxExtent;
+	var offset = Math.floor((line_extent - ruby_extent + this.getRtFontSize()) / 2);
+	css["margin-left"] = offset + "px";
+	css[line.flow.getPropExtent()] = line.getContentExtent() + "px";
+	css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
       }
       return css;
     },
@@ -2624,6 +2668,7 @@ var Ruby = (function(){
 	css["float"] = "left";
       } else {
 	css["font-size"] = css["line-height"] = this.getRtFontSize() + "px";
+	css["vertical-align"] = "bottom";
       }
       return css;
     },
@@ -4118,6 +4163,9 @@ var BoxChild = (function(){
     get : function(){
       return this.forward.concat(this.normal).concat(this.backward);
     },
+    setNormal : function(elements){
+      this.normal = elements;
+    },
     getLength : function(){
       return this.forward.length + this.normal.length + this.backward.length;
     },
@@ -4205,6 +4253,10 @@ var Box = (function(){
       if(this.isTextVertical()){
 	if(Env.isIphoneFamily){
 	  css["letter-spacing"] = "-0.001em";
+	}
+	if(typeof this.markup === "undefined" || !this.isRubyLine()){
+	  css["margin-left"] = css["margin-right"] = "auto";
+	  css["text-align"] = "center";
 	}
       }
       return css;
@@ -4385,6 +4437,10 @@ var Box = (function(){
     addMeasure : function(measure){
       this.size.addMeasure(this.flow, measure);
     },
+    setInlineElements : function(elements, measure){
+      this.childs.setNormal(elements);
+      this.childMeasure = measure;
+    },
     setCss : function(prop, value){
       this.css[prop] = value;
     },
@@ -4485,7 +4541,10 @@ var Box = (function(){
     isInlineText : function(){
       return this.isTextLine() && this.markup && this.markup.isInline();
     },
-    isRubyTextLine : function(){
+    isRubyLine : function(){
+      return this.isTextLine() && this.markup && (this.markup.getName() === "ruby");
+    },
+    isRtLine : function(){
       return this.isTextLine() && this.markup && (this.markup.getName() === "rt");
     },
     isTextVertical : function(){
@@ -6675,10 +6734,10 @@ var LineContext = (function(){
       if(element instanceof Box ||
 	 element instanceof Word ||
 	 element instanceof Tcy ||
-	 this.line.isRubyTextLine()){
+	 element instanceof Ruby ||
+	 this.line.isRtLine()){
 	return this.restMeasure >= advance;
       }
-      
       // justify target need space for tail fix.
       return this.restMeasure - this.line.fontSize >= advance;
     },
@@ -6786,12 +6845,10 @@ var LineContext = (function(){
       } else if(element instanceof Ruby){
 	this._addRuby(element);
       } else if (element instanceof Box){
-	if (element._type === "inline-block"){
-	  this._addInlineBlock(element);
-	} else if(element._type === "text-line"){	
+	if(element._type === "text-line"){	
 	  this._addTextLine(element);
 	} else {
-	  throw "undefined inline element found";
+	  this._addInlineBlock(element);
 	}
       } else {
 	this._addText(element);
@@ -6811,6 +6868,9 @@ var LineContext = (function(){
       return this.context.createInlineRoot();
     },
     createLine : function(){
+      if(this.curMeasure === 0){
+	return this._createEmptyLine();
+      }
       // if first-line, deactivate first line tag.
       if(this.isFirstLine()){
 	this.popFirstLine();
@@ -7012,16 +7072,18 @@ var LineContext = (function(){
       this.stream.setPos(normal_pos + 1);
       return this.lineTokens;
     },
+    _createEmptyLine : function(){
+      this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxFontSize);
+      this.line.setInlineElements([], this.lineMeasure);
+      return this.line;
+    },
     _createTextLine : function(){
       var ruby_extent = Math.floor(this.maxFontSize * (this.line.lineRate - 1));
       var max_text_extent = this.maxFontSize + ruby_extent;
       this.maxExtent = Math.max(this.maxExtent, max_text_extent);
       this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxExtent);
       this.line.charCount = this.charCount;
-      this.line.childs.normal = this.lineTokens;
-      this.line.childMeasure = this.curMeasure;
-      //this.line.tokens = this.lineTokens;
-      //this.line.textMeasure = this.curMeasure;
+      this.line.setInlineElements(this.lineTokens, this.curMeasure);
       this.line.textIndent = this.textIndent;
       return this.line;
     }
@@ -7937,9 +7999,10 @@ var InsideListItemGenerator = ChildBlockTreeGenerator.extend({
 
 var OutsideListItemGenerator = ParallelGenerator.extend({
   init : function(markup, parent, context){
-    markup.marker = parent.listStyle.getMarkerHtml(markup.order + 1);
+    var marker = parent.listStyle.getMarkerHtml(markup.order + 1);
+    var markup_marker = new Tag("<div class='nehan-li-marker'>", marker);
     this._super([
-      new ListItemMarkGenerator(markup, context),
+      new ListItemMarkGenerator(markup_marker, context),
       new ListItemBodyGenerator(markup, context)
     ], markup, context, parent.partition);
   }
@@ -7948,9 +8011,6 @@ var OutsideListItemGenerator = ParallelGenerator.extend({
 var ListItemMarkGenerator = ParaChildGenerator.extend({
   _getBoxType : function(){
     return "li-marker";
-  },
-  _createStream : function(){
-    return new TokenStream(this.markup.marker);
   }
 });
 
@@ -8010,14 +8070,13 @@ var EvalResult = (function(){
 })();
 
 var PageEvaluator = (function(){
-  function PageEvaluator(ctx){
-    this.ctx = ctx || new DocumentContext();
-    this.blockEvaluator = new BlockEvaluator(this.ctx);
+  function PageEvaluator(){
+    this.blockEvaluator = new BlockEvaluator();
   }
 
   PageEvaluator.prototype = {
     evaluate : function(box){
-      var html = this.blockEvaluator.evaluate(box, this.ctx);
+      var html = this.blockEvaluator.evaluate(box);
       var css_content = box.styles.join("\n");
       var style = Html.tagWrap("style", css_content, {"type":"text/css"});
       return new EvalResult({
@@ -8042,27 +8101,27 @@ var BlockEvaluator = (function(){
   }
 
   BlockEvaluator.prototype = {
-    evaluate : function(box, ctx){
+    evaluate : function(box){
       switch(box._type){
       case "br":
-	return this.evalBreak(box, ctx);
+	return this.evalBreak(box);
       case "hr":
-	return this.evalHorizontalRule(box, ctx);
+	return this.evalHorizontalRule(box);
       case "ibox":
-	return this.evalInlineBox(box, ctx);
+	return this.evalInlineBox(box);
       case "ipage":
-	return this.evalInlinePage(box, ctx);
+	return this.evalInlinePage(box);
       case "img":
-	return this.evalImage(box, ctx);
+	return this.evalImage(box);
       case "table":
-	return this.evalTable(box, ctx);
+	return this.evalTable(box);
       case "text-line":
-	return this.evalTextLine(box, ctx);
+	return this.evalTextLine(box);
       default:
-	return this.evalBox(box, ctx);
+	return this.evalBox(box);
       }
     },
-    evalBox : function(box, ctx){
+    evalBox : function(box){
       var attr = {
 	"style":Css.attr(box.getCss()),
 	"class":box.getCssClasses()
@@ -8070,53 +8129,51 @@ var BlockEvaluator = (function(){
       if(box.id){
 	attr.id = box.id;
       }
-      return Html.tagWrap("div", this.evalBoxChilds(box.getChilds(), ctx), attr);
+      return Html.tagWrap("div", this.evalBoxChilds(box.getChilds()), attr);
     },
-    evalBoxChilds : function(childs, ctx){
+    evalBoxChilds : function(childs){
       var self = this;
       return List.fold(childs, "", function(ret, box){
-	return [ret, self.evaluate(box, ctx)].join("\n");
+	return [ret, self.evaluate(box)].join("\n");
       });
     },
-    evalTextLine : function(box, ctx){
+    evalTextLine : function(box){
       if(box.isTextVertical()){
-	return this.inlineEvaluatorV.evaluate(box, ctx);
+	return this.inlineEvaluatorV.evaluate(box);
       }
-      return this.inlineEvaluatorH.evaluate(box, ctx);
+      return this.inlineEvaluatorH.evaluate(box);
     },
-    evalInlineBox : function(box, ctx){
+    evalInlineBox : function(box){
       return Html.tagWrap("div", box.content, {
 	"style":Css.attr(box.getCss()),
 	"class":box.getCssClasses()
       });
     },
-    evalHorizontalRule : function(box, ctx){
-      return this.evalInlineBox(box, ctx);
+    evalHorizontalRule : function(box){
+      return this.evalInlineBox(box);
     },
-    evalBreak : function(box, ctx){
-      return this.evalInlineBox(box, ctx);
+    evalBreak : function(box){
+      return this.evalInlineBox(box);
     },
-    evalImage : function(box, ctx){
-      var content = this.evalImageContent(box, ctx);
+    evalImage : function(box){
+      var content = this.evalImageContent(box);
       return Html.tagWrap("div", content, {
 	"style":Css.attr(box.getCss()),
 	"class":box.getCssClasses()
       });
     },
-    evalImageContent : function(box, ctx){
+    evalImageContent : function(box){
       return Html.tagSingle("img", {
 	"src": box.src,
 	"width": box.getContentWidth(),
 	"height": box.getContentHeight()
       });
     },
-    evalInlinePage : function(box, ctx){
-      var ctx2 = ctx.createInlineRoot();
-      return this.evalBox(box, ctx2);
+    evalInlinePage : function(box){
+      return this.evalBox(box);
     },
-    evalTable : function(box, ctx){
-      var ctx2 = ctx.createInlineRoot();
-      return this.evalBox(box, ctx2);
+    evalTable : function(box){
+      return this.evalBox(box);
     }
   };
 
@@ -8131,106 +8188,104 @@ var InlineEvaluator = Class.extend({
   wrapInlineTag : function(markup, body){
     return [markup.getSrc(), body, markup.getCloseSrc()].join("");
   },
-  evaluate : function(line, ctx){
+  evaluate : function(line){
     throw "InlineEvaluator::evaluate not implemented";
   },
-  evalTextLineBody : function(line, tokens, ctx){
+  evalTextLineBody : function(line, tokens){
     var self = this;
     var body = List.fold(tokens, "", function(ret, element){
-      return ret + self.evalInlineElement(line, element, ctx);
+      return ret + self.evalInlineElement(line, element);
     });
     //return line.isInlineText()? this.wrapInlineTag(line.markup, body) : body;
     return body;
   },
-  evalInlineElement : function(line, element, ctx){
+  evalInlineElement : function(line, element){
     if(element._type === "text-line"){
-      return this.evaluate(element, ctx);
+      return this.evaluate(element);
     }
     if(element instanceof Ruby){
-      return this.evalRuby(line, element, ctx);
+      return this.evalRuby(line, element);
     }
     if(Token.isText(element)){
-      return this.evalText(line, element, ctx);
+      return this.evalText(line, element);
     }
     if(Token.isTag(element)){
-      return this.evalTagSingle(line, element, ctx);
+      return this.evalTagSingle(line, element);
     }
     if(element instanceof Box){
-      return this.evalInlineBox(element, ctx);
+      return this.evalInlineBox(element);
     }
     return "";
   },
-  evalText : function(line, text, ctx){
+  evalText : function(line, text){
     switch(text._type){
     case "word":
-      return this.evalWord(line, text, ctx);
+      return this.evalWord(line, text);
     case "tcy":
-      return this.evalTcy(line, text, ctx);
+      return this.evalTcy(line, text);
     case "char":
-      return this.evalChar(line, text, ctx);
+      return this.evalChar(line, text);
     default:
       return "";
     }
   },
-  evalTagSingle : function(line, tag, ctx){
+  evalTagSingle : function(line, tag){
     return tag.getSrc();
   },
   evalInlineBox : function(box, ctx){
-    return this.parentEvaluator.evaluate(box, ctx);
+    return this.parentEvaluator.evaluate(box);
   },
-  evalWord : function(line, word, ctx){
+  evalWord : function(line, word){
     throw "not implemented: evalWord";
   },
-  evalTcy : function(line, tcy, ctx){
+  evalTcy : function(line, tcy){
     throw "not implemented: evalTcy";
   },
-  evalChar : function(line, tcy, ctx){
+  evalChar : function(line, tcy){
     throw "not implemented: evalChar";
   }
 });
 
 var VerticalInlineEvaluator = InlineEvaluator.extend({
-  evaluate : function(line, ctx){
-    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds(), ctx), {
+  evaluate : function(line){
+    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), {
       "style":Css.attr(line.getCss()),
       "class":line.getCssClasses()
     });
   },
-  evalRuby : function(line, ruby, ctx){
-    var body = this.evalRb(line, ruby, ctx) + this.evalRt(line, ruby, ctx);
+  evalRuby : function(line, ruby){
+    var body = this.evalRb(line, ruby) + this.evalRt(line, ruby);
     return Html.tagWrap("div", body, {
       "style":Css.attr(ruby.getCssRuby(line)),
-      "class":"nehan-ruby"
+      "class":"nehan-ruby-body"
     });
   },
-  evalRb : function(line, ruby, ctx){
-    var body = this.evalTextLineBody(line, ruby.getRbs(), ctx);
+  evalRb : function(line, ruby){
+    var body = this.evalTextLineBody(line, ruby.getRbs());
     return Html.tagWrap("div", body, {
       "style":Css.attr(ruby.getCssRb(line)),
-      "class": "nehan-rb"
+      "class":"nehan-rb"
     });
   },
-  evalRt : function(line, ruby, ctx){
-    var rt_body = this.evalRtLine(line, ruby, ctx);
-    return Html.tagWrap("div", rt_body, {
-      "style":Css.attr(ruby.getCssRt(line))
-    });
-  },
-  evalRtLine : function(line, ruby, ctx){
-    var generator = new RtGenerator(ruby.rt, ctx.createInlineRoot());
+  evalRt : function(line, ruby){
+    var generator = new RtGenerator(ruby.rt, new DocumentContext());
     var rt_line = generator.yield(line);
-    return this.evaluate(rt_line, ctx);
+    var css = ruby.getCssRt(line);
+    for(var prop in css){
+      rt_line.setCss(prop, css[prop]);
+    }
+    return this.evaluate(rt_line);
   },
-  evalWord : function(line, word, ctx){
+  evalWord : function(line, word){
     if(Env.isTransformEnable){
-      return this.evalWordTransform(line, word, ctx);
+      return this.evalWordTransform(line, word);
     } else if(Env.isIE){
-      return this.evalWordIE(line, word, ctx);
+      return this.evalWordIE(line, word);
     } else {
       return "";
     }
   },
-  evalWordTransform : function(line, word, ctx){
+  evalWordTransform : function(line, word){
     var body = Html.tagWrap("div", word.data, {
       "class": "nehan-vert-alpha"
     });
@@ -8244,43 +8299,42 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       })
     });
   },
-  evalWordIE : function(line, word, ctx){
-    var css = {
-      "writing-mode": "tb-rl",
-      "letter-spacing":line.letterSpacing + "px",
-      "line-height": word.fontSize + "px",
-      "float": "left"
-    };
+  evalWordIE : function(line, word){
     return Html.tagWrap("div", word.data, {
-      "style": Css.attr(css)
+      "style": Css.attr({
+	"writing-mode": "tb-rl",
+	"letter-spacing":line.letterSpacing + "px",
+	"line-height": word.fontSize + "px",
+	"float": "left"
+      })
     });
   },
-  evalTcy : function(line, tcy, ctx){
+  evalTcy : function(line, tcy){
     return Html.tagWrap("div", tcy.data, {
       "class": "nehan-tcy"
     });
   },
-  evalChar : function(line, chr, ctx){
+  evalChar : function(line, chr){
     if(chr.isImgChar()){
       if(Config.useVerticalGlyphIfEnable &&
 	 Env.isVerticalGlyphEnable &&
 	 !chr.isTenten()){
-	return this.evalVerticalGlyph(line, chr, ctx);
+	return this.evalVerticalGlyph(line, chr);
       } else {
-	return this.evalImgChar(line, chr, ctx);
+	return this.evalImgChar(line, chr);
       }
-    } else if(chr.isHalfSpaceChar(chr, ctx)){
-      return this.evalHalfSpaceChar(line, chr, ctx);
+    } else if(chr.isHalfSpaceChar(chr)){
+      return this.evalHalfSpaceChar(line, chr);
     } else if(chr.isCnvChar()){
-      return this.evalCnvChar(line, chr, ctx);
+      return this.evalCnvChar(line, chr);
     } else if(chr.isSmallKana()){
-      return this.evalSmallKana(line, chr, ctx);
+      return this.evalSmallKana(line, chr);
     } else if(chr.isPaddingEnable()){
-      return this.evalPaddingChar(line, chr, ctx);
+      return this.evalPaddingChar(line, chr);
     }
-    return this.evalCharBr(line, chr, ctx);
+    return this.evalCharBr(line, chr);
   },
-  evalCharBr : function(line, chr, ctx){
+  evalCharBr : function(line, chr){
     if(line.letterSpacing){
       return Html.tagWrap("div", chr.data, {
 	"style":Css.attr({
@@ -8290,24 +8344,21 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
     }
     return chr.data + "<br />";
   },
-  evalPaddingChar : function(line, chr, ctx){
+  evalPaddingChar : function(line, chr){
     return Html.tagWrap("div", chr.data, {
       style:Css.attr(chr.getCssPadding(line.flow))
     });
   },
-  evalImgChar : function(line, chr, ctx){
-    var width = chr.fontSize;
+  evalImgChar : function(line, chr){
     var vscale = chr.getVertScale();
+    var width = chr.fontSize;
     var height = (vscale === 1)? width : Math.floor(width * vscale);
     var css = {};
     if(chr.isPaddingEnable()){
       Args.copy(css, chr.getCssPadding(line.flow));
     }
-    var palette_color_value = Layout.fontColor.toUpperCase();
-    var font_color = ctx.getInlineFontColor(line);
-    if(font_color.getValue().toLowerCase() != Layout.fontColor.toLowerCase()){
-      palette_color_value = font_color.getPaletteValue().toUpperCase();
-    }
+    Args.copy(css, chr.getCssVertImgChar());
+    var palette_color_value = Layout.getPaletteFontColor(line.color).toUpperCase();
     return Html.tagSingle("img", {
       "class":"nehan-img-char",
       src:chr.getImgSrc(palette_color_value),
@@ -8316,28 +8367,18 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       height:height
     }) + Const.clearFix;
   },
-  evalVerticalGlyph : function(line, chr, ctx){
-    var classes = ["nehan-vert-rl"];
-    if(chr.isKakkoStart()){
-      if(!chr.isPaddingEnable()){
-	classes.push("nehan-vert-kern-start");
-      }
-    } else {
-      if(chr.getVertScale() < 1){
-	classes.push("nehan-vert-half");
-      }
-      if(chr.isPaddingEnable()){
-	classes.push("nehan-vert-space-end");
-      }
-    }
+  evalVerticalGlyph : function(line, chr){
+    var css = {};
+    Args.copy(css, chr.getCssVertGlyph(line));
     return Html.tagWrap("div", chr.data, {
-      "class":classes.join(" ")
+      "style":Css.attr(css),
+      "class":"nehan-vert-rl"
     });
   },
-  evalCnvChar: function(line, chr, ctx){
+  evalCnvChar: function(line, chr){
     return chr.cnv + "<br />";
   },
-  evalSmallKana : function(line, chr, ctx){
+  evalSmallKana : function(line, chr){
     return Html.tagWrap("div", chr.data, {
       style:Css.attr({
 	"position": "relative",
@@ -8348,7 +8389,7 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       })
     });
   },
-  evalHalfSpaceChar : function(line, chr, ctx){
+  evalHalfSpaceChar : function(line, chr){
     var half = Math.floor(chr.fontSize / 2);
     return Html.tagWrap("div", "&nbsp;", {
       style:Css.attr({
@@ -8357,8 +8398,8 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       })
     });
   },
-  evalInlineBox : function(box, ctx){
-    return this._super(box, ctx) + Const.clearFix;
+  evalInlineBox : function(box){
+    return this._super(box) + Const.clearFix;
   }
 });
 
@@ -8387,7 +8428,7 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
   evalRt : function(line, ruby, ctx){
     return Html.tagWrap("div", ruby.getRtString(), {
       "style":Css.attr(ruby.getCssRt(line)),
-      "class":"nehan-rb"
+      "class":"nehan-rt"
     });
   },
   evalWord : function(line, word, ctx){

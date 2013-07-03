@@ -23,7 +23,7 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
   evalRt : function(line, ruby, ctx){
     return Html.tagWrap("div", ruby.getRtString(), {
       "style":Css.attr(ruby.getCssRt(line)),
-      "class":"nehan-rb"
+      "class":"nehan-rt"
     });
   },
   evalWord : function(line, word, ctx){

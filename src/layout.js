@@ -66,5 +66,11 @@ var Layout = {
       return Math.floor(this.rubyRate * base_font_size);
     }
     return UnitSize.getUnitSize(rt_font_size, base_font_size);
+  },
+  getPaletteFontColor : function(color){
+    if(color.getValue().toLowerCase() !== this.fontColor.toLowerCase()){
+      return color.getPaletteValue();
+    }
+    return this.fontColor;
   }
 };

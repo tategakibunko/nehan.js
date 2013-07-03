@@ -5,27 +5,27 @@ var BlockEvaluator = (function(){
   }
 
   BlockEvaluator.prototype = {
-    evaluate : function(box, ctx){
+    evaluate : function(box){
       switch(box._type){
       case "br":
-	return this.evalBreak(box, ctx);
+	return this.evalBreak(box);
       case "hr":
-	return this.evalHorizontalRule(box, ctx);
+	return this.evalHorizontalRule(box);
       case "ibox":
-	return this.evalInlineBox(box, ctx);
+	return this.evalInlineBox(box);
       case "ipage":
-	return this.evalInlinePage(box, ctx);
+	return this.evalInlinePage(box);
       case "img":
-	return this.evalImage(box, ctx);
+	return this.evalImage(box);
       case "table":
-	return this.evalTable(box, ctx);
+	return this.evalTable(box);
       case "text-line":
-	return this.evalTextLine(box, ctx);
+	return this.evalTextLine(box);
       default:
-	return this.evalBox(box, ctx);
+	return this.evalBox(box);
       }
     },
-    evalBox : function(box, ctx){
+    evalBox : function(box){
       var attr = {
 	"style":Css.attr(box.getCss()),
 	"class":box.getCssClasses()
@@ -33,53 +33,51 @@ var BlockEvaluator = (function(){
       if(box.id){
 	attr.id = box.id;
       }
-      return Html.tagWrap("div", this.evalBoxChilds(box.getChilds(), ctx), attr);
+      return Html.tagWrap("div", this.evalBoxChilds(box.getChilds()), attr);
     },
-    evalBoxChilds : function(childs, ctx){
+    evalBoxChilds : function(childs){
       var self = this;
       return List.fold(childs, "", function(ret, box){
-	return [ret, self.evaluate(box, ctx)].join("\n");
+	return [ret, self.evaluate(box)].join("\n");
       });
     },
-    evalTextLine : function(box, ctx){
+    evalTextLine : function(box){
       if(box.isTextVertical()){
-	return this.inlineEvaluatorV.evaluate(box, ctx);
+	return this.inlineEvaluatorV.evaluate(box);
       }
-      return this.inlineEvaluatorH.evaluate(box, ctx);
+      return this.inlineEvaluatorH.evaluate(box);
     },
-    evalInlineBox : function(box, ctx){
+    evalInlineBox : function(box){
       return Html.tagWrap("div", box.content, {
 	"style":Css.attr(box.getCss()),
 	"class":box.getCssClasses()
       });
     },
-    evalHorizontalRule : function(box, ctx){
-      return this.evalInlineBox(box, ctx);
+    evalHorizontalRule : function(box){
+      return this.evalInlineBox(box);
     },
-    evalBreak : function(box, ctx){
-      return this.evalInlineBox(box, ctx);
+    evalBreak : function(box){
+      return this.evalInlineBox(box);
     },
-    evalImage : function(box, ctx){
-      var content = this.evalImageContent(box, ctx);
+    evalImage : function(box){
+      var content = this.evalImageContent(box);
       return Html.tagWrap("div", content, {
 	"style":Css.attr(box.getCss()),
 	"class":box.getCssClasses()
       });
     },
-    evalImageContent : function(box, ctx){
+    evalImageContent : function(box){
       return Html.tagSingle("img", {
 	"src": box.src,
 	"width": box.getContentWidth(),
 	"height": box.getContentHeight()
       });
     },
-    evalInlinePage : function(box, ctx){
-      var ctx2 = ctx.createInlineRoot();
-      return this.evalBox(box, ctx2);
+    evalInlinePage : function(box){
+      return this.evalBox(box);
     },
-    evalTable : function(box, ctx){
-      var ctx2 = ctx.createInlineRoot();
-      return this.evalBox(box, ctx2);
+    evalTable : function(box){
+      return this.evalBox(box);
     }
   };
 

@@ -1,12 +1,11 @@
 var PageEvaluator = (function(){
-  function PageEvaluator(ctx){
-    this.ctx = ctx || new DocumentContext();
-    this.blockEvaluator = new BlockEvaluator(this.ctx);
+  function PageEvaluator(){
+    this.blockEvaluator = new BlockEvaluator();
   }
 
   PageEvaluator.prototype = {
     evaluate : function(box){
-      var html = this.blockEvaluator.evaluate(box, this.ctx);
+      var html = this.blockEvaluator.evaluate(box);
       var css_content = box.styles.join("\n");
       var style = Html.tagWrap("style", css_content, {"type":"text/css"});
       return new EvalResult({

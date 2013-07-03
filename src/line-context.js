@@ -74,10 +74,10 @@ var LineContext = (function(){
       if(element instanceof Box ||
 	 element instanceof Word ||
 	 element instanceof Tcy ||
-	 this.line.isRubyTextLine()){
+	 element instanceof Ruby ||
+	 this.line.isRtLine()){
 	return this.restMeasure >= advance;
       }
-      
       // justify target need space for tail fix.
       return this.restMeasure - this.line.fontSize >= advance;
     },
@@ -185,12 +185,10 @@ var LineContext = (function(){
       } else if(element instanceof Ruby){
 	this._addRuby(element);
       } else if (element instanceof Box){
-	if (element._type === "inline-block"){
-	  this._addInlineBlock(element);
-	} else if(element._type === "text-line"){	
+	if(element._type === "text-line"){	
 	  this._addTextLine(element);
 	} else {
-	  throw "undefined inline element found";
+	  this._addInlineBlock(element);
 	}
       } else {
 	this._addText(element);
@@ -210,6 +208,9 @@ var LineContext = (function(){
       return this.context.createInlineRoot();
     },
     createLine : function(){
+      if(this.curMeasure === 0){
+	return this._createEmptyLine();
+      }
       // if first-line, deactivate first line tag.
       if(this.isFirstLine()){
 	this.popFirstLine();
@@ -411,16 +412,18 @@ var LineContext = (function(){
       this.stream.setPos(normal_pos + 1);
       return this.lineTokens;
     },
+    _createEmptyLine : function(){
+      this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxFontSize);
+      this.line.setInlineElements([], this.lineMeasure);
+      return this.line;
+    },
     _createTextLine : function(){
       var ruby_extent = Math.floor(this.maxFontSize * (this.line.lineRate - 1));
       var max_text_extent = this.maxFontSize + ruby_extent;
       this.maxExtent = Math.max(this.maxExtent, max_text_extent);
       this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxExtent);
       this.line.charCount = this.charCount;
-      this.line.childs.normal = this.lineTokens;
-      this.line.childMeasure = this.curMeasure;
-      //this.line.tokens = this.lineTokens;
-      //this.line.textMeasure = this.curMeasure;
+      this.line.setInlineElements(this.lineTokens, this.curMeasure);
       this.line.textIndent = this.textIndent;
       return this.line;
     }

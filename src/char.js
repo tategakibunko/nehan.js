@@ -29,6 +29,37 @@ var Char = (function(){
       }
       return padding.getCss();
     },
+    getCssVertGlyph : function(line){
+      var css = {};
+      var padding_enable = this.isPaddingEnable();
+      css["-webkit-writing-mode"] = "vertical-rl";
+      if(line.maxFontSize - this.fontSize > 0){
+	var offset = Math.floor((line.maxFontSize + this.fontSize) / 2) + "px";
+	css["-webkit-transform"] = "translate(" + offset + ")";
+      } else {
+	css["-webkit-transform"] = "translate(50%)";
+      }
+      if(this.isKakkoStart()){
+	if(!padding_enable){
+	  css["padding-top"] = "-0.5em";
+	}
+      } else {
+	if(this.getVertScale() < 1){
+	  css["height"] = "0.5em";
+	}
+	if(padding_enable){
+	  css["padding-bottom"] = "0.5em";
+	}
+      }
+      return css;
+    },
+    getCssVertImgChar : function(){
+      var css = {};
+      css.display = "block";
+      css["margin-left"] = "auto";
+      css["margin-right"] = "auto";
+      return css;
+    },
     getHoriScale : function(){
       return this.hscale? this.hscale : 1;
     },

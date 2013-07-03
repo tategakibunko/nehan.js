@@ -33,6 +33,13 @@ var Ruby = (function(){
       if(line.isTextHorizontal()){
 	css.display = "inline-block";
 	css["text-align"] = "center";
+      } else {
+	var ruby_extent = this.getExtent();
+	var line_extent = line.maxExtent;
+	var offset = Math.floor((line_extent - ruby_extent + this.getRtFontSize()) / 2);
+	css["margin-left"] = offset + "px";
+	css[line.flow.getPropExtent()] = line.getContentExtent() + "px";
+	css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
       }
       return css;
     },
@@ -42,6 +49,7 @@ var Ruby = (function(){
 	css["float"] = "left";
       } else {
 	css["font-size"] = css["line-height"] = this.getRtFontSize() + "px";
+	css["vertical-align"] = "bottom";
       }
       return css;
     },
