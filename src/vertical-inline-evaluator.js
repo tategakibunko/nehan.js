@@ -42,23 +42,13 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       "class": "nehan-vert-alpha"
     });
     return Html.tagWrap("div", body, {
-      "style": Css.attr({
-	"letter-spacing":line.letterSpacing + "px",
-	"width": word.fontSize + "px",
-	"height": word.bodySize + "px",
-	"word-break":"keep-all",
-	"overflow": "visible"
-      })
+      "style": Css.attr(word.getCssVertTrans(line))
     });
   },
   evalWordIE : function(line, word){
     return Html.tagWrap("div", word.data, {
-      "style": Css.attr({
-	"writing-mode": "tb-rl",
-	"letter-spacing":line.letterSpacing + "px",
-	"line-height": word.fontSize + "px",
-	"float": "left"
-      })
+      "class": "nehan-vert-alpha-ie",
+      "style": Css.attr(word.getCssVertTransIE(line))
     });
   },
   evalTcy : function(line, tcy){

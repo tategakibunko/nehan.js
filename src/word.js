@@ -6,6 +6,22 @@ var Word = (function(){
   }
 
   Word.prototype = {
+    getCssVertTrans : function(line){
+      var css = {};
+      css["letter-spacing"] = line.letterSpacing + "px";
+      css.width = this.fontSize + "px";
+      css.height = this.bodySize + "px";
+      css["margin-left"] = css["margin-right"] = "auto";
+      return css;
+    },
+    getCssVertTransIE : function(line){
+      var css = {};
+      css["float"] = "left";
+      css["writing-mode"] = "tb-rl";
+      css["letter-spacing"] = line.letterSpacing + "px";
+      css["line-height"] = this.fontSize + "px";
+      return css;
+    },
     getCharCount : function(){
       return 1; // word is count by 1 character.
     },

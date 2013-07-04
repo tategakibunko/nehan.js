@@ -5,11 +5,6 @@ var BlockContext = (function(){
 
   BlockContext.prototype = {
     pushTag : function(tag){
-      var parent_tag = this.getHeadTag();
-      if(parent_tag){
-	// copy 'inherit' value from parent in 'markup' level.
-	tag.inherit(parent_tag);
-      }
       this.tagStack.push(tag);
     },
     popTag : function(){
@@ -21,10 +16,10 @@ var BlockContext = (function(){
     getTagStack : function(){
       return this.tagStack;
     },
-    getDepth : function(){
+    getTagDepth : function(){
       return this.tagStack.getDepth();
     },
-    getDepthByName : function(name){
+    getTagDepthByName : function(name){
       return this.tagStack.getDepthByName(name);
     },
     findTag : function(fn){
@@ -36,13 +31,13 @@ var BlockContext = (function(){
     isTagEnable : function(fn){
       return this.tagStack.exists(fn);
     },
+    isTagNameEnable : function(tag_name){
+      return this.tagStack.isTagNameEnable(tag_name);
+    },
     isHeaderEnable : function(){
       return this.tagStack.exists(function(tag){
 	return tag.isHeaderTag();
       });
-    },
-    isTagNameEnable : function(tag_name){
-      return this.tagStack.isTagNameEnable(tag_name);
     }
   };
 

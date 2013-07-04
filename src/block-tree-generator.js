@@ -173,7 +173,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return this.generator.yield(parent);
   },
   _yieldStaticTag : function(parent, tag){
-    var box = this._yieldStaticElement(parent, tag, this.context);
+    var box = this._yieldStaticElement(parent, tag);
     if(!(box instanceof Box)){
       return box; // exception
     }

@@ -12,6 +12,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     this.stream = stream;
     this.context = context;
     this._terminate = false;
+    this.lineNo = 0;
   },
   hasNext : function(){
     if(this._terminate){
@@ -40,6 +41,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     var size = this._getLineSize(parent);
     var line = Layout.createTextLine(size, parent);
     line.markup = this.markup;
+    line.lineNo = this.lineNo;
     return line;
   },
   yield : function(parent){
@@ -106,12 +108,13 @@ var InlineTreeGenerator = ElementGenerator.extend({
   },
   _onLastTree : function(ctx, line){
     if(this.markup){
-      this.context.popInlineTagByName(this.markup.getName());
+      this.context.popInlineTag();
     }
   },
   _onCompleteTree : function(ctx, line){
     line.setMaxExtent(ctx.getMaxExtent());
     line.setMaxFontSize(ctx.getMaxFontSize());
+    this.lineNo++;
   },
   _yieldElement : function(ctx){
     if(this.generator && this.generator.hasNext()){
@@ -144,6 +147,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(Token.isTag(token) && token.getName() === "br"){
       return Exceptions.LINE_BREAK;
     }
+
     /*
     // if pseudo-element tag,
     // copy style of <this.markup.name>:<pseudo-name> dynamically.
@@ -155,8 +159,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
 	  token.setCssAttr(prop, pseudo_css_attr[prop]);
 	}
       }
-    }
-    */
+    }*/
 
     // if block element, break line and force terminate generator
     if(token.isBlock()){
@@ -166,7 +169,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
     // token is static size tag
     if(token.hasStaticSize()){
-      return this._yieldStaticElement(ctx.line, token, this.context);
+      return this._yieldStaticElement(ctx.line, token);
     }
     // token is inline-block tag
     if(token.isInlineBlock()){
@@ -176,8 +179,8 @@ var InlineTreeGenerator = ElementGenerator.extend({
     // token is other inline tag
     return this._yieldInlineTag(ctx, token);
   },
-  _yieldStaticElement : function(line, tag, context){
-    var element = this._super(line, tag, context);
+  _yieldStaticElement : function(line, tag){
+    var element = this._super(line, tag);
     if(element instanceof Box){
       element.display = "inline-block";
     }
@@ -185,7 +188,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
   },
   _yieldText : function(ctx, text){
     if(!text.hasMetrics()){
-      text.setMetrics(ctx.getLineFlow(), ctx.getFontSize(), ctx.isBoldEnable());
+      text.setMetrics(ctx.getLineFlow(), ctx.getFontSize(), ctx.isTextBold());
     }
     switch(text._type){
     case "char":
@@ -206,7 +209,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     // if advance is lager than max_measure,
     // we must cut this word into some parts.
     var font_size = ctx.getFontSize();
-    var is_bold = ctx.isBoldEnable();
+    var is_bold = ctx.isTextBold();
     var flow = ctx.getLineFlow();
     var part = word.cutMeasure(ctx.maxMeasure); // get sliced word
     part.setMetrics(flow, font_size, is_bold); // metrics for first half

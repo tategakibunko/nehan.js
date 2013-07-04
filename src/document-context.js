@@ -51,6 +51,12 @@ var DocumentContext = (function(){
 	styleContext:this.styleContext
       });
     },
+    inheritTag : function(tag){
+      var parent_tag = this.getCurBlockTag();
+      if(parent_tag){
+	tag.inherit(parent_tag);
+      }
+    },
     isEmptyMarkupContext : function(){
       return this.inlineContext.isEmpty();
     },
@@ -89,15 +95,6 @@ var DocumentContext = (function(){
     getCurInlineTag : function(){
       return this.inlineContext.getHeadTag();
     },
-    getCurEmpha : function(){
-      return this.inlineContext.getCurEmpha();
-    },
-    getInlineFontSize : function(parent){
-      return this.inlineContext.getFontSize(parent);
-    },
-    getInlineFontColor : function(parent){
-      return this.inlineContext.getFontColor(parent);
-    },
     getInlineTagStack : function(){
       return this.inlineContext.getTagStack();
     },
@@ -105,20 +102,11 @@ var DocumentContext = (function(){
       return this.inlineContext.getTagDepth();
     },
     pushInlineTag : function(tag){
-      var parent_tag = this.getCurBlockTag();
-      if(parent_tag){
-	tag.inherit(parent_tag);
-      }
+      this.inheritTag(tag);
       this.inlineContext.pushTag(tag);
     },
     popInlineTag : function(){
       return this.inlineContext.popTag();
-    },
-    popInlineTagByName : function(name){
-      return this.inlineContext.popTagByName(name);
-    },
-    findLastInlineTagByName : function(name){
-      return this.inlineContext.findLastTagByName(name);
     },
     findInlineTag : function(fn){
       return this.inlineContext.findTag(fn);
@@ -126,25 +114,13 @@ var DocumentContext = (function(){
     isInlineTagEnable : function(fn){
       return this.inlineContext.isTagEnable(fn);
     },
-    isBoldEnable : function(){
-      if(this.inlineContext.isBoldEnable()){
-	return true;
-      }
-      return  this.isHeaderEnable();
-    },
-    setFixedFontSize : function(font_size){
-      this.inlineContext.setFixedFontSize(font_size);
-    },
     // block context
     isHeaderEnable : function(){
       return this.blockContext.isHeaderEnable();
     },
     pushBlockTag : function(tag){
+      this.inheritTag(tag);
       this.blockContext.pushTag(tag);
-      var when = tag.getCssAttr("when");
-      if(when){
-	when(this, tag);
-      }
     },
     popBlockTag : function(){
       return this.blockContext.popTag();
@@ -156,10 +132,10 @@ var DocumentContext = (function(){
       return this.blockContext.getHeadTag();
     },
     getBlockDepth : function(){
-      return this.blockContext.getDepth();
+      return this.blockContext.getTagDepth();
     },
     getBlockDepthByName : function(name){
-      return this.blockContext.getDepthByName(name);
+      return this.blockContext.getTagDepthByName(name);
     },
     getOutlineTitle : function(){
       return this.blockContext.getOutlineTitle();

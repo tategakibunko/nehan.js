@@ -29,6 +29,9 @@ var Box = (function(){
       if(this.fontSize){
 	css["font-size"] = this.fontSize + "px";
       }
+      if(this.fontWeight){
+	Args.copy(css, this.fontWeight.getCss());
+      }
       if(this.letterSpacing && !this.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
@@ -37,16 +40,20 @@ var Box = (function(){
     },
     _getCssInline : function(){
       var css = this.css;
-      css["font-size"] = this.fontSize + "px";
       Args.copy(css, this.size.getCss());
 
+      if(this.fontSize){
+	css["font-size"] = this.fontSize + "px";
+      }
+      if(this.fontWeight){
+	Args.copy(css, this.fontWeight.getCss());
+      }
       // top level line need to follow parent blockflow.
       if(this.parent && this.parent.isBlock()){
 	Args.copy(css, this.flow.getCss());
       }
-      
       var start_offset = this.getStartOffset();
-      if(start_offset){
+      if(start_offset !== 0){
 	this.edge = new Margin();
 	this.edge.setStart(this.flow, start_offset);
       }
@@ -175,11 +182,12 @@ var Box = (function(){
       return this.edge? this.edge.border : null;
     },
     getStartOffset : function(){
+      var indent = this.textIndent || 0;
       switch(this.textAlign){
-      case "start": return this.textIndent;
-      case "end": return this.textIndent + this.getTextRestMeasure();
-      case "center": return this.textIndent + Math.floor(this.getTextRestMeasure() / 2);
-      default: return this.textIndent;
+      case "start": return indent;
+      case "end": return indent + this.getTextRestMeasure();
+      case "center": return indent + Math.floor(this.getTextRestMeasure() / 2);
+      default: return indent;
       }
     },
     getRestSize : function(){
@@ -271,37 +279,29 @@ var Box = (function(){
     setContentMeasure : function(flow, measure){
       this.size.setMeasure(flow, measure);
     },
-    setEdgeStart : function(prop, value){
-      if(this.edge){
-	this.edge.setEdgeStart(prop, this.flow, value);
-      }
-    },
-    setEdgeEnd : function(prop, value){
-      if(this.edge){
-	this.edge.setEdgeEnd(prop, this.flow, value);
-      }
-    },
-    setEdgeBefore : function(prop, value){
-      if(this.edge){
-	this.edge.setEdgeBefore(prop, this.flow, value);
-      }
-    },
-    setEdgeAfter : function(prop, value){
-      if(this.edge){
-	this.edge.setEdgeAfter(prop, this.flow, value);
-      }
-    },
     setEdge : function(edge){
-      if(edge instanceof BoxEdge){
+      var sizing = this.sizing? this.sizing : BoxSizings.getByName("margin-box");
+      if(sizing.isMarginBox()){
+	this._setEdgeByMarginBox(edge);
+      } else if(sizing.isBorderBox()){
+	this._setEdgeByBorderBox(edge);
+      } else if(sizing.isContentBox()){
 	this.edge = edge;
-      } else if(edge._type){
-	this.edge[edge._type] = edge;
       }
     },
-    setEdgeBySub : function(edge){
+    _setEdgeByMarginBox : function(edge){
       this.size.subEdge(edge);
       if(this.size.isValid()){
-	this.setEdge(edge);
+	this.edge = edge;
+      }
+    },
+    _setEdgeByBorderBox : function(edge){
+      var edge2 = new BoxEdge();
+      edge2.border = edge.border;
+      edge2.padding = edge.padding;
+      this.size.subEdge(edge2);
+      if(this.size.isValid()){
+	this.edge = edge;
       }
     },
     setMaxFontSize : function(max_font_size){
@@ -335,6 +335,15 @@ var Box = (function(){
     isEmptyChild : function(){
       return this.childs.getLength() === 0;
     },
+    isFirstChildOf : function(parent){
+      if(this._type === "li-marker" || this._type === "li-body" || this._type === "text-line"){
+	return false;
+      }
+      return parent && parent.isEmptyChild();
+    },
+    isTextBold : function(){
+      return (this.fontWeight && this.fontWeight.isBold());
+    },
     isBlock : function(){
       return !this.isTextLine();
     },
@@ -358,12 +367,6 @@ var Box = (function(){
     },
     isValidSize : function(){
       return this.size.isValid();
-    },
-    canJustify : function(){
-      if(this._type === "li-marker" || this._type === ":first-letter"){
-	return false;
-      }
-      return true;
     },
     canInclude : function(size){
       return this.size.canInclude(size);

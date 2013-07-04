@@ -19,7 +19,7 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
     return parent.flow.getBoxSize(measure, extent);
   },
   _onCompleteTree : function(ctx, line){
-    this.context.popInlineTagByName(this.markup.getName());
+    this.context.popInlineTag();
     line.shortenMeasure();
   }
 });

@@ -1,4 +1,9 @@
 var StaticBlockGenerator = ElementGenerator.extend({
+  _createBox : function(size, parent){
+    var box = this._super(size, parent);
+    box.sizing = BoxSizings.getByName("content-box"); // use normal box model
+    return box;
+  },
   yield : function(parent, size){
     var box = this._createBox(size, parent);
     if(this.markup.isPush()){
@@ -32,10 +37,6 @@ var StaticBlockGenerator = ElementGenerator.extend({
       return box;
     }
     return Exceptions.RETRY;
-  },
-  _setEdge : function(box, edge){
-    box.setEdge(edge); // set edge as normal box model.
-    return box;
   }
 });
 

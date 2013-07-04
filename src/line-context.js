@@ -90,8 +90,8 @@ var LineContext = (function(){
     isEmptySpace : function(){
       return this.restMeasure <= 0;
     },
-    isBoldEnable : function(){
-      return this.context.isBoldEnable();
+    isTextBold : function(){
+      return this.line.isTextBold();
     },
     isEmptyText : function(){
       return this.lineTokens.length === 0;
@@ -105,27 +105,11 @@ var LineContext = (function(){
     isLineStart : function(){
       return this.stream.pos == this.lineStartPos;
     },
-    isFirstLine : function(){
-      return this.lineStartPos === 0;
-    },
     pushTag : function(tag){
       this.context.pushInlineTag(tag, this.line);
     },
     pushBackToken : function(){
       this.stream.prev();
-    },
-    popFirstLine : function(){
-      var tag = this.context.popInlineTagByName(":first-line");
-      if(tag){
-	this.addElement(tag.getCloseTag(), {
-	  advance:0,
-	  extent:0,
-	  fontSize:0
-	});
-      }
-    },
-    popTagByName : function(name){
-      this.context.popInlineTagByName(name);
     },
     findFirstText : function(){
       return this.stream.findTextNext(this.lineStartPos);
@@ -210,10 +194,6 @@ var LineContext = (function(){
     createLine : function(){
       if(this.curMeasure === 0){
 	return this._createEmptyLine();
-      }
-      // if first-line, deactivate first line tag.
-      if(this.isFirstLine()){
-	this.popFirstLine();
       }
       // if overflow measure without line-break, try to justify.
       if(this.isOverWithoutLineBreak()){
@@ -314,10 +294,9 @@ var LineContext = (function(){
       // count up char count of line
       this.charCount += element.getCharCount();
 
-      // check empha tag is open.
-      var empha = this.context.getCurEmpha();
-      if(empha){
-	element.setEmpha(empha);
+      // set empha if enabled.
+      if(this.line.empha){
+	element.setEmpha(this.line.empha);
       }
     },
     // fix line that is started with wrong text.

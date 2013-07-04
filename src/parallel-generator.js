@@ -28,7 +28,7 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     wrap_page.setFlow(wrap_flow);
     return this._yieldChilds(wrap_page, parent);
   },
-  _setEdge : function(box, edge){
+  _setBoxEdge : function(box, edge){
     // ignore edge
     // because each edge of child layout are set by child-generators.
   },

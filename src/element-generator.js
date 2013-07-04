@@ -16,140 +16,182 @@ var ElementGenerator = Class.extend({
   // called when box is created, and std style is already loaded.
   _onCreateBox : function(box, parent){
   },
-  // this function is also called from InlineTreeGenerator via 'call' to yield an inline block element.
-  // so to give a clear scope, we accept 'context' as last argument,
-  // although it is same as 'this.context' in this generator.
-  _yieldStaticElement : function(parent, tag, context){
-    var generator;
-    var static_size = tag.getStaticSize(parent.fontSize || Layout.fontSize, parent.getContentMeasure());
+  _yieldStaticElement : function(parent, tag){
+    var font_size = parent.fontSize || Layout.fontSize;
+    var max_measure = parent.getContentMeasure();
+    var element_size = tag.getStaticSize(font_size, max_measure);
     if(tag.getName() === "img"){
-      generator = new ImageGenerator(tag, context);
-    } else if(tag.hasFlow()){
-      // if original flow defined, yield as inline page
-      generator = new InlinePageGenerator(tag, context.createInlineRoot());
-    } else {
-      // if static size is simply defined, treat as just an embed html with static size.
-      generator = new InlineBoxGenerator(tag, context);
+      return (new ImageGenerator(tag, this.context)).yield(parent, element_size);
     }
-    return generator.yield(parent, static_size);
+    // if original flow defined, yield as inline page
+    if(tag.hasFlow()){
+      return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent, element_size);
+    }
+    // if static size is simply defined, treat as just an embed html with static size.
+    return (new InlineBoxGenerator(tag, this.context)).yield(parent, element_size);
   },
   _getBoxType : function(){
     return this.markup.getName();
   },
-  _setEdge : function(box, edge){
-    // this makes difference to basic css box model.
-    // as paged media has fixed size boundary,
-    // we reduce 'inside' of box to embody margin/padding/border,
-    // while basic box model add them to 'outside' of box.
-    box.setEdgeBySub(edge);
-  },
-  _isFirstChild : function(box, parent){
-    // li-marker and li-body are always first childs of 'li', so ignore them.
-    if(box._type === "li-marker" || box._type === "li-body"){
-      return false;
-    }
-    if(box._type === "text-line"){
-      return false;
-    }
-    return parent.isEmptyChild();
-  },
-  _setBoxStyle : function(box, parent){
+  _setBoxFirstChild : function(box, parent){
+    box.firstChild = box.isFirstChildOf(parent);
+
     // if box is first child of parent,
     // copy style of <this.markup.name>:first-child.
-    if(parent && this._isFirstChild(box, parent)){
+    if(box.firstChild){
       this.markup.setFirstChild();
     }
-    // set font size
+  },
+  _setBoxClasses : function(box, parent){
+    List.iter(this.markup.classes, function(klass){
+      box.addClass(klass);
+    });
+  },
+  _setBoxFontSize : function(box, parent){
     var base_font_size = parent? parent.fontSize : Layout.fontSize;
     var font_size = this.markup.getCssAttr("font-size", "inherit");
     if(font_size != "inherit"){
       box.fontSize = UnitSize.getUnitSize(font_size, base_font_size);
     }
-
-    // set font color
+  },
+  _setBoxFontColor : function(box, parent){
     var font_color = this.markup.getCssAttr("color", "inherit");
     if(font_color != "inherit"){
       box.color = new Color(font_color);
     }
-
-    // set box edge
+  },
+  _setBoxFontFamily : function(box, parent){
+    var font_family = this.markup.getCssAttr("font-family");
+    if(font_family){
+      box.setCss("font-family", font_family);
+    }
+  },
+  _setBoxFontStyle : function(box, parent){
+    var font_style = this.markup.getCssAttr("font-style");
+    if(font_style){
+      box.setCss("font-style", font_style);
+    }
+  },
+  _setBoxFontWeight : function(box, parent){
+    var font_weight = this.markup.getCssAttr("font-weight");
+    if(font_weight){
+      box.setCss("font-weight", font_weight);
+    }
+  },
+  _setBoxSizing : function(box, parent){
+    var box_sizing = this.markup.getCssAttr("box-sizing");
+    if(box_sizing){
+      box.sizing = BoxSizings.getByName(box_sizing);
+    }
+  },
+  _setBoxEdge : function(box, parent){
     var edge = this.markup.getBoxEdge(box.flow, box.fontSize, box.getContentMeasure());
     if(edge){
-      this._setEdge(box, edge);
+      box.setEdge(edge);
     }
-
-    // set other variables
+  },
+  _setBoxLineRate : function(box, parent){
     var line_rate = this.markup.getCssAttr("line-rate");
     if(line_rate){
       box.lineRate = line_rate;
     }
+  },
+  _setBoxTextAlign : function(box, parent){
     var text_align = this.markup.getCssAttr("text-align");
     if(text_align){
       box.textAlign = text_align;
     }
-    var flow_name = this.markup.getCssAttr("flow");
-    if(flow_name){
-      switch(flow_name){
-      case "flip":
-	box.setFlow(parent.getFlipFlow());
-	break;
-      case "inherit":
-	box.setFlow(parent.flow);
-	break;
-      default:
-	box.setFlow(BoxFlows.getByName(flow_name));
-	break;
-      }
+  },
+  _setBoxFlowName : function(box, parent){
+    var flow_name = this.markup.getCssAttr("flow", "inherit");
+    if(flow_name === "flip"){
+      box.setFlow(parent.getFlipFlow());
+    } else if(flow_name !== "inherit"){
+      box.setFlow(BoxFlows.getByName(flow_name));
     }
+  },
+  _setBoxFloat : function(box, parent){
     var logical_float = this.markup.getCssAttr("float", "none");
     if(logical_float != "none"){
       box.logicalFloat = logical_float;
     }
+  },
+  _setBoxTextIndent : function(box, parent){
     var text_indent = this.markup.getCssAttr("text-indent", 0);
     if(text_indent){
       box.textIndent = box.fontSize;
     }
+  },
+  _setBoxPageBreak : function(box, parent){
     var page_break_after = this.markup.getCssAttr("page-break-after", false);
     if(page_break_after){
       box.pageBreakAfter = true;
     }
+  },
+  _setBoxLetterSpacing : function(box, parent){
     var letter_spacing = this.markup.getCssAttr("letter-spacing");
     if(letter_spacing){
       box.letterSpacing = UnitSize.getUnitSize(letter_spacing, base_font_size);
     }
-
-    // read other optional styles not affect layouting issue.
-    var markup = this.markup;
-    List.iter([
-      "background",
-      "background-color",
-      "background-image",
-      "background-repeat",
-      "background-position",
-      "cursor",
-      "font",
-      "font-family",
-      "font-style",
-      "font-weight",
-      "opacity",
-      "z-index"
-    ], function(prop){
-      var value = markup.getCssAttr(prop);
-      if(value){
-	box.setCss(prop, value);
-      }
-    });
-
-    // copy classes from markup to box object.
-    List.iter(this.markup.classes, function(klass){
-      box.addClass(klass);
-    });
+  },
+  _setBoxBackground : function(box, parent){
+    var background = this.markup.getCssAttr("background");
+    if(background){
+      box.setCss("background", background);
+    }
+  },
+  _setBoxBackgroundColor : function(box, parent){
+    var background_color = this.markup.getCssAttr("background-color");
+    if(background_color){
+      box.setCss("background-color", background_color);
+    }
+  },
+  _setBoxBackgroundImage : function(box, parent){
+    var background_image = this.markup.getCssAttr("background-image");
+    if(background_image){
+      box.setCss("background-image", background_image);
+    }
+  },
+  _setBoxBackgroundPosition : function(box, parent){
+    var background_pos = this.markup.getCssAttr("background-position");
+    if(background_pos){
+      box.setCss("background-position", background_pos);
+    }
+  },
+  _setBoxBackgroundRepeat : function(box, parent){
+    var background_repeat = this.markup.getCssAttr("background-repeat");
+    if(background_repeat){
+      box.setCss("background-repeat", background_pos);
+    }
+  },
+  _setBoxStyle : function(box, parent){
+    this._setBoxFontSize(box, parent);
+    this._setBoxFontColor(box, parent);
+    this._setBoxFontFamily(box, parent);
+    this._setBoxFontStyle(box, parent);
+    this._setBoxFontWeight(box, parent);
+    this._setBoxSizing(box, parent);
+    this._setBoxEdge(box, parent);
+    this._setBoxLineRate(box, parent);
+    this._setBoxTextAlign(box, parent);
+    this._setBoxTextIndent(box, parent);
+    this._setBoxFlowName(box, parent);
+    this._setBoxFloat(box, parent);
+    this._setBoxPageBreak(box, parent);
+    this._setBoxLetterSpacing(box, parent);
+    this._setBoxBackground(box, parent);
+    this._setBoxBackgroundColor(box, parent);
+    this._setBoxBackgroundImage(box, parent);
+    this._setBoxBackgroundPosition(box, parent);
+    this._setBoxBackgroundRepeat(box, parent);
   },
   _createBox : function(size, parent){
     var box_type = this._getBoxType();
     var box = Layout.createBox(size, parent, box_type);
     box.markup = this.markup;
     this._onReadyBox(box, parent);
+    this._setBoxFirstChild(box, parent);
+    this._setBoxClasses(box, parent);
     this._setBoxStyle(box, parent);
     this._onCreateBox(box, parent);
     return box;
