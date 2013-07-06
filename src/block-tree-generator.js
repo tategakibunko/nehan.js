@@ -80,6 +80,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
 	this.rollback();
 	break;
       }
+
       page.addChildBlock(element);
 
       if(cur_extent == max_extent){
@@ -111,7 +112,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return this.markup.getCssAttr("page-break-before", "") === "always";
   },
   _isEmptyElement : function(flow, element){
-    return (element instanceof Box) && (element.getContentExtent(flow) <= 0);
+    return (element instanceof Box) && !element.isTextLine() && (element.getContentExtent(flow) <= 0);
   },
   _createStream : function(){
     var source = this._createSource(this.markup.content);

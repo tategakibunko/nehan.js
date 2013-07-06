@@ -96,6 +96,7 @@ var Catalog = (function(){
       var html = "", page_count = this.stream.getPageCount();
       for(var i = 0; i < page_count; i++){
 	html += (this.stream.get(i)).html;
+	html += "<hr class='space'>";
       }
       return html;
     },

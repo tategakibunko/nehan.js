@@ -24,6 +24,10 @@ var Box = (function(){
       if(this.parent){
 	Args.copy(css, this.parent.flow.getCss());
       }
+      if(this._type === "img" && this.isTextVertical() && this.parent && this.parent.isTextLine()){
+	delete css["float"];
+	css["margin-left"] = css["margin-right"] = "auto";
+      }
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }

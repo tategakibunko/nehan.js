@@ -25,12 +25,12 @@ var LineContext = (function(){
     getElementExtent : function(element){
       if(Token.isText(element)){
 	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
-	  return Math.floor(this.line.fontSize * 2);
+	  return this.line.textEmpha.getExtent(this.line.fontSize);
 	}
 	return this.line.fontSize;
       }
       if(element instanceof Ruby){
-	return element.getExtent();
+	return element.getExtent(this.line.fontSize);
       }
       return element.getBoxExtent(this.getLineFlow());
     },

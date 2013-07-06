@@ -36,12 +36,13 @@ hr.space {background:#fff;color:#fff;visibility:hidden;}
   height:150px;
 }
 #hori-result, #vert-result{
+  overflow:hidden;
   float:left;
   width:360px;
 }
 .nehan-body{
+  overflow:hidden;
   background-color:pink;
-  margin-bottom:1em;
 }
 .nehan-figure{
   background-color:#8ae;

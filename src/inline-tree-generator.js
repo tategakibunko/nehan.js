@@ -148,7 +148,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
       return Exceptions.LINE_BREAK;
     }
 
-    /*
+/*
     // if pseudo-element tag,
     // copy style of <this.markup.name>:<pseudo-name> dynamically.
     if(this.markup && token.isPseudoElementTag()){
@@ -159,7 +159,8 @@ var InlineTreeGenerator = ElementGenerator.extend({
 	  token.setCssAttr(prop, pseudo_css_attr[prop]);
 	}
       }
-    }*/
+    }
+*/
 
     // if block element, break line and force terminate generator
     if(token.isBlock()){

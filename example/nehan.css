@@ -90,9 +90,6 @@ div, span{
 .nehan-empha-char{
   font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace;
 }
-.nehan-ruby-line-hori .nehan-empha-char{
-  top:0.2em;
-}
 .nehan-text-line-hori .nehan-char-kakko-start{
   margin-left:-0.5em;
 }

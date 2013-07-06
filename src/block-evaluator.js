@@ -60,6 +60,7 @@ var BlockEvaluator = (function(){
       return this.evalInlineBox(box);
     },
     evalImage : function(box){
+      //console.log("evalImage!:%o", box);
       var content = this.evalImageContent(box);
       return Html.tagWrap("div", content, {
 	"style":Css.attr(box.getCss()),

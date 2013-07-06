@@ -2256,12 +2256,8 @@ var Char = (function(){
       var css = {};
       var padding_enable = this.isPaddingEnable();
       css["-webkit-writing-mode"] = "vertical-rl";
-      if(line.maxFontSize - line.fontSize > 0){
-	var offset = Math.floor((line.maxFontSize + line.fontSize) / 2);
-	css["-webkit-transform"] = "translate(" + offset + "px)";
-      } else {
-	css["-webkit-transform"] = "translate(50%)";
-      }
+      css["margin-left"] = "auto";
+      css["margin-right"] = "auto";
       if(this.isKakkoStart()){
 	if(!padding_enable){
 	  css["padding-top"] = "-0.5em";
@@ -2288,18 +2284,22 @@ var Char = (function(){
       }
       return css;
     },
-    getCssVertEmphaSrc : function(){
+    getCssVertEmphaSrc : function(line){
       var css = {};
-      css["float"] = "left";
-      css["padding-left"] = "-0.5em";
       return css;
     },
-    getCssVertEmphaText : function(){
+    getCssVertEmphaText : function(line){
       var css = {};
-      css["float"] = "left";
-      css["padding-left"] = "-0.5em";
+      css.display = "inline-block";
+      css.width = line.fontSize + "px";
+      css.height = line.fontSize + "px";
+      return css;
     },
-    getCssHoriEmphaText : function(){
+    getCssHoriEmphaSrc : function(line){
+      var css = {};
+      return css;
+    },
+    getCssHoriEmphaText : function(line){
       var css = {};
       css["margin-bottom"] = "-0.5em";
       return css;
@@ -2680,8 +2680,8 @@ var Ruby = (function(){
     getAdvance : function(flow){
       return this.advanceSize;
     },
-    getExtent : function(){
-      return this.extent;
+    getExtent : function(font_size){
+      return 3 * this.rubyFontSize + font_size;
     },
     getRbs : function(){
       return this.rbs;
@@ -2694,18 +2694,14 @@ var Ruby = (function(){
     },
     getCssVertRuby : function(line){
       var css = {};
-      var ruby_extent = this.getExtent();
-      var line_extent = line.maxExtent;
-      var offset = Math.floor((line_extent - ruby_extent + this.getRtFontSize()) / 2);
-      css["margin-left"] = offset + "px";
-      css[line.flow.getPropExtent()] = line.getContentExtent() + "px";
+      css["margin-left"] = Math.floor((line.maxExtent - line.fontSize) / 2) + "px";
+      css[line.flow.getPropExtent()] = this.getExtent(line.fontSize) + "px";
       css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
       return css;
     },
     getCssHoriRuby : function(line){
       var css = {};
       css.display = "inline-block";
-      css["text-align"] = "center";
       return css;
     },
     getCssVertRt : function(line){
@@ -2732,7 +2728,6 @@ var Ruby = (function(){
     },
     setMetrics : function(flow, font_size, letter_spacing){
       this.rubyFontSize = Layout.getRubyFontSize(font_size);
-      this.extent = font_size + this.rubyFontSize;
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font_size);
 	return ret + rb.getAdvance(flow, letter_spacing);
@@ -4329,37 +4324,31 @@ var TextEmpha = (function(){
     getText : function(){
       return this.style.getText();
     },
+    getExtent : function(font_size){
+      return font_size * 3;
+    },
     getCssVertEmphaWrap : function(line, chr){
       var css = {};
       css["padding-left"] = "0.5em";
-      css.width = (line.fontSize * 2) + "px";
+      css.width = this.getExtent(line.fontSize) + "px";
       css.height = chr.getAdvance(line.fontSize, line.letterSpacing) + "px";
       return css;
     },
     getCssHoriEmphaWrap : function(line, chr){
       var css = {};
       css.display = "inline-block";
-      css["margin-top"] = -line.fontSize + "px";
-      css.width = line.fontSize + "px";
-      css.height = chr.getAdvance(line.flow, line.letterSpacing) + line.fontSize;
+      css["padding-top"] = -line.fontSize + "px";
+      css.width = chr.getAdvance(line.fontSize, line.letterSpacing) + "px";
+      css.height = this.getExtent(line.fontSize) + "px";
       return css;
-    },
-    getCssVertEmphaText : function(line){
-      var css = {};
-      return css;
-    },
-    getCssHoriEmphaText : function(line){
-      var css = {};
-      css["margin-bottom"] = "-0.5em";
-      return css;
-    },
+    }/*,
     getCss : function(flow){
       var css = {};
       Args.copy(css, this.pos.getCss(flow));
       Args.copy(css, this.style.getCss());
       Args.copy(css, this.color.getCss());
       return css;
-    }
+    }*/
   };
 
   return TextEmpha;
@@ -4458,6 +4447,10 @@ var Box = (function(){
       }
       if(this.parent){
 	Args.copy(css, this.parent.flow.getCss());
+      }
+      if(this._type === "img" && this.isTextVertical() && this.parent && this.parent.isTextLine()){
+	delete css["float"];
+	css["margin-left"] = css["margin-right"] = "auto";
       }
       if(this.color){
 	Args.copy(css, this.color.getCss());
@@ -6888,12 +6881,12 @@ var LineContext = (function(){
     getElementExtent : function(element){
       if(Token.isText(element)){
 	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
-	  return Math.floor(this.line.fontSize * 2);
+	  return this.line.textEmpha.getExtent(this.line.fontSize);
 	}
 	return this.line.fontSize;
       }
       if(element instanceof Ruby){
-	return element.getExtent();
+	return element.getExtent(this.line.fontSize);
       }
       return element.getBoxExtent(this.getLineFlow());
     },
@@ -7417,7 +7410,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
       return Exceptions.LINE_BREAK;
     }
 
-    /*
     // if pseudo-element tag,
     // copy style of <this.markup.name>:<pseudo-name> dynamically.
     if(this.markup && token.isPseudoElementTag()){
@@ -7428,7 +7420,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
 	  token.setCssAttr(prop, pseudo_css_attr[prop]);
 	}
       }
-    }*/
+    }
 
     // if block element, break line and force terminate generator
     if(token.isBlock()){
@@ -7661,6 +7653,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
 	this.rollback();
 	break;
       }
+
       page.addChildBlock(element);
 
       if(cur_extent == max_extent){
@@ -7692,7 +7685,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return this.markup.getCssAttr("page-break-before", "") === "always";
   },
   _isEmptyElement : function(flow, element){
-    return (element instanceof Box) && (element.getContentExtent(flow) <= 0);
+    return (element instanceof Box) && !element.isTextLine() && (element.getContentExtent(flow) <= 0);
   },
   _createStream : function(){
     var source = this._createSource(this.markup.content);
@@ -8334,6 +8327,7 @@ var BlockEvaluator = (function(){
       return this.evalInlineBox(box);
     },
     evalImage : function(box){
+      //console.log("evalImage!:%o", box);
       var content = this.evalImageContent(box);
       return Html.tagWrap("div", content, {
 	"style":Css.attr(box.getCss()),
@@ -8503,14 +8497,18 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
     });
   },
   evalEmpha : function(line, chr, char_body){
-    var char_body2 = Html.tagWrap("div", char_body, {
-      "style":Css.attr(chr.getCssVertEmphaSrc())
+    char_body = char_body.replace("<br />", "");
+    var char_body2 = Html.tagWrap("span", char_body, {
+      "class":"nehan-empha-src",
+      "style":Css.attr(chr.getCssVertEmphaSrc(line))
     });
-    var empha_body = Html.tagWrap("div", line.textEmpha.getText(), {
-      "style":Css.attr(chr.getCssVertEmphaText())
+    var empha_body = Html.tagWrap("span", line.textEmpha.getText(), {
+      "class":"nehan-empha-text",
+      "style":Css.attr(chr.getCssVertEmphaText(line))
     });
     // TODO: check text-emphasis-position is over or under
     return Html.tagWrap("div", char_body2 + empha_body, {
+      "class":"nehan-empha-wrap",
       "style":Css.attr(line.textEmpha.getCssVertEmphaWrap(line, chr))
     });
   },
@@ -8595,9 +8593,11 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
     return chr.data;
   },
   evalEmpha : function(line, chr, char_body){
-    var char_body2 = Html.tagWrap("div", char_body);
+    var char_body2 = Html.tagWrap("div", char_body, {
+      "style":Css.attr(chr.getCssHoriEmphaSrc(line))
+    });
     var empha_body = Html.tagWrap("div", line.textEmpha.getText(), {
-      "style":Css.attr(line.textEmpha.getCssHoriEmphaText())
+      "style":Css.attr(chr.getCssHoriEmphaText(line))
     });
     // TODO: check text-emphasis-position is over or under
     return Html.tagWrap("span", empha_body + char_body2, {

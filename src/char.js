@@ -33,12 +33,8 @@ var Char = (function(){
       var css = {};
       var padding_enable = this.isPaddingEnable();
       css["-webkit-writing-mode"] = "vertical-rl";
-      if(line.maxFontSize - line.fontSize > 0){
-	var offset = Math.floor((line.maxFontSize + line.fontSize) / 2);
-	css["-webkit-transform"] = "translate(" + offset + "px)";
-      } else {
-	css["-webkit-transform"] = "translate(50%)";
-      }
+      css["margin-left"] = "auto";
+      css["margin-right"] = "auto";
       if(this.isKakkoStart()){
 	if(!padding_enable){
 	  css["padding-top"] = "-0.5em";
@@ -65,18 +61,22 @@ var Char = (function(){
       }
       return css;
     },
-    getCssVertEmphaSrc : function(){
+    getCssVertEmphaSrc : function(line){
       var css = {};
-      css["float"] = "left";
-      css["padding-left"] = "-0.5em";
       return css;
     },
-    getCssVertEmphaText : function(){
+    getCssVertEmphaText : function(line){
       var css = {};
-      css["float"] = "left";
-      css["padding-left"] = "-0.5em";
+      css.display = "inline-block";
+      css.width = line.fontSize + "px";
+      css.height = line.fontSize + "px";
+      return css;
     },
-    getCssHoriEmphaText : function(){
+    getCssHoriEmphaSrc : function(line){
+      var css = {};
+      return css;
+    },
+    getCssHoriEmphaText : function(line){
       var css = {};
       css["margin-bottom"] = "-0.5em";
       return css;

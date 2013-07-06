@@ -81,14 +81,18 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
     });
   },
   evalEmpha : function(line, chr, char_body){
-    var char_body2 = Html.tagWrap("div", char_body, {
-      "style":Css.attr(chr.getCssVertEmphaSrc())
+    char_body = char_body.replace("<br />", "");
+    var char_body2 = Html.tagWrap("span", char_body, {
+      "class":"nehan-empha-src",
+      "style":Css.attr(chr.getCssVertEmphaSrc(line))
     });
-    var empha_body = Html.tagWrap("div", line.textEmpha.getText(), {
-      "style":Css.attr(chr.getCssVertEmphaText())
+    var empha_body = Html.tagWrap("span", line.textEmpha.getText(), {
+      "class":"nehan-empha-text",
+      "style":Css.attr(chr.getCssVertEmphaText(line))
     });
     // TODO: check text-emphasis-position is over or under
     return Html.tagWrap("div", char_body2 + empha_body, {
+      "class":"nehan-empha-wrap",
       "style":Css.attr(line.textEmpha.getCssVertEmphaWrap(line, chr))
     });
   },

@@ -13,8 +13,8 @@ var Ruby = (function(){
     getAdvance : function(flow){
       return this.advanceSize;
     },
-    getExtent : function(){
-      return this.extent;
+    getExtent : function(font_size){
+      return 3 * this.rubyFontSize + font_size;
     },
     getRbs : function(){
       return this.rbs;
@@ -27,18 +27,14 @@ var Ruby = (function(){
     },
     getCssVertRuby : function(line){
       var css = {};
-      var ruby_extent = this.getExtent();
-      var line_extent = line.maxExtent;
-      var offset = Math.floor((line_extent - ruby_extent + this.getRtFontSize()) / 2);
-      css["margin-left"] = offset + "px";
-      css[line.flow.getPropExtent()] = line.getContentExtent() + "px";
+      css["margin-left"] = Math.floor((line.maxExtent - line.fontSize) / 2) + "px";
+      css[line.flow.getPropExtent()] = this.getExtent(line.fontSize) + "px";
       css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
       return css;
     },
     getCssHoriRuby : function(line){
       var css = {};
       css.display = "inline-block";
-      css["text-align"] = "center";
       return css;
     },
     getCssVertRt : function(line){
@@ -65,7 +61,6 @@ var Ruby = (function(){
     },
     setMetrics : function(flow, font_size, letter_spacing){
       this.rubyFontSize = Layout.getRubyFontSize(font_size);
-      this.extent = font_size + this.rubyFontSize;
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font_size);
 	return ret + rb.getAdvance(flow, letter_spacing);

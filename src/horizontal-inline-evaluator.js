@@ -41,9 +41,11 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
     return chr.data;
   },
   evalEmpha : function(line, chr, char_body){
-    var char_body2 = Html.tagWrap("div", char_body);
+    var char_body2 = Html.tagWrap("div", char_body, {
+      "style":Css.attr(chr.getCssHoriEmphaSrc(line))
+    });
     var empha_body = Html.tagWrap("div", line.textEmpha.getText(), {
-      "style":Css.attr(line.textEmpha.getCssHoriEmphaText())
+      "style":Css.attr(chr.getCssHoriEmphaText(line))
     });
     // TODO: check text-emphasis-position is over or under
     return Html.tagWrap("span", empha_body + char_body2, {
