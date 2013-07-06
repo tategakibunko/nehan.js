@@ -26,9 +26,6 @@ var InlineEvaluator = Class.extend({
     if(Token.isText(element)){
       return this.evalText(line, element);
     }
-    if(Token.isTag(element)){
-      return this.evalTagSingle(line, element);
-    }
     if(element instanceof Box){
       return this.evalInlineBox(element);
     }
@@ -39,15 +36,14 @@ var InlineEvaluator = Class.extend({
     case "word":
       return this.evalWord(line, text);
     case "tcy":
-      return this.evalTcy(line, text);
+      var tcy = this.evalTcy(line, text);
+      return line.textEmpha? this.evalEmpha(line, text, tcy) : tcy;
     case "char":
-      return this.evalChar(line, text);
+      var chr = this.evalChar(line, text);
+      return line.textEmpha? this.evalEmpha(line, text, chr) : chr;
     default:
       return "";
     }
-  },
-  evalTagSingle : function(line, tag){
-    return tag.getSrc();
   },
   evalInlineBox : function(box, ctx){
     return this.parentEvaluator.evaluate(box);

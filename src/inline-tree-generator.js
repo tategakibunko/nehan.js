@@ -181,7 +181,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
   },
   _yieldStaticElement : function(line, tag){
     var element = this._super(line, tag);
-    if(element instanceof Box){
+    if(element instanceof Box && line.isTextHorizontal()){
       element.display = "inline-block";
     }
     return element;
@@ -209,9 +209,10 @@ var InlineTreeGenerator = ElementGenerator.extend({
     // if advance is lager than max_measure,
     // we must cut this word into some parts.
     var font_size = ctx.getFontSize();
+    var max_measure = ctx.maxMeasure;
     var is_bold = ctx.isTextBold();
     var flow = ctx.getLineFlow();
-    var part = word.cutMeasure(ctx.maxMeasure); // get sliced word
+    var part = word.cutMeasure(font_size, max_measure); // get sliced word
     part.setMetrics(flow, font_size, is_bold); // metrics for first half
     word.setMetrics(flow, font_size, is_bold); // metrics for second half
     return part;

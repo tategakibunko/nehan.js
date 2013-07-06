@@ -9,17 +9,19 @@ textarea{
   width: 980px;
 }
 .main{
-  width:710px;
+  width:740px;
   float:left;
 }
+hr.space {background:#fff;color:#fff;visibility:hidden;}
 #menu{
   float:left;
-  width:230px;
+  width:190px;
+  margin-right:10px;
   list-style:none;
 }
 #menu a{
   display:block;
-  width:200px;
+  width:190px;
   height:1.2em;
 }
 #menu a.clicked{
@@ -30,20 +32,15 @@ textarea{
   background-color:wheat;
 }
 #source{
-  width:700px; height:150px;
+  width:700px;
+  height:150px;
 }
 #hori-result, #vert-result{
-  width:350px;
   float:left;
+  width:360px;
 }
 .nehan-body{
-  float:left;
   background-color:pink;
-
-  /* caution!
-     here we set margin to .nehan-body, but notice that you can only edit 'outer' world of .nehan-body(root class of page layout).
-     because inner size of .nehan-body is completely under control of nehan layout engine.
-     */
   margin-bottom:1em;
 }
 .nehan-figure{

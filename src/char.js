@@ -19,13 +19,13 @@ var Char = (function(){
   var tail_ng = ["\uff08","\x5c","\x28","\u300c","\u3010","\uff3b","\u3014","\x5c","\x5b","\u300e","\uff1c","\u3008","\u300a","\u201c","\u301d"];
 
   Char.prototype = {
-    getCssPadding : function(flow){
+    getCssPadding : function(line){
       var padding = new Padding();
       if(this.paddingStart){
-	padding.setStart(flow, this.paddingStart);
+	padding.setStart(line.flow, this.paddingStart);
       }
       if(this.paddingEnd){
-	padding.setEnd(flow, this.paddingEnd);
+	padding.setEnd(line.flow, this.paddingEnd);
       }
       return padding.getCss();
     },
@@ -33,9 +33,9 @@ var Char = (function(){
       var css = {};
       var padding_enable = this.isPaddingEnable();
       css["-webkit-writing-mode"] = "vertical-rl";
-      if(line.maxFontSize - this.fontSize > 0){
-	var offset = Math.floor((line.maxFontSize + this.fontSize) / 2) + "px";
-	css["-webkit-transform"] = "translate(" + offset + ")";
+      if(line.maxFontSize - line.fontSize > 0){
+	var offset = Math.floor((line.maxFontSize + line.fontSize) / 2);
+	css["-webkit-transform"] = "translate(" + offset + "px)";
       } else {
 	css["-webkit-transform"] = "translate(50%)";
       }
@@ -53,11 +53,53 @@ var Char = (function(){
       }
       return css;
     },
-    getCssVertImgChar : function(){
+    getCssVertImgChar : function(line){
       var css = {};
       css.display = "block";
+      css.width = line.fontSize + "px";
+      css.height = this.getVertHeight(line.fontSize) + "px";
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
+      if(this.isPaddingEnable()){
+	Args.copy(css, this.getCssPadding(line));
+      }
+      return css;
+    },
+    getCssVertEmphaSrc : function(){
+      var css = {};
+      css["float"] = "left";
+      css["padding-left"] = "-0.5em";
+      return css;
+    },
+    getCssVertEmphaText : function(){
+      var css = {};
+      css["float"] = "left";
+      css["padding-left"] = "-0.5em";
+    },
+    getCssHoriEmphaText : function(){
+      var css = {};
+      css["margin-bottom"] = "-0.5em";
+      return css;
+    },
+    getCssVertLetterSpacing : function(line){
+      var css = {};
+      css["margin-bottom"] = line.letterSpacing + "px";
+      return css;
+    },
+    getCssVertHalfSpaceChar : function(line){
+      var css = {};
+      var half = Math.floor(line.fontSize / 2);
+      css.height = half + "px";
+      css["line-height"] = half + "px";
+      return css;
+    },
+    getCssVertSmallKana : function(){
+      var css = {};
+      css.position = "relative";
+      css.top = "-0.1em";
+      css.right = "-0.12em";
+      css.height = this.bodySize + "px";
+      css["line-height"] = this.bodySize + "px";
       return css;
     },
     getHoriScale : function(){
@@ -66,14 +108,12 @@ var Char = (function(){
     getVertScale : function(){
       return this.vscale? this.vscale : 1;
     },
-    isPaddingEnable : function(){
-      return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
+    getVertHeight : function(font_size){
+      var vscale = this.getVertScale();
+      return (vscale === 1)? font_size : Math.floor(font_size * vscale);
     },
     hasMetrics : function(){
-      return (typeof this.bodySize != "undefined") && (typeof this.fontSize != "undefined");
-    },
-    hasEmpha : function(){
-      return (typeof this.empha !== "undefined") && (this.empha !== "");
+      return (typeof this.bodySize != "undefined");
     },
     getAdvance : function(flow, letter_spacing){
       return this.bodySize + this.getPaddingSize() + letter_spacing;
@@ -90,7 +130,6 @@ var Char = (function(){
     setMetrics : function(flow, font_size, is_bold){
       var is_vert = flow.isTextVertical();
       var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
-      this.fontSize = font_size;
       this.bodySize = (step_scale != 1)? Math.floor(font_size * step_scale) : font_size;
       if(this.spaceRateStart){
 	this.paddingStart = Math.floor(this.spaceRateStart * font_size);
@@ -104,9 +143,6 @@ var Char = (function(){
       if(!is_vert && !this.isRef && this.isHankaku()){
 	this.bodySize = Math.floor(font_size / 2);
       }
-    },
-    setEmpha : function(empha){
-      this.empha = empha;
     },
     _setImg : function(img, vscale, hscale){
       this.img = img;
@@ -264,6 +300,12 @@ var Char = (function(){
     },
     getImgSrc : function(color){
       return [Layout.fontImgRoot, this.img, color + ".png"].join("/");
+    },
+    isPaddingEnable : function(){
+      return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
+    },
+    isVertGlyphEnable : function(){
+      return !this.isTenten() && Config.useVerticalGlyphIfEnable && Env.isVerticalGlyphEnable;
     },
     isTenten : function(){
       return this.img && this.img === "tenten";

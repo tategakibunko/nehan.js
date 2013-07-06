@@ -9,20 +9,20 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
   evalRuby : function(line, ruby, ctx){
     var body = this.evalRt(line, ruby, ctx) + this.evalRb(line, ruby, ctx);
     return Html.tagWrap("span", body, {
-      "style":Css.attr(ruby.getCssRuby(line)),
+      "style":Css.attr(ruby.getCssHoriRuby(line)),
       "class":"nehan-ruby"
     });
   },
   evalRb : function(line, ruby, ctx){
     var body = this.evalTextLineBody(line, ruby.getRbs(), ctx);
     return Html.tagWrap("div", body, {
-      "style":Css.attr(ruby.getCssRb(line)),
+      "style":Css.attr(ruby.getCssHoriRb(line)),
       "class":"nehan-rb"
     });
   },
   evalRt : function(line, ruby, ctx){
     return Html.tagWrap("div", ruby.getRtString(), {
-      "style":Css.attr(ruby.getCssRt(line)),
+      "style":Css.attr(ruby.getCssHoriRt(line)),
       "class":"nehan-rt"
     });
   },
@@ -40,8 +40,18 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
     }
     return chr.data;
   },
+  evalEmpha : function(line, chr, char_body){
+    var char_body2 = Html.tagWrap("div", char_body);
+    var empha_body = Html.tagWrap("div", line.textEmpha.getText(), {
+      "style":Css.attr(line.textEmpha.getCssHoriEmphaText())
+    });
+    // TODO: check text-emphasis-position is over or under
+    return Html.tagWrap("span", empha_body + char_body2, {
+      "style":Css.attr(line.textEmpha.getCssHoriEmphaWrap(line, chr))
+    });
+  },
   evalKerningChar : function(line, chr, ctx){
-    var css = chr.getCssPadding(line.flow);
+    var css = chr.getCssPadding(line);
     if(chr.isKakkoStart()){
       return Html.tagWrap("span", chr.data, {
 	"style": Css.attr(css),
@@ -64,7 +74,7 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
   },
   evalPaddingChar : function(line, chr, ctx){
     return Html.tagWrap("span", chr.data, {
-      "style": Css.attr(chr.getCssPadding(line.flow))
+      "style": Css.attr(chr.getCssPadding(line))
     });
   }
 });

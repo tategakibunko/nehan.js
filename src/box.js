@@ -16,6 +16,7 @@ var Box = (function(){
     },
     _getCssBlock : function(){
       var css = this.css;
+      css["font-size"] = this.fontSize + "px";
       Args.copy(css, this.size.getCss());
       if(this.edge){
 	Args.copy(css, this.edge.getCss());
@@ -26,9 +27,6 @@ var Box = (function(){
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
-      if(this.fontSize){
-	css["font-size"] = this.fontSize + "px";
-      }
       if(this.fontWeight){
 	Args.copy(css, this.fontWeight.getCss());
       }
@@ -36,14 +34,14 @@ var Box = (function(){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
       css.display = this.display || "block";
+      css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
     _getCssInline : function(){
       var css = this.css;
-      Args.copy(css, this.size.getCss());
-
-      if(this.fontSize){
-	css["font-size"] = this.fontSize + "px";
+      css["font-size"] = this.fontSize + "px";
+      if(this.color){
+	Args.copy(css, this.color.getCss());
       }
       if(this.fontWeight){
 	Args.copy(css, this.fontWeight.getCss());
@@ -53,10 +51,15 @@ var Box = (function(){
 	Args.copy(css, this.flow.getCss());
       }
       var start_offset = this.getStartOffset();
-      if(start_offset !== 0){
+      if(start_offset > 0){
 	this.edge = new Margin();
 	this.edge.setStart(this.flow, start_offset);
+
+	var cur_measure = this.getContentMeasure();
+	this.size.setMeasure(this.flow, cur_measure - start_offset);
       }
+      Args.copy(css, this.size.getCss());
+
       if(this.edge){
 	Args.copy(css, this.edge.getCss());
       }
@@ -349,6 +352,9 @@ var Box = (function(){
     },
     isTextLine : function(){
       return this._type === "text-line";
+    },
+    isTextLineRoot : function(){
+      return this.parent && this.parent.isBlock();
     },
     isInlineText : function(){
       return this.isTextLine() && this.markup && this.markup.isInline();

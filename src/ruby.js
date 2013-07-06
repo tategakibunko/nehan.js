@@ -8,13 +8,13 @@ var Ruby = (function(){
 
   Ruby.prototype = {
     hasMetrics : function(){
-      return (typeof this.advanceSize != "undefined");
+      return (typeof this.advanceSize !== "undefined");
     },
     getAdvance : function(flow){
       return this.advanceSize;
     },
     getExtent : function(){
-      return this.baseFontSize + this.rubyFontSize;
+      return this.extent;
     },
     getRbs : function(){
       return this.rbs;
@@ -22,48 +22,50 @@ var Ruby = (function(){
     getRtString : function(){
       return this.rt? this.rt.getContent() : "";
     },
-    getRbFontSize : function(){
-      return this.baseFontSize;
-    },
     getRtFontSize : function(){
       return this.rubyFontSize;
     },
-    getCssRuby : function(line){
+    getCssVertRuby : function(line){
       var css = {};
-      if(line.isTextHorizontal()){
-	css.display = "inline-block";
-	css["text-align"] = "center";
-      } else {
-	var ruby_extent = this.getExtent();
-	var line_extent = line.maxExtent;
-	var offset = Math.floor((line_extent - ruby_extent + this.getRtFontSize()) / 2);
-	css["margin-left"] = offset + "px";
-	css[line.flow.getPropExtent()] = line.getContentExtent() + "px";
-	css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
-      }
+      var ruby_extent = this.getExtent();
+      var line_extent = line.maxExtent;
+      var offset = Math.floor((line_extent - ruby_extent + this.getRtFontSize()) / 2);
+      css["margin-left"] = offset + "px";
+      css[line.flow.getPropExtent()] = line.getContentExtent() + "px";
+      css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
       return css;
     },
-    getCssRt : function(line){
+    getCssHoriRuby : function(line){
       var css = {};
-      if(line.isTextVertical()){
-	css["float"] = "left";
-      } else {
-	css["font-size"] = css["line-height"] = this.getRtFontSize() + "px";
-	css["vertical-align"] = "bottom";
-      }
+      css.display = "inline-block";
+      css["text-align"] = "center";
       return css;
     },
-    getCssRb : function(line){
+    getCssVertRt : function(line){
       var css = {};
-      if(line.isTextVertical()){
-	css["float"] = "left";
-      }
+      css["float"] = "left";
+      return css;
+    },
+    getCssHoriRt : function(line){
+      var css = {};
+      css["font-size"] = css["line-height"] = this.getRtFontSize() + "px";
+      css["vertical-align"] = "bottom";
+      return css;
+    },
+    getCssVertRb : function(line){
+      var css = {};
+      css["float"] = "left";
+      Args.copy(css, this.padding.getCss());
+      return css;
+    },
+    getCssHoriRb : function(line){
+      var css = {};
       Args.copy(css, this.padding.getCss());
       return css;
     },
     setMetrics : function(flow, font_size, letter_spacing){
-      this.baseFontSize = font_size;
       this.rubyFontSize = Layout.getRubyFontSize(font_size);
+      this.extent = font_size + this.rubyFontSize;
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font_size);
 	return ret + rb.getAdvance(flow, letter_spacing);

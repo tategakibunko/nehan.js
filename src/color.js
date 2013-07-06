@@ -1,9 +1,12 @@
 var Color = (function(){
   function Color(value){
-    this.value = Colors.get(value);
+    this.setValue(value);
   }
 
   Color.prototype = {
+    setValue : function(value){
+      this.value = Colors.get(value);
+    },
     getCss : function(){
       var css = {};
       css.color = this.getCssValue();

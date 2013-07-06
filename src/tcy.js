@@ -12,17 +12,10 @@ var Tcy = (function(){
       return this.bodySize + letter_spacing;
     },
     hasMetrics : function(){
-      return (typeof this.bodySize != "undefined") && (typeof this.fontSize != "undefined");
-    },
-    hasEmpha : function(){
-      return (typeof this.empha !== "undefined") && (this.empha !== "");
+      return (typeof this.bodySize != "undefined");
     },
     setMetrics : function(flow, font_size, is_bold){
-      this.fontSize = font_size;
       this.bodySize = font_size;
-    },
-    setEmpha : function(empha){
-      this.empha = empha;
     }
   };
 

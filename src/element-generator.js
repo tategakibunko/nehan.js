@@ -55,8 +55,8 @@ var ElementGenerator = Class.extend({
     }
   },
   _setBoxFontColor : function(box, parent){
-    var font_color = this.markup.getCssAttr("color", "inherit");
-    if(font_color != "inherit"){
+    var font_color = this.markup.getCssAttr("color");
+    if(font_color){
       box.color = new Color(font_color);
     }
   },
@@ -75,7 +75,7 @@ var ElementGenerator = Class.extend({
   _setBoxFontWeight : function(box, parent){
     var font_weight = this.markup.getCssAttr("font-weight");
     if(font_weight){
-      box.setCss("font-weight", font_weight);
+      box.fontWeight = new FontWeight(font_weight);
     }
   },
   _setBoxSizing : function(box, parent){
@@ -91,8 +91,8 @@ var ElementGenerator = Class.extend({
     }
   },
   _setBoxLineRate : function(box, parent){
-    var line_rate = this.markup.getCssAttr("line-rate");
-    if(line_rate){
+    var line_rate = this.markup.getCssAttr("line-rate", "inherit");
+    if(line_rate !== "inherit"){
       box.lineRate = line_rate;
     }
   },
@@ -100,6 +100,24 @@ var ElementGenerator = Class.extend({
     var text_align = this.markup.getCssAttr("text-align");
     if(text_align){
       box.textAlign = text_align;
+    }
+  },
+  _setBoxTextIndent : function(box, parent){
+    var text_indent = this.markup.getCssAttr("text-indent", "inherit");
+    if(text_indent !== "inherit"){
+      box.textIndent = UnixSize.getUnitSize(text_indent, box.fontSize);
+    }
+  },
+  _setBoxTextEmphasis : function(box, parent){
+    var empha_style = this.markup.getCssAttr("text-emphasis-style");
+    if(empha_style){
+      var empha_pos = this.markup.getCssAttr("text-emphasis-position", "over");
+      var empha_color = this.markup.getCssAttr("text-emphasis-color", "black");
+      var text_empha = new TextEmpha();
+      text_empha.setStyle(empha_style);
+      text_empha.setPos(empha_pos);
+      text_empha.setColor(empha_color);
+      box.textEmpha = text_empha;
     }
   },
   _setBoxFlowName : function(box, parent){
@@ -116,12 +134,6 @@ var ElementGenerator = Class.extend({
       box.logicalFloat = logical_float;
     }
   },
-  _setBoxTextIndent : function(box, parent){
-    var text_indent = this.markup.getCssAttr("text-indent", 0);
-    if(text_indent){
-      box.textIndent = box.fontSize;
-    }
-  },
   _setBoxPageBreak : function(box, parent){
     var page_break_after = this.markup.getCssAttr("page-break-after", false);
     if(page_break_after){
@@ -131,7 +143,7 @@ var ElementGenerator = Class.extend({
   _setBoxLetterSpacing : function(box, parent){
     var letter_spacing = this.markup.getCssAttr("letter-spacing");
     if(letter_spacing){
-      box.letterSpacing = UnitSize.getUnitSize(letter_spacing, base_font_size);
+      box.letterSpacing = UnitSize.getUnitSize(letter_spacing, box.fontSize);
     }
   },
   _setBoxBackground : function(box, parent){
@@ -175,6 +187,7 @@ var ElementGenerator = Class.extend({
     this._setBoxLineRate(box, parent);
     this._setBoxTextAlign(box, parent);
     this._setBoxTextIndent(box, parent);
+    this._setBoxTextEmphasis(box, parent);
     this._setBoxFlowName(box, parent);
     this._setBoxFloat(box, parent);
     this._setBoxPageBreak(box, parent);

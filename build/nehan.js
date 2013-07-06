@@ -452,11 +452,7 @@ var Style = {
   },
   "img":{
     "display":"inline",
-    "single":true,
-    "margin":{
-      "before":"0.5em",
-      "after":"0.5em"
-    }
+    "single":true
   },
   "input":{
     "display":"inline",
@@ -937,34 +933,34 @@ var Style = {
   // text emphasis
   //-------------------------------------------------------
   ".nehan-empha-dot-filled":{
-    "empha-mark":"&#x2022;"
+    "text-emphasis-style":"&#x2022;"
   },
   ".nehan-empha-dot-open":{
-    "empha-mark":"&#x25e6;"
+    "text-emphasis-style":"&#x25e6;"
   },
   ".nehan-empha-circle-filled":{
-    "empha-mark":"&#x25cf;"
+    "text-emphasis-style":"&#x25cf;"
   },
   ".nehan-empha-circle-open":{
-    "empha-mark":"&#x25cb;"
-  },
-  ".nehan-empha-double-circle-open":{
-    "empha-mark":"&#x25ce;"
+    "text-emphasis-style":"&#x25cb;"
   },
   ".nehan-empha-double-circle-filled":{
-    "empha-mark":"&#x25c9;"
+    "text-emphasis-style":"&#x25c9;"
+  },
+  ".nehan-empha-double-circle-open":{
+    "text-emphasis-style":"&#x25ce;"
   },
   ".nehan-empha-triangle-filled":{
-    "empha-mark":"&#x25b2;"
+    "text-emphasis-style":"&#x25b2;"
   },
   ".nehan-empha-triangle-open":{
-    "empha-mark":"&#x25b3;"
+    "text-emphasis-style":"&#x25b3;"
   },
   ".nehan-empha-sesame-filled":{
-    "empha-mark":"&#xfe45;"
+    "text-emphasis-style":"&#xfe45;"
   },
   ".nehan-empha-sesame-open":{
-    "empha-mark":"&#xfe46;"
+    "text-emphasis-style":"&#xfe46;"
   },
   //-------------------------------------------------------
   // nehan tip area
@@ -2246,13 +2242,13 @@ var Char = (function(){
   var tail_ng = ["\uff08","\x5c","\x28","\u300c","\u3010","\uff3b","\u3014","\x5c","\x5b","\u300e","\uff1c","\u3008","\u300a","\u201c","\u301d"];
 
   Char.prototype = {
-    getCssPadding : function(flow){
+    getCssPadding : function(line){
       var padding = new Padding();
       if(this.paddingStart){
-	padding.setStart(flow, this.paddingStart);
+	padding.setStart(line.flow, this.paddingStart);
       }
       if(this.paddingEnd){
-	padding.setEnd(flow, this.paddingEnd);
+	padding.setEnd(line.flow, this.paddingEnd);
       }
       return padding.getCss();
     },
@@ -2260,9 +2256,9 @@ var Char = (function(){
       var css = {};
       var padding_enable = this.isPaddingEnable();
       css["-webkit-writing-mode"] = "vertical-rl";
-      if(line.maxFontSize - this.fontSize > 0){
-	var offset = Math.floor((line.maxFontSize + this.fontSize) / 2) + "px";
-	css["-webkit-transform"] = "translate(" + offset + ")";
+      if(line.maxFontSize - line.fontSize > 0){
+	var offset = Math.floor((line.maxFontSize + line.fontSize) / 2);
+	css["-webkit-transform"] = "translate(" + offset + "px)";
       } else {
 	css["-webkit-transform"] = "translate(50%)";
       }
@@ -2280,11 +2276,53 @@ var Char = (function(){
       }
       return css;
     },
-    getCssVertImgChar : function(){
+    getCssVertImgChar : function(line){
       var css = {};
       css.display = "block";
+      css.width = line.fontSize + "px";
+      css.height = this.getVertHeight(line.fontSize) + "px";
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
+      if(this.isPaddingEnable()){
+	Args.copy(css, this.getCssPadding(line));
+      }
+      return css;
+    },
+    getCssVertEmphaSrc : function(){
+      var css = {};
+      css["float"] = "left";
+      css["padding-left"] = "-0.5em";
+      return css;
+    },
+    getCssVertEmphaText : function(){
+      var css = {};
+      css["float"] = "left";
+      css["padding-left"] = "-0.5em";
+    },
+    getCssHoriEmphaText : function(){
+      var css = {};
+      css["margin-bottom"] = "-0.5em";
+      return css;
+    },
+    getCssVertLetterSpacing : function(line){
+      var css = {};
+      css["margin-bottom"] = line.letterSpacing + "px";
+      return css;
+    },
+    getCssVertHalfSpaceChar : function(line){
+      var css = {};
+      var half = Math.floor(line.fontSize / 2);
+      css.height = half + "px";
+      css["line-height"] = half + "px";
+      return css;
+    },
+    getCssVertSmallKana : function(){
+      var css = {};
+      css.position = "relative";
+      css.top = "-0.1em";
+      css.right = "-0.12em";
+      css.height = this.bodySize + "px";
+      css["line-height"] = this.bodySize + "px";
       return css;
     },
     getHoriScale : function(){
@@ -2293,14 +2331,12 @@ var Char = (function(){
     getVertScale : function(){
       return this.vscale? this.vscale : 1;
     },
-    isPaddingEnable : function(){
-      return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
+    getVertHeight : function(font_size){
+      var vscale = this.getVertScale();
+      return (vscale === 1)? font_size : Math.floor(font_size * vscale);
     },
     hasMetrics : function(){
-      return (typeof this.bodySize != "undefined") && (typeof this.fontSize != "undefined");
-    },
-    hasEmpha : function(){
-      return (typeof this.empha !== "undefined") && (this.empha !== "");
+      return (typeof this.bodySize != "undefined");
     },
     getAdvance : function(flow, letter_spacing){
       return this.bodySize + this.getPaddingSize() + letter_spacing;
@@ -2317,7 +2353,6 @@ var Char = (function(){
     setMetrics : function(flow, font_size, is_bold){
       var is_vert = flow.isTextVertical();
       var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
-      this.fontSize = font_size;
       this.bodySize = (step_scale != 1)? Math.floor(font_size * step_scale) : font_size;
       if(this.spaceRateStart){
 	this.paddingStart = Math.floor(this.spaceRateStart * font_size);
@@ -2331,9 +2366,6 @@ var Char = (function(){
       if(!is_vert && !this.isRef && this.isHankaku()){
 	this.bodySize = Math.floor(font_size / 2);
       }
-    },
-    setEmpha : function(empha){
-      this.empha = empha;
     },
     _setImg : function(img, vscale, hscale){
       this.img = img;
@@ -2492,6 +2524,12 @@ var Char = (function(){
     getImgSrc : function(color){
       return [Layout.fontImgRoot, this.img, color + ".png"].join("/");
     },
+    isPaddingEnable : function(){
+      return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
+    },
+    isVertGlyphEnable : function(){
+      return !this.isTenten() && Config.useVerticalGlyphIfEnable && Env.isVerticalGlyphEnable;
+    },
     isTenten : function(){
       return this.img && this.img === "tenten";
     },
@@ -2544,7 +2582,7 @@ var Word = (function(){
     getCssVertTrans : function(line){
       var css = {};
       css["letter-spacing"] = line.letterSpacing + "px";
-      css.width = this.fontSize + "px";
+      css.width = line.fontSize + "px";
       css.height = this.bodySize + "px";
       css["margin-left"] = css["margin-right"] = "auto";
       return css;
@@ -2554,7 +2592,7 @@ var Word = (function(){
       css["float"] = "left";
       css["writing-mode"] = "tb-rl";
       css["letter-spacing"] = line.letterSpacing + "px";
-      css["line-height"] = this.fontSize + "px";
+      css["line-height"] = line.fontSize + "px";
       return css;
     },
     getCharCount : function(){
@@ -2564,21 +2602,14 @@ var Word = (function(){
       return this.bodySize + letter_spacing * this.getLetterCount();
     },
     hasMetrics : function(){
-      return (typeof this.bodySize !== "undefined") && (typeof this.fontSize != "undefined");
-    },
-    hasEmpha : function(){
-      return (typeof this.empha !== "undefined") && (this.empha !== "");
+      return (typeof this.bodySize !== "undefined");
     },
     setMetrics : function(flow, font_size, is_bold){
-      this.fontSize = font_size;
       this.bodySize = this.data.length * Math.floor(font_size / 2);
       if(is_bold){
 	var bold_rate = Layout.boldRate;
 	this.bodySize += Math.floor(bold_rate * this.bodySize);
       }
-    },
-    setEmpha : function(empha){
-      this.empha = empha;
     },
     getLetterCount : function(){
       return this.data.length;
@@ -2590,8 +2621,8 @@ var Word = (function(){
       return this._devided;
     },
     // devide word by measure size and return first half of word.
-    cutMeasure : function(measure){
-      var half_size = Math.floor(this.fontSize / 2);
+    cutMeasure : function(font_size, measure){
+      var half_size = Math.floor(font_size / 2);
       var this_half_count = Math.floor(this.bodySize / half_size);
       var measure_half_count = Math.floor(measure / half_size);
       if(this_half_count <= measure_half_count){
@@ -2623,17 +2654,10 @@ var Tcy = (function(){
       return this.bodySize + letter_spacing;
     },
     hasMetrics : function(){
-      return (typeof this.bodySize != "undefined") && (typeof this.fontSize != "undefined");
-    },
-    hasEmpha : function(){
-      return (typeof this.empha !== "undefined") && (this.empha !== "");
+      return (typeof this.bodySize != "undefined");
     },
     setMetrics : function(flow, font_size, is_bold){
-      this.fontSize = font_size;
       this.bodySize = font_size;
-    },
-    setEmpha : function(empha){
-      this.empha = empha;
     }
   };
 
@@ -2651,13 +2675,13 @@ var Ruby = (function(){
 
   Ruby.prototype = {
     hasMetrics : function(){
-      return (typeof this.advanceSize != "undefined");
+      return (typeof this.advanceSize !== "undefined");
     },
     getAdvance : function(flow){
       return this.advanceSize;
     },
     getExtent : function(){
-      return this.baseFontSize + this.rubyFontSize;
+      return this.extent;
     },
     getRbs : function(){
       return this.rbs;
@@ -2665,48 +2689,50 @@ var Ruby = (function(){
     getRtString : function(){
       return this.rt? this.rt.getContent() : "";
     },
-    getRbFontSize : function(){
-      return this.baseFontSize;
-    },
     getRtFontSize : function(){
       return this.rubyFontSize;
     },
-    getCssRuby : function(line){
+    getCssVertRuby : function(line){
       var css = {};
-      if(line.isTextHorizontal()){
-	css.display = "inline-block";
-	css["text-align"] = "center";
-      } else {
-	var ruby_extent = this.getExtent();
-	var line_extent = line.maxExtent;
-	var offset = Math.floor((line_extent - ruby_extent + this.getRtFontSize()) / 2);
-	css["margin-left"] = offset + "px";
-	css[line.flow.getPropExtent()] = line.getContentExtent() + "px";
-	css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
-      }
+      var ruby_extent = this.getExtent();
+      var line_extent = line.maxExtent;
+      var offset = Math.floor((line_extent - ruby_extent + this.getRtFontSize()) / 2);
+      css["margin-left"] = offset + "px";
+      css[line.flow.getPropExtent()] = line.getContentExtent() + "px";
+      css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
       return css;
     },
-    getCssRt : function(line){
+    getCssHoriRuby : function(line){
       var css = {};
-      if(line.isTextVertical()){
-	css["float"] = "left";
-      } else {
-	css["font-size"] = css["line-height"] = this.getRtFontSize() + "px";
-	css["vertical-align"] = "bottom";
-      }
+      css.display = "inline-block";
+      css["text-align"] = "center";
       return css;
     },
-    getCssRb : function(line){
+    getCssVertRt : function(line){
       var css = {};
-      if(line.isTextVertical()){
-	css["float"] = "left";
-      }
+      css["float"] = "left";
+      return css;
+    },
+    getCssHoriRt : function(line){
+      var css = {};
+      css["font-size"] = css["line-height"] = this.getRtFontSize() + "px";
+      css["vertical-align"] = "bottom";
+      return css;
+    },
+    getCssVertRb : function(line){
+      var css = {};
+      css["float"] = "left";
+      Args.copy(css, this.padding.getCss());
+      return css;
+    },
+    getCssHoriRb : function(line){
+      var css = {};
       Args.copy(css, this.padding.getCss());
       return css;
     },
     setMetrics : function(flow, font_size, letter_spacing){
-      this.baseFontSize = font_size;
       this.rubyFontSize = Layout.getRubyFontSize(font_size);
+      this.extent = font_size + this.rubyFontSize;
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font_size);
 	return ret + rb.getAdvance(flow, letter_spacing);
@@ -2781,10 +2807,13 @@ var Rgb = (function(){
 
 var Color = (function(){
   function Color(value){
-    this.value = Colors.get(value);
+    this.setValue(value);
   }
 
   Color.prototype = {
+    setValue : function(value){
+      this.value = Colors.get(value);
+    },
     getCss : function(){
       var css = {};
       css.color = this.getCssValue();
@@ -3314,12 +3343,11 @@ var BoxFlow = (function(){
     isValid : function(){
       return this.inflow.isValid() && this.blockflow.isValid();
     },
-    isRubyLineFirst : function(){
-      // vertical-lr is text-line first.
-      if(this.inflow.isVertical() && this.blockflow.isLeftToRight()){
-	return false;
+    isTextLineFirst : function(){
+      if(this.isTextVertical() && this.blockflow.isLeftToRight()){
+	return true;
       }
-      return true;
+      return false;
     },
     isBlockflowVertical : function(){
       return this.blockflow.isVertical();
@@ -3529,8 +3557,8 @@ var BoxSizings = {
 
 
 var FontWeight = (function(){
-  function FontWeight(){
-    this.value = "normal";
+  function FontWeight(value){
+    this.value = value;
   }
 
   FontWeight.prototype = {
@@ -4219,6 +4247,125 @@ var BoxSize = (function(){
   return BoxSize;
 })();
 
+var TextEmphaStyle = (function(){
+  var empha_marks = {
+    "dot filled":"&#x2022;",
+    "dot open":"&#x25e6;",
+
+    "circle filled":"&#x25cf;",
+    "circle open":"&#x25cb;",
+
+    "double-circle filled":"&#x25c9;",
+    "double-circle open":"&#x25ce;",
+
+    "triangle filled":"&#x25b2;",
+    "triangle open":"&#x25b3;",
+
+    "sesame filled":"&#xfe45;",
+    "sesame open":"&#xfe46;"
+  };
+
+  function TextEmphaStyle(value){
+    this.value = value || "dot filled";
+  }
+
+  TextEmphaStyle.prototype = {
+    setValue : function(value){
+      this.value = value;
+    },
+    getText : function(){
+      return empha_marks[this.value] || this.value || empha_marks["dot filled"];
+    },
+    getCss : function(){
+      var css = {};
+      //return css["text-emphasis-style"] = this.value;
+      return css;
+    }
+  };
+
+  return TextEmphaStyle;
+})();
+
+
+var TextEmphaPos = (function(){
+  function TextEmphaPos(value){
+    this.value = value || "over";
+  }
+
+  TextEmphaPos.prototype = {
+    isEmphaFirst : function(){
+      return this.value === "over" || this.value === "left" || this.value === "before";
+    },
+    setValue : function(value){
+      this.value = value;
+    },
+    getCss : function(line){
+      var css = {};
+      return css;
+    }
+  };
+
+  return TextEmphaPos;
+})();
+
+
+var TextEmpha = (function(){
+  function TextEmpha(){
+    this.pos = new TextEmphaPos();
+    this.style = new TextEmphaStyle();
+    this.color = new Color(Layout.fontColor);
+  }
+
+  TextEmpha.prototype = {
+    setPos : function(value){
+      this.pos.setValue(value);
+    },
+    setStyle : function(value){
+      this.style.setValue(value);
+    },
+    setColor : function(value){
+      this.color.setValue(value);
+    },
+    getText : function(){
+      return this.style.getText();
+    },
+    getCssVertEmphaWrap : function(line, chr){
+      var css = {};
+      css["padding-left"] = "0.5em";
+      css.width = (line.fontSize * 2) + "px";
+      css.height = chr.getAdvance(line.fontSize, line.letterSpacing) + "px";
+      return css;
+    },
+    getCssHoriEmphaWrap : function(line, chr){
+      var css = {};
+      css.display = "inline-block";
+      css["margin-top"] = -line.fontSize + "px";
+      css.width = line.fontSize + "px";
+      css.height = chr.getAdvance(line.flow, line.letterSpacing) + line.fontSize;
+      return css;
+    },
+    getCssVertEmphaText : function(line){
+      var css = {};
+      return css;
+    },
+    getCssHoriEmphaText : function(line){
+      var css = {};
+      css["margin-bottom"] = "-0.5em";
+      return css;
+    },
+    getCss : function(flow){
+      var css = {};
+      Args.copy(css, this.pos.getCss(flow));
+      Args.copy(css, this.style.getCss());
+      Args.copy(css, this.color.getCss());
+      return css;
+    }
+  };
+
+  return TextEmpha;
+})();
+
+
 var LogicalSize = (function(){
   function LogicalSize(measure, extent){
     this.measure = measure;
@@ -4304,6 +4451,7 @@ var Box = (function(){
     },
     _getCssBlock : function(){
       var css = this.css;
+      css["font-size"] = this.fontSize + "px";
       Args.copy(css, this.size.getCss());
       if(this.edge){
 	Args.copy(css, this.edge.getCss());
@@ -4314,9 +4462,6 @@ var Box = (function(){
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
-      if(this.fontSize){
-	css["font-size"] = this.fontSize + "px";
-      }
       if(this.fontWeight){
 	Args.copy(css, this.fontWeight.getCss());
       }
@@ -4324,14 +4469,14 @@ var Box = (function(){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
       css.display = this.display || "block";
+      css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
     _getCssInline : function(){
       var css = this.css;
-      Args.copy(css, this.size.getCss());
-
-      if(this.fontSize){
-	css["font-size"] = this.fontSize + "px";
+      css["font-size"] = this.fontSize + "px";
+      if(this.color){
+	Args.copy(css, this.color.getCss());
       }
       if(this.fontWeight){
 	Args.copy(css, this.fontWeight.getCss());
@@ -4341,10 +4486,15 @@ var Box = (function(){
 	Args.copy(css, this.flow.getCss());
       }
       var start_offset = this.getStartOffset();
-      if(start_offset !== 0){
+      if(start_offset > 0){
 	this.edge = new Margin();
 	this.edge.setStart(this.flow, start_offset);
+
+	var cur_measure = this.getContentMeasure();
+	this.size.setMeasure(this.flow, cur_measure - start_offset);
       }
+      Args.copy(css, this.size.getCss());
+
       if(this.edge){
 	Args.copy(css, this.edge.getCss());
       }
@@ -4637,6 +4787,9 @@ var Box = (function(){
     },
     isTextLine : function(){
       return this._type === "text-line";
+    },
+    isTextLineRoot : function(){
+      return this.parent && this.parent.isBlock();
     },
     isInlineText : function(){
       return this.isTextLine() && this.markup && this.markup.isInline();
@@ -6481,8 +6634,8 @@ var ElementGenerator = Class.extend({
     }
   },
   _setBoxFontColor : function(box, parent){
-    var font_color = this.markup.getCssAttr("color", "inherit");
-    if(font_color != "inherit"){
+    var font_color = this.markup.getCssAttr("color");
+    if(font_color){
       box.color = new Color(font_color);
     }
   },
@@ -6501,7 +6654,7 @@ var ElementGenerator = Class.extend({
   _setBoxFontWeight : function(box, parent){
     var font_weight = this.markup.getCssAttr("font-weight");
     if(font_weight){
-      box.setCss("font-weight", font_weight);
+      box.fontWeight = new FontWeight(font_weight);
     }
   },
   _setBoxSizing : function(box, parent){
@@ -6517,8 +6670,8 @@ var ElementGenerator = Class.extend({
     }
   },
   _setBoxLineRate : function(box, parent){
-    var line_rate = this.markup.getCssAttr("line-rate");
-    if(line_rate){
+    var line_rate = this.markup.getCssAttr("line-rate", "inherit");
+    if(line_rate !== "inherit"){
       box.lineRate = line_rate;
     }
   },
@@ -6526,6 +6679,24 @@ var ElementGenerator = Class.extend({
     var text_align = this.markup.getCssAttr("text-align");
     if(text_align){
       box.textAlign = text_align;
+    }
+  },
+  _setBoxTextIndent : function(box, parent){
+    var text_indent = this.markup.getCssAttr("text-indent", "inherit");
+    if(text_indent !== "inherit"){
+      box.textIndent = UnixSize.getUnitSize(text_indent, box.fontSize);
+    }
+  },
+  _setBoxTextEmphasis : function(box, parent){
+    var empha_style = this.markup.getCssAttr("text-emphasis-style");
+    if(empha_style){
+      var empha_pos = this.markup.getCssAttr("text-emphasis-position", "over");
+      var empha_color = this.markup.getCssAttr("text-emphasis-color", "black");
+      var text_empha = new TextEmpha();
+      text_empha.setStyle(empha_style);
+      text_empha.setPos(empha_pos);
+      text_empha.setColor(empha_color);
+      box.textEmpha = text_empha;
     }
   },
   _setBoxFlowName : function(box, parent){
@@ -6542,12 +6713,6 @@ var ElementGenerator = Class.extend({
       box.logicalFloat = logical_float;
     }
   },
-  _setBoxTextIndent : function(box, parent){
-    var text_indent = this.markup.getCssAttr("text-indent", 0);
-    if(text_indent){
-      box.textIndent = box.fontSize;
-    }
-  },
   _setBoxPageBreak : function(box, parent){
     var page_break_after = this.markup.getCssAttr("page-break-after", false);
     if(page_break_after){
@@ -6557,7 +6722,7 @@ var ElementGenerator = Class.extend({
   _setBoxLetterSpacing : function(box, parent){
     var letter_spacing = this.markup.getCssAttr("letter-spacing");
     if(letter_spacing){
-      box.letterSpacing = UnitSize.getUnitSize(letter_spacing, base_font_size);
+      box.letterSpacing = UnitSize.getUnitSize(letter_spacing, box.fontSize);
     }
   },
   _setBoxBackground : function(box, parent){
@@ -6601,6 +6766,7 @@ var ElementGenerator = Class.extend({
     this._setBoxLineRate(box, parent);
     this._setBoxTextAlign(box, parent);
     this._setBoxTextIndent(box, parent);
+    this._setBoxTextEmphasis(box, parent);
     this._setBoxFlowName(box, parent);
     this._setBoxFloat(box, parent);
     this._setBoxPageBreak(box, parent);
@@ -6703,7 +6869,7 @@ var LineContext = (function(){
     this.markup = this.context.getCurInlineTag() || null;
     this.lineStartPos = this.stream.getPos();
     this.textIndent = stream.isHead()? (line.textIndent || 0) : 0;
-    this.maxFontSize = line.fontSize;
+    this.maxFontSize = 0;
     this.maxExtent = 0;
     this.maxMeasure = line.getContentMeasure() - this.textIndent;
     this.curMeasure = 0;
@@ -6721,7 +6887,10 @@ var LineContext = (function(){
   LineContext.prototype = {
     getElementExtent : function(element){
       if(Token.isText(element)){
-	return element.fontSize;
+	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
+	  return Math.floor(this.line.fontSize * 2);
+	}
+	return this.line.fontSize;
       }
       if(element instanceof Ruby){
 	return element.getExtent();
@@ -6729,13 +6898,7 @@ var LineContext = (function(){
       return element.getBoxExtent(this.getLineFlow());
     },
     getElementFontSize : function(element){
-      if(Token.isText(element)){
-	return element.fontSize;
-      }
-      if(element instanceof Ruby){
-	return element.getRbFontSize();
-      }
-      return element.fontSize || 0;
+      return (element instanceof Box)? element.fontSize : this.line.fontSize;
     },
     getElementAdvance : function(element){
       if(Token.isText(element)){
@@ -6990,11 +7153,6 @@ var LineContext = (function(){
 
       // count up char count of line
       this.charCount += element.getCharCount();
-
-      // set empha if enabled.
-      if(this.line.empha){
-	element.setEmpha(this.line.empha);
-      }
     },
     // fix line that is started with wrong text.
     _justifyHead : function(head_token){
@@ -7292,7 +7450,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
   },
   _yieldStaticElement : function(line, tag){
     var element = this._super(line, tag);
-    if(element instanceof Box){
+    if(element instanceof Box && line.isTextHorizontal()){
       element.display = "inline-block";
     }
     return element;
@@ -7320,9 +7478,10 @@ var InlineTreeGenerator = ElementGenerator.extend({
     // if advance is lager than max_measure,
     // we must cut this word into some parts.
     var font_size = ctx.getFontSize();
+    var max_measure = ctx.maxMeasure;
     var is_bold = ctx.isTextBold();
     var flow = ctx.getLineFlow();
-    var part = word.cutMeasure(ctx.maxMeasure); // get sliced word
+    var part = word.cutMeasure(font_size, max_measure); // get sliced word
     part.setMetrics(flow, font_size, is_bold); // metrics for first half
     word.setMetrics(flow, font_size, is_bold); // metrics for second half
     return part;
@@ -8228,9 +8387,6 @@ var InlineEvaluator = Class.extend({
     if(Token.isText(element)){
       return this.evalText(line, element);
     }
-    if(Token.isTag(element)){
-      return this.evalTagSingle(line, element);
-    }
     if(element instanceof Box){
       return this.evalInlineBox(element);
     }
@@ -8241,15 +8397,14 @@ var InlineEvaluator = Class.extend({
     case "word":
       return this.evalWord(line, text);
     case "tcy":
-      return this.evalTcy(line, text);
+      var tcy = this.evalTcy(line, text);
+      return line.textEmpha? this.evalEmpha(line, text, tcy) : tcy;
     case "char":
-      return this.evalChar(line, text);
+      var chr = this.evalChar(line, text);
+      return line.textEmpha? this.evalEmpha(line, text, chr) : chr;
     default:
       return "";
     }
-  },
-  evalTagSingle : function(line, tag){
-    return tag.getSrc();
   },
   evalInlineBox : function(box, ctx){
     return this.parentEvaluator.evaluate(box);
@@ -8275,21 +8430,21 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   evalRuby : function(line, ruby){
     var body = this.evalRb(line, ruby) + this.evalRt(line, ruby);
     return Html.tagWrap("div", body, {
-      "style":Css.attr(ruby.getCssRuby(line)),
+      "style":Css.attr(ruby.getCssVertRuby(line)),
       "class":"nehan-ruby-body"
     });
   },
   evalRb : function(line, ruby){
     var body = this.evalTextLineBody(line, ruby.getRbs());
     return Html.tagWrap("div", body, {
-      "style":Css.attr(ruby.getCssRb(line)),
+      "style":Css.attr(ruby.getCssVertRb(line)),
       "class":"nehan-rb"
     });
   },
   evalRt : function(line, ruby){
     var generator = new RtGenerator(ruby.rt, new DocumentContext());
     var rt_line = generator.yield(line);
-    var css = ruby.getCssRt(line);
+    var css = ruby.getCssVertRt(line);
     for(var prop in css){
       rt_line.setCss(prop, css[prop]);
     }
@@ -8325,13 +8480,10 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   },
   evalChar : function(line, chr){
     if(chr.isImgChar()){
-      if(Config.useVerticalGlyphIfEnable &&
-	 Env.isVerticalGlyphEnable &&
-	 !chr.isTenten()){
+      if(chr.isVertGlyphEnable()){
 	return this.evalVerticalGlyph(line, chr);
-      } else {
-	return this.evalImgChar(line, chr);
       }
+      return this.evalImgChar(line, chr);
     } else if(chr.isHalfSpaceChar(chr)){
       return this.evalHalfSpaceChar(line, chr);
     } else if(chr.isCnvChar()){
@@ -8340,48 +8492,45 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       return this.evalSmallKana(line, chr);
     } else if(chr.isPaddingEnable()){
       return this.evalPaddingChar(line, chr);
-    }
-    return this.evalCharBr(line, chr);
-  },
-  evalCharBr : function(line, chr){
-    if(line.letterSpacing){
-      return Html.tagWrap("div", chr.data, {
-	"style":Css.attr({
-	  "margin-bottom":line.letterSpacing + "px"
-	})
-      });
+    } else if(line.letterSpacing){
+      return this.evalCharLetterSpacing(line, chr);
     }
     return chr.data + "<br />";
   },
+  evalCharLetterSpacing : function(line, chr){
+    return Html.tagWrap("div", chr.data, {
+      "style":Css.attr(chr.getCssVertLetterSpacing(line))
+    });
+  },
+  evalEmpha : function(line, chr, char_body){
+    var char_body2 = Html.tagWrap("div", char_body, {
+      "style":Css.attr(chr.getCssVertEmphaSrc())
+    });
+    var empha_body = Html.tagWrap("div", line.textEmpha.getText(), {
+      "style":Css.attr(chr.getCssVertEmphaText())
+    });
+    // TODO: check text-emphasis-position is over or under
+    return Html.tagWrap("div", char_body2 + empha_body, {
+      "style":Css.attr(line.textEmpha.getCssVertEmphaWrap(line, chr))
+    });
+  },
   evalPaddingChar : function(line, chr){
     return Html.tagWrap("div", chr.data, {
-      style:Css.attr(chr.getCssPadding(line.flow))
+      style:Css.attr(chr.getCssPadding(line))
     });
   },
   evalImgChar : function(line, chr){
-    var vscale = chr.getVertScale();
-    var width = chr.fontSize;
-    var height = (vscale === 1)? width : Math.floor(width * vscale);
-    var css = {};
-    if(chr.isPaddingEnable()){
-      Args.copy(css, chr.getCssPadding(line.flow));
-    }
-    Args.copy(css, chr.getCssVertImgChar());
     var palette_color_value = Layout.getPaletteFontColor(line.color).toUpperCase();
     return Html.tagSingle("img", {
       "class":"nehan-img-char",
       src:chr.getImgSrc(palette_color_value),
-      style:Css.attr(css),
-      width:width,
-      height:height
+      style:Css.attr(chr.getCssVertImgChar(line))
     }) + Const.clearFix;
   },
   evalVerticalGlyph : function(line, chr){
-    var css = {};
-    Args.copy(css, chr.getCssVertGlyph(line));
     return Html.tagWrap("div", chr.data, {
-      "style":Css.attr(css),
-      "class":"nehan-vert-rl"
+      "class":"nehan-vert-rl",
+      "style":Css.attr(chr.getCssVertGlyph(line))
     });
   },
   evalCnvChar: function(line, chr){
@@ -8389,22 +8538,13 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   },
   evalSmallKana : function(line, chr){
     return Html.tagWrap("div", chr.data, {
-      style:Css.attr({
-	"position": "relative",
-	"top": "-0.1em",
-	"right":"-0.12em",
-	"height": chr.bodySize + "px",
-	"line-height": chr.bodySize + "px"
-      })
+      style:Css.attr(chr.getCssVertSmallKana())
     });
   },
   evalHalfSpaceChar : function(line, chr){
-    var half = Math.floor(chr.fontSize / 2);
+    var half = Math.floor(line.fontSize / 2);
     return Html.tagWrap("div", "&nbsp;", {
-      style:Css.attr({
-	"height": half + "px",
-	"line-height": half + "px"
-      })
+      style:Css.attr(chr.getCssVertHalfSpaceChar(line))
     });
   },
   evalInlineBox : function(box){
@@ -8423,20 +8563,20 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
   evalRuby : function(line, ruby, ctx){
     var body = this.evalRt(line, ruby, ctx) + this.evalRb(line, ruby, ctx);
     return Html.tagWrap("span", body, {
-      "style":Css.attr(ruby.getCssRuby(line)),
+      "style":Css.attr(ruby.getCssHoriRuby(line)),
       "class":"nehan-ruby"
     });
   },
   evalRb : function(line, ruby, ctx){
     var body = this.evalTextLineBody(line, ruby.getRbs(), ctx);
     return Html.tagWrap("div", body, {
-      "style":Css.attr(ruby.getCssRb(line)),
+      "style":Css.attr(ruby.getCssHoriRb(line)),
       "class":"nehan-rb"
     });
   },
   evalRt : function(line, ruby, ctx){
     return Html.tagWrap("div", ruby.getRtString(), {
-      "style":Css.attr(ruby.getCssRt(line)),
+      "style":Css.attr(ruby.getCssHoriRt(line)),
       "class":"nehan-rt"
     });
   },
@@ -8454,8 +8594,18 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
     }
     return chr.data;
   },
+  evalEmpha : function(line, chr, char_body){
+    var char_body2 = Html.tagWrap("div", char_body);
+    var empha_body = Html.tagWrap("div", line.textEmpha.getText(), {
+      "style":Css.attr(line.textEmpha.getCssHoriEmphaText())
+    });
+    // TODO: check text-emphasis-position is over or under
+    return Html.tagWrap("span", empha_body + char_body2, {
+      "style":Css.attr(line.textEmpha.getCssHoriEmphaWrap(line, chr))
+    });
+  },
   evalKerningChar : function(line, chr, ctx){
-    var css = chr.getCssPadding(line.flow);
+    var css = chr.getCssPadding(line);
     if(chr.isKakkoStart()){
       return Html.tagWrap("span", chr.data, {
 	"style": Css.attr(css),
@@ -8478,7 +8628,7 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
   },
   evalPaddingChar : function(line, chr, ctx){
     return Html.tagWrap("span", chr.data, {
-      "style": Css.attr(chr.getCssPadding(line.flow))
+      "style": Css.attr(chr.getCssPadding(line))
     });
   }
 });

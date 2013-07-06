@@ -16,12 +16,11 @@ var BoxFlow = (function(){
     isValid : function(){
       return this.inflow.isValid() && this.blockflow.isValid();
     },
-    isRubyLineFirst : function(){
-      // vertical-lr is text-line first.
-      if(this.inflow.isVertical() && this.blockflow.isLeftToRight()){
-	return false;
+    isTextLineFirst : function(){
+      if(this.isTextVertical() && this.blockflow.isLeftToRight()){
+	return true;
       }
-      return true;
+      return false;
     },
     isBlockflowVertical : function(){
       return this.blockflow.isVertical();

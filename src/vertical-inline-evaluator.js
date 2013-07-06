@@ -8,21 +8,21 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   evalRuby : function(line, ruby){
     var body = this.evalRb(line, ruby) + this.evalRt(line, ruby);
     return Html.tagWrap("div", body, {
-      "style":Css.attr(ruby.getCssRuby(line)),
+      "style":Css.attr(ruby.getCssVertRuby(line)),
       "class":"nehan-ruby-body"
     });
   },
   evalRb : function(line, ruby){
     var body = this.evalTextLineBody(line, ruby.getRbs());
     return Html.tagWrap("div", body, {
-      "style":Css.attr(ruby.getCssRb(line)),
+      "style":Css.attr(ruby.getCssVertRb(line)),
       "class":"nehan-rb"
     });
   },
   evalRt : function(line, ruby){
     var generator = new RtGenerator(ruby.rt, new DocumentContext());
     var rt_line = generator.yield(line);
-    var css = ruby.getCssRt(line);
+    var css = ruby.getCssVertRt(line);
     for(var prop in css){
       rt_line.setCss(prop, css[prop]);
     }
@@ -58,13 +58,10 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   },
   evalChar : function(line, chr){
     if(chr.isImgChar()){
-      if(Config.useVerticalGlyphIfEnable &&
-	 Env.isVerticalGlyphEnable &&
-	 !chr.isTenten()){
+      if(chr.isVertGlyphEnable()){
 	return this.evalVerticalGlyph(line, chr);
-      } else {
-	return this.evalImgChar(line, chr);
       }
+      return this.evalImgChar(line, chr);
     } else if(chr.isHalfSpaceChar(chr)){
       return this.evalHalfSpaceChar(line, chr);
     } else if(chr.isCnvChar()){
@@ -73,48 +70,45 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       return this.evalSmallKana(line, chr);
     } else if(chr.isPaddingEnable()){
       return this.evalPaddingChar(line, chr);
-    }
-    return this.evalCharBr(line, chr);
-  },
-  evalCharBr : function(line, chr){
-    if(line.letterSpacing){
-      return Html.tagWrap("div", chr.data, {
-	"style":Css.attr({
-	  "margin-bottom":line.letterSpacing + "px"
-	})
-      });
+    } else if(line.letterSpacing){
+      return this.evalCharLetterSpacing(line, chr);
     }
     return chr.data + "<br />";
   },
+  evalCharLetterSpacing : function(line, chr){
+    return Html.tagWrap("div", chr.data, {
+      "style":Css.attr(chr.getCssVertLetterSpacing(line))
+    });
+  },
+  evalEmpha : function(line, chr, char_body){
+    var char_body2 = Html.tagWrap("div", char_body, {
+      "style":Css.attr(chr.getCssVertEmphaSrc())
+    });
+    var empha_body = Html.tagWrap("div", line.textEmpha.getText(), {
+      "style":Css.attr(chr.getCssVertEmphaText())
+    });
+    // TODO: check text-emphasis-position is over or under
+    return Html.tagWrap("div", char_body2 + empha_body, {
+      "style":Css.attr(line.textEmpha.getCssVertEmphaWrap(line, chr))
+    });
+  },
   evalPaddingChar : function(line, chr){
     return Html.tagWrap("div", chr.data, {
-      style:Css.attr(chr.getCssPadding(line.flow))
+      style:Css.attr(chr.getCssPadding(line))
     });
   },
   evalImgChar : function(line, chr){
-    var vscale = chr.getVertScale();
-    var width = chr.fontSize;
-    var height = (vscale === 1)? width : Math.floor(width * vscale);
-    var css = {};
-    if(chr.isPaddingEnable()){
-      Args.copy(css, chr.getCssPadding(line.flow));
-    }
-    Args.copy(css, chr.getCssVertImgChar());
     var palette_color_value = Layout.getPaletteFontColor(line.color).toUpperCase();
     return Html.tagSingle("img", {
       "class":"nehan-img-char",
       src:chr.getImgSrc(palette_color_value),
-      style:Css.attr(css),
-      width:width,
-      height:height
+      style:Css.attr(chr.getCssVertImgChar(line))
     }) + Const.clearFix;
   },
   evalVerticalGlyph : function(line, chr){
-    var css = {};
-    Args.copy(css, chr.getCssVertGlyph(line));
     return Html.tagWrap("div", chr.data, {
-      "style":Css.attr(css),
-      "class":"nehan-vert-rl"
+      "class":"nehan-vert-rl",
+      "style":Css.attr(chr.getCssVertGlyph(line))
     });
   },
   evalCnvChar: function(line, chr){
@@ -122,22 +116,13 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   },
   evalSmallKana : function(line, chr){
     return Html.tagWrap("div", chr.data, {
-      style:Css.attr({
-	"position": "relative",
-	"top": "-0.1em",
-	"right":"-0.12em",
-	"height": chr.bodySize + "px",
-	"line-height": chr.bodySize + "px"
-      })
+      style:Css.attr(chr.getCssVertSmallKana())
     });
   },
   evalHalfSpaceChar : function(line, chr){
-    var half = Math.floor(chr.fontSize / 2);
+    var half = Math.floor(line.fontSize / 2);
     return Html.tagWrap("div", "&nbsp;", {
-      style:Css.attr({
-	"height": half + "px",
-	"line-height": half + "px"
-      })
+      style:Css.attr(chr.getCssVertHalfSpaceChar(line))
     });
   },
   evalInlineBox : function(box){

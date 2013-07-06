@@ -274,11 +274,7 @@ var Style = {
   },
   "img":{
     "display":"inline",
-    "single":true,
-    "margin":{
-      "before":"0.5em",
-      "after":"0.5em"
-    }
+    "single":true
   },
   "input":{
     "display":"inline",
@@ -759,34 +755,34 @@ var Style = {
   // text emphasis
   //-------------------------------------------------------
   ".nehan-empha-dot-filled":{
-    "empha-mark":"&#x2022;"
+    "text-emphasis-style":"&#x2022;"
   },
   ".nehan-empha-dot-open":{
-    "empha-mark":"&#x25e6;"
+    "text-emphasis-style":"&#x25e6;"
   },
   ".nehan-empha-circle-filled":{
-    "empha-mark":"&#x25cf;"
+    "text-emphasis-style":"&#x25cf;"
   },
   ".nehan-empha-circle-open":{
-    "empha-mark":"&#x25cb;"
-  },
-  ".nehan-empha-double-circle-open":{
-    "empha-mark":"&#x25ce;"
+    "text-emphasis-style":"&#x25cb;"
   },
   ".nehan-empha-double-circle-filled":{
-    "empha-mark":"&#x25c9;"
+    "text-emphasis-style":"&#x25c9;"
+  },
+  ".nehan-empha-double-circle-open":{
+    "text-emphasis-style":"&#x25ce;"
   },
   ".nehan-empha-triangle-filled":{
-    "empha-mark":"&#x25b2;"
+    "text-emphasis-style":"&#x25b2;"
   },
   ".nehan-empha-triangle-open":{
-    "empha-mark":"&#x25b3;"
+    "text-emphasis-style":"&#x25b3;"
   },
   ".nehan-empha-sesame-filled":{
-    "empha-mark":"&#xfe45;"
+    "text-emphasis-style":"&#xfe45;"
   },
   ".nehan-empha-sesame-open":{
-    "empha-mark":"&#xfe46;"
+    "text-emphasis-style":"&#xfe46;"
   },
   //-------------------------------------------------------
   // nehan tip area

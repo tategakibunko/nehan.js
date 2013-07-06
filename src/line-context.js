@@ -6,7 +6,7 @@ var LineContext = (function(){
     this.markup = this.context.getCurInlineTag() || null;
     this.lineStartPos = this.stream.getPos();
     this.textIndent = stream.isHead()? (line.textIndent || 0) : 0;
-    this.maxFontSize = line.fontSize;
+    this.maxFontSize = 0;
     this.maxExtent = 0;
     this.maxMeasure = line.getContentMeasure() - this.textIndent;
     this.curMeasure = 0;
@@ -24,7 +24,10 @@ var LineContext = (function(){
   LineContext.prototype = {
     getElementExtent : function(element){
       if(Token.isText(element)){
-	return element.fontSize;
+	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
+	  return Math.floor(this.line.fontSize * 2);
+	}
+	return this.line.fontSize;
       }
       if(element instanceof Ruby){
 	return element.getExtent();
@@ -32,13 +35,7 @@ var LineContext = (function(){
       return element.getBoxExtent(this.getLineFlow());
     },
     getElementFontSize : function(element){
-      if(Token.isText(element)){
-	return element.fontSize;
-      }
-      if(element instanceof Ruby){
-	return element.getRbFontSize();
-      }
-      return element.fontSize || 0;
+      return (element instanceof Box)? element.fontSize : this.line.fontSize;
     },
     getElementAdvance : function(element){
       if(Token.isText(element)){
@@ -293,11 +290,6 @@ var LineContext = (function(){
 
       // count up char count of line
       this.charCount += element.getCharCount();
-
-      // set empha if enabled.
-      if(this.line.empha){
-	element.setEmpha(this.line.empha);
-      }
     },
     // fix line that is started with wrong text.
     _justifyHead : function(head_token){

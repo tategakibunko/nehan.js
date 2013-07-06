@@ -1,6 +1,6 @@
 var FontWeight = (function(){
-  function FontWeight(){
-    this.value = "normal";
+  function FontWeight(value){
+    this.value = value;
   }
 
   FontWeight.prototype = {
