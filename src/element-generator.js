@@ -16,19 +16,25 @@ var ElementGenerator = Class.extend({
   // called when box is created, and std style is already loaded.
   _onCreateBox : function(box, parent){
   },
+  _getMarkupStaticSize : function(parent){
+    if(this.markup){
+      var font_size = parent? parent.fontSize : Layout.fontSize;
+      var measure = parent? parent.getContentMeasure(parent.flow) : Layout.getStdMeasure();
+      return this.markup.getStaticSize(font_size, measure);
+    }
+    return parent.getRestSize();
+  },
   _yieldStaticElement : function(parent, tag){
-    var font_size = parent.fontSize || Layout.fontSize;
-    var max_measure = parent.getContentMeasure();
-    var element_size = tag.getStaticSize(font_size, max_measure);
     if(tag.getName() === "img"){
-      return (new ImageGenerator(tag, this.context)).yield(parent, element_size);
+      return (new ImageGenerator(tag, this.context)).yield(parent);
     }
     // if original flow defined, yield as inline page
     if(tag.hasFlow()){
-      return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent, element_size);
+      var size = tag.getStaticSize(parent.fontSize, parent.getContentMeasure());
+      return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent, size);
     }
     // if static size is simply defined, treat as just an embed html with static size.
-    return (new InlineBoxGenerator(tag, this.context)).yield(parent, element_size);
+    return (new InlineBoxGenerator(tag, this.context)).yield(parent);
   },
   _getBoxType : function(){
     return this.markup.getName();
@@ -198,12 +204,26 @@ var ElementGenerator = Class.extend({
     this._setBoxBackgroundPosition(box, parent);
     this._setBoxBackgroundRepeat(box, parent);
   },
+  _setPseudoElement : function(box, parent){
+    // if pseudo-element tag,
+    // copy style of <this.markup.name>:<pseudo-name> dynamically.
+    if(this.markup.isPseudoElementTag()){
+      var pseudo_name = this.markup.getPseudoElementName();
+      var pseudo_css_attr = this.markup.getPseudoCssAttr(pseudo_name);
+      for(var prop in pseudo_css_attr){
+	if(prop !== "content"){
+	  this.markup.setCssAttr(prop, pseudo_css_attr[prop]);
+	}
+      }
+    }
+  },
   _createBox : function(size, parent){
     var box_type = this._getBoxType();
     var box = Layout.createBox(size, parent, box_type);
     box.markup = this.markup;
     this._onReadyBox(box, parent);
     this._setBoxFirstChild(box, parent);
+    this._setPseudoElement(box, parent);
     this._setBoxClasses(box, parent);
     this._setBoxStyle(box, parent);
     this._onCreateBox(box, parent);

@@ -27,7 +27,7 @@ var InlineEvaluator = Class.extend({
       return this.evalText(line, element);
     }
     if(element instanceof Box){
-      return this.evalInlineBox(element);
+      return this.evalInlineBox(line, element);
     }
     return "";
   },
@@ -45,8 +45,8 @@ var InlineEvaluator = Class.extend({
       return "";
     }
   },
-  evalInlineBox : function(box, ctx){
-    return this.parentEvaluator.evaluate(box);
+  evalInlineBox : function(line, box){
+    throw "not implemented: evalInlineBox";
   },
   evalWord : function(line, word){
     throw "not implemented: evalWord";

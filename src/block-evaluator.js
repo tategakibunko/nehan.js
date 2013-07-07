@@ -27,7 +27,7 @@ var BlockEvaluator = (function(){
     },
     evalBox : function(box){
       var attr = {
-	"style":Css.attr(box.getCss()),
+	"style":Css.toString(box.getCssBlock()),
 	"class":box.getCssClasses()
       };
       if(box.id){
@@ -49,7 +49,7 @@ var BlockEvaluator = (function(){
     },
     evalInlineBox : function(box){
       return Html.tagWrap("div", box.content, {
-	"style":Css.attr(box.getCss()),
+	"style":Css.toString(box.getCssBlock()),
 	"class":box.getCssClasses()
       });
     },
@@ -60,10 +60,9 @@ var BlockEvaluator = (function(){
       return this.evalInlineBox(box);
     },
     evalImage : function(box){
-      //console.log("evalImage!:%o", box);
       var content = this.evalImageContent(box);
       return Html.tagWrap("div", content, {
-	"style":Css.attr(box.getCss()),
+	"style":Css.toString(box.getCssBlock()),
 	"class":box.getCssClasses()
       });
     },

@@ -74,8 +74,8 @@ var Layout = {
   createTextLine : function(size, parent){
     return this.createBox(size, parent, "text-line");
   },
-  createRootBox : function(type){
-    var box = new Box(this.getStdPageSize(), null, type);
+  createRootBox : function(size, type){
+    var box = new Box(size, null, type);
     box.flow = this.getStdBoxFlow();
     box.lineRate = this.lineRate;
     box.textAlign = "start";
@@ -86,6 +86,10 @@ var Layout = {
   },
   getStdPageSize : function(){
     return new BoxSize(this.width, this.height);
+  },
+  getStdMeasure : function(){
+    var flow = this.getStdBoxFlow();
+    return this[flow.getPropMeasure()];
   },
   getStdBoxFlow : function(){
     var flow_name = this[this.direction];
@@ -1397,7 +1401,7 @@ var Const = {
 };
 
 var Css = {
-  attr : function(args){
+  toString : function(args){
     var tmp = [];
     for(var prop in args){
       tmp.push(prop + ":" + Html.escape(args[prop] + ""));
@@ -1998,20 +2002,22 @@ var Tag = (function (){
       var name = this.getName();
       return (name === ":first-letter" || name === ":first-line");
     },
-    isEmphaTag : function(){
-      return this.getCssAttr("empha-mark") !== null;
-    },
     isEmbeddableTag : function(){
       return this.getCssAttr("embeddable") === true;
     },
     isBlock : function(){
-      if(this.isFloated() || this.isPush() || this.isPull()){
+      // floated block with static size is treated as block level floated box.
+      if(this.hasStaticSize() && this.isFloated()){
+	return true;
+      }
+      if(this.isPush() || this.isPull()){
 	return true;
       }
       return this.getCssAttr("display", "inline") === "block";
     },
     isInline : function(){
-      return this.getCssAttr("display", "inline") === "inline";
+      var display = this.getCssAttr("display", "inline");
+      return (display === "inline" || display === "inline-block");
     },
     isInlineBlock : function(){
       return this.getCssAttr("display", "inline") === "inline-block";
@@ -2260,14 +2266,14 @@ var Char = (function(){
       css["margin-right"] = "auto";
       if(this.isKakkoStart()){
 	if(!padding_enable){
-	  css["padding-top"] = "-0.5em";
+	  css["margin-top"] = "-0.5em";
 	}
       } else {
 	if(this.getVertScale() < 1){
 	  css["height"] = "0.5em";
 	}
 	if(padding_enable){
-	  css["padding-bottom"] = "0.5em";
+	  css["margin-bottom"] = "0.5em";
 	}
       }
       return css;
@@ -2724,6 +2730,7 @@ var Ruby = (function(){
     getCssHoriRb : function(line){
       var css = {};
       Args.copy(css, this.padding.getCss());
+      css["text-align"] = "center";
       return css;
     },
     setMetrics : function(flow, font_size, letter_spacing){
@@ -2750,50 +2757,25 @@ var Ruby = (function(){
 
 
 var Rgb = (function(){
-  // 256(8 * 8 * 4) color palette scales.
-  var RG_PALETTE = [0, 36, 73, 109, 146, 182, 219, 255];
-  var B_PALETTE = [0, 85, 170, 255];
-
   function Rgb(value){
     this.value = String(value);
-    var red = parseInt(this.value.substring(0,2), 16);
-    var green = parseInt(this.value.substring(2,4), 16);
-    var blue = parseInt(this.value.substring(4,6), 16);
-
-    // color values defined in nehan palette.
-    // we use this value for img characters.
-    var palette_red = this._findPalette(red, RG_PALETTE);
-    var palette_green = this._findPalette(green, RG_PALETTE);
-    var palette_blue = this._findPalette(blue, B_PALETTE);
-
-    this.paletteValue = [
-      this._makeHexStr(palette_red),
-      this._makeHexStr(palette_green),
-      this._makeHexStr(palette_blue)
-    ].join("");
+    this.red = parseInt(this.value.substring(0,2), 16);
+    this.green = parseInt(this.value.substring(2,4), 16);
+    this.blue = parseInt(this.value.substring(4,6), 16);
   }
   
   Rgb.prototype = {
+    getRed : function(){
+      return this.red;
+    },
+    getGreen : function(){
+      return this.green;
+    },
+    getBlue : function(){
+      return this.blue;
+    },
     getColorValue : function(){
       return this.value;
-    },
-    getPaletteValue : function(){
-      return this.paletteValue;
-    },
-    _makeHexStr : function(ival){
-      var str = ival.toString(16);
-      if(str.length <= 1){
-	return "0" + str;
-      }
-      return str;
-    },
-    _findPalette : function(ival, palette){
-      if(List.exists(palette, Closure.eq(ival))){
-	return ival;
-      }
-      return List.minobj(palette, function(pval){
-	return Math.abs(pval - ival);
-      });
     }
   };
 
@@ -2809,19 +2791,19 @@ var Color = (function(){
     setValue : function(value){
       this.value = Colors.get(value);
     },
+    getValue : function(){
+      return this.value;
+    },
+    getCssValue : function(){
+      return (this.value === "transparent")? this.value : "#" + this.value;
+    },
+    getRgb : function(){
+      return new Rgb(this.value);
+    },
     getCss : function(){
       var css = {};
       css.color = this.getCssValue();
       return css;
-    },
-    getValue : function(){
-      return this.value;
-    },
-    getPaletteValue : function(){
-      return (new Rgb(this.value)).getPaletteValue();
-    },
-    getCssValue : function(){
-      return (this.value === "transparent")? this.value : "#" + this.value;
     }
   };
 
@@ -2984,6 +2966,46 @@ var Colors = (function(){
 	return value[0] + value[0] + value[1] + value[1] + value[2] + value[2];
       }
       return value;
+    }
+  };
+})();
+
+
+var Palette = (function(){
+  // 256(8 * 8 * 4) color palette scales.
+  var RG_PALETTE = [0, 36, 73, 109, 146, 182, 219, 255];
+  var B_PALETTE = [0, 85, 170, 255];
+
+  var make_hex_str = function(ival){
+    var str = ival.toString(16);
+    if(str.length <= 1){
+      return "0" + str;
+    }
+    return str;
+  };
+
+  var find_palette = function(ival, palette){
+    if(List.exists(palette, Closure.eq(ival))){
+      return ival;
+    }
+    return List.minobj(palette, function(pval){
+      return Math.abs(pval - ival);
+    });
+  };
+
+  return {
+    // search and return color value defined in nehan palette.
+    // we use this value for img characters.
+    getColor : function(rgb){
+      var palette_red = find_palette(rgb.getRed(), RG_PALETTE);
+      var palette_green = find_palette(rgb.getGreen(), RG_PALETTE);
+      var palette_blue = find_palette(rgb.getBlue(), B_PALETTE);
+
+      return [
+	make_hex_str(palette_red),
+	make_hex_str(palette_green),
+	make_hex_str(palette_blue)
+      ].join("");
     }
   };
 })();
@@ -3505,10 +3527,10 @@ var BoxCorner = {
 };
 
 var BoxSizing = (function(){
-  function BoxSizing(){
+  function BoxSizing(value){
     // 'margin-box' is original sizing scheme of nehan,
     // even if margin is included in box size.
-    this.value = "margin-box";
+    this.value = value || "margin-box";
   }
 
   BoxSizing.prototype = {
@@ -4341,14 +4363,7 @@ var TextEmpha = (function(){
       css.width = chr.getAdvance(line.fontSize, line.letterSpacing) + "px";
       css.height = this.getExtent(line.fontSize) + "px";
       return css;
-    }/*,
-    getCss : function(flow){
-      var css = {};
-      Args.copy(css, this.pos.getCss(flow));
-      Args.copy(css, this.style.getCss());
-      Args.copy(css, this.color.getCss());
-      return css;
-    }*/
+    }
   };
 
   return TextEmpha;
@@ -4435,10 +4450,7 @@ var Box = (function(){
   }
 
   Box.prototype = {
-    getCss : function(){
-      return (this._type === "text-line")? this._getCssInline() : this._getCssBlock();
-    },
-    _getCssBlock : function(){
+    getCssBlock : function(){
       var css = this.css;
       css["font-size"] = this.fontSize + "px";
       Args.copy(css, this.size.getCss());
@@ -4447,10 +4459,6 @@ var Box = (function(){
       }
       if(this.parent){
 	Args.copy(css, this.parent.flow.getCss());
-      }
-      if(this._type === "img" && this.isTextVertical() && this.parent && this.parent.isTextLine()){
-	delete css["float"];
-	css["margin-left"] = css["margin-right"] = "auto";
       }
       if(this.color){
 	Args.copy(css, this.color.getCss());
@@ -4465,7 +4473,7 @@ var Box = (function(){
       css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
-    _getCssInline : function(){
+    getCssInline : function(){
       var css = this.css;
       css["font-size"] = this.fontSize + "px";
       if(this.color){
@@ -4500,6 +4508,12 @@ var Box = (function(){
 	  css["text-align"] = "center";
 	}
       }
+      return css;
+    },
+    getCssVertInlineBox : function(){
+      var css = this.getCssBlock();
+      css["float"] = "none";
+      css["margin-left"] = css["margin-right"] = "auto";
       return css;
     },
     getCharCount : function(){
@@ -6588,19 +6602,25 @@ var ElementGenerator = Class.extend({
   // called when box is created, and std style is already loaded.
   _onCreateBox : function(box, parent){
   },
+  _getMarkupStaticSize : function(parent){
+    if(this.markup){
+      var font_size = parent? parent.fontSize : Layout.fontSize;
+      var measure = parent? parent.getContentMeasure(parent.flow) : Layout.getStdMeasure();
+      return this.markup.getStaticSize(font_size, measure);
+    }
+    return parent.getRestSize();
+  },
   _yieldStaticElement : function(parent, tag){
-    var font_size = parent.fontSize || Layout.fontSize;
-    var max_measure = parent.getContentMeasure();
-    var element_size = tag.getStaticSize(font_size, max_measure);
     if(tag.getName() === "img"){
-      return (new ImageGenerator(tag, this.context)).yield(parent, element_size);
+      return (new ImageGenerator(tag, this.context)).yield(parent);
     }
     // if original flow defined, yield as inline page
     if(tag.hasFlow()){
-      return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent, element_size);
+      var size = tag.getStaticSize(parent.fontSize, parent.getContentMeasure());
+      return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent, size);
     }
     // if static size is simply defined, treat as just an embed html with static size.
-    return (new InlineBoxGenerator(tag, this.context)).yield(parent, element_size);
+    return (new InlineBoxGenerator(tag, this.context)).yield(parent);
   },
   _getBoxType : function(){
     return this.markup.getName();
@@ -6770,12 +6790,26 @@ var ElementGenerator = Class.extend({
     this._setBoxBackgroundPosition(box, parent);
     this._setBoxBackgroundRepeat(box, parent);
   },
+  _setPseudoElement : function(box, parent){
+    // if pseudo-element tag,
+    // copy style of <this.markup.name>:<pseudo-name> dynamically.
+    if(this.markup.isPseudoElementTag()){
+      var pseudo_name = this.markup.getPseudoElementName();
+      var pseudo_css_attr = this.markup.getPseudoCssAttr(pseudo_name);
+      for(var prop in pseudo_css_attr){
+	if(prop !== "content"){
+	  this.markup.setCssAttr(prop, pseudo_css_attr[prop]);
+	}
+      }
+    }
+  },
   _createBox : function(size, parent){
     var box_type = this._getBoxType();
     var box = Layout.createBox(size, parent, box_type);
     box.markup = this.markup;
     this._onReadyBox(box, parent);
     this._setBoxFirstChild(box, parent);
+    this._setPseudoElement(box, parent);
     this._setBoxClasses(box, parent);
     this._setBoxStyle(box, parent);
     this._onCreateBox(box, parent);
@@ -6785,12 +6819,16 @@ var ElementGenerator = Class.extend({
 
 
 var StaticBlockGenerator = ElementGenerator.extend({
+  _getBoxSize : function(parent){
+    return this._getMarkupStaticSize(parent);
+  },
   _createBox : function(size, parent){
     var box = this._super(size, parent);
     box.sizing = BoxSizings.getByName("content-box"); // use normal box model
     return box;
   },
-  yield : function(parent, size){
+  yield : function(parent){
+    var size = this._getBoxSize(parent);
     var box = this._createBox(size, parent);
     if(this.markup.isPush()){
       box.backward = true;
@@ -6847,10 +6885,9 @@ var ImageGenerator = StaticBlockGenerator.extend({
 });
 
 var HorizontalRuleGenerator = StaticBlockGenerator.extend({
-  yield : function(parent){
-    var measure = parent.getContentMeasure();
-    var size = parent.flow.getBoxSize(measure, 1);
-    return this._super(parent, size);
+  _getBoxSize : function(parent){
+    var measure = parent? parent.getContentMeasure() : Layout.getStdMeasure();
+    return parent.flow.getBoxSize(measure, 1);
   }
 });
 
@@ -6869,7 +6906,9 @@ var LineContext = (function(){
     this.restMeasure = this.maxMeasure;
     this.restExtent = line.getRestContentExtent();
     this.lineMeasure = line.getContentMeasure() - this.textIndent;
+    this.startTokens = [];
     this.lineTokens = [];
+    this.endTokens = [];
     this.lineBreak = false;
     this.charCount = 0;
     this.lastToken = null;
@@ -7022,7 +7061,10 @@ var LineContext = (function(){
       } else if(element instanceof Ruby){
 	this._addRuby(element);
       } else if (element instanceof Box){
-	if(element._type === "text-line"){	
+	if(element.logicalFloat){
+	  this._setLogicalFloat(element, element.logicalFloat);
+	}
+	if(element._type === "text-line"){
 	  this._addTextLine(element);
 	} else {
 	  this._addInlineBlock(element);
@@ -7032,6 +7074,16 @@ var LineContext = (function(){
       }
       if(advance > 0){
 	this._addAdvance(advance);
+      }
+    },
+    _setLogicalFloat : function(element, logical_float){
+      switch(logical_float){
+      case "start":
+	element.forward = true;
+	break;
+      case "end":
+	element.backward = true;
+	break;
       }
     },
     setAnchor : function(anchor_name){
@@ -7127,22 +7179,34 @@ var LineContext = (function(){
       }
       return 0.5;
     },
+    _pushElement : function(element){
+      if(element.forward){
+	this.startTokens.push(element);
+      } else if(element.backward){
+	this.endTokens.push(element);
+      } else {
+	this.lineTokens.push(element);
+      }
+    },
+    _getLineTokens : function(){
+      return this.startTokens.concat(this.lineTokens).concat(this.endTokens);
+    },
     _addRuby : function(element){
-      this.lineTokens.push(element);
+      this._pushElement(element);
     },
     _addTag : function(element){
-      this.lineTokens.push(element);
+      this._pushElement(element);
     },
     _addInlineBlock : function(element){
-      this.lineTokens.push(element);
+      this._pushElement(element);
     },
     _addTextLine : function(element){
-      this.lineTokens.push(element);
+      this._pushElement(element);
       this.charCount += element.getCharCount();
     },
     _addText : function(element){
       // text element
-      this.lineTokens.push(element);
+      this._pushElement(element);
 
       // count up char count of line
       this.charCount += element.getCharCount();
@@ -7163,7 +7227,7 @@ var LineContext = (function(){
       }
       // if one head NG, push it into current line.
       if(count === 1){
-	this.lineTokens.push(head_token);
+	this._pushElement(head_token);
 	this.stream.setPos(head_token.pos + 1);
 	return this.lineTokens;
       }
@@ -7250,7 +7314,7 @@ var LineContext = (function(){
       this.maxExtent = Math.max(this.maxExtent, max_text_extent);
       this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxExtent);
       this.line.charCount = this.charCount;
-      this.line.setInlineElements(this.lineTokens, this.curMeasure);
+      this.line.setInlineElements(this._getLineTokens(), this.curMeasure);
       this.line.textIndent = this.textIndent;
       return this.line;
     }
@@ -7409,19 +7473,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(Token.isTag(token) && token.getName() === "br"){
       return Exceptions.LINE_BREAK;
     }
-
-    // if pseudo-element tag,
-    // copy style of <this.markup.name>:<pseudo-name> dynamically.
-    if(this.markup && token.isPseudoElementTag()){
-      var pseudo_name = token.getPseudoElementName();
-      var pseudo_css_attr = this.markup.getPseudoCssAttr(pseudo_name);
-      for(var prop in pseudo_css_attr){
-	if(prop !== "content"){
-	  token.setCssAttr(prop, pseudo_css_attr[prop]);
-	}
-      }
-    }
-
     // if block element, break line and force terminate generator
     if(token.isBlock()){
       ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
@@ -7439,13 +7490,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
     // token is other inline tag
     return this._yieldInlineTag(ctx, token);
-  },
-  _yieldStaticElement : function(line, tag){
-    var element = this._super(line, tag);
-    if(element instanceof Box && line.isTextHorizontal()){
-      element.display = "inline-block";
-    }
-    return element;
   },
   _yieldText : function(ctx, text){
     if(!text.hasMetrics()){
@@ -7619,10 +7663,13 @@ var BlockTreeGenerator = ElementGenerator.extend({
       return Exceptions.PAGE_BREAK;
     }
     var page_box, page_size;
-    page_size = size || (parent? parent.getRestSize() : null);
+    page_size = size || this._getBoxSize(parent);
     page_box = this._createBox(page_size, parent);
     var ret = this._yieldPageTo(page_box);
     return ret;
+  },
+  _getBoxSize : function(parent){
+    return parent.getRestSize();
   },
   // fill page with child page elements.
   _yieldPageTo : function(page){
@@ -7839,15 +7886,14 @@ var InlineBlockGenerator = BlockTreeGenerator.extend({
   _getBoxType : function(){
     return "inline-block";
   },
+  _getBoxSize : function(parent){
+    return this._getMarkupStaticSize(parent) || parent.getRestSize();
+  },
   // ctx : LineContext
   yield : function(parent){
     var box = this._super(parent);
     if(typeof box === "number"){
       return box; // exception
-    }
-    box.shortenBox();
-    if(!box.isTextVertical()){
-      box.display = "inline-block";
     }
     return box;
   }
@@ -7921,9 +7967,11 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     }
     this._super(markup, context);
   },
-  // create root page, __size and __parent are ignored.
-  _createBox : function(__size, __parent){
-    var box = Layout.createRootBox("body");
+  _getBoxSize : function(){
+    return Layout.getStdPageSize();
+  },
+  _createBox : function(size, parent){
+    var box = Layout.createRootBox(size, "body");
     this._setBoxStyle(box);
     box.percent = this.stream.getSeekPercent();
     box.seekPos = this.stream.getSeekPos();
@@ -8003,6 +8051,11 @@ var InlinePageGenerator = BlockTreeGenerator.extend({
   hasNext : function(){
     return false;
   },
+  /*
+  _getBoxSize : function(parent){
+    return this._getMarkupStaticSize(parent);
+  },
+  */
   yield : function(parent, size){
     var wrap = Layout.createBox(size, parent, "div");
     var page = this._super(wrap); // yield page to wrap.
@@ -8294,7 +8347,7 @@ var BlockEvaluator = (function(){
     },
     evalBox : function(box){
       var attr = {
-	"style":Css.attr(box.getCss()),
+	"style":Css.toString(box.getCssBlock()),
 	"class":box.getCssClasses()
       };
       if(box.id){
@@ -8316,7 +8369,7 @@ var BlockEvaluator = (function(){
     },
     evalInlineBox : function(box){
       return Html.tagWrap("div", box.content, {
-	"style":Css.attr(box.getCss()),
+	"style":Css.toString(box.getCssBlock()),
 	"class":box.getCssClasses()
       });
     },
@@ -8327,10 +8380,9 @@ var BlockEvaluator = (function(){
       return this.evalInlineBox(box);
     },
     evalImage : function(box){
-      //console.log("evalImage!:%o", box);
       var content = this.evalImageContent(box);
       return Html.tagWrap("div", content, {
-	"style":Css.attr(box.getCss()),
+	"style":Css.toString(box.getCssBlock()),
 	"class":box.getCssClasses()
       });
     },
@@ -8382,7 +8434,7 @@ var InlineEvaluator = Class.extend({
       return this.evalText(line, element);
     }
     if(element instanceof Box){
-      return this.evalInlineBox(element);
+      return this.evalInlineBox(line, element);
     }
     return "";
   },
@@ -8400,8 +8452,8 @@ var InlineEvaluator = Class.extend({
       return "";
     }
   },
-  evalInlineBox : function(box, ctx){
-    return this.parentEvaluator.evaluate(box);
+  evalInlineBox : function(line, box){
+    throw "not implemented: evalInlineBox";
   },
   evalWord : function(line, word){
     throw "not implemented: evalWord";
@@ -8417,21 +8469,21 @@ var InlineEvaluator = Class.extend({
 var VerticalInlineEvaluator = InlineEvaluator.extend({
   evaluate : function(line){
     return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), {
-      "style":Css.attr(line.getCss()),
+      "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
     });
   },
   evalRuby : function(line, ruby){
     var body = this.evalRb(line, ruby) + this.evalRt(line, ruby);
     return Html.tagWrap("div", body, {
-      "style":Css.attr(ruby.getCssVertRuby(line)),
+      "style":Css.toString(ruby.getCssVertRuby(line)),
       "class":"nehan-ruby-body"
     });
   },
   evalRb : function(line, ruby){
     var body = this.evalTextLineBody(line, ruby.getRbs());
     return Html.tagWrap("div", body, {
-      "style":Css.attr(ruby.getCssVertRb(line)),
+      "style":Css.toString(ruby.getCssVertRb(line)),
       "class":"nehan-rb"
     });
   },
@@ -8458,13 +8510,13 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       "class": "nehan-vert-alpha"
     });
     return Html.tagWrap("div", body, {
-      "style": Css.attr(word.getCssVertTrans(line))
+      "style": Css.toString(word.getCssVertTrans(line))
     });
   },
   evalWordIE : function(line, word){
     return Html.tagWrap("div", word.data, {
       "class": "nehan-vert-alpha-ie",
-      "style": Css.attr(word.getCssVertTransIE(line))
+      "style": Css.toString(word.getCssVertTransIE(line))
     });
   },
   evalTcy : function(line, tcy){
@@ -8493,42 +8545,43 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   },
   evalCharLetterSpacing : function(line, chr){
     return Html.tagWrap("div", chr.data, {
-      "style":Css.attr(chr.getCssVertLetterSpacing(line))
+      "style":Css.toString(chr.getCssVertLetterSpacing(line))
     });
   },
   evalEmpha : function(line, chr, char_body){
     char_body = char_body.replace("<br />", "");
     var char_body2 = Html.tagWrap("span", char_body, {
       "class":"nehan-empha-src",
-      "style":Css.attr(chr.getCssVertEmphaSrc(line))
+      "style":Css.toString(chr.getCssVertEmphaSrc(line))
     });
     var empha_body = Html.tagWrap("span", line.textEmpha.getText(), {
       "class":"nehan-empha-text",
-      "style":Css.attr(chr.getCssVertEmphaText(line))
+      "style":Css.toString(chr.getCssVertEmphaText(line))
     });
     // TODO: check text-emphasis-position is over or under
     return Html.tagWrap("div", char_body2 + empha_body, {
       "class":"nehan-empha-wrap",
-      "style":Css.attr(line.textEmpha.getCssVertEmphaWrap(line, chr))
+      "style":Css.toString(line.textEmpha.getCssVertEmphaWrap(line, chr))
     });
   },
   evalPaddingChar : function(line, chr){
     return Html.tagWrap("div", chr.data, {
-      style:Css.attr(chr.getCssPadding(line))
+      style:Css.toString(chr.getCssPadding(line))
     });
   },
   evalImgChar : function(line, chr){
-    var palette_color_value = Layout.getPaletteFontColor(line.color).toUpperCase();
+    var font_rgb = line.color.getRgb();
+    var palette_color = Palette.getColor(font_rgb).toUpperCase();
     return Html.tagSingle("img", {
       "class":"nehan-img-char",
-      src:chr.getImgSrc(palette_color_value),
-      style:Css.attr(chr.getCssVertImgChar(line))
+      src:chr.getImgSrc(palette_color),
+      style:Css.toString(chr.getCssVertImgChar(line))
     }) + Const.clearFix;
   },
   evalVerticalGlyph : function(line, chr){
     return Html.tagWrap("div", chr.data, {
       "class":"nehan-vert-rl",
-      "style":Css.attr(chr.getCssVertGlyph(line))
+      "style":Css.toString(chr.getCssVertGlyph(line))
     });
   },
   evalCnvChar: function(line, chr){
@@ -8536,17 +8589,20 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   },
   evalSmallKana : function(line, chr){
     return Html.tagWrap("div", chr.data, {
-      style:Css.attr(chr.getCssVertSmallKana())
+      style:Css.toString(chr.getCssVertSmallKana())
     });
   },
   evalHalfSpaceChar : function(line, chr){
     var half = Math.floor(line.fontSize / 2);
     return Html.tagWrap("div", "&nbsp;", {
-      style:Css.attr(chr.getCssVertHalfSpaceChar(line))
+      style:Css.toString(chr.getCssVertHalfSpaceChar(line))
     });
   },
-  evalInlineBox : function(box){
-    return this._super(box) + Const.clearFix;
+  evalInlineBox : function(line, box){
+    var body = (box._type === "img")? this.parentEvaluator.evalImageContent(box) : box.content;
+    return Html.tagWrap("div", body, {
+      "style":Css.toString(box.getCssVertInlineBox())
+    });
   }
 });
 
@@ -8554,27 +8610,27 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
   evaluate : function(line, ctx){
     var tag_name = line.isInlineText()? "span" : "div";
     return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), {
-      "style":Css.attr(line.getCss()),
+      "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
     });
   },
   evalRuby : function(line, ruby, ctx){
     var body = this.evalRt(line, ruby, ctx) + this.evalRb(line, ruby, ctx);
     return Html.tagWrap("span", body, {
-      "style":Css.attr(ruby.getCssHoriRuby(line)),
+      "style":Css.toString(ruby.getCssHoriRuby(line)),
       "class":"nehan-ruby"
     });
   },
   evalRb : function(line, ruby, ctx){
     var body = this.evalTextLineBody(line, ruby.getRbs(), ctx);
     return Html.tagWrap("div", body, {
-      "style":Css.attr(ruby.getCssHoriRb(line)),
+      "style":Css.toString(ruby.getCssHoriRb(line)),
       "class":"nehan-rb"
     });
   },
   evalRt : function(line, ruby, ctx){
     return Html.tagWrap("div", ruby.getRtString(), {
-      "style":Css.attr(ruby.getCssHoriRt(line)),
+      "style":Css.toString(ruby.getCssHoriRt(line)),
       "class":"nehan-rt"
     });
   },
@@ -8594,33 +8650,33 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
   },
   evalEmpha : function(line, chr, char_body){
     var char_body2 = Html.tagWrap("div", char_body, {
-      "style":Css.attr(chr.getCssHoriEmphaSrc(line))
+      "style":Css.toString(chr.getCssHoriEmphaSrc(line))
     });
     var empha_body = Html.tagWrap("div", line.textEmpha.getText(), {
-      "style":Css.attr(chr.getCssHoriEmphaText(line))
+      "style":Css.toString(chr.getCssHoriEmphaText(line))
     });
     // TODO: check text-emphasis-position is over or under
     return Html.tagWrap("span", empha_body + char_body2, {
-      "style":Css.attr(line.textEmpha.getCssHoriEmphaWrap(line, chr))
+      "style":Css.toString(line.textEmpha.getCssHoriEmphaWrap(line, chr))
     });
   },
   evalKerningChar : function(line, chr, ctx){
     var css = chr.getCssPadding(line);
     if(chr.isKakkoStart()){
       return Html.tagWrap("span", chr.data, {
-	"style": Css.attr(css),
+	"style": Css.toString(css),
 	"class":"nehan-char-kakko-start"
       });
     }
     if(chr.isKakkoEnd()){
       return Html.tagWrap("span", chr.data, {
-	"style": Css.attr(css),
+	"style": Css.toString(css),
 	"class":"nehan-char-kakko-end"
       });
     }
     if(chr.isKutenTouten()){
       return Html.tagWrap("span", chr.data, {
-	"style": Css.attr(css),
+	"style": Css.toString(css),
 	"class":"nehan-char-kuto"
       });
     }
@@ -8628,8 +8684,12 @@ var HorizontalInlineEvaluator = InlineEvaluator.extend({
   },
   evalPaddingChar : function(line, chr, ctx){
     return Html.tagWrap("span", chr.data, {
-      "style": Css.attr(chr.getCssPadding(line))
+      "style": Css.toString(chr.getCssPadding(line))
     });
+  },
+  evalInlineBox : function(line, box){
+    box.display = "inline-block";
+    return this.parentEvaluator.evaluate(box);
   }
 });
 
@@ -8950,6 +9010,8 @@ if(__engine_args.test){
   __exports.BoxEdge = BoxEdge;
   __exports.BoxSize = BoxSize;
   __exports.LogicalSize = LogicalSize;
+  __exports.BoxSizing = BoxSizing;
+  __exports.BoxSizings = BoxSizings;
   __exports.UnitSize = UnitSize;
   __exports.BoxChild = BoxChild;
   __exports.Box = Box;

@@ -11,10 +11,7 @@ var Box = (function(){
   }
 
   Box.prototype = {
-    getCss : function(){
-      return (this._type === "text-line")? this._getCssInline() : this._getCssBlock();
-    },
-    _getCssBlock : function(){
+    getCssBlock : function(){
       var css = this.css;
       css["font-size"] = this.fontSize + "px";
       Args.copy(css, this.size.getCss());
@@ -23,10 +20,6 @@ var Box = (function(){
       }
       if(this.parent){
 	Args.copy(css, this.parent.flow.getCss());
-      }
-      if(this._type === "img" && this.isTextVertical() && this.parent && this.parent.isTextLine()){
-	delete css["float"];
-	css["margin-left"] = css["margin-right"] = "auto";
       }
       if(this.color){
 	Args.copy(css, this.color.getCss());
@@ -41,7 +34,7 @@ var Box = (function(){
       css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
-    _getCssInline : function(){
+    getCssInline : function(){
       var css = this.css;
       css["font-size"] = this.fontSize + "px";
       if(this.color){
@@ -76,6 +69,12 @@ var Box = (function(){
 	  css["text-align"] = "center";
 	}
       }
+      return css;
+    },
+    getCssVertInlineBox : function(){
+      var css = this.getCssBlock();
+      css["float"] = "none";
+      css["margin-left"] = css["margin-right"] = "auto";
       return css;
     },
     getCharCount : function(){

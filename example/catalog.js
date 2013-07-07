@@ -1,10 +1,10 @@
 var Catalog = (function(){
   function Catalog(direction, width, height){
     this.engine = Nehan.setup({
-      /*
       config:{
 	useVerticalGlyphIfEnable:false
-      },*/
+	//useVerticalGlyphIfEnable:true
+      },
       layout:{
 	direction:direction,
 	hori:"lr-tb",
@@ -534,7 +534,6 @@ var TestCode = {
 
       "pseudo-first-line":[
 	"<p class='test-pe-first-line'>",
-	//"not implemented yet",
 	text_large,
 	"</p>"
       ].join("\n"),

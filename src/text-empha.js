@@ -35,14 +35,7 @@ var TextEmpha = (function(){
       css.width = chr.getAdvance(line.fontSize, line.letterSpacing) + "px";
       css.height = this.getExtent(line.fontSize) + "px";
       return css;
-    }/*,
-    getCss : function(flow){
-      var css = {};
-      Args.copy(css, this.pos.getCss(flow));
-      Args.copy(css, this.style.getCss());
-      Args.copy(css, this.color.getCss());
-      return css;
-    }*/
+    }
   };
 
   return TextEmpha;

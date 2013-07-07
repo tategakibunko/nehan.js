@@ -9,7 +9,7 @@ test("utils-obj", function(){
 });
 
 test("utils-css", function(){
-  equal(Css.attr({"width":"100px", "height":"200px"}), "width:100px;height:200px");
+  equal(Css.toString({"width":"100px", "height":"200px"}), "width:100px;height:200px");
 });
 
 test("utils-camel-name", function(){

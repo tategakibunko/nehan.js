@@ -1,20 +1,80 @@
-test("box", function(){
+test("content-box-sizing", function(){
   var size = new BoxSize(100,200);
   var box = new Box(size, null);
   var flow = new BoxFlow("lr", "tb");
-  var margin0 = new Margin();
-  box.edge = new BoxEdge();
-  box.setEdge(margin0);
+  box.sizing = BoxSizings.getByName("content-box");
   box.setFlow(flow);
+
   equal(box.getBoxWidth(), 100);
   equal(box.getBoxHeight(), 200);
 
-  var margin = new Margin();
-  margin.left = 20;
-  margin.top = 10;
-  box.setEdge(margin);
+  var edge = new BoxEdge();
+  edge.padding.right = 20;
+  edge.padding.top = 10;
+
+  // set edge with box-sizing mode "content-box"
+  box.setEdge(edge);
+
+  // content size not change
+  equal(box.getContentWidth(), 100);
+  equal(box.getContentHeight(), 200);
+
+  // box outer size change by padding
   equal(box.getBoxWidth(), 120);
   equal(box.getBoxHeight(), 210);
+});
+
+test("border-box-sizing", function(){
+  var size = new BoxSize(100,200);
+  var box = new Box(size, null);
+  var flow = new BoxFlow("lr", "tb");
+  box.sizing = BoxSizings.getByName("border-box");
+  box.setFlow(flow);
+
+  equal(box.getBoxWidth(), 100);
+  equal(box.getBoxHeight(), 200);
+
+  var edge = new BoxEdge();
+  edge.margin.left = 20;
+  edge.padding.right = 20;
+  edge.padding.top = 10;
+
+  // set edge with box-sizing mode "border-box"
+  box.setEdge(edge);
+
+  // margin size is added
+  equal(box.getBoxWidth(), 120);
+  equal(box.getBoxHeight(), 200);
+
+  // content size is shorten by padding
+  equal(box.getContentWidth(), 80);
+  equal(box.getContentHeight(), 190);
+});
+
+test("margin-box-sizing", function(){
+  var size = new BoxSize(100,200);
+  var box = new Box(size, null);
+  var flow = new BoxFlow("lr", "tb");
+  box.sizing = BoxSizings.getByName("margin-box");
+  box.setFlow(flow);
+
+  equal(box.getBoxWidth(), 100);
+  equal(box.getBoxHeight(), 200);
+
+  var edge = new BoxEdge();
+  edge.margin.left = 20;
+  edge.margin.top = 10;
+
+  // set edge with box-sizing mode "margin-box"
+  box.setEdge(edge);
+
+  // box size not change
+  equal(box.getBoxWidth(), 100);
+  equal(box.getBoxHeight(), 200);
+
+  // content size shorten by any kind of edge(margin/border/padding).
+  equal(box.getContentWidth(), 80);
+  equal(box.getContentHeight(), 190);
 });
 
 test("box-size", function(){
@@ -69,13 +129,3 @@ test("box-child", function(){
   equal(childs[2].getContentWidth(), 900);
 });
 
-test("box-shorten", function(){
-  var box = new Box(new BoxSize(100,100));
-  box.flow = new BoxFlow("lr", "tb");
-  box.addChild(new Box(new BoxSize(50, 10)));
-  box.addChild(new Box(new BoxSize(90, 10)));
-  box.addChild(new Box(new BoxSize(20, 10)));
-  box.shortenBox();
-  equal(box.getBoxWidth(), 90);
-  equal(box.getBoxHeight(), 30);
-});

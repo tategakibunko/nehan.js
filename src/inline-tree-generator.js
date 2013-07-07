@@ -147,21 +147,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(Token.isTag(token) && token.getName() === "br"){
       return Exceptions.LINE_BREAK;
     }
-
-/*
-    // if pseudo-element tag,
-    // copy style of <this.markup.name>:<pseudo-name> dynamically.
-    if(this.markup && token.isPseudoElementTag()){
-      var pseudo_name = token.getPseudoElementName();
-      var pseudo_css_attr = this.markup.getPseudoCssAttr(pseudo_name);
-      for(var prop in pseudo_css_attr){
-	if(prop !== "content"){
-	  token.setCssAttr(prop, pseudo_css_attr[prop]);
-	}
-      }
-    }
-*/
-
     // if block element, break line and force terminate generator
     if(token.isBlock()){
       ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
@@ -179,13 +164,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
     // token is other inline tag
     return this._yieldInlineTag(ctx, token);
-  },
-  _yieldStaticElement : function(line, tag){
-    var element = this._super(line, tag);
-    if(element instanceof Box && line.isTextHorizontal()){
-      element.display = "inline-block";
-    }
-    return element;
   },
   _yieldText : function(ctx, text){
     if(!text.hasMetrics()){

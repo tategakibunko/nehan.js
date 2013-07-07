@@ -46,10 +46,13 @@ var BlockTreeGenerator = ElementGenerator.extend({
       return Exceptions.PAGE_BREAK;
     }
     var page_box, page_size;
-    page_size = size || (parent? parent.getRestSize() : null);
+    page_size = size || this._getBoxSize(parent);
     page_box = this._createBox(page_size, parent);
     var ret = this._yieldPageTo(page_box);
     return ret;
+  },
+  _getBoxSize : function(parent){
+    return parent.getRestSize();
   },
   // fill page with child page elements.
   _yieldPageTo : function(page){

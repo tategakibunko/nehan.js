@@ -119,12 +119,6 @@ test("tag-is", function(){
   equal(tag.isPseudoElementTag(), true);
   equal(tag.getPseudoElementName(), "first-letter");
 
-  tag = new Tag("<span class='nehan-empha-dot-filled'>");
-  equal(tag.isEmphaTag(), true);
-
-  tag = new Tag("<span style='empha-mark:aaa'>");
-  equal(tag.isEmphaTag(), true);
-
   tag = new Tag("<iframe>");
   equal(tag.isEmbeddableTag(), true);
 

@@ -7,9 +7,11 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     }
     this._super(markup, context);
   },
-  // create root page, __size and __parent are ignored.
-  _createBox : function(__size, __parent){
-    var box = Layout.createRootBox("body");
+  _getBoxSize : function(){
+    return Layout.getStdPageSize();
+  },
+  _createBox : function(size, parent){
+    var box = Layout.createRootBox(size, "body");
     this._setBoxStyle(box);
     box.percent = this.stream.getSeekPercent();
     box.seekPos = this.stream.getSeekPos();

@@ -38,6 +38,8 @@ if(__engine_args.test){
   __exports.BoxEdge = BoxEdge;
   __exports.BoxSize = BoxSize;
   __exports.LogicalSize = LogicalSize;
+  __exports.BoxSizing = BoxSizing;
+  __exports.BoxSizings = BoxSizings;
   __exports.UnitSize = UnitSize;
   __exports.BoxChild = BoxChild;
   __exports.Box = Box;

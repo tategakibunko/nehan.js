@@ -13,7 +13,9 @@ var LineContext = (function(){
     this.restMeasure = this.maxMeasure;
     this.restExtent = line.getRestContentExtent();
     this.lineMeasure = line.getContentMeasure() - this.textIndent;
+    this.startTokens = [];
     this.lineTokens = [];
+    this.endTokens = [];
     this.lineBreak = false;
     this.charCount = 0;
     this.lastToken = null;
@@ -166,7 +168,10 @@ var LineContext = (function(){
       } else if(element instanceof Ruby){
 	this._addRuby(element);
       } else if (element instanceof Box){
-	if(element._type === "text-line"){	
+	if(element.logicalFloat){
+	  this._setLogicalFloat(element, element.logicalFloat);
+	}
+	if(element._type === "text-line"){
 	  this._addTextLine(element);
 	} else {
 	  this._addInlineBlock(element);
@@ -176,6 +181,16 @@ var LineContext = (function(){
       }
       if(advance > 0){
 	this._addAdvance(advance);
+      }
+    },
+    _setLogicalFloat : function(element, logical_float){
+      switch(logical_float){
+      case "start":
+	element.forward = true;
+	break;
+      case "end":
+	element.backward = true;
+	break;
       }
     },
     setAnchor : function(anchor_name){
@@ -271,22 +286,34 @@ var LineContext = (function(){
       }
       return 0.5;
     },
+    _pushElement : function(element){
+      if(element.forward){
+	this.startTokens.push(element);
+      } else if(element.backward){
+	this.endTokens.push(element);
+      } else {
+	this.lineTokens.push(element);
+      }
+    },
+    _getLineTokens : function(){
+      return this.startTokens.concat(this.lineTokens).concat(this.endTokens);
+    },
     _addRuby : function(element){
-      this.lineTokens.push(element);
+      this._pushElement(element);
     },
     _addTag : function(element){
-      this.lineTokens.push(element);
+      this._pushElement(element);
     },
     _addInlineBlock : function(element){
-      this.lineTokens.push(element);
+      this._pushElement(element);
     },
     _addTextLine : function(element){
-      this.lineTokens.push(element);
+      this._pushElement(element);
       this.charCount += element.getCharCount();
     },
     _addText : function(element){
       // text element
-      this.lineTokens.push(element);
+      this._pushElement(element);
 
       // count up char count of line
       this.charCount += element.getCharCount();
@@ -307,7 +334,7 @@ var LineContext = (function(){
       }
       // if one head NG, push it into current line.
       if(count === 1){
-	this.lineTokens.push(head_token);
+	this._pushElement(head_token);
 	this.stream.setPos(head_token.pos + 1);
 	return this.lineTokens;
       }
@@ -394,7 +421,7 @@ var LineContext = (function(){
       this.maxExtent = Math.max(this.maxExtent, max_text_extent);
       this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxExtent);
       this.line.charCount = this.charCount;
-      this.line.setInlineElements(this.lineTokens, this.curMeasure);
+      this.line.setInlineElements(this._getLineTokens(), this.curMeasure);
       this.line.textIndent = this.textIndent;
       return this.line;
     }

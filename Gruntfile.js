@@ -65,6 +65,7 @@ module.exports = function(grunt) {
 	    "src/rgb.js",
 	    "src/color.js",
 	    "src/colors.js",
+	    "src/palette.js",
 	    "src/cardinal.js",
 	    "src/list-style-type.js",
 	    "src/list-style-pos.js",

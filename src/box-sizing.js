@@ -1,8 +1,8 @@
 var BoxSizing = (function(){
-  function BoxSizing(){
+  function BoxSizing(value){
     // 'margin-box' is original sizing scheme of nehan,
     // even if margin is included in box size.
-    this.value = "margin-box";
+    this.value = value || "margin-box";
   }
 
   BoxSizing.prototype = {

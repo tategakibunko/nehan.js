@@ -57,6 +57,7 @@ var Ruby = (function(){
     getCssHoriRb : function(line){
       var css = {};
       Args.copy(css, this.padding.getCss());
+      css["text-align"] = "center";
       return css;
     },
     setMetrics : function(flow, font_size, letter_spacing){

@@ -1,10 +1,14 @@
 var StaticBlockGenerator = ElementGenerator.extend({
+  _getBoxSize : function(parent){
+    return this._getMarkupStaticSize(parent);
+  },
   _createBox : function(size, parent){
     var box = this._super(size, parent);
     box.sizing = BoxSizings.getByName("content-box"); // use normal box model
     return box;
   },
-  yield : function(parent, size){
+  yield : function(parent){
+    var size = this._getBoxSize(parent);
     var box = this._createBox(size, parent);
     if(this.markup.isPush()){
       box.backward = true;

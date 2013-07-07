@@ -26,8 +26,8 @@ var Layout = {
   createTextLine : function(size, parent){
     return this.createBox(size, parent, "text-line");
   },
-  createRootBox : function(type){
-    var box = new Box(this.getStdPageSize(), null, type);
+  createRootBox : function(size, type){
+    var box = new Box(size, null, type);
     box.flow = this.getStdBoxFlow();
     box.lineRate = this.lineRate;
     box.textAlign = "start";
@@ -38,6 +38,10 @@ var Layout = {
   },
   getStdPageSize : function(){
     return new BoxSize(this.width, this.height);
+  },
+  getStdMeasure : function(){
+    var flow = this.getStdBoxFlow();
+    return this[flow.getPropMeasure()];
   },
   getStdBoxFlow : function(){
     var flow_name = this[this.direction];

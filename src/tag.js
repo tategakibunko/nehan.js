@@ -295,20 +295,22 @@ var Tag = (function (){
       var name = this.getName();
       return (name === ":first-letter" || name === ":first-line");
     },
-    isEmphaTag : function(){
-      return this.getCssAttr("empha-mark") !== null;
-    },
     isEmbeddableTag : function(){
       return this.getCssAttr("embeddable") === true;
     },
     isBlock : function(){
-      if(this.isFloated() || this.isPush() || this.isPull()){
+      // floated block with static size is treated as block level floated box.
+      if(this.hasStaticSize() && this.isFloated()){
+	return true;
+      }
+      if(this.isPush() || this.isPull()){
 	return true;
       }
       return this.getCssAttr("display", "inline") === "block";
     },
     isInline : function(){
-      return this.getCssAttr("display", "inline") === "inline";
+      var display = this.getCssAttr("display", "inline");
+      return (display === "inline" || display === "inline-block");
     },
     isInlineBlock : function(){
       return this.getCssAttr("display", "inline") === "inline-block";

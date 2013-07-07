@@ -1,21 +1,21 @@
 var VerticalInlineEvaluator = InlineEvaluator.extend({
   evaluate : function(line){
     return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), {
-      "style":Css.attr(line.getCss()),
+      "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
     });
   },
   evalRuby : function(line, ruby){
     var body = this.evalRb(line, ruby) + this.evalRt(line, ruby);
     return Html.tagWrap("div", body, {
-      "style":Css.attr(ruby.getCssVertRuby(line)),
+      "style":Css.toString(ruby.getCssVertRuby(line)),
       "class":"nehan-ruby-body"
     });
   },
   evalRb : function(line, ruby){
     var body = this.evalTextLineBody(line, ruby.getRbs());
     return Html.tagWrap("div", body, {
-      "style":Css.attr(ruby.getCssVertRb(line)),
+      "style":Css.toString(ruby.getCssVertRb(line)),
       "class":"nehan-rb"
     });
   },
@@ -42,13 +42,13 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
       "class": "nehan-vert-alpha"
     });
     return Html.tagWrap("div", body, {
-      "style": Css.attr(word.getCssVertTrans(line))
+      "style": Css.toString(word.getCssVertTrans(line))
     });
   },
   evalWordIE : function(line, word){
     return Html.tagWrap("div", word.data, {
       "class": "nehan-vert-alpha-ie",
-      "style": Css.attr(word.getCssVertTransIE(line))
+      "style": Css.toString(word.getCssVertTransIE(line))
     });
   },
   evalTcy : function(line, tcy){
@@ -77,42 +77,43 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   },
   evalCharLetterSpacing : function(line, chr){
     return Html.tagWrap("div", chr.data, {
-      "style":Css.attr(chr.getCssVertLetterSpacing(line))
+      "style":Css.toString(chr.getCssVertLetterSpacing(line))
     });
   },
   evalEmpha : function(line, chr, char_body){
     char_body = char_body.replace("<br />", "");
     var char_body2 = Html.tagWrap("span", char_body, {
       "class":"nehan-empha-src",
-      "style":Css.attr(chr.getCssVertEmphaSrc(line))
+      "style":Css.toString(chr.getCssVertEmphaSrc(line))
     });
     var empha_body = Html.tagWrap("span", line.textEmpha.getText(), {
       "class":"nehan-empha-text",
-      "style":Css.attr(chr.getCssVertEmphaText(line))
+      "style":Css.toString(chr.getCssVertEmphaText(line))
     });
     // TODO: check text-emphasis-position is over or under
     return Html.tagWrap("div", char_body2 + empha_body, {
       "class":"nehan-empha-wrap",
-      "style":Css.attr(line.textEmpha.getCssVertEmphaWrap(line, chr))
+      "style":Css.toString(line.textEmpha.getCssVertEmphaWrap(line, chr))
     });
   },
   evalPaddingChar : function(line, chr){
     return Html.tagWrap("div", chr.data, {
-      style:Css.attr(chr.getCssPadding(line))
+      style:Css.toString(chr.getCssPadding(line))
     });
   },
   evalImgChar : function(line, chr){
-    var palette_color_value = Layout.getPaletteFontColor(line.color).toUpperCase();
+    var font_rgb = line.color.getRgb();
+    var palette_color = Palette.getColor(font_rgb).toUpperCase();
     return Html.tagSingle("img", {
       "class":"nehan-img-char",
-      src:chr.getImgSrc(palette_color_value),
-      style:Css.attr(chr.getCssVertImgChar(line))
+      src:chr.getImgSrc(palette_color),
+      style:Css.toString(chr.getCssVertImgChar(line))
     }) + Const.clearFix;
   },
   evalVerticalGlyph : function(line, chr){
     return Html.tagWrap("div", chr.data, {
       "class":"nehan-vert-rl",
-      "style":Css.attr(chr.getCssVertGlyph(line))
+      "style":Css.toString(chr.getCssVertGlyph(line))
     });
   },
   evalCnvChar: function(line, chr){
@@ -120,16 +121,19 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   },
   evalSmallKana : function(line, chr){
     return Html.tagWrap("div", chr.data, {
-      style:Css.attr(chr.getCssVertSmallKana())
+      style:Css.toString(chr.getCssVertSmallKana())
     });
   },
   evalHalfSpaceChar : function(line, chr){
     var half = Math.floor(line.fontSize / 2);
     return Html.tagWrap("div", "&nbsp;", {
-      style:Css.attr(chr.getCssVertHalfSpaceChar(line))
+      style:Css.toString(chr.getCssVertHalfSpaceChar(line))
     });
   },
-  evalInlineBox : function(box){
-    return this._super(box) + Const.clearFix;
+  evalInlineBox : function(line, box){
+    var body = (box._type === "img")? this.parentEvaluator.evalImageContent(box) : box.content;
+    return Html.tagWrap("div", body, {
+      "style":Css.toString(box.getCssVertInlineBox())
+    });
   }
 });

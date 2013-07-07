@@ -18,32 +18,12 @@ test("document-context", function(){
   equal(tag.name, "b");
   equal(ctx.getInlineTagDepth(), 1);
 
-  ctx.pushBlock(new Tag("<p>"));
+  ctx.pushBlockTag(new Tag("<p>"));
   equal(ctx.getBlockDepth(), 1);
   equal(ctx.getCurBlockTag().getName(), "p");
 
-  var tag = ctx.popBlock();
+  var tag = ctx.popBlockTag();
   equal(tag.name, "p");
   equal(ctx.getBlockDepth(), 0);
   equal(ctx.getCurBlockTag(), null);
 });
-
-test("document-context-font-size", function(){
-  var ctx = new DocumentContext();
-  var parent = {fontSize:16}; // dummy parent
-
-  ctx.pushInlineTag(new Tag("<span class='nehan-large'>"), parent);
-  equal(ctx.getInlineFontSize(parent), 18);
-  ctx.pushInlineTag(new Tag("<a href='hoge'>"), parent);
-  equal(ctx.getInlineFontSize(parent), 18);
-  ctx.pushInlineTag(new Tag("<span class='nehan-small'>"), parent);
-  equal(ctx.getInlineFontSize(parent), 13);
-
-  ctx.popInlineTagByName("span");
-  equal(ctx.getInlineFontSize(parent), 18);
-  ctx.popInlineTagByName("a");
-  equal(ctx.getInlineFontSize(parent), 18);
-  ctx.popInlineTagByName("span");
-  equal(ctx.getInlineFontSize(parent), 16);
-});
-

@@ -1,5 +1,5 @@
 var Css = {
-  attr : function(args){
+  toString : function(args){
     var tmp = [];
     for(var prop in args){
       tmp.push(prop + ":" + Html.escape(args[prop] + ""));

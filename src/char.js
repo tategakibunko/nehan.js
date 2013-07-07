@@ -37,14 +37,14 @@ var Char = (function(){
       css["margin-right"] = "auto";
       if(this.isKakkoStart()){
 	if(!padding_enable){
-	  css["padding-top"] = "-0.5em";
+	  css["margin-top"] = "-0.5em";
 	}
       } else {
 	if(this.getVertScale() < 1){
 	  css["height"] = "0.5em";
 	}
 	if(padding_enable){
-	  css["padding-bottom"] = "0.5em";
+	  css["margin-bottom"] = "0.5em";
 	}
       }
       return css;

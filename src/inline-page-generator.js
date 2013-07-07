@@ -4,6 +4,11 @@ var InlinePageGenerator = BlockTreeGenerator.extend({
   hasNext : function(){
     return false;
   },
+  /*
+  _getBoxSize : function(parent){
+    return this._getMarkupStaticSize(parent);
+  },
+  */
   yield : function(parent, size){
     var wrap = Layout.createBox(size, parent, "div");
     var page = this._super(wrap); // yield page to wrap.
