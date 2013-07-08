@@ -784,7 +784,7 @@ var Style = {
   //-------------------------------------------------------
   ".nehan-drop-caps::first-letter":{
     "display":"block",
-    "flow":"inherit",
+    //"flow":"inherit",
     "width":"4em",
     "height":"4em",
     "float":"start",

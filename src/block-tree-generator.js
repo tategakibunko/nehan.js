@@ -152,6 +152,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
     if(Token.isTag(token) && token.isPageBreakTag()){
       return Exceptions.PAGE_BREAK;
     }
+    if(Token.isTag(token) && token.getName() === "first-letter"){
+      token.setFirstLetter(); // load first-letter style
+    }
     if(Token.isInline(token)){
       // this is not block level element, so we push back this token,
       // and delegate this stream to InlineTreeGenerator from the head of this inline element.

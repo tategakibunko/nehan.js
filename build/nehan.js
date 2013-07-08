@@ -966,7 +966,7 @@ var Style = {
   //-------------------------------------------------------
   ".nehan-drop-caps::first-letter":{
     "display":"block",
-    "flow":"inherit",
+    //"flow":"inherit",
     "width":"4em",
     "height":"4em",
     "float":"start",
@@ -1774,9 +1774,9 @@ var Tag = (function (){
     },
     setFirstLetter : function(){
       var cache_key = this.getDataset("key");
-      var style = get_css_attr_cache(cache_key);
-      if(style){
-	this.setCssAttrs(style);
+      var cache = get_css_attr_cache(cache_key);
+      if(cache){
+	this.setCssAttrs(cache);
       }
     },
     addClass : function(klass){
@@ -2116,7 +2116,7 @@ var Tag = (function (){
       var cache_key = this._getPseudoElementCssCacheKey(this.selectors, "first-letter");
       add_css_attr_cache(cache_key, first_letter_style);
       return content.replace(rex_first_letter, function(match, p1, p2, p3){
-	return p1 + Html.tagStart("::first-letter", {"data-key":cache_key}) + p3 + "</::first-letter>";
+	return p1 + Html.tagStart("first-letter", {"data-key":cache_key}) + p3 + "</first-letter>";
       });
     },
     _parseContent : function(content){
@@ -6589,7 +6589,9 @@ var ElementGenerator = Class.extend({
       return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent, size);
     }
     // if static size is simply defined, treat as just an embed html with static size.
+    console.log("inline-block?:%o", tag);
     return (new InlineBoxGenerator(tag, this.context)).yield(parent);
+    //return (new InlineBlockGenerator(tag, this.context.createInlineRoot())).yield(parent);
   },
   _getBoxType : function(){
     return this.markup.getName();
@@ -6601,11 +6603,6 @@ var ElementGenerator = Class.extend({
     // copy style of <this.markup.name>:first-child.
     if(box.firstChild){
       this.markup.setFirstChild();
-    }
-  },
-  _setBoxFirstLetter : function(box, parent){
-    if(this.markup.getName() === "::first-letter"){
-      this.markup.setFirstLetter();
     }
   },
   _setBoxClasses : function(box, parent){
@@ -6770,7 +6767,6 @@ var ElementGenerator = Class.extend({
     box.markup = this.markup;
     this._onReadyBox(box, parent);
     this._setBoxFirstChild(box, parent);
-    this._setBoxFirstLetter(box, parent);
     this._setBoxClasses(box, parent);
     this._setBoxStyle(box, parent);
     this._onCreateBox(box, parent);
@@ -7434,6 +7430,9 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(Token.isTag(token) && token.getName() === "br"){
       return Exceptions.LINE_BREAK;
     }
+    if(Token.isTag(token) && token.getName() === "first-letter"){
+      token.setFirstLetter(); // load first-letter style
+    }
     // if block element, break line and force terminate generator
     if(token.isBlock()){
       ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
@@ -7524,7 +7523,6 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   },
   _createLine : function(parent){
     var line = this._super(parent);
-    this._setBoxFirstLetter(line, parent);
     this._setBoxStyle(line, parent);
     return line;
   },
@@ -7730,6 +7728,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
     }
     if(Token.isTag(token) && token.isPageBreakTag()){
       return Exceptions.PAGE_BREAK;
+    }
+    if(Token.isTag(token) && token.getName() === "first-letter"){
+      token.setFirstLetter(); // load first-letter style
     }
     if(Token.isInline(token)){
       // this is not block level element, so we push back this token,

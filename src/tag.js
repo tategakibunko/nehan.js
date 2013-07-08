@@ -87,9 +87,9 @@ var Tag = (function (){
     },
     setFirstLetter : function(){
       var cache_key = this.getDataset("key");
-      var style = get_css_attr_cache(cache_key);
-      if(style){
-	this.setCssAttrs(style);
+      var cache = get_css_attr_cache(cache_key);
+      if(cache){
+	this.setCssAttrs(cache);
       }
     },
     addClass : function(klass){
@@ -429,7 +429,7 @@ var Tag = (function (){
       var cache_key = this._getPseudoElementCssCacheKey(this.selectors, "first-letter");
       add_css_attr_cache(cache_key, first_letter_style);
       return content.replace(rex_first_letter, function(match, p1, p2, p3){
-	return p1 + Html.tagStart("::first-letter", {"data-key":cache_key}) + p3 + "</::first-letter>";
+	return p1 + Html.tagStart("first-letter", {"data-key":cache_key}) + p3 + "</first-letter>";
       });
     },
     _parseContent : function(content){

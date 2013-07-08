@@ -31,7 +31,9 @@ var ElementGenerator = Class.extend({
       return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent, size);
     }
     // if static size is simply defined, treat as just an embed html with static size.
+    console.log("inline-block?:%o", tag);
     return (new InlineBoxGenerator(tag, this.context)).yield(parent);
+    //return (new InlineBlockGenerator(tag, this.context.createInlineRoot())).yield(parent);
   },
   _getBoxType : function(){
     return this.markup.getName();
@@ -43,11 +45,6 @@ var ElementGenerator = Class.extend({
     // copy style of <this.markup.name>:first-child.
     if(box.firstChild){
       this.markup.setFirstChild();
-    }
-  },
-  _setBoxFirstLetter : function(box, parent){
-    if(this.markup.getName() === "::first-letter"){
-      this.markup.setFirstLetter();
     }
   },
   _setBoxClasses : function(box, parent){
@@ -212,7 +209,6 @@ var ElementGenerator = Class.extend({
     box.markup = this.markup;
     this._onReadyBox(box, parent);
     this._setBoxFirstChild(box, parent);
-    this._setBoxFirstLetter(box, parent);
     this._setBoxClasses(box, parent);
     this._setBoxStyle(box, parent);
     this._onCreateBox(box, parent);
