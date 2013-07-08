@@ -17,12 +17,9 @@ var ElementGenerator = Class.extend({
   _onCreateBox : function(box, parent){
   },
   _getMarkupStaticSize : function(parent){
-    if(this.markup){
-      var font_size = parent? parent.fontSize : Layout.fontSize;
-      var measure = parent? parent.getContentMeasure(parent.flow) : Layout.getStdMeasure();
-      return this.markup.getStaticSize(font_size, measure);
-    }
-    return parent.getRestSize();
+    var font_size = parent? parent.fontSize : Layout.fontSize;
+    var measure = parent? parent.getContentMeasure(parent.flow) : Layout.getStdMeasure();
+    return this.markup.getStaticSize(font_size, measure);
   },
   _yieldStaticElement : function(parent, tag){
     if(tag.getName() === "img"){
@@ -46,6 +43,11 @@ var ElementGenerator = Class.extend({
     // copy style of <this.markup.name>:first-child.
     if(box.firstChild){
       this.markup.setFirstChild();
+    }
+  },
+  _setBoxFirstLetter : function(box, parent){
+    if(this.markup.getName() === "::first-letter"){
+      this.markup.setFirstLetter();
     }
   },
   _setBoxClasses : function(box, parent){
@@ -204,26 +206,13 @@ var ElementGenerator = Class.extend({
     this._setBoxBackgroundPosition(box, parent);
     this._setBoxBackgroundRepeat(box, parent);
   },
-  _setPseudoElement : function(box, parent){
-    // if pseudo-element tag,
-    // copy style of <this.markup.name>:<pseudo-name> dynamically.
-    if(this.markup.isPseudoElementTag()){
-      var pseudo_name = this.markup.getPseudoElementName();
-      var pseudo_css_attr = this.markup.getPseudoCssAttr(pseudo_name);
-      for(var prop in pseudo_css_attr){
-	if(prop !== "content"){
-	  this.markup.setCssAttr(prop, pseudo_css_attr[prop]);
-	}
-      }
-    }
-  },
   _createBox : function(size, parent){
     var box_type = this._getBoxType();
     var box = Layout.createBox(size, parent, box_type);
     box.markup = this.markup;
     this._onReadyBox(box, parent);
     this._setBoxFirstChild(box, parent);
-    this._setPseudoElement(box, parent);
+    this._setBoxFirstLetter(box, parent);
     this._setBoxClasses(box, parent);
     this._setBoxStyle(box, parent);
     this._onCreateBox(box, parent);

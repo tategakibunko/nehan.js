@@ -22,6 +22,9 @@ test("selector-class", function(){
   selector = new Selector("div .hoge");
   equal(selector.test("div p.hoge"), true);
   equal(selector.test("div ul li.hoge"), true);
+
+  selector = new Selector(".nehan-drop-caps :first-letter");
+  equal(selector.test("p.nehan-drop-caps :first-letter"), true);
 });
 
 test("selector-id", function(){

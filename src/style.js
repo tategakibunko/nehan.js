@@ -554,26 +554,6 @@ var Style = {
     "single":true
   },
   //-------------------------------------------------------
-  // pseudo-elements
-  //-------------------------------------------------------
-  ":before":{
-    "display":"inline-block",
-    // content of pseudo elements are all escaped,
-    // that is, ruby is also escaped. there are no rubies in pseudo element.
-    // so line-rate is set to 1(text-line only).
-    "line-rate":1
-  },
-  ":after":{
-    "display":"inline-block",
-    "line-rate":1
-  },
-  ":first-letter":{
-    "display":"inline-block"
-  },
-  ":first-line":{
-    "display":"inline"
-  },
-  //-------------------------------------------------------
   // rounded corner
   //-------------------------------------------------------
   ".nehan-rounded":{
@@ -802,7 +782,7 @@ var Style = {
   //-------------------------------------------------------
   // other utility classes
   //-------------------------------------------------------
-  ".nehan-drop-caps:first-letter":{
+  ".nehan-drop-caps::first-letter":{
     "display":"block",
     "flow":"inherit",
     "width":"4em",

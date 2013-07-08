@@ -81,15 +81,16 @@ var Tag = (function (){
 	this.setCssAttr(prop, obj[prop]);
       }
     },
-    setFontSizeUpdate : function(font_size){
-      this.fontSize = font_size;
-    },
-    setFontColorUpdate : function(font_color){
-      this.fontColor = font_color;
-    },
     setFirstChild : function(){
-      var css = this.getPseudoCssAttr("first-child");
+      var css = this.getPseudoClassCssAttr("first-child");
       this.setCssAttrs(css);
+    },
+    setFirstLetter : function(){
+      var cache_key = this.getDataset("key");
+      var style = get_css_attr_cache(cache_key);
+      if(style){
+	this.setCssAttrs(style);
+      }
     },
     addClass : function(klass){
       this.classes.push(klass);
@@ -122,15 +123,13 @@ var Tag = (function (){
     getAttr : function(name, def_value){
       return this.getTagAttr(name) || this.getCssAttr(name) || ((typeof def_value !== "undefined")? def_value : null);
     },
-    getPseudoElementName : function(){
-      if(this.isPseudoElementTag()){
-	return this.getName().substring(1);
-      }
-      return "";
+    getPseudoClassCssAttr : function(class_name){
+      var selectors = this._parsePseudoClassSelectors(class_name);
+      return this._parseCssAttr(selectors);
     },
-    getPseudoCssAttr : function(pseudo_name){
-      var pseudo_selectors = this._parsePseudoSelectors(pseudo_name);
-      return this._parseCssAttr(pseudo_selectors);
+    getPseudoElementCssAttr : function(element_name){
+      var selectors = this._parsePseudoElementSelectors(element_name);
+      return this._parseCssAttr(selectors);
     },
     getSelectors : function(){
       return this.selectors;
@@ -288,13 +287,6 @@ var Tag = (function (){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
-    isPseudoTag : function(){
-      return this.getName().charAt(0) === ":";
-    },
-    isPseudoElementTag : function(){
-      var name = this.getName();
-      return (name === ":first-letter" || name === ":first-line");
-    },
     isEmbeddableTag : function(){
       return this.getCssAttr("embeddable") === true;
     },
@@ -349,6 +341,9 @@ var Tag = (function (){
     _getCssCacheKey : function(selectors){
       return selectors.join(",");
     },
+    _getPseudoElementCssCacheKey : function(selectors, element_name){
+      return [element_name, this._getCssCacheKey(this.selectors)].join("::");
+    },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
     },
@@ -393,6 +388,22 @@ var Tag = (function (){
 	}));
       });
     },
+    // if class_name is "first-child",
+    // and this.selectors is ["p", "p.hoge"]
+    // => ["p:first-child", "p.hoge:first-child"]
+    _parsePseudoClassSelectors : function(class_name){
+      return List.map(this.selectors, function(key){
+	return key + ":" + class_name;
+      });
+    },
+    // if element_name is "before",
+    // and this.selectors is ["p", "p.hoge"]
+    // => ["p::before", "p.hoge::before"]
+    _parsePseudoElementSelectors : function(element_name){
+      return List.map(this.selectors, function(key){
+	return key + "::" + element_name;
+      });
+    },
     _parseCssAttr : function(selectors){
       var cache_key = this._getCssCacheKey(selectors);
       var cache = get_css_attr_cache(cache_key);
@@ -402,48 +413,29 @@ var Tag = (function (){
       }
       return cache;
     },
-    // if pseudo_name is "before",
-    // and this.selectors is ["p", "p.hoge"]
-    // => ["p:before", "p.hoge:before"]
-    _parsePseudoSelectors : function(pseudo_name){
-      return List.map(this.selectors, function(key){
-	return key + ":" + pseudo_name;
-      });
+    _parseBeforeContent : function(){
+      var pseudo_css_attr = this.getPseudoElementCssAttr("before");
+      return pseudo_css_attr.content || "";
     },
-    _parsePseudoContent : function(pseudo_name){
-      var pseudo_css_attr = this.getPseudoCssAttr(pseudo_name);
-      var content = pseudo_css_attr.content || "";
-      if(content === ""){
-	return "";
-      }
-      return Html.tagWrap(":" + pseudo_name, Html.escape(content));
+    _parseAfterContent : function(){
+      var pseudo_css_attr = this.getPseudoElementCssAttr("after");
+      return pseudo_css_attr.content || "";
     },
-    _parsePseudoFirstContent : function(content){
-      var first_letter_style = this.getPseudoCssAttr("first-letter");
-      var first_line_style = this.getPseudoCssAttr("first-line");
-      var first_letter_enable = !Obj.isEmpty(first_letter_style);
-      var first_line_enable = !Obj.isEmpty(first_line_style);
-
-      if(!first_letter_enable && !first_line_enable){
+    _parsePseudoFirstLetter : function(content){
+      var first_letter_style = this.getPseudoElementCssAttr("first-letter");
+      if(Obj.isEmpty(first_letter_style)){
 	return content;
       }
-      var prefix = [], postfix = [];
-      if(first_line_enable){
-	prefix.push("<:first-line>");
-      }
-      if(first_letter_enable){
-	prefix.push("<:first-letter>");
-	postfix.push("</:first-letter>");
-      }
+      var cache_key = this._getPseudoElementCssCacheKey(this.selectors, "first-letter");
+      add_css_attr_cache(cache_key, first_letter_style);
       return content.replace(rex_first_letter, function(match, p1, p2, p3){
-	return p1 + prefix.join("") + p3 + postfix.join("");
+	return p1 + Html.tagStart("::first-letter", {"data-key":cache_key}) + p3 + "</::first-letter>";
       });
     },
     _parseContent : function(content){
-      var before = this._parsePseudoContent("before");
-      var after = this._parsePseudoContent("after");
-      content = this._parsePseudoFirstContent(content);
-      return before + content + after;
+      var before = this._parseBeforeContent();
+      var after = this._parseAfterContent();
+      return this._parsePseudoFirstLetter([before, content, after].join(""));
     },
     // <img src='/path/to/img' push>
     // => {src:'/path/to/img', push:true}

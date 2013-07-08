@@ -736,26 +736,6 @@ var Style = {
     "single":true
   },
   //-------------------------------------------------------
-  // pseudo-elements
-  //-------------------------------------------------------
-  ":before":{
-    "display":"inline-block",
-    // content of pseudo elements are all escaped,
-    // that is, ruby is also escaped. there are no rubies in pseudo element.
-    // so line-rate is set to 1(text-line only).
-    "line-rate":1
-  },
-  ":after":{
-    "display":"inline-block",
-    "line-rate":1
-  },
-  ":first-letter":{
-    "display":"inline-block"
-  },
-  ":first-line":{
-    "display":"inline"
-  },
-  //-------------------------------------------------------
   // rounded corner
   //-------------------------------------------------------
   ".nehan-rounded":{
@@ -984,7 +964,7 @@ var Style = {
   //-------------------------------------------------------
   // other utility classes
   //-------------------------------------------------------
-  ".nehan-drop-caps:first-letter":{
+  ".nehan-drop-caps::first-letter":{
     "display":"block",
     "flow":"inherit",
     "width":"4em",
@@ -1788,15 +1768,16 @@ var Tag = (function (){
 	this.setCssAttr(prop, obj[prop]);
       }
     },
-    setFontSizeUpdate : function(font_size){
-      this.fontSize = font_size;
-    },
-    setFontColorUpdate : function(font_color){
-      this.fontColor = font_color;
-    },
     setFirstChild : function(){
-      var css = this.getPseudoCssAttr("first-child");
+      var css = this.getPseudoClassCssAttr("first-child");
       this.setCssAttrs(css);
+    },
+    setFirstLetter : function(){
+      var cache_key = this.getDataset("key");
+      var style = get_css_attr_cache(cache_key);
+      if(style){
+	this.setCssAttrs(style);
+      }
     },
     addClass : function(klass){
       this.classes.push(klass);
@@ -1829,15 +1810,13 @@ var Tag = (function (){
     getAttr : function(name, def_value){
       return this.getTagAttr(name) || this.getCssAttr(name) || ((typeof def_value !== "undefined")? def_value : null);
     },
-    getPseudoElementName : function(){
-      if(this.isPseudoElementTag()){
-	return this.getName().substring(1);
-      }
-      return "";
+    getPseudoClassCssAttr : function(class_name){
+      var selectors = this._parsePseudoClassSelectors(class_name);
+      return this._parseCssAttr(selectors);
     },
-    getPseudoCssAttr : function(pseudo_name){
-      var pseudo_selectors = this._parsePseudoSelectors(pseudo_name);
-      return this._parseCssAttr(pseudo_selectors);
+    getPseudoElementCssAttr : function(element_name){
+      var selectors = this._parsePseudoElementSelectors(element_name);
+      return this._parseCssAttr(selectors);
     },
     getSelectors : function(){
       return this.selectors;
@@ -1995,13 +1974,6 @@ var Tag = (function (){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
-    isPseudoTag : function(){
-      return this.getName().charAt(0) === ":";
-    },
-    isPseudoElementTag : function(){
-      var name = this.getName();
-      return (name === ":first-letter" || name === ":first-line");
-    },
     isEmbeddableTag : function(){
       return this.getCssAttr("embeddable") === true;
     },
@@ -2056,6 +2028,9 @@ var Tag = (function (){
     _getCssCacheKey : function(selectors){
       return selectors.join(",");
     },
+    _getPseudoElementCssCacheKey : function(selectors, element_name){
+      return [element_name, this._getCssCacheKey(this.selectors)].join("::");
+    },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
     },
@@ -2100,6 +2075,22 @@ var Tag = (function (){
 	}));
       });
     },
+    // if class_name is "first-child",
+    // and this.selectors is ["p", "p.hoge"]
+    // => ["p:first-child", "p.hoge:first-child"]
+    _parsePseudoClassSelectors : function(class_name){
+      return List.map(this.selectors, function(key){
+	return key + ":" + class_name;
+      });
+    },
+    // if element_name is "before",
+    // and this.selectors is ["p", "p.hoge"]
+    // => ["p::before", "p.hoge::before"]
+    _parsePseudoElementSelectors : function(element_name){
+      return List.map(this.selectors, function(key){
+	return key + "::" + element_name;
+      });
+    },
     _parseCssAttr : function(selectors){
       var cache_key = this._getCssCacheKey(selectors);
       var cache = get_css_attr_cache(cache_key);
@@ -2109,48 +2100,29 @@ var Tag = (function (){
       }
       return cache;
     },
-    // if pseudo_name is "before",
-    // and this.selectors is ["p", "p.hoge"]
-    // => ["p:before", "p.hoge:before"]
-    _parsePseudoSelectors : function(pseudo_name){
-      return List.map(this.selectors, function(key){
-	return key + ":" + pseudo_name;
-      });
+    _parseBeforeContent : function(){
+      var pseudo_css_attr = this.getPseudoElementCssAttr("before");
+      return pseudo_css_attr.content || "";
     },
-    _parsePseudoContent : function(pseudo_name){
-      var pseudo_css_attr = this.getPseudoCssAttr(pseudo_name);
-      var content = pseudo_css_attr.content || "";
-      if(content === ""){
-	return "";
-      }
-      return Html.tagWrap(":" + pseudo_name, Html.escape(content));
+    _parseAfterContent : function(){
+      var pseudo_css_attr = this.getPseudoElementCssAttr("after");
+      return pseudo_css_attr.content || "";
     },
-    _parsePseudoFirstContent : function(content){
-      var first_letter_style = this.getPseudoCssAttr("first-letter");
-      var first_line_style = this.getPseudoCssAttr("first-line");
-      var first_letter_enable = !Obj.isEmpty(first_letter_style);
-      var first_line_enable = !Obj.isEmpty(first_line_style);
-
-      if(!first_letter_enable && !first_line_enable){
+    _parsePseudoFirstLetter : function(content){
+      var first_letter_style = this.getPseudoElementCssAttr("first-letter");
+      if(Obj.isEmpty(first_letter_style)){
 	return content;
       }
-      var prefix = [], postfix = [];
-      if(first_line_enable){
-	prefix.push("<:first-line>");
-      }
-      if(first_letter_enable){
-	prefix.push("<:first-letter>");
-	postfix.push("</:first-letter>");
-      }
+      var cache_key = this._getPseudoElementCssCacheKey(this.selectors, "first-letter");
+      add_css_attr_cache(cache_key, first_letter_style);
       return content.replace(rex_first_letter, function(match, p1, p2, p3){
-	return p1 + prefix.join("") + p3 + postfix.join("");
+	return p1 + Html.tagStart("::first-letter", {"data-key":cache_key}) + p3 + "</::first-letter>";
       });
     },
     _parseContent : function(content){
-      var before = this._parsePseudoContent("before");
-      var after = this._parsePseudoContent("after");
-      content = this._parsePseudoFirstContent(content);
-      return before + content + after;
+      var before = this._parseBeforeContent();
+      var after = this._parseAfterContent();
+      return this._parsePseudoFirstLetter([before, content, after].join(""));
     },
     // <img src='/path/to/img' push>
     // => {src:'/path/to/img', push:true}
@@ -6603,12 +6575,9 @@ var ElementGenerator = Class.extend({
   _onCreateBox : function(box, parent){
   },
   _getMarkupStaticSize : function(parent){
-    if(this.markup){
-      var font_size = parent? parent.fontSize : Layout.fontSize;
-      var measure = parent? parent.getContentMeasure(parent.flow) : Layout.getStdMeasure();
-      return this.markup.getStaticSize(font_size, measure);
-    }
-    return parent.getRestSize();
+    var font_size = parent? parent.fontSize : Layout.fontSize;
+    var measure = parent? parent.getContentMeasure(parent.flow) : Layout.getStdMeasure();
+    return this.markup.getStaticSize(font_size, measure);
   },
   _yieldStaticElement : function(parent, tag){
     if(tag.getName() === "img"){
@@ -6632,6 +6601,11 @@ var ElementGenerator = Class.extend({
     // copy style of <this.markup.name>:first-child.
     if(box.firstChild){
       this.markup.setFirstChild();
+    }
+  },
+  _setBoxFirstLetter : function(box, parent){
+    if(this.markup.getName() === "::first-letter"){
+      this.markup.setFirstLetter();
     }
   },
   _setBoxClasses : function(box, parent){
@@ -6790,26 +6764,13 @@ var ElementGenerator = Class.extend({
     this._setBoxBackgroundPosition(box, parent);
     this._setBoxBackgroundRepeat(box, parent);
   },
-  _setPseudoElement : function(box, parent){
-    // if pseudo-element tag,
-    // copy style of <this.markup.name>:<pseudo-name> dynamically.
-    if(this.markup.isPseudoElementTag()){
-      var pseudo_name = this.markup.getPseudoElementName();
-      var pseudo_css_attr = this.markup.getPseudoCssAttr(pseudo_name);
-      for(var prop in pseudo_css_attr){
-	if(prop !== "content"){
-	  this.markup.setCssAttr(prop, pseudo_css_attr[prop]);
-	}
-      }
-    }
-  },
   _createBox : function(size, parent){
     var box_type = this._getBoxType();
     var box = Layout.createBox(size, parent, box_type);
     box.markup = this.markup;
     this._onReadyBox(box, parent);
     this._setBoxFirstChild(box, parent);
-    this._setPseudoElement(box, parent);
+    this._setBoxFirstLetter(box, parent);
     this._setBoxClasses(box, parent);
     this._setBoxStyle(box, parent);
     this._onCreateBox(box, parent);
@@ -6891,8 +6852,8 @@ var HorizontalRuleGenerator = StaticBlockGenerator.extend({
   }
 });
 
-var LineContext = (function(){
-  function LineContext(line, stream, context){
+var InlineTreeContext = (function(){
+  function InlineTreeContext(line, stream, context){
     this.line = line;
     this.stream = stream;
     this.context = context;
@@ -6916,7 +6877,7 @@ var LineContext = (function(){
     this.lastText = null;
   }
 
-  LineContext.prototype = {
+  InlineTreeContext.prototype = {
     getElementExtent : function(element){
       if(Token.isText(element)){
 	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
@@ -7320,7 +7281,7 @@ var LineContext = (function(){
     }
   };
 
-  return LineContext;
+  return InlineTreeContext;
 })();
 
 
@@ -7375,7 +7336,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     return this._yield(line);
   },
   _yield : function(line){
-    var ctx = new LineContext(line, this.stream, this.context);
+    var ctx = new InlineTreeContext(line, this.stream, this.context);
 
     // even if extent for basic line is not left,
     // just break and let parent generator break page.
@@ -7563,6 +7524,7 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   },
   _createLine : function(parent){
     var line = this._super(parent);
+    this._setBoxFirstLetter(line, parent);
     this._setBoxStyle(line, parent);
     return line;
   },
@@ -7669,7 +7631,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return ret;
   },
   _getBoxSize : function(parent){
-    return parent.getRestSize();
+    return this._getMarkupStaticSize() || parent.getRestSize();
   },
   // fill page with child page elements.
   _yieldPageTo : function(page){
@@ -7886,10 +7848,7 @@ var InlineBlockGenerator = BlockTreeGenerator.extend({
   _getBoxType : function(){
     return "inline-block";
   },
-  _getBoxSize : function(parent){
-    return this._getMarkupStaticSize(parent) || parent.getRestSize();
-  },
-  // ctx : LineContext
+  // ctx : InlineTreeContext
   yield : function(parent){
     var box = this._super(parent);
     if(typeof box === "number"){
@@ -8051,11 +8010,6 @@ var InlinePageGenerator = BlockTreeGenerator.extend({
   hasNext : function(){
     return false;
   },
-  /*
-  _getBoxSize : function(parent){
-    return this._getMarkupStaticSize(parent);
-  },
-  */
   yield : function(parent, size){
     var wrap = Layout.createBox(size, parent, "div");
     var page = this._super(wrap); // yield page to wrap.

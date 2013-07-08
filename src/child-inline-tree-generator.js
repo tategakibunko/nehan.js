@@ -10,6 +10,7 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   },
   _createLine : function(parent){
     var line = this._super(parent);
+    this._setBoxFirstLetter(line, parent);
     this._setBoxStyle(line, parent);
     return line;
   },

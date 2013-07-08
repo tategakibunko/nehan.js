@@ -115,10 +115,6 @@ test("tag-is", function(){
   tag = new Tag("<a href='#hoge'>");
   equal(tag.isAnchorLinkTag(), true);
 
-  tag = new Tag("<:first-letter>");
-  equal(tag.isPseudoElementTag(), true);
-  equal(tag.getPseudoElementName(), "first-letter");
-
   tag = new Tag("<iframe>");
   equal(tag.isEmbeddableTag(), true);
 
@@ -129,8 +125,8 @@ test("tag-is", function(){
   equal(tag.isBlock(), false); // img is default inline!
   equal(tag.isInline(), true); // img is default inline!
 
-  tag = new Tag("<img class='nehan-float-start'>");
-  equal(tag.isBlock(), true); // aligned img is block
+  tag = new Tag("<img width='20' height='20' class='nehan-float-start'>");
+  equal(tag.isBlock(), true); // aligned block with static size is block
 
   tag = new Tag("<div style='display:inline'>");
   equal(tag.isInline(), true);

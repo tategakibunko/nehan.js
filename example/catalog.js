@@ -20,25 +20,25 @@ var Catalog = (function(){
       "font-size":"2.0em"
     });
     // style to test pseudo element before
-    this.engine.setStyle(".test-pe-before:before", {
+    this.engine.setStyle(".test-pe-before::before", {
       "content":"this is content before",
       "font-size":"2em",
       "margin":{end:"1.0em"}
     });
     // style to test pseudo element after
-    this.engine.setStyle(".test-pe-after:after", {
+    this.engine.setStyle(".test-pe-after::after", {
       "content":"this is content after",
       "font-size":"2em",
       "margin":{start:"1.0em"}
     });
     // style to test pseudo element first-letter
-    this.engine.setStyle(".test-pe-first-letter:first-letter", {
+    this.engine.setStyle(".test-pe-first-letter::first-letter", {
       "font-size":"2em",
       "margin":{end:"0.1em"},
       "line-rate":1.0
     });
     // style to test pseudo element first-line
-    this.engine.setStyle(".test-pe-first-line:first-line", {
+    this.engine.setStyle(".test-pe-first-line::first-line", {
       "font-size":"1.6em"
     });
     // style to test letter-spacing

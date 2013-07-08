@@ -49,7 +49,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     return this._yield(line);
   },
   _yield : function(line){
-    var ctx = new LineContext(line, this.stream, this.context);
+    var ctx = new InlineTreeContext(line, this.stream, this.context);
 
     // even if extent for basic line is not left,
     // just break and let parent generator break page.

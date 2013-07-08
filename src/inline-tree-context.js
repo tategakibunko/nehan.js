@@ -1,5 +1,5 @@
-var LineContext = (function(){
-  function LineContext(line, stream, context){
+var InlineTreeContext = (function(){
+  function InlineTreeContext(line, stream, context){
     this.line = line;
     this.stream = stream;
     this.context = context;
@@ -23,7 +23,7 @@ var LineContext = (function(){
     this.lastText = null;
   }
 
-  LineContext.prototype = {
+  InlineTreeContext.prototype = {
     getElementExtent : function(element){
       if(Token.isText(element)){
 	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
@@ -427,6 +427,6 @@ var LineContext = (function(){
     }
   };
 
-  return LineContext;
+  return InlineTreeContext;
 })();
 

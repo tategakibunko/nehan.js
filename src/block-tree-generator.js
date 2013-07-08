@@ -52,7 +52,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return ret;
   },
   _getBoxSize : function(parent){
-    return parent.getRestSize();
+    return this._getMarkupStaticSize() || parent.getRestSize();
   },
   // fill page with child page elements.
   _yieldPageTo : function(page){
