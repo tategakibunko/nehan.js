@@ -6959,10 +6959,7 @@ var InlineTreeContext = (function(){
     canContainBasicLine : function(){
       return this.restExtent >= Math.floor(this.line.fontSize * this.line.lineRate);
     },
-    canContainExtent : function(extent){
-      return this.restExtent >= extent;
-    },
-    canContainAdvance : function(element, advance){
+    canContain : function(element, advance){
       if(element instanceof Box ||
 	 element instanceof Word ||
 	 element instanceof Tcy ||
@@ -6973,9 +6970,6 @@ var InlineTreeContext = (function(){
       }
       // justify target need space for tail fix.
       return this.restMeasure - this.line.fontSize >= advance;
-    },
-    canContain : function(element, advance, extent){
-      return this.canContainAdvance(element, advance) && this.canContainExtent(extent);
     },
     isPreLine : function(){
       return this.line._type === "pre";
@@ -7045,15 +7039,14 @@ var InlineTreeContext = (function(){
     },
     addElement : function(element){
       var advance = this.getElementAdvance(element);
-      var extent = this.getElementExtent(element);
-      if(!this.canContain(element, advance, extent)){
+      if(!this.canContain(element, advance)){
 	throw "OverflowInline";
       }
-
       var font_size = this.getElementFontSize(element);
       if(font_size > this.maxFontSize){
 	this._setMaxFontSize(font_size);
       }
+      var extent = this.getElementExtent(element);
       if(extent > this.maxExtent){
 	this._setMaxExtent(extent);
       }
@@ -7325,14 +7318,12 @@ var InlineTreeContext = (function(){
 })();
 
 
-// TODO:
-// although it is quite rare situation, ruby disappears when
+// TODO: although it is quite rare situation, ruby disappears when
 // 1. line overflow by tail ruby and
 // 2. it is placed at the head of next line but
 // 3. parent page can't contain the line because of block level overflow.
 // then after rollback and 2nd-yielding by parent generator,
 // ruby disappears because stream already steps to the next pos of ruby.
-// any good idea to solve this problem?
 var InlineTreeGenerator = ElementGenerator.extend({
   init : function(markup, stream, context){
     this.markup = markup;
@@ -7547,9 +7538,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     case "style":
       ctx.addStyle(tag);
       return Exceptions.IGNORE;
-    case "first-line":
-      //return (new FirstLineGenerator(tag, this.context, this.stream)).yield(ctx.line);
-      return (new FirstLineGenerator(tag, this.context, ctx.stream)).yield(ctx.line);
     default:
       this.generator = this._createChildInlineTreeGenerator(ctx, tag);
       return this.generator.yield(ctx.line);
@@ -8437,9 +8425,6 @@ var InlineEvaluator = Class.extend({
   init : function(parent_evaluator){
     this.parentEvaluator = parent_evaluator;
   },
-  wrapInlineTag : function(markup, body){
-    return [markup.getSrc(), body, markup.getCloseSrc()].join("");
-  },
   evaluate : function(line){
     throw "InlineEvaluator::evaluate not implemented";
   },
@@ -8449,9 +8434,27 @@ var InlineEvaluator = Class.extend({
       return ret + self.evalInlineElement(line, element);
     });
     if(line.isLinkLine()){
-      return this.wrapInlineTag(line.markup, body);
+      return this.evalLinkLine(line, body);
     }
     return body;
+  },
+  evalLinkLine : function(line, body){
+    var attr = {}, markup = line.markup;
+    attr.href = markup.getTagAttr("href", "#");
+    var name = markup.getTagAttr("name");
+    if(name){
+      markup.addClass("nehan-anchor");
+      attr.name = name;
+    }
+    var target = markup.getTagAttr("target");
+    if(target){
+      attr.target = target;
+    }
+    if(attr.href.indexOf("#") >= 0){
+      markup.addClass("nehan-anchor-link");
+    }
+    attr["class"] = markup.getCssClasses();
+    return Html.tagWrap("a", body, attr);
   },
   evalInlineElement : function(line, element){
     if(element._type === "text-line"){

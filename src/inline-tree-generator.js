@@ -1,11 +1,9 @@
-// TODO:
-// although it is quite rare situation, ruby disappears when
+// TODO: although it is quite rare situation, ruby disappears when
 // 1. line overflow by tail ruby and
 // 2. it is placed at the head of next line but
 // 3. parent page can't contain the line because of block level overflow.
 // then after rollback and 2nd-yielding by parent generator,
 // ruby disappears because stream already steps to the next pos of ruby.
-// any good idea to solve this problem?
 var InlineTreeGenerator = ElementGenerator.extend({
   init : function(markup, stream, context){
     this.markup = markup;
@@ -220,9 +218,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     case "style":
       ctx.addStyle(tag);
       return Exceptions.IGNORE;
-    case "first-line":
-      //return (new FirstLineGenerator(tag, this.context, this.stream)).yield(ctx.line);
-      return (new FirstLineGenerator(tag, this.context, ctx.stream)).yield(ctx.line);
     default:
       this.generator = this._createChildInlineTreeGenerator(ctx, tag);
       return this.generator.yield(ctx.line);

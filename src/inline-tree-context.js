@@ -66,10 +66,7 @@ var InlineTreeContext = (function(){
     canContainBasicLine : function(){
       return this.restExtent >= Math.floor(this.line.fontSize * this.line.lineRate);
     },
-    canContainExtent : function(extent){
-      return this.restExtent >= extent;
-    },
-    canContainAdvance : function(element, advance){
+    canContain : function(element, advance){
       if(element instanceof Box ||
 	 element instanceof Word ||
 	 element instanceof Tcy ||
@@ -80,9 +77,6 @@ var InlineTreeContext = (function(){
       }
       // justify target need space for tail fix.
       return this.restMeasure - this.line.fontSize >= advance;
-    },
-    canContain : function(element, advance, extent){
-      return this.canContainAdvance(element, advance) && this.canContainExtent(extent);
     },
     isPreLine : function(){
       return this.line._type === "pre";
@@ -152,15 +146,14 @@ var InlineTreeContext = (function(){
     },
     addElement : function(element){
       var advance = this.getElementAdvance(element);
-      var extent = this.getElementExtent(element);
-      if(!this.canContain(element, advance, extent)){
+      if(!this.canContain(element, advance)){
 	throw "OverflowInline";
       }
-
       var font_size = this.getElementFontSize(element);
       if(font_size > this.maxFontSize){
 	this._setMaxFontSize(font_size);
       }
+      var extent = this.getElementExtent(element);
       if(extent > this.maxExtent){
 	this._setMaxExtent(extent);
       }

@@ -2,9 +2,6 @@ var InlineEvaluator = Class.extend({
   init : function(parent_evaluator){
     this.parentEvaluator = parent_evaluator;
   },
-  wrapInlineTag : function(markup, body){
-    return [markup.getSrc(), body, markup.getCloseSrc()].join("");
-  },
   evaluate : function(line){
     throw "InlineEvaluator::evaluate not implemented";
   },
@@ -14,9 +11,27 @@ var InlineEvaluator = Class.extend({
       return ret + self.evalInlineElement(line, element);
     });
     if(line.isLinkLine()){
-      return this.wrapInlineTag(line.markup, body);
+      return this.evalLinkLine(line, body);
     }
     return body;
+  },
+  evalLinkLine : function(line, body){
+    var attr = {}, markup = line.markup;
+    attr.href = markup.getTagAttr("href", "#");
+    var name = markup.getTagAttr("name");
+    if(name){
+      markup.addClass("nehan-anchor");
+      attr.name = name;
+    }
+    var target = markup.getTagAttr("target");
+    if(target){
+      attr.target = target;
+    }
+    if(attr.href.indexOf("#") >= 0){
+      markup.addClass("nehan-anchor-link");
+    }
+    attr["class"] = markup.getCssClasses();
+    return Html.tagWrap("a", body, attr);
   },
   evalInlineElement : function(line, element){
     if(element._type === "text-line"){

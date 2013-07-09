@@ -479,8 +479,8 @@ var TestCode = {
       ].join("\n"),
 
       "link":[
-	"<a href='/'>" + text_large + "</a>",
-	"<a href='http://google.com/' target='_blank'>new window</a>"
+	"あああ<a href='/'>いいいい</a>",
+	"open <a href='http://google.com/' target='_blank'>new window</a>"
       ].join("<br />"),
 
       "bold":[
