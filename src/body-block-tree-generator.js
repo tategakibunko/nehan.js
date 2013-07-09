@@ -12,7 +12,7 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
   },
   _createBox : function(size, parent){
     var box = Layout.createRootBox(size, "body");
-    this._setBoxStyle(box);
+    this._setBoxStyle(box, null);
     box.percent = this.stream.getSeekPercent();
     box.seekPos = this.stream.getSeekPos();
     box.pageNo = this.context.getPageNo();

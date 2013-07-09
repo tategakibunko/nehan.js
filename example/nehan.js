@@ -2046,7 +2046,7 @@ var Tag = (function (){
       return name === "end-page" || name === "page-break";
     },
     _getCssCacheKey : function(selectors){
-      return selectors.join("+");
+      return selectors.join("*");
     },
     _getPseudoElementCssCacheKey : function(element_name){
       return [this.fullSelectorCacheKey, element_name].join("::");
@@ -2131,12 +2131,12 @@ var Tag = (function (){
       return Html.tagWrap(element_name, content, {"data-key":cache_key});
     },
     _appendFirstLetter : function(content){
-      var first_letter_style = this.getPseudoElementCssAttr("first-letter");
-      if(Obj.isEmpty(first_letter_style)){
+      var css_attr = this.getPseudoElementCssAttr("first-letter");
+      if(Obj.isEmpty(css_attr)){
 	return content;
       }
       var cache_key = this._getPseudoElementCssCacheKey(this.selectors, "first-letter");
-      add_css_attr_cache(cache_key, first_letter_style);
+      add_css_attr_cache(cache_key, css_attr);
       return content.replace(rex_first_letter, function(match, p1, p2, p3){
 	return p1 + Html.tagStart("first-letter", {"data-key":cache_key}) + p3 + "</first-letter>";
       });
@@ -4854,6 +4854,168 @@ var Box = (function(){
   return Box;
 })();
 
+// style setting from markup to box
+var BoxStyle = {
+  set : function(markup, box, parent){
+    this._setFontSize(markup, box, parent);
+    this._setFontColor(markup, box, parent);
+    this._setFontFamily(markup, box, parent);
+    this._setFontStyle(markup, box, parent);
+    this._setFontWeight(markup, box, parent);
+    this._setSizing(markup, box, parent);
+    this._setEdge(markup, box, parent);
+    this._setLineRate(markup, box, parent);
+    this._setTextAlign(markup, box, parent);
+    this._setTextIndent(markup, box, parent);
+    this._setTextEmphasis(markup, box, parent);
+    this._setFlowName(markup, box, parent);
+    this._setFloat(markup, box, parent);
+    this._setPageBreak(markup, box, parent);
+    this._setLetterSpacing(markup, box, parent);
+    this._setBackground(markup, box, parent);
+    this._setBackgroundColor(markup, box, parent);
+    this._setBackgroundImage(markup, box, parent);
+    this._setBackgroundPosition(markup, box, parent);
+    this._setBackgroundRepeat(markup, box, parent);
+    this._setClasses(markup, box, parent);
+  },
+  _setClasses : function(markup, box, parent){
+    List.iter(markup.classes, function(klass){
+      box.addClass(klass);
+    });
+  },
+  _setFontSize : function(markup, box, parent){
+    var base_font_size = parent? parent.fontSize : Layout.fontSize;
+    var font_size = markup.getCssAttr("font-size", "inherit");
+    if(font_size != "inherit"){
+      box.fontSize = UnitSize.getUnitSize(font_size, base_font_size);
+    }
+  },
+  _setFontColor : function(markup, box, parent){
+    var font_color = markup.getCssAttr("color");
+    if(font_color){
+      box.color = new Color(font_color);
+    }
+  },
+  _setFontFamily : function(markup, box, parent){
+    var font_family = markup.getCssAttr("font-family");
+    if(font_family){
+      box.setCss("font-family", font_family);
+    }
+  },
+  _setFontStyle : function(markup, box, parent){
+    var font_style = markup.getCssAttr("font-style");
+    if(font_style){
+      box.setCss("font-style", font_style);
+    }
+  },
+  _setFontWeight : function(markup, box, parent){
+    var font_weight = markup.getCssAttr("font-weight");
+    if(font_weight){
+      box.fontWeight = new FontWeight(font_weight);
+    }
+  },
+  _setSizing : function(markup, box, parent){
+    var box_sizing = markup.getCssAttr("box-sizing");
+    if(box_sizing){
+      box.sizing = BoxSizings.getByName(box_sizing);
+    }
+  },
+  _setEdge : function(markup, box, parent){
+    var edge = markup.getBoxEdge(box.flow, box.fontSize, box.getContentMeasure());
+    if(edge){
+      box.setEdge(edge);
+    }
+  },
+  _setLineRate : function(markup, box, parent){
+    var line_rate = markup.getCssAttr("line-rate", "inherit");
+    if(line_rate !== "inherit"){
+      box.lineRate = line_rate;
+    }
+  },
+  _setTextAlign : function(markup, box, parent){
+    var text_align = markup.getCssAttr("text-align");
+    if(text_align){
+      box.textAlign = text_align;
+    }
+  },
+  _setTextIndent : function(markup, box, parent){
+    var text_indent = markup.getCssAttr("text-indent", "inherit");
+    if(text_indent !== "inherit"){
+      box.textIndent = UnixSize.getUnitSize(text_indent, box.fontSize);
+    }
+  },
+  _setTextEmphasis : function(markup, box, parent){
+    var empha_style = markup.getCssAttr("text-emphasis-style");
+    if(empha_style){
+      var empha_pos = markup.getCssAttr("text-emphasis-position", "over");
+      var empha_color = markup.getCssAttr("text-emphasis-color", "black");
+      var text_empha = new TextEmpha();
+      text_empha.setStyle(empha_style);
+      text_empha.setPos(empha_pos);
+      text_empha.setColor(empha_color);
+      box.textEmpha = text_empha;
+    }
+  },
+  _setFlowName : function(markup, box, parent){
+    var flow_name = markup.getCssAttr("flow", "inherit");
+    if(flow_name === "flip"){
+      box.setFlow(parent.getFlipFlow());
+    } else if(flow_name !== "inherit"){
+      box.setFlow(BoxFlows.getByName(flow_name));
+    }
+  },
+  _setFloat : function(markup, box, parent){
+    var logical_float = markup.getCssAttr("float", "none");
+    if(logical_float != "none"){
+      box.logicalFloat = logical_float;
+    }
+  },
+  _setPageBreak : function(markup, box, parent){
+    var page_break_after = markup.getCssAttr("page-break-after", false);
+    if(page_break_after){
+      box.pageBreakAfter = true;
+    }
+  },
+  _setLetterSpacing : function(markup, box, parent){
+    var letter_spacing = markup.getCssAttr("letter-spacing");
+    if(letter_spacing){
+      box.letterSpacing = UnitSize.getUnitSize(letter_spacing, box.fontSize);
+    }
+  },
+  _setBackground : function(markup, box, parent){
+    var background = markup.getCssAttr("background");
+    if(background){
+      box.setCss("background", background);
+    }
+  },
+  _setBackgroundColor : function(markup, box, parent){
+    var background_color = markup.getCssAttr("background-color");
+    if(background_color){
+      box.setCss("background-color", background_color);
+    }
+  },
+  _setBackgroundImage : function(markup, box, parent){
+    var background_image = markup.getCssAttr("background-image");
+    if(background_image){
+      box.setCss("background-image", background_image);
+    }
+  },
+  _setBackgroundPosition : function(markup, box, parent){
+    var background_pos = markup.getCssAttr("background-position");
+    if(background_pos){
+      box.setCss("background-position", background_pos);
+    }
+  },
+  _setBackgroundRepeat : function(markup, box, parent){
+    var background_repeat = markup.getCssAttr("background-repeat");
+    if(background_repeat){
+      box.setCss("background-repeat", background_pos);
+    }
+  }
+};
+
+
 var Lexer = (function (){
 
   var rexTcy = /\d\d|!\?|!!|\?!|\?\?/;
@@ -6618,11 +6780,9 @@ var ElementGenerator = Class.extend({
     return this.markup.getName();
   },
   _setBoxFirstChild : function(box, parent){
-    box.firstChild = box.isFirstChildOf(parent);
-
     // if box is first child of parent,
     // copy style of <this.markup.name>:first-child.
-    if(box.firstChild){
+    if(box.isFirstChildOf(parent)){
       this.markup.setFirstChild();
     }
   },
@@ -6631,156 +6791,8 @@ var ElementGenerator = Class.extend({
       box.addClass(klass);
     });
   },
-  _setBoxFontSize : function(box, parent){
-    var base_font_size = parent? parent.fontSize : Layout.fontSize;
-    var font_size = this.markup.getCssAttr("font-size", "inherit");
-    if(font_size != "inherit"){
-      box.fontSize = UnitSize.getUnitSize(font_size, base_font_size);
-    }
-  },
-  _setBoxFontColor : function(box, parent){
-    var font_color = this.markup.getCssAttr("color");
-    if(font_color){
-      box.color = new Color(font_color);
-    }
-  },
-  _setBoxFontFamily : function(box, parent){
-    var font_family = this.markup.getCssAttr("font-family");
-    if(font_family){
-      box.setCss("font-family", font_family);
-    }
-  },
-  _setBoxFontStyle : function(box, parent){
-    var font_style = this.markup.getCssAttr("font-style");
-    if(font_style){
-      box.setCss("font-style", font_style);
-    }
-  },
-  _setBoxFontWeight : function(box, parent){
-    var font_weight = this.markup.getCssAttr("font-weight");
-    if(font_weight){
-      box.fontWeight = new FontWeight(font_weight);
-    }
-  },
-  _setBoxSizing : function(box, parent){
-    var box_sizing = this.markup.getCssAttr("box-sizing");
-    if(box_sizing){
-      box.sizing = BoxSizings.getByName(box_sizing);
-    }
-  },
-  _setBoxEdge : function(box, parent){
-    var edge = this.markup.getBoxEdge(box.flow, box.fontSize, box.getContentMeasure());
-    if(edge){
-      box.setEdge(edge);
-    }
-  },
-  _setBoxLineRate : function(box, parent){
-    var line_rate = this.markup.getCssAttr("line-rate", "inherit");
-    if(line_rate !== "inherit"){
-      box.lineRate = line_rate;
-    }
-  },
-  _setBoxTextAlign : function(box, parent){
-    var text_align = this.markup.getCssAttr("text-align");
-    if(text_align){
-      box.textAlign = text_align;
-    }
-  },
-  _setBoxTextIndent : function(box, parent){
-    var text_indent = this.markup.getCssAttr("text-indent", "inherit");
-    if(text_indent !== "inherit"){
-      box.textIndent = UnixSize.getUnitSize(text_indent, box.fontSize);
-    }
-  },
-  _setBoxTextEmphasis : function(box, parent){
-    var empha_style = this.markup.getCssAttr("text-emphasis-style");
-    if(empha_style){
-      var empha_pos = this.markup.getCssAttr("text-emphasis-position", "over");
-      var empha_color = this.markup.getCssAttr("text-emphasis-color", "black");
-      var text_empha = new TextEmpha();
-      text_empha.setStyle(empha_style);
-      text_empha.setPos(empha_pos);
-      text_empha.setColor(empha_color);
-      box.textEmpha = text_empha;
-    }
-  },
-  _setBoxFlowName : function(box, parent){
-    var flow_name = this.markup.getCssAttr("flow", "inherit");
-    if(flow_name === "flip"){
-      box.setFlow(parent.getFlipFlow());
-    } else if(flow_name !== "inherit"){
-      box.setFlow(BoxFlows.getByName(flow_name));
-    }
-  },
-  _setBoxFloat : function(box, parent){
-    var logical_float = this.markup.getCssAttr("float", "none");
-    if(logical_float != "none"){
-      box.logicalFloat = logical_float;
-    }
-  },
-  _setBoxPageBreak : function(box, parent){
-    var page_break_after = this.markup.getCssAttr("page-break-after", false);
-    if(page_break_after){
-      box.pageBreakAfter = true;
-    }
-  },
-  _setBoxLetterSpacing : function(box, parent){
-    var letter_spacing = this.markup.getCssAttr("letter-spacing");
-    if(letter_spacing){
-      box.letterSpacing = UnitSize.getUnitSize(letter_spacing, box.fontSize);
-    }
-  },
-  _setBoxBackground : function(box, parent){
-    var background = this.markup.getCssAttr("background");
-    if(background){
-      box.setCss("background", background);
-    }
-  },
-  _setBoxBackgroundColor : function(box, parent){
-    var background_color = this.markup.getCssAttr("background-color");
-    if(background_color){
-      box.setCss("background-color", background_color);
-    }
-  },
-  _setBoxBackgroundImage : function(box, parent){
-    var background_image = this.markup.getCssAttr("background-image");
-    if(background_image){
-      box.setCss("background-image", background_image);
-    }
-  },
-  _setBoxBackgroundPosition : function(box, parent){
-    var background_pos = this.markup.getCssAttr("background-position");
-    if(background_pos){
-      box.setCss("background-position", background_pos);
-    }
-  },
-  _setBoxBackgroundRepeat : function(box, parent){
-    var background_repeat = this.markup.getCssAttr("background-repeat");
-    if(background_repeat){
-      box.setCss("background-repeat", background_pos);
-    }
-  },
   _setBoxStyle : function(box, parent){
-    this._setBoxFontSize(box, parent);
-    this._setBoxFontColor(box, parent);
-    this._setBoxFontFamily(box, parent);
-    this._setBoxFontStyle(box, parent);
-    this._setBoxFontWeight(box, parent);
-    this._setBoxSizing(box, parent);
-    this._setBoxEdge(box, parent);
-    this._setBoxLineRate(box, parent);
-    this._setBoxTextAlign(box, parent);
-    this._setBoxTextIndent(box, parent);
-    this._setBoxTextEmphasis(box, parent);
-    this._setBoxFlowName(box, parent);
-    this._setBoxFloat(box, parent);
-    this._setBoxPageBreak(box, parent);
-    this._setBoxLetterSpacing(box, parent);
-    this._setBoxBackground(box, parent);
-    this._setBoxBackgroundColor(box, parent);
-    this._setBoxBackgroundImage(box, parent);
-    this._setBoxBackgroundPosition(box, parent);
-    this._setBoxBackgroundRepeat(box, parent);
+    BoxStyle.set(this.markup, box, parent);
   },
   _createBox : function(size, parent){
     var box_type = this._getBoxType();
@@ -7344,9 +7356,20 @@ var InlineTreeGenerator = ElementGenerator.extend({
     var extent = parent.getContentExtent();
     return parent.flow.getBoxSize(measure, extent);
   },
+  _setFirstLineStyle : function(line, parent){
+    var css_attr = this.markup? this.markup.getPseudoElementCssAttr("first-line") : {};
+    if(!Obj.isEmpty(css_attr)){
+      var first_line_tag = new Tag("<first-line>");
+      first_line_tag.setCssAttrs(css_attr);
+      BoxStyle.set(first_line_tag, line, parent);
+    }
+  },
   _createLine  : function(parent){
     var size = this._getLineSize(parent);
     var line = Layout.createTextLine(size, parent);
+    if(this.lineNo === 0){
+      this._setFirstLineStyle(line, parent);
+    }
     line.markup = this.markup;
     line.lineNo = this.lineNo;
     return line;
@@ -7414,9 +7437,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     return line;
   },
   _onLastTree : function(ctx, line){
-    if(this.markup){
-      this.context.popInlineTag();
-    }
   },
   _onCompleteTree : function(ctx, line){
     line.setMaxExtent(ctx.getMaxExtent());
@@ -7519,6 +7539,9 @@ var InlineTreeGenerator = ElementGenerator.extend({
     case "style":
       ctx.addStyle(tag);
       return Exceptions.IGNORE;
+    case "first-line":
+      //return (new FirstLineGenerator(tag, this.context, this.stream)).yield(ctx.line);
+      return (new FirstLineGenerator(tag, this.context, ctx.stream)).yield(ctx.line);
     default:
       this.generator = this._createChildInlineTreeGenerator(ctx, tag);
       return this.generator.yield(ctx.line);
@@ -7543,6 +7566,7 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
     this.context = context;
     this.context.pushInlineTag(this.markup);
     this.stream = this._createStream();
+    this.lineNo = 0;
   },
   _createStream : function(){
     return new TokenStream(this.markup.getContent());
@@ -7557,9 +7581,12 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
     var extent = parent.getContentExtent();
     return parent.flow.getBoxSize(measure, extent);
   },
-  _onCompleteTree : function(ctx, line){
+  _onLastTree : function(){
     this.context.popInlineTag();
+  },
+  _onCompleteTree : function(ctx, line){
     line.shortenMeasure();
+    this.lineNo++;
   }
 });
 
@@ -7963,7 +7990,7 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
   },
   _createBox : function(size, parent){
     var box = Layout.createRootBox(size, "body");
-    this._setBoxStyle(box);
+    this._setBoxStyle(box, null);
     box.percent = this.stream.getSeekPercent();
     box.seekPos = this.stream.getSeekPos();
     box.pageNo = this.context.getPageNo();

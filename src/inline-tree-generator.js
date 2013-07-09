@@ -37,9 +37,20 @@ var InlineTreeGenerator = ElementGenerator.extend({
     var extent = parent.getContentExtent();
     return parent.flow.getBoxSize(measure, extent);
   },
+  _setFirstLineStyle : function(line, parent){
+    var css_attr = this.markup? this.markup.getPseudoElementCssAttr("first-line") : {};
+    if(!Obj.isEmpty(css_attr)){
+      var first_line_tag = new Tag("<first-line>");
+      first_line_tag.setCssAttrs(css_attr);
+      BoxStyle.set(first_line_tag, line, parent);
+    }
+  },
   _createLine  : function(parent){
     var size = this._getLineSize(parent);
     var line = Layout.createTextLine(size, parent);
+    if(this.lineNo === 0){
+      this._setFirstLineStyle(line, parent);
+    }
     line.markup = this.markup;
     line.lineNo = this.lineNo;
     return line;
@@ -107,9 +118,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     return line;
   },
   _onLastTree : function(ctx, line){
-    if(this.markup){
-      this.context.popInlineTag();
-    }
   },
   _onCompleteTree : function(ctx, line){
     line.setMaxExtent(ctx.getMaxExtent());
@@ -212,6 +220,9 @@ var InlineTreeGenerator = ElementGenerator.extend({
     case "style":
       ctx.addStyle(tag);
       return Exceptions.IGNORE;
+    case "first-line":
+      //return (new FirstLineGenerator(tag, this.context, this.stream)).yield(ctx.line);
+      return (new FirstLineGenerator(tag, this.context, ctx.stream)).yield(ctx.line);
     default:
       this.generator = this._createChildInlineTreeGenerator(ctx, tag);
       return this.generator.yield(ctx.line);

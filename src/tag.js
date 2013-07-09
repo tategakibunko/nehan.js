@@ -359,7 +359,7 @@ var Tag = (function (){
       return name === "end-page" || name === "page-break";
     },
     _getCssCacheKey : function(selectors){
-      return selectors.join("+");
+      return selectors.join("*");
     },
     _getPseudoElementCssCacheKey : function(element_name){
       return [this.fullSelectorCacheKey, element_name].join("::");
@@ -444,12 +444,12 @@ var Tag = (function (){
       return Html.tagWrap(element_name, content, {"data-key":cache_key});
     },
     _appendFirstLetter : function(content){
-      var first_letter_style = this.getPseudoElementCssAttr("first-letter");
-      if(Obj.isEmpty(first_letter_style)){
+      var css_attr = this.getPseudoElementCssAttr("first-letter");
+      if(Obj.isEmpty(css_attr)){
 	return content;
       }
       var cache_key = this._getPseudoElementCssCacheKey(this.selectors, "first-letter");
-      add_css_attr_cache(cache_key, first_letter_style);
+      add_css_attr_cache(cache_key, css_attr);
       return content.replace(rex_first_letter, function(match, p1, p2, p3){
 	return p1 + Html.tagStart("first-letter", {"data-key":cache_key}) + p3 + "</first-letter>";
       });
