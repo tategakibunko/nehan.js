@@ -41,7 +41,7 @@ var Char = (function(){
 	}
       } else {
 	if(this.getVertScale() < 1){
-	  css["height"] = "0.5em";
+	  css.height = "0.5em";
 	}
 	if(padding_enable){
 	  css["margin-bottom"] = "0.5em";

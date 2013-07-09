@@ -2264,7 +2264,7 @@ var Char = (function(){
 	}
       } else {
 	if(this.getVertScale() < 1){
-	  css["height"] = "0.5em";
+	  css.height = "0.5em";
 	}
 	if(padding_enable){
 	  css["margin-bottom"] = "0.5em";
@@ -6773,7 +6773,7 @@ var ElementGenerator = Class.extend({
     switch(tag.getName()){
     case "img":
       return (new ImageGenerator(tag, this.context)).yield(parent);
-    case "ibox":
+    case "ibox": case "div":
       return (new InlineBoxGenerator(tag, this.context)).yield(parent);
     default:
       return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent);
@@ -6863,7 +6863,7 @@ var InlineBoxGenerator = StaticBlockGenerator.extend({
     return "ibox";
   },
   _onCreateBox : function(box, parent){
-    box.content = this.markup.getSrc();
+    box.content = this.markup.getContentRaw();
     box.css.overflow = "hidden";
   }
 });
