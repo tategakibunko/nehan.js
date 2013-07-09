@@ -4803,6 +4803,9 @@ var Box = (function(){
     isRtLine : function(){
       return this.isTextLine() && this.markup && (this.markup.getName() === "rt");
     },
+    isLinkLine : function(){
+      return this.isTextLine() && this.markup && (this.markup.getName() === "a");
+    },
     isFirstLetter : function(){
       return this.markup && this.markup.getName() === "first-letter";
     },
@@ -8440,7 +8443,9 @@ var InlineEvaluator = Class.extend({
     var body = List.fold(tokens, "", function(ret, element){
       return ret + self.evalInlineElement(line, element);
     });
-    //return line.isInlineText()? this.wrapInlineTag(line.markup, body) : body;
+    if(line.isLinkLine()){
+      return this.wrapInlineTag(line.markup, body);
+    }
     return body;
   },
   evalInlineElement : function(line, element){

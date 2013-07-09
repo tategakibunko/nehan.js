@@ -13,7 +13,9 @@ var InlineEvaluator = Class.extend({
     var body = List.fold(tokens, "", function(ret, element){
       return ret + self.evalInlineElement(line, element);
     });
-    //return line.isInlineText()? this.wrapInlineTag(line.markup, body) : body;
+    if(line.isLinkLine()){
+      return this.wrapInlineTag(line.markup, body);
+    }
     return body;
   },
   evalInlineElement : function(line, element){

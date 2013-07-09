@@ -370,6 +370,9 @@ var Box = (function(){
     isRtLine : function(){
       return this.isTextLine() && this.markup && (this.markup.getName() === "rt");
     },
+    isLinkLine : function(){
+      return this.isTextLine() && this.markup && (this.markup.getName() === "a");
+    },
     isFirstLetter : function(){
       return this.markup && this.markup.getName() === "first-letter";
     },
