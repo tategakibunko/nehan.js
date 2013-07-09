@@ -120,7 +120,8 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
     return chr.cnv + "<br />";
   },
   evalSmallKana : function(line, chr){
-    return Html.tagWrap("div", chr.data, {
+    var tag_name = line.textEmpha? "span" : "div";
+    return Html.tagWrap(tag_name, chr.data, {
       style:Css.toString(chr.getCssVertSmallKana())
     });
   },
