@@ -1,12 +1,12 @@
 var BlockTreeGenerator = ElementGenerator.extend({
   init : function(markup, context){
     this._super(markup, context);
+    this.context.pushBlockTag(this.markup);
     this.generator = null;
     this.rollbackCount = 0;
     this.stream = this._createStream();
     this.localPageNo = 0;
     this.pageBreakBefore = this._isPageBreakBefore();
-    this.context.pushBlockTag(this.markup);
   },
   hasNext : function(){
     if(this.generator && this.generator.hasNext()){
@@ -40,6 +40,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     if(this.stream.isEmpty()){
       return Exceptions.SKIP;
     }
+
     // let this generator yield PAGE_BREAK exception(only once).
     if(this.pageBreakBefore){
       this.pageBreakBefore = false;
@@ -118,7 +119,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return (element instanceof Box) && !element.isTextLine() && (element.getContentExtent(flow) <= 0);
   },
   _createStream : function(){
-    var source = this._createSource(this.markup.content);
+    var source = this._createSource(this.markup.getContent());
     return new TokenStream(source);
   },
   // caution:
@@ -144,6 +145,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
     var token = this.stream.get();
     if(token === null){
       return Exceptions.BUFFER_END;
+    }
+    if(Token.isTag(token)){
+      this.context.inheritTag(token);
     }
     // in block level, new-line character makes no sense, just ignored.
     if(Token.isChar(token) && token.isNewLineChar()){

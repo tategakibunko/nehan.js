@@ -22,18 +22,14 @@ var ElementGenerator = Class.extend({
     return this.markup.getStaticSize(font_size, measure);
   },
   _yieldStaticElement : function(parent, tag){
-    if(tag.getName() === "img"){
+    switch(tag.getName()){
+    case "img":
       return (new ImageGenerator(tag, this.context)).yield(parent);
+    case "ibox":
+      return (new InlineBoxGenerator(tag, this.context)).yield(parent);
+    default:
+      return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent);
     }
-    // if original flow defined, yield as inline page
-    if(tag.hasFlow()){
-      var size = tag.getStaticSize(parent.fontSize, parent.getContentMeasure());
-      return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent, size);
-    }
-    // if static size is simply defined, treat as just an embed html with static size.
-    console.log("inline-block?:%o", tag);
-    return (new InlineBoxGenerator(tag, this.context)).yield(parent);
-    //return (new InlineBlockGenerator(tag, this.context.createInlineRoot())).yield(parent);
   },
   _getBoxType : function(){
     return this.markup.getName();

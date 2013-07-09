@@ -246,6 +246,7 @@ var Style = {
   },
   "hr":{
     "display":"block",
+    "box-sizing":"content-box",
     "single":true,
     "margin":{
       "after":"1em"
@@ -784,7 +785,6 @@ var Style = {
   //-------------------------------------------------------
   ".nehan-drop-caps::first-letter":{
     "display":"block",
-    //"flow":"inherit",
     "width":"4em",
     "height":"4em",
     "float":"start",

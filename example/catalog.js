@@ -2,8 +2,8 @@ var Catalog = (function(){
   function Catalog(direction, width, height){
     this.engine = Nehan.setup({
       config:{
-	useVerticalGlyphIfEnable:false
-	//useVerticalGlyphIfEnable:true
+	//useVerticalGlyphIfEnable:false
+	useVerticalGlyphIfEnable:true
       },
       layout:{
 	direction:direction,

@@ -1,7 +1,7 @@
 var TableTagStream = FilteredTagStream.extend({
   init : function(markup){
     // TODO: caption not supported yet.
-    this._super(markup.content, function(tag){
+    this._super(markup.getContent(), function(tag){
       return (tag.isSameAs("thead") ||
 	      tag.isSameAs("tbody") ||
 	      tag.isSameAs("tfoot") ||
@@ -45,21 +45,21 @@ var TableTagStream = FilteredTagStream.extend({
 	switch(token.name){
 	case "tr":
 	  token.row = ctx.row;
-	  self._setChildTokens(token, self._parseCols(ctx, token.content));
+	  self._setChildTokens(token, self._parseCols(ctx, token.getContent()));
 	  ctx.row++;
 	  tbodies.push(token);
 	  break;
 	case "thead":
 	  thead = token;
-	  theads = theads.concat(self._parseRows(ctx, token.content));
+	  theads = theads.concat(self._parseRows(ctx, token.getContent()));
 	  break;
 	case "tbody":
 	  tbody = token;
-	  tbodies = tbodies.concat(self._parseRows(ctx, token.content));
+	  tbodies = tbodies.concat(self._parseRows(ctx, token.getContent()));
 	  break;
 	case "tfoot":
 	  tfoot = token;
-	  tfoots = tfoots.concat(self._parseRows(ctx, token.content));
+	  tfoots = tfoots.concat(self._parseRows(ctx, token.getContent()));
 	  break;
 	}
       }
@@ -119,7 +119,7 @@ var TableTagStream = FilteredTagStream.extend({
 
     return List.map(rows, function(row){
       row.row = ctx.row;
-      row = self._setChildTokens(row, self._parseCols(ctx, row.content));
+      row = self._setChildTokens(row, self._parseCols(ctx, row.getContent()));
       ctx.row++;
       return row;
     });

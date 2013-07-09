@@ -428,6 +428,7 @@ var Style = {
   },
   "hr":{
     "display":"block",
+    "box-sizing":"content-box",
     "single":true,
     "margin":{
       "after":"1em"
@@ -966,7 +967,6 @@ var Style = {
   //-------------------------------------------------------
   ".nehan-drop-caps::first-letter":{
     "display":"block",
-    //"flow":"inherit",
     "width":"4em",
     "height":"4em",
     "float":"start",
@@ -1691,11 +1691,21 @@ var Tag = (function (){
     this._inherited = false; // flag to avoid duplicate inheritance
     this.src = src;
     this.name = this._parseName(this.src);
+    this.parent = null;
+    this.contentRaw = content || "";
+
+    // <img width='xx' height='yy'>
+    // => tagAttr = {width:'xx', height:'yy'}
     this.tagAttr = {};
+
+    // <img data-key='xxx'>
+    // -> dataset = {key:'xxx'}
     this.dataset = {};
+
+    // updated when 'inherit' is called.
     this.cssAttrContext = {};
 
-    // this object is updated by Tag::setCssAttr.
+    // updated by 'setCssAttr'.
     // notice that this must be defined before this._parseTagAttr.
     this.cssAttrDynamic = {};
 
@@ -1703,9 +1713,7 @@ var Tag = (function (){
     this.id = this._parseId();
     this.classes = this._parseClasses();
     this.selectors = this._parseSelectors(this.id, this.classes);
-    this.cssAttrStatic = this._parseCssAttr(this.selectors);
-    this.parent = null;
-    this.content = this._parseContent(content || "");
+    this.cssAttrContext = this._parseCssAttr(this.selectors);
   }
 
   // name and value regexp
@@ -1741,21 +1749,26 @@ var Tag = (function (){
       }
       var self = this;
       this.parent = parent_tag;
-      this.iterCssAttr(function(prop, val){
-	if(val === "inherit"){
-	  self.setCssAttr(prop, parent_tag.getAttr(prop));
-	}
-      });
       if(parent_tag.getName() != "body"){
+	var prev_selector_size = this.selectors.length;
 	var parent_selectors = parent_tag.getSelectors();
 	var ctx_selectors = this._parseContextSelectors(parent_selectors);
-	this.cssAttrContext = this._parseCssAttr(ctx_selectors);
 	this.selectors = this.selectors.concat(ctx_selectors);
+	if(this.selectors.length > prev_selector_size){
+	  this.cssAttrContext = this._parseCssAttr(this.selectors); // update style by new selector list
+	}
       }
+      // copy 'inherit' value from parent.
+      for(var prop in this.cssAttrContext){
+	if(this.cssAttrContext[prop] === "inherit"){
+	  this.setCssAttr(prop, parent_tag.getAttr(prop));
+	}
+      }
+      this.fullSelectorCacheKey = this._getCssCacheKey(this.selectors);
       this._inherited = true;
     },
-    setContent : function(content){
-      this.content = this._parseContent(content);
+    setContentRaw : function(content_raw){
+      this.contentRaw = content_raw;
     },
     setTagAttr : function(name, value){
       this.tagAttr[name] = value;
@@ -1793,11 +1806,11 @@ var Tag = (function (){
     iterCssAttrDynamic : function(fn){
       List.each(this.cssAttrDynamic, fn);
     },
-    iterCssAttrStatic : function(fn){
-      List.each(this.cssAttrStatic, fn);
+    iterCssAttrContext : function(fn){
+      List.each(this.cssAttrContext, fn);
     },
     iterCssAttr : function(fn){
-      this.iterCssAttrStatic(fn);
+      this.iterCssAttrContext(fn);
       this.iterCssAttrDynamic(fn); // dynamic attrs prior to static ones.
     },
     iterAttr : function(fn){
@@ -1828,14 +1841,14 @@ var Tag = (function (){
       return this.tagAttr[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
     getCssAttr : function(name, def_value){
-      return this.cssAttrDynamic[name] || this.cssAttrContext[name] || this.cssAttrStatic[name] || ((typeof def_value !== "undefined")? def_value : null);
+      return this.cssAttrDynamic[name] || this.cssAttrContext[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
     // used for property that could be contructed with multiple values such as margin(start/end/before/after).
     // for example, when we get "margin" of some target,
     // we read style from default css, and context selector css, and inline style,
     // and we must 'merge' them to get strict style settings.
     getCssAttrs : function(name, def_value){
-      return List.fold([this.cssAttrStatic, this.cssAttrContext, this.cssAttrDynamic], [], function(ret, target){
+      return List.fold([this.cssAttrContext, this.cssAttrDynamic], [], function(ret, target){
 	if(typeof target[name] !== "undefined"){
 	  ret.push(target[name]);
 	}
@@ -1849,7 +1862,14 @@ var Tag = (function (){
       var name = this.getName();
       return this.isClose()? name.slice(1) : name;
     },
+    getContentRaw : function(){
+      return this.contentRaw;
+    },
     getContent : function(){
+      if(this.content){
+	return this.content;
+      }
+      this.content = this._parseContent(this.contentRaw);
       return this.content;
     },
     getCloseTag : function(){
@@ -1863,9 +1883,6 @@ var Tag = (function (){
     },
     getSrc : function(){
       return this.src;
-    },
-    getWrapSrc : function(){
-      return this.src + this.content + this.getCloseSrc();
     },
     getLogicalFloat : function(){
       return this.getCssAttr("float", "none");
@@ -1945,6 +1962,9 @@ var Tag = (function (){
 	return this.alias == name;
       }
       return this.name == name;
+    },
+    isPseudoElement : function(){
+      return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
     isClassAttrEnable : function(){
       return (typeof this.tagAttr["class"] != "undefined");
@@ -2026,10 +2046,10 @@ var Tag = (function (){
       return name === "end-page" || name === "page-break";
     },
     _getCssCacheKey : function(selectors){
-      return selectors.join(",");
+      return selectors.join("+");
     },
-    _getPseudoElementCssCacheKey : function(selectors, element_name){
-      return [element_name, this._getCssCacheKey(this.selectors)].join("::");
+    _getPseudoElementCssCacheKey : function(element_name){
+      return [this.fullSelectorCacheKey, element_name].join("::");
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
@@ -2100,15 +2120,17 @@ var Tag = (function (){
       }
       return cache;
     },
-    _parseBeforeContent : function(){
-      var pseudo_css_attr = this.getPseudoElementCssAttr("before");
-      return pseudo_css_attr.content || "";
+    _parsePseudoElementContentSrc : function(element_name){
+      var css_attr = this.getPseudoElementCssAttr(element_name);
+      if(Obj.isEmpty(css_attr)){
+	return "";
+      }
+      var cache_key = this._getPseudoElementCssCacheKey(element_name);
+      add_css_attr_cache(css_attr);
+      var content = css_attr.content || "";
+      return Html.tagWrap(element_name, content, {"data-key":cache_key});
     },
-    _parseAfterContent : function(){
-      var pseudo_css_attr = this.getPseudoElementCssAttr("after");
-      return pseudo_css_attr.content || "";
-    },
-    _parsePseudoFirstLetter : function(content){
+    _appendFirstLetter : function(content){
       var first_letter_style = this.getPseudoElementCssAttr("first-letter");
       if(Obj.isEmpty(first_letter_style)){
 	return content;
@@ -2119,10 +2141,10 @@ var Tag = (function (){
 	return p1 + Html.tagStart("first-letter", {"data-key":cache_key}) + p3 + "</first-letter>";
       });
     },
-    _parseContent : function(content){
-      var before = this._parseBeforeContent();
-      var after = this._parseAfterContent();
-      return this._parsePseudoFirstLetter([before, content, after].join(""));
+    _parseContent : function(content_raw){
+      var before = this._parsePseudoElementContentSrc("before");
+      var after = this._parsePseudoElementContentSrc("after");
+      return this._appendFirstLetter([before, content_raw, after].join(""));
     },
     // <img src='/path/to/img' push>
     // => {src:'/path/to/img', push:true}
@@ -4479,6 +4501,8 @@ var Box = (function(){
 	  css["margin-left"] = css["margin-right"] = "auto";
 	  css["text-align"] = "center";
 	}
+      } else if(this.lineRate <= 1.0){
+	css["line-height"] = "1em";
       }
       return css;
     },
@@ -4779,6 +4803,9 @@ var Box = (function(){
     isRtLine : function(){
       return this.isTextLine() && this.markup && (this.markup.getName() === "rt");
     },
+    isFirstLetter : function(){
+      return this.markup && this.markup.getName() === "first-letter";
+    },
     isTextVertical : function(){
       return this.flow.isTextVertical();
     },
@@ -4939,7 +4966,7 @@ var Lexer = (function (){
     },
     _parseChildContentTag : function(tag){
       var content = this._getTagContent(tag.name);
-      tag.setContent(Utils.trimCRLF(content));
+      tag.setContentRaw(Utils.trimCRLF(content));
       this._stepBuff(content.length + tag.name.length + 3); // 3 = "</>".length
       return tag;
     },
@@ -5719,7 +5746,6 @@ var DocumentContext = (function(){
       return this.inlineContext.getTagDepth();
     },
     pushInlineTag : function(tag){
-      this.inheritTag(tag);
       this.inlineContext.pushTag(tag);
     },
     popInlineTag : function(){
@@ -5736,7 +5762,6 @@ var DocumentContext = (function(){
       return this.blockContext.isHeaderEnable();
     },
     pushBlockTag : function(tag){
-      this.inheritTag(tag);
       this.blockContext.pushTag(tag);
     },
     popBlockTag : function(){
@@ -5786,7 +5811,7 @@ var DocumentContext = (function(){
     logSectionHeader : function(tag){
       var type = tag.getName();
       var rank = tag.getHeaderRank();
-      var title = tag.content;
+      var title = tag.getContentRaw();
       var page_no = this.pageNo;
       var header_id = __global_header_id++;
       this.outlineContext.logSectionHeader(type, rank, title, page_no, header_id);
@@ -6214,7 +6239,7 @@ var HeadTagStream = FilteredTagStream.extend({
 var TableTagStream = FilteredTagStream.extend({
   init : function(markup){
     // TODO: caption not supported yet.
-    this._super(markup.content, function(tag){
+    this._super(markup.getContent(), function(tag){
       return (tag.isSameAs("thead") ||
 	      tag.isSameAs("tbody") ||
 	      tag.isSameAs("tfoot") ||
@@ -6258,21 +6283,21 @@ var TableTagStream = FilteredTagStream.extend({
 	switch(token.name){
 	case "tr":
 	  token.row = ctx.row;
-	  self._setChildTokens(token, self._parseCols(ctx, token.content));
+	  self._setChildTokens(token, self._parseCols(ctx, token.getContent()));
 	  ctx.row++;
 	  tbodies.push(token);
 	  break;
 	case "thead":
 	  thead = token;
-	  theads = theads.concat(self._parseRows(ctx, token.content));
+	  theads = theads.concat(self._parseRows(ctx, token.getContent()));
 	  break;
 	case "tbody":
 	  tbody = token;
-	  tbodies = tbodies.concat(self._parseRows(ctx, token.content));
+	  tbodies = tbodies.concat(self._parseRows(ctx, token.getContent()));
 	  break;
 	case "tfoot":
 	  tfoot = token;
-	  tfoots = tfoots.concat(self._parseRows(ctx, token.content));
+	  tfoots = tfoots.concat(self._parseRows(ctx, token.getContent()));
 	  break;
 	}
       }
@@ -6332,7 +6357,7 @@ var TableTagStream = FilteredTagStream.extend({
 
     return List.map(rows, function(row){
       row.row = ctx.row;
-      row = self._setChildTokens(row, self._parseCols(ctx, row.content));
+      row = self._setChildTokens(row, self._parseCols(ctx, row.getContent()));
       ctx.row++;
       return row;
     });
@@ -6489,7 +6514,7 @@ var HtmlGenerator = (function(){
       return this.generator.getOutlineHtml(root_name);
     },
     _createStream : function(){
-      return new HtmlTagStream(this.markup.content);
+      return new HtmlTagStream(this.markup.getContentRaw());
     },
     _getGenerator : function(){
       var generator = null;
@@ -6500,7 +6525,7 @@ var HtmlGenerator = (function(){
 	}
 	switch(tag.getName()){
 	case "head":
-	  this._parseHead(tag.content);
+	  this._parseHead(tag.getContentRaw());
 	  break;
 	case "body":
 	  generator = new BodyBlockTreeGenerator(tag, this.context);
@@ -6536,7 +6561,7 @@ var HtmlGenerator = (function(){
       }
     },
     _parseTitle : function(tag){
-      this.context.setTitle(tag.content);
+      this.context.setTitle(tag.getContentRaw());
     },
     _parseMeta : function(tag){
       var context = this.context;
@@ -6580,18 +6605,14 @@ var ElementGenerator = Class.extend({
     return this.markup.getStaticSize(font_size, measure);
   },
   _yieldStaticElement : function(parent, tag){
-    if(tag.getName() === "img"){
+    switch(tag.getName()){
+    case "img":
       return (new ImageGenerator(tag, this.context)).yield(parent);
+    case "ibox":
+      return (new InlineBoxGenerator(tag, this.context)).yield(parent);
+    default:
+      return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent);
     }
-    // if original flow defined, yield as inline page
-    if(tag.hasFlow()){
-      var size = tag.getStaticSize(parent.fontSize, parent.getContentMeasure());
-      return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent, size);
-    }
-    // if static size is simply defined, treat as just an embed html with static size.
-    console.log("inline-block?:%o", tag);
-    return (new InlineBoxGenerator(tag, this.context)).yield(parent);
-    //return (new InlineBlockGenerator(tag, this.context.createInlineRoot())).yield(parent);
   },
   _getBoxType : function(){
     return this.markup.getName();
@@ -6826,11 +6847,8 @@ var InlineBoxGenerator = StaticBlockGenerator.extend({
   _getBoxType : function(){
     return "ibox";
   },
-  _getBoxContent : function(){
-    return this.markup.isChildContentTag()? this.markup.getWrapSrc() : this.markup.getSrc();
-  },
   _onCreateBox : function(box, parent){
-    box.content = this._getBoxContent();
+    box.content = this.markup.getSrc();
     box.css.overflow = "hidden";
   }
 });
@@ -6841,10 +6859,15 @@ var ImageGenerator = StaticBlockGenerator.extend({
   }
 });
 
-var HorizontalRuleGenerator = StaticBlockGenerator.extend({
+var HorizontalRuleGenerator = ElementGenerator.extend({
   _getBoxSize : function(parent){
     var measure = parent? parent.getContentMeasure() : Layout.getStdMeasure();
     return parent.flow.getBoxSize(measure, 1);
+  },
+  yield : function(parent){
+    var size = this._getBoxSize(parent);
+    var box = this._createBox(size, parent);
+    return box;
   }
 });
 
@@ -6924,6 +6947,7 @@ var InlineTreeContext = (function(){
 	 element instanceof Word ||
 	 element instanceof Tcy ||
 	 element instanceof Ruby ||
+	 this.line.isFirstLetter() ||
 	 this.line.isRtLine()){
 	return this.restMeasure >= advance;
       }
@@ -7411,6 +7435,9 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(token === null){
       return Exceptions.BUFFER_END;
     }
+    if(Token.isTag(token)){
+      this.context.inheritTag(token);
+    }
     if(token instanceof Ruby){
       return token;
     }
@@ -7484,7 +7511,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
   },
   _yieldInlineTag : function(ctx, tag){
     if(tag.isSingleTag()){
-      ctx.inheritParentTag(tag);
       return tag;
     }
     switch(tag.getName()){
@@ -7515,8 +7541,8 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   init : function(markup, context){
     this.markup = markup;
     this.context = context;
-    this.stream = this._createStream();
     this.context.pushInlineTag(this.markup);
+    this.stream = this._createStream();
   },
   _createStream : function(){
     return new TokenStream(this.markup.getContent());
@@ -7578,12 +7604,12 @@ var LinkGenerator = ChildInlineTreeGenerator.extend({
 var BlockTreeGenerator = ElementGenerator.extend({
   init : function(markup, context){
     this._super(markup, context);
+    this.context.pushBlockTag(this.markup);
     this.generator = null;
     this.rollbackCount = 0;
     this.stream = this._createStream();
     this.localPageNo = 0;
     this.pageBreakBefore = this._isPageBreakBefore();
-    this.context.pushBlockTag(this.markup);
   },
   hasNext : function(){
     if(this.generator && this.generator.hasNext()){
@@ -7617,6 +7643,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     if(this.stream.isEmpty()){
       return Exceptions.SKIP;
     }
+
     // let this generator yield PAGE_BREAK exception(only once).
     if(this.pageBreakBefore){
       this.pageBreakBefore = false;
@@ -7695,7 +7722,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return (element instanceof Box) && !element.isTextLine() && (element.getContentExtent(flow) <= 0);
   },
   _createStream : function(){
-    var source = this._createSource(this.markup.content);
+    var source = this._createSource(this.markup.getContent());
     return new TokenStream(source);
   },
   // caution:
@@ -7721,6 +7748,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
     var token = this.stream.get();
     if(token === null){
       return Exceptions.BUFFER_END;
+    }
+    if(Token.isTag(token)){
+      this.context.inheritTag(token);
     }
     // in block level, new-line character makes no sense, just ignored.
     if(Token.isChar(token) && token.isNewLineChar()){
@@ -7905,6 +7935,7 @@ var SectionRootGenerator = ChildBlockTreeGenerator.extend({
   },
   _onLastTree : function(page){
     this.context.endSectionRoot(this.markup);
+    this._super();
   }
 });
 
@@ -7969,6 +8000,9 @@ var FloatedBlockTreeGenerator = BlockTreeGenerator.extend({
     this.stream = stream;
     this.floatedBox = floated_box;
   },
+  _onLastTree : function(){
+    // do nothing
+  },
   yield: function(parent){
     var backupPos2 = this.stream.backupPos; // backup the 'backup pos'
     var wrap_box = this._getFloatedWrapBox(parent, this.floatedBox);
@@ -8011,9 +8045,13 @@ var InlinePageGenerator = BlockTreeGenerator.extend({
   hasNext : function(){
     return false;
   },
-  yield : function(parent, size){
+  yield : function(parent){
+    var size = this._getBoxSize(parent);
     var wrap = Layout.createBox(size, parent, "div");
     var page = this._super(wrap); // yield page to wrap.
+    if(typeof page === "number"){
+      return page; // exception
+    }
     wrap.addChildBlock(page);
     wrap.logicalFloat = page.logicalFloat;
     return wrap;
@@ -8161,7 +8199,7 @@ var ListGenerator = ChildBlockTreeGenerator.extend({
     box.partition = new Partition([marker_advance, box.getContentMeasure() - marker_advance]);
   },
   _createStream : function(){
-    return new ListTagStream(this.markup.content);
+    return new ListTagStream(this.markup.getContent());
   }
 });
 
@@ -8171,7 +8209,7 @@ var InsideListItemGenerator = ChildBlockTreeGenerator.extend({
     var marker_html = Html.tagWrap("span", marker, {
       "class":"nehan-li-marker"
     });
-    markup.content = marker_html + Const.space + markup.content;
+    markup.content = marker_html + Const.space + markup.getContent();
     this._super(markup, context);
   }
 });
@@ -8201,7 +8239,7 @@ var ListItemBodyGenerator = ParaChildGenerator.extend({
 
 var DefListGenerator = ChildBlockTreeGenerator.extend({
   _createStream : function(){
-    return new DefListTagStream(this.markup.content);
+    return new DefListTagStream(this.markup.getContent());
   }
 });
 

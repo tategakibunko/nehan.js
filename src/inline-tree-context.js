@@ -74,6 +74,7 @@ var InlineTreeContext = (function(){
 	 element instanceof Word ||
 	 element instanceof Tcy ||
 	 element instanceof Ruby ||
+	 this.line.isFirstLetter() ||
 	 this.line.isRtLine()){
 	return this.restMeasure >= advance;
       }

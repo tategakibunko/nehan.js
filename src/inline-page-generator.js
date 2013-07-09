@@ -4,9 +4,13 @@ var InlinePageGenerator = BlockTreeGenerator.extend({
   hasNext : function(){
     return false;
   },
-  yield : function(parent, size){
+  yield : function(parent){
+    var size = this._getBoxSize(parent);
     var wrap = Layout.createBox(size, parent, "div");
     var page = this._super(wrap); // yield page to wrap.
+    if(typeof page === "number"){
+      return page; // exception
+    }
     wrap.addChildBlock(page);
     wrap.logicalFloat = page.logicalFloat;
     return wrap;

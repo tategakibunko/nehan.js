@@ -16,6 +16,6 @@ var ListGenerator = ChildBlockTreeGenerator.extend({
     box.partition = new Partition([marker_advance, box.getContentMeasure() - marker_advance]);
   },
   _createStream : function(){
-    return new ListTagStream(this.markup.content);
+    return new ListTagStream(this.markup.getContent());
   }
 });

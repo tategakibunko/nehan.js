@@ -23,7 +23,7 @@ var HtmlGenerator = (function(){
       return this.generator.getOutlineHtml(root_name);
     },
     _createStream : function(){
-      return new HtmlTagStream(this.markup.content);
+      return new HtmlTagStream(this.markup.getContentRaw());
     },
     _getGenerator : function(){
       var generator = null;
@@ -34,7 +34,7 @@ var HtmlGenerator = (function(){
 	}
 	switch(tag.getName()){
 	case "head":
-	  this._parseHead(tag.content);
+	  this._parseHead(tag.getContentRaw());
 	  break;
 	case "body":
 	  generator = new BodyBlockTreeGenerator(tag, this.context);
@@ -70,7 +70,7 @@ var HtmlGenerator = (function(){
       }
     },
     _parseTitle : function(tag){
-      this.context.setTitle(tag.content);
+      this.context.setTitle(tag.getContentRaw());
     },
     _parseMeta : function(tag){
       var context = this.context;

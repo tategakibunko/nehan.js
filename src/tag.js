@@ -4,11 +4,21 @@ var Tag = (function (){
     this._inherited = false; // flag to avoid duplicate inheritance
     this.src = src;
     this.name = this._parseName(this.src);
+    this.parent = null;
+    this.contentRaw = content || "";
+
+    // <img width='xx' height='yy'>
+    // => tagAttr = {width:'xx', height:'yy'}
     this.tagAttr = {};
+
+    // <img data-key='xxx'>
+    // -> dataset = {key:'xxx'}
     this.dataset = {};
+
+    // updated when 'inherit' is called.
     this.cssAttrContext = {};
 
-    // this object is updated by Tag::setCssAttr.
+    // updated by 'setCssAttr'.
     // notice that this must be defined before this._parseTagAttr.
     this.cssAttrDynamic = {};
 
@@ -16,9 +26,7 @@ var Tag = (function (){
     this.id = this._parseId();
     this.classes = this._parseClasses();
     this.selectors = this._parseSelectors(this.id, this.classes);
-    this.cssAttrStatic = this._parseCssAttr(this.selectors);
-    this.parent = null;
-    this.content = this._parseContent(content || "");
+    this.cssAttrContext = this._parseCssAttr(this.selectors);
   }
 
   // name and value regexp
@@ -54,21 +62,26 @@ var Tag = (function (){
       }
       var self = this;
       this.parent = parent_tag;
-      this.iterCssAttr(function(prop, val){
-	if(val === "inherit"){
-	  self.setCssAttr(prop, parent_tag.getAttr(prop));
-	}
-      });
       if(parent_tag.getName() != "body"){
+	var prev_selector_size = this.selectors.length;
 	var parent_selectors = parent_tag.getSelectors();
 	var ctx_selectors = this._parseContextSelectors(parent_selectors);
-	this.cssAttrContext = this._parseCssAttr(ctx_selectors);
 	this.selectors = this.selectors.concat(ctx_selectors);
+	if(this.selectors.length > prev_selector_size){
+	  this.cssAttrContext = this._parseCssAttr(this.selectors); // update style by new selector list
+	}
       }
+      // copy 'inherit' value from parent.
+      for(var prop in this.cssAttrContext){
+	if(this.cssAttrContext[prop] === "inherit"){
+	  this.setCssAttr(prop, parent_tag.getAttr(prop));
+	}
+      }
+      this.fullSelectorCacheKey = this._getCssCacheKey(this.selectors);
       this._inherited = true;
     },
-    setContent : function(content){
-      this.content = this._parseContent(content);
+    setContentRaw : function(content_raw){
+      this.contentRaw = content_raw;
     },
     setTagAttr : function(name, value){
       this.tagAttr[name] = value;
@@ -106,11 +119,11 @@ var Tag = (function (){
     iterCssAttrDynamic : function(fn){
       List.each(this.cssAttrDynamic, fn);
     },
-    iterCssAttrStatic : function(fn){
-      List.each(this.cssAttrStatic, fn);
+    iterCssAttrContext : function(fn){
+      List.each(this.cssAttrContext, fn);
     },
     iterCssAttr : function(fn){
-      this.iterCssAttrStatic(fn);
+      this.iterCssAttrContext(fn);
       this.iterCssAttrDynamic(fn); // dynamic attrs prior to static ones.
     },
     iterAttr : function(fn){
@@ -141,14 +154,14 @@ var Tag = (function (){
       return this.tagAttr[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
     getCssAttr : function(name, def_value){
-      return this.cssAttrDynamic[name] || this.cssAttrContext[name] || this.cssAttrStatic[name] || ((typeof def_value !== "undefined")? def_value : null);
+      return this.cssAttrDynamic[name] || this.cssAttrContext[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
     // used for property that could be contructed with multiple values such as margin(start/end/before/after).
     // for example, when we get "margin" of some target,
     // we read style from default css, and context selector css, and inline style,
     // and we must 'merge' them to get strict style settings.
     getCssAttrs : function(name, def_value){
-      return List.fold([this.cssAttrStatic, this.cssAttrContext, this.cssAttrDynamic], [], function(ret, target){
+      return List.fold([this.cssAttrContext, this.cssAttrDynamic], [], function(ret, target){
 	if(typeof target[name] !== "undefined"){
 	  ret.push(target[name]);
 	}
@@ -162,7 +175,14 @@ var Tag = (function (){
       var name = this.getName();
       return this.isClose()? name.slice(1) : name;
     },
+    getContentRaw : function(){
+      return this.contentRaw;
+    },
     getContent : function(){
+      if(this.content){
+	return this.content;
+      }
+      this.content = this._parseContent(this.contentRaw);
       return this.content;
     },
     getCloseTag : function(){
@@ -176,9 +196,6 @@ var Tag = (function (){
     },
     getSrc : function(){
       return this.src;
-    },
-    getWrapSrc : function(){
-      return this.src + this.content + this.getCloseSrc();
     },
     getLogicalFloat : function(){
       return this.getCssAttr("float", "none");
@@ -258,6 +275,9 @@ var Tag = (function (){
 	return this.alias == name;
       }
       return this.name == name;
+    },
+    isPseudoElement : function(){
+      return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
     isClassAttrEnable : function(){
       return (typeof this.tagAttr["class"] != "undefined");
@@ -339,10 +359,10 @@ var Tag = (function (){
       return name === "end-page" || name === "page-break";
     },
     _getCssCacheKey : function(selectors){
-      return selectors.join(",");
+      return selectors.join("+");
     },
-    _getPseudoElementCssCacheKey : function(selectors, element_name){
-      return [element_name, this._getCssCacheKey(this.selectors)].join("::");
+    _getPseudoElementCssCacheKey : function(element_name){
+      return [this.fullSelectorCacheKey, element_name].join("::");
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
@@ -413,15 +433,17 @@ var Tag = (function (){
       }
       return cache;
     },
-    _parseBeforeContent : function(){
-      var pseudo_css_attr = this.getPseudoElementCssAttr("before");
-      return pseudo_css_attr.content || "";
+    _parsePseudoElementContentSrc : function(element_name){
+      var css_attr = this.getPseudoElementCssAttr(element_name);
+      if(Obj.isEmpty(css_attr)){
+	return "";
+      }
+      var cache_key = this._getPseudoElementCssCacheKey(element_name);
+      add_css_attr_cache(css_attr);
+      var content = css_attr.content || "";
+      return Html.tagWrap(element_name, content, {"data-key":cache_key});
     },
-    _parseAfterContent : function(){
-      var pseudo_css_attr = this.getPseudoElementCssAttr("after");
-      return pseudo_css_attr.content || "";
-    },
-    _parsePseudoFirstLetter : function(content){
+    _appendFirstLetter : function(content){
       var first_letter_style = this.getPseudoElementCssAttr("first-letter");
       if(Obj.isEmpty(first_letter_style)){
 	return content;
@@ -432,10 +454,10 @@ var Tag = (function (){
 	return p1 + Html.tagStart("first-letter", {"data-key":cache_key}) + p3 + "</first-letter>";
       });
     },
-    _parseContent : function(content){
-      var before = this._parseBeforeContent();
-      var after = this._parseAfterContent();
-      return this._parsePseudoFirstLetter([before, content, after].join(""));
+    _parseContent : function(content_raw){
+      var before = this._parsePseudoElementContentSrc("before");
+      var after = this._parsePseudoElementContentSrc("after");
+      return this._appendFirstLetter([before, content_raw, after].join(""));
     },
     // <img src='/path/to/img' push>
     // => {src:'/path/to/img', push:true}

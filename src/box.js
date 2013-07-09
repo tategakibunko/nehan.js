@@ -68,6 +68,8 @@ var Box = (function(){
 	  css["margin-left"] = css["margin-right"] = "auto";
 	  css["text-align"] = "center";
 	}
+      } else if(this.lineRate <= 1.0){
+	css["line-height"] = "1em";
       }
       return css;
     },
@@ -367,6 +369,9 @@ var Box = (function(){
     },
     isRtLine : function(){
       return this.isTextLine() && this.markup && (this.markup.getName() === "rt");
+    },
+    isFirstLetter : function(){
+      return this.markup && this.markup.getName() === "first-letter";
     },
     isTextVertical : function(){
       return this.flow.isTextVertical();

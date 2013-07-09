@@ -102,7 +102,6 @@ var DocumentContext = (function(){
       return this.inlineContext.getTagDepth();
     },
     pushInlineTag : function(tag){
-      this.inheritTag(tag);
       this.inlineContext.pushTag(tag);
     },
     popInlineTag : function(){
@@ -119,7 +118,6 @@ var DocumentContext = (function(){
       return this.blockContext.isHeaderEnable();
     },
     pushBlockTag : function(tag){
-      this.inheritTag(tag);
       this.blockContext.pushTag(tag);
     },
     popBlockTag : function(){
@@ -169,7 +167,7 @@ var DocumentContext = (function(){
     logSectionHeader : function(tag){
       var type = tag.getName();
       var rank = tag.getHeaderRank();
-      var title = tag.content;
+      var title = tag.getContentRaw();
       var page_no = this.pageNo;
       var header_id = __global_header_id++;
       this.outlineContext.logSectionHeader(type, rank, title, page_no, header_id);

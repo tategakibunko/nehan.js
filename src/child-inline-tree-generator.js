@@ -2,8 +2,8 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   init : function(markup, context){
     this.markup = markup;
     this.context = context;
-    this.stream = this._createStream();
     this.context.pushInlineTag(this.markup);
+    this.stream = this._createStream();
   },
   _createStream : function(){
     return new TokenStream(this.markup.getContent());

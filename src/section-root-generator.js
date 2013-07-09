@@ -27,5 +27,6 @@ var SectionRootGenerator = ChildBlockTreeGenerator.extend({
   },
   _onLastTree : function(page){
     this.context.endSectionRoot(this.markup);
+    this._super();
   }
 });
