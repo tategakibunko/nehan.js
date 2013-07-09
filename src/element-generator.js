@@ -25,7 +25,12 @@ var ElementGenerator = Class.extend({
     switch(tag.getName()){
     case "img":
       return (new ImageGenerator(tag, this.context)).yield(parent);
-    case "ibox": case "div":
+    case "ibox":
+      return (new InlineBoxGenerator(tag, this.context)).yield(parent);
+    case "div":
+      if(tag.hasFlow()){
+	return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent);
+      }
       return (new InlineBoxGenerator(tag, this.context)).yield(parent);
     default:
       return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent);
