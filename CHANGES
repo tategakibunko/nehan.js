@@ -6,7 +6,7 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 4.0.2, 2013/xx/xx
+version 4.0.2, 2013/07/09
 ==========================
 o use requestAnimationFrame if enable.
 o new css property border-style, border-color supported.
