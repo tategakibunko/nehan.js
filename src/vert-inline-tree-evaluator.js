@@ -1,4 +1,4 @@
-var VertInlineTreeEvaluator = InlineEvaluator.extend({
+var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
   evaluate : function(line){
     return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), {
       "style":Css.toString(line.getCssInline()),

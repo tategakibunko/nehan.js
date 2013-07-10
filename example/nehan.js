@@ -8528,7 +8528,7 @@ var InlineTreeEvaluator = Class.extend({
   }
 });
 
-var VertInlineTreeEvaluator = InlineEvaluator.extend({
+var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
   evaluate : function(line){
     return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), {
       "style":Css.toString(line.getCssInline()),
@@ -8669,7 +8669,7 @@ var VertInlineTreeEvaluator = InlineEvaluator.extend({
   }
 });
 
-var HoriInlineTreeEvaluator = InlineEvaluator.extend({
+var HoriInlineTreeEvaluator = InlineTreeEvaluator.extend({
   evaluate : function(line, ctx){
     var tag_name = line.isInlineText()? "span" : "div";
     return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), {
