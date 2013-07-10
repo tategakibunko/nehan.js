@@ -31,6 +31,9 @@ var BlockTreeContext = (function(){
 	throw "FinishBlock";
       }
     },
+    pushBackToken : function(){
+      this.stream.prev();
+    },
     getNextToken : function(){
       var token = this.stream.get();
       if(token && Token.isTag(token)){

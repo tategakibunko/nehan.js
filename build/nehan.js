@@ -7657,6 +7657,9 @@ var BlockTreeContext = (function(){
 	throw "FinishBlock";
       }
     },
+    pushBackToken : function(){
+      this.stream.prev();
+    },
     getNextToken : function(){
       var token = this.stream.get();
       if(token && Token.isTag(token)){
@@ -7733,7 +7736,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
 
     while(true){
       this.backup();
-      var element = this._yieldPageElement(page);
+      var element = this._yieldPageElement(ctx, page);
       if(element == Exceptions.PAGE_BREAK){
 	break;
       } else if(element == Exceptions.BUFFER_END){
@@ -7752,10 +7755,10 @@ var BlockTreeGenerator = ElementGenerator.extend({
       try {
 	ctx.addElement(element);
       } catch(e){
-	if(e !== "FinishBlock"){
+	if(e === "OverflowBlock" || e === "EmptyBlock"){
 	  this.rollback();
-	  break;
 	}
+	break;
       }
     }
     if(this.localPageNo > 0){
@@ -7801,16 +7804,14 @@ var BlockTreeGenerator = ElementGenerator.extend({
   // called when page box is fully filled by blocks.
   _onCompleteTree : function(page){
   },
-  _yieldPageElement : function(parent){
+  _yieldPageElement : function(ctx, parent){
     if(this.generator && this.generator.hasNext()){
       return this.generator.yield(parent);
     }
-    var token = this.stream.get();
+    //var token = this.stream.get();
+    var token = ctx.getNextToken();
     if(token === null){
       return Exceptions.BUFFER_END;
-    }
-    if(Token.isTag(token)){
-      this.context.inheritTag(token);
     }
     // in block level, new-line character makes no sense, just ignored.
     if(Token.isChar(token) && token.isNewLineChar()){
@@ -7825,7 +7826,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     if(Token.isInline(token)){
       // this is not block level element, so we push back this token,
       // and delegate this stream to InlineTreeGenerator from the head of this inline element.
-      this.stream.prev();
+      ctx.pushBackToken();
       this.generator = new InlineTreeGenerator(this.markup, this.stream, this.context);
       return this.generator.yield(parent);
     }
