@@ -6,21 +6,11 @@ var Tag = (function (){
     this.name = this._parseName(this.src);
     this.parent = null;
     this.contentRaw = content || "";
-
-    // <img width='xx' height='yy'>
-    // => tagAttr = {width:'xx', height:'yy'}
-    this.tagAttr = {};
-
-    // <img data-key='xxx'>
-    // -> dataset = {key:'xxx'}
     this.dataset = {};
-
-    // updated when 'inherit' is called.
+    this.tagAttr = {};
     this.cssAttrContext = {};
-
-    // updated by 'setCssAttr'.
-    // notice that this must be defined before this._parseTagAttr.
-    this.cssAttrDynamic = {};
+    this.cssAttrDynamic = {}; // updated by 'setCssAttr'.
+    this.childs = []; // updated by inherit
 
     this.tagAttr = this._parseTagAttr(this.src);
     this.id = this._parseId();
@@ -62,6 +52,7 @@ var Tag = (function (){
       }
       var self = this;
       this.parent = parent_tag;
+      this.parent.addChild(this);
       if(parent_tag.getName() != "body"){
 	var prev_selector_size = this.selectors.length;
 	var parent_selectors = parent_tag.getSelectors();
@@ -105,6 +96,9 @@ var Tag = (function (){
 	this.setCssAttrs(cache);
       }
     },
+    addChild : function(tag){
+      this.childs.push(tag);
+    },
     addClass : function(klass){
       this.classes.push(klass);
     },
@@ -135,6 +129,9 @@ var Tag = (function (){
     },
     getAttr : function(name, def_value){
       return this.getTagAttr(name) || this.getCssAttr(name) || ((typeof def_value !== "undefined")? def_value : null);
+    },
+    getChilds : function(){
+      return this.childs;
     },
     getPseudoClassCssAttr : function(class_name){
       var selectors = this._parsePseudoClassSelectors(class_name);
