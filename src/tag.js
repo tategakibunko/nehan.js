@@ -130,8 +130,19 @@ var Tag = (function (){
     getAttr : function(name, def_value){
       return this.getTagAttr(name) || this.getCssAttr(name) || ((typeof def_value !== "undefined")? def_value : null);
     },
+    getParent : function(){
+      return this.parent || null;
+    },
     getChilds : function(){
       return this.childs;
+    },
+    getTypeChilds : function(name){
+      return List.filter(this.parent.getChilds(), function(tag){
+	return tag.getName() === name;
+      });
+    },
+    getOrder : function(){
+      return this.order || 0;
     },
     getPseudoClassCssAttr : function(class_name){
       var selectors = this._parsePseudoClassSelectors(class_name);
@@ -354,6 +365,30 @@ var Tag = (function (){
     isPageBreakTag : function(){
       var name = this.getName();
       return name === "end-page" || name === "page-break";
+    },
+    isNthChildOf : function(fn){
+      return fn(this.getOrder());
+    },
+    isNthLastChildOf : function(fn){
+      var childs = this.parent.getChilds();
+      return fn(childs.length - this.getOrder() - 1);
+    },
+    isNthOfType : function(fn){
+      var order = this.getOrder();
+      var type_childs = this.getTypeChilds(this.getName());
+      var nth = List.indexOf(type_childs, function(tag){
+	return tag.getOrder() === order;
+      });
+      return fn(nth);
+    },
+    isNthLastOfType : function(fn){
+      var order = this.getOrder();
+      var type_childs = this.getTypeChilds(this.getName());
+      type_childs.reverse();
+      var nth = List.indexOf(type_childs, function(tag){
+	return tag.getOrder() === order;
+      });
+      return fn(nth);
     },
     _getCssCacheKey : function(selectors){
       return selectors.join("*");

@@ -55,6 +55,10 @@ var DocumentContext = (function(){
       var parent_tag = this.getCurBlockTag();
       if(parent_tag){
 	tag.inherit(parent_tag);
+	var onload = tag.getCssAttr("onload");
+	if(onload){
+	  onload(this, tag);
+	}
       }
     },
     isEmptyMarkupContext : function(){
