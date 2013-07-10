@@ -169,6 +169,10 @@ var List = {
       ret[i] = [lst1[i], lst2[i]];
     }
     return ret;
+  },
+  reverse : function(lst){
+    lst.reverse();
+    return lst;
   }
 };
 

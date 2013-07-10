@@ -4,6 +4,7 @@ var Lexer = (function (){
   var rexWord = /^([\w!\.\?\/\_:#;"',]+)/;
   var rexTag = /^(<[^>]+>)/;
   var rexCharRef = /^(&[^;\s]+;)/;
+  var global_token_id = 0;
 
   function Lexer(src){
     this.pos = 0;
@@ -25,6 +26,7 @@ var Lexer = (function (){
       var token = this._getToken();
       if(token){
 	token.spos = this.pos;
+	token._gtid = global_token_id++;
       }
       return token;
     },

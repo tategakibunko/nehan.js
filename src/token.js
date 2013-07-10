@@ -1,4 +1,7 @@
 var Token = {
+  isSame : function(token1, token2){
+    return token1._gtid === token2._gtid;
+  },
   isTag : function(token){
     return token._type === "tag";
   },

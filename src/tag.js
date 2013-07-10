@@ -146,7 +146,7 @@ var Tag = (function (){
       });
     },
     getOrder : function(){
-      return this.order || 0;
+      return this.order || -1;
     },
     getPseudoClassCssAttr : function(class_name){
       var selectors = this._parsePseudoClassSelectors(class_name);
@@ -282,12 +282,6 @@ var Tag = (function (){
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
     },
-    isSameAs : function(name){
-      if(this.alias){
-	return this.alias == name;
-      }
-      return this.name == name;
-    },
     isPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
@@ -370,51 +364,44 @@ var Tag = (function (){
       var name = this.getName();
       return name === "end-page" || name === "page-break";
     },
+    _getChildIndexFrom : function(childs){
+      var self = this;
+      return List.indexOf(childs, function(tag){
+	return Token.isSame(self, tag);
+      });
+    },
+    getChildNth : function(){
+      return this._getChildIndexFrom(this.getParentChilds());
+    },
+    getLastChildNth : function(){
+      return this._getChildIndexFrom(List.reverse(this.getParentChilds()));
+    },
+    getChildOfTypeNth : function(){
+      return this._getChildIndexFrom(this.getParentTypeChilds());
+    },
+    getLastChildOfTypeNth : function(){
+      return this._getChildIndexFrom(this.getParentTypeChilds());
+    },
     isFirstChild : function(){
-      return this.getOrder() === 0;
+      return this.getChildNth() === 0;
     },
     isLastChild : function(){
       var childs = this.getParentChilds();
-      return (childs.length > 0 && List.last(childs).getOrder() === this.getOrder());
+      return this.getChildNth() === (childs.length - 1);
     },
     isFirstOfType : function(){
-      var childs = this.getParentTypeChilds();
-      return (childs.length > 0 && childs[0].getOrder() === this.getOrder());
+      return this.getChildOfTypeNth() === 0;
     },
     isLastOfType : function(){
       var childs = this.getParentTypeChilds();
-      return (childs.length > 0 && List.last(childs).getOrder() === this.getOrder());
+      return this.getChildOfTypeNth() === (childs.length - 1);
     },
     isOnlyChild : function(){
       return this.getParentChilds().length === 1;
     },
     isOnlyOfType : function(){
       var childs = this.getParentTypeChilds();
-      return (childs.length === 1 && childs[0].getOrder() == this.getOrder());
-    },
-    isNthChildOf : function(fn){
-      return fn(this.getOrder());
-    },
-    isNthLastChildOf : function(fn){
-      var childs = this.getParentChilds();
-      return fn(childs.length - this.getOrder() - 1);
-    },
-    isNthOfType : function(fn){
-      var order = this.getOrder();
-      var childs = this.getParentTypeChilds();
-      var nth = List.indexOf(childs, function(tag){
-	return tag.getOrder() === order;
-      });
-      return fn(nth);
-    },
-    isNthLastOfType : function(fn){
-      var order = this.getOrder();
-      var childs = this.getParentTypeChilds();
-      childs.reverse();
-      var nth = List.indexOf(childs, function(tag){
-	return tag.getOrder() === order;
-      });
-      return fn(nth);
+      return (childs.length === 1 && Token.isSame(childs[0], this));
     },
     _getCssCacheKey : function(selectors){
       return selectors.join("*");

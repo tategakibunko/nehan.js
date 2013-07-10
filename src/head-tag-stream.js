@@ -1,11 +1,12 @@
 var HeadTagStream = FilteredTagStream.extend({
   init : function(src){
     this._super(src, function(tag){
-      return (tag.isSameAs("title") ||
-	      tag.isSameAs("meta") ||
-	      tag.isSameAs("link") ||
-	      tag.isSameAs("style") ||
-	      tag.isSameAs("script"));
+      var name = tag.getName();
+      return (name === "title" ||
+	      name === "meta" ||
+	      name === "link" ||
+	      name === "style" ||
+	      name === "script");
     });
   }
 });

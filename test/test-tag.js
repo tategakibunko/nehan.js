@@ -224,3 +224,60 @@ test("tag-contextual-keys2", function(){
     "div#wrap p.child"
   ]);
 });
+
+test("tag-nth", function(){
+  var ctx = new DocumentContext();
+  var gtid = 0;
+  var create_token = function(name){
+    var ret = new Tag("<" + name + ">");
+    ret._gtid = gtid++;
+    return ret;
+  };
+  var div = create_token("div");
+  ctx.pushBlockTag(div);
+
+  var ul = create_token("ul");
+  ctx.inheritTag(ul);
+  ctx.pushBlockTag(ul);
+
+  var li1 = create_token("li");
+  ctx.inheritTag(li1);
+  ctx.pushBlockTag(li1);
+  ctx.popBlockTag(); // li1
+
+  var li2 = create_token("li");
+  ctx.inheritTag(li2);
+  ctx.pushBlockTag(li2);
+  ctx.popBlockTag(); // li2
+
+  var li3 = create_token("li");
+  ctx.inheritTag(li3);
+  ctx.pushBlockTag(li3);
+  ctx.popBlockTag(); // li3
+  ctx.popBlockTag(); // ul
+
+  var p = create_token("p");
+  ctx.inheritTag(p);
+  ctx.pushBlockTag(p);
+  ctx.popBlockTag(); // p
+  ctx.popBlockTag(); // div
+
+  equal(li1.isFirstChild(), true);
+  equal(li1.getChildNth(), 0);
+  equal(li1.getLastChildNth(), 2);
+
+  equal(li2.isFirstChild(), false);
+  equal(li2.getChildNth(), 1);
+  equal(li2.getLastChildNth(), 1);
+
+  equal(li3.isFirstChild(), false);
+  equal(li3.getChildNth(), 2);
+  equal(li3.getLastChildNth(), 0);
+
+  equal(ul.getChildNth(), 0);
+  equal(ul.getChildOfTypeNth(), 0);
+
+  equal(p.getChildNth(), 1);
+  equal(p.getChildOfTypeNth(), 0);
+});
+

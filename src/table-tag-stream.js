@@ -2,10 +2,11 @@ var TableTagStream = FilteredTagStream.extend({
   init : function(markup){
     // TODO: caption not supported yet.
     this._super(markup.getContent(), function(tag){
-      return (tag.isSameAs("thead") ||
-	      tag.isSameAs("tbody") ||
-	      tag.isSameAs("tfoot") ||
-	      tag.isSameAs("tr"));
+      var name = tag.getName();
+      return (name === "thead" ||
+	      name === "tbody" ||
+	      name === "tfoot" ||
+	      name === "tr");
     });
     this.markup = markup;
     this.markup.tableChilds = this.tokens = this._parseTokens(this.tokens);
@@ -114,7 +115,7 @@ var TableTagStream = FilteredTagStream.extend({
   _parseRows : function(ctx, content){
     var self = this;
     var rows = (new FilteredTagStream(content, function(tag){
-      return tag.isSameAs("tr");
+      return tag.getName() === "tr";
     })).getAll();
 
     return List.map(rows, function(row){
@@ -126,7 +127,8 @@ var TableTagStream = FilteredTagStream.extend({
   },
   _parseCols : function(ctx, content){
     var cols = (new FilteredTagStream(content, function(tag){
-      return tag.isSameAs("td") || tag.isSameAs("th");
+      var name = tag.getName();
+      return (name === "td" || name === "th");
     })).getAll();
 
     List.iteri(cols, function(i, col){
