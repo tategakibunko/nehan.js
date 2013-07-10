@@ -22,7 +22,7 @@ var Collapse = (function(){
       break;
     case "thead": case "tbody": case "tfoot":
       var start_row = markup.row;
-      var end_row = start_row + markup.childs.length;
+      var end_row = start_row + markup.tableChilds.length;
       map.setRange(start_row, 0, end_row, map.maxCol);
       break;
     case "tr":
@@ -37,7 +37,7 @@ var Collapse = (function(){
   var createBorderMap = function(map, box, markup){
     var callee = arguments.callee;
     setBorderMap(map, box, markup);
-    List.iter(markup.childs || [], function(child){
+    List.iter(markup.tableChilds || [], function(child){
       callee(map, box, child);
     });
   };
@@ -53,7 +53,7 @@ var Collapse = (function(){
       markup.setCssAttr("border-width", border);
       break;
     }
-    List.iter(markup.childs || [], function(child){
+    List.iter(markup.tableChilds || [], function(child){
       callee(map, child);
     });
   };

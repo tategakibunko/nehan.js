@@ -1,6 +1,6 @@
 var PageEvaluator = (function(){
   function PageEvaluator(){
-    this.blockEvaluator = new BlockEvaluator();
+    this.blockEvaluator = new BlockTreeEvaluator();
   }
 
   PageEvaluator.prototype = {

@@ -93,8 +93,8 @@ if(__engine_args.test){
 
   // evaluator
   __exports.PageEvaluator = PageEvaluator;
-  __exports.BlockEvaluator = BlockEvaluator;
-  __exports.InlineEvaluator = InlineEvaluator;
+  __exports.BlockTreeEvaluator = BlockTreeEvaluator;
+  __exports.InlineTreeEvaluator = InlineTreeEvaluator;
   __exports.PageGroupEvaluator = PageGroupEvaluator;
 
   // page stream

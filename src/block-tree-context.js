@@ -1,0 +1,45 @@
+var BlockTreeContext = (function(){
+  function BlockTreeContext(page, stream, context){
+    this.page = page;
+    this.stream = stream;
+    this.context = context;
+    this.curExtent = 0;
+    this.maxExtent = page.getContentExtent();
+    this.flow = page.flow;
+  }
+
+  BlockTreeContext.prototype = {
+    isEmptyBlock : function(){
+      return this.curExtent === 0;
+    },
+    addElement : function(element){
+      var extent = element.getContentExtent(this.flow);
+      if(element instanceof Box && !element.isTextLine() && extent <= 0){
+	throw "EmptyBlock";
+      }
+      if(this.curExtent + extent > this.maxExtent){
+	throw "OverflowBlock";
+      }
+      this.page.addChildBlock(element);
+      this.curExtent += extent;
+
+      if(element.pageBreakAfter){
+	page.pageBreakAfter = true;
+	throw "FinishBlock";
+      }
+      if(this.curExtent === this.maxExtent){
+	throw "FinishBlock";
+      }
+    },
+    getNextToken : function(){
+      var token = this.stream.get();
+      if(token && Token.isTag(token)){
+	this.context.inheritTag(token);
+      }
+      return token;
+    }
+  };
+  
+  return BlockTreeContext;
+})();
+

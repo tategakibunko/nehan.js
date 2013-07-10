@@ -67,10 +67,10 @@ var InlineTreeContext = (function(){
       return this.restExtent >= Math.floor(this.line.fontSize * this.line.lineRate);
     },
     canContain : function(element, advance){
-      if(element instanceof Box ||
-	 element instanceof Word ||
+      if(element instanceof Word ||
 	 element instanceof Tcy ||
 	 element instanceof Ruby ||
+	 (element instanceof Box  && this.curMeasure === 0) ||
 	 this.line.isFirstLetter() ||
 	 this.line.isRtLine()){
 	return this.restMeasure >= advance;
@@ -112,16 +112,19 @@ var InlineTreeContext = (function(){
       this.stream.next();
     },
     getNextToken : function(){
-      var is_line_start = this.isLineStart();
       var token = this.stream.get();
 
       // skip head half space if 1 and 2.
       // 1. first token of line is a half space.
       // 2. next text token is a word.
-      if(token && is_line_start && Token.isChar(token) && token.isHalfSpaceChar()){
-	var next = this.findFirstText();
-	if(next && Token.isWord(next)){
-	  token = this.stream.get();
+      if(token){
+	if(Token.isChar(token) && token.isHalfSpaceChar() && this.isLineStart()){
+	  var next = this.findFirstText();
+	  if(next && Token.isWord(next)){
+	    token = this.stream.get();
+	  }
+	} else if(Token.isTag(token)){
+	  this.context.inheritTag(token);
 	}
       }
       this.lastToken = token;

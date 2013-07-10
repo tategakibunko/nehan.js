@@ -1,16 +1,16 @@
-var BlockEvaluator = (function(){
-  function BlockEvaluator(){
-    this.inlineEvaluatorH = new HorizontalInlineEvaluator(this);
-    this.inlineEvaluatorV = new VerticalInlineEvaluator(this);
+var BlockTreeEvaluator = (function(){
+  function BlockTreeEvaluator(){
+    this.inlineEvaluatorH = new HoriInlineTreeEvaluator(this);
+    this.inlineEvaluatorV = new VertInlineTreeEvaluator(this);
   }
 
-  BlockEvaluator.prototype = {
+  BlockTreeEvaluator.prototype = {
     evaluate : function(box){
       switch(box._type){
       case "br":
 	return this.evalBreak(box);
       case "hr":
-	return this.evalHorizontalRule(box);
+	return this.evalHr(box);
       case "ibox":
 	return this.evalInlineBox(box);
       case "ipage":
@@ -53,7 +53,7 @@ var BlockEvaluator = (function(){
 	"class":box.getCssClasses()
       });
     },
-    evalHorizontalRule : function(box){
+    evalHr : function(box){
       return this.evalInlineBox(box);
     },
     evalBreak : function(box){
@@ -81,6 +81,6 @@ var BlockEvaluator = (function(){
     }
   };
 
-  return BlockEvaluator;
+  return BlockTreeEvaluator;
 })();
 

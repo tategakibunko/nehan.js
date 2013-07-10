@@ -134,9 +134,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(token === null){
       return Exceptions.BUFFER_END;
     }
-    if(Token.isTag(token)){
-      this.context.inheritTag(token);
-    }
     if(token instanceof Ruby){
       return token;
     }

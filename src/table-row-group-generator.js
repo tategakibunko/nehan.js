@@ -3,6 +3,6 @@ var TableRowGroupGenerator = ChildBlockTreeGenerator.extend({
     box.partition = parent.partition;
   },
   _createStream : function(){
-    return new DirectTokenStream(this.markup.childs);
+    return new DirectTokenStream(this.markup.tableChilds);
   }
 });

@@ -57,9 +57,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
   },
   // fill page with child page elements.
   _yieldPageTo : function(page){
-    var cur_extent = 0;
-    var max_extent = page.getContentExtent();
-    var page_flow = page.flow;
+    var ctx = new BlockTreeContext(page, this.stream, this.context);
 
     while(true){
       this.backup();
@@ -78,21 +76,14 @@ var BlockTreeGenerator = ElementGenerator.extend({
       } else if(element == Exceptions.IGNORE){
 	continue;
       }
-      var extent = element.getBoxExtent(page_flow);
-      cur_extent += extent;
-      if(cur_extent > max_extent || this._isEmptyElement(page_flow, element)){
-	this.rollback();
-	break;
-      }
 
-      page.addChildBlock(element);
-
-      if(cur_extent == max_extent){
-	break;
-      }
-      if(element.pageBreakAfter){
-	page.pageBreakAfter = true; // propagate pageBreakAfter to parent box
-	break;
+      try {
+	ctx.addElement(element);
+      } catch(e){
+	if(e !== "FinishBlock"){
+	  this.rollback();
+	  break;
+	}
       }
     }
     if(this.localPageNo > 0){
@@ -107,8 +98,8 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this._onCompleteTree(page);
 
     // if content is not empty, increment localPageNo.
-    if(cur_extent > 0){
-      this.localPageNo++;
+    if(!ctx.isEmptyBlock()){
+      this.localPage++;
     }
     return page;
   },
@@ -228,7 +219,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     case "li":
       return this._getListItemGenerator(parent, tag);
     case "hr":
-      return this._getHorizontalRuleGenerator(parent, tag);
+      return this._getHrGenerator(parent, tag);
     default:
       return new ChildBlockTreeGenerator(tag, this.context);
     }
@@ -239,8 +230,8 @@ var BlockTreeGenerator = ElementGenerator.extend({
   _getSectionRootGenerator : function(parent, tag){
     return new SectionRootGenerator(tag, this.context);
   },
-  _getHorizontalRuleGenerator : function(parent, tag){
-    return new HorizontalRuleGenerator(tag, this.context);
+  _getHrGenerator : function(parent, tag){
+    return new HrGenerator(tag, this.context);
   },
   _getHeaderLineGenerator : function(parent, tag){
     return new HeaderGenerator(tag, this.context);

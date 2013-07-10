@@ -1,4 +1,4 @@
-var HorizontalInlineEvaluator = InlineEvaluator.extend({
+var HoriInlineTreeEvaluator = InlineEvaluator.extend({
   evaluate : function(line, ctx){
     var tag_name = line.isInlineText()? "span" : "div";
     return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), {

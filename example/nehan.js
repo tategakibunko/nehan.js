@@ -6113,7 +6113,7 @@ var Collapse = (function(){
       break;
     case "thead": case "tbody": case "tfoot":
       var start_row = markup.row;
-      var end_row = start_row + markup.childs.length;
+      var end_row = start_row + markup.tableChilds.length;
       map.setRange(start_row, 0, end_row, map.maxCol);
       break;
     case "tr":
@@ -6128,7 +6128,7 @@ var Collapse = (function(){
   var createBorderMap = function(map, box, markup){
     var callee = arguments.callee;
     setBorderMap(map, box, markup);
-    List.iter(markup.childs || [], function(child){
+    List.iter(markup.tableChilds || [], function(child){
       callee(map, box, child);
     });
   };
@@ -6144,7 +6144,7 @@ var Collapse = (function(){
       markup.setCssAttr("border-width", border);
       break;
     }
-    List.iter(markup.childs || [], function(child){
+    List.iter(markup.tableChilds || [], function(child){
       callee(map, child);
     });
   };
@@ -6411,16 +6411,16 @@ var TableTagStream = FilteredTagStream.extend({
 	      tag.isSameAs("tr"));
     });
     this.markup = markup;
-    this.markup.childs = this.tokens = this._parseTokens(this.tokens);
+    this.markup.tableChilds = this.tokens = this._parseTokens(this.tokens);
   },
   getPartition : function(box){
     var self = this;
     var partition = new TablePartition();
     var measure = box.getContentMeasure();
     List.iter(this.tokens, function(row_group){
-      var rows = row_group.childs;
+      var rows = row_group.tableChilds;
       List.iter(rows, function(row){
-	var cols = row.childs;
+	var cols = row.tableChilds;
 	var cols_count = cols.length;
 	if(partition.getPartition(cols_count) === null){
 	  var parts = self._parsePartition(cols, box);
@@ -6431,7 +6431,7 @@ var TableTagStream = FilteredTagStream.extend({
     return partition;
   },
   _setChildTokens : function(target, childs){
-    target.childs = childs;
+    target.tableChilds = childs;
     var len = childs.length;
     if(len > 0){
       target.firstChild = childs[0];
@@ -6476,7 +6476,7 @@ var TableTagStream = FilteredTagStream.extend({
       }
       this._setChildTokens(thead, theads);
       thead.row = nrow;
-      nrow += thead.childs.length;
+      nrow += thead.tableChilds.length;
       ret.push(thead);
     }
 
@@ -6486,7 +6486,7 @@ var TableTagStream = FilteredTagStream.extend({
       }
       this._setChildTokens(tbody, tbodies);
       tbody.row = nrow;
-      nrow += tbody.childs.length;
+      nrow += tbody.tableChilds.length;
       ret.push(tbody);
     }
 
@@ -6879,7 +6879,7 @@ var ImageGenerator = StaticBlockGenerator.extend({
   }
 });
 
-var HorizontalRuleGenerator = ElementGenerator.extend({
+var HrGenerator = ElementGenerator.extend({
   _getBoxSize : function(parent){
     var measure = parent? parent.getContentMeasure() : Layout.getStdMeasure();
     return parent.flow.getBoxSize(measure, 1);
@@ -6960,10 +6960,10 @@ var InlineTreeContext = (function(){
       return this.restExtent >= Math.floor(this.line.fontSize * this.line.lineRate);
     },
     canContain : function(element, advance){
-      if(element instanceof Box ||
-	 element instanceof Word ||
+      if(element instanceof Word ||
 	 element instanceof Tcy ||
 	 element instanceof Ruby ||
+	 (element instanceof Box  && this.curMeasure === 0) ||
 	 this.line.isFirstLetter() ||
 	 this.line.isRtLine()){
 	return this.restMeasure >= advance;
@@ -7005,16 +7005,19 @@ var InlineTreeContext = (function(){
       this.stream.next();
     },
     getNextToken : function(){
-      var is_line_start = this.isLineStart();
       var token = this.stream.get();
 
       // skip head half space if 1 and 2.
       // 1. first token of line is a half space.
       // 2. next text token is a word.
-      if(token && is_line_start && Token.isChar(token) && token.isHalfSpaceChar()){
-	var next = this.findFirstText();
-	if(next && Token.isWord(next)){
-	  token = this.stream.get();
+      if(token){
+	if(Token.isChar(token) && token.isHalfSpaceChar() && this.isLineStart()){
+	  var next = this.findFirstText();
+	  if(next && Token.isWord(next)){
+	    token = this.stream.get();
+	  }
+	} else if(Token.isTag(token)){
+	  this.context.inheritTag(token);
 	}
       }
       this.lastToken = token;
@@ -7454,9 +7457,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(token === null){
       return Exceptions.BUFFER_END;
     }
-    if(Token.isTag(token)){
-      this.context.inheritTag(token);
-    }
     if(token instanceof Ruby){
       return token;
     }
@@ -7624,6 +7624,52 @@ var LinkGenerator = ChildInlineTreeGenerator.extend({
   }
 });
 
+var BlockTreeContext = (function(){
+  function BlockTreeContext(page, stream, context){
+    this.page = page;
+    this.stream = stream;
+    this.context = context;
+    this.curExtent = 0;
+    this.maxExtent = page.getContentExtent();
+    this.flow = page.flow;
+  }
+
+  BlockTreeContext.prototype = {
+    isEmptyBlock : function(){
+      return this.curExtent === 0;
+    },
+    addElement : function(element){
+      var extent = element.getContentExtent(this.flow);
+      if(element instanceof Box && !element.isTextLine() && extent <= 0){
+	throw "EmptyBlock";
+      }
+      if(this.curExtent + extent > this.maxExtent){
+	throw "OverflowBlock";
+      }
+      this.page.addChildBlock(element);
+      this.curExtent += extent;
+
+      if(element.pageBreakAfter){
+	page.pageBreakAfter = true;
+	throw "FinishBlock";
+      }
+      if(this.curExtent === this.maxExtent){
+	throw "FinishBlock";
+      }
+    },
+    getNextToken : function(){
+      var token = this.stream.get();
+      if(token && Token.isTag(token)){
+	this.context.inheritTag(token);
+      }
+      return token;
+    }
+  };
+  
+  return BlockTreeContext;
+})();
+
+
 var BlockTreeGenerator = ElementGenerator.extend({
   init : function(markup, context){
     this._super(markup, context);
@@ -7683,9 +7729,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
   },
   // fill page with child page elements.
   _yieldPageTo : function(page){
-    var cur_extent = 0;
-    var max_extent = page.getContentExtent();
-    var page_flow = page.flow;
+    var ctx = new BlockTreeContext(page, this.stream, this.context);
 
     while(true){
       this.backup();
@@ -7704,21 +7748,14 @@ var BlockTreeGenerator = ElementGenerator.extend({
       } else if(element == Exceptions.IGNORE){
 	continue;
       }
-      var extent = element.getBoxExtent(page_flow);
-      cur_extent += extent;
-      if(cur_extent > max_extent || this._isEmptyElement(page_flow, element)){
-	this.rollback();
-	break;
-      }
 
-      page.addChildBlock(element);
-
-      if(cur_extent == max_extent){
-	break;
-      }
-      if(element.pageBreakAfter){
-	page.pageBreakAfter = true; // propagate pageBreakAfter to parent box
-	break;
+      try {
+	ctx.addElement(element);
+      } catch(e){
+	if(e !== "FinishBlock"){
+	  this.rollback();
+	  break;
+	}
       }
     }
     if(this.localPageNo > 0){
@@ -7733,8 +7770,8 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this._onCompleteTree(page);
 
     // if content is not empty, increment localPageNo.
-    if(cur_extent > 0){
-      this.localPageNo++;
+    if(!ctx.isEmptyBlock()){
+      this.localPage++;
     }
     return page;
   },
@@ -7854,7 +7891,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     case "li":
       return this._getListItemGenerator(parent, tag);
     case "hr":
-      return this._getHorizontalRuleGenerator(parent, tag);
+      return this._getHrGenerator(parent, tag);
     default:
       return new ChildBlockTreeGenerator(tag, this.context);
     }
@@ -7865,8 +7902,8 @@ var BlockTreeGenerator = ElementGenerator.extend({
   _getSectionRootGenerator : function(parent, tag){
     return new SectionRootGenerator(tag, this.context);
   },
-  _getHorizontalRuleGenerator : function(parent, tag){
-    return new HorizontalRuleGenerator(tag, this.context);
+  _getHrGenerator : function(parent, tag){
+    return new HrGenerator(tag, this.context);
   },
   _getHeaderLineGenerator : function(parent, tag){
     return new HeaderGenerator(tag, this.context);
@@ -8182,14 +8219,14 @@ var TableRowGroupGenerator = ChildBlockTreeGenerator.extend({
     box.partition = parent.partition;
   },
   _createStream : function(){
-    return new DirectTokenStream(this.markup.childs);
+    return new DirectTokenStream(this.markup.tableChilds);
   }
 });
 
 var TableRowGenerator = ParallelGenerator.extend({
   init : function(markup, parent, context){
-    var partition = parent.partition.getPartition(markup.childs.length);
-    var generators = List.map(markup.childs, function(td){
+    var partition = parent.partition.getPartition(markup.tableChilds.length);
+    var generators = List.map(markup.tableChilds, function(td){
       return new ParaChildGenerator(td, context.createInlineRoot());
     });
     this._super(generators, markup, context, partition);
@@ -8303,7 +8340,7 @@ var EvalResult = (function(){
 
 var PageEvaluator = (function(){
   function PageEvaluator(){
-    this.blockEvaluator = new BlockEvaluator();
+    this.blockEvaluator = new BlockTreeEvaluator();
   }
 
   PageEvaluator.prototype = {
@@ -8326,19 +8363,19 @@ var PageEvaluator = (function(){
 })();
 
 
-var BlockEvaluator = (function(){
-  function BlockEvaluator(){
-    this.inlineEvaluatorH = new HorizontalInlineEvaluator(this);
-    this.inlineEvaluatorV = new VerticalInlineEvaluator(this);
+var BlockTreeEvaluator = (function(){
+  function BlockTreeEvaluator(){
+    this.inlineEvaluatorH = new HoriInlineTreeEvaluator(this);
+    this.inlineEvaluatorV = new VertInlineTreeEvaluator(this);
   }
 
-  BlockEvaluator.prototype = {
+  BlockTreeEvaluator.prototype = {
     evaluate : function(box){
       switch(box._type){
       case "br":
 	return this.evalBreak(box);
       case "hr":
-	return this.evalHorizontalRule(box);
+	return this.evalHr(box);
       case "ibox":
 	return this.evalInlineBox(box);
       case "ipage":
@@ -8381,7 +8418,7 @@ var BlockEvaluator = (function(){
 	"class":box.getCssClasses()
       });
     },
-    evalHorizontalRule : function(box){
+    evalHr : function(box){
       return this.evalInlineBox(box);
     },
     evalBreak : function(box){
@@ -8409,16 +8446,16 @@ var BlockEvaluator = (function(){
     }
   };
 
-  return BlockEvaluator;
+  return BlockTreeEvaluator;
 })();
 
 
-var InlineEvaluator = Class.extend({
+var InlineTreeEvaluator = Class.extend({
   init : function(parent_evaluator){
     this.parentEvaluator = parent_evaluator;
   },
   evaluate : function(line){
-    throw "InlineEvaluator::evaluate not implemented";
+    throw "InlineTreeEvaluator::evaluate not implemented";
   },
   evalTextLineBody : function(line, tokens){
     var self = this;
@@ -8491,7 +8528,7 @@ var InlineEvaluator = Class.extend({
   }
 });
 
-var VerticalInlineEvaluator = InlineEvaluator.extend({
+var VertInlineTreeEvaluator = InlineEvaluator.extend({
   evaluate : function(line){
     return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), {
       "style":Css.toString(line.getCssInline()),
@@ -8632,7 +8669,7 @@ var VerticalInlineEvaluator = InlineEvaluator.extend({
   }
 });
 
-var HorizontalInlineEvaluator = InlineEvaluator.extend({
+var HoriInlineTreeEvaluator = InlineEvaluator.extend({
   evaluate : function(line, ctx){
     var tag_name = line.isInlineText()? "span" : "div";
     return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), {
@@ -9091,8 +9128,8 @@ if(__engine_args.test){
 
   // evaluator
   __exports.PageEvaluator = PageEvaluator;
-  __exports.BlockEvaluator = BlockEvaluator;
-  __exports.InlineEvaluator = InlineEvaluator;
+  __exports.BlockTreeEvaluator = BlockTreeEvaluator;
+  __exports.InlineTreeEvaluator = InlineTreeEvaluator;
   __exports.PageGroupEvaluator = PageGroupEvaluator;
 
   // page stream

@@ -8,16 +8,16 @@ var TableTagStream = FilteredTagStream.extend({
 	      tag.isSameAs("tr"));
     });
     this.markup = markup;
-    this.markup.childs = this.tokens = this._parseTokens(this.tokens);
+    this.markup.tableChilds = this.tokens = this._parseTokens(this.tokens);
   },
   getPartition : function(box){
     var self = this;
     var partition = new TablePartition();
     var measure = box.getContentMeasure();
     List.iter(this.tokens, function(row_group){
-      var rows = row_group.childs;
+      var rows = row_group.tableChilds;
       List.iter(rows, function(row){
-	var cols = row.childs;
+	var cols = row.tableChilds;
 	var cols_count = cols.length;
 	if(partition.getPartition(cols_count) === null){
 	  var parts = self._parsePartition(cols, box);
@@ -28,7 +28,7 @@ var TableTagStream = FilteredTagStream.extend({
     return partition;
   },
   _setChildTokens : function(target, childs){
-    target.childs = childs;
+    target.tableChilds = childs;
     var len = childs.length;
     if(len > 0){
       target.firstChild = childs[0];
@@ -73,7 +73,7 @@ var TableTagStream = FilteredTagStream.extend({
       }
       this._setChildTokens(thead, theads);
       thead.row = nrow;
-      nrow += thead.childs.length;
+      nrow += thead.tableChilds.length;
       ret.push(thead);
     }
 
@@ -83,7 +83,7 @@ var TableTagStream = FilteredTagStream.extend({
       }
       this._setChildTokens(tbody, tbodies);
       tbody.row = nrow;
-      nrow += tbody.childs.length;
+      nrow += tbody.tableChilds.length;
       ret.push(tbody);
     }
 

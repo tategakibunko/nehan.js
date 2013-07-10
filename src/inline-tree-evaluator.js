@@ -1,9 +1,9 @@
-var InlineEvaluator = Class.extend({
+var InlineTreeEvaluator = Class.extend({
   init : function(parent_evaluator){
     this.parentEvaluator = parent_evaluator;
   },
   evaluate : function(line){
-    throw "InlineEvaluator::evaluate not implemented";
+    throw "InlineTreeEvaluator::evaluate not implemented";
   },
   evalTextLineBody : function(line, tokens){
     var self = this;
