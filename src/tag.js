@@ -136,8 +136,12 @@ var Tag = (function (){
     getChilds : function(){
       return this.childs;
     },
-    getTypeChilds : function(name){
-      return List.filter(this.parent.getChilds(), function(tag){
+    getParentChilds : function(){
+      return this.parent? this.parent.getChilds() : [];
+    },
+    getParentTypeChilds : function(){
+      var name = this.getName();
+      return List.filter(this.getParentChilds(), function(tag){
 	return tag.getName() === name;
       });
     },
@@ -366,26 +370,48 @@ var Tag = (function (){
       var name = this.getName();
       return name === "end-page" || name === "page-break";
     },
+    isFirstChild : function(){
+      return this.getOrder() === 0;
+    },
+    isLastChild : function(){
+      var childs = this.getParentChilds();
+      return (childs.length > 0 && List.last(childs).getOrder() === this.getOrder());
+    },
+    isFirstOfType : function(){
+      var childs = this.getParentTypeChilds();
+      return (childs.length > 0 && childs[0].getOrder() === this.getOrder());
+    },
+    isLastOfType : function(){
+      var childs = this.getParentTypeChilds();
+      return (childs.length > 0 && List.last(childs).getOrder() === this.getOrder());
+    },
+    isOnlyChild : function(){
+      return this.getParentChilds().length === 1;
+    },
+    isOnlyOfType : function(){
+      var childs = this.getParentTypeChilds();
+      return (childs.length === 1 && childs[0].getOrder() == this.getOrder());
+    },
     isNthChildOf : function(fn){
       return fn(this.getOrder());
     },
     isNthLastChildOf : function(fn){
-      var childs = this.parent.getChilds();
+      var childs = this.getParentChilds();
       return fn(childs.length - this.getOrder() - 1);
     },
     isNthOfType : function(fn){
       var order = this.getOrder();
-      var type_childs = this.getTypeChilds(this.getName());
-      var nth = List.indexOf(type_childs, function(tag){
+      var childs = this.getParentTypeChilds();
+      var nth = List.indexOf(childs, function(tag){
 	return tag.getOrder() === order;
       });
       return fn(nth);
     },
     isNthLastOfType : function(fn){
       var order = this.getOrder();
-      var type_childs = this.getTypeChilds(this.getName());
-      type_childs.reverse();
-      var nth = List.indexOf(type_childs, function(tag){
+      var childs = this.getParentTypeChilds();
+      childs.reverse();
+      var nth = List.indexOf(childs, function(tag){
 	return tag.getOrder() === order;
       });
       return fn(nth);
