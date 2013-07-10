@@ -54,13 +54,6 @@ test("tag-special-prop", function(){
   equal(tag.getTagAttr("special:prop"), "hoge");
 });
 
-test("tag-wrap-src", function(){
-  var tag = new Tag("<p>");
-  tag.content = "hoge";
-  equal(tag.name, "p");
-  equal(tag.getWrapSrc(), "<p>" + tag.content + "</p>");
-});
-
 test("tag-selector-class", function(){
   var tag = new Tag("<p class='hi hey'>");
 

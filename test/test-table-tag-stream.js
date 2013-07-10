@@ -27,7 +27,7 @@ test("table-token-stream", function(){
   var token = stream.get();
   equal(token._type, "tag");
   equal(token.name, "tbody");
-  equal(token.childs.length, 2); // th * 2
+  equal(token.tableChilds.length, 2); // th * 2
 
   // tfoot
   var token = stream.get();
