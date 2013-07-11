@@ -3,6 +3,7 @@ var reqAnimationFrame = (function(){
   return window.requestAnimationFrame  ||
     window.webkitRequestAnimationFrame ||
     window.mozRequestAnimationFrame    ||
+    window.msRequestAnimationFrame     ||
     function(callback, wait){
       var _wait = (typeof wait === "undefined")? default_wait : wait;
       window.setTimeout(callback, _wait);
