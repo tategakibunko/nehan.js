@@ -457,6 +457,7 @@ var Style = {
   },
   "img":{
     "display":"inline",
+    "box-sizing":"content-box",
     "single":true
   },
   "input":{
@@ -7055,9 +7056,6 @@ var InlineTreeContext = (function(){
     },
     isLineStart : function(){
       return this.stream.pos == this.lineStartPos;
-    },
-    pushTag : function(tag){
-      this.context.pushInlineTag(tag, this.line);
     },
     pushBackToken : function(){
       this.stream.prev();

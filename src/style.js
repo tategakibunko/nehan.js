@@ -275,6 +275,7 @@ var Style = {
   },
   "img":{
     "display":"inline",
+    "box-sizing":"content-box",
     "single":true
   },
   "input":{
