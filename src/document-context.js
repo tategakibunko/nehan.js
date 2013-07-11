@@ -93,7 +93,7 @@ var DocumentContext = (function(){
       return this.anchors;
     },
     getAnchorPageNo : function(anchor_name){
-      return this.anchors[anchor_name];
+      return this.anchors[anchor_name] || -1;
     },
     // inline context
     getCurInlineTag : function(){
