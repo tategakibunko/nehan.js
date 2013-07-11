@@ -13,7 +13,7 @@ var BlockTreeContext = (function(){
       return this.curExtent === 0;
     },
     addElement : function(element){
-      var extent = element.getContentExtent(this.flow);
+      var extent = element.getBoxExtent(this.flow);
       if(element instanceof Box && !element.isTextLine() && extent <= 0){
 	throw "EmptyBlock";
       }

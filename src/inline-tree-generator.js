@@ -22,12 +22,11 @@ var InlineTreeGenerator = ElementGenerator.extend({
     return this.stream.hasNext();
   },
   backup : function(){
-    this.stream.backup();
+    // do nothing
   },
   // caution! : this rollback function is to be ALWAYS called from parent generator.
   // so do not call this from this generator.
   rollback : function(){
-    this.stream.rollback();
     this.generator = null;
   },
   _getLineSize : function(parent){
@@ -66,12 +65,8 @@ var InlineTreeGenerator = ElementGenerator.extend({
       return Exceptions.BREAK;
     }
 
-    // backup inline head position.
-    this.backup();
-
     while(true){
       var element = this._yieldElement(ctx);
-
       if(element == Exceptions.BUFFER_END){
 	ctx.setLineBreak();
 	break;
@@ -93,11 +88,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
       try {
 	ctx.addElement(element);
       } catch(e){
-	if(this.generator){
-	  this.generator.rollback();
-	} else {
-	  ctx.pushBackToken();
-	}
 	break;
       }
 
@@ -160,7 +150,11 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(token.isBlock()){
       ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
       this._terminate = true; // force terminate
-      return ctx.isEmptyText()? Exceptions.SKIP : Exceptions.LINE_BREAK;
+
+      if(ctx.isEmptyText()){
+	return Exceptions.SKIP;
+      }
+      return Exceptions.LINE_BREAK;
     }
     // token is static size tag
     if(token.hasStaticSize()){

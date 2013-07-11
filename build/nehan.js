@@ -1477,7 +1477,15 @@ var Exceptions = {
   OVER_FLOW:5,
   RETRY:6,
   SKIP:7,
-  BREAK:8
+  BREAK:8,
+  toString : function(num){
+    for(var prop in this){
+      if(this[prop] === num){
+	return prop;
+      }
+    }
+    return "??";
+  }
 };
 
 
@@ -7106,6 +7114,7 @@ var InlineTreeContext = (function(){
     addElement : function(element){
       var advance = this.getElementAdvance(element);
       if(!this.canContain(element, advance)){
+	this.pushBackToken();
 	throw "OverflowInline";
       }
       var font_size = this.getElementFontSize(element);
@@ -7408,12 +7417,11 @@ var InlineTreeGenerator = ElementGenerator.extend({
     return this.stream.hasNext();
   },
   backup : function(){
-    this.stream.backup();
+    // do nothing
   },
   // caution! : this rollback function is to be ALWAYS called from parent generator.
   // so do not call this from this generator.
   rollback : function(){
-    this.stream.rollback();
     this.generator = null;
   },
   _getLineSize : function(parent){
@@ -7452,12 +7460,8 @@ var InlineTreeGenerator = ElementGenerator.extend({
       return Exceptions.BREAK;
     }
 
-    // backup inline head position.
-    this.backup();
-
     while(true){
       var element = this._yieldElement(ctx);
-
       if(element == Exceptions.BUFFER_END){
 	ctx.setLineBreak();
 	break;
@@ -7479,11 +7483,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
       try {
 	ctx.addElement(element);
       } catch(e){
-	if(this.generator){
-	  this.generator.rollback();
-	} else {
-	  ctx.pushBackToken();
-	}
 	break;
       }
 
@@ -7546,7 +7545,11 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(token.isBlock()){
       ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
       this._terminate = true; // force terminate
-      return ctx.isEmptyText()? Exceptions.SKIP : Exceptions.LINE_BREAK;
+
+      if(ctx.isEmptyText()){
+	return Exceptions.SKIP;
+      }
+      return Exceptions.LINE_BREAK;
     }
     // token is static size tag
     if(token.hasStaticSize()){
@@ -7702,7 +7705,7 @@ var BlockTreeContext = (function(){
       return this.curExtent === 0;
     },
     addElement : function(element){
-      var extent = element.getContentExtent(this.flow);
+      var extent = element.getBoxExtent(this.flow);
       if(element instanceof Box && !element.isTextLine() && extent <= 0){
 	throw "EmptyBlock";
       }
@@ -7753,18 +7756,14 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return this.stream.hasNext();
   },
   backup : function(){
-    if(this.generator){
-      this.generator.backup();
-    }
+    this.stream.backup();
   },
   rollback : function(){
     this.rollbackCount++;
     if(this.rollbackCount > Config.maxRollbackCount){
       throw "too many rollbacks";
     }
-    if(this.generator){
-      this.generator.rollback();
-    }
+    this.stream.rollback();
   },
   getCurGenerator : function(){
     if(this.generator && this.generator.hasNext()){
@@ -8187,17 +8186,12 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     });
   },
   backup : function(){
-    List.iter(this.generators, function(generator){
-      generator.backup();
-    });
+    // do nothing
   },
   rollback : function(){
-    List.iter(this.generators, function(generator){
-      generator.rollback();
-    });
+    // do nothing
   },
   yield : function(parent){
-    this.backup();
     var wrap_size = parent.getRestSize();
     var wrap_page = this._createBox(wrap_size, parent);
     var wrap_flow = parent.getParallelFlow();

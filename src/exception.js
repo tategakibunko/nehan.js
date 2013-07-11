@@ -5,7 +5,15 @@ var Exceptions = {
   OVER_FLOW:5,
   RETRY:6,
   SKIP:7,
-  BREAK:8
+  BREAK:8,
+  toString : function(num){
+    for(var prop in this){
+      if(this[prop] === num){
+	return prop;
+      }
+    }
+    return "??";
+  }
 };
 
 

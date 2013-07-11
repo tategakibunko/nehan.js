@@ -147,6 +147,7 @@ var InlineTreeContext = (function(){
     addElement : function(element){
       var advance = this.getElementAdvance(element);
       if(!this.canContain(element, advance)){
+	this.pushBackToken();
 	throw "OverflowInline";
       }
       var font_size = this.getElementFontSize(element);
