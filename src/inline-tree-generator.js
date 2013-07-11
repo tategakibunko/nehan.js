@@ -141,7 +141,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
       return this._yieldText(ctx, token);
     }
     if(Token.isTag(token) && token.getName() === "br"){
-      return Exceptions.LINE_BREAK;
+      return this._yieldBr(ctx, token);
     }
     if(Token.isTag(token) && token.getName() === "first-letter"){
       token.setFirstLetter(); // load first-letter style
@@ -150,10 +150,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(token.isBlock()){
       ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
       this._terminate = true; // force terminate
-
-      if(ctx.isEmptyText()){
-	return Exceptions.SKIP;
-      }
       return Exceptions.LINE_BREAK;
     }
     // token is static size tag
@@ -167,6 +163,9 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
     // token is other inline tag
     return this._yieldInlineTag(ctx, token);
+  },
+  _yieldBr : function(ctx, token){
+    return Exceptions.LINE_BREAK;
   },
   _yieldText : function(ctx, text){
     if(!text.hasMetrics()){

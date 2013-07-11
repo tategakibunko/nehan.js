@@ -6977,7 +6977,6 @@ var InlineTreeContext = (function(){
     this.maxExtent = 0;
     this.maxMeasure = line.getContentMeasure() - this.textIndent;
     this.curMeasure = 0;
-    this.restMeasure = this.maxMeasure;
     this.restExtent = line.getRestContentExtent();
     this.lineMeasure = line.getContentMeasure() - this.textIndent;
     this.startTokens = [];
@@ -7040,16 +7039,13 @@ var InlineTreeContext = (function(){
 	 (element instanceof Box  && this.curMeasure === 0) ||
 	 this.line.isFirstLetter() ||
 	 this.line.isRtLine()){
-	return this.restMeasure >= advance;
+	return this.curMeasure + advance <= this.maxMeasure;
       }
       // justify target need space for tail fix.
-      return this.restMeasure - this.line.fontSize >= advance;
+      return this.curMeasure + advance + this.line.fontSize <= this.maxMeasure;
     },
     isPreLine : function(){
       return this.line._type === "pre";
-    },
-    isEmptySpace : function(){
-      return this.restMeasure <= 0;
     },
     isTextBold : function(){
       return this.line.isTextBold();
@@ -7198,7 +7194,6 @@ var InlineTreeContext = (function(){
     },
     _addAdvance : function(advance){
       this.curMeasure += advance;
-      this.restMeasure -= advance;
     },
     _setMaxExtent : function(extent){
       this.maxExtent = extent;
@@ -7536,7 +7531,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
       return this._yieldText(ctx, token);
     }
     if(Token.isTag(token) && token.getName() === "br"){
-      return Exceptions.LINE_BREAK;
+      return this._yieldBr(ctx, token);
     }
     if(Token.isTag(token) && token.getName() === "first-letter"){
       token.setFirstLetter(); // load first-letter style
@@ -7545,10 +7540,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(token.isBlock()){
       ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
       this._terminate = true; // force terminate
-
-      if(ctx.isEmptyText()){
-	return Exceptions.SKIP;
-      }
       return Exceptions.LINE_BREAK;
     }
     // token is static size tag
@@ -7562,6 +7553,9 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
     // token is other inline tag
     return this._yieldInlineTag(ctx, token);
+  },
+  _yieldBr : function(ctx, token){
+    return Exceptions.LINE_BREAK;
   },
   _yieldText : function(ctx, text){
     if(!text.hasMetrics()){
@@ -7637,6 +7631,9 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
     var line = this._super(parent);
     this._setBoxStyle(line, parent);
     return line;
+  },
+  _yieldBr : function(ctx, token){
+    return Exceptions.IGNORE;
   },
   _getLineSize : function(parent){
     var measure = parent.getTextRestMeasure();
