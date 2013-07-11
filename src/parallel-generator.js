@@ -11,12 +11,17 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     });
   },
   backup : function(){
-    // do nothing
+    List.iter(this.generators, function(generator){
+      generator.backup();
+    });
   },
   rollback : function(){
-    // do nothing
+    List.iter(this.generators, function(generator){
+      generator.rollback();
+    });
   },
   yield : function(parent){
+    this.backup();
     var wrap_size = parent.getRestSize();
     var wrap_page = this._createBox(wrap_size, parent);
     var wrap_flow = parent.getParallelFlow();

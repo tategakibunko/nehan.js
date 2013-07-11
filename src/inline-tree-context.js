@@ -10,7 +10,6 @@ var InlineTreeContext = (function(){
     this.maxExtent = 0;
     this.maxMeasure = line.getContentMeasure() - this.textIndent;
     this.curMeasure = 0;
-    this.restExtent = line.getRestContentExtent();
     this.lineMeasure = line.getContentMeasure() - this.textIndent;
     this.startTokens = [];
     this.lineTokens = [];
@@ -62,20 +61,12 @@ var InlineTreeContext = (function(){
     getLetterSpacing : function(){
       return this.line.letterSpacing || 0;
     },
-    canContainBasicLine : function(){
-      return this.restExtent >= Math.floor(this.line.fontSize * this.line.lineRate);
-    },
     canContain : function(element, advance){
-      if(element instanceof Word ||
-	 element instanceof Tcy ||
-	 element instanceof Ruby ||
-	 (element instanceof Box  && this.curMeasure === 0) ||
-	 this.line.isFirstLetter() ||
-	 this.line.isRtLine()){
-	return this.curMeasure + advance <= this.maxMeasure;
+      // space for justify is required for char element(except rt string).
+      if(element instanceof Char && !this.line.isRtLine()){
+	return this.curMeasure + advance + this.line.fontSize <= this.maxMeasure;
       }
-      // justify target need space for tail fix.
-      return this.curMeasure + advance + this.line.fontSize <= this.maxMeasure;
+      return this.curMeasure + advance <= this.maxMeasure;
     },
     isPreLine : function(){
       return this.line._type === "pre";
@@ -172,6 +163,9 @@ var InlineTreeContext = (function(){
       }
       if(advance > 0){
 	this._addAdvance(advance);
+      }
+      if(this.curMeasure === this.maxMeasure){
+	throw "FinishInline";
       }
     },
     _setLogicalFloat : function(element, logical_float){

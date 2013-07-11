@@ -6977,7 +6977,6 @@ var InlineTreeContext = (function(){
     this.maxExtent = 0;
     this.maxMeasure = line.getContentMeasure() - this.textIndent;
     this.curMeasure = 0;
-    this.restExtent = line.getRestContentExtent();
     this.lineMeasure = line.getContentMeasure() - this.textIndent;
     this.startTokens = [];
     this.lineTokens = [];
@@ -7029,20 +7028,12 @@ var InlineTreeContext = (function(){
     getLetterSpacing : function(){
       return this.line.letterSpacing || 0;
     },
-    canContainBasicLine : function(){
-      return this.restExtent >= Math.floor(this.line.fontSize * this.line.lineRate);
-    },
     canContain : function(element, advance){
-      if(element instanceof Word ||
-	 element instanceof Tcy ||
-	 element instanceof Ruby ||
-	 (element instanceof Box  && this.curMeasure === 0) ||
-	 this.line.isFirstLetter() ||
-	 this.line.isRtLine()){
-	return this.curMeasure + advance <= this.maxMeasure;
+      // space for justify is required for char element(except rt string).
+      if(element instanceof Char && !this.line.isRtLine()){
+	return this.curMeasure + advance + this.line.fontSize <= this.maxMeasure;
       }
-      // justify target need space for tail fix.
-      return this.curMeasure + advance + this.line.fontSize <= this.maxMeasure;
+      return this.curMeasure + advance <= this.maxMeasure;
     },
     isPreLine : function(){
       return this.line._type === "pre";
@@ -7139,6 +7130,9 @@ var InlineTreeContext = (function(){
       }
       if(advance > 0){
 	this._addAdvance(advance);
+      }
+      if(this.curMeasure === this.maxMeasure){
+	throw "FinishInline";
       }
     },
     _setLogicalFloat : function(element, logical_float){
@@ -7412,11 +7406,12 @@ var InlineTreeGenerator = ElementGenerator.extend({
     return this.stream.hasNext();
   },
   backup : function(){
-    // do nothing
+    this.stream.backup();
   },
   // caution! : this rollback function is to be ALWAYS called from parent generator.
   // so do not call this from this generator.
   rollback : function(){
+    this.stream.rollback();
     this.generator = null;
   },
   _getLineSize : function(parent){
@@ -7449,11 +7444,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
   _yield : function(line){
     var ctx = new InlineTreeContext(line, this.stream, this.context);
 
-    // even if extent for basic line is not left,
-    // just break and let parent generator break page.
-    if(!ctx.canContainBasicLine()){
-      return Exceptions.BREAK;
-    }
+    this.backup();
 
     while(true){
       var element = this._yieldElement(ctx);
@@ -7531,7 +7522,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
       return this._yieldText(ctx, token);
     }
     if(Token.isTag(token) && token.getName() === "br"){
-      return this._yieldBr(ctx, token);
+      return Exceptions.LINE_BREAK;
     }
     if(Token.isTag(token) && token.getName() === "first-letter"){
       token.setFirstLetter(); // load first-letter style
@@ -7553,9 +7544,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
     // token is other inline tag
     return this._yieldInlineTag(ctx, token);
-  },
-  _yieldBr : function(ctx, token){
-    return Exceptions.LINE_BREAK;
   },
   _yieldText : function(ctx, text){
     if(!text.hasMetrics()){
@@ -7632,9 +7620,6 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
     this._setBoxStyle(line, parent);
     return line;
   },
-  _yieldBr : function(ctx, token){
-    return Exceptions.IGNORE;
-  },
   _getLineSize : function(parent){
     var measure = parent.getTextRestMeasure();
     var extent = parent.getContentExtent();
@@ -7698,9 +7683,6 @@ var BlockTreeContext = (function(){
   }
 
   BlockTreeContext.prototype = {
-    isEmptyBlock : function(){
-      return this.curExtent === 0;
-    },
     addElement : function(element){
       var extent = element.getBoxExtent(this.flow);
       if(element instanceof Box && !element.isTextLine() && extent <= 0){
@@ -7741,7 +7723,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this._super(markup, context);
     this.context.pushBlockTag(this.markup);
     this.generator = null;
-    this.rollbackCount = 0;
     this.stream = this._createStream();
     this.localPageNo = 0;
     this.pageBreakBefore = this._isPageBreakBefore();
@@ -7753,14 +7734,16 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return this.stream.hasNext();
   },
   backup : function(){
-    this.stream.backup();
+    this.getStreamSrc().backup();
   },
   rollback : function(){
-    this.rollbackCount++;
-    if(this.rollbackCount > Config.maxRollbackCount){
-      throw "too many rollbacks";
+    this.getStreamSrc().rollback();
+  },
+  getStreamSrc : function(){
+    if(this.generator){
+      return this.generator;
     }
-    this.stream.rollback();
+    return this.stream;
   },
   getCurGenerator : function(){
     if(this.generator && this.generator.hasNext()){
@@ -7771,10 +7754,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
   // if size is not defined, rest size of parent is used.
   // if parent is null, root page is generated.
   yield : function(parent, size){
-    if(this.stream.isEmpty()){
-      return Exceptions.SKIP;
-    }
-
     // let this generator yield PAGE_BREAK exception(only once).
     if(this.pageBreakBefore){
       this.pageBreakBefore = false;
@@ -7822,18 +7801,18 @@ var BlockTreeGenerator = ElementGenerator.extend({
     }
     if(this.localPageNo > 0){
       page.clearBorderBefore();
+    } else {
     }
     if(!this.hasNext()){
       this._onLastTree(page);
     } else {
       page.clearBorderAfter();
     }
-    this.rollbackCount = 0;
     this._onCompleteTree(page);
 
     // if content is not empty, increment localPageNo.
-    if(!ctx.isEmptyBlock()){
-      this.localPage++;
+    if(page.getBoxExtent() > 0){
+      this.localPageNo++;
     }
     return page;
   },
@@ -8183,12 +8162,17 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     });
   },
   backup : function(){
-    // do nothing
+    List.iter(this.generators, function(generator){
+      generator.backup();
+    });
   },
   rollback : function(){
-    // do nothing
+    List.iter(this.generators, function(generator){
+      generator.rollback();
+    });
   },
   yield : function(parent){
+    this.backup();
     var wrap_size = parent.getRestSize();
     var wrap_page = this._createBox(wrap_size, parent);
     var wrap_flow = parent.getParallelFlow();

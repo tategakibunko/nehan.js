@@ -22,11 +22,12 @@ var InlineTreeGenerator = ElementGenerator.extend({
     return this.stream.hasNext();
   },
   backup : function(){
-    // do nothing
+    this.stream.backup();
   },
   // caution! : this rollback function is to be ALWAYS called from parent generator.
   // so do not call this from this generator.
   rollback : function(){
+    this.stream.rollback();
     this.generator = null;
   },
   _getLineSize : function(parent){
@@ -59,11 +60,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
   _yield : function(line){
     var ctx = new InlineTreeContext(line, this.stream, this.context);
 
-    // even if extent for basic line is not left,
-    // just break and let parent generator break page.
-    if(!ctx.canContainBasicLine()){
-      return Exceptions.BREAK;
-    }
+    this.backup();
 
     while(true){
       var element = this._yieldElement(ctx);
@@ -141,7 +138,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
       return this._yieldText(ctx, token);
     }
     if(Token.isTag(token) && token.getName() === "br"){
-      return this._yieldBr(ctx, token);
+      return Exceptions.LINE_BREAK;
     }
     if(Token.isTag(token) && token.getName() === "first-letter"){
       token.setFirstLetter(); // load first-letter style
@@ -163,9 +160,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
     // token is other inline tag
     return this._yieldInlineTag(ctx, token);
-  },
-  _yieldBr : function(ctx, token){
-    return Exceptions.LINE_BREAK;
   },
   _yieldText : function(ctx, text){
     if(!text.hasMetrics()){

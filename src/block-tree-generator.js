@@ -3,7 +3,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this._super(markup, context);
     this.context.pushBlockTag(this.markup);
     this.generator = null;
-    this.rollbackCount = 0;
     this.stream = this._createStream();
     this.localPageNo = 0;
     this.pageBreakBefore = this._isPageBreakBefore();
@@ -15,14 +14,16 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return this.stream.hasNext();
   },
   backup : function(){
-    this.stream.backup();
+    this.getStreamSrc().backup();
   },
   rollback : function(){
-    this.rollbackCount++;
-    if(this.rollbackCount > Config.maxRollbackCount){
-      throw "too many rollbacks";
+    this.getStreamSrc().rollback();
+  },
+  getStreamSrc : function(){
+    if(this.generator){
+      return this.generator;
     }
-    this.stream.rollback();
+    return this.stream;
   },
   getCurGenerator : function(){
     if(this.generator && this.generator.hasNext()){
@@ -33,10 +34,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
   // if size is not defined, rest size of parent is used.
   // if parent is null, root page is generated.
   yield : function(parent, size){
-    if(this.stream.isEmpty()){
-      return Exceptions.SKIP;
-    }
-
     // let this generator yield PAGE_BREAK exception(only once).
     if(this.pageBreakBefore){
       this.pageBreakBefore = false;
@@ -84,18 +81,18 @@ var BlockTreeGenerator = ElementGenerator.extend({
     }
     if(this.localPageNo > 0){
       page.clearBorderBefore();
+    } else {
     }
     if(!this.hasNext()){
       this._onLastTree(page);
     } else {
       page.clearBorderAfter();
     }
-    this.rollbackCount = 0;
     this._onCompleteTree(page);
 
     // if content is not empty, increment localPageNo.
-    if(!ctx.isEmptyBlock()){
-      this.localPage++;
+    if(page.getBoxExtent() > 0){
+      this.localPageNo++;
     }
     return page;
   },

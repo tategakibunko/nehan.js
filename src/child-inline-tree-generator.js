@@ -14,9 +14,6 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
     this._setBoxStyle(line, parent);
     return line;
   },
-  _yieldBr : function(ctx, token){
-    return Exceptions.IGNORE;
-  },
   _getLineSize : function(parent){
     var measure = parent.getTextRestMeasure();
     var extent = parent.getContentExtent();

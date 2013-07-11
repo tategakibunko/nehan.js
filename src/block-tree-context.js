@@ -9,9 +9,6 @@ var BlockTreeContext = (function(){
   }
 
   BlockTreeContext.prototype = {
-    isEmptyBlock : function(){
-      return this.curExtent === 0;
-    },
     addElement : function(element){
       var extent = element.getBoxExtent(this.flow);
       if(element instanceof Box && !element.isTextLine() && extent <= 0){
