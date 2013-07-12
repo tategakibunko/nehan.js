@@ -19,11 +19,6 @@ var BlockTreeContext = (function(){
       }
       this.page.addChildBlock(element);
       this.curExtent += extent;
-
-      if(element.pageBreakAfter){
-	page.pageBreakAfter = true;
-	throw "FinishBlock";
-      }
       if(this.curExtent === this.maxExtent){
 	throw "FinishBlock";
       }

@@ -282,6 +282,10 @@ var Tag = (function (){
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
     },
+    hasLayout : function(){
+      var name = this.getName();
+      return (name != "br" && name != "page-break" && name != "end-page");
+    },
     isPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },

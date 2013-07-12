@@ -14,7 +14,6 @@ var BoxStyle = {
     this._setTextEmphasis(markup, box, parent);
     this._setFlowName(markup, box, parent);
     this._setFloat(markup, box, parent);
-    this._setPageBreak(markup, box, parent);
     this._setLetterSpacing(markup, box, parent);
     this._setBackground(markup, box, parent);
     this._setBackgroundColor(markup, box, parent);
@@ -113,12 +112,6 @@ var BoxStyle = {
     var logical_float = markup.getCssAttr("float", "none");
     if(logical_float != "none"){
       box.logicalFloat = logical_float;
-    }
-  },
-  _setPageBreak : function(markup, box, parent){
-    var page_break_after = markup.getCssAttr("page-break-after", false);
-    if(page_break_after){
-      box.pageBreakAfter = true;
     }
   },
   _setLetterSpacing : function(markup, box, parent){

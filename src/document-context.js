@@ -53,6 +53,9 @@ var DocumentContext = (function(){
     },
     inheritTag : function(tag){
       var parent_tag = this.getCurBlockTag();
+      if(!tag.hasLayout()){
+	return;
+      }
       if(parent_tag){
 	tag.inherit(parent_tag);
 	var onload = tag.getCssAttr("onload");

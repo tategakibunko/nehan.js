@@ -406,15 +406,6 @@ var TestCode = {
 	text_large
       ].join("\n"),
 
-      "page-break2":[
-	"<div class='nehan-pb-after'>page break after</div>",
-	"page is breaked.",
-	"<h1 class='nehan-pb-before'>page break before</h1>",
-	"some text after break",
-	"<hr class='nehan-pb-after' />",
-	text_middle
-      ].join("\n"),
-
       "explicit-outline":[
 	"<h1>AAAA</h1>",
 	"<section>",

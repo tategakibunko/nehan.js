@@ -787,15 +787,6 @@ var Style = {
     "display":"inline-block"
   },
   //-------------------------------------------------------
-  // page-break classes
-  //-------------------------------------------------------
-  ".nehan-pb-before":{
-    "page-break-before":"always"
-  },
-  ".nehan-pb-after":{
-    "page-break-after":"always"
-  },
-  //-------------------------------------------------------
   // text-align classes
   //-------------------------------------------------------
   ".nehan-ta-start":{
@@ -1982,6 +1973,10 @@ var Tag = (function (){
     },
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
+    },
+    hasLayout : function(){
+      var name = this.getName();
+      return (name != "br" && name != "page-break" && name != "end-page");
     },
     isPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
@@ -4950,7 +4945,6 @@ var BoxStyle = {
     this._setTextEmphasis(markup, box, parent);
     this._setFlowName(markup, box, parent);
     this._setFloat(markup, box, parent);
-    this._setPageBreak(markup, box, parent);
     this._setLetterSpacing(markup, box, parent);
     this._setBackground(markup, box, parent);
     this._setBackgroundColor(markup, box, parent);
@@ -5049,12 +5043,6 @@ var BoxStyle = {
     var logical_float = markup.getCssAttr("float", "none");
     if(logical_float != "none"){
       box.logicalFloat = logical_float;
-    }
-  },
-  _setPageBreak : function(markup, box, parent){
-    var page_break_after = markup.getCssAttr("page-break-after", false);
-    if(page_break_after){
-      box.pageBreakAfter = true;
     }
   },
   _setLetterSpacing : function(markup, box, parent){
@@ -5941,6 +5929,9 @@ var DocumentContext = (function(){
     },
     inheritTag : function(tag){
       var parent_tag = this.getCurBlockTag();
+      if(!tag.hasLayout()){
+	return;
+      }
       if(parent_tag){
 	tag.inherit(parent_tag);
 	var onload = tag.getCssAttr("onload");
@@ -7721,11 +7712,6 @@ var BlockTreeContext = (function(){
       }
       this.page.addChildBlock(element);
       this.curExtent += extent;
-
-      if(element.pageBreakAfter){
-	page.pageBreakAfter = true;
-	throw "FinishBlock";
-      }
       if(this.curExtent === this.maxExtent){
 	throw "FinishBlock";
       }
@@ -7753,7 +7739,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this.generator = null;
     this.stream = this._createStream();
     this.localPageNo = 0;
-    this.pageBreakBefore = this._isPageBreakBefore();
   },
   hasNext : function(){
     if(this.generator && this.generator.hasNext()){
@@ -7782,11 +7767,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
   // if size is not defined, rest size of parent is used.
   // if parent is null, root page is generated.
   yield : function(parent, size){
-    // let this generator yield PAGE_BREAK exception(only once).
-    if(this.pageBreakBefore){
-      this.pageBreakBefore = false;
-      return Exceptions.PAGE_BREAK;
-    }
     var page_box, page_size;
     page_size = size || this._getBoxSize(parent);
     page_box = this._createBox(page_size, parent);
@@ -7843,9 +7823,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
       this.localPageNo++;
     }
     return page;
-  },
-  _isPageBreakBefore : function(){
-    return this.markup.getCssAttr("page-break-before", "") === "always";
   },
   _isEmptyElement : function(flow, element){
     return (element instanceof Box) && !element.isTextLine() && (element.getContentExtent(flow) <= 0);

@@ -5,7 +5,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this.generator = null;
     this.stream = this._createStream();
     this.localPageNo = 0;
-    this.pageBreakBefore = this._isPageBreakBefore();
   },
   hasNext : function(){
     if(this.generator && this.generator.hasNext()){
@@ -34,11 +33,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
   // if size is not defined, rest size of parent is used.
   // if parent is null, root page is generated.
   yield : function(parent, size){
-    // let this generator yield PAGE_BREAK exception(only once).
-    if(this.pageBreakBefore){
-      this.pageBreakBefore = false;
-      return Exceptions.PAGE_BREAK;
-    }
     var page_box, page_size;
     page_size = size || this._getBoxSize(parent);
     page_box = this._createBox(page_size, parent);
@@ -95,9 +89,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
       this.localPageNo++;
     }
     return page;
-  },
-  _isPageBreakBefore : function(){
-    return this.markup.getCssAttr("page-break-before", "") === "always";
   },
   _isEmptyElement : function(flow, element){
     return (element instanceof Box) && !element.isTextLine() && (element.getContentExtent(flow) <= 0);

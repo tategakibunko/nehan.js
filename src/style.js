@@ -605,15 +605,6 @@ var Style = {
     "display":"inline-block"
   },
   //-------------------------------------------------------
-  // page-break classes
-  //-------------------------------------------------------
-  ".nehan-pb-before":{
-    "page-break-before":"always"
-  },
-  ".nehan-pb-after":{
-    "page-break-after":"always"
-  },
-  //-------------------------------------------------------
   // text-align classes
   //-------------------------------------------------------
   ".nehan-ta-start":{
