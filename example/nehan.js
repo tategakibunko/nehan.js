@@ -4731,6 +4731,9 @@ var Box = (function(){
     getEdgeHeight : function(){
       return this.edge? this.edge.getHeight() : 0;
     },
+    getMarkupName : function(){
+      return this.markup? this.markup.getName() : "";
+    },
     addClass : function(klass){
       var classes = this.extraClasses || [];
       classes.push(klass);
@@ -4839,7 +4842,11 @@ var Box = (function(){
       return this.childs.getLength() === 0;
     },
     isFirstChildOf : function(parent){
-      if(this._type === "li-marker" || this._type === "li-body" || this._type === "text-line"){
+      if(this.type === "text-line"){
+	return false;
+      }
+      var name = this.getMarkupName();
+      if(name === "li-marker" || name === "li-body"){
 	return false;
       }
       return parent && parent.isEmptyChild();
@@ -4856,20 +4863,28 @@ var Box = (function(){
     isTextLineRoot : function(){
       return this.parent && this.parent.isBlock();
     },
-    isInlineText : function(){
+    isInlineOfInline : function(){
+      // when <p>aaaa<span>bbbb</span></p>,
+      // <span>bbbb</span> is inline of inline.
       return this.isTextLine() && this.markup && this.markup.isInline();
     },
     isRubyLine : function(){
-      return this.isTextLine() && this.markup && (this.markup.getName() === "ruby");
+      return this.isTextLine() && this.getMarkupName() === "ruby";
     },
     isRtLine : function(){
-      return this.isTextLine() && this.markup && (this.markup.getName() === "rt");
+      return this.isTextLine() && this.getMarkupName() === "rt";
     },
     isLinkLine : function(){
-      return this.isTextLine() && this.markup && (this.markup.getName() === "a");
+      return this.isTextLine() && this.getMarkupName() === "a";
     },
     isFirstLetter : function(){
-      return this.markup && this.markup.getName() === "first-letter";
+      return this.getMarkupName() === "first-letter";
+    },
+    isJustifyTarget : function(){
+      var name = this.getMarkupName();
+      return (name !== "first-letter" &&
+	      name !== "rt" &&
+	      name !== "li-marker");
     },
     isTextVertical : function(){
       return this.flow.isTextVertical();
@@ -7028,9 +7043,18 @@ var InlineTreeContext = (function(){
     getLetterSpacing : function(){
       return this.line.letterSpacing || 0;
     },
+    _isJustifyElement : function(element){
+      if(element instanceof Char){
+	return true;
+      }
+      if(element instanceof Ruby && this.curMeasure > 0){
+	return true;
+      }
+      return false;
+    },
     canContain : function(element, advance){
-      // space for justify is required for char element(except rt string).
-      if(element instanceof Char && !this.line.isRtLine()){
+      // space for justify is required for justify target.
+      if(this.line.isJustifyTarget()){
 	return this.curMeasure + advance + this.line.fontSize <= this.maxMeasure;
       }
       return this.curMeasure + advance <= this.maxMeasure;
@@ -7101,6 +7125,10 @@ var InlineTreeContext = (function(){
     addElement : function(element){
       var advance = this.getElementAdvance(element);
       if(!this.canContain(element, advance)){
+	// even if one element can't be included, it's layout error and skip it.
+	if(advance > 0 && this.curMeasure === 0){
+	  throw "LayoutError";
+	}
 	this.pushBackToken();
 	throw "OverflowInline";
       }
@@ -8308,23 +8336,12 @@ var InsideListItemGenerator = ChildBlockTreeGenerator.extend({
 var OutsideListItemGenerator = ParallelGenerator.extend({
   init : function(markup, parent, context){
     var marker = parent.listStyle.getMarkerHtml(markup.order + 1);
-    var markup_marker = new Tag("<div class='nehan-li-marker'>", marker);
+    var markup_marker = new Tag("<li-marker>", marker);
+    var markup_body = new Tag("<li-body>", markup.getContent());
     this._super([
-      new ListItemMarkGenerator(markup_marker, context),
-      new ListItemBodyGenerator(markup, context)
+      new ParaChildGenerator(markup_marker, context),
+      new ParaChildGenerator(markup_body, context)
     ], markup, context, parent.partition);
-  }
-});
-
-var ListItemMarkGenerator = ParaChildGenerator.extend({
-  _getBoxType : function(){
-    return "li-marker";
-  }
-});
-
-var ListItemBodyGenerator = ParaChildGenerator.extend({
-  _getBoxType : function(){
-    return "li-body";
   }
 });
 
@@ -8710,7 +8727,7 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
 
 var HoriInlineTreeEvaluator = InlineTreeEvaluator.extend({
   evaluate : function(line, ctx){
-    var tag_name = line.isInlineText()? "span" : "div";
+    var tag_name = line.isInlineOnfInline()? "span" : "div";
     return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), {
       "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()

@@ -61,9 +61,18 @@ var InlineTreeContext = (function(){
     getLetterSpacing : function(){
       return this.line.letterSpacing || 0;
     },
+    _isJustifyElement : function(element){
+      if(element instanceof Char){
+	return true;
+      }
+      if(element instanceof Ruby && this.curMeasure > 0){
+	return true;
+      }
+      return false;
+    },
     canContain : function(element, advance){
-      // space for justify is required for char element(except rt string).
-      if(element instanceof Char && !this.line.isRtLine()){
+      // space for justify is required for justify target.
+      if(this.line.isJustifyTarget()){
 	return this.curMeasure + advance + this.line.fontSize <= this.maxMeasure;
       }
       return this.curMeasure + advance <= this.maxMeasure;
@@ -134,6 +143,10 @@ var InlineTreeContext = (function(){
     addElement : function(element){
       var advance = this.getElementAdvance(element);
       if(!this.canContain(element, advance)){
+	// even if one element can't be included, it's layout error and skip it.
+	if(advance > 0 && this.curMeasure === 0){
+	  throw "LayoutError";
+	}
 	this.pushBackToken();
 	throw "OverflowInline";
       }

@@ -236,6 +236,9 @@ var Box = (function(){
     getEdgeHeight : function(){
       return this.edge? this.edge.getHeight() : 0;
     },
+    getMarkupName : function(){
+      return this.markup? this.markup.getName() : "";
+    },
     addClass : function(klass){
       var classes = this.extraClasses || [];
       classes.push(klass);
@@ -344,7 +347,11 @@ var Box = (function(){
       return this.childs.getLength() === 0;
     },
     isFirstChildOf : function(parent){
-      if(this._type === "li-marker" || this._type === "li-body" || this._type === "text-line"){
+      if(this.type === "text-line"){
+	return false;
+      }
+      var name = this.getMarkupName();
+      if(name === "li-marker" || name === "li-body"){
 	return false;
       }
       return parent && parent.isEmptyChild();
@@ -361,20 +368,28 @@ var Box = (function(){
     isTextLineRoot : function(){
       return this.parent && this.parent.isBlock();
     },
-    isInlineText : function(){
+    isInlineOfInline : function(){
+      // when <p>aaaa<span>bbbb</span></p>,
+      // <span>bbbb</span> is inline of inline.
       return this.isTextLine() && this.markup && this.markup.isInline();
     },
     isRubyLine : function(){
-      return this.isTextLine() && this.markup && (this.markup.getName() === "ruby");
+      return this.isTextLine() && this.getMarkupName() === "ruby";
     },
     isRtLine : function(){
-      return this.isTextLine() && this.markup && (this.markup.getName() === "rt");
+      return this.isTextLine() && this.getMarkupName() === "rt";
     },
     isLinkLine : function(){
-      return this.isTextLine() && this.markup && (this.markup.getName() === "a");
+      return this.isTextLine() && this.getMarkupName() === "a";
     },
     isFirstLetter : function(){
-      return this.markup && this.markup.getName() === "first-letter";
+      return this.getMarkupName() === "first-letter";
+    },
+    isJustifyTarget : function(){
+      var name = this.getMarkupName();
+      return (name !== "first-letter" &&
+	      name !== "rt" &&
+	      name !== "li-marker");
     },
     isTextVertical : function(){
       return this.flow.isTextVertical();
