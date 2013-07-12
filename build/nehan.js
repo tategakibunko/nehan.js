@@ -8727,7 +8727,7 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
 
 var HoriInlineTreeEvaluator = InlineTreeEvaluator.extend({
   evaluate : function(line, ctx){
-    var tag_name = line.isInlineOnfInline()? "span" : "div";
+    var tag_name = line.isInlineOfInline()? "span" : "div";
     return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), {
       "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
