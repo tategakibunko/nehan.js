@@ -1669,7 +1669,7 @@ var CssParser = (function(){
     case "border-right-width":
     case "border-right-color":
     case "border-right-style":
-      return {end:value}
+      return {end:value};
 
     case "padding-before":
     case "margin-before":
@@ -1681,7 +1681,7 @@ var CssParser = (function(){
     case "border-top-width":
     case "border-top-color":
     case "border-top-style":
-      return {before:value}
+      return {before:value};
 
     case "padding-after":
     case "margin-after":
@@ -1693,7 +1693,7 @@ var CssParser = (function(){
     case "border-bottom-width":
     case "border-bottom-color":
     case "border-bottom-style":
-      return {after:value}
+      return {after:value};
 
     case "border":
       return parse_border_abbr(value);
@@ -1741,7 +1741,7 @@ var Selector = (function(){
 
   var set_format_values = function(ret, format_values){
     List.iter(format_values, function(fmt_value){
-      for(prop in fmt_value){
+      for(var prop in fmt_value){
 	set_format_value(ret, prop, fmt_value[prop]);
       }
     });

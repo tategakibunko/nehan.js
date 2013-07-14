@@ -15,7 +15,7 @@ var Selector = (function(){
 
   var set_format_values = function(ret, format_values){
     List.iter(format_values, function(fmt_value){
-      for(prop in fmt_value){
+      for(var prop in fmt_value){
 	set_format_value(ret, prop, fmt_value[prop]);
       }
     });
