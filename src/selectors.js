@@ -6,45 +6,10 @@ var Selectors = (function(){
     selectors.push(new Selector(selector_key, Style[selector_key]));
   }
 
-  var merge_edge = function(edge1, edge2, prop){
-    // conv both edge to standard edge format({before:x, end:x, after:x, start:x}).
-    var std_edge1 = EdgeParser.normalize(edge1, prop);
-    var std_edge2 = EdgeParser.normalize(edge2, prop);
-    return Args.copy(std_edge1, std_edge2);
-  };
-
-  var merge_corner = function(corner1, corner2, prop){
-    var std_corner1 = CornerParser.normalize(corner1, prop);
-    var std_corner2 = CornerParser.normalize(corner2, prop);
-    return Args.copy(std_corner1, std_corner2);
-  };
-
-  var merge = function(dst, obj){
-    for(var prop in obj){
-      switch(prop){
-      case "margin":
-      case "padding":
-      case "border-width":
-      case "border-color":
-      case "border-style":
-	dst[prop] = merge_edge(dst[prop] || {}, obj[prop], prop);
-	break;
-      case "border-radius":
-	dst[prop] = merge_corner(dst[prop] || {}, obj[prop], prop);
-	break;
-      default:
-	dst[prop] = obj[prop];
-	break;
-      }
-    }
-    return dst;
-  };
-
   return {
     setValue : function(selector_key, value){
-      var old_value = Style[selector_key] || null;
-      if(old_value){
-	merge(old_value, value);
+      if(Style[selector_key]){
+	Args.copy(Style[selector_key], value);
       } else {
 	Style[selector_key] = value;
 	selectors.push(new Selector(selector_key, value));
@@ -52,13 +17,13 @@ var Selectors = (function(){
     },
     getValue : function(selector_key){
       return List.fold(selectors, {}, function(ret, selector){
-	return selector.test(selector_key)? merge(ret, selector.getValue()) : ret;
+	return selector.test(selector_key)? Args.copy(ret, selector.getValue()) : ret;
       });
     },
     getMergedValue : function(selector_keys){
       var self = this;
       return List.fold(selector_keys, {}, function(ret, selector_key){
-	return merge(ret, self.getValue(selector_key));
+	return Args.copy(ret, self.getValue(selector_key));
       });
     }
   };

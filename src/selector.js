@@ -1,16 +1,32 @@
 var Selector = (function(){
-  function Selector(key, val){
+  function Selector(key, value){
     this.key = this._createKey(key);
     this.rex = this._createRegExp(this.key);
-    this.val = val;
+    this.value = this._formatValue(value);
   }
+
+  var set_format_value = function(ret, prop, format_value){
+    if(format_value instanceof Array){
+      set_format_values(ret, format_value);
+    } else {
+      ret[prop] = format_value;
+    }
+  };
+
+  var set_format_values = function(ret, format_values){
+    List.iter(format_values, function(fmt_value){
+      for(prop in fmt_value){
+	set_format_value(ret, prop, fmt_value[prop]);
+      }
+    });
+  };
 
   Selector.prototype = {
     getKey : function(){
       return this.key;
     },
     getValue : function(){
-      return this.val;
+      return this.value;
     },
     test : function(dst_key){
       dst_key = dst_key.toLowerCase();
@@ -27,6 +43,13 @@ var Selector = (function(){
     },
     hasContext : function(){
       return (/[\S]+\s+[\S]+/).test(this.key);
+    },
+    _formatValue : function(value){
+      var ret = {};
+      for(var prop in value){
+	set_format_value(ret, prop, CssParser.format(prop, value[prop]));
+      }
+      return ret;
     },
     _createKey : function(key){
       return Utils.trim(key).toLowerCase()

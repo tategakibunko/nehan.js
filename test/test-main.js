@@ -24,6 +24,7 @@ var BoxFlows = testEngine.BoxFlows;
 var Edge = testEngine.Edge;
 var EdgeParser = testEngine.EdgeParser;
 var CornerParser = testEngine.CornerParser;
+var CssParser = testEngine.CssParser;
 var Padding = testEngine.Padding;
 var Margin = testEngine.Margin;
 var Border = testEngine.Border;
