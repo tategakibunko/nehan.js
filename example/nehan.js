@@ -1514,6 +1514,7 @@ var Exceptions = {
   display
   font-family
   font-size
+  font-style
   font-weight
   float
   flow(nehan sepcial property)
@@ -2303,6 +2304,12 @@ var Tag = (function (){
     isOnlyOfType : function(){
       var childs = this.getParentTypeChilds();
       return (childs.length === 1 && Token.isSame(childs[0], this));
+    },
+    isRoot : function(){
+      return this.parent === null;
+    },
+    isEmpty : function(){
+      return this.getContent() === "";
     },
     _getCssCacheKey : function(selectors){
       return selectors.join("*");

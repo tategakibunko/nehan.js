@@ -15,6 +15,7 @@
   display
   font-family
   font-size
+  font-style
   font-weight
   float
   flow(nehan sepcial property)
