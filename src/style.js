@@ -463,7 +463,7 @@ var Style = {
     "embeddable":true,
     "table-layout":"fixed", // 'auto' not supported yet.
     "border-collapse":"collapse", // 'separate' not supported yet.
-    "border-spacing":"5px", // TODO: support batch style like "5px 10px".
+    //"border-spacing":"5px", // TODO: support batch style like "5px 10px".
     "border-width":"1px",
     "margin":{
       "start":"0.5em",

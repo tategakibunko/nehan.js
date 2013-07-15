@@ -645,7 +645,7 @@ var Style = {
     "embeddable":true,
     "table-layout":"fixed", // 'auto' not supported yet.
     "border-collapse":"collapse", // 'separate' not supported yet.
-    "border-spacing":"5px", // TODO: support batch style like "5px 10px".
+    //"border-spacing":"5px", // TODO: support batch style like "5px 10px".
     "border-width":"1px",
     "margin":{
       "start":"0.5em",
@@ -1497,6 +1497,38 @@ var Exceptions = {
 
 
   
+/*
+  supported css properties
+  ==============================
+
+  background-color
+  background-image
+  background-repeat
+  border
+  border-color
+  border-radius
+  border-style
+  border-width
+  box-sizing
+  color
+  display
+  font-family
+  font-size
+  font-weight
+  float
+  flow(nehan sepcial property)
+  line-rate(nehan special property)
+  list-style
+  list-style-image
+  list-style-position
+  list-style-type
+  margin
+  padding
+  text-align
+  text-combine(horizontal only)
+  text-emphasis-style
+
+ */
 var CssParser = (function(){
   var normalize = function(value){
     return Utils.trim(String(value))
@@ -1624,89 +1656,31 @@ var CssParser = (function(){
   };
 
   var format = function(prop, value){
-    if(typeof value === "object"){
+    if(typeof value === "function" || typeof value === "object"){
       return value;
     }
     value = normalize(value);
     switch(prop){
-    case "padding":
-    case "margin":
-    case "border-width":
-    case "border-color":
-    case "border-style":
-      return parse_edge_4d(value);
-
-    case "border-radius":
-      return parse_corner_4d(value);
-
-    case "border-before-start-radius":
-    case "border-top-left-radius":
-      return parse_corder_2d(value);
-
-    case "border-before-end-radius":
-    case "border-top-right-radius":
-      return parse_corder_2d(value);
-
-    case "padding-start":
-    case "margin-start":
-    case "border-start-width":
-    case "border-start-color":
-    case "border-start-style":
-    case "padding-left":
-    case "margin-left":
-    case "border-left-width":
-    case "border-left-color":
-    case "border-left-style":
-      return {start:value};
-
-    case "padding-end":
-    case "margin-end":
-    case "border-end-width":
-    case "border-end-color":
-    case "border-end-style":
-    case "padding-right":
-    case "margin-right":
-    case "border-right-width":
-    case "border-right-color":
-    case "border-right-style":
-      return {end:value};
-
-    case "padding-before":
-    case "margin-before":
-    case "border-before-width":
-    case "border-before-color":
-    case "border-before-style":
-    case "padding-top":
-    case "margin-top":
-    case "border-top-width":
-    case "border-top-color":
-    case "border-top-style":
-      return {before:value};
-
-    case "padding-after":
-    case "margin-after":
-    case "border-after-width":
-    case "border-after-color":
-    case "border-after-style":
-    case "padding-bottom":
-    case "margin-bottom":
-    case "border-bottom-width":
-    case "border-bottom-color":
-    case "border-bottom-style":
-      return {after:value};
-
-    case "border":
-      return parse_border_abbr(value);
-
-    case "list-style":
-      return parse_list_style_abbr(value);
-
-    case "font":
-      return parse_font_abbr(value);
-
     case "background":
       return parse_background_abbr(value);
-
+    case "border":
+      return parse_border_abbr(value);
+    case "border-color":
+      return parse_edge_4d(value);
+    case "border-radius":
+      return parse_corner_4d(value);
+    case "border-style":
+      return parse_edge_4d(value);
+    case "border-width":
+      return parse_edge_4d(value);
+    case "font":
+      return parse_font_abbr(value);
+    case "list-style":
+      return parse_list_style_abbr(value);
+    case "margin":
+      return parse_edge_4d(value);
+    case "padding":
+      return parse_edge_4d(value);
     default: return value;
     }
   };
