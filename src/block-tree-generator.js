@@ -13,16 +13,14 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return this.stream.hasNext();
   },
   backup : function(){
-    this.getStreamSrc().backup();
+    this.stream.backup();
   },
   rollback : function(){
-    this.getStreamSrc().rollback();
-  },
-  getStreamSrc : function(){
     if(this.generator){
-      return this.generator;
+      this.generator.rollback();
+    } else {
+      this.stream.rollback();
     }
-    return this.stream;
   },
   getCurGenerator : function(){
     if(this.generator && this.generator.hasNext()){

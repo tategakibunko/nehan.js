@@ -7143,7 +7143,6 @@ var InlineTreeContext = (function(){
 	if(advance > 0 && this.curMeasure === 0){
 	  throw "LayoutError";
 	}
-	this.pushBackToken();
 	throw "OverflowInline";
       }
       var font_size = this.getElementFontSize(element);
@@ -7450,8 +7449,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
   backup : function(){
     this.stream.backup();
   },
-  // caution! : this rollback function is to be ALWAYS called from parent generator.
-  // so do not call this from this generator.
   rollback : function(){
     this.stream.rollback();
     this.generator = null;
@@ -7487,7 +7484,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     var ctx = new InlineTreeContext(line, this.stream, this.context);
 
     this.backup();
-
     while(true){
       var element = this._yieldElement(ctx);
       if(element == Exceptions.BUFFER_END){
@@ -7511,6 +7507,13 @@ var InlineTreeGenerator = ElementGenerator.extend({
       try {
 	ctx.addElement(element);
       } catch(e){
+	if(e === "OverflowInline"){
+	  if(this.generator){
+	    this.generator.rollback();
+	  } else {
+	    ctx.pushBackToken();
+	  }
+	}
 	break;
       }
 
@@ -7771,16 +7774,14 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return this.stream.hasNext();
   },
   backup : function(){
-    this.getStreamSrc().backup();
+    this.stream.backup();
   },
   rollback : function(){
-    this.getStreamSrc().rollback();
-  },
-  getStreamSrc : function(){
     if(this.generator){
-      return this.generator;
+      this.generator.rollback();
+    } else {
+      this.stream.rollback();
     }
-    return this.stream;
   },
   getCurGenerator : function(){
     if(this.generator && this.generator.hasNext()){

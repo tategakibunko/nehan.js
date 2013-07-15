@@ -147,7 +147,6 @@ var InlineTreeContext = (function(){
 	if(advance > 0 && this.curMeasure === 0){
 	  throw "LayoutError";
 	}
-	this.pushBackToken();
 	throw "OverflowInline";
       }
       var font_size = this.getElementFontSize(element);
