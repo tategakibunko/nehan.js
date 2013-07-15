@@ -169,7 +169,6 @@ module.exports = function(grunt) {
 	    "src/hori-inline-tree-evaluator.js",
 	    "src/page-group-evaluator.js",
 	    "src/page-stream.js",
-	    "src/document-page-stream.js",
 	    "src/page-group.js",
 	    "src/page-group-stream.js",
 	    "src/main.js",
