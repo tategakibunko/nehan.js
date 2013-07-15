@@ -4,6 +4,9 @@ var HtmlTagStream = FilteredTagStream.extend({
       var name = tag.getName();
       return (name === "head" || name === "body");
     });
+    if(this.isEmptyTokens()){
+      this.tokens = [new Tag("body", src)];
+    }
   }
 });
 

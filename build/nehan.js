@@ -47,6 +47,7 @@ var Config = {
 };
 
 var Layout = {
+  root:"body",
   direction:"vert",
   hori:"lr-tb", // sorry, rl-tb is not supported yet.
   vert:"tb-rl", // or "tb-lr"
@@ -6319,6 +6320,9 @@ var TokenStream = Class.extend({
   isEmpty : function(){
     return this.lexer.isEmpty();
   },
+  isEmptyTokens : function(){
+    return this.tokens.length === 0;
+  },
   isHead : function(){
     return this.pos === 0;
   },
@@ -6520,6 +6524,9 @@ var DocumentTagStream = FilteredTagStream.extend({
       var name = tag.getName();
       return (name === "!doctype" || name === "html");
     });
+    if(this.isEmptyTokens()){
+      this.tokens = [new Tag("html", src)];
+    }
   }
 });
 
@@ -6530,6 +6537,9 @@ var HtmlTagStream = FilteredTagStream.extend({
       var name = tag.getName();
       return (name === "head" || name === "body");
     });
+    if(this.isEmptyTokens()){
+      this.tokens = [new Tag("body", src)];
+    }
   }
 });
 
@@ -9038,16 +9048,17 @@ var PageStream = Class.extend({
       .replace(/<rt><\/rt>/gi, ""); // discard empty rt
   },
   _createGenerator : function(text){
-    return new BodyBlockTreeGenerator(text);
+    switch(Layout.root){
+    case "body":
+      return new BodyBlockTreeGenerator(text);
+    case "html":
+      return new HtmlGenerator(text);
+    default:
+      return new DocumentGenerator(text);
+    }
   },
   _createEvaluator : function(){
     return new PageEvaluator();
-  }
-});
-
-var DocumentPageStream = PageStream.extend({
-  _createGenerator : function(text){
-    return new DocumentGenerator(text);
   }
 });
 
@@ -9239,7 +9250,6 @@ if(__engine_args.test){
   // page stream
   __exports.PageStream = PageStream;
   __exports.PageGroupStream = PageGroupStream;
-  __exports.DocumentPageStream = DocumentPageStream;
 
   // core layouting components
   __exports.Env = Env;
@@ -9249,14 +9259,9 @@ if(__engine_args.test){
   __exports.Selectors = Selectors;
 }
 
-__exports.createPageStream = function(text){
-  return new PageStream(text);
-};
-__exports.createDocumentPageStream = function(text){
-  return new DocumentPageStream(text);
-};
-__exports.createPageGroupStream = function(text, group_size){
-  return new PageGroupStream(text, group_size);
+__exports.createPageStream = function(text, group_size){
+  group_size = group_size || 1;
+  return (group_size === 1)? (new PageStream(text)) : (new PageGroupStream(text, group_size));
 };
 __exports.getStyle = function(selector_key){
   return Selectors.getValue(selector_key);

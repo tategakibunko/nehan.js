@@ -13,6 +13,9 @@ var TokenStream = Class.extend({
   isEmpty : function(){
     return this.lexer.isEmpty();
   },
+  isEmptyTokens : function(){
+    return this.tokens.length === 0;
+  },
   isHead : function(){
     return this.pos === 0;
   },

@@ -141,7 +141,14 @@ var PageStream = Class.extend({
       .replace(/<rt><\/rt>/gi, ""); // discard empty rt
   },
   _createGenerator : function(text){
-    return new BodyBlockTreeGenerator(text);
+    switch(Layout.root){
+    case "body":
+      return new BodyBlockTreeGenerator(text);
+    case "html":
+      return new HtmlGenerator(text);
+    default:
+      return new DocumentGenerator(text);
+    }
   },
   _createEvaluator : function(){
     return new PageEvaluator();

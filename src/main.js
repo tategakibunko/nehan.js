@@ -101,7 +101,6 @@ if(__engine_args.test){
   // page stream
   __exports.PageStream = PageStream;
   __exports.PageGroupStream = PageGroupStream;
-  __exports.DocumentPageStream = DocumentPageStream;
 
   // core layouting components
   __exports.Env = Env;
@@ -111,14 +110,9 @@ if(__engine_args.test){
   __exports.Selectors = Selectors;
 }
 
-__exports.createPageStream = function(text){
-  return new PageStream(text);
-};
-__exports.createDocumentPageStream = function(text){
-  return new DocumentPageStream(text);
-};
-__exports.createPageGroupStream = function(text, group_size){
-  return new PageGroupStream(text, group_size);
+__exports.createPageStream = function(text, group_size){
+  group_size = group_size || 1;
+  return (group_size === 1)? (new PageStream(text)) : (new PageGroupStream(text, group_size));
 };
 __exports.getStyle = function(selector_key){
   return Selectors.getValue(selector_key);

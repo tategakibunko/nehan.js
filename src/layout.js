@@ -1,4 +1,5 @@
 var Layout = {
+  root:"body",
   direction:"vert",
   hori:"lr-tb", // sorry, rl-tb is not supported yet.
   vert:"tb-rl", // or "tb-lr"

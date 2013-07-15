@@ -4,6 +4,9 @@ var DocumentTagStream = FilteredTagStream.extend({
       var name = tag.getName();
       return (name === "!doctype" || name === "html");
     });
+    if(this.isEmptyTokens()){
+      this.tokens = [new Tag("html", src)];
+    }
   }
 });
 
