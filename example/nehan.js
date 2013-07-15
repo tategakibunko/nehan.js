@@ -9260,7 +9260,7 @@ if(__engine_args.test){
 }
 
 __exports.createPageStream = function(text, group_size){
-  group_size = group_size || 1;
+  group_size = Math.max(1, group_size || 1);
   return (group_size === 1)? (new PageStream(text)) : (new PageGroupStream(text, group_size));
 };
 __exports.getStyle = function(selector_key){
@@ -9268,6 +9268,11 @@ __exports.getStyle = function(selector_key){
 };
 __exports.setStyle = function(selector_key, value){
   Selectors.setValue(selector_key, value);
+};
+__exports.setStyles = function(values){
+  for(var selector_key in values){
+    Selectors.setValue(selector_key, values[selector_key]);
+  }
 };
 
 return __exports;
