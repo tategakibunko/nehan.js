@@ -1925,19 +1925,6 @@ var Tag = (function (){
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
   
   // utility functions
-  var is_style_enable = function(name, prop){
-    var element = Style[name] || null;
-    return element? (element[prop] || false) : false;
-  };
-  var is_single_tag = function(name){
-    return is_style_enable(name, "single");
-  };
-  var is_section_tag = function(name){
-    return is_style_enable(name, "section");
-  };
-  var is_section_root_tag = function(name){
-    return is_style_enable(name, "section-root");
-  };
   var css_attr_cache = {};
   var add_css_attr_cache = function(key, value){
     css_attr_cache[key] = value;
@@ -2085,10 +2072,6 @@ var Tag = (function (){
     getDataset : function(name, def_value){
       return this.dataset[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
-    getOpenTagName : function(){
-      var name = this.getName();
-      return this.isClose()? name.slice(1) : name;
-    },
     getContentRaw : function(){
       return this.contentRaw;
     },
@@ -2098,15 +2081,6 @@ var Tag = (function (){
       }
       this.content = this._parseContent(this.contentRaw);
       return this.content;
-    },
-    getCloseTag : function(){
-      return new Tag(this.getCloseSrc());
-    },
-    getCloseSrc : function(){
-      if(this.isClose()){
-	return this.src;
-      }
-      return "</" + this.getName() + ">";
     },
     getSrc : function(){
       return this.src;
@@ -2203,12 +2177,6 @@ var Tag = (function (){
     isPull : function(){
       return (typeof this.tagAttr.pull != "undefined");
     },
-    isOpen : function(){
-      if(is_single_tag()){
-	return false;
-      }
-      return this.name.substring(0,1) !== "/";
-    },
     isClose : function(){
       return this.name.substring(0,1) === "/";
     },
@@ -2220,7 +2188,7 @@ var Tag = (function (){
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
     isEmbeddableTag : function(){
-      return this.getCssAttr("embeddable") === true;
+      return this.getCssAttr("embeddable") === "true";
     },
     isBlock : function(){
       // floated block with static size is treated as block level floated box.
@@ -2240,7 +2208,7 @@ var Tag = (function (){
       return this.getCssAttr("display", "inline") === "inline-block";
     },
     isSingleTag : function(){
-      return is_single_tag(this.getName());
+      return this.getCssAttr("single") === "true";
     },
     isChildContentTag : function(){
       if(this.isSingleTag()){
@@ -2252,10 +2220,10 @@ var Tag = (function (){
       return this.getCssAttr("text-combine", "") === "horizontal";
     },
     isSectionRootTag : function(){
-      return is_section_root_tag(this.getName());
+      return this.getCssAttr("section-root") === "true";
     },
     isSectionTag : function(){
-      return is_section_tag(this.getName());
+      return this.getCssAttr("section") === "true";
     },
     isBoldTag : function(){
       var name = this.getName();

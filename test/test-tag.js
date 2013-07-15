@@ -4,15 +4,11 @@ test("tag-normal", function(){
   equal(tag.name, "a");
   equal(tag.getTagAttr("href"), "http://google.com?id=10&gid=20");
   equal(tag.getTagAttr("target"), "_blank");
-  deepEqual(tag.getCloseTag(), new Tag("</a>"));
-  equal(tag.getCloseSrc(), "</a>");
 
   tag = new Tag("<a href=http://google.com?id=10&gid=20 target = _blank   >");
   equal(tag.name, "a");
   equal(tag.getTagAttr("href"), "http://google.com?id=10&gid=20");
   equal(tag.getTagAttr("target"), "_blank");
-  deepEqual(tag.getCloseTag(), new Tag("</a>"));
-  equal(tag.getCloseSrc(), "</a>");
 });
 
 test("tag-empty-value", function(){
@@ -100,7 +96,6 @@ test("tag-is", function(){
   var tag;
   tag = new Tag("<a name='hoge'>");
   equal(tag.isAnchorTag(), true);
-  equal(tag.isOpen(), true);
 
   tag = new Tag("</a>");
   equal(tag.isClose(), true);
