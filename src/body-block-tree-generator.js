@@ -29,8 +29,6 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     return box;
   },
   _onCompleteTree : function(page){
-    page.styles = this.context.getPageStyles(page.pageNo);
-
     // lazy is confirmed when
     // 1. inline level of context is empty when _createBox.
     // 2. inline level of context is 'also' empty when _onCompleteTree.

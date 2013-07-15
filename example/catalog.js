@@ -479,21 +479,6 @@ var TestCode = {
 	"<strong>strong</strong>" + text_short
       ].join("<br />"),
 
-      "inline-style":[
-	"<style type='text/css' data-scope='global'>",
-	"a.test{color:red}",
-	"</style>",
-	"<a href='#' class='test'>hoge</a>",
-	"<page-break>",
-	"<style type='text/css' data-scope='local'>",
-	"a.test2{color:blue}",
-	"</style>",
-	"<a href='#' class='test2'>hige</a>",
-	"<page-break>",
-	"<a href='#' class='test'>hoge</a><br />",
-	"<a href='#' class='test2'>hige</a>"
-      ].join("\n"),
-
       "pseudo-first":[
 	"<dl class='test-pc'>",
 	"<dt>first term</dt>",

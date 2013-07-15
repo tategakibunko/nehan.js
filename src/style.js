@@ -54,10 +54,13 @@ var Style = {
   "blockquote":{
     "display":"block",
     "section-root":true,
+    "padding":{
+      "start":"1em",
+      "end":"1em",
+      "before":"0.5em",
+      "after":"0.5em"
+    },
     "margin":{
-      "start":"1.5em",
-      "end":"1.5em",
-      "before":"1.5em",
       "after":"1.5em"
     }
   },

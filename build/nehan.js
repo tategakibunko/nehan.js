@@ -237,10 +237,13 @@ var Style = {
   "blockquote":{
     "display":"block",
     "section-root":true,
+    "padding":{
+      "start":"1em",
+      "end":"1em",
+      "before":"0.5em",
+      "after":"0.5em"
+    },
     "margin":{
-      "start":"1.5em",
-      "end":"1.5em",
-      "before":"1.5em",
       "after":"1.5em"
     }
   },
@@ -5803,33 +5806,58 @@ var OutlineConverter = (function(){
   return OutlineConverter;
 })();
 
-var DocumentMeta = (function (){
-  function DocumentMeta(){
-    this.values = {};
+var DocumentHeader = (function(){
+  function DocumentHeader(){
+    this.title = "";
+    this.metas = [];
+    this.links = [];
+    this.scripts = [];
+    this.styles = [];
   }
 
-  DocumentMeta.prototype = {
-    get : function(name){
-      var entry = this.values[name] || null;
-      if(entry){
-	if(entry.length === 1){
-	  return entry[0];
-	}
-	return entry;
-      }
-      return null;
+  DocumentHeader.prototype = {
+    setTitle :function(title){
+      this.title = title;
     },
-    add : function(name, value){
-      var entry = this.values[name] || null;
-      if(entry){
-	entry.push(value);
-      } else {
-	this.values[name] = [value];
-      }
+    getTitle : function(){
+      return this.title;
+    },
+    addLink : function(markup){
+      this.links.push(markup);
+    },
+    getLinks : function(){
+      return this.links;
+    },
+    addMeta : function(markup){
+      this.metas.push(markup);
+    },
+    getMetas : function(){
+      return this.metas;
+    },
+    getMetaByName : function(name){
+      return List.find(this.metas, function(meta){
+	return meta.getTagAttr("name") === name;
+      });
+    },
+    getMetaContentByName : function(name){
+      var meta = this.getMetaByName(name);
+      return meta? meta.getTagAttr("content") : null;
+    },
+    addScript : function(markup){
+      this.scripts.push(markup);
+    },
+    getScripts : function(){
+      return this.scripts;
+    },
+    addStyle : function(markup){
+      this.styles.push(markup);
+    },
+    getStyles : function(){
+      return this.styles;
     }
   };
 
-  return DocumentMeta;
+  return DocumentHeader;
 })();
 
 
@@ -5917,34 +5945,6 @@ var InlineContext = (function(){
   return InlineContext;
 })();
 
-var StyleContext = (function(){
-  function StyleContext(){
-    this.localStyles = {};
-    this.globalStyles = [];
-  }
-
-  StyleContext.prototype = {
-    addLocalStyle : function(markup, page_no){
-      var styles = this.localStyles[page_no] || [];
-      var css_content = markup.getContent();
-      styles.push(css_content);
-      this.localStyles[page_no] = styles;
-    },
-    addGlobalStyle : function(markup){
-      var css_content = markup.getContent();
-      this.globalStyles.push(css_content);
-    },
-    getLocalStyles : function(page_no){
-      return this.localStyles[page_no] || [];
-    },
-    getGlobalStyles : function(){
-      return this.globalStyles;
-    }
-  };
-
-  return StyleContext;
-})();
-
 var DocumentContext = (function(){
 
   // header id to associate each header with outline.
@@ -5954,26 +5954,22 @@ var DocumentContext = (function(){
     var opt = option || {};
     this.charPos = opt.charPos || 0;
     this.pageNo = opt.pageNo || 0;
-    this.meta = opt.meta || new DocumentMeta();
+    this.header = opt.header || new DocumentHeader();
     this.blockContext = opt.blockContext || new BlockContext();
     this.inlineContext = opt.inlineContext || new InlineContext();
-    this.styleContext = opt.styleContext || new StyleContext();
     this.outlineContext = opt.outlineContext || new OutlineContext();
     this.anchors = opt.anchors || {};
   }
 
   DocumentContext.prototype = {
-    setTitle : function(title){
-      this.setMeta("title", title);
+    getHeader : function(){
+      return this.header;
     },
-    getTitle : function(){
-      return this.getMeta("title");
+    addScript : function(markup){
+      this.header.addScript(markup);
     },
-    setMeta : function(name, value){
-      this.meta.add(name, value);
-    },
-    getMeta : function(name){
-      return this.meta.get(name);
+    addStyle : function(markup){
+      this.header.addStyle(markup);
     },
     getPageNo : function(){
       return this.pageNo;
@@ -5991,11 +5987,10 @@ var DocumentContext = (function(){
       return new DocumentContext({
 	charPos:this.charPos,
 	pageNo:this.pageNo,
-	meta:this.meta,
+	header:this.header,
 	anchors:this.anchors,
 	outlineContext:this.outlineContext,
-	blockContext:this.blockContext,
-	styleContext:this.styleContext
+	blockContext:this.blockContext
       });
     },
     inheritTag : function(tag){
@@ -6013,27 +6008,6 @@ var DocumentContext = (function(){
     },
     isEmptyMarkupContext : function(){
       return this.inlineContext.isEmpty();
-    },
-    // style
-    addStyle : function(markup){
-      var scope = markup.getDataset("scope", "global");
-      if(scope === "local"){
-	this.styleContext.addLocalStyle(markup, this.pageNo);
-      } else {
-	this.styleContext.addGlobalStyle(markup);
-      }
-    },
-    getPageStyles : function(page_no){
-      var global_styles = this.getGlobalStyles();
-      var local_styles = this.getLocalStyles(page_no);
-      return global_styles.concat(local_styles);
-    },
-    getLocalStyles : function(page_no){
-      var _page_no = (typeof page_no != "undefined")? page_no : this.pageNo;
-      return this.styleContext.getLocalStyles(_page_no);
-    },
-    getGlobalStyles : function(){
-      return this.styleContext.getGlobalStyles();
     },
     // anchors
     setAnchor : function(anchor_name){
@@ -6861,6 +6835,7 @@ var HtmlGenerator = (function(){
     },
     _parseHead : function(content){
       var stream = new HeadTagStream(content);
+      var header = this.context.getHeader();
       while(true){
 	var tag = stream.get();
 	if(tag === null){
@@ -6868,37 +6843,37 @@ var HtmlGenerator = (function(){
 	}
 	switch(tag.getName()){
 	case "title":
-	  this._parseTitle(tag);
+	  this._parseTitle(header, tag);
 	  break;
 	case "meta":
-	  this._parseMeta(tag);
+	  this._parseMeta(header, tag);
 	  break;
 	case "link":
-	  this._parseLink(tag);
+	  this._parseLink(header, tag);
 	  break;
 	case "style":
-	  this._parseStyle(tag);
+	  this._parseStyle(header, tag);
 	  break;
 	case "script":
-	  this._parseScript(tag);
+	  this._parseScript(header, tag);
 	  break;
 	}
       }
     },
-    _parseTitle : function(tag){
-      this.context.setTitle(tag.getContentRaw());
+    _parseTitle : function(header, tag){
+      header.setTitle(tag.getContentRaw());
     },
-    _parseMeta : function(tag){
-      var context = this.context;
-      tag.iterTagAttr(function(prop, value){
-	context.setMeta(prop, value);
-      });
+    _parseMeta : function(header, tag){
+      header.addMeta(tag);
     },
-    _parseLink : function(tag){
+    _parseLink : function(header, tag){
+      header.addLink(tag);
     },
-    _parseStyle : function(tag){
+    _parseStyle : function(header, tag){
+      header.addStyle(tag);
     },
-    _parseScript : function(tag){
+    _parseScript : function(header, tag){
+      header.addScript(tag);
     }
   };
 
@@ -7681,6 +7656,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
     switch(tag.getName()){
     case "script":
+      ctx.addScript(tag);
       return Exceptions.IGNORE;
     case "style":
       ctx.addStyle(tag);
@@ -8156,8 +8132,6 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     return box;
   },
   _onCompleteTree : function(page){
-    page.styles = this.context.getPageStyles(page.pageNo);
-
     // lazy is confirmed when
     // 1. inline level of context is empty when _createBox.
     // 2. inline level of context is 'also' empty when _onCompleteTree.
@@ -8458,11 +8432,8 @@ var PageEvaluator = (function(){
 
   PageEvaluator.prototype = {
     evaluate : function(box){
-      var html = this.blockEvaluator.evaluate(box);
-      var css_content = box.styles.join("\n");
-      var style = Html.tagWrap("style", css_content, {"type":"text/css"});
       return new EvalResult({
-	html:[style, html].join("\n"),
+	html:this.blockEvaluator.evaluate(box),
 	percent:box.percent,
 	seekPos:box.seekPos,
 	pageNo:box.pageNo,

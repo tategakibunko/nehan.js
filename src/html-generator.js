@@ -45,6 +45,7 @@ var HtmlGenerator = (function(){
     },
     _parseHead : function(content){
       var stream = new HeadTagStream(content);
+      var header = this.context.getHeader();
       while(true){
 	var tag = stream.get();
 	if(tag === null){
@@ -52,37 +53,37 @@ var HtmlGenerator = (function(){
 	}
 	switch(tag.getName()){
 	case "title":
-	  this._parseTitle(tag);
+	  this._parseTitle(header, tag);
 	  break;
 	case "meta":
-	  this._parseMeta(tag);
+	  this._parseMeta(header, tag);
 	  break;
 	case "link":
-	  this._parseLink(tag);
+	  this._parseLink(header, tag);
 	  break;
 	case "style":
-	  this._parseStyle(tag);
+	  this._parseStyle(header, tag);
 	  break;
 	case "script":
-	  this._parseScript(tag);
+	  this._parseScript(header, tag);
 	  break;
 	}
       }
     },
-    _parseTitle : function(tag){
-      this.context.setTitle(tag.getContentRaw());
+    _parseTitle : function(header, tag){
+      header.setTitle(tag.getContentRaw());
     },
-    _parseMeta : function(tag){
-      var context = this.context;
-      tag.iterTagAttr(function(prop, value){
-	context.setMeta(prop, value);
-      });
+    _parseMeta : function(header, tag){
+      header.addMeta(tag);
     },
-    _parseLink : function(tag){
+    _parseLink : function(header, tag){
+      header.addLink(tag);
     },
-    _parseStyle : function(tag){
+    _parseStyle : function(header, tag){
+      header.addStyle(tag);
     },
-    _parseScript : function(tag){
+    _parseScript : function(header, tag){
+      header.addScript(tag);
     }
   };
 

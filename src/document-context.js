@@ -7,26 +7,22 @@ var DocumentContext = (function(){
     var opt = option || {};
     this.charPos = opt.charPos || 0;
     this.pageNo = opt.pageNo || 0;
-    this.meta = opt.meta || new DocumentMeta();
+    this.header = opt.header || new DocumentHeader();
     this.blockContext = opt.blockContext || new BlockContext();
     this.inlineContext = opt.inlineContext || new InlineContext();
-    this.styleContext = opt.styleContext || new StyleContext();
     this.outlineContext = opt.outlineContext || new OutlineContext();
     this.anchors = opt.anchors || {};
   }
 
   DocumentContext.prototype = {
-    setTitle : function(title){
-      this.setMeta("title", title);
+    getHeader : function(){
+      return this.header;
     },
-    getTitle : function(){
-      return this.getMeta("title");
+    addScript : function(markup){
+      this.header.addScript(markup);
     },
-    setMeta : function(name, value){
-      this.meta.add(name, value);
-    },
-    getMeta : function(name){
-      return this.meta.get(name);
+    addStyle : function(markup){
+      this.header.addStyle(markup);
     },
     getPageNo : function(){
       return this.pageNo;
@@ -44,11 +40,10 @@ var DocumentContext = (function(){
       return new DocumentContext({
 	charPos:this.charPos,
 	pageNo:this.pageNo,
-	meta:this.meta,
+	header:this.header,
 	anchors:this.anchors,
 	outlineContext:this.outlineContext,
-	blockContext:this.blockContext,
-	styleContext:this.styleContext
+	blockContext:this.blockContext
       });
     },
     inheritTag : function(tag){
@@ -66,27 +61,6 @@ var DocumentContext = (function(){
     },
     isEmptyMarkupContext : function(){
       return this.inlineContext.isEmpty();
-    },
-    // style
-    addStyle : function(markup){
-      var scope = markup.getDataset("scope", "global");
-      if(scope === "local"){
-	this.styleContext.addLocalStyle(markup, this.pageNo);
-      } else {
-	this.styleContext.addGlobalStyle(markup);
-      }
-    },
-    getPageStyles : function(page_no){
-      var global_styles = this.getGlobalStyles();
-      var local_styles = this.getLocalStyles(page_no);
-      return global_styles.concat(local_styles);
-    },
-    getLocalStyles : function(page_no){
-      var _page_no = (typeof page_no != "undefined")? page_no : this.pageNo;
-      return this.styleContext.getLocalStyles(_page_no);
-    },
-    getGlobalStyles : function(){
-      return this.styleContext.getGlobalStyles();
     },
     // anchors
     setAnchor : function(anchor_name){

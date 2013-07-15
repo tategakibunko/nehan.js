@@ -198,6 +198,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
     switch(tag.getName()){
     case "script":
+      ctx.addScript(tag);
       return Exceptions.IGNORE;
     case "style":
       ctx.addStyle(tag);
