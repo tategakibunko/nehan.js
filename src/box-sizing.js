@@ -6,23 +6,27 @@ var BoxSizing = (function(){
   }
 
   BoxSizing.prototype = {
-    isContentBox : function(){
-      return this.value === "content-box";
-    },
-    isMarginBox : function(){
+    containMarginSize : function(){
       return this.value === "margin-box";
     },
-    isBorderBox : function(){
-      return this.value === "border-box";
+    containBorderSize : function(){
+      return this.value === "margin-box" || this.value === "border-box";
     },
-    containPadding : function(){
-      return this.isBorderBox();
+    containPaddingSize : function(){
+      return this.value === "margin-box" || this.value === "border-box" || this.value === "padding-box";
     },
-    containBorder : function(){
-      return this.isBorderBox();
-    },
-    containMargin : function(){
-      return this.isMarginBox();
+    getSubEdge : function(edge){
+      var ret = new BoxEdge();
+      if(this.containMarginSize()){
+	ret.margin = edge.margin;
+      }
+      if(this.containPaddingSize()){
+	ret.padding = edge.padding;
+      }
+      if(this.containBorderSize()){
+	ret.border = edge.border;
+      }
+      return ret;
     },
     getCss : function(){
       var css = {};

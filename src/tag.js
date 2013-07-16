@@ -200,7 +200,7 @@ var Tag = (function (){
 	height = UnitSize.getBoxSize(height, font_size, max_size);
 	return new BoxSize(width, height);
       }
-      // if img tag size not defined, treat it as character size icon.
+      // if size of img is not defined, treat it as character size icon.
       // so, if basic font size is 16px, you can write <img src='/path/to/icon'>
       // instead of writing <img src='/path/to/icon' width='16' height='16'>
       if(this.name === "img"){
@@ -208,44 +208,6 @@ var Tag = (function (){
 	return new BoxSize(icon_size, icon_size);
       }
       return null;
-    },
-    getBoxEdge : function(flow, font_size, max_measure){
-      var padding = this.getCssAttr("padding");
-      var margin = this.getCssAttr("margin");
-      var border_width = this.getCssAttr("border-width");
-      var border_color = this.getCssAttr("border-color");
-      var border_style = this.getCssAttr("border-style");
-      var border_radius = this.getCssAttr("border-radius");
-      if(padding === null &&
-	 margin === null &&
-	 border_width === null &&
-	 border_radius === null){
-	return null;
-      }
-      var edge = new BoxEdge();
-      if(padding){
-	var padding_size = UnitSize.getEdgeSize(padding, font_size);
-	edge.setSize("padding", flow, padding_size);
-      }
-      if(margin){
-	var margin_size = UnitSize.getEdgeSize(margin, font_size);
-	edge.setSize("margin", flow, margin_size);
-      }
-      if(border_width){
-	var border_width_size = UnitSize.getEdgeSize(border_width, font_size);
-	edge.setSize("border", flow, border_width_size);
-      }
-      if(border_radius){
-	var border_radius_size = UnitSize.getCornerSize(border_radius, font_size);
-	edge.setBorderRadius(flow, border_radius_size);
-      }
-      if(border_color){
-	edge.setBorderColor(flow, border_color);
-      }
-      if(border_style){
-	edge.setBorderStyle(flow, border_style);
-      }
-      return edge;
     },
     hasStaticSize : function(){
       return (this.getAttr("width") !== null && this.getAttr("height") !== null);

@@ -38,7 +38,6 @@ if(__engine_args.test){
   __exports.Radius2d = Radius2d;
   __exports.BoxEdge = BoxEdge;
   __exports.BoxSize = BoxSize;
-  __exports.LogicalSize = LogicalSize;
   __exports.BoxSizing = BoxSizing;
   __exports.BoxSizings = BoxSizings;
   __exports.UnitSize = UnitSize;

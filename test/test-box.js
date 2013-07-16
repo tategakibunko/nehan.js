@@ -99,19 +99,9 @@ test("box-size", function(){
   equal(size.getExtent(flow), 202);
 
   var size = new BoxSize(100,200);
-  var lsize = size.toLogicalSize(flow);
-  equal(lsize.measure, size.width);
-  equal(lsize.extent, size.height);
-
-  var size = new BoxSize(100,200);
   var flow = new BoxFlow("tb", "rl");
   equal(size.getMeasure(flow), size.height);
   equal(size.getExtent(flow), size.width);
-
-  var size = new BoxSize(100,200);
-  var lsize = size.toLogicalSize(flow);
-  equal(lsize.measure, size.height);
-  equal(lsize.extent, size.width);
 });
 
 test("box-child", function(){

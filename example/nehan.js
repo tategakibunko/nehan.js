@@ -1508,6 +1508,7 @@ var Exceptions = {
   background-color
   background-image
   background-repeat
+  background-position
   border
   border-color
   border-radius
@@ -1585,6 +1586,8 @@ var CssParser = (function(){
   };
 
   // values:[0] => [0,0,0,0],
+  // values:[0,1] => [0, 1, 0, 1]
+  // values:[0,2,3] => [0,1,2,1]
   // values:[0,1,2,3] => [0,1,2,3]
   var make_values_4d = function(values){
     var map = get_map_4d(values.length);
@@ -1660,6 +1663,39 @@ var CssParser = (function(){
     return {}; // TODO
   };
 
+  var parse_background_pos = function(value){
+    var values = split_space(value);
+    var arg_len = values.length;
+    if(arg_len === 1){ // 1
+      return {
+	inline:{pos:values[0], offset:0},
+	block:{pos:"center", offset:0}
+      };
+    } else if(2 <= arg_len && arg_len < 4){ // 2, 3
+      return {
+	inline:{pos:values[0], offset:0},
+	block:{pos:values[1], offset:0}
+      };
+    } else if(arg_len >= 4){ // 4 ...
+      return {
+	inline:{pos:values[0], offset:values[1]},
+	block:{pos:values[2], offset:values[3]}
+      };
+    }
+    return null;
+  };
+
+  var parse_background_repeat = function(value){
+    var values = split_space(value);
+    var arg_len = values.length;
+    if(arg_len === 1){
+      return {inline:values[0], block:values[0]};
+    } else if(arg_len >= 2){
+      return {inline:values[0], block:values[1]};
+    }
+    return null;
+  };
+
   var format = function(prop, value){
     if(typeof value === "function" || typeof value === "object"){
       return value;
@@ -1668,6 +1704,10 @@ var CssParser = (function(){
     switch(prop){
     case "background":
       return parse_background_abbr(value);
+    case "background-position":
+      return parse_background_pos(value);
+    case "background-repeat":
+      return parse_background_repeat(value);
     case "border":
       return parse_border_abbr(value);
     case "border-color":
@@ -2111,6 +2151,7 @@ var Tag = (function (){
       }
       return null;
     },
+    /*
     getBoxEdge : function(flow, font_size, max_measure){
       var padding = this.getCssAttr("padding");
       var margin = this.getCssAttr("margin");
@@ -2148,7 +2189,7 @@ var Tag = (function (){
 	edge.setBorderStyle(flow, border_style);
       }
       return edge;
-    },
+    },*/
     hasStaticSize : function(){
       return (this.getAttr("width") !== null && this.getAttr("height") !== null);
     },
@@ -3577,6 +3618,139 @@ var InlineFlow = Flow.extend({
   }
 });
 
+var BackgroundRepeat = (function(){
+  function BackgroundRepeat(value){
+    this.value = value;
+  }
+
+  BackgroundRepeat.prototype = {
+    isSingleValue : function(){
+      return (this.value === "repeat-x" ||
+	      this.value === "repeat-y" ||
+	      this.value === "repeat-inline" ||
+	      this.value === "repeat-block");
+    },
+    getCssValue : function(flow){
+      var is_vert = flow.isTextVertical();
+      switch(this.value){
+      case "repeat-inline": case "repeat-x":
+	return is_vert? "repeat-y" : "repeat-x";
+      case "repeat-block": case "repeat-y":
+	return is_vert? "repeat-x" : "repeat-y";
+      default:
+	return this.value;
+      }
+    }
+  };
+
+  return BackgroundRepeat;
+})();
+
+var BackgroundRepeat2d = (function(){
+  function BackgroundRepeat2d(inline, block){
+    this.inline = inline;
+    this.block = block || this.inline;
+  }
+
+  BackgroundRepeat2d.prototype = {
+    _getRepeatValue : function(flow, value){
+      var is_vert = flow.isTextVertical();
+      switch(value){
+      case "repeat-inline": case "repeat-x":
+	return is_vert? "repeat-y" : "repeat-x";
+      case "repeat-block": case "repeat-y":
+	return is_vert? "repeat-x" : "repeat-y";
+      default:
+	return value;
+      }
+    },
+    getCssValue : function(flow){
+      var values = [this.inline];
+      if(!this.inline.isSingleValue()){
+	values.push(this.block);
+      }
+      return List.map(values, function(value){return value.getCssValue(); }).join(" ");
+    }
+  };
+
+  return BackgroundRepeat2d;
+})();
+
+var BackgroundPos = (function(){
+  function BackgroundPos(pos, offset){
+    this.pos = pos || "center";
+    this.offset = offset || 0;
+  }
+
+  BackgroundPos.prototype = {
+    getCssValue : function(flow){
+      var ret = [flow.getProp(this.pos)];
+      if(this.offset){
+	ret.push(this.offset);
+      }
+      return ret.join(" ");
+    }
+  };
+
+  return BackgroundPos;
+})();
+
+var BackgroundPos2d = (function(){
+  function BackgroundPos2d(inline, block){
+    this.inline = inline;
+    this.block = block;
+  }
+
+  BackgroundPos2d.prototype = {
+    getCssValue : function(flow){
+      return [
+	this.inline.getCssValue(flow),
+	this.block.getCssValue(flow)
+      ].join(" ");
+    },
+    getCss : function(flow){
+      var css = {};
+      css["background-pos"] = this.getCssValue(flow);
+      return css;
+    }
+  };
+
+  return BackgroundPos2d;
+})();
+
+var Background = (function(){
+  function Background(){
+  }
+
+  Background.prototype = {
+    getCss : function(flow){
+      var css = {};
+      if(this.pos){
+	Args.copy(css, this.pos.getCss(flow));
+      }
+      if(this.repeat){
+	Args.copy(css, this.repeat.getCss(flow));
+      }
+      if(this.origin){
+	css["background-origin"] = this.origin;
+      }
+      if(this.color){
+	css["background-color"] = this.color;
+      }
+      if(this.image){
+	css["background-image"] = this.image;
+      }
+      if(this.attachment){
+	css["background-attachment"] = this.attachment;
+      }
+      return css;
+    }
+  };
+
+  return Background;
+})();
+
+
 var BoxFlow = (function(){
   function BoxFlow(indir, blockdir, multicol){
     this.inflow = new InlineFlow(indir);
@@ -3697,6 +3871,9 @@ var BoxFlows = {
     return this.getByName(name);
   },
   getByName : function(name){
+    if(typeof this[name] === "undefined"){
+      throw "undefined box-flow" + name;
+    }
     return this[name];
   }
 };
@@ -3769,23 +3946,27 @@ var BoxSizing = (function(){
   }
 
   BoxSizing.prototype = {
-    isContentBox : function(){
-      return this.value === "content-box";
-    },
-    isMarginBox : function(){
+    containMarginSize : function(){
       return this.value === "margin-box";
     },
-    isBorderBox : function(){
-      return this.value === "border-box";
+    containBorderSize : function(){
+      return this.value === "margin-box" || this.value === "border-box";
     },
-    containPadding : function(){
-      return this.isBorderBox();
+    containPaddingSize : function(){
+      return this.value === "margin-box" || this.value === "border-box" || this.value === "padding-box";
     },
-    containBorder : function(){
-      return this.isBorderBox();
-    },
-    containMargin : function(){
-      return this.isMarginBox();
+    getSubEdge : function(edge){
+      var ret = new BoxEdge();
+      if(this.containMarginSize()){
+	ret.margin = edge.margin;
+      }
+      if(this.containPaddingSize()){
+	ret.padding = edge.padding;
+      }
+      if(this.containBorderSize()){
+	ret.border = edge.border;
+      }
+      return ret;
     },
     getCss : function(){
       var css = {};
@@ -3800,10 +3981,14 @@ var BoxSizing = (function(){
 
 var BoxSizings = {
   "content-box":(new BoxSizing("content-box")),
+  "padding-box":(new BoxSizing("padding-box")),
   "border-box":(new BoxSizing("border-box")),
   "margin-box":(new BoxSizing("margin-box")),
   getByName : function(name){
-    return this[name] || this["margin-box"];
+    if(typeof this[name] === "undefined"){
+      throw "undefined box-sizing:" + name;
+    }
+    return this[name];
   }
 };
 
@@ -3897,12 +4082,6 @@ var Edge = Class.extend({
   },
   getAfter : function(flow){
     return this[flow.getPropAfter()];
-  },
-  getLogicalSize : function(flow, dir){
-    return this[flow.getProp(dir)];
-  },
-  setLogicalSize : function(flow, dir, val){
-    this[flow.getProp(dir)] = val;
   }
 });
 
@@ -4348,9 +4527,6 @@ var BoxSize = (function(){
 	box_measure = rest_measure;
       }
       return flow.getBoxSize(box_measure, box_extent);
-    },
-    toLogicalSize : function(flow){
-      return new LogicalSize(this.getMeasure(flow), this.getExtent(flow));
     }
   };
 
@@ -4463,30 +4639,6 @@ var TextEmpha = (function(){
 })();
 
 
-var LogicalSize = (function(){
-  function LogicalSize(measure, extent){
-    this.measure = measure;
-    this.extent = extent;
-  }
-
-  LogicalSize.prototype = {
-    canInclude : function(size){
-      return (size.measure <= this.measure && size.extent <= this.extent);
-    },
-    getWidth : function(flow){
-      return this[flow.getPropWidth()];
-    },
-    getHeight : function(flow){
-      return this[flow.getPropHeight()];
-    },
-    toBoxSize : function(flow){
-      return new BoxSize(this.getWidth(flow), this.getHeight(flow));
-    }
-  };
-
-  return LogicalSize;
-})();
-
 var BoxChild = (function(){
   function BoxChild(){
     this.forward = [];
@@ -4556,6 +4708,9 @@ var Box = (function(){
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
+      if(this.background){
+	Args.copy(css, this.background.getCss());
+      }
       if(this.fontWeight){
 	Args.copy(css, this.fontWeight.getCss());
       }
@@ -4571,6 +4726,9 @@ var Box = (function(){
       css["font-size"] = this.fontSize + "px";
       if(this.color){
 	Args.copy(css, this.color.getCss());
+      }
+      if(this.background){
+	Args.copy(css, this.background.getCss());
       }
       if(this.fontWeight){
 	Args.copy(css, this.fontWeight.getCss());
@@ -4824,25 +4982,8 @@ var Box = (function(){
     },
     setEdge : function(edge){
       var sizing = this.sizing? this.sizing : BoxSizings.getByName("margin-box");
-      if(sizing.isMarginBox()){
-	this._setEdgeByMarginBox(edge);
-      } else if(sizing.isBorderBox()){
-	this._setEdgeByBorderBox(edge);
-      } else if(sizing.isContentBox()){
-	this.edge = edge;
-      }
-    },
-    _setEdgeByMarginBox : function(edge){
-      this.size.subEdge(edge);
-      if(this.size.isValid()){
-	this.edge = edge;
-      }
-    },
-    _setEdgeByBorderBox : function(edge){
-      var edge2 = new BoxEdge();
-      edge2.border = edge.border;
-      edge2.padding = edge.padding;
-      this.size.subEdge(edge2);
+      var sub_edge = sizing.getSubEdge(edge);
+      this.size.subEdge(sub_edge);
       if(this.size.isValid()){
 	this.edge = edge;
       }
@@ -4989,10 +5130,6 @@ var BoxStyle = {
     this._setFloat(markup, box, parent);
     this._setLetterSpacing(markup, box, parent);
     this._setBackground(markup, box, parent);
-    this._setBackgroundColor(markup, box, parent);
-    this._setBackgroundImage(markup, box, parent);
-    this._setBackgroundPosition(markup, box, parent);
-    this._setBackgroundRepeat(markup, box, parent);
     this._setClasses(markup, box, parent);
   },
   _setClasses : function(markup, box, parent){
@@ -5038,10 +5175,35 @@ var BoxStyle = {
     }
   },
   _setEdge : function(markup, box, parent){
-    var edge = markup.getBoxEdge(box.flow, box.fontSize, box.getContentMeasure());
-    if(edge){
-      box.setEdge(edge);
+    var padding = markup.getCssAttr("padding");
+    var margin = markup.getCssAttr("margin");
+    var border_width = markup.getCssAttr("border-width");
+    var border_radius = markup.getCssAttr("border-radius");
+    if(padding === null && margin === null && border_width === null && border_radius === null){
+      return null;
     }
+    var edge = new BoxEdge();
+    if(padding){
+      edge.setSize("padding", box.flow, UnitSize.getEdgeSize(padding, box.fontSize));
+    }
+    if(margin){
+      edge.setSize("margin", box.flow, UnitSize.getEdgeSize(margin, box.fontSize));
+    }
+    if(border_width){
+      edge.setSize("border", box.flow, UnitSize.getEdgeSize(border_width, box.fontSize));
+    }
+    if(border_radius){
+      edge.setBorderRadius(box.flow, UnitSize.getCornerSize(border_radius, box.fontSize));
+    }
+    var border_color = markup.getCssAttr("border-color");
+    if(border_color){
+      edge.setBorderColor(box.flow, border_color);
+    }
+    var border_style = markup.getCssAttr("border-style");
+    if(border_style){
+      edge.setBorderStyle(box.flow, border_style);
+    }
+    box.setEdge(edge);
   },
   _setLineRate : function(markup, box, parent){
     var line_rate = markup.getCssAttr("line-rate", "inherit");
@@ -5093,35 +5255,38 @@ var BoxStyle = {
       box.letterSpacing = UnitSize.getUnitSize(letter_spacing, box.fontSize);
     }
   },
+  _setBackgroundPos : function(background, pos){
+  },
+  _setBackgroundRepeat : function(background, repeat){
+  },
   _setBackground : function(markup, box, parent){
-    var background = markup.getCssAttr("background");
-    if(background){
-      box.setCss("background", background);
+    var color = markup.getCssAttr("background-color");
+    var image = markup.getCssAttr("background-image");
+    var pos = markup.getCssAttr("background-position");
+    var repeat = markup.getCssAttr("background-repeat");
+    if(color === null && image === null && pos === null && repeat === null){
+      return;
     }
-  },
-  _setBackgroundColor : function(markup, box, parent){
-    var background_color = markup.getCssAttr("background-color");
-    if(background_color){
-      box.setCss("background-color", background_color);
+    var background = new Background();
+    if(color){
+      background.color = color;
     }
-  },
-  _setBackgroundImage : function(markup, box, parent){
-    var background_image = markup.getCssAttr("background-image");
-    if(background_image){
-      box.setCss("background-image", background_image);
+    if(image){
+      background.image = image;
     }
-  },
-  _setBackgroundPosition : function(markup, box, parent){
-    var background_pos = markup.getCssAttr("background-position");
-    if(background_pos){
-      box.setCss("background-position", background_pos);
+    if(pos){
+      background.pos = new BackgroundPos2d(
+	new BackgroundPos(pos.inline, pos.offset),
+	new BackgroundPos(pos.block, pos.offset)
+      );
     }
-  },
-  _setBackgroundRepeat : function(markup, box, parent){
-    var background_repeat = markup.getCssAttr("background-repeat");
-    if(background_repeat){
-      box.setCss("background-repeat", background_pos);
+    if(repeat){
+      background.repeat = new BackgroundRepeat2d(
+	new BackgroundRepeat(repeat.inline),
+	new BackgroundRepeat(repeat.block)
+      );
     }
+    box.background = background;
   }
 };
 
@@ -9127,7 +9292,6 @@ if(__engine_args.test){
   __exports.Radius2d = Radius2d;
   __exports.BoxEdge = BoxEdge;
   __exports.BoxSize = BoxSize;
-  __exports.LogicalSize = LogicalSize;
   __exports.BoxSizing = BoxSizing;
   __exports.BoxSizings = BoxSizings;
   __exports.UnitSize = UnitSize;

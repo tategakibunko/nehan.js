@@ -37,7 +37,6 @@ var BoxSize = testEngine.BoxSize;
 var BoxSizing = testEngine.BoxSizing;
 var BoxSizings = testEngine.BoxSizings;
 var UnitSize = testEngine.UnitSize;
-var LogicalSize = testEngine.LogicalSize;
 var BoxChild = testEngine.BoxChild;
 var Box = testEngine.Box;
 var Color = testEngine.Color;

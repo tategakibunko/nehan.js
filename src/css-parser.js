@@ -5,6 +5,7 @@
   background-color
   background-image
   background-repeat
+  background-position
   border
   border-color
   border-radius
@@ -82,6 +83,8 @@ var CssParser = (function(){
   };
 
   // values:[0] => [0,0,0,0],
+  // values:[0,1] => [0, 1, 0, 1]
+  // values:[0,2,3] => [0,1,2,1]
   // values:[0,1,2,3] => [0,1,2,3]
   var make_values_4d = function(values){
     var map = get_map_4d(values.length);
@@ -157,6 +160,39 @@ var CssParser = (function(){
     return {}; // TODO
   };
 
+  var parse_background_pos = function(value){
+    var values = split_space(value);
+    var arg_len = values.length;
+    if(arg_len === 1){ // 1
+      return {
+	inline:{pos:values[0], offset:0},
+	block:{pos:"center", offset:0}
+      };
+    } else if(2 <= arg_len && arg_len < 4){ // 2, 3
+      return {
+	inline:{pos:values[0], offset:0},
+	block:{pos:values[1], offset:0}
+      };
+    } else if(arg_len >= 4){ // 4 ...
+      return {
+	inline:{pos:values[0], offset:values[1]},
+	block:{pos:values[2], offset:values[3]}
+      };
+    }
+    return null;
+  };
+
+  var parse_background_repeat = function(value){
+    var values = split_space(value);
+    var arg_len = values.length;
+    if(arg_len === 1){
+      return {inline:values[0], block:values[0]};
+    } else if(arg_len >= 2){
+      return {inline:values[0], block:values[1]};
+    }
+    return null;
+  };
+
   var format = function(prop, value){
     if(typeof value === "function" || typeof value === "object"){
       return value;
@@ -165,6 +201,10 @@ var CssParser = (function(){
     switch(prop){
     case "background":
       return parse_background_abbr(value);
+    case "background-position":
+      return parse_background_pos(value);
+    case "background-repeat":
+      return parse_background_repeat(value);
     case "border":
       return parse_border_abbr(value);
     case "border-color":

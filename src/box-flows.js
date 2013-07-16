@@ -16,6 +16,9 @@ var BoxFlows = {
     return this.getByName(name);
   },
   getByName : function(name){
+    if(typeof this[name] === "undefined"){
+      throw "undefined box-flow" + name;
+    }
     return this[name];
   }
 };

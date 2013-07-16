@@ -16,10 +16,6 @@ var BoxStyle = {
     this._setFloat(markup, box, parent);
     this._setLetterSpacing(markup, box, parent);
     this._setBackground(markup, box, parent);
-    this._setBackgroundColor(markup, box, parent);
-    this._setBackgroundImage(markup, box, parent);
-    this._setBackgroundPosition(markup, box, parent);
-    this._setBackgroundRepeat(markup, box, parent);
     this._setClasses(markup, box, parent);
   },
   _setClasses : function(markup, box, parent){
@@ -65,10 +61,35 @@ var BoxStyle = {
     }
   },
   _setEdge : function(markup, box, parent){
-    var edge = markup.getBoxEdge(box.flow, box.fontSize, box.getContentMeasure());
-    if(edge){
-      box.setEdge(edge);
+    var padding = markup.getCssAttr("padding");
+    var margin = markup.getCssAttr("margin");
+    var border_width = markup.getCssAttr("border-width");
+    var border_radius = markup.getCssAttr("border-radius");
+    if(padding === null && margin === null && border_width === null && border_radius === null){
+      return null;
     }
+    var edge = new BoxEdge();
+    if(padding){
+      edge.setSize("padding", box.flow, UnitSize.getEdgeSize(padding, box.fontSize));
+    }
+    if(margin){
+      edge.setSize("margin", box.flow, UnitSize.getEdgeSize(margin, box.fontSize));
+    }
+    if(border_width){
+      edge.setSize("border", box.flow, UnitSize.getEdgeSize(border_width, box.fontSize));
+    }
+    if(border_radius){
+      edge.setBorderRadius(box.flow, UnitSize.getCornerSize(border_radius, box.fontSize));
+    }
+    var border_color = markup.getCssAttr("border-color");
+    if(border_color){
+      edge.setBorderColor(box.flow, border_color);
+    }
+    var border_style = markup.getCssAttr("border-style");
+    if(border_style){
+      edge.setBorderStyle(box.flow, border_style);
+    }
+    box.setEdge(edge);
   },
   _setLineRate : function(markup, box, parent){
     var line_rate = markup.getCssAttr("line-rate", "inherit");
@@ -121,34 +142,33 @@ var BoxStyle = {
     }
   },
   _setBackground : function(markup, box, parent){
-    var background = markup.getCssAttr("background");
-    if(background){
-      box.setCss("background", background);
+    var color = markup.getCssAttr("background-color");
+    var image = markup.getCssAttr("background-image");
+    var pos = markup.getCssAttr("background-position");
+    var repeat = markup.getCssAttr("background-repeat");
+    if(color === null && image === null && pos === null && repeat === null){
+      return;
     }
-  },
-  _setBackgroundColor : function(markup, box, parent){
-    var background_color = markup.getCssAttr("background-color");
-    if(background_color){
-      box.setCss("background-color", background_color);
+    var background = new Background();
+    if(color){
+      background.color = color;
     }
-  },
-  _setBackgroundImage : function(markup, box, parent){
-    var background_image = markup.getCssAttr("background-image");
-    if(background_image){
-      box.setCss("background-image", background_image);
+    if(image){
+      background.image = image;
     }
-  },
-  _setBackgroundPosition : function(markup, box, parent){
-    var background_pos = markup.getCssAttr("background-position");
-    if(background_pos){
-      box.setCss("background-position", background_pos);
+    if(pos){
+      background.pos = new BackgroundPos2d(
+	new BackgroundPos(pos.inline, pos.offset),
+	new BackgroundPos(pos.block, pos.offset)
+      );
     }
-  },
-  _setBackgroundRepeat : function(markup, box, parent){
-    var background_repeat = markup.getCssAttr("background-repeat");
-    if(background_repeat){
-      box.setCss("background-repeat", background_pos);
+    if(repeat){
+      background.repeat = new BackgroundRepeat2d(
+	new BackgroundRepeat(repeat.inline),
+	new BackgroundRepeat(repeat.block)
+      );
     }
+    box.background = background;
   }
 };
 

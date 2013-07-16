@@ -24,6 +24,9 @@ var Box = (function(){
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
+      if(this.background){
+	Args.copy(css, this.background.getCss());
+      }
       if(this.fontWeight){
 	Args.copy(css, this.fontWeight.getCss());
       }
@@ -39,6 +42,9 @@ var Box = (function(){
       css["font-size"] = this.fontSize + "px";
       if(this.color){
 	Args.copy(css, this.color.getCss());
+      }
+      if(this.background){
+	Args.copy(css, this.background.getCss());
       }
       if(this.fontWeight){
 	Args.copy(css, this.fontWeight.getCss());
@@ -292,25 +298,8 @@ var Box = (function(){
     },
     setEdge : function(edge){
       var sizing = this.sizing? this.sizing : BoxSizings.getByName("margin-box");
-      if(sizing.isMarginBox()){
-	this._setEdgeByMarginBox(edge);
-      } else if(sizing.isBorderBox()){
-	this._setEdgeByBorderBox(edge);
-      } else if(sizing.isContentBox()){
-	this.edge = edge;
-      }
-    },
-    _setEdgeByMarginBox : function(edge){
-      this.size.subEdge(edge);
-      if(this.size.isValid()){
-	this.edge = edge;
-      }
-    },
-    _setEdgeByBorderBox : function(edge){
-      var edge2 = new BoxEdge();
-      edge2.border = edge.border;
-      edge2.padding = edge.padding;
-      this.size.subEdge(edge2);
+      var sub_edge = sizing.getSubEdge(edge);
+      this.size.subEdge(sub_edge);
       if(this.size.isValid()){
 	this.edge = edge;
       }

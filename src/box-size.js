@@ -71,9 +71,6 @@ var BoxSize = (function(){
 	box_measure = rest_measure;
       }
       return flow.getBoxSize(box_measure, box_extent);
-    },
-    toLogicalSize : function(flow){
-      return new LogicalSize(this.getMeasure(flow), this.getExtent(flow));
     }
   };
 

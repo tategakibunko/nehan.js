@@ -67,11 +67,5 @@ var Edge = Class.extend({
   },
   getAfter : function(flow){
     return this[flow.getPropAfter()];
-  },
-  getLogicalSize : function(flow, dir){
-    return this[flow.getProp(dir)];
-  },
-  setLogicalSize : function(flow, dir, val){
-    this[flow.getProp(dir)] = val;
   }
 });
