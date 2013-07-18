@@ -58,8 +58,6 @@ if(__engine_args.test){
   __exports.Lexer = Lexer;
   __exports.Token = Token;
   __exports.TagStack = TagStack;
-  __exports.InlineContext = InlineContext;
-  __exports.BlockContext = BlockContext;
   __exports.DocumentContext = DocumentContext;
   __exports.TocContext = TocContext;
   __exports.EvalResult = EvalResult;

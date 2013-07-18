@@ -9,7 +9,7 @@ var TableTagStream = FilteredTagStream.extend({
 	      name === "tr");
     });
     this.markup = markup;
-    this.markup.tableChilds = this.tokens = this._parseTokens(this.tokens);
+    this.markup.tableChilds = this.tokens = this._parseTokens(this.markup, this.tokens);
   },
   getPartition : function(box){
     var self = this;
@@ -28,39 +28,31 @@ var TableTagStream = FilteredTagStream.extend({
     });
     return partition;
   },
-  _setChildTokens : function(target, childs){
-    target.tableChilds = childs;
-    var len = childs.length;
-    if(len > 0){
-      target.firstChild = childs[0];
-      target.lastChild = childs[len - 1];
-    }
-    return target;
-  },
-  _parseTokens : function(tokens){
+  _parseTokens : function(parent_markup, tokens){
     var theads = [], tfoots = [], tbodies = [], self = this;
     var thead = null, tbody = null, tfoot = null;
     var ctx = {row:0, col:0, maxCol:0};
     List.iter(tokens, function(token){
+      token.inherit(parent_markup);
       if(Token.isTag(token)){
 	switch(token.name){
 	case "tr":
 	  token.row = ctx.row;
-	  self._setChildTokens(token, self._parseCols(ctx, token.getContent()));
+	  token.tableChilds = self._parseCols(ctx, token);
 	  ctx.row++;
 	  tbodies.push(token);
 	  break;
 	case "thead":
 	  thead = token;
-	  theads = theads.concat(self._parseRows(ctx, token.getContent()));
+	  theads = theads.concat(self._parseRows(ctx, token));
 	  break;
 	case "tbody":
 	  tbody = token;
-	  tbodies = tbodies.concat(self._parseRows(ctx, token.getContent()));
+	  tbodies = tbodies.concat(self._parseRows(ctx, token));
 	  break;
 	case "tfoot":
 	  tfoot = token;
-	  tfoots = tfoots.concat(self._parseRows(ctx, token.getContent()));
+	  tfoots = tfoots.concat(self._parseRows(ctx, token));
 	  break;
 	}
       }
@@ -72,9 +64,9 @@ var TableTagStream = FilteredTagStream.extend({
       if(thead === null){
 	thead = new Tag("<thead>");
       }
-      this._setChildTokens(thead, theads);
+      thead.tableChilds = theads;
       thead.row = nrow;
-      nrow += thead.tableChilds.length;
+      nrow += theads.length;
       ret.push(thead);
     }
 
@@ -82,9 +74,9 @@ var TableTagStream = FilteredTagStream.extend({
       if(tbody === null){
 	tbody = new Tag("<tbody>");
       }
-      this._setChildTokens(tbody, tbodies);
+      tbody.tableChilds = tbodies;
       tbody.row = nrow;
-      nrow += tbody.tableChilds.length;
+      nrow += tbodies.length;
       ret.push(tbody);
     }
 
@@ -92,12 +84,12 @@ var TableTagStream = FilteredTagStream.extend({
       if(tfoot === null){
 	tfoot = new Tag("<tfoot>");
       }
-      this._setChildTokens(tfoot, tfoots);
+      tfoot.tableChilds = tfoots;
       tfoot.row = nrow;
       ret.push(tfoot);
     }
 
-    this._setChildTokens(this.markup, ret);
+    this.markup.tableChilds = ret;
     this.markup.maxCol = ctx.maxCol;
     this.markup.rowCount = ctx.row;
 
@@ -112,26 +104,28 @@ var TableTagStream = FilteredTagStream.extend({
       return 0;
     });
   },
-  _parseRows : function(ctx, content){
+  _parseRows : function(ctx, parent){
     var self = this;
-    var rows = (new FilteredTagStream(content, function(tag){
+    var rows = (new FilteredTagStream(parent.getContent(), function(tag){
       return tag.getName() === "tr";
     })).getAll();
 
     return List.map(rows, function(row){
+      row.inherit(parent);
       row.row = ctx.row;
-      row = self._setChildTokens(row, self._parseCols(ctx, row.getContent()));
+      row.tableChilds = self._parseCols(ctx, row);
       ctx.row++;
       return row;
     });
   },
-  _parseCols : function(ctx, content){
-    var cols = (new FilteredTagStream(content, function(tag){
+  _parseCols : function(ctx, parent){
+    var cols = (new FilteredTagStream(parent.getContent(), function(tag){
       var name = tag.getName();
       return (name === "td" || name === "th");
     })).getAll();
 
     List.iteri(cols, function(i, col){
+      col.inherit(parent);
       col.row = ctx.row;
       col.col = i;
     });

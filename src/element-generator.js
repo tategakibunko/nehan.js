@@ -39,13 +39,6 @@ var ElementGenerator = Class.extend({
   _getBoxType : function(){
     return this.markup.getName();
   },
-  _setBoxFirstChild : function(box, parent){
-    // if box is first child of parent,
-    // copy style of <this.markup.name>:first-child.
-    if(box.isFirstChildOf(parent)){
-      this.markup.setFirstChild();
-    }
-  },
   _setBoxClasses : function(box, parent){
     List.iter(this.markup.classes, function(klass){
       box.addClass(klass);
@@ -59,7 +52,6 @@ var ElementGenerator = Class.extend({
     var box = Layout.createBox(size, parent, box_type);
     box.markup = this.markup;
     this._onReadyBox(box, parent);
-    this._setBoxFirstChild(box, parent);
     this._setBoxClasses(box, parent);
     this._setBoxStyle(box, parent);
     this._onCreateBox(box, parent);

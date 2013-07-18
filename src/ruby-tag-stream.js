@@ -1,18 +1,18 @@
 var RubyTagStream = TokenStream.extend({
-  init : function(src){
-    this._super(src);
+  init : function(markup_ruby){
+    this._super(markup_ruby.getContent());
     this.getAll();
-    this.tokens = this._parse();
+    this.tokens = this._parse(markup_ruby);
     this.rewind();
   },
-  _parse : function(stream){
+  _parse : function(markup_ruby){
     var ret = [];
     while(this.hasNext()){
-      ret.push(this._parseRuby());
+      ret.push(this._parseRuby(markup_ruby));
     }
     return ret;
   },
-  _parseRuby : function(stream){
+  _parseRuby : function(markup_ruby){
     var rbs = [];
     var rt = null;
     while(true){
@@ -22,6 +22,7 @@ var RubyTagStream = TokenStream.extend({
       }
       if(Token.isTag(token) && token.getName() === "rt"){
 	rt = token;
+	rt.inherit(markup_ruby);
 	break;
       }
       if(Token.isText(token)){

@@ -34,12 +34,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     return parent.flow.getBoxSize(measure, extent);
   },
   _setFirstLineStyle : function(line, parent){
-    var css_attr = this.markup? this.markup.getPseudoElementCssAttr("first-line") : {};
-    if(!Obj.isEmpty(css_attr)){
-      var first_line_tag = new Tag("<first-line>");
-      first_line_tag.setCssAttrs(css_attr);
-      BoxStyle.set(first_line_tag, line, parent);
-    }
+    // TODO
   },
   _createLine  : function(parent){
     var size = this._getLineSize(parent);

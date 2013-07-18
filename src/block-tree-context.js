@@ -28,8 +28,8 @@ var BlockTreeContext = (function(){
     },
     getNextToken : function(){
       var token = this.stream.get();
-      if(token && Token.isTag(token)){
-	this.context.inheritTag(token);
+      if(token && Token.isTag(token) && this.page.markup){
+	token.inherit(this.page.markup);
       }
       return token;
     }

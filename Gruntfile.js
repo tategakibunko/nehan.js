@@ -121,8 +121,6 @@ module.exports = function(grunt) {
 	    "src/outline-parser.js",
 	    "src/outline-converter.js",
 	    "src/document-header.js",
-	    "src/block-context.js",
-	    "src/inline-context.js",
 	    "src/document-context.js",
 	    "src/border-map.js",
 	    "src/collapse.js",

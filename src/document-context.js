@@ -8,8 +8,8 @@ var DocumentContext = (function(){
     this.charPos = opt.charPos || 0;
     this.pageNo = opt.pageNo || 0;
     this.header = opt.header || new DocumentHeader();
-    this.blockContext = opt.blockContext || new BlockContext();
-    this.inlineContext = opt.inlineContext || new InlineContext();
+    this.blockContext = opt.blockContext || new TagStack();
+    this.inlineContext = opt.inlineContext || new TagStack();
     this.outlineContext = opt.outlineContext || new OutlineContext();
     this.anchors = opt.anchors || {};
   }
@@ -73,57 +73,21 @@ var DocumentContext = (function(){
       return this.anchors[anchor_name] || -1;
     },
     // inline context
-    getCurInlineTag : function(){
-      return this.inlineContext.getHeadTag();
-    },
-    getInlineTagStack : function(){
-      return this.inlineContext.getTagStack();
-    },
-    getInlineTagDepth : function(){
-      return this.inlineContext.getTagDepth();
-    },
     pushInlineTag : function(tag){
-      this.inlineContext.pushTag(tag);
+      this.inlineContext.push(tag);
     },
     popInlineTag : function(){
-      return this.inlineContext.popTag();
-    },
-    findInlineTag : function(fn){
-      return this.inlineContext.findTag(fn);
-    },
-    isInlineTagEnable : function(fn){
-      return this.inlineContext.isTagEnable(fn);
+      return this.inlineContext.pop();
     },
     // block context
-    isHeaderEnable : function(){
-      return this.blockContext.isHeaderEnable();
-    },
     pushBlockTag : function(tag){
-      this.blockContext.pushTag(tag);
+      this.blockContext.push(tag);
     },
     popBlockTag : function(){
-      return this.blockContext.popTag();
-    },
-    getBlockTagStack : function(){
-      return this.blockContext.getTagStack();
+      return this.blockContext.pop();
     },
     getCurBlockTag : function(){
-      return this.blockContext.getHeadTag();
-    },
-    getBlockDepth : function(){
-      return this.blockContext.getTagDepth();
-    },
-    getBlockDepthByName : function(name){
-      return this.blockContext.getTagDepthByName(name);
-    },
-    getOutlineTitle : function(){
-      return this.blockContext.getOutlineTitle();
-    },
-    findBlockTag : function(fn){
-      return this.blockContext.findTag(fn);
-    },
-    isBlockTagEnable : function(fn){
-      return this.blockContext.isTagEnable(fn);
+      return this.blockContext.getHead();
     },
     // outline context
     getOutlineBuffer : function(root_name){

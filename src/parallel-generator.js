@@ -4,6 +4,16 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     this.markup = markup;
     this.context = context;
     this.partition = partition;
+    this.context.pushBlockTag(this.markup);
+    this._inheritParent();
+  },
+  _inheritParent : function(){
+    var parent_markup = this.markup;
+    List.iter(this.generators, function(gen){
+      if(gen.markup){
+	gen.markup.inherit(parent_markup);
+      }
+    });
   },
   hasNext : function(){
     return List.exists(this.generators, function(generator){

@@ -8,7 +8,6 @@ var Tag = (function (){
   var get_css_attr_cache = function(key){
     return css_attr_cache[key] || null;
   };
-
   function Tag(src, content){
     this._type = "tag";
     this._inherited = false; // flag to avoid duplicate inheritance
@@ -19,43 +18,33 @@ var Tag = (function (){
     this.contentRaw = content || "";
     this.dataset = {};
     this.tagAttr = {};
-    this.cssAttrContext = {};
+    this.cssAttrStatic = {}; // initialized by 'inheritTag'.
     this.cssAttrDynamic = {}; // updated by 'setCssAttr'.
     this.childs = []; // updated by inherit
     this.next = null;
-
     this.tagAttr = this._parseTagAttr(this.src);
     this.id = this._parseId();
     this.classes = this._parseClasses();
-    this.selectors = this._parseSelectors(this.id, this.classes);
-    this.cssAttrContext = this._parseCssAttr(this.selectors);
   }
 
   Tag.prototype = {
     // copy parent settings in 'markup' level
     inherit : function(parent_tag){
-      if(this._inherited){
+      if(this._inherited || !this.hasLayout()){
 	return; // avoid duplicate initialize
       }
+      //console.log("%s inherit from %s", this.src, parent_tag.src);
       var self = this;
+      var cache_key = this.getCssCacheKey(parent_tag);
       this.parent = parent_tag;
       this.parent.addChild(this);
-      if(parent_tag.getName() != "body"){
-	var prev_selector_size = this.selectors.length;
-	var parent_selectors = parent_tag.getSelectors();
-	var ctx_selectors = this._parseContextSelectors(parent_selectors);
-	this.selectors = this.selectors.concat(ctx_selectors);
-	if(this.selectors.length > prev_selector_size){
-	  this.cssAttrContext = this._parseCssAttr(this.selectors); // update style by new selector list
-	}
-      }
+      this.cssAttrStatic = this._parseCssAttr(cache_key);
       // copy 'inherit' value from parent.
-      for(var prop in this.cssAttrContext){
-	if(this.cssAttrContext[prop] === "inherit"){
+      for(var prop in this.cssAttrStatic){
+	if(this.cssAttrStatic[prop] === "inherit"){
 	  this.setCssAttr(prop, parent_tag.getAttr(prop));
 	}
       }
-      this.fullSelectorCacheKey = this._getCssCacheKey(this.selectors);
       this._inherited = true;
     },
     setContentRaw : function(content_raw){
@@ -72,16 +61,8 @@ var Tag = (function (){
 	this.setCssAttr(prop, obj[prop]);
       }
     },
-    setFirstChild : function(){
-      var css = this.getPseudoClassCssAttr("first-child");
-      this.setCssAttrs(css);
-    },
     setFirstLetter : function(){
-      var cache_key = this.getDataset("key");
-      var cache = get_css_attr_cache(cache_key);
-      if(cache){
-	this.setCssAttrs(cache);
-      }
+      // TODO
     },
     setNext : function(tag){
       this.next = tag;
@@ -106,11 +87,11 @@ var Tag = (function (){
     iterCssAttrDynamic : function(fn){
       List.each(this.cssAttrDynamic, fn);
     },
-    iterCssAttrContext : function(fn){
-      List.each(this.cssAttrContext, fn);
+    iterCssAttrStatic : function(fn){
+      List.each(this.cssAttrStatic, fn);
     },
     iterCssAttr : function(fn){
-      this.iterCssAttrContext(fn);
+      this.iterCssAttrStatic(fn);
       this.iterCssAttrDynamic(fn); // dynamic attrs prior to static ones.
     },
     iterAttr : function(fn){
@@ -144,17 +125,6 @@ var Tag = (function (){
     getOrder : function(){
       return this.order || -1;
     },
-    getPseudoClassCssAttr : function(class_name){
-      var selectors = this._parsePseudoClassSelectors(class_name);
-      return this._parseCssAttr(selectors);
-    },
-    getPseudoElementCssAttr : function(element_name){
-      var selectors = this._parsePseudoElementSelectors(element_name);
-      return this._parseCssAttr(selectors);
-    },
-    getSelectors : function(){
-      return this.selectors;
-    },
     getCssClasses : function(){
       return this.classes.join(" ");
     },
@@ -162,19 +132,7 @@ var Tag = (function (){
       return this.tagAttr[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
     getCssAttr : function(name, def_value){
-      return this.cssAttrDynamic[name] || this.cssAttrContext[name] || ((typeof def_value !== "undefined")? def_value : null);
-    },
-    // used for property that could be contructed with multiple values such as margin(start/end/before/after).
-    // for example, when we get "margin" of some target,
-    // we read style from default css, and context selector css, and inline style,
-    // and we must 'merge' them to get strict style settings.
-    getCssAttrs : function(name, def_value){
-      return List.fold([this.cssAttrContext, this.cssAttrDynamic], [], function(ret, target){
-	if(typeof target[name] !== "undefined"){
-	  ret.push(target[name]);
-	}
-	return ret;
-      });
+      return this.cssAttrDynamic[name] || this.cssAttrStatic[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
     getDataset : function(name, def_value){
       return this.dataset[name] || ((typeof def_value !== "undefined")? def_value : null);
@@ -310,23 +268,49 @@ var Tag = (function (){
     isSameTag : function(dst){
       return this._gtid === dst._gtid;
     },
-    _getChildIndexFrom : function(childs){
+    // <p id='foo' class='hi hey'>
+    // => ["p", "p.hi", "p.hey", "p#foo"]
+    getTagKeys : function(){
+      var tag_name = this.getName();
+      var keys = [tag_name];
+      var class_keys = List.map(this.classes, function(class_name){
+	return tag_name + "." + class_name;
+      });
+      var id_keys = this.id? [tag_name + "#" + this.id] : [];
+      return keys.concat(class_keys).concat(id_keys);
+    },
+    // parent_keys: ["div", "div.parent"]
+    // child_keys: ["p", "p.child"]
+    // =>["div p", "div p.child", "div.parent p", "div.parent p.child"]
+    getContextTagKeys : function(parent){
+      var parent_keys = parent.getTagKeys();
+      var child_keys = this.getTagKeys();
+      return List.fold(parent_keys, [], function(ret1, parent_key){
+	return ret1.concat(List.fold(child_keys, [], function(ret2, child_key){
+	  return ret2.concat([parent_key + " " + child_key]);
+	}));
+      });
+    },
+    getCssCacheKey : function(parent){
+      return this.getContextTagKeys(parent).join("*");
+    },
+    getChildIndexFrom : function(childs){
       var self = this;
       return List.indexOf(childs, function(tag){
 	return self.isSameTag(tag);
       });
     },
     getChildNth : function(){
-      return this._getChildIndexFrom(this.getParentChilds());
+      return this.getChildIndexFrom(this.getParentChilds());
     },
     getLastChildNth : function(){
-      return this._getChildIndexFrom(List.reverse(this.getParentChilds()));
+      return this.getChildIndexFrom(List.reverse(this.getParentChilds()));
     },
     getChildOfTypeNth : function(){
-      return this._getChildIndexFrom(this.getParentTypeChilds());
+      return this.getChildIndexFrom(this.getParentTypeChilds());
     },
     getLastChildOfTypeNth : function(){
-      return this._getChildIndexFrom(this.getParentTypeChilds());
+      return this.getChildIndexFrom(this.getParentTypeChilds());
     },
     isFirstChild : function(){
       return this.getChildNth() === 0;
@@ -355,12 +339,6 @@ var Tag = (function (){
     isEmpty : function(){
       return this.getContent() === "";
     },
-    _getCssCacheKey : function(selectors){
-      return selectors.join("*");
-    },
-    _getPseudoElementCssCacheKey : function(element_name){
-      return [this.fullSelectorCacheKey, element_name].join("::");
-    },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
     },
@@ -383,77 +361,20 @@ var Tag = (function (){
 	return "." + class_name;
       });
     },
-    // <p id='foo' class='hi hey'>
-    // => ["p", "p.hi", "p.hey", "p#foo"]
-    _parseSelectors : function(id, classes){
-      var tag_name = this.getName();
-      var basic_selector = [tag_name];
-      var class_selectors = List.map(classes, function(class_name){
-	return tag_name + "." + class_name;
-      });
-      var id_selector = id? [tag_name + "#" + id] : [];
-      return basic_selector.concat(class_selectors).concat(id_selector);
-    },
-    // parent_keys: ["div", "div.parent"]
-    // child_keys: ["p", "p.child"]
-    // =>["div p", "div p.child", "div.parent p", "div.parent p.child"]
-    _parseContextSelectors : function(parent_selectors){
-      var child_selectors = this.selectors;
-      return List.fold(parent_selectors, [], function(ret1, parent_key){
-	return ret1.concat(List.fold(child_selectors, [], function(ret2, child_key){
-	  return ret2.concat([parent_key + " " + child_key]);
-	}));
-      });
-    },
-    // if class_name is "first-child",
-    // and this.selectors is ["p", "p.hoge"]
-    // => ["p:first-child", "p.hoge:first-child"]
-    _parsePseudoClassSelectors : function(class_name){
-      return List.map(this.selectors, function(key){
-	return key + ":" + class_name;
-      });
-    },
-    // if element_name is "before",
-    // and this.selectors is ["p", "p.hoge"]
-    // => ["p::before", "p.hoge::before"]
-    _parsePseudoElementSelectors : function(element_name){
-      return List.map(this.selectors, function(key){
-	return key + "::" + element_name;
-      });
-    },
-    _parseCssAttr : function(selectors){
-      var cache_key = this._getCssCacheKey(selectors);
+    _parseCssAttr : function(cache_key){
       var cache = get_css_attr_cache(cache_key);
       if(cache === null){
-	cache = Selectors.getMergedValue(selectors);
+	cache = Selectors.getValue(this);
 	add_css_attr_cache(cache_key, cache);
       }
       return cache;
     },
-    _parsePseudoElementContentSrc : function(element_name){
-      var css_attr = this.getPseudoElementCssAttr(element_name);
-      if(Obj.isEmpty(css_attr)){
-	return "";
-      }
-      var cache_key = this._getPseudoElementCssCacheKey(element_name);
-      add_css_attr_cache(css_attr);
-      var content = css_attr.content || "";
-      return Html.tagWrap(element_name, content, {"data-key":cache_key});
-    },
     _appendFirstLetter : function(content){
-      var css_attr = this.getPseudoElementCssAttr("first-letter");
-      if(Obj.isEmpty(css_attr)){
-	return content;
-      }
-      var cache_key = this._getPseudoElementCssCacheKey(this.selectors, "first-letter");
-      add_css_attr_cache(cache_key, css_attr);
-      return content.replace(rex_first_letter, function(match, p1, p2, p3){
-	return p1 + Html.tagStart("first-letter", {"data-key":cache_key}) + p3 + "</first-letter>";
-      });
+      return content; // TODO
     },
     _parseContent : function(content_raw){
-      var before = this._parsePseudoElementContentSrc("before");
-      var after = this._parsePseudoElementContentSrc("after");
+      var before = ""; // TODO
+      var after = ""; // TODO
       return this._appendFirstLetter([before, content_raw, after].join(""));
     },
     // <img src='/path/to/img' push>

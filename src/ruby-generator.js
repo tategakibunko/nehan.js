@@ -1,6 +1,7 @@
 var RubyGenerator = ChildInlineTreeGenerator.extend({
   _createStream : function(){
-    return new RubyTagStream(this.markup.getContent());
+    //return new RubyTagStream(this.markup.getContent());
+    return new RubyTagStream(this.markup);
   },
   _yieldElement : function(ctx){
     var ruby = this._super(ctx);

@@ -3,7 +3,6 @@ var InlineTreeContext = (function(){
     this.line = line;
     this.stream = stream;
     this.context = context;
-    this.markup = this.context.getCurInlineTag() || null;
     this.lineStartPos = this.stream.getPos();
     this.textIndent = stream.isHead()? (line.textIndent || 0) : 0;
     this.maxFontSize = 0;
@@ -86,9 +85,6 @@ var InlineTreeContext = (function(){
     isEmptyText : function(){
       return this.lineTokens.length === 0;
     },
-    isInlineTagEmpty : function(){
-      return this.context.getInlineTagDepth() <= 0;
-    },
     isOverWithoutLineBreak : function(){
       return !this.lineBreak && (this.lineTokens.length > 0);
     },
@@ -117,7 +113,10 @@ var InlineTreeContext = (function(){
 	    token = this.stream.get();
 	  }
 	} else if(Token.isTag(token)){
-	  this.context.inheritTag(token);
+	  //this.context.inheritTag(token);
+	  if(this.line.markup){
+	    token.inherit(this.line.markup);
+	  }
 	}
       }
       this.lastToken = token;

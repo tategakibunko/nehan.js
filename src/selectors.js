@@ -11,19 +11,27 @@ var Selectors = (function(){
       if(Style[selector_key]){
 	Args.copy(Style[selector_key], value);
       } else {
-	Style[selector_key] = value;
-	selectors.push(new Selector(selector_key, value));
+	var selector = new Selector(selector_key, value);
+	selectors.push(selector);
+	Style[selector_key] = selector.getValue();
       }
     },
-    getValue : function(selector_key){
-      return List.fold(selectors, {}, function(ret, selector){
-	return selector.test(selector_key)? Args.copy(ret, selector.getValue()) : ret;
+    /*
+    getValue : function(markup){
+      var css = List.fold(selectors, {}, function(ret, selector){
+	if(selector.test(markup)){
+	  var value = selector.getValue();
+	  console.log("%s matches %s:%o", markup.src, selector.key, value);
+	  return Args.copy(ret, value);
+	}
+	return ret;
       });
-    },
-    getMergedValue : function(selector_keys){
-      var self = this;
-      return List.fold(selector_keys, {}, function(ret, selector_key){
-	return Args.copy(ret, self.getValue(selector_key));
+      console.log("merged value is:%o", css);
+      return css;
+    }*/
+    getValue : function(markup){
+      return List.fold(selectors, {}, function(ret, selector){
+	return selector.test(markup)? Args.copy(ret, selector.getValue()) : ret;
       });
     }
   };
