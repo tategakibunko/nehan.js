@@ -1294,6 +1294,9 @@ var Utils = {
   trim : function(str){
     return str.replace(/^\s+/, "").replace(/\s+$/, "");
   },
+  cutQuote : function(str){
+    return str.replace(/['\"]/g, "");
+  },
   capitalize : function(str){
     if(str === ""){
       return "";
@@ -1743,6 +1746,359 @@ var CssParser = (function(){
 })();
 
 
+var SelectorAttr = (function(){
+  function SelectorAttr(expr){
+    this.expr = this._normalize(expr);
+    this.left = this.op = this.right = null;
+    this._parseExpr(this.expr);
+  }
+
+  var rex_symbol = /[^=^~|$*\s]+/;
+  var op_symbols = ["|=", "~=", "^=", "$=", "*=", "="];
+
+  SelectorAttr.prototype = {
+    _normalize : function(expr){
+      return expr.replace(/\[/g, "").replace(/\]/g, "");
+    },
+    _parseSymbol : function(expr){
+      var match = expr.match(rex_symbol);
+      if(match){
+	return match[0];
+      }
+      return "";
+    },
+    _parseOp : function(expr){
+      return List.find(op_symbols, function(symbol){
+	return expr.indexOf(symbol) >= 0;
+      });
+    },
+    _parseExpr : function(expr){
+      this.left = this._parseSymbol(expr);
+      if(this.left){
+	expr = Utils.trim(expr.slice(this.left.length));
+      }
+      this.op = this._parseOp(expr);
+      if(this.op){
+	expr = Utils.trim(expr.slice(this.op.length));
+	this.right = Utils.cutQuote(Utils.trim(expr));
+      }
+    },
+    _testHasAttr : function(markup){
+      return markup.getTagAttr(this.left) !== null;
+    },
+    _testEqual : function(markup){
+      var value = markup.getTagAttr(this.left);
+      return value === this.right;
+    },
+    _testCaretEqual : function(markup){
+      var value = markup.getTagAttr(this.left);
+      var rex = new RegExp("^" + this.right);
+      return rex.test(value);
+    },
+    _testDollarEqual : function(markup){
+      var value = markup.getTagAttr(this.left);
+      var rex = new RegExp(this.right + "$");
+      return rex.test(value);
+    },
+    _testTildeEqual : function(markup){
+      var values = markup.getTagAttr(this.left).split(/\s+/);
+      return List.exists(values, Closure.eq(this.right));
+    },
+    _testPipeEqual : function(markup){
+      var value = markup.getTagAttr(this.left);
+      return value == this.right || value.indexOf(this.right + "-") >= 0;
+    },
+    _testStarEqual : function(markup){
+      var value = markup.getTagAttr(this.left);
+      return value.indexOf(this.right) >= 0;
+    },
+    _testOp : function(markup){
+      switch(this.op){
+      case "=":  return this._testEqual(markup);
+      case "^=": return this._testCaretEqual(markup);
+      case "$=": return this._testDollarEqual(markup);
+      case "|=": return this._testPipeEqual(markup);
+      case "~=": return this._testTildeEqual(markup);
+      case "*=": return this._testStarEqual(markup);
+      }
+      throw "undefined operation:" + this.op;
+    },
+    test : function(markup){
+      if(this.op && this.left && this.right){
+	return this._testOp(markup);
+      }
+      if(this.left){
+	return this._testHasAttr(markup);
+      }
+      return false;
+    }
+  };
+
+  return SelectorAttr;
+})();
+
+
+var SelectorPseudo = (function(){
+  function SelectorPseudo(expr){
+    this.name = this._normalize(expr);
+  }
+
+  SelectorPseudo.prototype = {
+    _normalize : function(expr){
+      return expr.replace(/:+/g, "");
+    },
+    test : function(markup){
+      return true;
+    }
+  };
+
+  return SelectorPseudo;
+})();
+
+
+var SelectorType = (function(){
+  function SelectorType(opt){
+    this.name = opt.name;
+    this.id = opt.id;
+    this.className = opt.className;
+    this.attr = opt.attr;
+    this.pseudo = opt.pseudo;
+  }
+  
+  SelectorType.prototype = {
+    test : function(markup){
+      if(markup === null){
+	return false;
+      }
+      if(this.name && this.name != "*" && markup.getName() != this.name){
+	return false;
+      }
+      if(this.className && !markup.hasClass(this.className)){
+	return false;
+      }
+      if(this.id && markup.getTagAttr("id") != this.id){
+	return false;
+      }
+      if(this.attr && !this.attr.test(markup)){
+	return false;
+      }
+      if(this.pseudo && !this.pseudo.test(markup)){
+	return false;
+      }
+      return true;
+    }
+  };
+
+  return SelectorType;
+})();
+
+
+var SelectorCombinator = {
+  findDescendant : function(markup, parent_type){
+    markup = markup.getParent();
+    while(markup !== null){
+      if(parent_type.test(markup)){
+	return markup;
+      }
+      markup = markup.getParent();
+    }
+    return null;
+  },
+  findChild : function(markup, parent_type){
+    markup = markup.getParent();
+    if(markup === null){
+      return null;
+    }
+    return parent_type.test(markup)? markup : null;
+  },
+  findAdjSibling : function(markup, cur_type, prev_type){
+    var childs = markup.getParentChilds();
+    return List.find(childs, function(child){
+      var next = child.getNext();
+      return next && prev_type.test(child) && cur_type.test(next);
+    });
+  },
+  findGenSibling : function(markup, cur_type, prev_type){
+    var childs = markup.getParentChilds();
+    var sibling = List.find(childs, function(child){
+      return prev_type.test(child);
+    });
+    if(sibling === null){
+      return null;
+    }
+    markup = sibling.getNext();
+    while(markup !== null){
+      if(cur_type.test(markup)){
+	return sibling;
+      }
+      markup = markup.getNext();
+    }
+    return null;
+  }
+};
+
+
+var SelectorLexer = (function(){
+  function SelectorLexer(src){
+    this.buff = this._normalize(src);
+  }
+
+  var rex_type = /^[\w-_\.#\*]+/;
+  var rex_attr = /^\[[^\]]+\]/;
+  var rex_pseudo = /^:{1,2}[\w-_]+/;
+  
+  SelectorLexer.prototype = {
+    getTokens : function(){
+      var tokens = [];
+      var push = function(token){ tokens.push(token); };
+      while(this.buff !== ""){
+	var token = this.get();
+	if(token === null){
+	  break;
+	}
+	push(token);
+      }
+      return tokens;
+    },
+    get : function(){
+      if(this.buff === ""){
+	return null;
+      }
+      var c1 = this.buff.charAt(0);
+      switch(c1){
+      case "+": case "~": case ">": // combinator
+	this._stepBuff(1);
+	return c1;
+      default: // selector-type
+	var type = this._getType();
+	if(type){
+	  var attr = this._getAttr();
+	  var pseudo = this._getPseudo();
+	  return this._parseType(type, attr, pseudo);
+	}
+      }
+      throw "invalid selector:" + this.buff;
+    },
+    _normalize : function(src){
+      return Utils.trim(src).replace(/\s+/g, " ");
+    },
+    _stepBuff : function(count){
+      this.buff = Utils.trim(this.buff.slice(count));
+    },
+    _parseType : function(str, attr, pseudo){
+      return new SelectorType({
+	name:this._getName(str),
+	id:this._getId(str),
+	className:this._getClassName(str),
+	attr:(attr? (new SelectorAttr(attr)) : null),
+	pseudo:(pseudo? (new SelectorPseudo(pseudo)) : null)
+      });
+    },
+    _getByRex : function(rex){
+      var ret = null;
+      var match = this.buff.match(rex);
+      if(match){
+	ret = match[0];
+	this._stepBuff(ret.length);
+      }
+      return ret;
+    },
+    _getName : function(str){
+      return str.replace(/[\.#].+$/, "");
+    },
+    _getId : function(str){
+      var parts = str.split("#");
+      return (parts.length > 0)? parts[1] : "";
+    },
+    _getClassName : function(str){
+      var parts = str.split(".");
+      return (parts.length > 0)? parts[1] : "";
+    },
+    _getType : function(){
+      return this._getByRex(rex_type);
+    },
+    _getAttr : function(){
+      return this._getByRex(rex_attr);
+    },
+    _getPseudo : function(){
+      return this._getByRex(rex_pseudo);
+    }
+  };
+
+  return SelectorLexer;
+})();
+
+
+var SelectorStateMachine = (function(){
+  function SelectorStateMachine(src){
+    this.tokens = (new SelectorLexer(src)).getTokens();
+    this.pos = this.tokens.length - 1;
+  }
+
+  SelectorStateMachine.prototype = {
+    accept : function(markup){
+      if(this.tokens.length === 0){
+	throw "selector syntax error:" + src;
+      }
+      this._reset();
+      var cur, next, next2, combinator;
+      while(!this._finish()){
+	cur = this._pop();
+	if(cur instanceof SelectorType === false){
+	  throw "selector syntax error:" + src;
+	}
+	if(!cur.test(markup)){
+	  return false;
+	}
+	next = this._pop();
+	if(next === null){
+	  return true;
+	}
+	if(next instanceof SelectorType){
+	  next2 = next;
+	  combinator = " "; // descendant combinator
+	} else if(typeof next === "string"){
+	  combinator = next;
+	  next2 = this._pop();
+	  if(next2 === null || next2 instanceof SelectorType === false){
+	    throw "selector syntax error:" + src;
+	  }
+	}
+	switch(combinator){
+	case " ": markup = SelectorCombinator.findDescendant(markup, next2); break;
+	case ">": markup = SelectorCombinator.findChild(markup, next2); break;
+	case "+": markup = SelectorCombinator.findAdjSibling(markup, cur, next2); break;
+	case "~": markup = SelectorCombinator.findGenSibling(markup, cur, next2); break;
+	default: throw "selector syntax error:invalid combinator(" + combinator + ")";
+	}
+	if(markup === null){
+	  return false;
+	}
+	this._pushBack();
+      }
+      return true; // all accepted
+    },
+    _reset : function(){
+      this.pos = this.tokens.length - 1;
+    },
+    _finish : function(){
+      return this.pos < 0;
+    },
+    _pop : function(){
+      if(this.pos < 0){
+	return null;
+      }
+      return this.tokens[this.pos--];
+    },
+    _pushBack : function(){
+      this.pos++;
+    }
+  };
+
+  return SelectorStateMachine;
+})();
+
+
 var Selector = (function(){
   function Selector(key, value){
     this.key = this._createKey(key);
@@ -1941,9 +2297,20 @@ var TagAttrParser = (function(){
 })();
 
 var Tag = (function (){
+  var global_tag_id = 0;
+  var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+  var css_attr_cache = {};
+  var add_css_attr_cache = function(key, value){
+    css_attr_cache[key] = value;
+  };
+  var get_css_attr_cache = function(key){
+    return css_attr_cache[key] || null;
+  };
+
   function Tag(src, content){
     this._type = "tag";
     this._inherited = false; // flag to avoid duplicate inheritance
+    this._gtid = global_tag_id++;
     this.src = src;
     this.name = this._parseName(this.src);
     this.parent = null;
@@ -1953,6 +2320,7 @@ var Tag = (function (){
     this.cssAttrContext = {};
     this.cssAttrDynamic = {}; // updated by 'setCssAttr'.
     this.childs = []; // updated by inherit
+    this.next = null;
 
     this.tagAttr = this._parseTagAttr(this.src);
     this.id = this._parseId();
@@ -1960,18 +2328,6 @@ var Tag = (function (){
     this.selectors = this._parseSelectors(this.id, this.classes);
     this.cssAttrContext = this._parseCssAttr(this.selectors);
   }
-
-  // name and value regexp
-  var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
-  
-  // utility functions
-  var css_attr_cache = {};
-  var add_css_attr_cache = function(key, value){
-    css_attr_cache[key] = value;
-  };
-  var get_css_attr_cache = function(key){
-    return css_attr_cache[key] || null;
-  };
 
   Tag.prototype = {
     // copy parent settings in 'markup' level
@@ -2025,7 +2381,13 @@ var Tag = (function (){
 	this.setCssAttrs(cache);
       }
     },
+    setNext : function(tag){
+      this.next = tag;
+    },
     addChild : function(tag){
+      if(this.childs.length > 0){
+	List.last(this.childs).setNext(tag);
+      }
       this.childs.push(tag);
     },
     addClass : function(klass){
@@ -2064,6 +2426,9 @@ var Tag = (function (){
     },
     getChilds : function(){
       return this.childs;
+    },
+    getNext : function(){
+      return this.next || null;
     },
     getParentChilds : function(){
       return this.parent? this.parent.getChilds() : [];
@@ -2240,10 +2605,13 @@ var Tag = (function (){
       var name = this.getName();
       return name === "end-page" || name === "page-break";
     },
+    isSameTag : function(dst){
+      return this._gtid === dst._gtid;
+    },
     _getChildIndexFrom : function(childs){
       var self = this;
       return List.indexOf(childs, function(tag){
-	return Token.isSame(self, tag);
+	return self.isSameTag(tag);
       });
     },
     getChildNth : function(){
@@ -2277,7 +2645,7 @@ var Tag = (function (){
     },
     isOnlyOfType : function(){
       var childs = this.getParentTypeChilds();
-      return (childs.length === 1 && Token.isSame(childs[0], this));
+      return (childs.length === 1 && this.isSame(childs[0]));
     },
     isRoot : function(){
       return this.parent === null;
@@ -2434,9 +2802,6 @@ var Tag = (function (){
 
 
 var Token = {
-  isSame : function(token1, token2){
-    return token1._gtid === token2._gtid;
-  },
   isTag : function(token){
     return token._type === "tag";
   },
@@ -5253,12 +5618,10 @@ var BoxStyle = {
 
 
 var Lexer = (function (){
-
-  var rexTcy = /\d\d|!\?|!!|\?!|\?\?/;
-  var rexWord = /^([\w!\.\?\/\_:#;"',]+)/;
-  var rexTag = /^(<[^>]+>)/;
-  var rexCharRef = /^(&[^;\s]+;)/;
-  var global_token_id = 0;
+  var rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
+  var rex_word = /^([\w!\.\?\/\_:#;"',]+)/;
+  var rex_tag = /^(<[^>]+>)/;
+  var rex_char_ref = /^(&[^;\s]+;)/;
 
   function Lexer(src){
     this.pos = 0;
@@ -5280,7 +5643,6 @@ var Lexer = (function (){
       var token = this._getToken();
       if(token){
 	token.spos = this.pos;
-	token._gtid = global_token_id++;
       }
       return token;
     },
@@ -5297,17 +5659,17 @@ var Lexer = (function (){
     _getToken : function(){
       if(this.buff === ""){
 	return null;
-      } else if(this.buff.match(rexTag)){
+      } else if(this.buff.match(rex_tag)){
 	return this._parseTag(RegExp.$1);
-      } else if(this.buff.match(rexWord)){
+      } else if(this.buff.match(rex_word)){
 	var str = RegExp.$1;
 	if(str.length === 1){
 	  return this._parseChar(str);
-	} else if(str.length === 2 && str.match(rexTcy)){
+	} else if(str.length === 2 && str.match(rex_tcy)){
 	  return this._parseTcy(str);
 	}
 	return this._parseWord(str);
-      } else if(this.buff.match(rexCharRef)){
+      } else if(this.buff.match(rex_char_ref)){
 	return this._parseCharRef(RegExp.$1);
       } else {
 	return this._parseChar(this._getChar());
@@ -6374,8 +6736,8 @@ var Collapse = (function(){
 
 
 var TokenStream = Class.extend({
-  init : function(src){
-    this.lexer = new Lexer(src);
+  init : function(src, lexer){
+    this.lexer = lexer || new Lexer(src);
     this.tokens = [];
     this.pos = 0;
     this.backupPos = 0;
@@ -9213,7 +9575,7 @@ var PageGroupStream = PageStream.extend({
   }
 });
 
-Nehan.version = "4.0.2";
+Nehan.version = "4.0.3";
 
 Args.copy(Env, __engine_args.env || {});
 Args.copy(Layout, __engine_args.layout || {});
@@ -9259,6 +9621,12 @@ if(__engine_args.test){
   __exports.BoxChild = BoxChild;
   __exports.Box = Box;
   __exports.Selector = Selector;
+  __exports.SelectorLexer = SelectorLexer;
+  __exports.SelectorAttr = SelectorAttr;
+  __exports.SelectorPseudo = SelectorPseudo;
+  __exports.SelectorType = SelectorType;
+  __exports.SelectorCombinator = SelectorCombinator;
+  __exports.SelectorStateMachine = SelectorStateMachine;
   __exports.Tag = Tag;
   __exports.Char = Char;
   __exports.Word = Word;

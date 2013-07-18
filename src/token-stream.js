@@ -1,6 +1,6 @@
 var TokenStream = Class.extend({
-  init : function(src){
-    this.lexer = new Lexer(src);
+  init : function(src, lexer){
+    this.lexer = lexer || new Lexer(src);
     this.tokens = [];
     this.pos = 0;
     this.backupPos = 0;

@@ -1,7 +1,18 @@
 var Tag = (function (){
+  var global_tag_id = 0;
+  var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+  var css_attr_cache = {};
+  var add_css_attr_cache = function(key, value){
+    css_attr_cache[key] = value;
+  };
+  var get_css_attr_cache = function(key){
+    return css_attr_cache[key] || null;
+  };
+
   function Tag(src, content){
     this._type = "tag";
     this._inherited = false; // flag to avoid duplicate inheritance
+    this._gtid = global_tag_id++;
     this.src = src;
     this.name = this._parseName(this.src);
     this.parent = null;
@@ -11,6 +22,7 @@ var Tag = (function (){
     this.cssAttrContext = {};
     this.cssAttrDynamic = {}; // updated by 'setCssAttr'.
     this.childs = []; // updated by inherit
+    this.next = null;
 
     this.tagAttr = this._parseTagAttr(this.src);
     this.id = this._parseId();
@@ -18,18 +30,6 @@ var Tag = (function (){
     this.selectors = this._parseSelectors(this.id, this.classes);
     this.cssAttrContext = this._parseCssAttr(this.selectors);
   }
-
-  // name and value regexp
-  var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
-  
-  // utility functions
-  var css_attr_cache = {};
-  var add_css_attr_cache = function(key, value){
-    css_attr_cache[key] = value;
-  };
-  var get_css_attr_cache = function(key){
-    return css_attr_cache[key] || null;
-  };
 
   Tag.prototype = {
     // copy parent settings in 'markup' level
@@ -83,7 +83,13 @@ var Tag = (function (){
 	this.setCssAttrs(cache);
       }
     },
+    setNext : function(tag){
+      this.next = tag;
+    },
     addChild : function(tag){
+      if(this.childs.length > 0){
+	List.last(this.childs).setNext(tag);
+      }
       this.childs.push(tag);
     },
     addClass : function(klass){
@@ -122,6 +128,9 @@ var Tag = (function (){
     },
     getChilds : function(){
       return this.childs;
+    },
+    getNext : function(){
+      return this.next || null;
     },
     getParentChilds : function(){
       return this.parent? this.parent.getChilds() : [];
@@ -298,10 +307,13 @@ var Tag = (function (){
       var name = this.getName();
       return name === "end-page" || name === "page-break";
     },
+    isSameTag : function(dst){
+      return this._gtid === dst._gtid;
+    },
     _getChildIndexFrom : function(childs){
       var self = this;
       return List.indexOf(childs, function(tag){
-	return Token.isSame(self, tag);
+	return self.isSameTag(tag);
       });
     },
     getChildNth : function(){
@@ -335,7 +347,7 @@ var Tag = (function (){
     },
     isOnlyOfType : function(){
       var childs = this.getParentTypeChilds();
-      return (childs.length === 1 && Token.isSame(childs[0], this));
+      return (childs.length === 1 && this.isSame(childs[0]));
     },
     isRoot : function(){
       return this.parent === null;

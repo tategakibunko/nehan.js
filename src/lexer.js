@@ -1,10 +1,8 @@
 var Lexer = (function (){
-
-  var rexTcy = /\d\d|!\?|!!|\?!|\?\?/;
-  var rexWord = /^([\w!\.\?\/\_:#;"',]+)/;
-  var rexTag = /^(<[^>]+>)/;
-  var rexCharRef = /^(&[^;\s]+;)/;
-  var global_token_id = 0;
+  var rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
+  var rex_word = /^([\w!\.\?\/\_:#;"',]+)/;
+  var rex_tag = /^(<[^>]+>)/;
+  var rex_char_ref = /^(&[^;\s]+;)/;
 
   function Lexer(src){
     this.pos = 0;
@@ -26,7 +24,6 @@ var Lexer = (function (){
       var token = this._getToken();
       if(token){
 	token.spos = this.pos;
-	token._gtid = global_token_id++;
       }
       return token;
     },
@@ -43,17 +40,17 @@ var Lexer = (function (){
     _getToken : function(){
       if(this.buff === ""){
 	return null;
-      } else if(this.buff.match(rexTag)){
+      } else if(this.buff.match(rex_tag)){
 	return this._parseTag(RegExp.$1);
-      } else if(this.buff.match(rexWord)){
+      } else if(this.buff.match(rex_word)){
 	var str = RegExp.$1;
 	if(str.length === 1){
 	  return this._parseChar(str);
-	} else if(str.length === 2 && str.match(rexTcy)){
+	} else if(str.length === 2 && str.match(rex_tcy)){
 	  return this._parseTcy(str);
 	}
 	return this._parseWord(str);
-      } else if(this.buff.match(rexCharRef)){
+      } else if(this.buff.match(rex_char_ref)){
 	return this._parseCharRef(RegExp.$1);
       } else {
 	return this._parseChar(this._getChar());

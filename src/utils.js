@@ -11,6 +11,9 @@ var Utils = {
   trim : function(str){
     return str.replace(/^\s+/, "").replace(/\s+$/, "");
   },
+  cutQuote : function(str){
+    return str.replace(/['\"]/g, "");
+  },
   capitalize : function(str){
     if(str === ""){
       return "";

@@ -1,4 +1,4 @@
-Nehan.version = "4.0.2";
+Nehan.version = "4.0.3";
 
 Args.copy(Env, __engine_args.env || {});
 Args.copy(Layout, __engine_args.layout || {});
@@ -44,6 +44,12 @@ if(__engine_args.test){
   __exports.BoxChild = BoxChild;
   __exports.Box = Box;
   __exports.Selector = Selector;
+  __exports.SelectorLexer = SelectorLexer;
+  __exports.SelectorAttr = SelectorAttr;
+  __exports.SelectorPseudo = SelectorPseudo;
+  __exports.SelectorType = SelectorType;
+  __exports.SelectorCombinator = SelectorCombinator;
+  __exports.SelectorStateMachine = SelectorStateMachine;
   __exports.Tag = Tag;
   __exports.Char = Char;
   __exports.Word = Word;
