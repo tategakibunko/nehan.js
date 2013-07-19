@@ -56,7 +56,6 @@ test("tag-selector-class", function(){
   equal(tag.getName(), "p");
   deepEqual(tag._parseCssClasses(tag.classes), [".hi", ".hey"]);
   deepEqual(tag.classes, ["hi", "hey"]);
-  deepEqual(tag.selectors, ["p", "p.hi", "p.hey"]);
 
   equal(tag.hasClass("hi"), true);
   equal(tag.hasClass("hey"), true);
@@ -68,7 +67,6 @@ test("tag-selector-id-class", function(){
   equal(tag.getName(), "p");
   deepEqual(tag.id, "foo");
   deepEqual(tag.classes, ["hi", "hey"]);
-  deepEqual(tag.selectors, ["p", "p.hi", "p.hey", "p#foo"]);
 
   equal(tag.hasClass("hi"), true);
   equal(tag.hasClass("hey"), true);
@@ -164,9 +162,6 @@ test("tag-is", function(){
   tag = new Tag("<td>");
   equal(tag.isSectionRootTag(), true);
 
-  tag = new Tag("<p>");
-  equal(tag.isChildContentTag(), true);
-
   tag = new Tag("<input>");
   equal(tag.isSingleTag(), true);
 
@@ -186,40 +181,6 @@ test("tag-dataset", function(){
   equal(tag.getDataset("familyName"), "yamada");
 });
 
-test("tag-contextual-keys", function(){
-  var tag1 = new Tag("<div class='parent level-1'>");
-  var tag2 = new Tag("<p class='child level-2'>");
-  deepEqual(tag1.selectors, ["div", "div.parent", "div.level-1"]);
-  deepEqual(tag2.selectors, ["p", "p.child", "p.level-2"]);
-  deepEqual(tag2._parseContextSelectors(tag1.selectors), [
-    "div p",
-    "div p.child",
-    "div p.level-2",
-    "div.parent p",
-    "div.parent p.child",
-    "div.parent p.level-2",
-    "div.level-1 p",
-    "div.level-1 p.child",
-    "div.level-1 p.level-2"
-  ]);
-});
-
-test("tag-contextual-keys2", function(){
-  var tag1 = new Tag("<div id='wrap' class='parent'>");
-  var tag2 = new Tag("<p class='child'>");
-  equal(tag1.id, "wrap");
-  deepEqual(tag1.selectors, ["div", "div.parent", "div#wrap"]);
-  deepEqual(tag2.selectors, ["p", "p.child"]);
-  deepEqual(tag2._parseContextSelectors(tag1.selectors), [
-    "div p",
-    "div p.child",
-    "div.parent p",
-    "div.parent p.child",
-    "div#wrap p",
-    "div#wrap p.child"
-  ]);
-});
-
 test("tag-nth", function(){
   var ctx = new DocumentContext();
   var gtid = 0;
@@ -229,33 +190,21 @@ test("tag-nth", function(){
     return ret;
   };
   var div = create_token("div");
-  ctx.pushBlockTag(div);
 
   var ul = create_token("ul");
-  ctx.inheritTag(ul);
-  ctx.pushBlockTag(ul);
+  ul.inherit(div);
 
   var li1 = create_token("li");
-  ctx.inheritTag(li1);
-  ctx.pushBlockTag(li1);
-  ctx.popBlockTag(); // li1
+  li1.inherit(ul);
 
   var li2 = create_token("li");
-  ctx.inheritTag(li2);
-  ctx.pushBlockTag(li2);
-  ctx.popBlockTag(); // li2
+  li2.inherit(ul);
 
   var li3 = create_token("li");
-  ctx.inheritTag(li3);
-  ctx.pushBlockTag(li3);
-  ctx.popBlockTag(); // li3
-  ctx.popBlockTag(); // ul
+  li3.inherit(ul);
 
   var p = create_token("p");
-  ctx.inheritTag(p);
-  ctx.pushBlockTag(p);
-  ctx.popBlockTag(); // p
-  ctx.popBlockTag(); // div
+  p.inherit(div);
 
   equal(li1.isFirstChild(), true);
   equal(li1.getChildNth(), 0);

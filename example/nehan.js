@@ -1846,7 +1846,17 @@ var SelectorPseudo = (function(){
       return expr.replace(/:+/g, "");
     },
     test : function(markup){
-      return true;
+      switch(this.name){
+      case "first-child": return markup.isFirstChild();
+      case "last-child": return markup.isLastChild();
+      case "first-of-type": return markup.isFirstOfType();
+      case "last-of-type": return markup.isLastOfType();
+      case "only-child": return markup.isOnlyChild();
+      case "only-of-type": return markup.isOnlyOfType();
+      case "empty": return markup.isEmpty();
+      case "root": return markup.isRoot();
+      }
+      return false;
     }
   };
 
@@ -2285,7 +2295,7 @@ var Tag = (function (){
     this.classes = this._parseClasses(this.tagAttr["class"] || "");
     this.dataset = {}; // set by _parseTagAttr
     this.childs = []; // updated by inherit
-    this.cssAttrStatic = this._parseCssAttr(this.name); // updated when 'inherit'
+    this.cssAttrStatic = this._parseCssAttr(); // updated when 'inherit'
     this.cssAttrDynamic = {}; // added by setCssAttr
 
     // initialize inline-style value
@@ -2296,15 +2306,17 @@ var Tag = (function (){
   }
 
   Tag.prototype = {
-    inherit : function(parent_tag){
+    inherit : function(parent_tag, context){
       if(this._inherited || !this.hasLayout()){
 	return; // avoid duplicate initialize
       }
       var self = this;
-      var cache_key = this.getCssCacheKey(parent_tag);
       this.parent = parent_tag;
       this.parent.addChild(this);
-      this.cssAttrStatic = this._parseCssAttr(cache_key);
+      this.cssAttrStatic = this._parseCssAttr(); // reget css-attr with parent enabled.
+      if(this.cssAttrStatic.onload){
+	this.cssAttrStatic.onload(this, context);
+      }
       this._inherited = true;
     },
     setContentRaw : function(content_raw){
@@ -2536,8 +2548,8 @@ var Tag = (function (){
     // parent_keys: ["div", "div.parent"]
     // child_keys: ["p", "p.child"]
     // =>["div p", "div p.child", "div.parent p", "div.parent p.child"]
-    getContextTagKeys : function(parent){
-      var parent_keys = parent.getTagKeys();
+    getContextTagKeys : function(){
+      var parent_keys = this.parent.getTagKeys();
       var child_keys = this.getTagKeys();
       return List.fold(parent_keys, [], function(ret1, parent_key){
 	return ret1.concat(List.fold(child_keys, [], function(ret2, child_key){
@@ -2545,8 +2557,9 @@ var Tag = (function (){
 	}));
       });
     },
-    getCssCacheKey : function(parent){
-      return this.getContextTagKeys(parent).join("*");
+    getCssCacheKey : function(){
+      var keys = this.parent? this.getContextTagKeys() : this.getTagKeys();
+      return keys.join("*");
     },
     getChildIndexFrom : function(childs){
       var self = this;
@@ -2613,6 +2626,7 @@ var Tag = (function (){
       });
     },
     _parseCssAttr : function(cache_key){
+      var cache_key = this.getCssCacheKey();
       var cache = get_css_attr_cache(cache_key);
       if(cache === null){
 	cache = Selectors.getValue(this);

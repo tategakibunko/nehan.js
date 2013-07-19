@@ -24,9 +24,5 @@ test("page-group", function(){
   deepEqual(grp.get(0), box1);
   deepEqual(grp.get(1), box2);
   grp.commit();
-  equal(grp.lazy, true);
-  box1.lazy = false;
-  grp.commit();
-  equal(grp.lazy, false);
   equal(grp.pageNo, 0);
 });
