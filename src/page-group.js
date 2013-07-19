@@ -13,9 +13,6 @@ var PageGroup = (function(){
     },
     commit : function(){
       var first = this.getFirst();
-      var last = this.getLast();
-      // page group of evaluation can be lazy when both head and tail are context free.
-      this.lazy = first.lazy && last.lazy;
       this.percent = first.percent;
       this.seekPos = first.seekPos;
       this.pageNo = first.pageNo;

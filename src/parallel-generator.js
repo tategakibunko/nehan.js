@@ -4,7 +4,6 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     this.markup = markup;
     this.context = context;
     this.partition = partition;
-    this.context.pushBlockTag(this.markup);
     this._inheritParent();
   },
   _inheritParent : function(){

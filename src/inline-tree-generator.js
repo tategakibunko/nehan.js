@@ -51,7 +51,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     return this._yield(line);
   },
   _yield : function(line){
-    var ctx = new InlineTreeContext(line, this.stream, this.context);
+    var ctx = new InlineTreeContext(line, this.markup, this.stream, this.context);
 
     this.backup();
     while(true){
@@ -154,7 +154,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
     // token is inline-block tag
     if(token.isInlineBlock()){
-      this.generator = new InlineBlockGenerator(token, ctx.createInlineRoot());
+      this.generator = new InlineBlockGenerator(token, this.context);
       return this.generator.yield(ctx.line);
     }
     // token is other inline tag

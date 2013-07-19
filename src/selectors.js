@@ -16,19 +16,6 @@ var Selectors = (function(){
 	Style[selector_key] = selector.getValue();
       }
     },
-    /*
-    getValue : function(markup){
-      var css = List.fold(selectors, {}, function(ret, selector){
-	if(selector.test(markup)){
-	  var value = selector.getValue();
-	  console.log("%s matches %s:%o", markup.src, selector.key, value);
-	  return Args.copy(ret, value);
-	}
-	return ret;
-      });
-      console.log("merged value is:%o", css);
-      return css;
-    }*/
     getValue : function(markup){
       return List.fold(selectors, {}, function(ret, selector){
 	return selector.test(markup)? Args.copy(ret, selector.getValue()) : ret;

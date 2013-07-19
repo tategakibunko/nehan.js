@@ -493,6 +493,12 @@ var Style = {
       "after":"0.6em"
     }
   },
+  "li-mark":{
+    "display":"block"
+  },
+  "li-body":{
+    "display":"block"
+  },
   "link":{
     "meta":true,
     "single":true
@@ -658,12 +664,10 @@ var Style = {
     }
   },
   "tbody":{
-    "display":"block",
-    "border-collapse":"inherit"
+    "display":"block"
   },
   "td":{
     "display":"block",
-    "border-collapse":"inherit",
     "section-root":true,
     "border-width":"1px",
     "padding":{
@@ -679,13 +683,11 @@ var Style = {
     "interactive":true
   },
   "tfoot":{
-    "display":"block",
-    "border-collapse":"inherit"
+    "display":"block"
   },
   "th":{
     "display":"block",
     "line-rate":1.4,
-    "border-collapse":"inherit",
     "border-width":"1px",
     "padding":{
       "start":"0.8em",
@@ -695,8 +697,7 @@ var Style = {
     }
   },
   "thead":{
-    "display":"block",
-    "border-collapse":"inherit"
+    "display":"block"
   },
   "time":{
     "display":"inline"
@@ -828,9 +829,6 @@ var Style = {
   },
   ".nehan-flow-flip":{
     "flow":"flip"
-  },
-  ".nehan-flow-inherit":{
-    "float":"inherit"
   },
   //-------------------------------------------------------
   // list-style-position classes
@@ -2012,7 +2010,7 @@ var SelectorLexer = (function(){
     },
     _getClassName : function(str){
       var parts = str.split(".");
-      return (parts.length > 0)? parts[1] : "";
+      return (parts.length >= 2)? parts[1] : "";
     },
     _getType : function(){
       return this._getByRex(rex_type);
@@ -2166,19 +2164,6 @@ var Selectors = (function(){
 	Style[selector_key] = selector.getValue();
       }
     },
-    /*
-    getValue : function(markup){
-      var css = List.fold(selectors, {}, function(ret, selector){
-	if(selector.test(markup)){
-	  var value = selector.getValue();
-	  console.log("%s matches %s:%o", markup.src, selector.key, value);
-	  return Args.copy(ret, value);
-	}
-	return ret;
-      });
-      console.log("merged value is:%o", css);
-      return css;
-    }*/
     getValue : function(markup){
       return List.fold(selectors, {}, function(ret, selector){
 	return selector.test(markup)? Args.copy(ret, selector.getValue()) : ret;
@@ -2286,43 +2271,40 @@ var Tag = (function (){
   var get_css_attr_cache = function(key){
     return css_attr_cache[key] || null;
   };
-  function Tag(src, content){
+  function Tag(src, content_raw){
     this._type = "tag";
     this._inherited = false; // flag to avoid duplicate inheritance
     this._gtid = global_tag_id++;
     this.src = src;
-    this.name = this._parseName(this.src);
     this.parent = null;
-    this.contentRaw = content || "";
-    this.dataset = {};
-    this.tagAttr = {};
-    this.cssAttrStatic = {}; // initialized by 'inheritTag'.
-    this.cssAttrDynamic = {}; // updated by 'setCssAttr'.
-    this.childs = []; // updated by inherit
     this.next = null;
-    this.tagAttr = this._parseTagAttr(this.src);
-    this.id = this._parseId();
-    this.classes = this._parseClasses();
+    this.contentRaw = content_raw || "";
+    this.name = this._parseName(this.src);
+    this.tagAttr = TagAttrParser.parse(this.src);
+    this.id = this.tagAttr.id || "";
+    this.classes = this._parseClasses(this.tagAttr["class"] || "");
+    this.dataset = {}; // set by _parseTagAttr
+    this.childs = []; // updated by inherit
+    this.cssAttrStatic = this._parseCssAttr(this.name); // updated when 'inherit'
+    this.cssAttrDynamic = {}; // added by setCssAttr
+
+    // initialize inline-style value
+    if(this.tagAttr["style"]){
+      this._parseInlineStyle(this.tagAttr["style"] || "");
+    }
+    this._parseDataset(); // initialize data-set values
   }
 
   Tag.prototype = {
-    // copy parent settings in 'markup' level
     inherit : function(parent_tag){
       if(this._inherited || !this.hasLayout()){
 	return; // avoid duplicate initialize
       }
-      //console.log("%s inherit from %s", this.src, parent_tag.src);
       var self = this;
       var cache_key = this.getCssCacheKey(parent_tag);
       this.parent = parent_tag;
       this.parent.addChild(this);
       this.cssAttrStatic = this._parseCssAttr(cache_key);
-      // copy 'inherit' value from parent.
-      for(var prop in this.cssAttrStatic){
-	if(this.cssAttrStatic[prop] === "inherit"){
-	  this.setCssAttr(prop, parent_tag.getAttr(prop));
-	}
-      }
       this._inherited = true;
     },
     setContentRaw : function(content_raw){
@@ -2515,12 +2497,6 @@ var Tag = (function (){
     isSingleTag : function(){
       return this.getCssAttr("single") === "true";
     },
-    isChildContentTag : function(){
-      if(this.isSingleTag()){
-	return false;
-      }
-      return true;
-    },
     isTcyTag : function(){
       return this.getCssAttr("text-combine", "") === "horizontal";
     },
@@ -2625,12 +2601,9 @@ var Tag = (function (){
     },
     // <p class='hi hey'>
     // => ["hi", "hey"]
-    _parseClasses : function(){
-      var str = this.tagAttr["class"] || "";
-      if(str === ""){
-	return [];
-      }
-      return str.split(/\s+/);
+    _parseClasses : function(class_value){
+      class_value = Utils.trim(class_value.replace(/\s+/g, " "));
+      return (class_value === "")? [] : class_value.split(/\s+/);
     },
     // <p class='hi hey'>
     // => [".hi", ".hey"]
@@ -2655,40 +2628,27 @@ var Tag = (function (){
       var after = ""; // TODO
       return this._appendFirstLetter([before, content_raw, after].join(""));
     },
-    // <img src='/path/to/img' push>
-    // => {src:'/path/to/img', push:true}
-    _parseTagAttr : function(src){
-      var self = this;
-      var attr = TagAttrParser.parse(this.src);
-      for(var name in attr){
-	// inline style
-	if(name === "style"){
-	  // add to dynamic css
-	  var inline_css = this._parseInlineStyle(attr[name]);
-	  Args.copy(this.cssAttrDynamic, inline_css);
-	} else if(name.indexOf("data-") === 0){
-	  // <div data-name="john">
-	  // => {name:"john"}
-	  var dataset_name = this._parseDatasetName(name);
-	  this.dataset[dataset_name] = attr[name];
-	}
-      }
-      return attr;
-    },
     // "border:0; margin:0"
     // => {border:0, margin:0}
     _parseInlineStyle : function(src){
-      var attr = {};
+      var dynamic_attr = this.cssAttrDynamic;
       var stmts = (src.indexOf(";") >= 0)? src.split(";") : [src];
       List.iter(stmts, function(stmt){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]);
-	  var val = Utils.trim(nv[1]);
-	  attr[prop] = val;
+	  var value = Utils.trim(nv[1]);
+	  dynamic_attr[prop] = value;
 	}
       });
-      return attr;
+    },
+    _parseDataset : function(){
+      for(var name in this.tagAttr){
+	if(name.indexOf("data-") === 0){
+	  var dataset_name = this._parseDatasetName(name);
+	  this.dataset[dataset_name] = this.tagAttr[name];
+	}
+      }
     },
     // "data-name" => "name"
     // "data-family-name" => "familyName"
@@ -5617,7 +5577,7 @@ var Lexer = (function (){
       if(tag.isTcyTag()){
 	return this._parseTcyTag(tag);
       }
-      if(tag.isChildContentTag()){
+      if(!tag.isSingleTag()){
 	return this._parseChildContentTag(tag);
       }
       return tag;
@@ -6228,8 +6188,6 @@ var DocumentContext = (function(){
     this.charPos = opt.charPos || 0;
     this.pageNo = opt.pageNo || 0;
     this.header = opt.header || new DocumentHeader();
-    this.blockContext = opt.blockContext || new TagStack();
-    this.inlineContext = opt.inlineContext || new TagStack();
     this.outlineContext = opt.outlineContext || new OutlineContext();
     this.anchors = opt.anchors || {};
   }
@@ -6256,32 +6214,6 @@ var DocumentContext = (function(){
     addCharPos : function(char_count){
       this.charPos += char_count;
     },
-    createInlineRoot : function(){
-      return new DocumentContext({
-	charPos:this.charPos,
-	pageNo:this.pageNo,
-	header:this.header,
-	anchors:this.anchors,
-	outlineContext:this.outlineContext,
-	blockContext:this.blockContext
-      });
-    },
-    inheritTag : function(tag){
-      var parent_tag = this.getCurBlockTag();
-      if(!tag.hasLayout()){
-	return;
-      }
-      if(parent_tag){
-	tag.inherit(parent_tag);
-      }
-      var onload = tag.getCssAttr("onload");
-      if(onload){
-	onload(this, tag);
-      }
-    },
-    isEmptyMarkupContext : function(){
-      return this.inlineContext.isEmpty();
-    },
     // anchors
     setAnchor : function(anchor_name){
       this.anchors[anchor_name] = this.pageNo;
@@ -6291,23 +6223,6 @@ var DocumentContext = (function(){
     },
     getAnchorPageNo : function(anchor_name){
       return this.anchors[anchor_name] || -1;
-    },
-    // inline context
-    pushInlineTag : function(tag){
-      this.inlineContext.push(tag);
-    },
-    popInlineTag : function(){
-      return this.inlineContext.pop();
-    },
-    // block context
-    pushBlockTag : function(tag){
-      this.blockContext.push(tag);
-    },
-    popBlockTag : function(){
-      return this.blockContext.pop();
-    },
-    getCurBlockTag : function(){
-      return this.blockContext.getHead();
     },
     // outline context
     getOutlineBuffer : function(root_name){
@@ -7144,11 +7059,11 @@ var ElementGenerator = Class.extend({
       return (new InlineBoxGenerator(tag, this.context)).yield(parent);
     case "div":
       if(tag.hasFlow()){
-	return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent);
+	return (new InlinePageGenerator(tag, this.context)).yield(parent);
       }
       return (new InlineBoxGenerator(tag, this.context)).yield(parent);
     default:
-      return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent);
+      return (new InlinePageGenerator(tag, this.context)).yield(parent);
     }
   },
   _getBoxType : function(){
@@ -7251,8 +7166,9 @@ var HrGenerator = ElementGenerator.extend({
 });
 
 var InlineTreeContext = (function(){
-  function InlineTreeContext(line, stream, context){
+  function InlineTreeContext(line, markup, stream, context){
     this.line = line;
+    this.markup = markup;
     this.stream = stream;
     this.context = context;
     this.lineStartPos = this.stream.getPos();
@@ -7364,11 +7280,8 @@ var InlineTreeContext = (function(){
 	  if(next && Token.isWord(next)){
 	    token = this.stream.get();
 	  }
-	} else if(Token.isTag(token)){
-	  //this.context.inheritTag(token);
-	  if(this.line.markup){
-	    token.inherit(this.line.markup);
-	  }
+	} else if(Token.isTag(token) && this.markup){
+	  token.inherit(this.markup);
 	}
       }
       this.lastToken = token;
@@ -7731,7 +7644,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     return this._yield(line);
   },
   _yield : function(line){
-    var ctx = new InlineTreeContext(line, this.stream, this.context);
+    var ctx = new InlineTreeContext(line, this.markup, this.stream, this.context);
 
     this.backup();
     while(true){
@@ -7834,7 +7747,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
     }
     // token is inline-block tag
     if(token.isInlineBlock()){
-      this.generator = new InlineBlockGenerator(token, ctx.createInlineRoot());
+      this.generator = new InlineBlockGenerator(token, this.context);
       return this.generator.yield(ctx.line);
     }
     // token is other inline tag
@@ -7904,7 +7817,6 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   init : function(markup, context){
     this.markup = markup;
     this.context = context;
-    this.context.pushInlineTag(this.markup);
     this.stream = this._createStream();
     this.lineNo = 0;
   },
@@ -7922,7 +7834,6 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
     return parent.flow.getBoxSize(measure, extent);
   },
   _onLastTree : function(){
-    this.context.popInlineTag();
   },
   _onCompleteTree : function(ctx, line){
     line.shortenMeasure();
@@ -7970,8 +7881,9 @@ var LinkGenerator = ChildInlineTreeGenerator.extend({
 });
 
 var BlockTreeContext = (function(){
-  function BlockTreeContext(page, stream, context){
+  function BlockTreeContext(page, markup, stream, context){
     this.page = page;
+    this.markup = markup;
     this.stream = stream;
     this.context = context;
     this.curExtent = 0;
@@ -7999,8 +7911,8 @@ var BlockTreeContext = (function(){
     },
     getNextToken : function(){
       var token = this.stream.get();
-      if(token && Token.isTag(token) && this.page.markup){
-	token.inherit(this.page.markup);
+      if(token && Token.isTag(token) && this.markup){
+	token.inherit(this.markup);
       }
       return token;
     }
@@ -8013,7 +7925,6 @@ var BlockTreeContext = (function(){
 var BlockTreeGenerator = ElementGenerator.extend({
   init : function(markup, context){
     this._super(markup, context);
-    this.context.pushBlockTag(this.markup);
     this.generator = null;
     this.stream = this._createStream();
     this.localPageNo = 0;
@@ -8054,7 +7965,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
   },
   // fill page with child page elements.
   _yieldPageTo : function(page){
-    var ctx = new BlockTreeContext(page, this.stream, this.context);
+    var ctx = new BlockTreeContext(page, this.markup, this.stream, this.context);
 
     while(true){
       this.backup();
@@ -8118,7 +8029,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
       .replace(/\r/g, ""); // discard CR
   },
   _onLastTree : function(page){
-    this.context.popBlockTag();
   },
   // called when page box is fully filled by blocks.
   _onCompleteTree : function(page){
@@ -8160,7 +8070,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     // yield it as single inline page with rest size of current parent.
     if(tag.hasFlow() && tag.getCssAttr("flow") != parent.getFlowName()){
       var inline_size = parent.getRestSize();
-      var generator = new InlinePageGenerator(tag, this.context.createInlineRoot());
+      var generator = new InlinePageGenerator(tag, this.context);
       return generator.yield(parent, inline_size);
     }
     this.generator = this._createChildBlockTreeGenerator(parent, tag);
@@ -8251,7 +8161,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return new TableRowGroupGenerator(tag, this.context);
   },
   _getTableRowGenerator : function(parent, tag){
-    return new TableRowGenerator(tag, parent, this.context.createInlineRoot());
+    return new TableRowGenerator(tag, parent, this.context);
   }
 });
 
@@ -8340,24 +8250,10 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     box.seekPos = this.stream.getSeekPos();
     box.pageNo = this.context.getPageNo();
     box.charPos = this.context.getCharPos();
-
-    // caution:
-    // box.lazy is a flag to see whether this box can be evaluated later.
-    // when lazy is enabled, we can evaluate the box at any time, it always yields same html.
-    // but this lazy flag at this time is not confirmed, it's temporary.
-    // this flag is confirmed when _onCompleteTree.
-    // if context is 'also' empty when page is completed, lazy flag is confirmed.
-    box.lazy = this.context.isEmptyMarkupContext();
     box.css["font-size"] = Layout.fontSize + "px";
     return box;
   },
   _onCompleteTree : function(page){
-    // lazy is confirmed when
-    // 1. inline level of context is empty when _createBox.
-    // 2. inline level of context is 'also' empty when _onCompleteTree.
-    // in short, if both head and tail are context free, lazy evaluation is enabled.
-    page.lazy = page.lazy && this.context.isEmptyMarkupContext();
-
     // step page no and character count inside this page
     this.context.stepPageNo();
     this.context.addCharPos(page.getCharCount());
@@ -8434,7 +8330,6 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     this.markup = markup;
     this.context = context;
     this.partition = partition;
-    this.context.pushBlockTag(this.markup);
     this._inheritParent();
   },
   _inheritParent : function(){
@@ -8555,7 +8450,7 @@ var TableRowGenerator = ParallelGenerator.extend({
   init : function(markup, parent, context){
     var partition = parent.partition.getPartition(markup.tableChilds.length);
     var generators = List.map(markup.tableChilds, function(td){
-      return new ParaChildGenerator(td, context.createInlineRoot());
+      return new ParaChildGenerator(td, context);
     });
     this._super(generators, markup, context, partition);
   }
@@ -9080,12 +8975,8 @@ var PageGroupEvaluator = (function(){
       var self = this;
       var char_count = 0;
       var html = [];
-      var lazy = true;
       var results = List.map(page_group.getPages(), function(page){
 	var ret = self.evaluator.evaluate(page);
-	if(!ret.lazy){
-	  lazy = false;
-	}
 	char_count += ret.charCount;
 	html.push(ret.html);
 	return ret;
@@ -9231,10 +9122,7 @@ var PageStream = Class.extend({
     });
   },
   _addBuffer : function(entry){
-    // if entry can't be lazy, eval immediately.
-    if(!entry.lazy){
-      entry = this.evaluator.evaluate(entry);
-    }
+    entry = this.evaluator.evaluate(entry);
     this.buffer.push(entry);
   },
   // common preprocessor
@@ -9278,9 +9166,6 @@ var PageGroup = (function(){
     },
     commit : function(){
       var first = this.getFirst();
-      var last = this.getLast();
-      // page group of evaluation can be lazy when both head and tail are context free.
-      this.lazy = first.lazy && last.lazy;
       this.percent = first.percent;
       this.seekPos = first.seekPos;
       this.pageNo = first.pageNo;

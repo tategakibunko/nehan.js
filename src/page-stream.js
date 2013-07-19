@@ -123,10 +123,7 @@ var PageStream = Class.extend({
     });
   },
   _addBuffer : function(entry){
-    // if entry can't be lazy, eval immediately.
-    if(!entry.lazy){
-      entry = this.evaluator.evaluate(entry);
-    }
+    entry = this.evaluator.evaluate(entry);
     this.buffer.push(entry);
   },
   // common preprocessor

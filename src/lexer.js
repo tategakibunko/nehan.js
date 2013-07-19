@@ -97,7 +97,7 @@ var Lexer = (function (){
       if(tag.isTcyTag()){
 	return this._parseTcyTag(tag);
       }
-      if(tag.isChildContentTag()){
+      if(!tag.isSingleTag()){
 	return this._parseChildContentTag(tag);
       }
       return tag;

@@ -72,7 +72,7 @@ var SelectorLexer = (function(){
     },
     _getClassName : function(str){
       var parts = str.split(".");
-      return (parts.length > 0)? parts[1] : "";
+      return (parts.length >= 2)? parts[1] : "";
     },
     _getType : function(){
       return this._getByRex(rex_type);

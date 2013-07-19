@@ -29,11 +29,11 @@ var ElementGenerator = Class.extend({
       return (new InlineBoxGenerator(tag, this.context)).yield(parent);
     case "div":
       if(tag.hasFlow()){
-	return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent);
+	return (new InlinePageGenerator(tag, this.context)).yield(parent);
       }
       return (new InlineBoxGenerator(tag, this.context)).yield(parent);
     default:
-      return (new InlinePageGenerator(tag, this.context.createInlineRoot())).yield(parent);
+      return (new InlinePageGenerator(tag, this.context)).yield(parent);
     }
   },
   _getBoxType : function(){

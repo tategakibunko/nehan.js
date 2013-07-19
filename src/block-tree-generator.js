@@ -1,7 +1,6 @@
 var BlockTreeGenerator = ElementGenerator.extend({
   init : function(markup, context){
     this._super(markup, context);
-    this.context.pushBlockTag(this.markup);
     this.generator = null;
     this.stream = this._createStream();
     this.localPageNo = 0;
@@ -42,7 +41,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
   },
   // fill page with child page elements.
   _yieldPageTo : function(page){
-    var ctx = new BlockTreeContext(page, this.stream, this.context);
+    var ctx = new BlockTreeContext(page, this.markup, this.stream, this.context);
 
     while(true){
       this.backup();
@@ -106,7 +105,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
       .replace(/\r/g, ""); // discard CR
   },
   _onLastTree : function(page){
-    this.context.popBlockTag();
   },
   // called when page box is fully filled by blocks.
   _onCompleteTree : function(page){
@@ -148,7 +146,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     // yield it as single inline page with rest size of current parent.
     if(tag.hasFlow() && tag.getCssAttr("flow") != parent.getFlowName()){
       var inline_size = parent.getRestSize();
-      var generator = new InlinePageGenerator(tag, this.context.createInlineRoot());
+      var generator = new InlinePageGenerator(tag, this.context);
       return generator.yield(parent, inline_size);
     }
     this.generator = this._createChildBlockTreeGenerator(parent, tag);
@@ -239,6 +237,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return new TableRowGroupGenerator(tag, this.context);
   },
   _getTableRowGenerator : function(parent, tag){
-    return new TableRowGenerator(tag, parent, this.context.createInlineRoot());
+    return new TableRowGenerator(tag, parent, this.context);
   }
 });

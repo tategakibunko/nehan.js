@@ -1,6 +1,7 @@
 var BlockTreeContext = (function(){
-  function BlockTreeContext(page, stream, context){
+  function BlockTreeContext(page, markup, stream, context){
     this.page = page;
+    this.markup = markup;
     this.stream = stream;
     this.context = context;
     this.curExtent = 0;
@@ -28,8 +29,8 @@ var BlockTreeContext = (function(){
     },
     getNextToken : function(){
       var token = this.stream.get();
-      if(token && Token.isTag(token) && this.page.markup){
-	token.inherit(this.page.markup);
+      if(token && Token.isTag(token) && this.markup){
+	token.inherit(this.markup);
       }
       return token;
     }

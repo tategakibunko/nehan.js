@@ -8,43 +8,40 @@ var Tag = (function (){
   var get_css_attr_cache = function(key){
     return css_attr_cache[key] || null;
   };
-  function Tag(src, content){
+  function Tag(src, content_raw){
     this._type = "tag";
     this._inherited = false; // flag to avoid duplicate inheritance
     this._gtid = global_tag_id++;
     this.src = src;
-    this.name = this._parseName(this.src);
     this.parent = null;
-    this.contentRaw = content || "";
-    this.dataset = {};
-    this.tagAttr = {};
-    this.cssAttrStatic = {}; // initialized by 'inheritTag'.
-    this.cssAttrDynamic = {}; // updated by 'setCssAttr'.
-    this.childs = []; // updated by inherit
     this.next = null;
-    this.tagAttr = this._parseTagAttr(this.src);
-    this.id = this._parseId();
-    this.classes = this._parseClasses();
+    this.contentRaw = content_raw || "";
+    this.name = this._parseName(this.src);
+    this.tagAttr = TagAttrParser.parse(this.src);
+    this.id = this.tagAttr.id || "";
+    this.classes = this._parseClasses(this.tagAttr["class"] || "");
+    this.dataset = {}; // set by _parseTagAttr
+    this.childs = []; // updated by inherit
+    this.cssAttrStatic = this._parseCssAttr(this.name); // updated when 'inherit'
+    this.cssAttrDynamic = {}; // added by setCssAttr
+
+    // initialize inline-style value
+    if(this.tagAttr["style"]){
+      this._parseInlineStyle(this.tagAttr["style"] || "");
+    }
+    this._parseDataset(); // initialize data-set values
   }
 
   Tag.prototype = {
-    // copy parent settings in 'markup' level
     inherit : function(parent_tag){
       if(this._inherited || !this.hasLayout()){
 	return; // avoid duplicate initialize
       }
-      //console.log("%s inherit from %s", this.src, parent_tag.src);
       var self = this;
       var cache_key = this.getCssCacheKey(parent_tag);
       this.parent = parent_tag;
       this.parent.addChild(this);
       this.cssAttrStatic = this._parseCssAttr(cache_key);
-      // copy 'inherit' value from parent.
-      for(var prop in this.cssAttrStatic){
-	if(this.cssAttrStatic[prop] === "inherit"){
-	  this.setCssAttr(prop, parent_tag.getAttr(prop));
-	}
-      }
       this._inherited = true;
     },
     setContentRaw : function(content_raw){
@@ -237,12 +234,6 @@ var Tag = (function (){
     isSingleTag : function(){
       return this.getCssAttr("single") === "true";
     },
-    isChildContentTag : function(){
-      if(this.isSingleTag()){
-	return false;
-      }
-      return true;
-    },
     isTcyTag : function(){
       return this.getCssAttr("text-combine", "") === "horizontal";
     },
@@ -347,12 +338,9 @@ var Tag = (function (){
     },
     // <p class='hi hey'>
     // => ["hi", "hey"]
-    _parseClasses : function(){
-      var str = this.tagAttr["class"] || "";
-      if(str === ""){
-	return [];
-      }
-      return str.split(/\s+/);
+    _parseClasses : function(class_value){
+      class_value = Utils.trim(class_value.replace(/\s+/g, " "));
+      return (class_value === "")? [] : class_value.split(/\s+/);
     },
     // <p class='hi hey'>
     // => [".hi", ".hey"]
@@ -377,40 +365,27 @@ var Tag = (function (){
       var after = ""; // TODO
       return this._appendFirstLetter([before, content_raw, after].join(""));
     },
-    // <img src='/path/to/img' push>
-    // => {src:'/path/to/img', push:true}
-    _parseTagAttr : function(src){
-      var self = this;
-      var attr = TagAttrParser.parse(this.src);
-      for(var name in attr){
-	// inline style
-	if(name === "style"){
-	  // add to dynamic css
-	  var inline_css = this._parseInlineStyle(attr[name]);
-	  Args.copy(this.cssAttrDynamic, inline_css);
-	} else if(name.indexOf("data-") === 0){
-	  // <div data-name="john">
-	  // => {name:"john"}
-	  var dataset_name = this._parseDatasetName(name);
-	  this.dataset[dataset_name] = attr[name];
-	}
-      }
-      return attr;
-    },
     // "border:0; margin:0"
     // => {border:0, margin:0}
     _parseInlineStyle : function(src){
-      var attr = {};
+      var dynamic_attr = this.cssAttrDynamic;
       var stmts = (src.indexOf(";") >= 0)? src.split(";") : [src];
       List.iter(stmts, function(stmt){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]);
-	  var val = Utils.trim(nv[1]);
-	  attr[prop] = val;
+	  var value = Utils.trim(nv[1]);
+	  dynamic_attr[prop] = value;
 	}
       });
-      return attr;
+    },
+    _parseDataset : function(){
+      for(var name in this.tagAttr){
+	if(name.indexOf("data-") === 0){
+	  var dataset_name = this._parseDatasetName(name);
+	  this.dataset[dataset_name] = this.tagAttr[name];
+	}
+      }
     },
     // "data-name" => "name"
     // "data-family-name" => "familyName"

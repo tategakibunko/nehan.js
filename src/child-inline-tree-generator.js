@@ -2,7 +2,6 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   init : function(markup, context){
     this.markup = markup;
     this.context = context;
-    this.context.pushInlineTag(this.markup);
     this.stream = this._createStream();
     this.lineNo = 0;
   },
@@ -20,7 +19,6 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
     return parent.flow.getBoxSize(measure, extent);
   },
   _onLastTree : function(){
-    this.context.popInlineTag();
   },
   _onCompleteTree : function(ctx, line){
     line.shortenMeasure();

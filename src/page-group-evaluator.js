@@ -8,12 +8,8 @@ var PageGroupEvaluator = (function(){
       var self = this;
       var char_count = 0;
       var html = [];
-      var lazy = true;
       var results = List.map(page_group.getPages(), function(page){
 	var ret = self.evaluator.evaluate(page);
-	if(!ret.lazy){
-	  lazy = false;
-	}
 	char_count += ret.charCount;
 	html.push(ret.html);
 	return ret;

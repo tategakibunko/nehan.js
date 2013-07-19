@@ -1,6 +1,7 @@
 var InlineTreeContext = (function(){
-  function InlineTreeContext(line, stream, context){
+  function InlineTreeContext(line, markup, stream, context){
     this.line = line;
+    this.markup = markup;
     this.stream = stream;
     this.context = context;
     this.lineStartPos = this.stream.getPos();
@@ -112,11 +113,8 @@ var InlineTreeContext = (function(){
 	  if(next && Token.isWord(next)){
 	    token = this.stream.get();
 	  }
-	} else if(Token.isTag(token)){
-	  //this.context.inheritTag(token);
-	  if(this.line.markup){
-	    token.inherit(this.line.markup);
-	  }
+	} else if(Token.isTag(token) && this.markup){
+	  token.inherit(this.markup);
 	}
       }
       this.lastToken = token;

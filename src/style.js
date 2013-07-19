@@ -310,6 +310,12 @@ var Style = {
       "after":"0.6em"
     }
   },
+  "li-mark":{
+    "display":"block"
+  },
+  "li-body":{
+    "display":"block"
+  },
   "link":{
     "meta":true,
     "single":true
@@ -475,12 +481,10 @@ var Style = {
     }
   },
   "tbody":{
-    "display":"block",
-    "border-collapse":"inherit"
+    "display":"block"
   },
   "td":{
     "display":"block",
-    "border-collapse":"inherit",
     "section-root":true,
     "border-width":"1px",
     "padding":{
@@ -496,13 +500,11 @@ var Style = {
     "interactive":true
   },
   "tfoot":{
-    "display":"block",
-    "border-collapse":"inherit"
+    "display":"block"
   },
   "th":{
     "display":"block",
     "line-rate":1.4,
-    "border-collapse":"inherit",
     "border-width":"1px",
     "padding":{
       "start":"0.8em",
@@ -512,8 +514,7 @@ var Style = {
     }
   },
   "thead":{
-    "display":"block",
-    "border-collapse":"inherit"
+    "display":"block"
   },
   "time":{
     "display":"inline"
@@ -645,9 +646,6 @@ var Style = {
   },
   ".nehan-flow-flip":{
     "flow":"flip"
-  },
-  ".nehan-flow-inherit":{
-    "float":"inherit"
   },
   //-------------------------------------------------------
   // list-style-position classes

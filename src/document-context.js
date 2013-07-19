@@ -8,8 +8,6 @@ var DocumentContext = (function(){
     this.charPos = opt.charPos || 0;
     this.pageNo = opt.pageNo || 0;
     this.header = opt.header || new DocumentHeader();
-    this.blockContext = opt.blockContext || new TagStack();
-    this.inlineContext = opt.inlineContext || new TagStack();
     this.outlineContext = opt.outlineContext || new OutlineContext();
     this.anchors = opt.anchors || {};
   }
@@ -36,32 +34,6 @@ var DocumentContext = (function(){
     addCharPos : function(char_count){
       this.charPos += char_count;
     },
-    createInlineRoot : function(){
-      return new DocumentContext({
-	charPos:this.charPos,
-	pageNo:this.pageNo,
-	header:this.header,
-	anchors:this.anchors,
-	outlineContext:this.outlineContext,
-	blockContext:this.blockContext
-      });
-    },
-    inheritTag : function(tag){
-      var parent_tag = this.getCurBlockTag();
-      if(!tag.hasLayout()){
-	return;
-      }
-      if(parent_tag){
-	tag.inherit(parent_tag);
-      }
-      var onload = tag.getCssAttr("onload");
-      if(onload){
-	onload(this, tag);
-      }
-    },
-    isEmptyMarkupContext : function(){
-      return this.inlineContext.isEmpty();
-    },
     // anchors
     setAnchor : function(anchor_name){
       this.anchors[anchor_name] = this.pageNo;
@@ -71,23 +43,6 @@ var DocumentContext = (function(){
     },
     getAnchorPageNo : function(anchor_name){
       return this.anchors[anchor_name] || -1;
-    },
-    // inline context
-    pushInlineTag : function(tag){
-      this.inlineContext.push(tag);
-    },
-    popInlineTag : function(){
-      return this.inlineContext.pop();
-    },
-    // block context
-    pushBlockTag : function(tag){
-      this.blockContext.push(tag);
-    },
-    popBlockTag : function(){
-      return this.blockContext.pop();
-    },
-    getCurBlockTag : function(){
-      return this.blockContext.getHead();
     },
     // outline context
     getOutlineBuffer : function(root_name){
