@@ -2289,8 +2289,8 @@ var Tag = (function (){
     this.cssAttrDynamic = {}; // added by setCssAttr
 
     // initialize inline-style value
-    if(this.tagAttr["style"]){
-      this._parseInlineStyle(this.tagAttr["style"] || "");
+    if(this.tagAttr.style){
+      this._parseInlineStyle(this.tagAttr.style || "");
     }
     this._parseDataset(); // initialize data-set values
   }
