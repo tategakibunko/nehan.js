@@ -2068,15 +2068,12 @@ var SelectorLexer = (function(){
       while(true){
 	var attr = this._getByRex(rex_attr);
 	if(attr){
-	  push(attr);
+	  push(new SelectorAttr(attr));
 	} else {
 	  break;
 	}
       }
       return attrs;
-    },
-    _getAttr : function(){
-      return this._getByRex(rex_attr);
     },
     _getPseudo : function(){
       return this._getByRex(rex_pseudo);
