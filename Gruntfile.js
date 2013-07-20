@@ -127,7 +127,6 @@ module.exports = function(grunt) {
 	    "src/token-stream.js",
 	    "src/filtered-tag-stream.js",
 	    "src/direct-token-stream.js",
-	    "src/phrasing-token-stream.js",
 	    "src/document-tag-stream.js",
 	    "src/html-tag-stream.js",
 	    "src/head-tag-stream.js",
