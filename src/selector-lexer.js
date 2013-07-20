@@ -12,7 +12,7 @@ var SelectorLexer = (function(){
       var tokens = [];
       var push = function(token){ tokens.push(token); };
       while(this.buff !== ""){
-	var token = this.get();
+	var token = this._getNextToken();
 	if(token === null){
 	  break;
 	}
@@ -20,7 +20,7 @@ var SelectorLexer = (function(){
       }
       return tokens;
     },
-    get : function(){
+    _getNextToken : function(){
       if(this.buff === ""){
 	return null;
       }
