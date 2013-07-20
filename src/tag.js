@@ -354,8 +354,8 @@ var Tag = (function (){
       return Obj.isEmpty(attr)? "" : Html.tagWrap("after", attr.content || "");
     },
     _parseContent : function(content_raw){
-      var before = this._getPseudoBefore(); // TODO
-      var after = this._getPseudoAfter(); // TODO
+      var before = this._getPseudoBefore();
+      var after = this._getPseudoAfter();
       return this._setPseudoFirst([before, content_raw, after].join(""));
     },
     // "border:0; margin:0"

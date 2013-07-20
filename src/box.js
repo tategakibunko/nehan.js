@@ -109,9 +109,6 @@ var Box = (function(){
     getCssClasses : function(){
       return this.getClasses().join(" ");
     },
-    getFirstChild : function(){
-      return this.childs.getFirst();
-    },
     getChilds : function(){
       return this.childs.get();
     },

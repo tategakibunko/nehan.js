@@ -123,7 +123,6 @@ var PageStream = Class.extend({
     });
   },
   _addBuffer : function(entry){
-    entry = this.evaluator.evaluate(entry);
     this.buffer.push(entry);
   },
   // common preprocessor

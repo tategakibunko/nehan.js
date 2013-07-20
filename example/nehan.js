@@ -2671,8 +2671,8 @@ var Tag = (function (){
       return Obj.isEmpty(attr)? "" : Html.tagWrap("after", attr.content || "");
     },
     _parseContent : function(content_raw){
-      var before = this._getPseudoBefore(); // TODO
-      var after = this._getPseudoAfter(); // TODO
+      var before = this._getPseudoBefore();
+      var after = this._getPseudoAfter();
       return this._setPseudoFirst([before, content_raw, after].join(""));
     },
     // "border:0; margin:0"
@@ -5030,9 +5030,6 @@ var Box = (function(){
     },
     getCssClasses : function(){
       return this.getClasses().join(" ");
-    },
-    getFirstChild : function(){
-      return this.childs.getFirst();
     },
     getChilds : function(){
       return this.childs.get();
@@ -9176,7 +9173,6 @@ var PageStream = Class.extend({
     });
   },
   _addBuffer : function(entry){
-    entry = this.evaluator.evaluate(entry);
     this.buffer.push(entry);
   },
   // common preprocessor
