@@ -1,6 +1,28 @@
 test("selector-spec", function(){
-  var selector = new Selector("h1");
+  var selector;
+  selector = new Selector("*");
+  equal(selector.getSpec(), 0);
+
+  selector = new Selector("h1");
   equal(selector.getSpec(), 1);
+
+  selector = new Selector("h1 h2");
+  equal(selector.getSpec(), 2);
+
+  selector = new Selector("h1 h2.hoge");
+  equal(selector.getSpec(), 12);
+
+  selector = new Selector("h1#hoge h2.hige");
+  equal(selector.getSpec(), 112);
+
+  selector = new Selector("h1#hoge h2.hige[name='foo']");
+  equal(selector.getSpec(), 122);
+
+  selector = new Selector("h1#hoge h2.hige[name='foo'][target='fuga']");
+  equal(selector.getSpec(), 132);
+
+  selector = new Selector("h1#hoge h2.hige[name='foo'][target='fuga']::first-letter");
+  equal(selector.getSpec(), 132);
 });
 
 test("selector-single", function(){
