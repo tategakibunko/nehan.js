@@ -148,6 +148,7 @@ module.exports = function(grunt) {
 	    "src/ruby-generator.js",
 	    "src/rt-generator.js",
 	    "src/link-generator.js",
+	    "src/first-line-generator.js",
 	    "src/block-tree-context.js",
 	    "src/block-tree-generator.js",
 	    "src/inline-block-generator.js",

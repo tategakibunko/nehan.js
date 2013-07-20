@@ -2410,6 +2410,7 @@ var Tag = (function (){
       this.iterTagAttr(fn); // inline attrs prior to css attrs.
     },
     getName : function(){
+      //return this.alias || this.name;
       return this.name;
     },
     getAttr : function(name, def_value){
@@ -2486,6 +2487,13 @@ var Tag = (function (){
 	return new BoxSize(icon_size, icon_size);
       }
       return null;
+    },
+    rename : function(name){
+      this.name = name;
+    },
+    regetSelectorValue : function(){
+      this.cssAttrStatic = {};
+      this._getSelectorValue();
     },
     hasStaticSize : function(){
       return (this.getAttr("width") !== null && this.getAttr("height") !== null);
@@ -7668,15 +7676,9 @@ var InlineTreeGenerator = ElementGenerator.extend({
     var extent = parent.getContentExtent();
     return parent.flow.getBoxSize(measure, extent);
   },
-  _setFirstLineStyle : function(line, parent){
-    // TODO
-  },
   _createLine  : function(parent){
     var size = this._getLineSize(parent);
     var line = Layout.createTextLine(size, parent);
-    if(this.lineNo === 0){
-      this._setFirstLineStyle(line, parent);
-    }
     line.markup = this.markup;
     line.lineNo = this.lineNo;
     return line;
@@ -7845,6 +7847,8 @@ var InlineTreeGenerator = ElementGenerator.extend({
       return new RubyGenerator(tag, this.context);
     case "a":
       return new LinkGenerator(tag, this.context);
+    case "first-line":
+      return new FirstLineGenerator(tag, this.context);
     default:
       return new ChildInlineTreeGenerator(tag, this.context);
     }
@@ -7918,6 +7922,22 @@ var LinkGenerator = ChildInlineTreeGenerator.extend({
     }
   }
 });
+
+
+var FirstLineGenerator = ChildInlineTreeGenerator.extend({
+  init : function(markup, context){
+    this._super(markup, context);
+  },
+  _createLine : function(parent){
+    if(this.lineNo > 0){
+      // first-line tag has finished, so reset normal css of parent.
+      this.markup.rename(this.markup.parent.getName());
+      this.markup.regetSelectorValue();
+    }
+    return this._super(parent);
+  }
+});
+
 
 var BlockTreeContext = (function(){
   function BlockTreeContext(page, markup, stream, context){

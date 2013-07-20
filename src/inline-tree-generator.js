@@ -33,15 +33,9 @@ var InlineTreeGenerator = ElementGenerator.extend({
     var extent = parent.getContentExtent();
     return parent.flow.getBoxSize(measure, extent);
   },
-  _setFirstLineStyle : function(line, parent){
-    // TODO
-  },
   _createLine  : function(parent){
     var size = this._getLineSize(parent);
     var line = Layout.createTextLine(size, parent);
-    if(this.lineNo === 0){
-      this._setFirstLineStyle(line, parent);
-    }
     line.markup = this.markup;
     line.lineNo = this.lineNo;
     return line;
@@ -210,6 +204,8 @@ var InlineTreeGenerator = ElementGenerator.extend({
       return new RubyGenerator(tag, this.context);
     case "a":
       return new LinkGenerator(tag, this.context);
+    case "first-line":
+      return new FirstLineGenerator(tag, this.context);
     default:
       return new ChildInlineTreeGenerator(tag, this.context);
     }

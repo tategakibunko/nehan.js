@@ -90,6 +90,7 @@ var Tag = (function (){
       this.iterTagAttr(fn); // inline attrs prior to css attrs.
     },
     getName : function(){
+      //return this.alias || this.name;
       return this.name;
     },
     getAttr : function(name, def_value){
@@ -166,6 +167,13 @@ var Tag = (function (){
 	return new BoxSize(icon_size, icon_size);
       }
       return null;
+    },
+    rename : function(name){
+      this.name = name;
+    },
+    regetSelectorValue : function(){
+      this.cssAttrStatic = {};
+      this._getSelectorValue();
     },
     hasStaticSize : function(){
       return (this.getAttr("width") !== null && this.getAttr("height") !== null);

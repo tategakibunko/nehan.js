@@ -7,3 +7,4 @@ var LinkGenerator = ChildInlineTreeGenerator.extend({
     }
   }
 });
+
