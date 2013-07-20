@@ -48,7 +48,7 @@ var Config = {
 };
 
 var Layout = {
-  root:"body",
+  root:"body", // or 'html' or 'document'
   direction:"vert",
   hori:"lr-tb", // sorry, rl-tb is not supported yet.
   vert:"tb-rl", // or "tb-lr"
@@ -2215,6 +2215,14 @@ var Selectors = (function(){
   var selectors = [];
   var selectors_pe = [];
 
+  var sort_selectors = function(){
+    selectors.sort(function(s1,s2){ return s1.spec - s2.spec; });
+  };
+
+  var sort_selectors_pe = function(){
+    selectors_pe.sort(function(s1,s2){ return s1.spec - s2.spec; });
+  };
+
   var update_value = function(selector_key, value){
     Args.copy(Style[selector_key], value);
   };
@@ -2226,7 +2234,6 @@ var Selectors = (function(){
     } else {
       selectors.push(selector);
     }
-    selectors.sort(function(s1,s2){ return s2.spec - s1.spec; });
     return selector;
   };
   
@@ -2248,10 +2255,16 @@ var Selectors = (function(){
     });
   };
 
-  // initialize selector list
-  Obj.iter(Style, function(obj, key, value){
-    insert_value(key, value);
-  });
+  var init_selectors = function(){
+    // initialize selector list
+    Obj.iter(Style, function(obj, key, value){
+      insert_value(key, value);
+    });
+    sort_selectors();
+    sort_selectors_pe();
+  };
+
+  init_selectors();
 
   return {
     setValue : function(selector_key, value){
@@ -2260,6 +2273,11 @@ var Selectors = (function(){
       } else {
 	var selector = insert_value(selector_key, value);
 	Style[selector_key] = selector.getValue();
+	if(selector.isPseudoElement()){
+	  sort_selectors_pe();
+	} else {
+	  sort_selectors();
+	}
       }
     },
     getValue : function(markup, pseudo_element){
