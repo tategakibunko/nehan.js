@@ -9097,6 +9097,9 @@ var PageStream = Class.extend({
   getPageCount : function(){
     return this.buffer.length;
   },
+  getGroupPageNo : function(cell_page_no){
+    return cell_page_no;
+  },
   getOutlineTree : function(root_name){
     return this.generator.getOutlineTree(root_name || "body");
   },
