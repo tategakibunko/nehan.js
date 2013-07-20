@@ -43,6 +43,7 @@ var Config = {
   maxRollbackCount : 10,
   minBlockScaleDownRate : 65,
   useVerticalGlyphIfEnable: true,
+  maxBase:36,
   lexingBufferLen : 2000
 };
 
@@ -1842,9 +1843,6 @@ var SelectorPseudo = (function(){
   }
 
   SelectorPseudo.prototype = {
-    _normalize : function(expr){
-      return expr.replace(/:+/g, "");
-    },
     isPseudoElement : function(){
       return (this.name === "before" ||
 	      this.name === "after" ||
@@ -1870,6 +1868,9 @@ var SelectorPseudo = (function(){
       case "root": return markup.isRoot();
       }
       return false;
+    },
+    _normalize : function(expr){
+      return expr.replace(/:+/g, "");
     }
   };
 
@@ -1882,14 +1883,11 @@ var SelectorType = (function(){
     this.name = opt.name;
     this.id = opt.id;
     this.className = opt.className;
-    this.attr = opt.attr;
+    this.attrs = opt.attrs;
     this.pseudo = opt.pseudo;
   }
   
   SelectorType.prototype = {
-    // see: http://www.w3.org/TR/css3-selectors/#specificity
-    _countSpecificity : function(){
-    },
     test : function(markup){
       if(markup === null){
 	return false;
@@ -1903,13 +1901,36 @@ var SelectorType = (function(){
       if(this.id && markup.getTagAttr("id") != this.id){
 	return false;
       }
-      if(this.attr && !this.attr.test(markup)){
+      if(this.attrs.length > 0 && !this._testAttrs(markup)){
 	return false;
       }
       if(this.pseudo && !this.pseudo.test(markup)){
 	return false;
       }
       return true;
+    },
+    getIdSpec : function(){
+      return this.id? 1 : 0;
+    },
+    getClassSpec : function(){
+      return this.className? 1 : 0;
+    },
+    getTypeSpec : function(){
+      return (this.name !== "*" && this.name !== "") ? 1 : 0;
+    },
+    getPseudoClassSpec : function(){
+      if(this.pseudo){
+	return this.pseudo.isPseudoElement()? 0 : 1;
+      }
+      return 0;
+    },
+    getAttrSpec : function(){
+      return this.attrs.length;
+    },
+    _testAttrs : function(markup){
+      return List.forall(this.attrs, function(attr){
+	return attr.test(markup);
+      });
     }
   };
 
@@ -1996,9 +2017,9 @@ var SelectorLexer = (function(){
       default: // selector-type
 	var type = this._getType();
 	if(type){
-	  var attr = this._getAttr();
+	  var attrs = this._getAttrs();
 	  var pseudo = this._getPseudo();
-	  return this._parseType(type, attr, pseudo);
+	  return this._parseType(type, attrs, pseudo);
 	}
       }
       throw "invalid selector:" + this.buff;
@@ -2009,12 +2030,12 @@ var SelectorLexer = (function(){
     _stepBuff : function(count){
       this.buff = Utils.trim(this.buff.slice(count));
     },
-    _parseType : function(str, attr, pseudo){
+    _parseType : function(str, attrs, pseudo){
       return new SelectorType({
 	name:this._getName(str),
 	id:this._getId(str),
 	className:this._getClassName(str),
-	attr:(attr? (new SelectorAttr(attr)) : null),
+	attrs:attrs,
 	pseudo:(pseudo? (new SelectorPseudo(pseudo)) : null)
       });
     },
@@ -2040,6 +2061,19 @@ var SelectorLexer = (function(){
     },
     _getType : function(){
       return this._getByRex(rex_type);
+    },
+    _getAttrs : function(){
+      var attrs = [];
+      var push = function(attr){ attrs.push(attr); };
+      while(true){
+	var attr = this._getByRex(rex_attr);
+	if(attr){
+	  push(attr);
+	} else {
+	  break;
+	}
+      }
+      return attrs;
     },
     _getAttr : function(){
       return this._getByRex(rex_attr);
@@ -2109,7 +2143,7 @@ var Selector = (function(){
     this.key = this._normalizeKey(key);
     this.value = this._formatValue(value);
     this.tokens = this._getSelectorTokens(this.key);
-    this.specificity = this._getSpecificity(this.tokens);
+    this.spec = this._countSpec(this.tokens);
   }
 
   var set_format_value = function(ret, prop, format_value){
@@ -2135,6 +2169,9 @@ var Selector = (function(){
     getValue : function(){
       return this.value;
     },
+    getSpec : function(){
+      return this.specificity;
+    },
     test : function(markup){
       return SelectorStateMachine.accept(this.tokens, markup);
     },
@@ -2144,8 +2181,18 @@ var Selector = (function(){
     hasPseudoElement : function(element_name){
       return this.key.indexOf("::" + element_name) >= 0;
     },
-    _getSpecificity : function(tokens){
-      return 0; // TODO
+    // count selector 'specificity'
+    // see http://www.w3.org/TR/css3-selectors/#specificity
+    _countSpec : function(tokens){
+      var a = 0, b = 0, c = 0;
+      List.iter(tokens, function(token){
+	if(token instanceof SelectorType){
+	  a += token.getIdSpec();
+	  b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();
+	  c += token.getTypeSpec();
+	}
+      });
+      return parseInt([a,b,c].join(""), 10); // maybe ok in most case.
     },
     _getSelectorTokens : function(key){
       var lexer = new SelectorLexer(key);

@@ -4,9 +4,6 @@ var SelectorPseudo = (function(){
   }
 
   SelectorPseudo.prototype = {
-    _normalize : function(expr){
-      return expr.replace(/:+/g, "");
-    },
     isPseudoElement : function(){
       return (this.name === "before" ||
 	      this.name === "after" ||
@@ -32,6 +29,9 @@ var SelectorPseudo = (function(){
       case "root": return markup.isRoot();
       }
       return false;
+    },
+    _normalize : function(expr){
+      return expr.replace(/:+/g, "");
     }
   };
 

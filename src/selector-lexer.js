@@ -32,9 +32,9 @@ var SelectorLexer = (function(){
       default: // selector-type
 	var type = this._getType();
 	if(type){
-	  var attr = this._getAttr();
+	  var attrs = this._getAttrs();
 	  var pseudo = this._getPseudo();
-	  return this._parseType(type, attr, pseudo);
+	  return this._parseType(type, attrs, pseudo);
 	}
       }
       throw "invalid selector:" + this.buff;
@@ -45,12 +45,12 @@ var SelectorLexer = (function(){
     _stepBuff : function(count){
       this.buff = Utils.trim(this.buff.slice(count));
     },
-    _parseType : function(str, attr, pseudo){
+    _parseType : function(str, attrs, pseudo){
       return new SelectorType({
 	name:this._getName(str),
 	id:this._getId(str),
 	className:this._getClassName(str),
-	attr:(attr? (new SelectorAttr(attr)) : null),
+	attrs:attrs,
 	pseudo:(pseudo? (new SelectorPseudo(pseudo)) : null)
       });
     },
@@ -76,6 +76,19 @@ var SelectorLexer = (function(){
     },
     _getType : function(){
       return this._getByRex(rex_type);
+    },
+    _getAttrs : function(){
+      var attrs = [];
+      var push = function(attr){ attrs.push(attr); };
+      while(true){
+	var attr = this._getByRex(rex_attr);
+	if(attr){
+	  push(attr);
+	} else {
+	  break;
+	}
+      }
+      return attrs;
     },
     _getAttr : function(){
       return this._getByRex(rex_attr);

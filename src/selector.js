@@ -3,7 +3,7 @@ var Selector = (function(){
     this.key = this._normalizeKey(key);
     this.value = this._formatValue(value);
     this.tokens = this._getSelectorTokens(this.key);
-    this.specificity = this._getSpecificity(this.tokens);
+    this.spec = this._countSpec(this.tokens);
   }
 
   var set_format_value = function(ret, prop, format_value){
@@ -29,6 +29,9 @@ var Selector = (function(){
     getValue : function(){
       return this.value;
     },
+    getSpec : function(){
+      return this.specificity;
+    },
     test : function(markup){
       return SelectorStateMachine.accept(this.tokens, markup);
     },
@@ -38,8 +41,18 @@ var Selector = (function(){
     hasPseudoElement : function(element_name){
       return this.key.indexOf("::" + element_name) >= 0;
     },
-    _getSpecificity : function(tokens){
-      return 0; // TODO
+    // count selector 'specificity'
+    // see http://www.w3.org/TR/css3-selectors/#specificity
+    _countSpec : function(tokens){
+      var a = 0, b = 0, c = 0;
+      List.iter(tokens, function(token){
+	if(token instanceof SelectorType){
+	  a += token.getIdSpec();
+	  b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();
+	  c += token.getTypeSpec();
+	}
+      });
+      return parseInt([a,b,c].join(""), 10); // maybe ok in most case.
     },
     _getSelectorTokens : function(key){
       var lexer = new SelectorLexer(key);
