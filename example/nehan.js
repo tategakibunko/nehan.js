@@ -1845,8 +1845,21 @@ var SelectorPseudo = (function(){
     _normalize : function(expr){
       return expr.replace(/:+/g, "");
     },
+    isPseudoElement : function(){
+      return (this.name === "before" ||
+	      this.name === "after" ||
+	      this.name === "first-letter" ||
+	      this.name === "first-line");
+    },
     test : function(markup){
       switch(this.name){
+      // pseudo-element
+      case "before": return true;
+      case "after": return true;
+      case "first-letter": return !markup.isEmpty();
+      case "first-line": return !markup.isEmpty();
+
+      // pseudo-class
       case "first-child": return markup.isFirstChild();
       case "last-child": return markup.isLastChild();
       case "first-of-type": return markup.isFirstOfType();
@@ -1874,6 +1887,9 @@ var SelectorType = (function(){
   }
   
   SelectorType.prototype = {
+    // see: http://www.w3.org/TR/css3-selectors/#specificity
+    _countSpecificity : function(){
+    },
     test : function(markup){
       if(markup === null){
 	return false;
@@ -2037,81 +2053,63 @@ var SelectorLexer = (function(){
 })();
 
 
-var SelectorStateMachine = (function(){
-  function SelectorStateMachine(src){
-    this.tokens = (new SelectorLexer(src)).getTokens();
-    this.pos = this.tokens.length - 1;
-  }
-
-  SelectorStateMachine.prototype = {
-    accept : function(markup){
-      if(this.tokens.length === 0){
+var SelectorStateMachine = {
+  accept : function(tokens, markup){
+    if(tokens.length === 0){
+      throw "selector syntax error:" + src;
+    }
+    var pos = tokens.length - 1;
+    var pop = function(){
+      return (pos < 0)? null : tokens[pos--];
+    };
+    var push_back = function(){
+      pos++;
+    };
+    var cur, next, next2, combinator;
+    while(pos >= 0){
+      cur = pop();
+      if(cur instanceof SelectorType === false){
 	throw "selector syntax error:" + src;
       }
-      this._reset();
-      var cur, next, next2, combinator;
-      while(!this._finish()){
-	cur = this._pop();
-	if(cur instanceof SelectorType === false){
+      if(!cur.test(markup)){
+	return false;
+      }
+      next = pop();
+      if(next === null){
+	return true;
+      }
+      if(next instanceof SelectorType){
+	next2 = next;
+	combinator = " "; // descendant combinator
+      } else if(typeof next === "string"){
+	combinator = next;
+	next2 = pop();
+	if(next2 === null || next2 instanceof SelectorType === false){
 	  throw "selector syntax error:" + src;
 	}
-	if(!cur.test(markup)){
-	  return false;
-	}
-	next = this._pop();
-	if(next === null){
-	  return true;
-	}
-	if(next instanceof SelectorType){
-	  next2 = next;
-	  combinator = " "; // descendant combinator
-	} else if(typeof next === "string"){
-	  combinator = next;
-	  next2 = this._pop();
-	  if(next2 === null || next2 instanceof SelectorType === false){
-	    throw "selector syntax error:" + src;
-	  }
-	}
-	switch(combinator){
-	case " ": markup = SelectorCombinator.findDescendant(markup, next2); break;
-	case ">": markup = SelectorCombinator.findChild(markup, next2); break;
-	case "+": markup = SelectorCombinator.findAdjSibling(markup, cur, next2); break;
-	case "~": markup = SelectorCombinator.findGenSibling(markup, cur, next2); break;
-	default: throw "selector syntax error:invalid combinator(" + combinator + ")";
-	}
-	if(markup === null){
-	  return false;
-	}
-	this._pushBack();
       }
-      return true; // all accepted
-    },
-    _reset : function(){
-      this.pos = this.tokens.length - 1;
-    },
-    _finish : function(){
-      return this.pos < 0;
-    },
-    _pop : function(){
-      if(this.pos < 0){
-	return null;
+      switch(combinator){
+      case " ": markup = SelectorCombinator.findDescendant(markup, next2); break;
+      case ">": markup = SelectorCombinator.findChild(markup, next2); break;
+      case "+": markup = SelectorCombinator.findAdjSibling(markup, cur, next2); break;
+      case "~": markup = SelectorCombinator.findGenSibling(markup, cur, next2); break;
+      default: throw "selector syntax error:invalid combinator(" + combinator + ")";
       }
-      return this.tokens[this.pos--];
-    },
-    _pushBack : function(){
-      this.pos++;
+      if(markup === null){
+	return false;
+      }
+      push_back();
     }
-  };
-
-  return SelectorStateMachine;
-})();
-
+    return true; // all accepted
+  }
+};
 
 var Selector = (function(){
   function Selector(key, value){
     this.key = this._normalizeKey(key);
     this.value = this._formatValue(value);
-    this.machine = new SelectorStateMachine(key);
+    this.tokens = this._getSelectorTokens(this.key);
+    this.specificity = this._getSpecificity(this.tokens);
   }
 
   var set_format_value = function(ret, prop, format_value){
@@ -2138,7 +2136,20 @@ var Selector = (function(){
       return this.value;
     },
     test : function(markup){
-      return this.machine.accept(markup);
+      return SelectorStateMachine.accept(this.tokens, markup);
+    },
+    isPseudoElement : function(){
+      return this.key.indexOf("::") >= 0;
+    },
+    hasPseudoElement : function(element_name){
+      return this.key.indexOf("::" + element_name) >= 0;
+    },
+    _getSpecificity : function(tokens){
+      return 0; // TODO
+    },
+    _getSelectorTokens : function(key){
+      var lexer = new SelectorLexer(key);
+      return lexer.getTokens();
     },
     _normalizeKey : function(key){
       return Utils.trim(key).toLowerCase().replace(/\s+/g, " ");
@@ -2158,26 +2169,62 @@ var Selector = (function(){
 
 var Selectors = (function(){
   var selectors = [];
+  var selectors_pe = [];
 
-  // initialize default selectors
-  for(var selector_key in Style){
-    selectors.push(new Selector(selector_key, Style[selector_key]));
-  }
+  Obj.iter(Style, function(obj, key, val){
+    var selector = new Selector(key, val);
+    selectors.push(selector);
+    if(selector.isPseudoElement()){
+      selectors_pe.push(selector);
+    }
+  });
+
+  var update_value = function(selector_key, value){
+    Args.copy(Style[selector_key], value);
+  };
+
+  var insert_value = function(selector_key, value){
+    var selector = new Selector(selector_key, value);
+    selectors.push(selector);
+    if(selector.isPseudoElement()){
+      selectors_pe.push(selector);
+    }
+    Style[selector_key] = selector.getValue();
+
+    // TODO: re-sort
+  };
+  
+  var get_value = function(markup){
+    return List.fold(selectors, {}, function(ret, selector){
+      if(!selector.isPseudoElement() && selector.test(markup)){
+	return Args.copy(ret, selector.getValue());
+      }
+      return ret;
+    });
+  };
+
+  var get_value_pe = function(markup, pseudo_element){
+    return List.fold(selectors_pe, {}, function(ret, selector){
+      if(selector.hasPseudoElement(pseudo_element) && selector.test(markup)){
+	return Args.copy(ret, selector.getValue());
+      }
+      return ret;
+    });
+  };
 
   return {
     setValue : function(selector_key, value){
       if(Style[selector_key]){
-	Args.copy(Style[selector_key], value);
+	update_value(selector_key, value);
       } else {
-	var selector = new Selector(selector_key, value);
-	selectors.push(selector);
-	Style[selector_key] = selector.getValue();
+	insert_value(selector_key, value);
       }
     },
-    getValue : function(markup){
-      return List.fold(selectors, {}, function(ret, selector){
-	return selector.test(markup)? Args.copy(ret, selector.getValue()) : ret;
-      });
+    getValue : function(markup, pseudo_element){
+      if(pseudo_element){
+	return get_value_pe(markup, pseudo_element);
+      }
+      return get_value(markup);
     }
   };
 })();
@@ -2289,7 +2336,7 @@ var Tag = (function (){
     this.classes = this._parseClasses(this.tagAttr["class"] || "");
     this.dataset = {}; // set by _parseTagAttr
     this.childs = []; // updated by inherit
-    this.cssAttrStatic = Selectors.getValue(this); // initialize css-attr, but updated when 'inherit'.
+    this.cssAttrStatic = this._getSelectorValue(); // initialize css-attr, but updated when 'inherit'.
     this.cssAttrDynamic = {}; // added by setCssAttr
 
     // initialize inline-style value
@@ -2307,7 +2354,7 @@ var Tag = (function (){
       var self = this;
       this.parent = parent_tag;
       this.parent.addChild(this);
-      this.cssAttrStatic = Selectors.getValue(this); // reget css-attr with parent enabled.
+      this.cssAttrStatic = this._getSelectorValue(); // reget css-attr with parent enabled.
       if(this.cssAttrStatic.onload){
 	this.cssAttrStatic.onload(this, context);
       }
@@ -2326,9 +2373,6 @@ var Tag = (function (){
       for(var prop in obj){
 	this.setCssAttr(prop, obj[prop]);
       }
-    },
-    setFirstLetter : function(){
-      // TODO
     },
     setNext : function(tag){
       this.next = tag;
@@ -2571,7 +2615,12 @@ var Tag = (function (){
       return this.parent === null;
     },
     isEmpty : function(){
-      return this.getContent() === "";
+      return this.contentRaw === "";
+    },
+    _getSelectorValue : function(){
+      //var markup = this.isPseudoElement()? this.parent : this;
+      //return Selectors.getValue(markup);
+      return Selectors.getValue(this);
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
@@ -2592,13 +2641,34 @@ var Tag = (function (){
 	return "." + class_name;
       });
     },
-    _appendFirstLetter : function(content){
-      return content; // TODO
+    _setPseudoFirst : function(content){
+      var first_letter = Selectors.getValue(this, "first-letter");
+      content = Obj.isEmpty(first_letter)? content : this._setPseudoFirstLetter(content);
+      var first_line = Selectors.getValue(this, "first-line");
+      return Obj.isEmpty(first_line)? content : this._setPseudoFirstLine(content);
+    },
+    _setPseudoFirstLetter : function(content){
+      return content.replace(rex_first_letter, function(match, p1, p2, p3){
+	return p1 + Html.tagStart("first-letter", p3);
+      });
+    },
+    _setPseudoFirstLine : function(content){
+      return Html.tagWrap("first-line", content);
+    },
+    _getPseudoBefore : function(){
+      var attr = Selectors.getValue(this, "before");
+      return Obj.isEmpty(attr)? "" : Html.tagWrap("before", attr.content || "");
+    },
+    _getPseudoAfter : function(){
+      var attr = Selectors.getValue(this, "after");
+      return Obj.isEmpty(attr)? "" : Html.tagWrap("after", attr.content || "");
     },
     _parseContent : function(content_raw){
-      var before = ""; // TODO
-      var after = ""; // TODO
-      return this._appendFirstLetter([before, content_raw, after].join(""));
+      var before = this._getPseudoBefore(); // TODO
+      var after = this._getPseudoAfter(); // TODO
+      //var content = this._setPseudoFirst([before, content_raw, after].join(""));
+      var content = [before, content_raw, after].join("");
+      return content;
     },
     // "border:0; margin:0"
     // => {border:0, margin:0}
@@ -7253,7 +7323,7 @@ var InlineTreeContext = (function(){
 	    token = this.stream.get();
 	  }
 	} else if(Token.isTag(token) && this.markup){
-	  token.inherit(this.markup);
+	  token.inherit(this.markup, this.context);
 	}
       }
       this.lastToken = token;
@@ -7704,9 +7774,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(Token.isTag(token) && token.getName() === "br"){
       return Exceptions.LINE_BREAK;
     }
-    if(Token.isTag(token) && token.getName() === "first-letter"){
-      token.setFirstLetter(); // load first-letter style
-    }
     // if block element, break line and force terminate generator
     if(token.isBlock()){
       ctx.pushBackToken(); // push back this token(this block is handled by parent generator).
@@ -7884,7 +7951,7 @@ var BlockTreeContext = (function(){
     getNextToken : function(){
       var token = this.stream.get();
       if(token && Token.isTag(token) && this.markup){
-	token.inherit(this.markup);
+	token.inherit(this.markup, this.context);
       }
       return token;
     }
@@ -8020,9 +8087,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
     }
     if(Token.isTag(token) && token.isPageBreakTag()){
       return Exceptions.PAGE_BREAK;
-    }
-    if(Token.isTag(token) && token.getName() === "first-letter"){
-      token.setFirstLetter(); // load first-letter style
     }
     if(Token.isInline(token)){
       // this is not block level element, so we push back this token,
@@ -8306,9 +8370,10 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
   },
   _inheritParent : function(){
     var parent_markup = this.markup;
+    var context = this.context;
     List.iter(this.generators, function(gen){
       if(gen.markup){
-	gen.markup.inherit(parent_markup);
+	gen.markup.inherit(parent_markup, context);
       }
     });
   },

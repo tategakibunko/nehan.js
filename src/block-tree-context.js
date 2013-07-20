@@ -30,7 +30,7 @@ var BlockTreeContext = (function(){
     getNextToken : function(){
       var token = this.stream.get();
       if(token && Token.isTag(token) && this.markup){
-	token.inherit(this.markup);
+	token.inherit(this.markup, this.context);
       }
       return token;
     }

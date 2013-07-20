@@ -7,8 +7,21 @@ var SelectorPseudo = (function(){
     _normalize : function(expr){
       return expr.replace(/:+/g, "");
     },
+    isPseudoElement : function(){
+      return (this.name === "before" ||
+	      this.name === "after" ||
+	      this.name === "first-letter" ||
+	      this.name === "first-line");
+    },
     test : function(markup){
       switch(this.name){
+      // pseudo-element
+      case "before": return true;
+      case "after": return true;
+      case "first-letter": return !markup.isEmpty();
+      case "first-line": return !markup.isEmpty();
+
+      // pseudo-class
       case "first-child": return markup.isFirstChild();
       case "last-child": return markup.isLastChild();
       case "first-of-type": return markup.isFirstOfType();

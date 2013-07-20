@@ -139,9 +139,6 @@ var InlineTreeGenerator = ElementGenerator.extend({
     if(Token.isTag(token) && token.getName() === "br"){
       return Exceptions.LINE_BREAK;
     }
-    if(Token.isTag(token) && token.getName() === "first-letter"){
-      token.setFirstLetter(); // load first-letter style
-    }
     // if block element, break line and force terminate generator
     if(token.isBlock()){
       ctx.pushBackToken(); // push back this token(this block is handled by parent generator).

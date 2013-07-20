@@ -8,6 +8,9 @@ var SelectorType = (function(){
   }
   
   SelectorType.prototype = {
+    // see: http://www.w3.org/TR/css3-selectors/#specificity
+    _countSpecificity : function(){
+    },
     test : function(markup){
       if(markup === null){
 	return false;

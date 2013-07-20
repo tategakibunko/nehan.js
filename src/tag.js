@@ -16,7 +16,7 @@ var Tag = (function (){
     this.classes = this._parseClasses(this.tagAttr["class"] || "");
     this.dataset = {}; // set by _parseTagAttr
     this.childs = []; // updated by inherit
-    this.cssAttrStatic = Selectors.getValue(this); // initialize css-attr, but updated when 'inherit'.
+    this.cssAttrStatic = this._getSelectorValue(); // initialize css-attr, but updated when 'inherit'.
     this.cssAttrDynamic = {}; // added by setCssAttr
 
     // initialize inline-style value
@@ -34,7 +34,7 @@ var Tag = (function (){
       var self = this;
       this.parent = parent_tag;
       this.parent.addChild(this);
-      this.cssAttrStatic = Selectors.getValue(this); // reget css-attr with parent enabled.
+      this.cssAttrStatic = this._getSelectorValue(); // reget css-attr with parent enabled.
       if(this.cssAttrStatic.onload){
 	this.cssAttrStatic.onload(this, context);
       }
@@ -53,9 +53,6 @@ var Tag = (function (){
       for(var prop in obj){
 	this.setCssAttr(prop, obj[prop]);
       }
-    },
-    setFirstLetter : function(){
-      // TODO
     },
     setNext : function(tag){
       this.next = tag;
@@ -298,7 +295,12 @@ var Tag = (function (){
       return this.parent === null;
     },
     isEmpty : function(){
-      return this.getContent() === "";
+      return this.contentRaw === "";
+    },
+    _getSelectorValue : function(){
+      //var markup = this.isPseudoElement()? this.parent : this;
+      //return Selectors.getValue(markup);
+      return Selectors.getValue(this);
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
@@ -319,13 +321,34 @@ var Tag = (function (){
 	return "." + class_name;
       });
     },
-    _appendFirstLetter : function(content){
-      return content; // TODO
+    _setPseudoFirst : function(content){
+      var first_letter = Selectors.getValue(this, "first-letter");
+      content = Obj.isEmpty(first_letter)? content : this._setPseudoFirstLetter(content);
+      var first_line = Selectors.getValue(this, "first-line");
+      return Obj.isEmpty(first_line)? content : this._setPseudoFirstLine(content);
+    },
+    _setPseudoFirstLetter : function(content){
+      return content.replace(rex_first_letter, function(match, p1, p2, p3){
+	return p1 + Html.tagStart("first-letter", p3);
+      });
+    },
+    _setPseudoFirstLine : function(content){
+      return Html.tagWrap("first-line", content);
+    },
+    _getPseudoBefore : function(){
+      var attr = Selectors.getValue(this, "before");
+      return Obj.isEmpty(attr)? "" : Html.tagWrap("before", attr.content || "");
+    },
+    _getPseudoAfter : function(){
+      var attr = Selectors.getValue(this, "after");
+      return Obj.isEmpty(attr)? "" : Html.tagWrap("after", attr.content || "");
     },
     _parseContent : function(content_raw){
-      var before = ""; // TODO
-      var after = ""; // TODO
-      return this._appendFirstLetter([before, content_raw, after].join(""));
+      var before = this._getPseudoBefore(); // TODO
+      var after = this._getPseudoAfter(); // TODO
+      //var content = this._setPseudoFirst([before, content_raw, after].join(""));
+      var content = [before, content_raw, after].join("");
+      return content;
     },
     // "border:0; margin:0"
     // => {border:0, margin:0}

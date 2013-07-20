@@ -2,7 +2,8 @@ var Selector = (function(){
   function Selector(key, value){
     this.key = this._normalizeKey(key);
     this.value = this._formatValue(value);
-    this.machine = new SelectorStateMachine(key);
+    this.tokens = this._getSelectorTokens(this.key);
+    this.specificity = this._getSpecificity(this.tokens);
   }
 
   var set_format_value = function(ret, prop, format_value){
@@ -29,7 +30,20 @@ var Selector = (function(){
       return this.value;
     },
     test : function(markup){
-      return this.machine.accept(markup);
+      return SelectorStateMachine.accept(this.tokens, markup);
+    },
+    isPseudoElement : function(){
+      return this.key.indexOf("::") >= 0;
+    },
+    hasPseudoElement : function(element_name){
+      return this.key.indexOf("::" + element_name) >= 0;
+    },
+    _getSpecificity : function(tokens){
+      return 0; // TODO
+    },
+    _getSelectorTokens : function(key){
+      var lexer = new SelectorLexer(key);
+      return lexer.getTokens();
     },
     _normalizeKey : function(key){
       return Utils.trim(key).toLowerCase().replace(/\s+/g, " ");

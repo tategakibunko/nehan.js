@@ -114,7 +114,7 @@ var InlineTreeContext = (function(){
 	    token = this.stream.get();
 	  }
 	} else if(Token.isTag(token) && this.markup){
-	  token.inherit(this.markup);
+	  token.inherit(this.markup, this.context);
 	}
       }
       this.lastToken = token;

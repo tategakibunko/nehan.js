@@ -8,9 +8,10 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
   },
   _inheritParent : function(){
     var parent_markup = this.markup;
+    var context = this.context;
     List.iter(this.generators, function(gen){
       if(gen.markup){
-	gen.markup.inherit(parent_markup);
+	gen.markup.inherit(parent_markup, context);
       }
     });
   },
