@@ -1,5 +1,6 @@
 var Tag = (function (){
   var global_tag_id = 0;
+  //var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
 
   function Tag(src, content_raw){
@@ -298,8 +299,9 @@ var Tag = (function (){
       return this.contentRaw === "";
     },
     _getSelectorValue : function(){
-      //var markup = this.isPseudoElement()? this.parent : this;
-      //return Selectors.getValue(markup);
+      if(this.isPseudoElement()){
+	return Selectors.getValue(this.parent, this.getName());
+      }
       return Selectors.getValue(this);
     },
     _parseName : function(src){
@@ -329,7 +331,7 @@ var Tag = (function (){
     },
     _setPseudoFirstLetter : function(content){
       return content.replace(rex_first_letter, function(match, p1, p2, p3){
-	return p1 + Html.tagStart("first-letter", p3);
+	return p1 + Html.tagWrap("first-letter", p3);
       });
     },
     _setPseudoFirstLine : function(content){
@@ -346,9 +348,7 @@ var Tag = (function (){
     _parseContent : function(content_raw){
       var before = this._getPseudoBefore(); // TODO
       var after = this._getPseudoAfter(); // TODO
-      //var content = this._setPseudoFirst([before, content_raw, after].join(""));
-      var content = [before, content_raw, after].join("");
-      return content;
+      return this._setPseudoFirst([before, content_raw, after].join(""));
     },
     // "border:0; margin:0"
     // => {border:0, margin:0}
