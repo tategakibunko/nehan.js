@@ -2226,6 +2226,7 @@ var Selectors = (function(){
     } else {
       selectors.push(selector);
     }
+    selectors.sort(function(s1,s2){ return s2.spec - s1.spec; });
     return selector;
   };
   
@@ -2397,7 +2398,7 @@ var Tag = (function (){
       this.parent = parent_tag;
       this.parent.addChild(this);
       this.cssAttrStatic = this._getSelectorValue(); // reget css-attr with parent enabled.
-      this.callHook(this, context);
+      this.callHook(context);
       this._inherited = true;
     },
     callHook : function(context){

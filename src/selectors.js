@@ -13,6 +13,7 @@ var Selectors = (function(){
     } else {
       selectors.push(selector);
     }
+    selectors.sort(function(s1,s2){ return s2.spec - s1.spec; });
     return selector;
   };
   
