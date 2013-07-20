@@ -2167,7 +2167,7 @@ var Selector = (function(){
       return this.value;
     },
     getSpec : function(){
-      return this.specificity;
+      return this.spec;
     },
     test : function(markup){
       return SelectorStateMachine.accept(this.tokens, markup);

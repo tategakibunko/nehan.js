@@ -1,3 +1,8 @@
+test("selector-spec", function(){
+  var selector = new Selector("h1");
+  equal(selector.getSpec(), 1);
+});
+
 test("selector-single", function(){
   var selector = new Selector("h1");
   var h1 = new Tag("<h1>");
