@@ -80,7 +80,7 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     List.iter(child_pages, function(child_page){
       if(child_page){
 	child_page.setContentExtent(child_flow, max_content_extent);
-	wrap_page.addChildBlock(child_page);
+	wrap_page.addParaChildBlock(child_page);
       }
     });
     return wrap_page;

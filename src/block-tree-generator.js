@@ -15,10 +15,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this.stream.backup();
   },
   rollback : function(){
+    this.stream.rollback();
     if(this.generator){
       this.generator.rollback();
-    } else {
-      this.stream.rollback();
     }
   },
   getCurGenerator : function(){

@@ -252,6 +252,11 @@ var Box = (function(){
       this.childExtent += child.getBoxExtent(this.flow);
       this.charCount += child.getCharCount();
     },
+    addParaChildBlock : function(child){
+      this.childs.add(child);
+      this.childExtent = Math.max(child.getBoxExtent(this.flow), this.childExtent);
+      this.charCount += child.getCharCount();
+    },
     addChildInline : function(child, measure){
       this.childs.add(child);
       this.childMeasure += measure;

@@ -5240,6 +5240,11 @@ var Box = (function(){
       this.childExtent += child.getBoxExtent(this.flow);
       this.charCount += child.getCharCount();
     },
+    addParaChildBlock : function(child){
+      this.childs.add(child);
+      this.childExtent = Math.max(child.getBoxExtent(this.flow), this.childExtent);
+      this.charCount += child.getCharCount();
+    },
     addChildInline : function(child, measure){
       this.childs.add(child);
       this.childMeasure += measure;
@@ -8046,10 +8051,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this.stream.backup();
   },
   rollback : function(){
+    this.stream.rollback();
     if(this.generator){
       this.generator.rollback();
-    } else {
-      this.stream.rollback();
     }
   },
   getCurGenerator : function(){
@@ -8510,7 +8514,7 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     List.iter(child_pages, function(child_page){
       if(child_page){
 	child_page.setContentExtent(child_flow, max_content_extent);
-	wrap_page.addChildBlock(child_page);
+	wrap_page.addParaChildBlock(child_page);
       }
     });
     return wrap_page;
