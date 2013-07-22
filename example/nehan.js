@@ -7728,8 +7728,11 @@ var InlineTreeGenerator = ElementGenerator.extend({
     this.stream.backup();
   },
   rollback : function(){
-    this.stream.rollback();
-    this.generator = null;
+    if(this.generator){
+      this.generator.rollback();
+    } else {
+      this.stream.rollback();
+    }
   },
   _getLineSize : function(parent){
     var measure = parent.getContentMeasure();
