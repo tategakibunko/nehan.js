@@ -1285,7 +1285,7 @@ var UnitSize = {
 var Utils = {
   debug : function(){
     if(Config.debug && console && console.log){
-      console.log.apply(console, arguments)
+      console.log.apply(console, arguments);
     }
   },
   trimHeadCRLF : function(str){
@@ -9118,6 +9118,7 @@ var PageStream = Class.extend({
     this._seekPageNo = 0;
     this._seekPercent = 0;
     this._seekPos = 0;
+    this._retryCount = 0;
   },
   hasPage : function(page_no){
     return (typeof this.buffer[page_no] != "undefined");
@@ -9227,14 +9228,18 @@ var PageStream = Class.extend({
     var self = this;
     var entry = this._yield();
     if(entry.seekPos > 0 && this._seekPos === entry.seekPos){
-      this.onError(this);
-      return;
+      this._retryCount++;
+      if(this._retryCount > Config.maxRollbackCount){
+	this.onError(this);
+	return;
+      }
     }
     this._addBuffer(entry);
     this.onProgress(this);
     this._seekPageNo++;
     this._seekPercent = entry.percent;
     this._seekPos = entry.seekPos;
+    this._retryCount = 0;
     reqAnimationFrame(function(){
       self._asyncGet(wait);
     });

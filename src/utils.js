@@ -1,7 +1,7 @@
 var Utils = {
   debug : function(){
     if(Config.debug && console && console.log){
-      console.log.apply(console, arguments)
+      console.log.apply(console, arguments);
     }
   },
   trimHeadCRLF : function(str){
