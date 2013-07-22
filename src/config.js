@@ -1,5 +1,7 @@
 var Config = {
   lang:"ja-JP",
+  //debug:true,
+  debug:false,
   kerning:true,
   justify:true,
   maxRollbackCount : 10,

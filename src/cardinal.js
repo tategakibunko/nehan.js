@@ -58,7 +58,6 @@ var Cardinal = (function(){
 	var index = (i === 0)? digits[i] : Math.min(digit + 1, base - 1);
 	ret += table[index] || "";
       }
-      //console.log("get %d(%s) -> %s(base %d)", decimal, digits.join("-"), ret, base);
       return ret;
     }
   };

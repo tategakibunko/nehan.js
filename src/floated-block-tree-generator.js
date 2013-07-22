@@ -1,11 +1,9 @@
 var FloatedBlockTreeGenerator = BlockTreeGenerator.extend({
-  init : function(stream, context, floated_box){
+  init : function(markup, stream, context, floated_box){
+    this.markup = markup;
     this.context = context;
     this.stream = stream;
     this.floatedBox = floated_box;
-  },
-  _onLastTree : function(){
-    // do nothing
   },
   yield: function(parent){
     var backupPos2 = this.stream.backupPos; // backup the 'backup pos'

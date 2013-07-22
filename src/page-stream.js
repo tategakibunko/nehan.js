@@ -92,7 +92,8 @@ var PageStream = Class.extend({
   asyncGet : function(opt){
     Args.merge(this, {
       onComplete : function(time){},
-      onProgress : function(self){}
+      onProgress : function(self){},
+      onError : function(self){}
     }, opt || {});
     this._setTimeStart();
     this._asyncGet(opt.wait || 0);
@@ -116,6 +117,10 @@ var PageStream = Class.extend({
     }
     var self = this;
     var entry = this._yield();
+    if(entry.seekPos > 0 && this._seekPos === entry.seekPos){
+      this.onError(this);
+      return;
+    }
     this._addBuffer(entry);
     this.onProgress(this);
     this._seekPageNo++;

@@ -232,7 +232,6 @@ var CssParser = (function(){
       try {
 	return format(prop, value);
       } catch(e){
-	//console.log(e);
 	return {};
       }
     }

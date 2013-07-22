@@ -15,9 +15,10 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this.stream.backup();
   },
   rollback : function(){
-    this.stream.rollback();
     if(this.generator){
       this.generator.rollback();
+    } else {
+      this.stream.rollback();
     }
   },
   getCurGenerator : function(){
@@ -112,7 +113,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
     if(this.generator && this.generator.hasNext()){
       return this.generator.yield(parent);
     }
-    //var token = this.stream.get();
     var token = ctx.getNextToken();
     if(token === null){
       return Exceptions.BUFFER_END;
@@ -167,7 +167,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return box; // return as single block.
   },
   _yieldFloatedBlock : function(parent, aligned_box, tag){
-    var generator = new FloatedBlockTreeGenerator(this.stream, this.context, aligned_box);
+    var generator = new FloatedBlockTreeGenerator(this.markup, this.stream, this.context, aligned_box);
     var block = generator.yield(parent);
     this.generator = generator.getCurGenerator(); // inherit generator of aligned area
     return block;

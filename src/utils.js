@@ -1,4 +1,9 @@
 var Utils = {
+  debug : function(){
+    if(Config.debug && console && console.log){
+      console.log.apply(console, arguments)
+    }
+  },
   trimHeadCRLF : function(str){
     return str.replace(/^\n+/, "");
   },

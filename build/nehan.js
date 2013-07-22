@@ -38,6 +38,8 @@ var __engine_args = _engine_args || {};
 
 var Config = {
   lang:"ja-JP",
+  //debug:true,
+  debug:false,
   kerning:true,
   justify:true,
   maxRollbackCount : 10,
@@ -1281,6 +1283,11 @@ var UnitSize = {
 };
 
 var Utils = {
+  debug : function(){
+    if(Config.debug && console && console.log){
+      console.log.apply(console, arguments)
+    }
+  },
   trimHeadCRLF : function(str){
     return str.replace(/^\n+/, "");
   },
@@ -1737,7 +1744,6 @@ var CssParser = (function(){
       try {
 	return format(prop, value);
       } catch(e){
-	//console.log(e);
 	return {};
       }
     }
@@ -3647,7 +3653,6 @@ var Cardinal = (function(){
 	var index = (i === 0)? digits[i] : Math.min(digit + 1, base - 1);
 	ret += table[index] || "";
       }
-      //console.log("get %d(%s) -> %s(base %d)", decimal, digits.join("-"), ret, base);
       return ret;
     }
   };
@@ -6571,7 +6576,9 @@ var TokenStream = Class.extend({
     return (this.eof && this.pos >= this.tokens.length);
   },
   backup : function(){
-    this.backupPos = this.pos;
+    if(this.hasNext()){
+      this.backupPos = this.pos;
+    }
   },
   rollback : function(){
     this.pos = this.backupPos;
@@ -7785,13 +7792,8 @@ var InlineTreeGenerator = ElementGenerator.extend({
     } // while(true)
 
     line = ctx.createLine();
-    if(!this.hasNext()){
-      this._onLastTree(ctx, line);
-    }
     this._onCompleteTree(ctx, line);
     return line;
-  },
-  _onLastTree : function(ctx, line){
   },
   _onCompleteTree : function(ctx, line){
     line.setMaxExtent(ctx.getMaxExtent());
@@ -7929,8 +7931,6 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
     var extent = parent.getContentExtent();
     return parent.flow.getBoxSize(measure, extent);
   },
-  _onLastTree : function(){
-  },
   _onCompleteTree : function(ctx, line){
     line.shortenMeasure();
     this.lineNo++;
@@ -8051,9 +8051,10 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this.stream.backup();
   },
   rollback : function(){
-    this.stream.rollback();
     if(this.generator){
       this.generator.rollback();
+    } else {
+      this.stream.rollback();
     }
   },
   getCurGenerator : function(){
@@ -8148,7 +8149,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
     if(this.generator && this.generator.hasNext()){
       return this.generator.yield(parent);
     }
-    //var token = this.stream.get();
     var token = ctx.getNextToken();
     if(token === null){
       return Exceptions.BUFFER_END;
@@ -8203,7 +8203,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return box; // return as single block.
   },
   _yieldFloatedBlock : function(parent, aligned_box, tag){
-    var generator = new FloatedBlockTreeGenerator(this.stream, this.context, aligned_box);
+    var generator = new FloatedBlockTreeGenerator(this.markup, this.stream, this.context, aligned_box);
     var block = generator.yield(parent);
     this.generator = generator.getCurGenerator(); // inherit generator of aligned area
     return block;
@@ -8369,13 +8369,11 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
 });
 
 var FloatedBlockTreeGenerator = BlockTreeGenerator.extend({
-  init : function(stream, context, floated_box){
+  init : function(markup, stream, context, floated_box){
+    this.markup = markup;
     this.context = context;
     this.stream = stream;
     this.floatedBox = floated_box;
-  },
-  _onLastTree : function(){
-    // do nothing
   },
   yield: function(parent){
     var backupPos2 = this.stream.backupPos; // backup the 'backup pos'
@@ -8432,6 +8430,7 @@ var InlinePageGenerator = BlockTreeGenerator.extend({
   }
 });
 
+// parallel generator is proxy of multiple generators.
 var ParallelGenerator = ChildBlockTreeGenerator.extend({
   init : function(generators, markup, context, partition){
     this.generators = generators;
@@ -8455,9 +8454,7 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     });
   },
   backup : function(){
-    List.iter(this.generators, function(generator){
-      generator.backup();
-    });
+    // do nothing
   },
   rollback : function(){
     List.iter(this.generators, function(generator){
@@ -8485,8 +8482,8 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
   _yieldChilds : function(wrap_page, parent){
     var self = this, valid = false;
     var child_flow = parent.flow;
-    var is_valid = function(page){
-      return page && page.getContentExtent;
+    var is_empty = function(page){
+      return (page instanceof Box === false || page.getContentExtent() === 0);
     };
     var child_pages = List.mapi(this.generators, function(index, generator){
       var child_measure = self._getChildMeasure(index);
@@ -8495,12 +8492,13 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
       return generator.yield(wrap_page, child_size);
     });
 
-    if(!List.exists(child_pages, is_valid)){
-      return Exceptions.RETRY;
+    if(List.forall(child_pages, is_empty)){
+      this.rollback();
+      return Exceptions.BREAK;
     }
       
     var max_child = List.maxobj(child_pages, function(child_page){
-      if(child_page && child_page.getContentExtent){
+      if(child_page instanceof Box){
 	return child_page.getContentExtent();
       }
       return 0;
@@ -9200,7 +9198,8 @@ var PageStream = Class.extend({
   asyncGet : function(opt){
     Args.merge(this, {
       onComplete : function(time){},
-      onProgress : function(self){}
+      onProgress : function(self){},
+      onError : function(self){}
     }, opt || {});
     this._setTimeStart();
     this._asyncGet(opt.wait || 0);
@@ -9224,6 +9223,10 @@ var PageStream = Class.extend({
     }
     var self = this;
     var entry = this._yield();
+    if(entry.seekPos > 0 && this._seekPos === entry.seekPos){
+      this.onError(this);
+      return;
+    }
     this._addBuffer(entry);
     this.onProgress(this);
     this._seekPageNo++;

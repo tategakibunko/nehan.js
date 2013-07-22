@@ -23,7 +23,9 @@ var TokenStream = Class.extend({
     return (this.eof && this.pos >= this.tokens.length);
   },
   backup : function(){
-    this.backupPos = this.pos;
+    if(this.hasNext()){
+      this.backupPos = this.pos;
+    }
   },
   rollback : function(){
     this.pos = this.backupPos;

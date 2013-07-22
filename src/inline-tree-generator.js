@@ -89,13 +89,8 @@ var InlineTreeGenerator = ElementGenerator.extend({
     } // while(true)
 
     line = ctx.createLine();
-    if(!this.hasNext()){
-      this._onLastTree(ctx, line);
-    }
     this._onCompleteTree(ctx, line);
     return line;
-  },
-  _onLastTree : function(ctx, line){
   },
   _onCompleteTree : function(ctx, line){
     line.setMaxExtent(ctx.getMaxExtent());

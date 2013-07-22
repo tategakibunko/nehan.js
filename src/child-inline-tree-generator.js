@@ -18,8 +18,6 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
     var extent = parent.getContentExtent();
     return parent.flow.getBoxSize(measure, extent);
   },
-  _onLastTree : function(){
-  },
   _onCompleteTree : function(ctx, line){
     line.shortenMeasure();
     this.lineNo++;
