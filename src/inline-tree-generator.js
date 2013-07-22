@@ -25,11 +25,8 @@ var InlineTreeGenerator = ElementGenerator.extend({
     this.stream.backup();
   },
   rollback : function(){
-    if(this.generator){
-      this.generator.rollback();
-    } else {
-      this.stream.rollback();
-    }
+    this.stream.rollback();
+    this.generator = null;
   },
   _getLineSize : function(parent){
     var measure = parent.getContentMeasure();
