@@ -1,4 +1,4 @@
-var InlineBlockGenerator = BlockTreeGenerator.extend({
+var InlineBlockGenerator = TreeGenerator.extend({
   _getBoxType : function(){
     return "inline-block";
   }

@@ -3,7 +3,7 @@ var SectionContentGenerator = ChildBlockTreeGenerator.extend({
     this._super(markup, context);
     this.context.logStartSection(markup);
   },
-  _onLastTree : function(page){
+  _onLastBlock : function(page){
     this.context.logEndSection(this.markup);
   }
 });

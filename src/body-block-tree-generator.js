@@ -20,7 +20,7 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     box.css["font-size"] = Layout.fontSize + "px";
     return box;
   },
-  _onCompleteTree : function(page){
+  _onCompleteBlock : function(page){
     // step page no and character count inside this page
     this.context.stepPageNo();
     this.context.addCharPos(page.getCharCount());

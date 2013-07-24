@@ -1,6 +1,6 @@
-var ChildBlockTreeGenerator = BlockTreeGenerator.extend({
+var ChildBlockTreeGenerator = TreeGenerator.extend({
   // resize page to sum of total child size.
-  _onCompleteTree : function(page){
+  _onCompleteBlock : function(page){
     page.shortenExtent(page.getParentFlow());
   }
 });

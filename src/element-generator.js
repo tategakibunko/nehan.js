@@ -18,6 +18,9 @@ var ElementGenerator = Class.extend({
   // called when box is created, and std style is already loaded.
   _onCreateBox : function(box, parent){
   },
+  _isTextLine : function(element){
+    return element instanceof Box && element.isTextLine();
+  },
   _getMarkupStaticSize : function(parent){
     var font_size = parent? parent.fontSize : Layout.fontSize;
     var measure = parent? parent.getContentMeasure(parent.flow) : Layout.getStdMeasure();

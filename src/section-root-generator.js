@@ -25,7 +25,7 @@ var SectionRootGenerator = ChildBlockTreeGenerator.extend({
   setAnchor : function(name, page_no){
     this.context.setAnchor(name, page_no);
   },
-  _onLastTree : function(page){
+  _onLastBlock : function(page){
     this.context.endSectionRoot(this.markup);
     this._super();
   }

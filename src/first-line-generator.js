@@ -1,6 +1,6 @@
 var FirstLineGenerator = ChildInlineTreeGenerator.extend({
-  init : function(markup, context){
-    this._super(markup, context);
+  init : function(markup, context, parent_line_no){
+    this._super(markup, context, parent_line_no);
   },
   _createLine : function(parent){
     if(this.lineNo > 0){

@@ -3,7 +3,7 @@ var RubyGenerator = ChildInlineTreeGenerator.extend({
     //return new RubyTagStream(this.markup.getContent());
     return new RubyTagStream(markup);
   },
-  _yieldElement : function(ctx){
+  _yieldInlineElement : function(ctx){
     var ruby = this._super(ctx);
     if(typeof ruby === "number"){
       return ruby; // exception
