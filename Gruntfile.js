@@ -111,7 +111,7 @@ module.exports = function(grunt) {
 	    "src/box-child.js",
 	    "src/box.js",
 	    "src/box-style.js",
-	    "src/lexer.js",
+	    "src/html-lexer.js",
 	    "src/tag-stack.js",
 	    "src/section-header.js",
 	    "src/section.js",

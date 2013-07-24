@@ -1,6 +1,6 @@
 var TokenStream = Class.extend({
   init : function(src, lexer){
-    this.lexer = lexer || new Lexer(src);
+    this.lexer = lexer || new HtmlLexer(src);
     this.tokens = [];
     this.pos = 0;
     this.backupPos = 0;
@@ -26,6 +26,9 @@ var TokenStream = Class.extend({
     if(this.hasNext()){
       this.backupPos = this.pos;
     }
+  },
+  look : function(index){
+    return this.tokens[index] || null;
   },
   rollback : function(){
     this.pos = this.backupPos;

@@ -1,9 +1,29 @@
 var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
-  init : function(markup, context){
+  init : function(markup, context, parent_line_no){
     this.markup = markup;
     this.context = context;
     this.stream = this._createStream();
     this.lineNo = 0;
+    this.parentLineNo = parent_line_no;
+    this.rollbacked = false;
+  },
+  rollback : function(){
+    this._super();
+
+    // avoid duplicate increment for parentLineNo
+    if(!this.rollbacked){
+      this.parentLineNo++;
+      this.rollbacked = true;
+    }
+  },
+  isCommit : function(){
+    return this._commit;
+  },
+  getParentPos : function(){
+    return this.markup.pos;
+  },
+  getParentLineNo : function(){
+    return this.parentLineNo;
   },
   _createStream : function(){
     return new TokenStream(this.markup.getContent());
@@ -20,7 +40,6 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   },
   _onCompleteTree : function(ctx, line){
     line.shortenMeasure();
-    this.lineNo++;
   }
 });
 

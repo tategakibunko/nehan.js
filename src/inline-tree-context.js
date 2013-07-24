@@ -46,6 +46,9 @@ var InlineTreeContext = (function(){
       }
       return element.getBoxMeasure(this.getLineFlow());
     },
+    getPrevStreamPos : function(){
+      return Math.max(0, this.stream.getPos() - 1);
+    },
     getFontSize : function(){
       return this.line.fontSize;
     },

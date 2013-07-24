@@ -6,6 +6,7 @@ var Exceptions = {
   RETRY:6,
   SKIP:7,
   BREAK:8,
+  IGNORE:9,
   toString : function(num){
     for(var prop in this){
       if(this[prop] === num){

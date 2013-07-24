@@ -12,7 +12,10 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return this.stream.hasNext();
   },
   backup : function(){
-    this.stream.backup();
+    if(this.generator === null || this.generator instanceof InlineTreeGenerator === false){
+      this.stream.backup();
+    }
+    //this.stream.backup();
   },
   rollback : function(){
     if(this.generator){
@@ -63,6 +66,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
 
       try {
 	ctx.addElement(element);
+	this.generator.commit();
       } catch(e){
 	if(e === "OverflowBlock" || e === "EmptyBlock"){
 	  this.rollback();

@@ -1,15 +1,10 @@
-// TODO: although it is quite rare situation, ruby disappears when
-// 1. line overflow by tail ruby and
-// 2. it is placed at the head of next line but
-// 3. parent page can't contain the line because of block level overflow.
-// then after rollback and 2nd-yielding by parent generator,
-// ruby disappears because stream already steps to the next pos of ruby.
 var InlineTreeGenerator = ElementGenerator.extend({
   init : function(markup, stream, context){
     this.markup = markup;
     this.stream = stream;
     this.context = context;
     this._terminate = false;
+    this.generator = null;
     this.lineNo = 0;
   },
   hasNext : function(){
@@ -24,9 +19,24 @@ var InlineTreeGenerator = ElementGenerator.extend({
   backup : function(){
     this.stream.backup();
   },
+  commit : function(){
+    this.lineNo++;
+  },
+  // this rollback is called from parent generator when layout overflows by 'block level'.
   rollback : function(){
     this.stream.rollback();
-    this.generator = null;
+    var rollback_pos = this.stream.getPos();
+    if(this.generator){
+      var cgen_pos = this.generator.getParentPos();
+      var cgen_line_no = this.generator.getParentLineNo();
+      if(rollback_pos < cgen_pos){
+	this.generator = null;
+      } else if(this.generator.hasNext() || (cgen_pos + 1 == rollback_pos && cgen_line_no == this.lineNo)){
+	// still un-yielded child-gen,
+	// or child-gen that is previous of backupPos and line no of child-gen is equal to backupPos token.
+	this.generator.rollback();
+      }
+    }
   },
   _getLineSize : function(parent){
     var measure = parent.getContentMeasure();
@@ -50,29 +60,26 @@ var InlineTreeGenerator = ElementGenerator.extend({
     this.backup();
     while(true){
       var element = this._yieldElement(ctx);
-      if(element == Exceptions.BUFFER_END){
-	ctx.setLineBreak();
-	break;
-      } else if(element == Exceptions.SKIP){
-	return Exceptions.IGNORE;
-      } else if(element == Exceptions.LINE_BREAK){
-	ctx.setLineBreak();
-	break;
-      } else if(element == Exceptions.RETRY){
-	ctx.setLineBreak();
-	break;
-      } else if(element == Exceptions.IGNORE){
-	continue;
-      } else if(element == Exceptions.BREAK){
-	ctx.setLineBreak();
-	break;
+      if(typeof element === "number"){
+	if(element == Exceptions.BUFFER_END){
+	  ctx.setLineBreak();
+	  break;
+	} else if(element == Exceptions.LINE_BREAK){
+	  ctx.setLineBreak();
+	  break;
+	} else if(element == Exceptions.IGNORE){
+	  continue;
+	} else {
+	  alert("unexpected inline-exception:" + Exceptions.toString(element));
+	  break;
+	}
       }
 
       try {
 	ctx.addElement(element);
       } catch(e){
 	if(e === "OverflowInline"){
-	  if(this.generator){
+	  if(element instanceof Box || element instanceof Ruby){
 	    this.generator.rollback();
 	  } else {
 	    ctx.pushBackToken();
@@ -95,13 +102,12 @@ var InlineTreeGenerator = ElementGenerator.extend({
   _onCompleteTree : function(ctx, line){
     line.setMaxExtent(ctx.getMaxExtent());
     line.setMaxFontSize(ctx.getMaxFontSize());
-    this.lineNo++;
   },
   _yieldElement : function(ctx){
     if(this.generator && this.generator.hasNext()){
       return this.generator.yield(ctx.line);
     }
-    this.generator = null;
+    //this.generator = null;
     var token = ctx.getNextToken();
     return this._yieldToken(ctx, token);
   },
@@ -190,19 +196,20 @@ var InlineTreeGenerator = ElementGenerator.extend({
       return Exceptions.IGNORE;
     default:
       this.generator = this._createChildInlineTreeGenerator(ctx, tag);
+      this.generator.startPos = this.stream.pos - 1;
       return this.generator.yield(ctx.line);
     }
   },
   _createChildInlineTreeGenerator : function(ctx, tag){
     switch(tag.getName()){
     case "ruby":
-      return new RubyGenerator(tag, this.context);
+      return new RubyGenerator(tag, this.context, this.lineNo);
     case "a":
-      return new LinkGenerator(tag, this.context);
+      return new LinkGenerator(tag, this.context, this.lineNo);
     case "first-line":
-      return new FirstLineGenerator(tag, this.context);
+      return new FirstLineGenerator(tag, this.context, this.lineNo);
     default:
-      return new ChildInlineTreeGenerator(tag, this.context);
+      return new ChildInlineTreeGenerator(tag, this.context, this.lineNo);
     }
   }
 });
