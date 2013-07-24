@@ -8136,7 +8136,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
 
       try {
 	ctx.addElement(element);
-	this.generator.commit();
+	if(this.generator){
+	  this.generator.commit();
+	}
       } catch(e){
 	if(e === "OverflowBlock" || e === "EmptyBlock"){
 	  this.rollback();
