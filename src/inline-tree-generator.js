@@ -21,17 +21,20 @@ var InlineTreeGenerator = ElementGenerator.extend({
   },
   commit : function(){
     this.lineNo++;
+    if(this.generator && this.generator.hasNext() === false){
+      this.generator = null;
+    }
   },
   // this rollback is called from parent generator when layout overflows by 'block level'.
   rollback : function(){
+    var rollback_pos = this.stream.getBackupPos();
     this.stream.rollback();
-    var rollback_pos = this.stream.getPos();
     if(this.generator){
       var cgen_pos = this.generator.getParentPos();
       var cgen_line_no = this.generator.getParentLineNo();
       if(rollback_pos < cgen_pos){
 	this.generator = null;
-      } else if(this.generator.hasNext() || (cgen_pos + 1 == rollback_pos && cgen_line_no == this.lineNo)){
+      } else if(cgen_pos + 1 == rollback_pos && cgen_line_no == this.lineNo){
 	// still un-yielded child-gen,
 	// or child-gen that is previous of backupPos and line no of child-gen is equal to backupPos token.
 	this.generator.rollback();
@@ -52,9 +55,9 @@ var InlineTreeGenerator = ElementGenerator.extend({
   },
   yield : function(parent){
     var line = this._createLine(parent);
-    return this._yield(line);
+    return this._yieldInlinesTo(line);
   },
-  _yield : function(line){
+  _yieldInlinesTo : function(line){
     var ctx = new InlineTreeContext(line, this.markup, this.stream, this.context);
 
     this.backup();

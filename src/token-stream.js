@@ -85,6 +85,9 @@ var TokenStream = Class.extend({
   getPos : function(){
     return this.pos;
   },
+  getBackupPos : function(){
+    return this.backupPos;
+  },
   getAll : function(){
     while(!this.eof){
       this._doBuffer();

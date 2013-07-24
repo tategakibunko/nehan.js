@@ -1,9 +1,6 @@
 var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   init : function(markup, context, parent_line_no){
-    this.markup = markup;
-    this.context = context;
-    this.stream = this._createStream();
-    this.lineNo = 0;
+    this._super(markup, this._createStream(markup), context);
     this.parentLineNo = parent_line_no;
     this.rollbacked = false;
   },
@@ -25,8 +22,8 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   getParentLineNo : function(){
     return this.parentLineNo;
   },
-  _createStream : function(){
-    return new TokenStream(this.markup.getContent());
+  _createStream : function(markup){
+    return new TokenStream(markup.getContent());
   },
   _createLine : function(parent){
     var line = this._super(parent);

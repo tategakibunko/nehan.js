@@ -9,7 +9,7 @@ var FloatedBlockTreeGenerator = BlockTreeGenerator.extend({
     var backupPos2 = this.stream.backupPos; // backup the 'backup pos'
     var wrap_box = this._getFloatedWrapBox(parent, this.floatedBox);
     var rest_box = this._getFloatedRestBox(parent, wrap_box, this.floatedBox);
-    this._yieldPageTo(rest_box);
+    this._yieldBlocksTo(rest_box);
     if(this.floatedBox.logicalFloat === "start"){
       wrap_box.addChildBlock(this.floatedBox);
       wrap_box.addChildBlock(rest_box);

@@ -15,7 +15,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
     if(this.generator === null || this.generator instanceof InlineTreeGenerator === false){
       this.stream.backup();
     }
-    //this.stream.backup();
   },
   rollback : function(){
     if(this.generator){
@@ -36,14 +35,14 @@ var BlockTreeGenerator = ElementGenerator.extend({
     var page_box, page_size;
     page_size = size || this._getBoxSize(parent);
     page_box = this._createBox(page_size, parent);
-    var ret = this._yieldPageTo(page_box);
+    var ret = this._yieldBlocksTo(page_box);
     return ret;
   },
   _getBoxSize : function(parent){
     return this._getMarkupStaticSize() || parent.getRestSize();
   },
   // fill page with child page elements.
-  _yieldPageTo : function(page){
+  _yieldBlocksTo : function(page){
     var ctx = new BlockTreeContext(page, this.markup, this.stream, this.context);
 
     while(true){

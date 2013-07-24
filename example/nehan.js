@@ -6638,6 +6638,9 @@ var TokenStream = Class.extend({
   getPos : function(){
     return this.pos;
   },
+  getBackupPos : function(){
+    return this.backupPos;
+  },
   getAll : function(){
     while(!this.eof){
       this._doBuffer();
@@ -7732,17 +7735,20 @@ var InlineTreeGenerator = ElementGenerator.extend({
   },
   commit : function(){
     this.lineNo++;
+    if(this.generator && this.generator.hasNext() === false){
+      this.generator = null;
+    }
   },
   // this rollback is called from parent generator when layout overflows by 'block level'.
   rollback : function(){
+    var rollback_pos = this.stream.getBackupPos();
     this.stream.rollback();
-    var rollback_pos = this.stream.getPos();
     if(this.generator){
       var cgen_pos = this.generator.getParentPos();
       var cgen_line_no = this.generator.getParentLineNo();
       if(rollback_pos < cgen_pos){
 	this.generator = null;
-      } else if(this.generator.hasNext() || (cgen_pos + 1 == rollback_pos && cgen_line_no == this.lineNo)){
+      } else if(cgen_pos + 1 == rollback_pos && cgen_line_no == this.lineNo){
 	// still un-yielded child-gen,
 	// or child-gen that is previous of backupPos and line no of child-gen is equal to backupPos token.
 	this.generator.rollback();
@@ -7763,9 +7769,9 @@ var InlineTreeGenerator = ElementGenerator.extend({
   },
   yield : function(parent){
     var line = this._createLine(parent);
-    return this._yield(line);
+    return this._yieldInlinesTo(line);
   },
-  _yield : function(line){
+  _yieldInlinesTo : function(line){
     var ctx = new InlineTreeContext(line, this.markup, this.stream, this.context);
 
     this.backup();
@@ -7928,10 +7934,7 @@ var InlineTreeGenerator = ElementGenerator.extend({
 
 var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   init : function(markup, context, parent_line_no){
-    this.markup = markup;
-    this.context = context;
-    this.stream = this._createStream();
-    this.lineNo = 0;
+    this._super(markup, this._createStream(markup), context);
     this.parentLineNo = parent_line_no;
     this.rollbacked = false;
   },
@@ -7953,8 +7956,8 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   getParentLineNo : function(){
     return this.parentLineNo;
   },
-  _createStream : function(){
-    return new TokenStream(this.markup.getContent());
+  _createStream : function(markup){
+    return new TokenStream(markup.getContent());
   },
   _createLine : function(parent){
     var line = this._super(parent);
@@ -7973,9 +7976,9 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
 
 
 var RubyGenerator = ChildInlineTreeGenerator.extend({
-  _createStream : function(){
+  _createStream : function(markup){
     //return new RubyTagStream(this.markup.getContent());
-    return new RubyTagStream(this.markup);
+    return new RubyTagStream(markup);
   },
   _yieldElement : function(ctx){
     var ruby = this._super(ctx);
@@ -8001,8 +8004,8 @@ var RtGenerator = ChildInlineTreeGenerator.extend({
 
 
 var LinkGenerator = ChildInlineTreeGenerator.extend({
-  init : function(markup, context){
-    this._super(markup, context);
+  init : function(markup, context, parent_line_no){
+    this._super(markup, context, parent_line_no);
     var anchor_name = markup.getTagAttr("name");
     if(anchor_name){
       context.setAnchor(anchor_name);
@@ -8085,7 +8088,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
     if(this.generator === null || this.generator instanceof InlineTreeGenerator === false){
       this.stream.backup();
     }
-    //this.stream.backup();
   },
   rollback : function(){
     if(this.generator){
@@ -8106,14 +8108,14 @@ var BlockTreeGenerator = ElementGenerator.extend({
     var page_box, page_size;
     page_size = size || this._getBoxSize(parent);
     page_box = this._createBox(page_size, parent);
-    var ret = this._yieldPageTo(page_box);
+    var ret = this._yieldBlocksTo(page_box);
     return ret;
   },
   _getBoxSize : function(parent){
     return this._getMarkupStaticSize() || parent.getRestSize();
   },
   // fill page with child page elements.
-  _yieldPageTo : function(page){
+  _yieldBlocksTo : function(page){
     var ctx = new BlockTreeContext(page, this.markup, this.stream, this.context);
 
     while(true){
@@ -8419,7 +8421,7 @@ var FloatedBlockTreeGenerator = BlockTreeGenerator.extend({
     var backupPos2 = this.stream.backupPos; // backup the 'backup pos'
     var wrap_box = this._getFloatedWrapBox(parent, this.floatedBox);
     var rest_box = this._getFloatedRestBox(parent, wrap_box, this.floatedBox);
-    this._yieldPageTo(rest_box);
+    this._yieldBlocksTo(rest_box);
     if(this.floatedBox.logicalFloat === "start"){
       wrap_box.addChildBlock(this.floatedBox);
       wrap_box.addChildBlock(rest_box);
