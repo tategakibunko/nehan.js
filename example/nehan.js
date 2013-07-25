@@ -7918,25 +7918,26 @@ var TreeGenerator = ElementGenerator.extend({
       return new ChildBlockTreeGenerator(this.context.createBlockRoot(tag));
     }
     if(list_style.isInside()){
-      return this._createInsideListItemGenerator(tag, parent);
+      return this._createInsideListItemGenerator(parent, tag);
     }
-    return this._createOutsideListItemGenerator(tag, parent);
+    return this._createOutsideListItemGenerator(parent, tag);
   },
   _createInsideListItemGenerator : function(parent, tag){
     var marker = parent.listStyle.getMarkerHtml(tag.order + 1);
     var content = Html.tagWrap("span", marker, {
       "class":"nehan-li-marker"
     }) + Const.space + tag.getContent();
-    return ChildBlockTreeGenerator(this.context.createBlockRoot(tag, new TokenStream(content)));
+
+    return new ChildBlockTreeGenerator(this.context.createBlockRoot(tag, new TokenStream(content)));
   },
   _createOutsideListItemGenerator : function(parent, tag){
     var context2 = this.context.createBlockRoot(tag);
     var marker = parent.listStyle.getMarkerHtml(tag.order + 1);
     var markup_marker = new Tag("<li-marker>", marker);
     var markup_body = new Tag("<li-body>", tag.getContent());
-    new ParallelGenerator([
-      new ParaChildGenerator(markup_marker, context2.createBlockRoot(markup_marker)),
-      new ParaChildGenerator(markup_body, context2.createBlockRoot(markup_body))
+    return new ParallelGenerator([
+      new ParaChildGenerator(context2.createBlockRoot(markup_marker)),
+      new ParaChildGenerator(context2.createBlockRoot(markup_body))
     ], parent.partition, context2);
   },
   _onLastBlock : function(page){
