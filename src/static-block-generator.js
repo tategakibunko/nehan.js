@@ -1,6 +1,6 @@
 var StaticBlockGenerator = ElementGenerator.extend({
   _getBoxSize : function(parent){
-    return this._getMarkupStaticSize(parent);
+    return this.context.getMarkupStaticSize(parent);
   },
   _createBox : function(size, parent){
     var box = this._super(size, parent);
@@ -10,10 +10,10 @@ var StaticBlockGenerator = ElementGenerator.extend({
   yield : function(parent){
     var size = this._getBoxSize(parent);
     var box = this._createBox(size, parent);
-    if(this.markup.isPush()){
+    if(this.context.markup.isPush()){
       box.backward = true;
     }
-    if(this.markup.isPull()){
+    if(this.context.markup.isPull()){
       box.forward = true;
     }
     // get rest size without edge of box.

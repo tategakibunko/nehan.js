@@ -1,14 +1,14 @@
 var SectionRootGenerator = ChildBlockTreeGenerator.extend({
-  init : function(markup, context){
-    this._super(markup, context);
-    this.context.startSectionRoot(markup);
+  init : function(context){
+    this._super(context);
+    this.context.startSectionRoot();
   },
   hasOutline : function(root_name){
     var buffer = this.getOutlineBuffer(root_name);
     return buffer.isEmpty() === false;
   },
   getOutlineBuffer : function(root_name){
-    var name = root_name || this.markup.getName();
+    var name = root_name || this.context.markup.getName();
     return this.context.getOutlineBuffer(name);
   },
   getOutlineTree : function(root_name){
@@ -26,7 +26,7 @@ var SectionRootGenerator = ChildBlockTreeGenerator.extend({
     this.context.setAnchor(name, page_no);
   },
   _onLastBlock : function(page){
-    this.context.endSectionRoot(this.markup);
+    this.context.endSectionRoot();
     this._super();
   }
 });

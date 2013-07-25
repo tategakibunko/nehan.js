@@ -1,9 +1,9 @@
 var LinkGenerator = ChildInlineTreeGenerator.extend({
-  init : function(markup, context, parent_line_no){
-    this._super(markup, context, parent_line_no);
-    var anchor_name = markup.getTagAttr("name");
+  init : function(context){
+    this._super(context);
+    var anchor_name = this.context.markupInline.getTagAttr("name");
     if(anchor_name){
-      context.setAnchor(anchor_name);
+      this.context.setAnchor(anchor_name);
     }
   }
 });

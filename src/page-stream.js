@@ -152,11 +152,20 @@ var PageStream = Class.extend({
   _createGenerator : function(text){
     switch(Layout.root){
     case "body":
-      return new BodyBlockTreeGenerator(text);
+      return new BodyBlockTreeGenerator(new DocumentContext({
+	markup:new Tag("<body>", text),
+	stream:(new TokenStream(text))
+      }));
     case "html":
-      return new HtmlGenerator(text);
+      return new HtmlGenerator(new DocumentContext({
+	markup:new Tag("<html>", text),
+	stream:(new HtmlTagStream(text))
+      }));
     default:
-      return new DocumentGenerator(text);
+      return new DocumentGenerator(new DocumentContext({
+	markup:null,
+	stream:(new DocunemtTagStream(text))
+      }));
     }
   },
   _createEvaluator : function(){

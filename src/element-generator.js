@@ -1,6 +1,5 @@
 var ElementGenerator = Class.extend({
-  init : function(markup, context){
-    this.markup = markup;
+  init : function(context){
     this.context = context;
   },
   hasNext : function(){
@@ -21,41 +20,43 @@ var ElementGenerator = Class.extend({
   _isTextLine : function(element){
     return element instanceof Box && element.isTextLine();
   },
-  _getMarkupStaticSize : function(parent){
-    var font_size = parent? parent.fontSize : Layout.fontSize;
-    var measure = parent? parent.getContentMeasure(parent.flow) : Layout.getStdMeasure();
-    return this.markup.getStaticSize(font_size, measure);
-  },
   _yieldStaticElement : function(parent, tag){
+    var generator = this._createStaticGenerator(parent, tag);
+    console.log(generator);
+    return generator.yield(parent);
+  },
+  _createStaticGenerator : function(parent, tag){
     switch(tag.getName()){
     case "img":
-      return (new ImageGenerator(tag, this.context)).yield(parent);
+      return new ImageGenerator(this.context.createBlockRoot(tag, null));
     case "ibox":
-      return (new InlineBoxGenerator(tag, this.context)).yield(parent);
+      return new InlineBoxGenerator(this.context.createBlockRoot(tag, null));
     case "div":
       if(tag.hasFlow()){
-	return (new InlinePageGenerator(tag, this.context)).yield(parent);
+	return new InlinePageGenerator(this.context.createBlockRoot(tag));
       }
-      return (new InlineBoxGenerator(tag, this.context)).yield(parent);
+      return new InlineBoxGenerator(this.context.createBlockRoot(tag, null));
     default:
-      return (new InlinePageGenerator(tag, this.context)).yield(parent);
+      return new InlinePageGenerator(this.context.createBlockRoot(tag));
     }
   },
   _getBoxType : function(){
-    return this.markup.getName();
+    return this.context.getMarkupName();
   },
   _setBoxClasses : function(box, parent){
-    List.iter(this.markup.classes, function(klass){
+    List.iter(this.context.getMarkupClasses(), function(klass){
       box.addClass(klass);
     });
   },
   _setBoxStyle : function(box, parent){
-    BoxStyle.set(this.markup, box, parent);
+    if(this.context.markup){
+      BoxStyle.set(this.context.markup, box, parent);
+    }
   },
   _createBox : function(size, parent){
     var box_type = this._getBoxType();
     var box = Layout.createBox(size, parent, box_type);
-    box.markup = this.markup;
+    box.markup = this.context.markup;
     this._onReadyBox(box, parent);
     this._setBoxClasses(box, parent);
     this._setBoxStyle(box, parent);

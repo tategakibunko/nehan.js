@@ -20,7 +20,10 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
     });
   },
   evalRt : function(line, ruby){
-    var generator = new RtGenerator(ruby.rt, new DocumentContext());
+    var generator = new RtGenerator(new DocumentContext({
+      markup:ruby.rt,
+      stream:(new TokenStream(ruby.rt.getContentRaw()))
+    }));
     var rt_line = generator.yield(line);
     var css = ruby.getCssVertRt(line);
     for(var prop in css){

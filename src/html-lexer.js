@@ -6,7 +6,7 @@ var HtmlLexer = (function (){
 
   function HtmlLexer(src){
     this.pos = 0;
-    this.buff = src;
+    this.buff = this._normalize(src);
     // TODO:
     // each time lexer is called 'get', this.buff is reduced.
     // but if we implement searching issue in this system,
@@ -17,6 +17,12 @@ var HtmlLexer = (function (){
   }
 
   HtmlLexer.prototype = {
+    _normalize : function(src){
+      return src
+	.replace(/^[ \n]+/, "") // shorten head space
+	.replace(/\s+$/, "") // discard tail space
+	.replace(/\r/g, ""); // discard CR
+    },
     isEmpty : function(){
       return this.empty;
     },

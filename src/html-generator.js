@@ -1,12 +1,7 @@
 var HtmlGenerator = (function(){
-  function HtmlGenerator(markup, context){
-    this.markup = markup;
-    this.context = context || new DocumentContext();
-    this.stream = this._createStream();
+  function HtmlGenerator(context){
+    this.context = context;
     this.generator = this._getGenerator();
-    if(this.generator === null){
-      throw "HtmlGenerator::invalid html";
-    }
   }
 
   HtmlGenerator.prototype = {
@@ -22,68 +17,47 @@ var HtmlGenerator = (function(){
     getOutlineHtml : function(root_name){
       return this.generator.getOutlineHtml(root_name);
     },
-    _createStream : function(){
-      return new HtmlTagStream(this.markup.getContentRaw());
-    },
     _getGenerator : function(){
-      var generator = null;
-      while(true){
-	var tag = this.stream.get();
-	if(tag === null){
-	  break;
-	}
+      while(this.context.hasNextToken()){
+	var tag = this.context.getNextToken();
 	switch(tag.getName()){
 	case "head":
-	  this._parseHead(tag.getContentRaw());
+	  this._parseHead(this.context.getHeader(), tag.getContentRaw());
 	  break;
 	case "body":
-	  generator = new BodyBlockTreeGenerator(tag, this.context);
+	  return new BodyBlockTreeGenerator(
+	    this.context.createBlockRoot({
+	      markup:tag,
+	      stream:(new TokenStream(tag.getContentRaw()))
+	    })
+	  );
 	  break;
 	}
       }
-      return generator;
+      throw "invalid html:<body> not found";
     },
-    _parseHead : function(content){
+    _parseHead : function(header, content){
       var stream = new HeadTagStream(content);
-      var header = this.context.getHeader();
-      while(true){
+      while(stream.hasNext()){
 	var tag = stream.get();
-	if(tag === null){
-	  break;
-	}
 	switch(tag.getName()){
 	case "title":
-	  this._parseTitle(header, tag);
+	  header.setTitle(tag.getContentRaw());
 	  break;
 	case "meta":
-	  this._parseMeta(header, tag);
+	  header.addMeta(tag);
 	  break;
 	case "link":
-	  this._parseLink(header, tag);
+	  header.addLink(tag);
 	  break;
 	case "style":
-	  this._parseStyle(header, tag);
+	  header.addStyle(tag);
 	  break;
 	case "script":
-	  this._parseScript(header, tag);
+	  header.addScript(tag);
 	  break;
 	}
       }
-    },
-    _parseTitle : function(header, tag){
-      header.setTitle(tag.getContentRaw());
-    },
-    _parseMeta : function(header, tag){
-      header.addMeta(tag);
-    },
-    _parseLink : function(header, tag){
-      header.addLink(tag);
-    },
-    _parseStyle : function(header, tag){
-      header.addStyle(tag);
-    },
-    _parseScript : function(header, tag){
-      header.addScript(tag);
     }
   };
 

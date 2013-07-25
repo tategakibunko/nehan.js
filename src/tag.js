@@ -29,8 +29,8 @@ var Tag = (function (){
 
   Tag.prototype = {
     inherit : function(parent_tag, context){
-      if(this._inherited || !this.hasLayout()){
-	return; // avoid duplicate initialize
+      if(this._inherited || !this.hasLayout() || parent_tag === null){
+	return this; // avoid duplicate initialize
       }
       var self = this;
       this.parent = parent_tag;
@@ -38,6 +38,7 @@ var Tag = (function (){
       this.cssAttrStatic = this._getSelectorValue(); // reget css-attr with parent enabled.
       this.callHook(context);
       this._inherited = true;
+      return this;
     },
     callHook : function(context){
       if(this.cssAttrStatic.onload){

@@ -1,11 +1,9 @@
 var InlineTreeContext = (function(){
-  function InlineTreeContext(line, markup, stream, context){
+  function InlineTreeContext(line, context){
     this.line = line;
-    this.markup = markup;
-    this.stream = stream;
     this.context = context;
-    this.lineStartPos = this.stream.getPos();
-    this.textIndent = stream.isHead()? (line.textIndent || 0) : 0;
+    this.lineStartPos = this.context.getStreamPos();
+    this.textIndent = this.context.stream.isHead()? (line.textIndent || 0) : 0;
     this.maxFontSize = 0;
     this.maxExtent = 0;
     this.maxMeasure = line.getContentMeasure() - this.textIndent;
@@ -46,9 +44,6 @@ var InlineTreeContext = (function(){
       }
       return element.getBoxMeasure(this.getLineFlow());
     },
-    getPrevStreamPos : function(){
-      return Math.max(0, this.stream.getPos() - 1);
-    },
     getFontSize : function(){
       return this.line.fontSize;
     },
@@ -80,9 +75,6 @@ var InlineTreeContext = (function(){
       }
       return this.curMeasure + advance <= this.maxMeasure;
     },
-    isPreLine : function(){
-      return this.line._type === "pre";
-    },
     isTextBold : function(){
       return this.line.isTextBold();
     },
@@ -93,19 +85,16 @@ var InlineTreeContext = (function(){
       return !this.lineBreak && (this.lineTokens.length > 0);
     },
     isLineStart : function(){
-      return this.stream.pos == this.lineStartPos;
-    },
-    pushBackToken : function(){
-      this.stream.prev();
+      return this.context.getStreamPos() == this.lineStartPos;
     },
     findFirstText : function(){
-      return this.stream.findTextNext(this.lineStartPos);
+      return this.context.stream.findTextNext(this.lineStartPos);
     },
     skipToken : function(){
-      this.stream.next();
+      this.context.stream.next();
     },
     getNextToken : function(){
-      var token = this.stream.get();
+      var token = this.context.stream.get();
 
       // skip head half space if 1 and 2.
       // 1. first token of line is a half space.
@@ -114,10 +103,8 @@ var InlineTreeContext = (function(){
 	if(Token.isChar(token) && token.isHalfSpaceChar() && this.isLineStart()){
 	  var next = this.findFirstText();
 	  if(next && Token.isWord(next)){
-	    token = this.stream.get();
+	    token = this.context.stream.get();
 	  }
-	} else if(Token.isTag(token) && this.markup){
-	  token.inherit(this.markup, this.context);
 	}
       }
       this.lastToken = token;
@@ -136,9 +123,6 @@ var InlineTreeContext = (function(){
     },
     getMaxMeasure : function(){
       return this.maxMeasure;
-    },
-    addStyle : function(tag){
-      this.context.addStyle(tag);
     },
     addElement : function(element){
       var advance = this.getElementAdvance(element);
@@ -190,15 +174,9 @@ var InlineTreeContext = (function(){
 	break;
       }
     },
-    setAnchor : function(anchor_name){
-      this.context.setAnchor(anchor_name);
-    },
     setLineBreak : function(){
       this.lastText = null;
       this.lineBreak = true;
-    },
-    createInlineRoot : function(){
-      return this.context.createInlineRoot();
     },
     createLine : function(){
       if(this.curMeasure === 0){
@@ -212,16 +190,16 @@ var InlineTreeContext = (function(){
     },
     justify : function(last_token){
       var head_token = last_token;
-      var tail_token = this.stream.findTextPrev();
-      var backup_pos = this.stream.getPos();
+      var tail_token = this.context.stream.findTextPrev();
+      var backup_pos = this.context.stream.getPos();
       
       // head text of next line meets head-NG.
       if(head_token && Token.isChar(head_token) && head_token.isHeadNg()){
 	this.lineTokens = this._justifyHead(head_token);
-	if(this.stream.getPos() != backup_pos){ // some text is moved by head-NG.
-	  tail_token = this.stream.findTextPrev(); // search tail_token from new stream position pointing to new head pos.
+	if(this.context.stream.getPos() != backup_pos){ // some text is moved by head-NG.
+	  tail_token = this.context.stream.findTextPrev(); // search tail_token from new stream position pointing to new head pos.
 	  // if new head is single br, this must be included in current line, so skip it.
-	  this.stream.skipIf(function(token){
+	  this.context.stream.skipIf(function(token){
 	    return token && Token.isTag(token) && token.getName() === "br";
 	  });
 	}
@@ -247,7 +225,7 @@ var InlineTreeContext = (function(){
 	if(token.isKakkoStart()){
 	  this._setKerningStart(token, this.prevText);
 	} else if(token.isKakkoEnd() || token.isKutenTouten()){
-	  var next_text = this.stream.findTextNext(token.pos);
+	  var next_text = this.context.stream.findTextNext(token.pos);
 	  this._setKerningEnd(token, next_text);
 	}
       }
@@ -317,7 +295,7 @@ var InlineTreeContext = (function(){
     // fix line that is started with wrong text.
     _justifyHead : function(head_token){
       var count = 0;
-      this.stream.iterWhile(head_token.pos, function(pos, token){
+      this.context.stream.iterWhile(head_token.pos, function(pos, token){
 	if(Token.isChar(token) && token.isHeadNg()){
 	  count++;
 	  return true; // continue
@@ -331,12 +309,12 @@ var InlineTreeContext = (function(){
       // if one head NG, push it into current line.
       if(count === 1){
 	this._pushElement(head_token);
-	this.stream.setPos(head_token.pos + 1);
+	this.context.stream.setPos(head_token.pos + 1);
 	return this.lineTokens;
       }
       // if more than two head NG, find non NG text from tail, and cut the line at the pos.
       var normal_pos = -1;
-      this.stream.revIterWhile(head_token.pos, function(pos, token){
+      this.context.stream.revIterWhile(head_token.pos, function(pos, token){
 	if(pos <= this.lineStartPos){
 	  return false; // break (error)
 	}
@@ -357,13 +335,13 @@ var InlineTreeContext = (function(){
 	ptr--;
       }
       // set stream position at the normal pos.
-      this.stream.setPos(normal_pos);
+      this.context.stream.setPos(normal_pos);
       return this.lineTokens;
     },
     // fix line that is ended with wrong text.
     _justifyTail : function(tail_token){
       var count = 0;
-      this.stream.revIterWhile(tail_token.pos, function(pos, token){
+      this.context.stream.revIterWhile(tail_token.pos, function(pos, token){
 	if(Token.isChar(token) && token.isTailNg()){
 	  count++;
 	  return true;
@@ -377,12 +355,12 @@ var InlineTreeContext = (function(){
       // if one tail NG, pop it(tail token is displayed in next line).
       if(count === 1){
 	this.lineTokens.pop();
-	this.stream.setPos(tail_token.pos);
+	this.context.stream.setPos(tail_token.pos);
 	return this.lineTokens;
       }
       // if more than two tail NG, find non NG text from tail, and cut the line at the pos.
       var normal_pos = -1;
-      this.stream.revIterWhile(tail_token.pos, function(pos, token){
+      this.context.stream.revIterWhile(tail_token.pos, function(pos, token){
 	if(pos <= this.lineStartPos){
 	  return false; // break (error)
 	}
@@ -403,7 +381,7 @@ var InlineTreeContext = (function(){
 	ptr--;
       }
       // set stream postion at the 'next' of normal pos.
-      this.stream.setPos(normal_pos + 1);
+      this.context.stream.setPos(normal_pos + 1);
       return this.lineTokens;
     },
     _createEmptyLine : function(){

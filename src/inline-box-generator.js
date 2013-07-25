@@ -3,7 +3,7 @@ var InlineBoxGenerator = StaticBlockGenerator.extend({
     return "ibox";
   },
   _onCreateBox : function(box, parent){
-    box.content = this.markup.getContentRaw();
+    box.content = this.context.markup.getContentRaw();
     box.css.overflow = "hidden";
   }
 });

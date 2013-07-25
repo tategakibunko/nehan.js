@@ -1,11 +1,7 @@
 var DocumentGenerator = (function(){
-  function DocumentGenerator(src){
-    this.context = new DocumentContext();
-    this.stream = new DocumentTagStream(src);
-    this.generator = this._createGenerator();
-    if(this.generator === null){
-      throw "DocumentGenerator::invalid document";
-    }
+  function DocumentGenerator(context){
+    this.context = context;
+    this.generator = this._createGenerator(this.context.stream);
   }
 
   DocumentGenerator.prototype = {
@@ -27,25 +23,22 @@ var DocumentGenerator = (function(){
     getOutlineHtml : function(root_name){
       return this.generator.getOutlineHtml(root_name);
     },
-    _parseDocType : function(tag){
-    },
     _createGenerator : function(){
-      var generator = null;
-      while(true){
-	var tag = this.stream.get();
-	if(tag === null){
-	  break;
-	}
+      while(this.context.hasNextToken()){
+	var tag = this.context.getNextToken();
 	switch(tag.getName()){
 	case "!doctype":
-	  this._parseDocType(tag);
+	  this.context.setDocumentType(tag);
 	  break;
 	case "html":
-	  generator = new HtmlGenerator(tag, this.context);
-	  break;
+	  return new HtmlGenerator(
+	    this.context.createBlockRoot(
+	      tag, new HtmlTagStream(tag.getContentRaw())
+	    )
+	  );
 	}
       }
-      return generator;
+      throw "invalid document:<html> not found";
     }
   };
 

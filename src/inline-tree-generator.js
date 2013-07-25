@@ -1,13 +1,13 @@
 var ChildInlineTreeGenerator = TreeGenerator.extend({
-  init : function(markup, context, parent_line_no){
-    this._super(markup, context);
+  init : function(context, parent_line_no){
+    this._super(context);
     this.parentLineNo = parent_line_no;
   },
   yield : function(parent){
     return this._yieldInline(parent);
   },
   getParentPos : function(){
-    return this.markup.pos;
+    return this.context.markup.pos;
   },
   getParentLineNo : function(){
     return this.parentLineNo;
@@ -25,7 +25,7 @@ var ChildInlineTreeGenerator = TreeGenerator.extend({
     var extent = parent.getContentExtent();
     return parent.flow.getBoxSize(measure, extent);
   },
-  _onCompleteLine : function(ctx, line){
+  _onCompleteLine : function(line){
     line.shortenMeasure();
   }
 });

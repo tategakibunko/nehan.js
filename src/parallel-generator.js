@@ -1,20 +1,9 @@
 // parallel generator is proxy of multiple generators.
 var ParallelGenerator = ChildBlockTreeGenerator.extend({
-  init : function(generators, markup, context, partition){
+  init : function(generators, partition, context){
+    this._super(context);
     this.generators = generators;
-    this.markup = markup;
-    this.context = context;
     this.partition = partition;
-    this._inheritParent();
-  },
-  _inheritParent : function(){
-    var parent_markup = this.markup;
-    var context = this.context;
-    List.iter(this.generators, function(gen){
-      if(gen.markup){
-	gen.markup.inherit(parent_markup, context);
-      }
-    });
   },
   hasNext : function(){
     return List.exists(this.generators, function(generator){
