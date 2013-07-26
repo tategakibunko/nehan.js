@@ -31,7 +31,6 @@ var HtmlGenerator = (function(){
 	      stream:(new TokenStream(tag.getContentRaw()))
 	    })
 	  );
-	  break;
 	}
       }
       throw "invalid html:<body> not found";
