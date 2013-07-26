@@ -6316,6 +6316,8 @@ var DocumentContext = (function(){
     this.stream = opt.stream || null;
     this.charPos = opt.charPos || 0;
     this.pageNo = opt.pageNo || 0;
+    this.localPageNo = opt.localPageNo || 0;
+    this.localLineNo = opt.localLineNo || 0;
     this.header = opt.header || new DocumentHeader();
     this.blockContext = opt.blockContext || null;
     this.inlineContext = opt.inlineContext || null;
@@ -6328,15 +6330,39 @@ var DocumentContext = (function(){
     setDocumentType : function(markup){
       this.documentType = markup;
     },
+    // page no, line no
+    isFirstLocalPage : function(){
+      return this.localPageNo === 0;
+    },
+    stepLocalPageNo : function(){
+      this.localPageNo++;
+      return this.localPageNo;
+    },
+    stepLocalLineNo : function(){
+      this.localLineNo++;
+      return this.localLineNo;
+    },
+    getLocalPageNo : function(){
+      return this.localPageNo;
+    },
+    getLocalLineNo : function(){
+      return this.localLineNo;
+    },
     // stream
+    getStream : function(){
+      return this.stream;
+    },
+    backupStream : function(){
+      this.stream.backup();
+    },
+    rollbackStream : function(){
+      this.stream.rollback();
+    },
     hasNextToken : function(){
       return this.stream.hasNext();
     },
     getNextToken : function(){
       return this.stream.get();
-    },
-    skipToken : function(){
-      this.stream.next();
     },
     pushBackToken : function(){
       this.stream.prev();
@@ -6349,6 +6375,16 @@ var DocumentContext = (function(){
     },
     getSeekPercent : function(){
       return this.stream.getSeekPercent();
+    },
+    getStreamTokenCount : function(){
+      return this.stream.getTokenCount();
+    },
+    isFirstLine : function(){
+      return this.stream.isHead();
+    },
+    // current markup
+    getMarkup : function(){
+      return this.markup;
     },
     getMarkupStaticSize : function(parent){
       var font_size = parent? parent.fontSize : Layout.fontSize;
@@ -6386,11 +6422,14 @@ var DocumentContext = (function(){
       });
     },
     createBlockContext : function(parent){
-      this.blockContext = new BlockTreeContext(parent);
+      this.blockContext = new BlockContext(parent);
       return this.blockContext;
     },
     addBlockElement : function(element){
       this.blockContext.addElement(element);
+      if(element instanceof Box && element.isTextLine()){
+	this.stepLocalLineNo();
+      }
     },
     // inline context
     createInlineRoot : function(markup, stream){
@@ -6407,7 +6446,7 @@ var DocumentContext = (function(){
       });
     },
     createInlineContext : function(parent){
-      this.inlineContext = new InlineTreeContext(parent, this);
+      this.inlineContext = new InlineContext(parent, this);
       return this.inlineContext;
     },
     createLine : function(){
@@ -7245,8 +7284,6 @@ var ElementGenerator = Class.extend({
   },
   backup : function(){
   },
-  commit : function(){
-  },
   rollback : function(){
   },
   // called when box is created, but no style is not loaded.
@@ -7260,7 +7297,6 @@ var ElementGenerator = Class.extend({
   },
   _yieldStaticElement : function(parent, tag){
     var generator = this._createStaticGenerator(parent, tag);
-    console.log(generator);
     return generator.yield(parent);
   },
   _createStaticGenerator : function(parent, tag){
@@ -7379,12 +7415,13 @@ var HrGenerator = ElementGenerator.extend({
   }
 });
 
-var InlineTreeContext = (function(){
-  function InlineTreeContext(line, context){
+var InlineContext = (function(){
+  function InlineContext(line, context){
     this.line = line;
     this.context = context;
-    this.lineStartPos = this.context.getStreamPos();
-    this.textIndent = this.context.stream.isHead()? (line.textIndent || 0) : 0;
+    this.stream = context.stream;
+    this.lineStartPos = this.stream.getPos();
+    this.textIndent = this.context.isFirstLine()? (line.textIndent || 0) : 0;
     this.maxFontSize = 0;
     this.maxExtent = 0;
     this.maxMeasure = line.getContentMeasure() - this.textIndent;
@@ -7400,7 +7437,7 @@ var InlineTreeContext = (function(){
     this.lastText = null;
   }
 
-  InlineTreeContext.prototype = {
+  InlineContext.prototype = {
     getElementExtent : function(element){
       if(Token.isText(element)){
 	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
@@ -7466,25 +7503,19 @@ var InlineTreeContext = (function(){
       return !this.lineBreak && (this.lineTokens.length > 0);
     },
     isLineStart : function(){
-      return this.context.getStreamPos() == this.lineStartPos;
-    },
-    findFirstText : function(){
-      return this.context.stream.findTextNext(this.lineStartPos);
-    },
-    skipToken : function(){
-      this.context.stream.next();
+      return this.stream.getPos() == this.lineStartPos;
     },
     getNextToken : function(){
-      var token = this.context.stream.get();
+      var token = this.stream.get();
 
       // skip head half space if 1 and 2.
       // 1. first token of line is a half space.
       // 2. next text token is a word.
       if(token){
 	if(Token.isChar(token) && token.isHalfSpaceChar() && this.isLineStart()){
-	  var next = this.findFirstText();
+	  var next = this.stream.findTextNext(this.lineStartPos);
 	  if(next && Token.isWord(next)){
-	    token = this.context.stream.get();
+	    token = this.stream.get();
 	  }
 	}
       }
@@ -7571,16 +7602,16 @@ var InlineTreeContext = (function(){
     },
     justify : function(last_token){
       var head_token = last_token;
-      var tail_token = this.context.stream.findTextPrev();
-      var backup_pos = this.context.stream.getPos();
+      var tail_token = this.stream.findTextPrev();
+      var backup_pos = this.stream.getPos();
       
       // head text of next line meets head-NG.
       if(head_token && Token.isChar(head_token) && head_token.isHeadNg()){
 	this.lineTokens = this._justifyHead(head_token);
-	if(this.context.stream.getPos() != backup_pos){ // some text is moved by head-NG.
-	  tail_token = this.context.stream.findTextPrev(); // search tail_token from new stream position pointing to new head pos.
+	if(this.stream.getPos() != backup_pos){ // some text is moved by head-NG.
+	  tail_token = this.stream.findTextPrev(); // search tail_token from new stream position pointing to new head pos.
 	  // if new head is single br, this must be included in current line, so skip it.
-	  this.context.stream.skipIf(function(token){
+	  this.stream.skipIf(function(token){
 	    return token && Token.isTag(token) && token.getName() === "br";
 	  });
 	}
@@ -7606,7 +7637,7 @@ var InlineTreeContext = (function(){
 	if(token.isKakkoStart()){
 	  this._setKerningStart(token, this.prevText);
 	} else if(token.isKakkoEnd() || token.isKutenTouten()){
-	  var next_text = this.context.stream.findTextNext(token.pos);
+	  var next_text = this.stream.findTextNext(token.pos);
 	  this._setKerningEnd(token, next_text);
 	}
       }
@@ -7676,7 +7707,7 @@ var InlineTreeContext = (function(){
     // fix line that is started with wrong text.
     _justifyHead : function(head_token){
       var count = 0;
-      this.context.stream.iterWhile(head_token.pos, function(pos, token){
+      this.stream.iterWhile(head_token.pos, function(pos, token){
 	if(Token.isChar(token) && token.isHeadNg()){
 	  count++;
 	  return true; // continue
@@ -7690,12 +7721,12 @@ var InlineTreeContext = (function(){
       // if one head NG, push it into current line.
       if(count === 1){
 	this._pushElement(head_token);
-	this.context.stream.setPos(head_token.pos + 1);
+	this.stream.setPos(head_token.pos + 1);
 	return this.lineTokens;
       }
       // if more than two head NG, find non NG text from tail, and cut the line at the pos.
       var normal_pos = -1;
-      this.context.stream.revIterWhile(head_token.pos, function(pos, token){
+      this.stream.revIterWhile(head_token.pos, function(pos, token){
 	if(pos <= this.lineStartPos){
 	  return false; // break (error)
 	}
@@ -7716,13 +7747,13 @@ var InlineTreeContext = (function(){
 	ptr--;
       }
       // set stream position at the normal pos.
-      this.context.stream.setPos(normal_pos);
+      this.stream.setPos(normal_pos);
       return this.lineTokens;
     },
     // fix line that is ended with wrong text.
     _justifyTail : function(tail_token){
       var count = 0;
-      this.context.stream.revIterWhile(tail_token.pos, function(pos, token){
+      this.stream.revIterWhile(tail_token.pos, function(pos, token){
 	if(Token.isChar(token) && token.isTailNg()){
 	  count++;
 	  return true;
@@ -7736,12 +7767,12 @@ var InlineTreeContext = (function(){
       // if one tail NG, pop it(tail token is displayed in next line).
       if(count === 1){
 	this.lineTokens.pop();
-	this.context.stream.setPos(tail_token.pos);
+	this.stream.setPos(tail_token.pos);
 	return this.lineTokens;
       }
       // if more than two tail NG, find non NG text from tail, and cut the line at the pos.
       var normal_pos = -1;
-      this.context.stream.revIterWhile(tail_token.pos, function(pos, token){
+      this.stream.revIterWhile(tail_token.pos, function(pos, token){
 	if(pos <= this.lineStartPos){
 	  return false; // break (error)
 	}
@@ -7762,7 +7793,7 @@ var InlineTreeContext = (function(){
 	ptr--;
       }
       // set stream postion at the 'next' of normal pos.
-      this.context.stream.setPos(normal_pos + 1);
+      this.stream.setPos(normal_pos + 1);
       return this.lineTokens;
     },
     _createEmptyLine : function(){
@@ -7782,18 +7813,18 @@ var InlineTreeContext = (function(){
     }
   };
 
-  return InlineTreeContext;
+  return InlineContext;
 })();
 
 
-var BlockTreeContext = (function(){
-  function BlockTreeContext(page){
+var BlockContext = (function(){
+  function BlockContext(page){
     this.page = page;
     this.curExtent = 0;
     this.maxExtent = page.getContentExtent();
   }
 
-  BlockTreeContext.prototype = {
+  BlockContext.prototype = {
     addElement : function(element){
       var extent = element.getBoxExtent(this.page.flow);
       if(element instanceof Box && !element.isTextLine() && extent <= 0){
@@ -7810,7 +7841,7 @@ var BlockTreeContext = (function(){
     }
   };
   
-  return BlockTreeContext;
+  return BlockContext;
 })();
 
 
@@ -7818,23 +7849,39 @@ var TreeGenerator = ElementGenerator.extend({
   init : function(context){
     this._super(context);
     this.generator = null;
-    this.localPageNo = 0;
-    this.localLineNo = 0;
   },
   hasNext : function(){
     if(this.generator && this.generator.hasNext()){
       return true;
     }
-    return this.context.stream.hasNext();
+    return this.context.hasNextToken();
   },
   backup : function(){
-    this.context.stream.backup();
+    this.context.backupStream();
   },
-  rollback : function(){
-    if(this.generator){
+  _rollbackWithInlineGenerator : function(){
+    this.context.rollbackStream();
+    var parent_line_no = this.generator.getParentLineNo();
+    var local_line_no = this.context.getLocalLineNo();
+    var restart_stream_pos = this.context.getStreamPos();
+    var generator_start_pos = this.generator.getParentPos();
+    if(parent_line_no < local_line_no){
+      this.generator = null;
+    } else if(local_line_no === parent_line_no && generator_start_pos < restart_stream_pos){
       this.generator.rollback();
     } else {
-      this.context.stream.rollback();
+      this.generator = null;
+    }
+  },
+  rollback : function(){
+    if(this.generator === null){
+      this.context.rollbackStream();
+      return;
+    }
+    if(this.generator instanceof ChildInlineTreeGenerator){
+      this._rollbackWithInlineGenerator();
+    } else {
+      this.generator.rollback();
     }
   },
   getCurGenerator : function(){
@@ -7864,19 +7911,20 @@ var TreeGenerator = ElementGenerator.extend({
     var size = this._getLineSize(parent);
     var line = Layout.createTextLine(size, parent);
     line.markup = this.context.markup;
-    line.lineNo = this.localLineNo;
+    line.lineNo = this.context.getLocalLineNo();
     return line;
   },
   _createChildInlineTreeGenerator : function(tag){
+    var line_no = this.context.getLocalLineNo();
     switch(tag.getName()){
     case "ruby":
-      return new RubyGenerator(this.context.createInlineRoot(tag, new RubyTagStream(tag)));
+      return new RubyGenerator(this.context.createInlineRoot(tag, new RubyTagStream(tag)), line_no);
     case "a":
-      return new LinkGenerator(this.context.createInlineRoot(tag));
+      return new LinkGenerator(this.context.createInlineRoot(tag), line_no);
     case "first-line":
-      return new FirstLineGenerator(this.context.createInlineRoot(tag));
+      return new FirstLineGenerator(this.context.createInlineRoot(tag), line_no);
     default:
-      return new ChildInlineTreeGenerator(this.context.createInlineRoot(tag));
+      return new ChildInlineTreeGenerator(this.context.createInlineRoot(tag), line_no);
     }
   },
   _createChildBlockTreeGenerator : function(parent, tag){
@@ -7978,12 +8026,6 @@ var TreeGenerator = ElementGenerator.extend({
 
       try {
 	this.context.addBlockElement(element);
-	if(this.generator){
-	  this.generator.commit();
-	}
-	if(this._isTextLine(element)){
-	  this.localLineNo++;
-	}
       } catch(e){
 	if(e === "OverflowBlock" || e === "EmptyBlock"){
 	  this.rollback();
@@ -7991,9 +8033,8 @@ var TreeGenerator = ElementGenerator.extend({
 	break;
       }
     }
-    if(this.localPageNo > 0){
+    if(!this.context.isFirstLocalPage()){
       page.clearBorderBefore();
-    } else {
     }
     if(!this.hasNext()){
       this._onLastBlock(page);
@@ -8002,14 +8043,13 @@ var TreeGenerator = ElementGenerator.extend({
     }
     this._onCompleteBlock(page);
 
-    // if content is not empty, increment localPageNo.
+    // if content is not empty, increment local page no.
     if(page.getBoxExtent() > 0){
-      this.localPageNo++;
+      this.context.stepLocalPageNo();
     }
     return page;
   },
   _yieldInlinesTo : function(line){
-    //console.log(this.context);
     this.context.createInlineContext(line);
     this.backup();
 
@@ -8036,6 +8076,7 @@ var TreeGenerator = ElementGenerator.extend({
 	if(e === "OverflowInline"){
 	  if(this.generator && (element instanceof Box || element instanceof Ruby)){
 	    this.generator.rollback();
+	    this.generator.stepParentLineNo(); // updte line no for child-igen.
 	  } else {
 	    this.context.pushBackToken();
 	  }
@@ -8082,7 +8123,7 @@ var TreeGenerator = ElementGenerator.extend({
     if(this.generator && this.generator.hasNext()){
       return this.generator.yield(line);
     }
-    this.generator = null;
+    //this.generator = null;
     var token = this.context.getInlineNextToken();
     return this._yieldInlineToken(line, token);
   },
@@ -8106,7 +8147,16 @@ var TreeGenerator = ElementGenerator.extend({
     if(Token.isText(token)){
       return this._yieldText(line, token);
     }
-    if(Token.isTag(token) && token.getName() === "br"){
+    var tag_name = token.getName();
+    if(tag_name === "br"){
+      return Exceptions.LINE_BREAK;
+    }
+    if(tag_name === "first-letter"){
+      token.inherit(this.context.getMarkup());
+    }
+    // if block element, break line and force terminate generator
+    if(token.isBlock()){
+      this.context.pushBackToken();
       return Exceptions.LINE_BREAK;
     }
     // token is static size tag
@@ -8122,7 +8172,8 @@ var TreeGenerator = ElementGenerator.extend({
     return this._yieldInlineTag(line, token);
   },
   _yieldText : function(line, text){
-    if(!text.hasMetrics()){
+    // always set metrics for first-line, because style of first-line tag changes whether it is first-line or not.
+    if(this.context.getMarkupName() === "first-line" || !text.hasMetrics()){
       text.setMetrics(line.flow, line.fontSize, this.context.isTextBold());
     }
     switch(text._type){
@@ -8162,7 +8213,7 @@ var TreeGenerator = ElementGenerator.extend({
       this.context.addStyle(tag);
       return Exceptions.IGNORE;
     default:
-      this.generator = this._createChildInlineTreeGenerator(tag, this.localLineNo);
+      this.generator = this._createChildInlineTreeGenerator(tag, this.context.getLocalLineNo());
       return this.generator.yield(line);
     }
   },
@@ -8221,6 +8272,9 @@ var ChildInlineTreeGenerator = TreeGenerator.extend({
   getParentLineNo : function(){
     return this.parentLineNo;
   },
+  stepParentLineNo : function(){
+    this.parentLineNo++;
+  },
   _createStream : function(markup){
     return new TokenStream(markup.getContent());
   },
@@ -8277,10 +8331,9 @@ var LinkGenerator = ChildInlineTreeGenerator.extend({
 
 var FirstLineGenerator = ChildInlineTreeGenerator.extend({
   _createLine : function(parent){
-    if(this.lineNo > 0){
-      // first-line tag has finished, so reset normal css of parent.
-      this.context.markup.rename(this.context.markupInline.parent.getName());
-      this.context.markup.regetSelectorValue();
+    // first-line already created, so clear static attr for first-line tag.
+    if(!this.context.isFirstLine()){
+      this.context.markup.cssAttrStatic = {};
     }
     return this._super(parent);
   }
@@ -8452,7 +8505,10 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
   },
   rollback : function(){
     List.iter(this.generators, function(generator){
-      generator.rollback();
+      // FIXME: this is not proper rollback check.
+      if(generator.hasNext()){
+	generator.rollback();
+      }
     });
   },
   yield : function(parent){
@@ -8554,7 +8610,7 @@ var TableRowGenerator = ParallelGenerator.extend({
 */
 var ListGenerator = ChildBlockTreeGenerator.extend({
   _onCreateBox : function(box, parent){
-    var item_count = this.context.stream.getTokenCount();
+    var item_count = this.context.getStreamTokenCount();
     var list_style_type = this.context.markup.getCssAttr("list-style-type", "none");
     var list_style_pos = this.context.markup.getCssAttr("list-style-position", "outside");
     var list_style_image = this.context.markup.getCssAttr("list-style-image", "none");

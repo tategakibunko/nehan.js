@@ -1,9 +1,8 @@
 var FirstLineGenerator = ChildInlineTreeGenerator.extend({
   _createLine : function(parent){
-    if(this.lineNo > 0){
-      // first-line tag has finished, so reset normal css of parent.
-      this.context.markup.rename(this.context.markupInline.parent.getName());
-      this.context.markup.regetSelectorValue();
+    // first-line already created, so clear static attr for first-line tag.
+    if(!this.context.isFirstLine()){
+      this.context.markup.cssAttrStatic = {};
     }
     return this._super(parent);
   }

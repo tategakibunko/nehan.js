@@ -9,6 +9,8 @@ var DocumentContext = (function(){
     this.stream = opt.stream || null;
     this.charPos = opt.charPos || 0;
     this.pageNo = opt.pageNo || 0;
+    this.localPageNo = opt.localPageNo || 0;
+    this.localLineNo = opt.localLineNo || 0;
     this.header = opt.header || new DocumentHeader();
     this.blockContext = opt.blockContext || null;
     this.inlineContext = opt.inlineContext || null;
@@ -21,15 +23,39 @@ var DocumentContext = (function(){
     setDocumentType : function(markup){
       this.documentType = markup;
     },
+    // page no, line no
+    isFirstLocalPage : function(){
+      return this.localPageNo === 0;
+    },
+    stepLocalPageNo : function(){
+      this.localPageNo++;
+      return this.localPageNo;
+    },
+    stepLocalLineNo : function(){
+      this.localLineNo++;
+      return this.localLineNo;
+    },
+    getLocalPageNo : function(){
+      return this.localPageNo;
+    },
+    getLocalLineNo : function(){
+      return this.localLineNo;
+    },
     // stream
+    getStream : function(){
+      return this.stream;
+    },
+    backupStream : function(){
+      this.stream.backup();
+    },
+    rollbackStream : function(){
+      this.stream.rollback();
+    },
     hasNextToken : function(){
       return this.stream.hasNext();
     },
     getNextToken : function(){
       return this.stream.get();
-    },
-    skipToken : function(){
-      this.stream.next();
     },
     pushBackToken : function(){
       this.stream.prev();
@@ -42,6 +68,16 @@ var DocumentContext = (function(){
     },
     getSeekPercent : function(){
       return this.stream.getSeekPercent();
+    },
+    getStreamTokenCount : function(){
+      return this.stream.getTokenCount();
+    },
+    isFirstLine : function(){
+      return this.stream.isHead();
+    },
+    // current markup
+    getMarkup : function(){
+      return this.markup;
     },
     getMarkupStaticSize : function(parent){
       var font_size = parent? parent.fontSize : Layout.fontSize;
@@ -79,11 +115,14 @@ var DocumentContext = (function(){
       });
     },
     createBlockContext : function(parent){
-      this.blockContext = new BlockTreeContext(parent);
+      this.blockContext = new BlockContext(parent);
       return this.blockContext;
     },
     addBlockElement : function(element){
       this.blockContext.addElement(element);
+      if(element instanceof Box && element.isTextLine()){
+	this.stepLocalLineNo();
+      }
     },
     // inline context
     createInlineRoot : function(markup, stream){
@@ -100,7 +139,7 @@ var DocumentContext = (function(){
       });
     },
     createInlineContext : function(parent){
-      this.inlineContext = new InlineTreeContext(parent, this);
+      this.inlineContext = new InlineContext(parent, this);
       return this.inlineContext;
     },
     createLine : function(){

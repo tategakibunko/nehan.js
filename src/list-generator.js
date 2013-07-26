@@ -1,6 +1,6 @@
 var ListGenerator = ChildBlockTreeGenerator.extend({
   _onCreateBox : function(box, parent){
-    var item_count = this.context.stream.getTokenCount();
+    var item_count = this.context.getStreamTokenCount();
     var list_style_type = this.context.markup.getCssAttr("list-style-type", "none");
     var list_style_pos = this.context.markup.getCssAttr("list-style-position", "outside");
     var list_style_image = this.context.markup.getCssAttr("list-style-image", "none");

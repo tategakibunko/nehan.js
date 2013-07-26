@@ -7,8 +7,6 @@ var ElementGenerator = Class.extend({
   },
   backup : function(){
   },
-  commit : function(){
-  },
   rollback : function(){
   },
   // called when box is created, but no style is not loaded.
@@ -22,7 +20,6 @@ var ElementGenerator = Class.extend({
   },
   _yieldStaticElement : function(parent, tag){
     var generator = this._createStaticGenerator(parent, tag);
-    console.log(generator);
     return generator.yield(parent);
   },
   _createStaticGenerator : function(parent, tag){

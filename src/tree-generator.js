@@ -2,23 +2,39 @@ var TreeGenerator = ElementGenerator.extend({
   init : function(context){
     this._super(context);
     this.generator = null;
-    this.localPageNo = 0;
-    this.localLineNo = 0;
   },
   hasNext : function(){
     if(this.generator && this.generator.hasNext()){
       return true;
     }
-    return this.context.stream.hasNext();
+    return this.context.hasNextToken();
   },
   backup : function(){
-    this.context.stream.backup();
+    this.context.backupStream();
   },
-  rollback : function(){
-    if(this.generator){
+  _rollbackWithInlineGenerator : function(){
+    this.context.rollbackStream();
+    var parent_line_no = this.generator.getParentLineNo();
+    var local_line_no = this.context.getLocalLineNo();
+    var restart_stream_pos = this.context.getStreamPos();
+    var generator_start_pos = this.generator.getParentPos();
+    if(parent_line_no < local_line_no){
+      this.generator = null;
+    } else if(local_line_no === parent_line_no && generator_start_pos < restart_stream_pos){
       this.generator.rollback();
     } else {
-      this.context.stream.rollback();
+      this.generator = null;
+    }
+  },
+  rollback : function(){
+    if(this.generator === null){
+      this.context.rollbackStream();
+      return;
+    }
+    if(this.generator instanceof ChildInlineTreeGenerator){
+      this._rollbackWithInlineGenerator();
+    } else {
+      this.generator.rollback();
     }
   },
   getCurGenerator : function(){
@@ -48,19 +64,20 @@ var TreeGenerator = ElementGenerator.extend({
     var size = this._getLineSize(parent);
     var line = Layout.createTextLine(size, parent);
     line.markup = this.context.markup;
-    line.lineNo = this.localLineNo;
+    line.lineNo = this.context.getLocalLineNo();
     return line;
   },
   _createChildInlineTreeGenerator : function(tag){
+    var line_no = this.context.getLocalLineNo();
     switch(tag.getName()){
     case "ruby":
-      return new RubyGenerator(this.context.createInlineRoot(tag, new RubyTagStream(tag)));
+      return new RubyGenerator(this.context.createInlineRoot(tag, new RubyTagStream(tag)), line_no);
     case "a":
-      return new LinkGenerator(this.context.createInlineRoot(tag));
+      return new LinkGenerator(this.context.createInlineRoot(tag), line_no);
     case "first-line":
-      return new FirstLineGenerator(this.context.createInlineRoot(tag));
+      return new FirstLineGenerator(this.context.createInlineRoot(tag), line_no);
     default:
-      return new ChildInlineTreeGenerator(this.context.createInlineRoot(tag));
+      return new ChildInlineTreeGenerator(this.context.createInlineRoot(tag), line_no);
     }
   },
   _createChildBlockTreeGenerator : function(parent, tag){
@@ -162,12 +179,6 @@ var TreeGenerator = ElementGenerator.extend({
 
       try {
 	this.context.addBlockElement(element);
-	if(this.generator){
-	  this.generator.commit();
-	}
-	if(this._isTextLine(element)){
-	  this.localLineNo++;
-	}
       } catch(e){
 	if(e === "OverflowBlock" || e === "EmptyBlock"){
 	  this.rollback();
@@ -175,9 +186,8 @@ var TreeGenerator = ElementGenerator.extend({
 	break;
       }
     }
-    if(this.localPageNo > 0){
+    if(!this.context.isFirstLocalPage()){
       page.clearBorderBefore();
-    } else {
     }
     if(!this.hasNext()){
       this._onLastBlock(page);
@@ -186,14 +196,13 @@ var TreeGenerator = ElementGenerator.extend({
     }
     this._onCompleteBlock(page);
 
-    // if content is not empty, increment localPageNo.
+    // if content is not empty, increment local page no.
     if(page.getBoxExtent() > 0){
-      this.localPageNo++;
+      this.context.stepLocalPageNo();
     }
     return page;
   },
   _yieldInlinesTo : function(line){
-    //console.log(this.context);
     this.context.createInlineContext(line);
     this.backup();
 
@@ -220,6 +229,7 @@ var TreeGenerator = ElementGenerator.extend({
 	if(e === "OverflowInline"){
 	  if(this.generator && (element instanceof Box || element instanceof Ruby)){
 	    this.generator.rollback();
+	    this.generator.stepParentLineNo(); // updte line no for child-igen.
 	  } else {
 	    this.context.pushBackToken();
 	  }
@@ -266,7 +276,7 @@ var TreeGenerator = ElementGenerator.extend({
     if(this.generator && this.generator.hasNext()){
       return this.generator.yield(line);
     }
-    this.generator = null;
+    //this.generator = null;
     var token = this.context.getInlineNextToken();
     return this._yieldInlineToken(line, token);
   },
@@ -290,7 +300,16 @@ var TreeGenerator = ElementGenerator.extend({
     if(Token.isText(token)){
       return this._yieldText(line, token);
     }
-    if(Token.isTag(token) && token.getName() === "br"){
+    var tag_name = token.getName();
+    if(tag_name === "br"){
+      return Exceptions.LINE_BREAK;
+    }
+    if(tag_name === "first-letter"){
+      token.inherit(this.context.getMarkup());
+    }
+    // if block element, break line and force terminate generator
+    if(token.isBlock()){
+      this.context.pushBackToken();
       return Exceptions.LINE_BREAK;
     }
     // token is static size tag
@@ -306,7 +325,8 @@ var TreeGenerator = ElementGenerator.extend({
     return this._yieldInlineTag(line, token);
   },
   _yieldText : function(line, text){
-    if(!text.hasMetrics()){
+    // always set metrics for first-line, because style of first-line tag changes whether it is first-line or not.
+    if(this.context.getMarkupName() === "first-line" || !text.hasMetrics()){
       text.setMetrics(line.flow, line.fontSize, this.context.isTextBold());
     }
     switch(text._type){
@@ -346,7 +366,7 @@ var TreeGenerator = ElementGenerator.extend({
       this.context.addStyle(tag);
       return Exceptions.IGNORE;
     default:
-      this.generator = this._createChildInlineTreeGenerator(tag, this.localLineNo);
+      this.generator = this._createChildInlineTreeGenerator(tag, this.context.getLocalLineNo());
       return this.generator.yield(line);
     }
   },

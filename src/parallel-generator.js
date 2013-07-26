@@ -15,7 +15,10 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
   },
   rollback : function(){
     List.iter(this.generators, function(generator){
-      generator.rollback();
+      // FIXME: this is not proper rollback check.
+      if(generator.hasNext()){
+	generator.rollback();
+      }
     });
   },
   yield : function(parent){
