@@ -179,6 +179,13 @@ var TestCode = {
 
     var list_items = [
       "<li>" + text_large + "</li>",
+      "<li>" + text_large + "</li>",
+      "<li>" + text_large + "</li>",
+      "<li>" + text_large + "</li>",
+      "<li>" + text_large + "</li>",
+      "<li>" + text_large + "</li>",
+      "<li>" + text_middle + "</li>",
+      "<li>" + text_middle + "</li>",
       "<li>" + text_middle + "</li>",
       "<li>" + text_short + "</li>"
     ].join("\n");

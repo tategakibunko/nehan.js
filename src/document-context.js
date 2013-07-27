@@ -16,6 +16,7 @@ var DocumentContext = (function(){
     this.inlineContext = opt.inlineContext || null;
     this.outlineContext = opt.outlineContext || new OutlineContext();
     this.anchors = opt.anchors || {};
+    this.mode = "";
   }
 
   DocumentContext.prototype = {
@@ -23,7 +24,10 @@ var DocumentContext = (function(){
     setDocumentType : function(markup){
       this.documentType = markup;
     },
-    // page no, line no
+    // mode, page no, line no
+    getCurrentMode : function(){
+      return this.mode;
+    },
     isFirstLocalPage : function(){
       return this.localPageNo === 0;
     },
@@ -92,6 +96,7 @@ var DocumentContext = (function(){
     },
     // block context
     createBlockRoot : function(markup, stream){
+      this.mode = "block";
       stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
       return new DocumentContext({
 	markup:markup.inherit(this.markup, this),
@@ -124,8 +129,12 @@ var DocumentContext = (function(){
 	this.stepLocalLineNo();
       }
     },
+    getRestExtent : function(){
+      return this.blockContext.getRestExtent();
+    },
     // inline context
     createInlineRoot : function(markup, stream){
+      this.mode = "inline";
       stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
       return new DocumentContext({
 	markup:markup.inherit(this.markup, this),

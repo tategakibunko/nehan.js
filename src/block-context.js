@@ -6,8 +6,12 @@ var BlockContext = (function(){
   }
 
   BlockContext.prototype = {
+    getRestExtent : function(){
+      return this.maxExtent - this.curExtent;
+    },
     addElement : function(element){
       var extent = element.getBoxExtent(this.page.flow);
+      console.log("addBlcokElement:%o(extent = %d)", element, extent);
       if(element instanceof Box && !element.isTextLine() && extent <= 0){
 	throw "EmptyBlock";
       }

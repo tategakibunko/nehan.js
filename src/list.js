@@ -157,11 +157,15 @@ var List = {
     }
     return ret;
   },
-  last : function(lst, def_val){
-    if(lst.length === 0){
-      return def_val;
+  first : function(lst){
+    return lst[0] || null;
+  },
+  last : function(lst){
+    var len = lst.length;
+    if(len === 0){
+      return null;
     }
-    return lst[lst.length - 1];
+    return lst[len - 1];
   },
   zip : function(lst1, lst2){
     var ret = [];

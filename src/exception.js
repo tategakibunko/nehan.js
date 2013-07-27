@@ -7,6 +7,7 @@ var Exceptions = {
   SKIP:7,
   BREAK:8,
   IGNORE:9,
+  ATOM_ERROR:10,
   toString : function(num){
     for(var prop in this){
       if(this[prop] === num){

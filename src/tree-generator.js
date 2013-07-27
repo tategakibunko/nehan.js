@@ -180,7 +180,8 @@ var TreeGenerator = ElementGenerator.extend({
       try {
 	this.context.addBlockElement(element);
       } catch(e){
-	if(e === "OverflowBlock" || e === "EmptyBlock"){
+	if(e === "EmptyBlock"){
+	} else if(e === "OverflowBlock"){
 	  this.rollback();
 	}
 	break;
@@ -218,7 +219,8 @@ var TreeGenerator = ElementGenerator.extend({
 	} else if(element == Exceptions.IGNORE){
 	  continue;
 	} else {
-	  alert("unexpected inline-exception:" + Exceptions.toString(element));
+	  //alert("unexpected inline-exception:" + Exceptions.toString(element));
+	  this.context.setLineBreak();
 	  break;
 	}
       }
@@ -229,7 +231,8 @@ var TreeGenerator = ElementGenerator.extend({
 	if(e === "OverflowInline"){
 	  if(this.generator && (element instanceof Box || element instanceof Ruby)){
 	    this.generator.rollback();
-	    this.generator.stepParentLineNo(); // updte line no for child-igen.
+	    // update line no for child-igen.
+	    this.generator.parentLineNo = this.context.localLineNo + 1;
 	  } else {
 	    this.context.pushBackToken();
 	  }
@@ -255,6 +258,7 @@ var TreeGenerator = ElementGenerator.extend({
       }
       return this.generator.yield(parent);
     }
+    this.generator = null;
     var token = this.context.getNextToken();
     if(token === null){
       return Exceptions.BUFFER_END;
@@ -276,7 +280,11 @@ var TreeGenerator = ElementGenerator.extend({
     if(this.generator && this.generator.hasNext()){
       return this.generator.yield(line);
     }
+    // do not remove child-inline-generator like block level.
+    // because block level can be rollbacked from only stream position,
+    // but line may consit of stream and child-generator, multiple source.
     //this.generator = null;
+
     var token = this.context.getInlineNextToken();
     return this._yieldInlineToken(line, token);
   },

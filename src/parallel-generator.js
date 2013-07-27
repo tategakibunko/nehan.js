@@ -16,9 +16,11 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
   rollback : function(){
     List.iter(this.generators, function(generator){
       // FIXME: this is not proper rollback check.
+      /*
       if(generator.hasNext()){
 	generator.rollback();
-      }
+      }*/
+      generator.rollback();
     });
   },
   yield : function(parent){
@@ -43,7 +45,8 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     var self = this, valid = false;
     var child_flow = parent.flow;
     var is_empty = function(page){
-      return (page instanceof Box === false || page.getContentExtent() === 0);
+      return (typeof page === "number" || // exception
+	      page.getContentExtent() === 0);
     };
     var child_pages = List.mapi(this.generators, function(index, generator){
       var child_measure = self._getChildMeasure(index);
@@ -56,7 +59,7 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
       this.rollback();
       return Exceptions.BREAK;
     }
-      
+
     var max_child = List.maxobj(child_pages, function(child_page){
       if(child_page instanceof Box){
 	return child_page.getContentExtent();
@@ -70,7 +73,7 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     
     // resize each child by uniform extent size.
     List.iter(child_pages, function(child_page){
-      if(child_page){
+      if(child_page && child_page instanceof Box){
 	child_page.setContentExtent(child_flow, max_content_extent);
 	wrap_page.addParaChildBlock(child_page);
       }

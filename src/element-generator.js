@@ -7,6 +7,8 @@ var ElementGenerator = Class.extend({
   },
   backup : function(){
   },
+  commit : function(){
+  },
   rollback : function(){
   },
   // called when box is created, but no style is not loaded.

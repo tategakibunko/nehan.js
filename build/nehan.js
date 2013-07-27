@@ -1194,11 +1194,15 @@ var List = {
     }
     return ret;
   },
-  last : function(lst, def_val){
-    if(lst.length === 0){
-      return def_val;
+  first : function(lst){
+    return lst[0] || null;
+  },
+  last : function(lst){
+    var len = lst.length;
+    if(len === 0){
+      return null;
     }
-    return lst[lst.length - 1];
+    return lst[len - 1];
   },
   zip : function(lst1, lst2){
     var ret = [];
@@ -1498,6 +1502,7 @@ var Exceptions = {
   SKIP:7,
   BREAK:8,
   IGNORE:9,
+  ATOM_ERROR:10,
   toString : function(num){
     for(var prop in this){
       if(this[prop] === num){
@@ -6323,6 +6328,7 @@ var DocumentContext = (function(){
     this.inlineContext = opt.inlineContext || null;
     this.outlineContext = opt.outlineContext || new OutlineContext();
     this.anchors = opt.anchors || {};
+    this.mode = "";
   }
 
   DocumentContext.prototype = {
@@ -6330,7 +6336,10 @@ var DocumentContext = (function(){
     setDocumentType : function(markup){
       this.documentType = markup;
     },
-    // page no, line no
+    // mode, page no, line no
+    getCurrentMode : function(){
+      return this.mode;
+    },
     isFirstLocalPage : function(){
       return this.localPageNo === 0;
     },
@@ -6399,6 +6408,7 @@ var DocumentContext = (function(){
     },
     // block context
     createBlockRoot : function(markup, stream){
+      this.mode = "block";
       stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
       return new DocumentContext({
 	markup:markup.inherit(this.markup, this),
@@ -6431,8 +6441,12 @@ var DocumentContext = (function(){
 	this.stepLocalLineNo();
       }
     },
+    getRestExtent : function(){
+      return this.blockContext.getRestExtent();
+    },
     // inline context
     createInlineRoot : function(markup, stream){
+      this.mode = "inline";
       stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
       return new DocumentContext({
 	markup:markup.inherit(this.markup, this),
@@ -7283,6 +7297,8 @@ var ElementGenerator = Class.extend({
   },
   backup : function(){
   },
+  commit : function(){
+  },
   rollback : function(){
   },
   // called when box is created, but no style is not loaded.
@@ -7824,8 +7840,12 @@ var BlockContext = (function(){
   }
 
   BlockContext.prototype = {
+    getRestExtent : function(){
+      return this.maxExtent - this.curExtent;
+    },
     addElement : function(element){
       var extent = element.getBoxExtent(this.page.flow);
+      console.log("addBlcokElement:%o(extent = %d)", element, extent);
       if(element instanceof Box && !element.isTextLine() && extent <= 0){
 	throw "EmptyBlock";
       }
@@ -8026,7 +8046,8 @@ var TreeGenerator = ElementGenerator.extend({
       try {
 	this.context.addBlockElement(element);
       } catch(e){
-	if(e === "OverflowBlock" || e === "EmptyBlock"){
+	if(e === "EmptyBlock"){
+	} else if(e === "OverflowBlock"){
 	  this.rollback();
 	}
 	break;
@@ -8064,7 +8085,8 @@ var TreeGenerator = ElementGenerator.extend({
 	} else if(element == Exceptions.IGNORE){
 	  continue;
 	} else {
-	  alert("unexpected inline-exception:" + Exceptions.toString(element));
+	  //alert("unexpected inline-exception:" + Exceptions.toString(element));
+	  this.context.setLineBreak();
 	  break;
 	}
       }
@@ -8075,7 +8097,8 @@ var TreeGenerator = ElementGenerator.extend({
 	if(e === "OverflowInline"){
 	  if(this.generator && (element instanceof Box || element instanceof Ruby)){
 	    this.generator.rollback();
-	    this.generator.stepParentLineNo(); // updte line no for child-igen.
+	    // update line no for child-igen.
+	    this.generator.parentLineNo = this.context.localLineNo + 1;
 	  } else {
 	    this.context.pushBackToken();
 	  }
@@ -8101,6 +8124,7 @@ var TreeGenerator = ElementGenerator.extend({
       }
       return this.generator.yield(parent);
     }
+    this.generator = null;
     var token = this.context.getNextToken();
     if(token === null){
       return Exceptions.BUFFER_END;
@@ -8122,7 +8146,11 @@ var TreeGenerator = ElementGenerator.extend({
     if(this.generator && this.generator.hasNext()){
       return this.generator.yield(line);
     }
+    // do not remove child-inline-generator like block level.
+    // because block level can be rollbacked from only stream position,
+    // but line may consit of stream and child-generator, multiple source.
     //this.generator = null;
+
     var token = this.context.getInlineNextToken();
     return this._yieldInlineToken(line, token);
   },
@@ -8505,9 +8533,11 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
   rollback : function(){
     List.iter(this.generators, function(generator){
       // FIXME: this is not proper rollback check.
+      /*
       if(generator.hasNext()){
 	generator.rollback();
-      }
+      }*/
+      generator.rollback();
     });
   },
   yield : function(parent){
@@ -8532,7 +8562,8 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     var self = this, valid = false;
     var child_flow = parent.flow;
     var is_empty = function(page){
-      return (page instanceof Box === false || page.getContentExtent() === 0);
+      return (typeof page === "number" || // exception
+	      page.getContentExtent() === 0);
     };
     var child_pages = List.mapi(this.generators, function(index, generator){
       var child_measure = self._getChildMeasure(index);
@@ -8545,7 +8576,7 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
       this.rollback();
       return Exceptions.BREAK;
     }
-      
+
     var max_child = List.maxobj(child_pages, function(child_page){
       if(child_page instanceof Box){
 	return child_page.getContentExtent();
@@ -8559,7 +8590,7 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     
     // resize each child by uniform extent size.
     List.iter(child_pages, function(child_page){
-      if(child_page){
+      if(child_page && child_page instanceof Box){
 	child_page.setContentExtent(child_flow, max_content_extent);
 	wrap_page.addParaChildBlock(child_page);
       }
