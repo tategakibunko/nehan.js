@@ -11,11 +11,6 @@ var BlockContext = (function(){
     },
     addElement : function(element){
       var extent = element.getBoxExtent(this.page.flow);
-      /*
-      if(element instanceof Box && !element.isTextLine() && extent <= 0){
-	throw "EmptyBlock";
-      }
-      */
       if(element instanceof Box && !element.isTextLine() && extent <= 0){
 	element.pageBreakAfter = true;
       }

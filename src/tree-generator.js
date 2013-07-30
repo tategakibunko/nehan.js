@@ -31,11 +31,6 @@ var TreeGenerator = ElementGenerator.extend({
   // fill page with child page elements.
   _yieldElementsTo : function(page){
     this.context.createBlockContext(page);
-    /*
-    if(this.generator && this.generator instanceof InlineTreeGenerator){
-      this.generator.context.blockContext = this.context.blockContext;
-    }
-    */
     if(this.generator){
       this.generator.context.blockContext = this.context.blockContext;
     }

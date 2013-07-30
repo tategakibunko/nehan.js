@@ -7905,11 +7905,6 @@ var BlockContext = (function(){
     },
     addElement : function(element){
       var extent = element.getBoxExtent(this.page.flow);
-      /*
-      if(element instanceof Box && !element.isTextLine() && extent <= 0){
-	throw "EmptyBlock";
-      }
-      */
       if(element instanceof Box && !element.isTextLine() && extent <= 0){
 	element.pageBreakAfter = true;
       }
@@ -7961,11 +7956,6 @@ var TreeGenerator = ElementGenerator.extend({
   // fill page with child page elements.
   _yieldElementsTo : function(page){
     this.context.createBlockContext(page);
-    /*
-    if(this.generator && this.generator instanceof InlineTreeGenerator){
-      this.generator.context.blockContext = this.context.blockContext;
-    }
-    */
     if(this.generator){
       this.generator.context.blockContext = this.context.blockContext;
     }
@@ -8092,15 +8082,10 @@ var InlineTreeGenerator = TreeGenerator.extend({
   _onLastLine : function(line){
   },
   yield : function(parent){
-    var line;
     if(this.cachedLine){
-      if(this.cachedLine.parent.getContentMeasure() == parent.getContentMeasure()){
-	return this._yieldCachedLine(parent);
-      }
-      this.context.inlineContext.updateMaxMeasure(parent.getContentMeasure());
-      return this._yieldInlinesTo(this._yieldCachedLine(parent));
+      return this._yieldCachedLine(parent);
     }
-    line = this._createLine(parent);
+    var line = this._createLine(parent);
     this.context.createInlineContext(line);
     return this._yieldInlinesTo(line);
   },
@@ -8111,10 +8096,17 @@ var InlineTreeGenerator = TreeGenerator.extend({
   },
   _yieldCachedLine : function(parent){
     var line = this.cachedLine;
-    line.parent = parent;
+    var old_measure = line.parent.getContentMeasure();
+    var cur_measure = parent.getContentMeasure();
     line.lineNo = this.context.getLocalLineNo();
+    line.parent = parent;
     this.cachedLine = null;
-    return line;
+    if(old_measure == cur_measure){
+      return line;
+    }
+    // restart line context with new max-measure.
+    this.context.inlineContext.updateMaxMeasure(parent.getContentMeasure());
+    return this._yieldInlinesTo(line);
   },
   _yieldInlinesTo : function(line){
     while(true){
