@@ -55,7 +55,7 @@ if(__engine_args.test){
   __exports.Word = Word;
   __exports.Tcy = Tcy;
   __exports.Ruby = Ruby;
-  __exports.Lexer = Lexer;
+  __exports.HtmlLexer = HtmlLexer;
   __exports.Token = Token;
   __exports.TagStack = TagStack;
   __exports.DocumentContext = DocumentContext;

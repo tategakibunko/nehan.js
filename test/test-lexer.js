@@ -1,6 +1,6 @@
 test("lexer1", function(){
   var source = "<p>a<p>b<p>c</p></p></p>";
-  var lexer = new Lexer(source);
+  var lexer = new HtmlLexer(source);
   var token = lexer.get();
   equal(token._type, "tag");
   equal(token.name, "p");
@@ -9,7 +9,7 @@ test("lexer1", function(){
 
 test("lexer2", function(){
   var source = "<div>aaa<div>bbb"; // unclosed div
-  var lexer = new Lexer(source);
+  var lexer = new HtmlLexer(source);
   var token = lexer.get();
   equal(token._type, "tag");
   equal(token.name, "div");
@@ -18,7 +18,7 @@ test("lexer2", function(){
 
 test("lexer3", function(){
   var source = "<section>a<section>b</section><section>c</section></section>";
-  var lexer = new Lexer(source);
+  var lexer = new HtmlLexer(source);
   var token = lexer.get();
   equal(token.name, "section");
   equal(token.getContentRaw(), "a<section>b</section><section>c</section>");
