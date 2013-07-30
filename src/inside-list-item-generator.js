@@ -4,7 +4,8 @@ var InsideListItemGenerator = ChildBlockTreeGenerator.extend({
     var marker_html = Html.tagWrap("span", marker, {
       "class":"nehan-li-marker"
     });
-    markup.content = marker_html + Const.space + markup.getContent();
+    //markup.content = marker_html + Const.space + markup.getContent();
+    markup.contentRaw = marker_html + Const.space + markup.getContentRaw();
     this._super(markup, context);
   }
 });

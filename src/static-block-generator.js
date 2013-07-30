@@ -32,6 +32,10 @@ var StaticBlockGenerator = ElementGenerator.extend({
     var root_page_size = Layout.getStdPageSize();
     var reduced_size = box.size.resizeWithin(parent.flow, rest_size);
 
+    box.size = reduced_size;
+    return box;
+
+    /*
     // use reduced size if
     // 1. even root size of page can't include this box
     // 2. or reduced box size is within Config.minBlockScaleDownRate of original
@@ -41,6 +45,7 @@ var StaticBlockGenerator = ElementGenerator.extend({
       return box;
     }
     return Exceptions.RETRY;
+    */
   }
 });
 

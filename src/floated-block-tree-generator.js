@@ -4,10 +4,9 @@ var FloatedBlockTreeGenerator = TreeGenerator.extend({
     this.floatedBox = floated_box;
   },
   yield: function(parent){
-    var backupPos2 = this.context.stream.backupPos; // backup the 'backup pos'
     var wrap_box = this._getFloatedWrapBox(parent, this.floatedBox);
     var rest_box = this._getFloatedRestBox(parent, wrap_box, this.floatedBox);
-    this._yieldBlocksTo(rest_box);
+    this._yieldElementsTo(rest_box);
     if(this.floatedBox.logicalFloat === "start"){
       wrap_box.addChildBlock(this.floatedBox);
       wrap_box.addChildBlock(rest_box);
@@ -15,7 +14,6 @@ var FloatedBlockTreeGenerator = TreeGenerator.extend({
       wrap_box.addChildBlock(rest_box);
       wrap_box.addChildBlock(this.floatedBox);
     }
-    this.context.stream.backupPos = backupPos2; // restore backup pos
     return wrap_box;
   },
   _getFloatedRestBox : function(parent, wrap_box, floated_box){

@@ -150,22 +150,20 @@ var PageStream = Class.extend({
       .replace(/<rt><\/rt>/gi, ""); // discard empty rt
   },
   _createGenerator : function(text){
+    var context = new DocumentContext();
     switch(Layout.root){
     case "body":
-      return new BodyBlockTreeGenerator(new DocumentContext({
-	markup:new Tag("<body>", text),
-	stream:(new TokenStream(text))
-      }));
+      return new BodyBlockTreeGenerator(
+	context.createBlockRoot(new Tag("<body>", text), new TokenStream(text))
+      );
     case "html":
-      return new HtmlGenerator(new DocumentContext({
-	markup:new Tag("<html>", text),
-	stream:(new HtmlTagStream(text))
-      }));
+      return new HtmlGenerator(
+	context.createBlockRoot(new Tag("<html>", text), new HtmlTagStream(text))
+      );
     default:
-      return new DocumentGenerator(new DocumentContext({
-	markup:null,
-	stream:(new DocunemtTagStream(text))
-      }));
+      return new DocumentGenerator(
+	context.createBlockRoot(null, new DocunemtTagStream(text))
+      );
     }
   },
   _createEvaluator : function(){

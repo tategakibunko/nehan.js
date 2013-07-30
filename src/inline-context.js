@@ -3,170 +3,53 @@ var InlineContext = (function(){
     this.line = line;
     this.context = context;
     this.stream = context.stream;
-    this.lineStartPos = this.stream.getPos();
-    this.textIndent = this.context.isFirstLine()? (line.textIndent || 0) : 0;
+    this.lineStartPos = context.getStreamPos();
+    this.textIndent = context.isStreamHead()? (line.textIndent || 0) : 0;
     this.maxFontSize = 0;
     this.maxExtent = 0;
     this.maxMeasure = line.getContentMeasure() - this.textIndent;
+    this.lineMeasure = line.getContentMeasure();
     this.curMeasure = 0;
-    this.lineMeasure = line.getContentMeasure() - this.textIndent;
-    this.startTokens = [];
-    this.lineTokens = [];
-    this.endTokens = [];
-    this.lineBreak = false;
     this.charCount = 0;
+    this.pullTokens = [];
+    this.lineTokens = [];
+    this.pushTokens = [];
+    this.lineBreak = false;
     this.lastToken = null;
     this.prevText = null;
     this.lastText = null;
   }
 
   InlineContext.prototype = {
-    getElementExtent : function(element){
-      if(Token.isText(element)){
-	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
-	  return this.line.textEmpha.getExtent(this.line.fontSize);
-	}
-	return this.line.fontSize;
-      }
-      if(element instanceof Ruby){
-	return element.getExtent(this.line.fontSize);
-      }
-      return element.getBoxExtent(this.getLineFlow());
-    },
-    getElementFontSize : function(element){
-      return (element instanceof Box)? element.fontSize : this.line.fontSize;
-    },
-    getElementAdvance : function(element){
-      if(Token.isText(element)){
-	return element.getAdvance(this.getLineFlow(), this.getLetterSpacing());
-      }
-      if(element instanceof Ruby){
-	return element.getAdvance(this.getLineFlow());
-      }
-      return element.getBoxMeasure(this.getLineFlow());
-    },
-    getFontSize : function(){
-      return this.line.fontSize;
-    },
-    getMaxFontSize : function(){
-      return this.maxFontSize;
-    },
-    getMaxExtent : function(){
-      return this.maxExtent;
-    },
-    getLineFlow : function(){
-      return this.line.flow;
-    },
-    getLetterSpacing : function(){
-      return this.line.letterSpacing || 0;
-    },
-    _isJustifyElement : function(element){
-      if(element instanceof Char){
-	return true;
-      }
-      if(element instanceof Ruby && this.curMeasure > 0){
-	return true;
-      }
-      return false;
-    },
-    canContain : function(element, advance){
-      // space for justify is required for justify target.
-      if(this.line.isJustifyTarget()){
-	return this.curMeasure + advance + this.line.fontSize <= this.maxMeasure;
-      }
-      return this.curMeasure + advance <= this.maxMeasure;
-    },
-    isTextBold : function(){
-      return this.line.isTextBold();
-    },
-    isEmptyText : function(){
-      return this.lineTokens.length === 0;
-    },
-    isOverWithoutLineBreak : function(){
-      return !this.lineBreak && (this.lineTokens.length > 0);
-    },
-    isLineStart : function(){
-      return this.stream.getPos() == this.lineStartPos;
-    },
-    getNextToken : function(){
-      var token = this.stream.get();
-
-      // skip head half space if 1 and 2.
-      // 1. first token of line is a half space.
-      // 2. next text token is a word.
-      if(token){
-	if(Token.isChar(token) && token.isHalfSpaceChar() && this.isLineStart()){
-	  var next = this.stream.findTextNext(this.lineStartPos);
-	  if(next && Token.isWord(next)){
-	    token = this.stream.get();
-	  }
-	}
-      }
-      this.lastToken = token;
-
-      if(token && Token.isText(token)){
-	this._setKerning(token);
-      }
-
-      return token;
-    },
-    getTextTokenLength : function(){
-      return this.lineTokens.length;
-    },
-    getRestMeasure : function(){
-      return this.line.getContentMeasure() - this.curMeasure;
-    },
-    getMaxMeasure : function(){
-      return this.maxMeasure;
+    updateMaxMeasure : function(measure){
+      this.maxMeasure = measure - this.textIndent;
+      this.lineMeasure = measure;
     },
     addElement : function(element){
-      var advance = this.getElementAdvance(element);
-      if(!this.canContain(element, advance)){
-	// even if one element can't be included, it's layout error and skip it.
+      var advance = this._getElementAdvance(element);
+      if(!this._canContain(element, advance)){
 	if(advance > 0 && this.curMeasure === 0){
-	  throw "LayoutError";
+	  throw "LayoutError"
 	}
 	throw "OverflowInline";
       }
-      var font_size = this.getElementFontSize(element);
+      var font_size = this._getElementFontSize(element);
       if(font_size > this.maxFontSize){
-	this._setMaxFontSize(font_size);
+	this.maxFontSize = font_size;
       }
-      var extent = this.getElementExtent(element);
+      var extent = this._getElementExtent(element);
       if(extent > this.maxExtent){
-	this._setMaxExtent(extent);
+	this.maxExtent = extent;
       }
-      if(Token.isTag(element)){
-	this._addTag(element);
-      } else if(element instanceof Ruby){
-	this._addRuby(element);
-      } else if (element instanceof Box){
-	if(element.logicalFloat){
-	  this._setLogicalFloat(element, element.logicalFloat);
-	}
-	if(element._type === "text-line"){
-	  this._addTextLine(element);
-	} else {
-	  this._addInlineBlock(element);
-	}
-      } else {
-	this._addText(element);
+      if(element.getCharCount){
+	this.charCount += element.getCharCount();
       }
+      this._pushElement(element);
       if(advance > 0){
-	this._addAdvance(advance);
+	this.curMeasure += advance;
       }
       if(this.curMeasure === this.maxMeasure){
 	throw "FinishInline";
-      }
-    },
-    _setLogicalFloat : function(element, logical_float){
-      switch(logical_float){
-      case "start":
-	element.forward = true;
-	break;
-      case "end":
-	element.backward = true;
-	break;
       }
     },
     setLineBreak : function(){
@@ -178,12 +61,90 @@ var InlineContext = (function(){
 	return this._createEmptyLine();
       }
       // if overflow measure without line-break, try to justify.
-      if(this.isOverWithoutLineBreak()){
-	this.justify(this.lastToken);
+      if(this._isOverWithoutLineBreak()){
+	this._justify(this.lastToken);
       }
       return this._createTextLine();
     },
-    justify : function(last_token){
+    getNextToken : function(){
+      var token = this.stream.get();
+
+      // skip head half space when
+      // 1. first token of line is a half space and
+      // 2. next text token is a word.
+      if(token && this._isLineStart() && Token.isChar(token) && token.isHalfSpaceChar()){
+	var next = this.stream.findTextNext(this.lineStartPos);
+	if(next && Token.isWord(next)){
+	  token = this.stream.get();
+	}
+      }
+      this.lastToken = token;
+
+      if(token && Token.isText(token)){
+	this._setKerning(token);
+      }
+
+      return token;
+    },
+    getRestMeasure : function(){
+      return this.line.getContentMeasure() - this.curMeasure;
+    },
+    getMaxMeasure : function(){
+      return this.maxMeasure;
+    },
+    getMaxFontSize : function(){
+      return this.maxFontSize;
+    },
+    getMaxExtent : function(){
+      return this.maxExtent;
+    },
+    _getElementExtent : function(element){
+      if(Token.isText(element)){
+	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
+	  return this.line.textEmpha.getExtent(this.line.fontSize);
+	}
+	return this.line.fontSize;
+      }
+      if(element instanceof Ruby){
+	return element.getExtent(this.line.fontSize);
+      }
+      return element.getBoxExtent(this.line.flow);
+    },
+    _getElementFontSize : function(element){
+      return (element instanceof Box)? element.fontSize : this.line.fontSize;
+    },
+    _getElementAdvance : function(element){
+      if(Token.isText(element)){
+	return element.getAdvance(this.line.flow, this.line.letterSpacing || 0);
+      }
+      if(element instanceof Ruby){
+	return element.getAdvance(this.line.flow);
+      }
+      return element.getBoxMeasure(this.line.flow);
+    },
+    _isJustifyElement : function(element){
+      if(element instanceof Char){
+	return true;
+      }
+      if(element instanceof Ruby && this.curMeasure > 0){
+	return true;
+      }
+      return false;
+    },
+    _canContain : function(element, advance){
+      // space for justify is required for justify target.
+      if(this.line.isJustifyTarget()){
+	return this.curMeasure + advance + this.line.fontSize <= this.maxMeasure;
+      }
+      return this.curMeasure + advance <= this.maxMeasure;
+    },
+    _isOverWithoutLineBreak : function(){
+      return !this.lineBreak && (this.lineTokens.length > 0);
+    },
+    _isLineStart : function(){
+      return this.stream.getPos() == this.lineStartPos;
+    },
+    _justify : function(last_token){
       var head_token = last_token;
       var tail_token = this.stream.findTextPrev();
       var backup_pos = this.stream.getPos();
@@ -203,15 +164,6 @@ var InlineContext = (function(){
       if(tail_token && Token.isChar(tail_token) && tail_token.isTailNg()){
 	this.lineTokens = this._justifyTail(tail_token);
       }
-    },
-    _addAdvance : function(advance){
-      this.curMeasure += advance;
-    },
-    _setMaxExtent : function(extent){
-      this.maxExtent = extent;
-    },
-    _setMaxFontSize : function(max_font_size){
-      this.maxFontSize = max_font_size;
     },
     _setKerning : function(token){
       this.prevText = this.lastText;
@@ -256,36 +208,21 @@ var InlineContext = (function(){
       return 0.5;
     },
     _pushElement : function(element){
-      if(element.forward){
-	this.startTokens.push(element);
-      } else if(element.backward){
-	this.endTokens.push(element);
-      } else {
+      var logical_float = element.logicalFloat || "";
+      switch(logical_float){
+      case "start":
+	this.pullTokens.push(element);
+	break;
+      case "end":
+	this.pushTokens.push(element);
+	break;
+      default:
 	this.lineTokens.push(element);
+	break;
       }
     },
     _getLineTokens : function(){
-      return this.startTokens.concat(this.lineTokens).concat(this.endTokens);
-    },
-    _addRuby : function(element){
-      this._pushElement(element);
-    },
-    _addTag : function(element){
-      this._pushElement(element);
-    },
-    _addInlineBlock : function(element){
-      this._pushElement(element);
-    },
-    _addTextLine : function(element){
-      this._pushElement(element);
-      this.charCount += element.getCharCount();
-    },
-    _addText : function(element){
-      // text element
-      this._pushElement(element);
-
-      // count up char count of line
-      this.charCount += element.getCharCount();
+      return this.pullTokens.concat(this.lineTokens).concat(this.pushTokens);
     },
     // fix line that is started with wrong text.
     _justifyHead : function(head_token){

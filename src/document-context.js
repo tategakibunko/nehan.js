@@ -16,17 +16,12 @@ var DocumentContext = (function(){
     this.inlineContext = opt.inlineContext || null;
     this.outlineContext = opt.outlineContext || new OutlineContext();
     this.anchors = opt.anchors || {};
-    this.mode = "";
   }
 
   DocumentContext.prototype = {
     // docunemt type
     setDocumentType : function(markup){
       this.documentType = markup;
-    },
-    // mode, page no, line no
-    getCurrentMode : function(){
-      return this.mode;
     },
     isFirstLocalPage : function(){
       return this.localPageNo === 0;
@@ -49,12 +44,6 @@ var DocumentContext = (function(){
     getStream : function(){
       return this.stream;
     },
-    backupStream : function(){
-      this.stream.backup();
-    },
-    rollbackStream : function(){
-      this.stream.rollback();
-    },
     hasNextToken : function(){
       return this.stream.hasNext();
     },
@@ -76,7 +65,7 @@ var DocumentContext = (function(){
     getStreamTokenCount : function(){
       return this.stream.getTokenCount();
     },
-    isFirstLine : function(){
+    isStreamHead : function(){
       return this.stream.isHead();
     },
     // current markup
@@ -96,7 +85,6 @@ var DocumentContext = (function(){
     },
     // block context
     createBlockRoot : function(markup, stream){
-      this.mode = "block";
       stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
       return new DocumentContext({
 	markup:markup.inherit(this.markup, this),
@@ -115,9 +103,15 @@ var DocumentContext = (function(){
 	charPos:this.charPos,
 	pageNo:this.pageNo,
 	header:this.header,
+	blockContext:this.blockContext,
 	outlineContext:this.outlineContext,
 	ahchors:this.anchors
       });
+    },
+    createInlineBlockRoot : function(markup, stream){
+      var ctx = this.createBlockRoot(markup, stream);
+      ctx.mode = "inline-block";
+      return ctx;
     },
     createBlockContext : function(parent){
       this.blockContext = new BlockContext(parent);
@@ -134,7 +128,6 @@ var DocumentContext = (function(){
     },
     // inline context
     createInlineRoot : function(markup, stream){
-      this.mode = "inline";
       stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
       return new DocumentContext({
 	markup:markup.inherit(this.markup, this),
@@ -142,9 +135,19 @@ var DocumentContext = (function(){
 	charPos:this.charPos,
 	pageNo:this.pageNo,
 	header:this.header,
-	blockContext:this.blockContext,
+	blockContext:this.blockContext, // inherit block context
 	outlineContext:this.outlineContext,
 	ahchors:this.anchors
+      });
+    },
+    createChildInlineRoot : function(markup, stream){
+      var ctx = this.createInlineRoot(markup, stream);
+      ctx.blockContext = null;
+      return ctx;
+    },
+    createInlineStream : function(){
+      return this.stream.createRefStream(function(token){
+	return token !== null && Token.isInline(token);
       });
     },
     createInlineContext : function(parent){
@@ -171,12 +174,6 @@ var DocumentContext = (function(){
     },
     addInlineElement : function(element){
       this.inlineContext.addElement(element);
-    },
-    isPreLine : function(){
-      return this.markup.getName() === "pre";
-    },
-    isTextBold : function(){
-      return this.inlineContext.isTextBold();
     },
     // header
     getHeader : function(){

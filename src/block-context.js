@@ -11,9 +11,13 @@ var BlockContext = (function(){
     },
     addElement : function(element){
       var extent = element.getBoxExtent(this.page.flow);
-      console.log("addBlcokElement:%o(extent = %d)", element, extent);
+      /*
       if(element instanceof Box && !element.isTextLine() && extent <= 0){
 	throw "EmptyBlock";
+      }
+      */
+      if(element instanceof Box && !element.isTextLine() && extent <= 0){
+	element.pageBreakAfter = true;
       }
       if(this.curExtent + extent > this.maxExtent){
 	throw "OverflowBlock";

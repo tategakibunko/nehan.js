@@ -137,11 +137,9 @@ var Tag = (function (){
       return this.contentRaw;
     },
     getContent : function(){
-      if(this.content){
-	return this.content;
-      }
-      this.content = this._parseContent(this.contentRaw);
-      return this.content;
+      var before = this._getPseudoBefore();
+      var after = this._getPseudoAfter();
+      return this._setPseudoFirst([before, this.contentRaw, after].join(""));
     },
     getSrc : function(){
       return this.src;
@@ -356,11 +354,6 @@ var Tag = (function (){
     _getPseudoAfter : function(){
       var attr = Selectors.getValue(this, "after");
       return Obj.isEmpty(attr)? "" : Html.tagWrap("after", attr.content || "");
-    },
-    _parseContent : function(content_raw){
-      var before = this._getPseudoBefore();
-      var after = this._getPseudoAfter();
-      return this._setPseudoFirst([before, content_raw, after].join(""));
     },
     // "border:0; margin:0"
     // => {border:0, margin:0}

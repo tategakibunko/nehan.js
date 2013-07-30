@@ -49,6 +49,18 @@ var TokenStream = Class.extend({
       this.next();
     }
   },
+  createRefStream : function(fn){
+    var start = this.pos, end = this.pos;
+    while(this.hasNext()){
+      var token = this.get();
+      if(!fn(token)){
+	this.prev();
+	break;
+      }
+      end++;
+    }
+    return new ReferenceTokenStream(this, start, end);
+  },
   skipUntil : function(fn){
     while(this.hasNext()){
       var token = this.get();

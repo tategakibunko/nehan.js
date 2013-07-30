@@ -373,6 +373,9 @@ var Box = (function(){
     isLinkLine : function(){
       return this.isTextLine() && this.getMarkupName() === "a";
     },
+    isPreLine : function(){
+      return this.isTextLine() && this.getMarkupName() === "pre";
+    },
     isFirstLetter : function(){
       return this.getMarkupName() === "first-letter";
     },

@@ -10,66 +10,36 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
       return generator.hasNext();
     });
   },
-  backup : function(){
-    // do nothing
-  },
-  rollback : function(){
-    List.iter(this.generators, function(generator){
-      // FIXME: this is not proper rollback check.
-      /*
-      if(generator.hasNext()){
-	generator.rollback();
-      }*/
-      generator.rollback();
-    });
-  },
   yield : function(parent){
-    this.backup();
     var wrap_size = parent.getRestSize();
     var wrap_page = this._createBox(wrap_size, parent);
     var wrap_flow = parent.getParallelFlow();
-    wrap_page.setFlow(wrap_flow);
-    return this._yieldChilds(wrap_page, parent);
-  },
-  _setBoxEdge : function(box, edge){
-    // ignore edge
-    // because each edge of child layout are set by child-generators.
-  },
-  _getChildMeasure : function(index){
-    return this.partition.getSize(index);
-  },
-  _getChildExtent : function(parent){
-    return parent.getRestContentExtent();
-  },
-  _yieldChilds : function(wrap_page, parent){
-    var self = this, valid = false;
     var child_flow = parent.flow;
-    var is_empty = function(page){
-      return (typeof page === "number" || // exception
-	      page.getContentExtent() === 0);
-    };
+    wrap_page.setFlow(wrap_flow);
+    return this._yieldChildsTo(wrap_page, child_flow, this.partition);
+  },
+  _yieldChildsTo : function(wrap_page, child_flow, partition){
+    var child_extent = wrap_page.getRestContentExtent();
     var child_pages = List.mapi(this.generators, function(index, generator){
-      var child_measure = self._getChildMeasure(index);
-      var child_extent = self._getChildExtent(parent);
+      var child_measure = partition.getSize(index);
       var child_size = child_flow.getBoxSize(child_measure, child_extent);
-      return generator.yield(wrap_page, child_size);
-    });
-
-    if(List.forall(child_pages, is_empty)){
-      this.rollback();
-      return Exceptions.BREAK;
-    }
-
-    var max_child = List.maxobj(child_pages, function(child_page){
-      if(child_page instanceof Box){
-	return child_page.getContentExtent();
+      var element = generator.yield(wrap_page, child_size);
+      if(element.breakBefore){
+	wrap_page.breakAfter = true;
+	return null;
       }
-      return 0;
+      if(element.breakAfter){
+	wrap_page.breakAfter = true;
+      }
+      return element;
+    });
+    var max_child = List.maxobj(child_pages, function(child_page){
+      return (child_page instanceof Box)? child_page.getContentExtent() : 0;
     });
     var max_content_extent = max_child.getContentExtent();
     var max_box_extent = max_child.getBoxExtent();
 
-    wrap_page.setContentExtent(parent.flow, max_box_extent);
+    wrap_page.setContentExtent(child_flow, max_box_extent);
     
     // resize each child by uniform extent size.
     List.iter(child_pages, function(child_page){

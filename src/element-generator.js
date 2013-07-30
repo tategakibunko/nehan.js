@@ -5,12 +5,6 @@ var ElementGenerator = Class.extend({
   hasNext : function(){
     return false;
   },
-  backup : function(){
-  },
-  commit : function(){
-  },
-  rollback : function(){
-  },
   // called when box is created, but no style is not loaded.
   _onReadyBox : function(box, parent){
   },
@@ -39,6 +33,96 @@ var ElementGenerator = Class.extend({
       return new InlinePageGenerator(this.context.createBlockRoot(tag));
     }
   },
+  _createInlineTreeGenerator : function(){
+    var markup = this.context.markup;
+    var stream = this.context.createInlineStream();
+    return new InlineTreeGenerator(this.context.createInlineRoot(markup, stream));
+  },
+  _createChildInlineTreeGenerator : function(tag){
+    var line_no = this.context.getLocalLineNo();
+    switch(tag.getName()){
+    case "ruby":
+      return new RubyGenerator(this.context.createChildInlineRoot(tag, new RubyTagStream(tag)), line_no);
+    case "a":
+      return new LinkGenerator(this.context.createChildInlineRoot(tag), line_no);
+    case "first-line":
+      return new FirstLineGenerator(this.context.createChildInlineRoot(tag), line_no);
+    default:
+      return new ChildInlineTreeGenerator(this.context.createChildInlineRoot(tag), line_no);
+    }
+  },
+  _createInlineBlockGenerator : function(tag){
+    return new InlineBlockGenerator(this.context.createInlineBlockRoot(tag));
+  },
+  _createChildBlockTreeGenerator : function(parent, tag){
+    switch(tag.getName()){
+    case "h1": case "h2": case "h3": case "h4": case "h5": case "h6":
+      return new HeaderGenerator(this.context.createBlockRoot(tag));
+    case "section": case "article": case "nav": case "aside":
+      return new SectionContentGenerator(this.context.createBlockRoot(tag));
+    case "details": case "blockquote": case "figure": case "fieldset":
+      return new SectionRootGenerator(this.context.createBlockRoot(tag));
+    case "table":
+      return new TableGenerator(this.context.createBlockRoot(tag, new TableTagStream(tag)));
+    case "tbody": case "thead": case "tfoot":
+      return new TableRowGroupGenerator(this.context.createBlockRoot(tag, new DirectTokenStream(tag.tableChilds)));
+    case "dl":
+      return new ChildBlockTreeGenerator(this.context.createBlockRoot(tag, new DefListTagStream(tag.getContent())));
+    case "ul": case "ol":
+      return new ListGenerator(this.context.createBlockRoot(tag,new ListTagStream(tag.getContent())));
+    case "hr":
+      return new HrGenerator(this.context);
+    case "tr":
+      return this._createTableRowGenerator(parent, tag);
+    case "li":
+      return this._createListItemGenerator(parent, tag);
+    default:
+      return new ChildBlockTreeGenerator(this.context.createBlockRoot(tag));
+    }
+  },
+  _createTableRowGenerator : function(parent, tag){
+    var partition = parent.partition.getPartition(tag.tableChilds.length);
+    var context2 = this.context.createBlockRoot(tag); // tr
+    return new ParallelGenerator(List.map(tag.tableChilds, function(td){
+      return new ParaChildGenerator(context2.createBlockRoot(td)); // tr -> td
+    }), partition, context2);
+  },
+  _createListItemGenerator : function(parent, tag){
+    var list_style = parent.listStyle || null;
+    if(list_style === null){
+      return new ChildBlockTreeGenerator(this.context.createBlockRoot(tag));
+    }
+    if(list_style.isInside()){
+      return this._createInsideListItemGenerator(parent, tag);
+    }
+    return this._createOutsideListItemGenerator(parent, tag);
+  },
+  _createInsideListItemGenerator : function(parent, tag){
+    var marker = parent.listStyle.getMarkerHtml(tag.order + 1);
+    var content = Html.tagWrap("span", marker, {
+      "class":"nehan-li-marker"
+    }) + Const.space + tag.getContent();
+
+    return new ChildBlockTreeGenerator(this.context.createBlockRoot(tag, new TokenStream(content)));
+  },
+  _createOutsideListItemGenerator : function(parent, tag){
+    var context2 = this.context.createBlockRoot(tag);
+    var marker = parent.listStyle.getMarkerHtml(tag.order + 1);
+    var markup_marker = new Tag("<li-marker>", marker);
+    var markup_body = new Tag("<li-body>", tag.getContent());
+    return new ParallelGenerator([
+      new ParaChildGenerator(context2.createBlockRoot(markup_marker)),
+      new ParaChildGenerator(context2.createBlockRoot(markup_body))
+    ], parent.partition, context2);
+  },
+  _getBoxSize : function(parent){
+    return this.context.getMarkupStaticSize(parent) || parent.getRestSize();
+  },
+  _getLineSize : function(parent){
+    var measure = parent.getContentMeasure();
+    var extent = parent.getContentExtent();
+    return parent.flow.getBoxSize(measure, extent);
+  },
   _getBoxType : function(){
     return this.context.getMarkupName();
   },
@@ -51,6 +135,13 @@ var ElementGenerator = Class.extend({
     if(this.context.markup){
       BoxStyle.set(this.context.markup, box, parent);
     }
+  },
+  _createLine : function(parent){
+    var size = this._getLineSize(parent);
+    var line = Layout.createTextLine(size, parent);
+    line.markup = this.context.markup;
+    line.lineNo = this.context.getLocalLineNo();
+    return line;
   },
   _createBox : function(size, parent){
     var box_type = this._getBoxType();
