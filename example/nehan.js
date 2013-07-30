@@ -7584,7 +7584,7 @@ var InlineContext = (function(){
       var advance = this._getElementAdvance(element);
       if(!this._canContain(element, advance)){
 	if(advance > 0 && this.curMeasure === 0){
-	  throw "LayoutError"
+	  throw "LayoutError";
 	}
 	throw "OverflowInline";
       }
