@@ -26,10 +26,7 @@ var HtmlGenerator = (function(){
 	  break;
 	case "body":
 	  return new BodyBlockTreeGenerator(
-	    this.context.createBlockRoot({
-	      markup:tag,
-	      stream:(new TokenStream(tag.getContentRaw()))
-	    })
+	    this.context.createBlockRoot(tag, new TokenStream(tag.getContentRaw()))
 	  );
 	}
       }

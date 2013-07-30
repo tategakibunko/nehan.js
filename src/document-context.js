@@ -87,7 +87,7 @@ var DocumentContext = (function(){
     createBlockRoot : function(markup, stream){
       stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
       return new DocumentContext({
-	markup:markup.inherit(this.markup, this),
+	markup:(markup? markup.inherit(this.markup, this) : null),
 	stream:stream,
 	charPos:this.charPos,
 	pageNo:this.pageNo,

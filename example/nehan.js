@@ -6395,7 +6395,7 @@ var DocumentContext = (function(){
     createBlockRoot : function(markup, stream){
       stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
       return new DocumentContext({
-	markup:markup.inherit(this.markup, this),
+	markup:(markup? markup.inherit(this.markup, this) : null),
 	stream:stream,
 	charPos:this.charPos,
 	pageNo:this.pageNo,
@@ -7277,10 +7277,7 @@ var HtmlGenerator = (function(){
 	  break;
 	case "body":
 	  return new BodyBlockTreeGenerator(
-	    this.context.createBlockRoot({
-	      markup:tag,
-	      stream:(new TokenStream(tag.getContentRaw()))
-	    })
+	    this.context.createBlockRoot(tag, new TokenStream(tag.getContentRaw()))
 	  );
 	}
       }
@@ -9266,7 +9263,7 @@ var PageStream = Class.extend({
       );
     default:
       return new DocumentGenerator(
-	context.createBlockRoot(null, new DocunemtTagStream(text))
+	context.createBlockRoot(null, new DocumentTagStream(text))
       );
     }
   },

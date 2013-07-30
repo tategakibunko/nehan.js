@@ -162,7 +162,7 @@ var PageStream = Class.extend({
       );
     default:
       return new DocumentGenerator(
-	context.createBlockRoot(null, new DocunemtTagStream(text))
+	context.createBlockRoot(null, new DocumentTagStream(text))
       );
     }
   },
