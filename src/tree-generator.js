@@ -105,7 +105,7 @@ var TreeGenerator = ElementGenerator.extend({
     if(Token.isText(token) || Token.isInline(token)){
       this.context.pushBackToken();
       this.generator = new InlineTreeGenerator(
-	this.context.createInlineRoot(this.context.markup, this.context.createInlineStream())
+	this.context.createInlineRoot(this.context.markup, this.context.stream)
       );
       return this.generator.yield(parent);
     }

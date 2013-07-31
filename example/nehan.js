@@ -6727,7 +6727,6 @@ var TokenStream = Class.extend({
     this.lexer = lexer || new HtmlLexer(src);
     this.tokens = [];
     this.pos = 0;
-    this.backupPos = 0;
     this.eof = false;
     this._doBuffer();
   },
@@ -6746,16 +6745,8 @@ var TokenStream = Class.extend({
   isEnd : function(){
     return (this.eof && this.pos >= this.tokens.length);
   },
-  backup : function(){
-    if(this.hasNext()){
-      this.backupPos = this.pos;
-    }
-  },
   look : function(index){
     return this.tokens[index] || null;
-  },
-  rollback : function(){
-    this.pos = this.backupPos;
   },
   next : function(cnt){
     var count = cnt || 1;
@@ -6772,18 +6763,6 @@ var TokenStream = Class.extend({
     if(token && fn(token)){
       this.next();
     }
-  },
-  createRefStream : function(fn){
-    var start = this.pos, end = this.pos;
-    while(this.hasNext()){
-      var token = this.get();
-      if(!fn(token)){
-	this.prev();
-	break;
-      }
-      end++;
-    }
-    return new ReferenceTokenStream(this, start, end);
   },
   skipUntil : function(fn){
     while(this.hasNext()){
@@ -6820,9 +6799,6 @@ var TokenStream = Class.extend({
   },
   getPos : function(){
     return this.pos;
-  },
-  getBackupPos : function(){
-    return this.backupPos;
   },
   getAll : function(){
     while(!this.eof){
@@ -6917,28 +6893,6 @@ var TokenStream = Class.extend({
   }
 });
 
-var ReferenceTokenStream = TokenStream.extend({
-  init : function(stream, start, end){
-    this.tokens = stream.tokens;
-    this.lexer = stream.lexer;
-    this.stream = stream;
-    this.pos = start;
-    this.end = end;
-    this.eof = true;
-  },
-  setRefSrcPos : function(pos){
-    this.stream.setPos(pos);
-  },
-  doBuffer : function(){
-    // do nothing
-  },
-  hasNext : function(){
-    return this.pos < this.end;
-  },
-  isEnd : function(){
-    return this.pos >= this.end;
-  }
-});
 var FilteredTagStream = TokenStream.extend({
   init : function(src, fn){
     var order = 0;
@@ -8027,7 +7981,7 @@ var TreeGenerator = ElementGenerator.extend({
     if(Token.isText(token) || Token.isInline(token)){
       this.context.pushBackToken();
       this.generator = new InlineTreeGenerator(
-	this.context.createInlineRoot(this.context.markup, this.context.createInlineStream())
+	this.context.createInlineRoot(this.context.markup, this.context.stream)
       );
       return this.generator.yield(parent);
     }
@@ -8066,6 +8020,9 @@ var InlineTreeGenerator = TreeGenerator.extend({
     return this.context.markup.pos;
   },
   hasNext : function(){
+    if(this._terminate){
+      return false;
+    }
     if(this.cachedElement || this.cachedLine){
       return true;
     }
@@ -8113,8 +8070,8 @@ var InlineTreeGenerator = TreeGenerator.extend({
 	  continue;
 	} else {
 	  this.context.setLineBreak();
-	  if(element === Exceptions.FORCE_TERMINATE && this.context.stream instanceof ReferenceTokenStream){
-	    this.context.stream.setRefSrcPos(Math.max(0, this.context.getStreamPos() - 1));
+	  if(element === Exceptions.FORCE_TERMINATE){
+	    this.context.pushBackToken();
 	  }
 	  break;
 	}

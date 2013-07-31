@@ -125,7 +125,6 @@ module.exports = function(grunt) {
 	    "src/border-map.js",
 	    "src/collapse.js",
 	    "src/token-stream.js",
-	    "src/reference-token-stream.js",
 	    "src/filtered-tag-stream.js",
 	    "src/direct-token-stream.js",
 	    "src/document-tag-stream.js",

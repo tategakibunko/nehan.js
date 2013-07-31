@@ -3,7 +3,6 @@ var TokenStream = Class.extend({
     this.lexer = lexer || new HtmlLexer(src);
     this.tokens = [];
     this.pos = 0;
-    this.backupPos = 0;
     this.eof = false;
     this._doBuffer();
   },
@@ -22,16 +21,8 @@ var TokenStream = Class.extend({
   isEnd : function(){
     return (this.eof && this.pos >= this.tokens.length);
   },
-  backup : function(){
-    if(this.hasNext()){
-      this.backupPos = this.pos;
-    }
-  },
   look : function(index){
     return this.tokens[index] || null;
-  },
-  rollback : function(){
-    this.pos = this.backupPos;
   },
   next : function(cnt){
     var count = cnt || 1;
@@ -48,18 +39,6 @@ var TokenStream = Class.extend({
     if(token && fn(token)){
       this.next();
     }
-  },
-  createRefStream : function(fn){
-    var start = this.pos, end = this.pos;
-    while(this.hasNext()){
-      var token = this.get();
-      if(!fn(token)){
-	this.prev();
-	break;
-      }
-      end++;
-    }
-    return new ReferenceTokenStream(this, start, end);
   },
   skipUntil : function(fn){
     while(this.hasNext()){
@@ -96,9 +75,6 @@ var TokenStream = Class.extend({
   },
   getPos : function(){
     return this.pos;
-  },
-  getBackupPos : function(){
-    return this.backupPos;
   },
   getAll : function(){
     while(!this.eof){

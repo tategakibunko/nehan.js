@@ -7,6 +7,9 @@ var InlineTreeGenerator = TreeGenerator.extend({
     return this.context.markup.pos;
   },
   hasNext : function(){
+    if(this._terminate){
+      return false;
+    }
     if(this.cachedElement || this.cachedLine){
       return true;
     }
@@ -54,8 +57,8 @@ var InlineTreeGenerator = TreeGenerator.extend({
 	  continue;
 	} else {
 	  this.context.setLineBreak();
-	  if(element === Exceptions.FORCE_TERMINATE && this.context.stream instanceof ReferenceTokenStream){
-	    this.context.stream.setRefSrcPos(Math.max(0, this.context.getStreamPos() - 1));
+	  if(element === Exceptions.FORCE_TERMINATE){
+	    this.context.pushBackToken();
 	  }
 	  break;
 	}
