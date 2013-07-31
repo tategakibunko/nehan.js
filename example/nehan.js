@@ -1497,12 +1497,10 @@ var Exceptions = {
   PAGE_BREAK:2,
   LINE_BREAK:3,
   BUFFER_END:4,
-  OVER_FLOW:5,
-  RETRY:6,
-  SKIP:7,
-  BREAK:8,
-  IGNORE:9,
-  FORCE_TERMINATE:10,
+  SINGLE_RETRY:5,
+  BREAK:6,
+  IGNORE:7,
+  FORCE_TERMINATE:8,
   toString : function(num){
     for(var prop in this){
       if(this[prop] === num){
@@ -5743,91 +5741,6 @@ var HtmlLexer = (function (){
 })();
 
 
-var TagStack = (function (){
-  function TagStack(opt){
-    this.tags = [];
-    this.head = null;
-  }
-
-  TagStack.prototype = {
-    isEmpty : function(){
-      return this.tags.length <= 0;
-    },
-    isTagNameEnable : function(name){
-      return this.exists(function(tag){
-	return tag.getName() == name;
-      });
-    },
-    getDepth : function(){
-      return this.tags.length;
-    },
-    getDepthByName : function(name){
-      return List.count(this.tags, function(tag){
-	return tag.getName() == name;
-      });
-    },
-    getHead : function(){
-      return this.head;
-    },
-    pop : function(){
-      var ret = this.tags.pop();
-      this.head = this._getCurHead();
-      return ret;
-    },
-    push : function(tag){
-      this.head = tag;
-      this.tags.push(tag);
-    },
-    exists : function(fn){
-      return List.exists(this.tags, fn);
-    },
-    find : function(fn){
-      return List.find(this.tags, fn);
-    },
-    revfind : function(fn){
-      return List.revfind(this.tags, fn);
-    },
-    iter : function(fn){
-      List.iter(this.tags, fn);
-    },
-    reviter : function(fn){
-      List.revIter(this.tags, fn);
-    },
-    filter : function(fn){
-      return List.filter(this.tags, fn);
-    },
-    getByName : function(name){
-      for(var i = this.tags.length - 1; i >= 0; i--){
-	var tag = this.tags[i];
-	if(tag.name == name){
-	  return tag;
-	}
-      }
-      return null;
-    },
-    popByName : function(name){
-      for(var i = this.tags.length - 1; i >= 0; i--){
-	var tag = this.tags[i];
-	if(tag.name == name){
-	  var ret = this.tags.splice(i,1)[0];
-	  this.head = this._getCurHead();
-	  return ret;
-	}
-      }
-      return null;
-    },
-    _getCurHead : function(){
-      if(this.tags.length === 0){
-	return null;
-      }
-      return this.tags[this.tags.length - 1];
-    }
-  };
-
-  return TagStack;
-})();
-
-
 var SectionHeader = (function(){
   function SectionHeader(rank, title, id){
     this.rank = rank;
@@ -7449,7 +7362,7 @@ var StaticBlockGenerator = ElementGenerator.extend({
     
     // even if edge can't be included, retry.
     if(!rest_size.isValid()){
-      return Exceptions.RETRY;
+      return Exceptions.SINGLE_RETRY;
     }
     // if rest size has prenty of space for this box, just return as it it.
     if(rest_size.canInclude(box.size)){
@@ -7458,10 +7371,6 @@ var StaticBlockGenerator = ElementGenerator.extend({
     var root_page_size = Layout.getStdPageSize();
     var reduced_size = box.size.resizeWithin(parent.flow, rest_size);
 
-    box.size = reduced_size;
-    return box;
-
-    /*
     // use reduced size if
     // 1. even root size of page can't include this box
     // 2. or reduced box size is within Config.minBlockScaleDownRate of original
@@ -7470,8 +7379,7 @@ var StaticBlockGenerator = ElementGenerator.extend({
       box.size = reduced_size;
       return box;
     }
-    return Exceptions.RETRY;
-    */
+    return Exceptions.SINGLE_RETRY;
   }
 });
 
@@ -7916,6 +7824,10 @@ var TreeGenerator = ElementGenerator.extend({
       if(typeof element === "number"){ // exception
 	if(element == Exceptions.IGNORE){
 	  continue;
+	} else if(element == Exceptions.SINGLE_RETRY){
+	  this.context.pushBackToken();
+	  page.breakAfter = true;
+	  break;
 	} else if(element == Exceptions.BREAK){
 	  page.breakAfter = true;
 	  break;
@@ -7973,6 +7885,9 @@ var TreeGenerator = ElementGenerator.extend({
     }
     if(Token.isTag(token) && token.hasStaticSize() && token.isBlock()){
       var static_element = this._yieldStaticElement(parent, token);
+      if(typeof static_element === "number"){ // exception
+	return static_element;
+      }
       if(token.getCssAttr("float") !== null){
 	return this._yieldFloatedBlock(parent, static_element);
       }
@@ -8070,7 +7985,7 @@ var InlineTreeGenerator = TreeGenerator.extend({
 	  continue;
 	} else {
 	  this.context.setLineBreak();
-	  if(element === Exceptions.FORCE_TERMINATE){
+	  if(element === Exceptions.FORCE_TERMINATE || element == Exceptions.SINGLE_RETRY){
 	    this.context.pushBackToken();
 	  }
 	  break;
@@ -9370,7 +9285,6 @@ if(__engine_args.test){
   __exports.Ruby = Ruby;
   __exports.HtmlLexer = HtmlLexer;
   __exports.Token = Token;
-  __exports.TagStack = TagStack;
   __exports.DocumentContext = DocumentContext;
   __exports.TocContext = TocContext;
   __exports.EvalResult = EvalResult;

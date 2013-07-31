@@ -23,7 +23,7 @@ var StaticBlockGenerator = ElementGenerator.extend({
     
     // even if edge can't be included, retry.
     if(!rest_size.isValid()){
-      return Exceptions.RETRY;
+      return Exceptions.SINGLE_RETRY;
     }
     // if rest size has prenty of space for this box, just return as it it.
     if(rest_size.canInclude(box.size)){
@@ -32,10 +32,6 @@ var StaticBlockGenerator = ElementGenerator.extend({
     var root_page_size = Layout.getStdPageSize();
     var reduced_size = box.size.resizeWithin(parent.flow, rest_size);
 
-    box.size = reduced_size;
-    return box;
-
-    /*
     // use reduced size if
     // 1. even root size of page can't include this box
     // 2. or reduced box size is within Config.minBlockScaleDownRate of original
@@ -44,8 +40,7 @@ var StaticBlockGenerator = ElementGenerator.extend({
       box.size = reduced_size;
       return box;
     }
-    return Exceptions.RETRY;
-    */
+    return Exceptions.SINGLE_RETRY;
   }
 });
 

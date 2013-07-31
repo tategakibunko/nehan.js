@@ -57,7 +57,7 @@ var InlineTreeGenerator = TreeGenerator.extend({
 	  continue;
 	} else {
 	  this.context.setLineBreak();
-	  if(element === Exceptions.FORCE_TERMINATE){
+	  if(element === Exceptions.FORCE_TERMINATE || element == Exceptions.SINGLE_RETRY){
 	    this.context.pushBackToken();
 	  }
 	  break;

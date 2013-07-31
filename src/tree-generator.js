@@ -40,6 +40,10 @@ var TreeGenerator = ElementGenerator.extend({
       if(typeof element === "number"){ // exception
 	if(element == Exceptions.IGNORE){
 	  continue;
+	} else if(element == Exceptions.SINGLE_RETRY){
+	  this.context.pushBackToken();
+	  page.breakAfter = true;
+	  break;
 	} else if(element == Exceptions.BREAK){
 	  page.breakAfter = true;
 	  break;
@@ -97,6 +101,9 @@ var TreeGenerator = ElementGenerator.extend({
     }
     if(Token.isTag(token) && token.hasStaticSize() && token.isBlock()){
       var static_element = this._yieldStaticElement(parent, token);
+      if(typeof static_element === "number"){ // exception
+	return static_element;
+      }
       if(token.getCssAttr("float") !== null){
 	return this._yieldFloatedBlock(parent, static_element);
       }

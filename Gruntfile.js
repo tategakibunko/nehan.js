@@ -112,7 +112,6 @@ module.exports = function(grunt) {
 	    "src/box.js",
 	    "src/box-style.js",
 	    "src/html-lexer.js",
-	    "src/tag-stack.js",
 	    "src/section-header.js",
 	    "src/section.js",
 	    "src/toc-context.js",

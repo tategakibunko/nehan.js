@@ -57,7 +57,6 @@ if(__engine_args.test){
   __exports.Ruby = Ruby;
   __exports.HtmlLexer = HtmlLexer;
   __exports.Token = Token;
-  __exports.TagStack = TagStack;
   __exports.DocumentContext = DocumentContext;
   __exports.TocContext = TocContext;
   __exports.EvalResult = EvalResult;
