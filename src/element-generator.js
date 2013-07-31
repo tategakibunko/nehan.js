@@ -69,9 +69,9 @@ var ElementGenerator = Class.extend({
     case "dl":
       return new ChildBlockTreeGenerator(this.context.createBlockRoot(tag, new DefListTagStream(tag.getContent())));
     case "ul": case "ol":
-      return new ListGenerator(this.context.createBlockRoot(tag,new ListTagStream(tag.getContent())));
+      return new ListGenerator(this.context.createBlockRoot(tag, new ListTagStream(tag.getContent())));
     case "hr":
-      return new HrGenerator(this.context);
+      return new HrGenerator(this.context.createBlockRoot(tag, null));
     case "tr":
       return this._createTableRowGenerator(parent, tag);
     case "li":
