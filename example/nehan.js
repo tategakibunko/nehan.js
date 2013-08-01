@@ -6237,6 +6237,7 @@ var DocumentContext = (function(){
     this.charPos = opt.charPos || 0;
     this.pageNo = opt.pageNo || 0;
     this.localPageNo = opt.localPageNo || 0;
+    this.localLineNo = opt.localLineNo || 0;
     this.header = opt.header || new DocumentHeader();
     this.blockContext = opt.blockContext || null;
     this.inlineContext = opt.inlineContext || null;
@@ -6249,8 +6250,12 @@ var DocumentContext = (function(){
     setDocumentType : function(markup){
       this.documentType = markup;
     },
+    // document position
     isFirstLocalPage : function(){
       return this.localPageNo === 0;
+    },
+    isFirstLocalLine : function(){
+      return this.localLineNo === 0;
     },
     stepLocalPageNo : function(){
       this.localPageNo++;
@@ -6338,6 +6343,9 @@ var DocumentContext = (function(){
     },
     addBlockElement : function(element){
       this.blockContext.addElement(element);
+      if(element.isTextLine()){
+	this.localLineNo++;
+      }
     },
     getRestExtent : function(){
       return this.blockContext.getRestExtent();
@@ -6374,7 +6382,7 @@ var DocumentContext = (function(){
       return this.inlineContext.createLine();
     },
     getRestMeasure : function(){
-      return this.inlineContext.getRestMeasure();
+      return this.inlineContext? this.inlineContext.getRestMeasure() : 0;
     },
     getInlineNextToken : function(){
       return this.inlineContext.getNextToken();
@@ -7426,10 +7434,20 @@ var InlineContext = (function(){
       this.maxMeasure = measure - this.textIndent;
       this.lineMeasure = measure;
     },
+    isLineStartPos : function(element){
+      var ptr = this.line;
+      while(ptr.parent !== null){
+	if(ptr.childMeasure > 0){
+	  return false;
+	}
+	ptr = ptr.parent;
+      }
+      return true;
+    },
     addElement : function(element){
       var advance = this._getElementAdvance(element);
       if(!this._canContain(element, advance)){
-	if(advance > 0 && this.curMeasure === 0){
+	if(advance > 0 && this.isLineStartPos(element)){
 	  throw "LayoutError";
 	}
 	throw "OverflowInline";
@@ -7942,6 +7960,15 @@ var InlineTreeGenerator = TreeGenerator.extend({
   },
   _onLastLine : function(line){
   },
+  _isCacheEnableElement : function(element){
+    if(Token.isChar(element)){
+      return !element.isHeadNg();
+    }
+    if(element instanceof Box){
+      return element.getContentExtent() > 0 && element.getContentMeasure() > 0;
+    }
+    return true;
+  },
   yield : function(parent){
     if(this.cachedLine){
       return this._yieldCachedLine(parent);
@@ -7993,7 +8020,7 @@ var InlineTreeGenerator = TreeGenerator.extend({
       } catch(e){
 	if(e === "OverflowInline"){
 	  end_after = true;
-	  if(!Token.isChar(element) || !element.isHeadNg()){
+	  if(this._isCacheEnableElement(element)){
 	    this.cachedElement = element;
 	  }
 	}
@@ -8127,9 +8154,11 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
     return line;
   },
   _getLineSize : function(parent){
-    var measure = parent.getTextRestMeasure();
+    var measure = parent.getContentMeasure();
+    if(this.context.isFirstLocalLine()){
+      measure -= parent.childMeasure;
+    }
     var extent = parent.getContentExtent();
-    console.log("rest measure = %d", measure);
     return parent.flow.getBoxSize(measure, extent);
   },
   _onCompleteLine : function(line){

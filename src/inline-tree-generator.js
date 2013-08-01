@@ -22,6 +22,15 @@ var InlineTreeGenerator = TreeGenerator.extend({
   },
   _onLastLine : function(line){
   },
+  _isCacheEnableElement : function(element){
+    if(Token.isChar(element)){
+      return !element.isHeadNg();
+    }
+    if(element instanceof Box){
+      return element.getContentExtent() > 0 && element.getContentMeasure() > 0;
+    }
+    return true;
+  },
   yield : function(parent){
     if(this.cachedLine){
       return this._yieldCachedLine(parent);
@@ -73,7 +82,7 @@ var InlineTreeGenerator = TreeGenerator.extend({
       } catch(e){
 	if(e === "OverflowInline"){
 	  end_after = true;
-	  if(!Token.isChar(element) || !element.isHeadNg()){
+	  if(this._isCacheEnableElement(element)){
 	    this.cachedElement = element;
 	  }
 	}

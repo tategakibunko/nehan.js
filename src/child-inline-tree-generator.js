@@ -5,9 +5,11 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
     return line;
   },
   _getLineSize : function(parent){
-    var measure = parent.getTextRestMeasure();
+    var measure = parent.getContentMeasure();
+    if(this.context.isFirstLocalLine()){
+      measure -= parent.childMeasure;
+    }
     var extent = parent.getContentExtent();
-    console.log("rest measure = %d", measure);
     return parent.flow.getBoxSize(measure, extent);
   },
   _onCompleteLine : function(line){

@@ -10,6 +10,7 @@ var DocumentContext = (function(){
     this.charPos = opt.charPos || 0;
     this.pageNo = opt.pageNo || 0;
     this.localPageNo = opt.localPageNo || 0;
+    this.localLineNo = opt.localLineNo || 0;
     this.header = opt.header || new DocumentHeader();
     this.blockContext = opt.blockContext || null;
     this.inlineContext = opt.inlineContext || null;
@@ -22,8 +23,12 @@ var DocumentContext = (function(){
     setDocumentType : function(markup){
       this.documentType = markup;
     },
+    // document position
     isFirstLocalPage : function(){
       return this.localPageNo === 0;
+    },
+    isFirstLocalLine : function(){
+      return this.localLineNo === 0;
     },
     stepLocalPageNo : function(){
       this.localPageNo++;
@@ -111,6 +116,9 @@ var DocumentContext = (function(){
     },
     addBlockElement : function(element){
       this.blockContext.addElement(element);
+      if(element.isTextLine()){
+	this.localLineNo++;
+      }
     },
     getRestExtent : function(){
       return this.blockContext.getRestExtent();
@@ -147,7 +155,7 @@ var DocumentContext = (function(){
       return this.inlineContext.createLine();
     },
     getRestMeasure : function(){
-      return this.inlineContext.getRestMeasure();
+      return this.inlineContext? this.inlineContext.getRestMeasure() : 0;
     },
     getInlineNextToken : function(){
       return this.inlineContext.getNextToken();

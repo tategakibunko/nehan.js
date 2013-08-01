@@ -21,10 +21,20 @@ var InlineContext = (function(){
       this.maxMeasure = measure - this.textIndent;
       this.lineMeasure = measure;
     },
+    isLineStartPos : function(element){
+      var ptr = this.line;
+      while(ptr.parent !== null){
+	if(ptr.childMeasure > 0){
+	  return false;
+	}
+	ptr = ptr.parent;
+      }
+      return true;
+    },
     addElement : function(element){
       var advance = this._getElementAdvance(element);
       if(!this._canContain(element, advance)){
-	if(advance > 0 && this.curMeasure === 0){
+	if(advance > 0 && this.isLineStartPos(element)){
 	  throw "LayoutError";
 	}
 	throw "OverflowInline";
