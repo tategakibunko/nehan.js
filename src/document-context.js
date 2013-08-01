@@ -10,7 +10,6 @@ var DocumentContext = (function(){
     this.charPos = opt.charPos || 0;
     this.pageNo = opt.pageNo || 0;
     this.localPageNo = opt.localPageNo || 0;
-    this.localLineNo = opt.localLineNo || 0;
     this.header = opt.header || new DocumentHeader();
     this.blockContext = opt.blockContext || null;
     this.inlineContext = opt.inlineContext || null;
@@ -30,15 +29,8 @@ var DocumentContext = (function(){
       this.localPageNo++;
       return this.localPageNo;
     },
-    stepLocalLineNo : function(){
-      this.localLineNo++;
-      return this.localLineNo;
-    },
     getLocalPageNo : function(){
       return this.localPageNo;
-    },
-    getLocalLineNo : function(){
-      return this.localLineNo;
     },
     // stream
     getStream : function(){
@@ -119,9 +111,6 @@ var DocumentContext = (function(){
     },
     addBlockElement : function(element){
       this.blockContext.addElement(element);
-      if(element instanceof Box && element.isTextLine()){
-	this.stepLocalLineNo();
-      }
     },
     getRestExtent : function(){
       return this.blockContext.getRestExtent();
@@ -141,9 +130,9 @@ var DocumentContext = (function(){
       });
     },
     createChildInlineRoot : function(markup, stream){
-      var ctx = this.createInlineRoot(markup, stream);
-      ctx.blockContext = null;
-      return ctx;
+      var context = this.createInlineRoot(markup, stream);
+      context.blockContext = null; // hide block context for child-inline-generator
+      return context;
     },
     createInlineStream : function(){
       return this.stream.createRefStream(function(token){

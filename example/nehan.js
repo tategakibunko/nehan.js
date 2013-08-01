@@ -6231,7 +6231,6 @@ var DocumentContext = (function(){
     this.charPos = opt.charPos || 0;
     this.pageNo = opt.pageNo || 0;
     this.localPageNo = opt.localPageNo || 0;
-    this.localLineNo = opt.localLineNo || 0;
     this.header = opt.header || new DocumentHeader();
     this.blockContext = opt.blockContext || null;
     this.inlineContext = opt.inlineContext || null;
@@ -6251,15 +6250,8 @@ var DocumentContext = (function(){
       this.localPageNo++;
       return this.localPageNo;
     },
-    stepLocalLineNo : function(){
-      this.localLineNo++;
-      return this.localLineNo;
-    },
     getLocalPageNo : function(){
       return this.localPageNo;
-    },
-    getLocalLineNo : function(){
-      return this.localLineNo;
     },
     // stream
     getStream : function(){
@@ -6340,9 +6332,6 @@ var DocumentContext = (function(){
     },
     addBlockElement : function(element){
       this.blockContext.addElement(element);
-      if(element instanceof Box && element.isTextLine()){
-	this.stepLocalLineNo();
-      }
     },
     getRestExtent : function(){
       return this.blockContext.getRestExtent();
@@ -6362,9 +6351,9 @@ var DocumentContext = (function(){
       });
     },
     createChildInlineRoot : function(markup, stream){
-      var ctx = this.createInlineRoot(markup, stream);
-      ctx.blockContext = null;
-      return ctx;
+      var context = this.createInlineRoot(markup, stream);
+      context.blockContext = null; // hide block context for child-inline-generator
+      return context;
     },
     createInlineStream : function(){
       return this.stream.createRefStream(function(token){
@@ -7214,22 +7203,16 @@ var ElementGenerator = Class.extend({
       return new InlinePageGenerator(this.context.createBlockRoot(tag));
     }
   },
-  _createInlineTreeGenerator : function(){
-    var markup = this.context.markup;
-    var stream = this.context.createInlineStream();
-    return new InlineTreeGenerator(this.context.createInlineRoot(markup, stream));
-  },
   _createChildInlineTreeGenerator : function(tag){
-    var line_no = this.context.getLocalLineNo();
     switch(tag.getName()){
     case "ruby":
-      return new RubyGenerator(this.context.createChildInlineRoot(tag, new RubyTagStream(tag)), line_no);
+      return new RubyGenerator(this.context.createChildInlineRoot(tag, new RubyTagStream(tag)));
     case "a":
-      return new LinkGenerator(this.context.createChildInlineRoot(tag), line_no);
+      return new LinkGenerator(this.context.createChildInlineRoot(tag));
     case "first-line":
-      return new FirstLineGenerator(this.context.createChildInlineRoot(tag), line_no);
+      return new FirstLineGenerator(this.context.createChildInlineRoot(tag));
     default:
-      return new ChildInlineTreeGenerator(this.context.createChildInlineRoot(tag), line_no);
+      return new ChildInlineTreeGenerator(this.context.createChildInlineRoot(tag));
     }
   },
   _createInlineBlockGenerator : function(tag){
@@ -7321,7 +7304,6 @@ var ElementGenerator = Class.extend({
     var size = this._getLineSize(parent);
     var line = Layout.createTextLine(size, parent);
     line.markup = this.context.markup;
-    line.lineNo = this.context.getLocalLineNo();
     return line;
   },
   _createBox : function(size, parent){
@@ -7458,7 +7440,9 @@ var InlineContext = (function(){
       if(element.getCharCount){
 	this.charCount += element.getCharCount();
       }
-      this._pushElement(element);
+      if(advance > 0 && extent > 0){
+	this._pushElement(element);
+      }
       if(advance > 0){
 	this.curMeasure += advance;
       }
@@ -7967,7 +7951,6 @@ var InlineTreeGenerator = TreeGenerator.extend({
     var line = this.cachedLine;
     var old_measure = line.parent.getContentMeasure();
     var cur_measure = parent.getContentMeasure();
-    line.lineNo = this.context.getLocalLineNo();
     line.parent = parent;
     this.cachedLine = null;
     if(old_measure == cur_measure){
@@ -8086,7 +8069,7 @@ var InlineTreeGenerator = TreeGenerator.extend({
     if(token.isSingleTag()){
       return token;
     }
-    this.generator = this._createChildInlineTreeGenerator(token, this.context.getLocalLineNo());
+    this.generator = this._createChildInlineTreeGenerator(token);
     return this.generator.yield(line);
   },
   _yieldText : function(line, text){

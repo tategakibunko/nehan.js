@@ -33,22 +33,16 @@ var ElementGenerator = Class.extend({
       return new InlinePageGenerator(this.context.createBlockRoot(tag));
     }
   },
-  _createInlineTreeGenerator : function(){
-    var markup = this.context.markup;
-    var stream = this.context.createInlineStream();
-    return new InlineTreeGenerator(this.context.createInlineRoot(markup, stream));
-  },
   _createChildInlineTreeGenerator : function(tag){
-    var line_no = this.context.getLocalLineNo();
     switch(tag.getName()){
     case "ruby":
-      return new RubyGenerator(this.context.createChildInlineRoot(tag, new RubyTagStream(tag)), line_no);
+      return new RubyGenerator(this.context.createChildInlineRoot(tag, new RubyTagStream(tag)));
     case "a":
-      return new LinkGenerator(this.context.createChildInlineRoot(tag), line_no);
+      return new LinkGenerator(this.context.createChildInlineRoot(tag));
     case "first-line":
-      return new FirstLineGenerator(this.context.createChildInlineRoot(tag), line_no);
+      return new FirstLineGenerator(this.context.createChildInlineRoot(tag));
     default:
-      return new ChildInlineTreeGenerator(this.context.createChildInlineRoot(tag), line_no);
+      return new ChildInlineTreeGenerator(this.context.createChildInlineRoot(tag));
     }
   },
   _createInlineBlockGenerator : function(tag){
@@ -140,7 +134,6 @@ var ElementGenerator = Class.extend({
     var size = this._getLineSize(parent);
     var line = Layout.createTextLine(size, parent);
     line.markup = this.context.markup;
-    line.lineNo = this.context.getLocalLineNo();
     return line;
   },
   _createBox : function(size, parent){

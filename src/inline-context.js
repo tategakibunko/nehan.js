@@ -44,7 +44,9 @@ var InlineContext = (function(){
       if(element.getCharCount){
 	this.charCount += element.getCharCount();
       }
-      this._pushElement(element);
+      if(advance > 0 && extent > 0){
+	this._pushElement(element);
+      }
       if(advance > 0){
 	this.curMeasure += advance;
       }

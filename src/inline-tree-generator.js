@@ -39,7 +39,6 @@ var InlineTreeGenerator = TreeGenerator.extend({
     var line = this.cachedLine;
     var old_measure = line.parent.getContentMeasure();
     var cur_measure = parent.getContentMeasure();
-    line.lineNo = this.context.getLocalLineNo();
     line.parent = parent;
     this.cachedLine = null;
     if(old_measure == cur_measure){
@@ -158,7 +157,7 @@ var InlineTreeGenerator = TreeGenerator.extend({
     if(token.isSingleTag()){
       return token;
     }
-    this.generator = this._createChildInlineTreeGenerator(token, this.context.getLocalLineNo());
+    this.generator = this._createChildInlineTreeGenerator(token);
     return this.generator.yield(line);
   },
   _yieldText : function(line, text){
