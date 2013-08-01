@@ -139,8 +139,8 @@ var DocumentContext = (function(){
 	return token !== null && Token.isInline(token);
       });
     },
-    createInlineContext : function(parent){
-      this.inlineContext = new InlineContext(parent, this);
+    createInlineContext : function(line){
+      this.inlineContext = new InlineContext(line, this.stream);
       return this.inlineContext;
     },
     createLine : function(){

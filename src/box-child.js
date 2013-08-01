@@ -9,6 +9,9 @@ var BoxChild = (function(){
     get : function(){
       return this.forward.concat(this.normal).concat(this.backward);
     },
+    getNormal : function(){
+      return this.normal;
+    },
     setNormal : function(elements){
       this.normal = elements;
     },

@@ -112,6 +112,9 @@ var Box = (function(){
     getChilds : function(){
       return this.childs.get();
     },
+    getChildsNormal : function(){
+      return this.childs.getNormal();
+    },
     getChildExtent : function(){
       return this.childExtent;
     },

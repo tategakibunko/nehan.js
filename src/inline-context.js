@@ -1,10 +1,9 @@
 var InlineContext = (function(){
-  function InlineContext(line, context){
+  function InlineContext(line, stream){
     this.line = line;
-    this.context = context;
-    this.stream = context.stream;
-    this.lineStartPos = context.getStreamPos();
-    this.textIndent = context.isStreamHead()? (line.textIndent || 0) : 0;
+    this.stream = stream;
+    this.lineStartPos = stream.getPos();
+    this.textIndent = stream.isHead()? (line.textIndent || 0) : 0;
     this.maxFontSize = 0;
     this.maxExtent = 0;
     this.maxMeasure = line.getContentMeasure() - this.textIndent;
@@ -45,7 +44,7 @@ var InlineContext = (function(){
 	this.charCount += element.getCharCount();
       }
       if(advance > 0 && extent > 0){
-	this._pushElement(element);
+	this._pushElement(element, advance);
       }
       if(advance > 0){
 	this.curMeasure += advance;
@@ -209,7 +208,7 @@ var InlineContext = (function(){
       }
       return 0.5;
     },
-    _pushElement : function(element){
+    _pushElement : function(element, advance){
       var logical_float = element.logicalFloat || "";
       switch(logical_float){
       case "start":
