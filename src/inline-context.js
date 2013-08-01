@@ -10,9 +10,6 @@ var InlineContext = (function(){
     this.lineMeasure = line.getContentMeasure();
     this.curMeasure = 0;
     this.charCount = 0;
-    this.pullTokens = [];
-    this.lineTokens = [];
-    this.pushTokens = [];
     this.lineBreak = false;
     this.lastToken = null;
     this.prevText = null;
@@ -61,11 +58,20 @@ var InlineContext = (function(){
       if(this.curMeasure === 0){
 	return this._createEmptyLine();
       }
+      var tokens = this.line.getChildsNormal();
+      var old_len = tokens.length;
+      var self = this;
+
       // if overflow measure without line-break, try to justify.
       if(this._isOverWithoutLineBreak()){
-	this._justify(this.lastToken);
+	tokens = this._justify(tokens, this.lastToken);
+	if(tokens.length !== old_len){
+	  this.curMeasure = this.line.childMeasure = List.sum(tokens, function(token){
+	    return self._getElementAdvance(token);
+	  });
+	}
       }
-      return this._createTextLine();
+      return this._createTextLine(tokens);
     },
     getNextToken : function(){
       var token = this.stream.get();
@@ -140,31 +146,11 @@ var InlineContext = (function(){
       return this.curMeasure + advance <= this.maxMeasure;
     },
     _isOverWithoutLineBreak : function(){
-      return !this.lineBreak && (this.lineTokens.length > 0);
+      //return !this.lineBreak && (this.lineTokens.length > 0);
+      return !this.lineBreak && !this.line.isEmptyChild();
     },
     _isLineStart : function(){
       return this.stream.getPos() == this.lineStartPos;
-    },
-    _justify : function(last_token){
-      var head_token = last_token;
-      var tail_token = this.stream.findTextPrev();
-      var backup_pos = this.stream.getPos();
-      
-      // head text of next line meets head-NG.
-      if(head_token && Token.isChar(head_token) && head_token.isHeadNg()){
-	this.lineTokens = this._justifyHead(head_token);
-	if(this.stream.getPos() != backup_pos){ // some text is moved by head-NG.
-	  tail_token = this.stream.findTextPrev(); // search tail_token from new stream position pointing to new head pos.
-	  // if new head is single br, this must be included in current line, so skip it.
-	  this.stream.skipIf(function(token){
-	    return token && Token.isTag(token) && token.getName() === "br";
-	  });
-	}
-      }
-      // tail text of this line meets tail-NG.
-      if(tail_token && Token.isChar(tail_token) && tail_token.isTailNg()){
-	this.lineTokens = this._justifyTail(tail_token);
-      }
     },
     _setKerning : function(token){
       this.prevText = this.lastText;
@@ -210,23 +196,37 @@ var InlineContext = (function(){
     },
     _pushElement : function(element, advance){
       var logical_float = element.logicalFloat || "";
-      switch(logical_float){
-      case "start":
-	this.pullTokens.push(element);
-	break;
-      case "end":
-	this.pushTokens.push(element);
-	break;
-      default:
-	this.lineTokens.push(element);
-	break;
+      if(logical_float === "start"){
+	element.forward = true;
+      } else if(logical_float === "end"){
+	element.backward = true;
       }
+      this.line.addChildInline(element, advance);
     },
-    _getLineTokens : function(){
-      return this.pullTokens.concat(this.lineTokens).concat(this.pushTokens);
+    _justify : function(tokens, last_token){
+      var head_token = last_token;
+      var tail_token = this.stream.findTextPrev();
+      var backup_pos = this.stream.getPos();
+
+      // head text of next line meets head-NG.
+      if(head_token && Token.isChar(head_token) && head_token.isHeadNg()){
+	tokens = this._justifyHead(tokens, head_token);
+	if(this.stream.getPos() != backup_pos){ // some text is moved by head-NG.
+	  tail_token = this.stream.findTextPrev(); // search tail_token from new stream position pointing to new head pos.
+	  // if new head is single br, this must be included in current line, so skip it.
+	  this.stream.skipIf(function(token){
+	    return token && Token.isTag(token) && token.getName() === "br";
+	  });
+	}
+      }
+      // tail text of this line meets tail-NG.
+      if(tail_token && Token.isChar(tail_token) && tail_token.isTailNg()){
+	tokens = this._justifyTail(tokens, tail_token);
+      }
+      return tokens;
     },
     // fix line that is started with wrong text.
-    _justifyHead : function(head_token){
+    _justifyHead : function(tokens, head_token){
       var count = 0;
       this.stream.iterWhile(head_token.pos, function(pos, token){
 	if(Token.isChar(token) && token.isHeadNg()){
@@ -237,13 +237,13 @@ var InlineContext = (function(){
       });
       // no head NG, just return texts as they are.
       if(count <= 0){
-	return this.lineTokens;
+	return tokens;
       }
       // if one head NG, push it into current line.
       if(count === 1){
-	this._pushElement(head_token);
+	tokens.push(head_token);
 	this.stream.setPos(head_token.pos + 1);
-	return this.lineTokens;
+	return tokens;
       }
       // if more than two head NG, find non NG text from tail, and cut the line at the pos.
       var normal_pos = -1;
@@ -259,20 +259,20 @@ var InlineContext = (function(){
       });
       // if no proper pos is found in current line, give up justifying.
       if(normal_pos < 0){
-	return this.lineTokens;
+	return tokens;
       }
       // if normal pos is found, pop line until that pos.
       var ptr = head_token.pos;
       while(ptr > normal_pos){
-	this.lineTokens.pop();
+	tokens.pop();
 	ptr--;
       }
       // set stream position at the normal pos.
       this.stream.setPos(normal_pos);
-      return this.lineTokens;
+      return tokens;
     },
     // fix line that is ended with wrong text.
-    _justifyTail : function(tail_token){
+    _justifyTail : function(tokens, tail_token){
       var count = 0;
       this.stream.revIterWhile(tail_token.pos, function(pos, token){
 	if(Token.isChar(token) && token.isTailNg()){
@@ -283,13 +283,13 @@ var InlineContext = (function(){
       });
       // no tail NG, just return texts as they are.
       if(count <= 0){
-	return this.lineTokens;
+	return tokens;
       }
       // if one tail NG, pop it(tail token is displayed in next line).
       if(count === 1){
-	this.lineTokens.pop();
+	tokens.pop();
 	this.stream.setPos(tail_token.pos);
-	return this.lineTokens;
+	return tokens;
       }
       // if more than two tail NG, find non NG text from tail, and cut the line at the pos.
       var normal_pos = -1;
@@ -305,30 +305,30 @@ var InlineContext = (function(){
       });
       // if no proper pos is found in current line, give up justifying.
       if(normal_pos < 0){
-	return this.lineTokens;
+	return tokens;
       }
       // if normal pos is found, pop line until that pos.
       var ptr = tail_token.pos;
       while(ptr > normal_pos){
-	this.lineTokens.pop();
+	tokens.pop();
 	ptr--;
       }
       // set stream postion at the 'next' of normal pos.
       this.stream.setPos(normal_pos + 1);
-      return this.lineTokens;
+      return tokens;
     },
     _createEmptyLine : function(){
       this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxFontSize);
       this.line.setInlineElements([], this.lineMeasure);
       return this.line;
     },
-    _createTextLine : function(){
+    _createTextLine : function(tokens){
       var ruby_extent = Math.floor(this.maxFontSize * (this.line.lineRate - 1));
       var max_text_extent = this.maxFontSize + ruby_extent;
       this.maxExtent = Math.max(this.maxExtent, max_text_extent);
       this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxExtent);
       this.line.charCount = this.charCount;
-      this.line.setInlineElements(this._getLineTokens(), this.curMeasure);
+      this.line.setInlineElements(tokens, this.curMeasure);
       this.line.textIndent = this.textIndent;
       return this.line;
     }

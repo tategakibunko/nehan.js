@@ -7,6 +7,7 @@ var ChildInlineTreeGenerator = InlineTreeGenerator.extend({
   _getLineSize : function(parent){
     var measure = parent.getTextRestMeasure();
     var extent = parent.getContentExtent();
+    console.log("rest measure = %d", measure);
     return parent.flow.getBoxSize(measure, extent);
   },
   _onCompleteLine : function(line){

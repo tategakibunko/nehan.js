@@ -48,9 +48,10 @@ var InlineTreeGenerator = TreeGenerator.extend({
     this.context.inlineContext.updateMaxMeasure(parent.getContentMeasure());
     return this._yieldInlinesTo(line);
   },
-  _yieldInlinesTo : function(line){
+  _yieldInlinesTo : function(parent){
+    var end_after = false;
     while(true){
-      var element = this._yieldInlineElement(line);
+      var element = this._yieldInlineElement(parent);
       if(typeof element === "number"){ // exceptions
 	if(element == Exceptions.IGNORE){
 	  continue;
@@ -65,8 +66,13 @@ var InlineTreeGenerator = TreeGenerator.extend({
 
       try {
 	this.context.addInlineElement(element);
+	if(element.endAfter){
+	  end_after = true;
+	  break;
+	}
       } catch(e){
 	if(e === "OverflowInline"){
+	  end_after = true;
 	  if(!Token.isChar(element) || !element.isHeadNg()){
 	    this.cachedElement = element;
 	  }
@@ -82,6 +88,7 @@ var InlineTreeGenerator = TreeGenerator.extend({
     } // while(true)
 
     line = this.context.createLine();
+    line.endAfter = end_after;
     this._onCompleteLine(line);
 
     if(!this.hasNext()){

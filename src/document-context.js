@@ -146,6 +146,9 @@ var DocumentContext = (function(){
     createLine : function(){
       return this.inlineContext.createLine();
     },
+    getRestMeasure : function(){
+      return this.inlineContext.getRestMeasure();
+    },
     getInlineNextToken : function(){
       return this.inlineContext.getNextToken();
     },
