@@ -2418,21 +2418,21 @@ var Tag = (function (){
 
   Tag.prototype = {
     inherit : function(parent_tag, context){
-      if(this._inherited || !this.hasLayout() || parent_tag === null){
+      if(this._inherited || !this.hasLayout()){
 	return this; // avoid duplicate initialize
       }
       var self = this;
       this.parent = parent_tag;
-      this.parent.addChild(this);
+      if(this.parent){
+	this.parent.addChild(this);
+      }
       this.cssAttrStatic = this._getSelectorValue(); // reget css-attr with parent enabled.
-      this.callHook(context);
+      var onload = this.getCssAttr("onload");
+      if(onload){
+	onload(this, context);
+      }
       this._inherited = true;
       return this;
-    },
-    callHook : function(context){
-      if(this.cssAttrStatic.onload){
-	this.cssAttrStatic.onload(this, context);
-      }
     },
     setContentRaw : function(content_raw){
       this.contentRaw = content_raw;
@@ -6246,11 +6246,11 @@ var DocumentContext = (function(){
   }
 
   DocumentContext.prototype = {
-    // docunemt type
+    // docunemt type context
     setDocumentType : function(markup){
       this.documentType = markup;
     },
-    // document position
+    // document position context
     isFirstLocalPage : function(){
       return this.localPageNo === 0;
     },
@@ -6264,7 +6264,7 @@ var DocumentContext = (function(){
     getLocalPageNo : function(){
       return this.localPageNo;
     },
-    // stream
+    // stream contextx
     getStream : function(){
       return this.stream;
     },
@@ -6292,7 +6292,11 @@ var DocumentContext = (function(){
     isStreamHead : function(){
       return this.stream.isHead();
     },
-    // current markup
+    // markup context
+    inheritMarkup : function(markup, parent){
+      parent = parent || this.markup;
+      return markup.inherit(parent, this);
+    },
     getMarkup : function(){
       return this.markup;
     },
@@ -6311,7 +6315,7 @@ var DocumentContext = (function(){
     createBlockRoot : function(markup, stream){
       stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
       return new DocumentContext({
-	markup:(markup? markup.inherit(this.markup, this) : null),
+	markup:(markup? this.inheritMarkup(markup, this.markup) : null),
 	stream:stream,
 	charPos:this.charPos,
 	pageNo:this.pageNo,
@@ -6354,7 +6358,7 @@ var DocumentContext = (function(){
     createInlineRoot : function(markup, stream){
       stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
       return new DocumentContext({
-	markup:markup.inherit(this.markup, this),
+	markup:this.inheritMarkup(markup, this.markup),
 	stream:stream,
 	charPos:this.charPos,
 	pageNo:this.pageNo,
@@ -6402,7 +6406,7 @@ var DocumentContext = (function(){
     addInlineElement : function(element){
       this.inlineContext.addElement(element);
     },
-    // header
+    // header context
     getHeader : function(){
       return this.header;
     },
@@ -6424,7 +6428,7 @@ var DocumentContext = (function(){
     addCharPos : function(char_count){
       this.charPos += char_count;
     },
-    // anchors
+    // anchor context
     setAnchor : function(anchor_name){
       this.anchors[anchor_name] = this.pageNo;
     },
@@ -6913,7 +6917,6 @@ var TableTagStream = FilteredTagStream.extend({
     var thead = null, tbody = null, tfoot = null;
     var ctx = {row:0, col:0, maxCol:0};
     List.iter(tokens, function(token){
-      token.inherit(parent_markup);
       if(Token.isTag(token)){
 	switch(token.name){
 	case "tr":
@@ -6991,7 +6994,6 @@ var TableTagStream = FilteredTagStream.extend({
     })).getAll();
 
     return List.map(rows, function(row){
-      row.inherit(parent);
       row.row = ctx.row;
       row.tableChilds = self._parseCols(ctx, row);
       ctx.row++;
@@ -7005,7 +7007,6 @@ var TableTagStream = FilteredTagStream.extend({
     })).getAll();
 
     List.iteri(cols, function(i, col){
-      col.inherit(parent);
       col.row = ctx.row;
       col.col = i;
     });
@@ -7062,7 +7063,6 @@ var RubyTagStream = TokenStream.extend({
       }
       if(Token.isTag(token) && token.getName() === "rt"){
 	rt = token;
-	rt.inherit(markup_ruby);
 	break;
       }
       if(Token.isText(token)){
@@ -7891,7 +7891,7 @@ var TreeGenerator = ElementGenerator.extend({
       return Exceptions.PAGE_BREAK;
     }
     if(Token.isTag(token)){
-      token.inherit(this.context.markup, this.context);
+      this.context.inheritMarkup(token);
     }
     if(Token.isTag(token) && token.hasStaticSize() && token.isBlock()){
       var static_element = this._yieldStaticElement(parent, token);
@@ -8092,7 +8092,7 @@ var InlineTreeGenerator = TreeGenerator.extend({
       return Exceptions.IGNORE;
     }
     if(tag_name === "first-letter"){
-      token.inherit(this.context.getMarkup());
+      this.context.inheritMarkup(token);
     }
     // if block element occured, force terminate generator
     if(token.isBlock()){

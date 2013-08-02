@@ -33,7 +33,6 @@ var TableTagStream = FilteredTagStream.extend({
     var thead = null, tbody = null, tfoot = null;
     var ctx = {row:0, col:0, maxCol:0};
     List.iter(tokens, function(token){
-      token.inherit(parent_markup);
       if(Token.isTag(token)){
 	switch(token.name){
 	case "tr":
@@ -111,7 +110,6 @@ var TableTagStream = FilteredTagStream.extend({
     })).getAll();
 
     return List.map(rows, function(row){
-      row.inherit(parent);
       row.row = ctx.row;
       row.tableChilds = self._parseCols(ctx, row);
       ctx.row++;
@@ -125,7 +123,6 @@ var TableTagStream = FilteredTagStream.extend({
     })).getAll();
 
     List.iteri(cols, function(i, col){
-      col.inherit(parent);
       col.row = ctx.row;
       col.col = i;
     });

@@ -22,7 +22,6 @@ var RubyTagStream = TokenStream.extend({
       }
       if(Token.isTag(token) && token.getName() === "rt"){
 	rt = token;
-	rt.inherit(markup_ruby);
 	break;
       }
       if(Token.isText(token)){

@@ -97,7 +97,7 @@ var TreeGenerator = ElementGenerator.extend({
       return Exceptions.PAGE_BREAK;
     }
     if(Token.isTag(token)){
-      token.inherit(this.context.markup, this.context);
+      this.context.inheritMarkup(token);
     }
     if(Token.isTag(token) && token.hasStaticSize() && token.isBlock()){
       var static_element = this._yieldStaticElement(parent, token);

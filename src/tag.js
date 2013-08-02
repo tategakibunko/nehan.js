@@ -29,21 +29,21 @@ var Tag = (function (){
 
   Tag.prototype = {
     inherit : function(parent_tag, context){
-      if(this._inherited || !this.hasLayout() || parent_tag === null){
+      if(this._inherited || !this.hasLayout()){
 	return this; // avoid duplicate initialize
       }
       var self = this;
       this.parent = parent_tag;
-      this.parent.addChild(this);
+      if(this.parent){
+	this.parent.addChild(this);
+      }
       this.cssAttrStatic = this._getSelectorValue(); // reget css-attr with parent enabled.
-      this.callHook(context);
+      var onload = this.getCssAttr("onload");
+      if(onload){
+	onload(this, context);
+      }
       this._inherited = true;
       return this;
-    },
-    callHook : function(context){
-      if(this.cssAttrStatic.onload){
-	this.cssAttrStatic.onload(this, context);
-      }
     },
     setContentRaw : function(content_raw){
       this.contentRaw = content_raw;

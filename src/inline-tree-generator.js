@@ -154,7 +154,7 @@ var InlineTreeGenerator = TreeGenerator.extend({
       return Exceptions.IGNORE;
     }
     if(tag_name === "first-letter"){
-      token.inherit(this.context.getMarkup());
+      this.context.inheritMarkup(token);
     }
     // if block element occured, force terminate generator
     if(token.isBlock()){

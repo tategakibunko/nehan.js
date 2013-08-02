@@ -19,11 +19,11 @@ var DocumentContext = (function(){
   }
 
   DocumentContext.prototype = {
-    // docunemt type
+    // docunemt type context
     setDocumentType : function(markup){
       this.documentType = markup;
     },
-    // document position
+    // document position context
     isFirstLocalPage : function(){
       return this.localPageNo === 0;
     },
@@ -37,7 +37,7 @@ var DocumentContext = (function(){
     getLocalPageNo : function(){
       return this.localPageNo;
     },
-    // stream
+    // stream contextx
     getStream : function(){
       return this.stream;
     },
@@ -65,7 +65,11 @@ var DocumentContext = (function(){
     isStreamHead : function(){
       return this.stream.isHead();
     },
-    // current markup
+    // markup context
+    inheritMarkup : function(markup, parent){
+      parent = parent || this.markup;
+      return markup.inherit(parent, this);
+    },
     getMarkup : function(){
       return this.markup;
     },
@@ -84,7 +88,7 @@ var DocumentContext = (function(){
     createBlockRoot : function(markup, stream){
       stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
       return new DocumentContext({
-	markup:(markup? markup.inherit(this.markup, this) : null),
+	markup:(markup? this.inheritMarkup(markup, this.markup) : null),
 	stream:stream,
 	charPos:this.charPos,
 	pageNo:this.pageNo,
@@ -127,7 +131,7 @@ var DocumentContext = (function(){
     createInlineRoot : function(markup, stream){
       stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
       return new DocumentContext({
-	markup:markup.inherit(this.markup, this),
+	markup:this.inheritMarkup(markup, this.markup),
 	stream:stream,
 	charPos:this.charPos,
 	pageNo:this.pageNo,
@@ -175,7 +179,7 @@ var DocumentContext = (function(){
     addInlineElement : function(element){
       this.inlineContext.addElement(element);
     },
-    // header
+    // header context
     getHeader : function(){
       return this.header;
     },
@@ -197,7 +201,7 @@ var DocumentContext = (function(){
     addCharPos : function(char_count){
       this.charPos += char_count;
     },
-    // anchors
+    // anchor context
     setAnchor : function(anchor_name){
       this.anchors[anchor_name] = this.pageNo;
     },
