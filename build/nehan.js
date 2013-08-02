@@ -2427,12 +2427,53 @@ var Tag = (function (){
 	this.parent.addChild(this);
       }
       this.cssAttrStatic = this._getSelectorValue(); // reget css-attr with parent enabled.
-      var onload = this.getCssAttr("onload");
-      if(onload){
-	onload(this, context);
-      }
+      this.applyCallbacks(context);
       this._inherited = true;
       return this;
+    },
+    applyCallbacks : function(context){
+      var css;
+      var onload = this.getCssAttr("onload");
+      if(onload){
+	css = onload(this, context);
+	if(css){
+	  this.setCssAttrs(css);
+	}
+      }
+      var nth_child = this.getCssAttr("nth-child");
+      if(nth_child){
+	css = nth_child(this.getChildNth(), this, context);
+	if(css){
+	  this.setCssAttrs(css);
+	}
+      }
+      var nth_of_type = this.getCssAttr("nth-of-type");
+      if(nth_of_type){
+	css = nth_of_type(this.getChildOfTypeNth(), this, cotext);
+	if(css){
+	  this.setCssAttrs(css);
+	}
+      }
+/*
+      // TODO:
+      // nth-last-child, nth-last-of-type not supported yet,
+      // because getting order from tail needs 2-pass parsing,
+      // and it consts too much for js engine.
+      var nth_last_child = this.getCssAttr("nth-last-child");
+      if(nth_last_child){
+	css = nth_last_child(this.getLastChildNth());
+	if(css){
+	  this.setCssAttrs(css);
+	}
+      }
+      var nth_last_of_type = this.getCssAttr("nth-last-of-type");
+      if(nth_last_of_type){
+	css = nth_last_of_type(this.getLastChildOfTypeNth());
+	if(css){
+	  this.setCssAttrs(css);
+	}
+      }
+*/
     },
     setContentRaw : function(content_raw){
       this.contentRaw = content_raw;
