@@ -7,13 +7,7 @@ var HtmlLexer = (function (){
   function HtmlLexer(src){
     this.pos = 0;
     this.buff = this._normalize(src);
-    // TODO:
-    // each time lexer is called 'get', this.buff is reduced.
-    // but if we implement searching issue in this system,
-    // we will need the buffer copy.
-    //this.src = src;
-    this.bufferLength = this.buff.length;
-    this.empty = (this.buff === "");
+    this.length = this.buff.length; // original length
   }
 
   HtmlLexer.prototype = {
@@ -24,7 +18,7 @@ var HtmlLexer = (function (){
 	.replace(/\r/g, ""); // discard CR
     },
     isEmpty : function(){
-      return this.empty;
+      return this.length === 0;
     },
     get : function(){
       var token = this._getToken();
@@ -34,10 +28,10 @@ var HtmlLexer = (function (){
       return token;
     },
     getBufferLength : function(){
-      return this.bufferLength;
+      return this.length;
     },
     getSeekPercent : function(seek_pos){
-      return Math.floor(100 * seek_pos / this.bufferLength);
+      return Math.floor(100 * seek_pos / this.length);
     },
     _stepBuff : function(count){
       this.pos += count;
