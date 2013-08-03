@@ -9324,8 +9324,6 @@ if(__engine_args.test){
   __exports.BoxFlow = BoxFlow;
   __exports.BoxFlows = BoxFlows;
   __exports.Edge = Edge;
-  __exports.EdgeParser = EdgeParser;
-  __exports.CornerParser = CornerParser;
   __exports.CssParser = CssParser;
   __exports.Padding = Padding;
   __exports.Margin = Margin;
