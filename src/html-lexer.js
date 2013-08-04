@@ -9,7 +9,6 @@ var HtmlLexer = (function (){
     this.buff = this._normalize(src);
     this.length = this.buff.length; // original length
   }
-
   HtmlLexer.prototype = {
     _normalize : function(src){
       return src
@@ -40,9 +39,11 @@ var HtmlLexer = (function (){
     _getToken : function(){
       if(this.buff === ""){
 	return null;
-      } else if(this.buff.match(rex_tag)){
+      }
+      if(this.buff.match(rex_tag)){
 	return this._parseTag(RegExp.$1);
-      } else if(this.buff.match(rex_word)){
+      }
+      if(this.buff.match(rex_word)){
 	var str = RegExp.$1;
 	if(str.length === 1){
 	  return this._parseChar(str);
@@ -50,11 +51,11 @@ var HtmlLexer = (function (){
 	  return this._parseTcy(str);
 	}
 	return this._parseWord(str);
-      } else if(this.buff.match(rex_char_ref)){
-	return this._parseCharRef(RegExp.$1);
-      } else {
-	return this._parseChar(this._getChar());
       }
+      if(this.buff.match(rex_char_ref)){
+	return this._parseCharRef(RegExp.$1);
+      }
+      return this._parseChar(this._getChar());
     },
     _getRb : function(){
       var rb = this.buffRb.substring(0, 1);
@@ -130,7 +131,6 @@ var HtmlLexer = (function (){
       return new Char(str, true);
     }
   };
-
   return HtmlLexer;
 })();
 

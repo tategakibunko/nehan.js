@@ -2574,6 +2574,12 @@ var Tag = (function (){
     getSrc : function(){
       return this.src;
     },
+    getWrapSrc : function(){
+      if(this.isSingleTag()){
+	return this.src;
+      }
+      return this.src + this.contentRaw + "</" + this.name + ">";
+    },
     getLogicalFloat : function(){
       return this.getCssAttr("float", "none");
     },
@@ -5654,15 +5660,8 @@ var HtmlLexer = (function (){
   function HtmlLexer(src){
     this.pos = 0;
     this.buff = this._normalize(src);
-    // TODO:
-    // each time lexer is called 'get', this.buff is reduced.
-    // but if we implement searching issue in this system,
-    // we will need the buffer copy.
-    //this.src = src;
-    this.bufferLength = this.buff.length;
-    this.empty = (this.buff === "");
+    this.length = this.buff.length; // original length
   }
-
   HtmlLexer.prototype = {
     _normalize : function(src){
       return src
@@ -5671,7 +5670,7 @@ var HtmlLexer = (function (){
 	.replace(/\r/g, ""); // discard CR
     },
     isEmpty : function(){
-      return this.empty;
+      return this.length === 0;
     },
     get : function(){
       var token = this._getToken();
@@ -5681,10 +5680,10 @@ var HtmlLexer = (function (){
       return token;
     },
     getBufferLength : function(){
-      return this.bufferLength;
+      return this.length;
     },
     getSeekPercent : function(seek_pos){
-      return Math.floor(100 * seek_pos / this.bufferLength);
+      return Math.floor(100 * seek_pos / this.length);
     },
     _stepBuff : function(count){
       this.pos += count;
@@ -5693,9 +5692,11 @@ var HtmlLexer = (function (){
     _getToken : function(){
       if(this.buff === ""){
 	return null;
-      } else if(this.buff.match(rex_tag)){
+      }
+      if(this.buff.match(rex_tag)){
 	return this._parseTag(RegExp.$1);
-      } else if(this.buff.match(rex_word)){
+      }
+      if(this.buff.match(rex_word)){
 	var str = RegExp.$1;
 	if(str.length === 1){
 	  return this._parseChar(str);
@@ -5703,11 +5704,11 @@ var HtmlLexer = (function (){
 	  return this._parseTcy(str);
 	}
 	return this._parseWord(str);
-      } else if(this.buff.match(rex_char_ref)){
-	return this._parseCharRef(RegExp.$1);
-      } else {
-	return this._parseChar(this._getChar());
       }
+      if(this.buff.match(rex_char_ref)){
+	return this._parseCharRef(RegExp.$1);
+      }
+      return this._parseChar(this._getChar());
     },
     _getRb : function(){
       var rb = this.buffRb.substring(0, 1);
@@ -5783,7 +5784,6 @@ var HtmlLexer = (function (){
       return new Char(str, true);
     }
   };
-
   return HtmlLexer;
 })();
 
@@ -6687,15 +6687,18 @@ var Collapse = (function(){
 
 
 var TokenStream = Class.extend({
-  init : function(src, lexer){
-    this.lexer = lexer || new HtmlLexer(src);
+  init : function(src){
+    this.lexer = this._createLexer(src);
     this.tokens = [];
     this.pos = 0;
     this.eof = false;
     this._doBuffer();
   },
+  _createLexer : function(src){
+    return new HtmlLexer(src);
+  },
   hasNext : function(){
-    return !this.isEnd();
+    return (!this.eof || this.pos < this.tokens.length);
   },
   isEmpty : function(){
     return this.lexer.isEmpty();
@@ -6705,9 +6708,6 @@ var TokenStream = Class.extend({
   },
   isHead : function(){
     return this.pos === 0;
-  },
-  isEnd : function(){
-    return (this.eof && this.pos >= this.tokens.length);
   },
   look : function(index){
     return this.tokens[index] || null;
@@ -6785,6 +6785,21 @@ var TokenStream = Class.extend({
   getSeekPercent : function(){
     var seek_pos = this.getSeekPos();
     return this.lexer.getSeekPercent(seek_pos);
+  },
+  getWhile : function(fn){
+    var ret = [], push = function(token){
+      ret.push(token);
+    };
+    while(this.hasNext()){
+      var token = this.get();
+      if(token && fn(token)){
+	push(token);
+      } else {
+	this.prev();
+	break;
+      }
+    }
+    return ret;
   },
   // iterate while fn(pos, token) returns true.
   // so loop is false break

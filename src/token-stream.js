@@ -1,13 +1,16 @@
 var TokenStream = Class.extend({
-  init : function(src, lexer){
-    this.lexer = lexer || new HtmlLexer(src);
+  init : function(src){
+    this.lexer = this._createLexer(src);
     this.tokens = [];
     this.pos = 0;
     this.eof = false;
     this._doBuffer();
   },
+  _createLexer : function(src){
+    return new HtmlLexer(src);
+  },
   hasNext : function(){
-    return !this.isEnd();
+    return (!this.eof || this.pos < this.tokens.length);
   },
   isEmpty : function(){
     return this.lexer.isEmpty();
@@ -17,9 +20,6 @@ var TokenStream = Class.extend({
   },
   isHead : function(){
     return this.pos === 0;
-  },
-  isEnd : function(){
-    return (this.eof && this.pos >= this.tokens.length);
   },
   look : function(index){
     return this.tokens[index] || null;
@@ -97,6 +97,21 @@ var TokenStream = Class.extend({
   getSeekPercent : function(){
     var seek_pos = this.getSeekPos();
     return this.lexer.getSeekPercent(seek_pos);
+  },
+  getWhile : function(fn){
+    var ret = [], push = function(token){
+      ret.push(token);
+    };
+    while(this.hasNext()){
+      var token = this.get();
+      if(token && fn(token)){
+	push(token);
+      } else {
+	this.prev();
+	break;
+      }
+    }
+    return ret;
   },
   // iterate while fn(pos, token) returns true.
   // so loop is false break

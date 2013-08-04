@@ -185,6 +185,12 @@ var Tag = (function (){
     getSrc : function(){
       return this.src;
     },
+    getWrapSrc : function(){
+      if(this.isSingleTag()){
+	return this.src;
+      }
+      return this.src + this.contentRaw + "</" + this.name + ">";
+    },
     getLogicalFloat : function(){
       return this.getCssAttr("float", "none");
     },
