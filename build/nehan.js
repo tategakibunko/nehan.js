@@ -7699,7 +7699,7 @@ var InlineContext = (function(){
 	}
       }
       // tail text of this line meets tail-NG.
-      if(tail_token && tail_token.pos < head_token.pos && Token.isChar(tail_token) && tail_token.isTailNg()){
+      if(tail_token && head_token && tail_token.pos < head_token.pos && Token.isChar(tail_token) && tail_token.isTailNg()){
 	tokens = this._justifyTail(tokens, tail_token);
       }
       return tokens;
