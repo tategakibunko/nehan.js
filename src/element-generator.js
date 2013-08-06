@@ -75,7 +75,8 @@ var ElementGenerator = Class.extend({
     }
   },
   _createTableRowGenerator : function(parent, tag){
-    var partition = parent.partition.getPartition(tag.tableChilds.length);
+    var child_count = tag.tableChilds? tag.tableChilds.length : 1;
+    var partition = parent.partition.getPartition(child_count);
     var context2 = this.context.createBlockRoot(tag); // tr
     return new ParallelGenerator(List.map(tag.tableChilds, function(td){
       return new ParaChildGenerator(context2.createBlockRoot(td)); // tr -> td

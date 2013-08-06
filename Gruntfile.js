@@ -163,7 +163,6 @@ module.exports = function(grunt) {
 	    "src/para-child-generator.js",
 	    "src/table-generator.js",
 	    "src/table-row-group-generator.js",
-	    "src/table-row-generator.js",
 	    "src/list-generator.js",
 	    "src/inside-list-item-generator.js",
 	    "src/outside-list-item-generator.js",

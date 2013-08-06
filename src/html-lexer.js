@@ -7,7 +7,7 @@ var HtmlLexer = (function (){
   function HtmlLexer(src){
     this.pos = 0;
     this.buff = this._normalize(src);
-    this.length = this.buff.length; // original length
+    this.src = this.buff;
   }
   HtmlLexer.prototype = {
     _normalize : function(src){
@@ -17,7 +17,7 @@ var HtmlLexer = (function (){
 	.replace(/\r/g, ""); // discard CR
     },
     isEmpty : function(){
-      return this.length === 0;
+      return this.src === "";
     },
     get : function(){
       var token = this._getToken();
@@ -26,11 +26,11 @@ var HtmlLexer = (function (){
       }
       return token;
     },
-    getBufferLength : function(){
-      return this.length;
+    getSrc : function(){
+      return this.src;
     },
     getSeekPercent : function(seek_pos){
-      return Math.floor(100 * seek_pos / this.length);
+      return Math.floor(100 * seek_pos / this.src.length);
     },
     _stepBuff : function(count){
       this.pos += count;

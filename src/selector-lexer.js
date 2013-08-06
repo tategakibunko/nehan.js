@@ -3,7 +3,7 @@ var SelectorLexer = (function(){
     this.buff = this._normalize(src);
   }
 
-  var rex_type = /^[\w-_\.#\*]+/;
+  var rex_type = /^[\w-_\.#\*!]+/;
   var rex_attr = /^\[[^\]]+\]/;
   var rex_pseudo = /^:{1,2}[\w-_]+/;
   

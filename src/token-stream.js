@@ -9,6 +9,9 @@ var TokenStream = Class.extend({
   _createLexer : function(src){
     return new HtmlLexer(src);
   },
+  getSrc : function(){
+    return this.lexer.getSrc();
+  },
   hasNext : function(){
     return (!this.eof || this.pos < this.tokens.length);
   },

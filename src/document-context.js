@@ -41,6 +41,9 @@ var DocumentContext = (function(){
     getStream : function(){
       return this.stream;
     },
+    getStreamSrc : function(){
+      return this.stream.getSrc();
+    },
     hasNextToken : function(){
       return this.stream.hasNext();
     },

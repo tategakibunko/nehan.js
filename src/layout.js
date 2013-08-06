@@ -1,5 +1,5 @@
 var Layout = {
-  root:"body", // or 'html' or 'document'
+  root:"document", // 'body' or 'html' or 'document'
   direction:"vert",
   hori:"lr-tb", // sorry, rl-tb is not supported yet.
   vert:"tb-rl", // or "tb-lr"

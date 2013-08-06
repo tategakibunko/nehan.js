@@ -17,8 +17,14 @@ var DocumentGenerator = (function(){
     getMeta : function(name){
       return this.context.getMeta(name);
     },
+    hasOutline : function(root_name){
+      return this.generator.hasOutline(root_name);
+    },
     getOutline : function(root_name){
       return this.generator.getOutline(root_name);
+    },
+    getOutlineTree : function(root_name){
+      return this.generator.getOutlineTree(root_name);
     },
     getOutlineHtml : function(root_name){
       return this.generator.getOutlineHtml(root_name);
@@ -31,14 +37,19 @@ var DocumentGenerator = (function(){
 	  this.context.setDocumentType(tag);
 	  break;
 	case "html":
-	  return new HtmlGenerator(
-	    this.context.createBlockRoot(
-	      tag, new HtmlTagStream(tag.getContentRaw())
-	    )
-	  );
+	  return this._createHtmlGenerator(tag);
 	}
       }
-      throw "invalid document:<html> not found";
+      return this._createHtmlGenerator(
+	new Tag("<html>", this.context.getStreamSrc())
+      );
+    },
+    _createHtmlGenerator : function(tag){
+      return new HtmlGenerator(
+	this.context.createBlockRoot(
+	  tag, new HtmlTagStream(tag.getContentRaw())
+	)
+      );
     }
   };
 

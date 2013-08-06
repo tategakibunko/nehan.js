@@ -49,7 +49,7 @@ var Config = {
 };
 
 var Layout = {
-  root:"body", // or 'html' or 'document'
+  root:"document", // 'body' or 'html' or 'document'
   direction:"vert",
   hori:"lr-tb", // sorry, rl-tb is not supported yet.
   vert:"tb-rl", // or "tb-lr"
@@ -742,6 +742,12 @@ var Style = {
   //-------------------------------------------------------
   "wbr":{
     "display":"inline",
+    "single":true
+  },
+  //-------------------------------------------------------
+  // tag / others
+  //-------------------------------------------------------
+  "!doctype":{
     "single":true
   },
   //-------------------------------------------------------
@@ -1997,7 +2003,7 @@ var SelectorLexer = (function(){
     this.buff = this._normalize(src);
   }
 
-  var rex_type = /^[\w-_\.#\*]+/;
+  var rex_type = /^[\w-_\.#\*!]+/;
   var rex_attr = /^\[[^\]]+\]/;
   var rex_pseudo = /^:{1,2}[\w-_]+/;
   
@@ -5660,7 +5666,7 @@ var HtmlLexer = (function (){
   function HtmlLexer(src){
     this.pos = 0;
     this.buff = this._normalize(src);
-    this.length = this.buff.length; // original length
+    this.src = this.buff;
   }
   HtmlLexer.prototype = {
     _normalize : function(src){
@@ -5670,7 +5676,7 @@ var HtmlLexer = (function (){
 	.replace(/\r/g, ""); // discard CR
     },
     isEmpty : function(){
-      return this.length === 0;
+      return this.src === "";
     },
     get : function(){
       var token = this._getToken();
@@ -5679,11 +5685,11 @@ var HtmlLexer = (function (){
       }
       return token;
     },
-    getBufferLength : function(){
-      return this.length;
+    getSrc : function(){
+      return this.src;
     },
     getSeekPercent : function(seek_pos){
-      return Math.floor(100 * seek_pos / this.length);
+      return Math.floor(100 * seek_pos / this.src.length);
     },
     _stepBuff : function(count){
       this.pos += count;
@@ -6309,6 +6315,9 @@ var DocumentContext = (function(){
     getStream : function(){
       return this.stream;
     },
+    getStreamSrc : function(){
+      return this.stream.getSrc();
+    },
     hasNextToken : function(){
       return this.stream.hasNext();
     },
@@ -6696,6 +6705,9 @@ var TokenStream = Class.extend({
   },
   _createLexer : function(src){
     return new HtmlLexer(src);
+  },
+  getSrc : function(){
+    return this.lexer.getSrc();
   },
   hasNext : function(){
     return (!this.eof || this.pos < this.tokens.length);
@@ -7149,8 +7161,14 @@ var DocumentGenerator = (function(){
     getMeta : function(name){
       return this.context.getMeta(name);
     },
+    hasOutline : function(root_name){
+      return this.generator.hasOutline(root_name);
+    },
     getOutline : function(root_name){
       return this.generator.getOutline(root_name);
+    },
+    getOutlineTree : function(root_name){
+      return this.generator.getOutlineTree(root_name);
     },
     getOutlineHtml : function(root_name){
       return this.generator.getOutlineHtml(root_name);
@@ -7163,14 +7181,19 @@ var DocumentGenerator = (function(){
 	  this.context.setDocumentType(tag);
 	  break;
 	case "html":
-	  return new HtmlGenerator(
-	    this.context.createBlockRoot(
-	      tag, new HtmlTagStream(tag.getContentRaw())
-	    )
-	  );
+	  return this._createHtmlGenerator(tag);
 	}
       }
-      throw "invalid document:<html> not found";
+      return this._createHtmlGenerator(
+	new Tag("<html>", this.context.getStreamSrc())
+      );
+    },
+    _createHtmlGenerator : function(tag){
+      return new HtmlGenerator(
+	this.context.createBlockRoot(
+	  tag, new HtmlTagStream(tag.getContentRaw())
+	)
+      );
     }
   };
 
@@ -7191,8 +7214,14 @@ var HtmlGenerator = (function(){
     hasNext : function(){
       return this.generator.hasNext();
     },
+    hasOutline : function(root_name){
+      return this.generator.hasOutline(root_name);
+    },
     getOutline : function(root_name){
       return this.generator.getOutline(root_name);
+    },
+    getOutlineTree : function(root_name){
+      return this.generator.getOutlineTree(root_name);
     },
     getOutlineHtml : function(root_name){
       return this.generator.getOutlineHtml(root_name);
@@ -7205,12 +7234,17 @@ var HtmlGenerator = (function(){
 	  this._parseHead(this.context.getHeader(), tag.getContentRaw());
 	  break;
 	case "body":
-	  return new BodyBlockTreeGenerator(
-	    this.context.createBlockRoot(tag, new TokenStream(tag.getContentRaw()))
-	  );
+	  return this._createBodyGenerator(tag);
 	}
       }
-      throw "invalid html:<body> not found";
+      return this._createBodyGenerator(
+	new Tag("<body>", this.context.getStreamSrc())
+      );
+    },
+    _createBodyGenerator : function(tag){
+      return new BodyBlockTreeGenerator(
+	this.context.createBlockRoot(tag, new TokenStream(tag.getContentRaw()))
+      );
     },
     _parseHead : function(header, content){
       var stream = new HeadTagStream(content);
@@ -7318,7 +7352,8 @@ var ElementGenerator = Class.extend({
     }
   },
   _createTableRowGenerator : function(parent, tag){
-    var partition = parent.partition.getPartition(tag.tableChilds.length);
+    var child_count = tag.tableChilds? tag.tableChilds.length : 1;
+    var partition = parent.partition.getPartition(child_count);
     var context2 = this.context.createBlockRoot(tag); // tr
     return new ParallelGenerator(List.map(tag.tableChilds, function(td){
       return new ParaChildGenerator(context2.createBlockRoot(td)); // tr -> td
@@ -8500,17 +8535,6 @@ var TableRowGroupGenerator = ChildBlockTreeGenerator.extend({
   }
 });
 
-/*
-var TableRowGenerator = ParallelGenerator.extend({
-  init : function(markup, context){
-    var partition = parent.partition.getPartition(markup.tableChilds.length);
-    var generators = List.map(markup.tableChilds, function(td){
-      return new ParaChildGenerator(td, context);
-    });
-    this._super(generators, markup, context, partition);
-  }
-});
-*/
 var ListGenerator = ChildBlockTreeGenerator.extend({
   _onCreateBox : function(box, parent){
     var item_count = this.context.getStreamTokenCount();

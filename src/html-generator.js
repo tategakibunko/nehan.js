@@ -11,8 +11,14 @@ var HtmlGenerator = (function(){
     hasNext : function(){
       return this.generator.hasNext();
     },
+    hasOutline : function(root_name){
+      return this.generator.hasOutline(root_name);
+    },
     getOutline : function(root_name){
       return this.generator.getOutline(root_name);
+    },
+    getOutlineTree : function(root_name){
+      return this.generator.getOutlineTree(root_name);
     },
     getOutlineHtml : function(root_name){
       return this.generator.getOutlineHtml(root_name);
@@ -25,12 +31,17 @@ var HtmlGenerator = (function(){
 	  this._parseHead(this.context.getHeader(), tag.getContentRaw());
 	  break;
 	case "body":
-	  return new BodyBlockTreeGenerator(
-	    this.context.createBlockRoot(tag, new TokenStream(tag.getContentRaw()))
-	  );
+	  return this._createBodyGenerator(tag);
 	}
       }
-      throw "invalid html:<body> not found";
+      return this._createBodyGenerator(
+	new Tag("<body>", this.context.getStreamSrc())
+      );
+    },
+    _createBodyGenerator : function(tag){
+      return new BodyBlockTreeGenerator(
+	this.context.createBlockRoot(tag, new TokenStream(tag.getContentRaw()))
+      );
     },
     _parseHead : function(header, content){
       var stream = new HeadTagStream(content);
