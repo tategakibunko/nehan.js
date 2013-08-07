@@ -2,6 +2,8 @@ var InlineTreeGenerator = TreeGenerator.extend({
   init : function(context){
     this._super(context);
     this.cachedLine = null;
+    this._prevStart = 0;
+    this._retry = 0;
   },
   getParentPos : function(){
     return this.context.markup.pos;
@@ -59,6 +61,11 @@ var InlineTreeGenerator = TreeGenerator.extend({
   },
   _yieldInlinesTo : function(parent){
     var end_after = false;
+    this._retry = (this.context.getStreamPos() === this._prevStart)? this._retry + 1 : 0;
+    if(this._retry > Config.maxRollbackCount){
+      var skip = this.context.getNextToken();
+      this._retry = 0;
+    }
     while(true){
       var element = this._yieldInlineElement(parent);
       if(typeof element === "number"){ // exceptions
