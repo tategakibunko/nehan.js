@@ -379,7 +379,6 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-size":"2.4em",
-    "font-weight":"bold",
     "margin":{
       "after":"0.5em"
     }
@@ -388,7 +387,6 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-size":"2.0em",
-    "font-weight":"bold",
     "margin":{
       "after":"0.75em"
     }
@@ -397,7 +395,6 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-size":"1.6em",
-    "font-weight":"bold",
     "margin":{
       "after":"1em"
     }
@@ -406,7 +403,6 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-size":"1.4em",
-    "font-weight":"bold",
     "margin":{
       "after":"1.25em"
     }
@@ -423,8 +419,8 @@ var Style = {
   "h6":{
     "display":"block",
     "line-rate":1.4,
-    "font-size":"1.0em",
-    "font-weight":"bold"
+    "font-weight":"bold",
+    "font-size":"1.0em"
   },
   "head":{
   },
