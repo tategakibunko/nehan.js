@@ -7173,6 +7173,9 @@ var DocumentGenerator = (function(){
     getOutlineHtml : function(root_name){
       return this.generator.getOutlineHtml(root_name);
     },
+    getAnchors : function(){
+      return this.generator.getAnchors();
+    },
     _createGenerator : function(){
       while(this.context.hasNextToken()){
 	var tag = this.context.getNextToken();
@@ -7225,6 +7228,9 @@ var HtmlGenerator = (function(){
     },
     getOutlineHtml : function(root_name){
       return this.generator.getOutlineHtml(root_name);
+    },
+    getAnchors : function(){
+      return this.generator.getAnchors();
     },
     _getGenerator : function(){
       while(this.context.hasNextToken()){
