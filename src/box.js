@@ -367,6 +367,9 @@ var Box = (function(){
       // <span>bbbb</span> is inline of inline.
       return this.isTextLine() && this.markup && this.markup.isInline();
     },
+    isHeaderLine : function(){
+      return this.isTextLine() && this.markup && this.markup.isHeaderTag();
+    },
     isRubyLine : function(){
       return this.isTextLine() && this.getMarkupName() === "ruby";
     },

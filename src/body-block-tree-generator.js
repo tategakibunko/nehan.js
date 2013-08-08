@@ -3,7 +3,6 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     return Layout.getStdPageSize();
   },
   _createBox : function(size, parent){
-    console.log(">>> body create box");
     var box = Layout.createRootBox(size, "body");
     this._setBoxStyle(box, null);
     box.percent = this.context.getSeekPercent();
@@ -14,7 +13,6 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     return box;
   },
   _onCompleteBlock : function(page){
-    console.log("<<< body complete block");
     // step page no and character count inside this page
     this.context.stepPageNo();
     this.context.addCharPos(page.getCharCount());

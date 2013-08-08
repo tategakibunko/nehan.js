@@ -57,7 +57,8 @@ var Layout = {
   height: 580,
   fontSize:16,
   rubyRate:0.5, // used when Style.rt["font-size"] not defined.
-  boldRate:0.2,
+  boldRate:0.5,
+  upperCaseRate:0.8,
   fontColor:"000000",
   linkColor:"0000FF",
   fontImgRoot:"http://nehan.googlecode.com/hg/char-img",
@@ -3238,11 +3239,32 @@ var Word = (function(){
     hasMetrics : function(){
       return (typeof this.bodySize !== "undefined");
     },
-    setMetrics : function(flow, font_size, is_bold){
-      this.bodySize = this.data.length * Math.floor(font_size / 2);
+    countUpper : function(){
+      var count = 0;
+      for(var i = 0; i < this.data.length; i++){
+	if(/[A-Z]/.test(this.data.charAt(i))){
+	  count++;
+	}
+      }
+      return count;
+    },
+    setMetricsHeader : function(flow, font_size, is_bold){
+      var upper_len = this.countUpper();
+      var lower_len = this.data.length - upper_len;
+      this.bodySize = Math.floor(lower_len * font_size * 0.5);
+      this.bodySize += Math.floor(upper_len * font_size * Layout.upperCaseRate);
       if(is_bold){
-	var bold_rate = Layout.boldRate;
-	this.bodySize += Math.floor(bold_rate * this.bodySize);
+	this.bodySize += Math.floor(Layout.boldRate * this.bodySize);
+      }
+    },
+    setMetrics : function(flow, font_size, is_bold, is_header){
+      if(is_header && /[A-Z]/.test(this.data)){
+	this.setMetricsHeader(flow, font_size, is_bold);
+	return;
+      }
+      this.bodySize = Math.floor(this.data.length * font_size * 0.5);
+      if(is_bold){
+	this.bodySize += Math.floor(Layout.boldRate * this.bodySize);
       }
     },
     getLetterCount : function(){
@@ -5408,6 +5430,9 @@ var Box = (function(){
       // when <p>aaaa<span>bbbb</span></p>,
       // <span>bbbb</span> is inline of inline.
       return this.isTextLine() && this.markup && this.markup.isInline();
+    },
+    isHeaderLine : function(){
+      return this.isTextLine() && this.markup && this.markup.isHeaderTag();
     },
     isRubyLine : function(){
       return this.isTextLine() && this.getMarkupName() === "ruby";
@@ -8213,7 +8238,7 @@ var InlineTreeGenerator = TreeGenerator.extend({
   _yieldText : function(line, text){
     // always set metrics for first-line, because style of first-line tag changes whether it is first-line or not.
     if(this.context.getMarkupName() === "first-line" || !text.hasMetrics()){
-      text.setMetrics(line.flow, line.fontSize, line.isTextBold());
+      text.setMetrics(line.flow, line.fontSize, line.isTextBold(), line.isHeaderLine());
     }
     switch(text._type){
     case "char":
@@ -8235,9 +8260,10 @@ var InlineTreeGenerator = TreeGenerator.extend({
     // if advance is lager than max_measure,
     // we must cut this word into some parts.
     var is_bold = line.isTextBold();
+    var is_header = line.isHeaderLine();
     var part = word.cutMeasure(line.fontSize, max_measure); // get sliced word
-    part.setMetrics(line.flow, line.fontSize, is_bold); // metrics for first half
-    word.setMetrics(line.flow, line.fontSize, is_bold); // metrics for second half
+    part.setMetrics(line.flow, line.fontSize, is_bold, is_header); // metrics for first half
+    word.setMetrics(line.flow, line.fontSize, is_bold, is_header); // metrics for second half
     return part;
   }
 });
@@ -8381,7 +8407,6 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     return Layout.getStdPageSize();
   },
   _createBox : function(size, parent){
-    console.log(">>> body create box");
     var box = Layout.createRootBox(size, "body");
     this._setBoxStyle(box, null);
     box.percent = this.context.getSeekPercent();
@@ -8392,7 +8417,6 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     return box;
   },
   _onCompleteBlock : function(page){
-    console.log("<<< body complete block");
     // step page no and character count inside this page
     this.context.stepPageNo();
     this.context.addCharPos(page.getCharCount());

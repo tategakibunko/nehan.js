@@ -31,11 +31,32 @@ var Word = (function(){
     hasMetrics : function(){
       return (typeof this.bodySize !== "undefined");
     },
-    setMetrics : function(flow, font_size, is_bold){
-      this.bodySize = this.data.length * Math.floor(font_size / 2);
+    countUpper : function(){
+      var count = 0;
+      for(var i = 0; i < this.data.length; i++){
+	if(/[A-Z]/.test(this.data.charAt(i))){
+	  count++;
+	}
+      }
+      return count;
+    },
+    setMetricsHeader : function(flow, font_size, is_bold){
+      var upper_len = this.countUpper();
+      var lower_len = this.data.length - upper_len;
+      this.bodySize = Math.floor(lower_len * font_size * 0.5);
+      this.bodySize += Math.floor(upper_len * font_size * Layout.upperCaseRate);
       if(is_bold){
-	var bold_rate = Layout.boldRate;
-	this.bodySize += Math.floor(bold_rate * this.bodySize);
+	this.bodySize += Math.floor(Layout.boldRate * this.bodySize);
+      }
+    },
+    setMetrics : function(flow, font_size, is_bold, is_header){
+      if(is_header && /[A-Z]/.test(this.data)){
+	this.setMetricsHeader(flow, font_size, is_bold);
+	return;
+      }
+      this.bodySize = Math.floor(this.data.length * font_size * 0.5);
+      if(is_bold){
+	this.bodySize += Math.floor(Layout.boldRate * this.bodySize);
       }
     },
     getLetterCount : function(){

@@ -7,7 +7,8 @@ var Layout = {
   height: 580,
   fontSize:16,
   rubyRate:0.5, // used when Style.rt["font-size"] not defined.
-  boldRate:0.2,
+  boldRate:0.5,
+  upperCaseRate:0.8,
   fontColor:"000000",
   linkColor:"0000FF",
   fontImgRoot:"http://nehan.googlecode.com/hg/char-img",
