@@ -130,7 +130,7 @@ var Box = (function(){
     getTextMeasure : function(){
       return this.childMeasure;
     },
-    getTextRestMeasure : function(){
+    getRestContentMeasure : function(){
       return this.getContentMeasure() - this.childMeasure;
     },
     getRestContentExtent : function(){
@@ -199,13 +199,13 @@ var Box = (function(){
       var indent = this.textIndent || 0;
       switch(this.textAlign){
       case "start": return indent;
-      case "end": return indent + this.getTextRestMeasure();
-      case "center": return indent + Math.floor(this.getTextRestMeasure() / 2);
+      case "end": return indent + this.getRestContentMeasure();
+      case "center": return indent + Math.floor(this.getRestContentMeasure() / 2);
       default: return indent;
       }
     },
     getRestSize : function(){
-      var rest_measure = this.getContentMeasure();
+      var rest_measure = this.getRestContentMeasure();
       var rest_extent = this.getRestContentExtent();
       return this.flow.getBoxSize(rest_measure, rest_extent);
     },

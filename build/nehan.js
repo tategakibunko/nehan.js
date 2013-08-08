@@ -5172,7 +5172,7 @@ var Box = (function(){
     getTextMeasure : function(){
       return this.childMeasure;
     },
-    getTextRestMeasure : function(){
+    getRestContentMeasure : function(){
       return this.getContentMeasure() - this.childMeasure;
     },
     getRestContentExtent : function(){
@@ -5241,13 +5241,13 @@ var Box = (function(){
       var indent = this.textIndent || 0;
       switch(this.textAlign){
       case "start": return indent;
-      case "end": return indent + this.getTextRestMeasure();
-      case "center": return indent + Math.floor(this.getTextRestMeasure() / 2);
+      case "end": return indent + this.getRestContentMeasure();
+      case "center": return indent + Math.floor(this.getRestContentMeasure() / 2);
       default: return indent;
       }
     },
     getRestSize : function(){
-      var rest_measure = this.getContentMeasure();
+      var rest_measure = this.getRestContentMeasure();
       var rest_extent = this.getRestContentExtent();
       return this.flow.getBoxSize(rest_measure, rest_extent);
     },
@@ -6272,13 +6272,13 @@ var DocumentContext = (function(){
 
   // header id to associate each header with outline.
   var __global_header_id = 0;
+  var __global_page_no = 0;
   
   function DocumentContext(option){
     var opt = option || {};
     this.markup = opt.markup || null;
     this.stream = opt.stream || null;
     this.charPos = opt.charPos || 0;
-    this.pageNo = opt.pageNo || 0;
     this.localPageNo = opt.localPageNo || 0;
     this.localLineNo = opt.localLineNo || 0;
     this.header = opt.header || new DocumentHeader();
@@ -6364,7 +6364,6 @@ var DocumentContext = (function(){
 	markup:(markup? this.inheritMarkup(markup, this.markup) : null),
 	stream:stream,
 	charPos:this.charPos,
-	pageNo:this.pageNo,
 	header:this.header,
 	outlineContext:this.outlineContext,
 	ahchors:this.anchors
@@ -6375,7 +6374,6 @@ var DocumentContext = (function(){
 	markup:this.markup,
 	stream:this.stream,
 	charPos:this.charPos,
-	pageNo:this.pageNo,
 	header:this.header,
 	blockContext:this.blockContext,
 	outlineContext:this.outlineContext,
@@ -6407,7 +6405,6 @@ var DocumentContext = (function(){
 	markup:this.inheritMarkup(markup, this.markup),
 	stream:stream,
 	charPos:this.charPos,
-	pageNo:this.pageNo,
 	header:this.header,
 	blockContext:this.blockContext, // inherit block context
 	outlineContext:this.outlineContext,
@@ -6463,20 +6460,20 @@ var DocumentContext = (function(){
       this.header.addStyle(markup);
     },
     getPageNo : function(){
-      return this.pageNo;
+      return __global_page_no;
     },
     getCharPos : function(){
       return this.charPos;
     },
     stepPageNo : function(){
-      this.pageNo++;
+      __global_page_no++;
     },
     addCharPos : function(char_count){
       this.charPos += char_count;
     },
     // anchor context
     setAnchor : function(anchor_name){
-      this.anchors[anchor_name] = this.pageNo;
+      this.anchors[anchor_name] = this.getPageNo();
     },
     getAnchors : function(){
       return this.anchors;
@@ -6498,7 +6495,7 @@ var DocumentContext = (function(){
     },
     logStartSection : function(){
       var type = this.markup.getName();
-      this.outlineContext.logStartSection(type, this.pageNo);
+      this.outlineContext.logStartSection(type, this.getPageNo());
     },
     logEndSection : function(){
       var type = this.markup.getName();
@@ -6508,7 +6505,7 @@ var DocumentContext = (function(){
       var type = this.markup.getName();
       var rank = this.markup.getHeaderRank();
       var title = this.markup.getContentRaw();
-      var page_no = this.pageNo;
+      var page_no = this.getPageNo();
       var header_id = __global_header_id++;
       this.outlineContext.logSectionHeader(type, rank, title, page_no, header_id);
       return header_id;
@@ -6925,9 +6922,6 @@ var HtmlTagStream = FilteredTagStream.extend({
       var name = tag.getName();
       return (name === "head" || name === "body");
     });
-    if(this.isEmptyTokens()){
-      this.tokens = [new Tag("body", src)];
-    }
   }
 });
 
@@ -7141,7 +7135,7 @@ var RubyTagStream = TokenStream.extend({
 var DocumentGenerator = (function(){
   function DocumentGenerator(context){
     this.context = context;
-    this.generator = this._createGenerator(this.context.stream);
+    this.generator = this._createGenerator();
   }
 
   DocumentGenerator.prototype = {
@@ -7187,10 +7181,10 @@ var DocumentGenerator = (function(){
 	new Tag("<html>", this.context.getStreamSrc())
       );
     },
-    _createHtmlGenerator : function(tag){
+    _createHtmlGenerator : function(html_tag){
       return new HtmlGenerator(
 	this.context.createBlockRoot(
-	  tag, new HtmlTagStream(tag.getContentRaw())
+	  html_tag, new HtmlTagStream(html_tag.getContentRaw())
 	)
       );
     }
@@ -7203,7 +7197,7 @@ var DocumentGenerator = (function(){
 var HtmlGenerator = (function(){
   function HtmlGenerator(context){
     this.context = context;
-    this.generator = this._getGenerator();
+    this.generator = this._createGenerator();
   }
 
   HtmlGenerator.prototype = {
@@ -7228,7 +7222,7 @@ var HtmlGenerator = (function(){
     getAnchors : function(){
       return this.generator.getAnchors();
     },
-    _getGenerator : function(){
+    _createGenerator : function(){
       while(this.context.hasNextToken()){
 	var tag = this.context.getNextToken();
 	switch(tag.getName()){
@@ -7243,9 +7237,11 @@ var HtmlGenerator = (function(){
 	new Tag("<body>", this.context.getStreamSrc())
       );
     },
-    _createBodyGenerator : function(tag){
+    _createBodyGenerator : function(body_tag){
       return new BodyBlockTreeGenerator(
-	this.context.createBlockRoot(tag, new TokenStream(tag.getContentRaw()))
+	this.context.createBlockRoot(
+	  body_tag, new TokenStream(body_tag.getContentRaw())
+	)
       );
     },
     _parseHead : function(header, content){
@@ -8346,7 +8342,7 @@ var SectionRootGenerator = ChildBlockTreeGenerator.extend({
     return buffer.isEmpty() === false;
   },
   getOutlineBuffer : function(root_name){
-    var name = root_name || this.context.markup.getName();
+    var name = root_name || this.context.getMarkupName();
     return this.context.getOutlineBuffer(name);
   },
   getOutlineTree : function(root_name){
@@ -8385,6 +8381,7 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     return Layout.getStdPageSize();
   },
   _createBox : function(size, parent){
+    console.log(">>> body create box");
     var box = Layout.createRootBox(size, "body");
     this._setBoxStyle(box, null);
     box.percent = this.context.getSeekPercent();
@@ -8395,6 +8392,7 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     return box;
   },
   _onCompleteBlock : function(page){
+    console.log("<<< body complete block");
     // step page no and character count inside this page
     this.context.stepPageNo();
     this.context.addCharPos(page.getCharCount());
@@ -9240,21 +9238,11 @@ var PageStream = Class.extend({
       .replace(/<rt><\/rt>/gi, ""); // discard empty rt
   },
   _createGenerator : function(text){
-    var context = new DocumentContext();
-    switch(Layout.root){
-    case "body":
-      return new BodyBlockTreeGenerator(
-	context.createBlockRoot(new Tag("<body>", text), new TokenStream(text))
-      );
-    case "html":
-      return new HtmlGenerator(
-	context.createBlockRoot(new Tag("<html>", text), new HtmlTagStream(text))
-      );
-    default:
-      return new DocumentGenerator(
-	context.createBlockRoot(null, new DocumentTagStream(text))
-      );
-    }
+    return new DocumentGenerator(
+      new DocumentContext({
+	stream:new DocumentTagStream(text)
+      })
+    );
   },
   _createEvaluator : function(){
     return new PageEvaluator();

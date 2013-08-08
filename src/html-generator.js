@@ -1,7 +1,7 @@
 var HtmlGenerator = (function(){
   function HtmlGenerator(context){
     this.context = context;
-    this.generator = this._getGenerator();
+    this.generator = this._createGenerator();
   }
 
   HtmlGenerator.prototype = {
@@ -26,7 +26,7 @@ var HtmlGenerator = (function(){
     getAnchors : function(){
       return this.generator.getAnchors();
     },
-    _getGenerator : function(){
+    _createGenerator : function(){
       while(this.context.hasNextToken()){
 	var tag = this.context.getNextToken();
 	switch(tag.getName()){
@@ -41,9 +41,11 @@ var HtmlGenerator = (function(){
 	new Tag("<body>", this.context.getStreamSrc())
       );
     },
-    _createBodyGenerator : function(tag){
+    _createBodyGenerator : function(body_tag){
       return new BodyBlockTreeGenerator(
-	this.context.createBlockRoot(tag, new TokenStream(tag.getContentRaw()))
+	this.context.createBlockRoot(
+	  body_tag, new TokenStream(body_tag.getContentRaw())
+	)
       );
     },
     _parseHead : function(header, content){

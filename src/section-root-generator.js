@@ -8,7 +8,7 @@ var SectionRootGenerator = ChildBlockTreeGenerator.extend({
     return buffer.isEmpty() === false;
   },
   getOutlineBuffer : function(root_name){
-    var name = root_name || this.context.markup.getName();
+    var name = root_name || this.context.getMarkupName();
     return this.context.getOutlineBuffer(name);
   },
   getOutlineTree : function(root_name){

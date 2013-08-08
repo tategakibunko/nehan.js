@@ -2,13 +2,13 @@ var DocumentContext = (function(){
 
   // header id to associate each header with outline.
   var __global_header_id = 0;
+  var __global_page_no = 0;
   
   function DocumentContext(option){
     var opt = option || {};
     this.markup = opt.markup || null;
     this.stream = opt.stream || null;
     this.charPos = opt.charPos || 0;
-    this.pageNo = opt.pageNo || 0;
     this.localPageNo = opt.localPageNo || 0;
     this.localLineNo = opt.localLineNo || 0;
     this.header = opt.header || new DocumentHeader();
@@ -94,7 +94,6 @@ var DocumentContext = (function(){
 	markup:(markup? this.inheritMarkup(markup, this.markup) : null),
 	stream:stream,
 	charPos:this.charPos,
-	pageNo:this.pageNo,
 	header:this.header,
 	outlineContext:this.outlineContext,
 	ahchors:this.anchors
@@ -105,7 +104,6 @@ var DocumentContext = (function(){
 	markup:this.markup,
 	stream:this.stream,
 	charPos:this.charPos,
-	pageNo:this.pageNo,
 	header:this.header,
 	blockContext:this.blockContext,
 	outlineContext:this.outlineContext,
@@ -137,7 +135,6 @@ var DocumentContext = (function(){
 	markup:this.inheritMarkup(markup, this.markup),
 	stream:stream,
 	charPos:this.charPos,
-	pageNo:this.pageNo,
 	header:this.header,
 	blockContext:this.blockContext, // inherit block context
 	outlineContext:this.outlineContext,
@@ -193,20 +190,20 @@ var DocumentContext = (function(){
       this.header.addStyle(markup);
     },
     getPageNo : function(){
-      return this.pageNo;
+      return __global_page_no;
     },
     getCharPos : function(){
       return this.charPos;
     },
     stepPageNo : function(){
-      this.pageNo++;
+      __global_page_no++;
     },
     addCharPos : function(char_count){
       this.charPos += char_count;
     },
     // anchor context
     setAnchor : function(anchor_name){
-      this.anchors[anchor_name] = this.pageNo;
+      this.anchors[anchor_name] = this.getPageNo();
     },
     getAnchors : function(){
       return this.anchors;
@@ -228,7 +225,7 @@ var DocumentContext = (function(){
     },
     logStartSection : function(){
       var type = this.markup.getName();
-      this.outlineContext.logStartSection(type, this.pageNo);
+      this.outlineContext.logStartSection(type, this.getPageNo());
     },
     logEndSection : function(){
       var type = this.markup.getName();
@@ -238,7 +235,7 @@ var DocumentContext = (function(){
       var type = this.markup.getName();
       var rank = this.markup.getHeaderRank();
       var title = this.markup.getContentRaw();
-      var page_no = this.pageNo;
+      var page_no = this.getPageNo();
       var header_id = __global_header_id++;
       this.outlineContext.logSectionHeader(type, rank, title, page_no, header_id);
       return header_id;

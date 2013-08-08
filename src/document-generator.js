@@ -1,7 +1,7 @@
 var DocumentGenerator = (function(){
   function DocumentGenerator(context){
     this.context = context;
-    this.generator = this._createGenerator(this.context.stream);
+    this.generator = this._createGenerator();
   }
 
   DocumentGenerator.prototype = {
@@ -47,10 +47,10 @@ var DocumentGenerator = (function(){
 	new Tag("<html>", this.context.getStreamSrc())
       );
     },
-    _createHtmlGenerator : function(tag){
+    _createHtmlGenerator : function(html_tag){
       return new HtmlGenerator(
 	this.context.createBlockRoot(
-	  tag, new HtmlTagStream(tag.getContentRaw())
+	  html_tag, new HtmlTagStream(html_tag.getContentRaw())
 	)
       );
     }
