@@ -1,4 +1,4 @@
-var InlineTreeGenerator = TreeGenerator.extend({
+var InlineTreeGenerator = BlockTreeGenerator.extend({
   init : function(context){
     this._super(context);
     this.cachedLine = null;
@@ -61,10 +61,17 @@ var InlineTreeGenerator = TreeGenerator.extend({
   },
   _yieldInlinesTo : function(parent){
     var end_after = false;
-    this._retry = (this.context.getStreamPos() === this._prevStart)? this._retry + 1 : 0;
-    if(this._retry > Config.maxRollbackCount){
-      var skip = this.context.getNextToken();
+    var start_pos = this.context.getStreamPos();
+    if(start_pos === this._prevStart){
+      this._retry++;
+      if(this._retry > Config.maxRollbackCount){
+	var skip = this.context.getNextToken();
+	// console.log("skip!:%o", skip);
+	this._retry = 0;
+      }
+    } else {
       this._retry = 0;
+      this._prevStart = start_pos;
     }
     while(true){
       var element = this._yieldInlineElement(parent);

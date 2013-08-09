@@ -84,7 +84,9 @@ if(__engine_args.test){
 
   // generator
   __exports.ElementGenerator = ElementGenerator;
-  __exports.TreeGenerator = TreeGenerator;
+  __exports.BlockTreeGenerator = BlockTreeGenerator;
+  __exports.InlineTreeGenerator = InlineTreeGenerator;
+  __exports.ChildBlockTreeGenerator = ChildBlockTreeGenerator;
   __exports.ChildInlineTreeGenerator = ChildInlineTreeGenerator;
   __exports.BodyBlockTreeGenerator = BodyBlockTreeGenerator;
   __exports.ParallelGenerator = ParallelGenerator;

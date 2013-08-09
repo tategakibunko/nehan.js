@@ -143,7 +143,7 @@ module.exports = function(grunt) {
 	    "src/hr-generator.js",
 	    "src/inline-context.js",
 	    "src/block-context.js",
-	    "src/tree-generator.js",
+	    "src/block-tree-generator.js",
 	    "src/inline-tree-generator.js",
 	    "src/child-inline-tree-generator.js",
 	    "src/ruby-generator.js",

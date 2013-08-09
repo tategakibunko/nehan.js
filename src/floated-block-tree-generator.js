@@ -1,4 +1,4 @@
-var FloatedBlockTreeGenerator = TreeGenerator.extend({
+var FloatedBlockTreeGenerator = BlockTreeGenerator.extend({
   init : function(context, floated_box){
     this._super(context);
     this.floatedBox = floated_box;

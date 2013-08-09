@@ -7906,7 +7906,7 @@ var BlockContext = (function(){
 })();
 
 
-var TreeGenerator = ElementGenerator.extend({
+var BlockTreeGenerator = ElementGenerator.extend({
   init : function(context){
     this._super(context);
     this.generator = null;
@@ -8050,7 +8050,7 @@ var TreeGenerator = ElementGenerator.extend({
   }
 });
 
-var InlineTreeGenerator = TreeGenerator.extend({
+var InlineTreeGenerator = BlockTreeGenerator.extend({
   init : function(context){
     this._super(context);
     this.cachedLine = null;
@@ -8113,10 +8113,17 @@ var InlineTreeGenerator = TreeGenerator.extend({
   },
   _yieldInlinesTo : function(parent){
     var end_after = false;
-    this._retry = (this.context.getStreamPos() === this._prevStart)? this._retry + 1 : 0;
-    if(this._retry > Config.maxRollbackCount){
-      var skip = this.context.getNextToken();
+    var start_pos = this.context.getStreamPos();
+    if(start_pos === this._prevStart){
+      this._retry++;
+      if(this._retry > Config.maxRollbackCount){
+	var skip = this.context.getNextToken();
+	// console.log("skip!:%o", skip);
+	this._retry = 0;
+      }
+    } else {
       this._retry = 0;
+      this._prevStart = start_pos;
     }
     while(true){
       var element = this._yieldInlineElement(parent);
@@ -8335,13 +8342,13 @@ var FirstLineGenerator = ChildInlineTreeGenerator.extend({
 });
 
 
-var InlineBlockGenerator = TreeGenerator.extend({
+var InlineBlockGenerator = BlockTreeGenerator.extend({
   _getBoxType : function(){
     return "inline-block";
   }
 });
 
-var ChildBlockTreeGenerator = TreeGenerator.extend({
+var ChildBlockTreeGenerator = BlockTreeGenerator.extend({
   // resize page to sum of total child size.
   _onCompleteBlock : function(page){
     page.shortenExtent(page.getParentFlow());
@@ -8423,7 +8430,7 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
   }
 });
 
-var FloatedBlockTreeGenerator = TreeGenerator.extend({
+var FloatedBlockTreeGenerator = BlockTreeGenerator.extend({
   init : function(context, floated_box){
     this._super(context);
     this.floatedBox = floated_box;
@@ -8464,7 +8471,7 @@ var FloatedBlockTreeGenerator = TreeGenerator.extend({
 
 // InlinePageGenerator yield the first page only,
 // because size of first page can be defined, but continuous pages are not.
-var InlinePageGenerator = TreeGenerator.extend({
+var InlinePageGenerator = BlockTreeGenerator.extend({
   hasNext : function(){
     return false;
   },
@@ -9121,7 +9128,6 @@ var PageStream = Class.extend({
     this._seekPageNo = 0;
     this._seekPercent = 0;
     this._seekPos = 0;
-    this._retryCount = 0;
   },
   hasPage : function(page_no){
     return (typeof this.buffer[page_no] != "undefined");
@@ -9230,19 +9236,11 @@ var PageStream = Class.extend({
     }
     var self = this;
     var entry = this._yield();
-    if(entry.seekPos > 0 && this._seekPos === entry.seekPos){
-      this._retryCount++;
-      if(this._retryCount > Config.maxRollbackCount){
-	this.onError(this);
-	return;
-      }
-    }
     this._addBuffer(entry);
     this.onProgress(this);
     this._seekPageNo++;
     this._seekPercent = entry.percent;
     this._seekPos = entry.seekPos;
-    this._retryCount = 0;
     reqAnimationFrame(function(){
       self._asyncGet(wait);
     });
@@ -9441,7 +9439,9 @@ if(__engine_args.test){
 
   // generator
   __exports.ElementGenerator = ElementGenerator;
-  __exports.TreeGenerator = TreeGenerator;
+  __exports.BlockTreeGenerator = BlockTreeGenerator;
+  __exports.InlineTreeGenerator = InlineTreeGenerator;
+  __exports.ChildBlockTreeGenerator = ChildBlockTreeGenerator;
   __exports.ChildInlineTreeGenerator = ChildInlineTreeGenerator;
   __exports.BodyBlockTreeGenerator = BodyBlockTreeGenerator;
   __exports.ParallelGenerator = ParallelGenerator;
