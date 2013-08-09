@@ -7970,6 +7970,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
 	  break;
 	}
       } catch(e){
+	if(e === "FinishBlock"){
+	  page.breakAfter = true;
+	}
 	break;
       }
     }
@@ -8438,7 +8441,7 @@ var FloatedBlockTreeGenerator = BlockTreeGenerator.extend({
   yield: function(parent){
     var wrap_box = this._getFloatedWrapBox(parent, this.floatedBox);
     var rest_box = this._getFloatedRestBox(parent, wrap_box, this.floatedBox);
-    this._yieldElementsTo(rest_box);
+    this._yieldBlocksTo(rest_box);
     if(this.floatedBox.logicalFloat === "start"){
       wrap_box.addChildBlock(this.floatedBox);
       wrap_box.addChildBlock(rest_box);

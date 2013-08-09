@@ -62,6 +62,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
 	  break;
 	}
       } catch(e){
+	if(e === "FinishBlock"){
+	  page.breakAfter = true;
+	}
 	break;
       }
     }
