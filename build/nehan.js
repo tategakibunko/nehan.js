@@ -7934,17 +7934,17 @@ var BlockTreeGenerator = ElementGenerator.extend({
     var page_box, page_size;
     page_size = size || this._getBoxSize(parent);
     page_box = this._createBox(page_size, parent);
-    return this._yieldElementsTo(page_box);
+    return this._yieldBlocksTo(page_box);
   },
   // fill page with child page elements.
-  _yieldElementsTo : function(page){
+  _yieldBlocksTo : function(page){
     this.context.createBlockContext(page);
     if(this.generator){
       this.generator.context.blockContext = this.context.blockContext;
     }
 
     while(true){
-      var element = this._yieldElement(page);
+      var element = this._yieldBlockElement(page);
       if(typeof element === "number"){ // exception
 	if(element == Exceptions.IGNORE){
 	  continue;
@@ -7989,7 +7989,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
     }
     return page;
   },
-  _yieldElement : function(parent){
+  _yieldBlockElement : function(parent){
     if(this.generator && this.generator.hasNext()){
       return this.generator.yield(parent);
     }
