@@ -106,7 +106,7 @@ var BoxStyle = {
   _setTextIndent : function(markup, box, parent){
     var text_indent = markup.getCssAttr("text-indent", "inherit");
     if(text_indent !== "inherit"){
-      box.textIndent = UnixSize.getUnitSize(text_indent, box.fontSize);
+      box.textIndent = Math.max(0, UnitSize.getUnitSize(text_indent, box.fontSize));
     }
   },
   _setTextEmphasis : function(markup, box, parent){

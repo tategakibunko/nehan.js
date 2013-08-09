@@ -5611,7 +5611,7 @@ var BoxStyle = {
   _setTextIndent : function(markup, box, parent){
     var text_indent = markup.getCssAttr("text-indent", "inherit");
     if(text_indent !== "inherit"){
-      box.textIndent = UnixSize.getUnitSize(text_indent, box.fontSize);
+      box.textIndent = Math.max(0, UnitSize.getUnitSize(text_indent, box.fontSize));
     }
   },
   _setTextEmphasis : function(markup, box, parent){
@@ -6865,7 +6865,7 @@ var TokenStream = Class.extend({
     var start_pos = (typeof start_pos != "undefined")? start_p : this.pos;
     var text = null;
     this.revIterWhile(start_pos - 1, function(pos, token){
-      if(Token.isText(token)){
+      if(token && Token.isText(token)){
 	text = token;
 	return false; // break
       }
@@ -6877,7 +6877,7 @@ var TokenStream = Class.extend({
     var start_pos = (typeof start_p != "undefined")? start_p : this.pos;
     var text = null;
     this.iterWhile(start_pos + 1, function(pos, token){
-      if(Token.isText(token)){
+      if(token && Token.isText(token)){
 	text = token;
 	return false; // break
       }
@@ -8260,7 +8260,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
   },
   _yieldWord : function(line, word){
     var advance = word.getAdvance(line.flow, line.letterSpacing || 0);
-    var max_measure = this.context.getInlineMaxMeasure();
+    var max_measure = this.context.getInlineMaxMeasure() - line.fontSize;
 
     // if advance of this word is less than max-measure, just return.
     if(advance <= max_measure){

@@ -150,7 +150,7 @@ var TokenStream = Class.extend({
     var start_pos = (typeof start_pos != "undefined")? start_p : this.pos;
     var text = null;
     this.revIterWhile(start_pos - 1, function(pos, token){
-      if(Token.isText(token)){
+      if(token && Token.isText(token)){
 	text = token;
 	return false; // break
       }
@@ -162,7 +162,7 @@ var TokenStream = Class.extend({
     var start_pos = (typeof start_p != "undefined")? start_p : this.pos;
     var text = null;
     this.iterWhile(start_pos + 1, function(pos, token){
-      if(Token.isText(token)){
+      if(token && Token.isText(token)){
 	text = token;
 	return false; // break
       }

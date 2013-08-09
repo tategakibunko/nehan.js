@@ -205,7 +205,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
   },
   _yieldWord : function(line, word){
     var advance = word.getAdvance(line.flow, line.letterSpacing || 0);
-    var max_measure = this.context.getInlineMaxMeasure();
+    var max_measure = this.context.getInlineMaxMeasure() - line.fontSize;
 
     // if advance of this word is less than max-measure, just return.
     if(advance <= max_measure){
