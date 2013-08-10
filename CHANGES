@@ -9,6 +9,9 @@ Mark "!": change that can break compatibility with older version
 version 4.0.3, 2013/
 ==========================
 o improve inline performance
+o add Config.allowExternalClassName flag
+o now all class names that does not start with "nehan-" are discarded by default.
+(if use any class names for tag, enable Config.allowExternalClassName flag)
 
 version 4.0.2, 2013/07/09
 ==========================

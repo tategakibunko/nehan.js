@@ -7,5 +7,6 @@ var Config = {
   minBlockScaleDownRate : 65,
   useVerticalGlyphIfEnable: true,
   maxBase:36,
+  allowExternalClassName: false,
   lexingBufferLen : 2000
 };

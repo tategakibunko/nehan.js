@@ -16,33 +16,33 @@ var Catalog = (function(){
     });
 
     // style to test pseudo class
-    this.engine.setStyle("dl.test-pc dt:first-child", {
+    this.engine.setStyle("dl.nehan-test-pc dt:first-child", {
       "font-size":"2.0em"
     });
     // style to test pseudo element before
-    this.engine.setStyle(".test-pe-before::before", {
+    this.engine.setStyle(".nehan-test-pe-before::before", {
       "content":"this is content before",
       "font-size":"2em",
       "margin":{end:"1.0em"}
     });
     // style to test pseudo element after
-    this.engine.setStyle(".test-pe-after::after", {
+    this.engine.setStyle(".nehan-test-pe-after::after", {
       "content":"this is content after",
       "font-size":"2em",
       "margin":{start:"1.0em"}
     });
     // style to test pseudo element first-letter
-    this.engine.setStyle(".test-pe-first-letter::first-letter", {
+    this.engine.setStyle(".nehan-test-pe-first-letter::first-letter", {
       "font-size":"2em",
       "margin":{end:"0.1em"},
       "line-rate":1.0
     });
     // style to test pseudo element first-line
-    this.engine.setStyle(".test-pe-first-line::first-line", {
+    this.engine.setStyle(".nehan-test-pe-first-line::first-line", {
       "font-size":"1.6em"
     });
     // style to test letter-spacing
-    this.engine.setStyle(".test-wide-letter-spacing", {
+    this.engine.setStyle(".nehan-test-wide-letter-spacing", {
       "letter-spacing":"0.5em"
     });
     this.engine.setStyle(".bold-big-red-p", {
@@ -50,7 +50,7 @@ var Catalog = (function(){
       "font-weight":"bold",
       "color":"red"
     });
-    this.engine.setStyle(".various-border-color", {
+    this.engine.setStyle(".nehan-various-border-color", {
       "border-width":"2px",
       "border-style":{
 	"before":"solid",
@@ -65,14 +65,14 @@ var Catalog = (function(){
 	"end":"black"
       }
     });
-    this.engine.setStyle(".test-list-style-img", {
+    this.engine.setStyle(".nehan-test-list-style-img", {
       "list-style-image":{
 	url:"icon.png",
 	width:16,
 	height:16
       }
     });
-    this.engine.setStyle(".test-list-style-img img", {
+    this.engine.setStyle(".nehan-test-list-style-img img", {
       margin:0
     });
   }
@@ -329,7 +329,7 @@ var TestCode = {
       ].join("\n"),
 
       "list-style-image":[
-	"<ul class='test-list-style-img'>",
+	"<ul class='nehan-test-list-style-img'>",
 	list_items,
 	"</ul>"
       ].join("\n"),
@@ -487,7 +487,7 @@ var TestCode = {
       ].join("<br />"),
 
       "pseudo-first":[
-	"<dl class='test-pc'>",
+	"<dl class='nehan-test-pc'>",
 	"<dt>first term</dt>",
 	"<dd>desc1</dd>",
 	"<dt>second term</dt>",
@@ -496,15 +496,15 @@ var TestCode = {
       ].join("\n"),
 
       "pseudo-before":[
-	"<p class='test-pe-before'>hoge</p>"
+	"<p class='nehan-test-pe-before'>hoge</p>"
       ].join("\n"),
 
       "pseudo-after":[
-	"<p class='test-pe-after'>hoge</p>"
+	"<p class='nehan-test-pe-after'>hoge</p>"
       ].join("\n"),
 
       "pseudo-first-letter1":[
-	"<p class='test-pe-first-letter'>",
+	"<p class='nehan-test-pe-first-letter'>",
 	text_short,
 	"</p>"
       ].join("\n"),
@@ -516,19 +516,19 @@ var TestCode = {
       ].join("\n"),
 
       "pseudo-first-line":[
-	"<p class='test-pe-first-line'>",
+	"<p class='nehan-test-pe-first-line'>",
 	text_large,
 	"</p>"
       ].join("\n"),
 
       "wide-letter-spacing":[
-	"<p class='test-wide-letter-spacing'>",
+	"<p class='nehan-test-wide-letter-spacing'>",
 	text_large + " abcd",
 	"</p>"
       ].join("\n"),
 
       "various-border-color":[
-	"<p class='various-border-color'>",
+	"<p class='nehan-various-border-color'>",
 	text_large,
 	"</p>"
       ].join("\n")

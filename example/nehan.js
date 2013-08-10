@@ -45,6 +45,7 @@ var Config = {
   minBlockScaleDownRate : 65,
   useVerticalGlyphIfEnable: true,
   maxBase:36,
+  allowExternalClassName: false,
   lexingBufferLen : 2000
 };
 
@@ -2394,6 +2395,11 @@ var Tag = (function (){
   var global_tag_id = 0;
   //var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+  var is_inline_style_not_allowed = function(name){
+    return List.exists(["padding", "margin", "border"], function(prop){
+      return name.indexOf(prop) >= 0;
+    });
+  };
 
   function Tag(src, content_raw){
     this._type = "tag";
@@ -2763,7 +2769,13 @@ var Tag = (function (){
     // => ["hi", "hey"]
     _parseClasses : function(class_value){
       class_value = Utils.trim(class_value.replace(/\s+/g, " "));
-      return (class_value === "")? [] : class_value.split(/\s+/);
+      var classes = (class_value === "")? [] : class_value.split(/\s+/);
+      if(Config.allowExternalClassName){
+	return classes;
+      }
+      return List.filter(classes, function(klass){
+	return klass.indexOf("nehan") >= 0;
+      });
     },
     // <p class='hi hey'>
     // => [".hi", ".hey"]
@@ -2803,8 +2815,10 @@ var Tag = (function (){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]);
-	  var value = Utils.trim(nv[1]);
-	  dynamic_attr[prop] = value;
+	  if(!is_inline_style_not_allowed(prop)){
+	    var value = Utils.trim(nv[1]);
+	    dynamic_attr[prop] = value;
+	  }
 	}
       });
     },
