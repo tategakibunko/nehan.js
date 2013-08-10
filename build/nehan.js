@@ -7878,7 +7878,7 @@ var InlineContext = (function(){
       return tokens;
     },
     _createEmptyLine : function(){
-      this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxFontSize);
+      this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.line.fontSize);
       this.line.setInlineElements([], this.lineMeasure);
       return this.line;
     },
