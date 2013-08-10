@@ -6332,7 +6332,7 @@ var DocumentContext = (function(){
     getLocalPageNo : function(){
       return this.localPageNo;
     },
-    // stream contextx
+    // stream context
     getStream : function(){
       return this.stream;
     },
@@ -6470,6 +6470,12 @@ var DocumentContext = (function(){
     },
     setLineBreak : function(){
       this.inlineContext.setLineBreak();
+    },
+    isJustified : function(){
+      return this.inlineContext.isJustified();
+    },
+    restartInlineContext : function(max_measure){
+      this.inlineContext.restart(max_measure);
     },
     addInlineElement : function(element){
       this.inlineContext.addElement(element);
@@ -6865,11 +6871,13 @@ var TokenStream = Class.extend({
     var start_pos = (typeof start_pos != "undefined")? start_p : this.pos;
     var text = null;
     this.revIterWhile(start_pos - 1, function(pos, token){
-      if(token && Token.isText(token)){
-	text = token;
-	return false; // break
+      if(!Token.isText(token)){
+        // blocked by recursive inline element.
+        // TODO: get tail element of recursive inline element.
+        return false;
       }
-      return true; // continue
+      text = token;
+      return false; // break
     });
     return text;
   },
@@ -6877,11 +6885,13 @@ var TokenStream = Class.extend({
     var start_pos = (typeof start_p != "undefined")? start_p : this.pos;
     var text = null;
     this.iterWhile(start_pos + 1, function(pos, token){
-      if(token && Token.isText(token)){
-	text = token;
-	return false; // break
+      if(!Token.isText(token)){
+        // blocked by recursive inline element.
+        // TODO: get tail element of recursive inline element.
+        return false;
       }
-      return true; // continue
+      text = token;
+      return false; // break
     });
     return text;
   },
@@ -7541,12 +7551,14 @@ var InlineContext = (function(){
     this.lastToken = null;
     this.prevText = null;
     this.lastText = null;
+    this._justified = false;
   }
 
   InlineContext.prototype = {
-    updateMaxMeasure : function(measure){
+    restart : function(measure){
       this.maxMeasure = measure - this.textIndent;
       this.lineMeasure = measure;
+      this._justified = false;
     },
     isLineStartPos : function(element){
       var ptr = this.line;
@@ -7557,6 +7569,9 @@ var InlineContext = (function(){
 	ptr = ptr.parent;
       }
       return true;
+    },
+    isJustified : function(){
+      return this._justified;
     },
     addElement : function(element){
       var advance = this._getElementAdvance(element);
@@ -7603,8 +7618,9 @@ var InlineContext = (function(){
       if(this._isOverWithoutLineBreak()){
 	tokens = this._justify(tokens, this.lastToken);
 	if(tokens.length !== old_len){
-	  this.curMeasure = this.line.childMeasure = List.sum(tokens, function(token){
-	    return self._getElementAdvance(token);
+	  this._justified = true;
+	  this.curMeasure = this.line.childMeasure = List.fold(tokens, 0, function(sum, token){
+	    return sum + self._getElementAdvance(token);
 	  });
 	}
       }
@@ -7613,21 +7629,14 @@ var InlineContext = (function(){
     getNextToken : function(){
       var token = this.stream.get();
 
-      // skip head half space when
-      // 1. first token of line is a half space and
-      // 2. next text token is a word.
-      if(token && this._isLineStart() && Token.isChar(token) && token.isHalfSpaceChar()){
-	var next = this.stream.findTextNext(this.lineStartPos);
-	if(next && Token.isWord(next)){
-	  token = this.stream.get();
-	}
-      }
-      this.lastToken = token;
+      // TODO:
+      // skip head space before head word token.
+      // example: &nbsp;&nbsp;aaa -> aaa
 
+      this.lastToken = token;
       if(token && Token.isText(token)){
 	this._setKerning(token);
       }
-
       return token;
     },
     getRestMeasure : function(){
@@ -8079,10 +8088,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
   },
   _onLastLine : function(line){
   },
-  _isCacheEnableElement : function(element){
-    if(Token.isChar(element)){
-      return !element.isHeadNg();
-    }
+  _isEnableElement : function(element){
     if(element instanceof Box){
       return element.getContentExtent() > 0 && element.getContentMeasure() > 0;
     }
@@ -8111,7 +8117,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       return line;
     }
     // restart line context with new max-measure.
-    this.context.inlineContext.updateMaxMeasure(parent.getContentMeasure());
+    this.context.restartInlineContext(parent.getContentMeasure());
     return this._yieldInlinesTo(line);
   },
   _yieldInlinesTo : function(parent){
@@ -8151,9 +8157,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       } catch(e){
 	if(e === "OverflowInline"){
 	  end_after = true;
-	  if(this._isCacheEnableElement(element)){
-	    this.cachedElement = element;
-	  }
+	  this.cachedElement = this._isEnableElement(element)? element : null;
 	}
 	break;
       }
@@ -8169,6 +8173,9 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     line.endAfter = end_after;
     this._onCompleteLine(line);
 
+    if(this.context.isJustified()){
+      this.cachedElement = null;
+    }
     if(!this.hasNext()){
       this._onLastLine(line);
     }
@@ -8260,7 +8267,8 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
   },
   _yieldWord : function(line, word){
     var advance = word.getAdvance(line.flow, line.letterSpacing || 0);
-    var max_measure = this.context.getInlineMaxMeasure() - line.fontSize;
+    //var max_measure = this.context.getInlineMaxMeasure() - line.fontSize;
+    var max_measure = this.context.getInlineMaxMeasure();
 
     // if advance of this word is less than max-measure, just return.
     if(advance <= max_measure){

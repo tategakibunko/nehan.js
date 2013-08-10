@@ -150,11 +150,13 @@ var TokenStream = Class.extend({
     var start_pos = (typeof start_pos != "undefined")? start_p : this.pos;
     var text = null;
     this.revIterWhile(start_pos - 1, function(pos, token){
-      if(token && Token.isText(token)){
-	text = token;
-	return false; // break
+      if(!Token.isText(token)){
+        // blocked by recursive inline element.
+        // TODO: get tail element of recursive inline element.
+        return false;
       }
-      return true; // continue
+      text = token;
+      return false; // break
     });
     return text;
   },
@@ -162,11 +164,13 @@ var TokenStream = Class.extend({
     var start_pos = (typeof start_p != "undefined")? start_p : this.pos;
     var text = null;
     this.iterWhile(start_pos + 1, function(pos, token){
-      if(token && Token.isText(token)){
-	text = token;
-	return false; // break
+      if(!Token.isText(token)){
+        // blocked by recursive inline element.
+        // TODO: get tail element of recursive inline element.
+        return false;
       }
-      return true; // continue
+      text = token;
+      return false; // break
     });
     return text;
   },

@@ -14,12 +14,14 @@ var InlineContext = (function(){
     this.lastToken = null;
     this.prevText = null;
     this.lastText = null;
+    this._justified = false;
   }
 
   InlineContext.prototype = {
-    updateMaxMeasure : function(measure){
+    restart : function(measure){
       this.maxMeasure = measure - this.textIndent;
       this.lineMeasure = measure;
+      this._justified = false;
     },
     isLineStartPos : function(element){
       var ptr = this.line;
@@ -30,6 +32,9 @@ var InlineContext = (function(){
 	ptr = ptr.parent;
       }
       return true;
+    },
+    isJustified : function(){
+      return this._justified;
     },
     addElement : function(element){
       var advance = this._getElementAdvance(element);
@@ -76,8 +81,9 @@ var InlineContext = (function(){
       if(this._isOverWithoutLineBreak()){
 	tokens = this._justify(tokens, this.lastToken);
 	if(tokens.length !== old_len){
-	  this.curMeasure = this.line.childMeasure = List.sum(tokens, function(token){
-	    return self._getElementAdvance(token);
+	  this._justified = true;
+	  this.curMeasure = this.line.childMeasure = List.fold(tokens, 0, function(sum, token){
+	    return sum + self._getElementAdvance(token);
 	  });
 	}
       }
@@ -86,21 +92,14 @@ var InlineContext = (function(){
     getNextToken : function(){
       var token = this.stream.get();
 
-      // skip head half space when
-      // 1. first token of line is a half space and
-      // 2. next text token is a word.
-      if(token && this._isLineStart() && Token.isChar(token) && token.isHalfSpaceChar()){
-	var next = this.stream.findTextNext(this.lineStartPos);
-	if(next && Token.isWord(next)){
-	  token = this.stream.get();
-	}
-      }
-      this.lastToken = token;
+      // TODO:
+      // skip head space before head word token.
+      // example: &nbsp;&nbsp;aaa -> aaa
 
+      this.lastToken = token;
       if(token && Token.isText(token)){
 	this._setKerning(token);
       }
-
       return token;
     },
     getRestMeasure : function(){

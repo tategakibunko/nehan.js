@@ -24,10 +24,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
   },
   _onLastLine : function(line){
   },
-  _isCacheEnableElement : function(element){
-    if(Token.isChar(element)){
-      return !element.isHeadNg();
-    }
+  _isEnableElement : function(element){
     if(element instanceof Box){
       return element.getContentExtent() > 0 && element.getContentMeasure() > 0;
     }
@@ -56,7 +53,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       return line;
     }
     // restart line context with new max-measure.
-    this.context.inlineContext.updateMaxMeasure(parent.getContentMeasure());
+    this.context.restartInlineContext(parent.getContentMeasure());
     return this._yieldInlinesTo(line);
   },
   _yieldInlinesTo : function(parent){
@@ -96,9 +93,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       } catch(e){
 	if(e === "OverflowInline"){
 	  end_after = true;
-	  if(this._isCacheEnableElement(element)){
-	    this.cachedElement = element;
-	  }
+	  this.cachedElement = this._isEnableElement(element)? element : null;
 	}
 	break;
       }
@@ -114,6 +109,9 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     line.endAfter = end_after;
     this._onCompleteLine(line);
 
+    if(this.context.isJustified()){
+      this.cachedElement = null;
+    }
     if(!this.hasNext()){
       this._onLastLine(line);
     }
@@ -205,7 +203,8 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
   },
   _yieldWord : function(line, word){
     var advance = word.getAdvance(line.flow, line.letterSpacing || 0);
-    var max_measure = this.context.getInlineMaxMeasure() - line.fontSize;
+    //var max_measure = this.context.getInlineMaxMeasure() - line.fontSize;
+    var max_measure = this.context.getInlineMaxMeasure();
 
     // if advance of this word is less than max-measure, just return.
     if(advance <= max_measure){

@@ -37,7 +37,7 @@ var DocumentContext = (function(){
     getLocalPageNo : function(){
       return this.localPageNo;
     },
-    // stream contextx
+    // stream context
     getStream : function(){
       return this.stream;
     },
@@ -175,6 +175,12 @@ var DocumentContext = (function(){
     },
     setLineBreak : function(){
       this.inlineContext.setLineBreak();
+    },
+    isJustified : function(){
+      return this.inlineContext.isJustified();
+    },
+    restartInlineContext : function(max_measure){
+      this.inlineContext.restart(max_measure);
     },
     addInlineElement : function(element){
       this.inlineContext.addElement(element);
