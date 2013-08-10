@@ -153,10 +153,14 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     if(Token.isText(token)){
       return this._yieldText(line, token);
     }
+    if(token.isMetaTag()){
+      return Exceptions.IGNORE;
+    }
     var tag_name = token.getName();
     if(tag_name === "br"){
       return Exceptions.LINE_BREAK;
     }
+    /*
     if(tag_name === "script"){
       this.context.addScript(token);
       return Exceptions.IGNORE;
@@ -165,6 +169,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       this.context.addStyle(token);
       return Exceptions.IGNORE;
     }
+    */
     if(tag_name === "first-letter"){
       this.context.inheritMarkup(token);
     }

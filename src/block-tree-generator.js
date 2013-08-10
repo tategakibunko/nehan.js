@@ -93,16 +93,20 @@ var BlockTreeGenerator = ElementGenerator.extend({
     if(token === null){
       return Exceptions.BUFFER_END;
     }
+    var is_tag = Token.isTag(token);
     if(Token.isChar(token) && token.isNewLineChar()){
       return Exceptions.IGNORE;
     }
-    if(Token.isTag(token) && token.isPageBreakTag()){
+    if(is_tag && token.isPageBreakTag()){
       return Exceptions.PAGE_BREAK;
     }
-    if(Token.isTag(token)){
+    if(is_tag && token.isMetaTag()){
+      return Exceptions.IGNORE;
+    }
+    if(is_tag){
       this.context.inheritMarkup(token);
     }
-    if(Token.isTag(token) && token.hasStaticSize() && token.isBlock()){
+    if(is_tag && token.hasStaticSize() && token.isBlock()){
       var static_element = this._yieldStaticElement(parent, token);
       if(typeof static_element === "number"){ // exception
 	return static_element;

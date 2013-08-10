@@ -312,6 +312,9 @@ var Tag = (function (){
       var name = this.getName();
       return name === "end-page" || name === "page-break";
     },
+    isMetaTag : function(){
+      return this.getCssAttr("meta") === "true";
+    },
     isSameTag : function(dst){
       return this._gtid === dst._gtid;
     },
