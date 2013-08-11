@@ -36,8 +36,8 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
     var max_child = List.maxobj(child_pages, function(child_page){
       return (child_page instanceof Box)? child_page.getContentExtent() : 0;
     });
-    var max_content_extent = max_child.getContentExtent();
-    var max_box_extent = max_child.getBoxExtent();
+    var max_content_extent = max_child? max_child.getContentExtent() : 0;
+    var max_box_extent = max_child? max_child.getBoxExtent() : 0;
 
     wrap_page.setContentExtent(child_flow, max_box_extent);
     
