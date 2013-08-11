@@ -22,8 +22,6 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     line.setMaxExtent(this.context.getInlineMaxExtent());
     line.setMaxFontSize(this.context.getInlineMaxFontSize());
   },
-  _onLastLine : function(line){
-  },
   _isEnableElement : function(element){
     if(element instanceof Box){
       return element.getContentExtent() > 0 && element.getContentMeasure() > 0;
@@ -111,9 +109,6 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
 
     if(this.context.isJustified()){
       this.cachedElement = null;
-    }
-    if(!this.hasNext()){
-      this._onLastLine(line);
     }
 
     if(this.context.blockContext && this.context.getRestExtent() < line.getBoxExtent(parent.flow)){
