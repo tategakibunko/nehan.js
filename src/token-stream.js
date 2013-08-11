@@ -147,7 +147,7 @@ var TokenStream = Class.extend({
     }
   },
   findTextPrev : function(start_p){
-    var start_pos = (typeof start_pos != "undefined")? start_p : this.pos;
+    var start_pos = (typeof start_p != "undefined")? start_p : this.pos;
     var text = null;
     this.revIterWhile(start_pos - 1, function(pos, token){
       if(token){

@@ -6885,7 +6885,7 @@ var TokenStream = Class.extend({
     }
   },
   findTextPrev : function(start_p){
-    var start_pos = (typeof start_pos != "undefined")? start_p : this.pos;
+    var start_pos = (typeof start_p != "undefined")? start_p : this.pos;
     var text = null;
     this.revIterWhile(start_pos - 1, function(pos, token){
       if(token){
@@ -7781,7 +7781,7 @@ var InlineContext = (function(){
     },
     _justify : function(tokens, last_token){
       var head_token = last_token;
-      var tail_token = this.stream.findTextPrev();
+      var tail_token = last_token? this.stream.findTextPrev(last_token.pos) : null;
       var backup_pos = this.stream.getPos();
 
       // head text of next line meets head-NG.

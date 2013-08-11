@@ -221,7 +221,7 @@ var InlineContext = (function(){
     },
     _justify : function(tokens, last_token){
       var head_token = last_token;
-      var tail_token = this.stream.findTextPrev();
+      var tail_token = last_token? this.stream.findTextPrev(last_token.pos) : null;
       var backup_pos = this.stream.getPos();
 
       // head text of next line meets head-NG.
