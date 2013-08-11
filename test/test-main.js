@@ -1,5 +1,8 @@
 var testEngine = Nehan.setup({
   test:true,
+  config:{
+    allowExternalClassName:true
+  },
   layout:{
     fontSize:16
   }
