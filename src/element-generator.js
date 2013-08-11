@@ -75,12 +75,15 @@ var ElementGenerator = Class.extend({
     }
   },
   _createTableRowGenerator : function(parent, tag){
-    var child_count = tag.tableChilds? tag.tableChilds.length : 1;
-    var partition = parent.partition.getPartition(child_count);
-    var context2 = this.context.createBlockRoot(tag); // tr
-    return new ParallelGenerator(List.map(tag.tableChilds, function(td){
-      return new ParaChildGenerator(context2.createBlockRoot(td)); // tr -> td
-    }), partition, context2);
+    if(tag.tableChilds && parent.partition){
+      var child_count = tag.tableChilds.length;
+      var partition = parent.partition.getPartition(child_count);
+      var context2 = this.context.createBlockRoot(tag); // tr
+      return new ParallelGenerator(List.map(tag.tableChilds, function(td){
+	return new ParaChildGenerator(context2.createBlockRoot(td)); // tr -> td
+      }), partition, context2);
+    }
+    return new ChildBlockTreeGenerator(this.context.createBlockRoot(tag));
   },
   _createListItemGenerator : function(parent, tag){
     var list_style = parent.listStyle || null;
