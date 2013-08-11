@@ -10,8 +10,7 @@ version 4.0.3, 2013/
 ==========================
 o improve inline performance
 o add Config.allowExternalClassName flag
-o now all class names that does not start with "nehan-" are discarded by default.
-(if use any class names for tag, enable Config.allowExternalClassName flag)
+o now nth-child, nth-of-type available as functional value.
 
 version 4.0.2, 2013/07/09
 ==========================
