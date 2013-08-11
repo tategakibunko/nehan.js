@@ -1,11 +1,10 @@
 var Exceptions = {
-  PAGE_BREAK:2,
-  LINE_BREAK:3,
-  BUFFER_END:4,
-  SINGLE_RETRY:5,
-  BREAK:6,
-  IGNORE:7,
-  FORCE_TERMINATE:8,
+  PAGE_BREAK:1,
+  LINE_BREAK:2,
+  BUFFER_END:3,
+  SINGLE_RETRY:4,
+  IGNORE:5,
+  FORCE_TERMINATE:6,
   toString : function(num){
     for(var prop in this){
       if(this[prop] === num){

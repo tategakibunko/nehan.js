@@ -44,7 +44,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
 	  this.context.pushBackToken();
 	  page.breakAfter = true;
 	  break;
-	} else if(element == Exceptions.BREAK){
+	} else if(element == Exceptions.PAGE_BREAK){
 	  page.breakAfter = true;
 	  break;
 	} else {

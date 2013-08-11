@@ -1499,13 +1499,12 @@ var Args = {
 };
 
 var Exceptions = {
-  PAGE_BREAK:2,
-  LINE_BREAK:3,
-  BUFFER_END:4,
-  SINGLE_RETRY:5,
-  BREAK:6,
-  IGNORE:7,
-  FORCE_TERMINATE:8,
+  PAGE_BREAK:1,
+  LINE_BREAK:2,
+  BUFFER_END:3,
+  SINGLE_RETRY:4,
+  IGNORE:5,
+  FORCE_TERMINATE:6,
   toString : function(num){
     for(var prop in this){
       if(this[prop] === num){
@@ -6889,12 +6888,15 @@ var TokenStream = Class.extend({
     var start_pos = (typeof start_pos != "undefined")? start_p : this.pos;
     var text = null;
     this.revIterWhile(start_pos - 1, function(pos, token){
-      if(!Token.isText(token)){
-        // blocked by recursive inline element.
-        // TODO: get tail element of recursive inline element.
-        return false;
+      if(token){
+	if(!Token.isText(token)){
+          // blocked by recursive inline element.
+          // TODO: get tail element of recursive inline element.
+          return false;
+	}
+	text = token;
+	return false; // break
       }
-      text = token;
       return false; // break
     });
     return text;
@@ -6903,12 +6905,15 @@ var TokenStream = Class.extend({
     var start_pos = (typeof start_p != "undefined")? start_p : this.pos;
     var text = null;
     this.iterWhile(start_pos + 1, function(pos, token){
-      if(!Token.isText(token)){
-        // blocked by recursive inline element.
-        // TODO: get tail element of recursive inline element.
-        return false;
+      if(token){
+	if(!Token.isText(token)){
+          // blocked by recursive inline element.
+          // TODO: get tail element of recursive inline element.
+          return false;
+	}
+	text = token;
+	return false; // break
       }
-      text = token;
       return false; // break
     });
     return text;
@@ -7588,6 +7593,11 @@ var InlineContext = (function(){
       }
       return true;
     },
+    skipBr : function(){
+      this.stream.skipIf(function(token){
+	return token && Token.isTag(token) && token.getName() === "br";
+      });
+    },
     isJustified : function(){
       return this._justified;
     },
@@ -7597,6 +7607,7 @@ var InlineContext = (function(){
 	if(advance > 0 && this.isLineStartPos(element)){
 	  throw "LayoutError";
 	}
+	this.skipBr();
 	throw "OverflowInline";
       }
       var font_size = this._getElementFontSize(element);
@@ -7617,6 +7628,7 @@ var InlineContext = (function(){
 	this.curMeasure += advance;
       }
       if(this.curMeasure === this.maxMeasure){
+	this.skipBr();
 	throw "FinishInline";
       }
     },
@@ -7625,7 +7637,7 @@ var InlineContext = (function(){
       this.lineBreak = true;
     },
     createLine : function(){
-      if(this.curMeasure === 0){
+      if(this.curMeasure === 0 && this.line.isTextLineRoot()){
 	return this._createEmptyLine();
       }
       var tokens = this.line.getChildsNormal();
@@ -7778,9 +7790,7 @@ var InlineContext = (function(){
 	if(this.stream.getPos() != backup_pos){ // some text is moved by head-NG.
 	  tail_token = this.stream.findTextPrev(); // search tail_token from new stream position pointing to new head pos.
 	  // if new head is single br, this must be included in current line, so skip it.
-	  this.stream.skipIf(function(token){
-	    return token && Token.isTag(token) && token.getName() === "br";
-	  });
+	  this.skipBr();
 	}
       }
       // tail text of this line meets tail-NG.
@@ -7979,7 +7989,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
 	  this.context.pushBackToken();
 	  page.breakAfter = true;
 	  break;
-	} else if(element == Exceptions.BREAK){
+	} else if(element == Exceptions.PAGE_BREAK){
 	  page.breakAfter = true;
 	  break;
 	} else {
@@ -8204,7 +8214,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
 
     if(this.context.blockContext && this.context.getRestExtent() < line.getBoxExtent(parent.flow)){
       this.cachedLine = line;
-      return Exceptions.BREAK;
+      return Exceptions.PAGE_BREAK;
     }
     return line;
   },

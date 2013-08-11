@@ -118,7 +118,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
 
     if(this.context.blockContext && this.context.getRestExtent() < line.getBoxExtent(parent.flow)){
       this.cachedLine = line;
-      return Exceptions.BREAK;
+      return Exceptions.PAGE_BREAK;
     }
     return line;
   },

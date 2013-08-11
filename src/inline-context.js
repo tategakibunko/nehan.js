@@ -33,6 +33,11 @@ var InlineContext = (function(){
       }
       return true;
     },
+    skipBr : function(){
+      this.stream.skipIf(function(token){
+	return token && Token.isTag(token) && token.getName() === "br";
+      });
+    },
     isJustified : function(){
       return this._justified;
     },
@@ -42,6 +47,7 @@ var InlineContext = (function(){
 	if(advance > 0 && this.isLineStartPos(element)){
 	  throw "LayoutError";
 	}
+	this.skipBr();
 	throw "OverflowInline";
       }
       var font_size = this._getElementFontSize(element);
@@ -62,6 +68,7 @@ var InlineContext = (function(){
 	this.curMeasure += advance;
       }
       if(this.curMeasure === this.maxMeasure){
+	this.skipBr();
 	throw "FinishInline";
       }
     },
@@ -70,7 +77,7 @@ var InlineContext = (function(){
       this.lineBreak = true;
     },
     createLine : function(){
-      if(this.curMeasure === 0){
+      if(this.curMeasure === 0 && this.line.isTextLineRoot()){
 	return this._createEmptyLine();
       }
       var tokens = this.line.getChildsNormal();
@@ -223,9 +230,7 @@ var InlineContext = (function(){
 	if(this.stream.getPos() != backup_pos){ // some text is moved by head-NG.
 	  tail_token = this.stream.findTextPrev(); // search tail_token from new stream position pointing to new head pos.
 	  // if new head is single br, this must be included in current line, so skip it.
-	  this.stream.skipIf(function(token){
-	    return token && Token.isTag(token) && token.getName() === "br";
-	  });
+	  this.skipBr();
 	}
       }
       // tail text of this line meets tail-NG.
