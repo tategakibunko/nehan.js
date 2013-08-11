@@ -25,7 +25,7 @@ var Box = (function(){
 	Args.copy(css, this.color.getCss());
       }
       if(this.background){
-	Args.copy(css, this.background.getCss());
+	Args.copy(css, this.background.getCss(this.flow));
       }
       if(this.fontWeight){
 	Args.copy(css, this.fontWeight.getCss());

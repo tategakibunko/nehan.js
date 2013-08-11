@@ -1,4 +1,6 @@
 var BackgroundRepeat2d = (function(){
+  // inline: BackgroundRepeat
+  // block: BackgroundRepeat
   function BackgroundRepeat2d(inline, block){
     this.inline = inline;
     this.block = block;
@@ -21,7 +23,9 @@ var BackgroundRepeat2d = (function(){
       if(!this.inline.isSingleValue()){
 	values.push(this.block);
       }
-      return List.map(values, function(value){return value.getCssValue(); }).join(" ");
+      return List.map(values, function(value){
+	return value.getCssValue(flow);
+      }).join(" ");
     }
   };
 

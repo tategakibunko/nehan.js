@@ -9,7 +9,8 @@ var Background = (function(){
 	Args.copy(css, this.pos.getCss(flow));
       }
       if(this.repeat){
-	Args.copy(css, this.repeat.getCss(flow));
+	css["background-repeat"] = this.repeat.getCssValue(flow);
+	//Args.copy(css, this.repeat.getCss(flow));
       }
       if(this.origin){
 	css["background-origin"] = this.origin;

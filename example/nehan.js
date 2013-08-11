@@ -4082,6 +4082,8 @@ var BackgroundRepeat = (function(){
 
 
 var BackgroundRepeat2d = (function(){
+  // inline: BackgroundRepeat
+  // block: BackgroundRepeat
   function BackgroundRepeat2d(inline, block){
     this.inline = inline;
     this.block = block;
@@ -4104,7 +4106,9 @@ var BackgroundRepeat2d = (function(){
       if(!this.inline.isSingleValue()){
 	values.push(this.block);
       }
-      return List.map(values, function(value){return value.getCssValue(); }).join(" ");
+      return List.map(values, function(value){
+	return value.getCssValue(flow);
+      }).join(" ");
     }
   };
 
@@ -4123,7 +4127,8 @@ var Background = (function(){
 	Args.copy(css, this.pos.getCss(flow));
       }
       if(this.repeat){
-	Args.copy(css, this.repeat.getCss(flow));
+	css["background-repeat"] = this.repeat.getCssValue(flow);
+	//Args.copy(css, this.repeat.getCss(flow));
       }
       if(this.origin){
 	css["background-origin"] = this.origin;
@@ -5106,7 +5111,7 @@ var Box = (function(){
 	Args.copy(css, this.color.getCss());
       }
       if(this.background){
-	Args.copy(css, this.background.getCss());
+	Args.copy(css, this.background.getCss(this.flow));
       }
       if(this.fontWeight){
 	Args.copy(css, this.fontWeight.getCss());
