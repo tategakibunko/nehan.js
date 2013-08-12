@@ -7791,7 +7791,9 @@ var InlineContext = (function(){
       var backup_pos = this.stream.getPos();
 
       // head text of next line meets head-NG.
-      if(head_token && Token.isChar(head_token) && head_token.isHeadNg()){
+      if(head_token &&
+	 Token.isChar(head_token) &&
+	 head_token.isHeadNg()){
 	tokens = this._justifyHead(tokens, head_token);
 	if(this.stream.getPos() != backup_pos){ // some text is moved by head-NG.
 	  tail_token = this.stream.findTextPrev(); // search tail_token from new stream position pointing to new head pos.
@@ -7800,7 +7802,12 @@ var InlineContext = (function(){
 	}
       }
       // tail text of this line meets tail-NG.
-      if(tail_token && head_token && tail_token.pos < head_token.pos && Token.isChar(tail_token) && tail_token.isTailNg()){
+      if(tail_token &&
+	 head_token &&
+	 tail_token.pos < head_token.pos &&
+	 Token.isChar(head_token) &&
+	 Token.isChar(tail_token) &&
+	 tail_token.isTailNg()){
 	tokens = this._justifyTail(tokens, tail_token);
       }
       return tokens;
