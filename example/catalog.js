@@ -40,6 +40,7 @@ var Catalog = (function(){
     });
     // style to test pseudo element first-line
     this.engine.setStyle(".nehan-test-pe-first-line::first-line", {
+      "display":"inline",
       "font-size":"1.6em"
     });
     // style to test letter-spacing

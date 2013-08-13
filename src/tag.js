@@ -155,6 +155,9 @@ var Tag = (function (){
     getNext : function(){
       return this.next || null;
     },
+    getDisplay : function(){
+      return this.getCssAttr("display", "block"); // display is block if not defined.
+    },
     getParentChilds : function(){
       return this.parent? this.parent.getChilds() : [];
     },
@@ -278,14 +281,14 @@ var Tag = (function (){
       if(this.isPush() || this.isPull()){
 	return true;
       }
-      return this.getCssAttr("display", "block") === "block";
+      return this.getDisplay() === "block";
     },
     isInline : function(){
-      var display = this.getCssAttr("display", "inline");
+      var display = this.getDisplay();
       return (display === "inline" || display === "inline-block");
     },
     isInlineBlock : function(){
-      return this.getCssAttr("display", "inline") === "inline-block";
+      return this.getDisplay() === "inline-block";
     },
     isSingleTag : function(){
       return this.getCssAttr("single") === "true";
