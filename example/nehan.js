@@ -2669,7 +2669,7 @@ var Tag = (function (){
       if(this.isPush() || this.isPull()){
 	return true;
       }
-      return this.getCssAttr("display", "inline") === "block";
+      return this.getCssAttr("display", "block") === "block";
     },
     isInline : function(){
       var display = this.getCssAttr("display", "inline");

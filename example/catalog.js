@@ -33,6 +33,7 @@ var Catalog = (function(){
     });
     // style to test pseudo element first-letter
     this.engine.setStyle(".nehan-test-pe-first-letter::first-letter", {
+      "display":"inline",
       "font-size":"2em",
       "margin":{end:"0.1em"},
       "line-rate":1.0
