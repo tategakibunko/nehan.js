@@ -30,7 +30,7 @@ var HtmlLexer = (function (){
       return this.src;
     },
     getSeekPercent : function(seek_pos){
-      return Math.floor(100 * seek_pos / this.src.length);
+      return Math.round(100 * seek_pos / this.src.length);
     },
     _stepBuff : function(count){
       this.pos += count;

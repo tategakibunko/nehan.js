@@ -57,7 +57,7 @@ var Layout = {
   },
   getListMarkerSpacingSize : function(font_size){
     font_size = font_size || this.fontSize;
-    return Math.floor(font_size * this.listMarkerSpacingRate);
+    return Math.round(font_size * this.listMarkerSpacingRate);
   },
   getVertBlockDir : function(){
     return this.vert.split("-")[1];
@@ -69,7 +69,7 @@ var Layout = {
     var rt = Style.rt || null;
     var rt_font_size = rt? rt["font-size"] : null;
     if(rt === null || rt_font_size === null){
-      return Math.floor(this.rubyRate * base_font_size);
+      return Math.round(this.rubyRate * base_font_size);
     }
     return UnitSize.getUnitSize(rt_font_size, base_font_size);
   },

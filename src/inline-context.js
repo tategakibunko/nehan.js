@@ -344,7 +344,7 @@ var InlineContext = (function(){
       return this.line;
     },
     _createTextLine : function(tokens){
-      var ruby_extent = Math.floor(this.maxFontSize * (this.line.lineRate - 1));
+      var ruby_extent = Math.round(this.maxFontSize * (this.line.lineRate - 1));
       var max_text_extent = this.maxFontSize + ruby_extent;
       this.maxExtent = Math.max(this.maxExtent, max_text_extent);
       this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxExtent);

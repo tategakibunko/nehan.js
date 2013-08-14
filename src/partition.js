@@ -25,7 +25,7 @@ var Partition = (function(){
       }
       var total_size = List.sum(parts);
       var rest_size = max_size - total_size;
-      var auto_size = Math.floor(rest_size / auto_count);
+      var auto_size = Math.round(rest_size / auto_count);
       return List.map(parts, function(size){
 	return size? size : auto_size;
       });

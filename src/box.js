@@ -200,7 +200,7 @@ var Box = (function(){
       switch(this.textAlign){
       case "start": return indent;
       case "end": return indent + this.getRestContentMeasure();
-      case "center": return indent + Math.floor(this.getRestContentMeasure() / 2);
+      case "center": return indent + Math.round(this.getRestContentMeasure() / 2);
       default: return indent;
       }
     },
@@ -330,7 +330,7 @@ var Box = (function(){
     },
     splitMeasure : function(count){
       var measure = this.getContentMeasure();
-      var div_size = Math.floor(measure / count);
+      var div_size = Math.round(measure / count);
       var ret = [];
       for(var i = 0; i < count; i++){
 	ret.push(div_size);

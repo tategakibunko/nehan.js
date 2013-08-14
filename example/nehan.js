@@ -108,7 +108,7 @@ var Layout = {
   },
   getListMarkerSpacingSize : function(font_size){
     font_size = font_size || this.fontSize;
-    return Math.floor(font_size * this.listMarkerSpacingRate);
+    return Math.round(font_size * this.listMarkerSpacingRate);
   },
   getVertBlockDir : function(){
     return this.vert.split("-")[1];
@@ -120,7 +120,7 @@ var Layout = {
     var rt = Style.rt || null;
     var rt_font_size = rt? rt["font-size"] : null;
     if(rt === null || rt_font_size === null){
-      return Math.floor(this.rubyRate * base_font_size);
+      return Math.round(this.rubyRate * base_font_size);
     }
     return UnitSize.getUnitSize(rt_font_size, base_font_size);
   },
@@ -1252,17 +1252,17 @@ var UnitSize = {
     var str = (typeof val === "string")? val : String(val);
     if(str.indexOf("rem") > 0){
       var rem_scale = parseFloat(str.replace("rem",""));
-      return Math.floor(Layout.fontSize * rem_scale); // use root font-size
+      return Math.round(Layout.fontSize * rem_scale); // use root font-size
     }
     if(str.indexOf("em") > 0){
       var em_scale = parseFloat(str.replace("em",""));
-      return Math.floor(unit_size * em_scale);
+      return Math.round(unit_size * em_scale);
     }
     if(str.indexOf("pt") > 0){
-      return Math.floor(parseInt(str, 10) * 4 / 3);
+      return Math.round(parseInt(str, 10) * 4 / 3);
     }
     if(str.indexOf("%") > 0){
-      return Math.floor(unit_size * parseInt(str, 10) / 100);
+      return Math.round(unit_size * parseInt(str, 10) / 100);
     }
     var px = parseInt(str, 10);
     return isNaN(px)? 0 : px;
@@ -1270,7 +1270,7 @@ var UnitSize = {
   getBoxSize : function(val, unit_size, max_size){
     var str = (typeof val === "string")? val : String(val);
     if(str.indexOf("%") > 0){
-      var scaled_size = Math.floor(max_size * parseInt(str, 10) / 100);
+      var scaled_size = Math.round(max_size * parseInt(str, 10) / 100);
       return Math.min(max_size, scaled_size); // restrict less than maxMeasure
     }
     return this.getUnitSize(val, unit_size);
@@ -1341,7 +1341,7 @@ var MathUtils = {
     var work = decimal;
     while(work > 0){
       ret.unshift(work % base);
-      work = Math.floor(work / base);
+      work = Math.round(work / base);
     }
     return ret;
   }
@@ -2964,7 +2964,7 @@ var Char = (function(){
     },
     getCssVertHalfSpaceChar : function(line){
       var css = {};
-      var half = Math.floor(line.fontSize / 2);
+      var half = Math.round(line.fontSize / 2);
       css.height = half + "px";
       css["line-height"] = half + "px";
       return css;
@@ -2986,7 +2986,7 @@ var Char = (function(){
     },
     getVertHeight : function(font_size){
       var vscale = this.getVertScale();
-      return (vscale === 1)? font_size : Math.floor(font_size * vscale);
+      return (vscale === 1)? font_size : Math.round(font_size * vscale);
     },
     hasMetrics : function(){
       return (typeof this.bodySize != "undefined");
@@ -3006,18 +3006,18 @@ var Char = (function(){
     setMetrics : function(flow, font_size, is_bold){
       var is_vert = flow.isTextVertical();
       var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
-      this.bodySize = (step_scale != 1)? Math.floor(font_size * step_scale) : font_size;
+      this.bodySize = (step_scale != 1)? Math.round(font_size * step_scale) : font_size;
       if(this.spaceRateStart){
-	this.paddingStart = Math.floor(this.spaceRateStart * font_size);
+	this.paddingStart = Math.round(this.spaceRateStart * font_size);
       }
       if(this.spaceRateEnd){
-	this.paddingEnd = Math.floor(this.spaceRateEnd * font_size);
+	this.paddingEnd = Math.round(this.spaceRateEnd * font_size);
       }
       if(this.img && this.img === "tenten"){
 	this.bodySize = font_size;
       }
       if(!is_vert && !this.isRef && this.isHankaku()){
-	this.bodySize = Math.floor(font_size / 2);
+	this.bodySize = Math.round(font_size / 2);
       }
     },
     _setImg : function(img, vscale, hscale){
@@ -3269,10 +3269,10 @@ var Word = (function(){
     setMetricsHeader : function(flow, font_size, is_bold){
       var upper_len = this.countUpper();
       var lower_len = this.data.length - upper_len;
-      this.bodySize = Math.floor(lower_len * font_size * 0.5);
-      this.bodySize += Math.floor(upper_len * font_size * Layout.upperCaseRate);
+      this.bodySize = Math.round(lower_len * font_size * 0.5);
+      this.bodySize += Math.round(upper_len * font_size * Layout.upperCaseRate);
       if(is_bold){
-	this.bodySize += Math.floor(Layout.boldRate * this.bodySize);
+	this.bodySize += Math.round(Layout.boldRate * this.bodySize);
       }
     },
     setMetrics : function(flow, font_size, is_bold, is_header){
@@ -3280,9 +3280,9 @@ var Word = (function(){
 	this.setMetricsHeader(flow, font_size, is_bold);
 	return;
       }
-      this.bodySize = Math.floor(this.data.length * font_size * 0.5);
+      this.bodySize = Math.round(this.data.length * font_size * 0.5);
       if(is_bold){
-	this.bodySize += Math.floor(Layout.boldRate * this.bodySize);
+	this.bodySize += Math.round(Layout.boldRate * this.bodySize);
       }
     },
     getLetterCount : function(){
@@ -3296,9 +3296,9 @@ var Word = (function(){
     },
     // devide word by measure size and return first half of word.
     cutMeasure : function(font_size, measure){
-      var half_size = Math.floor(font_size / 2);
-      var this_half_count = Math.floor(this.bodySize / half_size);
-      var measure_half_count = Math.floor(measure / half_size);
+      var half_size = Math.round(font_size / 2);
+      var this_half_count = Math.round(this.bodySize / half_size);
+      var measure_half_count = Math.round(measure / half_size);
       if(this_half_count <= measure_half_count){
 	return this;
       }
@@ -3368,7 +3368,7 @@ var Ruby = (function(){
     },
     getCssVertRuby : function(line){
       var css = {};
-      css["margin-left"] = Math.floor((line.maxExtent - line.fontSize) / 2) + "px";
+      css["margin-left"] = Math.round((line.maxExtent - line.fontSize) / 2) + "px";
       css[line.flow.getPropExtent()] = this.getExtent(line.fontSize) + "px";
       css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
       return css;
@@ -3811,7 +3811,7 @@ var ListStyleType = (function(){
       return digit + "."; // add period as postfix.
     },
     getMarkerAdvance : function(flow, font_size, item_count){
-      var font_size_half = Math.floor(font_size / 2);
+      var font_size_half = Math.round(font_size / 2);
       var period_size = font_size_half;
       var marker_spacing_size = Layout.getListMarkerSpacingSize(font_size);
       var marker_font_size = this.isZenkaku()? font_size : font_size_half;
@@ -4826,7 +4826,7 @@ var Partition = (function(){
       }
       var total_size = List.sum(parts);
       var rest_size = max_size - total_size;
-      var auto_size = Math.floor(rest_size / auto_count);
+      var auto_size = Math.round(rest_size / auto_count);
       return List.map(parts, function(size){
 	return size? size : auto_size;
       });
@@ -4908,7 +4908,7 @@ var BoxSize = (function(){
       this[flow.getPropExtent()] += extent;
     },
     percentFrom : function(target_size){
-      return Math.floor(100 * this.width / target_size.width);
+      return Math.round(100 * this.width / target_size.width);
     },
     resizeWithin : function(flow, rest_size){
       var rest_measure = rest_size.getMeasure(flow);
@@ -4923,7 +4923,7 @@ var BoxSize = (function(){
       if(box_measure > rest_measure){
 	var slope = box_extent / box_measure; // extent per measure
 	var m_over = box_measure - rest_measure;
-	box_extent = Math.floor(box_extent - slope * m_over);
+	box_extent = Math.round(box_extent - slope * m_over);
 	box_measure = rest_measure;
       }
       return flow.getBoxSize(box_measure, box_extent);
@@ -5287,7 +5287,7 @@ var Box = (function(){
       switch(this.textAlign){
       case "start": return indent;
       case "end": return indent + this.getRestContentMeasure();
-      case "center": return indent + Math.floor(this.getRestContentMeasure() / 2);
+      case "center": return indent + Math.round(this.getRestContentMeasure() / 2);
       default: return indent;
       }
     },
@@ -5417,7 +5417,7 @@ var Box = (function(){
     },
     splitMeasure : function(count){
       var measure = this.getContentMeasure();
-      var div_size = Math.floor(measure / count);
+      var div_size = Math.round(measure / count);
       var ret = [];
       for(var i = 0; i < count; i++){
 	ret.push(div_size);
@@ -5733,7 +5733,7 @@ var HtmlLexer = (function (){
       return this.src;
     },
     getSeekPercent : function(seek_pos){
-      return Math.floor(100 * seek_pos / this.src.length);
+      return Math.round(100 * seek_pos / this.src.length);
     },
     _stepBuff : function(count){
       this.pos += count;
@@ -7913,7 +7913,7 @@ var InlineContext = (function(){
       return this.line;
     },
     _createTextLine : function(tokens){
-      var ruby_extent = Math.floor(this.maxFontSize * (this.line.lineRate - 1));
+      var ruby_extent = Math.round(this.maxFontSize * (this.line.lineRate - 1));
       var max_text_extent = this.maxFontSize + ruby_extent;
       this.maxExtent = Math.max(this.maxExtent, max_text_extent);
       this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxExtent);
@@ -9044,7 +9044,7 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
     });
   },
   evalHalfSpaceChar : function(line, chr){
-    var half = Math.floor(line.fontSize / 2);
+    var half = Math.round(line.fontSize / 2);
     return Html.tagWrap("div", "&nbsp;", {
       style:Css.toString(chr.getCssVertHalfSpaceChar(line))
     });
@@ -9391,7 +9391,7 @@ var PageGroupStream = PageStream.extend({
   // for example, first page group(size=4) consists of [0,1,2,3] cell pages.
   // so cell page nums '0..3' are equivalent to group page no '0'.
   getGroupPageNo : function(cell_page_no){
-    return Math.floor(cell_page_no / this.groupSize);
+    return Math.round(cell_page_no / this.groupSize);
   },
   _yield : function(){
     var group = new PageGroup(this.groupSize);

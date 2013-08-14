@@ -88,7 +88,7 @@ var Char = (function(){
     },
     getCssVertHalfSpaceChar : function(line){
       var css = {};
-      var half = Math.floor(line.fontSize / 2);
+      var half = Math.round(line.fontSize / 2);
       css.height = half + "px";
       css["line-height"] = half + "px";
       return css;
@@ -110,7 +110,7 @@ var Char = (function(){
     },
     getVertHeight : function(font_size){
       var vscale = this.getVertScale();
-      return (vscale === 1)? font_size : Math.floor(font_size * vscale);
+      return (vscale === 1)? font_size : Math.round(font_size * vscale);
     },
     hasMetrics : function(){
       return (typeof this.bodySize != "undefined");
@@ -130,18 +130,18 @@ var Char = (function(){
     setMetrics : function(flow, font_size, is_bold){
       var is_vert = flow.isTextVertical();
       var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
-      this.bodySize = (step_scale != 1)? Math.floor(font_size * step_scale) : font_size;
+      this.bodySize = (step_scale != 1)? Math.round(font_size * step_scale) : font_size;
       if(this.spaceRateStart){
-	this.paddingStart = Math.floor(this.spaceRateStart * font_size);
+	this.paddingStart = Math.round(this.spaceRateStart * font_size);
       }
       if(this.spaceRateEnd){
-	this.paddingEnd = Math.floor(this.spaceRateEnd * font_size);
+	this.paddingEnd = Math.round(this.spaceRateEnd * font_size);
       }
       if(this.img && this.img === "tenten"){
 	this.bodySize = font_size;
       }
       if(!is_vert && !this.isRef && this.isHankaku()){
-	this.bodySize = Math.floor(font_size / 2);
+	this.bodySize = Math.round(font_size / 2);
       }
     },
     _setImg : function(img, vscale, hscale){

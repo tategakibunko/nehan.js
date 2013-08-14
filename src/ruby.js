@@ -27,7 +27,7 @@ var Ruby = (function(){
     },
     getCssVertRuby : function(line){
       var css = {};
-      css["margin-left"] = Math.floor((line.maxExtent - line.fontSize) / 2) + "px";
+      css["margin-left"] = Math.round((line.maxExtent - line.fontSize) / 2) + "px";
       css[line.flow.getPropExtent()] = this.getExtent(line.fontSize) + "px";
       css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
       return css;

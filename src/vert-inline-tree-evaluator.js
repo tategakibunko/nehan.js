@@ -129,7 +129,7 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
     });
   },
   evalHalfSpaceChar : function(line, chr){
-    var half = Math.floor(line.fontSize / 2);
+    var half = Math.round(line.fontSize / 2);
     return Html.tagWrap("div", "&nbsp;", {
       style:Css.toString(chr.getCssVertHalfSpaceChar(line))
     });

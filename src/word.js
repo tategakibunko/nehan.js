@@ -43,10 +43,10 @@ var Word = (function(){
     setMetricsHeader : function(flow, font_size, is_bold){
       var upper_len = this.countUpper();
       var lower_len = this.data.length - upper_len;
-      this.bodySize = Math.floor(lower_len * font_size * 0.5);
-      this.bodySize += Math.floor(upper_len * font_size * Layout.upperCaseRate);
+      this.bodySize = Math.round(lower_len * font_size * 0.5);
+      this.bodySize += Math.round(upper_len * font_size * Layout.upperCaseRate);
       if(is_bold){
-	this.bodySize += Math.floor(Layout.boldRate * this.bodySize);
+	this.bodySize += Math.round(Layout.boldRate * this.bodySize);
       }
     },
     setMetrics : function(flow, font_size, is_bold, is_header){
@@ -54,9 +54,9 @@ var Word = (function(){
 	this.setMetricsHeader(flow, font_size, is_bold);
 	return;
       }
-      this.bodySize = Math.floor(this.data.length * font_size * 0.5);
+      this.bodySize = Math.round(this.data.length * font_size * 0.5);
       if(is_bold){
-	this.bodySize += Math.floor(Layout.boldRate * this.bodySize);
+	this.bodySize += Math.round(Layout.boldRate * this.bodySize);
       }
     },
     getLetterCount : function(){
@@ -70,9 +70,9 @@ var Word = (function(){
     },
     // devide word by measure size and return first half of word.
     cutMeasure : function(font_size, measure){
-      var half_size = Math.floor(font_size / 2);
-      var this_half_count = Math.floor(this.bodySize / half_size);
-      var measure_half_count = Math.floor(measure / half_size);
+      var half_size = Math.round(font_size / 2);
+      var this_half_count = Math.round(this.bodySize / half_size);
+      var measure_half_count = Math.round(measure / half_size);
       if(this_half_count <= measure_half_count){
 	return this;
       }

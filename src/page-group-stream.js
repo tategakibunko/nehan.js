@@ -11,7 +11,7 @@ var PageGroupStream = PageStream.extend({
   // for example, first page group(size=4) consists of [0,1,2,3] cell pages.
   // so cell page nums '0..3' are equivalent to group page no '0'.
   getGroupPageNo : function(cell_page_no){
-    return Math.floor(cell_page_no / this.groupSize);
+    return Math.round(cell_page_no / this.groupSize);
   },
   _yield : function(){
     var group = new PageGroup(this.groupSize);

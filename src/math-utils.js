@@ -7,7 +7,7 @@ var MathUtils = {
     var work = decimal;
     while(work > 0){
       ret.unshift(work % base);
-      work = Math.floor(work / base);
+      work = Math.round(work / base);
     }
     return ret;
   }

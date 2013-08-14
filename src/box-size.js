@@ -52,7 +52,7 @@ var BoxSize = (function(){
       this[flow.getPropExtent()] += extent;
     },
     percentFrom : function(target_size){
-      return Math.floor(100 * this.width / target_size.width);
+      return Math.round(100 * this.width / target_size.width);
     },
     resizeWithin : function(flow, rest_size){
       var rest_measure = rest_size.getMeasure(flow);
@@ -67,7 +67,7 @@ var BoxSize = (function(){
       if(box_measure > rest_measure){
 	var slope = box_extent / box_measure; // extent per measure
 	var m_over = box_measure - rest_measure;
-	box_extent = Math.floor(box_extent - slope * m_over);
+	box_extent = Math.round(box_extent - slope * m_over);
 	box_measure = rest_measure;
       }
       return flow.getBoxSize(box_measure, box_extent);

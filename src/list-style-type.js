@@ -64,7 +64,7 @@ var ListStyleType = (function(){
       return digit + "."; // add period as postfix.
     },
     getMarkerAdvance : function(flow, font_size, item_count){
-      var font_size_half = Math.floor(font_size / 2);
+      var font_size_half = Math.round(font_size / 2);
       var period_size = font_size_half;
       var marker_spacing_size = Layout.getListMarkerSpacingSize(font_size);
       var marker_font_size = this.isZenkaku()? font_size : font_size_half;
