@@ -11,20 +11,17 @@
 /* reset */
 div, span{
   vertical-align:baseline;
-  font:inherit;
   font-size:100%;
   margin:0;
   padding:0;
   border:0;
 }
-
-/* block elements */
-.nehan-box{
-  font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック',monospace;
+.nehan-text-line-vert,
+.nehan-empha-char{
+  font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace;
 }
 .nehan-text-line-vert{
   line-height:1em;
-  font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho',monospace;
 }
 .nehan-text-line-hori{
   overflow:visible;
@@ -32,63 +29,14 @@ div, span{
 .nehan-text-line-vert a{
   text-decoration:none;
 }
-.nehan-blockquote{
-  color:#666;
-}
-.nehan-table{
-  background-color:white;
-}
-.nehan-table,
-.nehan-tr,
-.nehan-thead,
-.nehan-tfoot,
-.nehan-td,
-.nehan-th,
-.nehan-fieldset{
-  border-color:#a8a8a8;
-  border-style:solid;
-}
-.nehan-th{
-  background-color:transparent;
-}
-.nehan-thead{
-  font-weight:bold;
-  background-color:#c3d9ff;
-}
-.nehan-tfoot{
-  font-style:italic;
-}
-.nehan-legend,
-.nehan-dt{
-  font-weight:bold;
-}
-.nehan-hr{
-  border-color:#b8b8b8;
-  border-style:solid;
-}
-.nehan-pb-after, .nehan-pb-before{
-  border-color:transparent;
-  border-style:none !important;
-}
-.nehan-header{
-  border-style:solid;
-  border-color:#6a6a6a; 
-}
 .nehan-header .nehan-text-line,
-.nehan-header .nehan-vert-alpha{
-  font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック',monospace !important;
-}
+.nehan-header .nehan-vert-alpha,
 .nehan-li-marker,
 .nehan-li-marker .nehan-text-line-vert{
-  font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック',monospace !important;
+  font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace !important;
 }
-
-/* inline elements */
 .nehan-body a{
   word-wrap:normal !important;
-}
-.nehan-empha-char{
-  font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace;
 }
 .nehan-text-line-hori .nehan-char-kakko-start{
   margin-left:-0.5em;
@@ -99,11 +47,8 @@ div, span{
 .nehan-text-line-hori .nehan-char-kuto{
   margin-right:-0.5em;
 }
-.nehan-b, .nehan-strong{
-  font-weight:bold;
-}
 .nehan-vert-alpha{
-  font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'ＭＳ 明朝','MS Mincho',monospace;
+  font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'ＭＳ 明朝','MS Mincho', monospace;
   word-break:normal;
   overflow:visible;
   -webkit-transform : rotate(90deg);
@@ -119,49 +64,3 @@ div, span{
   writing-mode:tb-rl;
   float:left;
 }
-.nehan-code{
-  font-family:'andale mono', 'lucida console', monospace;
-}
-.nehan-em, .nehan-dfn, .nehan-address{
-  font-style:italic;
-}
-.nehan-del{
-  color:#666;
-}
-/* tip utils */
-.nehan-tip{
-  border-style:solid;
-}
-.nehan-error, .nehan-alert {
-  background:#fbe3e4;
-  color:#8a1f11;
-  border-color:#fbc2c4;
-}
-.nehan-notice {
-  background:#fff6bf;
-  color:#514721;
-  border-color:#ffd324;
-}
-.nehan-success {
-  background:#e6efc2;
-  color:#264409;
-  border-color:#c6d880;
-}
-.nehan-info {
-  background:#d5edf8;
-  color:#205791;
-  border-color:#92cae4;
-}
-.nehan-error a, .nehan-alert a {
-  color:#8a1f11;
-}
-.nehan-notice a {
-  color:#514721;
-}
-.nehan-success a {
-  color:#264409;
-}
-.nehan-info a {
-  color:#205791;
-}
-

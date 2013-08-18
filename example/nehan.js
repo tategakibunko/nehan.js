@@ -209,6 +209,7 @@ var Style = {
   },
   "address":{
     "display":"inline",
+    "font-style":"italic",
     "section":true
   },
   "area":{
@@ -239,6 +240,7 @@ var Style = {
     "display":"inline"
   },
   "blockquote":{
+    "color":"#666666",
     "display":"block",
     "section-root":true,
     "padding":{
@@ -281,6 +283,7 @@ var Style = {
     "display":"inline"
   },
   "code":{
+    "font-family":"'andale mono', 'lucida console', monospace",
     "display":"inline"
   },
   "col":{
@@ -303,6 +306,7 @@ var Style = {
     }
   },
   "del":{
+    "color":"#666666",
     "display":"inline"
   },
   "details":{
@@ -310,7 +314,8 @@ var Style = {
     "section-root":true
   },
   "dfn":{
-    "display":"inline"
+    "display":"inline",
+    "font-style":"italic"
   },
   "div":{
     "display":"block",
@@ -324,6 +329,7 @@ var Style = {
   },
   "dt":{
     "display":"block",
+    "font-weight":"bold",
     "margin":{
       "after":"0.2em"
     }
@@ -332,7 +338,8 @@ var Style = {
   // tag / e
   //-------------------------------------------------------
   "em":{
-    "display":"inline"
+    "display":"inline",
+    "font-style":"italic"
   },
   "embed":{
   },
@@ -433,6 +440,8 @@ var Style = {
   "hr":{
     "display":"block",
     "box-sizing":"content-box",
+    "border-color":"#b8b8b8",
+    "border-style":"solid",
     "single":true,
     "margin":{
       "after":"1em"
@@ -485,6 +494,7 @@ var Style = {
   },
   "legend":{
     "display":"block",
+    "font-weight":"bold",
     "line-rate":1.5
   },
   "li":{
@@ -655,7 +665,10 @@ var Style = {
     "display":"block",
     "embeddable":true,
     "table-layout":"fixed", // 'auto' not supported yet.
+    "background-color":"white",
     "border-collapse":"collapse", // 'separate' not supported yet.
+    "border-color":"#a8a8a8",
+    "border-style":"solid",
     //"border-spacing":"5px", // TODO: support batch style like "5px 10px".
     "border-width":"1px",
     "margin":{
@@ -671,6 +684,8 @@ var Style = {
     "display":"block",
     "section-root":true,
     "border-width":"1px",
+    "border-color":"#a8a8a8",
+    "border-style":"solid",
     "padding":{
       "start":"0.8em",
       "end":"0.8em",
@@ -684,12 +699,17 @@ var Style = {
     "interactive":true
   },
   "tfoot":{
-    "display":"block"
+    "display":"block",
+    "border-color":"#a8a8a8",
+    "border-style":"solid",
+    "font-style":"italic"
   },
   "th":{
     "display":"block",
     "line-rate":1.4,
     "border-width":"1px",
+    "border-color":"#a8a8a8",
+    "border-style":"solid",
     "padding":{
       "start":"0.8em",
       "end":"0.8em",
@@ -698,7 +718,11 @@ var Style = {
     }
   },
   "thead":{
-    "display":"block"
+    "display":"block",
+    "font-weight":"bold",
+    "background-color":"#c3d9ff",
+    "border-color":"#a8a8a8",
+    "border-style":"solid"
   },
   "time":{
     "display":"inline"
@@ -707,7 +731,9 @@ var Style = {
     "meta":true
   },
   "tr":{
-    "display":"block"
+    "display":"block",
+    "border-color":"#a8a8a8",
+    "border-style":"solid"
   },
   "track":{
   },
@@ -955,6 +981,7 @@ var Style = {
   // nehan tip area
   //-------------------------------------------------------
   ".nehan-tip":{
+    "border-style":"solid",
     "padding":{
       "before":"0.1em",
       "start":"0.8em",
@@ -965,6 +992,46 @@ var Style = {
       "after":"1em"
     },
     "border-width":"2px"
+  },
+  ".nehan-alert":{
+    "background-color":"#fbe3e4",
+    "border-color":"#fbc2c4",
+    "color":"#8a1f11"
+  },
+  ".nehan-alert a":{
+    "color":"#8a1f11"
+  },
+  ".nehan-error":{
+    "background-color":"#fbe3e4",
+    "border-color":"#fbc2c4",
+    "color":"#8a1f11"
+  },
+  ".nehan-error a":{
+    "color":"#8a1f11"
+  },
+  ".nehan-notice":{
+    "background-color":"#fff6bf",
+    "border-color":"#ffd324",
+    "color":"#514721"
+  },
+  ".nehan-notice a":{
+    "color":"#514721"
+  },
+  ".nehan-success":{
+    "background-color":"#e6efc2",
+    "border-color":"#c6d880",
+    "color":"#264409"
+  },
+  ".nehan-success a":{
+    "color":"#264409"
+  },
+  ".nehan-info":{
+    "background-color":"#d5edf8",
+    "border-color":"#92cae4",
+    "color":"#205791"
+  },
+  ".nehan-info a":{
+    "color":"#205791"
   },
   //-------------------------------------------------------
   // other utility classes
