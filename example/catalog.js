@@ -77,6 +77,61 @@ var Catalog = (function(){
     this.engine.setStyle(".nehan-test-list-style-img img", {
       margin:0
     });
+    this.engine.setStyles({
+      ".nehan-tip":{
+	"border-style":"solid",
+	"padding":{
+	  "before":"0.1em",
+	  "start":"0.8em",
+	  "end":"0.8em",
+	  "after":"0.8em"
+	},
+	"margin":{
+	  "after":"1em"
+	},
+	"border-width":"2px"
+      },
+      ".nehan-alert":{
+	"background-color":"#fbe3e4",
+	"border-color":"#fbc2c4",
+	"color":"#8a1f11"
+      },
+      ".nehan-alert a":{
+	"color":"#8a1f11"
+      },
+      ".nehan-error":{
+	"background-color":"#fbe3e4",
+	"border-color":"#fbc2c4",
+	"color":"#8a1f11"
+      },
+      ".nehan-error a":{
+	"color":"#8a1f11"
+      },
+      ".nehan-notice":{
+	"background-color":"#fff6bf",
+	"border-color":"#ffd324",
+	"color":"#514721"
+      },
+      ".nehan-notice a":{
+	"color":"#514721"
+      },
+      ".nehan-success":{
+	"background-color":"#e6efc2",
+	"border-color":"#c6d880",
+	"color":"#264409"
+      },
+      ".nehan-success a":{
+	"color":"#264409"
+      },
+      ".nehan-info":{
+	"background-color":"#d5edf8",
+	"border-color":"#92cae4",
+	"color":"#205791"
+      },
+      ".nehan-info a":{
+	"color":"#205791"
+      }
+    });
   }
 
   Catalog.prototype = {
