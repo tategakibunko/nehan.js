@@ -1,7 +1,7 @@
 var SelectorCombinator = {
   findDescendant : function(markup, parent_type){
     markup = markup.getParent();
-    while(markup !== null && markup.name != "body"){
+    while(markup !== null){
       if(parent_type.test(markup)){
 	return markup;
       }
@@ -32,7 +32,7 @@ var SelectorCombinator = {
       return null;
     }
     markup = sibling.getNext();
-    while(markup !== null && markup.name != "body"){
+    while(markup !== null){
       if(cur_type.test(markup)){
 	return sibling;
       }

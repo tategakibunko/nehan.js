@@ -29,6 +29,9 @@ var Selector = (function(){
     getValue : function(){
       return this.value;
     },
+    setValue : function(value){
+      this.value = value;
+    },
     getSpec : function(){
       return this.spec;
     },

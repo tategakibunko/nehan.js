@@ -1952,7 +1952,7 @@ var SelectorType = (function(){
 var SelectorCombinator = {
   findDescendant : function(markup, parent_type){
     markup = markup.getParent();
-    while(markup !== null && markup.name != "body"){
+    while(markup !== null){
       if(parent_type.test(markup)){
 	return markup;
       }
@@ -1983,7 +1983,7 @@ var SelectorCombinator = {
       return null;
     }
     markup = sibling.getNext();
-    while(markup !== null && markup.name != "body"){
+    while(markup !== null){
       if(cur_type.test(markup)){
 	return sibling;
       }
@@ -2177,6 +2177,9 @@ var Selector = (function(){
     getValue : function(){
       return this.value;
     },
+    setValue : function(value){
+      this.value = value;
+    },
     getSpec : function(){
       return this.spec;
     },
@@ -2235,7 +2238,14 @@ var Selectors = (function(){
   };
 
   var update_value = function(selector_key, value){
-    Args.copy(Style[selector_key], value);
+    var style_value = Style[selector_key];
+    Args.copy(style_value, value);
+    var selector = List.find(selectors.concat(selectors_pe), function(selector){
+      return selector.getKey() === selector_key;
+    });
+    if(selector){
+      selector.setValue(style_value);
+    }
   };
 
   var insert_value = function(selector_key, value){

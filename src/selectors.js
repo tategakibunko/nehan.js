@@ -11,7 +11,14 @@ var Selectors = (function(){
   };
 
   var update_value = function(selector_key, value){
-    Args.copy(Style[selector_key], value);
+    var style_value = Style[selector_key];
+    Args.copy(style_value, value);
+    var selector = List.find(selectors.concat(selectors_pe), function(selector){
+      return selector.getKey() === selector_key;
+    });
+    if(selector){
+      selector.setValue(style_value);
+    }
   };
 
   var insert_value = function(selector_key, value){
