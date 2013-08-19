@@ -16,6 +16,9 @@ div, span{
   padding:0;
   border:0;
 }
+.nehan-text-line{
+  overflow:visible;
+}
 .nehan-text-line-vert,
 .nehan-empha-char{
   font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace;
@@ -23,11 +26,9 @@ div, span{
 .nehan-text-line-vert{
   line-height:1em;
 }
-.nehan-text-line-hori{
-  overflow:visible;
-}
-.nehan-text-line-vert a{
-  text-decoration:none;
+.nehan-text-line-vert a,
+.nehan-text-line-vert a:hover{
+  text-decoration:none !important;
 }
 .nehan-header .nehan-text-line,
 .nehan-header .nehan-vert-alpha,
