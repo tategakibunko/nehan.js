@@ -66,19 +66,28 @@ var HtmlLexer = (function (){
       return this.buff.substring(0,1);
     },
     _getTagContentAux : function(tag_name){
-      var start_tag = "<" + tag_name;
-      var end_tag = "</" + tag_name;
-      var get_end_pos = function(buff, offset){
-	var callee = arguments.callee;
-	var start_pos = buff.indexOf(start_tag, offset);
-	var end_pos = buff.indexOf(end_tag, offset);
-	if(start_pos < 0 || end_pos < start_pos){
+      var recur_tag_rex = new RegExp("<" + tag_name + "[\\s|>]");
+      var end_tag = "</" + tag_name + ">";
+      var get_end_pos = function(buff){
+	var end_pos = buff.indexOf(end_tag);
+	if(end_pos < 0){
+	  return -1;
+	}
+	var recur_match = buff.match(recur_tag_rex);
+	var recur_pos = recur_match? recur_match.index : -1;
+	if(recur_pos < 0 || end_pos < recur_pos){
 	  return end_pos;
 	}
-	var end_pos2 = callee(buff, start_pos + tag_name.length + 2);
-	return callee(buff, end_pos2 + tag_name.length + 3);
+	var restart_pos = recur_pos + tag_name.length + 2;
+	var end_pos2 = arguments.callee(buff.substring(restart_pos));
+	if(end_pos2 < 0){
+	  return -1;
+	}
+	var restart_pos2 = restart_pos + end_pos2 + tag_name.length + 3;
+	return restart_pos2 + arguments.callee(buff.substring(restart_pos2));
       };
-      var end_pos = get_end_pos(this.buff, 0);
+
+      var end_pos = get_end_pos(this.buff);
       if(end_pos < 0){
 	return this.buff; // tag not closed, so return whole rest buff.
       }
@@ -88,6 +97,7 @@ var HtmlLexer = (function (){
       try {
 	return this._getTagContentAux(tag_name);
       } catch (e){
+	console.log(e);
 	return "";
       }
     },

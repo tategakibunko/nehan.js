@@ -23,3 +23,11 @@ test("html-lexer3", function(){
   equal(token.name, "section");
   equal(token.getContentRaw(), "a<section>b</section><section>c</section>");
 });
+
+test("html-lexer4", function(){
+  var source = "<b><br /><a>hoge</a></b>";
+  var lexer = new HtmlLexer(source);
+  var token = lexer.get();
+  equal(token.name, "b");
+  equal(token.getContentRaw(), "<br /><a>hoge</a>");
+});
