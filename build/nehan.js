@@ -8316,7 +8316,6 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     }
     // if block element occured, force terminate generator
     if(token.isBlock()){
-      console.log("block in inline!:%o", token);
       this._terminate = true;
       return Exceptions.FORCE_TERMINATE;
     }
