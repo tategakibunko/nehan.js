@@ -97,7 +97,6 @@ var HtmlLexer = (function (){
       try {
 	return this._getTagContentAux(tag_name);
       } catch (e){
-	console.log(e);
 	return "";
       }
     },
