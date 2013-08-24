@@ -274,14 +274,18 @@ var Tag = (function (){
       return this.getCssAttr("embeddable") === "true";
     },
     isBlock : function(){
+      var display = this.getDisplay();
+      if(display === "block"){
+	return true;
+      }
       // floated block with static size is treated as block level floated box.
-      if(this.hasStaticSize() && this.isFloated()){
+      if(this.hasStaticSize() && this.isFloated() && display !== "inline-block"){
 	return true;
       }
       if(this.isPush() || this.isPull()){
 	return true;
       }
-      return this.getDisplay() === "block";
+      return false;
     },
     isInline : function(){
       var display = this.getDisplay();

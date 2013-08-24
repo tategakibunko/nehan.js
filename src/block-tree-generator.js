@@ -52,12 +52,18 @@ var BlockTreeGenerator = ElementGenerator.extend({
 	}
       }
       try {
-	if(element.breakBefore){
+	var break_before = element.breakBefore || false;
+	var break_after = element.breakAfter || false;
+	if(break_before){
 	  page.breakAfter = true;
 	  break;
 	}
+	if(element.logicalFloat){
+	  page.logicalFloat = element.logicalFloat;
+	  element = this._yieldFloatedBlock(page, element);
+	}
 	this.context.addBlockElement(element);
-	if(element.breakAfter){
+	if(break_after){
 	  page.breakAfter = true;
 	  break;
 	}
@@ -107,14 +113,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
       this.context.inheritMarkup(token);
     }
     if(is_tag && token.hasStaticSize() && token.isBlock()){
-      var static_element = this._yieldStaticElement(parent, token);
-      if(typeof static_element === "number"){ // exception
-	return static_element;
-      }
-      if(token.getCssAttr("float") !== null){
-	return this._yieldFloatedBlock(parent, static_element);
-      }
-      return static_element;
+      return this._yieldStaticElement(parent, token);
     }
     if(Token.isText(token) || Token.isInline(token)){
       this.context.pushBackToken();
@@ -138,7 +137,12 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this.generator = this._createChildBlockTreeGenerator(parent, token);
     return this.generator.yield(parent);
   },
-  _yieldFloatedBlock : function(parent, floated_box, tag){
+  _yieldFloatedBlock : function(parent, floated_box){
+    console.log("yieldFloatedBlock:parent measure = %d, floated measure = %d",
+		parent.getContentMeasure(), floated_box.getBoxMeasure());
+    if(parent.getContentMeasure() <= floated_box.getBoxMeasure()){
+      return floated_box;
+    }
     var generator = new FloatedBlockTreeGenerator(this.context.createFloatedRoot(), floated_box);
     var block = generator.yield(parent);
     this.generator = generator.getCurGenerator(); // inherit generator of aligned area

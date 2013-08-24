@@ -83,9 +83,12 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       }
 
       try {
+	end_after = element.endAfter || false;
+	if(element.logicalFloat){
+	  return element;
+	}
 	this.context.addInlineElement(element);
-	if(element.endAfter){
-	  end_after = true;
+	if(end_after){
 	  break;
 	}
       } catch(e){
@@ -104,7 +107,9 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     } // while(true)
 
     line = this.context.createLine();
-    line.endAfter = end_after;
+    if(end_after){
+      line.endAfter = true;
+    }
     this._onCompleteLine(line);
 
     if(this.context.isJustified()){

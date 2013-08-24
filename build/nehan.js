@@ -2690,14 +2690,18 @@ var Tag = (function (){
       return this.getCssAttr("embeddable") === "true";
     },
     isBlock : function(){
+      var display = this.getDisplay();
+      if(display === "block"){
+	return true;
+      }
       // floated block with static size is treated as block level floated box.
-      if(this.hasStaticSize() && this.isFloated()){
+      if(this.hasStaticSize() && this.isFloated() && display !== "inline-block"){
 	return true;
       }
       if(this.isPush() || this.isPull()){
 	return true;
       }
-      return this.getDisplay() === "block";
+      return false;
     },
     isInline : function(){
       var display = this.getDisplay();
@@ -5224,9 +5228,6 @@ var Box = (function(){
     getChilds : function(){
       return this.childs.get();
     },
-    getChildsNormal : function(){
-      return this.childs.getNormal();
-    },
     getChildExtent : function(){
       return this.childExtent;
     },
@@ -5372,15 +5373,14 @@ var Box = (function(){
       this.childExtent = Math.max(child.getBoxExtent(this.flow), this.childExtent);
       this.charCount += child.getCharCount();
     },
-    addChildInline : function(child, measure){
-      this.childs.add(child);
-      this.childMeasure += measure;
-    },
     addExtent : function(extent){
       this.size.addExtent(this.flow, extent);
     },
     addMeasure : function(measure){
       this.size.addMeasure(this.flow, measure);
+    },
+    setChildMeasure : function(measure){
+      this.childMeasure = measure;
     },
     setInlineElements : function(elements, measure){
       this.childs.setNormal(elements);
@@ -5448,19 +5448,6 @@ var Box = (function(){
 	ret.push(div_size);
       }
       return ret;
-    },
-    isEmptyChild : function(){
-      return this.childs.getLength() === 0;
-    },
-    isFirstChildOf : function(parent){
-      if(this.type === "text-line"){
-	return false;
-      }
-      var name = this.getMarkupName();
-      if(name === "li-marker" || name === "li-body"){
-	return false;
-      }
-      return parent && parent.isEmptyChild();
     },
     isTextBold : function(){
       return (this.fontWeight && this.fontWeight.isBold());
@@ -7617,6 +7604,7 @@ var InlineContext = (function(){
     this.lastToken = null;
     this.prevText = null;
     this.lastText = null;
+    this.tokens = [];
     this._justified = false;
   }
 
@@ -7665,10 +7653,12 @@ var InlineContext = (function(){
 	this.charCount += element.getCharCount();
       }
       if(advance > 0 && extent > 0){
-	this._pushElement(element, advance);
-      }
-      if(advance > 0){
 	this.curMeasure += advance;
+	// update current line measure before 'InlineContext::createLine'
+	// to recognize whether current pos is at the start of line or not.
+	// this value is used in 'InlineContext::isLineStartPos'.
+	this.line.setChildMeasure(this.curMeasure);
+	this.tokens.push(element);
       }
       if(this.curMeasure === this.maxMeasure){
 	this.skipBr();
@@ -7683,21 +7673,20 @@ var InlineContext = (function(){
       if(this.curMeasure === 0 && this.line.isTextLineRoot()){
 	return this._createEmptyLine();
       }
-      var tokens = this.line.getChildsNormal();
-      var old_len = tokens.length;
-      var self = this;
 
       // if overflow measure without line-break, try to justify.
       if(this._isOverWithoutLineBreak()){
-	tokens = this._justify(tokens, this.lastToken);
-	if(tokens.length !== old_len){
+	var old_len = this.tokens.length;
+	this._justify(this.lastToken);
+	if(this.tokens.length !== old_len){
+	  var self = this;
 	  this._justified = true;
-	  this.curMeasure = this.line.childMeasure = List.fold(tokens, 0, function(sum, token){
+	  this.curMeasure = List.fold(this.tokens, 0, function(sum, token){
 	    return sum + self._getElementAdvance(token);
 	  });
 	}
       }
-      return this._createTextLine(tokens);
+      return this._createTextLine();
     },
     getNextToken : function(){
       var token = this.stream.get();
@@ -7765,8 +7754,7 @@ var InlineContext = (function(){
       return this.curMeasure + advance <= this.maxMeasure;
     },
     _isOverWithoutLineBreak : function(){
-      //return !this.lineBreak && (this.lineTokens.length > 0);
-      return !this.lineBreak && !this.line.isEmptyChild();
+      return !this.lineBreak && (this.tokens.length > 0);
     },
     _isLineStart : function(){
       return this.stream.getPos() == this.lineStartPos;
@@ -7813,16 +7801,7 @@ var InlineContext = (function(){
       }
       return 0.5;
     },
-    _pushElement : function(element, advance){
-      var logical_float = element.logicalFloat || "";
-      if(logical_float === "start"){
-	element.forward = true;
-      } else if(logical_float === "end"){
-	element.backward = true;
-      }
-      this.line.addChildInline(element, advance);
-    },
-    _justify : function(tokens, last_token){
+    _justify : function(last_token){
       var head_token = last_token;
       var tail_token = last_token? this.stream.findTextPrev(last_token.pos) : null;
       var backup_pos = this.stream.getPos();
@@ -7831,7 +7810,7 @@ var InlineContext = (function(){
       if(head_token &&
 	 Token.isChar(head_token) &&
 	 head_token.isHeadNg()){
-	tokens = this._justifyHead(tokens, head_token);
+	this._justifyHead(head_token);
 	if(this.stream.getPos() != backup_pos){ // some text is moved by head-NG.
 	  tail_token = this.stream.findTextPrev(); // search tail_token from new stream position pointing to new head pos.
 	  // if new head is single br, this must be included in current line, so skip it.
@@ -7845,12 +7824,11 @@ var InlineContext = (function(){
 	 Token.isChar(head_token) &&
 	 Token.isChar(tail_token) &&
 	 tail_token.isTailNg()){
-	tokens = this._justifyTail(tokens, tail_token);
+	this._justifyTail(tail_token);
       }
-      return tokens;
     },
     // fix line that is started with wrong text.
-    _justifyHead : function(tokens, head_token){
+    _justifyHead : function(head_token){
       var count = 0;
       this.stream.iterWhile(head_token.pos, function(pos, token){
 	if(Token.isChar(token) && token.isHeadNg()){
@@ -7861,13 +7839,13 @@ var InlineContext = (function(){
       });
       // no head NG, just return texts as they are.
       if(count <= 0){
-	return tokens;
+	return;
       }
       // if one head NG, push it into current line.
       if(count === 1){
-	tokens.push(head_token);
+	this.tokens.push(head_token);
 	this.stream.setPos(head_token.pos + 1);
-	return tokens;
+	return;
       }
       // if more than two head NG, find non NG text from tail, and cut the line at the pos.
       var normal_pos = -1;
@@ -7883,20 +7861,19 @@ var InlineContext = (function(){
       });
       // if no proper pos is found in current line, give up justifying.
       if(normal_pos < 0){
-	return tokens;
+	return;
       }
       // if normal pos is found, pop line until that pos.
       var ptr = head_token.pos;
       while(ptr > normal_pos){
-	tokens.pop();
+	this.tokens.pop();
 	ptr--;
       }
       // set stream position at the normal pos.
       this.stream.setPos(normal_pos);
-      return tokens;
     },
     // fix line that is ended with wrong text.
-    _justifyTail : function(tokens, tail_token){
+    _justifyTail : function(tail_token){
       var count = 0;
       this.stream.revIterWhile(tail_token.pos, function(pos, token){
 	if(Token.isChar(token) && token.isTailNg()){
@@ -7907,13 +7884,13 @@ var InlineContext = (function(){
       });
       // no tail NG, just return texts as they are.
       if(count <= 0){
-	return tokens;
+	return;
       }
       // if one tail NG, pop it(tail token is displayed in next line).
       if(count === 1){
-	tokens.pop();
+	this.tokens.pop();
 	this.stream.setPos(tail_token.pos);
-	return tokens;
+	return;
       }
       // if more than two tail NG, find non NG text from tail, and cut the line at the pos.
       var normal_pos = -1;
@@ -7929,30 +7906,29 @@ var InlineContext = (function(){
       });
       // if no proper pos is found in current line, give up justifying.
       if(normal_pos < 0){
-	return tokens;
+	return;
       }
       // if normal pos is found, pop line until that pos.
       var ptr = tail_token.pos;
       while(ptr > normal_pos){
-	tokens.pop();
+	this.tokens.pop();
 	ptr--;
       }
       // set stream postion at the 'next' of normal pos.
       this.stream.setPos(normal_pos + 1);
-      return tokens;
     },
     _createEmptyLine : function(){
       this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.line.fontSize);
       this.line.setInlineElements([], this.lineMeasure);
       return this.line;
     },
-    _createTextLine : function(tokens){
+    _createTextLine : function(){
       var ruby_extent = Math.round(this.maxFontSize * (this.line.lineRate - 1));
       var max_text_extent = this.maxFontSize + ruby_extent;
       this.maxExtent = Math.max(this.maxExtent, max_text_extent);
       this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.maxExtent);
       this.line.charCount = this.charCount;
-      this.line.setInlineElements(tokens, this.curMeasure);
+      this.line.setInlineElements(this.tokens, this.curMeasure);
       this.line.textIndent = this.textIndent;
       return this.line;
     }
@@ -8047,12 +8023,18 @@ var BlockTreeGenerator = ElementGenerator.extend({
 	}
       }
       try {
-	if(element.breakBefore){
+	var break_before = element.breakBefore || false;
+	var break_after = element.breakAfter || false;
+	if(break_before){
 	  page.breakAfter = true;
 	  break;
 	}
+	if(element.logicalFloat){
+	  page.logicalFloat = element.logicalFloat;
+	  element = this._yieldFloatedBlock(page, element);
+	}
 	this.context.addBlockElement(element);
-	if(element.breakAfter){
+	if(break_after){
 	  page.breakAfter = true;
 	  break;
 	}
@@ -8102,14 +8084,7 @@ var BlockTreeGenerator = ElementGenerator.extend({
       this.context.inheritMarkup(token);
     }
     if(is_tag && token.hasStaticSize() && token.isBlock()){
-      var static_element = this._yieldStaticElement(parent, token);
-      if(typeof static_element === "number"){ // exception
-	return static_element;
-      }
-      if(token.getCssAttr("float") !== null){
-	return this._yieldFloatedBlock(parent, static_element);
-      }
-      return static_element;
+      return this._yieldStaticElement(parent, token);
     }
     if(Token.isText(token) || Token.isInline(token)){
       this.context.pushBackToken();
@@ -8133,7 +8108,12 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this.generator = this._createChildBlockTreeGenerator(parent, token);
     return this.generator.yield(parent);
   },
-  _yieldFloatedBlock : function(parent, floated_box, tag){
+  _yieldFloatedBlock : function(parent, floated_box){
+    console.log("yieldFloatedBlock:parent measure = %d, floated measure = %d",
+		parent.getContentMeasure(), floated_box.getBoxMeasure());
+    if(parent.getContentMeasure() <= floated_box.getBoxMeasure()){
+      return floated_box;
+    }
     var generator = new FloatedBlockTreeGenerator(this.context.createFloatedRoot(), floated_box);
     var block = generator.yield(parent);
     this.generator = generator.getCurGenerator(); // inherit generator of aligned area
@@ -8229,9 +8209,12 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       }
 
       try {
+	end_after = element.endAfter || false;
+	if(element.logicalFloat){
+	  return element;
+	}
 	this.context.addInlineElement(element);
-	if(element.endAfter){
-	  end_after = true;
+	if(end_after){
 	  break;
 	}
       } catch(e){
@@ -8250,7 +8233,9 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     } // while(true)
 
     line = this.context.createLine();
-    line.endAfter = end_after;
+    if(end_after){
+      line.endAfter = true;
+    }
     this._onCompleteLine(line);
 
     if(this.context.isJustified()){

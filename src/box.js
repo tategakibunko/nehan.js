@@ -112,9 +112,6 @@ var Box = (function(){
     getChilds : function(){
       return this.childs.get();
     },
-    getChildsNormal : function(){
-      return this.childs.getNormal();
-    },
     getChildExtent : function(){
       return this.childExtent;
     },
@@ -260,15 +257,14 @@ var Box = (function(){
       this.childExtent = Math.max(child.getBoxExtent(this.flow), this.childExtent);
       this.charCount += child.getCharCount();
     },
-    addChildInline : function(child, measure){
-      this.childs.add(child);
-      this.childMeasure += measure;
-    },
     addExtent : function(extent){
       this.size.addExtent(this.flow, extent);
     },
     addMeasure : function(measure){
       this.size.addMeasure(this.flow, measure);
+    },
+    setChildMeasure : function(measure){
+      this.childMeasure = measure;
     },
     setInlineElements : function(elements, measure){
       this.childs.setNormal(elements);
@@ -336,19 +332,6 @@ var Box = (function(){
 	ret.push(div_size);
       }
       return ret;
-    },
-    isEmptyChild : function(){
-      return this.childs.getLength() === 0;
-    },
-    isFirstChildOf : function(parent){
-      if(this.type === "text-line"){
-	return false;
-      }
-      var name = this.getMarkupName();
-      if(name === "li-marker" || name === "li-body"){
-	return false;
-      }
-      return parent && parent.isEmptyChild();
     },
     isTextBold : function(){
       return (this.fontWeight && this.fontWeight.isBold());
