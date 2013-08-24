@@ -8109,8 +8109,6 @@ var BlockTreeGenerator = ElementGenerator.extend({
     return this.generator.yield(parent);
   },
   _yieldFloatedBlock : function(parent, floated_box){
-    console.log("yieldFloatedBlock:parent measure = %d, floated measure = %d",
-		parent.getContentMeasure(), floated_box.getBoxMeasure());
     if(parent.getContentMeasure() <= floated_box.getBoxMeasure()){
       return floated_box;
     }
