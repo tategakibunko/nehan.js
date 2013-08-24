@@ -45,7 +45,6 @@ var Config = {
   minBlockScaleDownRate : 65,
   useVerticalGlyphIfEnable: true,
   maxBase:36,
-  allowExternalClassName: true,
   lexingBufferLen : 2000
 };
 
@@ -2796,18 +2795,16 @@ var Tag = (function (){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
     },
     _parseId : function(){
-      return this.tagAttr.id || "";
+      var id = this.tagAttr.id || "";
+      return (id === "")? id : ((this.tagAttr.id.indexOf("nehan-") === 0)? "nehan-" + id : id);
     },
     // <p class='hi hey'>
     // => ["hi", "hey"]
     _parseClasses : function(class_value){
       class_value = Utils.trim(class_value.replace(/\s+/g, " "));
       var classes = (class_value === "")? [] : class_value.split(/\s+/);
-      if(Config.allowExternalClassName){
-	return classes;
-      }
-      return List.filter(classes, function(klass){
-	return klass.indexOf("nehan") >= 0;
+      return List.map(classes, function(klass){
+	return (klass.indexOf("nehan-") === 0)? klass : "nehan-" + klass;
       });
     },
     // <p class='hi hey'>

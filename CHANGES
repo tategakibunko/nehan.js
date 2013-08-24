@@ -9,7 +9,7 @@ Mark "!": change that can break compatibility with older version
 version 4.0.3, 2013/
 ==========================
 o improve inline performance
-o add Config.allowExternalClassName flag
+o now onload(which takes functional value) is available for all selector.
 o now nth-child, nth-of-type available as functional value.
 
 version 4.0.2, 2013/07/09
