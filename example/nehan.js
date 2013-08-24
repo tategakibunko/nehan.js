@@ -8294,9 +8294,8 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       return Exceptions.IGNORE;
     }
     */
-    if(tag_name === "first-letter"){
-      this.context.inheritMarkup(token);
-    }
+    this.context.inheritMarkup(token);
+
     // if block element occured, force terminate generator
     if(token.isBlock()){
       this._terminate = true;
