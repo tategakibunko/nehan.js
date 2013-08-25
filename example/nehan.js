@@ -6461,8 +6461,11 @@ var DocumentContext = (function(){
 	this.localLineNo++;
       }
     },
-    getRestExtent : function(){
-      return this.blockContext.getRestExtent();
+    canContainExtent : function(extent){
+      if(this.blockContext){
+	return this.blockContext.getRestExtent() >= extent;
+      }
+      return true;
     },
     // inline context
     createInlineRoot : function(markup, stream){
@@ -7371,11 +7374,7 @@ var ElementGenerator = Class.extend({
   _isTextLine : function(element){
     return element instanceof Box && element.isTextLine();
   },
-  _yieldStaticElement : function(parent, tag){
-    var generator = this._createStaticGenerator(parent, tag);
-    return generator.yield(parent);
-  },
-  _createStaticGenerator : function(parent, tag){
+  _createStaticGenerator : function(tag){
     switch(tag.getName()){
     case "img":
       return new ImageGenerator(this.context.createBlockRoot(tag, null));
@@ -7519,7 +7518,20 @@ var StaticBlockGenerator = ElementGenerator.extend({
     box.sizing = BoxSizings.getByName("content-box"); // use normal box model
     return box;
   },
+  _findLineParent : function(line){
+    var parent = line.parent;
+    while(parent && parent.isTextLine()){
+      parent = parent.parent;
+    }
+    return parent;
+  },
   yield : function(parent){
+    if(parent.isTextLine()){
+      parent = this._findLineParent(parent);
+    }
+    return this._yield(parent);
+  },
+  _yield : function(parent){
     var size = this._getBoxSize(parent);
     var box = this._createBox(size, parent);
     if(this.context.markup.isPush()){
@@ -8081,7 +8093,8 @@ var BlockTreeGenerator = ElementGenerator.extend({
       this.context.inheritMarkup(token);
     }
     if(is_tag && token.hasStaticSize() && token.isBlock()){
-      return this._yieldStaticElement(parent, token);
+      this.generator = this._createStaticGenerator(token);
+      return this.generator.yield(parent);
     }
     if(Token.isText(token) || Token.isInline(token)){
       this.context.pushBackToken();
@@ -8196,8 +8209,11 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
 	  continue;
 	} else {
 	  this.context.setLineBreak();
-	  if(element === Exceptions.FORCE_TERMINATE || element == Exceptions.SINGLE_RETRY){
+	  if(element === Exceptions.FORCE_TERMINATE){
 	    this.context.pushBackToken();
+	  } else if(element == Exceptions.SINGLE_RETRY){
+	    this.context.pushBackToken();
+	    end_after = true;
 	  }
 	  break;
 	}
@@ -8232,12 +8248,10 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       line.endAfter = true;
     }
     this._onCompleteLine(line);
-
     if(this.context.isJustified()){
       this.cachedElement = null;
     }
-
-    if(this.context.blockContext && this.context.getRestExtent() < line.getBoxExtent(parent.flow)){
+    if(!this.context.canContainExtent(line.getBoxExtent(parent.flow))){
       this.cachedLine = line;
       return Exceptions.PAGE_BREAK;
     }
@@ -8281,16 +8295,6 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     if(tag_name === "br"){
       return Exceptions.LINE_BREAK;
     }
-    /*
-    if(tag_name === "script"){
-      this.context.addScript(token);
-      return Exceptions.IGNORE;
-    }
-    if(tag_name === "style"){
-      this.context.addStyle(token);
-      return Exceptions.IGNORE;
-    }
-    */
     this.context.inheritMarkup(token);
 
     // if block element occured, force terminate generator
@@ -8300,7 +8304,8 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     }
     // token is static size tag
     if(token.hasStaticSize()){
-      return this._yieldStaticElement(line, token);
+      this.generator = this._createStaticGenerator(token);
+      return this.generator.yield(line);
     }
     // token is inline-block tag
     if(token.isInlineBlock()){

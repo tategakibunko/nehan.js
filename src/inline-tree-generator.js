@@ -75,8 +75,11 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
 	  continue;
 	} else {
 	  this.context.setLineBreak();
-	  if(element === Exceptions.FORCE_TERMINATE || element == Exceptions.SINGLE_RETRY){
+	  if(element === Exceptions.FORCE_TERMINATE){
 	    this.context.pushBackToken();
+	  } else if(element == Exceptions.SINGLE_RETRY){
+	    this.context.pushBackToken();
+	    end_after = true;
 	  }
 	  break;
 	}
@@ -111,12 +114,10 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       line.endAfter = true;
     }
     this._onCompleteLine(line);
-
     if(this.context.isJustified()){
       this.cachedElement = null;
     }
-
-    if(this.context.blockContext && this.context.getRestExtent() < line.getBoxExtent(parent.flow)){
+    if(!this.context.canContainExtent(line.getBoxExtent(parent.flow))){
       this.cachedLine = line;
       return Exceptions.PAGE_BREAK;
     }
@@ -160,16 +161,6 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     if(tag_name === "br"){
       return Exceptions.LINE_BREAK;
     }
-    /*
-    if(tag_name === "script"){
-      this.context.addScript(token);
-      return Exceptions.IGNORE;
-    }
-    if(tag_name === "style"){
-      this.context.addStyle(token);
-      return Exceptions.IGNORE;
-    }
-    */
     this.context.inheritMarkup(token);
 
     // if block element occured, force terminate generator
@@ -179,7 +170,8 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     }
     // token is static size tag
     if(token.hasStaticSize()){
-      return this._yieldStaticElement(line, token);
+      this.generator = this._createStaticGenerator(token);
+      return this.generator.yield(line);
     }
     // token is inline-block tag
     if(token.isInlineBlock()){

@@ -125,8 +125,11 @@ var DocumentContext = (function(){
 	this.localLineNo++;
       }
     },
-    getRestExtent : function(){
-      return this.blockContext.getRestExtent();
+    canContainExtent : function(extent){
+      if(this.blockContext){
+	return this.blockContext.getRestExtent() >= extent;
+      }
+      return true;
     },
     // inline context
     createInlineRoot : function(markup, stream){

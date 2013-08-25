@@ -113,7 +113,8 @@ var BlockTreeGenerator = ElementGenerator.extend({
       this.context.inheritMarkup(token);
     }
     if(is_tag && token.hasStaticSize() && token.isBlock()){
-      return this._yieldStaticElement(parent, token);
+      this.generator = this._createStaticGenerator(token);
+      return this.generator.yield(parent);
     }
     if(Token.isText(token) || Token.isInline(token)){
       this.context.pushBackToken();

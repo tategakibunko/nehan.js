@@ -14,11 +14,7 @@ var ElementGenerator = Class.extend({
   _isTextLine : function(element){
     return element instanceof Box && element.isTextLine();
   },
-  _yieldStaticElement : function(parent, tag){
-    var generator = this._createStaticGenerator(parent, tag);
-    return generator.yield(parent);
-  },
-  _createStaticGenerator : function(parent, tag){
+  _createStaticGenerator : function(tag){
     switch(tag.getName()){
     case "img":
       return new ImageGenerator(this.context.createBlockRoot(tag, null));

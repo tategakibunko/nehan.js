@@ -7,7 +7,20 @@ var StaticBlockGenerator = ElementGenerator.extend({
     box.sizing = BoxSizings.getByName("content-box"); // use normal box model
     return box;
   },
+  _findLineParent : function(line){
+    var parent = line.parent;
+    while(parent && parent.isTextLine()){
+      parent = parent.parent;
+    }
+    return parent;
+  },
   yield : function(parent){
+    if(parent.isTextLine()){
+      parent = this._findLineParent(parent);
+    }
+    return this._yield(parent);
+  },
+  _yield : function(parent){
     var size = this._getBoxSize(parent);
     var box = this._createBox(size, parent);
     if(this.context.markup.isPush()){

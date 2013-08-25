@@ -54,11 +54,11 @@ test("tag-selector-class", function(){
   var tag = new Tag("<p class='hi hey'>");
 
   equal(tag.getName(), "p");
-  deepEqual(tag._parseCssClasses(tag.classes), [".hi", ".hey"]);
-  deepEqual(tag.classes, ["hi", "hey"]);
+  deepEqual(tag._parseCssClasses(tag.classes), [".nehan-hi", ".nehan-hey"]);
+  deepEqual(tag.classes, ["nehan-hi", "nehan-hey"]);
 
-  equal(tag.hasClass("hi"), true);
-  equal(tag.hasClass("hey"), true);
+  equal(tag.hasClass("nehan-hi"), true);
+  equal(tag.hasClass("nehan-hey"), true);
 });
 
 test("tag-selector-id-class", function(){
@@ -66,10 +66,10 @@ test("tag-selector-id-class", function(){
 
   equal(tag.getName(), "p");
   deepEqual(tag.id, "foo");
-  deepEqual(tag.classes, ["hi", "hey"]);
+  deepEqual(tag.classes, ["nehan-hi", "nehan-hey"]);
 
-  equal(tag.hasClass("hi"), true);
-  equal(tag.hasClass("hey"), true);
+  equal(tag.hasClass("nehan-hi"), true);
+  equal(tag.hasClass("nehan-hey"), true);
 });
 
 test("tag-inline-style", function(){
