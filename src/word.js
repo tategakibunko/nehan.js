@@ -19,6 +19,7 @@ var Word = (function(){
       css["float"] = "left";
       css["writing-mode"] = "tb-rl";
       css["letter-spacing"] = line.letterSpacing + "px";
+      css["padding-left"] = Math.round(line.fontSize / 2) + "px";
       css["line-height"] = line.fontSize + "px";
       return css;
     },

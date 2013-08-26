@@ -48,7 +48,8 @@ div, span{
 .nehan-text-line-hori .nehan-char-kuto{
   margin-right:-0.5em;
 }
-.nehan-vert-alpha{
+.nehan-vert-alpha,
+.nehan-rotate-90{
   font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'ＭＳ 明朝','MS Mincho', monospace;
   word-break:normal;
   overflow:visible;
@@ -61,7 +62,8 @@ div, span{
   transform : rotate(90deg);
   transform-origin : 50% 50%;
 }
-.nehan-vert-alpha-ie{
+.nehan-vert-alpha-ie,
+.nehan-rotate-90-ie{
   writing-mode:tb-rl;
   float:left;
 }

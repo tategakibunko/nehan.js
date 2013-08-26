@@ -52,7 +52,27 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
     return Html.tagWrap("div", word.data, {
       "class": "nehan-vert-alpha-ie",
       "style": Css.toString(word.getCssVertTransIE(line))
+    }) + Const.clearFix;
+  },
+  evalRotateChar : function(line, chr){
+    if(Env.isTransformEnable){
+      return this.evalRotateCharTransform(line, chr);
+    } else if(Env.isIE){
+      return this.evalRotateCharIE(line, chr);
+    } else {
+      return this.evalCharWithBr(line, chr);
+    }
+  },
+  evalRotateCharTransform : function(line, chr){
+    return Html.tagWrap("div", chr.data, {
+      "class":"nehan-rotate-90"
     });
+  },
+  evalRotateCharIE : function(line, chr){
+    return Html.tagWrap("div", chr.data, {
+      "style":Css.toString(chr.getCssVertRotateCharIE(line)),
+      "class":"nehan-rotate-90-ie"
+    }) + Const.clearFix;
   },
   evalTcy : function(line, tcy){
     return Html.tagWrap("div", tcy.data, {
@@ -69,6 +89,8 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
       return this.evalHalfSpaceChar(line, chr);
     } else if(chr.isCnvChar()){
       return this.evalCnvChar(line, chr);
+    } else if(chr.isRotateChar()){
+      return this.evalRotateChar(line, chr);
     } else if(chr.isSmallKana()){
       return this.evalSmallKana(line, chr);
     } else if(chr.isPaddingEnable()){
@@ -76,6 +98,9 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
     } else if(line.letterSpacing){
       return this.evalCharLetterSpacing(line, chr);
     }
+    return this.evalCharWithBr(line, chr);
+  },
+  evalCharWithBr : function(line, chr){
     return chr.data + "<br />";
   },
   evalCharLetterSpacing : function(line, chr){

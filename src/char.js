@@ -61,6 +61,14 @@ var Char = (function(){
       }
       return css;
     },
+    getCssVertRotateCharIE : function(line){
+      var css = {};
+      css["float"] = "left";
+      css["writing-mode"] = "tb-rl";
+      css["padding-left"] = Math.round(line.fontSize / 2) + "px";
+      css["line-height"] = line.fontSize + "px";
+      return css;
+    },
     getCssVertEmphaSrc : function(line){
       var css = {};
       return css;
@@ -153,6 +161,9 @@ var Char = (function(){
       this.cnv = cnv;
       this.vscale = vscale || 1;
       this.hscale = hscale || this.vscale;
+    },
+    _setRotate : function(angle){
+      this.rotate = angle;
     },
     _setup : function(code){
       switch(code){
@@ -278,6 +289,10 @@ var Char = (function(){
 	this._setCnv("&#8592;"); break;
       case 8592: // left
 	this._setCnv("&#8593;"); break;
+      case 8220: // left double quotation mark
+	this._setRotate(90); break;
+      case 8221: // right double quotateion mark
+	this._setRotate(90); break;
       }
     },
     isNewLineChar : function(){
@@ -288,6 +303,9 @@ var Char = (function(){
     },
     isCnvChar : function(){
       return (typeof this.cnv != "undefined");
+    },
+    isRotateChar : function(){
+      return (typeof this.rotate != "undefined");
     },
     isCharRef : function(){
       return this.isRef;
