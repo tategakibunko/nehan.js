@@ -429,7 +429,7 @@ var Tag = (function (){
       List.iter(stmts, function(stmt){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
-	  var prop = Utils.trim(nv[0]);
+	  var prop = Utils.trim(nv[0]).toLowerCase();
 	  if(!is_inline_style_not_allowed(prop)){
 	    var value = Utils.trim(nv[1]);
 	    dynamic_attr[prop] = value;

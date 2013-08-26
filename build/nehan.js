@@ -2342,7 +2342,7 @@ var TagAttrParser = (function(){
 	  delim_pos = pos;
 	}
       });
-      return (delim_pos >= 0)? src.substring(0, delim_pos) : src;
+      return ((delim_pos >= 0)? src.substring(0, delim_pos) : src).toLowerCase();
     };
 
     var get_quoted_value = function(quote_str){
@@ -2844,7 +2844,7 @@ var Tag = (function (){
       List.iter(stmts, function(stmt){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
-	  var prop = Utils.trim(nv[0]);
+	  var prop = Utils.trim(nv[0]).toLowerCase();
 	  if(!is_inline_style_not_allowed(prop)){
 	    var value = Utils.trim(nv[1]);
 	    dynamic_attr[prop] = value;
@@ -5743,6 +5743,9 @@ var HtmlLexer = (function (){
   HtmlLexer.prototype = {
     _normalize : function(src){
       return src
+	.replace(/(<\/[^>]+>)/g, function(p1){
+	  return p1.toLowerCase();
+	}) // convert close tag to lower case(for innerHTML of IE)
 	.replace(/^[ \n]+/, "") // shorten head space
 	.replace(/\s+$/, "") // discard tail space
 	.replace(/\r/g, ""); // discard CR

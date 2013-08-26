@@ -16,7 +16,7 @@ var TagAttrParser = (function(){
 	  delim_pos = pos;
 	}
       });
-      return (delim_pos >= 0)? src.substring(0, delim_pos) : src;
+      return ((delim_pos >= 0)? src.substring(0, delim_pos) : src).toLowerCase();
     };
 
     var get_quoted_value = function(quote_str){
