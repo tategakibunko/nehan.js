@@ -1,6 +1,5 @@
 var Tag = (function (){
   var global_tag_id = 0;
-  //var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
   var is_inline_style_not_allowed = function(name){
     return List.exists(["padding", "margin", "border"], function(prop){
