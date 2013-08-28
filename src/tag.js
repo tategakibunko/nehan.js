@@ -271,7 +271,7 @@ var Tag = (function (){
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
     isEmbeddableTag : function(){
-      return this.getCssAttr("embeddable") === "true";
+      return this.getCssAttr("embeddable") === true;
     },
     isBlock : function(){
       var display = this.getDisplay();
@@ -295,16 +295,16 @@ var Tag = (function (){
       return this.getDisplay() === "inline-block";
     },
     isSingleTag : function(){
-      return this.getCssAttr("single") === "true";
+      return this.getCssAttr("single") === true;
     },
     isTcyTag : function(){
       return this.getCssAttr("text-combine", "") === "horizontal";
     },
     isSectionRootTag : function(){
-      return this.getCssAttr("section-root") === "true";
+      return this.getCssAttr("section-root") === true;
     },
     isSectionTag : function(){
-      return this.getCssAttr("section") === "true";
+      return this.getCssAttr("section") === true;
     },
     isBoldTag : function(){
       var name = this.getName();
@@ -320,7 +320,7 @@ var Tag = (function (){
       return name === "end-page" || name === "page-break";
     },
     isMetaTag : function(){
-      return this.getCssAttr("meta") === "true";
+      return this.getCssAttr("meta") === true;
     },
     isSameTag : function(dst){
       return this._gtid === dst._gtid;
@@ -372,7 +372,7 @@ var Tag = (function (){
     },
     _getSelectorValue : function(){
       if(this.isPseudoElement()){
-	return Selectors.getValue(this.parent, this.getName());
+	return Selectors.getValuePe(this.parent, this.getName());
       }
       return Selectors.getValue(this);
     },
@@ -400,9 +400,9 @@ var Tag = (function (){
       });
     },
     _setPseudoFirst : function(content){
-      var first_letter = Selectors.getValue(this, "first-letter");
+      var first_letter = Selectors.getValuePe(this, "first-letter");
       content = Obj.isEmpty(first_letter)? content : this._setPseudoFirstLetter(content);
-      var first_line = Selectors.getValue(this, "first-line");
+      var first_line = Selectors.getValuePe(this, "first-line");
       return Obj.isEmpty(first_line)? content : this._setPseudoFirstLine(content);
     },
     _setPseudoFirstLetter : function(content){
@@ -414,11 +414,11 @@ var Tag = (function (){
       return Html.tagWrap("first-line", content);
     },
     _getPseudoBefore : function(){
-      var attr = Selectors.getValue(this, "before");
+      var attr = Selectors.getValuePe(this, "before");
       return Obj.isEmpty(attr)? "" : Html.tagWrap("before", attr.content || "");
     },
     _getPseudoAfter : function(){
-      var attr = Selectors.getValue(this, "after");
+      var attr = Selectors.getValuePe(this, "after");
       return Obj.isEmpty(attr)? "" : Html.tagWrap("after", attr.content || "");
     },
     // "border:0; margin:0"

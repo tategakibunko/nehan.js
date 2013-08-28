@@ -194,10 +194,11 @@ var CssParser = (function(){
   };
 
   var format = function(prop, value){
-    if(typeof value === "function" || typeof value === "object"){
+    switch(typeof value){
+    case "function": case "object": case "boolean":
       return value;
     }
-    value = normalize(value);
+    value = normalize(value); // number, string
     switch(prop){
     case "background":
       return parse_background_abbr(value);

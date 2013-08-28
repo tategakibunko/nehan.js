@@ -74,10 +74,10 @@ var Selectors = (function(){
 	}
       }
     },
-    getValue : function(markup, pseudo_element){
-      if(pseudo_element){
-	return get_value_pe(markup, pseudo_element);
-      }
+    getValuePe : function(markup, pseudo_element){
+      return get_value_pe(markup, pseudo_element);
+    },
+    getValue : function(markup){
       return get_value(markup);
     }
   };
