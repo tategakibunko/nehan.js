@@ -64,7 +64,17 @@ var Layout = {
   fontImgRoot:"http://nehan.googlecode.com/hg/char-img",
   lineRate: 2.0,
   listMarkerSpacingRate:0.4,
-
+  fontSizeAbs:{
+    "xx-large":"33px",
+    "x-large":"24px",
+    "large":"18px",
+    "medium":"16px",
+    "small":"13px",
+    "x-small":"10px",
+    "xx-small":"8px",
+    "larger":"1.2em",
+    "smaller":"0.8em"
+  },
   createBox : function(size, parent, type){
     var box = new Box(size, parent, type);
     box.flow = parent.flow;
@@ -792,31 +802,31 @@ var Style = {
   // font-size classes
   //-------------------------------------------------------
   ".nehan-xx-large":{
-    "font-size":"33px"
+    "font-size": Layout.fontSizeAbs["xx-large"]
   },
   ".nehan-x-large":{
-    "font-size":"24px"
+    "font-size": Layout.fontSizeAbs["x-large"]
   },
   ".nehan-large":{
-    "font-size":"18px"
+    "font-size": Layout.fontSizeAbs["large"]
   },
   ".nehan-medium":{
-    "font-size":"16px"
+    "font-size": Layout.fontSizeAbs["medium"]
   },
   ".nehan-small":{
-    "font-size":"13px"
+    "font-size": Layout.fontSizeAbs["small"]
   },
   ".nehan-x-small":{
-    "font-size":"10px"
+    "font-size": Layout.fontSizeAbs["x-small"]
   },
   ".nehan-xx-small":{
-    "font-size":"10px"
+    "font-size": Layout.fontSizeAbs["xx-small"]
   },
   ".nehan-larger":{
-    "font-size":"1.2em"
+    "font-size": Layout.fontSizeAbs["larger"]
   },
   ".nehan-smaller":{
-    "font-size":"0.8em"
+    "font-size": Layout.fontSizeAbs["smaller"]
   },
   //-------------------------------------------------------
   // display classes
@@ -1262,8 +1272,13 @@ var Obj = {
 };
 
 var UnitSize = {
+  getFontSize : function(val, unit_size){
+    var str = String(val);
+    var size = Layout.fontSizeAbs[str] || str;
+    return this.getUnitSize(size, unit_size);
+  },
   getUnitSize : function(val, unit_size){
-    var str = (typeof val === "string")? val : String(val);
+    var str = String(val);
     if(str.indexOf("rem") > 0){
       var rem_scale = parseFloat(str.replace("rem",""));
       return Math.round(Layout.fontSize * rem_scale); // use root font-size
@@ -5583,7 +5598,7 @@ var BoxStyle = {
     var base_font_size = parent? parent.fontSize : Layout.fontSize;
     var font_size = markup.getCssAttr("font-size", "inherit");
     if(font_size != "inherit"){
-      box.fontSize = UnitSize.getUnitSize(font_size, base_font_size);
+      box.fontSize = UnitSize.getFontSize(font_size, base_font_size);
     }
   },
   _setFontColor : function(markup, box, parent){

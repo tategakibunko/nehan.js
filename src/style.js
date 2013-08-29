@@ -606,31 +606,31 @@ var Style = {
   // font-size classes
   //-------------------------------------------------------
   ".nehan-xx-large":{
-    "font-size":"33px"
+    "font-size": Layout.fontSizeAbs["xx-large"]
   },
   ".nehan-x-large":{
-    "font-size":"24px"
+    "font-size": Layout.fontSizeAbs["x-large"]
   },
   ".nehan-large":{
-    "font-size":"18px"
+    "font-size": Layout.fontSizeAbs["large"]
   },
   ".nehan-medium":{
-    "font-size":"16px"
+    "font-size": Layout.fontSizeAbs["medium"]
   },
   ".nehan-small":{
-    "font-size":"13px"
+    "font-size": Layout.fontSizeAbs["small"]
   },
   ".nehan-x-small":{
-    "font-size":"10px"
+    "font-size": Layout.fontSizeAbs["x-small"]
   },
   ".nehan-xx-small":{
-    "font-size":"10px"
+    "font-size": Layout.fontSizeAbs["xx-small"]
   },
   ".nehan-larger":{
-    "font-size":"1.2em"
+    "font-size": Layout.fontSizeAbs["larger"]
   },
   ".nehan-smaller":{
-    "font-size":"0.8em"
+    "font-size": Layout.fontSizeAbs["smaller"]
   },
   //-------------------------------------------------------
   // display classes

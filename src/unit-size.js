@@ -1,6 +1,11 @@
 var UnitSize = {
+  getFontSize : function(val, unit_size){
+    var str = String(val);
+    var size = Layout.fontSizeAbs[str] || str;
+    return this.getUnitSize(size, unit_size);
+  },
   getUnitSize : function(val, unit_size){
-    var str = (typeof val === "string")? val : String(val);
+    var str = String(val);
     if(str.indexOf("rem") > 0){
       var rem_scale = parseFloat(str.replace("rem",""));
       return Math.round(Layout.fontSize * rem_scale); // use root font-size

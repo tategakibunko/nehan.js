@@ -27,7 +27,7 @@ var BoxStyle = {
     var base_font_size = parent? parent.fontSize : Layout.fontSize;
     var font_size = markup.getCssAttr("font-size", "inherit");
     if(font_size != "inherit"){
-      box.fontSize = UnitSize.getUnitSize(font_size, base_font_size);
+      box.fontSize = UnitSize.getFontSize(font_size, base_font_size);
     }
   },
   _setFontColor : function(markup, box, parent){

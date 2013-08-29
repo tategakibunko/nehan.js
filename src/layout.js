@@ -14,7 +14,17 @@ var Layout = {
   fontImgRoot:"http://nehan.googlecode.com/hg/char-img",
   lineRate: 2.0,
   listMarkerSpacingRate:0.4,
-
+  fontSizeAbs:{
+    "xx-large":"33px",
+    "x-large":"24px",
+    "large":"18px",
+    "medium":"16px",
+    "small":"13px",
+    "x-small":"10px",
+    "xx-small":"8px",
+    "larger":"1.2em",
+    "smaller":"0.8em"
+  },
   createBox : function(size, parent, type){
     var box = new Box(size, parent, type);
     box.flow = parent.flow;
