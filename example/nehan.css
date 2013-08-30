@@ -19,26 +19,12 @@ div, span{
 .nehan-text-line{
   overflow:visible;
 }
-.nehan-text-line-vert,
-.nehan-empha-char{
-  /*
-  font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace;
-     */
-}
 .nehan-text-line-vert{
   line-height:1em;
 }
 .nehan-text-line-vert a,
 .nehan-text-line-vert a:hover{
   text-decoration:none !important;
-}
-.nehan-header .nehan-text-line,
-.nehan-header .nehan-vert-alpha,
-.nehan-li-marker,
-.nehan-li-marker .nehan-text-line-vert{
-  /*
-  font-family:'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace !important;
-     */
 }
 .nehan-body a{
   word-wrap:normal !important;
@@ -54,9 +40,6 @@ div, span{
 }
 .nehan-vert-alpha,
 .nehan-rotate-90{
-  /*
-  font-family:'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'ＭＳ 明朝','MS Mincho', monospace;
-     */
   word-break:normal;
   overflow:visible;
   -webkit-transform : rotate(90deg);
