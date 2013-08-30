@@ -81,7 +81,7 @@ var Layout = {
     box.flow = parent.flow;
     box.lineRate = parent.lineRate;
     box.textAlign = parent.textAlign;
-    box.fontSize = parent.fontSize;
+    box.font = parent.font;
     box.color = parent.color;
     box.letterSpacing = parent.letterSpacing;
     return box;
@@ -94,7 +94,7 @@ var Layout = {
     box.flow = this.getStdBoxFlow();
     box.lineRate = this.lineRate;
     box.textAlign = "start";
-    box.fontSize = this.fontSize;
+    box.font = new Font();
     box.color = new Color(this.fontColor);
     box.letterSpacing = 0;
     return box;
@@ -1274,7 +1274,7 @@ var Obj = {
 
 var UnitSize = {
   getFontSize : function(val, unit_size){
-    var str = String(val);
+    var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
     var size = Layout.fontSizeAbs[str] || str;
     return this.getUnitSize(size, unit_size);
   },
@@ -2968,10 +2968,10 @@ var Char = (function(){
       return css;
     },
     getCssVertImgChar : function(line){
-      var css = {};
+      var css = {}, font_size = line.getFontSize();
       css.display = "block";
-      css.width = line.fontSize + "px";
-      css.height = this.getVertHeight(line.fontSize) + "px";
+      css.width = font_size + "px";
+      css.height = this.getVertHeight(font_size) + "px";
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
       if(this.isPaddingEnable()){
@@ -2980,11 +2980,11 @@ var Char = (function(){
       return css;
     },
     getCssVertRotateCharIE : function(line){
-      var css = {};
+      var css = {}, font_size = line.getFontSize();
       css["float"] = "left";
       css["writing-mode"] = "tb-rl";
-      css["padding-left"] = Math.round(line.fontSize / 2) + "px";
-      css["line-height"] = line.fontSize + "px";
+      css["padding-left"] = Math.round(font_size / 2) + "px";
+      css["line-height"] = font_size + "px";
       return css;
     },
     getCssVertEmphaSrc : function(line){
@@ -2992,10 +2992,10 @@ var Char = (function(){
       return css;
     },
     getCssVertEmphaText : function(line){
-      var css = {};
+      var css = {}, font_size = line.getFontSize();
       css.display = "inline-block";
-      css.width = line.fontSize + "px";
-      css.height = line.fontSize + "px";
+      css.width = font_size + "px";
+      css.height = font_size + "px";
       return css;
     },
     getCssHoriEmphaSrc : function(line){
@@ -3013,8 +3013,8 @@ var Char = (function(){
       return css;
     },
     getCssVertHalfSpaceChar : function(line){
-      var css = {};
-      var half = Math.round(line.fontSize / 2);
+      var css = {}, font_size = line.getFontSize();
+      var half = Math.round(font_size / 2);
       css.height = half + "px";
       css["line-height"] = half + "px";
       return css;
@@ -3053,21 +3053,21 @@ var Char = (function(){
       }
       return 1;
     },
-    setMetrics : function(flow, font_size, is_bold){
+    setMetrics : function(flow, font){
       var is_vert = flow.isTextVertical();
       var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
-      this.bodySize = (step_scale != 1)? Math.round(font_size * step_scale) : font_size;
+      this.bodySize = (step_scale != 1)? Math.round(font.size * step_scale) : font.size;
       if(this.spaceRateStart){
-	this.paddingStart = Math.round(this.spaceRateStart * font_size);
+	this.paddingStart = Math.round(this.spaceRateStart * font.size);
       }
       if(this.spaceRateEnd){
-	this.paddingEnd = Math.round(this.spaceRateEnd * font_size);
+	this.paddingEnd = Math.round(this.spaceRateEnd * font.size);
       }
       if(this.img && this.img === "tenten"){
-	this.bodySize = font_size;
+	this.bodySize = font.size;
       }
       if(!is_vert && !this.isRef && this.isHankaku()){
-	this.bodySize = Math.round(font_size / 2);
+	this.bodySize = Math.round(font.size / 2);
       }
     },
     _setImg : function(img, vscale, hscale){
@@ -3293,20 +3293,20 @@ var Word = (function(){
 
   Word.prototype = {
     getCssVertTrans : function(line){
-      var css = {};
+      var css = {}, font_size = line.getFontSize();
       css["letter-spacing"] = line.letterSpacing + "px";
-      css.width = line.fontSize + "px";
+      css.width = font_size + "px";
       css.height = this.bodySize + "px";
       css["margin-left"] = css["margin-right"] = "auto";
       return css;
     },
     getCssVertTransIE : function(line){
-      var css = {};
+      var css = {}, font_size = line.getFontSize();
       css["float"] = "left";
       css["writing-mode"] = "tb-rl";
       css["letter-spacing"] = line.letterSpacing + "px";
-      css["padding-left"] = Math.round(line.fontSize / 2) + "px";
-      css["line-height"] = line.fontSize + "px";
+      css["padding-left"] = Math.round(font_size / 2) + "px";
+      css["line-height"] = font_size + "px";
       return css;
     },
     getCharCount : function(){
@@ -3327,22 +3327,9 @@ var Word = (function(){
       }
       return count;
     },
-    setMetricsHeader : function(flow, font_size, is_bold){
-      var upper_len = this.countUpper();
-      var lower_len = this.data.length - upper_len;
-      this.bodySize = Math.round(lower_len * font_size * 0.5);
-      this.bodySize += Math.round(upper_len * font_size * Layout.upperCaseRate);
-      if(is_bold){
-	this.bodySize += Math.round(Layout.boldRate * this.bodySize);
-      }
-    },
-    setMetrics : function(flow, font_size, is_bold, is_header){
-      if(is_header && /[A-Z]/.test(this.data)){
-	this.setMetricsHeader(flow, font_size, is_bold);
-	return;
-      }
-      this.bodySize = Math.round(this.data.length * font_size * 0.5);
-      if(is_bold){
+    setMetrics : function(flow, font){
+      this.bodySize = Math.round(this.data.length * font.size * 0.5);
+      if(font.isBold()){
 	this.bodySize += Math.round(Layout.boldRate * this.bodySize);
       }
     },
@@ -3391,8 +3378,8 @@ var Tcy = (function(){
     hasMetrics : function(){
       return (typeof this.bodySize != "undefined");
     },
-    setMetrics : function(flow, font_size, is_bold){
-      this.bodySize = font_size;
+    setMetrics : function(flow, font){
+      this.bodySize = font.size;
     }
   };
 
@@ -3428,9 +3415,9 @@ var Ruby = (function(){
       return this.rubyFontSize;
     },
     getCssVertRuby : function(line){
-      var css = {};
-      css["margin-left"] = Math.round((line.maxExtent - line.fontSize) / 2) + "px";
-      css[line.flow.getPropExtent()] = this.getExtent(line.fontSize) + "px";
+      var css = {}, font_size = line.getFontSize();
+      css["margin-left"] = Math.round((line.maxExtent - font_size) / 2) + "px";
+      css[line.flow.getPropExtent()] = this.getExtent(font_size) + "px";
       css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
       return css;
     },
@@ -3462,10 +3449,10 @@ var Ruby = (function(){
       css["text-align"] = "center";
       return css;
     },
-    setMetrics : function(flow, font_size, letter_spacing){
-      this.rubyFontSize = Layout.getRubyFontSize(font_size);
+    setMetrics : function(flow, font, letter_spacing){
+      this.rubyFontSize = Layout.getRubyFontSize(font.size);
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
-	rb.setMetrics(flow, font_size);
+	rb.setMetrics(flow, font);
 	return ret + rb.getAdvance(flow, letter_spacing);
       });
       var advance_rt = this.rubyFontSize * this.getRtString().length;
@@ -4482,23 +4469,53 @@ var BoxSizings = {
 };
 
 
-var FontWeight = (function(){
-  function FontWeight(value){
-    this.value = value;
+var Font = (function(){
+  function Font(){
+    this.size = Layout.fontSize;
   }
 
-  FontWeight.prototype = {
+  Font.prototype = {
     isBold : function(){
-      return this.value !== "normal" && this.value !== "lighter";
+      return this.weight && this.weight !== "normal" && this.weight !== "lighter";
+    },
+    getFontSize : function(){
+      return this.size || Layout.fontSize;
+    },
+    toString : function(){
+      var parts = [];
+      if(this.weight){
+	parts.push(this.weight);
+      }
+      if(this.style){
+	parts.push(this.style);
+      }
+      if(this.size){
+	parts.push(this.size + "px");
+      }
+      if(this.family){
+	parts.push(this.family);
+      }
+      return parts.join(" ");
     },
     getCss : function(){
       var css = {};
-      css["font-weight"] = this.value;
+      if(this.weight){
+	css["font-weight"] = this.weight;
+      }
+      if(this.style){
+	css["font-style"] = this.style;
+      }
+      if(this.size){
+	css["font-size"] = this.size + "px";
+      }
+      if(this.family){
+	css["font-family"] = this.family;
+      }
       return css;
     }
   };
 
-  return FontWeight;
+  return Font;
 })();
 
 
@@ -5108,18 +5125,18 @@ var TextEmpha = (function(){
       return font_size * 3;
     },
     getCssVertEmphaWrap : function(line, chr){
-      var css = {};
+      var css = {}, font_size = line.getFontSize();
       css["padding-left"] = "0.5em";
-      css.width = this.getExtent(line.fontSize) + "px";
-      css.height = chr.getAdvance(line.fontSize, line.letterSpacing) + "px";
+      css.width = this.getExtent(font_size) + "px";
+      css.height = chr.getAdvance(font_size, line.letterSpacing) + "px";
       return css;
     },
     getCssHoriEmphaWrap : function(line, chr){
-      var css = {};
+      var css = {}, font_size = line.getFontSize();
       css.display = "inline-block";
-      css["padding-top"] = -line.fontSize + "px";
-      css.width = chr.getAdvance(line.fontSize, line.letterSpacing) + "px";
-      css.height = this.getExtent(line.fontSize) + "px";
+      css["padding-top"] = -font_size + "px";
+      css.width = chr.getAdvance(font_size, line.letterSpacing) + "px";
+      css.height = this.getExtent(font_size) + "px";
       return css;
     }
   };
@@ -5189,8 +5206,10 @@ var Box = (function(){
   Box.prototype = {
     getCssBlock : function(){
       var css = this.css;
-      css["font-size"] = this.fontSize + "px";
       Args.copy(css, this.size.getCss());
+      if(this.font){
+	Args.copy(css, this.font.getCss());
+      }
       if(this.edge){
 	Args.copy(css, this.edge.getCss());
       }
@@ -5215,7 +5234,9 @@ var Box = (function(){
     },
     getCssInline : function(){
       var css = this.css;
-      css["font-size"] = this.fontSize + "px";
+      if(this.font){
+	Args.copy(css, this.font.getCss());
+      }
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
@@ -5299,6 +5320,9 @@ var Box = (function(){
     },
     getFlipFlow : function(){
       return this.flow.getFlipFlow();
+    },
+    getFontSize : function(){
+      return this.font? this.font.size : Layout.fontSize;
     },
     getTextMeasure : function(){
       return this.childMeasure;
@@ -5509,9 +5533,6 @@ var Box = (function(){
       }
       return ret;
     },
-    isTextBold : function(){
-      return (this.fontWeight && this.fontWeight.isBold());
-    },
     isBlock : function(){
       return !this.isTextLine();
     },
@@ -5525,9 +5546,6 @@ var Box = (function(){
       // when <p>aaaa<span>bbbb</span></p>,
       // <span>bbbb</span> is inline of inline.
       return this.isTextLine() && this.markup && this.markup.isInline();
-    },
-    isHeaderLine : function(){
-      return this.isTextLine() && this.markup && this.markup.isHeaderTag();
     },
     isRubyLine : function(){
       return this.isTextLine() && this.getMarkupName() === "ruby";
@@ -5601,12 +5619,9 @@ var Box = (function(){
 // style setting from markup to box
 var BoxStyle = {
   set : function(markup, box, parent){
-    this._setFontSize(markup, box, parent);
-    this._setFontColor(markup, box, parent);
-    this._setFontFamily(markup, box, parent);
-    this._setFontStyle(markup, box, parent);
-    this._setFontWeight(markup, box, parent);
-    this._setSizing(markup, box, parent);
+    this._setColor(markup, box, parent);
+    this._setFont(markup, box, parent);
+    this._setBoxSizing(markup, box, parent);
     this._setEdge(markup, box, parent);
     this._setLineRate(markup, box, parent);
     this._setTextAlign(markup, box, parent);
@@ -5623,38 +5638,32 @@ var BoxStyle = {
       box.addClass(klass);
     });
   },
-  _setFontSize : function(markup, box, parent){
-    var base_font_size = parent? parent.fontSize : Layout.fontSize;
-    var font_size = markup.getCssAttr("font-size", "inherit");
-    if(font_size != "inherit"){
-      box.fontSize = UnitSize.getFontSize(font_size, base_font_size);
+  _setColor : function(markup, box, parent){
+    var color = markup.getCssAttr("color");
+    if(color){
+      box.color = new Color(color);
     }
   },
-  _setFontColor : function(markup, box, parent){
-    var font_color = markup.getCssAttr("color");
-    if(font_color){
-      box.color = new Color(font_color);
-    }
-  },
-  _setFontFamily : function(markup, box, parent){
+  _setFont : function(markup, box, parent){
+    var font = new Font();
+    var base_font_size = parent? parent.getFontSize() : Layout.fontSize;
     var font_family = markup.getCssAttr("font-family");
     if(font_family){
-      box.setCss("font-family", font_family);
+      font.family = font_family;
     }
-  },
-  _setFontStyle : function(markup, box, parent){
-    var font_style = markup.getCssAttr("font-style");
-    if(font_style){
-      box.setCss("font-style", font_style);
-    }
-  },
-  _setFontWeight : function(markup, box, parent){
     var font_weight = markup.getCssAttr("font-weight");
     if(font_weight){
-      box.fontWeight = new FontWeight(font_weight);
+      font.weight = font_weight;
     }
+    var font_style = markup.getCssAttr("font-style");
+    if(font_style){
+      font.style = font_style;
+    }
+    var font_size = markup.getCssAttr("font-size", "inherit");
+    font.size = (font_size === "inherit")? base_font_size : UnitSize.getFontSize(font_size, base_font_size);
+    box.font = font;
   },
-  _setSizing : function(markup, box, parent){
+  _setBoxSizing : function(markup, box, parent){
     var box_sizing = markup.getCssAttr("box-sizing");
     if(box_sizing){
       box.sizing = BoxSizings.getByName(box_sizing);
@@ -5670,16 +5679,16 @@ var BoxStyle = {
     }
     var edge = new BoxEdge();
     if(padding){
-      edge.setSize("padding", box.flow, UnitSize.getEdgeSize(padding, box.fontSize));
+      edge.setSize("padding", box.flow, UnitSize.getEdgeSize(padding, box.getFontSize()));
     }
     if(margin){
-      edge.setSize("margin", box.flow, UnitSize.getEdgeSize(margin, box.fontSize));
+      edge.setSize("margin", box.flow, UnitSize.getEdgeSize(margin, box.getFontSize()));
     }
     if(border_width){
-      edge.setSize("border", box.flow, UnitSize.getEdgeSize(border_width, box.fontSize));
+      edge.setSize("border", box.flow, UnitSize.getEdgeSize(border_width, box.getFontSize()));
     }
     if(border_radius){
-      edge.setBorderRadius(box.flow, UnitSize.getCornerSize(border_radius, box.fontSize));
+      edge.setBorderRadius(box.flow, UnitSize.getCornerSize(border_radius, box.getFontSize()));
     }
     var border_color = markup.getCssAttr("border-color");
     if(border_color){
@@ -5706,7 +5715,7 @@ var BoxStyle = {
   _setTextIndent : function(markup, box, parent){
     var text_indent = markup.getCssAttr("text-indent", "inherit");
     if(text_indent !== "inherit"){
-      box.textIndent = Math.max(0, UnitSize.getUnitSize(text_indent, box.fontSize));
+      box.textIndent = Math.max(0, UnitSize.getUnitSize(text_indent, box.getFontSize()));
     }
   },
   _setTextEmphasis : function(markup, box, parent){
@@ -5738,7 +5747,7 @@ var BoxStyle = {
   _setLetterSpacing : function(markup, box, parent){
     var letter_spacing = markup.getCssAttr("letter-spacing");
     if(letter_spacing){
-      box.letterSpacing = UnitSize.getUnitSize(letter_spacing, box.fontSize);
+      box.letterSpacing = UnitSize.getUnitSize(letter_spacing, box.getFontSize());
     }
   },
   _setBackground : function(markup, box, parent){
@@ -6479,7 +6488,7 @@ var DocumentContext = (function(){
       return this.markup;
     },
     getMarkupStaticSize : function(parent){
-      var font_size = parent? parent.fontSize : Layout.fontSize;
+      var font_size = parent? parent.getFontSize() : Layout.fontSize;
       var measure = parent? parent.getContentMeasure(parent.flow) : Layout.getStdMeasure();
       return this.markup? this.markup.getStaticSize(font_size, measure) : null;
     },
@@ -6764,7 +6773,7 @@ var Collapse = (function(){
     if(border === null){
       return null;
     }
-    var val = UnitSize.getEdgeSize(border, box.fontSize, box.getContentMeasure());
+    var val = UnitSize.getEdgeSize(border, box.getFontSize(), box.getContentMeasure());
     if(typeof val == "number"){
       return {before:val, after:val, start:val, end:val};
     }
@@ -7191,7 +7200,7 @@ var TableTagStream = FilteredTagStream.extend({
     return List.map(childs, function(child){
       var size = child.getTagAttr("measure") || child.getTagAttr("width") || 0;
       if(size){
-	return UnitSize.getBoxSize(size, box.fontSize, box.getContentMeasure());
+	return UnitSize.getBoxSize(size, box.getFontSize(), box.getContentMeasure());
       }
       return 0;
     });
@@ -7791,17 +7800,17 @@ var InlineContext = (function(){
     _getElementExtent : function(element){
       if(Token.isText(element)){
 	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
-	  return this.line.textEmpha.getExtent(this.line.fontSize);
+	  return this.line.textEmpha.getExtent(this.line.getFontSize());
 	}
-	return this.line.fontSize;
+	return this.line.getFontSize();
       }
       if(element instanceof Ruby){
-	return element.getExtent(this.line.fontSize);
+	return element.getExtent(this.line.getFontSize());
       }
       return element.getBoxExtent(this.line.flow);
     },
     _getElementFontSize : function(element){
-      return (element instanceof Box)? element.fontSize : this.line.fontSize;
+      return (element instanceof Box)? element.getFontSize() : this.line.getFontSize();
     },
     _getElementAdvance : function(element){
       if(Token.isText(element)){
@@ -7824,7 +7833,7 @@ var InlineContext = (function(){
     _canContain : function(element, advance){
       // space for justify is required for justify target.
       if(this.line.isJustifyTarget()){
-	return this.curMeasure + advance + this.line.fontSize <= this.maxMeasure;
+	return this.curMeasure + advance + this.line.getFontSize() <= this.maxMeasure;
       }
       return this.curMeasure + advance <= this.maxMeasure;
     },
@@ -7993,7 +8002,7 @@ var InlineContext = (function(){
       this.stream.setPos(normal_pos + 1);
     },
     _createEmptyLine : function(){
-      this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.line.fontSize);
+      this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.line.getFontSize());
       this.line.setInlineElements([], this.lineMeasure);
       return this.line;
     },
@@ -8387,7 +8396,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
   _yieldText : function(line, text){
     // always set metrics for first-line, because style of first-line tag changes whether it is first-line or not.
     if(this.context.getMarkupName() === "first-line" || !text.hasMetrics()){
-      text.setMetrics(line.flow, line.fontSize, line.isTextBold(), line.isHeaderLine());
+      text.setMetrics(line.flow, line.font);
     }
     switch(text._type){
     case "char":
@@ -8399,7 +8408,6 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
   },
   _yieldWord : function(line, word){
     var advance = word.getAdvance(line.flow, line.letterSpacing || 0);
-    //var max_measure = this.context.getInlineMaxMeasure() - line.fontSize;
     var max_measure = this.context.getInlineMaxMeasure();
 
     // if advance of this word is less than max-measure, just return.
@@ -8409,11 +8417,9 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     }
     // if advance is lager than max_measure,
     // we must cut this word into some parts.
-    var is_bold = line.isTextBold();
-    var is_header = line.isHeaderLine();
-    var part = word.cutMeasure(line.fontSize, max_measure); // get sliced word
-    part.setMetrics(line.flow, line.fontSize, is_bold, is_header); // metrics for first half
-    word.setMetrics(line.flow, line.fontSize, is_bold, is_header); // metrics for second half
+    var part = word.cutMeasure(line.getFontSize(), max_measure); // get sliced word
+    part.setMetrics(line.flow, line.font); // metrics for first half
+    word.setMetrics(line.flow, line.font); // metrics for second half
     return part;
   }
 });
@@ -8447,7 +8453,7 @@ var RubyGenerator = ChildInlineTreeGenerator.extend({
     }
     // avoid overwriting metrics.
     if(!ruby.hasMetrics()){
-      ruby.setMetrics(line.flow, line.fontSize, line.letterSpacing || 0);
+      ruby.setMetrics(line.flow, line.font, line.letterSpacing || 0);
     }
     return ruby;
   }
@@ -8563,7 +8569,7 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     box.seekPos = this.context.getSeekPos();
     box.pageNo = this.context.getPageNo();
     box.charPos = this.context.getCharPos();
-    box.css["font-size"] = Layout.fontSize + "px";
+    //box.css["font-size"] = Layout.fontSize + "px";
     return box;
   },
   _onCompleteBlock : function(page){
@@ -8729,7 +8735,7 @@ var ListGenerator = ChildBlockTreeGenerator.extend({
       image:list_style_image,
       format:list_style_format
     });
-    var marker_advance = list_style.getMarkerAdvance(parent.flow, parent.fontSize, item_count);
+    var marker_advance = list_style.getMarkerAdvance(parent.flow, parent.getFontSize(), item_count);
     box.listStyle = list_style;
     box.partition = new Partition([marker_advance, box.getContentMeasure() - marker_advance]);
   }
@@ -9153,7 +9159,8 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
     });
   },
   evalHalfSpaceChar : function(line, chr){
-    var half = Math.round(line.fontSize / 2);
+    var font_size = line.getFontSize();
+    var half = Math.round(font_size / 2);
     return Html.tagWrap("div", "&nbsp;", {
       style:Css.toString(chr.getCssVertHalfSpaceChar(line))
     });

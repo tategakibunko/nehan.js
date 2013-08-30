@@ -77,7 +77,7 @@ var DocumentContext = (function(){
       return this.markup;
     },
     getMarkupStaticSize : function(parent){
-      var font_size = parent? parent.fontSize : Layout.fontSize;
+      var font_size = parent? parent.getFontSize() : Layout.fontSize;
       var measure = parent? parent.getContentMeasure(parent.flow) : Layout.getStdMeasure();
       return this.markup? this.markup.getStaticSize(font_size, measure) : null;
     },

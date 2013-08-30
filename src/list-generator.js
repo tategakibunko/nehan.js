@@ -11,7 +11,7 @@ var ListGenerator = ChildBlockTreeGenerator.extend({
       image:list_style_image,
       format:list_style_format
     });
-    var marker_advance = list_style.getMarkerAdvance(parent.flow, parent.fontSize, item_count);
+    var marker_advance = list_style.getMarkerAdvance(parent.flow, parent.getFontSize(), item_count);
     box.listStyle = list_style;
     box.partition = new Partition([marker_advance, box.getContentMeasure() - marker_advance]);
   }

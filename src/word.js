@@ -7,20 +7,20 @@ var Word = (function(){
 
   Word.prototype = {
     getCssVertTrans : function(line){
-      var css = {};
+      var css = {}, font_size = line.getFontSize();
       css["letter-spacing"] = line.letterSpacing + "px";
-      css.width = line.fontSize + "px";
+      css.width = font_size + "px";
       css.height = this.bodySize + "px";
       css["margin-left"] = css["margin-right"] = "auto";
       return css;
     },
     getCssVertTransIE : function(line){
-      var css = {};
+      var css = {}, font_size = line.getFontSize();
       css["float"] = "left";
       css["writing-mode"] = "tb-rl";
       css["letter-spacing"] = line.letterSpacing + "px";
-      css["padding-left"] = Math.round(line.fontSize / 2) + "px";
-      css["line-height"] = line.fontSize + "px";
+      css["padding-left"] = Math.round(font_size / 2) + "px";
+      css["line-height"] = font_size + "px";
       return css;
     },
     getCharCount : function(){
@@ -41,22 +41,9 @@ var Word = (function(){
       }
       return count;
     },
-    setMetricsHeader : function(flow, font_size, is_bold){
-      var upper_len = this.countUpper();
-      var lower_len = this.data.length - upper_len;
-      this.bodySize = Math.round(lower_len * font_size * 0.5);
-      this.bodySize += Math.round(upper_len * font_size * Layout.upperCaseRate);
-      if(is_bold){
-	this.bodySize += Math.round(Layout.boldRate * this.bodySize);
-      }
-    },
-    setMetrics : function(flow, font_size, is_bold, is_header){
-      if(is_header && /[A-Z]/.test(this.data)){
-	this.setMetricsHeader(flow, font_size, is_bold);
-	return;
-      }
-      this.bodySize = Math.round(this.data.length * font_size * 0.5);
-      if(is_bold){
+    setMetrics : function(flow, font){
+      this.bodySize = Math.round(this.data.length * font.size * 0.5);
+      if(font.isBold()){
 	this.bodySize += Math.round(Layout.boldRate * this.bodySize);
       }
     },

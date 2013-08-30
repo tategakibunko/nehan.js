@@ -50,10 +50,10 @@ var Char = (function(){
       return css;
     },
     getCssVertImgChar : function(line){
-      var css = {};
+      var css = {}, font_size = line.getFontSize();
       css.display = "block";
-      css.width = line.fontSize + "px";
-      css.height = this.getVertHeight(line.fontSize) + "px";
+      css.width = font_size + "px";
+      css.height = this.getVertHeight(font_size) + "px";
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
       if(this.isPaddingEnable()){
@@ -62,11 +62,11 @@ var Char = (function(){
       return css;
     },
     getCssVertRotateCharIE : function(line){
-      var css = {};
+      var css = {}, font_size = line.getFontSize();
       css["float"] = "left";
       css["writing-mode"] = "tb-rl";
-      css["padding-left"] = Math.round(line.fontSize / 2) + "px";
-      css["line-height"] = line.fontSize + "px";
+      css["padding-left"] = Math.round(font_size / 2) + "px";
+      css["line-height"] = font_size + "px";
       return css;
     },
     getCssVertEmphaSrc : function(line){
@@ -74,10 +74,10 @@ var Char = (function(){
       return css;
     },
     getCssVertEmphaText : function(line){
-      var css = {};
+      var css = {}, font_size = line.getFontSize();
       css.display = "inline-block";
-      css.width = line.fontSize + "px";
-      css.height = line.fontSize + "px";
+      css.width = font_size + "px";
+      css.height = font_size + "px";
       return css;
     },
     getCssHoriEmphaSrc : function(line){
@@ -95,8 +95,8 @@ var Char = (function(){
       return css;
     },
     getCssVertHalfSpaceChar : function(line){
-      var css = {};
-      var half = Math.round(line.fontSize / 2);
+      var css = {}, font_size = line.getFontSize();
+      var half = Math.round(font_size / 2);
       css.height = half + "px";
       css["line-height"] = half + "px";
       return css;
@@ -135,21 +135,21 @@ var Char = (function(){
       }
       return 1;
     },
-    setMetrics : function(flow, font_size, is_bold){
+    setMetrics : function(flow, font){
       var is_vert = flow.isTextVertical();
       var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
-      this.bodySize = (step_scale != 1)? Math.round(font_size * step_scale) : font_size;
+      this.bodySize = (step_scale != 1)? Math.round(font.size * step_scale) : font.size;
       if(this.spaceRateStart){
-	this.paddingStart = Math.round(this.spaceRateStart * font_size);
+	this.paddingStart = Math.round(this.spaceRateStart * font.size);
       }
       if(this.spaceRateEnd){
-	this.paddingEnd = Math.round(this.spaceRateEnd * font_size);
+	this.paddingEnd = Math.round(this.spaceRateEnd * font.size);
       }
       if(this.img && this.img === "tenten"){
-	this.bodySize = font_size;
+	this.bodySize = font.size;
       }
       if(!is_vert && !this.isRef && this.isHankaku()){
-	this.bodySize = Math.round(font_size / 2);
+	this.bodySize = Math.round(font.size / 2);
       }
     },
     _setImg : function(img, vscale, hscale){

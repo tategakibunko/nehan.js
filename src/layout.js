@@ -31,7 +31,7 @@ var Layout = {
     box.flow = parent.flow;
     box.lineRate = parent.lineRate;
     box.textAlign = parent.textAlign;
-    box.fontSize = parent.fontSize;
+    box.font = parent.font;
     box.color = parent.color;
     box.letterSpacing = parent.letterSpacing;
     return box;
@@ -44,7 +44,7 @@ var Layout = {
     box.flow = this.getStdBoxFlow();
     box.lineRate = this.lineRate;
     box.textAlign = "start";
-    box.fontSize = this.fontSize;
+    box.font = new Font();
     box.color = new Color(this.fontColor);
     box.letterSpacing = 0;
     return box;

@@ -6,7 +6,7 @@ var RubyGenerator = ChildInlineTreeGenerator.extend({
     }
     // avoid overwriting metrics.
     if(!ruby.hasMetrics()){
-      ruby.setMetrics(line.flow, line.fontSize, line.letterSpacing || 0);
+      ruby.setMetrics(line.flow, line.font, line.letterSpacing || 0);
     }
     return ruby;
   }

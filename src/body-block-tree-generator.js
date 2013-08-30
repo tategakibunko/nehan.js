@@ -9,7 +9,7 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     box.seekPos = this.context.getSeekPos();
     box.pageNo = this.context.getPageNo();
     box.charPos = this.context.getCharPos();
-    box.css["font-size"] = Layout.fontSize + "px";
+    //box.css["font-size"] = Layout.fontSize + "px";
     return box;
   },
   _onCompleteBlock : function(page){

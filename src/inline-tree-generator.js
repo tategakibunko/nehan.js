@@ -187,7 +187,7 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
   _yieldText : function(line, text){
     // always set metrics for first-line, because style of first-line tag changes whether it is first-line or not.
     if(this.context.getMarkupName() === "first-line" || !text.hasMetrics()){
-      text.setMetrics(line.flow, line.fontSize, line.isTextBold(), line.isHeaderLine());
+      text.setMetrics(line.flow, line.font);
     }
     switch(text._type){
     case "char":
@@ -199,7 +199,6 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
   },
   _yieldWord : function(line, word){
     var advance = word.getAdvance(line.flow, line.letterSpacing || 0);
-    //var max_measure = this.context.getInlineMaxMeasure() - line.fontSize;
     var max_measure = this.context.getInlineMaxMeasure();
 
     // if advance of this word is less than max-measure, just return.
@@ -209,11 +208,9 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     }
     // if advance is lager than max_measure,
     // we must cut this word into some parts.
-    var is_bold = line.isTextBold();
-    var is_header = line.isHeaderLine();
-    var part = word.cutMeasure(line.fontSize, max_measure); // get sliced word
-    part.setMetrics(line.flow, line.fontSize, is_bold, is_header); // metrics for first half
-    word.setMetrics(line.flow, line.fontSize, is_bold, is_header); // metrics for second half
+    var part = word.cutMeasure(line.getFontSize(), max_measure); // get sliced word
+    part.setMetrics(line.flow, line.font); // metrics for first half
+    word.setMetrics(line.flow, line.font); // metrics for second half
     return part;
   }
 });

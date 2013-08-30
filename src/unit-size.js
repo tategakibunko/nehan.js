@@ -1,6 +1,6 @@
 var UnitSize = {
   getFontSize : function(val, unit_size){
-    var str = String(val);
+    var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
     var size = Layout.fontSizeAbs[str] || str;
     return this.getUnitSize(size, unit_size);
   },

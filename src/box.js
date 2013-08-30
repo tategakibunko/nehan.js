@@ -13,8 +13,10 @@ var Box = (function(){
   Box.prototype = {
     getCssBlock : function(){
       var css = this.css;
-      css["font-size"] = this.fontSize + "px";
       Args.copy(css, this.size.getCss());
+      if(this.font){
+	Args.copy(css, this.font.getCss());
+      }
       if(this.edge){
 	Args.copy(css, this.edge.getCss());
       }
@@ -39,7 +41,9 @@ var Box = (function(){
     },
     getCssInline : function(){
       var css = this.css;
-      css["font-size"] = this.fontSize + "px";
+      if(this.font){
+	Args.copy(css, this.font.getCss());
+      }
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
@@ -123,6 +127,9 @@ var Box = (function(){
     },
     getFlipFlow : function(){
       return this.flow.getFlipFlow();
+    },
+    getFontSize : function(){
+      return this.font? this.font.size : Layout.fontSize;
     },
     getTextMeasure : function(){
       return this.childMeasure;
@@ -333,9 +340,6 @@ var Box = (function(){
       }
       return ret;
     },
-    isTextBold : function(){
-      return (this.fontWeight && this.fontWeight.isBold());
-    },
     isBlock : function(){
       return !this.isTextLine();
     },
@@ -349,9 +353,6 @@ var Box = (function(){
       // when <p>aaaa<span>bbbb</span></p>,
       // <span>bbbb</span> is inline of inline.
       return this.isTextLine() && this.markup && this.markup.isInline();
-    },
-    isHeaderLine : function(){
-      return this.isTextLine() && this.markup && this.markup.isHeaderTag();
     },
     isRubyLine : function(){
       return this.isTextLine() && this.getMarkupName() === "ruby";

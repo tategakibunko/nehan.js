@@ -126,17 +126,17 @@ var InlineContext = (function(){
     _getElementExtent : function(element){
       if(Token.isText(element)){
 	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
-	  return this.line.textEmpha.getExtent(this.line.fontSize);
+	  return this.line.textEmpha.getExtent(this.line.getFontSize());
 	}
-	return this.line.fontSize;
+	return this.line.getFontSize();
       }
       if(element instanceof Ruby){
-	return element.getExtent(this.line.fontSize);
+	return element.getExtent(this.line.getFontSize());
       }
       return element.getBoxExtent(this.line.flow);
     },
     _getElementFontSize : function(element){
-      return (element instanceof Box)? element.fontSize : this.line.fontSize;
+      return (element instanceof Box)? element.getFontSize() : this.line.getFontSize();
     },
     _getElementAdvance : function(element){
       if(Token.isText(element)){
@@ -159,7 +159,7 @@ var InlineContext = (function(){
     _canContain : function(element, advance){
       // space for justify is required for justify target.
       if(this.line.isJustifyTarget()){
-	return this.curMeasure + advance + this.line.fontSize <= this.maxMeasure;
+	return this.curMeasure + advance + this.line.getFontSize() <= this.maxMeasure;
       }
       return this.curMeasure + advance <= this.maxMeasure;
     },
@@ -328,7 +328,7 @@ var InlineContext = (function(){
       this.stream.setPos(normal_pos + 1);
     },
     _createEmptyLine : function(){
-      this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.line.fontSize);
+      this.line.size = this.line.flow.getBoxSize(this.lineMeasure, this.line.getFontSize());
       this.line.setInlineElements([], this.lineMeasure);
       return this.line;
     },

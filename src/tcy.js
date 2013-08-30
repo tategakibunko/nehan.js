@@ -14,8 +14,8 @@ var Tcy = (function(){
     hasMetrics : function(){
       return (typeof this.bodySize != "undefined");
     },
-    setMetrics : function(flow, font_size, is_bold){
-      this.bodySize = font_size;
+    setMetrics : function(flow, font){
+      this.bodySize = font.size;
     }
   };
 

@@ -1,12 +1,9 @@
 // style setting from markup to box
 var BoxStyle = {
   set : function(markup, box, parent){
-    this._setFontSize(markup, box, parent);
-    this._setFontColor(markup, box, parent);
-    this._setFontFamily(markup, box, parent);
-    this._setFontStyle(markup, box, parent);
-    this._setFontWeight(markup, box, parent);
-    this._setSizing(markup, box, parent);
+    this._setColor(markup, box, parent);
+    this._setFont(markup, box, parent);
+    this._setBoxSizing(markup, box, parent);
     this._setEdge(markup, box, parent);
     this._setLineRate(markup, box, parent);
     this._setTextAlign(markup, box, parent);
@@ -23,38 +20,32 @@ var BoxStyle = {
       box.addClass(klass);
     });
   },
-  _setFontSize : function(markup, box, parent){
-    var base_font_size = parent? parent.fontSize : Layout.fontSize;
-    var font_size = markup.getCssAttr("font-size", "inherit");
-    if(font_size != "inherit"){
-      box.fontSize = UnitSize.getFontSize(font_size, base_font_size);
+  _setColor : function(markup, box, parent){
+    var color = markup.getCssAttr("color");
+    if(color){
+      box.color = new Color(color);
     }
   },
-  _setFontColor : function(markup, box, parent){
-    var font_color = markup.getCssAttr("color");
-    if(font_color){
-      box.color = new Color(font_color);
-    }
-  },
-  _setFontFamily : function(markup, box, parent){
+  _setFont : function(markup, box, parent){
+    var font = new Font();
+    var base_font_size = parent? parent.getFontSize() : Layout.fontSize;
     var font_family = markup.getCssAttr("font-family");
     if(font_family){
-      box.setCss("font-family", font_family);
+      font.family = font_family;
     }
-  },
-  _setFontStyle : function(markup, box, parent){
-    var font_style = markup.getCssAttr("font-style");
-    if(font_style){
-      box.setCss("font-style", font_style);
-    }
-  },
-  _setFontWeight : function(markup, box, parent){
     var font_weight = markup.getCssAttr("font-weight");
     if(font_weight){
-      box.fontWeight = new FontWeight(font_weight);
+      font.weight = font_weight;
     }
+    var font_style = markup.getCssAttr("font-style");
+    if(font_style){
+      font.style = font_style;
+    }
+    var font_size = markup.getCssAttr("font-size", "inherit");
+    font.size = (font_size === "inherit")? base_font_size : UnitSize.getFontSize(font_size, base_font_size);
+    box.font = font;
   },
-  _setSizing : function(markup, box, parent){
+  _setBoxSizing : function(markup, box, parent){
     var box_sizing = markup.getCssAttr("box-sizing");
     if(box_sizing){
       box.sizing = BoxSizings.getByName(box_sizing);
@@ -70,16 +61,16 @@ var BoxStyle = {
     }
     var edge = new BoxEdge();
     if(padding){
-      edge.setSize("padding", box.flow, UnitSize.getEdgeSize(padding, box.fontSize));
+      edge.setSize("padding", box.flow, UnitSize.getEdgeSize(padding, box.getFontSize()));
     }
     if(margin){
-      edge.setSize("margin", box.flow, UnitSize.getEdgeSize(margin, box.fontSize));
+      edge.setSize("margin", box.flow, UnitSize.getEdgeSize(margin, box.getFontSize()));
     }
     if(border_width){
-      edge.setSize("border", box.flow, UnitSize.getEdgeSize(border_width, box.fontSize));
+      edge.setSize("border", box.flow, UnitSize.getEdgeSize(border_width, box.getFontSize()));
     }
     if(border_radius){
-      edge.setBorderRadius(box.flow, UnitSize.getCornerSize(border_radius, box.fontSize));
+      edge.setBorderRadius(box.flow, UnitSize.getCornerSize(border_radius, box.getFontSize()));
     }
     var border_color = markup.getCssAttr("border-color");
     if(border_color){
@@ -106,7 +97,7 @@ var BoxStyle = {
   _setTextIndent : function(markup, box, parent){
     var text_indent = markup.getCssAttr("text-indent", "inherit");
     if(text_indent !== "inherit"){
-      box.textIndent = Math.max(0, UnitSize.getUnitSize(text_indent, box.fontSize));
+      box.textIndent = Math.max(0, UnitSize.getUnitSize(text_indent, box.getFontSize()));
     }
   },
   _setTextEmphasis : function(markup, box, parent){
@@ -138,7 +129,7 @@ var BoxStyle = {
   _setLetterSpacing : function(markup, box, parent){
     var letter_spacing = markup.getCssAttr("letter-spacing");
     if(letter_spacing){
-      box.letterSpacing = UnitSize.getUnitSize(letter_spacing, box.fontSize);
+      box.letterSpacing = UnitSize.getUnitSize(letter_spacing, box.getFontSize());
     }
   },
   _setBackground : function(markup, box, parent){
