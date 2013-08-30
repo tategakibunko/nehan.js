@@ -27,23 +27,22 @@ var BoxStyle = {
     }
   },
   _setFont : function(markup, box, parent){
-    var font = new Font();
-    var base_font_size = parent? parent.getFontSize() : Layout.fontSize;
     var font_family = markup.getCssAttr("font-family");
     if(font_family){
-      font.family = font_family;
+      box.font.family = font_family;
     }
     var font_weight = markup.getCssAttr("font-weight");
     if(font_weight){
-      font.weight = font_weight;
+      box.font.weight = font_weight;
     }
     var font_style = markup.getCssAttr("font-style");
     if(font_style){
-      font.style = font_style;
+      box.font.style = font_style;
     }
     var font_size = markup.getCssAttr("font-size", "inherit");
-    font.size = (font_size === "inherit")? base_font_size : UnitSize.getFontSize(font_size, base_font_size);
-    box.font = font;
+    if(font_size !== "inherit"){
+      box.font.size = UnitSize.getFontSize(font_size, box.getFontSize());
+    }
   },
   _setBoxSizing : function(markup, box, parent){
     var box_sizing = markup.getCssAttr("box-sizing");

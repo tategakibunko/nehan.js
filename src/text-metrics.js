@@ -1,26 +1,26 @@
 // more strict metrics using canvas
 var TextMetrics = (function(){
   var canvas = document.createElement("canvas");
-  canvas.style.width = Layout.width + "px";
+  canvas.style.width = Math.max(Layout.width, Layout.height) + "px";
   canvas.style.height = Layout.maxFontSize + "px";
 
-  var context = null;
-  if(canvas.getContext && canvas.measureText){
+  var context;
+  if(canvas.getContext){
     context = canvas.getContext("2d");
     context.textAlign = "left";
   }
+
   return {
     isEnable : function(){
-      return context !== null;
+      return context && (typeof context.measureText !== "undefined");
     },
     getMetrics : function(font, text){
-      context.font = font;
+      context.font = font.toString();
       return context.measureText(text);
     },
-    getMeasure : function(font, text, flow){
-      flow = flow || BoxFlows.getByName("tb-rl");
+    getMeasure : function(font, text){
       var metrics = this.getMetrics(font, text);
-      return metrics[flow.getPropMeasure()];
+      return metrics.width;
     }
   };
 })();

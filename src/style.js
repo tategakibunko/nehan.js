@@ -205,6 +205,7 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-size":"2.4em",
+    "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
       "after":"0.5em"
     }
@@ -213,6 +214,7 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-size":"2.0em",
+    "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
       "after":"0.75em"
     }
@@ -221,6 +223,7 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-size":"1.6em",
+    "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
       "after":"1em"
     }
@@ -229,6 +232,7 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-size":"1.4em",
+    "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
       "after":"1.25em"
     }
@@ -238,6 +242,7 @@ var Style = {
     "line-rate":1.4,
     "font-size":"1.0em",
     "font-weight":"bold",
+    "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
       "after":"1.5em"
     }
@@ -246,6 +251,7 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-weight":"bold",
+    "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "font-size":"1.0em"
   },
   "head":{
@@ -612,13 +618,13 @@ var Style = {
     "font-size": Layout.fontSizeAbs["x-large"]
   },
   ".nehan-large":{
-    "font-size": Layout.fontSizeAbs["large"]
+    "font-size": Layout.fontSizeAbs.large
   },
   ".nehan-medium":{
-    "font-size": Layout.fontSizeAbs["medium"]
+    "font-size": Layout.fontSizeAbs.medium
   },
   ".nehan-small":{
-    "font-size": Layout.fontSizeAbs["small"]
+    "font-size": Layout.fontSizeAbs.small
   },
   ".nehan-x-small":{
     "font-size": Layout.fontSizeAbs["x-small"]
@@ -627,10 +633,10 @@ var Style = {
     "font-size": Layout.fontSizeAbs["xx-small"]
   },
   ".nehan-larger":{
-    "font-size": Layout.fontSizeAbs["larger"]
+    "font-size": Layout.fontSizeAbs.larger
   },
   ".nehan-smaller":{
-    "font-size": Layout.fontSizeAbs["smaller"]
+    "font-size": Layout.fontSizeAbs.smaller
   },
   //-------------------------------------------------------
   // display classes

@@ -42,6 +42,10 @@ var Word = (function(){
       return count;
     },
     setMetrics : function(flow, font){
+      if(Config.useStrictWordMetrics && TextMetrics.isEnable()){
+	this.bodySize = TextMetrics.getMeasure(font, this.data);
+	return;
+      }
       this.bodySize = Math.round(this.data.length * font.size * 0.5);
       if(font.isBold()){
 	this.bodySize += Math.round(Layout.boldRate * this.bodySize);

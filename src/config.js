@@ -6,6 +6,7 @@ var Config = {
   maxRollbackCount : 10,
   minBlockScaleDownRate : 65,
   useVerticalGlyphIfEnable: true,
+  useStrictWordMetrics: true,
   maxBase:36,
   lexingBufferLen : 2000
 };

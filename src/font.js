@@ -1,45 +1,26 @@
 var Font = (function(){
-  function Font(){
-    this.size = Layout.fontSize;
+  function Font(parent_font){
+    Args.merge(this, {
+      weight:"normal",
+      style:"normal",
+      size:Layout.fontSize,
+      family:"monospace"
+    }, parent_font || {});
   }
 
   Font.prototype = {
     isBold : function(){
       return this.weight && this.weight !== "normal" && this.weight !== "lighter";
     },
-    getFontSize : function(){
-      return this.size || Layout.fontSize;
-    },
     toString : function(){
-      var parts = [];
-      if(this.weight){
-	parts.push(this.weight);
-      }
-      if(this.style){
-	parts.push(this.style);
-      }
-      if(this.size){
-	parts.push(this.size + "px");
-      }
-      if(this.family){
-	parts.push(this.family);
-      }
-      return parts.join(" ");
+      return [this.weight, this.style, this.size + "px", this.family].join(" ");
     },
     getCss : function(){
       var css = {};
-      if(this.weight){
-	css["font-weight"] = this.weight;
-      }
-      if(this.style){
-	css["font-style"] = this.style;
-      }
-      if(this.size){
-	css["font-size"] = this.size + "px";
-      }
-      if(this.family){
-	css["font-family"] = this.family;
-      }
+      css["font-weight"] = this.weight;
+      css["font-style"] = this.style;
+      css["font-size"] = this.size + "px";
+      css["font-family"] = this.family;
       return css;
     }
   };

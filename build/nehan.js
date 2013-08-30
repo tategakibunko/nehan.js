@@ -44,6 +44,7 @@ var Config = {
   maxRollbackCount : 10,
   minBlockScaleDownRate : 65,
   useVerticalGlyphIfEnable: true,
+  useStrictWordMetrics: true,
   maxBase:36,
   lexingBufferLen : 2000
 };
@@ -56,6 +57,7 @@ var Layout = {
   width: 800,
   height: 580,
   fontSize:16,
+  maxFontSize:64,
   rubyRate:0.5, // used when Style.rt["font-size"] not defined.
   boldRate:0.5,
   upperCaseRate:0.8,
@@ -64,6 +66,10 @@ var Layout = {
   fontImgRoot:"http://nehan.googlecode.com/hg/char-img",
   lineRate: 2.0,
   listMarkerSpacingRate:0.4,
+  vertFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
+  horiFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+  markerFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+  emphaFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
   fontSizeAbs:{
     "xx-large":"33px",
     "x-large":"24px",
@@ -75,29 +81,30 @@ var Layout = {
     "larger":"1.2em",
     "smaller":"0.8em"
   },
-  maxFontSize:64,
+  createRootBox : function(size, type){
+    var box = new Box(size, null, type);
+    var font = new Font();
+    font.family = (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
+    box.flow = this.getStdBoxFlow();
+    box.lineRate = this.lineRate;
+    box.textAlign = "start";
+    box.font = font;
+    box.color = new Color(this.fontColor);
+    box.letterSpacing = 0;
+    return box;
+  },
   createBox : function(size, parent, type){
     var box = new Box(size, parent, type);
     box.flow = parent.flow;
     box.lineRate = parent.lineRate;
     box.textAlign = parent.textAlign;
-    box.font = parent.font;
+    box.font = new Font(parent.font);
     box.color = parent.color;
     box.letterSpacing = parent.letterSpacing;
     return box;
   },
   createTextLine : function(size, parent){
     return this.createBox(size, parent, "text-line");
-  },
-  createRootBox : function(size, type){
-    var box = new Box(size, null, type);
-    box.flow = this.getStdBoxFlow();
-    box.lineRate = this.lineRate;
-    box.textAlign = "start";
-    box.font = new Font();
-    box.color = new Color(this.fontColor);
-    box.letterSpacing = 0;
-    return box;
   },
   getStdPageSize : function(){
     return new BoxSize(this.width, this.height);
@@ -402,6 +409,7 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-size":"2.4em",
+    "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
       "after":"0.5em"
     }
@@ -410,6 +418,7 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-size":"2.0em",
+    "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
       "after":"0.75em"
     }
@@ -418,6 +427,7 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-size":"1.6em",
+    "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
       "after":"1em"
     }
@@ -426,6 +436,7 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-size":"1.4em",
+    "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
       "after":"1.25em"
     }
@@ -435,6 +446,7 @@ var Style = {
     "line-rate":1.4,
     "font-size":"1.0em",
     "font-weight":"bold",
+    "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
       "after":"1.5em"
     }
@@ -443,6 +455,7 @@ var Style = {
     "display":"block",
     "line-rate":1.4,
     "font-weight":"bold",
+    "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "font-size":"1.0em"
   },
   "head":{
@@ -809,13 +822,13 @@ var Style = {
     "font-size": Layout.fontSizeAbs["x-large"]
   },
   ".nehan-large":{
-    "font-size": Layout.fontSizeAbs["large"]
+    "font-size": Layout.fontSizeAbs.large
   },
   ".nehan-medium":{
-    "font-size": Layout.fontSizeAbs["medium"]
+    "font-size": Layout.fontSizeAbs.medium
   },
   ".nehan-small":{
-    "font-size": Layout.fontSizeAbs["small"]
+    "font-size": Layout.fontSizeAbs.small
   },
   ".nehan-x-small":{
     "font-size": Layout.fontSizeAbs["x-small"]
@@ -824,10 +837,10 @@ var Style = {
     "font-size": Layout.fontSizeAbs["xx-small"]
   },
   ".nehan-larger":{
-    "font-size": Layout.fontSizeAbs["larger"]
+    "font-size": Layout.fontSizeAbs.larger
   },
   ".nehan-smaller":{
-    "font-size": Layout.fontSizeAbs["smaller"]
+    "font-size": Layout.fontSizeAbs.smaller
   },
   //-------------------------------------------------------
   // display classes
@@ -3328,6 +3341,10 @@ var Word = (function(){
       return count;
     },
     setMetrics : function(flow, font){
+      if(Config.useStrictWordMetrics && TextMetrics.isEnable()){
+	this.bodySize = TextMetrics.getMeasure(font, this.data);
+	return;
+      }
       this.bodySize = Math.round(this.data.length * font.size * 0.5);
       if(font.isBold()){
 	this.bodySize += Math.round(Layout.boldRate * this.bodySize);
@@ -3796,26 +3813,26 @@ var Cardinal = (function(){
 // more strict metrics using canvas
 var TextMetrics = (function(){
   var canvas = document.createElement("canvas");
-  canvas.style.width = Layout.width + "px";
+  canvas.style.width = Math.max(Layout.width, Layout.height) + "px";
   canvas.style.height = Layout.maxFontSize + "px";
 
-  var context = null;
-  if(canvas.getContext && canvas.measureText){
+  var context;
+  if(canvas.getContext){
     context = canvas.getContext("2d");
     context.textAlign = "left";
   }
+
   return {
     isEnable : function(){
-      return context !== null;
+      return context && (typeof context.measureText !== "undefined");
     },
     getMetrics : function(font, text){
-      context.font = font;
+      context.font = font.toString();
       return context.measureText(text);
     },
-    getMeasure : function(font, text, flow){
-      flow = flow || BoxFlows.getByName("tb-rl");
+    getMeasure : function(font, text){
       var metrics = this.getMetrics(font, text);
-      return metrics[flow.getPropMeasure()];
+      return metrics.width;
     }
   };
 })();
@@ -4470,47 +4487,28 @@ var BoxSizings = {
 
 
 var Font = (function(){
-  function Font(){
-    this.size = Layout.fontSize;
+  function Font(parent_font){
+    Args.merge(this, {
+      weight:"normal",
+      style:"normal",
+      size:Layout.fontSize,
+      family:"monospace"
+    }, parent_font || {});
   }
 
   Font.prototype = {
     isBold : function(){
       return this.weight && this.weight !== "normal" && this.weight !== "lighter";
     },
-    getFontSize : function(){
-      return this.size || Layout.fontSize;
-    },
     toString : function(){
-      var parts = [];
-      if(this.weight){
-	parts.push(this.weight);
-      }
-      if(this.style){
-	parts.push(this.style);
-      }
-      if(this.size){
-	parts.push(this.size + "px");
-      }
-      if(this.family){
-	parts.push(this.family);
-      }
-      return parts.join(" ");
+      return [this.weight, this.style, this.size + "px", this.family].join(" ");
     },
     getCss : function(){
       var css = {};
-      if(this.weight){
-	css["font-weight"] = this.weight;
-      }
-      if(this.style){
-	css["font-style"] = this.style;
-      }
-      if(this.size){
-	css["font-size"] = this.size + "px";
-      }
-      if(this.family){
-	css["font-family"] = this.family;
-      }
+      css["font-weight"] = this.weight;
+      css["font-style"] = this.style;
+      css["font-size"] = this.size + "px";
+      css["font-family"] = this.family;
       return css;
     }
   };
@@ -5126,16 +5124,18 @@ var TextEmpha = (function(){
     },
     getCssVertEmphaWrap : function(line, chr){
       var css = {}, font_size = line.getFontSize();
+      css["font-family"] = Layout.emphaFontFamily;
       css["padding-left"] = "0.5em";
       css.width = this.getExtent(font_size) + "px";
-      css.height = chr.getAdvance(font_size, line.letterSpacing) + "px";
+      css.height = chr.getAdvance(line.flow, line.letterSpacing) + "px";
       return css;
     },
     getCssHoriEmphaWrap : function(line, chr){
       var css = {}, font_size = line.getFontSize();
       css.display = "inline-block";
+      css["font-family"] = Layout.emphaFontFamily;
       css["padding-top"] = -font_size + "px";
-      css.width = chr.getAdvance(font_size, line.letterSpacing) + "px";
+      css.width = chr.getAdvance(line.flow, line.letterSpacing) + "px";
       css.height = this.getExtent(font_size) + "px";
       return css;
     }
@@ -5645,23 +5645,22 @@ var BoxStyle = {
     }
   },
   _setFont : function(markup, box, parent){
-    var font = new Font();
-    var base_font_size = parent? parent.getFontSize() : Layout.fontSize;
     var font_family = markup.getCssAttr("font-family");
     if(font_family){
-      font.family = font_family;
+      box.font.family = font_family;
     }
     var font_weight = markup.getCssAttr("font-weight");
     if(font_weight){
-      font.weight = font_weight;
+      box.font.weight = font_weight;
     }
     var font_style = markup.getCssAttr("font-style");
     if(font_style){
-      font.style = font_style;
+      box.font.style = font_style;
     }
     var font_size = markup.getCssAttr("font-size", "inherit");
-    font.size = (font_size === "inherit")? base_font_size : UnitSize.getFontSize(font_size, base_font_size);
-    box.font = font;
+    if(font_size !== "inherit"){
+      box.font.size = UnitSize.getFontSize(font_size, box.getFontSize());
+    }
   },
   _setBoxSizing : function(markup, box, parent){
     var box_sizing = markup.getCssAttr("box-sizing");
@@ -7539,6 +7538,7 @@ var ElementGenerator = Class.extend({
     var marker = parent.listStyle.getMarkerHtml(tag.order + 1);
     var markup_marker = new Tag("<li-marker>", marker);
     var markup_body = new Tag("<li-body>", tag.getContent());
+    markup_marker.setCssAttr("font-family", Layout.markerFontFamily);
     return new ParallelGenerator([
       new ParaChildGenerator(context2.createBlockRoot(markup_marker)),
       new ParaChildGenerator(context2.createBlockRoot(markup_body))
@@ -8569,7 +8569,6 @@ var BodyBlockTreeGenerator = SectionRootGenerator.extend({
     box.seekPos = this.context.getSeekPos();
     box.pageNo = this.context.getPageNo();
     box.charPos = this.context.getCharPos();
-    //box.css["font-size"] = Layout.fontSize + "px";
     return box;
   },
   _onCompleteBlock : function(page){

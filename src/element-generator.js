@@ -104,6 +104,7 @@ var ElementGenerator = Class.extend({
     var marker = parent.listStyle.getMarkerHtml(tag.order + 1);
     var markup_marker = new Tag("<li-marker>", marker);
     var markup_body = new Tag("<li-body>", tag.getContent());
+    markup_marker.setCssAttr("font-family", Layout.markerFontFamily);
     return new ParallelGenerator([
       new ParaChildGenerator(context2.createBlockRoot(markup_marker)),
       new ParaChildGenerator(context2.createBlockRoot(markup_body))
