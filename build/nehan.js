@@ -75,6 +75,7 @@ var Layout = {
     "larger":"1.2em",
     "smaller":"0.8em"
   },
+  maxFontSize:64,
   createBox : function(size, parent, type){
     var box = new Box(size, parent, type);
     box.flow = parent.flow;
@@ -154,7 +155,7 @@ var Env = (function(){
     browser = matched[1].toLowerCase();
     version = parseInt(matched[2], 10);
     if(browser === "msie"){
-      is_transform_enable = this.version >= 9;
+      is_transform_enable = version >= 9;
     } else {
       is_transform_enable = true;
     }
@@ -3800,6 +3801,34 @@ var Cardinal = (function(){
 	ret += table[index] || "";
       }
       return ret;
+    }
+  };
+})();
+
+
+// more strict metrics using canvas
+var TextMetrics = (function(){
+  var canvas = document.createElement("canvas");
+  canvas.style.width = Layout.width + "px";
+  canvas.style.height = Layout.maxFontSize + "px";
+
+  var context = null;
+  if(canvas.getContext && canvas.measureText){
+    context = canvas.getContext("2d");
+    context.textAlign = "left";
+  }
+  return {
+    isEnable : function(){
+      return context !== null;
+    },
+    getMetrics : function(font, text){
+      context.font = font;
+      return context.measureText(text);
+    },
+    getMeasure : function(font, text, flow){
+      flow = flow || BoxFlows.getByName("tb-rl");
+      var metrics = this.getMetrics(font, text);
+      return metrics[flow.getPropMeasure()];
     }
   };
 })();
