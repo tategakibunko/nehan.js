@@ -69,7 +69,6 @@ var Layout = {
   vertFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
   horiFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
   markerFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-  emphaFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
   fontSizeAbs:{
     "xx-large":"33px",
     "x-large":"24px",
@@ -5124,7 +5123,6 @@ var TextEmpha = (function(){
     },
     getCssVertEmphaWrap : function(line, chr){
       var css = {}, font_size = line.getFontSize();
-      css["font-family"] = Layout.emphaFontFamily;
       css["padding-left"] = "0.5em";
       css.width = this.getExtent(font_size) + "px";
       css.height = chr.getAdvance(line.flow, line.letterSpacing) + "px";
@@ -5133,8 +5131,7 @@ var TextEmpha = (function(){
     getCssHoriEmphaWrap : function(line, chr){
       var css = {}, font_size = line.getFontSize();
       css.display = "inline-block";
-      css["font-family"] = Layout.emphaFontFamily;
-      css["padding-top"] = -font_size + "px";
+      css["padding-top"] = (-font_size) + "px";
       css.width = chr.getAdvance(line.flow, line.letterSpacing) + "px";
       css.height = this.getExtent(font_size) + "px";
       return css;
@@ -5264,6 +5261,7 @@ var Box = (function(){
 	Args.copy(css, this.edge.getCss());
       }
       if(this.isTextVertical()){
+	css["line-height"] = "1em";
 	if(Env.isIphoneFamily){
 	  css["letter-spacing"] = "-0.001em";
 	}
@@ -5271,8 +5269,6 @@ var Box = (function(){
 	  css["margin-left"] = css["margin-right"] = "auto";
 	  css["text-align"] = "center";
 	}
-      } else if(this.lineRate <= 1.0){
-	css["line-height"] = "1em";
       }
       return css;
     },
@@ -9229,18 +9225,21 @@ var HoriInlineTreeEvaluator = InlineTreeEvaluator.extend({
   evalKerningChar : function(line, chr, ctx){
     var css = chr.getCssPadding(line);
     if(chr.isKakkoStart()){
+      css["margin-left"] = "-0.5em";
       return Html.tagWrap("span", chr.data, {
 	"style": Css.toString(css),
 	"class":"nehan-char-kakko-start"
       });
     }
     if(chr.isKakkoEnd()){
+      css["margin-right"] = "-0.5em";
       return Html.tagWrap("span", chr.data, {
 	"style": Css.toString(css),
 	"class":"nehan-char-kakko-end"
       });
     }
     if(chr.isKutenTouten()){
+      css["margin-right"] = "-0.5em";
       return Html.tagWrap("span", chr.data, {
 	"style": Css.toString(css),
 	"class":"nehan-char-kuto"

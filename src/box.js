@@ -71,6 +71,7 @@ var Box = (function(){
 	Args.copy(css, this.edge.getCss());
       }
       if(this.isTextVertical()){
+	css["line-height"] = "1em";
 	if(Env.isIphoneFamily){
 	  css["letter-spacing"] = "-0.001em";
 	}
@@ -78,8 +79,6 @@ var Box = (function(){
 	  css["margin-left"] = css["margin-right"] = "auto";
 	  css["text-align"] = "center";
 	}
-      } else if(this.lineRate <= 1.0){
-	css["line-height"] = "1em";
       }
       return css;
     },

@@ -55,18 +55,21 @@ var HoriInlineTreeEvaluator = InlineTreeEvaluator.extend({
   evalKerningChar : function(line, chr, ctx){
     var css = chr.getCssPadding(line);
     if(chr.isKakkoStart()){
+      css["margin-left"] = "-0.5em";
       return Html.tagWrap("span", chr.data, {
 	"style": Css.toString(css),
 	"class":"nehan-char-kakko-start"
       });
     }
     if(chr.isKakkoEnd()){
+      css["margin-right"] = "-0.5em";
       return Html.tagWrap("span", chr.data, {
 	"style": Css.toString(css),
 	"class":"nehan-char-kakko-end"
       });
     }
     if(chr.isKutenTouten()){
+      css["margin-right"] = "-0.5em";
       return Html.tagWrap("span", chr.data, {
 	"style": Css.toString(css),
 	"class":"nehan-char-kuto"

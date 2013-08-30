@@ -23,7 +23,6 @@ var TextEmpha = (function(){
     },
     getCssVertEmphaWrap : function(line, chr){
       var css = {}, font_size = line.getFontSize();
-      css["font-family"] = Layout.emphaFontFamily;
       css["padding-left"] = "0.5em";
       css.width = this.getExtent(font_size) + "px";
       css.height = chr.getAdvance(line.flow, line.letterSpacing) + "px";
@@ -32,8 +31,7 @@ var TextEmpha = (function(){
     getCssHoriEmphaWrap : function(line, chr){
       var css = {}, font_size = line.getFontSize();
       css.display = "inline-block";
-      css["font-family"] = Layout.emphaFontFamily;
-      css["padding-top"] = -font_size + "px";
+      css["padding-top"] = (-font_size) + "px";
       css.width = chr.getAdvance(line.flow, line.letterSpacing) + "px";
       css.height = this.getExtent(font_size) + "px";
       return css;

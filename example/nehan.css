@@ -19,24 +19,12 @@ div, span{
 .nehan-text-line{
   overflow:visible;
 }
-.nehan-text-line-vert{
-  line-height:1em;
-}
 .nehan-text-line-vert a,
 .nehan-text-line-vert a:hover{
   text-decoration:none !important;
 }
 .nehan-body a{
   word-wrap:normal !important;
-}
-.nehan-text-line-hori .nehan-char-kakko-start{
-  margin-left:-0.5em;
-}
-.nehan-text-line-hori .nehan-char-kakko-end{
-  margin-right:-0.5em;
-}
-.nehan-text-line-hori .nehan-char-kuto{
-  margin-right:-0.5em;
 }
 .nehan-vert-alpha,
 .nehan-rotate-90{
