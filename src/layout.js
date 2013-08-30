@@ -25,6 +25,7 @@ var Layout = {
     "larger":"1.2em",
     "smaller":"0.8em"
   },
+  maxFontSize:64,
   createBox : function(size, parent, type){
     var box = new Box(size, parent, type);
     box.flow = parent.flow;

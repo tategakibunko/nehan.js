@@ -11,7 +11,7 @@ var Env = (function(){
     browser = matched[1].toLowerCase();
     version = parseInt(matched[2], 10);
     if(browser === "msie"){
-      is_transform_enable = this.version >= 9;
+      is_transform_enable = version >= 9;
     } else {
       is_transform_enable = true;
     }
