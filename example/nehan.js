@@ -1459,7 +1459,7 @@ var Css = {
   toString : function(args){
     var tmp = [];
     for(var prop in args){
-      tmp.push(prop + ":" + Html.escape(args[prop] + ""));
+      tmp.push(prop + ":" + args[prop]);
     }
     return tmp.join(";");
   },
