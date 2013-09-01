@@ -992,7 +992,7 @@ var Style = {
     "text-emphasis-style":"open circle"
   },
   ".nehan-empha-triangle-filled":{
-    "text-emphasis-style":"filled trianble"
+    "text-emphasis-style":"filled triangle"
   },
   ".nehan-empha-triangle-open":{
     "text-emphasis-style":"open triangle"
