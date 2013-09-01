@@ -974,34 +974,34 @@ var Style = {
   // text emphasis
   //-------------------------------------------------------
   ".nehan-empha-dot-filled":{
-    "text-emphasis-style":"&#x2022;"
+    "text-emphasis-style":"filled dot"
   },
   ".nehan-empha-dot-open":{
-    "text-emphasis-style":"&#x25e6;"
+    "text-emphasis-style":"open dot"
   },
   ".nehan-empha-circle-filled":{
-    "text-emphasis-style":"&#x25cf;"
+    "text-emphasis-style":"filled circle"
   },
   ".nehan-empha-circle-open":{
-    "text-emphasis-style":"&#x25cb;"
+    "text-emphasis-style":"open circle"
   },
   ".nehan-empha-double-circle-filled":{
-    "text-emphasis-style":"&#x25c9;"
+    "text-emphasis-style":"filled circle"
   },
   ".nehan-empha-double-circle-open":{
-    "text-emphasis-style":"&#x25ce;"
+    "text-emphasis-style":"open circle"
   },
   ".nehan-empha-triangle-filled":{
-    "text-emphasis-style":"&#x25b2;"
+    "text-emphasis-style":"filled trianble"
   },
   ".nehan-empha-triangle-open":{
-    "text-emphasis-style":"&#x25b3;"
+    "text-emphasis-style":"open triangle"
   },
   ".nehan-empha-sesame-filled":{
-    "text-emphasis-style":"&#xfe45;"
+    "text-emphasis-style":"filled sesame"
   },
   ".nehan-empha-sesame-open":{
-    "text-emphasis-style":"&#xfe46;"
+    "text-emphasis-style":"open sesame"
   },
   //-------------------------------------------------------
   // other utility classes
@@ -5037,25 +5037,31 @@ var BoxSize = (function(){
 })();
 
 var TextEmphaStyle = (function(){
+  var default_empha_style = "filled dot";
   var empha_marks = {
-    "dot filled":"&#x2022;",
-    "dot open":"&#x25e6;",
+    // dot
+    "filled dot":"&#x2022;",
+    "open dot":"&#x25e6;",
 
-    "circle filled":"&#x25cf;",
-    "circle open":"&#x25cb;",
+    // circle
+    "filled circle":"&#x25cf;",
+    "open circle":"&#x25cb;",
 
-    "double-circle filled":"&#x25c9;",
-    "double-circle open":"&#x25ce;",
+    // double-circle
+    "filled double-circle":"&#x25c9;",
+    "open double-circle":"&#x25ce;",
 
-    "triangle filled":"&#x25b2;",
-    "triangle open":"&#x25b3;",
+    // triangle
+    "filled triangle":"&#x25b2;",
+    "open triangle":"&#x25b3;",
 
-    "sesame filled":"&#xfe45;",
-    "sesame open":"&#xfe46;"
+    // sesame
+    "filled sesame":"&#xfe45;",
+    "open sesame":"&#xfe46;"
   };
 
   function TextEmphaStyle(value){
-    this.value = value || "dot filled";
+    this.value = value || "filled dot";
   }
 
   TextEmphaStyle.prototype = {
@@ -5063,7 +5069,7 @@ var TextEmphaStyle = (function(){
       this.value = value;
     },
     getText : function(){
-      return empha_marks[this.value] || this.value || empha_marks["dot filled"];
+      return empha_marks[this.value] || this.value || empha_marks[default_empha_style];
     },
     getCss : function(){
       var css = {};

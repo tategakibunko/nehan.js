@@ -1,23 +1,29 @@
 var TextEmphaStyle = (function(){
+  var default_empha_style = "filled dot";
   var empha_marks = {
-    "dot filled":"&#x2022;",
-    "dot open":"&#x25e6;",
+    // dot
+    "filled dot":"&#x2022;",
+    "open dot":"&#x25e6;",
 
-    "circle filled":"&#x25cf;",
-    "circle open":"&#x25cb;",
+    // circle
+    "filled circle":"&#x25cf;",
+    "open circle":"&#x25cb;",
 
-    "double-circle filled":"&#x25c9;",
-    "double-circle open":"&#x25ce;",
+    // double-circle
+    "filled double-circle":"&#x25c9;",
+    "open double-circle":"&#x25ce;",
 
-    "triangle filled":"&#x25b2;",
-    "triangle open":"&#x25b3;",
+    // triangle
+    "filled triangle":"&#x25b2;",
+    "open triangle":"&#x25b3;",
 
-    "sesame filled":"&#xfe45;",
-    "sesame open":"&#xfe46;"
+    // sesame
+    "filled sesame":"&#xfe45;",
+    "open sesame":"&#xfe46;"
   };
 
   function TextEmphaStyle(value){
-    this.value = value || "dot filled";
+    this.value = value || "filled dot";
   }
 
   TextEmphaStyle.prototype = {
@@ -25,7 +31,7 @@ var TextEmphaStyle = (function(){
       this.value = value;
     },
     getText : function(){
-      return empha_marks[this.value] || this.value || empha_marks["dot filled"];
+      return empha_marks[this.value] || this.value || empha_marks[default_empha_style];
     },
     getCss : function(){
       var css = {};
