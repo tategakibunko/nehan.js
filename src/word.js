@@ -14,6 +14,11 @@ var Word = (function(){
       css["margin-left"] = css["margin-right"] = "auto";
       return css;
     },
+    getCssVertTransBody : function(line){
+      var css = {};
+      css["font-family"] = line.getFontFamily();
+      return css;
+    },
     getCssVertTransIE : function(line){
       var css = {}, font_size = line.getFontSize();
       css["float"] = "left";

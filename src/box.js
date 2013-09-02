@@ -130,6 +130,9 @@ var Box = (function(){
     getFontSize : function(){
       return this.font? this.font.size : Layout.fontSize;
     },
+    getFontFamily : function(){
+      return this.font? this.font.family : "monospace";
+    },
     getTextMeasure : function(){
       return this.childMeasure;
     },

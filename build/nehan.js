@@ -2962,7 +2962,7 @@ var Char = (function(){
     getCssVertGlyph : function(line){
       var css = {};
       var padding_enable = this.isPaddingEnable();
-      css["-webkit-writing-mode"] = "vertical-rl";
+      css["font-family"] = line.getFontFamily();
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
       if(this.isKakkoStart()){
@@ -3310,6 +3310,11 @@ var Word = (function(){
       css.width = font_size + "px";
       css.height = this.bodySize + "px";
       css["margin-left"] = css["margin-right"] = "auto";
+      return css;
+    },
+    getCssVertTransBody : function(line){
+      var css = {};
+      css["font-family"] = line.getFontFamily();
       return css;
     },
     getCssVertTransIE : function(line){
@@ -5325,6 +5330,9 @@ var Box = (function(){
     },
     getFontSize : function(){
       return this.font? this.font.size : Layout.fontSize;
+    },
+    getFontFamily : function(){
+      return this.font? this.font.family : "monospace";
     },
     getTextMeasure : function(){
       return this.childMeasure;
@@ -9048,7 +9056,8 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
   },
   evalWordTransform : function(line, word){
     var body = Html.tagWrap("div", word.data, {
-      "class": "nehan-vert-alpha"
+      "class": "nehan-rotate-90",
+      "style": Css.toString(word.getCssVertTransBody(line))
     });
     return Html.tagWrap("div", body, {
       "style": Css.toString(word.getCssVertTrans(line))
@@ -9056,7 +9065,7 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
   },
   evalWordIE : function(line, word){
     return Html.tagWrap("div", word.data, {
-      "class": "nehan-vert-alpha-ie",
+      "class": "nehan-vert-ie",
       "style": Css.toString(word.getCssVertTransIE(line))
     }) + Const.clearFix;
   },
@@ -9077,7 +9086,7 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
   evalRotateCharIE : function(line, chr){
     return Html.tagWrap("div", chr.data, {
       "style":Css.toString(chr.getCssVertRotateCharIE(line)),
-      "class":"nehan-rotate-90-ie"
+      "class":"nehan-vert-ie"
     }) + Const.clearFix;
   },
   evalTcy : function(line, tcy){
@@ -9146,7 +9155,7 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
   },
   evalVerticalGlyph : function(line, chr){
     return Html.tagWrap("div", chr.data, {
-      "class":"nehan-vert-rl",
+      "class":"nehan-vert-glyph",
       "style":Css.toString(chr.getCssVertGlyph(line))
     });
   },

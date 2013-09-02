@@ -32,7 +32,7 @@ var Char = (function(){
     getCssVertGlyph : function(line){
       var css = {};
       var padding_enable = this.isPaddingEnable();
-      css["-webkit-writing-mode"] = "vertical-rl";
+      css["font-family"] = line.getFontFamily();
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
       if(this.isKakkoStart()){
