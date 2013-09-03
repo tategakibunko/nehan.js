@@ -8,6 +8,7 @@ var Box = (function(){
     this.css = {};
     this.parent = parent;
     this.charCount = 0;
+    this.display = "block";
   }
 
   Box.prototype = {
@@ -35,7 +36,7 @@ var Box = (function(){
       if(this.letterSpacing && !this.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
-      css.display = this.display || "block";
+      css.display = this.display;
       css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
@@ -344,6 +345,9 @@ var Box = (function(){
     },
     isBlock : function(){
       return !this.isTextLine();
+    },
+    isDisplayNone : function(){
+      return this.display === "none";
     },
     isTextLine : function(){
       return this._type === "text-line";

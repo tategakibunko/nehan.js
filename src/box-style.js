@@ -1,6 +1,7 @@
 // style setting from markup to box
 var BoxStyle = {
   set : function(markup, box, parent){
+    this._setDisplay(markup, box, parent);
     this._setColor(markup, box, parent);
     this._setFont(markup, box, parent);
     this._setBoxSizing(markup, box, parent);
@@ -14,6 +15,9 @@ var BoxStyle = {
     this._setLetterSpacing(markup, box, parent);
     this._setBackground(markup, box, parent);
     this._setClasses(markup, box, parent);
+  },
+  _setDisplay : function(markup, box, parent){
+    box.display = markup.getCssAttr("display", "block");
   },
   _setClasses : function(markup, box, parent){
     List.iter(markup.classes, function(klass){

@@ -33,6 +33,10 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       return this._yieldCachedLine(parent);
     }
     var line = this._createLine(parent);
+    if(line.isDisplayNone()){
+      this._terminate = true;
+      return Exceptions.IGNORE;
+    }
     this.context.createInlineContext(line);
     return this._yieldInlinesTo(line);
   },

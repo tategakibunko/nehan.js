@@ -23,6 +23,9 @@ var StaticBlockGenerator = ElementGenerator.extend({
   _yield : function(parent){
     var size = this._getBoxSize(parent);
     var box = this._createBox(size, parent);
+    if(box.isDisplayNone()){
+      return Exceptions.IGNORE;
+    }
     if(this.context.markup.isPush()){
       box.backward = true;
     }

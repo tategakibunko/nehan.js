@@ -4,6 +4,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this.generator = null;
   },
   hasNext : function(){
+    if(this._terminate){
+      return false;
+    }
     if(this.generator && this.generator.hasNext()){
       return true;
     }
@@ -26,6 +29,10 @@ var BlockTreeGenerator = ElementGenerator.extend({
     var page_box, page_size;
     page_size = size || this._getBoxSize(parent);
     page_box = this._createBox(page_size, parent);
+    if(page_box.isDisplayNone()){
+      this._terminate = true;
+      return Exceptions.IGNORE;
+    }
     return this._yieldBlocksTo(page_box);
   },
   // fill page with child page elements.

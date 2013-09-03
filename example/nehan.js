@@ -5209,6 +5209,7 @@ var Box = (function(){
     this.css = {};
     this.parent = parent;
     this.charCount = 0;
+    this.display = "block";
   }
 
   Box.prototype = {
@@ -5236,7 +5237,7 @@ var Box = (function(){
       if(this.letterSpacing && !this.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
-      css.display = this.display || "block";
+      css.display = this.display;
       css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
@@ -5546,6 +5547,9 @@ var Box = (function(){
     isBlock : function(){
       return !this.isTextLine();
     },
+    isDisplayNone : function(){
+      return this.display === "none";
+    },
     isTextLine : function(){
       return this._type === "text-line";
     },
@@ -5629,6 +5633,7 @@ var Box = (function(){
 // style setting from markup to box
 var BoxStyle = {
   set : function(markup, box, parent){
+    this._setDisplay(markup, box, parent);
     this._setColor(markup, box, parent);
     this._setFont(markup, box, parent);
     this._setBoxSizing(markup, box, parent);
@@ -5642,6 +5647,9 @@ var BoxStyle = {
     this._setLetterSpacing(markup, box, parent);
     this._setBackground(markup, box, parent);
     this._setClasses(markup, box, parent);
+  },
+  _setDisplay : function(markup, box, parent){
+    box.display = markup.getCssAttr("display", "block");
   },
   _setClasses : function(markup, box, parent){
     List.iter(markup.classes, function(klass){
@@ -7622,6 +7630,9 @@ var StaticBlockGenerator = ElementGenerator.extend({
   _yield : function(parent){
     var size = this._getBoxSize(parent);
     var box = this._createBox(size, parent);
+    if(box.isDisplayNone()){
+      return Exceptions.IGNORE;
+    }
     if(this.context.markup.isPush()){
       box.backward = true;
     }
@@ -8075,6 +8086,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
     this.generator = null;
   },
   hasNext : function(){
+    if(this._terminate){
+      return false;
+    }
     if(this.generator && this.generator.hasNext()){
       return true;
     }
@@ -8097,6 +8111,10 @@ var BlockTreeGenerator = ElementGenerator.extend({
     var page_box, page_size;
     page_size = size || this._getBoxSize(parent);
     page_box = this._createBox(page_size, parent);
+    if(page_box.isDisplayNone()){
+      this._terminate = true;
+      return Exceptions.IGNORE;
+    }
     return this._yieldBlocksTo(page_box);
   },
   // fill page with child page elements.
@@ -8258,6 +8276,10 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       return this._yieldCachedLine(parent);
     }
     var line = this._createLine(parent);
+    if(line.isDisplayNone()){
+      this._terminate = true;
+      return Exceptions.IGNORE;
+    }
     this.context.createInlineContext(line);
     return this._yieldInlinesTo(line);
   },
