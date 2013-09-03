@@ -31,7 +31,7 @@ var Layout = {
   },
   createRootBox : function(size, type){
     var box = new Box(size, null, type);
-    var font = new Font();
+    var font = new Font(null);
     font.family = (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
     box.flow = this.getStdBoxFlow();
     box.lineRate = this.lineRate;

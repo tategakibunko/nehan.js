@@ -30,9 +30,6 @@ var Box = (function(){
       if(this.background){
 	Args.copy(css, this.background.getCss(this.flow));
       }
-      if(this.fontWeight){
-	Args.copy(css, this.fontWeight.getCss());
-      }
       if(this.letterSpacing && !this.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
@@ -50,9 +47,6 @@ var Box = (function(){
       }
       if(this.background){
 	Args.copy(css, this.background.getCss());
-      }
-      if(this.fontWeight){
-	Args.copy(css, this.fontWeight.getCss());
       }
       // top level line need to follow parent blockflow.
       if(this.parent && this.parent.isBlock()){

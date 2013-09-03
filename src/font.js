@@ -6,6 +6,7 @@ var Font = (function(){
       size:Layout.fontSize,
       family:"monospace"
     }, parent_font || {});
+    this.parent = parent_font || null;
   }
 
   Font.prototype = {
@@ -16,11 +17,19 @@ var Font = (function(){
       return [this.weight, this.style, this.size + "px", this.family].join(" ");
     },
     getCss : function(){
-      var css = {};
-      css["font-weight"] = this.weight;
-      css["font-style"] = this.style;
-      css["font-size"] = this.size + "px";
-      css["font-family"] = this.family;
+      var css = {}, is_root_font = this.parent === null;
+      if(is_root_font || this.weight != this.parent.weight){
+	css["font-weight"] = this.weight;
+      }
+      if(is_root_font || this.style != this.parent.style){
+	css["font-style"] = this.style;
+      }
+      if(is_root_font || this.size != this.parent.size){
+	css["font-size"] = this.size + "px";
+      }
+      if(is_root_font || this.family != this.parent.family){
+	css["font-family"] = this.family;
+      }
       return css;
     }
   };
