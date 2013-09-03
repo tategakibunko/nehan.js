@@ -6596,6 +6596,9 @@ var DocumentContext = (function(){
     getInlineMaxFontSize : function(){
       return this.inlineContext.getMaxFontSize();
     },
+    getInlineFontSize : function(){
+      return this.inlineContext? this.inlineContext.getFontSize() : Layout.fontSize;
+    },
     setLineBreak : function(){
       this.inlineContext.setLineBreak();
     },
@@ -7797,6 +7800,9 @@ var InlineContext = (function(){
     },
     getRestMeasure : function(){
       return this.line.getContentMeasure() - this.curMeasure;
+    },
+    getFontSize : function(){
+      return this.line.getFontSize();
     },
     getMaxMeasure : function(){
       return this.maxMeasure;

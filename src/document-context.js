@@ -176,6 +176,9 @@ var DocumentContext = (function(){
     getInlineMaxFontSize : function(){
       return this.inlineContext.getMaxFontSize();
     },
+    getInlineFontSize : function(){
+      return this.inlineContext? this.inlineContext.getFontSize() : Layout.fontSize;
+    },
     setLineBreak : function(){
       this.inlineContext.setLineBreak();
     },

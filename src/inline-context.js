@@ -114,6 +114,9 @@ var InlineContext = (function(){
     getRestMeasure : function(){
       return this.line.getContentMeasure() - this.curMeasure;
     },
+    getFontSize : function(){
+      return this.line.getFontSize();
+    },
     getMaxMeasure : function(){
       return this.maxMeasure;
     },
