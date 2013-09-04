@@ -1,20 +1,20 @@
 @charset "utf-8";
 
-/*
-   Important Notice of 'nehan-' prefix classes.
-
-   You can't define 'sizing' value that affect 'size' of target in css class starts with 'nehan-' prefix.
-   Because in nehan.js, all the layouting values associated with box sizes are under control of nehan layout engine.
-   So you can define only color, font-family or some styles that doesn't affect size of box in classes started with 'nehan-' prefix.
- */
-
 /* reset */
-div, span{
-  vertical-align:baseline;
-  font-size:100%;
+.nehan-body,
+.nehan-body div,
+.nehan-body span,
+.nehan-body a,
+.nehan-body img{
   margin:0;
   padding:0;
   border:0;
+  font-size:100%;
+  font:inherit;
+  vertical-align:baseline;
+}
+.nehan-body a img {
+  border:none;
 }
 .nehan-text-line{
   overflow:visible;
