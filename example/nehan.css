@@ -4,6 +4,7 @@
 .nehan-body,
 .nehan-body div,
 .nehan-body span,
+.nehan-body br,
 .nehan-body a,
 .nehan-body img{
   margin:0;
@@ -12,6 +13,7 @@
   font-size:100%;
   font:inherit;
   vertical-align:baseline;
+  line-height:1em;
 }
 .nehan-body a img {
   border:none;

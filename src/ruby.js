@@ -44,7 +44,8 @@ var Ruby = (function(){
     },
     getCssHoriRt : function(line){
       var css = {};
-      css["font-size"] = css["line-height"] = this.getRtFontSize() + "px";
+      css["line-height"] = Math.round(1.5 * this.getRtFontSize()) + "px";
+      css["font-size"] = this.getRtFontSize() + "px";
       css["vertical-align"] = "bottom";
       return css;
     },
