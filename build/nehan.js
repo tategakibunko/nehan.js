@@ -3016,7 +3016,6 @@ var Char = (function(){
     },
     getCssHoriEmphaText : function(line){
       var css = {};
-      css["margin-bottom"] = "-0.5em";
       return css;
     },
     getCssVertLetterSpacing : function(line){
