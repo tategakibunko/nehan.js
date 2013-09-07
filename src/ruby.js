@@ -10,6 +10,9 @@ var Ruby = (function(){
     hasMetrics : function(){
       return (typeof this.advanceSize !== "undefined");
     },
+    getCharCount : function(){
+      return this.rbs? this.rbs.length : 0;
+    },
     getAdvance : function(flow){
       return this.advanceSize;
     },
