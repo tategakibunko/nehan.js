@@ -234,7 +234,7 @@ var InlineContext = (function(){
       if(tail_token &&
 	 head_token &&
 	 tail_token.pos < head_token.pos &&
-	 Token.isChar(head_token) &&
+	 Token.isText(head_token) &&
 	 Token.isChar(tail_token) &&
 	 tail_token.isTailNg()){
 	this._justifyTail(tail_token);
