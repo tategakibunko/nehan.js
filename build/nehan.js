@@ -3,7 +3,7 @@
  Copyright (C) 2010 Watanabe Masaki<lambda.watanabe[at]gmail.com>
  http://tategakibunko.mydns.jp/docs/nehan/
 
- licensed under MIT licence.
+ licensed under MIT license.
 
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
