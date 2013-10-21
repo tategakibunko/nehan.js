@@ -1,9 +1,11 @@
 var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
   evaluate : function(line){
-    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), {
+    var attr = {
       "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
-    });
+    };
+    Args.copy(attr, line.getDatasetAttr());
+    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), attr);
   },
   evalRuby : function(line, ruby){
     var body = this.evalRb(line, ruby) + this.evalRt(line, ruby);

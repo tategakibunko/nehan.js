@@ -1,10 +1,12 @@
 var HoriInlineTreeEvaluator = InlineTreeEvaluator.extend({
   evaluate : function(line, ctx){
     var tag_name = line.isInlineOfInline()? "span" : "div";
-    return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), {
+    var attr = {
       "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
-    });
+    };
+    Args.copy(attr, line.getDatasetAttr());
+    return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), attr);
   },
   evalRuby : function(line, ruby, ctx){
     var body = this.evalRt(line, ruby, ctx) + this.evalRb(line, ruby, ctx);

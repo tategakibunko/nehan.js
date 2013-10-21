@@ -33,6 +33,7 @@ var BlockTreeEvaluator = (function(){
       if(box.id){
 	attr.id = box.id;
       }
+      Args.copy(attr, box.getDatasetAttr());
       return Html.tagWrap("div", this.evalBoxChilds(box.getChilds()), attr);
     },
     evalBoxChilds : function(childs){
