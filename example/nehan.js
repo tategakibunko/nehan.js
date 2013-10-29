@@ -8920,15 +8920,11 @@ var BlockTreeEvaluator = (function(){
       }
     },
     evalBox : function(box){
-      var attr = {
+      return Html.tagWrap("div", this.evalBoxChilds(box.getChilds()), Args.copy({
+	"id":box.id || null,
 	"style":Css.toString(box.getCssBlock()),
 	"class":box.getCssClasses()
-      };
-      if(box.id){
-	attr.id = box.id;
-      }
-      Args.copy(attr, box.getDatasetAttr());
-      return Html.tagWrap("div", this.evalBoxChilds(box.getChilds()), attr);
+      }, box.getDatasetAttr()));
     },
     evalBoxChilds : function(childs){
       var self = this;
@@ -8962,11 +8958,11 @@ var BlockTreeEvaluator = (function(){
       });
     },
     evalImageContent : function(box){
-      return Html.tagSingle("img", {
+      return Html.tagSingle("img", Args.copy({
 	"src": box.src,
 	"width": box.getContentWidth(),
 	"height": box.getContentHeight()
-      });
+      }, box.getDatasetAttr()));
     },
     evalInlinePage : function(box){
       return this.evalBox(box);
