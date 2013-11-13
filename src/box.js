@@ -110,7 +110,7 @@ var Box = (function(){
     _getClassesInline : function(){
       var classes = ["nehan-text-line"];
       classes.push("nehan-text-line-" + (this.isTextVertical()? "vert" : "hori"));
-      if(this.markup){
+      if(this.markup && this.markup.getName() !== "body"){
 	classes.push("nehan-" + this.markup.getName());
       }
       return classes.concat(this.extraClasses || []);

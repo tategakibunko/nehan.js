@@ -121,11 +121,13 @@ __exports.getStyle = function(selector_key){
 };
 __exports.setStyle = function(selector_key, value){
   Selectors.setValue(selector_key, value);
+  return this;
 };
 __exports.setStyles = function(values){
   for(var selector_key in values){
     Selectors.setValue(selector_key, values[selector_key]);
   }
+  return this;
 };
 
 return __exports;

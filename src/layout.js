@@ -37,7 +37,7 @@ var Layout = {
     box.lineRate = this.lineRate;
     box.textAlign = "start";
     box.font = font;
-    box.color = new Color(this.fontColor);
+    //box.color = new Color(this.fontColor);
     box.letterSpacing = 0;
     return box;
   },

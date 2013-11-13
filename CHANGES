@@ -6,7 +6,7 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 4.0.3, 2013/
+version 4.0.3, 2013/11/14
 ==========================
 o improve inline performance
 o now onload(which takes functional value) is available for all selector.

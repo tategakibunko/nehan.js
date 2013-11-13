@@ -88,7 +88,7 @@ var Layout = {
     box.lineRate = this.lineRate;
     box.textAlign = "start";
     box.font = font;
-    box.color = new Color(this.fontColor);
+    //box.color = new Color(this.fontColor);
     box.letterSpacing = 0;
     return box;
   },
@@ -5323,7 +5323,7 @@ var Box = (function(){
     _getClassesInline : function(){
       var classes = ["nehan-text-line"];
       classes.push("nehan-text-line-" + (this.isTextVertical()? "vert" : "hori"));
-      if(this.markup){
+      if(this.markup && this.markup.getName() !== "body"){
 	classes.push("nehan-" + this.markup.getName());
       }
       return classes.concat(this.extraClasses || []);
@@ -9710,11 +9710,13 @@ __exports.getStyle = function(selector_key){
 };
 __exports.setStyle = function(selector_key, value){
   Selectors.setValue(selector_key, value);
+  return this;
 };
 __exports.setStyles = function(values){
   for(var selector_key in values){
     Selectors.setValue(selector_key, values[selector_key]);
   }
+  return this;
 };
 
 return __exports;
