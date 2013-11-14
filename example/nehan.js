@@ -9189,7 +9189,8 @@ var VertInlineTreeEvaluator = InlineTreeEvaluator.extend({
     });
   },
   evalImgChar : function(line, chr){
-    var font_rgb = line.color.getRgb();
+    var color = line.color || new Color(Layout.fontColor);
+    var font_rgb = color.getRgb();
     var palette_color = Palette.getColor(font_rgb).toUpperCase();
     return Html.tagSingle("img", {
       "class":"nehan-img-char",
