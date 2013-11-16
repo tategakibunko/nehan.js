@@ -9486,7 +9486,7 @@ var PageStream = Class.extend({
   // common preprocessor
   _createSource : function(text){
     return text
-      .replace(/(\/[a-zA-Z0-9\-]+>)[\s\n]+(<[^\/])/g, "$1$2") // discard space between close tag and open tag.
+      .replace(/(<\/[a-zA-Z0-9\-]+>)[\s]+</g, "$1<") // discard white-space between close tag and next tag.
       .replace(/\t/g, "") // discard TAB
       .replace(/<!--[\s\S]*?-->/g, "") // discard comment
       .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
