@@ -14,6 +14,9 @@ var OutlineContext = (function(){
       var root_log = this.getOutlineBuffer(this._curSection);
       root_log.addSectionLog(log);
     },
+    _getCurSection : function(){
+      return (this._stack.length > 0)? this._stack[this._stack.length - 1] : "body";
+    },
     getOutlineBuffer : function(root_name){
       var buffer = this._buffers[root_name] || new OutlineBuffer(root_name);
       this._buffers[root_name] = buffer;
@@ -24,7 +27,8 @@ var OutlineContext = (function(){
       this._curSection = root_name;
     },
     endSectionRoot : function(root_name){
-      this._curSection = this._stack.pop() || "body";
+      this._stack.pop();
+      this._curSection = this._getCurSection();
       return this._curSection;
     },
     logStartSection : function(type, page_no){
