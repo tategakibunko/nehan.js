@@ -96,7 +96,7 @@ var DocumentContext = (function(){
 	charPos:this.charPos,
 	header:this.header,
 	outlineContext:this.outlineContext,
-	ahchors:this.anchors
+	anchors:this.anchors
       });
     },
     createFloatedRoot : function(){
@@ -107,7 +107,7 @@ var DocumentContext = (function(){
 	header:this.header,
 	blockContext:this.blockContext,
 	outlineContext:this.outlineContext,
-	ahchors:this.anchors
+	anchors:this.anchors
       });
     },
     createInlineBlockRoot : function(markup, stream){
@@ -141,7 +141,7 @@ var DocumentContext = (function(){
 	header:this.header,
 	blockContext:this.blockContext, // inherit block context
 	outlineContext:this.outlineContext,
-	ahchors:this.anchors
+	anchors:this.anchors
       });
     },
     createChildInlineRoot : function(markup, stream){

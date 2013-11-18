@@ -6,6 +6,10 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 4.0.6, 2013/11/18
+==========================
+* fix bug about anchor data in document-context(caused by typo).
+
 version 4.0.5, 2013/11/18
 ==========================
 * fix bug about outline-context when secondary section root(like figure) appears.

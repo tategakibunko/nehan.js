@@ -1,4 +1,4 @@
-Nehan.version = "4.0.5";
+Nehan.version = "4.0.6";
 
 Args.copy(Env, __engine_args.env || {});
 Args.copy(Layout, __engine_args.layout || {});

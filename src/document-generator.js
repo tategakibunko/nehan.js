@@ -32,6 +32,9 @@ var DocumentGenerator = (function(){
     getAnchors : function(){
       return this.generator.getAnchors();
     },
+    getAnchorPageNo : function(anchor_name){
+      return this.generator.getAnchorPageNo(anchor_name);
+    },
     _createGenerator : function(){
       while(this.context.hasNextToken()){
 	var tag = this.context.getNextToken();

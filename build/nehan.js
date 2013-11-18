@@ -6545,7 +6545,7 @@ var DocumentContext = (function(){
 	charPos:this.charPos,
 	header:this.header,
 	outlineContext:this.outlineContext,
-	ahchors:this.anchors
+	anchors:this.anchors
       });
     },
     createFloatedRoot : function(){
@@ -6556,7 +6556,7 @@ var DocumentContext = (function(){
 	header:this.header,
 	blockContext:this.blockContext,
 	outlineContext:this.outlineContext,
-	ahchors:this.anchors
+	anchors:this.anchors
       });
     },
     createInlineBlockRoot : function(markup, stream){
@@ -6590,7 +6590,7 @@ var DocumentContext = (function(){
 	header:this.header,
 	blockContext:this.blockContext, // inherit block context
 	outlineContext:this.outlineContext,
-	ahchors:this.anchors
+	anchors:this.anchors
       });
     },
     createChildInlineRoot : function(markup, stream){
@@ -7367,6 +7367,9 @@ var DocumentGenerator = (function(){
     getAnchors : function(){
       return this.generator.getAnchors();
     },
+    getAnchorPageNo : function(anchor_name){
+      return this.generator.getAnchorPageNo(anchor_name);
+    },
     _createGenerator : function(){
       while(this.context.hasNextToken()){
 	var tag = this.context.getNextToken();
@@ -7422,6 +7425,9 @@ var HtmlGenerator = (function(){
     },
     getAnchors : function(){
       return this.generator.getAnchors();
+    },
+    getAnchorPageNo : function(anchor_name){
+      return this.generator.getAnchorPageNo(anchor_name);
     },
     _createGenerator : function(){
       while(this.context.hasNextToken()){
@@ -8594,8 +8600,8 @@ var SectionRootGenerator = ChildBlockTreeGenerator.extend({
   getAnchors : function(){
     return this.context.getAnchors();
   },
-  getAnchorPageNo : function(name){
-    return this.context.getAnchorPageNo(name);
+  getAnchorPageNo : function(anchor_name){
+    return this.context.getAnchorPageNo(anchor_name);
   },
   setAnchor : function(name, page_no){
     this.context.setAnchor(name, page_no);
@@ -9592,7 +9598,7 @@ var PageGroupStream = PageStream.extend({
   }
 });
 
-Nehan.version = "4.0.5";
+Nehan.version = "4.0.6";
 
 Args.copy(Env, __engine_args.env || {});
 Args.copy(Layout, __engine_args.layout || {});

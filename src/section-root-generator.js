@@ -19,8 +19,8 @@ var SectionRootGenerator = ChildBlockTreeGenerator.extend({
   getAnchors : function(){
     return this.context.getAnchors();
   },
-  getAnchorPageNo : function(name){
-    return this.context.getAnchorPageNo(name);
+  getAnchorPageNo : function(anchor_name){
+    return this.context.getAnchorPageNo(anchor_name);
   },
   setAnchor : function(name, page_no){
     this.context.setAnchor(name, page_no);
