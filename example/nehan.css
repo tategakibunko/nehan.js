@@ -13,7 +13,6 @@
   font-size:100%;
   font:inherit;
   vertical-align:baseline;
-  line-height:1em;
 }
 .nehan-body a img {
   border:none;
@@ -47,4 +46,8 @@
 .nehan-vert-ie{
   writing-mode:tb-rl;
   float:left;
+}
+.nehan-text-line-hori.nehan-first-letter,
+.nehan-text-line-hori .nehan-ruby .nehan-rt{
+  line-height:1em !important;
 }
