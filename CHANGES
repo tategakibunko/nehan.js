@@ -6,6 +6,10 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 4.0.8, 2013/11/28
+=========================
+* fix some illegal header-context overwriting.
+
 version 4.0.7, 2013/11/22
 =========================
 * fix css for Meiryo font trouble(not displayed properly in some charactors).
