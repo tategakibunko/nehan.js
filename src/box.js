@@ -348,6 +348,9 @@ var Box = (function(){
       }
       return ret;
     },
+    isHeader : function(){
+      return this.markup? this.markup.isHeaderTag() : false;
+    },
     isBlock : function(){
       return !this.isTextLine();
     },

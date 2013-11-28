@@ -5561,6 +5561,9 @@ var Box = (function(){
       }
       return ret;
     },
+    isHeader : function(){
+      return this.markup? this.markup.isHeaderTag() : false;
+    },
     isBlock : function(){
       return !this.isTextLine();
     },
@@ -6132,21 +6135,9 @@ var OutlineBuffer = (function(){
       }
       this.logs.push(log);
     },
-    // find same log without page no.
-    _isSameLog : function(log1, log2){
-      for(var prop in log1){
-	if(prop == "pageNo" || prop == "headerId"){
-	  continue;
-	}
-	if(log1[prop] != log2[prop]){
-	  return false;
-	}
-      }
-      return true;
-    },
     _findLog : function(log){
       for(var i = this.logs.length - 1; i >= 0; i--){
-	if(this._isSameLog(log, this.logs[i])){
+	if(log.headerId === this.logs[i].headerId){
 	  return i;
 	}
       }
@@ -6697,9 +6688,11 @@ var DocumentContext = (function(){
       var rank = this.markup.getHeaderRank();
       var title = this.markup.getContentRaw();
       var page_no = this.getPageNo();
-      var header_id = __global_header_id++;
-      this.outlineContext.logSectionHeader(type, rank, title, page_no, header_id);
-      return header_id;
+      if(typeof this.markup.headerId === "undefined"){
+	this.markup.headerId = __global_header_id++;
+      }
+      this.outlineContext.logSectionHeader(type, rank, title, page_no, this.markup.headerId);
+      return this.markup.headerId;
     }
   };
 

@@ -28,21 +28,9 @@ var OutlineBuffer = (function(){
       }
       this.logs.push(log);
     },
-    // find same log without page no.
-    _isSameLog : function(log1, log2){
-      for(var prop in log1){
-	if(prop == "pageNo" || prop == "headerId"){
-	  continue;
-	}
-	if(log1[prop] != log2[prop]){
-	  return false;
-	}
-      }
-      return true;
-    },
     _findLog : function(log){
       for(var i = this.logs.length - 1; i >= 0; i--){
-	if(this._isSameLog(log, this.logs[i])){
+	if(log.headerId === this.logs[i].headerId){
 	  return i;
 	}
       }
