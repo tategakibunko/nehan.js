@@ -19,11 +19,11 @@ var OutlineBuffer = (function(){
     },
     addHeaderLog : function(log){
       // if section tag can't be included in parent layout,
-      // it's added twice by rollback yielding.
-      // in such case, we have to update old one.
+      // it will be added 'twice' by rollback yielding.
+      // in such case, we have to overwrite old one.
       var pos = this._findLog(log);
       if(pos >= 0){
-	this.logs[pos] = log; // update log
+	this.logs[pos] = log; // overwrite log
 	return;
       }
       this.logs.push(log);
