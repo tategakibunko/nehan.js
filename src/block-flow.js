@@ -40,7 +40,7 @@ var BlockFlow = (function(){
     case "tb": return "bottom";
     default: return "";
     }
-  }
+  };
 
   return BlockFlow;
 })();

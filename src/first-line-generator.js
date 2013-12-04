@@ -10,7 +10,7 @@ var FirstLineGenerator = (function(){
       this.context.markup.cssAttrStatic = {};
     }
     return ChildInlineTreeGenerator.prototype._createLine.call(this, parent);
-  }
+  };
 
   return FirstLineGenerator;
 })();

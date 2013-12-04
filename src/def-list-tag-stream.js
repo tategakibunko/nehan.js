@@ -4,7 +4,7 @@ var DefListTagStream = (function(){
       var name = tag.getName();
       return (name === "dt" || name === "dd");
     });
-  };
+  }
   Class.extend(DefListTagStream, FilteredTagStream);
 
   return DefListTagStream;
