@@ -6,6 +6,10 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 4.0.9, 2013/12/04
+=========================
+! rewrite class inheritance(closure library based) for faster constructor.
+
 version 4.0.8, 2013/11/28
 =========================
 * fix some illegal header-context overwriting.
