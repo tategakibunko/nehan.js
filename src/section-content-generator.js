@@ -1,9 +1,14 @@
-var SectionContentGenerator = ChildBlockTreeGenerator.extend({
-  init : function(context){
-    this._super(context);
+var SectionContentGenerator = (function(){
+  function SectionContentGenerator(context){
+    ChildBlockTreeGenerator.call(this, context);
     this.context.logStartSection();
-  },
-  _onLastBlock : function(page){
-    this.context.logEndSection();
   }
-});
+  Class.extend(SectionContentGenerator, ChildBlockTreeGenerator);
+
+  SectionContentGenerator.prototype._onLastBlock = function(page){
+    this.context.logEndSection();
+  };
+
+  return SectionContentGenerator;
+})();
+

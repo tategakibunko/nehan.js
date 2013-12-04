@@ -1,36 +1,44 @@
-var Border = Edge.extend({
-  init : function(){
-    this._super("border");
-  },
-  clearBefore : function(flow){
+var Border = (function(){
+  function Border(){
+    Edge.call(this, "border");
+  }
+  Class.extend(Border, Edge);
+
+  Border.prototype.clearBefore = function(flow){
     this.setBefore(flow, 0);
     if(this.radius){
       this.radius.clearBefore(flow);
     }
-  },
-  clearAfter : function(flow){
+  };
+
+  Border.prototype.clearAfter = function(flow){
     this.setAfter(flow, 0);
     if(this.radius){
       this.radius.clearAfter(flow);
     }
-  },
-  getDirProp : function(dir){
+  };
+
+  Border.prototype.getDirProp = function(dir){
     return ["border", dir, "width"].join("-");
-  },
-  setRadius : function(flow, radius){
+  };
+
+  Border.prototype.setRadius = function(flow, radius){
     this.radius = new BorderRadius();
     this.radius.setSize(flow, radius);
-  },
-  setColor : function(flow, color){
+  };
+
+  Border.prototype.setColor = function(flow, color){
     this.color = new BorderColor();
     this.color.setColor(flow, color);
-  },
-  setStyle : function(flow, style){
+  };
+
+  Border.prototype.setStyle = function(flow, style){
     this.style = new BorderStyle();
     this.style.setStyle(flow, style);
-  },
-  getCss : function(){
-    var css = this._super();
+  };
+
+  Border.prototype.getCss = function(){
+    var css = Edge.prototype.getCss.call(this);
     if(this.radius){
       Args.copy(css, this.radius.getCss());
     }
@@ -41,5 +49,7 @@ var Border = Edge.extend({
       Args.copy(css, this.style.getCss());
     }
     return css;
-  }
-});
+  };
+
+  return Border;
+})();

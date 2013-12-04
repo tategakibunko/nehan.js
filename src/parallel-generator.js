@@ -1,24 +1,28 @@
 // parallel generator is proxy of multiple generators.
-var ParallelGenerator = ChildBlockTreeGenerator.extend({
-  init : function(generators, partition, context){
-    this._super(context);
+var ParallelGenerator = (function(){
+  function ParallelGenerator(generators, partition, context){
+    ChildBlockTreeGenerator.call(this, context);
     this.generators = generators;
     this.partition = partition;
-  },
-  hasNext : function(){
+  }
+  Class.extend(ParallelGenerator, ChildBlockTreeGenerator);
+
+  ParallelGenerator.prototype.hasNext = function(){
     return List.exists(this.generators, function(generator){
       return generator.hasNext();
     });
-  },
-  yield : function(parent){
+  };
+
+  ParallelGenerator.prototype.yield = function(parent){
     var wrap_size = parent.getRestSize();
     var wrap_page = this._createBox(wrap_size, parent);
     var wrap_flow = parent.getParallelFlow();
     var child_flow = parent.flow;
     wrap_page.setFlow(wrap_flow);
     return this._yieldChildsTo(wrap_page, child_flow, this.partition);
-  },
-  _yieldChildsTo : function(wrap_page, child_flow, partition){
+  };
+
+  ParallelGenerator.prototype._yieldChildsTo = function(wrap_page, child_flow, partition){
     var child_extent = wrap_page.getRestContentExtent();
     var child_pages = List.mapi(this.generators, function(index, generator){
       var child_measure = partition.getSize(index);
@@ -49,5 +53,8 @@ var ParallelGenerator = ChildBlockTreeGenerator.extend({
       }
     });
     return wrap_page;
-  }
-});
+  };
+
+  return ParallelGenerator;
+})();
+

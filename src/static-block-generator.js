@@ -1,26 +1,35 @@
-var StaticBlockGenerator = ElementGenerator.extend({
-  _getBoxSize : function(parent){
+var StaticBlockGenerator = (function(){
+  function StaticBlockGenerator(context){
+    ElementGenerator.call(this, context);
+  }
+  Class.extend(StaticBlockGenerator, ElementGenerator);
+
+  StaticBlockGenerator.prototype._getBoxSize = function(parent){
     return this.context.getMarkupStaticSize(parent);
-  },
-  _createBox : function(size, parent){
-    var box = this._super(size, parent);
+  };
+
+  StaticBlockGenerator.prototype._createBox = function(size, parent){
+    var box = ElementGenerator.prototype._createBox.call(this, size, parent);
     box.sizing = BoxSizings.getByName("content-box"); // use normal box model
     return box;
-  },
-  _findLineParent : function(line){
+  };
+
+  StaticBlockGenerator.prototype._findLineParent = function(line){
     var parent = line.parent;
     while(parent && parent.isTextLine()){
       parent = parent.parent;
     }
     return parent;
-  },
-  yield : function(parent){
+  };
+
+  StaticBlockGenerator.prototype.yield = function(parent){
     if(parent.isTextLine()){
       parent = this._findLineParent(parent);
     }
     return this._yield(parent);
-  },
-  _yield : function(parent){
+  };
+
+  StaticBlockGenerator.prototype._yield = function(parent){
     var size = this._getBoxSize(parent);
     var box = this._createBox(size, parent);
     if(box.isDisplayNone()){
@@ -57,6 +66,8 @@ var StaticBlockGenerator = ElementGenerator.extend({
       return box;
     }
     return Exceptions.SINGLE_RETRY;
-  }
-});
+  };
+
+  return StaticBlockGenerator;
+})();
 

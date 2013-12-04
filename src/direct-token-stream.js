@@ -1,9 +1,13 @@
-var DirectTokenStream = TokenStream.extend({
-  init : function(tokens){
-    this._super("");
+var DirectTokenStream = (function(){
+  function DirectTokenStream(tokens){
+    TokenStream.call(this, "");
     this.tokens = tokens;
-  },
-  isEmpty : function(){
-    return this.tokens.length === 0;
   }
-});
+  Class.extend(DirectTokenStream, TokenStream);
+
+  DirectTokenStream.prototype.isEmpty = function(){
+    return this.tokens.length === 0;
+  };
+
+  return DirectTokenStream;
+})();

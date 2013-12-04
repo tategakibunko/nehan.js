@@ -1,6 +1,6 @@
-var HeadTagStream = FilteredTagStream.extend({
-  init : function(src){
-    this._super(src, function(tag){
+var HeadTagStream = (function(){
+  function HeadTagStream(src){
+    FilteredTagStream.call(this, src, function(tag){
       var name = tag.getName();
       return (name === "title" ||
 	      name === "meta" ||
@@ -9,5 +9,8 @@ var HeadTagStream = FilteredTagStream.extend({
 	      name === "script");
     });
   }
-});
+  Class.extend(HeadTagStream, FilteredTagStream);
+
+  return HeadTagStream;
+})();
 

@@ -1,5 +1,9 @@
-var Padding = Edge.extend({
-  init : function(){
-    this._super("padding");
+var Padding = (function(){
+  function Padding(){
+    Edge.call(this, "padding");
   }
-});
+  Class.extend(Padding, Edge);
+
+  return Padding;
+})();
+

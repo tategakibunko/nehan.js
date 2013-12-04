@@ -1,6 +1,11 @@
-var RubyGenerator = ChildInlineTreeGenerator.extend({
-  _yieldInlineElement : function(line){
-    var ruby = this._super(line);
+var RubyGenerator = (function(){
+  function RubyGenerator(context){
+    ChildInlineTreeGenerator.call(this, context);
+  }
+  Class.extend(RubyGenerator, ChildInlineTreeGenerator);
+
+  RubyGenerator.prototype._yieldInlineElement = function(line){
+    var ruby = ChildInlineTreeGenerator.prototype._yieldInlineElement.call(this, line);
     if(typeof ruby === "number"){
       return ruby; // exception
     }
@@ -9,6 +14,8 @@ var RubyGenerator = ChildInlineTreeGenerator.extend({
       ruby.setMetrics(line.flow, line.font, line.letterSpacing || 0);
     }
     return ruby;
-  }
-});
+  };
+
+  return RubyGenerator;
+})();
 

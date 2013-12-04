@@ -167,7 +167,6 @@ module.exports = function(grunt) {
 	    "src/list-generator.js",
 	    "src/inside-list-item-generator.js",
 	    "src/outside-list-item-generator.js",
-	    "src/def-list-generator.js",
 	    "src/eval-result.js",
 	    "src/page-evaluator.js",
 	    "src/block-tree-evaluator.js",

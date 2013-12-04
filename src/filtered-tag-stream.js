@@ -1,7 +1,7 @@
-var FilteredTagStream = TokenStream.extend({
-  init : function(src, fn){
+var FilteredTagStream = (function(){
+  function FilteredTagStream(src, fn){
+    TokenStream.call(this, src);
     var order = 0;
-    this._super(src);
     this.tokens = this.getAllIf(function(token){
       if(Token.isText(token)){
 	return false;
@@ -12,4 +12,7 @@ var FilteredTagStream = TokenStream.extend({
       }
     });
   }
-});
+  Class.extend(FilteredTagStream, TokenStream);
+
+  return FilteredTagStream;
+})();

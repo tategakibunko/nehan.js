@@ -1,5 +1,10 @@
-var ListGenerator = ChildBlockTreeGenerator.extend({
-  _onCreateBox : function(box, parent){
+var ListGenerator = (function(){
+  function ListGenerator(context){
+    ChildBlockTreeGenerator.call(this, context);
+  }
+  Class.extend(ListGenerator, ChildBlockTreeGenerator);
+
+  ListGenerator.prototype._onCreateBox = function(box, parent){
     var item_count = this.context.getStreamTokenCount();
     var list_style_type = this.context.markup.getCssAttr("list-style-type", "none");
     var list_style_pos = this.context.markup.getCssAttr("list-style-position", "outside");
@@ -14,5 +19,8 @@ var ListGenerator = ChildBlockTreeGenerator.extend({
     var marker_advance = list_style.getMarkerAdvance(parent.flow, parent.getFontSize(), item_count);
     box.listStyle = list_style;
     box.partition = new Partition([marker_advance, box.getContentMeasure() - marker_advance]);
-  }
-});
+  };
+
+  return ListGenerator;
+})();
+

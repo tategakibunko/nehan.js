@@ -1,34 +1,40 @@
-var InlineTreeGenerator = BlockTreeGenerator.extend({
-  init : function(context){
-    this._super(context);
+var InlineTreeGenerator = (function(){
+  function InlineTreeGenerator(context){
+    BlockTreeGenerator.call(this, context);
     this.cachedLine = null;
     this._prevStart = 0;
     this._retry = 0;
-  },
-  getParentPos : function(){
+  }
+  Class.extend(InlineTreeGenerator, BlockTreeGenerator);
+
+  InlineTreeGenerator.prototype.getParentPos = function(){
     return this.context.markup.pos;
-  },
-  hasNext : function(){
+  };
+
+  InlineTreeGenerator.prototype.hasNext = function(){
     if(this._terminate){
       return false;
     }
     if(this.cachedElement || this.cachedLine){
       return true;
     }
-    return this._super();
-  },
+    return BlockTreeGenerator.prototype.hasNext.call(this);
+  };
+
   // called when line box is fully filled.
-  _onCompleteLine : function(line){
+  InlineTreeGenerator.prototype._onCompleteLine = function(line){
     line.setMaxExtent(this.context.getInlineMaxExtent());
     line.setMaxFontSize(this.context.getInlineMaxFontSize());
-  },
-  _isEnableElement : function(element){
+  };
+
+  InlineTreeGenerator.prototype._isEnableElement = function(element){
     if(element instanceof Box){
       return element.getContentExtent() > 0 && element.getContentMeasure() > 0;
     }
     return true;
-  },
-  yield : function(parent){
+  };
+
+  InlineTreeGenerator.prototype.yield = function(parent){
     if(this.cachedLine){
       return this._yieldCachedLine(parent);
     }
@@ -39,13 +45,15 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     }
     this.context.createInlineContext(line);
     return this._yieldInlinesTo(line);
-  },
-  _yieldCachedElement : function(parent){
+  };
+
+  InlineTreeGenerator.prototype._yieldCachedElement = function(parent){
     var ret = this.cachedElement;
     this.cachedElement = null;
     return ret;
-  },
-  _yieldCachedLine : function(parent){
+  };
+
+  InlineTreeGenerator.prototype._yieldCachedLine = function(parent){
     var line = this.cachedLine;
     var old_measure = line.parent.getContentMeasure();
     var cur_measure = parent.getContentMeasure();
@@ -57,8 +65,9 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     // restart line context with new max-measure.
     this.context.restartInlineContext(parent.getContentMeasure());
     return this._yieldInlinesTo(line);
-  },
-  _yieldInlinesTo : function(parent){
+  };
+
+  InlineTreeGenerator.prototype._yieldInlinesTo = function(parent){
     var end_after = false;
     var start_pos = this.context.getStreamPos();
     if(start_pos === this._prevStart){
@@ -126,8 +135,9 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
       return Exceptions.PAGE_BREAK;
     }
     return line;
-  },
-  _yieldInlineElement : function(line){
+  };
+
+  InlineTreeGenerator.prototype._yieldInlineElement = function(line){
     if(this.cachedElement){
       return this._yieldCachedElement(line);
     }
@@ -137,8 +147,9 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     this.generator = null;
     var token = this.context.getInlineNextToken();
     return this._yieldInlineToken(line, token);
-  },
-  _yieldInlineToken : function(line, token){
+  };
+
+  InlineTreeGenerator.prototype._yieldInlineToken = function(line, token){
     if(token === null){
       return Exceptions.BUFFER_END;
     }
@@ -187,8 +198,9 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     }
     this.generator = this._createChildInlineTreeGenerator(token);
     return this.generator.yield(line);
-  },
-  _yieldText : function(line, text){
+  };
+
+  InlineTreeGenerator.prototype._yieldText = function(line, text){
     // always set metrics for first-line, because style of first-line tag changes whether it is first-line or not.
     if(this.context.getMarkupName() === "first-line" || !text.hasMetrics()){
       text.setMetrics(line.flow, line.font);
@@ -200,8 +212,9 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     case "word":
       return this._yieldWord(line, text);
     }
-  },
-  _yieldWord : function(line, word){
+  };
+
+  InlineTreeGenerator.prototype._yieldWord = function(line, word){
     var advance = word.getAdvance(line.flow, line.letterSpacing || 0);
     var max_measure = this.context.getInlineMaxMeasure();
 
@@ -216,6 +229,8 @@ var InlineTreeGenerator = BlockTreeGenerator.extend({
     part.setMetrics(line.flow, line.font); // metrics for first half
     word.setMetrics(line.flow, line.font); // metrics for second half
     return part;
-  }
-});
+  };
+
+  return InlineTreeGenerator;
+})();
 

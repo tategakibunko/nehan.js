@@ -1,9 +1,11 @@
-var BlockTreeGenerator = ElementGenerator.extend({
-  init : function(context){
-    this._super(context);
+var BlockTreeGenerator = (function(){
+  function BlockTreeGenerator(context){
+    ElementGenerator.call(this, context);
     this.generator = null;
-  },
-  hasNext : function(){
+  }
+  Class.extend(BlockTreeGenerator, ElementGenerator);
+
+  BlockTreeGenerator.prototype.hasNext = function(){
     if(this._terminate){
       return false;
     }
@@ -11,21 +13,25 @@ var BlockTreeGenerator = ElementGenerator.extend({
       return true;
     }
     return this.context.hasNextToken();
-  },
-  getCurGenerator : function(){
+  };
+
+  BlockTreeGenerator.prototype.getCurGenerator = function(){
     if(this.generator && this.generator.hasNext()){
       return this.generator;
     }
     return null;
-  },
+  };
+
   // called when page box is fully filled.
-  _onCompleteBlock : function(page){
-  },
-  _onLastBlock : function(page){
-  },
+  BlockTreeGenerator.prototype._onCompleteBlock = function(page){
+  };
+
+  BlockTreeGenerator.prototype._onLastBlock = function(page){
+  };
+
   // if size is not defined, rest size of parent is used.
   // if parent is null, root page is generated.
-  yield : function(parent, size){
+  BlockTreeGenerator.prototype.yield = function(parent, size){
     var page_box, page_size;
     page_size = size || this._getBoxSize(parent);
     page_box = this._createBox(page_size, parent);
@@ -34,9 +40,10 @@ var BlockTreeGenerator = ElementGenerator.extend({
       return Exceptions.IGNORE;
     }
     return this._yieldBlocksTo(page_box);
-  },
+  };
+
   // fill page with child page elements.
-  _yieldBlocksTo : function(page){
+  BlockTreeGenerator.prototype._yieldBlocksTo = function(page){
     this.context.createBlockContext(page);
     if(this.generator){
       this.generator.context.blockContext = this.context.blockContext;
@@ -96,8 +103,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
       this.context.stepLocalPageNo();
     }
     return page;
-  },
-  _yieldBlockElement : function(parent){
+  };
+
+  BlockTreeGenerator.prototype._yieldBlockElement = function(parent){
     if(this.generator && this.generator.hasNext()){
       return this.generator.yield(parent);
     }
@@ -144,8 +152,9 @@ var BlockTreeGenerator = ElementGenerator.extend({
     }
     this.generator = this._createChildBlockTreeGenerator(parent, token);
     return this.generator.yield(parent);
-  },
-  _yieldFloatedBlock : function(parent, floated_box){
+  };
+
+  BlockTreeGenerator.prototype._yieldFloatedBlock = function(parent, floated_box){
     if(parent.getContentMeasure() <= floated_box.getBoxMeasure()){
       return floated_box;
     }
@@ -156,5 +165,8 @@ var BlockTreeGenerator = ElementGenerator.extend({
       this.generator.context.blockContext = this.context.blockContext; // and inherit parent block context
     }
     return block;
-  }
-});
+  };
+
+  return BlockTreeGenerator;
+})();
+

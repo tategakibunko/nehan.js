@@ -1,7 +1,7 @@
-var TableTagStream = FilteredTagStream.extend({
-  init : function(markup){
+var TableTagStream = (function(){
+  function TableTagStream(markup){
     // TODO: caption not supported yet.
-    this._super(markup.getContent(), function(tag){
+    FilteredTagStream.call(this, markup.getContent(), function(tag){
       var name = tag.getName();
       return (name === "thead" ||
 	      name === "tbody" ||
@@ -10,8 +10,10 @@ var TableTagStream = FilteredTagStream.extend({
     });
     this.markup = markup;
     this.markup.tableChilds = this.tokens = this._parseTokens(this.markup, this.tokens);
-  },
-  getPartition : function(box){
+  }
+  Class.extend(TableTagStream, FilteredTagStream);
+
+  TableTagStream.prototype.getPartition = function(box){
     var self = this;
     var partition = new TablePartition();
     var measure = box.getContentMeasure();
@@ -27,8 +29,9 @@ var TableTagStream = FilteredTagStream.extend({
       });
     });
     return partition;
-  },
-  _parseTokens : function(parent_markup, tokens){
+  };
+
+  TableTagStream.prototype._parseTokens = function(parent_markup, tokens){
     var theads = [], tfoots = [], tbodies = [], self = this;
     var thead = null, tbody = null, tfoot = null;
     var ctx = {row:0, col:0, maxCol:0};
@@ -93,8 +96,9 @@ var TableTagStream = FilteredTagStream.extend({
     this.markup.rowCount = ctx.row;
 
     return ret;
-  },
-  _parsePartition : function(childs, box){
+  };
+
+  TableTagStream.prototype._parsePartition = function(childs, box){
     return List.map(childs, function(child){
       var size = child.getTagAttr("measure") || child.getTagAttr("width") || 0;
       if(size){
@@ -102,8 +106,9 @@ var TableTagStream = FilteredTagStream.extend({
       }
       return 0;
     });
-  },
-  _parseRows : function(ctx, parent){
+  };
+
+  TableTagStream.prototype._parseRows = function(ctx, parent){
     var self = this;
     var rows = (new FilteredTagStream(parent.getContent(), function(tag){
       return tag.getName() === "tr";
@@ -115,8 +120,9 @@ var TableTagStream = FilteredTagStream.extend({
       ctx.row++;
       return row;
     });
-  },
-  _parseCols : function(ctx, parent){
+  };
+
+  TableTagStream.prototype._parseCols = function(ctx, parent){
     var cols = (new FilteredTagStream(parent.getContent(), function(tag){
       var name = tag.getName();
       return (name === "td" || name === "th");
@@ -131,7 +137,9 @@ var TableTagStream = FilteredTagStream.extend({
       ctx.maxCol = cols.length;
     }
     return cols;
-  }
-});
+  };
+
+  return TableTagStream;
+})();
 
 
