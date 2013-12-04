@@ -4068,7 +4068,7 @@ var BlockFlow = (function(){
     case "tb": return "bottom";
     default: return "";
     }
-  }
+  };
 
   return BlockFlow;
 })();
@@ -7337,7 +7337,7 @@ var DefListTagStream = (function(){
       var name = tag.getName();
       return (name === "dt" || name === "dd");
     });
-  };
+  }
   Class.extend(DefListTagStream, FilteredTagStream);
 
   return DefListTagStream;
@@ -8703,7 +8703,7 @@ var FirstLineGenerator = (function(){
       this.context.markup.cssAttrStatic = {};
     }
     return ChildInlineTreeGenerator.prototype._createLine.call(this, parent);
-  }
+  };
 
   return FirstLineGenerator;
 })();
