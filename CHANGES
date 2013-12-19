@@ -6,6 +6,10 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 4.0.10, 2013/12/04
+=========================
+* fix typo in text-empha-style(double circle).
+
 version 4.0.9, 2013/12/04
 =========================
 ! rewrite class inheritance(closure library based) for faster constructor.

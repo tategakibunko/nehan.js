@@ -783,10 +783,10 @@ var Style = {
     "text-emphasis-style":"open circle"
   },
   ".nehan-empha-double-circle-filled":{
-    "text-emphasis-style":"filled circle"
+    "text-emphasis-style":"filled double-circle"
   },
   ".nehan-empha-double-circle-open":{
-    "text-emphasis-style":"open circle"
+    "text-emphasis-style":"open double-circle"
   },
   ".nehan-empha-triangle-filled":{
     "text-emphasis-style":"filled triangle"
