@@ -25,6 +25,10 @@ var InlineTreeEvaluator = (function(){
 	markup.addClass("nehan-anchor");
 	attr.name = name;
       }
+      var title = markup.getTagAttr("title");
+      if(title){
+	attr.title = title;
+      }
       var target = markup.getTagAttr("target");
       if(target){
 	attr.target = target;
