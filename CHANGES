@@ -6,6 +6,10 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 4.0.11 ???
+=========================
+o add Tag::getDatasetAttrsRaw to get attributes with "data-" prefixes.
+
 version 4.0.10, 2013/12/04
 =========================
 * fix typo in text-empha-style(double circle).
