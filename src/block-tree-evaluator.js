@@ -66,7 +66,7 @@ var BlockTreeEvaluator = (function(){
     evalImageContent : function(box){
       return Html.tagSingle("img", Args.copy({
 	"src": box.src,
-	"title":box.markup.getTagAttr("title") || "",
+	"title":box.getMarkup().getTagAttr("title") || "",
 	"width": box.getContentWidth(),
 	"height": box.getContentHeight()
       }, box.getDatasetAttr()));

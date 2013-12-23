@@ -12,7 +12,7 @@ var InlinePageGenerator = (function(){
 
   InlinePageGenerator.prototype.yield = function(parent){
     var size = this._getBoxSize(parent);
-    var wrap = Layout.createBox(size, parent, "div");
+    var wrap = Layout.createBox(size, parent, {type:"div"});
     var page = BlockTreeGenerator.prototype.yield.call(this, wrap);
     if(typeof page === "number"){
       return page; // exception

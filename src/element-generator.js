@@ -135,14 +135,16 @@ var ElementGenerator = (function(){
     },
     _createLine : function(parent){
       var size = this._getLineSize(parent);
-      var line = Layout.createTextLine(size, parent);
-      line.markup = this.context.markup;
-      return line;
+      return Layout.createBox(size, parent, {
+	type:"text-line",
+	markup:this.context.markup
+      });
     },
     _createBox : function(size, parent){
-      var box_type = this._getBoxType();
-      var box = Layout.createBox(size, parent, box_type);
-      box.markup = this.context.markup;
+      var box = Layout.createBox(size, parent, {
+	type:this._getBoxType(),
+	markup:this.context.markup
+      });
       this._onReadyBox(box, parent);
       this._setBoxClasses(box, parent);
       this._setBoxStyle(box, parent);

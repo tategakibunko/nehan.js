@@ -60,12 +60,15 @@ var Layout = {
   maxFontSize:64,
   rubyRate:0.5, // used when Style.rt["font-size"] not defined.
   boldRate:0.5,
-  upperCaseRate:0.8,
+  lineRate: 2.0, // in nehan.js, extent size of line is specified by [lineRate] * [largest font_size of currentline].
+  listMarkerSpacingRate:0.4, // spacing size of list item(<LI>) marker.
+
+  // we need to specify these values(color,font-image-root) to display vertical font-images for browsers not supporting vert writing-mode.
   fontColor:"000000",
   linkColor:"0000FF",
   fontImgRoot:"http://nehan.googlecode.com/hg/char-img",
-  lineRate: 2.0,
-  listMarkerSpacingRate:0.4,
+
+  // these font-fmailies are needed to calculate proper text-metrics.
   vertFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
   horiFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
   markerFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
@@ -80,20 +83,23 @@ var Layout = {
     "larger":"1.2em",
     "smaller":"0.8em"
   },
-  createRootBox : function(size, type){
-    var box = new Box(size, null, type);
-    var font = new Font(null);
-    font.family = (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
+  createRootBox : function(size){
+    var box = new Box(size, null, {
+      type:"body"
+    });
+
+    // set root box properties.
+    box.font = this.getStdFont();
     box.flow = this.getStdBoxFlow();
     box.lineRate = this.lineRate;
     box.textAlign = "start";
-    box.font = font;
-    //box.color = new Color(this.fontColor);
     box.letterSpacing = 0;
     return box;
   },
-  createBox : function(size, parent, type){
-    var box = new Box(size, parent, type);
+  createBox : function(size, parent, opt){
+    var box = new Box(size, parent, opt);
+
+    // inherit parent box properties.
     box.flow = parent.flow;
     box.lineRate = parent.lineRate;
     box.textAlign = parent.textAlign;
@@ -101,9 +107,6 @@ var Layout = {
     box.color = parent.color;
     box.letterSpacing = parent.letterSpacing;
     return box;
-  },
-  createTextLine : function(size, parent){
-    return this.createBox(size, parent, "text-line");
   },
   getStdPageSize : function(){
     return new BoxSize(this.width, this.height);
@@ -121,6 +124,11 @@ var Layout = {
   },
   getStdHoriFlow : function(){
     return BoxFlows.getByName(this.hori);
+  },
+  getStdFont : function(){
+    var font = new Font(null);
+    font.family = (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
+    return font;
   },
   getListMarkerSpacingSize : function(font_size){
     font_size = font_size || this.fontSize;
@@ -5228,19 +5236,23 @@ var BoxChild = (function(){
 })();
 
 var Box = (function(){
-  function Box(size, parent, type){
-    this._type = type || "div";
+  function Box(size, parent, opt){
+    this._type = opt.type || "div";
+    this._display = opt.display || "block";
+    this._markup = opt.markup || null;
+    this.parent = parent;
+    this.size = size;
     this.childExtent = 0;
     this.childMeasure = 0;
-    this.size = size;
     this.childs = new BoxChild();
     this.css = {};
-    this.parent = parent;
     this.charCount = 0;
-    this.display = "block";
   }
 
   Box.prototype = {
+    getMarkup : function(){
+      return this._markup;
+    },
     getCssBlock : function(){
       var css = this.css;
       Args.copy(css, this.size.getCss());
@@ -5262,7 +5274,7 @@ var Box = (function(){
       if(this.letterSpacing && !this.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
-      css.display = this.display;
+      css.display = this._display;
       css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
@@ -5299,7 +5311,7 @@ var Box = (function(){
 	if(Env.isIphoneFamily){
 	  css["letter-spacing"] = "-0.001em";
 	}
-	if(typeof this.markup === "undefined" || !this.isRubyLine()){
+	if(typeof this._markup === "undefined" || !this.isRubyLine()){
 	  css["margin-left"] = css["margin-right"] = "auto";
 	  css["text-align"] = "center";
 	}
@@ -5314,8 +5326,8 @@ var Box = (function(){
     },
     getDatasetAttr : function(){
       var attr = {};
-      if(this.markup){
-	this.markup.iterTagAttr(function(name, value){
+      if(this._markup){
+	this._markup.iterTagAttr(function(name, value){
 	  if(name.indexOf("data-") >= 0){
 	    attr[name] = value;
 	  }
@@ -5326,8 +5338,13 @@ var Box = (function(){
     getCharCount : function(){
       return this.charCount;
     },
+    // classes as array
     getClasses : function(){
       return this.isTextLine()? this._getClassesInline() : this._getClassesBlock();
+    },
+    // ["nehan-box", "nehan-header"] => "nehan-box nehan-header"
+    getCssClasses : function(){
+      return this.getClasses().join(" ");
     },
     _getClassesBlock : function(){
       var classes = ["nehan-box"];
@@ -5339,13 +5356,10 @@ var Box = (function(){
     _getClassesInline : function(){
       var classes = ["nehan-text-line"];
       classes.push("nehan-text-line-" + (this.isTextVertical()? "vert" : "hori"));
-      if(this.markup && this.markup.getName() !== "body"){
-	classes.push("nehan-" + this.markup.getName());
+      if(this._markup && this._markup.getName() !== "body"){
+	classes.push("nehan-" + this._markup.getName());
       }
       return classes.concat(this.extraClasses || []);
-    },
-    getCssClasses : function(){
-      return this.getClasses().join(" ");
     },
     getChilds : function(){
       return this.childs.get();
@@ -5416,26 +5430,6 @@ var Box = (function(){
       }
       return ret;
     },
-    getBoxWidth : function(){
-      var ret = this.size.width;
-      if(this.edge){
-	ret += this.edge.getWidth();
-      }
-      return ret;
-    },
-    getBoxHeight : function(){
-      var ret = this.size.height;
-      if(this.edge){
-	ret += this.edge.getHeight();
-      }
-      return ret;
-    },
-    getBoxSize : function(){
-      return new BoxSize(this.getBoxWidth(), this.getBoxHeight());
-    },
-    getBorder : function(){
-      return this.edge? this.edge.border : null;
-    },
     getStartOffset : function(){
       var indent = this.textIndent || 0;
       switch(this.textAlign){
@@ -5484,7 +5478,7 @@ var Box = (function(){
       return this.edge? this.edge.getHeight() : 0;
     },
     getMarkupName : function(){
-      return this.markup? this.markup.getName() : "";
+      return this._markup? this._markup.getName() : "";
     },
     addClass : function(klass){
       var classes = this.extraClasses || [];
@@ -5500,12 +5494,6 @@ var Box = (function(){
       this.childs.add(child);
       this.childExtent = Math.max(child.getBoxExtent(this.flow), this.childExtent);
       this.charCount += child.getCharCount();
-    },
-    addExtent : function(extent){
-      this.size.addExtent(this.flow, extent);
-    },
-    addMeasure : function(measure){
-      this.size.addMeasure(this.flow, measure);
     },
     setChildMeasure : function(measure){
       this.childMeasure = measure;
@@ -5534,6 +5522,9 @@ var Box = (function(){
       if(flow.isValid()){
 	this.flow = flow;
       }
+    },
+    setDisplay : function(display){
+      this._display = display;
     },
     setContentExtent : function(flow, extent){
       this.size.setExtent(flow, extent);
@@ -5577,14 +5568,11 @@ var Box = (function(){
       }
       return ret;
     },
-    isHeader : function(){
-      return this.markup? this.markup.isHeaderTag() : false;
-    },
     isBlock : function(){
       return !this.isTextLine();
     },
     isDisplayNone : function(){
-      return this.display === "none";
+      return this._display === "none";
     },
     isTextLine : function(){
       return this._type === "text-line";
@@ -5595,22 +5583,16 @@ var Box = (function(){
     isInlineOfInline : function(){
       // when <p>aaaa<span>bbbb</span></p>,
       // <span>bbbb</span> is inline of inline.
-      return this.isTextLine() && this.markup && this.markup.isInline();
+      return this.parent && this.parent.isTextLine();
     },
     isRubyLine : function(){
       return this.isTextLine() && this.getMarkupName() === "ruby";
-    },
-    isRtLine : function(){
-      return this.isTextLine() && this.getMarkupName() === "rt";
     },
     isLinkLine : function(){
       return this.isTextLine() && this.getMarkupName() === "a";
     },
     isPreLine : function(){
       return this.isTextLine() && this.getMarkupName() === "pre";
-    },
-    isFirstLetter : function(){
-      return this.getMarkupName() === "first-letter";
     },
     isJustifyTarget : function(){
       var name = this.getMarkupName();
@@ -7668,14 +7650,16 @@ var ElementGenerator = (function(){
     },
     _createLine : function(parent){
       var size = this._getLineSize(parent);
-      var line = Layout.createTextLine(size, parent);
-      line.markup = this.context.markup;
-      return line;
+      return Layout.createBox(size, parent, {
+	type:"text-line",
+	markup:this.context.markup
+      });
     },
     _createBox : function(size, parent){
-      var box_type = this._getBoxType();
-      var box = Layout.createBox(size, parent, box_type);
-      box.markup = this.context.markup;
+      var box = Layout.createBox(size, parent, {
+	type:this._getBoxType(),
+	markup:this.context.markup
+      });
       this._onReadyBox(box, parent);
       this._setBoxClasses(box, parent);
       this._setBoxStyle(box, parent);
@@ -8827,7 +8811,7 @@ var BodyBlockTreeGenerator = (function(){
   };
 
   BodyBlockTreeGenerator.prototype._createBox = function(size, parent){
-    var box = Layout.createRootBox(size, "body");
+    var box = Layout.createRootBox(size);
     this._setBoxStyle(box, null);
     box.percent = this.context.getSeekPercent();
     box.seekPos = this.context.getSeekPos();
@@ -8871,7 +8855,7 @@ var FloatedBlockTreeGenerator = (function(){
     var rest_measure = parent.getContentMeasure() - floated_box.getBoxMeasure(parent.flow);
     var rest_extent = floated_box.getBoxExtent(parent.flow);
     var rest_size = parent.flow.getBoxSize(rest_measure, rest_extent);
-    var rest_box = Layout.createBox(rest_size, wrap_box, "box");
+    var rest_box = Layout.createBox(rest_size, wrap_box, {type:"box"});
     rest_box.setFlow(parent.flow);
     return rest_box;
   };
@@ -8880,7 +8864,7 @@ var FloatedBlockTreeGenerator = (function(){
     var wrap_measure = parent.getContentMeasure();
     var wrap_extent = floated_box.getBoxExtent(parent.flow);
     var wrap_box_size = parent.flow.getBoxSize(wrap_measure, wrap_extent);
-    var wrap_box = Layout.createBox(wrap_box_size, parent, "box");
+    var wrap_box = Layout.createBox(wrap_box_size, parent, {type:"box"});
     var wrap_flow = parent.getFloatedWrapFlow();
     wrap_box.setParent(parent, false);
     wrap_box.setFlow(wrap_flow);
@@ -8906,7 +8890,7 @@ var InlinePageGenerator = (function(){
 
   InlinePageGenerator.prototype.yield = function(parent){
     var size = this._getBoxSize(parent);
-    var wrap = Layout.createBox(size, parent, "div");
+    var wrap = Layout.createBox(size, parent, {type:"div"});
     var page = BlockTreeGenerator.prototype.yield.call(this, wrap);
     if(typeof page === "number"){
       return page; // exception
@@ -9230,7 +9214,7 @@ var BlockTreeEvaluator = (function(){
     evalImageContent : function(box){
       return Html.tagSingle("img", Args.copy({
 	"src": box.src,
-	"title":box.markup.getTagAttr("title") || "",
+	"title":box.getMarkup().getTagAttr("title") || "",
 	"width": box.getContentWidth(),
 	"height": box.getContentHeight()
       }, box.getDatasetAttr()));
@@ -9267,11 +9251,12 @@ var InlineTreeEvaluator = (function(){
       return body;
     },
     evalLinkLine : function(line, body){
-      var attr = {}, markup = line.markup;
+      var attr = {};
+      var markup = line.getMarkup();
       attr.href = markup.getTagAttr("href", "#");
       var name = markup.getTagAttr("name");
       if(name){
-	markup.addClass("nehan-anchor");
+	line.addClass("nehan-anchor");
 	attr.name = name;
       }
       var title = markup.getTagAttr("title");
@@ -9283,9 +9268,9 @@ var InlineTreeEvaluator = (function(){
 	attr.target = target;
       }
       if(attr.href.indexOf("#") >= 0){
-	markup.addClass("nehan-anchor-link");
+	line.addClass("nehan-anchor-link");
       }
-      attr["class"] = markup.getCssClasses();
+      attr["class"] = line.getCssClasses();
       return Html.tagWrap("a", body, attr);
     },
     evalInlineElement : function(line, element){
@@ -9640,7 +9625,7 @@ var HoriInlineTreeEvaluator = (function(){
   };
 
   HoriInlineTreeEvaluator.prototype.evalInlineBox = function(line, box){
-    box.display = "inline-block";
+    box.setDisplay("inline-block");
     return this.parentEvaluator.evaluate(box);
   };
 

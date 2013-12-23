@@ -1,17 +1,21 @@
 var Box = (function(){
-  function Box(size, parent, type){
-    this._type = type || "div";
+  function Box(size, parent, opt){
+    this._type = opt.type || "div";
+    this._display = opt.display || "block";
+    this._markup = opt.markup || null;
+    this.parent = parent;
+    this.size = size;
     this.childExtent = 0;
     this.childMeasure = 0;
-    this.size = size;
     this.childs = new BoxChild();
     this.css = {};
-    this.parent = parent;
     this.charCount = 0;
-    this.display = "block";
   }
 
   Box.prototype = {
+    getMarkup : function(){
+      return this._markup;
+    },
     getCssBlock : function(){
       var css = this.css;
       Args.copy(css, this.size.getCss());
@@ -33,7 +37,7 @@ var Box = (function(){
       if(this.letterSpacing && !this.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
-      css.display = this.display;
+      css.display = this._display;
       css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
@@ -70,7 +74,7 @@ var Box = (function(){
 	if(Env.isIphoneFamily){
 	  css["letter-spacing"] = "-0.001em";
 	}
-	if(typeof this.markup === "undefined" || !this.isRubyLine()){
+	if(typeof this._markup === "undefined" || !this.isRubyLine()){
 	  css["margin-left"] = css["margin-right"] = "auto";
 	  css["text-align"] = "center";
 	}
@@ -85,8 +89,8 @@ var Box = (function(){
     },
     getDatasetAttr : function(){
       var attr = {};
-      if(this.markup){
-	this.markup.iterTagAttr(function(name, value){
+      if(this._markup){
+	this._markup.iterTagAttr(function(name, value){
 	  if(name.indexOf("data-") >= 0){
 	    attr[name] = value;
 	  }
@@ -97,8 +101,13 @@ var Box = (function(){
     getCharCount : function(){
       return this.charCount;
     },
+    // classes as array
     getClasses : function(){
       return this.isTextLine()? this._getClassesInline() : this._getClassesBlock();
+    },
+    // ["nehan-box", "nehan-header"] => "nehan-box nehan-header"
+    getCssClasses : function(){
+      return this.getClasses().join(" ");
     },
     _getClassesBlock : function(){
       var classes = ["nehan-box"];
@@ -110,13 +119,10 @@ var Box = (function(){
     _getClassesInline : function(){
       var classes = ["nehan-text-line"];
       classes.push("nehan-text-line-" + (this.isTextVertical()? "vert" : "hori"));
-      if(this.markup && this.markup.getName() !== "body"){
-	classes.push("nehan-" + this.markup.getName());
+      if(this._markup && this._markup.getName() !== "body"){
+	classes.push("nehan-" + this._markup.getName());
       }
       return classes.concat(this.extraClasses || []);
-    },
-    getCssClasses : function(){
-      return this.getClasses().join(" ");
     },
     getChilds : function(){
       return this.childs.get();
@@ -187,26 +193,6 @@ var Box = (function(){
       }
       return ret;
     },
-    getBoxWidth : function(){
-      var ret = this.size.width;
-      if(this.edge){
-	ret += this.edge.getWidth();
-      }
-      return ret;
-    },
-    getBoxHeight : function(){
-      var ret = this.size.height;
-      if(this.edge){
-	ret += this.edge.getHeight();
-      }
-      return ret;
-    },
-    getBoxSize : function(){
-      return new BoxSize(this.getBoxWidth(), this.getBoxHeight());
-    },
-    getBorder : function(){
-      return this.edge? this.edge.border : null;
-    },
     getStartOffset : function(){
       var indent = this.textIndent || 0;
       switch(this.textAlign){
@@ -255,7 +241,7 @@ var Box = (function(){
       return this.edge? this.edge.getHeight() : 0;
     },
     getMarkupName : function(){
-      return this.markup? this.markup.getName() : "";
+      return this._markup? this._markup.getName() : "";
     },
     addClass : function(klass){
       var classes = this.extraClasses || [];
@@ -271,12 +257,6 @@ var Box = (function(){
       this.childs.add(child);
       this.childExtent = Math.max(child.getBoxExtent(this.flow), this.childExtent);
       this.charCount += child.getCharCount();
-    },
-    addExtent : function(extent){
-      this.size.addExtent(this.flow, extent);
-    },
-    addMeasure : function(measure){
-      this.size.addMeasure(this.flow, measure);
     },
     setChildMeasure : function(measure){
       this.childMeasure = measure;
@@ -305,6 +285,9 @@ var Box = (function(){
       if(flow.isValid()){
 	this.flow = flow;
       }
+    },
+    setDisplay : function(display){
+      this._display = display;
     },
     setContentExtent : function(flow, extent){
       this.size.setExtent(flow, extent);
@@ -348,14 +331,11 @@ var Box = (function(){
       }
       return ret;
     },
-    isHeader : function(){
-      return this.markup? this.markup.isHeaderTag() : false;
-    },
     isBlock : function(){
       return !this.isTextLine();
     },
     isDisplayNone : function(){
-      return this.display === "none";
+      return this._display === "none";
     },
     isTextLine : function(){
       return this._type === "text-line";
@@ -366,22 +346,16 @@ var Box = (function(){
     isInlineOfInline : function(){
       // when <p>aaaa<span>bbbb</span></p>,
       // <span>bbbb</span> is inline of inline.
-      return this.isTextLine() && this.markup && this.markup.isInline();
+      return this.parent && this.parent.isTextLine();
     },
     isRubyLine : function(){
       return this.isTextLine() && this.getMarkupName() === "ruby";
-    },
-    isRtLine : function(){
-      return this.isTextLine() && this.getMarkupName() === "rt";
     },
     isLinkLine : function(){
       return this.isTextLine() && this.getMarkupName() === "a";
     },
     isPreLine : function(){
       return this.isTextLine() && this.getMarkupName() === "pre";
-    },
-    isFirstLetter : function(){
-      return this.getMarkupName() === "first-letter";
     },
     isJustifyTarget : function(){
       var name = this.getMarkupName();

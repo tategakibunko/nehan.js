@@ -9,7 +9,7 @@ var BodyBlockTreeGenerator = (function(){
   };
 
   BodyBlockTreeGenerator.prototype._createBox = function(size, parent){
-    var box = Layout.createRootBox(size, "body");
+    var box = Layout.createRootBox(size);
     this._setBoxStyle(box, null);
     box.percent = this.context.getSeekPercent();
     box.seekPos = this.context.getSeekPos();

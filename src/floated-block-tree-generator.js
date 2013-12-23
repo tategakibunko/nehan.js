@@ -23,7 +23,7 @@ var FloatedBlockTreeGenerator = (function(){
     var rest_measure = parent.getContentMeasure() - floated_box.getBoxMeasure(parent.flow);
     var rest_extent = floated_box.getBoxExtent(parent.flow);
     var rest_size = parent.flow.getBoxSize(rest_measure, rest_extent);
-    var rest_box = Layout.createBox(rest_size, wrap_box, "box");
+    var rest_box = Layout.createBox(rest_size, wrap_box, {type:"box"});
     rest_box.setFlow(parent.flow);
     return rest_box;
   };
@@ -32,7 +32,7 @@ var FloatedBlockTreeGenerator = (function(){
     var wrap_measure = parent.getContentMeasure();
     var wrap_extent = floated_box.getBoxExtent(parent.flow);
     var wrap_box_size = parent.flow.getBoxSize(wrap_measure, wrap_extent);
-    var wrap_box = Layout.createBox(wrap_box_size, parent, "box");
+    var wrap_box = Layout.createBox(wrap_box_size, parent, {type:"box"});
     var wrap_flow = parent.getFloatedWrapFlow();
     wrap_box.setParent(parent, false);
     wrap_box.setFlow(wrap_flow);

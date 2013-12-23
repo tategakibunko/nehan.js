@@ -18,11 +18,12 @@ var InlineTreeEvaluator = (function(){
       return body;
     },
     evalLinkLine : function(line, body){
-      var attr = {}, markup = line.markup;
+      var attr = {};
+      var markup = line.getMarkup();
       attr.href = markup.getTagAttr("href", "#");
       var name = markup.getTagAttr("name");
       if(name){
-	markup.addClass("nehan-anchor");
+	line.addClass("nehan-anchor");
 	attr.name = name;
       }
       var title = markup.getTagAttr("title");
@@ -34,9 +35,9 @@ var InlineTreeEvaluator = (function(){
 	attr.target = target;
       }
       if(attr.href.indexOf("#") >= 0){
-	markup.addClass("nehan-anchor-link");
+	line.addClass("nehan-anchor-link");
       }
-      attr["class"] = markup.getCssClasses();
+      attr["class"] = line.getCssClasses();
       return Html.tagWrap("a", body, attr);
     },
     evalInlineElement : function(line, element){

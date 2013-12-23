@@ -1,3 +1,4 @@
+/*
 test("class", function(){
   var Person = Class.extend({
     init: function(isDancing){
@@ -19,4 +20,4 @@ test("class", function(){
   equal(n instanceof Person, true);
   equal(n instanceof Ninja, true);
 });
-
+*/

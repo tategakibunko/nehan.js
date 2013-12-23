@@ -5,9 +5,6 @@ test("content-box-sizing", function(){
   box.sizing = BoxSizings.getByName("content-box");
   box.setFlow(flow);
 
-  equal(box.getBoxWidth(), 100);
-  equal(box.getBoxHeight(), 200);
-
   var edge = new BoxEdge();
   edge.padding.right = 20;
   edge.padding.top = 10;
@@ -18,10 +15,6 @@ test("content-box-sizing", function(){
   // content size not change
   equal(box.getContentWidth(), 100);
   equal(box.getContentHeight(), 200);
-
-  // box outer size change by padding
-  equal(box.getBoxWidth(), 120);
-  equal(box.getBoxHeight(), 210);
 });
 
 test("border-box-sizing", function(){
@@ -31,9 +24,6 @@ test("border-box-sizing", function(){
   box.sizing = BoxSizings.getByName("border-box");
   box.setFlow(flow);
 
-  equal(box.getBoxWidth(), 100);
-  equal(box.getBoxHeight(), 200);
-
   var edge = new BoxEdge();
   edge.margin.left = 20;
   edge.padding.right = 20;
@@ -41,10 +31,6 @@ test("border-box-sizing", function(){
 
   // set edge with box-sizing mode "border-box"
   box.setEdge(edge);
-
-  // margin size is added
-  equal(box.getBoxWidth(), 120);
-  equal(box.getBoxHeight(), 200);
 
   // content size is shorten by padding
   equal(box.getContentWidth(), 80);
@@ -58,19 +44,12 @@ test("margin-box-sizing", function(){
   box.sizing = BoxSizings.getByName("margin-box");
   box.setFlow(flow);
 
-  equal(box.getBoxWidth(), 100);
-  equal(box.getBoxHeight(), 200);
-
   var edge = new BoxEdge();
   edge.margin.left = 20;
   edge.margin.top = 10;
 
   // set edge with box-sizing mode "margin-box"
   box.setEdge(edge);
-
-  // box size not change
-  equal(box.getBoxWidth(), 100);
-  equal(box.getBoxHeight(), 200);
 
   // content size shorten by any kind of edge(margin/border/padding).
   equal(box.getContentWidth(), 80);

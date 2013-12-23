@@ -9,12 +9,15 @@ var Layout = {
   maxFontSize:64,
   rubyRate:0.5, // used when Style.rt["font-size"] not defined.
   boldRate:0.5,
-  upperCaseRate:0.8,
+  lineRate: 2.0, // in nehan.js, extent size of line is specified by [lineRate] * [largest font_size of currentline].
+  listMarkerSpacingRate:0.4, // spacing size of list item(<LI>) marker.
+
+  // we need to specify these values(color,font-image-root) to display vertical font-images for browsers not supporting vert writing-mode.
   fontColor:"000000",
   linkColor:"0000FF",
   fontImgRoot:"http://nehan.googlecode.com/hg/char-img",
-  lineRate: 2.0,
-  listMarkerSpacingRate:0.4,
+
+  // these font-fmailies are needed to calculate proper text-metrics.
   vertFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
   horiFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
   markerFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
@@ -29,20 +32,23 @@ var Layout = {
     "larger":"1.2em",
     "smaller":"0.8em"
   },
-  createRootBox : function(size, type){
-    var box = new Box(size, null, type);
-    var font = new Font(null);
-    font.family = (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
+  createRootBox : function(size){
+    var box = new Box(size, null, {
+      type:"body"
+    });
+
+    // set root box properties.
+    box.font = this.getStdFont();
     box.flow = this.getStdBoxFlow();
     box.lineRate = this.lineRate;
     box.textAlign = "start";
-    box.font = font;
-    //box.color = new Color(this.fontColor);
     box.letterSpacing = 0;
     return box;
   },
-  createBox : function(size, parent, type){
-    var box = new Box(size, parent, type);
+  createBox : function(size, parent, opt){
+    var box = new Box(size, parent, opt);
+
+    // inherit parent box properties.
     box.flow = parent.flow;
     box.lineRate = parent.lineRate;
     box.textAlign = parent.textAlign;
@@ -50,9 +56,6 @@ var Layout = {
     box.color = parent.color;
     box.letterSpacing = parent.letterSpacing;
     return box;
-  },
-  createTextLine : function(size, parent){
-    return this.createBox(size, parent, "text-line");
   },
   getStdPageSize : function(){
     return new BoxSize(this.width, this.height);
@@ -70,6 +73,11 @@ var Layout = {
   },
   getStdHoriFlow : function(){
     return BoxFlows.getByName(this.hori);
+  },
+  getStdFont : function(){
+    var font = new Font(null);
+    font.family = (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
+    return font;
   },
   getListMarkerSpacingSize : function(font_size){
     font_size = font_size || this.fontSize;

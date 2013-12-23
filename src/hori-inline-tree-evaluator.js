@@ -100,7 +100,7 @@ var HoriInlineTreeEvaluator = (function(){
   };
 
   HoriInlineTreeEvaluator.prototype.evalInlineBox = function(line, box){
-    box.display = "inline-block";
+    box.setDisplay("inline-block");
     return this.parentEvaluator.evaluate(box);
   };
 
