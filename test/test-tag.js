@@ -95,14 +95,8 @@ test("tag-is", function(){
   tag = new Tag("<a name='hoge'>");
   equal(tag.isAnchorTag(), true);
 
-  tag = new Tag("</a>");
-  equal(tag.isClose(), true);
-
   tag = new Tag("<a href='#hoge'>");
   equal(tag.isAnchorLinkTag(), true);
-
-  tag = new Tag("<iframe>");
-  equal(tag.isEmbeddableTag(), true);
 
   tag = new Tag("<div>");
   equal(tag.isBlock(), true);

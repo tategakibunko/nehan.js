@@ -1,5 +1,6 @@
 var Box = (function(){
   function Box(size, parent, opt){
+    opt = opt || {};
     this._type = opt.type || "div";
     this._display = opt.display || "block";
     this._markup = opt.markup || null;

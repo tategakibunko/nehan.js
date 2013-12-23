@@ -166,9 +166,6 @@ var Tag = (function (){
 	return tag.getName() === name;
       });
     },
-    getOrder : function(){
-      return this.order || -1;
-    },
     getCssClasses : function(){
       return this.classes.join(" ");
     },
@@ -227,13 +224,6 @@ var Tag = (function (){
       }
       return null;
     },
-    rename : function(name){
-      this.name = name;
-    },
-    regetSelectorValue : function(){
-      this.cssAttrStatic = {};
-      this._getSelectorValue();
-    },
     hasStaticSize : function(){
       return (this.getAttr("width") !== null && this.getAttr("height") !== null);
     },
@@ -250,9 +240,6 @@ var Tag = (function (){
     isPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
-    isClassAttrEnable : function(){
-      return (typeof this.tagAttr["class"] != "undefined");
-    },
     isFloated : function(){
       return this.getLogicalFloat() != "none";
     },
@@ -262,18 +249,12 @@ var Tag = (function (){
     isPull : function(){
       return (typeof this.tagAttr.pull != "undefined");
     },
-    isClose : function(){
-      return this.name.substring(0,1) === "/";
-    },
     isAnchorTag : function(){
       return this.name === "a" && this.getTagAttr("name") !== null;
     },
     isAnchorLinkTag : function(){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
-    },
-    isEmbeddableTag : function(){
-      return this.getCssAttr("embeddable") === true;
     },
     isBlock : function(){
       var display = this.getDisplay();
@@ -315,8 +296,6 @@ var Tag = (function (){
     isHeaderTag : function(){
       return this.getHeaderRank() > 0;
     },
-    // check if 'single' page-break-tag
-    // not see page-break-xxx:'always'
     isPageBreakTag : function(){
       var name = this.getName();
       return name === "end-page" || name === "page-break";
