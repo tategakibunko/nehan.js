@@ -2603,6 +2603,9 @@ var Tag = (function (){
     getDataset : function(name, def_value){
       return this.dataset[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
+    getDatasetAttrs : function(){
+      return this.dataset;
+    },
     getContentRaw : function(){
       return this.contentRaw;
     },
@@ -5324,17 +5327,6 @@ var Box = (function(){
       css["float"] = "none";
       css["margin-left"] = css["margin-right"] = "auto";
       return css;
-    },
-    getDatasetAttr : function(){
-      var attr = {};
-      if(this._markup){
-	this._markup.iterTagAttr(function(name, value){
-	  if(name.indexOf("data-") >= 0){
-	    attr[name] = value;
-	  }
-	});
-      }
-      return attr;
     },
     getCharCount : function(){
       return this.charCount;
@@ -9175,11 +9167,12 @@ var BlockTreeEvaluator = (function(){
       }
     },
     evalBox : function(box){
+      var markup = box.getMarkup();
       return Html.tagWrap("div", this.evalBoxChilds(box.getChilds()), Args.copy({
 	"id":box.id || null,
 	"style":Css.toString(box.getCssBlock()),
 	"class":box.getCssClasses()
-      }, box.getDatasetAttr()));
+      }, markup? markup.getDatasetAttrs() : {}));
     },
     evalBoxChilds : function(childs){
       var self = this;
@@ -9213,12 +9206,13 @@ var BlockTreeEvaluator = (function(){
       });
     },
     evalImageContent : function(box){
+      var markup = box.getMarkup();
       return Html.tagSingle("img", Args.copy({
 	"src": box.src,
 	"title":box.getMarkup().getTagAttr("title") || "",
 	"width": box.getContentWidth(),
 	"height": box.getContentHeight()
-      }, box.getDatasetAttr()));
+      }, markup? markup.getDatasetAttrs() : {}));
     },
     evalInlinePage : function(box){
       return this.evalBox(box);
@@ -9328,12 +9322,11 @@ var VertInlineTreeEvaluator = (function(){
   Class.extend(VertInlineTreeEvaluator, InlineTreeEvaluator);
 
   VertInlineTreeEvaluator.prototype.evaluate = function(line){
-    var attr = {
+    var markup = line.getMarkup();
+    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), Args.copy({
       "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
-    };
-    Args.copy(attr, line.getDatasetAttr());
-    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), attr);
+    }, markup? markup.getDatasetAttrs() : {}));
   };
 
   VertInlineTreeEvaluator.prototype.evalRuby = function(line, ruby){
@@ -9532,11 +9525,11 @@ var HoriInlineTreeEvaluator = (function(){
 
   HoriInlineTreeEvaluator.prototype.evaluate = function(line, ctx){
     var tag_name = line.isInlineOfInline()? "span" : "div";
-    var attr = {
+    var markup = line.getMarkup();
+    var attr = Args.copy({
       "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
-    };
-    Args.copy(attr, line.getDatasetAttr());
+    }, markup? markup.getDatasetAttrs() : {});
     return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), attr);
   };
 

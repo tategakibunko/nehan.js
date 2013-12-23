@@ -6,11 +6,11 @@ var HoriInlineTreeEvaluator = (function(){
 
   HoriInlineTreeEvaluator.prototype.evaluate = function(line, ctx){
     var tag_name = line.isInlineOfInline()? "span" : "div";
-    var attr = {
+    var markup = line.getMarkup();
+    var attr = Args.copy({
       "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
-    };
-    Args.copy(attr, line.getDatasetAttr());
+    }, markup? markup.getDatasetAttrs() : {});
     return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), attr);
   };
 

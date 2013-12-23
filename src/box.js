@@ -87,17 +87,6 @@ var Box = (function(){
       css["margin-left"] = css["margin-right"] = "auto";
       return css;
     },
-    getDatasetAttr : function(){
-      var attr = {};
-      if(this._markup){
-	this._markup.iterTagAttr(function(name, value){
-	  if(name.indexOf("data-") >= 0){
-	    attr[name] = value;
-	  }
-	});
-      }
-      return attr;
-    },
     getCharCount : function(){
       return this.charCount;
     },

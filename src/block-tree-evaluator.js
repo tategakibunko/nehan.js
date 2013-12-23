@@ -26,11 +26,12 @@ var BlockTreeEvaluator = (function(){
       }
     },
     evalBox : function(box){
+      var markup = box.getMarkup();
       return Html.tagWrap("div", this.evalBoxChilds(box.getChilds()), Args.copy({
 	"id":box.id || null,
 	"style":Css.toString(box.getCssBlock()),
 	"class":box.getCssClasses()
-      }, box.getDatasetAttr()));
+      }, markup? markup.getDatasetAttrs() : {}));
     },
     evalBoxChilds : function(childs){
       var self = this;
@@ -64,12 +65,13 @@ var BlockTreeEvaluator = (function(){
       });
     },
     evalImageContent : function(box){
+      var markup = box.getMarkup();
       return Html.tagSingle("img", Args.copy({
 	"src": box.src,
 	"title":box.getMarkup().getTagAttr("title") || "",
 	"width": box.getContentWidth(),
 	"height": box.getContentHeight()
-      }, box.getDatasetAttr()));
+      }, markup? markup.getDatasetAttrs() : {}));
     },
     evalInlinePage : function(box){
       return this.evalBox(box);

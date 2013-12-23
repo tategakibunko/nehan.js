@@ -5,12 +5,11 @@ var VertInlineTreeEvaluator = (function(){
   Class.extend(VertInlineTreeEvaluator, InlineTreeEvaluator);
 
   VertInlineTreeEvaluator.prototype.evaluate = function(line){
-    var attr = {
+    var markup = line.getMarkup();
+    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), Args.copy({
       "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
-    };
-    Args.copy(attr, line.getDatasetAttr());
-    return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), attr);
+    }, markup? markup.getDatasetAttrs() : {}));
   };
 
   VertInlineTreeEvaluator.prototype.evalRuby = function(line, ruby){

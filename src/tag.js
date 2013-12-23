@@ -181,6 +181,9 @@ var Tag = (function (){
     getDataset : function(name, def_value){
       return this.dataset[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
+    getDatasetAttrs : function(){
+      return this.dataset;
+    },
     getContentRaw : function(){
       return this.contentRaw;
     },
