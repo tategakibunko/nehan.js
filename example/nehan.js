@@ -2311,16 +2311,17 @@ var Selectors = (function(){
     setValue : function(selector_key, value){
       if(Style[selector_key]){
 	update_value(selector_key, value);
-      } else {
-	var selector = insert_value(selector_key, value);
-	Style[selector_key] = selector.getValue();
-	if(selector.isPseudoElement()){
-	  sort_selectors_pe();
-	} else {
-	  sort_selectors();
-	}
+	return;
       }
+      var selector = insert_value(selector_key, value);
+      Style[selector_key] = selector.getValue();
+      if(selector.isPseudoElement()){
+	sort_selectors_pe();
+	return;
+      }
+      sort_selectors();
     },
+    // pseudo_element: "first-letter", "first-line", "before", "after"
     getValuePe : function(markup, pseudo_element){
       return get_value_pe(markup, pseudo_element);
     },
