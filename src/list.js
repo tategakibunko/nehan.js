@@ -1,9 +1,4 @@
 var List = {
-  each : function(obj, fn){
-    for(var prop in obj){
-      fn(prop, obj[prop]);
-    }
-  },
   iter : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       fn(lst[i]);

@@ -9,7 +9,7 @@ var VertInlineTreeEvaluator = (function(){
     return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), Args.copy({
       "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
-    }, markup? markup.getDatasetAttrs() : {}));
+    }, markup? markup.getDatasetAttrsRaw() : {}));
   };
 
   VertInlineTreeEvaluator.prototype.evalRuby = function(line, ruby){

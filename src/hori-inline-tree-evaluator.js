@@ -10,7 +10,7 @@ var HoriInlineTreeEvaluator = (function(){
     var attr = Args.copy({
       "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
-    }, markup? markup.getDatasetAttrs() : {});
+    }, markup? markup.getDatasetAttrsRaw() : {});
     return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), attr);
   };
 

@@ -31,7 +31,7 @@ var BlockTreeEvaluator = (function(){
 	"id":box.id || null,
 	"style":Css.toString(box.getCssBlock()),
 	"class":box.getCssClasses()
-      }, markup? markup.getDatasetAttrs() : {}));
+      }, markup? markup.getDatasetAttrsRaw() : {}));
     },
     evalBoxChilds : function(childs){
       var self = this;
@@ -71,7 +71,7 @@ var BlockTreeEvaluator = (function(){
 	"title":box.getMarkup().getTagAttr("title") || "",
 	"width": box.getContentWidth(),
 	"height": box.getContentHeight()
-      }, markup? markup.getDatasetAttrs() : {}));
+      }, markup? markup.getDatasetAttrsRaw() : {}));
     },
     evalInlinePage : function(box){
       return this.evalBox(box);

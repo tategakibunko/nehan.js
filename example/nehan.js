@@ -1058,11 +1058,6 @@ Class.extend = function(childCtor, parentCtor) {
 
 
 var List = {
-  each : function(obj, fn){
-    for(var prop in obj){
-      fn(prop, obj[prop]);
-    }
-  },
   iter : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       fn(lst[i]);
@@ -1247,6 +1242,7 @@ var Obj = {
     }
     return true;
   },
+  // fn : obj -> ?
   map : function(obj, fn){
     var ret = {};
     for(var prop in obj){
@@ -1254,6 +1250,13 @@ var Obj = {
     }
     return ret;
   },
+  // fn : prop -> value -> ?
+  each : function(obj, fn){
+    for(var prop in obj){
+      fn(prop, obj[prop]);
+    }
+  },
+  // fn : obj -> prop -> value -> ?
   iter : function(obj, fn){
     for(var prop in obj){
       fn(obj, prop, obj[prop]);
@@ -2441,7 +2444,8 @@ var Tag = (function (){
     this.tagAttr = TagAttrParser.parse(this.src);
     this.id = this.tagAttr.id || "";
     this.classes = this._parseClasses(this.tagAttr["class"] || "");
-    this.dataset = {}; // set by _parseTagAttr
+    this.dataset = {}; // dataset with no "data-" prefixes => {id:"10", name:"taro"} 
+    this.datasetRaw = {}; // dataset with "data-" prefixes => {"data-id":"10", "data-name":"taro"}
     this.childs = []; // updated by inherit
     this.cssAttrStatic = this._getSelectorValue(); // initialize css-attr, but updated when 'inherit'.
     this.cssAttrDynamic = {}; // added by setCssAttr
@@ -2544,13 +2548,13 @@ var Tag = (function (){
       });
     },
     iterTagAttr : function(fn){
-      List.each(this.tagAttr, fn);
+      Obj.each(this.tagAttr, fn);
     },
     iterCssAttrDynamic : function(fn){
-      List.each(this.cssAttrDynamic, fn);
+      Obj.each(this.cssAttrDynamic, fn);
     },
     iterCssAttrStatic : function(fn){
-      List.each(this.cssAttrStatic, fn);
+      Obj.each(this.cssAttrStatic, fn);
     },
     iterCssAttr : function(fn){
       this.iterCssAttrStatic(fn);
@@ -2600,8 +2604,13 @@ var Tag = (function (){
     getDataset : function(name, def_value){
       return this.dataset[name] || ((typeof def_value !== "undefined")? def_value : null);
     },
+    // dataset name and value object => {id:xxx, name:yyy}
     getDatasetAttrs : function(){
       return this.dataset;
+    },
+    // dataset name(with "data-" prefix) and value object => {"data-id":xxx, "data-name":yyy}
+    getDatasetAttrsRaw : function(){
+      return this.datasetRaw;
     },
     getContentRaw : function(){
       return this.contentRaw;
@@ -2844,7 +2853,9 @@ var Tag = (function (){
       for(var name in this.tagAttr){
 	if(name.indexOf("data-") === 0){
 	  var dataset_name = this._parseDatasetName(name);
-	  this.dataset[dataset_name] = this.tagAttr[name];
+	  var dataset_value = this.tagAttr[name];
+	  this.dataset[dataset_name] = dataset_value;
+	  this.datasetRaw[name] = dataset_value;
 	}
       }
     },
@@ -9152,7 +9163,7 @@ var BlockTreeEvaluator = (function(){
 	"id":box.id || null,
 	"style":Css.toString(box.getCssBlock()),
 	"class":box.getCssClasses()
-      }, markup? markup.getDatasetAttrs() : {}));
+      }, markup? markup.getDatasetAttrsRaw() : {}));
     },
     evalBoxChilds : function(childs){
       var self = this;
@@ -9192,7 +9203,7 @@ var BlockTreeEvaluator = (function(){
 	"title":box.getMarkup().getTagAttr("title") || "",
 	"width": box.getContentWidth(),
 	"height": box.getContentHeight()
-      }, markup? markup.getDatasetAttrs() : {}));
+      }, markup? markup.getDatasetAttrsRaw() : {}));
     },
     evalInlinePage : function(box){
       return this.evalBox(box);
@@ -9306,7 +9317,7 @@ var VertInlineTreeEvaluator = (function(){
     return Html.tagWrap("div", this.evalTextLineBody(line, line.getChilds()), Args.copy({
       "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
-    }, markup? markup.getDatasetAttrs() : {}));
+    }, markup? markup.getDatasetAttrsRaw() : {}));
   };
 
   VertInlineTreeEvaluator.prototype.evalRuby = function(line, ruby){
@@ -9509,7 +9520,7 @@ var HoriInlineTreeEvaluator = (function(){
     var attr = Args.copy({
       "style":Css.toString(line.getCssInline()),
       "class":line.getCssClasses()
-    }, markup? markup.getDatasetAttrs() : {});
+    }, markup? markup.getDatasetAttrsRaw() : {});
     return Html.tagWrap(tag_name, this.evalTextLineBody(line, line.getChilds(), ctx), attr);
   };
 

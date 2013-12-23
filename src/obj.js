@@ -5,6 +5,7 @@ var Obj = {
     }
     return true;
   },
+  // fn : obj -> ?
   map : function(obj, fn){
     var ret = {};
     for(var prop in obj){
@@ -12,6 +13,13 @@ var Obj = {
     }
     return ret;
   },
+  // fn : prop -> value -> ?
+  each : function(obj, fn){
+    for(var prop in obj){
+      fn(prop, obj[prop]);
+    }
+  },
+  // fn : obj -> prop -> value -> ?
   iter : function(obj, fn){
     for(var prop in obj){
       fn(obj, prop, obj[prop]);
