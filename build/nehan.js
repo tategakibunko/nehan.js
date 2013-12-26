@@ -45,6 +45,7 @@ var Config = {
   minBlockScaleDownRate : 65,
   useVerticalGlyphIfEnable: true,
   useStrictWordMetrics: true,
+  iboxEnable:false,
   maxBase:36,
   lexingBufferLen : 2000
 };
@@ -9178,7 +9179,8 @@ var BlockTreeEvaluator = (function(){
       return this.inlineEvaluatorH.evaluate(box);
     },
     evalInlineBox : function(box){
-      return Html.tagWrap("div", box.content, {
+      var content = Config.iboxEnable? box.content : "";
+      return Html.tagWrap("div", content, {
 	"style":Css.toString(box.getCssBlock()),
 	"class":box.getCssClasses()
       });

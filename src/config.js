@@ -7,6 +7,7 @@ var Config = {
   minBlockScaleDownRate : 65,
   useVerticalGlyphIfEnable: true,
   useStrictWordMetrics: true,
+  iboxEnable:false,
   maxBase:36,
   lexingBufferLen : 2000
 };
