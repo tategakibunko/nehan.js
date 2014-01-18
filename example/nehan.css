@@ -40,6 +40,8 @@
   -moz-transform-origin : 50% 50%;
   -o-transform : rotate(90deg);
   -o-transform-origin : 50% 50%;
+  -ms-transform : rotate(90deg);
+  -ms-transform-origin : 50% 50%;
   transform : rotate(90deg);
   transform-origin : 50% 50%;
 }
