@@ -8,6 +8,7 @@ Mark "!": change that can break compatibility with older version
 
 version 4.0.11 ???
 =========================
+* use 'white-space:pre' instead of tag name.
 * fix bug about rotation of alphabet in IE9+.
 o add Config.iboxEnable for security reason.
 o add Tag::getDatasetAttrsRaw to get attributes with "data-" prefixes.

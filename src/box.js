@@ -345,7 +345,7 @@ var Box = (function(){
       return this.isTextLine() && this.getMarkupName() === "a";
     },
     isPreLine : function(){
-      return this.isTextLine() && this.getMarkupName() === "pre";
+      return this.isTextLine() && this._markup && this._markup.getWhiteSpace() === "pre";
     },
     isJustifyTarget : function(){
       var name = this.getMarkupName();

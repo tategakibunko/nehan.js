@@ -408,7 +408,8 @@ var Style = {
   "param":{
   },
   "pre":{
-    "display":"block"
+    "display":"block",
+    "white-space":"pre"
   },
   "progress":{
     "display":"inline"

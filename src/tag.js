@@ -140,7 +140,6 @@ var Tag = (function (){
       this.iterTagAttr(fn); // inline attrs prior to css attrs.
     },
     getName : function(){
-      //return this.alias || this.name;
       return this.name;
     },
     getAttr : function(name, def_value){
@@ -157,6 +156,9 @@ var Tag = (function (){
     },
     getDisplay : function(){
       return this.getCssAttr("display", "block"); // display is block if not defined.
+    },
+    getWhiteSpace : function(){
+      return this.getCssAttr("white-space", "normal");
     },
     getParentChilds : function(){
       return this.parent? this.parent.getChilds() : [];

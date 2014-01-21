@@ -324,6 +324,8 @@ var TestCode = {
 	"</blockquote>"
       ].join("\n"),
 
+      "pre":"<pre>" + text_short + "\n" + text_short + "</pre>",
+
       "fieldset":[
 	"<fieldset>",
 	"<legend>legend</legend>",

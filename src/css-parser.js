@@ -30,7 +30,7 @@
   text-align
   text-combine(horizontal only)
   text-emphasis-style
-
+  white-space
  */
 var CssParser = (function(){
   var normalize = function(value){

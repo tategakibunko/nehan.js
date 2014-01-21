@@ -620,7 +620,8 @@ var Style = {
   "param":{
   },
   "pre":{
-    "display":"block"
+    "display":"block",
+    "white-space":"pre"
   },
   "progress":{
     "display":"inline"
@@ -1570,7 +1571,7 @@ var Exceptions = {
   text-align
   text-combine(horizontal only)
   text-emphasis-style
-
+  white-space
  */
 var CssParser = (function(){
   var normalize = function(value){
@@ -2566,7 +2567,6 @@ var Tag = (function (){
       this.iterTagAttr(fn); // inline attrs prior to css attrs.
     },
     getName : function(){
-      //return this.alias || this.name;
       return this.name;
     },
     getAttr : function(name, def_value){
@@ -2583,6 +2583,9 @@ var Tag = (function (){
     },
     getDisplay : function(){
       return this.getCssAttr("display", "block"); // display is block if not defined.
+    },
+    getWhiteSpace : function(){
+      return this.getCssAttr("white-space", "normal");
     },
     getParentChilds : function(){
       return this.parent? this.parent.getChilds() : [];
@@ -5577,7 +5580,7 @@ var Box = (function(){
       return this.isTextLine() && this.getMarkupName() === "a";
     },
     isPreLine : function(){
-      return this.isTextLine() && this.getMarkupName() === "pre";
+      return this.isTextLine() && this._markup && this._markup.getWhiteSpace() === "pre";
     },
     isJustifyTarget : function(){
       var name = this.getMarkupName();
