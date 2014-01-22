@@ -12,6 +12,8 @@ version 4.0.11 ???
 * fix bug about rotation of alphabet in IE9+.
 o add Config.iboxEnable for security reason.
 o add Tag::getDatasetAttrsRaw to get attributes with "data-" prefixes.
+o support z-index
+o support position:absolute
 
 version 4.0.10, 2013/12/04
 =========================
