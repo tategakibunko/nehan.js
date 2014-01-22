@@ -10,16 +10,19 @@ var BlockContext = (function(){
       return this.maxExtent - this.curExtent;
     },
     addElement : function(element){
+      var is_absolute = element.isPositionAbsolute();
       var extent = element.getBoxExtent(this.page.flow);
       if(element instanceof Box && !element.isTextLine() && extent <= 0){
 	element.pageBreakAfter = true;
       }
-      if(this.curExtent + extent > this.maxExtent){
+      if(!is_absolute && this.curExtent + extent > this.maxExtent){
 	throw "OverflowBlock";
       }
       this.page.addChildBlock(element);
-      this.curExtent += extent;
-      if(this.curExtent === this.maxExtent){
+      if(!is_absolute){
+	this.curExtent += extent;
+      }
+      if(!is_absolute && this.curExtent === this.maxExtent){
 	throw "FinishBlock";
       }
     }

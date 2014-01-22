@@ -6,6 +6,9 @@ var BoxSizing = (function(){
   }
 
   BoxSizing.prototype = {
+    containEdgeSize : function(){
+      return this.value !== "margin-box";
+    },
     containMarginSize : function(){
       return this.value === "margin-box";
     },

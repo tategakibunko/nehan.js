@@ -143,7 +143,15 @@ var Tag = (function (){
       return this.name;
     },
     getAttr : function(name, def_value){
-      return this.getTagAttr(name) || this.getCssAttr(name) || ((typeof def_value !== "undefined")? def_value : null);
+      var ret = this.getTagAttr(name);
+      if(typeof ret !== "undefined"){
+	return ret;
+      }
+      ret = this.getCssAttr(name);
+      if(typeof ret !== "undefined"){
+	return ret;
+      }
+      return (typeof def_value !== "undefined")? def_value : null;
     },
     getParent : function(){
       return this.parent || null;
@@ -173,13 +181,29 @@ var Tag = (function (){
       return this.classes.join(" ");
     },
     getTagAttr : function(name, def_value){
-      return this.tagAttr[name] || ((typeof def_value !== "undefined")? def_value : null);
+      var ret = this.tagAttr[name];
+      if(typeof ret !== "undefined"){
+	return ret;
+      }
+      return (typeof def_value !== "undefined")? def_value : null;
     },
     getCssAttr : function(name, def_value){
-      return this.cssAttrDynamic[name] || this.cssAttrStatic[name] || ((typeof def_value !== "undefined")? def_value : null);
+      var ret = this.cssAttrDynamic[name];
+      if(typeof ret !== "undefined"){
+	return ret;
+      }
+      ret = this.cssAttrStatic[name];
+      if(typeof ret !== "undefined"){
+	return ret;
+      }
+      return (typeof def_value !== "undefined")? def_value : null;
     },
     getDataset : function(name, def_value){
-      return this.dataset[name] || ((typeof def_value !== "undefined")? def_value : null);
+      var ret = this.dataset[name];
+      if(typeof ret !== "undefined"){
+	return ret;
+      }
+      return (typeof def_value !== "undefined")? def_value : null;
     },
     // dataset name and value object => {id:xxx, name:yyy}
     getDatasetAttrs : function(){

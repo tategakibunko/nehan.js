@@ -2,6 +2,8 @@
 var BoxStyle = {
   set : function(markup, box, parent){
     this._setDisplay(markup, box, parent);
+    this._setPosition(markup, box, parent);
+    this._setZIndex(markup, box, parent);
     this._setColor(markup, box, parent);
     this._setFont(markup, box, parent);
     this._setBoxSizing(markup, box, parent);
@@ -18,6 +20,21 @@ var BoxStyle = {
   },
   _setDisplay : function(markup, box, parent){
     box.display = markup.getCssAttr("display", "block");
+  },
+  _setPosition : function(markup, box, parent){
+    var position = markup.getCssAttr("position", "relative");
+    box.position = new BoxPosition(position, {
+      top: markup.getCssAttr("top", "auto"),
+      left: markup.getCssAttr("left", "auto"),
+      right: markup.getCssAttr("right", "auto"),
+      bottom: markup.getCssAttr("bottom", "auto")
+    });
+  },
+  _setZIndex : function(markup, box, parent){
+    var z_index = markup.getCssAttr("z-index");
+    if(z_index){
+      box.zIndex = z_index;
+    }
   },
   _setClasses : function(markup, box, parent){
     List.iter(markup.classes, function(klass){

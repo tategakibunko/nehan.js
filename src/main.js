@@ -1,4 +1,5 @@
 Nehan.version = "4.0.11";
+console.log("Nehan.version %s started", Nehan.version);
 
 Args.copy(Env, __engine_args.env || {});
 Args.copy(Layout, __engine_args.layout || {});

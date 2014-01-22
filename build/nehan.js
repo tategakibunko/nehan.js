@@ -2570,7 +2570,15 @@ var Tag = (function (){
       return this.name;
     },
     getAttr : function(name, def_value){
-      return this.getTagAttr(name) || this.getCssAttr(name) || ((typeof def_value !== "undefined")? def_value : null);
+      var ret = this.getTagAttr(name);
+      if(typeof ret !== "undefined"){
+	return ret;
+      }
+      ret = this.getCssAttr(name);
+      if(typeof ret !== "undefined"){
+	return ret;
+      }
+      return (typeof def_value !== "undefined")? def_value : null;
     },
     getParent : function(){
       return this.parent || null;
@@ -2600,13 +2608,29 @@ var Tag = (function (){
       return this.classes.join(" ");
     },
     getTagAttr : function(name, def_value){
-      return this.tagAttr[name] || ((typeof def_value !== "undefined")? def_value : null);
+      var ret = this.tagAttr[name];
+      if(typeof ret !== "undefined"){
+	return ret;
+      }
+      return (typeof def_value !== "undefined")? def_value : null;
     },
     getCssAttr : function(name, def_value){
-      return this.cssAttrDynamic[name] || this.cssAttrStatic[name] || ((typeof def_value !== "undefined")? def_value : null);
+      var ret = this.cssAttrDynamic[name];
+      if(typeof ret !== "undefined"){
+	return ret;
+      }
+      ret = this.cssAttrStatic[name];
+      if(typeof ret !== "undefined"){
+	return ret;
+      }
+      return (typeof def_value !== "undefined")? def_value : null;
     },
     getDataset : function(name, def_value){
-      return this.dataset[name] || ((typeof def_value !== "undefined")? def_value : null);
+      var ret = this.dataset[name];
+      if(typeof ret !== "undefined"){
+	return ret;
+      }
+      return (typeof def_value !== "undefined")? def_value : null;
     },
     // dataset name and value object => {id:xxx, name:yyy}
     getDatasetAttrs : function(){
@@ -4445,6 +4469,9 @@ var BoxSizing = (function(){
   }
 
   BoxSizing.prototype = {
+    containEdgeSize : function(){
+      return this.value !== "margin-box";
+    },
     containMarginSize : function(){
       return this.value === "margin-box";
     },
@@ -4844,103 +4871,6 @@ var Border = (function(){
   return Border;
 })();
 
-var BoxEdge = (function (){
-  function BoxEdge(){
-    this.padding = new Padding();
-    this.margin = new Margin();
-    this.border = new Border();
-  }
-
-  BoxEdge.prototype = {
-    isEnable : function(){
-      return this.padding.isEnable() || this.margin.isEnable() || this.border.isEnable();
-    },
-    clear : function(){
-      this.padding.clear();
-      this.margin.clear();
-      this.border.clear();
-    },
-    getCss : function(){
-      var css = {};
-      Args.copy(css, this.padding.getCss());
-      Args.copy(css, this.margin.getCss());
-      Args.copy(css, this.border.getCss());
-      return css;
-    },
-    getWidth : function(){
-      var ret = 0;
-      ret += this.padding.getWidth();
-      ret += this.margin.getWidth();
-      ret += this.border.getWidth();
-      return ret;
-    },
-    getHeight : function(){
-      var ret = 0;
-      ret += this.padding.getHeight();
-      ret += this.margin.getHeight();
-      ret += this.border.getHeight();
-      return ret;
-    },
-    getMeasureSize : function(flow){
-      var ret = 0;
-      ret += this.padding.getMeasureSize(flow);
-      ret += this.margin.getMeasureSize(flow);
-      ret += this.border.getMeasureSize(flow);
-      return ret;
-    },
-    getExtentSize : function(flow){
-      var ret = 0;
-      ret += this.padding.getExtentSize(flow);
-      ret += this.margin.getExtentSize(flow);
-      ret += this.border.getExtentSize(flow);
-      return ret;
-    },
-    setAll : function(prop, flow, value){
-      this[prop].setAll(flow, value);
-    },
-    setSize : function(prop, flow, size){
-      this[prop].setSize(flow, size);
-    },
-    setEdgeSize : function(flow, edge_size){
-      for(var prop in edge_size){
-	this.setSize(prop, flow, edge_size[prop]);
-      }
-    },
-    setEdgeStart : function(prop, flow, value){
-      this[prop].setStart(flow, value);
-    },
-    setEdgeEnd : function(prop, flow, value){
-      this[prop].setEnd(flow, value);
-    },
-    setEdgeBefore : function(prop, flow, value){
-      this[prop].setBefore(flow, value);
-    },
-    setEdgeAfter : function(prop, flow, value){
-      this[prop].setAfter(flow, value);
-    },
-    setBorderRadius : function(flow, value){
-      this.border.setRadius(flow, value);
-    },
-    setBorderColor : function(flow, value){
-      this.border.setColor(flow, value);
-    },
-    setBorderStyle : function(flow, value){
-      this.border.setStyle(flow, value);
-    },
-    clearBorderStart : function(flow){
-      this.border.clearStart(flow);
-    },
-    clearBorderBefore : function(flow){
-      this.border.clearBefore(flow);
-    },
-    clearBorderAfter : function(flow){
-      this.border.clearAfter(flow);
-    }
-  };
-
-  return BoxEdge;
-})();
-
 var Partition = (function(){
   function Partition(parts, max_size){
     switch(arguments.length){
@@ -4994,85 +4924,6 @@ var TablePartition = (function(){
   };
 
   return TablePartition;
-})();
-
-var BoxSize = (function(){
-  function BoxSize(width, height){
-    this.width = width;
-    this.height = height;
-  }
-
-  BoxSize.prototype = {
-    isValid : function(){
-      return this.width > 0 && this.height > 0;
-    },
-    canInclude : function(size){
-      return (size.width <= this.width && size.height <= this.height);
-    },
-    getCss : function(){
-      var css = {};
-      css.width = this.width + "px";
-      css.height = this.height + "px";
-      return css;
-    },
-    getWhSlope : function(){
-      return this.height / this.width;
-    },
-    getHwSlope : function(){
-      return this.width / this.height;
-    },
-    getMeasure : function(flow){
-      return this[flow.getPropMeasure()];
-    },
-    getExtent : function(flow){
-      return this[flow.getPropExtent()];
-    },
-    setExtent : function(flow, extent){
-      this[flow.getPropExtent()] = extent;
-    },
-    setMeasure : function(flow, measure){
-      this[flow.getPropMeasure()] = measure;
-    },
-    subEdge : function(edge){
-      var dw = edge.getWidth();
-      var dh = edge.getHeight();
-      this.width = Math.max(0, this.width - dw);
-      this.height = Math.max(0, this.height - dh);
-    },
-    subMeasure : function(flow, measure){
-      var prop = flow.getPropMeasure();
-      this[prop] = Math.max(0, this[prop] - measure);
-    },
-    addMeasure : function(flow, measure){
-      this[flow.getPropMeasure()] += measure;
-    },
-    addExtent : function(flow, extent){
-      this[flow.getPropExtent()] += extent;
-    },
-    percentFrom : function(target_size){
-      return Math.round(100 * this.width / target_size.width);
-    },
-    resizeWithin : function(flow, rest_size){
-      var rest_measure = rest_size.getMeasure(flow);
-      var rest_extent = rest_size.getExtent(flow);
-      var box_measure = this.getMeasure(flow);
-      var box_extent = this.getExtent(flow);
-      if(box_extent > rest_extent){
-	// box_measure : box_extent = ? : rest_extent
-	box_measure = box_measure * rest_extent / box_extent;
-	box_extent = rest_extent;
-      }
-      if(box_measure > rest_measure){
-	var slope = box_extent / box_measure; // extent per measure
-	var m_over = box_measure - rest_measure;
-	box_extent = Math.round(box_extent - slope * m_over);
-	box_measure = rest_measure;
-      }
-      return flow.getBoxSize(box_measure, box_extent);
-    }
-  };
-
-  return BoxSize;
 })();
 
 var TextEmphaStyle = (function(){
@@ -5187,6 +5038,182 @@ var TextEmpha = (function(){
 })();
 
 
+var BoxEdge = (function (){
+  function BoxEdge(){
+    this.padding = new Padding();
+    this.margin = new Margin();
+    this.border = new Border();
+  }
+
+  BoxEdge.prototype = {
+    isEnable : function(){
+      return this.padding.isEnable() || this.margin.isEnable() || this.border.isEnable();
+    },
+    clear : function(){
+      this.padding.clear();
+      this.margin.clear();
+      this.border.clear();
+    },
+    getCss : function(){
+      var css = {};
+      Args.copy(css, this.padding.getCss());
+      Args.copy(css, this.margin.getCss());
+      Args.copy(css, this.border.getCss());
+      return css;
+    },
+    getWidth : function(){
+      var ret = 0;
+      ret += this.padding.getWidth();
+      ret += this.margin.getWidth();
+      ret += this.border.getWidth();
+      return ret;
+    },
+    getHeight : function(){
+      var ret = 0;
+      ret += this.padding.getHeight();
+      ret += this.margin.getHeight();
+      ret += this.border.getHeight();
+      return ret;
+    },
+    getMeasureSize : function(flow){
+      var ret = 0;
+      ret += this.padding.getMeasureSize(flow);
+      ret += this.margin.getMeasureSize(flow);
+      ret += this.border.getMeasureSize(flow);
+      return ret;
+    },
+    getExtentSize : function(flow){
+      var ret = 0;
+      ret += this.padding.getExtentSize(flow);
+      ret += this.margin.getExtentSize(flow);
+      ret += this.border.getExtentSize(flow);
+      return ret;
+    },
+    setAll : function(prop, flow, value){
+      this[prop].setAll(flow, value);
+    },
+    setSize : function(prop, flow, size){
+      this[prop].setSize(flow, size);
+    },
+    setEdgeSize : function(flow, edge_size){
+      for(var prop in edge_size){
+	this.setSize(prop, flow, edge_size[prop]);
+      }
+    },
+    setEdgeStart : function(prop, flow, value){
+      this[prop].setStart(flow, value);
+    },
+    setEdgeEnd : function(prop, flow, value){
+      this[prop].setEnd(flow, value);
+    },
+    setEdgeBefore : function(prop, flow, value){
+      this[prop].setBefore(flow, value);
+    },
+    setEdgeAfter : function(prop, flow, value){
+      this[prop].setAfter(flow, value);
+    },
+    setBorderRadius : function(flow, value){
+      this.border.setRadius(flow, value);
+    },
+    setBorderColor : function(flow, value){
+      this.border.setColor(flow, value);
+    },
+    setBorderStyle : function(flow, value){
+      this.border.setStyle(flow, value);
+    },
+    clearBorderStart : function(flow){
+      this.border.clearStart(flow);
+    },
+    clearBorderBefore : function(flow){
+      this.border.clearBefore(flow);
+    },
+    clearBorderAfter : function(flow){
+      this.border.clearAfter(flow);
+    }
+  };
+
+  return BoxEdge;
+})();
+
+var BoxSize = (function(){
+  function BoxSize(width, height){
+    this.width = width;
+    this.height = height;
+  }
+
+  BoxSize.prototype = {
+    isValid : function(){
+      return this.width > 0 && this.height > 0;
+    },
+    canInclude : function(size){
+      return (size.width <= this.width && size.height <= this.height);
+    },
+    getCss : function(){
+      var css = {};
+      css.width = this.width + "px";
+      css.height = this.height + "px";
+      return css;
+    },
+    getWhSlope : function(){
+      return this.height / this.width;
+    },
+    getHwSlope : function(){
+      return this.width / this.height;
+    },
+    getMeasure : function(flow){
+      return this[flow.getPropMeasure()];
+    },
+    getExtent : function(flow){
+      return this[flow.getPropExtent()];
+    },
+    setExtent : function(flow, extent){
+      this[flow.getPropExtent()] = extent;
+    },
+    setMeasure : function(flow, measure){
+      this[flow.getPropMeasure()] = measure;
+    },
+    subEdge : function(edge){
+      var dw = edge.getWidth();
+      var dh = edge.getHeight();
+      this.width = Math.max(0, this.width - dw);
+      this.height = Math.max(0, this.height - dh);
+    },
+    subMeasure : function(flow, measure){
+      var prop = flow.getPropMeasure();
+      this[prop] = Math.max(0, this[prop] - measure);
+    },
+    addMeasure : function(flow, measure){
+      this[flow.getPropMeasure()] += measure;
+    },
+    addExtent : function(flow, extent){
+      this[flow.getPropExtent()] += extent;
+    },
+    percentFrom : function(target_size){
+      return Math.round(100 * this.width / target_size.width);
+    },
+    resizeWithin : function(flow, rest_size){
+      var rest_measure = rest_size.getMeasure(flow);
+      var rest_extent = rest_size.getExtent(flow);
+      var box_measure = this.getMeasure(flow);
+      var box_extent = this.getExtent(flow);
+      if(box_extent > rest_extent){
+	// box_measure : box_extent = ? : rest_extent
+	box_measure = box_measure * rest_extent / box_extent;
+	box_extent = rest_extent;
+      }
+      if(box_measure > rest_measure){
+	var slope = box_extent / box_measure; // extent per measure
+	var m_over = box_measure - rest_measure;
+	box_extent = Math.round(box_extent - slope * m_over);
+	box_measure = rest_measure;
+      }
+      return flow.getBoxSize(box_measure, box_extent);
+    }
+  };
+
+  return BoxSize;
+})();
+
 var BoxChild = (function(){
   function BoxChild(){
     this.forward = [];
@@ -5233,12 +5260,41 @@ var BoxChild = (function(){
   return BoxChild;
 })();
 
+var BoxPosition = (function(){
+  function BoxPosition(position, offset){
+    offset = offset || {};
+    this.position = position;
+    this.top = offset.top || "auto";
+    this.left = offset.left || "auto";
+    this.right = offset.right || "auto";
+    this.bottom = offset.bottom || "auto";
+  }
+
+  BoxPosition.prototype = {
+    isAbsolute : function(){
+      return this.position === "absolute";
+    },
+    getCss : function(){
+      var css = {};
+      css.position = this.position;
+      css.top = this.top;
+      css.left = this.left;
+      css.right = this.right;
+      css.bottom = this.bottom;
+      return css;
+    }
+  };
+
+  return BoxPosition;
+})();
+
+
 var Box = (function(){
   function Box(size, parent, opt){
     opt = opt || {};
     this._type = opt.type || "div";
-    this._display = opt.display || "block";
-    this._markup = opt.markup || null;
+    this.markup = opt.markup || null;
+    this.position = opt.position || new BoxPosition("relative");
     this.parent = parent;
     this.size = size;
     this.childExtent = 0;
@@ -5250,11 +5306,12 @@ var Box = (function(){
 
   Box.prototype = {
     getMarkup : function(){
-      return this._markup;
+      return this.markup;
     },
     getCssBlock : function(){
       var css = this.css;
       Args.copy(css, this.size.getCss());
+      Args.copy(css, this.position.getCss());
       if(this.font){
 	Args.copy(css, this.font.getCss());
       }
@@ -5273,8 +5330,12 @@ var Box = (function(){
       if(this.letterSpacing && !this.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
-      css.display = this._display;
+      css.display = this.display;
       css.overflow = "hidden"; // to avoid margin collapsing
+
+      if(this.zIndex){
+	css["z-index"] = this.zIndex;
+      }
       return css;
     },
     getCssInline : function(){
@@ -5310,7 +5371,7 @@ var Box = (function(){
 	if(Env.isIphoneFamily){
 	  css["letter-spacing"] = "-0.001em";
 	}
-	if(typeof this._markup === "undefined" || !this.isRubyLine()){
+	if(typeof this.markup === "undefined" || !this.isRubyLine()){
 	  css["margin-left"] = css["margin-right"] = "auto";
 	  css["text-align"] = "center";
 	}
@@ -5344,8 +5405,8 @@ var Box = (function(){
     _getClassesInline : function(){
       var classes = ["nehan-text-line"];
       classes.push("nehan-text-line-" + (this.isTextVertical()? "vert" : "hori"));
-      if(this._markup && this._markup.getName() !== "body"){
-	classes.push("nehan-" + this._markup.getName());
+      if(this.markup && this.markup.getName() !== "body"){
+	classes.push("nehan-" + this.markup.getName());
       }
       return classes.concat(this.extraClasses || []);
     },
@@ -5460,13 +5521,19 @@ var Box = (function(){
       return this.flow.getBoxSize(measure, extent);
     },
     getEdgeWidth : function(){
+      if(this.sizing && !this.sizing.containEdgeSize()){
+	return 0;
+      }
       return this.edge? this.edge.getWidth() : 0;
     },
     getEdgeHeight : function(){
+      if(this.sizing && !this.sizing.containEdgeSize()){
+	return 0;
+      }
       return this.edge? this.edge.getHeight() : 0;
     },
     getMarkupName : function(){
-      return this._markup? this._markup.getName() : "";
+      return this.markup? this.markup.getName() : "";
     },
     addClass : function(klass){
       var classes = this.extraClasses || [];
@@ -5475,7 +5542,9 @@ var Box = (function(){
     },
     addChildBlock : function(child){
       this.childs.add(child);
-      this.childExtent += child.getBoxExtent(this.flow);
+      if(!child.isPositionAbsolute()){
+	this.childExtent += child.getBoxExtent(this.flow);
+      }
       this.charCount += child.getCharCount();
     },
     addParaChildBlock : function(child){
@@ -5512,7 +5581,7 @@ var Box = (function(){
       }
     },
     setDisplay : function(display){
-      this._display = display;
+      this.display = display;
     },
     setContentExtent : function(flow, extent){
       this.size.setExtent(flow, extent);
@@ -5560,7 +5629,10 @@ var Box = (function(){
       return !this.isTextLine();
     },
     isDisplayNone : function(){
-      return this._display === "none";
+      return this.display === "none";
+    },
+    isPositionAbsolute : function(){
+      return this.position.isAbsolute();
     },
     isTextLine : function(){
       return this._type === "text-line";
@@ -5580,7 +5652,7 @@ var Box = (function(){
       return this.isTextLine() && this.getMarkupName() === "a";
     },
     isPreLine : function(){
-      return this.isTextLine() && this._markup && this._markup.getWhiteSpace() === "pre";
+      return this.isTextLine() && this.markup && this.markup.getWhiteSpace() === "pre";
     },
     isJustifyTarget : function(){
       var name = this.getMarkupName();
@@ -5640,6 +5712,8 @@ var Box = (function(){
 var BoxStyle = {
   set : function(markup, box, parent){
     this._setDisplay(markup, box, parent);
+    this._setPosition(markup, box, parent);
+    this._setZIndex(markup, box, parent);
     this._setColor(markup, box, parent);
     this._setFont(markup, box, parent);
     this._setBoxSizing(markup, box, parent);
@@ -5656,6 +5730,21 @@ var BoxStyle = {
   },
   _setDisplay : function(markup, box, parent){
     box.display = markup.getCssAttr("display", "block");
+  },
+  _setPosition : function(markup, box, parent){
+    var position = markup.getCssAttr("position", "relative");
+    box.position = new BoxPosition(position, {
+      top: markup.getCssAttr("top", "auto"),
+      left: markup.getCssAttr("left", "auto"),
+      right: markup.getCssAttr("right", "auto"),
+      bottom: markup.getCssAttr("bottom", "auto")
+    });
+  },
+  _setZIndex : function(markup, box, parent){
+    var z_index = markup.getCssAttr("z-index");
+    if(z_index){
+      box.zIndex = z_index;
+    }
   },
   _setClasses : function(markup, box, parent){
     List.iter(markup.classes, function(klass){
@@ -8153,16 +8242,19 @@ var BlockContext = (function(){
       return this.maxExtent - this.curExtent;
     },
     addElement : function(element){
+      var is_absolute = element.isPositionAbsolute();
       var extent = element.getBoxExtent(this.page.flow);
       if(element instanceof Box && !element.isTextLine() && extent <= 0){
 	element.pageBreakAfter = true;
       }
-      if(this.curExtent + extent > this.maxExtent){
+      if(!is_absolute && this.curExtent + extent > this.maxExtent){
 	throw "OverflowBlock";
       }
       this.page.addChildBlock(element);
-      this.curExtent += extent;
-      if(this.curExtent === this.maxExtent){
+      if(!is_absolute){
+	this.curExtent += extent;
+      }
+      if(!is_absolute && this.curExtent === this.maxExtent){
 	throw "FinishBlock";
       }
     }
@@ -9904,6 +9996,7 @@ var PageGroupStream = (function(){
 
 
 Nehan.version = "4.0.11";
+console.log("Nehan.version %s started", Nehan.version);
 
 Args.copy(Env, __engine_args.env || {});
 Args.copy(Layout, __engine_args.layout || {});

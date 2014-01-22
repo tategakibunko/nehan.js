@@ -2,8 +2,8 @@ var Box = (function(){
   function Box(size, parent, opt){
     opt = opt || {};
     this._type = opt.type || "div";
-    this._display = opt.display || "block";
-    this._markup = opt.markup || null;
+    this.markup = opt.markup || null;
+    this.position = opt.position || new BoxPosition("relative");
     this.parent = parent;
     this.size = size;
     this.childExtent = 0;
@@ -15,11 +15,12 @@ var Box = (function(){
 
   Box.prototype = {
     getMarkup : function(){
-      return this._markup;
+      return this.markup;
     },
     getCssBlock : function(){
       var css = this.css;
       Args.copy(css, this.size.getCss());
+      Args.copy(css, this.position.getCss());
       if(this.font){
 	Args.copy(css, this.font.getCss());
       }
@@ -38,8 +39,12 @@ var Box = (function(){
       if(this.letterSpacing && !this.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
-      css.display = this._display;
+      css.display = this.display;
       css.overflow = "hidden"; // to avoid margin collapsing
+
+      if(this.zIndex){
+	css["z-index"] = this.zIndex;
+      }
       return css;
     },
     getCssInline : function(){
@@ -75,7 +80,7 @@ var Box = (function(){
 	if(Env.isIphoneFamily){
 	  css["letter-spacing"] = "-0.001em";
 	}
-	if(typeof this._markup === "undefined" || !this.isRubyLine()){
+	if(typeof this.markup === "undefined" || !this.isRubyLine()){
 	  css["margin-left"] = css["margin-right"] = "auto";
 	  css["text-align"] = "center";
 	}
@@ -109,8 +114,8 @@ var Box = (function(){
     _getClassesInline : function(){
       var classes = ["nehan-text-line"];
       classes.push("nehan-text-line-" + (this.isTextVertical()? "vert" : "hori"));
-      if(this._markup && this._markup.getName() !== "body"){
-	classes.push("nehan-" + this._markup.getName());
+      if(this.markup && this.markup.getName() !== "body"){
+	classes.push("nehan-" + this.markup.getName());
       }
       return classes.concat(this.extraClasses || []);
     },
@@ -225,13 +230,19 @@ var Box = (function(){
       return this.flow.getBoxSize(measure, extent);
     },
     getEdgeWidth : function(){
+      if(this.sizing && !this.sizing.containEdgeSize()){
+	return 0;
+      }
       return this.edge? this.edge.getWidth() : 0;
     },
     getEdgeHeight : function(){
+      if(this.sizing && !this.sizing.containEdgeSize()){
+	return 0;
+      }
       return this.edge? this.edge.getHeight() : 0;
     },
     getMarkupName : function(){
-      return this._markup? this._markup.getName() : "";
+      return this.markup? this.markup.getName() : "";
     },
     addClass : function(klass){
       var classes = this.extraClasses || [];
@@ -240,7 +251,9 @@ var Box = (function(){
     },
     addChildBlock : function(child){
       this.childs.add(child);
-      this.childExtent += child.getBoxExtent(this.flow);
+      if(!child.isPositionAbsolute()){
+	this.childExtent += child.getBoxExtent(this.flow);
+      }
       this.charCount += child.getCharCount();
     },
     addParaChildBlock : function(child){
@@ -277,7 +290,7 @@ var Box = (function(){
       }
     },
     setDisplay : function(display){
-      this._display = display;
+      this.display = display;
     },
     setContentExtent : function(flow, extent){
       this.size.setExtent(flow, extent);
@@ -325,7 +338,10 @@ var Box = (function(){
       return !this.isTextLine();
     },
     isDisplayNone : function(){
-      return this._display === "none";
+      return this.display === "none";
+    },
+    isPositionAbsolute : function(){
+      return this.position.isAbsolute();
     },
     isTextLine : function(){
       return this._type === "text-line";
@@ -345,7 +361,7 @@ var Box = (function(){
       return this.isTextLine() && this.getMarkupName() === "a";
     },
     isPreLine : function(){
-      return this.isTextLine() && this._markup && this._markup.getWhiteSpace() === "pre";
+      return this.isTextLine() && this.markup && this.markup.getWhiteSpace() === "pre";
     },
     isJustifyTarget : function(){
       var name = this.getMarkupName();
