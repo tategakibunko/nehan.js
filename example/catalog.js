@@ -267,12 +267,6 @@ var TestCode = {
     ].join("\n");
 
     return {
-      "pseudo-first-letter2":[
-	"<p class='nehan-drop-caps'>",
-	"縦書き文庫は縦書きで作品を投稿できるサービスです。",
-	"</p>"
-      ].join("\n"),
-
       "header":[
 	headers1,
 	"<hr />",
