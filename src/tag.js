@@ -144,11 +144,11 @@ var Tag = (function (){
     },
     getAttr : function(name, def_value){
       var ret = this.getTagAttr(name);
-      if(typeof ret !== "undefined"){
+      if(typeof ret !== "undefined" && ret !== null){
 	return ret;
       }
       ret = this.getCssAttr(name);
-      if(typeof ret !== "undefined"){
+      if(typeof ret !== "undefined" && ret !== null){
 	return ret;
       }
       return (typeof def_value !== "undefined")? def_value : null;

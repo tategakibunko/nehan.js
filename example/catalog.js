@@ -34,6 +34,7 @@ var Catalog = (function(){
     // style to test pseudo element first-letter
     this.engine.setStyle(".nehan-test-pe-first-letter::first-letter", {
       "display":"inline",
+      "float":"start",
       "font-size":"2em",
       "margin":{end:"0.1em"},
       "line-rate":1.0
@@ -266,6 +267,12 @@ var TestCode = {
     ].join("\n");
 
     return {
+      "pseudo-first-letter2":[
+	"<p class='nehan-drop-caps'>",
+	"縦書き文庫は縦書きで作品を投稿できるサービスです。",
+	"</p>"
+      ].join("\n"),
+
       "header":[
 	headers1,
 	"<hr />",
