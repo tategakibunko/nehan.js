@@ -5264,10 +5264,10 @@ var BoxPosition = (function(){
   function BoxPosition(position, offset){
     offset = offset || {};
     this.position = position;
-    this.top = offset.top || "auto";
-    this.left = offset.left || "auto";
-    this.right = offset.right || "auto";
-    this.bottom = offset.bottom || "auto";
+    this.top = (typeof offset.top !== "undefined")? offset.top : "auto";
+    this.left = (typeof offset.left !== "undefined")? offset.left : "auto";
+    this.right = (typeof offset.right !== "undefined")? offset.right : "auto";
+    this.bottom = (typeof offset.bottom !== "undefined")? offset.bottom : "auto";
   }
 
   BoxPosition.prototype = {
