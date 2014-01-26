@@ -3313,17 +3313,20 @@ var Word = (function(){
       css["font-family"] = line.getFontFamily();
       return css;
     },
-    // set line-height to word body size before rotation,
-    // and fix offset by translate after rotatation.
     getCssVertTransBodyTrident : function(line){
       var css = {};
-      var trans = Math.floor((this.bodySize - line.getFontSize()) / 2);
       css["font-family"] = line.getFontFamily();
       css.width = line.getFontSize() + "px";
       css.height = this.bodySize + "px";
-      css["line-height"] = this.bodySize + "px";
       css["transform-origin"] = "50% 50%";
-      css["transform"] = "rotate(90deg) translate(-" + trans + "px, 0)";
+
+      // force set line-height to measure(this.bodySize) before rotation,
+      // and fix offset by translate after rotatation.
+      css["line-height"] = this.bodySize + "px";
+      var trans = Math.floor((this.bodySize - line.getFontSize()) / 2);
+      if(trans > 0){
+	css["transform"] = "rotate(90deg) translate(-" + trans + "px, 0)";
+      }
       return css;
     },
     getCssVertTransIE : function(line){
