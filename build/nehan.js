@@ -174,7 +174,7 @@ var Env = (function(){
     version = parseInt(navigator.appVersion, 10);
   }
 
-  var is_trident = ua.indexOf("trident") >= 0;
+  var is_trident = ua.indexOf("trident") >= 0 && ua.indexOf("msie") < 0;
   var is_ie = browser === "msie" || is_trident;
   var is_win = ua.indexOf("windows") >= 0;
   var is_mac = ua.indexOf("macintosh") >= 0;
