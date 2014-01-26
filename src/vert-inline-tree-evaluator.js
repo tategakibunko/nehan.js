@@ -43,6 +43,9 @@ var VertInlineTreeEvaluator = (function(){
 
   VertInlineTreeEvaluator.prototype.evalWord = function(line, word){
     if(Env.isTransformEnable){
+      if(Env.isTrident){
+	return this.evalWordTransformTrident(line, word);
+      }
       return this.evalWordTransform(line, word);
     } else if(Env.isIE){
       return this.evalWordIE(line, word);
@@ -55,6 +58,17 @@ var VertInlineTreeEvaluator = (function(){
     var body = Html.tagWrap("div", word.data, {
       "class": "nehan-rotate-90",
       "style": Css.toString(word.getCssVertTransBody(line))
+    });
+    return Html.tagWrap("div", body, {
+      "style": Css.toString(word.getCssVertTrans(line))
+    });
+  };
+
+  VertInlineTreeEvaluator.prototype.evalWordTransformTrident = function(line, word){
+    var body = Html.tagWrap("div", word.data, {
+      // trident rotation needs some hack.
+      //"class": "nehan-rotate-90",
+      "style": Css.toString(word.getCssVertTransBodyTrident(line))
     });
     return Html.tagWrap("div", body, {
       "style": Css.toString(word.getCssVertTrans(line))
