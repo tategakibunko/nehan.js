@@ -32,9 +32,9 @@ Include css, js in the ``<head>``
 
 See example directory.
 
-Quick start document is [nehan.js introduction](http://tategakibunko.mydns.jp/docs/nehan/).
+Quick start document is [nehan.js introduction](http://tb.antiscroll.com/docs/nehan/).
 
-Markup reference is [nehan.js markup reference](http://tategakibunko.mydns.jp/docs/nehan/markup/).
+Markup reference is [nehan.js markup reference](http://tb.antiscroll.com/docs/nehan/markup/).
 
 Want a quick tool? check out [jquery.nehan](https://github.com/tategakibunko/jquery.nehan).
 
