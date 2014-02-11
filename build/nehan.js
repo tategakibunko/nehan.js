@@ -1,7 +1,7 @@
 /*
  nehan.js
  Copyright (C) 2010 Watanabe Masaki<lambda.watanabe[at]gmail.com>
- http://tategakibunko.mydns.jp/docs/nehan/
+ http://tb.antiscroll.com/docs/nehan/
 
  licensed under MIT license.
 
