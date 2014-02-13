@@ -39,16 +39,18 @@ Include css, js in the ``<head>``
 This is async sample.
 
 ```
-Nehan.setup({
+var engine = Nehan.setup({
   layout:{
     direction:"hori", // or 'vert'
     width:640,
     height:480,
     fontSize:16
   }
-})
-.createPageStream("hello, nehan")
-.asyncGet({
+});
+
+var stream = engine.createPageStream("hello, nehan");
+
+stream.asyncGet({
   onProgress:function(stream){
     var paged_html = stream.getSeekPageResult().getHtml();
     // console.log("page:%s", paged_html);
@@ -62,14 +64,16 @@ Nehan.setup({
 If source text is short and blocking not matter, you can use ``syncGet`` instead of ``asyncGet``.
 
 ```
-var stream = Nehan.setup({
+var engine = Nehan.setup({
   layout:{
     direction:"hori", // or 'vert'
     width:640,
     height:480,
     fontSize:16
   }
-}).createPageStream("hello, nehan");
+})
+
+var stream = engine.createPageStream("hello, nehan");
 
 var time = stream.syncGet();
 
