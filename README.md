@@ -59,7 +59,7 @@ Nehan.setup({
 });
 ```
 
-If source text is short and blocking not matter, You can use ``syncGet`` instead of ``asyncGet``.
+If source text is short and blocking not matter, you can use ``syncGet`` instead of ``asyncGet``.
 
 ```
 var stream = Nehan.setup({
