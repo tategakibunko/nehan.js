@@ -36,6 +36,8 @@ Include css, js in the ``<head>``
 
 ## Usage
 
+This is async sample.
+
 ```
 Nehan.setup({
   layout:{
@@ -55,6 +57,25 @@ Nehan.setup({
     // console.log("time ellapsed:%f msec", time);
   }
 });
+```
+
+If source text is short and blocking not matter, You can use ``syncGet`` instead of ``asyncGet``.
+
+```
+var stream = Nehan.setup({
+  layout:{
+    direction:"hori", // or 'vert'
+    width:640,
+    height:480,
+    fontSize:16
+  }
+}).createPageStream("hello, nehan");
+
+var time = stream.syncGet();
+
+for(var i = 0; i < stream.getPageCount(); i++){
+  console.log("page:%s", stream.get(i).getHtml());
+}
 ```
 
 ## Detail
