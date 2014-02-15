@@ -36,12 +36,14 @@ Include css, js in the ``<head>``
 
 ## Usage
 
-This is async example. You obtain string of paged-media via ``onProgress`` callback.
+This is async example. You can obtain string of paged-media via ``onProgress`` callback.
 
 ```
 var engine = Nehan.setup({
   layout:{
     direction:"hori", // or 'vert'
+    vert:"tb-rl", // or 'tb-lr'
+    hori:"lr-tb", // 'rl-tb' not supported.
     width:640,
     height:480,
     fontSize:16
@@ -69,6 +71,8 @@ But be carefull because it takes long time if source text is too long.
 var engine = Nehan.setup({
   layout:{
     direction:"hori", // or 'vert'
+    vert:"tb-rl", // or 'tb-lr'
+    hori:"lr-tb", // 'rl-tb' not supported.
     width:640,
     height:480,
     fontSize:16
@@ -76,7 +80,6 @@ var engine = Nehan.setup({
 })
 
 var stream = engine.createPageStream("hello, nehan");
-
 var time = stream.syncGet();
 
 for(var i = 0; i < stream.getPageCount(); i++){
