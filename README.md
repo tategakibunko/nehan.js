@@ -36,7 +36,7 @@ Include css, js in the ``<head>``
 
 ## Usage
 
-This is async sample.
+This is async example. You obtain string of paged-media via ``onProgress`` callback.
 
 ```
 var engine = Nehan.setup({
@@ -63,6 +63,8 @@ stream.asyncGet({
 
 If source text is short and blocking not matter, you can use ``syncGet`` instead of ``asyncGet``.
 
+But be carefull because it takes long time if source text is too long.
+
 ```
 var engine = Nehan.setup({
   layout:{
@@ -84,7 +86,7 @@ for(var i = 0; i < stream.getPageCount(); i++){
 
 ## Detail
 
-See example directory or
+See example directory.
 
 Quick demo and document is found at [nehan.js introduction](http://tb.antiscroll.com/docs/nehan/).
 
