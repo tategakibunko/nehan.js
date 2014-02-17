@@ -143,7 +143,9 @@ lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
       <section>
         <h2><a name="install" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h2>
 
-<h3>1. generate engine with layout settings.</h3>
+<h3>1. generate layout engine with layout settings.</h3>
+
+<p>First, create layout engine with independent layouting environment.</p>
 
 <pre class="prettyprint lang-js">
 var engine = Nehan.setup({
@@ -160,13 +162,15 @@ var engine = Nehan.setup({
 
 <h3>2. create page stream</h3>
 
+<p>Now you can create paged-media stream via `createPageStream`.</p>
+
 <pre class="prettyprint lang-js">
 var stream = engine.createPageStream("hello, nehan.js!");
 </pre>
 
 <h3>3. yield page</h3>
 
-<p>PageStream is generated, now you can yield paged media in two way.</p>
+<p>Stream created, so now you can yield paged media by this stream in two way.</p>
 
 <h4>3-1. asyncGet(non blocking)</h4>
 
