@@ -1,0 +1,55 @@
+@charset "utf-8";
+
+/* reset */
+.nehan-body,
+.nehan-body div,
+.nehan-body span,
+.nehan-body br,
+.nehan-body a,
+.nehan-body img{
+  margin:0;
+  padding:0;
+  border:0;
+  font-size:100%;
+  font:inherit;
+  vertical-align:baseline;
+}
+.nehan-body a img {
+  border:none;
+}
+.nehan-text-line{
+  overflow:visible;
+}
+.nehan-text-line-vert a,
+.nehan-text-line-vert a:hover{
+  text-decoration:none !important;
+}
+.nehan-body a{
+  word-wrap:normal !important;
+}
+.nehan-vert-glyph{
+  -webkit-writing-mode:vertical-rl;
+  writing-mode:vertical-rl;
+}
+.nehan-rotate-90{
+  word-break:normal;
+  overflow:visible;
+  -webkit-transform : rotate(90deg);
+  -webkit-transform-origin : 50% 50%;
+  -moz-transform : rotate(90deg);
+  -moz-transform-origin : 50% 50%;
+  -o-transform : rotate(90deg);
+  -o-transform-origin : 50% 50%;
+  -ms-transform : rotate(90deg);
+  -ms-transform-origin : 50% 50%;
+  transform : rotate(90deg);
+  transform-origin : 50% 50%;
+}
+.nehan-vert-ie{
+  writing-mode:tb-rl;
+  float:left;
+}
+.nehan-text-line-hori.nehan-first-letter,
+.nehan-text-line-hori .nehan-ruby .nehan-rt{
+  line-height:1em !important;
+}
