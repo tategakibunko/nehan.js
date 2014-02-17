@@ -164,11 +164,11 @@ var engine = Nehan.setup({
 var stream = engine.createPageStream("hello, nehan.js!");
 </pre>
 
-<h4>3. yield page</h4>
+<h3>3. yield page</h3>
 
 <p>PageStream is generated, now you can yield paged media in two way.</p>
 
-<h5>3-1. asyncGet(non blocking)</h5>
+<h4>3-1. asyncGet(non blocking)</h4>
 
 <p>First way is <strong>asyncGet</strong>(recommended), it is <strong>non blocking function</strong>, you can use this function like this.</p>
 
@@ -189,7 +189,7 @@ stream.asyncGet({
 });
 </pre>
 
-<h5>3-2. syncGet(blocking)</h5>
+<h4>3-2. syncGet(blocking)</h4>
 
 <p>Second way is <strong>syncGet</strong>, it is <strong>blocking</strong> function because it parses all pages immediately.</p>
 
@@ -204,7 +204,6 @@ for(var i = 0; i < stream.getPageCount(); i++){
    console.log(page.html);
 }
 </pre>
-
       </section><!-- getting started -->
 
       <!-- license -->
