@@ -1,3 +1,12 @@
+.nehan-reader-pager{
+  margin-bottom:0.5em;
+}
+.nehan-reader-pager .nehan-reader-page-no{
+  width:50px;
+}
 .nehan-reader-screen{
   border:1px solid #ccc;
+}
+.nehan-outline{
+  margin-top:1em;
 }
