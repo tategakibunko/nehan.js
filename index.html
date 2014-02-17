@@ -158,93 +158,19 @@ var engine = Nehan.setup({
 });
 </pre>
 
-<h3>2. setting custom style</h3>
-
-<p>All classes and id must start with "nehan-" prefix.</p>
-
-<pre class="prettyprint lang-js">
-// add border-after 1px
-engine.setStyle("h1.nehan-title", {
-  "border-width":{
-    after:"1px"
-  },
-  "border-color":{
-    after:"#ccc"
-  },
-  "border-style":{
-    after:"dotted"
-  }
-});
-
-// declare my class selector "impact"
-// with pseudo-element "::first-letter"
-engine.setStyle(".nehan-impact::first-letter", {
-  "font-size":"3em", // make font bigger!!
-  margin:{
-    end:"0.1em" // add little space
-  }
-});
-
-// some property takes functional value like nth-child, nth-type-of-child
-engine.setStyle(".nehan-mylist li", {
-  "nth-child": function(n, markup, context){
-    if(n % 2 == 0){
-      return {"background-color":"pink"};
-    } else {
-      return {"background-color":"blue", "color":"white"};
-    }
-  }
-});
-
-// or you can declare same style above like this,
-// using special property 'onload'.
-engine.setStyle(".nehan-mylist2 li", {
-  onload: function(markup, context){
-    var n = markup.getChildNth();
-    if(n % 2 == 0){
-      return {"background-color":"pink"};
-    } else {
-      return {"background-color":"blue", "color":"white"};
-    }
-  }
-});
-</pre>
-
-<p class="notice">
-What kind of properties are supported?<br />
-I recommend that you see source <b><a href="https://github.com/tategakibunko/nehan.js/blob/master/src/style.js">style.js</a></b> in nehan.js project.<br />
-Notice that directional property is declared by "logical value" like start/end/before/after, it means left/right/top/bottom in horizontal document(lr-tb).
-</p>
-
-<h3>3. create page stream</h3>
+<h3>2. create page stream</h3>
 
 <pre class="prettyprint lang-js">
 var stream = engine.createPageStream("hello, nehan.js!");
 </pre>
 
-<h4>4. yield page</h4>
+<h4>3. yield page</h4>
 
 <p>PageStream is generated, now you can yield paged media in two way.</p>
 
-<h5>4-1. syncGet(blocking)</h5>
+<h5>3-1. asyncGet(non blocking)</h5>
 
-<p>First way is <strong>syncGet</strong>, it is <strong>blocking</strong> function because it parses all pages immediately.</p>
-
-<p>So don't use this function if document is too large.</p>
-
-<pre class="prettyprint lang-js">
-var time = stream.syncGet();
-console.log("finished! %f msec", time);
-
-for(var i = 0; i < stream.getPageCount(); i++){
-   var page = stream.get(i);
-   console.log(page.html);
-}
-</pre>
-
-<h5>4-2. asyncGet(non blocking)</h5>
-
-<p>Second way is <strong>asyncGet</strong>, it is <strong>non blocking function</strong>, you can use this function like this.</p>
+<p>First way is <strong>asyncGet</strong>(recommended), it is <strong>non blocking function</strong>, you can use this function like this.</p>
 
 <pre class="prettyprint lang-js">
 stream.asyncGet({
@@ -262,6 +188,23 @@ stream.asyncGet({
   }
 });
 </pre>
+
+<h5>3-2. syncGet(blocking)</h5>
+
+<p>Second way is <strong>syncGet</strong>, it is <strong>blocking</strong> function because it parses all pages immediately.</p>
+
+<p>So don't use this function if document is too large.</p>
+
+<pre class="prettyprint lang-js">
+var time = stream.syncGet();
+console.log("finished! %f msec", time);
+
+for(var i = 0; i < stream.getPageCount(); i++){
+   var page = stream.get(i);
+   console.log(page.html);
+}
+</pre>
+
       </section><!-- getting started -->
 
       <!-- license -->
