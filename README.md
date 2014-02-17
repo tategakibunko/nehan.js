@@ -91,11 +91,11 @@ for(var i = 0; i < stream.getPageCount(); i++){
 
 See example directory.
 
-Quick demo and document is found at [nehan.js introduction](http://tb.antiscroll.com/docs/nehan/).
+Quick demo and document is [here](http://tategakibunko.github.io/nehan.js).
 
 Markup reference is [nehan.js markup reference](http://tb.antiscroll.com/docs/nehan/markup/).
 
-jQuery plugin [jquery.nehan](https://github.com/tategakibunko/jquery.nehan).
+jQuery plugin is [here](https://github.com/tategakibunko/jquery.nehan).
 
 ## License
 
