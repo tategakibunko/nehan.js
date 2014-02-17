@@ -1,5 +1,5 @@
 $(function(){
-  $("nehan-book").nehan({
+  $(".nehan-book").nehan({
     usePager:true,
     direction: "hori",
     fontSize:16,
