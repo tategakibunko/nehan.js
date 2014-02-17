@@ -43,7 +43,7 @@
 	</p>
 
 <!-- demo start -->
-<div class="nehan-book">
+<div class="nehan-book" style="display:none">
 <h2>wraparounding</h2>
 
 <p><img src='images/128x128.gif' width='128' height='128' class='nehan-float-end nehan-gap-start'/>
@@ -225,7 +225,7 @@ var stream = engine.createPageStream("hello, nehan.js!");
 
 <p>PageStream is generated, now you can yield paged media in two way.</p>
 
-<h5>4-1. syncGet(blocking)</56>
+<h5>4-1. syncGet(blocking)</h5>
 
 <p>First way is <strong>syncGet</strong>, it is <strong>blocking</strong> function because it parses all pages immediately.</p>
 
@@ -263,11 +263,18 @@ stream.asyncGet({
 </pre>
       </section><!-- getting started -->
 
+      <!-- license -->
+      <section>
+        <h2><a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+	<p>licensed under MIT.</p>
+      </section>
+
       <footer>
         <p>This project is maintained by <a href="https://github.com/tategakibunko">tategakibunko</a></p>
         <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
+
     <script src="javascripts/scale.fix.js"></script>
     <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
     <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
