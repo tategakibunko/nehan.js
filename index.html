@@ -47,24 +47,21 @@
 <div class="nehan-book" style="display:none">
 <h2>wraparounding</h2>
 
-<p><img src='images/128x128.gif' width='128' height='128' class='nehan-float-end nehan-gap-start'/>
+<p><img src='images/64x64.gif' width='64' height='64' class='nehan-float-end nehan-gap-start'/>
 lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-<img src='images/256x256.gif' width='256' height='256' class='nehan-float-start nehan-gap-end'/>
+<img src='images/128x128.gif' width='128' height='128' class='nehan-float-start nehan-gap-end'/>
 lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in.</p>
+<page-break>
 
 <h2>mixed layout</h2>
-
-<div class="nehan-flow-tb-rl nehan-float-start nehan-gap-end" width="300" height="300">
-<img src='images/128x128.gif' width='128' height='128' class='nehan-float-start nehan-gap-end'/>
+<div class="nehan-flow-tb-rl nehan-float-start nehan-gap-end" width="260" height="260">
 <ruby>日本<rt>にほん</rt></ruby>国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された<ruby>国会<rt>こっかい</rt></ruby>における代表者を通じて行動し、<ruby>子孫<rt>しそん</rt></ruby>のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす<ruby><rb>恵沢</rb><rt>けいたく</rt></ruby>を確保し、政府の行為によって再び<ruby><rb>戦争</rb><rt>せんそう</rt></ruby>の<ruby><rb>惨禍</rb><rt>さんか</rt></ruby>が起ることのないやうにすることを決意し、ここに<ruby><rb>主権</rb><rt>しゅけん</rt></ruby>が国民に存することを宣言し、この憲法を確定する。
 </div>
 
 <p>
 lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 </p>
-
-<hr class="nehan-pb-after" />
-
+<page-break>
 <h2>table paging</h2>
 
 <table>
@@ -81,6 +78,7 @@ lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
 <tr><td>foot1</td><td>foot2</td></tr>
 </tfoot>
 </table>
+<page-break>
 
 <h2>unordered list</h2>
 
@@ -96,6 +94,7 @@ lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
 <li>abc ded ghi</li>
 </ul>
 
+<page-break>
 <h2>ordered list</h2>
 
 <ol>
@@ -109,6 +108,7 @@ lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
 <li>last</li>
 </ol>
 
+<page-break>
 <h2>definition list</h2>
 
 <dl>
@@ -209,6 +209,578 @@ for(var i = 0; i < stream.getPageCount(); i++){
 }
 </pre>
       </section><!-- getting started -->
+
+      <!-- markup -->
+      <section>
+        <h2><a name="markup" class="anchor" href="#markup"><span class="octicon octicon-link"></span></a>Markup Examples</h2>
+	<p>nehan.js uses special class names(already defined in nehan.js) to controll page layout.</p>
+
+<!-- logical float -->
+<h3>example / logical float</h3>
+<p>use <strong>nehan-float-start</strong> and <strong>nehan-float-end</strong> to float static block element.</p>
+<pre class="prettyprint lang-html">
+&lt;img width="128" height="128" src="128x128.gif" class="nehan-float-start nehan-gap-end"&gt;
+lorem ipsum dolor sit amet, consectetur adipisicing elit,
+&lt;img width="64" height="64" src="64x64.gif" class="nehan-float-end"&gt;
+lorem ipsum dolor sit amet, consectetur adipisicing elit,
+</pre>
+
+<div class="nehan-book" style="display:none">
+<img width="128" height="128" src="/static/image/placehold/128x128.gif" class="nehan-float-start nehan-gap-end">
+lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+<img width="64" height="64" src="/static/image/placehold/64x64.gif" class="nehan-float-end">
+lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+</div>
+<hr />
+<!---------------------------------------->
+
+<!-- mixed layout -->
+<h3>example / mixed layout</h3>
+
+<p>Use <strong>nehan-flow-lr-tb</strong>, <strong>nehan-flow-tb-rl</strong>, <strong>nehan-flow-tb-lr</strong>, <strong>nehan-flow-flip</strong> to mix multiple layout.</p>
+<p>nehan-flow-lr-tb is used for standard horizontal format.</p>
+<p>nehan-flow-tb-rl is used for standard Japanese vertical layout.</p>
+<p>nehan-flow-tb-lr is used for standard Chinese vertical layout.</p>
+<p>nehan-flow-flip is used for revert layout of current.</p>
+<p>Arabian horizontal format(rl-tb) are not supported yet.</p>
+
+<p>This is example using <code>nehan-flow-flip</code></p>
+
+<pre class="prettyprint lang-html">
+&lt;p&gt;lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/p&gt;
+&lt;div class='nehan-flow-flip'&gt;&lt;ruby&gt;日本&lt;rt&gt;にほん&lt;/rt&gt;&lt;/ruby&gt;国民は正当に&lt;/div&gt;
+</pre>
+
+<div style="display:none" class="nehan-book">
+<p>
+lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit. lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet.
+</p>
+<div class='nehan-flow-flip'><ruby>日本<rt>にほん</rt></ruby>国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された<ruby>国会<rt>こっかい</rt></ruby>における代表者を通じて行動し、われらとわれらの<ruby><rb>子孫</rb><rt>しそん</rt></ruby>のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす<ruby><rb>恵沢</rb><rt>けいたく</rt></ruby>を確保し、政府の行為によって再び<ruby><rb>戦争</rb><rt>せんそう</rt></ruby>の<ruby><rb>惨禍</rb><rt>さんか</rt></ruby>が起ることのないやうにすることを決意し、ここに<ruby><rb>主権</rb><rt>しゅけん</rt></ruby>が国民に存することを宣言し、この憲法を確定する。</div>
+</div>
+
+<p>This is example using <code>nehan-flow-tb-rl</code> with static size</p>
+
+<pre class="prettyprint lang-html">
+&lt;div class='nehan-flow-tb-rl nehan-float-end' width="200" height="200"&gt;&lt;ruby&gt;日本&lt;rt&gt;にほん&lt;/rt&gt;&lt;/ruby&gt;国民は正当に&lt;/div&gt;
+&lt;p&gt;lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/p&gt;
+</pre>
+
+<div style="display:none" class="nehan-book">
+<div class='nehan-flow-tb-rl nehan-float-end' width="200" height="200">
+<ruby>日本<rt>にほん</rt></ruby>国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された<ruby>国会<rt>こっかい</rt></ruby>における代表者を通じて行動し、われらとわれらの<ruby><rb>子孫</rb><rt>しそん</rt></ruby>のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす<ruby><rb>恵沢</rb><rt>けいたく</rt></ruby>を確保し、政府の行為によって再び<ruby><rb>戦争</rb><rt>せんそう</rt></ruby>の<ruby><rb>惨禍</rb><rt>さんか</rt></ruby>が起ることのないやうにすることを決意し、ここに<ruby><rb>主権</rb><rt>しゅけん</rt></ruby>が国民に存することを宣言し、この憲法を確定する。</div>
+
+<p>
+lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit. lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit. lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor.
+</p>
+</div>
+<hr />
+<!---------------------------------------->
+
+<!-- list -->
+<h3>example / list</h3>
+
+<p>Paging of ol, ul, dl are all supported.</p>
+
+<p>Use <code>nehan-lst-xxx</code> to change list-style-type.</p>
+
+<p>See <a href="#nehan-class-names">nehan class names</a> what list-style-types are supported.</p>
+
+<pre class="prettyprint lang-html">
+&lt;ol&gt;
+  &lt;li&gt;first&lt;/li&gt;
+  &lt;li&gt;
+  &lt;ol class='nehan-lst-lower-alpha'&gt;
+    &lt;li&gt;lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/li&gt;
+    &lt;li&gt;lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/li&gt;
+    &lt;li&gt;abc ded ghi&lt;/li&gt;
+  &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;last&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ol class='nehan-lst-lower-roman'&gt;
+  &lt;li&gt;lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/li&gt;
+  &lt;li&gt;lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/li&gt;
+  &lt;li&gt;abc ded ghi&lt;/li&gt;
+&lt;/ol&gt;
+</pre>
+
+<div style="display:none" class="nehan-book">
+<ol>
+<li>first</li>
+<li>
+<ol class='nehan-lst-lower-alpha'>
+<li>lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
+<li>lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
+<li>abc ded ghi</li>
+</ol>
+</li>
+<li>last</li>
+</ol>
+<ol class='nehan-lst-lower-roman'>
+<li>lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
+<li>lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
+<li>abc ded ghi</li>
+</ol>
+</div>
+<hr />
+<!---------------------------------------->
+
+
+<!-- table -->
+<h3>example / table</h3>
+
+<p>Paging of table tag is supported with some restrictions.</p>
+
+<ul class="notice" style="list-style-position:inside">
+<li>Property 'border-collapse' is set to 'collapse' by default, but 'separate' is not supported yet, so property 'border-spacing' is not available too.</li>
+<li>Auto table size algorithem is not implemented yet, now only fixed layout size.</li>
+</ul>
+
+<p>Use attribute <code>measure</code> or <code>width</code> to set the width of table(measure means 'logical width' in nehan).</p>
+
+<p>If width or measure is not defined, average size of width is used.</p>
+
+<pre class="prettyprint lang-html">
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;&lt;th width="200"&gt;head1&lt;/th&gt;&lt;th&gt;head2&lt;/th&gt;&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/td&gt;
+&lt;td&gt;
+&lt;ruby&gt;日本&lt;rt&gt;にほん&lt;/rt&gt;&lt;/ruby&gt;国民は正当に&lt;ruby&gt;選挙&lt;rt&gt;せんきょ&lt;/rt&gt;&lt;/ruby&gt;された
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;tr&gt;&lt;td&gt;body3&lt;/td&gt;&lt;td&gt;body4&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;body5&lt;/td&gt;&lt;td&gt;body6&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;body7&lt;/td&gt;&lt;td&gt;body8&lt;/td&gt;&lt;/tr&gt;
+&lt;tfoot&gt;
+&lt;tr&gt;&lt;td&gt;foot1&lt;/td&gt;&lt;td&gt;foot2&lt;/td&gt;&lt;/tr&gt;
+&lt;/tfoot&gt;
+&lt;/table&gt;
+</pre>
+
+<div style="display:none" class="nehan-book">
+<p>Even if table layout can be pagerize!!</p>
+<table>
+<thead>
+<tr><th width="200">head1</th><th>head2</th></tr>
+</thead>
+<tbody>
+<tr>
+<td>lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.</td>
+<td><ruby>日本<rt>にほん</rt></ruby>国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された<ruby>国会<rt>こっかい</rt></ruby>における代表者を通じて行動し、われらとわれらの<ruby><rb>子孫</rb><rt>しそん</rt></ruby>のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす<ruby><rb>恵沢</rb><rt>けいたく</rt></ruby>を確保し、政府の行為によって再び<ruby><rb>戦争</rb><rt>せんそう</rt></ruby>の<ruby><rb>惨禍</rb><rt>さんか</rt></ruby>が起ることのないやうにすることを決意し、ここに<ruby><rb>主権</rb><rt>しゅけん</rt></ruby>が国民に存することを宣言し、この憲法を確定する。</td>
+</tr>
+</tbody>
+<tr><td>body3</td><td>body4</td></tr>
+<tr><td>body5</td><td>body6</td></tr>
+<tr><td>body7</td><td>body8</td></tr>
+<tfoot>
+<tr><td>foot1</td><td>foot2</td></tr>
+</tfoot>
+</table>
+</div>
+
+<hr />
+<!---------------------------------------->
+
+<!-- page-break -->
+<h3>example / page-break</h3>
+
+<p>Use <code>&lt;page-break&gt;</code> or <code>&lt;end-page&gt;</code> tag, this is special syntax of nehan, not standard tag, but I think it's usefull for writers.</p>
+
+<pre class="prettyprint lang-html">
+first page
+&lt;page-break&gt;
+second page
+&lt;!-- same as page-break --&gt;
+&lt;end-page&gt;
+third page
+</pre>
+
+<div style="display:none" class="nehan-book">
+first page
+<page-break>
+second page
+<end-page>
+third page
+</div>
+
+<hr />
+<!---------------------------------------->
+
+<!-- anchor link -->
+<h2>example / anchor link</h2>
+
+<p>Set attribute <code>name</code> to link tag, and you can jump to the page by the ahchor link like &lt;a href='#anchor_name'&gt;.</p>
+
+<pre class="prettyprint lang-html">
+&lt;a name="top-page"&gt;&lt;/a&gt;
+top page text here...
+&lt;a href='#top-page'&gt;back to the top&lt;/a&gt;
+</pre>
+<hr />
+<!---------------------------------------->
+
+
+<!-- toc -->
+
+<h3>example / toc generation</h3>
+
+<p>Use <code>h1-h6</code>, and outline of document is generated automatically.</p>
+
+<p>After all document is parsed, you can get outline node by <code>getOutlineNode</code> from stream.</p>
+
+<pre class="prettyprint lang-js">
+var engine = Nehan.setup({width:400, height:400, fontSize:16});
+var stream = engine.createPageStream("&lt;h1&gt;first&lt;/h1&gt;&lt;h1&gt;second&lt;/h1&gt;");
+stream.asyncGet({
+  onComplete: function(time){
+    // you can get outline dom node like this.
+    var outline_node = stream.getOutlineNode("body", {
+      createRoot : function(){
+        return document.createElement("ol");
+      },
+      onClickLink : function(toc){
+        console.log("clicked link is at page %d.", toc.pageNo);
+      }
+    });
+  }
+});
+</pre>
+
+<div style="display:none" class="nehan-book">
+<h1>this is first h1</h1>
+<h2>this is first h2</h2>
+<p>some text here1.</p>
+<p>some text here2.</p>
+<p>some text here3.</p>
+<p>some text here4.</p>
+<h2>this is second h2</h2>
+<h3>this is first h3</h3>
+<h1>this is second h1</h1>
+</div>
+<hr />
+<!---------------------------------------->
+
+
+<!-- push -->
+<h3>example / static block push</h3>
+
+<p>Attribute <code>push</code> is used to push the block to the tail of a page.</p>
+
+<pre class="prettyprint lang-html">
+&lt;img src="/static/image/placehold/256x256.gif" width="256" height="256" push&gt;
+&lt;p&gt;lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/p&gt;
+</pre>
+
+<div style="display:none" class="nehan-book">
+<img src="/static/image/placehold/256x256.gif" width="256" height="256" push>
+<p>lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit</p>
+</div>
+<hr />
+<!---------------------------------------->
+
+<!-- pull -->
+<h3>example / static block pull</h3>
+
+<p>Attribute <code>pull</code> is used to pull the block to the head of a page.</p>
+
+<pre class="prettyprint lang-html">
+&lt;p&gt;lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/p&gt;
+&lt;img src="/static/image/placehold/256x256.gif" width="256" height="256" pull&gt;
+</pre>
+
+<div style="display:none" class="nehan-book">
+<p>lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit</p>
+<img src="/static/image/placehold/256x256.gif" width="256" height="256" pull>
+</div>
+<hr />
+<!---------------------------------------->
+
+<!-- font size -->
+<h3>example / font-size</h3>
+
+<p>use <code>nehan-xx-large</code>, <code>nehan-x-large</code>, <code>nehan-large</code>, <code>nehan-medium</code>, <code>nehan-small</code>, <code>nehan-x-small</code>, <code>nehan-xx-small</code>, <code>nehan-larger</code>, <code>nehan-smaller</code> class for span tag.</p>
+
+<pre class="prettyprint lang-html">
+&lt;p&gt;&lt;span class="nehan-larger"&gt;larger&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="nehan-smaller"&gt;smaller&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="nehan-xx-small"&gt;xx-small&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="nehan-x-small"&gt;x-small&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="nehan-small"&gt;small&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="nehan-medium"&gt;normal&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="nehan-large"&gt;large&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="nehan-x-large"&gt;x-large&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;&lt;span class="nehan-xx-large"&gt;xx-large&lt;/span&gt;&lt;/p&gt;
+</pre>
+
+<div style="display:none" class="nehan-book">
+<p><span class="nehan-larger">larger</span></p>
+<p><span class="nehan-smaller">smaller</span></p>
+<p><span class="nehan-xx-small">xx-small</span></p>
+<p><span class="nehan-x-small">x-small</span></p>
+<p><span class="nehan-small">small</span></p>
+<p><span class="nehan-medium">normal</span></p>
+<p><span class="nehan-large">large</span></p>
+<p><span class="nehan-x-large">x-large</span></p>
+<p><span class="nehan-xx-large">xx-large</span></p>
+</div>
+<hr />
+<!---------------------------------------->
+
+<!-- text-align -->
+<h3>example / text-align</h3>
+
+<p>use <strong>nehan-ta-start</strong>, <strong>nehan-ta-center</strong>, <strong>nehan-ta-end</strong> to align text.</p>
+
+<pre class="prettyprint lang-html">
+&lt;p class="nehan-ta-start"&gt;aligned to start&lt;/p&gt;
+&lt;p class="nehan-ta-center"&gt;aligned to center&lt;/p&gt;
+&lt;p class="nehan-ta-end"&gt;aligned to end&lt;/p&gt;
+</pre>
+
+<div style="display:none" class="nehan-book">
+<p class="nehan-ta-start">aligned to start</p>
+<p class="nehan-ta-center">aligned to center</p>
+<p class="nehan-ta-end">aligned to end</p>
+</div>
+<hr />
+<!---------------------------------------->
+
+
+<h3>example / text-combine</h3>
+
+<p>Use <code>nehan-tcy</code>, or <code>nehan-text-combine</code> for span tag.</p>
+<p>This feature is mainly used for Asian language in <strong>vertical</strong> layout.</p>
+
+<pre class="prettyprint lang-html">
+平成&lt;span class='nehan-tcy'&gt;25&lt;/span&gt;年&lt;span class='nehan-tcy'&gt;1&lt;/span&gt;月&lt;span class='nehan-text-combine'&gt;10&lt;/span&gt;日
+</pre>
+
+<div style="display:none" class="nehan-book-vert">
+平成<span class='nehan-tcy'>25</span>年<span class='nehan-tcy'>1</span>月<span class='nehan-text-combine'>10</span>日
+</div>
+<hr />
+<!---------------------------------------->
+
+<!-- text-emphasis -->
+<h3>example / text-emphasis</h3>
+
+<p>Use <code>nehan-empha-xxx</code> to decorate some text with emphasis symbols.</p>
+
+<pre class="prettyprint lang-html">
+&lt;p&gt;これは&lt;span class='nehan-empha-dot-filled'&gt;黒ドット&lt;/span&gt;です。&lt;/p&gt;
+&lt;p&gt;これは&lt;span class='nehan-empha-dot-open'&gt;白ドット&lt;/span&gt;です。&lt;/p&gt;
+&lt;p&gt;これは&lt;span class='nehan-empha-circle-filled'&gt;黒丸&lt;/span&gt;です。&lt;/p&gt;
+&lt;p&gt;これは&lt;span class='nehan-empha-circle-open'&gt;白丸&lt;/span&gt;です。&lt;/p&gt;
+&lt;p&gt;これは&lt;span class='nehan-empha-double-circle-filled'&gt;黒の蛇の目&lt;/span&gt;です。&lt;/p&gt;
+&lt;p&gt;これは&lt;span class='nehan-empha-double-circle-open'&gt;二重丸&lt;/span&gt;です。&lt;/p&gt;
+&lt;p&gt;これは&lt;span class='nehan-empha-triangle-filled'&gt;黒三角&lt;/span&gt;です。&lt;/p&gt;
+&lt;p&gt;これは&lt;span class='nehan-empha-triangle-open'&gt;白三角&lt;/span&gt;です。&lt;/p&gt;
+&lt;p&gt;これは&lt;span class='nehan-empha-sesame-filled'&gt;黒ゴマ&lt;/span&gt;です。&lt;/p&gt;
+&lt;p&gt;これは&lt;span class='nehan-empha-sesame-open'&gt;白ゴマ&lt;/span&gt;です。&lt;/p&gt;
+</pre>
+
+<div style="display:none" class="nehan-book">
+<p>これは<span class='nehan-empha-dot-filled'>黒ドット</span>です。</p>
+<p>これは<span class='nehan-empha-dot-open'>白ドット</span>です。</p>
+<p>これは<span class='nehan-empha-circle-filled'>黒丸</span>です。</p>
+<p>これは<span class='nehan-empha-circle-open'>白丸</span>です。</p>
+<p>これは<span class='nehan-empha-double-circle-filled'>黒の蛇の目</span>です。</p>
+<p>これは<span class='nehan-empha-double-circle-open'>二重丸</span>です。</p>
+<p>これは<span class='nehan-empha-triangle-filled'>黒三角</span>です。</p>
+<p>これは<span class='nehan-empha-triangle-open'>白三角</span>です。</p>
+<p>これは<span class='nehan-empha-sesame-filled'>黒ゴマ</span>です。</p>
+<p>これは<span class='nehan-empha-sesame-open'>白ゴマ</span>です。</p>
+</div>
+<hr />
+<!---------------------------------------->
+
+      </section><!-- markup -->
+
+      <!-- nehan class table -->
+      <section>
+        <h2><a name="nehan-class-table" class="anchor" href="#nehan-class-table"><span class="octicon octicon-link"></span></a>nehan class table</h2>
+
+<table>
+<thead>
+<tr>
+<th>category</th>
+<th style="width:250px">class name list</th>
+<th>description</th>
+</tr>
+
+<tr>
+<td>font-size</td>
+<td>
+<ul>
+<li>nehan-larger</li>
+<li>nehan-smaller</li>
+<li>nehan-xx-small</li>
+<li>nehan-x-small</li>
+<li>nehan-small</li>
+<li>nehan-normal</li>
+<li>nehan-large</li>
+<li>nehan-x-large</li>
+<li>nehan-xx-large</li>
+</ul>
+</td>
+<td>
+</td>
+</tr>
+
+<tr>
+<td>text-align</td>
+<td>
+<ul>
+<li>nehan-ta-start</li>
+<li>nehan-ta-center</li>
+<li>nehan-ta-end</li>
+</ul>
+</td>
+<td>
+'ta' means 'text-align'.
+</td>
+</tr>
+
+<tr>
+<td>text-combine</td>
+<td>
+<ul>
+<li>nehan-text-combine</li>
+<li>nehan-tcy</li>
+</ul>
+</td>
+<td>
+<p>nehan-tcy is same as nehan-text-combine.</p>
+<p>tcy means 'tate-chu-yoko' in Japanese.</p>
+</td>
+</tr>
+
+<tr>
+<td>text-emphasis</td>
+<td>
+<ul>
+<li>nehan-empha-dot-filled</li>
+<li>nehan-empha-dot-open</li>
+<li>nehan-empha-circle-filled</li>
+<li>nehan-empha-circle-open</li>
+<li>nehan-empha-double-circle-open</li>
+<li>nehan-empha-double-circle-filled</li>
+<li>nehan-empha-triangle-filled</li>
+<li>nehan-empha-triangle-open</li>
+<li>nehan-empha-sesame-filled</li>
+<li>nehan-empha-sesame-open</li>
+</ul>
+</td>
+<td>
+</td>
+</tr>
+
+<tr>
+<td>float</td>
+<td>
+<ul>
+<li>nehan-float-start</li>
+<li>nehan-float-end</li>
+</ul>
+</td>
+<td>
+</td>
+</tr>
+
+<tr>
+<td>adding a little gap</td>
+<td>
+<ul>
+<li>nehan-gap-start</li>
+<li>nehan-gap-end</li>
+</ul>
+</td>
+<td>
+</td>
+</tr>
+
+
+<tr>
+<td>list-style-type</td>
+<td>
+<ul>
+<li>nehan-lst-none</li>
+<li>nehan-lst-disc</li>
+<li>nehan-lst-circle</li>
+<li>nehan-lst-square</li>
+<li>nehan-lst-decimal</li>
+<li>nehan-lst-decimal-leading-zero</li>
+<li>nehan-lst-lower-alpha</li>
+<li>nehan-lst-upper-alpha</li>
+<li>nehan-lst-lower-latin</li>
+<li>nehan-lst-upper-latin</li>
+<li>nehan-lst-lower-greek</li>
+<li>nehan-lst-upper-greek</li>
+<li>nehan-lst-lower-roman</li>
+<li>nehan-lst-upper-roman</li>
+<li>nehan-lst-cjk-ideographic</li>
+<li>nehan-lst-hiragana</li>
+<li>nehan-lst-hiragana-iroha</li>
+<li>nehan-lst-katakana</li>
+<li>nehan-lst-katakana-iroha</li>
+</ul>
+</td>
+<td>
+'lst' means 'list-style-type'.
+</td>
+</tr>
+
+<tr>
+<td>list-style-position</td>
+<td>
+<ul>
+<li>nehan-lsp-inside</li>
+<li>nehan-lsp-outside</li>
+</ul>
+</td>
+<td>
+'lsp' means 'list-style-position'.
+</td>
+</tr>
+
+<tr>
+<td>page-flow</td>
+<td>
+<ul>
+<li>nehan-flow-lr-tb</li>
+<li>nehan-flow-tb-rl</li>
+<li>nehan-flow-tb-lr</li>
+<li>nehan-flow-flip</li>
+</ul>
+<td>
+<p>lr-tb is standard horizontal layout.</p>
+<p>tb-rl is vertical layout for Japanese etc.</p>
+<p>tb-lr is vertical layout for Chinese etc.</p>
+<p>rl-tb is not supported yet.</p>
+</td>
+</tr>
+
+
+<tr>
+<td>other utilities</td>
+<td>
+<ul>
+<li>nehan-drop-caps</li>
+<li>hr.nehan-space</li>
+</ul>
+</td>
+<td>
+<p>hr.nehan-space is used to add space to 'after' direction without border.</p>
+</td>
+</tr>
+</table>
+      </section><!-- nehan-class-table -->
+
 
       <!-- license -->
       <section>
