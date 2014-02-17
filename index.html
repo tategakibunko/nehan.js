@@ -28,17 +28,21 @@
         </ul>
       </header>
 
+      <!-- summary -->
       <section>
-        <h3><a name="about" class="anchor" href="#about"><span class="octicon octicon-link"></span></a>About</h3>
+        <h2><a name="summary" class="anchor" href="#summary"><span class="octicon octicon-link"></span></a>Summary</h2>
 
 	<p>nehan.js is dynamic layout engine to generate paged-media in non-blocking way.</p>
+      </section>
 
-	<h3><a name="demo" class="anchor" href="#demo"><span class="octicon octicon-link"></span></a>Demo</h3>
-
+      <!-- demo -->
+      <section>
+	<h2><a name="demo" class="anchor" href="#demo"><span class="octicon octicon-link"></span></a>Demo</h2>
 	<p>
 	  This demo is using <a target="_blank" href="https://github.com/tategakibunko/jquery.nehan/">jquery.nehan</a>.
 	</p>
 
+<!-- demo start -->
 <div class="nehan-book">
 <h2>wraparounding</h2>
 
@@ -120,8 +124,144 @@ lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
 <dt>term6</dt>
 <dd>abc ded ghi</dd>
 </dl>
-</div>
+</div><!-- demo end -->
       </section>
+
+
+      <!-- getting started -->
+      <section>
+        <h2><a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h2>
+	<p>Include css, js in the <code>&lt;head&gt;</code>.</p>
+<pre class="prettyprint lang-html">
+&lt;link href="/path/to/nehan.css" type="text/css" rel="stylesheet"&gt;
+&lt;script src="/path/to/nehan.js" type="text/javascript"&gt;&lt;/script&gt;
+</pre>
+      </section>
+
+
+      <section>
+        <h2><a name="install" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h2>
+
+<h3>1. generate engine with layout settings.</h3>
+
+<pre class="prettyprint lang-js">
+var engine = Nehan.setup({
+   layout:{
+      direction:"hori", // or "vert"
+      vert:"tb-rl", // or "tb-lr"
+      hori:"lr-tb",
+      fontSize:16,
+      width: 640,
+      height: 480
+   }
+});
+</pre>
+
+<h3>2. setting custom style</h3>
+
+<p>All classes and id must start with "nehan-" prefix.</p>
+
+<pre class="prettyprint lang-js">
+// add border-after 1px
+engine.setStyle("h1.nehan-title", {
+  "border-width":{
+    after:"1px"
+  },
+  "border-color":{
+    after:"#ccc"
+  },
+  "border-style":{
+    after:"dotted"
+  }
+});
+
+// declare my class selector "impact"
+// with pseudo-element "::first-letter"
+engine.setStyle(".nehan-impact::first-letter", {
+  "font-size":"3em", // make font bigger!!
+  margin:{
+    end:"0.1em" // add little space
+  }
+});
+
+// some property takes functional value like nth-child, nth-type-of-child
+engine.setStyle(".nehan-mylist li", {
+  "nth-child": function(n, markup, context){
+    if(n % 2 == 0){
+      return {"background-color":"pink"};
+    } else {
+      return {"background-color":"blue", "color":"white"};
+    }
+  }
+});
+
+// or you can declare same style above like this,
+// using special property 'onload'.
+engine.setStyle(".nehan-mylist2 li", {
+  onload: function(markup, context){
+    var n = markup.getChildNth();
+    if(n % 2 == 0){
+      return {"background-color":"pink"};
+    } else {
+      return {"background-color":"blue", "color":"white"};
+    }
+  }
+});
+</pre>
+
+<p class="notice">
+What kind of properties are supported?<br />
+I recommend that you see source <b><a href="https://github.com/tategakibunko/nehan.js/blob/master/src/style.js">style.js</a></b> in nehan.js project.<br />
+Notice that directional property is declared by "logical value" like start/end/before/after, it means left/right/top/bottom in horizontal document(lr-tb).
+</p>
+
+<h3>3. create page stream</h3>
+
+<pre class="prettyprint lang-js">
+var stream = engine.createPageStream("hello, nehan.js!");
+</pre>
+
+<h4>4. yield page</h4>
+
+<p>PageStream is generated, now you can yield paged media in two way.</p>
+
+<h5>4-1. syncGet(blocking)</56>
+
+<p>First way is <strong>syncGet</strong>, it is <strong>blocking</strong> function because it parses all pages immediately.</p>
+
+<p>So don't use this function if document is too large.</p>
+
+<pre class="prettyprint lang-js">
+var time = stream.syncGet();
+console.log("finished! %f msec", time);
+
+for(var i = 0; i < stream.getPageCount(); i++){
+   var page = stream.get(i);
+   console.log(page.html);
+}
+</pre>
+
+<h5>4-2. asyncGet(non blocking)</h5>
+
+<p>Second way is <strong>asyncGet</strong>, it is <strong>non blocking function</strong>, you can use this function like this.</p>
+
+<pre class="prettyprint lang-js">
+stream.asyncGet({
+  // called when each single pages are successfully calculated.
+  // argument caller is same as stream.
+  onProgress : function(caller){
+    var percent = caller.getSeekPercent(); // percentage position of this page.
+    var page_no = caller.getSeekPageNo(); // page no(starts from zero) of this page.
+    var page_result = caller.get(page_no); // get page result object of this page.
+    var page_html = page_result.getHtml(); // html of this page.
+    console.log(page_html);
+  },
+  onComplete : function(time){
+    console.log("finished! %f msec", time);
+  }
+});
+</pre>
+      </section><!-- getting started -->
 
       <footer>
         <p>This project is maintained by <a href="https://github.com/tategakibunko">tategakibunko</a></p>
