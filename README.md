@@ -23,7 +23,7 @@ Quick demo and document is [here](http://tategakibunko.github.io/nehan.js).
 
 ## jQuery plugin
 
-jQuery plugin is [here](https://tategakibunko.github.io/jquery.nehan).
+jQuery plugin is [here](http://tategakibunko.github.io/jquery.nehan).
 
 ## License
 
