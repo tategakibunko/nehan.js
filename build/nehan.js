@@ -185,6 +185,7 @@ var Env = (function(){
   var is_win = ua.indexOf("windows") >= 0;
   var is_mac = ua.indexOf("macintosh") >= 0;
   var is_chrome = browser.indexOf("chrome") >= 0;
+  var is_safari = browser.indexOf("safari") >= 0;
   var is_iphone = ua.indexOf("iphone") != -1;
   var is_ipod = ua.indexOf("ipod") != -1;
   var is_ipad = ua.indexOf("ipad") != -1;
@@ -193,7 +194,9 @@ var Env = (function(){
   var is_smart_phone = is_iphone_family || is_android_family;
   var is_webkit = ua.indexOf("webkit") != -1;
   var is_transform_enable = is_pure_trident || !(is_ie && version <= 8);
-  var is_vertical_glyph_enable = is_chrome && (is_win || is_mac) && version >= 24;
+  var is_chrome_vert_glyph_enable = is_chrome && (is_win || is_mac) && version >= 24;
+  var is_safari_vert_glyph_enable = is_safari && version >= 5;
+  var is_vertical_glyph_enable = is_chrome_vert_glyph_enable || is_safari_vert_glyph_enable;
 
   return {
     version : version,
