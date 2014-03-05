@@ -206,9 +206,6 @@ var Box = (function(){
     getBlockflow : function(){
       return this.flow.blockflow;
     },
-    getBoxFlowBoxSize : function(measure, extent){
-      return this.flow.getBoxSize(measure, extent);
-    },
     getEdgeWidth : function(){
       if(this.sizing && !this.sizing.containEdgeSize()){
 	return 0;
@@ -340,11 +337,6 @@ var Box = (function(){
     },
     canInclude : function(size){
       return this.size.canInclude(size);
-    },
-    clearEdge : function(){
-      if(this.edge){
-	this.edge.clear();
-      }
     },
     clearBorderBefore : function(){
       if(this.edge){
