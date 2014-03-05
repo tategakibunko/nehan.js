@@ -325,15 +325,6 @@ var Box = (function(){
     subMeasure : function(measure){
       this.size.subMeasure(this.flow, measure);
     },
-    splitMeasure : function(count){
-      var measure = this.getContentMeasure();
-      var div_size = Math.round(measure / count);
-      var ret = [];
-      for(var i = 0; i < count; i++){
-	ret.push(div_size);
-      }
-      return ret;
-    },
     isBlock : function(){
       return !this.isTextLine();
     },
