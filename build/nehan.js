@@ -5436,12 +5436,6 @@ var Box = (function(){
     getChilds : function(){
       return this.childs.get();
     },
-    getChildExtent : function(){
-      return this.childExtent;
-    },
-    getChildMeasure : function(){
-      return this.childMeasure;
-    },
     getFlowName : function(){
       return this.flow.getName();
     },
@@ -5454,9 +5448,6 @@ var Box = (function(){
     getFontFamily : function(){
       return this.font? this.font.family : "monospace";
     },
-    getTextMeasure : function(){
-      return this.childMeasure;
-    },
     getRestContentMeasure : function(){
       return this.getContentMeasure() - this.childMeasure;
     },
@@ -5468,17 +5459,6 @@ var Box = (function(){
     },
     getContentExtent : function(flow){
       return this.size.getExtent(flow || this.flow);
-    },
-    getMaxChildMeasure : function(flow){
-      var _flow = flow || this.flow;
-      var max_measure = 0;
-      List.iter(this.getChilds(), function(child){
-	var measure = child.getTextMeasure? child.getTextMeasure() : child.getContentMeasure(_flow);
-	if(measure > max_measure){
-	  max_measure = measure;
-	}
-      });
-      return max_measure;
     },
     getContentWidth : function(){
       return this.size.width;
@@ -5671,9 +5651,6 @@ var Box = (function(){
     },
     isTextHorizontal : function(){
       return this.flow.isTextHorizontal();
-    },
-    isValidSize : function(){
-      return this.size.isValid();
     },
     canInclude : function(size){
       return this.size.canInclude(size);
