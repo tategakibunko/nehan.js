@@ -194,18 +194,6 @@ var Box = (function(){
     getParallelFlipFlow : function(){
       return this.flow.getParallelFlipFlow();
     },
-    getPropStart : function(){
-      return this.flow.getPropStart();
-    },
-    getPropAfter : function(){
-      return this.flow.getPropAfter();
-    },
-    getInflow : function(){
-      return this.flow.inflow;
-    },
-    getBlockflow : function(){
-      return this.flow.blockflow;
-    },
     getEdgeWidth : function(){
       if(this.sizing && !this.sizing.containEdgeSize()){
 	return 0;
@@ -247,9 +235,6 @@ var Box = (function(){
     },
     setCss : function(prop, value){
       this.css[prop] = value;
-    },
-    setType : function(type){
-      this._type = type;
     },
     setId : function(id){
       this.id = id;
@@ -347,12 +332,6 @@ var Box = (function(){
       if(this.edge){
 	this.edge.clearBorderAfter(this.flow);
       }
-    },
-    shortenBox : function(flow){
-      var _flow = flow || this.flow;
-      this.shortenMeasure(_flow);
-      this.shortenExtent(_flow);
-      return this;
     },
     shortenMeasure : function(flow){
       flow = flow || this.flow;
