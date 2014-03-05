@@ -3,6 +3,12 @@ var DocumentContext = (function(){
   // header id to associate each header with outline.
   var __global_header_id = 0;
   var __global_page_no = 0;
+
+  // anchors
+  var __anchors = {};
+
+  // document header
+  var __header = new DocumentHeader();
   
   function DocumentContext(option){
     var opt = option || {};
@@ -11,11 +17,9 @@ var DocumentContext = (function(){
     this.charPos = opt.charPos || 0;
     this.localPageNo = opt.localPageNo || 0;
     this.localLineNo = opt.localLineNo || 0;
-    this.header = opt.header || new DocumentHeader();
     this.blockContext = opt.blockContext || null;
     this.inlineContext = opt.inlineContext || null;
     this.outlineContext = opt.outlineContext || new OutlineContext();
-    this.anchors = opt.anchors || {};
   }
 
   DocumentContext.prototype = {
@@ -94,9 +98,7 @@ var DocumentContext = (function(){
 	markup:(markup? this.inheritMarkup(markup, this.markup) : null),
 	stream:stream,
 	charPos:this.charPos,
-	header:this.header,
-	outlineContext:this.outlineContext,
-	anchors:this.anchors
+	outlineContext:this.outlineContext
       });
     },
     createFloatedRoot : function(){
@@ -104,10 +106,8 @@ var DocumentContext = (function(){
 	markup:this.markup,
 	stream:this.stream,
 	charPos:this.charPos,
-	header:this.header,
 	blockContext:this.blockContext,
-	outlineContext:this.outlineContext,
-	anchors:this.anchors
+	outlineContext:this.outlineContext
       });
     },
     createInlineBlockRoot : function(markup, stream){
@@ -138,10 +138,8 @@ var DocumentContext = (function(){
 	markup:this.inheritMarkup(markup, this.markup),
 	stream:stream,
 	charPos:this.charPos,
-	header:this.header,
 	blockContext:this.blockContext, // inherit block context
-	outlineContext:this.outlineContext,
-	anchors:this.anchors
+	outlineContext:this.outlineContext
       });
     },
     createChildInlineRoot : function(markup, stream){
@@ -193,13 +191,13 @@ var DocumentContext = (function(){
     },
     // header context
     getHeader : function(){
-      return this.header;
+      return __header;
     },
     addScript : function(markup){
-      this.header.addScript(markup);
+      __header.addScript(markup);
     },
     addStyle : function(markup){
-      this.header.addStyle(markup);
+      __header.addStyle(markup);
     },
     getPageNo : function(){
       return __global_page_no;
@@ -215,13 +213,13 @@ var DocumentContext = (function(){
     },
     // anchor context
     setAnchor : function(anchor_name){
-      this.anchors[anchor_name] = this.getPageNo();
+      __anchors[anchor_name] = this.getPageNo();
     },
     getAnchors : function(){
-      return this.anchors;
+      return __anchors;
     },
     getAnchorPageNo : function(anchor_name){
-      return this.anchors[anchor_name] || -1;
+      return __anchors[anchor_name] || -1;
     },
     // outline context
     getOutlineBuffer : function(root_name){
