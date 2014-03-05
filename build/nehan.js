@@ -5248,26 +5248,8 @@ var BoxChild = (function(){
     get : function(){
       return this.forward.concat(this.normal).concat(this.backward);
     },
-    getNormal : function(){
-      return this.normal;
-    },
     setNormal : function(elements){
       this.normal = elements;
-    },
-    getLength : function(){
-      return this.forward.length + this.normal.length + this.backward.length;
-    },
-    getFirst : function(){
-      if(this.forward.length > 0){
-	return this.forward[0];
-      }
-      if(this.normal.length > 0){
-	return this.normal[0];
-      }
-      if(this.backward.length > 0){
-	return this.backward[this.backward.length - 1];
-      }
-      return null;
     },
     add : function(child){
       if(child.backward){
