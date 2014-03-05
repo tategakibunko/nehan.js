@@ -122,6 +122,9 @@ var Box = (function(){
     getChilds : function(){
       return this.childs.get();
     },
+    getFlow : function(){
+      return this.flow;
+    },
     getFlowName : function(){
       return this.flow.getName();
     },

@@ -5418,6 +5418,9 @@ var Box = (function(){
     getChilds : function(){
       return this.childs.get();
     },
+    getFlow : function(){
+      return this.flow;
+    },
     getFlowName : function(){
       return this.flow.getName();
     },
@@ -6492,6 +6495,19 @@ var DocumentContext = (function(){
     getLocalPageNo : function(){
       return this.localPageNo;
     },
+    // page pos / char pos
+    getPageNo : function(){
+      return __global_page_no;
+    },
+    getCharPos : function(){
+      return this.charPos;
+    },
+    stepPageNo : function(){
+      __global_page_no++;
+    },
+    addCharPos : function(char_count){
+      this.charPos += char_count;
+    },
     // stream context
     getStream : function(){
       return this.stream;
@@ -6649,18 +6665,6 @@ var DocumentContext = (function(){
     },
     addStyle : function(markup){
       __header.addStyle(markup);
-    },
-    getPageNo : function(){
-      return __global_page_no;
-    },
-    getCharPos : function(){
-      return this.charPos;
-    },
-    stepPageNo : function(){
-      __global_page_no++;
-    },
-    addCharPos : function(char_count){
-      this.charPos += char_count;
     },
     // anchor context
     setAnchor : function(anchor_name){
