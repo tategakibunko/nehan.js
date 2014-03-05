@@ -24,7 +24,6 @@ var InlineTreeGenerator = (function(){
   // called when line box is fully filled.
   InlineTreeGenerator.prototype._onCompleteLine = function(line){
     line.setMaxExtent(this.context.getInlineMaxExtent());
-    line.setMaxFontSize(this.context.getInlineMaxFontSize());
   };
 
   InlineTreeGenerator.prototype._isEnableElement = function(element){

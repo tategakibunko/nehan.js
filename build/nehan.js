@@ -5620,14 +5620,6 @@ var Box = (function(){
 	this.edge = edge;
       }
     },
-    setMaxFontSize : function(max_font_size){
-      this.maxFontSize = max_font_size;
-      List.iter(this.getChilds(), function(element){
-	if(element instanceof Box && element._type === "text-line"){
-	  element.setMaxFontSize(max_font_size);
-	}
-      });
-    },
     setMaxExtent : function(extent){
       this.maxExtent = extent;
       List.iter(this.getChilds(), function(element){
@@ -5638,15 +5630,6 @@ var Box = (function(){
     },
     subMeasure : function(measure){
       this.size.subMeasure(this.flow, measure);
-    },
-    splitMeasure : function(count){
-      var measure = this.getContentMeasure();
-      var div_size = Math.round(measure / count);
-      var ret = [];
-      for(var i = 0; i < count; i++){
-	ret.push(div_size);
-      }
-      return ret;
     },
     isBlock : function(){
       return !this.isTextLine();
@@ -8486,7 +8469,6 @@ var InlineTreeGenerator = (function(){
   // called when line box is fully filled.
   InlineTreeGenerator.prototype._onCompleteLine = function(line){
     line.setMaxExtent(this.context.getInlineMaxExtent());
-    line.setMaxFontSize(this.context.getInlineMaxFontSize());
   };
 
   InlineTreeGenerator.prototype._isEnableElement = function(element){

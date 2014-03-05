@@ -306,14 +306,6 @@ var Box = (function(){
 	this.edge = edge;
       }
     },
-    setMaxFontSize : function(max_font_size){
-      this.maxFontSize = max_font_size;
-      List.iter(this.getChilds(), function(element){
-	if(element instanceof Box && element._type === "text-line"){
-	  element.setMaxFontSize(max_font_size);
-	}
-      });
-    },
     setMaxExtent : function(extent){
       this.maxExtent = extent;
       List.iter(this.getChilds(), function(element){
