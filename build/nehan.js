@@ -5119,11 +5119,6 @@ var BoxEdge = (function (){
     setSize : function(prop, flow, size){
       this[prop].setSize(flow, size);
     },
-    setEdgeSize : function(flow, edge_size){
-      for(var prop in edge_size){
-	this.setSize(prop, flow, edge_size[prop]);
-      }
-    },
     setEdgeStart : function(prop, flow, value){
       this[prop].setStart(flow, value);
     },
