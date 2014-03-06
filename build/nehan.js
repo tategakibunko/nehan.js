@@ -5116,21 +5116,6 @@ var BoxEdge = (function (){
     setAll : function(prop, flow, value){
       this[prop].setAll(flow, value);
     },
-    setSize : function(prop, flow, size){
-      this[prop].setSize(flow, size);
-    },
-    setEdgeStart : function(prop, flow, value){
-      this[prop].setStart(flow, value);
-    },
-    setEdgeEnd : function(prop, flow, value){
-      this[prop].setEnd(flow, value);
-    },
-    setEdgeBefore : function(prop, flow, value){
-      this[prop].setBefore(flow, value);
-    },
-    setEdgeAfter : function(prop, flow, value){
-      this[prop].setAfter(flow, value);
-    },
     setBorderRadius : function(flow, value){
       this.border.setRadius(flow, value);
     },
@@ -5726,13 +5711,13 @@ var BoxStyle = {
     }
     var edge = new BoxEdge();
     if(padding){
-      edge.setSize("padding", box.flow, UnitSize.getEdgeSize(padding, box.getFontSize()));
+      edge.padding.setSize(box.flow, UnitSize.getEdgeSize(padding, box.getFontSize()));
     }
     if(margin){
-      edge.setSize("margin", box.flow, UnitSize.getEdgeSize(margin, box.getFontSize()));
+      edge.margin.setSize(box.flow, UnitSize.getEdgeSize(margin, box.getFontSize()));
     }
     if(border_width){
-      edge.setSize("border", box.flow, UnitSize.getEdgeSize(border_width, box.getFontSize()));
+      edge.border.setSize(box.flow, UnitSize.getEdgeSize(border_width, box.getFontSize()));
     }
     if(border_radius){
       edge.setBorderRadius(box.flow, UnitSize.getCornerSize(border_radius, box.getFontSize()));

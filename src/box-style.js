@@ -81,13 +81,13 @@ var BoxStyle = {
     }
     var edge = new BoxEdge();
     if(padding){
-      edge.setSize("padding", box.flow, UnitSize.getEdgeSize(padding, box.getFontSize()));
+      edge.padding.setSize(box.flow, UnitSize.getEdgeSize(padding, box.getFontSize()));
     }
     if(margin){
-      edge.setSize("margin", box.flow, UnitSize.getEdgeSize(margin, box.getFontSize()));
+      edge.margin.setSize(box.flow, UnitSize.getEdgeSize(margin, box.getFontSize()));
     }
     if(border_width){
-      edge.setSize("border", box.flow, UnitSize.getEdgeSize(border_width, box.getFontSize()));
+      edge.border.setSize(box.flow, UnitSize.getEdgeSize(border_width, box.getFontSize()));
     }
     if(border_radius){
       edge.setBorderRadius(box.flow, UnitSize.getCornerSize(border_radius, box.getFontSize()));
