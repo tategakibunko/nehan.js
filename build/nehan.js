@@ -5018,21 +5018,22 @@ var TextEmphaPos = (function(){
 
 
 var TextEmpha = (function(){
-  function TextEmpha(){
-    this.pos = new TextEmphaPos();
-    this.style = new TextEmphaStyle();
-    this.color = new Color(Layout.fontColor);
+  function TextEmpha(opt){
+    opt = opt || {};
+    this.pos = opt.pos || new TextEmphaPos();
+    this.style = opt.style || new TextEmphaStyle();
+    this.color = opt.color || new Color(Layout.fontColor);
   }
 
   TextEmpha.prototype = {
-    setPos : function(value){
-      this.pos.setValue(value);
+    setPos : function(pos){
+      this.pos = pos;
     },
-    setStyle : function(value){
-      this.style.setValue(value);
+    setStyle : function(style){
+      this.style = style;
     },
-    setColor : function(value){
-      this.color.setValue(value);
+    setColor : function(color){
+      this.color = color;
     },
     getText : function(){
       return this.style.getText();
@@ -5774,11 +5775,11 @@ var BoxStyle = {
     if(empha_style){
       var empha_pos = markup.getCssAttr("text-emphasis-position", "over");
       var empha_color = markup.getCssAttr("text-emphasis-color", "black");
-      var text_empha = new TextEmpha();
-      text_empha.setStyle(empha_style);
-      text_empha.setPos(empha_pos);
-      text_empha.setColor(empha_color);
-      box.textEmpha = text_empha;
+      box.textEmpha = new TextEmpha({
+	style:new TextEmphaStyle(empha_style),
+	pos:new TextEmphaPos(empha_pos),
+	color:new Color(empha_color)
+      });
     }
   },
   _setFlowName : function(markup, box, parent){

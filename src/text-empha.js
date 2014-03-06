@@ -1,19 +1,20 @@
 var TextEmpha = (function(){
-  function TextEmpha(){
-    this.pos = new TextEmphaPos();
-    this.style = new TextEmphaStyle();
-    this.color = new Color(Layout.fontColor);
+  function TextEmpha(opt){
+    opt = opt || {};
+    this.pos = opt.pos || new TextEmphaPos();
+    this.style = opt.style || new TextEmphaStyle();
+    this.color = opt.color || new Color(Layout.fontColor);
   }
 
   TextEmpha.prototype = {
-    setPos : function(value){
-      this.pos.setValue(value);
+    setPos : function(pos){
+      this.pos = pos;
     },
-    setStyle : function(value){
-      this.style.setValue(value);
+    setStyle : function(style){
+      this.style = style;
     },
-    setColor : function(value){
-      this.color.setValue(value);
+    setColor : function(color){
+      this.color = color;
     },
     getText : function(){
       return this.style.getText();
