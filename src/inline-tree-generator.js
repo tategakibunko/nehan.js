@@ -73,7 +73,6 @@ var InlineTreeGenerator = (function(){
       this._retry++;
       if(this._retry > Config.maxRollbackCount){
 	var skip = this.context.getNextToken();
-	// console.log("skip!:%o", skip);
 	this._retry = 0;
       }
     } else {
