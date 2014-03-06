@@ -127,7 +127,7 @@ var Layout = {
     return BoxFlows.getByName(this.hori);
   },
   getStdFont : function(){
-    var font = new Font(null);
+    var font = new Font();
     font.family = (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
     return font;
   },
