@@ -128,7 +128,7 @@ var InlineContext = (function(){
     },
     _getElementExtent : function(element){
       if(Token.isText(element)){
-	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
+	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha && this.line.textEmpha.isEnable()){
 	  return this.line.textEmpha.getExtent(this.line.getFontSize());
 	}
 	return this.line.getFontSize();

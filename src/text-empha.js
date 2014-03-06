@@ -7,14 +7,8 @@ var TextEmpha = (function(){
   }
 
   TextEmpha.prototype = {
-    setPos : function(pos){
-      this.pos = pos;
-    },
-    setStyle : function(style){
-      this.style = style;
-    },
-    setColor : function(color){
-      this.color = color;
+    isEnable : function(){
+      return this.style.isEnable();
     },
     getText : function(){
       return this.style.getText();

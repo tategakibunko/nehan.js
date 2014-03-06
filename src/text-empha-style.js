@@ -23,10 +23,13 @@ var TextEmphaStyle = (function(){
   };
 
   function TextEmphaStyle(value){
-    this.value = value || "filled dot";
+    this.value = value || "none";
   }
 
   TextEmphaStyle.prototype = {
+    isEnable : function(){
+      return this.value != "none";
+    },
     setValue : function(value){
       this.value = value;
     },

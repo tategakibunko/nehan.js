@@ -61,10 +61,10 @@ var InlineTreeEvaluator = (function(){
 	return this.evalWord(line, text);
       case "tcy":
 	var tcy = this.evalTcy(line, text);
-	return line.textEmpha? this.evalEmpha(line, text, tcy) : tcy;
+	return (line.textEmpha && line.textEmpha.isEnable())? this.evalEmpha(line, text, tcy) : tcy;
       case "char":
 	var chr = this.evalChar(line, text);
-	return line.textEmpha? this.evalEmpha(line, text, chr) : chr;
+	return (line.textEmpha && line.textEmpha.isEnable())? this.evalEmpha(line, text, chr) : chr;
       default:
 	return "";
       }

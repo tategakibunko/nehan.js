@@ -189,7 +189,7 @@ var VertInlineTreeEvaluator = (function(){
   };
 
   VertInlineTreeEvaluator.prototype.evalSmallKana = function(line, chr){
-    var tag_name = line.textEmpha? "span" : "div";
+    var tag_name = (line.textEmpha && line.textEmpha.isEnable())? "span" : "div";
     return Html.tagWrap(tag_name, chr.data, {
       style:Css.toString(chr.getCssVertSmallKana())
     });

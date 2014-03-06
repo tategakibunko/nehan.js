@@ -4974,10 +4974,13 @@ var TextEmphaStyle = (function(){
   };
 
   function TextEmphaStyle(value){
-    this.value = value || "filled dot";
+    this.value = value || "none";
   }
 
   TextEmphaStyle.prototype = {
+    isEnable : function(){
+      return this.value != "none";
+    },
     setValue : function(value){
       this.value = value;
     },
@@ -4997,15 +5000,15 @@ var TextEmphaStyle = (function(){
 
 var TextEmphaPos = (function(){
   function TextEmphaPos(value){
-    this.value = value || "over";
+    Args.merge(this, {
+      hori:"over",
+      vert:"right"
+    }, value || {});
   }
 
   TextEmphaPos.prototype = {
     isEmphaFirst : function(){
-      return this.value === "over" || this.value === "left" || this.value === "before";
-    },
-    setValue : function(value){
-      this.value = value;
+      return this.hori === "over" || this.vert === "left";
     },
     getCss : function(line){
       var css = {};
@@ -5026,14 +5029,8 @@ var TextEmpha = (function(){
   }
 
   TextEmpha.prototype = {
-    setPos : function(pos){
-      this.pos = pos;
-    },
-    setStyle : function(style){
-      this.style = style;
-    },
-    setColor : function(color){
-      this.color = color;
+    isEnable : function(){
+      return this.style.isEnable();
     },
     getText : function(){
       return this.style.getText();
@@ -5753,7 +5750,7 @@ var BoxStyle = {
   _setTextEmphasis : function(markup, box, parent){
     var empha_style = markup.getCssAttr("text-emphasis-style");
     if(empha_style){
-      var empha_pos = markup.getCssAttr("text-emphasis-position", "over");
+      var empha_pos = markup.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
       var empha_color = markup.getCssAttr("text-emphasis-color", "black");
       box.textEmpha = new TextEmpha({
 	style:new TextEmphaStyle(empha_style),
@@ -7926,7 +7923,7 @@ var InlineContext = (function(){
     },
     _getElementExtent : function(element){
       if(Token.isText(element)){
-	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha){
+	if((Token.isChar(element) || Token.isTcy(element)) && this.line.textEmpha && this.line.textEmpha.isEnable()){
 	  return this.line.textEmpha.getExtent(this.line.getFontSize());
 	}
 	return this.line.getFontSize();
@@ -9295,10 +9292,10 @@ var InlineTreeEvaluator = (function(){
 	return this.evalWord(line, text);
       case "tcy":
 	var tcy = this.evalTcy(line, text);
-	return line.textEmpha? this.evalEmpha(line, text, tcy) : tcy;
+	return (line.textEmpha && line.textEmpha.isEnable())? this.evalEmpha(line, text, tcy) : tcy;
       case "char":
 	var chr = this.evalChar(line, text);
-	return line.textEmpha? this.evalEmpha(line, text, chr) : chr;
+	return (line.textEmpha && line.textEmpha.isEnable())? this.evalEmpha(line, text, chr) : chr;
       default:
 	return "";
       }
@@ -9512,7 +9509,7 @@ var VertInlineTreeEvaluator = (function(){
   };
 
   VertInlineTreeEvaluator.prototype.evalSmallKana = function(line, chr){
-    var tag_name = line.textEmpha? "span" : "div";
+    var tag_name = (line.textEmpha && line.textEmpha.isEnable())? "span" : "div";
     return Html.tagWrap(tag_name, chr.data, {
       style:Css.toString(chr.getCssVertSmallKana())
     });

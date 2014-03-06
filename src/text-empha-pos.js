@@ -1,14 +1,14 @@
 var TextEmphaPos = (function(){
   function TextEmphaPos(value){
-    this.value = value || "over";
+    Args.merge(this, {
+      hori:"over",
+      vert:"right"
+    }, value || {});
   }
 
   TextEmphaPos.prototype = {
     isEmphaFirst : function(){
-      return this.value === "over" || this.value === "left" || this.value === "before";
-    },
-    setValue : function(value){
-      this.value = value;
+      return this.hori === "over" || this.vert === "left";
     },
     getCss : function(line){
       var css = {};

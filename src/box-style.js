@@ -123,7 +123,7 @@ var BoxStyle = {
   _setTextEmphasis : function(markup, box, parent){
     var empha_style = markup.getCssAttr("text-emphasis-style");
     if(empha_style){
-      var empha_pos = markup.getCssAttr("text-emphasis-position", "over");
+      var empha_pos = markup.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
       var empha_color = markup.getCssAttr("text-emphasis-color", "black");
       box.textEmpha = new TextEmpha({
 	style:new TextEmphaStyle(empha_style),
