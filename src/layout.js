@@ -75,9 +75,9 @@ var Layout = {
     return BoxFlows.getByName(this.hori);
   },
   getStdFont : function(){
-    return new Font(Layout.fontSize, {
-      family:(this.direction === "vert")? this.vertFontFamily : this.horiFontFamily
-    });
+    var font = new Font(Layout.fontSize);
+    font.family = (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
+    return font;
   },
   getListMarkerSpacingSize : function(font_size){
     font_size = font_size || this.fontSize;

@@ -48,21 +48,21 @@ var BoxStyle = {
     }
   },
   _setFont : function(markup, box, parent){
-    var font_family = markup.getCssAttr("font-family");
-    if(font_family){
-      box.font.family = font_family;
-    }
-    var font_weight = markup.getCssAttr("font-weight");
-    if(font_weight){
-      box.font.weight = font_weight;
-    }
-    var font_style = markup.getCssAttr("font-style");
-    if(font_style){
-      box.font.style = font_style;
-    }
     var font_size = markup.getCssAttr("font-size", "inherit");
     if(font_size !== "inherit"){
-      box.font.size = UnitSize.getFontSize(font_size, box.getFontSize());
+      box.font.size = UnitSize.getFontSize(font_size, parent.font.size);
+    }
+    var font_family = markup.getCssAttr("font-family", "inherit");
+    if(font_family !== "inherit"){
+      box.font.family = font_family;
+    }
+    var font_weight = markup.getCssAttr("font-weight", "inherit");
+    if(font_weight !== "inherit"){
+      box.font.weight = font_weight;
+    }
+    var font_style = markup.getCssAttr("font-style", "inherit");
+    if(font_style !== "inherit"){
+      box.font.style = font_style;
     }
   },
   _setBoxSizing : function(markup, box, parent){

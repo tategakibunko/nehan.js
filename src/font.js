@@ -1,7 +1,6 @@
 var Font = (function(){
-  function Font(size, opt){
+  function Font(size){
     this.size = size;
-    Args.copy(this, opt || {});
   }
 
   Font.prototype = {
