@@ -104,7 +104,7 @@ var Layout = {
     box.flow = parent.flow;
     box.lineRate = parent.lineRate;
     box.textAlign = parent.textAlign;
-    box.font = new Font(parent.font);
+    box.font = new Font(parent.font.size);
     box.color = parent.color;
     box.letterSpacing = parent.letterSpacing;
     return box;
@@ -127,9 +127,9 @@ var Layout = {
     return BoxFlows.getByName(this.hori);
   },
   getStdFont : function(){
-    var font = new Font();
-    font.family = (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
-    return font;
+    return new Font(Layout.fontSize, {
+      family:(this.direction === "vert")? this.vertFontFamily : this.horiFontFamily
+    });
   },
   getListMarkerSpacingSize : function(font_size){
     font_size = font_size || this.fontSize;
@@ -4543,14 +4543,9 @@ var BoxSizings = {
 
 
 var Font = (function(){
-  function Font(parent_font){
-    Args.merge(this, {
-      weight:"normal",
-      style:"normal",
-      size:Layout.fontSize,
-      family:"monospace"
-    }, parent_font || {});
-    this.parent = parent_font || null;
+  function Font(size, opt){
+    this.size = size;
+    Args.copy(this, opt || {});
   }
 
   Font.prototype = {
@@ -4558,20 +4553,25 @@ var Font = (function(){
       return this.weight && this.weight !== "normal" && this.weight !== "lighter";
     },
     toString : function(){
-      return [this.weight, this.style, this.size + "px", this.family].join(" ");
+      return [
+	this.weight || "normal",
+	this.style || "normal",
+	this.size + "px",
+	this.family || "monospace"
+      ].join(" ");
     },
     getCss : function(){
-      var css = {}, is_root_font = this.parent === null;
-      if(is_root_font || this.weight != this.parent.weight){
-	css["font-weight"] = this.weight;
-      }
-      if(is_root_font || this.style != this.parent.style){
-	css["font-style"] = this.style;
-      }
-      if(is_root_font || this.size != this.parent.size){
+      var css = {};
+      if(this.size){
 	css["font-size"] = this.size + "px";
       }
-      if(is_root_font || this.family != this.parent.family){
+      if(this.weight){
+	css["font-weight"] = this.weight;
+      }
+      if(this.style){
+	css["font-style"] = this.style;
+      }
+      if(this.family){
 	css["font-family"] = this.family;
       }
       return css;

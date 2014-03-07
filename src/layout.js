@@ -52,7 +52,7 @@ var Layout = {
     box.flow = parent.flow;
     box.lineRate = parent.lineRate;
     box.textAlign = parent.textAlign;
-    box.font = new Font(parent.font);
+    box.font = new Font(parent.font.size);
     box.color = parent.color;
     box.letterSpacing = parent.letterSpacing;
     return box;
@@ -75,9 +75,9 @@ var Layout = {
     return BoxFlows.getByName(this.hori);
   },
   getStdFont : function(){
-    var font = new Font();
-    font.family = (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
-    return font;
+    return new Font(Layout.fontSize, {
+      family:(this.direction === "vert")? this.vertFontFamily : this.horiFontFamily
+    });
   },
   getListMarkerSpacingSize : function(font_size){
     font_size = font_size || this.fontSize;
