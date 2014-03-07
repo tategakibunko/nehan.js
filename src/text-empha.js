@@ -1,17 +1,20 @@
 var TextEmpha = (function(){
   function TextEmpha(opt){
     opt = opt || {};
-    this.pos = opt.pos || new TextEmphaPos();
     this.style = opt.style || new TextEmphaStyle();
+    this.pos = opt.pos || new TextEmphaPos();
     this.color = opt.color || new Color(Layout.fontColor);
   }
 
   TextEmpha.prototype = {
     isEnable : function(){
-      return this.style.isEnable();
+      return this.style && this.style.isEnable();
+    },
+    isEmphaStart : function(){
+      return this.pos? this.pos.isEmphaStart() : true;
     },
     getText : function(){
-      return this.style.getText();
+      return this.style? this.style.getText() : "";
     },
     getExtent : function(font_size){
       return font_size * 3;

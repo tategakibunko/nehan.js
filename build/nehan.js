@@ -5022,17 +5022,20 @@ var TextEmphaPos = (function(){
 var TextEmpha = (function(){
   function TextEmpha(opt){
     opt = opt || {};
-    this.pos = opt.pos || new TextEmphaPos();
     this.style = opt.style || new TextEmphaStyle();
+    this.pos = opt.pos || new TextEmphaPos();
     this.color = opt.color || new Color(Layout.fontColor);
   }
 
   TextEmpha.prototype = {
     isEnable : function(){
-      return this.style.isEnable();
+      return this.style && this.style.isEnable();
+    },
+    isEmphaStart : function(){
+      return this.pos? this.pos.isEmphaStart() : true;
     },
     getText : function(){
-      return this.style.getText();
+      return this.style? this.style.getText() : "";
     },
     getExtent : function(font_size){
       return font_size * 3;
@@ -5747,10 +5750,10 @@ var BoxStyle = {
     }
   },
   _setTextEmphasis : function(markup, box, parent){
-    var empha_style = markup.getCssAttr("text-emphasis-style");
-    if(empha_style){
+    var empha_style = markup.getCssAttr("text-emphasis-style", "none");
+    if(empha_style !== "none" && empha_style !== "inherit"){
       var empha_pos = markup.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
-      var empha_color = markup.getCssAttr("text-emphasis-color", "black");
+      var empha_color = markup.getCssAttr("text-emphasis-color", Layout.fontColor);
       box.textEmpha = new TextEmpha({
 	style:new TextEmphaStyle(empha_style),
 	pos:new TextEmphaPos(empha_pos),

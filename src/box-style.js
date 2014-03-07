@@ -121,10 +121,10 @@ var BoxStyle = {
     }
   },
   _setTextEmphasis : function(markup, box, parent){
-    var empha_style = markup.getCssAttr("text-emphasis-style");
-    if(empha_style){
+    var empha_style = markup.getCssAttr("text-emphasis-style", "none");
+    if(empha_style !== "none" && empha_style !== "inherit"){
       var empha_pos = markup.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
-      var empha_color = markup.getCssAttr("text-emphasis-color", "black");
+      var empha_color = markup.getCssAttr("text-emphasis-color", Layout.fontColor);
       box.textEmpha = new TextEmpha({
 	style:new TextEmphaStyle(empha_style),
 	pos:new TextEmphaPos(empha_pos),
