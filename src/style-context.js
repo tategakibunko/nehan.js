@@ -1,0 +1,660 @@
+var StyleContext = (function(){
+
+  // parent : parent style context
+  function StyleContext(markup, parent){
+    this.markup = this._inheritMarkup(markup, parent);
+    this.parent = parent;
+    this.display = this._loadDisplay(markup); // required
+    this.flow = this._loadFlow(markup, parent); // required
+    this.boxSizing = this._loadBoxSizing(markup); // required
+    this.childs = []; // children for this style, updated by _appendChild
+    var color = this._loadColor(markup, parent);
+    if(color){
+      this.color = color;
+    }
+    var font = this._loadFont(markup, parent);
+    if(font){
+      this.font = font;
+    }
+    var position = this._loadPosition(markup, parent);
+    if(position){
+      this.position = position;
+    }
+    var edge = this._loadEdge(markup, this.flow, this.font);
+    if(edge){
+      this.edge = edge;
+    }
+    var line_rate = this._loadLineRate(markup, parent);
+    if(line_rate){
+      this.lineRate = line_rate;
+    }
+    var text_align = this._loadTextAlign(markup, parent);
+    if(text_align){
+      this.textAlign = text_align;
+    }
+    var text_empha = this._loadTextEmpha(markup, parent);
+    if(text_empha){
+      this.textEmpha = text_empha;
+    }
+    var pushed = this._loadPushedAttr(markup);
+    if(pushed){
+      this.pushed = true;
+    }
+    var pulled = this._loadPulledAttr(markup);
+    if(pulled){
+      this.pulled = true;
+    }
+    var logical_float = this._loadLogicalFloat(markup);
+    if(logical_float){
+      this.logicalFloat = logical_float;
+    }
+    var list_style = this._loadListStyle(markup);
+    if(list_style){
+      this.listStyle = list_style;
+    }
+    this.contentSize = this._computeContentSize(this.edge || null); // required
+    this.cssBlock = this._computeCssBlock(); // required
+    this.cssInline = this._computeCssInline(); // required
+    if(this.parent){
+      this.parent._appendChild(this);
+    }
+  }
+
+  StyleContext.prototype = {
+    clone : function(css){
+      // no one can clone root style.
+      if(this.parent === null){
+	return this.createChild("div", css);
+      }
+      var tag = this.markup.clone();
+      tag.setCssAttrs(css || {}); // set dynamic styles
+      return new StyleContext(tag, this.parent || null);
+    },
+    // inherit style with tag_name and css(optional).
+    createChild : function(tag_name, css){
+      var tag = new Tag("<" + tag_name + ">");
+      tag.setCssAttrs(css || {}); // set dynamic styles
+      var style = new StyleContext(tag, this);
+
+      // save 'original' parent to child-style, because sometimes it is required by 'grand-child'.
+      // for example, in following code, <li-body> is anonymous block,
+      // and parent style of <li-body> is <li>.style, and parent style of <ul2> is <li-body>.style.
+      //
+      // <ul>
+      //   <li>
+      //     <li-mark>1.</li-mark>
+      //     <li-body><ul2>...</ul2></li-body>
+      //   </li>
+      // </ul>
+      // 
+      // <li-body> is created by <li>.style.createChild("div"), so not having original style of <ul> as it's parent.
+      // but <ul>.style is required by <ul2> to get it's accurate content-size.
+      // so child anonymous style(<li-mark>, <li-body> in this case) needs to save it's 'original' parent(<ul>.style in this case)
+      // in addition to <li>.style.
+      style.parent2 = this.parent; 
+      return style;
+    },
+    createBlock : function(opt){
+      var measure = opt.measure || this.getContentMeasure();
+      var extent = this.parent? (opt.extent || this.getContentExtent()) : this.getContentExtent();
+      var box_size = this.flow.getBoxSize(measure, extent);
+      var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
+      var box = new Box(box_size, this);
+      box.display = "block";
+      box.elements = opt.elements || [];
+      box.classes = classes;
+      if(this.edge){
+	box.edge = this.edge.clone();
+      }
+      if(this.logicalFloat){
+	box.logicalFloat = this.logicalFloat;
+      }
+      Args.copy(box.css, box_size.getCss());
+      Args.copy(box.css, this.cssBlock);
+      return box;
+    },
+    createLine : function(opt){
+      var line_rate = this.getLineRate();
+      var measure = opt.measure || this.getContentMeasure();
+      var extent = this.isRootLine()? this._computeLineExtent(opt.elements) : this.getAutoLineExtent();
+      var box_size = this.flow.getBoxSize(measure, extent);
+      var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
+      var line = new Box(box_size, this);
+      line.style = this;
+      line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
+      line.elements = opt.elements || [];
+      line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.markup.getName());
+      line.extent = extent;
+
+      // backup other line data. mainly required to restore inline-context in FloatLayoutGenerator.
+      if(this.isRootLine()){
+	line.hasLineBreak = opt.hasLineBreak || false;
+	line.inlineMeasure = opt.inlineMeasure || measure;
+	line.texts = opt.texts || [];
+      }
+      Args.copy(line.css, box_size.getCss());
+      Args.copy(line.css, this.cssInline);
+      return line;
+    },
+    isBlock : function(){
+      return this.display === "block";
+    },
+    isRoot : function(){
+      return this.parent === null;
+    },
+    isChildBlock : function(){
+      return this.isBlock() && !this.isRoot();
+    },
+    isInline : function(){
+      return this.display === "inline";
+    },
+    isRootLine : function(){
+      return this.display === "block";
+    },
+    isFloatStart : function(){
+      return this.logicalFloat && this.logicalFloat.isStart();
+    },
+    isFloatEnd : function(){
+      return this.logicalFloat && this.logicalFloat.isEnd();
+    },
+    isFloated : function(){
+      return this.isFloatStart() || this.isFloatEnd();
+    },
+    isParallel : function(){
+      return this.display === "list-item";
+    },
+    isPushed : function(){
+      return this.pushed || false;
+    },
+    isPulled : function(){
+      return this.pulled || false;
+    },
+    isTextEmphaEnable : function(){
+      return this.textEmpha && this.textEmpha.isEnable();
+    },
+    isTextVertical : function(){
+      return this.flow.isTextVertical();
+    },
+    isTextHorizontal : function(){
+      return this.flow.isTextHorizontal();
+    },
+    isFirstChild : function(){
+      return this.parent? this.parent.getNthChild(0) === this : false;
+    },
+    getMarkupName : function(){
+      return this.markup.getName();
+    },
+    getMarkupContent : function(){
+      return this.markup.getContent();
+    },
+    getFontSize : function(){
+      return this.font.size;
+    },
+    getFontFamily : function(){
+      return this.font.family || this.flow.isTextVertical()? Layout.vertFontFamily : Layout.horiFontFamily;
+    },
+    getLetterSpacing : function(){
+      return this.letterSpacing || 0;
+    },
+    getColor : function(){
+      return this.color || Layout.fontColor;
+    },
+    getRubyRate : function(){
+      return Layout.getRubyRate();
+    },
+    getLineRate : function(){
+      return this.lineRate || Layout.lineRate || 2;
+    },
+    getContentMeasure : function(flow){
+      return this.contentSize.getMeasure(flow || this.flow);
+    },
+    getContentExtent : function(flow){
+      return this.contentSize.getExtent(flow || this.flow);
+    },
+    getEmphaLineExtent : function(){
+      return this.getFontSize() * 2;
+    },
+    getTextLineExtent : function(){
+      return this.getFontSize() * this.getLineRate();
+    },
+    getAutoLineExtent : function(){
+      return this.isTextEmphaEnable()? this.getEmphaLineExtent() : this.getTextLineExtent();
+    },
+    getEdgeMeasure : function(flow){
+      return this.edge? this.edge.getMeasureSize(flow || this.flow) : 0;
+    },
+    getEdgeExtent : function(flow){
+      return this.edge? this.edge.getExtentSize(flow || this.flow) : 0;
+    },
+    getMarkerHtml : function(order){
+      return this.listStyle? this.listStyle.getMarkerHtml(order) : "";
+    },
+    getChildCount : function(){
+      return this.childs.length;
+    },
+    getChildIndex : function(){
+      return this.parent? this.parent.findChildIndex(this) : 0;
+    },
+    getChildIndexOfType : function(){
+      return this.parent? this.parent.findChildIndexOfType(this) : 0;
+    },
+    getNthChild : function(nth){
+      return this.childs[nth] || null;
+    },
+    findChildIndex : function(style){
+      return List.indexOf(this.childs, function(child){
+	return child === style;
+      });
+    },
+    findChildsOfType : function(style){
+      var name = style.getMarkupName();
+      return List.filter(this.childs, function(child){
+	return child.getMarkupName() === name;
+      });
+    },
+    findChildIndexOfType : function(style){
+      return List.indexOf(this.findChildsOfType(style), function(child){
+	return child === style;
+      });
+    },
+    resizeMeasure : function(measure){
+      if(this.edge){
+	measure -= this._computeEdgeContentMeasure(this.edge);
+      }
+      this.contentSize[this.flow.getPropMeasure()] = measure;
+      return this;
+    },
+    resizeExtent : function(extent){
+      if(this.edge){
+	extent -= this._computeEdgeContentExtent(this.edge);
+      }
+      this.contentSize[this.flow.getPropExtent()] = extent;
+      return this;
+    },
+    resize : function(measure, extent){
+      this.resizeMeasure(measure);
+      this.resizeExtent(extent);
+      return this;
+    },
+    _inheritMarkup : function(markup, parent){
+      var parent_markup = parent? parent.markup : null;
+      markup = markup.inherit(parent_markup);
+      var onload = markup.getCssAttr("onload");
+      if(onload){
+	markup.setCssAttrs(onload(markup) || {});
+      }
+      var nth_child = markup.getCssAttr("nth-child");
+      if(nth_child){
+	markup.setCssAttrs(nth_child(this.getChildIndex(), markup) || {});
+      }
+      var nth_of_type = markup.getCssAttr("nth-of-type");
+      if(nth_of_type){
+	markup.setCssAttrs(nth_of_type(this.getChildIndexOfType(), markup) || {});
+      }
+      return markup;
+    },
+    _appendChild : function(child_style){
+      this.childs.push(child_style);
+    },
+    _computeOuterSize : function(){
+      var measure = this._computeOuterMeasure();
+      var extent = this._computeOuterExtent();
+      return this.flow.getBoxSize(measure, extent);
+    },
+    _computeOuterMeasure : function(){
+      return this._computeStaticMeasure() || this._computeMaxMeasure();
+    },
+    _computeOuterExtent : function(){
+      return this._computeStaticExtent() || this._computeMaxExtent();
+    },
+    _computeStaticMeasure : function(){
+      var max_size = this._computeMaxMeasure(); // this value is required when static size is set by '%' value.
+      var static_size = this.markup.getAttr(this.flow.getPropMeasure()) || this.markup.getCssAttr("measure");
+      return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
+    },
+    _computeStaticExtent : function(){
+      var max_size = this._computeMaxExtent(); // this value is required when static size is set by '%' value.
+      var static_size = this.markup.getAttr(this.flow.getPropExtent()) || this.markup.getCssAttr("extent");
+      return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
+    },
+    _computeMaxMeasure : function(){
+      var max_size = this.parent? this.parent.getContentMeasure(this.flow) : Layout[this.flow.getPropMeasure()];
+      return max_size;
+    },
+    _computeMaxExtent : function(){
+      var max_size = this.parent? this.parent.getContentExtent(this.flow) : Layout[this.flow.getPropExtent()];
+      return (this.display === "block")? max_size : this.font.size;
+    },
+    // 'after' loading all properties, we can compute boundary box size.
+    _computeContentSize : function(edge){
+      var measure = this._computeContentMeasure(edge);
+      var extent = this._computeContentExtent(edge);
+      return this.flow.getBoxSize(measure, extent);
+    },
+    _computeContentMeasure : function(edge){
+      return this._computeOuterMeasure() - (edge? this._computeEdgeContentMeasure(edge) : 0);
+    },
+    _computeContentExtent : function(edge){
+      return this._computeOuterExtent() - (edge? this._computeEdgeContentExtent(edge) : 0);
+    },
+    _computeEdgeContentMeasure : function(edge){
+      switch(this.boxSizing){
+      case "content-box":
+	return 0;
+      case "border-box":
+	return edge.padding.getMeasureSize(this.flow) + edge.border.getMeasureSize(this.flow);
+      case "padding-box":
+	return edge.padding.getMeasureSize(this.flow);
+      case "margin-box": default:
+	return edge.getMeasureSize(this.flow);
+      }
+    },
+    _computeEdgeContentExtent : function(edge){
+      switch(this.boxSizing){
+      case "content-box":
+	return 0;
+      case "border-box":
+	return edge.padding.getExtentSize(this.flow) + edge.border.getExtentSize(this.flow);
+      case "padding-box":
+	return edge.padding.getExtentSize(this.flow);
+      case "margin-box": default:
+	return edge.getExtentSize(this.flow);
+      }
+    },
+    _computeLineExtent : function(elements){
+      var child_lines = List.filter(elements, function(element){ return element.style? true : false; });
+      if(child_lines.length === 0){
+	return this.getAutoLineExtent();
+      }
+      return this.isTextVertical()? this._computeVertLineExtent(child_lines) : this._computeHoriLineExtent(child_lines);
+    },
+    _computeHoriLineExtent : function(child_lines){
+      var max_font_size = List.fold(child_lines, this.getFontSize(), function(ret, line){
+	return Math.max(ret, line.style.getFontSize());
+      });
+      return max_font_size * this.getLineRate();
+    },
+    _centerizeVertLine : function(child_lines){
+      var this_flow = this.flow;
+      var this_font_size = this.getFontSize();
+      var max_font_size = this_font_size;
+      var max_extent = this.getAutoLineExtent();
+      List.iter(child_lines, function(line){
+	max_font_size = Math.max(max_font_size, line.style.getFontSize());
+      });
+
+      //console.log("max_font_size:%o", max_font_size);
+
+      // set font centerized offset from max_font_size.
+      List.iter(child_lines, function(line){
+	var font_size = line.style.getFontSize();
+	var font_center_offset = Math.floor((max_font_size - font_size) / 2);
+	max_extent = Math.max(line.size.getExtent(this_flow) + font_center_offset, max_extent);
+      });
+
+      //console.log("max_extent:%o", max_extent);
+
+      var text_center = Math.floor(max_extent / 2);
+
+      //console.log("text-center-pos:%o", text_center);
+
+      List.iter(child_lines, function(line){
+	var font_size = line.style.getFontSize();
+	var text_center_offset = text_center - Math.floor(font_size / 2);
+	if(text_center_offset > 0){
+	  line.edge = line.style.edge? line.style.edge.clone() : new BoxEdge(); // set line.edge(not line.style.edge) to overwrite padding temporally.
+	  line.edge.padding.setAfter(this_flow, text_center_offset); // set new edge(use line.edge not line.style.edge)
+	  line.size.setExtent(this_flow, max_extent - text_center_offset); // set new size
+	  Args.copy(line.css, line.edge.getCss()); // overwrite edge
+	  Args.copy(line.css, line.size.getCss()); // overwrite size
+	}
+      });
+
+      return max_extent;
+    },
+    _computeVertLineExtent : function(child_lines){
+      var max_extent = this._centerizeVertLine(child_lines);
+      return max_extent;
+    },
+    _computeCssInline : function(){
+      var css = {};
+      if(this.font){
+	Args.copy(css, this.font.getCss());
+      }
+      if(this.color){
+	Args.copy(css, this.color.getCss());
+      }
+      if(this.background){
+	Args.copy(css, this.background.getCss());
+      }
+      // top level line need to follow parent blockflow.
+      if(this.parent && this.parent.display === "block"){
+	Args.copy(css, this.flow.getCss());
+      }
+      if(this.edge && !this.isRootLine()){
+	Args.copy(css, this.edge.getCss());
+      }
+      if(this.isRootLine()){
+	Args.copy(css, this.flow.getCss());
+      }
+      if(this.flow.isTextVertical()){
+	css["line-height"] = "1em";
+	if(Env.isIphoneFamily){
+	  css["letter-spacing"] = "-0.001em";
+	}
+	if(this.markup.getName() !== "ruby"){
+	  css["margin-left"] = css["margin-right"] = "auto";
+	  css["text-align"] = "center";
+	}
+      }
+      return css;
+    },
+    _computeCssBlock : function(){
+      var css = {};
+      if(this.font){
+	Args.copy(css, this.font.getCss());
+      }
+      if(this.edge){
+	Args.copy(css, this.edge.getCss());
+      }
+      if(this.parent){
+	Args.copy(css, this.parent.flow.getCss());
+      }
+      if(this.color){
+	Args.copy(css, this.color.getCss());
+      }
+      if(this.background){
+	Args.copy(css, this.background.getCss(this.flow));
+      }
+      if(this.letterSpacing && !this.flow.isTextVertical()){
+	css["letter-spacing"] = this.letterSpacing + "px";
+      }
+      css.display = "block";
+      if(this.logicalFloat){
+	Args.copy(css, this.logicalFloat.getCss(this.flow));
+      }
+      css.overflow = "hidden"; // to avoid margin collapsing
+      if(this.zIndex){
+	css["z-index"] = this.zIndex;
+      }
+      return css;
+    },
+    _loadDisplay : function(markup){
+      return markup.getCssAttr("display", "inline");
+    },
+    _loadFlow : function(markup, parent){
+      var value = markup.getCssAttr("flow", "inherit");
+      var parent_flow = parent? parent.flow : Layout.getStdBoxFlow();
+      if(value === "inherit"){
+	return parent_flow;
+      }
+      if(value === "flip"){
+	return parent_flow.getFlipFlow();
+      }
+      return BoxFlows.getByName(value);
+    },
+    _loadPosition : function(markup){
+      var value = markup.getCssAttr("position", "relative");
+      return new BoxPosition(value, {
+	top: markup.getCssAttr("top", "auto"),
+	left: markup.getCssAttr("left", "auto"),
+	right: markup.getCssAttr("right", "auto"),
+	bottom: markup.getCssAttr("bottom", "auto")
+      });
+    },
+    _loadColor : function(markup){
+      var value = markup.getCssAttr("color", "inherit");
+      if(value !== "inherit"){
+	return new Color(value);
+      }
+    },
+    _loadFont : function(markup, parent){
+      var parent_font_size = parent? parent.font.size : Layout.fontSize;
+      var font = new Font(parent_font_size);
+      var font_size = markup.getCssAttr("font-size", "inherit");
+      if(font_size !== "inherit"){
+	font.size = UnitSize.getFontSize(font_size, parent_font_size);
+      }
+      var font_family = markup.getCssAttr("font-family", "inherit");
+      if(font_family !== "inherit"){
+	font.family = font_family;
+      }
+      var font_weight = markup.getCssAttr("font-weight", "inherit");
+      if(font_weight !== "inherit"){
+	font.weight = font_weight;
+      }
+      var font_style = markup.getCssAttr("font-style", "inherit");
+      if(font_style !== "inherit"){
+	font.style = font_style;
+      }
+      return font;
+    },
+    _loadBoxSizing : function(markup){
+      return markup.getCssAttr("box-sizing", "margin-box");
+    },
+    _loadEdge : function(markup, flow, font){
+      var padding = markup.getCssAttr("padding");
+      var margin = markup.getCssAttr("margin");
+      var border_width = markup.getCssAttr("border-width");
+      if(padding === null && margin === null && border_width === null){
+	return null;
+      }
+      var edge = new BoxEdge();
+      if(padding){
+	edge.padding.setSize(flow, UnitSize.getEdgeSize(padding, font.size));
+      }
+      if(margin){
+	edge.margin.setSize(flow, UnitSize.getEdgeSize(margin, font.size));
+      }
+      if(border_width){
+	edge.border.setSize(flow, UnitSize.getEdgeSize(border_width, font.size));
+      }
+      var border_radius = markup.getCssAttr("border-radius");
+      if(border_radius){
+	edge.setBorderRadius(flow, UnitSize.getCornerSize(border_radius, font.size));
+      }
+      var border_color = markup.getCssAttr("border-color");
+      if(border_color){
+	edge.setBorderColor(flow, border_color);
+      }
+      var border_style = markup.getCssAttr("border-style");
+      if(border_style){
+	edge.setBorderStyle(flow, border_style);
+      }
+      return edge;
+    },
+    _loadLineRate : function(markup, parent){
+      var value = markup.getCssAttr("line-rate");
+      var parent_line_rate = parent? parent.lineRate : Layout.lineRate;
+      return (value === "inherit")? parent_line_rate : parseFloat(value);
+    },
+    _loadTextAlign : function(markup, parent){
+      var value = markup.getCssAttr("text-align", "inherit");
+      var parent_text_align = parent? parent.textAlign : "start";
+      return (value === "inherit")? parent_text_align : new TextAlign(value);
+    },
+    _loadTextEmpha : function(markup, parent){
+      var parent_color = parent? parent.getColor() : Layout.fontColor;
+      var empha_style = markup.getCssAttr("text-emphasis-style", "none");
+      if(empha_style === "none" || empha_style === "inherit"){
+	return null;
+      }
+      var empha_pos = markup.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
+      var empha_color = markup.getCssAttr("text-emphasis-color", parent_color);
+      return new TextEmpha({
+	style:new TextEmphaStyle(empha_style),
+	pos:new TextEmphaPos(empha_pos),
+	color:new Color(empha_color)
+      });
+    },
+    _loadTextEmphaStyle : function(markup, parent){
+      var value = markup.getCssAttr("text-emphasis-style", "inherit");
+      return (value !== "inherit")? new TextEmphaStyle(value) : null;
+    },
+    _loadTextEmphaPos : function(markup, parent){
+      return markup.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
+    },
+    _loadTextEmphaColor : function(markup, parent, color){
+      return markup.getCssAttr("text-emphasis-color", color.getValue());
+    },
+    _loadLogicalFloat : function(markup){
+      var name = markup.getCssAttr("float", "none");
+      if(name === "none"){
+	return null;
+      }
+      return LogicalFloats.get(name);
+    },
+    _loadListStyle : function(markup){
+      var list_style_type = markup.getCssAttr("list-style-type", "none");
+      if(list_style_type === "none"){
+	return null;
+      }
+      return new ListStyle({
+	type:list_style_type,
+	position:markup.getCssAttr("list-style-position", "outside"),
+	image:markup.getCssAttr("list-style-image", "none"),
+	format:markup.getCssAttr("list-style-format")
+      });
+    },
+    _loadLetterSpacing : function(markup, parent, font){
+      var letter_spacing = markup.getCssAttr("letter-spacing");
+      if(letter_spacing){
+	return UnitSize.getUnitSize(letter_spacing, font.size);
+      }
+    },
+    _loadBackground : function(markup, parent){
+      var background = new Background();
+      var bg_color = markup.getCssAttr("background-color");
+      if(bg_color){
+	background.color = new Color(bg_color);
+      }
+      var bg_image = markup.getCssAttr("background-image");
+      if(bg_image){
+	background.image = bg_image;
+      }
+      var bg_pos = markup.getCssAttr("background-position");
+      if(bg_pos){
+	background.pos = new BackgroundPos2d(
+	  new BackgroundPos(bg_pos.inline, bg_pos.offset),
+	  new BackgroundPos(bg_pos.block, bg_pos.offset)
+	);
+      }
+      var bg_repeat = markup.getCssAttr("background-repeat");
+      if(bg_repeat){
+	background.repeat = new BackgroundRepeat2d(
+	  new BackgroundRepeat(bg_repeat.inline),
+	  new BackgroundRepeat(bg_repeat.block)
+	);
+      }
+    },
+    _loadPushedAttr : function(markup){
+      return markup.getCssAttr("pushed") !== null;
+    },
+    _loadPulledAttr : function(markup){
+      return markup.getCssAttr("pulled") !== null;
+    }
+  };
+
+  return StyleContext;
+})();
+

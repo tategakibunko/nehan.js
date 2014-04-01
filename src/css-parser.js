@@ -47,18 +47,6 @@ var CssParser = (function(){
     return (value.indexOf("/") < 0)? [value] : value.split("/");
   };
 
-  // props: [a,b,c]
-  // values:[1,2,3]
-  // => {a:1, b:2, c:3}
-  var zip_obj = function(props, values){
-    var ret = {};
-    if(props.length !== values.length){
-      throw "invalid args:zip_obj";
-    }
-    List.iteri(props, function(i, prop){ ret[prop] = values[i]; });
-    return ret;
-  };
-
   var get_map_2d = function(len){
     return Const.css2dIndex[Math.min(len, 2)] || [];
   };
@@ -94,16 +82,16 @@ var CssParser = (function(){
   var make_edge_4d = function(values){
     var props = Const.cssBoxDirsLogical; // len = 4
     var values_4d = make_values_4d(values); // len = 4
-    return zip_obj(props, values_4d);
+    return List.zipObj(props, values_4d);
   };
 
   var make_corner_4d = function(values){
     var props = Const.cssBoxCornersLogical; // len = 4
     var values_4d = make_values_4d(values); // len = 4
-    return zip_obj(props, values_4d);
+    return List.zipObj(props, values_4d);
   };
 
-  var parse_edge_4d = function(value){
+  var parse_4d = function(value){
     return make_edge_4d(split_space(value));
   };
 
@@ -125,13 +113,13 @@ var CssParser = (function(){
     var values = split_space(value);
     var arg_len = values.length;
     if(arg_len >= 1){
-      ret.push({"border-width":parse_edge_4d(values[0])});
+      ret.push({"border-width":parse_4d(values[0])});
     }
     if(arg_len >= 2){
-      ret.push({"border-style":parse_edge_4d(values[1])});
+      ret.push({"border-style":parse_4d(values[1])});
     }
     if(arg_len >= 3){
-      ret.push({"border-color":parse_edge_4d(values[2])});
+      ret.push({"border-color":parse_4d(values[2])});
     }
     return ret;
   };
@@ -141,13 +129,13 @@ var CssParser = (function(){
     var values = split_space(value);
     var arg_len = values.length;
     if(arg_len >= 1){
-      ret.push({"list-style-type":parse_edge_4d(values[0])});
+      ret.push({"list-style-type":parse_4d(values[0])});
     }
     if(arg_len >= 2){
-      ret.push({"list-style-image":parse_edge_4d(values[1])});
+      ret.push({"list-style-image":parse_4d(values[1])});
     }
     if(arg_len >= 3){
-      ret.push({"list-style-position":parse_edge_4d(values[2])});
+      ret.push({"list-style-position":parse_4d(values[2])});
     }
     return ret;
   };
@@ -209,21 +197,21 @@ var CssParser = (function(){
     case "border":
       return parse_border_abbr(value);
     case "border-color":
-      return parse_edge_4d(value);
+      return parse_4d(value);
     case "border-radius":
       return parse_corner_4d(value);
     case "border-style":
-      return parse_edge_4d(value);
+      return parse_4d(value);
     case "border-width":
-      return parse_edge_4d(value);
+      return parse_4d(value);
     case "font":
       return parse_font_abbr(value);
     case "list-style":
       return parse_list_style_abbr(value);
     case "margin":
-      return parse_edge_4d(value);
+      return parse_4d(value);
     case "padding":
-      return parse_edge_4d(value);
+      return parse_4d(value);
     default: return value;
     }
   };

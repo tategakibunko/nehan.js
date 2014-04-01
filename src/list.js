@@ -10,12 +10,12 @@ var List = {
     }
   },
   reviter : function(lst, fn){
-    for(var i = lst.length; i >= 0; i--){
+    for(var i = lst.length - 1; i >= 0; i--){
       fn(lst[i]);
     }
   },
   reviteri : function(lst, fn){
-    for(var i = lst.length; i >= 0; i--){
+    for(var i = lst.length - 1; i >= 0; i--){
       fn(i, lst[i]);
     }
   },
@@ -169,9 +169,26 @@ var List = {
     }
     return ret;
   },
+  // props: [a,b,c]
+  // values:[1,2,3]
+  // => {a:1, b:2, c:3}
+  zipObj : function(props, values){
+    var ret = {};
+    if(props.length !== values.length){
+      throw "invalid args:List.zipObj";
+    }
+    for(var i = 0, len = props.length; i < len; i++){
+      ret[props[i]] = values[i];
+    }
+    return ret;
+  },
+  // non destructive reverse
   reverse : function(lst){
-    lst.reverse();
-    return lst;
+    var ret = [];
+    this.reviter(lst, function(obj){
+      ret.push(obj);
+    });
+    return ret;
   }
 };
 

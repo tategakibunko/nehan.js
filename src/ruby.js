@@ -28,13 +28,6 @@ var Ruby = (function(){
     getRtFontSize : function(){
       return this.rubyFontSize;
     },
-    getCssVertRuby : function(line){
-      var css = {}, font_size = line.getFontSize();
-      css["margin-left"] = Math.round((line.maxExtent - font_size) / 2) + "px";
-      css[line.flow.getPropExtent()] = this.getExtent(font_size) + "px";
-      css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
-      return css;
-    },
     getCssHoriRuby : function(line){
       var css = {};
       css.display = "inline-block";

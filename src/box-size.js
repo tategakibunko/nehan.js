@@ -5,6 +5,9 @@ var BoxSize = (function(){
   }
 
   BoxSize.prototype = {
+    clone : function(){
+      return new BoxSize(this.width, this.height);
+    },
     isValid : function(){
       return this.width > 0 && this.height > 0;
     },

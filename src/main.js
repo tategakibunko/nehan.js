@@ -131,4 +131,6 @@ __exports.setStyles = function(values){
   return this;
 };
 
+__exports.LayoutTest = LayoutTest;
+
 return __exports;

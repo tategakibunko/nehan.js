@@ -8,8 +8,8 @@ var Word = (function(){
   Word.prototype = {
     getCssVertTrans : function(line){
       var css = {};
-      css["letter-spacing"] = line.letterSpacing + "px";
-      css.width = line.getFontSize() + "px";
+      css["letter-spacing"] = line.style.letterSpacing + "px";
+      css.width = line.style.getFontSize() + "px";
       css.height = this.bodySize + "px";
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
@@ -17,30 +17,30 @@ var Word = (function(){
     },
     getCssVertTransBody : function(line){
       var css = {};
-      css["font-family"] = line.getFontFamily();
+      css["font-family"] = line.style.getFontFamily();
       return css;
     },
     getCssVertTransBodyTrident : function(line){
       var css = {};
-      css["font-family"] = line.getFontFamily();
-      css.width = line.getFontSize() + "px";
+      css["font-family"] = line.style.getFontFamily();
+      css.width = line.style.getFontSize() + "px";
       css.height = this.bodySize + "px";
       css["transform-origin"] = "50% 50%";
 
       // force set line-height to measure(this.bodySize) before rotation,
       // and fix offset by translate after rotatation.
       css["line-height"] = this.bodySize + "px";
-      var trans = Math.floor((this.bodySize - line.getFontSize()) / 2);
+      var trans = Math.floor((this.bodySize - line.style.getFontSize()) / 2);
       if(trans > 0){
 	css["transform"] = "rotate(90deg) translate(-" + trans + "px, 0)";
       }
       return css;
     },
     getCssVertTransIE : function(line){
-      var css = {}, font_size = line.getFontSize();
+      var css = {}, font_size = line.style.getFontSize();
       css["float"] = "left";
       css["writing-mode"] = "tb-rl";
-      css["letter-spacing"] = line.letterSpacing + "px";
+      css["letter-spacing"] = (line.style.letterSpacing || 0) + "px";
       css["padding-left"] = Math.round(font_size / 2) + "px";
       css["line-height"] = font_size + "px";
       return css;
@@ -49,7 +49,7 @@ var Word = (function(){
       return 1; // word is count by 1 character.
     },
     getAdvance : function(flow, letter_spacing){
-      return this.bodySize + letter_spacing * this.getLetterCount();
+      return this.bodySize + (letter_spacing || 0) * this.getLetterCount();
     },
     hasMetrics : function(){
       return (typeof this.bodySize !== "undefined");

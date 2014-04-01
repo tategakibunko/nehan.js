@@ -131,11 +131,7 @@ var Style = {
     "font-style":"italic"
   },
   "div":{
-    "display":"block",
-
-    // using div tag with static size, inline html can be embeded.
-    //  <div width="100" height="100">embed html</div>
-    "embeddable":true
+    "display":"block"
   },
   "dl":{
     "display":"block"
@@ -321,7 +317,7 @@ var Style = {
     "line-rate":1.5
   },
   "li":{
-    "display":"block",
+    "display":"list-item",
     "margin":{
       "after":"0.6em"
     }
@@ -381,6 +377,16 @@ var Style = {
     "list-style-type": "decimal",
     "margin":{
       "before":"1em"
+    }
+  },
+  "ol ol":{
+    "margin":{
+      "before":"0em"
+    }
+  },
+  "ol ul":{
+    "margin":{
+      "before":"0em"
     }
   },
   "optgroup":{
@@ -486,6 +492,7 @@ var Style = {
   // tag / t
   //-------------------------------------------------------
   "table":{
+    //"display":"table",
     "display":"block",
     "embeddable":true,
     "table-layout":"fixed", // 'auto' not supported yet.
@@ -555,7 +562,7 @@ var Style = {
     "meta":true
   },
   "tr":{
-    "display":"block",
+    "display":"table-row",
     "border-color":"#a8a8a8",
     "border-style":"solid"
   },
@@ -574,6 +581,16 @@ var Style = {
     "list-style-position":"outside",
     "margin":{
       "before":"1em"
+    }
+  },
+  "ul ul":{
+    "margin":{
+      "before":"0em"
+    }
+  },
+  "ul ol":{
+    "margin":{
+      "before":"0em"
     }
   },
   //-------------------------------------------------------

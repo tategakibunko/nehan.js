@@ -104,13 +104,11 @@ var TokenStream = (function(){
       return this.lexer.getSeekPercent(seek_pos);
     },
     getWhile : function(fn){
-      var ret = [], push = function(token){
-	ret.push(token);
-      };
+      var ret = [], token;
       while(this.hasNext()){
-	var token = this.get();
+	token = this.get();
 	if(token && fn(token)){
-	  push(token);
+	  ret.push(token);
 	} else {
 	  this.prev();
 	  break;

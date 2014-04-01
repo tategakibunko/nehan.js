@@ -1,153 +1,22 @@
 var Box = (function(){
-  function Box(size, parent, opt){
-    opt = opt || {};
-    this._type = opt.type || "div";
-    this.markup = opt.markup || null;
-    this.position = opt.position || new BoxPosition("relative");
-    this.parent = parent;
+  function Box(size, style){
     this.size = size;
-    this.childExtent = 0;
-    this.childMeasure = 0;
-    this.childs = new BoxChild();
+    this.style = style;
     this.css = {};
-    this.charCount = 0;
   }
 
   Box.prototype = {
-    getMarkup : function(){
-      return this.markup;
-    },
-    getCssBlock : function(){
-      var css = this.css;
-      Args.copy(css, this.size.getCss());
-      Args.copy(css, this.position.getCss());
-      if(this.font){
-	Args.copy(css, this.font.getCss());
-      }
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
-      if(this.parent){
-	Args.copy(css, this.parent.flow.getCss());
-      }
-      if(this.color){
-	Args.copy(css, this.color.getCss());
-      }
-      if(this.background){
-	Args.copy(css, this.background.getCss(this.flow));
-      }
-      if(this.letterSpacing && !this.isTextVertical()){
-	css["letter-spacing"] = this.letterSpacing + "px";
-      }
-      css.display = this.display;
-      css.overflow = "hidden"; // to avoid margin collapsing
-
-      if(this.zIndex){
-	css["z-index"] = this.zIndex;
-      }
-      return css;
-    },
-    getCssInline : function(){
-      var css = this.css;
-      if(this.font){
-	Args.copy(css, this.font.getCss());
-      }
-      if(this.color){
-	Args.copy(css, this.color.getCss());
-      }
-      if(this.background){
-	Args.copy(css, this.background.getCss());
-      }
-      // top level line need to follow parent blockflow.
-      if(this.parent && this.parent.isBlock()){
-	Args.copy(css, this.flow.getCss());
-      }
-      var start_offset = this.getStartOffset();
-      if(start_offset > 0){
-	this.edge = new Margin();
-	this.edge.setStart(this.flow, start_offset);
-
-	var cur_measure = this.getContentMeasure();
-	this.size.setMeasure(this.flow, cur_measure - start_offset);
-      }
-      Args.copy(css, this.size.getCss());
-
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
-      if(this.isTextVertical()){
-	css["line-height"] = "1em";
-	if(Env.isIphoneFamily){
-	  css["letter-spacing"] = "-0.001em";
-	}
-	if(typeof this.markup === "undefined" || !this.isRubyLine()){
-	  css["margin-left"] = css["margin-right"] = "auto";
-	  css["text-align"] = "center";
-	}
-      }
-      return css;
-    },
     getCssVertInlineBox : function(){
       var css = this.getCssBlock();
       css["float"] = "none";
       css["margin-left"] = css["margin-right"] = "auto";
       return css;
     },
-    getCharCount : function(){
-      return this.charCount;
-    },
-    // classes as array
-    getClasses : function(){
-      return this.isTextLine()? this._getClassesInline() : this._getClassesBlock();
-    },
-    // ["nehan-box", "nehan-header"] => "nehan-box nehan-header"
-    getCssClasses : function(){
-      return this.getClasses().join(" ");
-    },
-    _getClassesBlock : function(){
-      var classes = ["nehan-box"];
-      if(this._type != "box"){
-	classes.push(Css.addNehanPrefix(this._type));
-      }
-      return classes.concat(this.extraClasses || []);
-    },
-    _getClassesInline : function(){
-      var classes = ["nehan-text-line"];
-      classes.push("nehan-text-line-" + (this.isTextVertical()? "vert" : "hori"));
-      if(this.markup && this.markup.getName() !== "body"){
-	classes.push("nehan-" + this.markup.getName());
-      }
-      return classes.concat(this.extraClasses || []);
-    },
-    getChilds : function(){
-      return this.childs.get();
-    },
-    getFlow : function(){
-      return this.flow;
-    },
-    getFlowName : function(){
-      return this.flow.getName();
-    },
-    getFlipFlow : function(){
-      return this.flow.getFlipFlow();
-    },
-    getFontSize : function(){
-      return this.font? this.font.size : Layout.fontSize;
-    },
-    getFontFamily : function(){
-      return this.font? this.font.family : "monospace";
-    },
-    getRestContentMeasure : function(){
-      return this.getContentMeasure() - this.childMeasure;
-    },
-    getRestContentExtent : function(){
-      return this.getContentExtent() - this.childExtent;
-    },
     getContentMeasure : function(flow){
-      return this.size.getMeasure(flow || this.flow);
+      return this.size.getMeasure(flow || this.style.flow);
     },
     getContentExtent : function(flow){
-      return this.size.getExtent(flow || this.flow);
+      return this.size.getExtent(flow || this.style.flow);
     },
     getContentWidth : function(){
       return this.size.width;
@@ -156,195 +25,35 @@ var Box = (function(){
       return this.size.height;
     },
     getBoxMeasure : function(flow){
-      var flow2 = flow || this.flow;
-      var ret = this.getContentMeasure(flow2);
+      flow = flow || this.style.flow;
+      var ret = this.getContentMeasure(flow);
       if(this.edge){
-	ret += this.edge.getMeasureSize(flow2);
+	ret += this.edge.getMeasureSize(flow);
       }
       return ret;
     },
     getBoxExtent : function(flow){
-      var flow2 = flow || this.flow;
-      var ret = this.getContentExtent(flow2);
+      flow = flow || this.style.flow;
+      var ret = this.getContentExtent(flow);
       if(this.edge){
-	ret += this.edge.getExtentSize(flow2);
+	ret += this.edge.getExtentSize(flow);
       }
       return ret;
     },
-    getStartOffset : function(){
-      var indent = this.textIndent || 0;
-      switch(this.textAlign){
-      case "start": return indent;
-      case "end": return indent + this.getRestContentMeasure();
-      case "center": return indent + Math.round(this.getRestContentMeasure() / 2);
-      default: return indent;
-      }
-    },
-    getRestSize : function(){
-      var rest_measure = this.getRestContentMeasure();
-      var rest_extent = this.getRestContentExtent();
-      return this.flow.getBoxSize(rest_measure, rest_extent);
-    },
-    getFloatedWrapFlow : function(){
-      return this.flow.getFloatedWrapFlow();
-    },
-    getParentFlow : function(){
-      return this.parent? this.parent.flow : null;
-    },
-    getParallelFlow : function(){
-      return this.flow.getParallelFlow();
-    },
-    getParallelFlipFlow : function(){
-      return this.flow.getParallelFlipFlow();
-    },
-    getEdgeWidth : function(){
-      if(this.sizing && !this.sizing.containEdgeSize()){
-	return 0;
-      }
-      return this.edge? this.edge.getWidth() : 0;
-    },
-    getEdgeHeight : function(){
-      if(this.sizing && !this.sizing.containEdgeSize()){
-	return 0;
-      }
-      return this.edge? this.edge.getHeight() : 0;
-    },
-    getMarkupName : function(){
-      return this.markup? this.markup.getName() : "";
-    },
-    addClass : function(klass){
-      var classes = this.extraClasses || [];
-      classes.push(klass);
-      this.extraClasses = classes;
-    },
-    addChildBlock : function(child){
-      this.childs.add(child);
-      if(!child.isPositionAbsolute()){
-	this.childExtent += child.getBoxExtent(this.flow);
-      }
-      this.charCount += child.getCharCount();
-    },
-    addParaChildBlock : function(child){
-      this.childs.add(child);
-      this.childExtent = Math.max(child.getBoxExtent(this.flow), this.childExtent);
-      this.charCount += child.getCharCount();
-    },
-    setChildMeasure : function(measure){
-      this.childMeasure = measure;
-    },
-    setInlineElements : function(elements, measure){
-      this.childs.setNormal(elements);
-      this.childMeasure = measure;
-    },
-    setCss : function(prop, value){
-      this.css[prop] = value;
-    },
-    setId : function(id){
-      this.id = id;
-    },
-    setParent : function(parent, inherit){
-      var is_inherit = (typeof inherit != "undefined")? inherit : true;
-      this.parent = parent;
-      if(is_inherit){
-	this.setFlow(parent.flow);
-      }
-    },
-    setFlow : function(flow){
-      if(flow.isValid()){
-	this.flow = flow;
-      }
-    },
-    setDisplay : function(display){
-      this.display = display;
-    },
-    setContentExtent : function(flow, extent){
-      this.size.setExtent(flow, extent);
-    },
-    setContentMeasure : function(flow, measure){
-      this.size.setMeasure(flow, measure);
-    },
-    setEdge : function(edge){
-      var sizing = this.sizing? this.sizing : BoxSizings.getByName("margin-box");
-      var sub_edge = sizing.getSubEdge(edge);
-      this.size.subEdge(sub_edge);
-      if(this.size.isValid()){
-	this.edge = edge;
-      }
-    },
-    setMaxExtent : function(extent){
-      this.maxExtent = extent;
-      List.iter(this.getChilds(), function(element){
-	if(element instanceof Box && element._type === "text-line"){
-	  element.setMaxExtent(extent);
-	}
-      });
-    },
-    subMeasure : function(measure){
-      this.size.subMeasure(this.flow, measure);
-    },
-    isBlock : function(){
-      return !this.isTextLine();
-    },
-    isDisplayNone : function(){
-      return this.display === "none";
-    },
-    isPositionAbsolute : function(){
-      return this.position.isAbsolute();
-    },
-    isTextLine : function(){
-      return this._type === "text-line";
-    },
-    isTextLineRoot : function(){
-      return this.parent && this.parent.isBlock();
-    },
-    isInlineOfInline : function(){
-      // when <p>aaaa<span>bbbb</span></p>,
-      // <span>bbbb</span> is inline of inline.
-      return this.parent && this.parent.isTextLine();
-    },
-    isRubyLine : function(){
-      return this.isTextLine() && this.getMarkupName() === "ruby";
-    },
-    isLinkLine : function(){
-      return this.isTextLine() && this.getMarkupName() === "a";
-    },
-    isPreLine : function(){
-      return this.isTextLine() && this.markup && this.markup.getWhiteSpace() === "pre";
-    },
-    isJustifyTarget : function(){
-      var name = this.getMarkupName();
-      return (name !== "first-letter" &&
-	      name !== "rt" &&
-	      name !== "li-marker");
-    },
-    isTextVertical : function(){
-      return this.flow.isTextVertical();
-    },
-    isTextHorizontal : function(){
-      return this.flow.isTextHorizontal();
-    },
-    canInclude : function(size){
-      return this.size.canInclude(size);
-    },
     clearBorderBefore : function(){
       if(this.edge){
-	this.edge.clearBorderBefore(this.flow);
+	this.edge.clearBorderBefore(this.style.flow);
       }
     },
     clearBorderAfter : function(){
       if(this.edge){
-	this.edge.clearBorderAfter(this.flow);
+	this.edge.clearBorderAfter(this.style.flow);
       }
     },
-    shortenMeasure : function(flow){
-      flow = flow || this.flow;
-      this.size.setMeasure(flow, this.childMeasure);
-      return this;
-    },
-    shortenExtent : function(flow){
-      flow = flow || this.flow;
-      this.setContentExtent(flow, this.childExtent);
-      return this;
+    debug : function(title){
+      console.log("[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", title,
+		  this.getContentMeasure(), this.getContentExtent(),
+		  this.getBoxMeasure(), this.getBoxExtent());
     }
   };
 

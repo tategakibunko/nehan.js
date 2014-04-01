@@ -89,6 +89,12 @@ var Layout = {
   getHoriIndir : function(){
     return this.hori.split("-")[0];
   },
+  getRubyRate : function(){
+    if(Style.rt && Style.rt["font-size"]){
+      return parseFloat(Style.rt["font-size"]);
+    }
+    return this.rubyRate || 0.5;
+  },
   getRubyFontSize : function(base_font_size){
     var rt = Style.rt || null;
     var rt_font_size = rt? rt["font-size"] : null;

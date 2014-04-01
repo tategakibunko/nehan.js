@@ -10,5 +10,13 @@ var Args = {
       dst[prop] = (typeof args[prop] == "undefined")? defaults[prop] : args[prop];
     }
     return dst;
+  },
+  activate : function(dst, src, props){
+    List.iter(props, function(prop){
+      if(src[prop]){
+	dst[prop] = src[prop];
+      }
+    });
+    return dst;
   }
 };

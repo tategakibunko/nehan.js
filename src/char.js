@@ -22,17 +22,16 @@ var Char = (function(){
     getCssPadding : function(line){
       var padding = new Padding();
       if(this.paddingStart){
-	padding.setStart(line.flow, this.paddingStart);
+	padding.setStart(line.style.flow, this.paddingStart);
       }
       if(this.paddingEnd){
-	padding.setEnd(line.flow, this.paddingEnd);
+	padding.setEnd(line.style.flow, this.paddingEnd);
       }
       return padding.getCss();
     },
     getCssVertGlyph : function(line){
       var css = {};
       var padding_enable = this.isPaddingEnable();
-      css["font-family"] = line.getFontFamily();
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
       if(this.isKakkoStart()){
@@ -50,7 +49,7 @@ var Char = (function(){
       return css;
     },
     getCssVertImgChar : function(line){
-      var css = {}, font_size = line.getFontSize();
+      var css = {}, font_size = line.style.getFontSize();
       css.display = "block";
       css.width = font_size + "px";
       css.height = this.getVertHeight(font_size) + "px";
@@ -62,7 +61,7 @@ var Char = (function(){
       return css;
     },
     getCssVertRotateCharIE : function(line){
-      var css = {}, font_size = line.getFontSize();
+      var css = {}, font_size = line.style.getFontSize();
       css["float"] = "left";
       css["writing-mode"] = "tb-rl";
       css["padding-left"] = Math.round(font_size / 2) + "px";
@@ -74,7 +73,7 @@ var Char = (function(){
       return css;
     },
     getCssVertEmphaText : function(line){
-      var css = {}, font_size = line.getFontSize();
+      var css = {}, font_size = line.style.getFontSize();
       css.display = "inline-block";
       css.width = font_size + "px";
       css.height = font_size + "px";
@@ -94,7 +93,7 @@ var Char = (function(){
       return css;
     },
     getCssVertHalfSpaceChar : function(line){
-      var css = {}, font_size = line.getFontSize();
+      var css = {}, font_size = line.style.getFontSize();
       var half = Math.round(font_size / 2);
       css.height = half + "px";
       css["line-height"] = half + "px";
@@ -123,7 +122,7 @@ var Char = (function(){
       return (typeof this.bodySize != "undefined");
     },
     getAdvance : function(flow, letter_spacing){
-      return this.bodySize + this.getPaddingSize() + letter_spacing;
+      return this.bodySize + this.getPaddingSize() + (letter_spacing || 0);
     },
     getPaddingSize : function(){
       return (this.paddingStart || 0) + (this.paddingEnd || 0);

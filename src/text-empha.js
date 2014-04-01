@@ -20,17 +20,17 @@ var TextEmpha = (function(){
       return font_size * 3;
     },
     getCssVertEmphaWrap : function(line, chr){
-      var css = {}, font_size = line.getFontSize();
-      css["padding-left"] = "0.5em";
+      var css = {}, font_size = line.style.getFontSize();
+      css["text-align"] = "left";
       css.width = this.getExtent(font_size) + "px";
-      css.height = chr.getAdvance(line.flow, line.letterSpacing) + "px";
+      css.height = chr.getAdvance(line.style.flow, line.style.letterSpacing || 0) + "px";
       return css;
     },
     getCssHoriEmphaWrap : function(line, chr){
-      var css = {}, font_size = line.getFontSize();
+      var css = {}, font_size = line.style.getFontSize();
       css.display = "inline-block";
       css["padding-top"] = (-font_size) + "px";
-      css.width = chr.getAdvance(line.flow, line.letterSpacing) + "px";
+      css.width = chr.getAdvance(line.style.flow, line.style.letterSpacing) + "px";
       css.height = this.getExtent(font_size) + "px";
       return css;
     }

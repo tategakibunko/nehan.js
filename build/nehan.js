@@ -141,6 +141,12 @@ var Layout = {
   getHoriIndir : function(){
     return this.hori.split("-")[0];
   },
+  getRubyRate : function(){
+    if(Style.rt && Style.rt["font-size"]){
+      return parseFloat(Style.rt["font-size"]);
+    }
+    return this.rubyRate || 0.5;
+  },
   getRubyFontSize : function(base_font_size){
     var rt = Style.rt || null;
     var rt_font_size = rt? rt["font-size"] : null;
@@ -349,11 +355,7 @@ var Style = {
     "font-style":"italic"
   },
   "div":{
-    "display":"block",
-
-    // using div tag with static size, inline html can be embeded.
-    //  <div width="100" height="100">embed html</div>
-    "embeddable":true
+    "display":"block"
   },
   "dl":{
     "display":"block"
@@ -539,7 +541,7 @@ var Style = {
     "line-rate":1.5
   },
   "li":{
-    "display":"block",
+    "display":"list-item",
     "margin":{
       "after":"0.6em"
     }
@@ -599,6 +601,16 @@ var Style = {
     "list-style-type": "decimal",
     "margin":{
       "before":"1em"
+    }
+  },
+  "ol ol":{
+    "margin":{
+      "before":"0em"
+    }
+  },
+  "ol ul":{
+    "margin":{
+      "before":"0em"
     }
   },
   "optgroup":{
@@ -704,6 +716,7 @@ var Style = {
   // tag / t
   //-------------------------------------------------------
   "table":{
+    //"display":"table",
     "display":"block",
     "embeddable":true,
     "table-layout":"fixed", // 'auto' not supported yet.
@@ -773,7 +786,7 @@ var Style = {
     "meta":true
   },
   "tr":{
-    "display":"block",
+    "display":"table-row",
     "border-color":"#a8a8a8",
     "border-style":"solid"
   },
@@ -792,6 +805,16 @@ var Style = {
     "list-style-position":"outside",
     "margin":{
       "before":"1em"
+    }
+  },
+  "ul ul":{
+    "margin":{
+      "before":"0em"
+    }
+  },
+  "ul ol":{
+    "margin":{
+      "before":"0em"
     }
   },
   //-------------------------------------------------------
@@ -1077,12 +1100,12 @@ var List = {
     }
   },
   reviter : function(lst, fn){
-    for(var i = lst.length; i >= 0; i--){
+    for(var i = lst.length - 1; i >= 0; i--){
       fn(lst[i]);
     }
   },
   reviteri : function(lst, fn){
-    for(var i = lst.length; i >= 0; i--){
+    for(var i = lst.length - 1; i >= 0; i--){
       fn(i, lst[i]);
     }
   },
@@ -1236,9 +1259,26 @@ var List = {
     }
     return ret;
   },
+  // props: [a,b,c]
+  // values:[1,2,3]
+  // => {a:1, b:2, c:3}
+  zipObj : function(props, values){
+    var ret = {};
+    if(props.length !== values.length){
+      throw "invalid args:List.zipObj";
+    }
+    for(var i = 0, len = props.length; i < len; i++){
+      ret[props[i]] = values[i];
+    }
+    return ret;
+  },
+  // non destructive reverse
   reverse : function(lst){
-    lst.reverse();
-    return lst;
+    var ret = [];
+    this.reviter(lst, function(obj){
+      ret.push(obj);
+    });
+    return ret;
   }
 };
 
@@ -1523,6 +1563,14 @@ var Args = {
       dst[prop] = (typeof args[prop] == "undefined")? defaults[prop] : args[prop];
     }
     return dst;
+  },
+  activate : function(dst, src, props){
+    List.iter(props, function(prop){
+      if(src[prop]){
+	dst[prop] = src[prop];
+      }
+    });
+    return dst;
   }
 };
 
@@ -1594,18 +1642,6 @@ var CssParser = (function(){
     return (value.indexOf("/") < 0)? [value] : value.split("/");
   };
 
-  // props: [a,b,c]
-  // values:[1,2,3]
-  // => {a:1, b:2, c:3}
-  var zip_obj = function(props, values){
-    var ret = {};
-    if(props.length !== values.length){
-      throw "invalid args:zip_obj";
-    }
-    List.iteri(props, function(i, prop){ ret[prop] = values[i]; });
-    return ret;
-  };
-
   var get_map_2d = function(len){
     return Const.css2dIndex[Math.min(len, 2)] || [];
   };
@@ -1641,16 +1677,16 @@ var CssParser = (function(){
   var make_edge_4d = function(values){
     var props = Const.cssBoxDirsLogical; // len = 4
     var values_4d = make_values_4d(values); // len = 4
-    return zip_obj(props, values_4d);
+    return List.zipObj(props, values_4d);
   };
 
   var make_corner_4d = function(values){
     var props = Const.cssBoxCornersLogical; // len = 4
     var values_4d = make_values_4d(values); // len = 4
-    return zip_obj(props, values_4d);
+    return List.zipObj(props, values_4d);
   };
 
-  var parse_edge_4d = function(value){
+  var parse_4d = function(value){
     return make_edge_4d(split_space(value));
   };
 
@@ -1672,13 +1708,13 @@ var CssParser = (function(){
     var values = split_space(value);
     var arg_len = values.length;
     if(arg_len >= 1){
-      ret.push({"border-width":parse_edge_4d(values[0])});
+      ret.push({"border-width":parse_4d(values[0])});
     }
     if(arg_len >= 2){
-      ret.push({"border-style":parse_edge_4d(values[1])});
+      ret.push({"border-style":parse_4d(values[1])});
     }
     if(arg_len >= 3){
-      ret.push({"border-color":parse_edge_4d(values[2])});
+      ret.push({"border-color":parse_4d(values[2])});
     }
     return ret;
   };
@@ -1688,13 +1724,13 @@ var CssParser = (function(){
     var values = split_space(value);
     var arg_len = values.length;
     if(arg_len >= 1){
-      ret.push({"list-style-type":parse_edge_4d(values[0])});
+      ret.push({"list-style-type":parse_4d(values[0])});
     }
     if(arg_len >= 2){
-      ret.push({"list-style-image":parse_edge_4d(values[1])});
+      ret.push({"list-style-image":parse_4d(values[1])});
     }
     if(arg_len >= 3){
-      ret.push({"list-style-position":parse_edge_4d(values[2])});
+      ret.push({"list-style-position":parse_4d(values[2])});
     }
     return ret;
   };
@@ -1756,21 +1792,21 @@ var CssParser = (function(){
     case "border":
       return parse_border_abbr(value);
     case "border-color":
-      return parse_edge_4d(value);
+      return parse_4d(value);
     case "border-radius":
       return parse_corner_4d(value);
     case "border-style":
-      return parse_edge_4d(value);
+      return parse_4d(value);
     case "border-width":
-      return parse_edge_4d(value);
+      return parse_4d(value);
     case "font":
       return parse_font_abbr(value);
     case "list-style":
       return parse_list_style_abbr(value);
     case "margin":
-      return parse_edge_4d(value);
+      return parse_4d(value);
     case "padding":
-      return parse_edge_4d(value);
+      return parse_4d(value);
     default: return value;
     }
   };
@@ -2432,7 +2468,6 @@ var TagAttrParser = (function(){
 })();
 
 var Tag = (function (){
-  var global_tag_id = 0;
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
   var is_inline_style_not_allowed = function(name){
     return List.exists(["padding", "margin", "border"], function(prop){
@@ -2443,10 +2478,8 @@ var Tag = (function (){
   function Tag(src, content_raw){
     this._type = "tag";
     this._inherited = false; // flag to avoid duplicate inheritance
-    this._gtid = global_tag_id++;
     this.src = src;
     this.parent = null;
-    this.next = null;
     this.contentRaw = content_raw || "";
     this.name = this._parseName(this.src);
     this.tagAttr = TagAttrParser.parse(this.src);
@@ -2454,7 +2487,6 @@ var Tag = (function (){
     this.classes = this._parseClasses(this.tagAttr["class"] || "");
     this.dataset = {}; // dataset with no "data-" prefixes => {id:"10", name:"taro"} 
     this.datasetRaw = {}; // dataset with "data-" prefixes => {"data-id":"10", "data-name":"taro"}
-    this.childs = []; // updated by inherit
     this.cssAttrStatic = this._getSelectorValue(); // initialize css-attr, but updated when 'inherit'.
     this.cssAttrDynamic = {}; // added by setCssAttr
 
@@ -2466,63 +2498,17 @@ var Tag = (function (){
   }
 
   Tag.prototype = {
-    inherit : function(parent_tag, context){
+    inherit : function(parent){
       if(this._inherited || !this.hasLayout()){
 	return this; // avoid duplicate initialize
       }
-      var self = this;
-      this.parent = parent_tag;
-      if(this.parent){
-	this.parent.addChild(this);
-      }
+      this.parent = parent;
       this.cssAttrStatic = this._getSelectorValue(); // reget css-attr with parent enabled.
-      this.applyCallbacks(context);
       this._inherited = true;
       return this;
     },
-    applyCallbacks : function(context){
-      var css;
-      var onload = this.getCssAttr("onload");
-      if(onload){
-	css = onload(this, context);
-	if(css){
-	  this.setCssAttrs(css);
-	}
-      }
-      var nth_child = this.getCssAttr("nth-child");
-      if(nth_child){
-	css = nth_child(this.getChildNth(), this, context);
-	if(css){
-	  this.setCssAttrs(css);
-	}
-      }
-      var nth_of_type = this.getCssAttr("nth-of-type");
-      if(nth_of_type){
-	css = nth_of_type(this.getChildOfTypeNth(), this, cotext);
-	if(css){
-	  this.setCssAttrs(css);
-	}
-      }
-/*
-      // TODO:
-      // nth-last-child, nth-last-of-type not supported yet,
-      // because getting order from tail needs 2-pass parsing,
-      // and it consts too much for js engine.
-      var nth_last_child = this.getCssAttr("nth-last-child");
-      if(nth_last_child){
-	css = nth_last_child(this.getLastChildNth());
-	if(css){
-	  this.setCssAttrs(css);
-	}
-      }
-      var nth_last_of_type = this.getCssAttr("nth-last-of-type");
-      if(nth_last_of_type){
-	css = nth_last_of_type(this.getLastChildOfTypeNth());
-	if(css){
-	  this.setCssAttrs(css);
-	}
-      }
-*/
+    clone : function(){
+      return new Tag(this.src, this.contentRaw);
     },
     setContentRaw : function(content_raw){
       this.contentRaw = content_raw;
@@ -2538,15 +2524,6 @@ var Tag = (function (){
 	this.setCssAttr(prop, obj[prop]);
       }
     },
-    setNext : function(tag){
-      this.next = tag;
-    },
-    addChild : function(tag){
-      if(this.childs.length > 0){
-	List.last(this.childs).setNext(tag);
-      }
-      this.childs.push(tag);
-    },
     addClass : function(klass){
       this.classes.push(klass);
     },
@@ -2555,22 +2532,8 @@ var Tag = (function (){
 	return cls != klass;
       });
     },
-    iterTagAttr : function(fn){
-      Obj.each(this.tagAttr, fn);
-    },
-    iterCssAttrDynamic : function(fn){
-      Obj.each(this.cssAttrDynamic, fn);
-    },
-    iterCssAttrStatic : function(fn){
-      Obj.each(this.cssAttrStatic, fn);
-    },
-    iterCssAttr : function(fn){
-      this.iterCssAttrStatic(fn);
-      this.iterCssAttrDynamic(fn); // dynamic attrs prior to static ones.
-    },
-    iterAttr : function(fn){
-      this.iterCssAttr(fn);
-      this.iterTagAttr(fn); // inline attrs prior to css attrs.
+    getParent : function(){
+      return this.parent;
     },
     getName : function(){
       return this.name;
@@ -2585,30 +2548,6 @@ var Tag = (function (){
 	return ret;
       }
       return (typeof def_value !== "undefined")? def_value : null;
-    },
-    getParent : function(){
-      return this.parent || null;
-    },
-    getChilds : function(){
-      return this.childs;
-    },
-    getNext : function(){
-      return this.next || null;
-    },
-    getDisplay : function(){
-      return this.getCssAttr("display", "block"); // display is block if not defined.
-    },
-    getWhiteSpace : function(){
-      return this.getCssAttr("white-space", "normal");
-    },
-    getParentChilds : function(){
-      return this.parent? this.parent.getChilds() : [];
-    },
-    getParentTypeChilds : function(){
-      var name = this.getName();
-      return List.filter(this.getParentChilds(), function(tag){
-	return tag.getName() === name;
-      });
     },
     getCssClasses : function(){
       return this.classes.join(" ");
@@ -2663,37 +2602,11 @@ var Tag = (function (){
       }
       return this.src + this.contentRaw + "</" + this.name + ">";
     },
-    getLogicalFloat : function(){
-      return this.getCssAttr("float", "none");
-    },
     getHeaderRank : function(){
       if(this.getName().match(/h([1-6])/)){
 	return parseInt(RegExp.$1, 10);
       }
       return 0;
-    },
-    getStaticSize : function(font_size, max_size){
-      var width = this.getAttr("width");
-      var height = this.getAttr("height");
-      if(width && height){
-	width = UnitSize.getBoxSize(width, font_size, max_size);
-	height = UnitSize.getBoxSize(height, font_size, max_size);
-	return new BoxSize(width, height);
-      }
-      // if size of img is not defined, treat it as character size icon.
-      // so, if basic font size is 16px, you can write <img src='/path/to/icon'>
-      // instead of writing <img src='/path/to/icon' width='16' height='16'>
-      if(this.name === "img"){
-	var icon_size = Layout.fontSize;
-	return new BoxSize(icon_size, icon_size);
-      }
-      return null;
-    },
-    hasStaticSize : function(){
-      return (this.getAttr("width") !== null && this.getAttr("height") !== null);
-    },
-    hasFlow : function(){
-      return this.getCssAttr("flow") !== null;
     },
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
@@ -2705,42 +2618,12 @@ var Tag = (function (){
     isPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
-    isFloated : function(){
-      return this.getLogicalFloat() != "none";
-    },
-    isPush : function(){
-      return (typeof this.tagAttr.push != "undefined");
-    },
-    isPull : function(){
-      return (typeof this.tagAttr.pull != "undefined");
-    },
     isAnchorTag : function(){
       return this.name === "a" && this.getTagAttr("name") !== null;
     },
     isAnchorLinkTag : function(){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
-    },
-    isBlock : function(){
-      var display = this.getDisplay();
-      if(display === "block"){
-	return true;
-      }
-      // floated block with static size is treated as block level floated box.
-      if(this.hasStaticSize() && this.isFloated() && display !== "inline-block"){
-	return true;
-      }
-      if(this.isPush() || this.isPull()){
-	return true;
-      }
-      return false;
-    },
-    isInline : function(){
-      var display = this.getDisplay();
-      return (display === "inline" || display === "inline-block");
-    },
-    isInlineBlock : function(){
-      return this.getDisplay() === "inline-block";
     },
     isSingleTag : function(){
       return this.getCssAttr("single") === true;
@@ -2767,48 +2650,6 @@ var Tag = (function (){
     },
     isMetaTag : function(){
       return this.getCssAttr("meta") === true;
-    },
-    isSameTag : function(dst){
-      return this._gtid === dst._gtid;
-    },
-    getChildIndexFrom : function(childs){
-      var self = this;
-      return List.indexOf(childs, function(tag){
-	return self.isSameTag(tag);
-      });
-    },
-    getChildNth : function(){
-      return this.getChildIndexFrom(this.getParentChilds());
-    },
-    getLastChildNth : function(){
-      return this.getChildIndexFrom(List.reverse(this.getParentChilds()));
-    },
-    getChildOfTypeNth : function(){
-      return this.getChildIndexFrom(this.getParentTypeChilds());
-    },
-    getLastChildOfTypeNth : function(){
-      return this.getChildIndexFrom(this.getParentTypeChilds());
-    },
-    isFirstChild : function(){
-      return this.getChildNth() === 0;
-    },
-    isLastChild : function(){
-      var childs = this.getParentChilds();
-      return this.getChildNth() === (childs.length - 1);
-    },
-    isFirstOfType : function(){
-      return this.getChildOfTypeNth() === 0;
-    },
-    isLastOfType : function(){
-      var childs = this.getParentTypeChilds();
-      return this.getChildOfTypeNth() === (childs.length - 1);
-    },
-    isOnlyChild : function(){
-      return this.getParentChilds().length === 1;
-    },
-    isOnlyOfType : function(){
-      var childs = this.getParentTypeChilds();
-      return (childs.length === 1 && this.isSame(childs[0]));
     },
     isRoot : function(){
       return this.parent === null;
@@ -2910,7 +2751,7 @@ var Token = {
     return token._type === "tag";
   },
   isText : function(token){
-    return token._type === "char" || token._type === "word" || token._type === "tcy";
+    return token._type === "char" || token._type === "word" || token._type === "tcy" || token._type === "ruby";
   },
   isChar : function(token){
     return token._type === "char";
@@ -2957,17 +2798,16 @@ var Char = (function(){
     getCssPadding : function(line){
       var padding = new Padding();
       if(this.paddingStart){
-	padding.setStart(line.flow, this.paddingStart);
+	padding.setStart(line.style.flow, this.paddingStart);
       }
       if(this.paddingEnd){
-	padding.setEnd(line.flow, this.paddingEnd);
+	padding.setEnd(line.style.flow, this.paddingEnd);
       }
       return padding.getCss();
     },
     getCssVertGlyph : function(line){
       var css = {};
       var padding_enable = this.isPaddingEnable();
-      css["font-family"] = line.getFontFamily();
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
       if(this.isKakkoStart()){
@@ -2985,7 +2825,7 @@ var Char = (function(){
       return css;
     },
     getCssVertImgChar : function(line){
-      var css = {}, font_size = line.getFontSize();
+      var css = {}, font_size = line.style.getFontSize();
       css.display = "block";
       css.width = font_size + "px";
       css.height = this.getVertHeight(font_size) + "px";
@@ -2997,7 +2837,7 @@ var Char = (function(){
       return css;
     },
     getCssVertRotateCharIE : function(line){
-      var css = {}, font_size = line.getFontSize();
+      var css = {}, font_size = line.style.getFontSize();
       css["float"] = "left";
       css["writing-mode"] = "tb-rl";
       css["padding-left"] = Math.round(font_size / 2) + "px";
@@ -3009,7 +2849,7 @@ var Char = (function(){
       return css;
     },
     getCssVertEmphaText : function(line){
-      var css = {}, font_size = line.getFontSize();
+      var css = {}, font_size = line.style.getFontSize();
       css.display = "inline-block";
       css.width = font_size + "px";
       css.height = font_size + "px";
@@ -3029,7 +2869,7 @@ var Char = (function(){
       return css;
     },
     getCssVertHalfSpaceChar : function(line){
-      var css = {}, font_size = line.getFontSize();
+      var css = {}, font_size = line.style.getFontSize();
       var half = Math.round(font_size / 2);
       css.height = half + "px";
       css["line-height"] = half + "px";
@@ -3058,7 +2898,7 @@ var Char = (function(){
       return (typeof this.bodySize != "undefined");
     },
     getAdvance : function(flow, letter_spacing){
-      return this.bodySize + this.getPaddingSize() + letter_spacing;
+      return this.bodySize + this.getPaddingSize() + (letter_spacing || 0);
     },
     getPaddingSize : function(){
       return (this.paddingStart || 0) + (this.paddingEnd || 0);
@@ -3310,8 +3150,8 @@ var Word = (function(){
   Word.prototype = {
     getCssVertTrans : function(line){
       var css = {};
-      css["letter-spacing"] = line.letterSpacing + "px";
-      css.width = line.getFontSize() + "px";
+      css["letter-spacing"] = line.style.letterSpacing + "px";
+      css.width = line.style.getFontSize() + "px";
       css.height = this.bodySize + "px";
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
@@ -3319,30 +3159,30 @@ var Word = (function(){
     },
     getCssVertTransBody : function(line){
       var css = {};
-      css["font-family"] = line.getFontFamily();
+      css["font-family"] = line.style.getFontFamily();
       return css;
     },
     getCssVertTransBodyTrident : function(line){
       var css = {};
-      css["font-family"] = line.getFontFamily();
-      css.width = line.getFontSize() + "px";
+      css["font-family"] = line.style.getFontFamily();
+      css.width = line.style.getFontSize() + "px";
       css.height = this.bodySize + "px";
       css["transform-origin"] = "50% 50%";
 
       // force set line-height to measure(this.bodySize) before rotation,
       // and fix offset by translate after rotatation.
       css["line-height"] = this.bodySize + "px";
-      var trans = Math.floor((this.bodySize - line.getFontSize()) / 2);
+      var trans = Math.floor((this.bodySize - line.style.getFontSize()) / 2);
       if(trans > 0){
 	css["transform"] = "rotate(90deg) translate(-" + trans + "px, 0)";
       }
       return css;
     },
     getCssVertTransIE : function(line){
-      var css = {}, font_size = line.getFontSize();
+      var css = {}, font_size = line.style.getFontSize();
       css["float"] = "left";
       css["writing-mode"] = "tb-rl";
-      css["letter-spacing"] = line.letterSpacing + "px";
+      css["letter-spacing"] = (line.style.letterSpacing || 0) + "px";
       css["padding-left"] = Math.round(font_size / 2) + "px";
       css["line-height"] = font_size + "px";
       return css;
@@ -3351,7 +3191,7 @@ var Word = (function(){
       return 1; // word is count by 1 character.
     },
     getAdvance : function(flow, letter_spacing){
-      return this.bodySize + letter_spacing * this.getLetterCount();
+      return this.bodySize + (letter_spacing || 0) * this.getLetterCount();
     },
     hasMetrics : function(){
       return (typeof this.bodySize !== "undefined");
@@ -3458,13 +3298,6 @@ var Ruby = (function(){
     },
     getRtFontSize : function(){
       return this.rubyFontSize;
-    },
-    getCssVertRuby : function(line){
-      var css = {}, font_size = line.getFontSize();
-      css["margin-left"] = Math.round((line.maxExtent - font_size) / 2) + "px";
-      css[line.flow.getPropExtent()] = this.getExtent(font_size) + "px";
-      css[line.flow.getPropMeasure()] = this.getAdvance() + "px";
-      return css;
     },
     getCssHoriRuby : function(line){
       var css = {};
@@ -4597,6 +4430,14 @@ var Edge = (function(){
       this.bottom = 0;
       this.left = 0;
     },
+    clone : function(){
+      var edge = new Edge(this.type);
+      edge.top = this.top;
+      edge.right = this.right;
+      edge.bottom = this.bottom;
+      edge.left = this.left;
+      return edge;
+    },
     isEnable : function(){
       return this.top !== 0 || this.right !== 0 || this.bottom !== 0 || this.left !== 0;
     },
@@ -5041,17 +4882,17 @@ var TextEmpha = (function(){
       return font_size * 3;
     },
     getCssVertEmphaWrap : function(line, chr){
-      var css = {}, font_size = line.getFontSize();
-      css["padding-left"] = "0.5em";
+      var css = {}, font_size = line.style.getFontSize();
+      css["text-align"] = "left";
       css.width = this.getExtent(font_size) + "px";
-      css.height = chr.getAdvance(line.flow, line.letterSpacing) + "px";
+      css.height = chr.getAdvance(line.style.flow, line.style.letterSpacing || 0) + "px";
       return css;
     },
     getCssHoriEmphaWrap : function(line, chr){
-      var css = {}, font_size = line.getFontSize();
+      var css = {}, font_size = line.style.getFontSize();
       css.display = "inline-block";
       css["padding-top"] = (-font_size) + "px";
-      css.width = chr.getAdvance(line.flow, line.letterSpacing) + "px";
+      css.width = chr.getAdvance(line.style.flow, line.style.letterSpacing) + "px";
       css.height = this.getExtent(font_size) + "px";
       return css;
     }
@@ -5071,6 +4912,13 @@ var BoxEdge = (function (){
   BoxEdge.prototype = {
     isEnable : function(){
       return this.padding.isEnable() || this.margin.isEnable() || this.border.isEnable();
+    },
+    clone : function(){
+      var edge = new BoxEdge();
+      edge.padding = this.padding.clone();
+      edge.margin = this.margin.clone();
+      edge.border = this.border.clone();
+      return edge;
     },
     clear : function(){
       this.padding.clear();
@@ -5145,6 +4993,9 @@ var BoxSize = (function(){
   }
 
   BoxSize.prototype = {
+    clone : function(){
+      return new BoxSize(this.width, this.height);
+    },
     isValid : function(){
       return this.width > 0 && this.height > 0;
     },
@@ -5217,34 +5068,6 @@ var BoxSize = (function(){
   return BoxSize;
 })();
 
-var BoxChild = (function(){
-  function BoxChild(){
-    this.forward = [];
-    this.normal = [];
-    this.backward = [];
-  }
-
-  BoxChild.prototype = {
-    get : function(){
-      return this.forward.concat(this.normal).concat(this.backward);
-    },
-    setNormal : function(elements){
-      this.normal = elements;
-    },
-    add : function(child){
-      if(child.backward){
-	this.backward.unshift(child);
-      } else if(child.forward){
-	this.forward.push(child);
-      } else {
-	this.normal.push(child);
-      }
-    }
-  };
-
-  return BoxChild;
-})();
-
 var BoxPosition = (function(){
   function BoxPosition(position, offset){
     offset = offset || {};
@@ -5275,155 +5098,24 @@ var BoxPosition = (function(){
 
 
 var Box = (function(){
-  function Box(size, parent, opt){
-    opt = opt || {};
-    this._type = opt.type || "div";
-    this.markup = opt.markup || null;
-    this.position = opt.position || new BoxPosition("relative");
-    this.parent = parent;
+  function Box(size, style){
     this.size = size;
-    this.childExtent = 0;
-    this.childMeasure = 0;
-    this.childs = new BoxChild();
+    this.style = style;
     this.css = {};
-    this.charCount = 0;
   }
 
   Box.prototype = {
-    getMarkup : function(){
-      return this.markup;
-    },
-    getCssBlock : function(){
-      var css = this.css;
-      Args.copy(css, this.size.getCss());
-      Args.copy(css, this.position.getCss());
-      if(this.font){
-	Args.copy(css, this.font.getCss());
-      }
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
-      if(this.parent){
-	Args.copy(css, this.parent.flow.getCss());
-      }
-      if(this.color){
-	Args.copy(css, this.color.getCss());
-      }
-      if(this.background){
-	Args.copy(css, this.background.getCss(this.flow));
-      }
-      if(this.letterSpacing && !this.isTextVertical()){
-	css["letter-spacing"] = this.letterSpacing + "px";
-      }
-      css.display = this.display;
-      css.overflow = "hidden"; // to avoid margin collapsing
-
-      if(this.zIndex){
-	css["z-index"] = this.zIndex;
-      }
-      return css;
-    },
-    getCssInline : function(){
-      var css = this.css;
-      if(this.font){
-	Args.copy(css, this.font.getCss());
-      }
-      if(this.color){
-	Args.copy(css, this.color.getCss());
-      }
-      if(this.background){
-	Args.copy(css, this.background.getCss());
-      }
-      // top level line need to follow parent blockflow.
-      if(this.parent && this.parent.isBlock()){
-	Args.copy(css, this.flow.getCss());
-      }
-      var start_offset = this.getStartOffset();
-      if(start_offset > 0){
-	this.edge = new Margin();
-	this.edge.setStart(this.flow, start_offset);
-
-	var cur_measure = this.getContentMeasure();
-	this.size.setMeasure(this.flow, cur_measure - start_offset);
-      }
-      Args.copy(css, this.size.getCss());
-
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
-      if(this.isTextVertical()){
-	css["line-height"] = "1em";
-	if(Env.isIphoneFamily){
-	  css["letter-spacing"] = "-0.001em";
-	}
-	if(typeof this.markup === "undefined" || !this.isRubyLine()){
-	  css["margin-left"] = css["margin-right"] = "auto";
-	  css["text-align"] = "center";
-	}
-      }
-      return css;
-    },
     getCssVertInlineBox : function(){
       var css = this.getCssBlock();
       css["float"] = "none";
       css["margin-left"] = css["margin-right"] = "auto";
       return css;
     },
-    getCharCount : function(){
-      return this.charCount;
-    },
-    // classes as array
-    getClasses : function(){
-      return this.isTextLine()? this._getClassesInline() : this._getClassesBlock();
-    },
-    // ["nehan-box", "nehan-header"] => "nehan-box nehan-header"
-    getCssClasses : function(){
-      return this.getClasses().join(" ");
-    },
-    _getClassesBlock : function(){
-      var classes = ["nehan-box"];
-      if(this._type != "box"){
-	classes.push(Css.addNehanPrefix(this._type));
-      }
-      return classes.concat(this.extraClasses || []);
-    },
-    _getClassesInline : function(){
-      var classes = ["nehan-text-line"];
-      classes.push("nehan-text-line-" + (this.isTextVertical()? "vert" : "hori"));
-      if(this.markup && this.markup.getName() !== "body"){
-	classes.push("nehan-" + this.markup.getName());
-      }
-      return classes.concat(this.extraClasses || []);
-    },
-    getChilds : function(){
-      return this.childs.get();
-    },
-    getFlow : function(){
-      return this.flow;
-    },
-    getFlowName : function(){
-      return this.flow.getName();
-    },
-    getFlipFlow : function(){
-      return this.flow.getFlipFlow();
-    },
-    getFontSize : function(){
-      return this.font? this.font.size : Layout.fontSize;
-    },
-    getFontFamily : function(){
-      return this.font? this.font.family : "monospace";
-    },
-    getRestContentMeasure : function(){
-      return this.getContentMeasure() - this.childMeasure;
-    },
-    getRestContentExtent : function(){
-      return this.getContentExtent() - this.childExtent;
-    },
     getContentMeasure : function(flow){
-      return this.size.getMeasure(flow || this.flow);
+      return this.size.getMeasure(flow || this.style.flow);
     },
     getContentExtent : function(flow){
-      return this.size.getExtent(flow || this.flow);
+      return this.size.getExtent(flow || this.style.flow);
     },
     getContentWidth : function(){
       return this.size.width;
@@ -5432,195 +5124,35 @@ var Box = (function(){
       return this.size.height;
     },
     getBoxMeasure : function(flow){
-      var flow2 = flow || this.flow;
-      var ret = this.getContentMeasure(flow2);
+      flow = flow || this.style.flow;
+      var ret = this.getContentMeasure(flow);
       if(this.edge){
-	ret += this.edge.getMeasureSize(flow2);
+	ret += this.edge.getMeasureSize(flow);
       }
       return ret;
     },
     getBoxExtent : function(flow){
-      var flow2 = flow || this.flow;
-      var ret = this.getContentExtent(flow2);
+      flow = flow || this.style.flow;
+      var ret = this.getContentExtent(flow);
       if(this.edge){
-	ret += this.edge.getExtentSize(flow2);
+	ret += this.edge.getExtentSize(flow);
       }
       return ret;
     },
-    getStartOffset : function(){
-      var indent = this.textIndent || 0;
-      switch(this.textAlign){
-      case "start": return indent;
-      case "end": return indent + this.getRestContentMeasure();
-      case "center": return indent + Math.round(this.getRestContentMeasure() / 2);
-      default: return indent;
-      }
-    },
-    getRestSize : function(){
-      var rest_measure = this.getRestContentMeasure();
-      var rest_extent = this.getRestContentExtent();
-      return this.flow.getBoxSize(rest_measure, rest_extent);
-    },
-    getFloatedWrapFlow : function(){
-      return this.flow.getFloatedWrapFlow();
-    },
-    getParentFlow : function(){
-      return this.parent? this.parent.flow : null;
-    },
-    getParallelFlow : function(){
-      return this.flow.getParallelFlow();
-    },
-    getParallelFlipFlow : function(){
-      return this.flow.getParallelFlipFlow();
-    },
-    getEdgeWidth : function(){
-      if(this.sizing && !this.sizing.containEdgeSize()){
-	return 0;
-      }
-      return this.edge? this.edge.getWidth() : 0;
-    },
-    getEdgeHeight : function(){
-      if(this.sizing && !this.sizing.containEdgeSize()){
-	return 0;
-      }
-      return this.edge? this.edge.getHeight() : 0;
-    },
-    getMarkupName : function(){
-      return this.markup? this.markup.getName() : "";
-    },
-    addClass : function(klass){
-      var classes = this.extraClasses || [];
-      classes.push(klass);
-      this.extraClasses = classes;
-    },
-    addChildBlock : function(child){
-      this.childs.add(child);
-      if(!child.isPositionAbsolute()){
-	this.childExtent += child.getBoxExtent(this.flow);
-      }
-      this.charCount += child.getCharCount();
-    },
-    addParaChildBlock : function(child){
-      this.childs.add(child);
-      this.childExtent = Math.max(child.getBoxExtent(this.flow), this.childExtent);
-      this.charCount += child.getCharCount();
-    },
-    setChildMeasure : function(measure){
-      this.childMeasure = measure;
-    },
-    setInlineElements : function(elements, measure){
-      this.childs.setNormal(elements);
-      this.childMeasure = measure;
-    },
-    setCss : function(prop, value){
-      this.css[prop] = value;
-    },
-    setId : function(id){
-      this.id = id;
-    },
-    setParent : function(parent, inherit){
-      var is_inherit = (typeof inherit != "undefined")? inherit : true;
-      this.parent = parent;
-      if(is_inherit){
-	this.setFlow(parent.flow);
-      }
-    },
-    setFlow : function(flow){
-      if(flow.isValid()){
-	this.flow = flow;
-      }
-    },
-    setDisplay : function(display){
-      this.display = display;
-    },
-    setContentExtent : function(flow, extent){
-      this.size.setExtent(flow, extent);
-    },
-    setContentMeasure : function(flow, measure){
-      this.size.setMeasure(flow, measure);
-    },
-    setEdge : function(edge){
-      var sizing = this.sizing? this.sizing : BoxSizings.getByName("margin-box");
-      var sub_edge = sizing.getSubEdge(edge);
-      this.size.subEdge(sub_edge);
-      if(this.size.isValid()){
-	this.edge = edge;
-      }
-    },
-    setMaxExtent : function(extent){
-      this.maxExtent = extent;
-      List.iter(this.getChilds(), function(element){
-	if(element instanceof Box && element._type === "text-line"){
-	  element.setMaxExtent(extent);
-	}
-      });
-    },
-    subMeasure : function(measure){
-      this.size.subMeasure(this.flow, measure);
-    },
-    isBlock : function(){
-      return !this.isTextLine();
-    },
-    isDisplayNone : function(){
-      return this.display === "none";
-    },
-    isPositionAbsolute : function(){
-      return this.position.isAbsolute();
-    },
-    isTextLine : function(){
-      return this._type === "text-line";
-    },
-    isTextLineRoot : function(){
-      return this.parent && this.parent.isBlock();
-    },
-    isInlineOfInline : function(){
-      // when <p>aaaa<span>bbbb</span></p>,
-      // <span>bbbb</span> is inline of inline.
-      return this.parent && this.parent.isTextLine();
-    },
-    isRubyLine : function(){
-      return this.isTextLine() && this.getMarkupName() === "ruby";
-    },
-    isLinkLine : function(){
-      return this.isTextLine() && this.getMarkupName() === "a";
-    },
-    isPreLine : function(){
-      return this.isTextLine() && this.markup && this.markup.getWhiteSpace() === "pre";
-    },
-    isJustifyTarget : function(){
-      var name = this.getMarkupName();
-      return (name !== "first-letter" &&
-	      name !== "rt" &&
-	      name !== "li-marker");
-    },
-    isTextVertical : function(){
-      return this.flow.isTextVertical();
-    },
-    isTextHorizontal : function(){
-      return this.flow.isTextHorizontal();
-    },
-    canInclude : function(size){
-      return this.size.canInclude(size);
-    },
     clearBorderBefore : function(){
       if(this.edge){
-	this.edge.clearBorderBefore(this.flow);
+	this.edge.clearBorderBefore(this.style.flow);
       }
     },
     clearBorderAfter : function(){
       if(this.edge){
-	this.edge.clearBorderAfter(this.flow);
+	this.edge.clearBorderAfter(this.style.flow);
       }
     },
-    shortenMeasure : function(flow){
-      flow = flow || this.flow;
-      this.size.setMeasure(flow, this.childMeasure);
-      return this;
-    },
-    shortenExtent : function(flow){
-      flow = flow || this.flow;
-      this.setContentExtent(flow, this.childExtent);
-      return this;
+    debug : function(title){
+      console.log("[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", title,
+		  this.getContentMeasure(), this.getContentExtent(),
+		  this.getBoxMeasure(), this.getBoxExtent());
     }
   };
 
@@ -6971,13 +6503,11 @@ var TokenStream = (function(){
       return this.lexer.getSeekPercent(seek_pos);
     },
     getWhile : function(fn){
-      var ret = [], push = function(token){
-	ret.push(token);
-      };
+      var ret = [], token;
       while(this.hasNext()){
-	var token = this.get();
+	token = this.get();
 	if(token && fn(token)){
-	  push(token);
+	  ret.push(token);
 	} else {
 	  this.prev();
 	  break;
@@ -9925,6 +9455,2483 @@ var PageGroupStream = (function(){
 })();
 
 
+var Kerning = {
+  set : function(token, opt){
+    if(token.isKakkoStart()){
+      this._setKerningStart(token, opt.prev || null);
+    } else if(token.isKakkoEnd() || token.isKutenTouten()){
+      this._setKerningEnd(token, opt.next || null);
+    }
+  },
+  _setKerningStart : function(cur_char, prev_text){
+    var space_rate = this._getTextSpaceStart(cur_char, prev_text);
+    if(space_rate > 0){
+      cur_char.spaceRateStart = space_rate;
+    }
+  },
+  _setKerningEnd : function(cur_char, next_text){
+    var space_rate = this._getTextSpaceEnd(cur_char, next_text);
+    if(space_rate > 0){
+      cur_char.spaceRateEnd = space_rate;
+    }
+  },
+  _getTextSpaceStart : function(cur_char, prev_text){
+    if(prev_text === null){
+      return 0.5;
+    }
+    if(Token.isChar(prev_text) && prev_text.isKakkoStart()){
+      return 0;
+    }
+    return 0.5;
+  },
+  _getTextSpaceEnd : function(cur_char, next_text){
+    if(next_text === null){
+      return 0.5;
+    }
+    if(Token.isChar(next_text) && (next_text.isKakkoEnd() || next_text.isKutenTouten())){
+      return 0;
+    }
+    return 0.5;
+  }
+};
+
+var LogicalFloat = (function(){
+  function LogicalFloat(value){
+    this.value = value || "none";
+  }
+
+  LogicalFloat.prototype = {
+    getCss : function(flow){
+      var css = {};
+      if(flow.isTextHorizontal()){
+	if(this.isStart()){
+	  css["float"] = "left";
+	} else if(this.isEnd()){
+	  css["float"] = "right";
+	}
+      }
+      return css;
+    },
+    isStart : function(){
+      return this.value === "start";
+    },
+    isEnd : function(){
+      return this.value === "end";
+    },
+    isNone : function(){
+      return this.value === "none";
+    }
+  };
+
+  return LogicalFloat;
+})();
+
+
+var LogicalFloats = {
+  start:(new LogicalFloat("start")),
+  end:(new LogicalFloat("end")),
+  none:(new LogicalFloat("none")),
+  get : function(name){
+    name = name || "none";
+    return this[name];
+  }
+};
+
+var TextAlign = (function(){
+  function TextAlign(value){
+    this.value = value || "start";
+  }
+
+  TextAlign.prototype = {
+    isStart : function(){
+      return this.value === "start";
+    },
+    isEnd : function(){
+      return this.value === "end";
+    },
+    isCenter : function(){
+      return this.value === "center";
+    },
+    getCss : function(line){
+      var css = {};
+      if(this.value === "center"){
+      }
+      return css;
+    }
+  };
+
+  return TextAlign;
+})();
+
+
+var StyleContext = (function(){
+
+  // parent : parent style context
+  function StyleContext(markup, parent){
+    this.markup = this._inheritMarkup(markup, parent);
+    this.parent = parent;
+    this.display = this._loadDisplay(markup); // required
+    this.flow = this._loadFlow(markup, parent); // required
+    this.boxSizing = this._loadBoxSizing(markup); // required
+    this.childs = []; // children for this style, updated by _appendChild
+    var color = this._loadColor(markup, parent);
+    if(color){
+      this.color = color;
+    }
+    var font = this._loadFont(markup, parent);
+    if(font){
+      this.font = font;
+    }
+    var position = this._loadPosition(markup, parent);
+    if(position){
+      this.position = position;
+    }
+    var edge = this._loadEdge(markup, this.flow, this.font);
+    if(edge){
+      this.edge = edge;
+    }
+    var line_rate = this._loadLineRate(markup, parent);
+    if(line_rate){
+      this.lineRate = line_rate;
+    }
+    var text_align = this._loadTextAlign(markup, parent);
+    if(text_align){
+      this.textAlign = text_align;
+    }
+    var text_empha = this._loadTextEmpha(markup, parent);
+    if(text_empha){
+      this.textEmpha = text_empha;
+    }
+    var pushed = this._loadPushedAttr(markup);
+    if(pushed){
+      this.pushed = true;
+    }
+    var pulled = this._loadPulledAttr(markup);
+    if(pulled){
+      this.pulled = true;
+    }
+    var logical_float = this._loadLogicalFloat(markup);
+    if(logical_float){
+      this.logicalFloat = logical_float;
+    }
+    var list_style = this._loadListStyle(markup);
+    if(list_style){
+      this.listStyle = list_style;
+    }
+    this.contentSize = this._computeContentSize(this.edge || null); // required
+    this.cssBlock = this._computeCssBlock(); // required
+    this.cssInline = this._computeCssInline(); // required
+    if(this.parent){
+      this.parent._appendChild(this);
+    }
+  }
+
+  StyleContext.prototype = {
+    clone : function(css){
+      // no one can clone root style.
+      if(this.parent === null){
+	return this.createChild("div", css);
+      }
+      var tag = this.markup.clone();
+      tag.setCssAttrs(css || {}); // set dynamic styles
+      return new StyleContext(tag, this.parent || null);
+    },
+    // inherit style with tag_name and css(optional).
+    createChild : function(tag_name, css){
+      var tag = new Tag("<" + tag_name + ">");
+      tag.setCssAttrs(css || {}); // set dynamic styles
+      var style = new StyleContext(tag, this);
+      style.parent2 = this.parent; // set 'real' parent
+      return style;
+    },
+    createBlock : function(opt){
+      var measure = opt.measure || this.getContentMeasure();
+      var extent = this.parent? (opt.extent || this.getContentExtent()) : this.getContentExtent();
+      var box_size = this.flow.getBoxSize(measure, extent);
+      var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
+      var box = new Box(box_size, this);
+      box.display = "block";
+      box.elements = opt.elements || [];
+      box.classes = classes;
+      if(this.edge){
+	box.edge = this.edge.clone();
+      }
+      if(this.logicalFloat){
+	box.logicalFloat = this.logicalFloat;
+      }
+      Args.copy(box.css, box_size.getCss());
+      Args.copy(box.css, this.cssBlock);
+      return box;
+    },
+    createLine : function(opt){
+      var line_rate = this.getLineRate();
+      var measure = opt.measure || this.getContentMeasure();
+      var extent = this.isRootLine()? this._computeLineExtent(opt.elements) : this.getAutoLineExtent();
+      var box_size = this.flow.getBoxSize(measure, extent);
+      var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
+      var line = new Box(box_size, this);
+      line.style = this;
+      line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
+      line.elements = opt.elements || [];
+      line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.markup.getName());
+      line.extent = extent;
+
+      // backup other line data. mainly required to restore inline-context in FloatLayoutGenerator.
+      if(this.isRootLine()){
+	line.hasLineBreak = opt.hasLineBreak || false;
+	line.inlineMeasure = opt.inlineMeasure || measure;
+	line.texts = opt.texts || [];
+      }
+      Args.copy(line.css, box_size.getCss());
+      Args.copy(line.css, this.cssInline);
+      return line;
+    },
+    isBlock : function(){
+      return this.display === "block";
+    },
+    isRoot : function(){
+      return this.parent === null;
+    },
+    isChildBlock : function(){
+      return this.isBlock() && !this.isRoot();
+    },
+    isInline : function(){
+      return this.display === "inline";
+    },
+    isRootLine : function(){
+      return this.display === "block";
+    },
+    isFloatStart : function(){
+      return this.logicalFloat && this.logicalFloat.isStart();
+    },
+    isFloatEnd : function(){
+      return this.logicalFloat && this.logicalFloat.isEnd();
+    },
+    isFloated : function(){
+      return this.isFloatStart() || this.isFloatEnd();
+    },
+    isParallel : function(){
+      return this.display === "list-item";
+    },
+    isPushed : function(){
+      return this.pushed || false;
+    },
+    isPulled : function(){
+      return this.pulled || false;
+    },
+    isTextEmphaEnable : function(){
+      return this.textEmpha && this.textEmpha.isEnable();
+    },
+    isTextVertical : function(){
+      return this.flow.isTextVertical();
+    },
+    isTextHorizontal : function(){
+      return this.flow.isTextHorizontal();
+    },
+    isFirstChild : function(){
+      return this.parent? this.parent.getNthChild(0) === this : false;
+    },
+    getMarkupName : function(){
+      return this.markup.getName();
+    },
+    getMarkupContent : function(){
+      return this.markup.getContent();
+    },
+    getFontSize : function(){
+      return this.font.size;
+    },
+    getFontFamily : function(){
+      return this.font.family || this.flow.isTextVertical()? Layout.vertFontFamily : Layout.horiFontFamily;
+    },
+    getLetterSpacing : function(){
+      return this.letterSpacing || 0;
+    },
+    getColor : function(){
+      return this.color || Layout.fontColor;
+    },
+    getRubyRate : function(){
+      return Layout.getRubyRate();
+    },
+    getLineRate : function(){
+      return this.lineRate || Layout.lineRate || 2;
+    },
+    getContentMeasure : function(flow){
+      return this.contentSize.getMeasure(flow || this.flow);
+    },
+    getContentExtent : function(flow){
+      return this.contentSize.getExtent(flow || this.flow);
+    },
+    getEmphaLineExtent : function(){
+      return this.getFontSize() * 2;
+    },
+    getTextLineExtent : function(){
+      return this.getFontSize() * this.getLineRate();
+    },
+    getAutoLineExtent : function(){
+      return this.isTextEmphaEnable()? this.getEmphaLineExtent() : this.getTextLineExtent();
+    },
+    getEdgeMeasure : function(flow){
+      return this.edge? this.edge.getMeasureSize(flow || this.flow) : 0;
+    },
+    getEdgeExtent : function(flow){
+      return this.edge? this.edge.getExtentSize(flow || this.flow) : 0;
+    },
+    getMarkerHtml : function(order){
+      return this.listStyle? this.listStyle.getMarkerHtml(order) : "";
+    },
+    getChildCount : function(){
+      return this.childs.length;
+    },
+    getChildIndex : function(){
+      return this.parent? this.parent.findChildIndex(this) : 0;
+    },
+    getChildIndexOfType : function(){
+      return this.parent? this.parent.findChildIndexOfType(this) : 0;
+    },
+    getNthChild : function(nth){
+      return this.childs[nth] || null;
+    },
+    findChildIndex : function(style){
+      return List.indexOf(this.childs, function(child){
+	return child === style;
+      });
+    },
+    findChildsOfType : function(style){
+      var name = style.getMarkupName();
+      return List.filter(this.childs, function(child){
+	return child.getMarkupName() === name;
+      });
+    },
+    findChildIndexOfType : function(style){
+      return List.indexOf(this.findChildsOfType(style), function(child){
+	return child === style;
+      });
+    },
+    resizeMeasure : function(measure){
+      if(this.edge){
+	measure -= this._computeEdgeContentMeasure(this.edge);
+      }
+      this.contentSize[this.flow.getPropMeasure()] = measure;
+      return this;
+    },
+    resizeExtent : function(extent){
+      if(this.edge){
+	extent -= this._computeEdgeContentExtent(this.edge);
+      }
+      this.contentSize[this.flow.getPropExtent()] = extent;
+      return this;
+    },
+    resize : function(measure, extent){
+      this.resizeMeasure(measure);
+      this.resizeExtent(extent);
+      return this;
+    },
+    _inheritMarkup : function(markup, parent){
+      var parent_markup = parent? parent.markup : null;
+      markup = markup.inherit(parent_markup);
+      var onload = markup.getCssAttr("onload");
+      if(onload){
+	markup.setCssAttrs(onload(markup) || {});
+      }
+      var nth_child = markup.getCssAttr("nth-child");
+      if(nth_child){
+	markup.setCssAttrs(nth_child(this.getChildIndex(), markup) || {});
+      }
+      var nth_of_type = markup.getCssAttr("nth-of-type");
+      if(nth_of_type){
+	markup.setCssAttrs(nth_of_type(this.getChildIndexOfType(), markup) || {});
+      }
+      return markup;
+    },
+    _appendChild : function(child_style){
+      this.childs.push(child_style);
+    },
+    _computeOuterSize : function(){
+      var measure = this._computeOuterMeasure();
+      var extent = this._computeOuterExtent();
+      return this.flow.getBoxSize(measure, extent);
+    },
+    _computeOuterMeasure : function(){
+      return this._computeStaticMeasure() || this._computeMaxMeasure();
+    },
+    _computeOuterExtent : function(){
+      return this._computeStaticExtent() || this._computeMaxExtent();
+    },
+    _computeStaticMeasure : function(){
+      var max_size = this._computeMaxMeasure(); // this value is required when static size is set by '%' value.
+      var static_size = this.markup.getAttr(this.flow.getPropMeasure()) || this.markup.getCssAttr("measure");
+      return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
+    },
+    _computeStaticExtent : function(){
+      var max_size = this._computeMaxExtent(); // this value is required when static size is set by '%' value.
+      var static_size = this.markup.getAttr(this.flow.getPropExtent()) || this.markup.getCssAttr("extent");
+      return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
+    },
+    _computeMaxMeasure : function(){
+      var max_size = this.parent? this.parent.getContentMeasure(this.flow) : Layout[this.flow.getPropMeasure()];
+      return max_size;
+    },
+    _computeMaxExtent : function(){
+      var max_size = this.parent? this.parent.getContentExtent(this.flow) : Layout[this.flow.getPropExtent()];
+      return (this.display === "block")? max_size : this.font.size;
+    },
+    // 'after' loading all properties, we can compute boundary box size.
+    _computeContentSize : function(edge){
+      var measure = this._computeContentMeasure(edge);
+      var extent = this._computeContentExtent(edge);
+      return this.flow.getBoxSize(measure, extent);
+    },
+    _computeContentMeasure : function(edge){
+      return this._computeOuterMeasure() - (edge? this._computeEdgeContentMeasure(edge) : 0);
+    },
+    _computeContentExtent : function(edge){
+      return this._computeOuterExtent() - (edge? this._computeEdgeContentExtent(edge) : 0);
+    },
+    _computeEdgeContentMeasure : function(edge){
+      switch(this.boxSizing){
+      case "content-box":
+	return 0;
+      case "border-box":
+	return edge.padding.getMeasureSize(this.flow) + edge.border.getMeasureSize(this.flow);
+      case "padding-box":
+	return edge.padding.getMeasureSize(this.flow);
+      case "margin-box": default:
+	return edge.getMeasureSize(this.flow);
+      }
+    },
+    _computeEdgeContentExtent : function(edge){
+      switch(this.boxSizing){
+      case "content-box":
+	return 0;
+      case "border-box":
+	return edge.padding.getExtentSize(this.flow) + edge.border.getExtentSize(this.flow);
+      case "padding-box":
+	return edge.padding.getExtentSize(this.flow);
+      case "margin-box": default:
+	return edge.getExtentSize(this.flow);
+      }
+    },
+    _computeLineExtent : function(elements){
+      var child_lines = List.filter(elements, function(element){ return element.style? true : false; });
+      if(child_lines.length === 0){
+	return this.getAutoLineExtent();
+      }
+      return this.isTextVertical()? this._computeVertLineExtent(child_lines) : this._computeHoriLineExtent(child_lines);
+    },
+    _computeHoriLineExtent : function(child_lines){
+      var max_font_size = List.fold(child_lines, this.getFontSize(), function(ret, line){
+	return Math.max(ret, line.style.getFontSize());
+      });
+      return max_font_size * this.getLineRate();
+    },
+    _centerizeVertLine : function(child_lines){
+      var this_flow = this.flow;
+      var this_font_size = this.getFontSize();
+      var max_font_size = this_font_size;
+      var max_extent = this.getAutoLineExtent();
+      List.iter(child_lines, function(line){
+	max_font_size = Math.max(max_font_size, line.style.getFontSize());
+      });
+
+      //console.log("max_font_size:%o", max_font_size);
+
+      // set font centerized offset from max_font_size.
+      List.iter(child_lines, function(line){
+	var font_size = line.style.getFontSize();
+	var font_center_offset = Math.floor((max_font_size - font_size) / 2);
+	max_extent = Math.max(line.size.getExtent(this_flow) + font_center_offset, max_extent);
+      });
+
+      //console.log("max_extent:%o", max_extent);
+
+      var text_center = Math.floor(max_extent / 2);
+
+      //console.log("text-center-pos:%o", text_center);
+
+      List.iter(child_lines, function(line){
+	var font_size = line.style.getFontSize();
+	var text_center_offset = text_center - Math.floor(font_size / 2);
+	if(text_center_offset > 0){
+	  line.edge = line.style.edge? line.style.edge.clone() : new BoxEdge(); // set line.edge(not line.style.edge) to overwrite padding temporally.
+	  line.edge.padding.setAfter(this_flow, text_center_offset); // set new edge(use line.edge not line.style.edge)
+	  line.size.setExtent(this_flow, max_extent - text_center_offset); // set new size
+	  Args.copy(line.css, line.edge.getCss()); // overwrite edge
+	  Args.copy(line.css, line.size.getCss()); // overwrite size
+	}
+      });
+
+      return max_extent;
+    },
+    _computeVertLineExtent : function(child_lines){
+      var max_extent = this._centerizeVertLine(child_lines);
+      return max_extent;
+    },
+    _computeCssInline : function(){
+      var css = {};
+      if(this.font){
+	Args.copy(css, this.font.getCss());
+      }
+      if(this.color){
+	Args.copy(css, this.color.getCss());
+      }
+      if(this.background){
+	Args.copy(css, this.background.getCss());
+      }
+      // top level line need to follow parent blockflow.
+      if(this.parent && this.parent.display === "block"){
+	Args.copy(css, this.flow.getCss());
+      }
+      if(this.edge && !this.isRootLine()){
+	Args.copy(css, this.edge.getCss());
+      }
+      if(this.isRootLine()){
+	Args.copy(css, this.flow.getCss());
+      }
+      if(this.flow.isTextVertical()){
+	css["line-height"] = "1em";
+	if(Env.isIphoneFamily){
+	  css["letter-spacing"] = "-0.001em";
+	}
+	if(this.markup.getName() !== "ruby"){
+	  css["margin-left"] = css["margin-right"] = "auto";
+	  css["text-align"] = "center";
+	}
+      }
+      return css;
+    },
+    _computeCssBlock : function(){
+      var css = {};
+      if(this.font){
+	Args.copy(css, this.font.getCss());
+      }
+      if(this.edge){
+	Args.copy(css, this.edge.getCss());
+      }
+      if(this.parent){
+	Args.copy(css, this.parent.flow.getCss());
+      }
+      if(this.color){
+	Args.copy(css, this.color.getCss());
+      }
+      if(this.background){
+	Args.copy(css, this.background.getCss(this.flow));
+      }
+      if(this.letterSpacing && !this.flow.isTextVertical()){
+	css["letter-spacing"] = this.letterSpacing + "px";
+      }
+      css.display = "block";
+      if(this.logicalFloat){
+	Args.copy(css, this.logicalFloat.getCss(this.flow));
+      }
+      css.overflow = "hidden"; // to avoid margin collapsing
+      if(this.zIndex){
+	css["z-index"] = this.zIndex;
+      }
+      return css;
+    },
+    _loadDisplay : function(markup){
+      return markup.getCssAttr("display", "inline");
+    },
+    _loadFlow : function(markup, parent){
+      var value = markup.getCssAttr("flow", "inherit");
+      var parent_flow = parent? parent.flow : Layout.getStdBoxFlow();
+      if(value === "inherit"){
+	return parent_flow;
+      }
+      if(value === "flip"){
+	return parent_flow.getFlipFlow();
+      }
+      return BoxFlows.getByName(value);
+    },
+    _loadPosition : function(markup){
+      var value = markup.getCssAttr("position", "relative");
+      return new BoxPosition(value, {
+	top: markup.getCssAttr("top", "auto"),
+	left: markup.getCssAttr("left", "auto"),
+	right: markup.getCssAttr("right", "auto"),
+	bottom: markup.getCssAttr("bottom", "auto")
+      });
+    },
+    _loadColor : function(markup){
+      var value = markup.getCssAttr("color", "inherit");
+      if(value !== "inherit"){
+	return new Color(value);
+      }
+    },
+    _loadFont : function(markup, parent){
+      var parent_font_size = parent? parent.font.size : Layout.fontSize;
+      var font = new Font(parent_font_size);
+      var font_size = markup.getCssAttr("font-size", "inherit");
+      if(font_size !== "inherit"){
+	font.size = UnitSize.getFontSize(font_size, parent_font_size);
+      }
+      var font_family = markup.getCssAttr("font-family", "inherit");
+      if(font_family !== "inherit"){
+	font.family = font_family;
+      }
+      var font_weight = markup.getCssAttr("font-weight", "inherit");
+      if(font_weight !== "inherit"){
+	font.weight = font_weight;
+      }
+      var font_style = markup.getCssAttr("font-style", "inherit");
+      if(font_style !== "inherit"){
+	font.style = font_style;
+      }
+      return font;
+    },
+    _loadBoxSizing : function(markup){
+      return markup.getCssAttr("box-sizing", "margin-box");
+    },
+    _loadEdge : function(markup, flow, font){
+      var padding = markup.getCssAttr("padding");
+      var margin = markup.getCssAttr("margin");
+      var border_width = markup.getCssAttr("border-width");
+      if(padding === null && margin === null && border_width === null){
+	return null;
+      }
+      var edge = new BoxEdge();
+      if(padding){
+	edge.padding.setSize(flow, UnitSize.getEdgeSize(padding, font.size));
+      }
+      if(margin){
+	edge.margin.setSize(flow, UnitSize.getEdgeSize(margin, font.size));
+      }
+      if(border_width){
+	edge.border.setSize(flow, UnitSize.getEdgeSize(border_width, font.size));
+      }
+      var border_radius = markup.getCssAttr("border-radius");
+      if(border_radius){
+	edge.setBorderRadius(flow, UnitSize.getCornerSize(border_radius, font.size));
+      }
+      var border_color = markup.getCssAttr("border-color");
+      if(border_color){
+	edge.setBorderColor(flow, border_color);
+      }
+      var border_style = markup.getCssAttr("border-style");
+      if(border_style){
+	edge.setBorderStyle(flow, border_style);
+      }
+      return edge;
+    },
+    _loadLineRate : function(markup, parent){
+      var value = markup.getCssAttr("line-rate");
+      var parent_line_rate = parent? parent.lineRate : Layout.lineRate;
+      return (value === "inherit")? parent_line_rate : parseFloat(value);
+    },
+    _loadTextAlign : function(markup, parent){
+      var value = markup.getCssAttr("text-align", "inherit");
+      var parent_text_align = parent? parent.textAlign : "start";
+      return (value === "inherit")? parent_text_align : new TextAlign(value);
+    },
+    _loadTextEmpha : function(markup, parent){
+      var parent_color = parent? parent.getColor() : Layout.fontColor;
+      var empha_style = markup.getCssAttr("text-emphasis-style", "none");
+      if(empha_style === "none" || empha_style === "inherit"){
+	return null;
+      }
+      var empha_pos = markup.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
+      var empha_color = markup.getCssAttr("text-emphasis-color", parent_color);
+      return new TextEmpha({
+	style:new TextEmphaStyle(empha_style),
+	pos:new TextEmphaPos(empha_pos),
+	color:new Color(empha_color)
+      });
+    },
+    _loadTextEmphaStyle : function(markup, parent){
+      var value = markup.getCssAttr("text-emphasis-style", "inherit");
+      return (value !== "inherit")? new TextEmphaStyle(value) : null;
+    },
+    _loadTextEmphaPos : function(markup, parent){
+      return markup.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
+    },
+    _loadTextEmphaColor : function(markup, parent, color){
+      return markup.getCssAttr("text-emphasis-color", color.getValue());
+    },
+    _loadLogicalFloat : function(markup){
+      var name = markup.getCssAttr("float", "none");
+      if(name === "none"){
+	return null;
+      }
+      return LogicalFloats.get(name);
+    },
+    _loadListStyle : function(markup){
+      var list_style_type = markup.getCssAttr("list-style-type", "none");
+      if(list_style_type === "none"){
+	return null;
+      }
+      return new ListStyle({
+	type:list_style_type,
+	position:markup.getCssAttr("list-style-position", "outside"),
+	image:markup.getCssAttr("list-style-image", "none"),
+	format:markup.getCssAttr("list-style-format")
+      });
+    },
+    _loadLetterSpacing : function(markup, parent, font){
+      var letter_spacing = markup.getCssAttr("letter-spacing");
+      if(letter_spacing){
+	return UnitSize.getUnitSize(letter_spacing, font.size);
+      }
+    },
+    _loadBackground : function(markup, parent){
+      var background = new Background();
+      var bg_color = markup.getCssAttr("background-color");
+      if(bg_color){
+	background.color = new Color(bg_color);
+      }
+      var bg_image = markup.getCssAttr("background-image");
+      if(bg_image){
+	background.image = bg_image;
+      }
+      var bg_pos = markup.getCssAttr("background-position");
+      if(bg_pos){
+	background.pos = new BackgroundPos2d(
+	  new BackgroundPos(bg_pos.inline, bg_pos.offset),
+	  new BackgroundPos(bg_pos.block, bg_pos.offset)
+	);
+      }
+      var bg_repeat = markup.getCssAttr("background-repeat");
+      if(bg_repeat){
+	background.repeat = new BackgroundRepeat2d(
+	  new BackgroundRepeat(bg_repeat.inline),
+	  new BackgroundRepeat(bg_repeat.block)
+	);
+      }
+    },
+    _loadPushedAttr : function(markup){
+      return markup.getCssAttr("pushed") !== null;
+    },
+    _loadPulledAttr : function(markup){
+      return markup.getCssAttr("pulled") !== null;
+    }
+  };
+
+  return StyleContext;
+})();
+
+
+var LayoutContext = (function(){
+  function LayoutContext(block, inline){
+    this.block = block;
+    this.inline = inline;
+  }
+
+  LayoutContext.prototype = {
+    debug : function(title){
+      console.log("[%s]:(rest_m,rest_e) = (%d,%d)", title, this.inline.getRestMeasure(), this.block.getRestExtent());
+    },
+    // block-level
+    addBlockElement : function(element, extent){
+      this.block.addElement(element, extent);
+    },
+    pushBlockElement : function(element, extent){
+      this.block.pushElement(element, extent);
+    },
+    pullBlockElement : function(element, extent){
+      this.block.pullElement(element, extent);
+    },
+    getBlockElements : function(){
+      return this.block.getElements();
+    },
+    getBlockExtent : function(){
+      return this.block.getExtent();
+    },
+    getBlockMaxExtent : function(){
+      return this.block.getMaxExtent();
+    },
+    getBlockRestExtent : function(){
+      return this.block.getRestExtent();
+    },
+    setBlockMaxExtent : function(extent){
+      return this.block.setMaxExtent(extent);
+    },
+    createChildBlockContext : function(){
+      return new LayoutContext(
+	new BlockLayoutContext(this.block.getRestExtent()),
+	new InlineLayoutContext(this.inline.getRestMeasure())
+      );
+    },
+    createStaticBlockContext : function(measure, extent){
+      return new LayoutContext(
+	new BlockLayoutContext(extent),
+	new InlineLayoutContext(measure)
+      );
+    },
+    // inline-level
+    isInlineEmpty : function(){
+      return this.inline.isEmpty();
+    },
+    hasLineBreak : function(){
+      return this.inline.hasLineBreak();
+    },
+    setLineBreak : function(status){
+      this.inline.setLineBreak(status);
+    },
+    setInlineMaxMeasure : function(measure){
+      return this.inline.setMaxMeasure(measure);
+    },
+    addInlineElement : function(element, measure){
+      this.inline.addElement(element, measure);
+    },
+    getInlinePrevText : function(){
+      return this.inline.getPrevText();
+    },
+    getInlineTexts : function(){
+      return this.inline.getTexts();
+    },
+    getInlineElements : function(){
+      return this.inline.getElements();
+    },
+    getInlineMeasure : function(){
+      return this.inline.getMeasure();
+    },
+    getInlineRestMeasure : function(){
+      return this.inline.getRestMeasure();
+    },
+    getInlineMaxMeasure : function(){
+      return this.inline.getMaxMeasure();
+    },
+    getInlineCharCount : function(){
+      return this.inline.getCharCount();
+    },
+    createChildInlineContext : function(){
+      return new LayoutContext(
+	this.block,
+	new InlineLayoutContext(this.inline.getRestMeasure())
+      );
+    },
+    justify : function(head_char){
+      return this.inline.justify(head_char);
+    },
+    restoreInlineContext : function(line){
+      this.inline.restoreContext(line);
+      return this;
+    }
+  };
+
+  return LayoutContext;
+})();
+
+
+var BlockLayoutContext = (function(){
+  function BlockLayoutContext(max_extent){
+    this.extent = 0;
+    this.maxExtent = max_extent; // const
+    this.pushedElements = [];
+    this.elements = [];
+    this.pulledElements = [];
+  }
+
+  BlockLayoutContext.prototype = {
+    addElement : function(element, extent){
+      this.elements.push(element);
+      this.extent += extent;
+    },
+    pushElement : function(element, extent){
+      this.pushedElements.push(element);
+      this.extent += extent;
+    },
+    pullElement : function(element, extent){
+      this.pulledElements.unshift(element);
+      this.extent += extent;
+    },
+    setMaxExtent : function(extent){
+      this.maxExtent = extent;
+    },
+    getExtent : function(){
+      return this.extent;
+    },
+    getRestExtent : function(){
+      return this.maxExtent - this.extent;
+    },
+    getMaxExtent : function(){
+      return this.maxExtent;
+    },
+    getElements : function(){
+      return this.pulledElements
+	.concat(this.elements)
+	.concat(this.pushedElements);
+    }
+  };
+
+  return BlockLayoutContext;
+})();
+
+
+var InlineLayoutContext = (function(){
+  function InlineLayoutContext(max_measure){
+    this.charCount = 0;
+    this.measure = 0;
+    this.maxMeasure = max_measure; // const
+    this.elements = [];
+    this.texts = [];
+    this.br = false;
+  }
+
+  InlineLayoutContext.prototype = {
+    isEmpty : function(){
+      return !this.br && this.elements.length === 0;
+    },
+    hasLineBreak : function(){
+      return this.br;
+    },
+    setLineBreak : function(status){
+      this.br = status;
+    },
+    setMaxMeasure : function(measure){
+      this.maxMeasure = measure;
+    },
+    addElement : function(element, measure){
+      this.elements.push(element);
+      if(Token.isText(element)){
+	this.texts.push(element);
+	if(element.getCharCount){
+	  this.charCount += element.getCharCount();
+	}
+      }
+      this.measure += measure;
+    },
+    getPrevText : function(){
+      return List.last(this.texts);
+    },
+    getTexts : function(){
+      return this.texts;
+    },
+    getElements : function(){
+      return this.elements;
+    },
+    getMeasure : function(){
+      return this.measure;
+    },
+    getRestMeasure : function(){
+      return this.maxMeasure - this.measure;
+    },
+    getMaxMeasure : function(){
+      return this.maxMeasure;
+    },
+    getCharCount : function(){
+      return this.charCount;
+    },
+    getLastChar : function(){
+      return List.last(this.texts);
+    },
+    justify : function(head){
+      var last = this.texts.length - 1;
+      var ptr = last;
+      while(ptr >= 0){
+	var tail = this.texts[ptr];
+	if(head && head.isHeadNg && head.isHeadNg() || tail.isTailNg && tail.isTailNg()){
+	  head = tail;
+	  ptr--;
+	} else {
+	  break;
+	}
+      }
+      // if ptr moved, justification is executed.
+      if(0 <= ptr && ptr < last){
+	// disable text after new tail pos.
+	this.elements = List.filter(this.elements, function(element){
+	  return element.pos? (element.pos <= tail.pos) : true;
+	});
+	return tail; // return new tail
+      }
+      return null; // justify failed or not required.
+    },
+    restoreContext : function(line){
+      this.texts = line.texts || [];
+      this.elements = line.elements || [];
+      this.br = line.hasLineBreak || false;
+      this.measure = line.inlineMeasure || 0;
+      this.charCount = this.texts.length || 0;
+    }
+  };
+
+  return InlineLayoutContext;
+})();
+
+
+var LayoutGenerator = (function(){
+  function LayoutGenerator(style, stream){
+    this.style = style;
+    this.stream = stream;
+    this._childLayout = null;
+    this._cachedElements = [];
+    this._terminate = false;
+  }
+
+  LayoutGenerator.prototype.setTerminate = function(status){
+    this._terminate = status;
+  };
+
+  LayoutGenerator.prototype.setChildLayout = function(generator){
+    this._childLayout = generator;
+  };
+
+  LayoutGenerator.prototype.hasNext = function(){
+    if(this._terminate){
+      return false;
+    }
+    if(this.hasCache()){
+      return true;
+    }
+    if(this.hasChildLayout()){
+      return true;
+    }
+    return this.stream? this.stream.hasNext() : false;
+  };
+
+  LayoutGenerator.prototype.hasChildLayout = function(){
+    if(this._childLayout && this._childLayout.hasNext()){
+      //console.log("layout child %s has next", this._childLayout.style.getMarkupName());
+      return true;
+    }
+    return false;
+  };
+
+  LayoutGenerator.prototype.hasCache = function(){
+    return this._cachedElements.length > 0;
+  };
+
+  LayoutGenerator.prototype.yieldChildLayout = function(context){
+    var next = this._childLayout.yield(context);
+    //console.log("child next:%o", next);
+    return next;
+  };
+
+  LayoutGenerator.prototype.peekLastCache = function(){
+    return List.last(this._cachedElements);
+  };
+
+  LayoutGenerator.prototype.pushCache = function(element){
+    var cache_count = element.cacheCount || 0;
+    if(cache_count > 0){
+      //console.info("[%s]:multi cache detected! count = %d, element = %o", this.style.getMarkupName(), cache_count, element);
+      if(cache_count >= Config.maxRollbackCount){
+	console.error("too many cache count(%d), force terminate", cache_count);
+	this.setTerminate(true); // this error sometimes causes infinite loop, so force terminate generator.
+	return;
+      }
+    }
+    if(element instanceof Box){
+      var flow = this.style.flow;
+      var measure = element.getBoxMeasure(flow);
+      var extent = element.getBoxExtent(flow);
+      //console.log("[%s]:push cache:%o(%d,%d)", this.style.getMarkupName(), element, measure, extent);
+    }
+    element.cacheCount = cache_count + 1;
+    this._cachedElements.push(element);
+  };
+
+  LayoutGenerator.prototype.popCache = function(){
+    var cache = this._cachedElements.pop();
+    //console.log("[%s]:pop cache:%o", this.style.markup.name, cache);
+    return cache;
+  };
+
+  LayoutGenerator.prototype.clearCache = function(){
+    this._cachedElements = [];
+  };
+
+  LayoutGenerator.prototype._createStartContext = function(){
+    return new LayoutContext(
+      new BlockLayoutContext(this.style.getContentExtent()),
+      new InlineLayoutContext(this.style.getContentMeasure())
+    );
+  };
+
+  LayoutGenerator.prototype._createChildBlockContext = function(current_context, child_style){
+    return new LayoutContext(
+      new BlockLayoutContext(current_context.getBlockRestExtent() - child_style.getEdgeExtent()),
+      new InlineLayoutContext(current_context.getInlineMaxMeasure() - child_style.getEdgeMeasure())
+    );
+  };
+
+  return LayoutGenerator;
+})();
+
+
+var BlockLayoutGenerator = (function(){
+  function BlockLayoutGenerator(style, stream){
+    LayoutGenerator.call(this, style, stream);
+  }
+  Class.extend(BlockLayoutGenerator, LayoutGenerator);
+
+  BlockLayoutGenerator.prototype.yield = function(context){
+    context = context || this._createStartContext();
+    //console.log("yield %s, rest_extent = %d", this.style.getMarkupName(), context.getBlockRestExtent());
+    if(context.getBlockMaxExtent() < 0){
+      //console.log("no more extent rest");
+      return null;
+    }
+    while(true){
+      var element = this._getNext(context);
+      if(element === null){
+	//console.log("[%s] null", this.style.getMarkupName());
+	break;
+      }
+      var extent = element.getBoxExtent(this.style.flow);
+      //console.log("[%s] block %o extent:%d", this.style.getMarkupName(), element, extent);
+      if(context.getBlockExtent() + extent > context.getBlockMaxExtent()){
+	//console.log("[%s] block over(cached, extent=%d) context(cur:%d, max:%d)", this.style.getMarkupName(), extent, context.getBlockExtent(), context.getBlockMaxExtent());
+	this.pushCache(element);
+	break;
+      }
+      this._addElement(context, element, extent);
+      if(context.getBlockExtent() === context.getBlockMaxExtent()){
+	//console.log("block just filled");
+	break;
+      }
+      //console.log("...accepted by %s(rest extent = %d)", this.style.markup.name, context.getBlockRestExtent());
+    }
+    return this._createBlock(context);
+  };
+
+  BlockLayoutGenerator.prototype._addElement = function(context, element, extent){
+    if(this.style.isPushed()){
+      context.pushBockElement(element, extent);
+    } else if(this.style.isPulled()){
+      context.pullBlockElement(element, extent);
+    } else {
+      context.addBlockElement(element, extent);
+    }
+  };
+
+  BlockLayoutGenerator.prototype._createBlock = function(context){
+    var extent = context.getBlockExtent();
+    var elements = context.getBlockElements();
+    if(extent === 0 || elements.length === 0){
+      //console.log("[%s] empty block!", this.style.getMarkupName());
+      return null;
+    }
+    return this.style.createBlock({
+      extent:extent,
+      elements:elements
+    });
+  };
+
+  BlockLayoutGenerator.prototype._getNext = function(context){
+    if(this.hasCache()){
+      var cache = this.popCache();
+      // restart inline if measure changed from when this cache is pushed.
+      if(this.hasChildLayout() && cache.display === "inline" && !cache.hasLineBreak /*&& cache.getBoxMeasure(this.style.flow) < context.getInlineMaxMeasure()*/){
+	//console.log("restart inline from cache:%o", cache);
+	var context2 = this._createChildBlockContext(context, this._childLayout.style).restoreInlineContext(cache);
+	return this.yieldChildLayout(context2);
+      }
+      return cache;
+    }
+    
+    if(this.hasChildLayout()){
+      //console.log("[%s]child layout exists", this.style.getMarkupName());
+      var context2 = this._createChildBlockContext(context, this._childLayout.style);
+      return this.yieldChildLayout(context2);
+    }
+
+    // read next token
+    var token = this.stream.get();
+    if(token === null){
+      return null;
+    }
+
+    // if tag token, inherit style
+    var child_style = (token instanceof Tag)? new StyleContext(token, this.style) : this.style;
+
+    // inline text or inline tag
+    if(Token.isText(token) || child_style.isInline()){
+      //console.log("block -> inline from %s", this.style.getMarkupName());
+      this.stream.prev();
+      this.setChildLayout(new InlineLayoutGenerator(this.style, this.stream));
+
+      // block context is not required by inline-generator.
+      // because it yields single line and block-over is always captured by it's parent block generator.
+      return this.yieldChildLayout();
+    }
+
+    var child_context = this._createChildBlockContext(context, child_style);
+
+    // child block with float
+    if(child_style.isFloated()){
+      this.stream.prev();
+      this.setChildLayout(new FloatLayoutGenerator(this.style, this.stream));
+      return this.yieldChildLayout(context.createChildBlockContext()); // caution: not this._createChildBlockContext but context.createChildBlockContext
+    }
+
+    if(child_style.display === "list-item"){
+      this.setChildLayout(new ListItemLayoutGenerator(child_style, this._createStream(token), context));
+      return this.yieldChildLayout(child_context);
+    }
+
+    if(child_style.display === "table-row"){
+      this.setChildLayout(new TableRowLayoutGenerator(child_style, this._createStream(token), context));
+      return this.yieldChildLayout(child_context);
+    }
+
+    switch(child_style.getMarkupName()){
+    case "ul": case "ol":
+      this.setChildLayout(new ListLayoutGenerator(child_style, new ListTagStream(token.getContent())));
+      return this.yieldChildLayout(child_context);
+      
+    default:
+      this.setChildLayout(new BlockLayoutGenerator(child_style, this._createStream(token)));
+      return this.yieldChildLayout(child_context);
+    }
+  };
+
+  BlockLayoutGenerator.prototype._createStream = function(tag){
+    return new TokenStream(tag.getContent()); // TODO
+  };
+
+  return BlockLayoutGenerator;
+})();
+
+
+var InlineLayoutGenerator = (function(){
+  function InlineLayoutGenerator(style, stream){
+    LayoutGenerator.call(this, style, stream);
+  }
+  Class.extend(InlineLayoutGenerator, LayoutGenerator);
+
+  InlineLayoutGenerator.prototype.yield = function(context){
+    context = context || this._createStartContext();
+    while(true){
+      var element = this._getNext(context);
+      if(element === null){
+	break;
+      }
+      if(element instanceof Tag && element.getName() === "br"){
+	context.setLineBreak(true);
+	break;
+      }
+      var measure = this._getMeasure(element);
+      //console.log("[%s] inline measure:%d", this.style.getMarkupName(), measure);
+      if(context.getInlineMeasure() + measure > context.getInlineMaxMeasure()){
+	//console.log("[%s] inline over and cached:%o", this.style.getMarkupName(), element);
+	this.pushCache(element);
+	break;
+      }
+      context.addInlineElement(element, measure);
+    }
+    // no br, no element
+    if(context.isInlineEmpty()){
+      //console.log("empty inline");
+      return null;
+    }
+    // justify line if it's generated by not line-break but measure-overflow.
+    if(!context.hasLineBreak()){
+      this._justifyLine(context);
+    }
+    return this._createLine(context);
+  };
+
+  InlineLayoutGenerator.prototype._createStream = function(token){
+    switch(token.getName()){
+    case "ruby": return new RubyTagStream(token);
+    default: return new TokenStream(token.getContent());
+    }
+  };
+
+  InlineLayoutGenerator.prototype._justifyLine = function(context){
+    var next_head = this.peekLastCache();
+    var new_tail = context.justify(next_head);
+    if(new_tail){
+      this.stream.setPos(new_tail.pos + 1);
+      this.clearCache(); // stream position changed, so disable cache.
+    }
+  };
+
+  InlineLayoutGenerator.prototype._createLine = function(context){
+    return this.style.createLine({
+      hasLineBreak:context.hasLineBreak(),
+      measure:(this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineMeasure()),
+      inlineMeasure:context.getInlineMeasure(),
+      elements:context.getInlineElements(),
+      texts:context.getInlineTexts(),
+      charCount:context.getInlineCharCount()
+    });
+  };
+
+  InlineLayoutGenerator.prototype._getNext = function(context){
+    if(this.hasCache()){
+      return this.popCache();
+    }
+
+    if(this.hasChildLayout()){
+      return this.yieldChildLayout(context.createChildInlineContext());
+    }
+
+    // read next token
+    var token = this.stream.get();
+    if(token === null){
+      return null;
+    }
+
+    // if tag token, inherit style
+    var style = this.style;
+    if(token instanceof Tag){
+      style = new StyleContext(token, this.style);
+      //console.log("inline(%s) - new style(%s):%o, isBlock=%o", this.style.getMarkupName(), style.getMarkupName(), style, style.isBlock());
+
+      // inline -> block, force terminate inline
+      if(style.isBlock()){
+	//console.log("inline -> block by %s", style.getMarkupName());
+	this.stream.prev();
+	this.setTerminate(true);
+	return null;
+      }
+    }
+
+    // inline text
+    if(Token.isText(token)){
+      return this._getText(context, token);
+    }
+
+    // inline tag(child inline)
+    switch(token.getName()){
+    case "br":
+      return token;
+    default:
+      //console.log("start child inline:%s", token.getContent());
+      this.setChildLayout(new InlineLayoutGenerator(style, this._createStream(token)));
+      return this.yieldChildLayout(context.createChildInlineContext());
+    }
+  };
+
+  InlineLayoutGenerator.prototype._getText = function(context, token){
+    if(!token.hasMetrics()){
+      if(token instanceof Char){
+	var next_token = this.stream.peek();
+	Kerning.set(token, {
+	  prev:context.getInlinePrevText(),
+	  next:((next_token && Token.isText(next_token))? next_token : null)
+	});
+      }
+      token.setMetrics(this.style.flow, this.style.font);
+    }
+    if(token instanceof Ruby){
+      return token;
+    }
+    switch(token._type){
+    case "char":
+    case "tcy":
+      return token;
+      case "word":
+      return this._getWord(context, token);
+    }
+  };
+
+  InlineLayoutGenerator.prototype._getWord = function(context, token){
+    var rest_measure = context.getInlineRestMeasure();
+    var advance = token.getAdvance(this.style.flow, this.style.letterSpacing || 0);
+    
+    // if advance of this word is less than max-measure, just return.
+    if(advance <= rest_measure){
+      token.setDevided(false);
+      return token;
+    }
+    // if advance is lager than max_measure,
+    // we must cut this word into some parts.
+    var part = token.cutMeasure(this.style.font.size, rest_measure); // get sliced word
+    part.setMetrics(this.style.flow, this.style.font); // metrics for first half
+    token.setMetrics(this.style.flow, this.style.font); // metrics for second half
+    this.stream.prev(); // re-parse this token because rest part is still exists.
+    return part;
+  };
+
+  InlineLayoutGenerator.prototype._getMeasure = function(element){
+    if(element instanceof Box){
+      return element.getBoxMeasure(this.style.flow);
+    }
+    if(element.getAdvance){
+      return element.getAdvance(this.style.flow, this.style.letterSpacing || 0);
+    }
+    return 0; // TODO
+  };
+
+  return InlineLayoutGenerator;
+})();
+
+
+var FloatGroup = (function(){
+  function FloatGroup(elements, logical_float){
+    this.elements = elements || [];
+    this.logicalFloat = logical_float || LogicalFloats.get("start");
+  }
+
+  FloatGroup.prototype = {
+    add : function(element){
+      // [f1,f2], [] => [f1], [f2] => [], [f1, f2]
+      this.elements.unshift(element); // keep original stack order
+    },
+    isFloatStart : function(){
+      return this.logicalFloat.isStart();
+    },
+    isFloatEnd : function(){
+      return this.logicalFloat.isEnd();
+    },
+    getElements : function(){
+      return this.isFloatStart()? this.elements : List.reverse(this.elements);
+    },
+    getMeasure : function(flow){
+      return List.fold(this.elements, 0, function(measure, element){
+	return measure + element.getBoxMeasure(flow);
+      });
+    },
+    getExtent : function(flow){
+      return List.fold(this.elements, 0, function(extent, element){
+	return Math.max(extent, element.getBoxExtent(flow));
+      });
+    }
+  };
+
+  return FloatGroup;
+})();
+
+
+// pop floated element both from start and end, but select larger one.
+var FloatGroupStack = (function(){
+
+  // [float block] -> FloatGroup
+  var pop_float_group = function(flow, logical_float, blocks){
+    var head = blocks.pop() || null;
+    if(head === null){
+      return null;
+    }
+    var extent = head.getBoxExtent(flow);
+    var group = new FloatGroup([head], logical_float);
+
+    // group while previous floated-element has smaller extent than the head
+    while(true){
+      var next = blocks.pop();
+      if(next && next.getBoxExtent(flow) <= extent){
+	group.add(next);
+      } else {
+	blocks.push(next); // push back
+	break;
+      }
+    }
+    return group;
+  };
+
+  // [float block] -> [FloatGroup]
+  var make_float_groups = function(flow, logical_float, blocks){
+    var ret = [];
+    do{
+      var group = pop_float_group(flow, logical_float, blocks);
+      if(group){
+	ret.push(group);
+      }
+    } while(group !== null);
+    return ret;
+  };
+
+  function FloatGroupStack(flow, start_blocks, end_blocks){
+    var start_groups = make_float_groups(flow, LogicalFloats.get("start"), start_blocks);
+    var end_groups = make_float_groups(flow, LogicalFloats.get("end"), end_blocks);
+    this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
+      return g1.getExtent(flow) - g2.getExtent(flow);
+    });
+  }
+
+  FloatGroupStack.prototype = {
+    isEmpty : function(){
+      return this.stack.length === 0;
+    },
+    pop : function(){
+      return this.stack.pop() || null;
+    }
+  };
+
+  return FloatGroupStack;
+})();
+
+
+var FloatLayoutGenerator = (function(){
+  // argument 'style' is the style of parent.
+  // if <body><float1>..</float1><float2>...</float2></body>,
+  // style of this contructor is 'body.style'
+  function FloatLayoutGenerator(style, stream){
+    LayoutGenerator.call(this, style, stream);
+    this.generators = this._getFloatedGenerators();
+
+    // create child generator to yield rest-space of float-elements with logical-float "start".
+    // notice that this generator uses 'clone' style, because size of space changes by position,
+    // but on the other hand, original style is referenced by float-elements as parent style.
+    // so we must keep original style immutable.
+    this.setChildLayout(new BlockLayoutGenerator(style.clone({"float":"start"}), stream));
+  }
+  Class.extend(FloatLayoutGenerator, LayoutGenerator);
+
+  FloatLayoutGenerator.prototype.hasNext = function(){
+    if(this.hasNextFloat()){
+      return true;
+    }
+    return LayoutGenerator.prototype.hasNext.call(this);
+  };
+
+  FloatLayoutGenerator.prototype.hasNextFloat = function(){
+    return List.exists(this.generators, function(gen){
+      return gen.hasNext();
+    });
+  };
+
+  FloatLayoutGenerator.prototype.yield = function(context){
+    context = context || this._createStartContext();
+    var stack = this._yieldFloatStack(context);
+    var rest_measure = context.getInlineRestMeasure();
+    var rest_extent = context.getBlockRestExtent();
+    return this._yieldFloat(context, stack, rest_measure, rest_extent);
+  };
+
+  FloatLayoutGenerator.prototype._yieldFloat = function(context, stack, rest_measure, rest_extent){
+    //console.log("yieldFloat(%d,%d)", rest_measure, rest_extent);
+    if(rest_measure <= 0){
+      return null;
+    }
+    var flow = this.style.flow;
+
+    // no more floated layout, just yield rest area.
+    if(stack.isEmpty()){
+      return this._yieldFloatSpace(context, rest_measure, rest_extent);
+    }
+    /*
+      <------ rest_measure ---->
+      --------------------------
+      |       |                |
+      | group | rest           | => group_set(wrap_float)
+      |       |                |
+      --------------------------
+    */
+    var group = stack.pop(); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
+    var rest = this._yieldFloat(context, stack, rest_measure - group.getMeasure(flow), group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
+    var group_set = this._wrapFloat(context, group, rest); // wrap these 2 floated layout as one block.
+
+    /*
+      To understand rest_extent_space, remember that this func is called recursivelly,
+      and argument 'rest_extent' is generated by 'previous' largest float group(g2).
+      
+      <--- rest_measure --->
+      ----------------------------
+      |    |                |    |
+      | g1 | rest           | g2 |
+      |    |                |    |
+      ----------------------|    |
+      |  rest_extent_space  |    |
+      ----------------------------
+    */
+    var rest_extent_space = rest_extent - group.getExtent(flow);
+
+    // no more space left in block-flow direction, or no more stream.
+    if(rest_extent_space <= 0 || !this.stream.hasNext()){
+      return group_set;
+    }
+
+    /*
+      <------ rest_measure ---->
+      --------------------------
+      |       |                |
+      | group | rest           | => group_set(wrap_float)
+      |       |                |
+      --------------------------
+      |  rest_extent_space     | => rest_extent - group_set.extent
+      --------------------------
+     */
+    // if there is space in block-flow direction, yield rest space and wrap tfloated-set and rest-space as one.
+    var space = this._yieldFloatSpace(context, rest_measure, rest_extent_space);
+    return this._wrapBlock(context, group_set, space);
+  };
+  
+  FloatLayoutGenerator.prototype._sortFloatRest = function(floated, rest){
+    var floated_elements = floated.getElements();
+    return floated.isFloatStart()? floated_elements.concat(rest) : [rest].concat(floated_elements);
+  };
+
+  FloatLayoutGenerator.prototype._wrapBlock = function(context, block1, block2){
+    var flow = this.style.flow;
+    var measure = block1.getBoxMeasure(flow); // block2 has same measure
+    var extent = block1.getBoxExtent(flow) + (block2? block2.getBoxExtent(flow) : 0);
+
+    // wrapping block always float to start direction
+    return this.style.createChild("div", {"float":"start"}).createBlock({
+      elements:[block1, block2],
+      measure:measure,
+      extent:extent
+    });
+  };
+
+  FloatLayoutGenerator.prototype._wrapFloat = function(context, floated, rest){
+    var flow = this.style.flow;
+    var measure = floated.getMeasure(flow) + (rest? rest.getBoxMeasure(flow) : 0);
+    var extent = floated.getExtent(flow);
+    return this.style.createChild("div").createBlock({
+      elements:this._sortFloatRest(floated, rest),
+      measure:measure,
+      extent:extent
+    });
+  };
+  
+  FloatLayoutGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
+    var style = this._childLayout.style;
+    style.resize(measure, extent);
+    return this.yieldChildLayout(context.createStaticBlockContext(
+      style.getContentMeasure(),
+      style.getContentExtent()
+    ));
+  };
+  
+  FloatLayoutGenerator.prototype._yieldFloatStack = function(context){
+    var start_blocks = [], end_blocks = [];
+    var rest_extent = context.getBlockRestExtent();
+    List.iter(this.generators, function(gen){
+      gen.style.resizeExtent(rest_extent);
+      var block = gen.yield();
+      if(block){
+	if(gen.style.isFloatStart()){
+	  start_blocks.push(block);
+	} else if(gen.style.isFloatEnd()){
+	  end_blocks.push(block);
+	}
+      }
+    });
+    return new FloatGroupStack(this.style.flow, start_blocks, end_blocks);
+  };
+
+  FloatLayoutGenerator.prototype._getFloatedTags = function(){
+    var parent_style = this.style;
+    return this.stream.getWhile(function(token){
+      return (token instanceof Tag && (new StyleContext(token, parent_style)).isFloated());
+    });
+  };
+
+  FloatLayoutGenerator.prototype._getFloatedGenerators = function(){
+    var parent_style = this.style;
+    return List.map(this._getFloatedTags(), function(tag){
+      return new BlockLayoutGenerator(
+	new StyleContext(tag, parent_style),
+	new TokenStream(tag.getContent())
+      );
+    });
+  };
+
+  return FloatLayoutGenerator;
+})();
+
+
+var ParallelLayoutGenerator = (function(){
+  function ParallelLayoutGenerator(style, generators){
+    LayoutGenerator.call(this, style, null);
+    this.generators = generators;
+  }
+  Class.extend(ParallelLayoutGenerator, LayoutGenerator);
+
+  ParallelLayoutGenerator.prototype.yield = function(context){
+    if(this.hasCache()){
+      return this.popCache();
+    }
+    context = context || this._createStartContext();
+    //console.log("[%s]:para yield, rest_extent = %d", this.style.getMarkupName(), context.getBlockRestExtent());
+    var blocks = this._yieldParallelBlocks(context);
+    if(blocks === null){
+      return null;
+    }
+    var wrap_block = this._wrapBlocks(blocks);
+    var wrap_extent = wrap_block.getBoxExtent(this.style.flow);
+    //wrap_block.debug("wrap_block");
+    if(context.getBlockExtent() + wrap_extent > context.getBlockMaxExtent()){
+      //console.log("[%s]:wrap box layout over", this.style.markup.name);
+      this.pushCache(wrap_block);
+      return null;
+    }
+    context.addBlockElement(wrap_block, wrap_extent);
+    return wrap_block;
+  };
+
+  ParallelLayoutGenerator.prototype.hasNext = function(context){
+    if(this._terminate){
+      return false;
+    }
+    if(this.hasCache()){
+      return true;
+    }
+    return List.exists(this.generators, function(gen){
+      //console.log("%s gen has next:%o", gen.style.getMarkupName(), gen.hasNext());
+      return gen.hasNext();
+    });
+  };
+
+  ParallelLayoutGenerator.prototype._yieldParallelBlocks = function(context){
+    var rest_extent = context.getBlockRestExtent();
+    var blocks = List.map(this.generators, function(gen){
+      var rest_measure = gen.style.getContentMeasure();
+      var edge_extent = gen.style.parent2? gen.style.parent2.getEdgeExtent() : 0;
+      return gen.yield(context.createStaticBlockContext(rest_measure, rest_extent - edge_extent));
+    });
+    return List.forall(blocks, function(block){ return block === null; })? null : blocks;
+  };
+
+  ParallelLayoutGenerator.prototype._wrapBlocks = function(blocks){
+    var flow = this.style.flow;
+    var generators = this.generators;
+    var max_block = List.maxobj(blocks, function(block){
+      return block? block.getBoxExtent(flow) : 0;
+    });
+    var max_content_extent = max_block.getContentExtent(flow);
+    var uniformed_blocks = List.mapi(blocks, function(i, block){
+      return block || generators[i].style.createBlock({elements:[], extent:max_content_extent});
+    });
+    return this.style.createBlock({
+      elements:uniformed_blocks,
+      extent:max_block.getBoxExtent(flow)
+    });
+  };
+
+  return ParallelLayoutGenerator;
+})();
+
+
+
+var ListLayoutGenerator = (function(){
+  function ListLayoutGenerator(style, stream){
+    BlockLayoutGenerator.call(this, style, stream);
+    this.style.markerSize = this._getMarkerSize(this.stream.getTokenCount());
+  }
+  Class.extend(ListLayoutGenerator, BlockLayoutGenerator);
+
+  ListLayoutGenerator.prototype._getMarkerSize = function(item_count){
+    var max_marker_text = this.style.getMarkerHtml(item_count);
+    var gen = new InlineLayoutGenerator(this.style, new TokenStream(max_marker_text));
+    var line = gen.yield();
+    var marker_measure = line.inlineMeasure + Math.floor(this.style.getFontSize() / 2);
+    var marker_extent = line.size.getExtent(this.style.flow);
+    return this.style.flow.getBoxSize(marker_measure, marker_extent);
+  };
+
+  return ListLayoutGenerator;
+})();
+
+
+var ListItemLayoutGenerator = (function(){
+  function ListItemLayoutGenerator(style, stream, context){
+    ParallelLayoutGenerator.call(this, style, [
+      this._createListMarkGenerator(context, style),
+      this._createListBodyGenerator(context, style, stream)
+    ]);
+  }
+  Class.extend(ListItemLayoutGenerator, ParallelLayoutGenerator);
+
+  ListItemLayoutGenerator.prototype._createListMarkGenerator = function(context, style){
+    var marker_size = style.parent.markerSize;
+    var item_order = style.getChildIndex();
+    var marker_text = style.parent.getMarkerHtml(item_order + 1);
+    var measure = marker_size.getMeasure(style.flow);
+    var marker_style = style.createChild("li-marker", {
+      "float":"start",
+      "class":"nehan-li-mark",
+      "measure":measure
+    });
+
+    return new BlockLayoutGenerator(marker_style, new TokenStream(marker_text));
+  };
+
+  ListItemLayoutGenerator.prototype._createListBodyGenerator = function(context, style, stream){
+    var marker_size = style.parent.markerSize;
+    var measure = style.getContentMeasure() - marker_size.getMeasure(style.flow);
+    var body_style = style.createChild("li-body", {
+      "float":"start",
+      "class":"nehan-li-body",
+      "measure":measure
+    });
+
+    return new BlockLayoutGenerator(body_style, stream);
+  };
+
+  return ListItemLayoutGenerator;
+})();
+  
+
+// tag : table
+// stream : [thead | tbody | tfoot]
+// yield : [thead | tbody | tfoot]
+// init : create partition map
+var TableLayoutGenerator = (function(){
+  function TableLayoutGenerator(style, stream){
+    BlockLayoutGenerator.call(this, style, stream);
+  }
+  Class.extend(TableLayoutGenerator, BlockLayoutGenerator);
+
+  TableLayoutGenerator.prototype.yield = function(context){
+  };
+
+  TableLayoutGenerator.prototype._getTableGroupTags = function(context){
+  };
+
+  return TableLayoutGenerator;
+})();
+
+// parent : table
+// tag : thead | tbody | tfoot
+// stream : [tr]
+// yield : [tr]
+var TableGroupLayoutGenerator = (function(){
+  function TableGroupLayoutGenerator(style, stream){
+    BlockLayoutGenerator.call(this, style, stream);
+  }
+  Class.extend(TableGroupLayoutGenerator, BlockLayoutGenerator);
+
+  TableGroupLayoutGenerator.prototype.yield = function(context){
+  };
+
+  TableGroupLayoutGenerator.prototype._getRowTags = function(context){
+    return this.stream.getWhile(function(token){
+      return (token instanceof Tag && token.getName() === "tr");
+    });
+  };
+
+  return TableGroupLayoutGenerator;
+})();
+
+
+// parent : thead | tbody | tfoot
+// tag : tr | th
+// stream : [td | th]
+// yield : parallel([td | th])
+var TableRowLayoutGenerator = (function(){
+  function TableRowLayoutGenerator(style, stream, context){
+    var generators = this._getGenerators(style, stream, context);
+    ParallelLayoutGenerator.call(this, style, generators);
+  }
+  Class.extend(TableRowLayoutGenerator, ParallelLayoutGenerator);
+
+  TableRowLayoutGenerator.prototype._getGenerators = function(style, stream, context){
+    var child_tags = this._getChildTags(stream);
+    var child_styles = this._getChildStyles(context, style, child_tags);
+    return List.map(child_styles, function(style){
+      return new BlockLayoutGenerator(style, new TokenStream(style.getMarkupContent()));
+    });
+  };
+
+  TableRowLayoutGenerator.prototype._getChildStyles = function(context, parent_style, child_tags){
+    var child_count = child_tags.length;
+    var rest_extent = context.getBlockRestExtent();
+    var rest_measure = context.getInlineMaxMeasure();
+    return List.mapi(child_tags, function(i, tag){
+      var default_style = new StyleContext(tag, parent_style);
+      var static_measure = default_style._computeStaticMeasure();
+      var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_count - i));
+      rest_measure -= measure;
+      return default_style.clone({
+	"float":"start",
+	"measure":measure,
+	"extent":rest_extent
+      });
+    });
+  };
+
+  TableRowLayoutGenerator.prototype._getChildTags = function(stream){
+    return stream.getWhile(function(token){
+      return (token instanceof Tag && (token.getName() === "td" || token.getName() === "th"));
+    });
+  };
+
+  return TableRowLayoutGenerator;
+})();
+
+var LayoutEvaluator = (function(){
+  function LayoutEvaluator(){
+  }
+
+  LayoutEvaluator.prototype = {
+    evaluate : function(box){
+      //console.log("evaluate:%o", box);
+      if(box === null || typeof box === "undefined"){
+	//console.warn("error box:%o", box);
+	return "";
+      }
+      // caution: not box.style.display but box.display
+      switch(box.display){
+      case "block": return this.evalBlock(box);
+      case "inline": return this.evalInline(box);
+      case "inline-block": return this.evalInlineBlock(box);
+      default: return "";
+      }
+    },
+    evalBlock : function(block){
+      return Html.tagWrap("div", this.evalBlockElements(block, block.elements), {
+	"style":Css.toString(block.css),
+	"class":block.classes.join(" ")
+      });
+    },
+    evalBlockElements : function(parent, elements){
+      var self = this;
+      return List.fold(elements, "", function(ret, child){
+	return ret + self.evaluate(child);
+      });
+    },
+    evalInline : function(line){
+      return Html.tagWrap("div", this.evalInlineElements(line, line.elements), {
+	"style":Css.toString(line.css),
+	"class":line.classes.join(" ")
+      });
+    },
+    evalInlineElements : function(line, elements){
+      var self = this;
+      return List.fold(elements, "", function(ret, element){
+	return ret + self.evalInlineElement(line, element);
+      });
+    },
+    evalInlineElement : function(line, element){
+      if(element instanceof Box){
+	return this.evalInlineChild(line, element);
+      }
+      var text = this.evalTextElement(line, element);
+      return line.style.isTextEmphaEnable()? this.evalEmpha(line, element, text) : text;
+    },
+    evalTextElement : function(line, text){
+      switch(text._type){
+      case "word": return this.evalWord(line, text);
+      case "char": return this.evalChar(line, text);
+      case "tcy": return this.evalTcy(line, text);
+      case "ruby": return this.evalRuby(line, text);
+      default: return "";
+      }
+    }
+  };
+
+  return LayoutEvaluator;
+})();
+
+
+var VertLayoutEvaluator = (function(){
+  function VertLayoutEvaluator(){
+    LayoutEvaluator.call(this);
+  }
+  Class.extend(VertLayoutEvaluator, LayoutEvaluator);
+
+  VertLayoutEvaluator.prototype.evalInlineBlock = function(iblock){
+    return this.evalBlock(iblock);
+  };
+
+  VertLayoutEvaluator.prototype.evalInlineChild = function(line, child){
+    return this.evalInline(child);
+  };
+
+  VertLayoutEvaluator.prototype.evalRuby = function(line, ruby){
+    var body = this.evalRb(line, ruby) + this.evalRt(line, ruby);
+    return Html.tagWrap("div", body, {
+      "stye":Css.toString(ruby.css),
+      "class":"nehan-ruby-body"
+    });
+  };
+
+  VertLayoutEvaluator.prototype.evalRb = function(line, ruby){
+    return Html.tagWrap("div", this.evalInlineElements(line, ruby.getRbs()), {
+      "style":Css.toString(ruby.getCssVertRb(line)),
+      "class":"nehan-rb"
+    });
+  };
+
+  VertLayoutEvaluator.prototype.evalRt = function(line, ruby){
+    var rt = (new InlineLayoutGenerator(
+      new StyleContext(ruby.rt, line.style),
+      new TokenStream(ruby.getRtString())
+    )).yield();
+    Args.copy(rt.css, ruby.getCssVertRt(line));
+    return this.evaluate(rt);
+  };
+
+  VertLayoutEvaluator.prototype.evalWord = function(line, word){
+    if(Env.isTransformEnable){
+      if(Env.isTrident){
+	return this.evalWordTransformTrident(line, word);
+      }
+      return this.evalWordTransform(line, word);
+    } else if(Env.isIE){
+      return this.evalWordIE(line, word);
+    } else {
+      return "";
+    }
+  };
+
+  VertLayoutEvaluator.prototype.evalWordTransform = function(line, word){
+    var body = Html.tagWrap("div", word.data, {
+      "class": "nehan-rotate-90",
+      "style": Css.toString(word.getCssVertTransBody(line))
+    });
+    return Html.tagWrap("div", body, {
+      "style": Css.toString(word.getCssVertTrans(line))
+    });
+  };
+
+  VertLayoutEvaluator.prototype.evalWordTransformTrident = function(line, word){
+    var body = Html.tagWrap("div", word.data, {
+      // trident rotation needs some hack.
+      //"class": "nehan-rotate-90",
+      "style": Css.toString(word.getCssVertTransBodyTrident(line))
+    });
+    return Html.tagWrap("div", body, {
+      "style": Css.toString(word.getCssVertTrans(line))
+    });
+  };
+
+  VertLayoutEvaluator.prototype.evalWordIE = function(line, word){
+    return Html.tagWrap("div", word.data, {
+      "class": "nehan-vert-ie",
+      "style": Css.toString(word.getCssVertTransIE(line))
+    }) + Const.clearFix;
+  };
+
+  VertLayoutEvaluator.prototype.evalRotateChar = function(line, chr){
+    if(Env.isTransformEnable){
+      return this.evalRotateCharTransform(line, chr);
+    } else if(Env.isIE){
+      return this.evalRotateCharIE(line, chr);
+    } else {
+      return this.evalCharWithBr(line, chr);
+    }
+  };
+
+  VertLayoutEvaluator.prototype.evalRotateCharTransform = function(line, chr){
+    return Html.tagWrap("div", chr.data, {
+      "class":"nehan-rotate-90"
+    });
+  };
+
+  VertLayoutEvaluator.prototype.evalRotateCharIE = function(line, chr){
+    return Html.tagWrap("div", chr.data, {
+      "style":Css.toString(chr.getCssVertRotateCharIE(line)),
+      "class":"nehan-vert-ie"
+    }) + Const.clearFix;
+  };
+
+  VertLayoutEvaluator.prototype.evalTcy = function(line, tcy){
+    return Html.tagWrap("div", tcy.data, {
+      "class": "nehan-tcy"
+    });
+  };
+
+  VertLayoutEvaluator.prototype.evalChar = function(line, chr){
+    if(chr.isImgChar()){
+      if(chr.isVertGlyphEnable()){
+	return this.evalVerticalGlyph(line, chr);
+      }
+      return this.evalImgChar(line, chr);
+    } else if(chr.isHalfSpaceChar(chr)){
+      return this.evalHalfSpaceChar(line, chr);
+    } else if(chr.isCnvChar()){
+      return this.evalCnvChar(line, chr);
+    } else if(chr.isRotateChar()){
+      return this.evalRotateChar(line, chr);
+    } else if(chr.isSmallKana()){
+      return this.evalSmallKana(line, chr);
+    } else if(chr.isPaddingEnable()){
+      return this.evalPaddingChar(line, chr);
+    } else if(line.letterSpacing){
+      return this.evalCharLetterSpacing(line, chr);
+    }
+    return this.evalCharWithBr(line, chr);
+  };
+
+  VertLayoutEvaluator.prototype.evalCharWithBr = function(line, chr){
+    return chr.data + "<br />";
+  };
+
+  VertLayoutEvaluator.prototype.evalCharLetterSpacing = function(line, chr){
+    return Html.tagWrap("div", chr.data, {
+      "style":Css.toString(chr.getCssVertLetterSpacing(line))
+    });
+  };
+
+  VertLayoutEvaluator.prototype.evalEmpha = function(line, chr, char_body){
+    char_body = char_body.replace("<br />", "");
+    var char_body2 = Html.tagWrap("span", char_body, {
+      "class":"nehan-empha-src",
+      "style":Css.toString(chr.getCssVertEmphaSrc(line))
+    });
+    var empha_body = Html.tagWrap("span", line.style.textEmpha.getText(), {
+      "class":"nehan-empha-text",
+      "style":Css.toString(chr.getCssVertEmphaText(line))
+    });
+    return Html.tagWrap("div", char_body2 + empha_body, {
+      "class":"nehan-empha-wrap",
+      "style":Css.toString(line.style.textEmpha.getCssVertEmphaWrap(line, chr))
+    });
+  };
+
+  VertLayoutEvaluator.prototype.evalPaddingChar = function(line, chr){
+    return Html.tagWrap("div", chr.data, {
+      style:Css.toString(chr.getCssPadding(line))
+    });
+  };
+
+  VertLayoutEvaluator.prototype.evalImgChar = function(line, chr){
+    var color = line.color || new Color(Layout.fontColor);
+    var font_rgb = color.getRgb();
+    var palette_color = Palette.getColor(font_rgb).toUpperCase();
+    return Html.tagSingle("img", {
+      "class":"nehan-img-char",
+      src:chr.getImgSrc(palette_color),
+      style:Css.toString(chr.getCssVertImgChar(line))
+    }) + Const.clearFix;
+  };
+
+  VertLayoutEvaluator.prototype.evalVerticalGlyph = function(line, chr){
+    return Html.tagWrap("div", chr.data, {
+      "class":"nehan-vert-glyph",
+      "style":Css.toString(chr.getCssVertGlyph(line))
+    });
+  };
+
+  VertLayoutEvaluator.prototype.evalCnvChar = function(line, chr){
+    return chr.cnv + "<br />";
+  };
+
+  VertLayoutEvaluator.prototype.evalSmallKana = function(line, chr){
+    var tag_name = (line.style.textEmpha && line.style.textEmpha.isEnable())? "span" : "div";
+    return Html.tagWrap(tag_name, chr.data, {
+      style:Css.toString(chr.getCssVertSmallKana())
+    });
+  };
+
+  VertLayoutEvaluator.prototype.evalHalfSpaceChar = function(line, chr){
+    var font_size = line.style.getFontSize();
+    var half = Math.round(font_size / 2);
+    return Html.tagWrap("div", "&nbsp;", {
+      style:Css.toString(chr.getCssVertHalfSpaceChar(line))
+    });
+  };
+
+  VertLayoutEvaluator.prototype.evalInlineBox = function(line, box){
+    var body = (box._type === "img")? this.parentEvaluator.evalImageContent(box) : box.content;
+    return Html.tagWrap("div", body, {
+      "style":Css.toString(box.getCssVertInlineBox())
+    });
+  };
+
+  return VertLayoutEvaluator;
+})();
+
+
+var HoriLayoutEvaluator = (function(){
+  function HoriLayoutEvaluator(){
+    LayoutEvaluator.call(this);
+  }
+  Class.extend(HoriLayoutEvaluator, LayoutEvaluator);
+
+  HoriLayoutEvaluator.prototype.evalInlineBlock = function(iblock){
+    iblock.css.display = "inline-block";
+    return this.evalBlock(iblock);
+  };
+
+  HoriLayoutEvaluator.prototype.evalInlineChild = function(line, child){
+    return Html.tagWrap("span", this.evalInlineElements(child, child.elements), {
+      "style":Css.toString(line.css),
+      "class":line.classes.join(" ")
+    });
+  };
+
+  HoriLayoutEvaluator.prototype.evalRuby = function(line, ruby){
+    var body = this.evalRt(line, ruby) + this.evalRb(line, ruby);
+    return Html.tagWrap("span", body, {
+      "style":Css.toString(ruby.getCssHoriRuby(line)),
+      "class":"nehan-ruby-body"
+    });
+  };
+
+  HoriLayoutEvaluator.prototype.evalRb = function(line, ruby){
+    return Html.tagWrap("div", this.evalInlineElements(line, ruby.getRbs()), {
+      "style":Css.toString(ruby.getCssHoriRb(line)),
+      "class":"nehan-rb"
+    });
+  };
+
+  HoriLayoutEvaluator.prototype.evalRt = function(line, ruby){
+    return Html.tagWrap("div", ruby.getRtString(), {
+      "style":Css.toString(ruby.getCssHoriRt(line)),
+      "class":"nehan-rt"
+    });
+  };
+
+  HoriLayoutEvaluator.prototype.evalWord = function(line, word){
+    return word.data;
+  };
+
+  HoriLayoutEvaluator.prototype.evalTcy = function(line, tcy){
+    return tcy.data;
+  };
+
+  HoriLayoutEvaluator.prototype.evalChar = function(line, chr){
+    if(chr.isHalfSpaceChar()){
+      return chr.cnv;
+    } else if(chr.isKerningChar()){
+      return this.evalKerningChar(line, chr);
+    }
+    return chr.data;
+  };
+
+  HoriLayoutEvaluator.prototype.evalEmpha = function(line, chr, char_body){
+    var char_body2 = Html.tagWrap("div", char_body, {
+      "style":Css.toString(chr.getCssHoriEmphaSrc(line))
+    });
+    var empha_body = Html.tagWrap("div", line.style.textEmpha.getText(), {
+      "style":Css.toString(chr.getCssHoriEmphaText(line))
+    });
+    // TODO: check text-emphasis-position is over or under
+    return Html.tagWrap("span", empha_body + char_body2, {
+      "style":Css.toString(line.style.textEmpha.getCssHoriEmphaWrap(line, chr))
+    });
+  };
+
+  HoriLayoutEvaluator.prototype.evalKerningChar = function(line, chr){
+    var css = chr.getCssPadding(line);
+    if(chr.isKakkoStart()){
+      css["margin-left"] = "-0.5em";
+      return Html.tagWrap("span", chr.data, {
+	"style": Css.toString(css),
+	"class":"nehan-char-kakko-start"
+      });
+    }
+    if(chr.isKakkoEnd()){
+      css["margin-right"] = "-0.5em";
+      return Html.tagWrap("span", chr.data, {
+	"style": Css.toString(css),
+	"class":"nehan-char-kakko-end"
+      });
+    }
+    if(chr.isKutenTouten()){
+      css["margin-right"] = "-0.5em";
+      return Html.tagWrap("span", chr.data, {
+	"style": Css.toString(css),
+	"class":"nehan-char-kuto"
+      });
+    }
+    return chr.data;
+  };
+
+  HoriLayoutEvaluator.prototype.evalPaddingChar = function(line, chr){
+    return Html.tagWrap("span", chr.data, {
+      "style": Css.toString(chr.getCssPadding(line))
+    });
+  };
+
+  return HoriLayoutEvaluator;
+})();
+
+
+
+var LayoutTest = (function(){
+
+  var TestText = {
+    "long":"日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。",
+    "middle":"<p>あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん</p>",
+    "short":"<p>余白のテキストです。</p>"
+  };
+
+  // various text data
+  var TestSnipet = {
+    "ruby":[
+      "<p>",
+      "<ruby>漢字<rt>かんじ</rt></ruby>と<span class='nehan-xx-large'><ruby>日本<rt>にほん</rt></ruby></span>と<span class='nehan-empha-dot-open'>圏点</span>です。",
+      "</p>"
+    ].join(""),
+
+    "float":[
+      "<p class='nehan-float-start' style='measure:100px'>",
+      "短い長さの前方コンテンツ",
+      "</p>",
+      
+      "<p class='nehan-float-start' style='measure:80px'>",
+      "先頭に回り込まれる先頭に回り込まれる先頭に回り込まれる先頭に回り込まれる",
+      "先頭に回り込まれる先頭に回り込まれる先頭に回り込まれる先頭に回り込まれる",
+      "</p>",
+
+      "<p class='nehan-float-end' style='measure:60px'>",
+      "一つ目の後方に回り込まれるコンテンツ",
+      "</p>",
+
+      "<p class='nehan-float-end' style='measure:50px'>",
+      "二つ目の後方コンテンツ",
+      "</p>"
+
+    ].join(""),
+
+    "ul":[
+      "<ul>",
+      "<li>" + TestText["short"] + "</li>",
+      "<li>" + [
+	"<ul>",
+	"<li>" + TestText["middle"] + "</li>",
+	"<li>" + TestText["long"] + "</li>",
+	"</ul>"
+      ].join("") + "</li>",
+      "<li>" + TestText["short"] + "</li>",
+      "<li>" + TestText["middle"] + "</li>",
+      "<li>" + TestText["long"] + "</li>",
+      "</ul>"
+    ].join(""),
+
+/*
+    "ul":[
+      "<ol>",
+      "<li>" +
+	TestText["long"] +
+	TestText["long"] +
+	TestText["long"] +
+	"</li>",
+      "</ol>"
+    ].join(""),
+*/
+
+/*
+    "ul":[
+      "<ol>",
+      "<li>" + TestText["short"] + "</li>",
+      "<li>" + TestText["short"] + "</li>",
+      "<li>" + TestText["short"] + "</li>",
+      "<li>" + TestText["short"] + "</li>",
+      "<li>" + TestText["short"] + "</li>",
+      "<li>" + TestText["short"] + "</li>",
+      "</ol>"
+    ].join(""),
+*/
+
+    /*
+    "ul":[
+      "<ol>",
+      "<li>あ</li>",
+      "<li>か</li>",
+      "</ol>"
+    ].join(""),
+    */
+
+    "ol":[
+      "<ol>",
+      "<li>" + TestText["short"] + "</li>",
+      "<li>" + [
+	"<ul>",
+	"<li>" + TestText["middle"] + "</li>",
+	"<li>" + TestText["short"] + "</li>",
+	"<li>" + TestText["long"] + "</li>",
+	"</ul>"
+      ].join("") + "</li>",
+      "<li>" + TestText["middle"] + "</li>",
+      "<li>" + TestText["long"] + "</li>",
+      "</ol>"
+    ].join(""),
+
+    "dummy":""
+  };
+
+  var TestScript = {
+    "ruby-test":TestSnipet["ruby"],
+
+    "ul-test":TestSnipet["ul"],
+
+    "ol-test":TestSnipet["ol"],
+
+    "plain-test":[
+      TestSnipet["ruby"],
+      TestText["long"],
+      TestText["middle"],
+      TestText["short"]
+    ].join(""),
+
+    "float-test":[
+      TestSnipet["float"],
+      TestText["long"],
+      TestText["middle"],
+      TestText["long"],
+      TestSnipet["float"],
+      TestText["long"],
+      TestText["middle"],
+      TestText["long"],
+      ""
+    ].join(""),
+
+    "table-test":[
+      "<table>",
+      //"<tbody>",
+
+      "<tr>",
+      "<td>hoge</td><td>hige</td><td>hage</td>",
+      "</tr>",
+
+      "<tr>",
+      "<td>ohoho</td><td>ahaha</td><td>hihihi</td>",
+      "</tr>",
+
+      "<tr>",
+      "<td>123</td><td>456</td><td>789</td>",
+      "</tr>",
+
+      "</tbody>",
+      "</table>"
+    ].join(""),
+
+    "dl-test":[
+      "<dl>",
+      "<dt>hoge</dt>",
+      "<dd>" + TestText["long"] + "</dd>",
+      "</dl>"
+    ].join("")
+  };
+
+  return {
+    getGenerator : function(name){
+      var script = TestScript[name] || TestSnipet[name] || TestText[name] || "undefined script";
+      var tag = new Tag("<body>", script);
+      var style = new StyleContext(tag, null);
+      var stream = new TokenStream(tag.getContent());
+      return new BlockLayoutGenerator(style, stream);
+    },
+    getEvaluator : function(){
+      return (Layout.direction === "vert")? new VertLayoutEvaluator() : new HoriLayoutEvaluator();
+    },
+    start : function(name, opt){
+      opt = opt || {};
+      Layout.width = opt.width || 800;
+      Layout.height = opt.height || 500;
+      Layout.direction = opt.direction || "vert";
+
+      var output = document.getElementById(opt.output || "result");
+      var debug = document.getElementById(opt.debug || "debug");
+      var generator = this.getGenerator(name);
+      var evaluator = this.getEvaluator();
+      var make_title = function(name){
+	var dom = document.createElement("h2");
+	dom.innerHTML = name + " / " + opt.direction;
+	return dom;
+      };
+      var make_div = function(html){
+	var dom = document.createElement("div");
+	dom.innerHTML = html;
+	return dom;
+      };
+      var make_time = function(t1, t2){
+	var sec = t2.getTime() - t1.getTime();
+	var dom = document.createElement("p");
+	dom.innerHTML = (sec / 1000) + "sec";
+	return dom;
+      };
+
+      output.appendChild(make_title(name));
+
+      var raws = [];
+      var t1 = new Date();
+      do {
+	var page = generator.yield();
+	if(page){
+	  var html = evaluator.evaluate(page);
+	  output.appendChild(make_div(html));
+	  raws.push(html);
+	}
+      } while(page != null);
+      var t2 = new Date();
+
+      output.appendChild(make_time(t1, t2));
+      //debug.value = raws.join("\n\n");
+    }
+  };
+})();
+
+
 Nehan.version = "4.0.11";
 
 Args.copy(Env, __engine_args.env || {});
@@ -10057,6 +12064,8 @@ __exports.setStyles = function(values){
   }
   return this;
 };
+
+__exports.LayoutTest = LayoutTest;
 
 return __exports;
 

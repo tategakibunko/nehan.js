@@ -1,5 +1,4 @@
 var Tag = (function (){
-  var global_tag_id = 0;
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
   var is_inline_style_not_allowed = function(name){
     return List.exists(["padding", "margin", "border"], function(prop){
@@ -10,10 +9,8 @@ var Tag = (function (){
   function Tag(src, content_raw){
     this._type = "tag";
     this._inherited = false; // flag to avoid duplicate inheritance
-    this._gtid = global_tag_id++;
     this.src = src;
     this.parent = null;
-    this.next = null;
     this.contentRaw = content_raw || "";
     this.name = this._parseName(this.src);
     this.tagAttr = TagAttrParser.parse(this.src);
@@ -21,7 +18,6 @@ var Tag = (function (){
     this.classes = this._parseClasses(this.tagAttr["class"] || "");
     this.dataset = {}; // dataset with no "data-" prefixes => {id:"10", name:"taro"} 
     this.datasetRaw = {}; // dataset with "data-" prefixes => {"data-id":"10", "data-name":"taro"}
-    this.childs = []; // updated by inherit
     this.cssAttrStatic = this._getSelectorValue(); // initialize css-attr, but updated when 'inherit'.
     this.cssAttrDynamic = {}; // added by setCssAttr
 
@@ -33,63 +29,17 @@ var Tag = (function (){
   }
 
   Tag.prototype = {
-    inherit : function(parent_tag, context){
+    inherit : function(parent){
       if(this._inherited || !this.hasLayout()){
 	return this; // avoid duplicate initialize
       }
-      var self = this;
-      this.parent = parent_tag;
-      if(this.parent){
-	this.parent.addChild(this);
-      }
+      this.parent = parent;
       this.cssAttrStatic = this._getSelectorValue(); // reget css-attr with parent enabled.
-      this.applyCallbacks(context);
       this._inherited = true;
       return this;
     },
-    applyCallbacks : function(context){
-      var css;
-      var onload = this.getCssAttr("onload");
-      if(onload){
-	css = onload(this, context);
-	if(css){
-	  this.setCssAttrs(css);
-	}
-      }
-      var nth_child = this.getCssAttr("nth-child");
-      if(nth_child){
-	css = nth_child(this.getChildNth(), this, context);
-	if(css){
-	  this.setCssAttrs(css);
-	}
-      }
-      var nth_of_type = this.getCssAttr("nth-of-type");
-      if(nth_of_type){
-	css = nth_of_type(this.getChildOfTypeNth(), this, cotext);
-	if(css){
-	  this.setCssAttrs(css);
-	}
-      }
-/*
-      // TODO:
-      // nth-last-child, nth-last-of-type not supported yet,
-      // because getting order from tail needs 2-pass parsing,
-      // and it consts too much for js engine.
-      var nth_last_child = this.getCssAttr("nth-last-child");
-      if(nth_last_child){
-	css = nth_last_child(this.getLastChildNth());
-	if(css){
-	  this.setCssAttrs(css);
-	}
-      }
-      var nth_last_of_type = this.getCssAttr("nth-last-of-type");
-      if(nth_last_of_type){
-	css = nth_last_of_type(this.getLastChildOfTypeNth());
-	if(css){
-	  this.setCssAttrs(css);
-	}
-      }
-*/
+    clone : function(){
+      return new Tag(this.src, this.contentRaw);
     },
     setContentRaw : function(content_raw){
       this.contentRaw = content_raw;
@@ -105,15 +55,6 @@ var Tag = (function (){
 	this.setCssAttr(prop, obj[prop]);
       }
     },
-    setNext : function(tag){
-      this.next = tag;
-    },
-    addChild : function(tag){
-      if(this.childs.length > 0){
-	List.last(this.childs).setNext(tag);
-      }
-      this.childs.push(tag);
-    },
     addClass : function(klass){
       this.classes.push(klass);
     },
@@ -122,22 +63,8 @@ var Tag = (function (){
 	return cls != klass;
       });
     },
-    iterTagAttr : function(fn){
-      Obj.each(this.tagAttr, fn);
-    },
-    iterCssAttrDynamic : function(fn){
-      Obj.each(this.cssAttrDynamic, fn);
-    },
-    iterCssAttrStatic : function(fn){
-      Obj.each(this.cssAttrStatic, fn);
-    },
-    iterCssAttr : function(fn){
-      this.iterCssAttrStatic(fn);
-      this.iterCssAttrDynamic(fn); // dynamic attrs prior to static ones.
-    },
-    iterAttr : function(fn){
-      this.iterCssAttr(fn);
-      this.iterTagAttr(fn); // inline attrs prior to css attrs.
+    getParent : function(){
+      return this.parent;
     },
     getName : function(){
       return this.name;
@@ -152,30 +79,6 @@ var Tag = (function (){
 	return ret;
       }
       return (typeof def_value !== "undefined")? def_value : null;
-    },
-    getParent : function(){
-      return this.parent || null;
-    },
-    getChilds : function(){
-      return this.childs;
-    },
-    getNext : function(){
-      return this.next || null;
-    },
-    getDisplay : function(){
-      return this.getCssAttr("display", "block"); // display is block if not defined.
-    },
-    getWhiteSpace : function(){
-      return this.getCssAttr("white-space", "normal");
-    },
-    getParentChilds : function(){
-      return this.parent? this.parent.getChilds() : [];
-    },
-    getParentTypeChilds : function(){
-      var name = this.getName();
-      return List.filter(this.getParentChilds(), function(tag){
-	return tag.getName() === name;
-      });
     },
     getCssClasses : function(){
       return this.classes.join(" ");
@@ -230,37 +133,11 @@ var Tag = (function (){
       }
       return this.src + this.contentRaw + "</" + this.name + ">";
     },
-    getLogicalFloat : function(){
-      return this.getCssAttr("float", "none");
-    },
     getHeaderRank : function(){
       if(this.getName().match(/h([1-6])/)){
 	return parseInt(RegExp.$1, 10);
       }
       return 0;
-    },
-    getStaticSize : function(font_size, max_size){
-      var width = this.getAttr("width");
-      var height = this.getAttr("height");
-      if(width && height){
-	width = UnitSize.getBoxSize(width, font_size, max_size);
-	height = UnitSize.getBoxSize(height, font_size, max_size);
-	return new BoxSize(width, height);
-      }
-      // if size of img is not defined, treat it as character size icon.
-      // so, if basic font size is 16px, you can write <img src='/path/to/icon'>
-      // instead of writing <img src='/path/to/icon' width='16' height='16'>
-      if(this.name === "img"){
-	var icon_size = Layout.fontSize;
-	return new BoxSize(icon_size, icon_size);
-      }
-      return null;
-    },
-    hasStaticSize : function(){
-      return (this.getAttr("width") !== null && this.getAttr("height") !== null);
-    },
-    hasFlow : function(){
-      return this.getCssAttr("flow") !== null;
     },
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
@@ -272,42 +149,12 @@ var Tag = (function (){
     isPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
-    isFloated : function(){
-      return this.getLogicalFloat() != "none";
-    },
-    isPush : function(){
-      return (typeof this.tagAttr.push != "undefined");
-    },
-    isPull : function(){
-      return (typeof this.tagAttr.pull != "undefined");
-    },
     isAnchorTag : function(){
       return this.name === "a" && this.getTagAttr("name") !== null;
     },
     isAnchorLinkTag : function(){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
-    },
-    isBlock : function(){
-      var display = this.getDisplay();
-      if(display === "block"){
-	return true;
-      }
-      // floated block with static size is treated as block level floated box.
-      if(this.hasStaticSize() && this.isFloated() && display !== "inline-block"){
-	return true;
-      }
-      if(this.isPush() || this.isPull()){
-	return true;
-      }
-      return false;
-    },
-    isInline : function(){
-      var display = this.getDisplay();
-      return (display === "inline" || display === "inline-block");
-    },
-    isInlineBlock : function(){
-      return this.getDisplay() === "inline-block";
     },
     isSingleTag : function(){
       return this.getCssAttr("single") === true;
@@ -334,48 +181,6 @@ var Tag = (function (){
     },
     isMetaTag : function(){
       return this.getCssAttr("meta") === true;
-    },
-    isSameTag : function(dst){
-      return this._gtid === dst._gtid;
-    },
-    getChildIndexFrom : function(childs){
-      var self = this;
-      return List.indexOf(childs, function(tag){
-	return self.isSameTag(tag);
-      });
-    },
-    getChildNth : function(){
-      return this.getChildIndexFrom(this.getParentChilds());
-    },
-    getLastChildNth : function(){
-      return this.getChildIndexFrom(List.reverse(this.getParentChilds()));
-    },
-    getChildOfTypeNth : function(){
-      return this.getChildIndexFrom(this.getParentTypeChilds());
-    },
-    getLastChildOfTypeNth : function(){
-      return this.getChildIndexFrom(this.getParentTypeChilds());
-    },
-    isFirstChild : function(){
-      return this.getChildNth() === 0;
-    },
-    isLastChild : function(){
-      var childs = this.getParentChilds();
-      return this.getChildNth() === (childs.length - 1);
-    },
-    isFirstOfType : function(){
-      return this.getChildOfTypeNth() === 0;
-    },
-    isLastOfType : function(){
-      var childs = this.getParentTypeChilds();
-      return this.getChildOfTypeNth() === (childs.length - 1);
-    },
-    isOnlyChild : function(){
-      return this.getParentChilds().length === 1;
-    },
-    isOnlyOfType : function(){
-      var childs = this.getParentTypeChilds();
-      return (childs.length === 1 && this.isSame(childs[0]));
     },
     isRoot : function(){
       return this.parent === null;

@@ -9,6 +9,13 @@ var BoxEdge = (function (){
     isEnable : function(){
       return this.padding.isEnable() || this.margin.isEnable() || this.border.isEnable();
     },
+    clone : function(){
+      var edge = new BoxEdge();
+      edge.padding = this.padding.clone();
+      edge.margin = this.margin.clone();
+      edge.border = this.border.clone();
+      return edge;
+    },
     clear : function(){
       this.padding.clear();
       this.margin.clear();
