@@ -7301,6 +7301,14 @@ var StyleContext = (function(){
     getEdgeExtent : function(flow){
       return this.edge? this.edge.getExtentSize(flow || this.flow) : 0;
     },
+    // if real parent(parent2) exists, obtain from it.
+    getContextEdgeMeasure : function(flow){
+      return this.parent2? this.parent2.getEdgeMeasure(flow) : this.getEdgeMeasure(flow);
+    },
+    // if real parent(parent2) exists, obtain from it.
+    getContextEdgeExtent : function(flow){
+      return this.parent2? this.parent2.getEdgeExtent(flow) : this.getEdgeExtent(flow);
+    },
     getMarkerHtml : function(order){
       return this.listStyle? this.listStyle.getMarkerHtml(order) : "";
     },
@@ -7746,6 +7754,12 @@ var LayoutContext = (function(){
 
   LayoutContext.prototype = {
     // block-level
+    isBlockSpaceLeft : function(){
+      return this.block.isSpaceLeft();
+    },
+    hasBlockSpaceFor : function(extent){
+      return this.block.hasSpaceFor(extent);
+    },
     addBlockElement : function(element, extent){
       this.block.addElement(element, extent);
     },
@@ -7824,6 +7838,12 @@ var BlockLayoutContext = (function(){
   }
 
   BlockLayoutContext.prototype = {
+    isSpaceLeft : function(){
+      return this.getRestExtent() > 0;
+    },
+    hasSpaceFor : function(extent){
+      return this.getRestExtent() >= extent;
+    },
     addElement : function(element, extent){
       this.elements.push(element);
       this.curExtent += extent;
@@ -7954,6 +7974,16 @@ var LayoutGenerator = (function(){
     this._terminate = false;
   }
 
+  LayoutGenerator.prototype.yield = function(parent_context){
+    var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
+    console.log("[%s]:context(max_m = %d, max_e = %d)", this.style.getMarkupName(), context.getInlineMaxMeasure(), context.getBlockMaxExtent());
+    return this._yield(context);
+  };
+
+  LayoutGenerator.prototype._yield = function(context){
+    throw "LayoutGenerator::_yield must be implemented in child class";
+  };
+
   LayoutGenerator.prototype.setTerminate = function(status){
     this._terminate = status;
   };
@@ -8027,35 +8057,19 @@ var LayoutGenerator = (function(){
     );
   };
 
-  LayoutGenerator.prototype._createFloatBlockContext = function(context){
+  LayoutGenerator.prototype._createChildContext = function(context){
     return new LayoutContext(
-      new BlockLayoutContext(context.getBlockRestExtent() - this.style.getEdgeExtent()),
+      new BlockLayoutContext(context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
       new InlineLayoutContext(this.style.getContentMeasure())
     );
   };
 
-  LayoutGenerator.prototype._createParallelBlockContext = function(context){
-    var edge_extent = this.style.parent2? this.style.parent2.getEdgeExtent() : 0;
-    return new LayoutContext(
-      new BlockLayoutContext(context.getBlockRestExtent() - edge_extent),
-      new InlineLayoutContext(this.style.getContentMeasure())
-    );
-  };
-
-  LayoutGenerator.prototype._createChildBlockContext = function(context, child_style){
-    var edge_extent = child_style? child_style.getEdgeExtent() : 0;
-    var edge_measure = child_style? child_style.getEdgeMeasure() : 0;
-    return new LayoutContext(
-      new BlockLayoutContext(context.getBlockRestExtent() - edge_extent),
-      new InlineLayoutContext(context.getInlineMaxMeasure() - edge_measure)
-    );
-  };
-
-  LayoutGenerator.prototype._createChildInlineContext = function(context){
-    return new LayoutContext(
-      context.block,
-      new InlineLayoutContext(context.getInlineRestMeasure())
-    );
+  // TODO
+  LayoutGenerator.prototype._createStream = function(tag){
+    switch(tag.getName()){
+    case "ruby": return new RubyTagStream(tag);
+    default: return new TokenStream(tag.getContent());
+    } 
   };
 
   return LayoutGenerator;
@@ -8068,51 +8082,38 @@ var BlockLayoutGenerator = (function(){
   }
   Class.extend(BlockLayoutGenerator, LayoutGenerator);
 
-  BlockLayoutGenerator.prototype.yield = function(context){
-    context = context || this._createStartContext();
-    //console.log("yield %s, rest_extent = %d", this.style.getMarkupName(), context.getBlockRestExtent());
-    if(context.getBlockMaxExtent() < 0){
-      //console.log("no more extent rest");
+  BlockLayoutGenerator.prototype._yield = function(context){
+    if(!context.isBlockSpaceLeft()){
       return null;
     }
     while(true){
       var element = this._getNext(context);
       if(element === null){
-	//console.log("[%s] null", this.style.getMarkupName());
 	break;
       }
       var extent = element.getBoxExtent(this.style.flow);
-      //console.log("[%s] block %o extent:%d", this.style.getMarkupName(), element, extent);
-      if(context.getBlockCurExtent() + extent > context.getBlockMaxExtent()){
-	//console.log("[%s] block over(cached, extent=%d) context(cur:%d, max:%d)", this.style.getMarkupName(), extent, context.getBlockCurExtent(), context.getBlockMaxExtent());
+      if(!context.hasBlockSpaceFor(extent)){
 	this.pushCache(element);
 	break;
       }
-      this._addElement(context, element, extent);
-      if(context.getBlockCurExtent() === context.getBlockMaxExtent()){
-	//console.log("block just filled");
+      if(this.style.isPushed()){
+	context.pushBockElement(element, extent);
+      } else if(this.style.isPulled()){
+	context.pullBlockElement(element, extent);
+      } else {
+	context.addBlockElement(element, extent);
+      }
+      if(!context.isBlockSpaceLeft()){
 	break;
       }
-      //console.log("...accepted by %s(rest extent = %d)", this.style.markup.name, context.getBlockRestExtent());
     }
     return this._createBlock(context);
-  };
-
-  BlockLayoutGenerator.prototype._addElement = function(context, element, extent){
-    if(this.style.isPushed()){
-      context.pushBockElement(element, extent);
-    } else if(this.style.isPulled()){
-      context.pullBlockElement(element, extent);
-    } else {
-      context.addBlockElement(element, extent);
-    }
   };
 
   BlockLayoutGenerator.prototype._createBlock = function(context){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
-      //console.log("[%s] empty block!", this.style.getMarkupName());
       return null;
     }
     return this.style.createBlock({
@@ -8123,33 +8124,12 @@ var BlockLayoutGenerator = (function(){
 
   BlockLayoutGenerator.prototype._getNext = function(context){
     if(this.hasCache()){
-      var cache = this.popCache();
-      // restore inline context if measure changed from when this cache is pushed.
-      if(this.hasChildLayout() && cache.display === "inline" && !cache.hasLineBreak){
-	var context2 = this._createChildBlockContext(context, this._childLayout.style)
-
-	// restart line in larger measure context.
-	if(cache.getBoxMeasure(this.style.flow) <= context.getInlineMaxMeasure()){
-	  return this.yieldChildLayout(context2.restoreInlineContext(cache));
-	}
-	// restart line into shorter measure context, caused by float-layouting.
-	// in description,
-	//
-	// 1. some float-layout has rest extent, and try to yield single line in that space but can't be included and cached.
-	// 2. and when restart, measure of new layout has shorter measure than the cached line.
-	//
-	// to resolve this situation, we restart stream from the head of line.
-	this._childLayout.stream.setPos(cache.elements[0].pos); // TODO: if cache.elements[0] is not text object, it may trouble.
-	this._childLayout.clearCache(); // stream rewinded, so cache must be destroyed.
-	return this.yieldChildLayout(context2);
-      }
+      var cache = this.popCache(context);
       return cache;
     }
     
     if(this.hasChildLayout()){
-      //console.log("[%s]child layout exists", this.style.getMarkupName());
-      var context2 = this._createChildBlockContext(context, this._childLayout.style);
-      return this.yieldChildLayout(context2);
+      return this.yieldChildLayout(context);
     }
 
     // read next token
@@ -8163,47 +8143,37 @@ var BlockLayoutGenerator = (function(){
 
     // inline text or inline tag
     if(Token.isText(token) || child_style.isInline()){
-      //console.log("block -> inline from %s", this.style.getMarkupName());
       this.stream.prev();
       this.setChildLayout(new InlineLayoutGenerator(this.style, this.stream));
-
-      // block context is not required by inline-generator.
-      // because it yields single line and block-over is always captured by it's parent block generator.
-      return this.yieldChildLayout();
+      return this.yieldChildLayout(context);
     }
-
-    var child_context = this._createChildBlockContext(context, child_style);
 
     // child block with float
     if(child_style.isFloated()){
       this.stream.prev();
       this.setChildLayout(new FloatLayoutGenerator(this.style, this.stream));
-      return this.yieldChildLayout(this._createChildBlockContext(context)); // child context with no child-style.
+      return this.yieldChildLayout(context);
     }
 
     if(child_style.display === "list-item"){
       this.setChildLayout(new ListItemLayoutGenerator(child_style, this._createStream(token), context));
-      return this.yieldChildLayout(child_context);
+      return this.yieldChildLayout(context);
     }
 
     if(child_style.display === "table-row"){
       this.setChildLayout(new TableRowLayoutGenerator(child_style, this._createStream(token), context));
-      return this.yieldChildLayout(child_context);
+      return this.yieldChildLayout(context);
     }
 
     switch(child_style.getMarkupName()){
     case "ul": case "ol":
-      this.setChildLayout(new ListLayoutGenerator(child_style, new ListTagStream(token.getContent())));
-      return this.yieldChildLayout(child_context);
+      this.setChildLayout(new ListLayoutGenerator(child_style, this._createStream(token)));
+      return this.yieldChildLayout(context);
       
     default:
       this.setChildLayout(new BlockLayoutGenerator(child_style, this._createStream(token)));
-      return this.yieldChildLayout(child_context);
+      return this.yieldChildLayout(context);
     }
-  };
-
-  BlockLayoutGenerator.prototype._createStream = function(tag){
-    return new TokenStream(tag.getContent()); // TODO
   };
 
   return BlockLayoutGenerator;
@@ -8216,8 +8186,31 @@ var InlineLayoutGenerator = (function(){
   }
   Class.extend(InlineLayoutGenerator, LayoutGenerator);
 
-  InlineLayoutGenerator.prototype.yield = function(context){
-    context = context || this._createStartContext();
+  InlineLayoutGenerator.prototype.popCache = function(context){
+    var cache = LayoutGenerator.prototype.popCache.call(this, context);
+    /*
+    // restore inline context if measure changed from when this cache is pushed.
+    if(this.hasChildLayout() && cache.display === "inline" && !cache.hasLineBreak){
+      // restart line in larger measure context.
+      if(cache.getBoxMeasure(this.style.flow) <= context.getInlineMaxMeasure()){
+	return this.yield(context.restoreInlineContext(cache));
+      }
+      // restart line into shorter measure context, caused by float-layouting.
+      // in description,
+      //
+      // 1. some float-layout has rest extent, and try to yield single line in that space but can't be included and cached.
+      // 2. and when restart, measure of new layout has shorter measure than the cached line.
+      //
+      // to resolve this situation, we restart stream from the head of line.
+      this.stream.setPos(cache.elements[0].pos); // TODO: if cache.elements[0] is not text object, it may trouble.
+      this.clearCache(); // stream rewinded, so cache must be destroyed.
+      return this.yield(context);
+    }*/
+    return cache;
+  };
+  
+
+  InlineLayoutGenerator.prototype._yield = function(context){
     while(true){
       var element = this._getNext(context);
       if(element === null){
@@ -8248,11 +8241,11 @@ var InlineLayoutGenerator = (function(){
     return this._createLine(context);
   };
 
-  InlineLayoutGenerator.prototype._createStream = function(token){
-    switch(token.getName()){
-    case "ruby": return new RubyTagStream(token);
-    default: return new TokenStream(token.getContent());
-    }
+  InlineLayoutGenerator.prototype._createChildContext = function(context){
+    return new LayoutContext(
+      context.block, // inline generator inherits block context as it is.
+      new InlineLayoutContext(context.getInlineRestMeasure())
+    );
   };
 
   InlineLayoutGenerator.prototype._justifyLine = function(context){
@@ -8317,7 +8310,7 @@ var InlineLayoutGenerator = (function(){
     default:
       //console.log("start child inline:%s", token.getContent());
       this.setChildLayout(new InlineLayoutGenerator(style, this._createStream(token)));
-      return this.yieldChildLayout(this._createChildInlineContext(context));
+      return this.yieldChildLayout(context);
     }
   };
 
@@ -8492,20 +8485,19 @@ var FloatLayoutGenerator = (function(){
   Class.extend(FloatLayoutGenerator, LayoutGenerator);
 
   FloatLayoutGenerator.prototype.hasNext = function(){
-    if(this.hasNextFloat()){
+    if(this._hasNextFloat()){
       return true;
     }
     return LayoutGenerator.prototype.hasNext.call(this);
   };
 
-  FloatLayoutGenerator.prototype.hasNextFloat = function(){
+  FloatLayoutGenerator.prototype._hasNextFloat = function(){
     return List.exists(this.generators, function(gen){
       return gen.hasNext();
     });
   };
 
-  FloatLayoutGenerator.prototype.yield = function(context){
-    context = context || this._createStartContext();
+  FloatLayoutGenerator.prototype._yield = function(context){
     var stack = this._yieldFloatStack(context);
     var rest_measure = context.getInlineRestMeasure();
     var rest_extent = context.getBlockRestExtent();
@@ -8533,7 +8525,7 @@ var FloatLayoutGenerator = (function(){
     */
     var group = stack.pop(); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
     var rest = this._yieldFloat(context, stack, rest_measure - group.getMeasure(flow), group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
-    var group_set = this._wrapFloat(context, group, rest); // wrap these 2 floated layout as one block.
+    var group_set = this._wrapFloat(group, rest); // wrap these 2 floated layout as one block.
 
     /*
       To understand rest_extent_space, remember that this func is called recursivelly,
@@ -8567,7 +8559,7 @@ var FloatLayoutGenerator = (function(){
     */
     // if there is space in block-flow direction, yield rest space and wrap tfloated-set and rest-space as one.
     var space = this._yieldFloatSpace(context, rest_measure, rest_extent_space);
-    return this._wrapBlock(context, group_set, space);
+    return this._wrapBlock(group_set, space);
   };
   
   FloatLayoutGenerator.prototype._sortFloatRest = function(floated, rest){
@@ -8575,7 +8567,7 @@ var FloatLayoutGenerator = (function(){
     return floated.isFloatStart()? floated_elements.concat(rest) : [rest].concat(floated_elements);
   };
 
-  FloatLayoutGenerator.prototype._wrapBlock = function(context, block1, block2){
+  FloatLayoutGenerator.prototype._wrapBlock = function(block1, block2){
     var flow = this.style.flow;
     var measure = block1.getBoxMeasure(flow); // block2 has same measure
     var extent = block1.getBoxExtent(flow) + (block2? block2.getBoxExtent(flow) : 0);
@@ -8588,7 +8580,7 @@ var FloatLayoutGenerator = (function(){
     });
   };
 
-  FloatLayoutGenerator.prototype._wrapFloat = function(context, floated, rest){
+  FloatLayoutGenerator.prototype._wrapFloat = function(floated, rest){
     var flow = this.style.flow;
     var measure = floated.getMeasure(flow) + (rest? rest.getBoxMeasure(flow) : 0);
     var extent = floated.getExtent(flow);
@@ -8601,14 +8593,14 @@ var FloatLayoutGenerator = (function(){
   
   FloatLayoutGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
     // mutable style is not good, but we need speed!!
-    this._childLayout.style.resize(measure, extent); 
+    this._childLayout.style.resize(measure, extent);
     return this.yieldChildLayout();
   };
   
   FloatLayoutGenerator.prototype._yieldFloatStack = function(context){
     var start_blocks = [], end_blocks = [];
     List.iter(this.generators, function(gen){
-      var block = gen.yield(gen._createFloatBlockContext(context));
+      var block = gen.yield(context);
       if(block){
 	if(gen.style.isFloatStart()){
 	  start_blocks.push(block);
@@ -8648,11 +8640,10 @@ var ParallelLayoutGenerator = (function(){
   }
   Class.extend(ParallelLayoutGenerator, LayoutGenerator);
 
-  ParallelLayoutGenerator.prototype.yield = function(context){
+  ParallelLayoutGenerator.prototype._yield = function(context){
     if(this.hasCache()){
       return this.popCache();
     }
-    context = context || this._createStartContext();
     //console.log("[%s]:para yield, rest_extent = %d", this.style.getMarkupName(), context.getBlockRestExtent());
     var blocks = this._yieldParallelBlocks(context);
     if(blocks === null){
@@ -8685,7 +8676,8 @@ var ParallelLayoutGenerator = (function(){
 
   ParallelLayoutGenerator.prototype._yieldParallelBlocks = function(context){
     var blocks = List.map(this.generators, function(gen){
-      return gen.yield(gen._createParallelBlockContext(context));
+      //return gen.yield(gen._createParallelBlockContext(context));
+      return gen.yield(context);
     });
     return List.forall(blocks, function(block){ return block === null; })? null : blocks;
   };

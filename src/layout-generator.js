@@ -7,6 +7,16 @@ var LayoutGenerator = (function(){
     this._terminate = false;
   }
 
+  LayoutGenerator.prototype.yield = function(parent_context){
+    var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
+    console.log("[%s]:context(max_m = %d, max_e = %d)", this.style.getMarkupName(), context.getInlineMaxMeasure(), context.getBlockMaxExtent());
+    return this._yield(context);
+  };
+
+  LayoutGenerator.prototype._yield = function(context){
+    throw "LayoutGenerator::_yield must be implemented in child class";
+  };
+
   LayoutGenerator.prototype.setTerminate = function(status){
     this._terminate = status;
   };
@@ -80,35 +90,19 @@ var LayoutGenerator = (function(){
     );
   };
 
-  LayoutGenerator.prototype._createFloatBlockContext = function(context){
+  LayoutGenerator.prototype._createChildContext = function(context){
     return new LayoutContext(
-      new BlockLayoutContext(context.getBlockRestExtent() - this.style.getEdgeExtent()),
+      new BlockLayoutContext(context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
       new InlineLayoutContext(this.style.getContentMeasure())
     );
   };
 
-  LayoutGenerator.prototype._createParallelBlockContext = function(context){
-    var edge_extent = this.style.parent2? this.style.parent2.getEdgeExtent() : 0;
-    return new LayoutContext(
-      new BlockLayoutContext(context.getBlockRestExtent() - edge_extent),
-      new InlineLayoutContext(this.style.getContentMeasure())
-    );
-  };
-
-  LayoutGenerator.prototype._createChildBlockContext = function(context, child_style){
-    var edge_extent = child_style? child_style.getEdgeExtent() : 0;
-    var edge_measure = child_style? child_style.getEdgeMeasure() : 0;
-    return new LayoutContext(
-      new BlockLayoutContext(context.getBlockRestExtent() - edge_extent),
-      new InlineLayoutContext(context.getInlineMaxMeasure() - edge_measure)
-    );
-  };
-
-  LayoutGenerator.prototype._createChildInlineContext = function(context){
-    return new LayoutContext(
-      context.block,
-      new InlineLayoutContext(context.getInlineRestMeasure())
-    );
+  // TODO
+  LayoutGenerator.prototype._createStream = function(tag){
+    switch(tag.getName()){
+    case "ruby": return new RubyTagStream(tag);
+    default: return new TokenStream(tag.getContent());
+    } 
   };
 
   return LayoutGenerator;

@@ -8,6 +8,12 @@ var BlockLayoutContext = (function(){
   }
 
   BlockLayoutContext.prototype = {
+    isSpaceLeft : function(){
+      return this.getRestExtent() > 0;
+    },
+    hasSpaceFor : function(extent){
+      return this.getRestExtent() >= extent;
+    },
     addElement : function(element, extent){
       this.elements.push(element);
       this.curExtent += extent;

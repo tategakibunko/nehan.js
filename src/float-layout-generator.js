@@ -15,20 +15,19 @@ var FloatLayoutGenerator = (function(){
   Class.extend(FloatLayoutGenerator, LayoutGenerator);
 
   FloatLayoutGenerator.prototype.hasNext = function(){
-    if(this.hasNextFloat()){
+    if(this._hasNextFloat()){
       return true;
     }
     return LayoutGenerator.prototype.hasNext.call(this);
   };
 
-  FloatLayoutGenerator.prototype.hasNextFloat = function(){
+  FloatLayoutGenerator.prototype._hasNextFloat = function(){
     return List.exists(this.generators, function(gen){
       return gen.hasNext();
     });
   };
 
-  FloatLayoutGenerator.prototype.yield = function(context){
-    context = context || this._createStartContext();
+  FloatLayoutGenerator.prototype._yield = function(context){
     var stack = this._yieldFloatStack(context);
     var rest_measure = context.getInlineRestMeasure();
     var rest_extent = context.getBlockRestExtent();
@@ -56,7 +55,7 @@ var FloatLayoutGenerator = (function(){
     */
     var group = stack.pop(); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
     var rest = this._yieldFloat(context, stack, rest_measure - group.getMeasure(flow), group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
-    var group_set = this._wrapFloat(context, group, rest); // wrap these 2 floated layout as one block.
+    var group_set = this._wrapFloat(group, rest); // wrap these 2 floated layout as one block.
 
     /*
       To understand rest_extent_space, remember that this func is called recursivelly,
@@ -90,7 +89,7 @@ var FloatLayoutGenerator = (function(){
     */
     // if there is space in block-flow direction, yield rest space and wrap tfloated-set and rest-space as one.
     var space = this._yieldFloatSpace(context, rest_measure, rest_extent_space);
-    return this._wrapBlock(context, group_set, space);
+    return this._wrapBlock(group_set, space);
   };
   
   FloatLayoutGenerator.prototype._sortFloatRest = function(floated, rest){
@@ -98,7 +97,7 @@ var FloatLayoutGenerator = (function(){
     return floated.isFloatStart()? floated_elements.concat(rest) : [rest].concat(floated_elements);
   };
 
-  FloatLayoutGenerator.prototype._wrapBlock = function(context, block1, block2){
+  FloatLayoutGenerator.prototype._wrapBlock = function(block1, block2){
     var flow = this.style.flow;
     var measure = block1.getBoxMeasure(flow); // block2 has same measure
     var extent = block1.getBoxExtent(flow) + (block2? block2.getBoxExtent(flow) : 0);
@@ -111,7 +110,7 @@ var FloatLayoutGenerator = (function(){
     });
   };
 
-  FloatLayoutGenerator.prototype._wrapFloat = function(context, floated, rest){
+  FloatLayoutGenerator.prototype._wrapFloat = function(floated, rest){
     var flow = this.style.flow;
     var measure = floated.getMeasure(flow) + (rest? rest.getBoxMeasure(flow) : 0);
     var extent = floated.getExtent(flow);
@@ -124,14 +123,14 @@ var FloatLayoutGenerator = (function(){
   
   FloatLayoutGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
     // mutable style is not good, but we need speed!!
-    this._childLayout.style.resize(measure, extent); 
+    this._childLayout.style.resize(measure, extent);
     return this.yieldChildLayout();
   };
   
   FloatLayoutGenerator.prototype._yieldFloatStack = function(context){
     var start_blocks = [], end_blocks = [];
     List.iter(this.generators, function(gen){
-      var block = gen.yield(gen._createFloatBlockContext(context));
+      var block = gen.yield(context);
       if(block){
 	if(gen.style.isFloatStart()){
 	  start_blocks.push(block);

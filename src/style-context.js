@@ -226,6 +226,14 @@ var StyleContext = (function(){
     getEdgeExtent : function(flow){
       return this.edge? this.edge.getExtentSize(flow || this.flow) : 0;
     },
+    // if real parent(parent2) exists, obtain from it.
+    getContextEdgeMeasure : function(flow){
+      return this.parent2? this.parent2.getEdgeMeasure(flow) : this.getEdgeMeasure(flow);
+    },
+    // if real parent(parent2) exists, obtain from it.
+    getContextEdgeExtent : function(flow){
+      return this.parent2? this.parent2.getEdgeExtent(flow) : this.getEdgeExtent(flow);
+    },
     getMarkerHtml : function(order){
       return this.listStyle? this.listStyle.getMarkerHtml(order) : "";
     },

@@ -10,6 +10,12 @@ var LayoutContext = (function(){
 
   LayoutContext.prototype = {
     // block-level
+    isBlockSpaceLeft : function(){
+      return this.block.isSpaceLeft();
+    },
+    hasBlockSpaceFor : function(extent){
+      return this.block.hasSpaceFor(extent);
+    },
     addBlockElement : function(element, extent){
       this.block.addElement(element, extent);
     },

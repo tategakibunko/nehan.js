@@ -5,11 +5,10 @@ var ParallelLayoutGenerator = (function(){
   }
   Class.extend(ParallelLayoutGenerator, LayoutGenerator);
 
-  ParallelLayoutGenerator.prototype.yield = function(context){
+  ParallelLayoutGenerator.prototype._yield = function(context){
     if(this.hasCache()){
       return this.popCache();
     }
-    context = context || this._createStartContext();
     //console.log("[%s]:para yield, rest_extent = %d", this.style.getMarkupName(), context.getBlockRestExtent());
     var blocks = this._yieldParallelBlocks(context);
     if(blocks === null){
@@ -42,7 +41,8 @@ var ParallelLayoutGenerator = (function(){
 
   ParallelLayoutGenerator.prototype._yieldParallelBlocks = function(context){
     var blocks = List.map(this.generators, function(gen){
-      return gen.yield(gen._createParallelBlockContext(context));
+      //return gen.yield(gen._createParallelBlockContext(context));
+      return gen.yield(context);
     });
     return List.forall(blocks, function(block){ return block === null; })? null : blocks;
   };
