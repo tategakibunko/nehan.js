@@ -142,7 +142,7 @@ var VertLayoutEvaluator = (function(){
     char_body = char_body.replace("<br />", "");
     var char_body2 = Html.tagWrap("span", char_body, {
       "class":"nehan-empha-src",
-      "style":Css.toString(chr.getCssVertEmphaSrc(line))
+      "style":Css.toString(chr.getCssVertEmphaTarget(line))
     });
     var empha_body = Html.tagWrap("span", line.style.textEmpha.getText(), {
       "class":"nehan-empha-text",

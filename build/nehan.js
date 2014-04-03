@@ -2844,7 +2844,7 @@ var Char = (function(){
       css["line-height"] = font_size + "px";
       return css;
     },
-    getCssVertEmphaSrc : function(line){
+    getCssVertEmphaTarget : function(line){
       var css = {};
       return css;
     },
@@ -2855,7 +2855,7 @@ var Char = (function(){
       css.height = font_size + "px";
       return css;
     },
-    getCssHoriEmphaSrc : function(line){
+    getCssHoriEmphaTarget : function(line){
       var css = {};
       return css;
     },
@@ -5779,264 +5779,30 @@ var DocumentHeader = (function(){
 
 
 var DocumentContext = (function(){
-
-  // header id to associate each header with outline.
-  var __global_header_id = 0;
-  var __global_page_no = 0;
-
-  // anchors
-  var __anchors = {};
-
-  // document header
-  var __header = new DocumentHeader();
-  
-  function DocumentContext(option){
-    var opt = option || {};
-    this.markup = opt.markup || null;
-    this.stream = opt.stream || null;
-    this.charPos = opt.charPos || 0;
-    this.localPageNo = opt.localPageNo || 0;
-    this.localLineNo = opt.localLineNo || 0;
-    this.blockContext = opt.blockContext || null;
-    this.inlineContext = opt.inlineContext || null;
-    this.outlineContext = opt.outlineContext || new OutlineContext();
+  function DocumentContext(opt){
+    opt = opt || {};
+    this.layout = opt.layout || new LayoutContext();
   }
 
   DocumentContext.prototype = {
-    // docunemt type context
-    setDocumentType : function(markup){
-      this.documentType = markup;
+    createStartContext : function(){
     },
-    // document position context
-    isFirstLocalPage : function(){
-      return this.localPageNo === 0;
-    },
-    isFirstLocalLine : function(){
-      return this.localLineNo === 0;
-    },
-    stepLocalPageNo : function(){
-      this.localPageNo++;
-      return this.localPageNo;
-    },
-    getLocalPageNo : function(){
-      return this.localPageNo;
-    },
-    // page pos / char pos
-    getPageNo : function(){
-      return __global_page_no;
-    },
-    getCharPos : function(){
-      return this.charPos;
-    },
-    stepPageNo : function(){
-      __global_page_no++;
-    },
-    addCharPos : function(char_count){
-      this.charPos += char_count;
-    },
-    // stream context
-    getStream : function(){
-      return this.stream;
-    },
-    getStreamSrc : function(){
-      return this.stream.getSrc();
-    },
-    hasNextToken : function(){
-      return this.stream.hasNext();
-    },
-    getNextToken : function(){
-      return this.stream.get();
-    },
-    pushBackToken : function(){
-      this.stream.prev();
-    },
-    getStreamPos : function(){
-      return this.stream.getPos();
-    },
-    getSeekPos : function(){
-      return this.stream.getSeekPos();
-    },
-    getSeekPercent : function(){
-      return this.stream.getSeekPercent();
-    },
-    getStreamTokenCount : function(){
-      return this.stream.getTokenCount();
-    },
-    isStreamHead : function(){
-      return this.stream.isHead();
-    },
-    // markup context
-    inheritMarkup : function(markup, parent){
-      parent = parent || this.markup;
-      return markup.inherit(parent, this);
-    },
-    getMarkup : function(){
-      return this.markup;
-    },
-    getMarkupStaticSize : function(parent){
-      var font_size = parent? parent.getFontSize() : Layout.fontSize;
-      var measure = parent? parent.getContentMeasure(parent.flow) : Layout.getStdMeasure();
-      return this.markup? this.markup.getStaticSize(font_size, measure) : null;
-    },
-    getMarkupName : function(){
-      return this.markup? this.markup.getName() : "";
-    },
-    getMarkupClasses : function(){
-      return this.markup? this.markup.classes : [];
-    },
-    // block context
-    createBlockRoot : function(markup, stream){
-      stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
+    createChildBlockContext : function(opt){
       return new DocumentContext({
-	markup:(markup? this.inheritMarkup(markup, this.markup) : null),
-	stream:stream,
-	charPos:this.charPos,
-	outlineContext:this.outlineContext
+	layout:this.createLayoutContext(
+	  opt.measure || this.layout.getBlockRestMeasure(),
+	  opt.extent || this.layout.getInlineRestMeasure()
+	),
+	style:this.style
       });
-    },
-    createFloatedRoot : function(){
-      return new DocumentContext({
-	markup:this.markup,
-	stream:this.stream,
-	charPos:this.charPos,
-	blockContext:this.blockContext,
-	outlineContext:this.outlineContext
-      });
-    },
-    createInlineBlockRoot : function(markup, stream){
-      var ctx = this.createBlockRoot(markup, stream);
-      ctx.mode = "inline-block";
-      return ctx;
-    },
-    createBlockContext : function(parent){
-      this.blockContext = new BlockContext(parent);
-      return this.blockContext;
-    },
-    addBlockElement : function(element){
-      this.blockContext.addElement(element);
-      if(element.isTextLine()){
-	this.localLineNo++;
-      }
-    },
-    canContainExtent : function(extent){
-      if(this.blockContext){
-	return this.blockContext.getRestExtent() >= extent;
-      }
-      return true;
-    },
-    // inline context
-    createInlineRoot : function(markup, stream){
-      stream = (stream === null)? null : (stream || new TokenStream(markup.getContent()));
-      return new DocumentContext({
-	markup:this.inheritMarkup(markup, this.markup),
-	stream:stream,
-	charPos:this.charPos,
-	blockContext:this.blockContext, // inherit block context
-	outlineContext:this.outlineContext
-      });
-    },
-    createChildInlineRoot : function(markup, stream){
-      var context = this.createInlineRoot(markup, stream);
-      context.blockContext = null; // hide block context for child-inline-generator
-      return context;
-    },
-    createInlineStream : function(){
-      return this.stream.createRefStream(function(token){
-	return token !== null && Token.isInline(token);
-      });
-    },
-    createInlineContext : function(line){
-      this.inlineContext = new InlineContext(line, this.stream);
-      return this.inlineContext;
-    },
-    createLine : function(){
-      return this.inlineContext.createLine();
-    },
-    getRestMeasure : function(){
-      return this.inlineContext? this.inlineContext.getRestMeasure() : 0;
-    },
-    getInlineNextToken : function(){
-      return this.inlineContext.getNextToken();
-    },
-    getInlineMaxMeasure : function(){
-      return this.inlineContext.getMaxMeasure();
-    },
-    getInlineMaxExtent : function(){
-      return this.inlineContext.getMaxExtent();
-    },
-    getInlineMaxFontSize : function(){
-      return this.inlineContext.getMaxFontSize();
-    },
-    getInlineFontSize : function(){
-      return this.inlineContext? this.inlineContext.getFontSize() : Layout.fontSize;
-    },
-    setLineBreak : function(){
-      this.inlineContext.setLineBreak();
-    },
-    isJustified : function(){
-      return this.inlineContext.isJustified();
-    },
-    restartInlineContext : function(max_measure){
-      this.inlineContext.restart(max_measure);
-    },
-    addInlineElement : function(element){
-      this.inlineContext.addElement(element);
-    },
-    // header context
-    getHeader : function(){
-      return __header;
-    },
-    addScript : function(markup){
-      __header.addScript(markup);
-    },
-    addStyle : function(markup){
-      __header.addStyle(markup);
-    },
-    // anchor context
-    setAnchor : function(anchor_name){
-      __anchors[anchor_name] = this.getPageNo();
-    },
-    getAnchors : function(){
-      return __anchors;
-    },
-    getAnchorPageNo : function(anchor_name){
-      return __anchors[anchor_name] || -1;
-    },
-    // outline context
-    getOutlineBuffer : function(root_name){
-      return this.outlineContext.getOutlineBuffer(root_name);
-    },
-    startSectionRoot : function(){
-      var type = this.markup.getName();
-      this.outlineContext.startSectionRoot(type);
-    },
-    endSectionRoot : function(){
-      var type = this.markup.getName();
-      return this.outlineContext.endSectionRoot(type);
-    },
-    logStartSection : function(){
-      var type = this.markup.getName();
-      this.outlineContext.logStartSection(type, this.getPageNo());
-    },
-    logEndSection : function(){
-      var type = this.markup.getName();
-      this.outlineContext.logEndSection(type);
-    },
-    logSectionHeader : function(){
-      var type = this.markup.getName();
-      var rank = this.markup.getHeaderRank();
-      var title = this.markup.getContentRaw();
-      var page_no = this.getPageNo();
-      if(typeof this.markup.headerId === "undefined"){
-	this.markup.headerId = __global_header_id++;
-      }
-      this.outlineContext.logSectionHeader(type, rank, title, page_no, this.markup.headerId);
-      return this.markup.headerId;
     }
   };
-
+  
   return DocumentContext;
 })();
+
+
+  
 
 
 var BorderMap = (function(){
@@ -7199,11 +6965,11 @@ var PageGroupStream = (function(){
 
 
 var Kerning = {
-  set : function(token, opt){
-    if(token.isKakkoStart()){
-      this._setKerningStart(token, opt.prev || null);
-    } else if(token.isKakkoEnd() || token.isKutenTouten()){
-      this._setKerningEnd(token, opt.next || null);
+  set : function(cur_char, prev_text, next_text){
+    if(cur_char.isKakkoStart()){
+      this._setKerningStart(cur_char, prev_text);
+    } else if(cur_char.isKakkoEnd() || cur_char.isKutenTouten()){
+      this._setKerningEnd(cur_char, next_text);
     }
   },
   _setKerningStart : function(cur_char, prev_text){
@@ -7974,10 +7740,11 @@ var LayoutContext = (function(){
     this.inline = inline;
   }
 
+  // extra document information
+  var __header_id__ = 0;
+  var __anchors__ = {};
+
   LayoutContext.prototype = {
-    debug : function(title){
-      console.log("[%s]:(rest_m,rest_e) = (%d,%d)", title, this.inline.getRestMeasure(), this.block.getRestExtent());
-    },
     // block-level
     addBlockElement : function(element, extent){
       this.block.addElement(element, extent);
@@ -7991,29 +7758,14 @@ var LayoutContext = (function(){
     getBlockElements : function(){
       return this.block.getElements();
     },
-    getBlockExtent : function(){
-      return this.block.getExtent();
+    getBlockCurExtent : function(){
+      return this.block.getCurExtent();
     },
     getBlockMaxExtent : function(){
       return this.block.getMaxExtent();
     },
     getBlockRestExtent : function(){
       return this.block.getRestExtent();
-    },
-    setBlockMaxExtent : function(extent){
-      return this.block.setMaxExtent(extent);
-    },
-    createChildBlockContext : function(){
-      return new LayoutContext(
-	new BlockLayoutContext(this.block.getRestExtent()),
-	new InlineLayoutContext(this.inline.getRestMeasure())
-      );
-    },
-    createStaticBlockContext : function(measure, extent){
-      return new LayoutContext(
-	new BlockLayoutContext(extent),
-	new InlineLayoutContext(measure)
-      );
     },
     // inline-level
     isInlineEmpty : function(){
@@ -8025,14 +7777,11 @@ var LayoutContext = (function(){
     setLineBreak : function(status){
       this.inline.setLineBreak(status);
     },
-    setInlineMaxMeasure : function(measure){
-      return this.inline.setMaxMeasure(measure);
-    },
     addInlineElement : function(element, measure){
       this.inline.addElement(element, measure);
     },
-    getInlinePrevText : function(){
-      return this.inline.getPrevText();
+    getInlineLastText : function(){
+      return this.inline.getLastText();
     },
     getInlineTexts : function(){
       return this.inline.getTexts();
@@ -8040,8 +7789,8 @@ var LayoutContext = (function(){
     getInlineElements : function(){
       return this.inline.getElements();
     },
-    getInlineMeasure : function(){
-      return this.inline.getMeasure();
+    getInlineCurMeasure : function(){
+      return this.inline.getCurMeasure();
     },
     getInlineRestMeasure : function(){
       return this.inline.getRestMeasure();
@@ -8051,12 +7800,6 @@ var LayoutContext = (function(){
     },
     getInlineCharCount : function(){
       return this.inline.getCharCount();
-    },
-    createChildInlineContext : function(){
-      return new LayoutContext(
-	this.block,
-	new InlineLayoutContext(this.inline.getRestMeasure())
-      );
     },
     justify : function(head_char){
       return this.inline.justify(head_char);
@@ -8073,7 +7816,7 @@ var LayoutContext = (function(){
 
 var BlockLayoutContext = (function(){
   function BlockLayoutContext(max_extent){
-    this.extent = 0;
+    this.curExtent = 0;
     this.maxExtent = max_extent; // const
     this.pushedElements = [];
     this.elements = [];
@@ -8083,24 +7826,21 @@ var BlockLayoutContext = (function(){
   BlockLayoutContext.prototype = {
     addElement : function(element, extent){
       this.elements.push(element);
-      this.extent += extent;
+      this.curExtent += extent;
     },
     pushElement : function(element, extent){
       this.pushedElements.push(element);
-      this.extent += extent;
+      this.curExtent += extent;
     },
     pullElement : function(element, extent){
       this.pulledElements.unshift(element);
-      this.extent += extent;
+      this.curExtent += extent;
     },
-    setMaxExtent : function(extent){
-      this.maxExtent = extent;
-    },
-    getExtent : function(){
-      return this.extent;
+    getCurExtent : function(){
+      return this.curExtent;
     },
     getRestExtent : function(){
-      return this.maxExtent - this.extent;
+      return this.maxExtent - this.curExtent;
     },
     getMaxExtent : function(){
       return this.maxExtent;
@@ -8119,7 +7859,7 @@ var BlockLayoutContext = (function(){
 var InlineLayoutContext = (function(){
   function InlineLayoutContext(max_measure){
     this.charCount = 0;
-    this.measure = 0;
+    this.curMeasure = 0;
     this.maxMeasure = max_measure; // const
     this.elements = [];
     this.texts = [];
@@ -8136,9 +7876,6 @@ var InlineLayoutContext = (function(){
     setLineBreak : function(status){
       this.br = status;
     },
-    setMaxMeasure : function(measure){
-      this.maxMeasure = measure;
-    },
     addElement : function(element, measure){
       this.elements.push(element);
       if(Token.isText(element)){
@@ -8147,9 +7884,9 @@ var InlineLayoutContext = (function(){
 	  this.charCount += element.getCharCount();
 	}
       }
-      this.measure += measure;
+      this.curMeasure += measure;
     },
-    getPrevText : function(){
+    getLastText : function(){
       return List.last(this.texts);
     },
     getTexts : function(){
@@ -8158,11 +7895,11 @@ var InlineLayoutContext = (function(){
     getElements : function(){
       return this.elements;
     },
-    getMeasure : function(){
-      return this.measure;
+    getCurMeasure : function(){
+      return this.curMeasure;
     },
     getRestMeasure : function(){
-      return this.maxMeasure - this.measure;
+      return this.maxMeasure - this.curMeasure;
     },
     getMaxMeasure : function(){
       return this.maxMeasure;
@@ -8199,7 +7936,7 @@ var InlineLayoutContext = (function(){
       this.texts = line.texts || [];
       this.elements = line.elements || [];
       this.br = line.hasLineBreak || false;
-      this.measure = line.inlineMeasure || 0;
+      this.curMeasure = line.inlineMeasure || 0;
       this.charCount = this.texts.length || 0;
     }
   };
@@ -8263,18 +8000,11 @@ var LayoutGenerator = (function(){
   LayoutGenerator.prototype.pushCache = function(element){
     var cache_count = element.cacheCount || 0;
     if(cache_count > 0){
-      //console.info("[%s]:multi cache detected! count = %d, element = %o", this.style.getMarkupName(), cache_count, element);
       if(cache_count >= Config.maxRollbackCount){
 	console.error("too many cache count(%d), force terminate", cache_count);
 	this.setTerminate(true); // this error sometimes causes infinite loop, so force terminate generator.
 	return;
       }
-    }
-    if(element instanceof Box){
-      var flow = this.style.flow;
-      var measure = element.getBoxMeasure(flow);
-      var extent = element.getBoxExtent(flow);
-      //console.log("[%s]:push cache:%o(%d,%d)", this.style.getMarkupName(), element, measure, extent);
     }
     element.cacheCount = cache_count + 1;
     this._cachedElements.push(element);
@@ -8297,10 +8027,34 @@ var LayoutGenerator = (function(){
     );
   };
 
-  LayoutGenerator.prototype._createChildBlockContext = function(current_context, child_style){
+  LayoutGenerator.prototype._createFloatBlockContext = function(context){
     return new LayoutContext(
-      new BlockLayoutContext(current_context.getBlockRestExtent() - child_style.getEdgeExtent()),
-      new InlineLayoutContext(current_context.getInlineMaxMeasure() - child_style.getEdgeMeasure())
+      new BlockLayoutContext(context.getBlockRestExtent() - this.style.getEdgeExtent()),
+      new InlineLayoutContext(this.style.getContentMeasure())
+    );
+  };
+
+  LayoutGenerator.prototype._createParallelBlockContext = function(context){
+    var edge_extent = this.style.parent2? this.style.parent2.getEdgeExtent() : 0;
+    return new LayoutContext(
+      new BlockLayoutContext(context.getBlockRestExtent() - edge_extent),
+      new InlineLayoutContext(this.style.getContentMeasure())
+    );
+  };
+
+  LayoutGenerator.prototype._createChildBlockContext = function(context, child_style){
+    var edge_extent = child_style? child_style.getEdgeExtent() : 0;
+    var edge_measure = child_style? child_style.getEdgeMeasure() : 0;
+    return new LayoutContext(
+      new BlockLayoutContext(context.getBlockRestExtent() - edge_extent),
+      new InlineLayoutContext(context.getInlineMaxMeasure() - edge_measure)
+    );
+  };
+
+  LayoutGenerator.prototype._createChildInlineContext = function(context){
+    return new LayoutContext(
+      context.block,
+      new InlineLayoutContext(context.getInlineRestMeasure())
     );
   };
 
@@ -8329,13 +8083,13 @@ var BlockLayoutGenerator = (function(){
       }
       var extent = element.getBoxExtent(this.style.flow);
       //console.log("[%s] block %o extent:%d", this.style.getMarkupName(), element, extent);
-      if(context.getBlockExtent() + extent > context.getBlockMaxExtent()){
-	//console.log("[%s] block over(cached, extent=%d) context(cur:%d, max:%d)", this.style.getMarkupName(), extent, context.getBlockExtent(), context.getBlockMaxExtent());
+      if(context.getBlockCurExtent() + extent > context.getBlockMaxExtent()){
+	//console.log("[%s] block over(cached, extent=%d) context(cur:%d, max:%d)", this.style.getMarkupName(), extent, context.getBlockCurExtent(), context.getBlockMaxExtent());
 	this.pushCache(element);
 	break;
       }
       this._addElement(context, element, extent);
-      if(context.getBlockExtent() === context.getBlockMaxExtent()){
+      if(context.getBlockCurExtent() === context.getBlockMaxExtent()){
 	//console.log("block just filled");
 	break;
       }
@@ -8355,7 +8109,7 @@ var BlockLayoutGenerator = (function(){
   };
 
   BlockLayoutGenerator.prototype._createBlock = function(context){
-    var extent = context.getBlockExtent();
+    var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
       //console.log("[%s] empty block!", this.style.getMarkupName());
@@ -8370,10 +8124,23 @@ var BlockLayoutGenerator = (function(){
   BlockLayoutGenerator.prototype._getNext = function(context){
     if(this.hasCache()){
       var cache = this.popCache();
-      // restart inline if measure changed from when this cache is pushed.
-      if(this.hasChildLayout() && cache.display === "inline" && !cache.hasLineBreak /*&& cache.getBoxMeasure(this.style.flow) < context.getInlineMaxMeasure()*/){
-	//console.log("restart inline from cache:%o", cache);
-	var context2 = this._createChildBlockContext(context, this._childLayout.style).restoreInlineContext(cache);
+      // restore inline context if measure changed from when this cache is pushed.
+      if(this.hasChildLayout() && cache.display === "inline" && !cache.hasLineBreak){
+	var context2 = this._createChildBlockContext(context, this._childLayout.style)
+
+	// restart line in larger measure context.
+	if(cache.getBoxMeasure(this.style.flow) <= context.getInlineMaxMeasure()){
+	  return this.yieldChildLayout(context2.restoreInlineContext(cache));
+	}
+	// restart line into shorter measure context, caused by float-layouting.
+	// in description,
+	//
+	// 1. some float-layout has rest extent, and try to yield single line in that space but can't be included and cached.
+	// 2. and when restart, measure of new layout has shorter measure than the cached line.
+	//
+	// to resolve this situation, we restart stream from the head of line.
+	this._childLayout.stream.setPos(cache.elements[0].pos); // TODO: if cache.elements[0] is not text object, it may trouble.
+	this._childLayout.clearCache(); // stream rewinded, so cache must be destroyed.
 	return this.yieldChildLayout(context2);
       }
       return cache;
@@ -8411,7 +8178,7 @@ var BlockLayoutGenerator = (function(){
     if(child_style.isFloated()){
       this.stream.prev();
       this.setChildLayout(new FloatLayoutGenerator(this.style, this.stream));
-      return this.yieldChildLayout(context.createChildBlockContext()); // caution: not this._createChildBlockContext but context.createChildBlockContext
+      return this.yieldChildLayout(this._createChildBlockContext(context)); // child context with no child-style.
     }
 
     if(child_style.display === "list-item"){
@@ -8462,7 +8229,7 @@ var InlineLayoutGenerator = (function(){
       }
       var measure = this._getMeasure(element);
       //console.log("[%s] inline measure:%d", this.style.getMarkupName(), measure);
-      if(context.getInlineMeasure() + measure > context.getInlineMaxMeasure()){
+      if(context.getInlineCurMeasure() + measure > context.getInlineMaxMeasure()){
 	//console.log("[%s] inline over and cached:%o", this.style.getMarkupName(), element);
 	this.pushCache(element);
 	break;
@@ -8500,8 +8267,8 @@ var InlineLayoutGenerator = (function(){
   InlineLayoutGenerator.prototype._createLine = function(context){
     return this.style.createLine({
       hasLineBreak:context.hasLineBreak(),
-      measure:(this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineMeasure()),
-      inlineMeasure:context.getInlineMeasure(),
+      measure:(this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure()),
+      inlineMeasure:context.getInlineCurMeasure(),
       elements:context.getInlineElements(),
       texts:context.getInlineTexts(),
       charCount:context.getInlineCharCount()
@@ -8514,7 +8281,7 @@ var InlineLayoutGenerator = (function(){
     }
 
     if(this.hasChildLayout()){
-      return this.yieldChildLayout(context.createChildInlineContext());
+      return this.yieldChildLayout();
     }
 
     // read next token
@@ -8550,18 +8317,16 @@ var InlineLayoutGenerator = (function(){
     default:
       //console.log("start child inline:%s", token.getContent());
       this.setChildLayout(new InlineLayoutGenerator(style, this._createStream(token)));
-      return this.yieldChildLayout(context.createChildInlineContext());
+      return this.yieldChildLayout(this._createChildInlineContext(context));
     }
   };
 
   InlineLayoutGenerator.prototype._getText = function(context, token){
     if(!token.hasMetrics()){
+      // if charactor token, set kerning before setting metrics.
+      // because some additional space is added to it in some case.
       if(token instanceof Char){
-	var next_token = this.stream.peek();
-	Kerning.set(token, {
-	  prev:context.getInlinePrevText(),
-	  next:((next_token && Token.isText(next_token))? next_token : null)
-	});
+	this._setCharKerning(context, token);
       }
       token.setMetrics(this.style.flow, this.style.font);
     }
@@ -8575,6 +8340,13 @@ var InlineLayoutGenerator = (function(){
       case "word":
       return this._getWord(context, token);
     }
+  };
+
+  InlineLayoutGenerator.prototype._setCharKerning = function(context, char_token){
+    var next_token = this.stream.peek();
+    var prev_text = context.getInlineLastText();
+    var next_text = next_token && Token.isText(next_token)? next_token : null;
+    Kerning.set(char_token, prev_text, next_text);
   };
 
   InlineLayoutGenerator.prototype._getWord = function(context, token){
@@ -8704,16 +8476,16 @@ var FloatGroupStack = (function(){
 
 
 var FloatLayoutGenerator = (function(){
-  // argument 'style' is the style of parent.
-  // if <body><float1>..</float1><float2>...</float2></body>,
+  // caution: constructor argument 'style' is the style of parent.
+  // so if <body><float1>..</float1><float2>...</float2></body>,
   // style of this contructor is 'body.style'
   function FloatLayoutGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
     this.generators = this._getFloatedGenerators();
 
     // create child generator to yield rest-space of float-elements with logical-float "start".
-    // notice that this generator uses 'clone' style, because size of space changes by position,
-    // but on the other hand, original style is referenced by float-elements as parent style.
+    // notice that this generator uses 'clone' of original style, because size of space changes by position,
+    // but on the other hand, float-elements refer to this original style as their parent style.
     // so we must keep original style immutable.
     this.setChildLayout(new BlockLayoutGenerator(style.clone({"float":"start"}), stream));
   }
@@ -8792,7 +8564,7 @@ var FloatLayoutGenerator = (function(){
       --------------------------
       |  rest_extent_space     | => rest_extent - group_set.extent
       --------------------------
-     */
+    */
     // if there is space in block-flow direction, yield rest space and wrap tfloated-set and rest-space as one.
     var space = this._yieldFloatSpace(context, rest_measure, rest_extent_space);
     return this._wrapBlock(context, group_set, space);
@@ -8820,7 +8592,7 @@ var FloatLayoutGenerator = (function(){
     var flow = this.style.flow;
     var measure = floated.getMeasure(flow) + (rest? rest.getBoxMeasure(flow) : 0);
     var extent = floated.getExtent(flow);
-    return this.style.createChild("div").createBlock({
+    return this.style.createChild("div", {"float":"start"}).createBlock({
       elements:this._sortFloatRest(floated, rest),
       measure:measure,
       extent:extent
@@ -8828,20 +8600,15 @@ var FloatLayoutGenerator = (function(){
   };
   
   FloatLayoutGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
-    var style = this._childLayout.style;
-    style.resize(measure, extent);
-    return this.yieldChildLayout(context.createStaticBlockContext(
-      style.getContentMeasure(),
-      style.getContentExtent()
-    ));
+    // mutable style is not good, but we need speed!!
+    this._childLayout.style.resize(measure, extent); 
+    return this.yieldChildLayout();
   };
   
   FloatLayoutGenerator.prototype._yieldFloatStack = function(context){
     var start_blocks = [], end_blocks = [];
-    var rest_extent = context.getBlockRestExtent();
     List.iter(this.generators, function(gen){
-      gen.style.resizeExtent(rest_extent);
-      var block = gen.yield();
+      var block = gen.yield(gen._createFloatBlockContext(context));
       if(block){
 	if(gen.style.isFloatStart()){
 	  start_blocks.push(block);
@@ -8894,7 +8661,7 @@ var ParallelLayoutGenerator = (function(){
     var wrap_block = this._wrapBlocks(blocks);
     var wrap_extent = wrap_block.getBoxExtent(this.style.flow);
     //wrap_block.debug("wrap_block");
-    if(context.getBlockExtent() + wrap_extent > context.getBlockMaxExtent()){
+    if(context.getBlockCurExtent() + wrap_extent > context.getBlockMaxExtent()){
       //console.log("[%s]:wrap box layout over", this.style.markup.name);
       this.pushCache(wrap_block);
       return null;
@@ -8917,11 +8684,8 @@ var ParallelLayoutGenerator = (function(){
   };
 
   ParallelLayoutGenerator.prototype._yieldParallelBlocks = function(context){
-    var rest_extent = context.getBlockRestExtent();
     var blocks = List.map(this.generators, function(gen){
-      var rest_measure = gen.style.getContentMeasure();
-      var edge_extent = gen.style.parent2? gen.style.parent2.getEdgeExtent() : 0;
-      return gen.yield(context.createStaticBlockContext(rest_measure, rest_extent - edge_extent));
+      return gen.yield(gen._createParallelBlockContext(context));
     });
     return List.forall(blocks, function(block){ return block === null; })? null : blocks;
   };
@@ -9099,7 +8863,6 @@ var LayoutEvaluator = (function(){
 
   LayoutEvaluator.prototype = {
     evaluate : function(box){
-      //console.log("evaluate:%o", box);
       if(box === null || typeof box === "undefined"){
 	//console.warn("error box:%o", box);
 	return "";
@@ -9141,7 +8904,10 @@ var LayoutEvaluator = (function(){
 	return this.evalInlineChild(line, element);
       }
       var text = this.evalTextElement(line, element);
-      return line.style.isTextEmphaEnable()? this.evalEmpha(line, element, text) : text;
+      if(line.style.isTextEmphaEnable()){
+	return this.evalEmpha(line, element, text);
+      }
+      return text;
     },
     evalTextElement : function(line, text){
       switch(text._type){
@@ -9302,7 +9068,7 @@ var VertLayoutEvaluator = (function(){
     char_body = char_body.replace("<br />", "");
     var char_body2 = Html.tagWrap("span", char_body, {
       "class":"nehan-empha-src",
-      "style":Css.toString(chr.getCssVertEmphaSrc(line))
+      "style":Css.toString(chr.getCssVertEmphaTarget(line))
     });
     var empha_body = Html.tagWrap("span", line.style.textEmpha.getText(), {
       "class":"nehan-empha-text",
@@ -9426,14 +9192,14 @@ var HoriLayoutEvaluator = (function(){
   };
 
   HoriLayoutEvaluator.prototype.evalEmpha = function(line, chr, char_body){
-    var char_body2 = Html.tagWrap("div", char_body, {
-      "style":Css.toString(chr.getCssHoriEmphaSrc(line))
+    var char_part = Html.tagWrap("div", char_body, {
+      "style":Css.toString(chr.getCssHoriEmphaTarget(line))
     });
-    var empha_body = Html.tagWrap("div", line.style.textEmpha.getText(), {
+    var empha_part = Html.tagWrap("div", line.style.textEmpha.getText(), {
       "style":Css.toString(chr.getCssHoriEmphaText(line))
     });
     // TODO: check text-emphasis-position is over or under
-    return Html.tagWrap("span", empha_body + char_body2, {
+    return Html.tagWrap("span", empha_part + char_part, {
       "style":Css.toString(line.style.textEmpha.getCssHoriEmphaWrap(line, chr))
     });
   };

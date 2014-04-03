@@ -1,7 +1,7 @@
 var InlineLayoutContext = (function(){
   function InlineLayoutContext(max_measure){
     this.charCount = 0;
-    this.measure = 0;
+    this.curMeasure = 0;
     this.maxMeasure = max_measure; // const
     this.elements = [];
     this.texts = [];
@@ -18,9 +18,6 @@ var InlineLayoutContext = (function(){
     setLineBreak : function(status){
       this.br = status;
     },
-    setMaxMeasure : function(measure){
-      this.maxMeasure = measure;
-    },
     addElement : function(element, measure){
       this.elements.push(element);
       if(Token.isText(element)){
@@ -29,9 +26,9 @@ var InlineLayoutContext = (function(){
 	  this.charCount += element.getCharCount();
 	}
       }
-      this.measure += measure;
+      this.curMeasure += measure;
     },
-    getPrevText : function(){
+    getLastText : function(){
       return List.last(this.texts);
     },
     getTexts : function(){
@@ -40,11 +37,11 @@ var InlineLayoutContext = (function(){
     getElements : function(){
       return this.elements;
     },
-    getMeasure : function(){
-      return this.measure;
+    getCurMeasure : function(){
+      return this.curMeasure;
     },
     getRestMeasure : function(){
-      return this.maxMeasure - this.measure;
+      return this.maxMeasure - this.curMeasure;
     },
     getMaxMeasure : function(){
       return this.maxMeasure;
@@ -81,7 +78,7 @@ var InlineLayoutContext = (function(){
       this.texts = line.texts || [];
       this.elements = line.elements || [];
       this.br = line.hasLineBreak || false;
-      this.measure = line.inlineMeasure || 0;
+      this.curMeasure = line.inlineMeasure || 0;
       this.charCount = this.texts.length || 0;
     }
   };

@@ -19,13 +19,13 @@ var BlockLayoutGenerator = (function(){
       }
       var extent = element.getBoxExtent(this.style.flow);
       //console.log("[%s] block %o extent:%d", this.style.getMarkupName(), element, extent);
-      if(context.getBlockExtent() + extent > context.getBlockMaxExtent()){
-	//console.log("[%s] block over(cached, extent=%d) context(cur:%d, max:%d)", this.style.getMarkupName(), extent, context.getBlockExtent(), context.getBlockMaxExtent());
+      if(context.getBlockCurExtent() + extent > context.getBlockMaxExtent()){
+	//console.log("[%s] block over(cached, extent=%d) context(cur:%d, max:%d)", this.style.getMarkupName(), extent, context.getBlockCurExtent(), context.getBlockMaxExtent());
 	this.pushCache(element);
 	break;
       }
       this._addElement(context, element, extent);
-      if(context.getBlockExtent() === context.getBlockMaxExtent()){
+      if(context.getBlockCurExtent() === context.getBlockMaxExtent()){
 	//console.log("block just filled");
 	break;
       }
@@ -45,7 +45,7 @@ var BlockLayoutGenerator = (function(){
   };
 
   BlockLayoutGenerator.prototype._createBlock = function(context){
-    var extent = context.getBlockExtent();
+    var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
       //console.log("[%s] empty block!", this.style.getMarkupName());
@@ -60,10 +60,23 @@ var BlockLayoutGenerator = (function(){
   BlockLayoutGenerator.prototype._getNext = function(context){
     if(this.hasCache()){
       var cache = this.popCache();
-      // restart inline if measure changed from when this cache is pushed.
-      if(this.hasChildLayout() && cache.display === "inline" && !cache.hasLineBreak /*&& cache.getBoxMeasure(this.style.flow) < context.getInlineMaxMeasure()*/){
-	//console.log("restart inline from cache:%o", cache);
-	var context2 = this._createChildBlockContext(context, this._childLayout.style).restoreInlineContext(cache);
+      // restore inline context if measure changed from when this cache is pushed.
+      if(this.hasChildLayout() && cache.display === "inline" && !cache.hasLineBreak){
+	var context2 = this._createChildBlockContext(context, this._childLayout.style)
+
+	// restart line in larger measure context.
+	if(cache.getBoxMeasure(this.style.flow) <= context.getInlineMaxMeasure()){
+	  return this.yieldChildLayout(context2.restoreInlineContext(cache));
+	}
+	// restart line into shorter measure context, caused by float-layouting.
+	// in description,
+	//
+	// 1. some float-layout has rest extent, and try to yield single line in that space but can't be included and cached.
+	// 2. and when restart, measure of new layout has shorter measure than the cached line.
+	//
+	// to resolve this situation, we restart stream from the head of line.
+	this._childLayout.stream.setPos(cache.elements[0].pos); // TODO: if cache.elements[0] is not text object, it may trouble.
+	this._childLayout.clearCache(); // stream rewinded, so cache must be destroyed.
 	return this.yieldChildLayout(context2);
       }
       return cache;
@@ -101,7 +114,7 @@ var BlockLayoutGenerator = (function(){
     if(child_style.isFloated()){
       this.stream.prev();
       this.setChildLayout(new FloatLayoutGenerator(this.style, this.stream));
-      return this.yieldChildLayout(context.createChildBlockContext()); // caution: not this._createChildBlockContext but context.createChildBlockContext
+      return this.yieldChildLayout(this._createChildBlockContext(context)); // child context with no child-style.
     }
 
     if(child_style.display === "list-item"){

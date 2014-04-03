@@ -17,7 +17,7 @@ var InlineLayoutGenerator = (function(){
       }
       var measure = this._getMeasure(element);
       //console.log("[%s] inline measure:%d", this.style.getMarkupName(), measure);
-      if(context.getInlineMeasure() + measure > context.getInlineMaxMeasure()){
+      if(context.getInlineCurMeasure() + measure > context.getInlineMaxMeasure()){
 	//console.log("[%s] inline over and cached:%o", this.style.getMarkupName(), element);
 	this.pushCache(element);
 	break;
@@ -55,8 +55,8 @@ var InlineLayoutGenerator = (function(){
   InlineLayoutGenerator.prototype._createLine = function(context){
     return this.style.createLine({
       hasLineBreak:context.hasLineBreak(),
-      measure:(this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineMeasure()),
-      inlineMeasure:context.getInlineMeasure(),
+      measure:(this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure()),
+      inlineMeasure:context.getInlineCurMeasure(),
       elements:context.getInlineElements(),
       texts:context.getInlineTexts(),
       charCount:context.getInlineCharCount()
@@ -69,7 +69,7 @@ var InlineLayoutGenerator = (function(){
     }
 
     if(this.hasChildLayout()){
-      return this.yieldChildLayout(context.createChildInlineContext());
+      return this.yieldChildLayout();
     }
 
     // read next token
@@ -105,18 +105,16 @@ var InlineLayoutGenerator = (function(){
     default:
       //console.log("start child inline:%s", token.getContent());
       this.setChildLayout(new InlineLayoutGenerator(style, this._createStream(token)));
-      return this.yieldChildLayout(context.createChildInlineContext());
+      return this.yieldChildLayout(this._createChildInlineContext(context));
     }
   };
 
   InlineLayoutGenerator.prototype._getText = function(context, token){
     if(!token.hasMetrics()){
+      // if charactor token, set kerning before setting metrics.
+      // because some additional space is added to it in some case.
       if(token instanceof Char){
-	var next_token = this.stream.peek();
-	Kerning.set(token, {
-	  prev:context.getInlinePrevText(),
-	  next:((next_token && Token.isText(next_token))? next_token : null)
-	});
+	this._setCharKerning(context, token);
       }
       token.setMetrics(this.style.flow, this.style.font);
     }
@@ -130,6 +128,13 @@ var InlineLayoutGenerator = (function(){
       case "word":
       return this._getWord(context, token);
     }
+  };
+
+  InlineLayoutGenerator.prototype._setCharKerning = function(context, char_token){
+    var next_token = this.stream.peek();
+    var prev_text = context.getInlineLastText();
+    var next_text = next_token && Token.isText(next_token)? next_token : null;
+    Kerning.set(char_token, prev_text, next_text);
   };
 
   InlineLayoutGenerator.prototype._getWord = function(context, token){

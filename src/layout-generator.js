@@ -53,18 +53,11 @@ var LayoutGenerator = (function(){
   LayoutGenerator.prototype.pushCache = function(element){
     var cache_count = element.cacheCount || 0;
     if(cache_count > 0){
-      //console.info("[%s]:multi cache detected! count = %d, element = %o", this.style.getMarkupName(), cache_count, element);
       if(cache_count >= Config.maxRollbackCount){
 	console.error("too many cache count(%d), force terminate", cache_count);
 	this.setTerminate(true); // this error sometimes causes infinite loop, so force terminate generator.
 	return;
       }
-    }
-    if(element instanceof Box){
-      var flow = this.style.flow;
-      var measure = element.getBoxMeasure(flow);
-      var extent = element.getBoxExtent(flow);
-      //console.log("[%s]:push cache:%o(%d,%d)", this.style.getMarkupName(), element, measure, extent);
     }
     element.cacheCount = cache_count + 1;
     this._cachedElements.push(element);
@@ -87,10 +80,34 @@ var LayoutGenerator = (function(){
     );
   };
 
-  LayoutGenerator.prototype._createChildBlockContext = function(current_context, child_style){
+  LayoutGenerator.prototype._createFloatBlockContext = function(context){
     return new LayoutContext(
-      new BlockLayoutContext(current_context.getBlockRestExtent() - child_style.getEdgeExtent()),
-      new InlineLayoutContext(current_context.getInlineMaxMeasure() - child_style.getEdgeMeasure())
+      new BlockLayoutContext(context.getBlockRestExtent() - this.style.getEdgeExtent()),
+      new InlineLayoutContext(this.style.getContentMeasure())
+    );
+  };
+
+  LayoutGenerator.prototype._createParallelBlockContext = function(context){
+    var edge_extent = this.style.parent2? this.style.parent2.getEdgeExtent() : 0;
+    return new LayoutContext(
+      new BlockLayoutContext(context.getBlockRestExtent() - edge_extent),
+      new InlineLayoutContext(this.style.getContentMeasure())
+    );
+  };
+
+  LayoutGenerator.prototype._createChildBlockContext = function(context, child_style){
+    var edge_extent = child_style? child_style.getEdgeExtent() : 0;
+    var edge_measure = child_style? child_style.getEdgeMeasure() : 0;
+    return new LayoutContext(
+      new BlockLayoutContext(context.getBlockRestExtent() - edge_extent),
+      new InlineLayoutContext(context.getInlineMaxMeasure() - edge_measure)
+    );
+  };
+
+  LayoutGenerator.prototype._createChildInlineContext = function(context){
+    return new LayoutContext(
+      context.block,
+      new InlineLayoutContext(context.getInlineRestMeasure())
     );
   };
 

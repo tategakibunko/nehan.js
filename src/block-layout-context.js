@@ -1,6 +1,6 @@
 var BlockLayoutContext = (function(){
   function BlockLayoutContext(max_extent){
-    this.extent = 0;
+    this.curExtent = 0;
     this.maxExtent = max_extent; // const
     this.pushedElements = [];
     this.elements = [];
@@ -10,24 +10,21 @@ var BlockLayoutContext = (function(){
   BlockLayoutContext.prototype = {
     addElement : function(element, extent){
       this.elements.push(element);
-      this.extent += extent;
+      this.curExtent += extent;
     },
     pushElement : function(element, extent){
       this.pushedElements.push(element);
-      this.extent += extent;
+      this.curExtent += extent;
     },
     pullElement : function(element, extent){
       this.pulledElements.unshift(element);
-      this.extent += extent;
+      this.curExtent += extent;
     },
-    setMaxExtent : function(extent){
-      this.maxExtent = extent;
-    },
-    getExtent : function(){
-      return this.extent;
+    getCurExtent : function(){
+      return this.curExtent;
     },
     getRestExtent : function(){
-      return this.maxExtent - this.extent;
+      return this.maxExtent - this.curExtent;
     },
     getMaxExtent : function(){
       return this.maxExtent;

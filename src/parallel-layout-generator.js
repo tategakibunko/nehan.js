@@ -18,7 +18,7 @@ var ParallelLayoutGenerator = (function(){
     var wrap_block = this._wrapBlocks(blocks);
     var wrap_extent = wrap_block.getBoxExtent(this.style.flow);
     //wrap_block.debug("wrap_block");
-    if(context.getBlockExtent() + wrap_extent > context.getBlockMaxExtent()){
+    if(context.getBlockCurExtent() + wrap_extent > context.getBlockMaxExtent()){
       //console.log("[%s]:wrap box layout over", this.style.markup.name);
       this.pushCache(wrap_block);
       return null;
@@ -41,11 +41,8 @@ var ParallelLayoutGenerator = (function(){
   };
 
   ParallelLayoutGenerator.prototype._yieldParallelBlocks = function(context){
-    var rest_extent = context.getBlockRestExtent();
     var blocks = List.map(this.generators, function(gen){
-      var rest_measure = gen.style.getContentMeasure();
-      var edge_extent = gen.style.parent2? gen.style.parent2.getEdgeExtent() : 0;
-      return gen.yield(context.createStaticBlockContext(rest_measure, rest_extent - edge_extent));
+      return gen.yield(gen._createParallelBlockContext(context));
     });
     return List.forall(blocks, function(block){ return block === null; })? null : blocks;
   };

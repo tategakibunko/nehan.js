@@ -1,9 +1,9 @@
 var Kerning = {
-  set : function(token, opt){
-    if(token.isKakkoStart()){
-      this._setKerningStart(token, opt.prev || null);
-    } else if(token.isKakkoEnd() || token.isKutenTouten()){
-      this._setKerningEnd(token, opt.next || null);
+  set : function(cur_char, prev_text, next_text){
+    if(cur_char.isKakkoStart()){
+      this._setKerningStart(cur_char, prev_text);
+    } else if(cur_char.isKakkoEnd() || cur_char.isKutenTouten()){
+      this._setKerningEnd(cur_char, next_text);
     }
   },
   _setKerningStart : function(cur_char, prev_text){

@@ -68,7 +68,7 @@ var Char = (function(){
       css["line-height"] = font_size + "px";
       return css;
     },
-    getCssVertEmphaSrc : function(line){
+    getCssVertEmphaTarget : function(line){
       var css = {};
       return css;
     },
@@ -79,7 +79,7 @@ var Char = (function(){
       css.height = font_size + "px";
       return css;
     },
-    getCssHoriEmphaSrc : function(line){
+    getCssHoriEmphaTarget : function(line){
       var css = {};
       return css;
     },

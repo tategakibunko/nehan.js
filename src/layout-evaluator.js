@@ -4,7 +4,6 @@ var LayoutEvaluator = (function(){
 
   LayoutEvaluator.prototype = {
     evaluate : function(box){
-      //console.log("evaluate:%o", box);
       if(box === null || typeof box === "undefined"){
 	//console.warn("error box:%o", box);
 	return "";
@@ -46,7 +45,10 @@ var LayoutEvaluator = (function(){
 	return this.evalInlineChild(line, element);
       }
       var text = this.evalTextElement(line, element);
-      return line.style.isTextEmphaEnable()? this.evalEmpha(line, element, text) : text;
+      if(line.style.isTextEmphaEnable()){
+	return this.evalEmpha(line, element, text);
+      }
+      return text;
     },
     evalTextElement : function(line, text){
       switch(text._type){

@@ -1,14 +1,14 @@
 var FloatLayoutGenerator = (function(){
-  // argument 'style' is the style of parent.
-  // if <body><float1>..</float1><float2>...</float2></body>,
+  // caution: constructor argument 'style' is the style of parent.
+  // so if <body><float1>..</float1><float2>...</float2></body>,
   // style of this contructor is 'body.style'
   function FloatLayoutGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
     this.generators = this._getFloatedGenerators();
 
     // create child generator to yield rest-space of float-elements with logical-float "start".
-    // notice that this generator uses 'clone' style, because size of space changes by position,
-    // but on the other hand, original style is referenced by float-elements as parent style.
+    // notice that this generator uses 'clone' of original style, because size of space changes by position,
+    // but on the other hand, float-elements refer to this original style as their parent style.
     // so we must keep original style immutable.
     this.setChildLayout(new BlockLayoutGenerator(style.clone({"float":"start"}), stream));
   }
@@ -87,7 +87,7 @@ var FloatLayoutGenerator = (function(){
       --------------------------
       |  rest_extent_space     | => rest_extent - group_set.extent
       --------------------------
-     */
+    */
     // if there is space in block-flow direction, yield rest space and wrap tfloated-set and rest-space as one.
     var space = this._yieldFloatSpace(context, rest_measure, rest_extent_space);
     return this._wrapBlock(context, group_set, space);
@@ -115,7 +115,7 @@ var FloatLayoutGenerator = (function(){
     var flow = this.style.flow;
     var measure = floated.getMeasure(flow) + (rest? rest.getBoxMeasure(flow) : 0);
     var extent = floated.getExtent(flow);
-    return this.style.createChild("div").createBlock({
+    return this.style.createChild("div", {"float":"start"}).createBlock({
       elements:this._sortFloatRest(floated, rest),
       measure:measure,
       extent:extent
@@ -123,20 +123,15 @@ var FloatLayoutGenerator = (function(){
   };
   
   FloatLayoutGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
-    var style = this._childLayout.style;
-    style.resize(measure, extent);
-    return this.yieldChildLayout(context.createStaticBlockContext(
-      style.getContentMeasure(),
-      style.getContentExtent()
-    ));
+    // mutable style is not good, but we need speed!!
+    this._childLayout.style.resize(measure, extent); 
+    return this.yieldChildLayout();
   };
   
   FloatLayoutGenerator.prototype._yieldFloatStack = function(context){
     var start_blocks = [], end_blocks = [];
-    var rest_extent = context.getBlockRestExtent();
     List.iter(this.generators, function(gen){
-      gen.style.resizeExtent(rest_extent);
-      var block = gen.yield();
+      var block = gen.yield(gen._createFloatBlockContext(context));
       if(block){
 	if(gen.style.isFloatStart()){
 	  start_blocks.push(block);

@@ -56,14 +56,14 @@ var HoriLayoutEvaluator = (function(){
   };
 
   HoriLayoutEvaluator.prototype.evalEmpha = function(line, chr, char_body){
-    var char_body2 = Html.tagWrap("div", char_body, {
-      "style":Css.toString(chr.getCssHoriEmphaSrc(line))
+    var char_part = Html.tagWrap("div", char_body, {
+      "style":Css.toString(chr.getCssHoriEmphaTarget(line))
     });
-    var empha_body = Html.tagWrap("div", line.style.textEmpha.getText(), {
+    var empha_part = Html.tagWrap("div", line.style.textEmpha.getText(), {
       "style":Css.toString(chr.getCssHoriEmphaText(line))
     });
     // TODO: check text-emphasis-position is over or under
-    return Html.tagWrap("span", empha_body + char_body2, {
+    return Html.tagWrap("span", empha_part + char_part, {
       "style":Css.toString(line.style.textEmpha.getCssHoriEmphaWrap(line, chr))
     });
   };
