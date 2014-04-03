@@ -78,7 +78,7 @@ var StyleContext = (function(){
 
       // save 'original' parent to child-style, because sometimes it is required by 'grand-child'.
       // for example, in following code, <li-body> is anonymous block,
-      // and parent style of <li-body> is <li>.style, and parent style of <ul2> is <li-body>.style.
+      // and parent style of <li-body> is <li>.style, and parent of <ul2> is <li-body>.style.
       //
       // <ul>
       //   <li>
@@ -87,11 +87,11 @@ var StyleContext = (function(){
       //   </li>
       // </ul>
       // 
-      // <li-body> is created by <li>.style.createChild("div"), so not having original style of <ul> as it's parent.
+      // <li-body> is created by <li>.style.createChild("div"), so not have original parent style(<ul>.style) as it's parent style.
       // but <ul>.style is required by <ul2> to get it's accurate content-size.
-      // so child anonymous style(<li-mark>, <li-body> in this case) needs to save it's 'original' parent(<ul>.style in this case)
+      // so child anonymous style(<li-mark>, <li-body> in this case) needs to save it's 'original' parent(<ul>.style in this case) as 'contextParent'
       // in addition to <li>.style.
-      style.parent2 = this.parent; 
+      style.contextParent = this.parent; 
       return style;
     },
     createBlock : function(opt){
@@ -187,6 +187,9 @@ var StyleContext = (function(){
     getMarkupContent : function(){
       return this.markup.getContent();
     },
+    getMarkupPos : function(){
+      return this.markup.pos;
+    },
     getFontSize : function(){
       return this.font.size;
     },
@@ -226,13 +229,13 @@ var StyleContext = (function(){
     getEdgeExtent : function(flow){
       return this.edge? this.edge.getExtentSize(flow || this.flow) : 0;
     },
-    // if real parent(parent2) exists, obtain from it.
+    // same as getEdgeMeasure, but if contextParent exists, obtain from it.
     getContextEdgeMeasure : function(flow){
-      return this.parent2? this.parent2.getEdgeMeasure(flow) : this.getEdgeMeasure(flow);
+      return this.contextParent? this.contextParent.getEdgeMeasure(flow) : this.getEdgeMeasure(flow);
     },
-    // if real parent(parent2) exists, obtain from it.
+    // same as getEdgeExtent, but if contextParent exists, obtain from it.
     getContextEdgeExtent : function(flow){
-      return this.parent2? this.parent2.getEdgeExtent(flow) : this.getEdgeExtent(flow);
+      return this.contextParent? this.contextParent.getEdgeExtent(flow) : this.getEdgeExtent(flow);
     },
     getMarkerHtml : function(order){
       return this.listStyle? this.listStyle.getMarkerHtml(order) : "";

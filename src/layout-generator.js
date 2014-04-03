@@ -9,7 +9,6 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype.yield = function(parent_context){
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
-    console.log("[%s]:context(max_m = %d, max_e = %d)", this.style.getMarkupName(), context.getInlineMaxMeasure(), context.getBlockMaxExtent());
     return this._yield(context);
   };
 
@@ -40,7 +39,6 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype.hasChildLayout = function(){
     if(this._childLayout && this._childLayout.hasNext()){
-      //console.log("layout child %s has next", this._childLayout.style.getMarkupName());
       return true;
     }
     return false;
@@ -52,7 +50,6 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype.yieldChildLayout = function(context){
     var next = this._childLayout.yield(context);
-    //console.log("child next:%o", next);
     return next;
   };
 
@@ -75,7 +72,6 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype.popCache = function(){
     var cache = this._cachedElements.pop();
-    //console.log("[%s]:pop cache:%o", this.style.markup.name, cache);
     return cache;
   };
 

@@ -1,5 +1,5 @@
 var Ruby = (function(){
-  function Ruby(rbs, rt){
+  function Ruby(rbs, rt, pos){
     this._type = "ruby";
     this.rbs = rbs;
     this.rt = rt;

@@ -49,50 +49,16 @@ var LayoutTest = (function(){
       "</ul>"
     ].join(""),
 
-/*
-    "ul":[
-      "<ol>",
-      "<li>" +
-	TestText["long"] +
-	TestText["long"] +
-	TestText["long"] +
-	"</li>",
-      "</ol>"
-    ].join(""),
-*/
-
-/*
-    "ul":[
-      "<ol>",
-      "<li>" + TestText["short"] + "</li>",
-      "<li>" + TestText["short"] + "</li>",
-      "<li>" + TestText["short"] + "</li>",
-      "<li>" + TestText["short"] + "</li>",
-      "<li>" + TestText["short"] + "</li>",
-      "<li>" + TestText["short"] + "</li>",
-      "</ol>"
-    ].join(""),
-*/
-
-    /*
-    "ul":[
-      "<ol>",
-      "<li>あ</li>",
-      "<li>か</li>",
-      "</ol>"
-    ].join(""),
-    */
-
     "ol":[
       "<ol>",
       "<li>" + TestText["short"] + "</li>",
       "<li>" + [
 	"<ul>",
 	"<li>" + TestText["middle"] + "</li>",
-	"<li>" + TestText["short"] + "</li>",
 	"<li>" + TestText["long"] + "</li>",
 	"</ul>"
       ].join("") + "</li>",
+      "<li>" + TestText["short"] + "</li>",
       "<li>" + TestText["middle"] + "</li>",
       "<li>" + TestText["long"] + "</li>",
       "</ol>"
@@ -117,8 +83,11 @@ var LayoutTest = (function(){
 
     "float-test":[
       TestSnipet["float"],
+      TestSnipet["ruby"],
       TestText["long"],
+      TestSnipet["ruby"],
       TestText["middle"],
+      TestSnipet["ruby"],
       TestText["long"],
       TestSnipet["float"],
       TestText["long"],

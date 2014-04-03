@@ -4,6 +4,26 @@ var BlockLayoutGenerator = (function(){
   }
   Class.extend(BlockLayoutGenerator, LayoutGenerator);
 
+  var get_line_start_pos = function(line){
+    var head = line.elements[0];
+    return (head instanceof Box)? head.style.getMarkupPos() : head.pos;
+  };
+
+  BlockLayoutGenerator.prototype.popCache = function(context){
+    var cache = LayoutGenerator.prototype.popCache.call(this);
+
+    // if cache is inline, and measure size varies, reget line if need.
+    if(this.hasChildLayout() && cache.display === "inline"){
+      if(cache.getBoxMeasure(this.style.flow) <= this.style.getContentMeasure() && cache.hasLineBreak){
+	return cache;
+      }
+      this._childLayout.stream.setPos(get_line_start_pos(cache)); // rewind stream to the head of line.
+      this._childLayout.clearCache(); // stream rewinded, so cache must be destroyed.
+      return this.yieldChildLayout(context);
+    }
+    return cache;
+  };
+
   BlockLayoutGenerator.prototype._yield = function(context){
     if(!context.isBlockSpaceLeft()){
       return null;

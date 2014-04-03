@@ -4,30 +4,6 @@ var InlineLayoutGenerator = (function(){
   }
   Class.extend(InlineLayoutGenerator, LayoutGenerator);
 
-  InlineLayoutGenerator.prototype.popCache = function(context){
-    var cache = LayoutGenerator.prototype.popCache.call(this, context);
-    /*
-    // restore inline context if measure changed from when this cache is pushed.
-    if(this.hasChildLayout() && cache.display === "inline" && !cache.hasLineBreak){
-      // restart line in larger measure context.
-      if(cache.getBoxMeasure(this.style.flow) <= context.getInlineMaxMeasure()){
-	return this.yield(context.restoreInlineContext(cache));
-      }
-      // restart line into shorter measure context, caused by float-layouting.
-      // in description,
-      //
-      // 1. some float-layout has rest extent, and try to yield single line in that space but can't be included and cached.
-      // 2. and when restart, measure of new layout has shorter measure than the cached line.
-      //
-      // to resolve this situation, we restart stream from the head of line.
-      this.stream.setPos(cache.elements[0].pos); // TODO: if cache.elements[0] is not text object, it may trouble.
-      this.clearCache(); // stream rewinded, so cache must be destroyed.
-      return this.yield(context);
-    }*/
-    return cache;
-  };
-  
-
   InlineLayoutGenerator.prototype._yield = function(context){
     while(true){
       var element = this._getNext(context);
@@ -88,7 +64,7 @@ var InlineLayoutGenerator = (function(){
 
   InlineLayoutGenerator.prototype._getNext = function(context){
     if(this.hasCache()){
-      return this.popCache();
+      return this.popCache(context);
     }
 
     if(this.hasChildLayout()){

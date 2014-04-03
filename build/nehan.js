@@ -3270,7 +3270,7 @@ var Tcy = (function(){
 
 
 var Ruby = (function(){
-  function Ruby(rbs, rt){
+  function Ruby(rbs, rt, pos){
     this._type = "ruby";
     this.rbs = rbs;
     this.rt = rt;
@@ -7153,7 +7153,7 @@ var StyleContext = (function(){
 
       // save 'original' parent to child-style, because sometimes it is required by 'grand-child'.
       // for example, in following code, <li-body> is anonymous block,
-      // and parent style of <li-body> is <li>.style, and parent style of <ul2> is <li-body>.style.
+      // and parent style of <li-body> is <li>.style, and parent of <ul2> is <li-body>.style.
       //
       // <ul>
       //   <li>
@@ -7162,11 +7162,11 @@ var StyleContext = (function(){
       //   </li>
       // </ul>
       // 
-      // <li-body> is created by <li>.style.createChild("div"), so not having original style of <ul> as it's parent.
+      // <li-body> is created by <li>.style.createChild("div"), so not have original parent style(<ul>.style) as it's parent style.
       // but <ul>.style is required by <ul2> to get it's accurate content-size.
-      // so child anonymous style(<li-mark>, <li-body> in this case) needs to save it's 'original' parent(<ul>.style in this case)
+      // so child anonymous style(<li-mark>, <li-body> in this case) needs to save it's 'original' parent(<ul>.style in this case) as 'contextParent'
       // in addition to <li>.style.
-      style.parent2 = this.parent; 
+      style.contextParent = this.parent; 
       return style;
     },
     createBlock : function(opt){
@@ -7262,6 +7262,9 @@ var StyleContext = (function(){
     getMarkupContent : function(){
       return this.markup.getContent();
     },
+    getMarkupPos : function(){
+      return this.markup.pos;
+    },
     getFontSize : function(){
       return this.font.size;
     },
@@ -7301,13 +7304,13 @@ var StyleContext = (function(){
     getEdgeExtent : function(flow){
       return this.edge? this.edge.getExtentSize(flow || this.flow) : 0;
     },
-    // if real parent(parent2) exists, obtain from it.
+    // same as getEdgeMeasure, but if contextParent exists, obtain from it.
     getContextEdgeMeasure : function(flow){
-      return this.parent2? this.parent2.getEdgeMeasure(flow) : this.getEdgeMeasure(flow);
+      return this.contextParent? this.contextParent.getEdgeMeasure(flow) : this.getEdgeMeasure(flow);
     },
-    // if real parent(parent2) exists, obtain from it.
+    // same as getEdgeExtent, but if contextParent exists, obtain from it.
     getContextEdgeExtent : function(flow){
-      return this.parent2? this.parent2.getEdgeExtent(flow) : this.getEdgeExtent(flow);
+      return this.contextParent? this.contextParent.getEdgeExtent(flow) : this.getEdgeExtent(flow);
     },
     getMarkerHtml : function(order){
       return this.listStyle? this.listStyle.getMarkerHtml(order) : "";
@@ -7976,7 +7979,6 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype.yield = function(parent_context){
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
-    console.log("[%s]:context(max_m = %d, max_e = %d)", this.style.getMarkupName(), context.getInlineMaxMeasure(), context.getBlockMaxExtent());
     return this._yield(context);
   };
 
@@ -8007,7 +8009,6 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype.hasChildLayout = function(){
     if(this._childLayout && this._childLayout.hasNext()){
-      //console.log("layout child %s has next", this._childLayout.style.getMarkupName());
       return true;
     }
     return false;
@@ -8019,7 +8020,6 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype.yieldChildLayout = function(context){
     var next = this._childLayout.yield(context);
-    //console.log("child next:%o", next);
     return next;
   };
 
@@ -8042,7 +8042,6 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype.popCache = function(){
     var cache = this._cachedElements.pop();
-    //console.log("[%s]:pop cache:%o", this.style.markup.name, cache);
     return cache;
   };
 
@@ -8081,6 +8080,26 @@ var BlockLayoutGenerator = (function(){
     LayoutGenerator.call(this, style, stream);
   }
   Class.extend(BlockLayoutGenerator, LayoutGenerator);
+
+  var get_line_start_pos = function(line){
+    var head = line.elements[0];
+    return (head instanceof Box)? head.style.getMarkupPos() : head.pos;
+  };
+
+  BlockLayoutGenerator.prototype.popCache = function(context){
+    var cache = LayoutGenerator.prototype.popCache.call(this);
+
+    // if cache is inline, and measure size varies, reget line if need.
+    if(this.hasChildLayout() && cache.display === "inline"){
+      if(cache.getBoxMeasure(this.style.flow) <= this.style.getContentMeasure() && cache.hasLineBreak){
+	return cache;
+      }
+      this._childLayout.stream.setPos(get_line_start_pos(cache)); // rewind stream to the head of line.
+      this._childLayout.clearCache(); // stream rewinded, so cache must be destroyed.
+      return this.yieldChildLayout(context);
+    }
+    return cache;
+  };
 
   BlockLayoutGenerator.prototype._yield = function(context){
     if(!context.isBlockSpaceLeft()){
@@ -8186,30 +8205,6 @@ var InlineLayoutGenerator = (function(){
   }
   Class.extend(InlineLayoutGenerator, LayoutGenerator);
 
-  InlineLayoutGenerator.prototype.popCache = function(context){
-    var cache = LayoutGenerator.prototype.popCache.call(this, context);
-    /*
-    // restore inline context if measure changed from when this cache is pushed.
-    if(this.hasChildLayout() && cache.display === "inline" && !cache.hasLineBreak){
-      // restart line in larger measure context.
-      if(cache.getBoxMeasure(this.style.flow) <= context.getInlineMaxMeasure()){
-	return this.yield(context.restoreInlineContext(cache));
-      }
-      // restart line into shorter measure context, caused by float-layouting.
-      // in description,
-      //
-      // 1. some float-layout has rest extent, and try to yield single line in that space but can't be included and cached.
-      // 2. and when restart, measure of new layout has shorter measure than the cached line.
-      //
-      // to resolve this situation, we restart stream from the head of line.
-      this.stream.setPos(cache.elements[0].pos); // TODO: if cache.elements[0] is not text object, it may trouble.
-      this.clearCache(); // stream rewinded, so cache must be destroyed.
-      return this.yield(context);
-    }*/
-    return cache;
-  };
-  
-
   InlineLayoutGenerator.prototype._yield = function(context){
     while(true){
       var element = this._getNext(context);
@@ -8270,7 +8265,7 @@ var InlineLayoutGenerator = (function(){
 
   InlineLayoutGenerator.prototype._getNext = function(context){
     if(this.hasCache()){
-      return this.popCache();
+      return this.popCache(context);
     }
 
     if(this.hasChildLayout()){
@@ -9284,50 +9279,16 @@ var LayoutTest = (function(){
       "</ul>"
     ].join(""),
 
-/*
-    "ul":[
-      "<ol>",
-      "<li>" +
-	TestText["long"] +
-	TestText["long"] +
-	TestText["long"] +
-	"</li>",
-      "</ol>"
-    ].join(""),
-*/
-
-/*
-    "ul":[
-      "<ol>",
-      "<li>" + TestText["short"] + "</li>",
-      "<li>" + TestText["short"] + "</li>",
-      "<li>" + TestText["short"] + "</li>",
-      "<li>" + TestText["short"] + "</li>",
-      "<li>" + TestText["short"] + "</li>",
-      "<li>" + TestText["short"] + "</li>",
-      "</ol>"
-    ].join(""),
-*/
-
-    /*
-    "ul":[
-      "<ol>",
-      "<li>あ</li>",
-      "<li>か</li>",
-      "</ol>"
-    ].join(""),
-    */
-
     "ol":[
       "<ol>",
       "<li>" + TestText["short"] + "</li>",
       "<li>" + [
 	"<ul>",
 	"<li>" + TestText["middle"] + "</li>",
-	"<li>" + TestText["short"] + "</li>",
 	"<li>" + TestText["long"] + "</li>",
 	"</ul>"
       ].join("") + "</li>",
+      "<li>" + TestText["short"] + "</li>",
       "<li>" + TestText["middle"] + "</li>",
       "<li>" + TestText["long"] + "</li>",
       "</ol>"
@@ -9352,8 +9313,11 @@ var LayoutTest = (function(){
 
     "float-test":[
       TestSnipet["float"],
+      TestSnipet["ruby"],
       TestText["long"],
+      TestSnipet["ruby"],
       TestText["middle"],
+      TestSnipet["ruby"],
       TestText["long"],
       TestSnipet["float"],
       TestText["long"],
