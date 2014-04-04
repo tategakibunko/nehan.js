@@ -15,7 +15,6 @@ var VertLayoutEvaluator = (function(){
   VertLayoutEvaluator.prototype.evalRuby = function(line, ruby){
     var body = this.evalRb(line, ruby) + this.evalRt(line, ruby);
     return Html.tagWrap("div", body, {
-      "stye":Css.toString(ruby.css),
       "class":"nehan-ruby-body"
     });
   };

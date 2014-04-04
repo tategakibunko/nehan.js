@@ -8045,7 +8045,6 @@ var LayoutGenerator = (function(){
     );
   };
 
-  // TODO
   LayoutGenerator.prototype._createStream = function(tag){
     switch(tag.getName()){
     case "ruby": return new RubyTagStream(tag);
@@ -8921,7 +8920,6 @@ var VertLayoutEvaluator = (function(){
   VertLayoutEvaluator.prototype.evalRuby = function(line, ruby){
     var body = this.evalRb(line, ruby) + this.evalRt(line, ruby);
     return Html.tagWrap("div", body, {
-      "stye":Css.toString(ruby.css),
       "class":"nehan-ruby-body"
     });
   };
@@ -9127,7 +9125,7 @@ var HoriLayoutEvaluator = (function(){
 
   HoriLayoutEvaluator.prototype.evalInlineChild = function(line, child){
     return Html.tagWrap("span", this.evalInlineElements(child, child.elements), {
-      "style":Css.toString(line.css),
+      "style":Css.toString(line.getCssInline()),
       "class":line.classes.join(" ")
     });
   };

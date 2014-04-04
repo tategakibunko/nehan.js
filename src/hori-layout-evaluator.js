@@ -11,7 +11,7 @@ var HoriLayoutEvaluator = (function(){
 
   HoriLayoutEvaluator.prototype.evalInlineChild = function(line, child){
     return Html.tagWrap("span", this.evalInlineElements(child, child.elements), {
-      "style":Css.toString(line.css),
+      "style":Css.toString(line.getCssInline()),
       "class":line.classes.join(" ")
     });
   };
