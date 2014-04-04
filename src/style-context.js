@@ -52,9 +52,6 @@ var StyleContext = (function(){
     if(list_style){
       this.listStyle = list_style;
     }
-    this.contentSize = this._computeContentSize(this.edge || null); // required
-    this.cssBlock = this._computeCssBlock(); // required
-    this.cssInline = this._computeCssInline(); // required
     if(this.parent){
       this.parent._appendChild(this);
     }
@@ -109,14 +106,15 @@ var StyleContext = (function(){
       if(this.logicalFloat){
 	box.logicalFloat = this.logicalFloat;
       }
-      Args.copy(box.css, box_size.getCss());
-      Args.copy(box.css, this.cssBlock);
       return box;
     },
     createLine : function(opt){
-      var line_rate = this.getLineRate();
+      var elements = opt.elements || [];
+      var child_lines = this._filterChildLines(elements);
+      var max_font_size = this._computeMaxLineFontSize(child_lines);
+      var max_extent = this._computeMaxLineExtent(child_lines, max_font_size);
       var measure = opt.measure || this.getContentMeasure();
-      var extent = this.isRootLine()? this._computeLineExtent(opt.elements) : this.getAutoLineExtent();
+      var extent = this.isRootLine()? this._computeRootLineExtent(child_lines, max_font_size, max_extent) : this.getAutoLineExtent();
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
       var line = new Box(box_size, this);
@@ -124,16 +122,18 @@ var StyleContext = (function(){
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
       line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.markup.getName());
-      line.extent = extent;
 
-      // backup other line data. mainly required to restore inline-context in FloatLayoutGenerator.
+      // backup other line data. mainly required to restore inline-context.
       if(this.isRootLine()){
-	line.hasLineBreak = opt.hasLineBreak || false;
+	line.br = opt.br || false;
 	line.inlineMeasure = opt.inlineMeasure || measure;
 	line.texts = opt.texts || [];
+
+	// if vertical line, needs some position fix.
+	if(this.isTextVertical()){
+	  this._centerizeVertRootLine(child_lines, max_font_size, max_extent);
+	}
       }
-      Args.copy(line.css, box_size.getCss());
-      Args.copy(line.css, this.cssInline);
       return line;
     },
     isBlock : function(){
@@ -208,12 +208,6 @@ var StyleContext = (function(){
     getLineRate : function(){
       return this.lineRate || Layout.lineRate || 2;
     },
-    getContentMeasure : function(flow){
-      return this.contentSize.getMeasure(flow || this.flow);
-    },
-    getContentExtent : function(flow){
-      return this.contentSize.getExtent(flow || this.flow);
-    },
     getEmphaLineExtent : function(){
       return this.getFontSize() * 2;
     },
@@ -268,166 +262,78 @@ var StyleContext = (function(){
 	return child === style;
       });
     },
-    resizeMeasure : function(measure){
-      if(this.edge){
-	measure -= this._computeEdgeContentMeasure(this.edge);
-      }
-      this.contentSize[this.flow.getPropMeasure()] = measure;
-      return this;
-    },
-    resizeExtent : function(extent){
-      if(this.edge){
-	extent -= this._computeEdgeContentExtent(this.edge);
-      }
-      this.contentSize[this.flow.getPropExtent()] = extent;
-      return this;
-    },
-    resize : function(measure, extent){
-      this.resizeMeasure(measure);
-      this.resizeExtent(extent);
-      return this;
-    },
-    _inheritMarkup : function(markup, parent){
-      var parent_markup = parent? parent.markup : null;
-      markup = markup.inherit(parent_markup);
-      var onload = markup.getCssAttr("onload");
-      if(onload){
-	markup.setCssAttrs(onload(markup) || {});
-      }
-      var nth_child = markup.getCssAttr("nth-child");
-      if(nth_child){
-	markup.setCssAttrs(nth_child(this.getChildIndex(), markup) || {});
-      }
-      var nth_of_type = markup.getCssAttr("nth-of-type");
-      if(nth_of_type){
-	markup.setCssAttrs(nth_of_type(this.getChildIndexOfType(), markup) || {});
-      }
-      return markup;
-    },
-    _appendChild : function(child_style){
-      this.childs.push(child_style);
-    },
-    _computeOuterSize : function(){
-      var measure = this._computeOuterMeasure();
-      var extent = this._computeOuterExtent();
+    getOuterSize : function(){
+      var measure = this.getOuterMeasure();
+      var extent = this.getOuterExtent();
       return this.flow.getBoxSize(measure, extent);
     },
-    _computeOuterMeasure : function(){
-      return this._computeStaticMeasure() || this._computeMaxMeasure();
+    getOuterMeasure : function(){
+      return this.getStaticMeasure() || this.getMaxMeasure();
     },
-    _computeOuterExtent : function(){
-      return this._computeStaticExtent() || this._computeMaxExtent();
+    getOuterExtent : function(){
+      return this.getStaticExtent() || this.getMaxExtent();
     },
-    _computeStaticMeasure : function(){
-      var max_size = this._computeMaxMeasure(); // this value is required when static size is set by '%' value.
+    getStaticMeasure : function(){
+      var max_size = this.getMaxMeasure(); // this value is required when static size is set by '%' value.
       var static_size = this.markup.getAttr(this.flow.getPropMeasure()) || this.markup.getCssAttr("measure");
       return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
     },
-    _computeStaticExtent : function(){
-      var max_size = this._computeMaxExtent(); // this value is required when static size is set by '%' value.
+    getStaticExtent : function(){
+      var max_size = this.getMaxExtent(); // this value is required when static size is set by '%' value.
       var static_size = this.markup.getAttr(this.flow.getPropExtent()) || this.markup.getCssAttr("extent");
       return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
     },
-    _computeMaxMeasure : function(){
+    getMaxMeasure : function(){
       var max_size = this.parent? this.parent.getContentMeasure(this.flow) : Layout[this.flow.getPropMeasure()];
       return max_size;
     },
-    _computeMaxExtent : function(){
+    getMaxExtent : function(){
       var max_size = this.parent? this.parent.getContentExtent(this.flow) : Layout[this.flow.getPropExtent()];
       return (this.display === "block")? max_size : this.font.size;
     },
     // 'after' loading all properties, we can compute boundary box size.
-    _computeContentSize : function(edge){
-      var measure = this._computeContentMeasure(edge);
-      var extent = this._computeContentExtent(edge);
+    getContentSize : function(){
+      var measure = this.getContentMeasure();
+      var extent = this.getContentExtent();
       return this.flow.getBoxSize(measure, extent);
     },
-    _computeContentMeasure : function(edge){
-      return this._computeOuterMeasure() - (edge? this._computeEdgeContentMeasure(edge) : 0);
+    getContentMeasure : function(){
+      return this.getOuterMeasure() - this.getEdgeContentMeasure();
     },
-    _computeContentExtent : function(edge){
-      return this._computeOuterExtent() - (edge? this._computeEdgeContentExtent(edge) : 0);
+    getContentExtent : function(){
+      return this.getOuterExtent() - this.getEdgeContentExtent();
     },
-    _computeEdgeContentMeasure : function(edge){
+    getEdgeContentMeasure : function(){
+      if(typeof this.edge === "undefined"){
+	return 0;
+      }
       switch(this.boxSizing){
       case "content-box":
 	return 0;
       case "border-box":
-	return edge.padding.getMeasureSize(this.flow) + edge.border.getMeasureSize(this.flow);
+	return this.edge.padding.getMeasureSize(this.flow) + this.edge.border.getMeasureSize(this.flow);
       case "padding-box":
-	return edge.padding.getMeasureSize(this.flow);
+	return this.edge.padding.getMeasureSize(this.flow);
       case "margin-box": default:
-	return edge.getMeasureSize(this.flow);
+	return this.edge.getMeasureSize(this.flow);
       }
     },
-    _computeEdgeContentExtent : function(edge){
+    getEdgeContentExtent : function(){
+      if(typeof this.edge === "undefined"){
+	return 0;
+      }
       switch(this.boxSizing){
       case "content-box":
 	return 0;
       case "border-box":
-	return edge.padding.getExtentSize(this.flow) + edge.border.getExtentSize(this.flow);
+	return this.edge.padding.getExtentSize(this.flow) + this.edge.border.getExtentSize(this.flow);
       case "padding-box":
-	return edge.padding.getExtentSize(this.flow);
+	return this.edge.padding.getExtentSize(this.flow);
       case "margin-box": default:
-	return edge.getExtentSize(this.flow);
+	return this.edge.getExtentSize(this.flow);
       }
     },
-    _computeLineExtent : function(elements){
-      var child_lines = List.filter(elements, function(element){ return element.style? true : false; });
-      if(child_lines.length === 0){
-	return this.getAutoLineExtent();
-      }
-      return this.isTextVertical()? this._computeVertLineExtent(child_lines) : this._computeHoriLineExtent(child_lines);
-    },
-    _computeHoriLineExtent : function(child_lines){
-      var max_font_size = List.fold(child_lines, this.getFontSize(), function(ret, line){
-	return Math.max(ret, line.style.getFontSize());
-      });
-      return max_font_size * this.getLineRate();
-    },
-    _centerizeVertLine : function(child_lines){
-      var this_flow = this.flow;
-      var this_font_size = this.getFontSize();
-      var max_font_size = this_font_size;
-      var max_extent = this.getAutoLineExtent();
-      List.iter(child_lines, function(line){
-	max_font_size = Math.max(max_font_size, line.style.getFontSize());
-      });
-
-      //console.log("max_font_size:%o", max_font_size);
-
-      // set font centerized offset from max_font_size.
-      List.iter(child_lines, function(line){
-	var font_size = line.style.getFontSize();
-	var font_center_offset = Math.floor((max_font_size - font_size) / 2);
-	max_extent = Math.max(line.size.getExtent(this_flow) + font_center_offset, max_extent);
-      });
-
-      //console.log("max_extent:%o", max_extent);
-
-      var text_center = Math.floor(max_extent / 2);
-
-      //console.log("text-center-pos:%o", text_center);
-
-      List.iter(child_lines, function(line){
-	var font_size = line.style.getFontSize();
-	var text_center_offset = text_center - Math.floor(font_size / 2);
-	if(text_center_offset > 0){
-	  line.edge = line.style.edge? line.style.edge.clone() : new BoxEdge(); // set line.edge(not line.style.edge) to overwrite padding temporally.
-	  line.edge.padding.setAfter(this_flow, text_center_offset); // set new edge(use line.edge not line.style.edge)
-	  line.size.setExtent(this_flow, max_extent - text_center_offset); // set new size
-	  Args.copy(line.css, line.edge.getCss()); // overwrite edge
-	  Args.copy(line.css, line.size.getCss()); // overwrite size
-	}
-      });
-
-      return max_extent;
-    },
-    _computeVertLineExtent : function(child_lines){
-      var max_extent = this._centerizeVertLine(child_lines);
-      return max_extent;
-    },
-    _computeCssInline : function(){
+    getCssInline : function(){
       var css = {};
       if(this.font){
 	Args.copy(css, this.font.getCss());
@@ -460,7 +366,7 @@ var StyleContext = (function(){
       }
       return css;
     },
-    _computeCssBlock : function(){
+    getCssBlock : function(){
       var css = {};
       if(this.font){
 	Args.copy(css, this.font.getCss());
@@ -489,6 +395,67 @@ var StyleContext = (function(){
 	css["z-index"] = this.zIndex;
       }
       return css;
+    },
+    _inheritMarkup : function(markup, parent){
+      var parent_markup = parent? parent.markup : null;
+      markup = markup.inherit(parent_markup);
+      var onload = markup.getCssAttr("onload");
+      if(onload){
+	markup.setCssAttrs(onload(markup) || {});
+      }
+      var nth_child = markup.getCssAttr("nth-child");
+      if(nth_child){
+	markup.setCssAttrs(nth_child(this.getChildIndex(), markup) || {});
+      }
+      var nth_of_type = markup.getCssAttr("nth-of-type");
+      if(nth_of_type){
+	markup.setCssAttrs(nth_of_type(this.getChildIndexOfType(), markup) || {});
+      }
+      return markup;
+    },
+    _appendChild : function(child_style){
+      this.childs.push(child_style);
+    },
+    _filterChildLines : function(elements){
+      return List.filter(elements, function(element){
+	return element.style? true : false;
+      });
+    },
+    _computeRootLineExtent : function(child_lines, max_font_size, max_extent){
+      if(child_lines.length === 0){
+	return this.getAutoLineExtent();
+      }
+      return this.isTextVertical()? max_extent : Math.floor(max_font_size * this.getLineRate());
+    },
+    _computeMaxLineFontSize : function(child_lines){
+      return List.fold(child_lines, this.getFontSize(), function(ret, line){
+	return Math.max(ret, line.style.getFontSize());
+      });
+    },
+    // get inline max_extent size after centerizing each font.
+    _computeMaxLineExtent : function(child_lines, max_font_size){
+      var flow = this.flow;
+      return List.fold(child_lines, this.getAutoLineExtent(), function(ret, line){
+	var font_size = line.style.getFontSize();
+	var font_center_offset = Math.floor((max_font_size - font_size) / 2);
+	return Math.max(ret, line.size.getExtent(flow) + font_center_offset);
+      });
+    },
+    _centerizeVertRootLine : function(child_lines, max_font_size, max_extent){
+      var flow = this.flow;
+      var text_center = Math.floor(max_extent / 2);
+
+      List.iter(child_lines, function(line){
+	var font_size = line.style.getFontSize();
+	var text_center_offset = text_center - Math.floor(font_size / 2);
+	if(text_center_offset > 0){
+	  line.edge = line.style.edge? line.style.edge.clone() : new BoxEdge(); // set line.edge(not line.style.edge) to overwrite padding temporally.
+	  line.edge.padding.setAfter(flow, text_center_offset); // set new edge(use line.edge not line.style.edge)
+	  line.size.setExtent(flow, max_extent - text_center_offset); // set new size
+	  Args.copy(line.css, line.edge.getCss()); // overwrite edge
+	  Args.copy(line.css, line.size.getCss()); // overwrite size
+	}
+      });
     },
     _loadDisplay : function(markup){
       return markup.getCssAttr("display", "inline");

@@ -6,6 +6,25 @@ var Box = (function(){
   }
 
   Box.prototype = {
+    debug : function(title){
+      console.log("[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", title,
+		  this.getContentMeasure(), this.getContentExtent(),
+		  this.getBoxMeasure(), this.getBoxExtent());
+    },
+    getCssBlock : function(){
+      var css = {};
+      Args.copy(css, this.style.getCssBlock()); // base style
+      Args.copy(css, this.size.getCss()); // local size
+      Args.copy(css, this.css); // some dynamic values
+      return css;
+    },
+    getCssInline : function(){
+      var css = {};
+      Args.copy(css, this.style.getCssInline()); // base style
+      Args.copy(css, this.size.getCss()); // local size
+      Args.copy(css, this.css); // some dynamic values
+      return css;
+    },
     getCssVertInlineBox : function(){
       var css = this.getCssBlock();
       css["float"] = "none";
@@ -50,10 +69,9 @@ var Box = (function(){
 	this.edge.clearBorderAfter(this.style.flow);
       }
     },
-    debug : function(title){
-      console.log("[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", title,
-		  this.getContentMeasure(), this.getContentExtent(),
-		  this.getBoxMeasure(), this.getBoxExtent());
+    resizeExtent : function(flow, extent){
+      this.size.setExtent(flow, extent);
+      return this;
     }
   };
 

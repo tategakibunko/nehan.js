@@ -12,7 +12,7 @@ var InlineLayoutContext = (function(){
     isEmpty : function(){
       return !this.br && this.elements.length === 0;
     },
-    hasLineBreak : function(){
+    hasBr : function(){
       return this.br;
     },
     setLineBreak : function(status){
@@ -73,13 +73,6 @@ var InlineLayoutContext = (function(){
 	return tail; // return new tail
       }
       return null; // justify failed or not required.
-    },
-    restoreContext : function(line){
-      this.texts = line.texts || [];
-      this.elements = line.elements || [];
-      this.br = line.hasLineBreak || false;
-      this.curMeasure = line.inlineMeasure || 0;
-      this.charCount = this.texts.length || 0;
     }
   };
 

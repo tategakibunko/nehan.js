@@ -98,10 +98,10 @@ var LayoutTest = (function(){
 
     "table-test":[
       "<table>",
-      //"<tbody>",
+      "<tbody>",
 
       "<tr>",
-      "<td>hoge</td><td>hige</td><td>hage</td>",
+      "<td>" + TestText["long"] + "</td><td>hige</td><td>hage</td>",
       "</tr>",
 
       "<tr>",

@@ -18,7 +18,7 @@ var LayoutEvaluator = (function(){
     },
     evalBlock : function(block){
       return Html.tagWrap("div", this.evalBlockElements(block, block.elements), {
-	"style":Css.toString(block.css),
+	"style":Css.toString(block.getCssBlock()),
 	"class":block.classes.join(" ")
       });
     },
@@ -30,7 +30,7 @@ var LayoutEvaluator = (function(){
     },
     evalInline : function(line){
       return Html.tagWrap("div", this.evalInlineElements(line, line.elements), {
-	"style":Css.toString(line.css),
+	"style":Css.toString(line.getCssInline()),
 	"class":line.classes.join(" ")
       });
     },

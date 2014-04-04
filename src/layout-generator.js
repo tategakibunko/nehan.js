@@ -16,6 +16,10 @@ var LayoutGenerator = (function(){
     throw "LayoutGenerator::_yield must be implemented in child class";
   };
 
+  LayoutGenerator.prototype.cloneStyle = function(opt){
+    this.style = this.style.clone(opt);
+  };
+
   LayoutGenerator.prototype.setTerminate = function(status){
     this._terminate = status;
   };

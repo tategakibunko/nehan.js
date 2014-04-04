@@ -122,8 +122,11 @@ var FloatLayoutGenerator = (function(){
   };
   
   FloatLayoutGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
-    // mutable style is not good, but we need speed!!
-    this._childLayout.style.resize(measure, extent);
+    this._childLayout.cloneStyle({
+      "float":"start",
+      measure:measure,
+      extent:extent
+    });
     return this.yieldChildLayout();
   };
   

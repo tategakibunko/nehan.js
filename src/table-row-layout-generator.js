@@ -23,7 +23,7 @@ var TableRowLayoutGenerator = (function(){
     var rest_measure = context.getInlineMaxMeasure();
     return List.mapi(child_tags, function(i, tag){
       var default_style = new StyleContext(tag, parent_style);
-      var static_measure = default_style._computeStaticMeasure();
+      var static_measure = default_style.getStaticMeasure();
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_count - i));
       rest_measure -= measure;
       return default_style.clone({

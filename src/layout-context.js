@@ -41,8 +41,8 @@ var LayoutContext = (function(){
     isInlineEmpty : function(){
       return this.inline.isEmpty();
     },
-    hasLineBreak : function(){
-      return this.inline.hasLineBreak();
+    hasBr : function(){
+      return this.inline.hasBr();
     },
     setLineBreak : function(status){
       this.inline.setLineBreak(status);
@@ -73,10 +73,6 @@ var LayoutContext = (function(){
     },
     justify : function(head_char){
       return this.inline.justify(head_char);
-    },
-    restoreInlineContext : function(line){
-      this.inline.restoreContext(line);
-      return this;
     }
   };
 

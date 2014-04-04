@@ -3270,11 +3270,10 @@ var Tcy = (function(){
 
 
 var Ruby = (function(){
-  function Ruby(rbs, rt, pos){
+  function Ruby(rbs, rt){
     this._type = "ruby";
     this.rbs = rbs;
     this.rt = rt;
-    this.padding = new Padding();
   }
 
   Ruby.prototype = {
@@ -3319,12 +3318,16 @@ var Ruby = (function(){
     getCssVertRb : function(line){
       var css = {};
       css["float"] = "left";
-      Args.copy(css, this.padding.getCss());
+      if(this.padding){
+	Args.copy(css, this.padding.getCss());
+      }
       return css;
     },
     getCssHoriRb : function(line){
       var css = {};
-      Args.copy(css, this.padding.getCss());
+      if(this.padding){
+	Args.copy(css, this.padding.getCss());
+      }
       css["text-align"] = "center";
       return css;
     },
@@ -3339,6 +3342,7 @@ var Ruby = (function(){
       if(advance_rt > advance_rbs){
 	var ctx_space = Math.ceil((advance_rt - advance_rbs) / 2);
 	if(this.rbs.length > 0){
+	  this.padding = new Padding();
 	  this.padding.setStart(flow, ctx_space);
 	  this.padding.setEnd(flow, ctx_space);
 	}
@@ -5105,6 +5109,25 @@ var Box = (function(){
   }
 
   Box.prototype = {
+    debug : function(title){
+      console.log("[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", title,
+		  this.getContentMeasure(), this.getContentExtent(),
+		  this.getBoxMeasure(), this.getBoxExtent());
+    },
+    getCssBlock : function(){
+      var css = {};
+      Args.copy(css, this.style.getCssBlock()); // base style
+      Args.copy(css, this.size.getCss()); // local size
+      Args.copy(css, this.css); // some dynamic values
+      return css;
+    },
+    getCssInline : function(){
+      var css = {};
+      Args.copy(css, this.style.getCssInline()); // base style
+      Args.copy(css, this.size.getCss()); // local size
+      Args.copy(css, this.css); // some dynamic values
+      return css;
+    },
     getCssVertInlineBox : function(){
       var css = this.getCssBlock();
       css["float"] = "none";
@@ -5149,10 +5172,9 @@ var Box = (function(){
 	this.edge.clearBorderAfter(this.style.flow);
       }
     },
-    debug : function(title){
-      console.log("[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", title,
-		  this.getContentMeasure(), this.getContentExtent(),
-		  this.getBoxMeasure(), this.getBoxExtent());
+    resizeExtent : function(flow, extent){
+      this.size.setExtent(flow, extent);
+      return this;
     }
   };
 
@@ -7127,9 +7149,6 @@ var StyleContext = (function(){
     if(list_style){
       this.listStyle = list_style;
     }
-    this.contentSize = this._computeContentSize(this.edge || null); // required
-    this.cssBlock = this._computeCssBlock(); // required
-    this.cssInline = this._computeCssInline(); // required
     if(this.parent){
       this.parent._appendChild(this);
     }
@@ -7184,14 +7203,15 @@ var StyleContext = (function(){
       if(this.logicalFloat){
 	box.logicalFloat = this.logicalFloat;
       }
-      Args.copy(box.css, box_size.getCss());
-      Args.copy(box.css, this.cssBlock);
       return box;
     },
     createLine : function(opt){
-      var line_rate = this.getLineRate();
+      var elements = opt.elements || [];
+      var child_lines = this._filterChildLines(elements);
+      var max_font_size = this._computeMaxLineFontSize(child_lines);
+      var max_extent = this._computeMaxLineExtent(child_lines, max_font_size);
       var measure = opt.measure || this.getContentMeasure();
-      var extent = this.isRootLine()? this._computeLineExtent(opt.elements) : this.getAutoLineExtent();
+      var extent = this.isRootLine()? this._computeRootLineExtent(child_lines, max_font_size, max_extent) : this.getAutoLineExtent();
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
       var line = new Box(box_size, this);
@@ -7199,16 +7219,18 @@ var StyleContext = (function(){
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
       line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.markup.getName());
-      line.extent = extent;
 
-      // backup other line data. mainly required to restore inline-context in FloatLayoutGenerator.
+      // backup other line data. mainly required to restore inline-context.
       if(this.isRootLine()){
-	line.hasLineBreak = opt.hasLineBreak || false;
+	line.br = opt.br || false;
 	line.inlineMeasure = opt.inlineMeasure || measure;
 	line.texts = opt.texts || [];
+
+	// if vertical line, needs some position fix.
+	if(this.isTextVertical()){
+	  this._centerizeVertRootLine(child_lines, max_font_size, max_extent);
+	}
       }
-      Args.copy(line.css, box_size.getCss());
-      Args.copy(line.css, this.cssInline);
       return line;
     },
     isBlock : function(){
@@ -7283,12 +7305,6 @@ var StyleContext = (function(){
     getLineRate : function(){
       return this.lineRate || Layout.lineRate || 2;
     },
-    getContentMeasure : function(flow){
-      return this.contentSize.getMeasure(flow || this.flow);
-    },
-    getContentExtent : function(flow){
-      return this.contentSize.getExtent(flow || this.flow);
-    },
     getEmphaLineExtent : function(){
       return this.getFontSize() * 2;
     },
@@ -7343,166 +7359,78 @@ var StyleContext = (function(){
 	return child === style;
       });
     },
-    resizeMeasure : function(measure){
-      if(this.edge){
-	measure -= this._computeEdgeContentMeasure(this.edge);
-      }
-      this.contentSize[this.flow.getPropMeasure()] = measure;
-      return this;
-    },
-    resizeExtent : function(extent){
-      if(this.edge){
-	extent -= this._computeEdgeContentExtent(this.edge);
-      }
-      this.contentSize[this.flow.getPropExtent()] = extent;
-      return this;
-    },
-    resize : function(measure, extent){
-      this.resizeMeasure(measure);
-      this.resizeExtent(extent);
-      return this;
-    },
-    _inheritMarkup : function(markup, parent){
-      var parent_markup = parent? parent.markup : null;
-      markup = markup.inherit(parent_markup);
-      var onload = markup.getCssAttr("onload");
-      if(onload){
-	markup.setCssAttrs(onload(markup) || {});
-      }
-      var nth_child = markup.getCssAttr("nth-child");
-      if(nth_child){
-	markup.setCssAttrs(nth_child(this.getChildIndex(), markup) || {});
-      }
-      var nth_of_type = markup.getCssAttr("nth-of-type");
-      if(nth_of_type){
-	markup.setCssAttrs(nth_of_type(this.getChildIndexOfType(), markup) || {});
-      }
-      return markup;
-    },
-    _appendChild : function(child_style){
-      this.childs.push(child_style);
-    },
-    _computeOuterSize : function(){
-      var measure = this._computeOuterMeasure();
-      var extent = this._computeOuterExtent();
+    getOuterSize : function(){
+      var measure = this.getOuterMeasure();
+      var extent = this.getOuterExtent();
       return this.flow.getBoxSize(measure, extent);
     },
-    _computeOuterMeasure : function(){
-      return this._computeStaticMeasure() || this._computeMaxMeasure();
+    getOuterMeasure : function(){
+      return this.getStaticMeasure() || this.getMaxMeasure();
     },
-    _computeOuterExtent : function(){
-      return this._computeStaticExtent() || this._computeMaxExtent();
+    getOuterExtent : function(){
+      return this.getStaticExtent() || this.getMaxExtent();
     },
-    _computeStaticMeasure : function(){
-      var max_size = this._computeMaxMeasure(); // this value is required when static size is set by '%' value.
+    getStaticMeasure : function(){
+      var max_size = this.getMaxMeasure(); // this value is required when static size is set by '%' value.
       var static_size = this.markup.getAttr(this.flow.getPropMeasure()) || this.markup.getCssAttr("measure");
       return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
     },
-    _computeStaticExtent : function(){
-      var max_size = this._computeMaxExtent(); // this value is required when static size is set by '%' value.
+    getStaticExtent : function(){
+      var max_size = this.getMaxExtent(); // this value is required when static size is set by '%' value.
       var static_size = this.markup.getAttr(this.flow.getPropExtent()) || this.markup.getCssAttr("extent");
       return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
     },
-    _computeMaxMeasure : function(){
+    getMaxMeasure : function(){
       var max_size = this.parent? this.parent.getContentMeasure(this.flow) : Layout[this.flow.getPropMeasure()];
       return max_size;
     },
-    _computeMaxExtent : function(){
+    getMaxExtent : function(){
       var max_size = this.parent? this.parent.getContentExtent(this.flow) : Layout[this.flow.getPropExtent()];
       return (this.display === "block")? max_size : this.font.size;
     },
     // 'after' loading all properties, we can compute boundary box size.
-    _computeContentSize : function(edge){
-      var measure = this._computeContentMeasure(edge);
-      var extent = this._computeContentExtent(edge);
+    getContentSize : function(){
+      var measure = this.getContentMeasure();
+      var extent = this.getContentExtent();
       return this.flow.getBoxSize(measure, extent);
     },
-    _computeContentMeasure : function(edge){
-      return this._computeOuterMeasure() - (edge? this._computeEdgeContentMeasure(edge) : 0);
+    getContentMeasure : function(){
+      return this.getOuterMeasure() - this.getEdgeContentMeasure();
     },
-    _computeContentExtent : function(edge){
-      return this._computeOuterExtent() - (edge? this._computeEdgeContentExtent(edge) : 0);
+    getContentExtent : function(){
+      return this.getOuterExtent() - this.getEdgeContentExtent();
     },
-    _computeEdgeContentMeasure : function(edge){
+    getEdgeContentMeasure : function(){
+      if(typeof this.edge === "undefined"){
+	return 0;
+      }
       switch(this.boxSizing){
       case "content-box":
 	return 0;
       case "border-box":
-	return edge.padding.getMeasureSize(this.flow) + edge.border.getMeasureSize(this.flow);
+	return this.edge.padding.getMeasureSize(this.flow) + this.edge.border.getMeasureSize(this.flow);
       case "padding-box":
-	return edge.padding.getMeasureSize(this.flow);
+	return this.edge.padding.getMeasureSize(this.flow);
       case "margin-box": default:
-	return edge.getMeasureSize(this.flow);
+	return this.edge.getMeasureSize(this.flow);
       }
     },
-    _computeEdgeContentExtent : function(edge){
+    getEdgeContentExtent : function(){
+      if(typeof this.edge === "undefined"){
+	return 0;
+      }
       switch(this.boxSizing){
       case "content-box":
 	return 0;
       case "border-box":
-	return edge.padding.getExtentSize(this.flow) + edge.border.getExtentSize(this.flow);
+	return this.edge.padding.getExtentSize(this.flow) + this.edge.border.getExtentSize(this.flow);
       case "padding-box":
-	return edge.padding.getExtentSize(this.flow);
+	return this.edge.padding.getExtentSize(this.flow);
       case "margin-box": default:
-	return edge.getExtentSize(this.flow);
+	return this.edge.getExtentSize(this.flow);
       }
     },
-    _computeLineExtent : function(elements){
-      var child_lines = List.filter(elements, function(element){ return element.style? true : false; });
-      if(child_lines.length === 0){
-	return this.getAutoLineExtent();
-      }
-      return this.isTextVertical()? this._computeVertLineExtent(child_lines) : this._computeHoriLineExtent(child_lines);
-    },
-    _computeHoriLineExtent : function(child_lines){
-      var max_font_size = List.fold(child_lines, this.getFontSize(), function(ret, line){
-	return Math.max(ret, line.style.getFontSize());
-      });
-      return max_font_size * this.getLineRate();
-    },
-    _centerizeVertLine : function(child_lines){
-      var this_flow = this.flow;
-      var this_font_size = this.getFontSize();
-      var max_font_size = this_font_size;
-      var max_extent = this.getAutoLineExtent();
-      List.iter(child_lines, function(line){
-	max_font_size = Math.max(max_font_size, line.style.getFontSize());
-      });
-
-      //console.log("max_font_size:%o", max_font_size);
-
-      // set font centerized offset from max_font_size.
-      List.iter(child_lines, function(line){
-	var font_size = line.style.getFontSize();
-	var font_center_offset = Math.floor((max_font_size - font_size) / 2);
-	max_extent = Math.max(line.size.getExtent(this_flow) + font_center_offset, max_extent);
-      });
-
-      //console.log("max_extent:%o", max_extent);
-
-      var text_center = Math.floor(max_extent / 2);
-
-      //console.log("text-center-pos:%o", text_center);
-
-      List.iter(child_lines, function(line){
-	var font_size = line.style.getFontSize();
-	var text_center_offset = text_center - Math.floor(font_size / 2);
-	if(text_center_offset > 0){
-	  line.edge = line.style.edge? line.style.edge.clone() : new BoxEdge(); // set line.edge(not line.style.edge) to overwrite padding temporally.
-	  line.edge.padding.setAfter(this_flow, text_center_offset); // set new edge(use line.edge not line.style.edge)
-	  line.size.setExtent(this_flow, max_extent - text_center_offset); // set new size
-	  Args.copy(line.css, line.edge.getCss()); // overwrite edge
-	  Args.copy(line.css, line.size.getCss()); // overwrite size
-	}
-      });
-
-      return max_extent;
-    },
-    _computeVertLineExtent : function(child_lines){
-      var max_extent = this._centerizeVertLine(child_lines);
-      return max_extent;
-    },
-    _computeCssInline : function(){
+    getCssInline : function(){
       var css = {};
       if(this.font){
 	Args.copy(css, this.font.getCss());
@@ -7535,7 +7463,7 @@ var StyleContext = (function(){
       }
       return css;
     },
-    _computeCssBlock : function(){
+    getCssBlock : function(){
       var css = {};
       if(this.font){
 	Args.copy(css, this.font.getCss());
@@ -7564,6 +7492,67 @@ var StyleContext = (function(){
 	css["z-index"] = this.zIndex;
       }
       return css;
+    },
+    _inheritMarkup : function(markup, parent){
+      var parent_markup = parent? parent.markup : null;
+      markup = markup.inherit(parent_markup);
+      var onload = markup.getCssAttr("onload");
+      if(onload){
+	markup.setCssAttrs(onload(markup) || {});
+      }
+      var nth_child = markup.getCssAttr("nth-child");
+      if(nth_child){
+	markup.setCssAttrs(nth_child(this.getChildIndex(), markup) || {});
+      }
+      var nth_of_type = markup.getCssAttr("nth-of-type");
+      if(nth_of_type){
+	markup.setCssAttrs(nth_of_type(this.getChildIndexOfType(), markup) || {});
+      }
+      return markup;
+    },
+    _appendChild : function(child_style){
+      this.childs.push(child_style);
+    },
+    _filterChildLines : function(elements){
+      return List.filter(elements, function(element){
+	return element.style? true : false;
+      });
+    },
+    _computeRootLineExtent : function(child_lines, max_font_size, max_extent){
+      if(child_lines.length === 0){
+	return this.getAutoLineExtent();
+      }
+      return this.isTextVertical()? max_extent : Math.floor(max_font_size * this.getLineRate());
+    },
+    _computeMaxLineFontSize : function(child_lines){
+      return List.fold(child_lines, this.getFontSize(), function(ret, line){
+	return Math.max(ret, line.style.getFontSize());
+      });
+    },
+    // get inline max_extent size after centerizing each font.
+    _computeMaxLineExtent : function(child_lines, max_font_size){
+      var flow = this.flow;
+      return List.fold(child_lines, this.getAutoLineExtent(), function(ret, line){
+	var font_size = line.style.getFontSize();
+	var font_center_offset = Math.floor((max_font_size - font_size) / 2);
+	return Math.max(ret, line.size.getExtent(flow) + font_center_offset);
+      });
+    },
+    _centerizeVertRootLine : function(child_lines, max_font_size, max_extent){
+      var flow = this.flow;
+      var text_center = Math.floor(max_extent / 2);
+
+      List.iter(child_lines, function(line){
+	var font_size = line.style.getFontSize();
+	var text_center_offset = text_center - Math.floor(font_size / 2);
+	if(text_center_offset > 0){
+	  line.edge = line.style.edge? line.style.edge.clone() : new BoxEdge(); // set line.edge(not line.style.edge) to overwrite padding temporally.
+	  line.edge.padding.setAfter(flow, text_center_offset); // set new edge(use line.edge not line.style.edge)
+	  line.size.setExtent(flow, max_extent - text_center_offset); // set new size
+	  Args.copy(line.css, line.edge.getCss()); // overwrite edge
+	  Args.copy(line.css, line.size.getCss()); // overwrite size
+	}
+      });
     },
     _loadDisplay : function(markup){
       return markup.getCssAttr("display", "inline");
@@ -7788,8 +7777,8 @@ var LayoutContext = (function(){
     isInlineEmpty : function(){
       return this.inline.isEmpty();
     },
-    hasLineBreak : function(){
-      return this.inline.hasLineBreak();
+    hasBr : function(){
+      return this.inline.hasBr();
     },
     setLineBreak : function(status){
       this.inline.setLineBreak(status);
@@ -7820,10 +7809,6 @@ var LayoutContext = (function(){
     },
     justify : function(head_char){
       return this.inline.justify(head_char);
-    },
-    restoreInlineContext : function(line){
-      this.inline.restoreContext(line);
-      return this;
     }
   };
 
@@ -7893,7 +7878,7 @@ var InlineLayoutContext = (function(){
     isEmpty : function(){
       return !this.br && this.elements.length === 0;
     },
-    hasLineBreak : function(){
+    hasBr : function(){
       return this.br;
     },
     setLineBreak : function(status){
@@ -7954,13 +7939,6 @@ var InlineLayoutContext = (function(){
 	return tail; // return new tail
       }
       return null; // justify failed or not required.
-    },
-    restoreContext : function(line){
-      this.texts = line.texts || [];
-      this.elements = line.elements || [];
-      this.br = line.hasLineBreak || false;
-      this.curMeasure = line.inlineMeasure || 0;
-      this.charCount = this.texts.length || 0;
     }
   };
 
@@ -7984,6 +7962,10 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._yield = function(context){
     throw "LayoutGenerator::_yield must be implemented in child class";
+  };
+
+  LayoutGenerator.prototype.cloneStyle = function(opt){
+    this.style = this.style.clone(opt);
   };
 
   LayoutGenerator.prototype.setTerminate = function(status){
@@ -8091,7 +8073,7 @@ var BlockLayoutGenerator = (function(){
 
     // if cache is inline, and measure size varies, reget line if need.
     if(this.hasChildLayout() && cache.display === "inline"){
-      if(cache.getBoxMeasure(this.style.flow) <= this.style.getContentMeasure() && cache.hasLineBreak){
+      if(cache.getBoxMeasure(this.style.flow) <= this.style.getContentMeasure() && cache.br){
 	return cache;
       }
       this._childLayout.stream.setPos(get_line_start_pos(cache)); // rewind stream to the head of line.
@@ -8230,7 +8212,7 @@ var InlineLayoutGenerator = (function(){
       return null;
     }
     // justify line if it's generated by not line-break but measure-overflow.
-    if(!context.hasLineBreak()){
+    if(!context.hasBr()){
       this._justifyLine(context);
     }
     return this._createLine(context);
@@ -8254,7 +8236,7 @@ var InlineLayoutGenerator = (function(){
 
   InlineLayoutGenerator.prototype._createLine = function(context){
     return this.style.createLine({
-      hasLineBreak:context.hasLineBreak(),
+      br:context.hasBr(),
       measure:(this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure()),
       inlineMeasure:context.getInlineCurMeasure(),
       elements:context.getInlineElements(),
@@ -8587,8 +8569,11 @@ var FloatLayoutGenerator = (function(){
   };
   
   FloatLayoutGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
-    // mutable style is not good, but we need speed!!
-    this._childLayout.style.resize(measure, extent);
+    this._childLayout.cloneStyle({
+      "float":"start",
+      measure:measure,
+      extent:extent
+    });
     return this.yieldChildLayout();
   };
   
@@ -8639,16 +8624,13 @@ var ParallelLayoutGenerator = (function(){
     if(this.hasCache()){
       return this.popCache();
     }
-    //console.log("[%s]:para yield, rest_extent = %d", this.style.getMarkupName(), context.getBlockRestExtent());
     var blocks = this._yieldParallelBlocks(context);
     if(blocks === null){
       return null;
     }
     var wrap_block = this._wrapBlocks(blocks);
     var wrap_extent = wrap_block.getBoxExtent(this.style.flow);
-    //wrap_block.debug("wrap_block");
-    if(context.getBlockCurExtent() + wrap_extent > context.getBlockMaxExtent()){
-      //console.log("[%s]:wrap box layout over", this.style.markup.name);
+    if(!context.hasBlockSpaceFor(wrap_extent)){
       this.pushCache(wrap_block);
       return null;
     }
@@ -8664,29 +8646,40 @@ var ParallelLayoutGenerator = (function(){
       return true;
     }
     return List.exists(this.generators, function(gen){
-      //console.log("%s gen has next:%o", gen.style.getMarkupName(), gen.hasNext());
       return gen.hasNext();
     });
   };
 
   ParallelLayoutGenerator.prototype._yieldParallelBlocks = function(context){
     var blocks = List.map(this.generators, function(gen){
-      //return gen.yield(gen._createParallelBlockContext(context));
       return gen.yield(context);
     });
     return List.forall(blocks, function(block){ return block === null; })? null : blocks;
   };
 
+  ParallelLayoutGenerator.prototype._findMaxBlock = function(blocks){
+    var flow = this.style.flow;
+    return List.maxobj(blocks, function(block){
+      return block? block.getBoxExtent(flow) : 0;
+    });
+  };
+
+  ParallelLayoutGenerator.prototype._alignContentExtent = function(blocks, content_extent){
+    var flow = this.style.flow;
+    var generators = this.generators;
+    return List.mapi(blocks, function(i, block){
+      if(block === null){
+	return generators[i].style.createBlock({elements:[], extent:content_extent});
+      }
+      return block.resizeExtent(flow, content_extent);
+    });
+  };
+
   ParallelLayoutGenerator.prototype._wrapBlocks = function(blocks){
     var flow = this.style.flow;
     var generators = this.generators;
-    var max_block = List.maxobj(blocks, function(block){
-      return block? block.getBoxExtent(flow) : 0;
-    });
-    var max_content_extent = max_block.getContentExtent(flow);
-    var uniformed_blocks = List.mapi(blocks, function(i, block){
-      return block || generators[i].style.createBlock({elements:[], extent:max_content_extent});
-    });
+    var max_block = this._findMaxBlock(blocks);
+    var uniformed_blocks = this._alignContentExtent(blocks, max_block.getContentExtent(flow));
     return this.style.createBlock({
       elements:uniformed_blocks,
       extent:max_block.getBoxExtent(flow)
@@ -8824,7 +8817,7 @@ var TableRowLayoutGenerator = (function(){
     var rest_measure = context.getInlineMaxMeasure();
     return List.mapi(child_tags, function(i, tag){
       var default_style = new StyleContext(tag, parent_style);
-      var static_measure = default_style._computeStaticMeasure();
+      var static_measure = default_style.getStaticMeasure();
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_count - i));
       rest_measure -= measure;
       return default_style.clone({
@@ -8864,7 +8857,7 @@ var LayoutEvaluator = (function(){
     },
     evalBlock : function(block){
       return Html.tagWrap("div", this.evalBlockElements(block, block.elements), {
-	"style":Css.toString(block.css),
+	"style":Css.toString(block.getCssBlock()),
 	"class":block.classes.join(" ")
       });
     },
@@ -8876,7 +8869,7 @@ var LayoutEvaluator = (function(){
     },
     evalInline : function(line){
       return Html.tagWrap("div", this.evalInlineElements(line, line.elements), {
-	"style":Css.toString(line.css),
+	"style":Css.toString(line.getCssInline()),
 	"class":line.classes.join(" ")
       });
     },
@@ -9328,10 +9321,10 @@ var LayoutTest = (function(){
 
     "table-test":[
       "<table>",
-      //"<tbody>",
+      "<tbody>",
 
       "<tr>",
-      "<td>hoge</td><td>hige</td><td>hage</td>",
+      "<td>" + TestText["long"] + "</td><td>hige</td><td>hage</td>",
       "</tr>",
 
       "<tr>",

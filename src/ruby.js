@@ -1,9 +1,8 @@
 var Ruby = (function(){
-  function Ruby(rbs, rt, pos){
+  function Ruby(rbs, rt){
     this._type = "ruby";
     this.rbs = rbs;
     this.rt = rt;
-    this.padding = new Padding();
   }
 
   Ruby.prototype = {
@@ -48,12 +47,16 @@ var Ruby = (function(){
     getCssVertRb : function(line){
       var css = {};
       css["float"] = "left";
-      Args.copy(css, this.padding.getCss());
+      if(this.padding){
+	Args.copy(css, this.padding.getCss());
+      }
       return css;
     },
     getCssHoriRb : function(line){
       var css = {};
-      Args.copy(css, this.padding.getCss());
+      if(this.padding){
+	Args.copy(css, this.padding.getCss());
+      }
       css["text-align"] = "center";
       return css;
     },
@@ -68,6 +71,7 @@ var Ruby = (function(){
       if(advance_rt > advance_rbs){
 	var ctx_space = Math.ceil((advance_rt - advance_rbs) / 2);
 	if(this.rbs.length > 0){
+	  this.padding = new Padding();
 	  this.padding.setStart(flow, ctx_space);
 	  this.padding.setEnd(flow, ctx_space);
 	}
