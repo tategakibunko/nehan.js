@@ -4895,7 +4895,6 @@ var TextEmpha = (function(){
     getCssHoriEmphaWrap : function(line, chr){
       var css = {}, font_size = line.style.getFontSize();
       css.display = "inline-block";
-      css["padding-top"] = (-font_size) + "px";
       css.width = chr.getAdvance(line.style.flow, line.style.letterSpacing) + "px";
       css.height = this.getExtent(font_size) + "px";
       return css;
