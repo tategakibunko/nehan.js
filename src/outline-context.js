@@ -14,6 +14,16 @@ var OutlineContext = (function(){
     isEmpty : function(){
       return this.logs.length === 0;
     },
+    get : function(index){
+      return this.logs[index] || null;
+    },
+    outputTree : function(){
+      return OutlineParser.getTree(this);
+    },
+    outputNode : function(opt){
+      var tree = this.outputTree();
+      return OutlineConverter.convert(tree, opt);
+    },
     getPageNo : function(){
       return this.pageNo;
     },

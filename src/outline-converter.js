@@ -18,6 +18,94 @@
    </li>
   </ol>
 */
+
+var OutlineConverter = (function(){
+  var __opt__ = {};
+  var parse = function(parent, tree, ctx){
+    if(tree === null){
+      return parent;
+    }
+    var toc = create_toc(tree, ctx);
+    var li = create_child(toc);
+    var link = create_link(toc);
+    if(link){
+      link.onclick = function(){
+	return on_click_link(toc);
+      };
+      li.appendChild(link);
+    }
+    var page_no_item = create_page_no_item(toc);
+    if(page_no_item){
+      li.appendChild(page_no_item);
+    }
+    parent.appendChild(li);
+
+    var child = tree.getChild();
+    if(child){
+      ctx = ctx.startRoot();
+      var child_toc = create_toc(child, ctx);
+      var ol = create_root(child_toc);
+      arguments.callee(ol, child, ctx);
+      li.appendChild(ol);
+      ctx = ctx.endRoot();
+    }
+    var next = tree.getNext();
+    if(next){
+      arguments.callee(parent, next, ctx.stepNext());
+    }
+    return parent;
+  };
+
+  var on_click_link = function(toc){
+    return false;
+  };
+
+  var create_toc = function(tree, ctx){
+    return {
+      title:tree.getTitle(),
+      pageNo:tree.getPageNo(),
+      tocId:ctx.getTocId(),
+      headerId:tree.getHeaderId()
+    };
+  };
+
+  var create_root = function(toc){
+    var root = document.createElement("ol");
+    root.className = "nehan-toc-root";
+    return root;
+  };
+
+  var create_child = function(toc){
+    var li = document.createElement("li");
+    li.className = "nehan-toc-item";
+    return li;
+  };
+
+  var create_link = function(toc){
+    var link = document.createElement("a");
+    var title = toc.title.replace(/<a[^>]+>/gi, "").replace(/<\/a>/gi, "");
+    link.href = "#" + toc.pageNo;
+    link.innerHTML = title;
+    link.className = "nehan-toc-link";
+    link.id = Css.addNehanTocLinkPrefix(toc.tocId);
+    return link;
+  };
+
+  var create_page_no_item = function(toc){
+    return null;
+  };
+
+  return {
+    convert : function(tree, opt){
+      __opt__ = opt || {};
+      var root = create_root();
+      var context = new TocContext();
+      return parse(root, tree, context);
+    }
+  };
+})();
+
+/*
 var OutlineConverter = (function(){
   function OutlineConverter(tree, opt){
     this.tree = tree;
@@ -100,3 +188,4 @@ var OutlineConverter = (function(){
 
   return OutlineConverter;
 })();
+*/

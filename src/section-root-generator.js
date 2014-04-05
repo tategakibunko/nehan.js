@@ -12,8 +12,8 @@ var SectionRootGenerator = (function(){
 
   SectionRootGenerator.prototype._onComplete = function(block){
     DocumentContext.addOutlineContext(this.outlineContext);
-    console.log("[%s] on complete, page_count = %d", this.style.getMarkupName(), this.outlineContext.getPageNo());
-    console.log("outline:%o", this.outlineContext);
+    //var tree = this.outlineContext.outputTree();
+    //var dom_tree = this.outlineContext.outputNode();
   };
 
   return SectionRootGenerator;

@@ -5454,6 +5454,16 @@ var OutlineContext = (function(){
     isEmpty : function(){
       return this.logs.length === 0;
     },
+    get : function(index){
+      return this.logs[index] || null;
+    },
+    outputTree : function(){
+      return OutlineParser.getTree(this);
+    },
+    outputNode : function(opt){
+      var tree = this.outputTree();
+      return OutlineConverter.convert(tree, opt);
+    },
     getPageNo : function(){
       return this.pageNo;
     },
@@ -5497,74 +5507,76 @@ var OutlineContext = (function(){
 })();
 
 var OutlineParser = (function(){
-  function OutlineParser(logs){
-    this._ptr = 0;
-    this._logs = logs;
-    this._root = new Section("section", null, 0);
-  }
+  var __ptr__ = 0;
+  var __outline__ = null;
+  var __root__ = null;
 
-  OutlineParser.prototype = {
-    getTree : function(){
-      this._parse(this._root, this);
-      return this._root;
-    },
-    _getNext : function(){
-      return this._logs.get(this._ptr++);
-    },
-    _rollback : function(){
-      this._ptr = Math.max(0, this._ptr - 1);
-    },
-    _parse : function(parent, ctx){
-      var log = ctx._getNext();
-      if(log === null){
-	return;
+  var get_next = function(){
+    return __outline__.get(__ptr__++);
+  };
+
+  var rollback = function(){
+    __ptr__ = Math.max(0, __ptr__ - 1);
+  };
+
+  var parse = function(parent){
+    var log = get_next();
+    if(log === null){
+      return;
+    }
+    switch(log.name){
+    case "start-section":
+      var section = new Section(log.type, parent, log.pageNo);
+      if(parent){
+	parent.addChild(section);
       }
-      switch(log.name){
-      case "start-section":
-	var section = new Section(log.type, parent, log.pageNo);
-	if(parent){
-	  parent.addChild(section);
-	}
-	arguments.callee(section, ctx);
-	break;
+      arguments.callee(section);
+      break;
 
-      case "end-section":
-	arguments.callee(parent.getParent(), ctx);
-	break;
+    case "end-section":
+      arguments.callee(parent.getParent());
+      break;
 
-      case "set-header":
-	var header = new SectionHeader(log.rank, log.title, log.headerId);
-	if(parent === null){
-	  var auto_section = new Section("section", null, log.pageNo);
-	  auto_section.setHeader(header);
-	  arguments.callee(auto_section, ctx);
-	} else if(!parent.hasHeader()){
-	  parent.setHeader(header);
-	  arguments.callee(parent, ctx);
-	} else {
-	  var rank = log.rank;
-	  var parent_rank = parent.getRank();
-	  if(rank < parent_rank){ // higher rank
-	    ctx._rollback();
-	    arguments.callee(parent.getParent(), ctx);
-	  } else if(log.rank == parent_rank){ // same rank
-	    var next_section = new Section("section", parent, log.pageNo);
-	    next_section.setHeader(header);
-	    parent.addNext(next_section);
-	    arguments.callee(next_section, ctx);
-	  } else { // lower rank
-	    var child_section = new Section("section", parent, log.pageNo);
-	    child_section.setHeader(header);
-	    parent.addChild(child_section);
-	    arguments.callee(child_section, ctx);
-	  }
+    case "set-header":
+      var header = new SectionHeader(log.rank, log.title, log.headerId);
+      if(parent === null){
+	var auto_section = new Section("section", null, log.pageNo);
+	auto_section.setHeader(header);
+	arguments.callee(auto_section);
+      } else if(!parent.hasHeader()){
+	parent.setHeader(header);
+	arguments.callee(parent);
+      } else {
+	var rank = log.rank;
+	var parent_rank = parent.getRank();
+	if(rank < parent_rank){ // higher rank
+	  rollback();
+	  arguments.callee(parent.getParent());
+	} else if(log.rank == parent_rank){ // same rank
+	  var next_section = new Section("section", parent, log.pageNo);
+	  next_section.setHeader(header);
+	  parent.addNext(next_section);
+	  arguments.callee(next_section);
+	} else { // lower rank
+	  var child_section = new Section("section", parent, log.pageNo);
+	  child_section.setHeader(header);
+	  parent.addChild(child_section);
+	  arguments.callee(child_section);
 	}
-	break;
       }
+      break;
     }
   };
 
-  return OutlineParser;
+  return {
+    getTree : function(outline_context){
+      __ptr__ = 0;
+      __outline__ = outline_context;
+      __root__ = new Section("section", null, 0);
+      parse(__root__);
+      return __root__;
+    }
+  };
 })();
 
 /*
@@ -5587,6 +5599,94 @@ var OutlineParser = (function(){
    </li>
   </ol>
 */
+
+var OutlineConverter = (function(){
+  var __opt__ = {};
+  var parse = function(parent, tree, ctx){
+    if(tree === null){
+      return parent;
+    }
+    var toc = create_toc(tree, ctx);
+    var li = create_child(toc);
+    var link = create_link(toc);
+    if(link){
+      link.onclick = function(){
+	return on_click_link(toc);
+      };
+      li.appendChild(link);
+    }
+    var page_no_item = create_page_no_item(toc);
+    if(page_no_item){
+      li.appendChild(page_no_item);
+    }
+    parent.appendChild(li);
+
+    var child = tree.getChild();
+    if(child){
+      ctx = ctx.startRoot();
+      var child_toc = create_toc(child, ctx);
+      var ol = create_root(child_toc);
+      arguments.callee(ol, child, ctx);
+      li.appendChild(ol);
+      ctx = ctx.endRoot();
+    }
+    var next = tree.getNext();
+    if(next){
+      arguments.callee(parent, next, ctx.stepNext());
+    }
+    return parent;
+  };
+
+  var on_click_link = function(toc){
+    return false;
+  };
+
+  var create_toc = function(tree, ctx){
+    return {
+      title:tree.getTitle(),
+      pageNo:tree.getPageNo(),
+      tocId:ctx.getTocId(),
+      headerId:tree.getHeaderId()
+    };
+  };
+
+  var create_root = function(toc){
+    var root = document.createElement("ol");
+    root.className = "nehan-toc-root";
+    return root;
+  };
+
+  var create_child = function(toc){
+    var li = document.createElement("li");
+    li.className = "nehan-toc-item";
+    return li;
+  };
+
+  var create_link = function(toc){
+    var link = document.createElement("a");
+    var title = toc.title.replace(/<a[^>]+>/gi, "").replace(/<\/a>/gi, "");
+    link.href = "#" + toc.pageNo;
+    link.innerHTML = title;
+    link.className = "nehan-toc-link";
+    link.id = Css.addNehanTocLinkPrefix(toc.tocId);
+    return link;
+  };
+
+  var create_page_no_item = function(toc){
+    return null;
+  };
+
+  return {
+    convert : function(tree, opt){
+      __opt__ = opt || {};
+      var root = create_root();
+      var context = new TocContext();
+      return parse(root, tree, context);
+    }
+  };
+})();
+
+/*
 var OutlineConverter = (function(){
   function OutlineConverter(tree, opt){
     this.tree = tree;
@@ -5669,6 +5769,7 @@ var OutlineConverter = (function(){
 
   return OutlineConverter;
 })();
+*/
 
 var DocumentHeader = (function(){
   function DocumentHeader(){
@@ -8873,8 +8974,8 @@ var SectionRootGenerator = (function(){
 
   SectionRootGenerator.prototype._onComplete = function(block){
     DocumentContext.addOutlineContext(this.outlineContext);
-    console.log("[%s] on complete, page_count = %d", this.style.getMarkupName(), this.outlineContext.getPageNo());
-    console.log("outline:%o", this.outlineContext);
+    //var tree = this.outlineContext.outputTree();
+    //var dom_tree = this.outlineContext.outputNode();
   };
 
   return SectionRootGenerator;
@@ -9495,6 +9596,14 @@ var LayoutTest = (function(){
       var t2 = new Date();
 
       output.appendChild(make_time(t1, t2));
+
+      var outline_contexts = DocumentContext.getOutlineContext("body");
+      if(outline_contexts){
+	console.log("outline contexts:%o", outline_contexts);
+	var toc = document.getElementById("toc");
+	var toc_node = outline_contexts[0].outputNode();
+	toc.appendChild(toc_node);
+      }
       //debug.value = raws.join("\n\n");
     }
   };
