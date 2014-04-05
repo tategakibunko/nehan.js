@@ -2,6 +2,7 @@ var OutlineContext = (function(){
   function OutlineContext(style){
     this.logs = [];
     this.style = style;
+    this.pageNo = 0;
   }
 
   var __header_id__ = 0; // glocal unique header id
@@ -13,34 +14,42 @@ var OutlineContext = (function(){
     isEmpty : function(){
       return this.logs.length === 0;
     },
+    getPageNo : function(){
+      return this.pageNo;
+    },
+    stepPageNo : function(){
+      this.pageNo++;
+    },
     getMarkupName : function(){
       return this.style.getMarkupName();
     },
-    addStartSection : function(type, page_no){
+    startSection : function(type){
       this.logs.push({
 	name:"start-section",
 	type:type,
-	pageNo:page_no
+	pageNo:this.pageNo
       });
       return this;
     },
-    addEndSection : function(type){
+    endSection : function(type){
       this.logs.push({
 	name:"end-section",
 	type:type
       });
       return this;
     },
-    addSectionHeader : function(opt){
+    addHeader : function(opt){
+      // header id is used to associate header box object with outline.
+      var header_id = gen_header_id();
       this.logs.push({
 	name:"set-header",
 	type:opt.type,
 	rank:opt.rank,
 	title:opt.title,
-	pageNo:opt.pageNo,
-	headerId:gen_header_id() // header id is used to associate header box object with outline.
+	pageNo:this.pageNo,
+	headerId:header_id
       });
-      return this;
+      return header_id;
     }
   };
 

@@ -1,33 +1,19 @@
 var SectionRootGenerator = (function(){
   function SectionRootGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
-    this.pageNo = 0;
-    this.outlineContext = new OutlineContext(style);
+    this.outlineContext = new OutlineContext(style); // create new section root
   }
   Class.extend(SectionRootGenerator, BlockGenerator);
 
-  SectionRootGenerator.prototype._onAddElement = function(element){
-    if(element.style.isHeader()){
-      this.__addHeaderElement(element.style);
-    }
+  SectionRootGenerator.prototype._onCreate = function(block){
+    this.outlineContext.stepPageNo();
+    console.log("[%s] create page", this.style.getMarkupName());
   };
 
-  SectionRootGenerator.prototype._onComplete = function(){
-    console.log("[%s] on complete", this.style.getMarkupName());
+  SectionRootGenerator.prototype._onComplete = function(block){
     DocumentContext.addOutlineContext(this.outlineContext);
-    this.pageNo++;
-  };
-
-  SectionRootGenerator.prototype._addHeaderElement = function(element){
-  };
-
-  SectionRootGenerator.prototype._addHeaderElement = function(element){
-    this.outlineContext.addSectionHeader({
-      type:element.style.getMarkupName(),
-      rank:element.style.getHeaderRank(),
-      title:element.style.getMarkupContent(),
-      pageNo:this.pageNo
-    });
+    console.log("[%s] on complete, page_count = %d", this.style.getMarkupName(), this.outlineContext.getPageNo());
+    console.log("outline:%o", this.outlineContext);
   };
 
   return SectionRootGenerator;

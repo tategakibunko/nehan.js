@@ -163,6 +163,8 @@ module.exports = function(grunt) {
 	    "src/table-generator.js",
 	    "src/table-row-generator.js",
 	    "src/section-root-generator.js",
+	    "src/section-content-generator.js",
+	    "src/header-generator.js",
 	    "src/body-generator.js",
 	    "src/layout-evaluator.js",
 	    "src/vert-evaluator.js",

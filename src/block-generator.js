@@ -98,10 +98,35 @@ var BlockGenerator = (function(){
     case "body":
       this.setChildLayout(new BodyGenerator(child_style, child_stream));
       return this.yieldChildLayout(context);
+
+    case "details":
+    case "blockquote":
+    case "figure":
+    case "fieldset":
+      this.setChildLayout(new SectionRootGenerator(child_style, child_stream));
+      return this.yieldChildLayout(context);
+
+    case "section":
+    case "article":
+    case "nav":
+    case "aside":
+      this.setChildLayout(new SectionContentGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
+
+    case "h1":
+    case "h2":
+    case "h3":
+    case "h4":
+    case "h5":
+    case "h6":
+      this.setChildLayout(new HeaderGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
+
     case "ul":
     case "ol":
       this.setChildLayout(new ListGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
+
     default:
       this.setChildLayout(new BlockGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
@@ -129,9 +154,9 @@ var BlockGenerator = (function(){
       extent:extent,
       elements:elements
     });
-    this._onCreateBlock(block);
+    this._onCreate(block);
     if(!this.hasNext()){
-      this._onComplete();
+      this._onComplete(block);
     }
     return block;
   };
@@ -139,7 +164,7 @@ var BlockGenerator = (function(){
   BlockGenerator.prototype._onAddElement = function(block){
   };
 
-  BlockGenerator.prototype._onCreateBlock = function(block){
+  BlockGenerator.prototype._onCreate = function(block){
   };
 
   BlockGenerator.prototype._onComplete = function(block){

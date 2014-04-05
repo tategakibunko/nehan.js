@@ -4,8 +4,5 @@ var BodyGenerator = (function(){
   }
   Class.extend(BodyGenerator, SectionRootGenerator);
 
-  BodyGenerator.prototype._onAddElement = function(element){
-  };
-
   return BodyGenerator;
 })();

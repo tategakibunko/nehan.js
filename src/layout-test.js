@@ -121,6 +121,15 @@ var LayoutTest = (function(){
       "<dt>hoge</dt>",
       "<dd>" + TestText["long"] + "</dd>",
       "</dl>"
+    ].join(""),
+
+    "header-test":[
+      "<h1>h1h1h1</h1>",
+      "<h2>h2h2h2</h2>",
+      "<h3>h3h3h3</h3>",
+      "<h4>h4h4h4</h4>",
+      "<h5>h5h5h5</h5>",
+      "<h6>h6h6h6</h6>"
     ].join("")
   };
 

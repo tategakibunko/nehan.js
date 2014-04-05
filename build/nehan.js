@@ -5442,6 +5442,7 @@ var OutlineContext = (function(){
   function OutlineContext(style){
     this.logs = [];
     this.style = style;
+    this.pageNo = 0;
   }
 
   var __header_id__ = 0; // glocal unique header id
@@ -5453,34 +5454,42 @@ var OutlineContext = (function(){
     isEmpty : function(){
       return this.logs.length === 0;
     },
+    getPageNo : function(){
+      return this.pageNo;
+    },
+    stepPageNo : function(){
+      this.pageNo++;
+    },
     getMarkupName : function(){
       return this.style.getMarkupName();
     },
-    addStartSection : function(type, page_no){
+    startSection : function(type){
       this.logs.push({
 	name:"start-section",
 	type:type,
-	pageNo:page_no
+	pageNo:this.pageNo
       });
       return this;
     },
-    addEndSection : function(type){
+    endSection : function(type){
       this.logs.push({
 	name:"end-section",
 	type:type
       });
       return this;
     },
-    addSectionHeader : function(opt){
+    addHeader : function(opt){
+      // header id is used to associate header box object with outline.
+      var header_id = gen_header_id();
       this.logs.push({
 	name:"set-header",
 	type:opt.type,
 	rank:opt.rank,
 	title:opt.title,
-	pageNo:opt.pageNo,
-	headerId:gen_header_id() // header id is used to associate header box object with outline.
+	pageNo:this.pageNo,
+	headerId:header_id
       });
-      return this;
+      return header_id;
     }
   };
 
@@ -8076,6 +8085,7 @@ var BlockGenerator = (function(){
     var child_style = (token instanceof Tag)? new StyleContext(token, this.style) : this.style;
 
     // inline text or inline tag
+    // stream push back, and delegate current style and stream to InlineGenerator
     if(Token.isText(token) || child_style.isInline()){
       this.stream.prev();
       this.setChildLayout(new InlineGenerator(this.style, this.stream));
@@ -8083,32 +8093,60 @@ var BlockGenerator = (function(){
     }
 
     // child block with float
+    // stream push back, and delegate current style and stream to InlineGenerator
     if(child_style.isFloated()){
       this.stream.prev();
       this.setChildLayout(new FloatGenerator(this.style, this.stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
 
+    var child_stream = this._createStream(token);
+
     if(child_style.display === "list-item"){
-      this.setChildLayout(new ListItemGenerator(child_style, this._createStream(token), this.outlineContext));
+      this.setChildLayout(new ListItemGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
 
     if(child_style.display === "table-row"){
-      this.setChildLayout(new TableRowGenerator(child_style, this._createStream(token), this.outlineContext));
+      this.setChildLayout(new TableRowGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
 
     switch(child_style.getMarkupName()){
     case "body":
-      this.setChildLayout(new BodyGenerator(child_style, this._createStream(token)));
+      this.setChildLayout(new BodyGenerator(child_style, child_stream));
       return this.yieldChildLayout(context);
+
+    case "details":
+    case "blockquote":
+    case "figure":
+    case "fieldset":
+      this.setChildLayout(new SectionRootGenerator(child_style, child_stream));
+      return this.yieldChildLayout(context);
+
+    case "section":
+    case "article":
+    case "nav":
+    case "aside":
+      this.setChildLayout(new SectionContentGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
+
+    case "h1":
+    case "h2":
+    case "h3":
+    case "h4":
+    case "h5":
+    case "h6":
+      this.setChildLayout(new HeaderGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
+
     case "ul":
     case "ol":
-      this.setChildLayout(new ListGenerator(child_style, this._createStream(token), this.outlineContext));
+      this.setChildLayout(new ListGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
+
     default:
-      this.setChildLayout(new BlockGenerator(child_style, this._createStream(token), this.outlineContext));
+      this.setChildLayout(new BlockGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
   };
@@ -8134,9 +8172,9 @@ var BlockGenerator = (function(){
       extent:extent,
       elements:elements
     });
-    this._onCreateBlock(block);
+    this._onCreate(block);
     if(!this.hasNext()){
-      this._onComplete();
+      this._onComplete(block);
     }
     return block;
   };
@@ -8144,7 +8182,7 @@ var BlockGenerator = (function(){
   BlockGenerator.prototype._onAddElement = function(block){
   };
 
-  BlockGenerator.prototype._onCreateBlock = function(block){
+  BlockGenerator.prototype._onCreate = function(block){
   };
 
   BlockGenerator.prototype._onComplete = function(block){
@@ -8824,46 +8862,63 @@ var TableRowGenerator = (function(){
 var SectionRootGenerator = (function(){
   function SectionRootGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
-    this.pageNo = 0;
-    this.outlineContext = new OutlineContext(style);
+    this.outlineContext = new OutlineContext(style); // create new section root
   }
   Class.extend(SectionRootGenerator, BlockGenerator);
 
-  SectionRootGenerator.prototype._onAddElement = function(element){
-    if(element.style.isHeader()){
-      this.__addHeaderElement(element.style);
-    }
+  SectionRootGenerator.prototype._onCreate = function(block){
+    this.outlineContext.stepPageNo();
+    console.log("[%s] create page", this.style.getMarkupName());
   };
 
-  SectionRootGenerator.prototype._onComplete = function(){
-    console.log("[%s] on complete", this.style.getMarkupName());
+  SectionRootGenerator.prototype._onComplete = function(block){
     DocumentContext.addOutlineContext(this.outlineContext);
-    this.pageNo++;
-  };
-
-  SectionRootGenerator.prototype._addHeaderElement = function(element){
-  };
-
-  SectionRootGenerator.prototype._addHeaderElement = function(element){
-    this.outlineContext.addSectionHeader({
-      type:element.style.getMarkupName(),
-      rank:element.style.getHeaderRank(),
-      title:element.style.getMarkupContent(),
-      pageNo:this.pageNo
-    });
+    console.log("[%s] on complete, page_count = %d", this.style.getMarkupName(), this.outlineContext.getPageNo());
+    console.log("outline:%o", this.outlineContext);
   };
 
   return SectionRootGenerator;
 })();
+
+var SectionContentGenerator = (function(){
+  function SectionContentGenerator(style, stream, outline_context){
+    BlockGenerator.call(this, style, stream, outline_context);
+    this.outlineContext.startSection(this.style.getMarkupName());
+  }
+  Class.extend(SectionContentGenerator, BlockGenerator);
+
+  SectionContentGenerator.prototype._onComplete = function(block){
+    this.context.endSection(this.style.getMarkupName());
+  };
+
+  return SectionContentGenerator;
+})();
+
+
+var HeaderGenerator = (function(){
+  function HeaderGenerator(style, stream, outline_context){
+    BlockGenerator.call(this, style, stream, outline_context);
+  }
+  Class.extend(HeaderGenerator, BlockGenerator);
+
+  HeaderGenerator.prototype._onComplete = function(block){
+    var header_id = this.outlineContext.addHeader({
+      type:this.style.getMarkupName(),
+      rank:this.style.getHeaderRank(),
+      title:this.style.getMarkupContent()
+    });
+    block.id = Css.addNehanHeaderPrefix(header_id);
+  };
+  
+  return HeaderGenerator;
+})();
+
 
 var BodyGenerator = (function(){
   function BodyGenerator(style, stream){
     SectionRootGenerator.call(this, style, stream);
   }
   Class.extend(BodyGenerator, SectionRootGenerator);
-
-  BodyGenerator.prototype._onAddElement = function(element){
-  };
 
   return BodyGenerator;
 })();
@@ -9374,6 +9429,15 @@ var LayoutTest = (function(){
       "<dt>hoge</dt>",
       "<dd>" + TestText["long"] + "</dd>",
       "</dl>"
+    ].join(""),
+
+    "header-test":[
+      "<h1>h1h1h1</h1>",
+      "<h2>h2h2h2</h2>",
+      "<h3>h3h3h3</h3>",
+      "<h4>h4h4h4</h4>",
+      "<h5>h5h5h5</h5>",
+      "<h6>h6h6h6</h6>"
     ].join("")
   };
 
