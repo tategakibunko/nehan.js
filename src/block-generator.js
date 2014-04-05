@@ -38,13 +38,7 @@ var BlockGenerator = (function(){
 	this.pushCache(element);
 	break;
       }
-      if(this.style.isPushed()){
-	context.pushBockElement(element, extent);
-      } else if(this.style.isPulled()){
-	context.pullBlockElement(element, extent);
-      } else {
-	context.addBlockElement(element, extent);
-      }
+      this._addElement(context, element, extent);
       if(!context.isBlockSpaceLeft()){
 	break;
       }
@@ -104,6 +98,28 @@ var BlockGenerator = (function(){
       this.setChildLayout(new BlockGenerator(child_style, this._createStream(token)));
       return this.yieldChildLayout(context);
     }
+  };
+
+  BlockGenerator.prototype._addElement = function(context, element, extent){
+    if(this.style.isPushed()){
+      context.pushBockElement(element, extent);
+    } else if(this.style.isPulled()){
+      context.pullBlockElement(element, extent);
+    } else {
+      context.addBlockElement(element, extent);
+    }
+  };
+
+  BlockGenerator.prototype._createBlock = function(context){
+    var extent = context.getBlockCurExtent();
+    var elements = context.getBlockElements();
+    if(extent === 0 || elements.length === 0){
+      return null;
+    }
+    return this.style.createBlock({
+      extent:extent,
+      elements:elements
+    });
   };
 
   return BlockGenerator;

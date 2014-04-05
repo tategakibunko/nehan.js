@@ -79,7 +79,7 @@ var LayoutTest = (function(){
       TestText["long"],
       TestText["middle"],
       TestText["short"]
-    ].join(""),
+    ].join("<br>"),
 
     "float-test":[
       TestSnipet["float"],
