@@ -86,8 +86,10 @@ var InlineGenerator = (function(){
       if(style.isBlock()){
 	this.stream.prev();
 	this.setTerminate(true);
-	// to avoid parent block generator broken by null(by empty-line), return space temporary.
-	return this._getText(context, new Char("&nbsp;", true));
+
+	// add line-break to avoid empty-line(return null to parent block, and parent is page-broken).
+	context.setLineBreak(true);
+	return null;
       }
     }
 

@@ -1574,25 +1574,6 @@ var Args = {
   }
 };
 
-var Exceptions = {
-  PAGE_BREAK:1,
-  LINE_BREAK:2,
-  BUFFER_END:3,
-  SINGLE_RETRY:4,
-  IGNORE:5,
-  FORCE_TERMINATE:6,
-  toString : function(num){
-    for(var prop in this){
-      if(this[prop] === num){
-	return prop;
-      }
-    }
-    return "??";
-  }
-};
-
-
-  
 /*
   supported css properties
   ==============================
@@ -8281,8 +8262,8 @@ var InlineGenerator = (function(){
       if(style.isBlock()){
 	this.stream.prev();
 	this.setTerminate(true);
-	// to avoid parent block generator broken by null(by empty-line), return space temporary.
-	return this._getText(context, new Char("&nbsp;", true));
+	context.setLineBreak(true);
+	return null;
       }
     }
 
