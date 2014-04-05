@@ -5438,104 +5438,49 @@ var TocContext = (function(){
   return TocContext;
 })();
 
-var OutlineBuffer = (function(){
-  function OutlineBuffer(root_name){
-    this.rootName = root_name;
+var OutlineContext = (function(){
+  function OutlineContext(style){
     this.logs = [];
+    this.style = style;
   }
 
-  OutlineBuffer.prototype = {
+  var __header_id__ = 0; // glocal unique header id
+  var gen_header_id = function(){
+    return __header_id__++;
+  };
+
+  OutlineContext.prototype = {
     isEmpty : function(){
       return this.logs.length === 0;
     },
-    get : function(pos){
-      return this.logs[pos] || null;
+    getMarkupName : function(){
+      return this.style.getMarkupName();
     },
-    getSectionRootName : function(){
-      return this.rootName;
-    },
-    addSectionLog : function(log){
-      this.logs.push(log);
-    },
-    addHeaderLog : function(log){
-      // if section tag can't be included in parent layout,
-      // it will be added 'twice' by rollback yielding.
-      // in such case, we have to overwrite old one.
-      var pos = this._findLog(log);
-      if(pos >= 0){
-	this.logs[pos] = log; // overwrite log
-	return;
-      }
-      this.logs.push(log);
-    },
-    _findLog : function(log){
-      for(var i = this.logs.length - 1; i >= 0; i--){
-	if(log.headerId === this.logs[i].headerId){
-	  return i;
-	}
-      }
-      return -1;
-    }
-  };
-
-  return OutlineBuffer;
-})();
-
-var OutlineContext = (function(){
-  function OutlineContext(){
-    this._buffers = {};
-    this._stack = [];
-    this._curSection = "body";
-  }
-
-  OutlineContext.prototype = {
-    _addHeaderLog : function(log){
-      var root_log = this.getOutlineBuffer(this._curSection);
-      root_log.addHeaderLog(log);
-    },
-    _addSectionLog : function(log){
-      var root_log = this.getOutlineBuffer(this._curSection);
-      root_log.addSectionLog(log);
-    },
-    _getCurSection : function(){
-      return (this._stack.length > 0)? this._stack[this._stack.length - 1] : "body";
-    },
-    getOutlineBuffer : function(root_name){
-      var buffer = this._buffers[root_name] || new OutlineBuffer(root_name);
-      this._buffers[root_name] = buffer;
-      return buffer;
-    },
-    startSectionRoot : function(root_name){
-      this._stack.push(root_name);
-      this._curSection = root_name;
-    },
-    endSectionRoot : function(root_name){
-      this._stack.pop();
-      this._curSection = this._getCurSection();
-      return this._curSection;
-    },
-    logStartSection : function(type, page_no){
-      this._addSectionLog({
+    addStartSection : function(type, page_no){
+      this.logs.push({
 	name:"start-section",
 	type:type,
 	pageNo:page_no
       });
+      return this;
     },
-    logEndSection : function(type){
-      this._addSectionLog({
+    addEndSection : function(type){
+      this.logs.push({
 	name:"end-section",
 	type:type
       });
+      return this;
     },
-    logSectionHeader : function(type, rank, title, page_no, header_id){
-      this._addHeaderLog({
+    addSectionHeader : function(opt){
+      this.logs.push({
 	name:"set-header",
-	type:type,
-	rank:rank,
-	title:title,
-	pageNo:page_no,
-	headerId:header_id // header id is used to associate header box object with outline.
+	type:opt.type,
+	rank:opt.rank,
+	title:opt.title,
+	pageNo:opt.pageNo,
+	headerId:gen_header_id() // header id is used to associate header box object with outline.
       });
+      return this;
     }
   };
 
@@ -5772,26 +5717,36 @@ var DocumentHeader = (function(){
 
 
 var DocumentContext = (function(){
-  function DocumentContext(opt){
-    opt = opt || {};
-    this.layout = opt.layout || new LayoutContext();
-  }
+  var __anchors__ = {};
+  var __outlines__ = [];
+  var __metas__ = {};
 
-  DocumentContext.prototype = {
-    createStartContext : function(){
-    },
-    createChildBlockContext : function(opt){
-      return new DocumentContext({
-	layout:this.createLayoutContext(
-	  opt.measure || this.layout.getBlockRestMeasure(),
-	  opt.extent || this.layout.getInlineRestMeasure()
-	),
-	style:this.style
+  return {
+    getOutlineContext : function(markup_name){
+      return List.filter(__outlines__, function(outline_context){
+	return outline_context.getMarkupName() === markup_name;
       });
+    },
+    addOutlineContext : function(outline_context){
+      __outlines__.push(outline_context);
+    },
+    addMetaValue : function(name, value){
+      if(typeof __metas__[name] === "undefined"){
+	__metas__[name] = [value];
+	return;
+      }
+      __metas__[name].push(value);
+    },
+    getMetaValue : function(name){
+      return __metas__[name] || null;
+    },
+    addAnchorPageNo : function(name, page_no){
+      __anchors__[name] = page_no;
+    },
+    getAnchorPageNo : function(name){
+      return __anchors__[name] || null;
     }
-  };
-  
-  return DocumentContext;
+  }
 })();
 
 
@@ -7219,6 +7174,9 @@ var StyleContext = (function(){
     isRootLine : function(){
       return this.display === "block";
     },
+    isHeader : function(){
+      return this.markup.isHeaderTag();
+    },
     isFloatStart : function(){
       return this.logicalFloat && this.logicalFloat.isStart();
     },
@@ -7257,6 +7215,9 @@ var StyleContext = (function(){
     },
     getMarkupPos : function(){
       return this.markup.pos;
+    },
+    getHeaderRank : function(){
+      return this.markup.getHeaderRank();
     },
     getFontSize : function(){
       return this.font.size;
@@ -8047,8 +8008,9 @@ var LayoutGenerator = (function(){
 
 
 var BlockGenerator = (function(){
-  function BlockGenerator(style, stream){
+  function BlockGenerator(style, stream, outline_context){
     LayoutGenerator.call(this, style, stream);
+    this.outlineContext = outline_context;
   }
   Class.extend(BlockGenerator, LayoutGenerator);
 
@@ -8123,27 +8085,30 @@ var BlockGenerator = (function(){
     // child block with float
     if(child_style.isFloated()){
       this.stream.prev();
-      this.setChildLayout(new FloatGenerator(this.style, this.stream));
+      this.setChildLayout(new FloatGenerator(this.style, this.stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
 
     if(child_style.display === "list-item"){
-      this.setChildLayout(new ListItemGenerator(child_style, this._createStream(token), context));
+      this.setChildLayout(new ListItemGenerator(child_style, this._createStream(token), this.outlineContext));
       return this.yieldChildLayout(context);
     }
 
     if(child_style.display === "table-row"){
-      this.setChildLayout(new TableRowGenerator(child_style, this._createStream(token), context));
+      this.setChildLayout(new TableRowGenerator(child_style, this._createStream(token), this.outlineContext));
       return this.yieldChildLayout(context);
     }
 
     switch(child_style.getMarkupName()){
+    case "body":
+      this.setChildLayout(new BodyGenerator(child_style, this._createStream(token)));
+      return this.yieldChildLayout(context);
     case "ul":
     case "ol":
-      this.setChildLayout(new ListGenerator(child_style, this._createStream(token)));
+      this.setChildLayout(new ListGenerator(child_style, this._createStream(token), this.outlineContext));
       return this.yieldChildLayout(context);
     default:
-      this.setChildLayout(new BlockGenerator(child_style, this._createStream(token)));
+      this.setChildLayout(new BlockGenerator(child_style, this._createStream(token), this.outlineContext));
       return this.yieldChildLayout(context);
     }
   };
@@ -8156,6 +8121,7 @@ var BlockGenerator = (function(){
     } else {
       context.addBlockElement(element, extent);
     }
+    this._onAddElement(element);
   };
 
   BlockGenerator.prototype._createBlock = function(context){
@@ -8164,10 +8130,24 @@ var BlockGenerator = (function(){
     if(extent === 0 || elements.length === 0){
       return null;
     }
-    return this.style.createBlock({
+    var block = this.style.createBlock({
       extent:extent,
       elements:elements
     });
+    this._onCreateBlock(block);
+    if(!this.hasNext()){
+      this._onComplete();
+    }
+    return block;
+  };
+
+  BlockGenerator.prototype._onAddElement = function(block){
+  };
+
+  BlockGenerator.prototype._onCreateBlock = function(block){
+  };
+
+  BlockGenerator.prototype._onComplete = function(block){
   };
 
   return BlockGenerator;
@@ -8262,6 +8242,10 @@ var InlineGenerator = (function(){
       if(style.isBlock()){
 	this.stream.prev();
 	this.setTerminate(true);
+
+	// add line-break to avoid empty-line.
+	// because empty-line is returned as null to parent block generator,
+	// and it causes page-break of parent block generator.
 	context.setLineBreak(true);
 	return null;
       }
@@ -8445,15 +8429,15 @@ var FloatGenerator = (function(){
   // caution: constructor argument 'style' is the style of parent.
   // so if <body><float1>..</float1><float2>...</float2></body>,
   // style of this contructor is 'body.style'
-  function FloatGenerator(style, stream){
-    LayoutGenerator.call(this, style, stream);
+  function FloatGenerator(style, stream, outline_context){
+    BlockGenerator.call(this, style, stream, outline_context);
     this.generators = this._getFloatedGenerators();
 
     // create child generator to yield rest-space of float-elements with logical-float "start".
     // notice that this generator uses 'clone' of original style, because size of space changes by position,
     // but on the other hand, float-elements refer to this original style as their parent style.
     // so we must keep original style immutable.
-    this.setChildLayout(new BlockGenerator(style.clone({"float":"start"}), stream));
+    this.setChildLayout(new BlockGenerator(style.clone({"float":"start"}), stream, outline_context));
   }
   Class.extend(FloatGenerator, LayoutGenerator);
 
@@ -8594,11 +8578,12 @@ var FloatGenerator = (function(){
   };
 
   FloatGenerator.prototype._getFloatedGenerators = function(){
-    var parent_style = this.style;
+    var self = this;
     return List.map(this._getFloatedTags(), function(tag){
       return new BlockGenerator(
-	new StyleContext(tag, parent_style),
-	new TokenStream(tag.getContent())
+	new StyleContext(tag, self.style),
+	new TokenStream(tag.getContent()),
+	self.outlineContext
       );
     });
   };
@@ -8686,8 +8671,8 @@ var ParallelGenerator = (function(){
 
 
 var ListGenerator = (function(){
-  function ListGenerator(style, stream){
-    BlockGenerator.call(this, style, stream);
+  function ListGenerator(style, stream, outline_context){
+    BlockGenerator.call(this, style, stream, outline_context);
     this.style.markerSize = this._getMarkerSize(this.stream.getTokenCount());
   }
   Class.extend(ListGenerator, BlockGenerator);
@@ -8706,15 +8691,15 @@ var ListGenerator = (function(){
 
 
 var ListItemGenerator = (function(){
-  function ListItemGenerator(style, stream, context){
+  function ListItemGenerator(style, stream, outline_context){
     ParallelGenerator.call(this, style, [
-      this._createListMarkGenerator(context, style),
-      this._createListBodyGenerator(context, style, stream)
+      this._createListMarkGenerator(style, outline_context),
+      this._createListBodyGenerator(style, stream, outline_context)
     ]);
   }
   Class.extend(ListItemGenerator, ParallelGenerator);
 
-  ListItemGenerator.prototype._createListMarkGenerator = function(context, style){
+  ListItemGenerator.prototype._createListMarkGenerator = function(style, outline_context){
     var marker_size = style.parent.markerSize;
     var item_order = style.getChildIndex();
     var marker_text = style.parent.getMarkerHtml(item_order + 1);
@@ -8725,10 +8710,10 @@ var ListItemGenerator = (function(){
       "measure":measure
     });
 
-    return new BlockGenerator(marker_style, new TokenStream(marker_text));
+    return new BlockGenerator(marker_style, new TokenStream(marker_text), outline_context);
   };
 
-  ListItemGenerator.prototype._createListBodyGenerator = function(context, style, stream){
+  ListItemGenerator.prototype._createListBodyGenerator = function(style, stream, outline_context){
     var marker_size = style.parent.markerSize;
     var measure = style.getContentMeasure() - marker_size.getMeasure(style.flow);
     var body_style = style.createChild("li-body", {
@@ -8737,7 +8722,7 @@ var ListItemGenerator = (function(){
       "measure":measure
     });
 
-    return new BlockGenerator(body_style, stream);
+    return new BlockGenerator(body_style, stream, outline_context);
   };
 
   ListItemGenerator.prototype._alignContentExtent = function(blocks, content_extent){
@@ -8798,33 +8783,31 @@ var TableGroupLayoutGenerator = (function(){
 // stream : [td | th]
 // yield : parallel([td | th])
 var TableRowGenerator = (function(){
-  function TableRowGenerator(style, stream, context){
-    var generators = this._getGenerators(style, stream, context);
+  function TableRowGenerator(style, stream, outline_context){
+    var generators = this._getGenerators(style, stream, outline_context);
     ParallelGenerator.call(this, style, generators);
   }
   Class.extend(TableRowGenerator, ParallelGenerator);
 
-  TableRowGenerator.prototype._getGenerators = function(style, stream, context){
+  TableRowGenerator.prototype._getGenerators = function(style, stream, outline_context){
     var child_tags = this._getChildTags(stream);
-    var child_styles = this._getChildStyles(context, style, child_tags);
-    return List.map(child_styles, function(style){
-      return new BlockGenerator(style, new TokenStream(style.getMarkupContent()));
+    var child_styles = this._getChildStyles(style, child_tags);
+    return List.map(child_styles, function(child_style){
+      return new BlockGenerator(child_style, new TokenStream(child_style.getMarkupContent()), outline_context);
     });
   };
 
-  TableRowGenerator.prototype._getChildStyles = function(context, parent_style, child_tags){
+  TableRowGenerator.prototype._getChildStyles = function(style, child_tags){
     var child_count = child_tags.length;
-    var rest_extent = context.getBlockRestExtent();
-    var rest_measure = context.getInlineMaxMeasure();
+    var rest_measure = style.getContentMeasure();
     return List.mapi(child_tags, function(i, tag){
-      var default_style = new StyleContext(tag, parent_style);
+      var default_style = new StyleContext(tag, style);
       var static_measure = default_style.getStaticMeasure();
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_count - i));
       rest_measure -= measure;
       return default_style.clone({
 	"float":"start",
-	"measure":measure,
-	"extent":rest_extent
+	"measure":measure
       });
     });
   };
@@ -8839,15 +8822,51 @@ var TableRowGenerator = (function(){
 })();
 
 var SectionRootGenerator = (function(){
-  function SectionRootGenerator(){
+  function SectionRootGenerator(style, stream){
+    BlockGenerator.call(this, style, stream);
+    this.pageNo = 0;
+    this.outlineContext = new OutlineContext(style);
   }
+  Class.extend(SectionRootGenerator, BlockGenerator);
 
-  SectionRootGenerator.prototype = {
+  SectionRootGenerator.prototype._onAddElement = function(element){
+    if(element.style.isHeader()){
+      this.__addHeaderElement(element.style);
+    }
+  };
+
+  SectionRootGenerator.prototype._onComplete = function(){
+    console.log("[%s] on complete", this.style.getMarkupName());
+    DocumentContext.addOutlineContext(this.outlineContext);
+    this.pageNo++;
+  };
+
+  SectionRootGenerator.prototype._addHeaderElement = function(element){
+  };
+
+  SectionRootGenerator.prototype._addHeaderElement = function(element){
+    this.outlineContext.addSectionHeader({
+      type:element.style.getMarkupName(),
+      rank:element.style.getHeaderRank(),
+      title:element.style.getMarkupContent(),
+      pageNo:this.pageNo
+    });
   };
 
   return SectionRootGenerator;
 })();
 
+var BodyGenerator = (function(){
+  function BodyGenerator(style, stream){
+    SectionRootGenerator.call(this, style, stream);
+  }
+  Class.extend(BodyGenerator, SectionRootGenerator);
+
+  BodyGenerator.prototype._onAddElement = function(element){
+  };
+
+  return BodyGenerator;
+})();
 
 var LayoutEvaluator = (function(){
   function LayoutEvaluator(){
@@ -9313,7 +9332,7 @@ var LayoutTest = (function(){
       TestText["long"],
       TestText["middle"],
       TestText["short"]
-    ].join("<br>"),
+    ].join(""),
 
     "float-test":[
       TestSnipet["float"],
@@ -9361,10 +9380,11 @@ var LayoutTest = (function(){
   return {
     getGenerator : function(name){
       var script = TestScript[name] || TestSnipet[name] || TestText[name] || "undefined script";
+      //var tag = new Tag("<html>", "<body>" + script + "</body>");
       var tag = new Tag("<body>", script);
       var style = new StyleContext(tag, null);
       var stream = new TokenStream(tag.getContent());
-      return new BlockGenerator(style, stream);
+      return new BodyGenerator(style, stream);
     },
     getEvaluator : function(){
       return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();

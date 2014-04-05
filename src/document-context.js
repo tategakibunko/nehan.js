@@ -1,24 +1,34 @@
 var DocumentContext = (function(){
-  function DocumentContext(opt){
-    opt = opt || {};
-    this.layout = opt.layout || new LayoutContext();
-  }
+  var __anchors__ = {};
+  var __outlines__ = [];
+  var __metas__ = {};
 
-  DocumentContext.prototype = {
-    createStartContext : function(){
-    },
-    createChildBlockContext : function(opt){
-      return new DocumentContext({
-	layout:this.createLayoutContext(
-	  opt.measure || this.layout.getBlockRestMeasure(),
-	  opt.extent || this.layout.getInlineRestMeasure()
-	),
-	style:this.style
+  return {
+    getOutlineContext : function(markup_name){
+      return List.filter(__outlines__, function(outline_context){
+	return outline_context.getMarkupName() === markup_name;
       });
+    },
+    addOutlineContext : function(outline_context){
+      __outlines__.push(outline_context);
+    },
+    addMetaValue : function(name, value){
+      if(typeof __metas__[name] === "undefined"){
+	__metas__[name] = [value];
+	return;
+      }
+      __metas__[name].push(value);
+    },
+    getMetaValue : function(name){
+      return __metas__[name] || null;
+    },
+    addAnchorPageNo : function(name, page_no){
+      __anchors__[name] = page_no;
+    },
+    getAnchorPageNo : function(name){
+      return __anchors__[name] || null;
     }
-  };
-  
-  return DocumentContext;
+  }
 })();
 
 

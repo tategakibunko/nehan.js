@@ -3,33 +3,31 @@
 // stream : [td | th]
 // yield : parallel([td | th])
 var TableRowGenerator = (function(){
-  function TableRowGenerator(style, stream, context){
-    var generators = this._getGenerators(style, stream, context);
+  function TableRowGenerator(style, stream, outline_context){
+    var generators = this._getGenerators(style, stream, outline_context);
     ParallelGenerator.call(this, style, generators);
   }
   Class.extend(TableRowGenerator, ParallelGenerator);
 
-  TableRowGenerator.prototype._getGenerators = function(style, stream, context){
+  TableRowGenerator.prototype._getGenerators = function(style, stream, outline_context){
     var child_tags = this._getChildTags(stream);
-    var child_styles = this._getChildStyles(context, style, child_tags);
-    return List.map(child_styles, function(style){
-      return new BlockGenerator(style, new TokenStream(style.getMarkupContent()));
+    var child_styles = this._getChildStyles(style, child_tags);
+    return List.map(child_styles, function(child_style){
+      return new BlockGenerator(child_style, new TokenStream(child_style.getMarkupContent()), outline_context);
     });
   };
 
-  TableRowGenerator.prototype._getChildStyles = function(context, parent_style, child_tags){
+  TableRowGenerator.prototype._getChildStyles = function(style, child_tags){
     var child_count = child_tags.length;
-    var rest_extent = context.getBlockRestExtent();
-    var rest_measure = context.getInlineMaxMeasure();
+    var rest_measure = style.getContentMeasure();
     return List.mapi(child_tags, function(i, tag){
-      var default_style = new StyleContext(tag, parent_style);
+      var default_style = new StyleContext(tag, style);
       var static_measure = default_style.getStaticMeasure();
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_count - i));
       rest_measure -= measure;
       return default_style.clone({
 	"float":"start",
-	"measure":measure,
-	"extent":rest_extent
+	"measure":measure
       });
     });
   };

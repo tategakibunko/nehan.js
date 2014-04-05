@@ -1,6 +1,7 @@
 var BlockGenerator = (function(){
-  function BlockGenerator(style, stream){
+  function BlockGenerator(style, stream, outline_context){
     LayoutGenerator.call(this, style, stream);
+    this.outlineContext = outline_context;
   }
   Class.extend(BlockGenerator, LayoutGenerator);
 
@@ -66,6 +67,7 @@ var BlockGenerator = (function(){
     var child_style = (token instanceof Tag)? new StyleContext(token, this.style) : this.style;
 
     // inline text or inline tag
+    // stream push back, and delegate current style and stream to InlineGenerator
     if(Token.isText(token) || child_style.isInline()){
       this.stream.prev();
       this.setChildLayout(new InlineGenerator(this.style, this.stream));
@@ -73,29 +75,35 @@ var BlockGenerator = (function(){
     }
 
     // child block with float
+    // stream push back, and delegate current style and stream to InlineGenerator
     if(child_style.isFloated()){
       this.stream.prev();
-      this.setChildLayout(new FloatGenerator(this.style, this.stream));
+      this.setChildLayout(new FloatGenerator(this.style, this.stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
 
+    var child_stream = this._createStream(token);
+
     if(child_style.display === "list-item"){
-      this.setChildLayout(new ListItemGenerator(child_style, this._createStream(token), context));
+      this.setChildLayout(new ListItemGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
 
     if(child_style.display === "table-row"){
-      this.setChildLayout(new TableRowGenerator(child_style, this._createStream(token), context));
+      this.setChildLayout(new TableRowGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
 
     switch(child_style.getMarkupName()){
+    case "body":
+      this.setChildLayout(new BodyGenerator(child_style, child_stream));
+      return this.yieldChildLayout(context);
     case "ul":
     case "ol":
-      this.setChildLayout(new ListGenerator(child_style, this._createStream(token)));
+      this.setChildLayout(new ListGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
     default:
-      this.setChildLayout(new BlockGenerator(child_style, this._createStream(token)));
+      this.setChildLayout(new BlockGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
   };
@@ -108,6 +116,7 @@ var BlockGenerator = (function(){
     } else {
       context.addBlockElement(element, extent);
     }
+    this._onAddElement(element);
   };
 
   BlockGenerator.prototype._createBlock = function(context){
@@ -116,10 +125,24 @@ var BlockGenerator = (function(){
     if(extent === 0 || elements.length === 0){
       return null;
     }
-    return this.style.createBlock({
+    var block = this.style.createBlock({
       extent:extent,
       elements:elements
     });
+    this._onCreateBlock(block);
+    if(!this.hasNext()){
+      this._onComplete();
+    }
+    return block;
+  };
+
+  BlockGenerator.prototype._onAddElement = function(block){
+  };
+
+  BlockGenerator.prototype._onCreateBlock = function(block){
+  };
+
+  BlockGenerator.prototype._onComplete = function(block){
   };
 
   return BlockGenerator;

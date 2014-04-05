@@ -151,6 +151,9 @@ var StyleContext = (function(){
     isRootLine : function(){
       return this.display === "block";
     },
+    isHeader : function(){
+      return this.markup.isHeaderTag();
+    },
     isFloatStart : function(){
       return this.logicalFloat && this.logicalFloat.isStart();
     },
@@ -189,6 +192,9 @@ var StyleContext = (function(){
     },
     getMarkupPos : function(){
       return this.markup.pos;
+    },
+    getHeaderRank : function(){
+      return this.markup.getHeaderRank();
     },
     getFontSize : function(){
       return this.font.size;

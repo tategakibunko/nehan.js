@@ -1,58 +1,46 @@
 var OutlineContext = (function(){
-  function OutlineContext(){
-    this._buffers = {};
-    this._stack = [];
-    this._curSection = "body";
+  function OutlineContext(style){
+    this.logs = [];
+    this.style = style;
   }
 
+  var __header_id__ = 0; // glocal unique header id
+  var gen_header_id = function(){
+    return __header_id__++;
+  };
+
   OutlineContext.prototype = {
-    _addHeaderLog : function(log){
-      var root_log = this.getOutlineBuffer(this._curSection);
-      root_log.addHeaderLog(log);
+    isEmpty : function(){
+      return this.logs.length === 0;
     },
-    _addSectionLog : function(log){
-      var root_log = this.getOutlineBuffer(this._curSection);
-      root_log.addSectionLog(log);
+    getMarkupName : function(){
+      return this.style.getMarkupName();
     },
-    _getCurSection : function(){
-      return (this._stack.length > 0)? this._stack[this._stack.length - 1] : "body";
-    },
-    getOutlineBuffer : function(root_name){
-      var buffer = this._buffers[root_name] || new OutlineBuffer(root_name);
-      this._buffers[root_name] = buffer;
-      return buffer;
-    },
-    startSectionRoot : function(root_name){
-      this._stack.push(root_name);
-      this._curSection = root_name;
-    },
-    endSectionRoot : function(root_name){
-      this._stack.pop();
-      this._curSection = this._getCurSection();
-      return this._curSection;
-    },
-    logStartSection : function(type, page_no){
-      this._addSectionLog({
+    addStartSection : function(type, page_no){
+      this.logs.push({
 	name:"start-section",
 	type:type,
 	pageNo:page_no
       });
+      return this;
     },
-    logEndSection : function(type){
-      this._addSectionLog({
+    addEndSection : function(type){
+      this.logs.push({
 	name:"end-section",
 	type:type
       });
+      return this;
     },
-    logSectionHeader : function(type, rank, title, page_no, header_id){
-      this._addHeaderLog({
+    addSectionHeader : function(opt){
+      this.logs.push({
 	name:"set-header",
-	type:type,
-	rank:rank,
-	title:title,
-	pageNo:page_no,
-	headerId:header_id // header id is used to associate header box object with outline.
+	type:opt.type,
+	rank:opt.rank,
+	title:opt.title,
+	pageNo:opt.pageNo,
+	headerId:gen_header_id() // header id is used to associate header box object with outline.
       });
+      return this;
     }
   };
 

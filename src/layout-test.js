@@ -79,7 +79,7 @@ var LayoutTest = (function(){
       TestText["long"],
       TestText["middle"],
       TestText["short"]
-    ].join("<br>"),
+    ].join(""),
 
     "float-test":[
       TestSnipet["float"],
@@ -127,10 +127,11 @@ var LayoutTest = (function(){
   return {
     getGenerator : function(name){
       var script = TestScript[name] || TestSnipet[name] || TestText[name] || "undefined script";
+      //var tag = new Tag("<html>", "<body>" + script + "</body>");
       var tag = new Tag("<body>", script);
       var style = new StyleContext(tag, null);
       var stream = new TokenStream(tag.getContent());
-      return new BlockGenerator(style, stream);
+      return new BodyGenerator(style, stream);
     },
     getEvaluator : function(){
       return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
