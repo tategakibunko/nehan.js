@@ -92,15 +92,15 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createStartContext = function(){
     return new LayoutContext(
-      new BlockLayoutContext(this.style.getContentExtent()),
-      new InlineLayoutContext(this.style.getContentMeasure())
+      new BlockContext(this.style.getContentExtent()),
+      new InlineContext(this.style.getContentMeasure())
     );
   };
 
   LayoutGenerator.prototype._createChildContext = function(context){
     return new LayoutContext(
-      new BlockLayoutContext(context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
-      new InlineLayoutContext(this.style.getContentMeasure())
+      new BlockContext(context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
+      new InlineContext(this.style.getContentMeasure())
     );
   };
 

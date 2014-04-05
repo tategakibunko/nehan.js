@@ -7821,8 +7821,8 @@ var LayoutContext = (function(){
 })();
 
 
-var BlockLayoutContext = (function(){
-  function BlockLayoutContext(max_extent){
+var BlockContext = (function(){
+  function BlockContext(max_extent){
     this.curExtent = 0;
     this.maxExtent = max_extent; // const
     this.pushedElements = [];
@@ -7830,7 +7830,7 @@ var BlockLayoutContext = (function(){
     this.pulledElements = [];
   }
 
-  BlockLayoutContext.prototype = {
+  BlockContext.prototype = {
     isSpaceLeft : function(){
       return this.getRestExtent() > 0;
     },
@@ -7865,12 +7865,12 @@ var BlockLayoutContext = (function(){
     }
   };
 
-  return BlockLayoutContext;
+  return BlockContext;
 })();
 
 
-var InlineLayoutContext = (function(){
-  function InlineLayoutContext(max_measure){
+var InlineContext = (function(){
+  function InlineContext(max_measure){
     this.charCount = 0;
     this.curMeasure = 0;
     this.maxMeasure = max_measure; // const
@@ -7879,7 +7879,7 @@ var InlineLayoutContext = (function(){
     this.br = false;
   }
 
-  InlineLayoutContext.prototype = {
+  InlineContext.prototype = {
     isEmpty : function(){
       return !this.br && this.elements.length === 0;
     },
@@ -7953,7 +7953,7 @@ var InlineLayoutContext = (function(){
     }
   };
 
-  return InlineLayoutContext;
+  return InlineContext;
 })();
 
 
@@ -8051,15 +8051,15 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createStartContext = function(){
     return new LayoutContext(
-      new BlockLayoutContext(this.style.getContentExtent()),
-      new InlineLayoutContext(this.style.getContentMeasure())
+      new BlockContext(this.style.getContentExtent()),
+      new InlineContext(this.style.getContentMeasure())
     );
   };
 
   LayoutGenerator.prototype._createChildContext = function(context){
     return new LayoutContext(
-      new BlockLayoutContext(context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
-      new InlineLayoutContext(this.style.getContentMeasure())
+      new BlockContext(context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
+      new InlineContext(this.style.getContentMeasure())
     );
   };
 
@@ -8074,18 +8074,18 @@ var LayoutGenerator = (function(){
 })();
 
 
-var BlockLayoutGenerator = (function(){
-  function BlockLayoutGenerator(style, stream){
+var BlockGenerator = (function(){
+  function BlockGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
   }
-  Class.extend(BlockLayoutGenerator, LayoutGenerator);
+  Class.extend(BlockGenerator, LayoutGenerator);
 
   var get_line_start_pos = function(line){
     var head = line.elements[0];
     return (head instanceof Box)? head.style.getMarkupPos() : head.pos;
   };
 
-  BlockLayoutGenerator.prototype.popCache = function(context){
+  BlockGenerator.prototype.popCache = function(context){
     var cache = LayoutGenerator.prototype.popCache.call(this);
 
     // if cache is inline, and measure size varies, reget line if need.
@@ -8100,7 +8100,7 @@ var BlockLayoutGenerator = (function(){
     return cache;
   };
 
-  BlockLayoutGenerator.prototype._yield = function(context){
+  BlockGenerator.prototype._yield = function(context){
     if(!context.isBlockSpaceLeft()){
       return null;
     }
@@ -8128,7 +8128,7 @@ var BlockLayoutGenerator = (function(){
     return this._createBlock(context);
   };
 
-  BlockLayoutGenerator.prototype._createBlock = function(context){
+  BlockGenerator.prototype._createBlock = function(context){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
@@ -8140,7 +8140,7 @@ var BlockLayoutGenerator = (function(){
     });
   };
 
-  BlockLayoutGenerator.prototype._getNext = function(context){
+  BlockGenerator.prototype._getNext = function(context){
     if(this.hasCache()){
       var cache = this.popCache(context);
       return cache;
@@ -8162,49 +8162,58 @@ var BlockLayoutGenerator = (function(){
     // inline text or inline tag
     if(Token.isText(token) || child_style.isInline()){
       this.stream.prev();
-      this.setChildLayout(new InlineLayoutGenerator(this.style, this.stream));
+      this.setChildLayout(new InlineGenerator(this.style, this.stream));
       return this.yieldChildLayout(context);
     }
 
     // child block with float
     if(child_style.isFloated()){
       this.stream.prev();
-      this.setChildLayout(new FloatLayoutGenerator(this.style, this.stream));
+      this.setChildLayout(new FloatGenerator(this.style, this.stream));
       return this.yieldChildLayout(context);
     }
 
     if(child_style.display === "list-item"){
-      this.setChildLayout(new ListItemLayoutGenerator(child_style, this._createStream(token), context));
+      this.setChildLayout(new ListItemGenerator(child_style, this._createStream(token), context));
       return this.yieldChildLayout(context);
     }
 
     if(child_style.display === "table-row"){
-      this.setChildLayout(new TableRowLayoutGenerator(child_style, this._createStream(token), context));
+      this.setChildLayout(new TableRowGenerator(child_style, this._createStream(token), context));
       return this.yieldChildLayout(context);
     }
 
     switch(child_style.getMarkupName()){
-    case "ul": case "ol":
-      this.setChildLayout(new ListLayoutGenerator(child_style, this._createStream(token)));
+    case "ul":
+    case "ol":
+      this.setChildLayout(new ListGenerator(child_style, this._createStream(token)));
+      return this.yieldChildLayout(context);
+    case "h1":
+    case "h2":
+    case "h3":
+    case "h4":
+    case "h5":
+    case "h6":
+      this.setChildLayout(new HeaderLayoutGenerator(child_style, this._createStream(token)));
       return this.yieldChildLayout(context);
       
     default:
-      this.setChildLayout(new BlockLayoutGenerator(child_style, this._createStream(token)));
+      this.setChildLayout(new BlockGenerator(child_style, this._createStream(token)));
       return this.yieldChildLayout(context);
     }
   };
 
-  return BlockLayoutGenerator;
+  return BlockGenerator;
 })();
 
 
-var InlineLayoutGenerator = (function(){
-  function InlineLayoutGenerator(style, stream){
+var InlineGenerator = (function(){
+  function InlineGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
   }
-  Class.extend(InlineLayoutGenerator, LayoutGenerator);
+  Class.extend(InlineGenerator, LayoutGenerator);
 
-  InlineLayoutGenerator.prototype._yield = function(context){
+  InlineGenerator.prototype._yield = function(context){
     while(true){
       var element = this._getNext(context);
       if(element === null){
@@ -8235,14 +8244,14 @@ var InlineLayoutGenerator = (function(){
     return this._createLine(context);
   };
 
-  InlineLayoutGenerator.prototype._createChildContext = function(context){
+  InlineGenerator.prototype._createChildContext = function(context){
     return new LayoutContext(
       context.block, // inline generator inherits block context as it is.
-      new InlineLayoutContext(context.getInlineRestMeasure())
+      new InlineContext(context.getInlineRestMeasure())
     );
   };
 
-  InlineLayoutGenerator.prototype._justifyLine = function(context){
+  InlineGenerator.prototype._justifyLine = function(context){
     var next_head = this.peekLastCache(); // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var new_tail = context.justify(next_head); // if justify is occured, new_tail token is gained.
     if(new_tail){
@@ -8251,7 +8260,7 @@ var InlineLayoutGenerator = (function(){
     }
   };
 
-  InlineLayoutGenerator.prototype._createLine = function(context){
+  InlineGenerator.prototype._createLine = function(context){
     var measure = this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure();
     return this.style.createLine({
       br:context.hasBr(), // is line broken by br?
@@ -8263,7 +8272,7 @@ var InlineLayoutGenerator = (function(){
     });
   };
 
-  InlineLayoutGenerator.prototype._getNext = function(context){
+  InlineGenerator.prototype._getNext = function(context){
     if(this.hasCache()){
       return this.popCache(context);
     }
@@ -8301,12 +8310,12 @@ var InlineLayoutGenerator = (function(){
     case "br":
       return token;
     default:
-      this.setChildLayout(new InlineLayoutGenerator(style, this._createStream(token)));
+      this.setChildLayout(new InlineGenerator(style, this._createStream(token)));
       return this.yieldChildLayout(context);
     }
   };
 
-  InlineLayoutGenerator.prototype._getText = function(context, token){
+  InlineGenerator.prototype._getText = function(context, token){
     if(!token.hasMetrics()){
       // if charactor token, set kerning before setting metrics.
       // because some additional space is added to it in some case.
@@ -8327,14 +8336,14 @@ var InlineLayoutGenerator = (function(){
     }
   };
 
-  InlineLayoutGenerator.prototype._setCharKerning = function(context, char_token){
+  InlineGenerator.prototype._setCharKerning = function(context, char_token){
     var next_token = this.stream.peek();
     var prev_text = context.getInlineLastText();
     var next_text = next_token && Token.isText(next_token)? next_token : null;
     Kerning.set(char_token, prev_text, next_text);
   };
 
-  InlineLayoutGenerator.prototype._getWord = function(context, token){
+  InlineGenerator.prototype._getWord = function(context, token){
     var rest_measure = context.getInlineRestMeasure();
     var advance = token.getAdvance(this.style.flow, this.style.letterSpacing || 0);
     
@@ -8352,7 +8361,7 @@ var InlineLayoutGenerator = (function(){
     return part;
   };
 
-  InlineLayoutGenerator.prototype._getMeasure = function(element){
+  InlineGenerator.prototype._getMeasure = function(element){
     if(element instanceof Box){
       return element.getBoxMeasure(this.style.flow);
     }
@@ -8362,7 +8371,7 @@ var InlineLayoutGenerator = (function(){
     return 0; // TODO
   };
 
-  return InlineLayoutGenerator;
+  return InlineGenerator;
 })();
 
 
@@ -8460,11 +8469,11 @@ var FloatGroupStack = (function(){
 })();
 
 
-var FloatLayoutGenerator = (function(){
+var FloatGenerator = (function(){
   // caution: constructor argument 'style' is the style of parent.
   // so if <body><float1>..</float1><float2>...</float2></body>,
   // style of this contructor is 'body.style'
-  function FloatLayoutGenerator(style, stream){
+  function FloatGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
     this.generators = this._getFloatedGenerators();
 
@@ -8472,31 +8481,31 @@ var FloatLayoutGenerator = (function(){
     // notice that this generator uses 'clone' of original style, because size of space changes by position,
     // but on the other hand, float-elements refer to this original style as their parent style.
     // so we must keep original style immutable.
-    this.setChildLayout(new BlockLayoutGenerator(style.clone({"float":"start"}), stream));
+    this.setChildLayout(new BlockGenerator(style.clone({"float":"start"}), stream));
   }
-  Class.extend(FloatLayoutGenerator, LayoutGenerator);
+  Class.extend(FloatGenerator, LayoutGenerator);
 
-  FloatLayoutGenerator.prototype.hasNext = function(){
+  FloatGenerator.prototype.hasNext = function(){
     if(this._hasNextFloat()){
       return true;
     }
     return LayoutGenerator.prototype.hasNext.call(this);
   };
 
-  FloatLayoutGenerator.prototype._hasNextFloat = function(){
+  FloatGenerator.prototype._hasNextFloat = function(){
     return List.exists(this.generators, function(gen){
       return gen.hasNext();
     });
   };
 
-  FloatLayoutGenerator.prototype._yield = function(context){
+  FloatGenerator.prototype._yield = function(context){
     var stack = this._yieldFloatStack(context);
     var rest_measure = context.getInlineRestMeasure();
     var rest_extent = context.getBlockRestExtent();
     return this._yieldFloat(context, stack, rest_measure, rest_extent);
   };
 
-  FloatLayoutGenerator.prototype._yieldFloat = function(context, stack, rest_measure, rest_extent){
+  FloatGenerator.prototype._yieldFloat = function(context, stack, rest_measure, rest_extent){
     if(rest_measure <= 0){
       return null;
     }
@@ -8553,12 +8562,12 @@ var FloatLayoutGenerator = (function(){
     return this._wrapBlock(group_set, space);
   };
   
-  FloatLayoutGenerator.prototype._sortFloatRest = function(floated, rest){
+  FloatGenerator.prototype._sortFloatRest = function(floated, rest){
     var floated_elements = floated.getElements();
     return floated.isFloatStart()? floated_elements.concat(rest) : [rest].concat(floated_elements);
   };
 
-  FloatLayoutGenerator.prototype._wrapBlock = function(block1, block2){
+  FloatGenerator.prototype._wrapBlock = function(block1, block2){
     var flow = this.style.flow;
     var measure = block1.getBoxMeasure(flow); // block2 has same measure
     var extent = block1.getBoxExtent(flow) + (block2? block2.getBoxExtent(flow) : 0);
@@ -8571,7 +8580,7 @@ var FloatLayoutGenerator = (function(){
     });
   };
 
-  FloatLayoutGenerator.prototype._wrapFloat = function(floated, rest, wrap_measure){
+  FloatGenerator.prototype._wrapFloat = function(floated, rest, wrap_measure){
     var flow = this.style.flow;
     var extent = floated.getExtent(flow);
     return this.style.createChild("div", {"float":"start"}).createBlock({
@@ -8581,7 +8590,7 @@ var FloatLayoutGenerator = (function(){
     });
   };
   
-  FloatLayoutGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
+  FloatGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
     this._childLayout.cloneStyle({
       "float":"start",
       measure:measure,
@@ -8590,7 +8599,7 @@ var FloatLayoutGenerator = (function(){
     return this.yieldChildLayout();
   };
   
-  FloatLayoutGenerator.prototype._yieldFloatStack = function(context){
+  FloatGenerator.prototype._yieldFloatStack = function(context){
     var start_blocks = [], end_blocks = [];
     List.iter(this.generators, function(gen){
       var block = gen.yield(context);
@@ -8605,35 +8614,35 @@ var FloatLayoutGenerator = (function(){
     return new FloatGroupStack(this.style.flow, start_blocks, end_blocks);
   };
 
-  FloatLayoutGenerator.prototype._getFloatedTags = function(){
+  FloatGenerator.prototype._getFloatedTags = function(){
     var parent_style = this.style;
     return this.stream.getWhile(function(token){
       return (token instanceof Tag && (new StyleContext(token, parent_style)).isFloated());
     });
   };
 
-  FloatLayoutGenerator.prototype._getFloatedGenerators = function(){
+  FloatGenerator.prototype._getFloatedGenerators = function(){
     var parent_style = this.style;
     return List.map(this._getFloatedTags(), function(tag){
-      return new BlockLayoutGenerator(
+      return new BlockGenerator(
 	new StyleContext(tag, parent_style),
 	new TokenStream(tag.getContent())
       );
     });
   };
 
-  return FloatLayoutGenerator;
+  return FloatGenerator;
 })();
 
 
-var ParallelLayoutGenerator = (function(){
-  function ParallelLayoutGenerator(style, generators){
+var ParallelGenerator = (function(){
+  function ParallelGenerator(style, generators){
     LayoutGenerator.call(this, style, null);
     this.generators = generators;
   }
-  Class.extend(ParallelLayoutGenerator, LayoutGenerator);
+  Class.extend(ParallelGenerator, LayoutGenerator);
 
-  ParallelLayoutGenerator.prototype._yield = function(context){
+  ParallelGenerator.prototype._yield = function(context){
     if(this.hasCache()){
       return this.popCache();
     }
@@ -8651,7 +8660,7 @@ var ParallelLayoutGenerator = (function(){
     return wrap_block;
   };
 
-  ParallelLayoutGenerator.prototype.hasNext = function(context){
+  ParallelGenerator.prototype.hasNext = function(context){
     if(this._terminate){
       return false;
     }
@@ -8663,21 +8672,21 @@ var ParallelLayoutGenerator = (function(){
     });
   };
 
-  ParallelLayoutGenerator.prototype._yieldParallelBlocks = function(context){
+  ParallelGenerator.prototype._yieldParallelBlocks = function(context){
     var blocks = List.map(this.generators, function(gen){
       return gen.yield(context);
     });
     return List.forall(blocks, function(block){ return block === null; })? null : blocks;
   };
 
-  ParallelLayoutGenerator.prototype._findMaxBlock = function(blocks){
+  ParallelGenerator.prototype._findMaxBlock = function(blocks){
     var flow = this.style.flow;
     return List.maxobj(blocks, function(block){
       return block? block.getBoxExtent(flow) : 0;
     });
   };
 
-  ParallelLayoutGenerator.prototype._alignContentExtent = function(blocks, content_extent){
+  ParallelGenerator.prototype._alignContentExtent = function(blocks, content_extent){
     var flow = this.style.flow;
     var generators = this.generators;
     return List.mapi(blocks, function(i, block){
@@ -8688,7 +8697,7 @@ var ParallelLayoutGenerator = (function(){
     });
   };
 
-  ParallelLayoutGenerator.prototype._wrapBlocks = function(blocks){
+  ParallelGenerator.prototype._wrapBlocks = function(blocks){
     var flow = this.style.flow;
     var generators = this.generators;
     var max_block = this._findMaxBlock(blocks);
@@ -8699,41 +8708,41 @@ var ParallelLayoutGenerator = (function(){
     });
   };
 
-  return ParallelLayoutGenerator;
+  return ParallelGenerator;
 })();
 
 
 
-var ListLayoutGenerator = (function(){
-  function ListLayoutGenerator(style, stream){
-    BlockLayoutGenerator.call(this, style, stream);
+var ListGenerator = (function(){
+  function ListGenerator(style, stream){
+    BlockGenerator.call(this, style, stream);
     this.style.markerSize = this._getMarkerSize(this.stream.getTokenCount());
   }
-  Class.extend(ListLayoutGenerator, BlockLayoutGenerator);
+  Class.extend(ListGenerator, BlockGenerator);
 
-  ListLayoutGenerator.prototype._getMarkerSize = function(item_count){
+  ListGenerator.prototype._getMarkerSize = function(item_count){
     var max_marker_text = this.style.getMarkerHtml(item_count);
-    var gen = new InlineLayoutGenerator(this.style, new TokenStream(max_marker_text));
+    var gen = new InlineGenerator(this.style, new TokenStream(max_marker_text));
     var line = gen.yield();
     var marker_measure = line.inlineMeasure + Math.floor(this.style.getFontSize() / 2);
     var marker_extent = line.size.getExtent(this.style.flow);
     return this.style.flow.getBoxSize(marker_measure, marker_extent);
   };
 
-  return ListLayoutGenerator;
+  return ListGenerator;
 })();
 
 
-var ListItemLayoutGenerator = (function(){
-  function ListItemLayoutGenerator(style, stream, context){
-    ParallelLayoutGenerator.call(this, style, [
+var ListItemGenerator = (function(){
+  function ListItemGenerator(style, stream, context){
+    ParallelGenerator.call(this, style, [
       this._createListMarkGenerator(context, style),
       this._createListBodyGenerator(context, style, stream)
     ]);
   }
-  Class.extend(ListItemLayoutGenerator, ParallelLayoutGenerator);
+  Class.extend(ListItemGenerator, ParallelGenerator);
 
-  ListItemLayoutGenerator.prototype._createListMarkGenerator = function(context, style){
+  ListItemGenerator.prototype._createListMarkGenerator = function(context, style){
     var marker_size = style.parent.markerSize;
     var item_order = style.getChildIndex();
     var marker_text = style.parent.getMarkerHtml(item_order + 1);
@@ -8744,10 +8753,10 @@ var ListItemLayoutGenerator = (function(){
       "measure":measure
     });
 
-    return new BlockLayoutGenerator(marker_style, new TokenStream(marker_text));
+    return new BlockGenerator(marker_style, new TokenStream(marker_text));
   };
 
-  ListItemLayoutGenerator.prototype._createListBodyGenerator = function(context, style, stream){
+  ListItemGenerator.prototype._createListBodyGenerator = function(context, style, stream){
     var marker_size = style.parent.markerSize;
     var measure = style.getContentMeasure() - marker_size.getMeasure(style.flow);
     var body_style = style.createChild("li-body", {
@@ -8756,17 +8765,17 @@ var ListItemLayoutGenerator = (function(){
       "measure":measure
     });
 
-    return new BlockLayoutGenerator(body_style, stream);
+    return new BlockGenerator(body_style, stream);
   };
 
-  ListItemLayoutGenerator.prototype._alignContentExtent = function(blocks, content_extent){
+  ListItemGenerator.prototype._alignContentExtent = function(blocks, content_extent){
     if(this.style.isTextVertical()){
       return blocks;
     }
-    return ParallelLayoutGenerator.prototype._alignContentExtent.call(this, blocks, content_extent);
+    return ParallelGenerator.prototype._alignContentExtent.call(this, blocks, content_extent);
   };
 
-  return ListItemLayoutGenerator;
+  return ListItemGenerator;
 })();
   
 
@@ -8774,19 +8783,19 @@ var ListItemLayoutGenerator = (function(){
 // stream : [thead | tbody | tfoot]
 // yield : [thead | tbody | tfoot]
 // init : create partition map
-var TableLayoutGenerator = (function(){
-  function TableLayoutGenerator(style, stream){
-    BlockLayoutGenerator.call(this, style, stream);
+var TableGenerator = (function(){
+  function TableGenerator(style, stream){
+    BlockGenerator.call(this, style, stream);
   }
-  Class.extend(TableLayoutGenerator, BlockLayoutGenerator);
+  Class.extend(TableGenerator, BlockGenerator);
 
-  TableLayoutGenerator.prototype.yield = function(context){
+  TableGenerator.prototype.yield = function(context){
   };
 
-  TableLayoutGenerator.prototype._getTableGroupTags = function(context){
+  TableGenerator.prototype._getTableGroupTags = function(context){
   };
 
-  return TableLayoutGenerator;
+  return TableGenerator;
 })();
 
 // parent : table
@@ -8795,9 +8804,9 @@ var TableLayoutGenerator = (function(){
 // yield : [tr]
 var TableGroupLayoutGenerator = (function(){
   function TableGroupLayoutGenerator(style, stream){
-    BlockLayoutGenerator.call(this, style, stream);
+    BlockGenerator.call(this, style, stream);
   }
-  Class.extend(TableGroupLayoutGenerator, BlockLayoutGenerator);
+  Class.extend(TableGroupLayoutGenerator, BlockGenerator);
 
   TableGroupLayoutGenerator.prototype.yield = function(context){
   };
@@ -8816,22 +8825,22 @@ var TableGroupLayoutGenerator = (function(){
 // tag : tr | th
 // stream : [td | th]
 // yield : parallel([td | th])
-var TableRowLayoutGenerator = (function(){
-  function TableRowLayoutGenerator(style, stream, context){
+var TableRowGenerator = (function(){
+  function TableRowGenerator(style, stream, context){
     var generators = this._getGenerators(style, stream, context);
-    ParallelLayoutGenerator.call(this, style, generators);
+    ParallelGenerator.call(this, style, generators);
   }
-  Class.extend(TableRowLayoutGenerator, ParallelLayoutGenerator);
+  Class.extend(TableRowGenerator, ParallelGenerator);
 
-  TableRowLayoutGenerator.prototype._getGenerators = function(style, stream, context){
+  TableRowGenerator.prototype._getGenerators = function(style, stream, context){
     var child_tags = this._getChildTags(stream);
     var child_styles = this._getChildStyles(context, style, child_tags);
     return List.map(child_styles, function(style){
-      return new BlockLayoutGenerator(style, new TokenStream(style.getMarkupContent()));
+      return new BlockGenerator(style, new TokenStream(style.getMarkupContent()));
     });
   };
 
-  TableRowLayoutGenerator.prototype._getChildStyles = function(context, parent_style, child_tags){
+  TableRowGenerator.prototype._getChildStyles = function(context, parent_style, child_tags){
     var child_count = child_tags.length;
     var rest_extent = context.getBlockRestExtent();
     var rest_measure = context.getInlineMaxMeasure();
@@ -8848,14 +8857,18 @@ var TableRowLayoutGenerator = (function(){
     });
   };
 
-  TableRowLayoutGenerator.prototype._getChildTags = function(stream){
+  TableRowGenerator.prototype._getChildTags = function(stream){
     return stream.getWhile(function(token){
       return (token instanceof Tag && (token.getName() === "td" || token.getName() === "th"));
     });
   };
 
-  return TableRowLayoutGenerator;
+  return TableRowGenerator;
 })();
+
+var SectionRootGenerator = (function(){
+})();
+
 
 var LayoutEvaluator = (function(){
   function LayoutEvaluator(){
@@ -8924,36 +8937,36 @@ var LayoutEvaluator = (function(){
 })();
 
 
-var VertLayoutEvaluator = (function(){
-  function VertLayoutEvaluator(){
+var VertEvaluator = (function(){
+  function VertEvaluator(){
     LayoutEvaluator.call(this);
   }
-  Class.extend(VertLayoutEvaluator, LayoutEvaluator);
+  Class.extend(VertEvaluator, LayoutEvaluator);
 
-  VertLayoutEvaluator.prototype.evalInlineBlock = function(iblock){
+  VertEvaluator.prototype.evalInlineBlock = function(iblock){
     return this.evalBlock(iblock);
   };
 
-  VertLayoutEvaluator.prototype.evalInlineChild = function(line, child){
+  VertEvaluator.prototype.evalInlineChild = function(line, child){
     return this.evalInline(child);
   };
 
-  VertLayoutEvaluator.prototype.evalRuby = function(line, ruby){
+  VertEvaluator.prototype.evalRuby = function(line, ruby){
     var body = this.evalRb(line, ruby) + this.evalRt(line, ruby);
     return Html.tagWrap("div", body, {
       "class":"nehan-ruby-body"
     });
   };
 
-  VertLayoutEvaluator.prototype.evalRb = function(line, ruby){
+  VertEvaluator.prototype.evalRb = function(line, ruby){
     return Html.tagWrap("div", this.evalInlineElements(line, ruby.getRbs()), {
       "style":Css.toString(ruby.getCssVertRb(line)),
       "class":"nehan-rb"
     });
   };
 
-  VertLayoutEvaluator.prototype.evalRt = function(line, ruby){
-    var rt = (new InlineLayoutGenerator(
+  VertEvaluator.prototype.evalRt = function(line, ruby){
+    var rt = (new InlineGenerator(
       new StyleContext(ruby.rt, line.style),
       new TokenStream(ruby.getRtString())
     )).yield();
@@ -8961,7 +8974,7 @@ var VertLayoutEvaluator = (function(){
     return this.evaluate(rt);
   };
 
-  VertLayoutEvaluator.prototype.evalWord = function(line, word){
+  VertEvaluator.prototype.evalWord = function(line, word){
     if(Env.isTransformEnable){
       if(Env.isTrident){
 	return this.evalWordTransformTrident(line, word);
@@ -8974,7 +8987,7 @@ var VertLayoutEvaluator = (function(){
     }
   };
 
-  VertLayoutEvaluator.prototype.evalWordTransform = function(line, word){
+  VertEvaluator.prototype.evalWordTransform = function(line, word){
     var body = Html.tagWrap("div", word.data, {
       "class": "nehan-rotate-90",
       "style": Css.toString(word.getCssVertTransBody(line))
@@ -8984,7 +8997,7 @@ var VertLayoutEvaluator = (function(){
     });
   };
 
-  VertLayoutEvaluator.prototype.evalWordTransformTrident = function(line, word){
+  VertEvaluator.prototype.evalWordTransformTrident = function(line, word){
     var body = Html.tagWrap("div", word.data, {
       // trident rotation needs some hack.
       //"class": "nehan-rotate-90",
@@ -8995,14 +9008,14 @@ var VertLayoutEvaluator = (function(){
     });
   };
 
-  VertLayoutEvaluator.prototype.evalWordIE = function(line, word){
+  VertEvaluator.prototype.evalWordIE = function(line, word){
     return Html.tagWrap("div", word.data, {
       "class": "nehan-vert-ie",
       "style": Css.toString(word.getCssVertTransIE(line))
     }) + Const.clearFix;
   };
 
-  VertLayoutEvaluator.prototype.evalRotateChar = function(line, chr){
+  VertEvaluator.prototype.evalRotateChar = function(line, chr){
     if(Env.isTransformEnable){
       return this.evalRotateCharTransform(line, chr);
     } else if(Env.isIE){
@@ -9012,26 +9025,26 @@ var VertLayoutEvaluator = (function(){
     }
   };
 
-  VertLayoutEvaluator.prototype.evalRotateCharTransform = function(line, chr){
+  VertEvaluator.prototype.evalRotateCharTransform = function(line, chr){
     return Html.tagWrap("div", chr.data, {
       "class":"nehan-rotate-90"
     });
   };
 
-  VertLayoutEvaluator.prototype.evalRotateCharIE = function(line, chr){
+  VertEvaluator.prototype.evalRotateCharIE = function(line, chr){
     return Html.tagWrap("div", chr.data, {
       "style":Css.toString(chr.getCssVertRotateCharIE(line)),
       "class":"nehan-vert-ie"
     }) + Const.clearFix;
   };
 
-  VertLayoutEvaluator.prototype.evalTcy = function(line, tcy){
+  VertEvaluator.prototype.evalTcy = function(line, tcy){
     return Html.tagWrap("div", tcy.data, {
       "class": "nehan-tcy"
     });
   };
 
-  VertLayoutEvaluator.prototype.evalChar = function(line, chr){
+  VertEvaluator.prototype.evalChar = function(line, chr){
     if(chr.isImgChar()){
       if(chr.isVertGlyphEnable()){
 	return this.evalVerticalGlyph(line, chr);
@@ -9053,17 +9066,17 @@ var VertLayoutEvaluator = (function(){
     return this.evalCharWithBr(line, chr);
   };
 
-  VertLayoutEvaluator.prototype.evalCharWithBr = function(line, chr){
+  VertEvaluator.prototype.evalCharWithBr = function(line, chr){
     return chr.data + "<br />";
   };
 
-  VertLayoutEvaluator.prototype.evalCharLetterSpacing = function(line, chr){
+  VertEvaluator.prototype.evalCharLetterSpacing = function(line, chr){
     return Html.tagWrap("div", chr.data, {
       "style":Css.toString(chr.getCssVertLetterSpacing(line))
     });
   };
 
-  VertLayoutEvaluator.prototype.evalEmpha = function(line, chr, char_body){
+  VertEvaluator.prototype.evalEmpha = function(line, chr, char_body){
     char_body = char_body.replace("<br />", "");
     var char_body2 = Html.tagWrap("span", char_body, {
       "class":"nehan-empha-src",
@@ -9079,13 +9092,13 @@ var VertLayoutEvaluator = (function(){
     });
   };
 
-  VertLayoutEvaluator.prototype.evalPaddingChar = function(line, chr){
+  VertEvaluator.prototype.evalPaddingChar = function(line, chr){
     return Html.tagWrap("div", chr.data, {
       style:Css.toString(chr.getCssPadding(line))
     });
   };
 
-  VertLayoutEvaluator.prototype.evalImgChar = function(line, chr){
+  VertEvaluator.prototype.evalImgChar = function(line, chr){
     var color = line.color || new Color(Layout.fontColor);
     var font_rgb = color.getRgb();
     var palette_color = Palette.getColor(font_rgb).toUpperCase();
@@ -9096,25 +9109,25 @@ var VertLayoutEvaluator = (function(){
     }) + Const.clearFix;
   };
 
-  VertLayoutEvaluator.prototype.evalVerticalGlyph = function(line, chr){
+  VertEvaluator.prototype.evalVerticalGlyph = function(line, chr){
     return Html.tagWrap("div", chr.data, {
       "class":"nehan-vert-glyph",
       "style":Css.toString(chr.getCssVertGlyph(line))
     });
   };
 
-  VertLayoutEvaluator.prototype.evalCnvChar = function(line, chr){
+  VertEvaluator.prototype.evalCnvChar = function(line, chr){
     return chr.cnv + "<br />";
   };
 
-  VertLayoutEvaluator.prototype.evalSmallKana = function(line, chr){
+  VertEvaluator.prototype.evalSmallKana = function(line, chr){
     var tag_name = (line.style.textEmpha && line.style.textEmpha.isEnable())? "span" : "div";
     return Html.tagWrap(tag_name, chr.data, {
       style:Css.toString(chr.getCssVertSmallKana())
     });
   };
 
-  VertLayoutEvaluator.prototype.evalHalfSpaceChar = function(line, chr){
+  VertEvaluator.prototype.evalHalfSpaceChar = function(line, chr){
     var font_size = line.style.getFontSize();
     var half = Math.round(font_size / 2);
     return Html.tagWrap("div", "&nbsp;", {
@@ -9122,36 +9135,36 @@ var VertLayoutEvaluator = (function(){
     });
   };
 
-  VertLayoutEvaluator.prototype.evalInlineBox = function(line, box){
+  VertEvaluator.prototype.evalInlineBox = function(line, box){
     var body = (box._type === "img")? this.parentEvaluator.evalImageContent(box) : box.content;
     return Html.tagWrap("div", body, {
       "style":Css.toString(box.getCssVertInlineBox())
     });
   };
 
-  return VertLayoutEvaluator;
+  return VertEvaluator;
 })();
 
 
-var HoriLayoutEvaluator = (function(){
-  function HoriLayoutEvaluator(){
+var HoriEvaluator = (function(){
+  function HoriEvaluator(){
     LayoutEvaluator.call(this);
   }
-  Class.extend(HoriLayoutEvaluator, LayoutEvaluator);
+  Class.extend(HoriEvaluator, LayoutEvaluator);
 
-  HoriLayoutEvaluator.prototype.evalInlineBlock = function(iblock){
+  HoriEvaluator.prototype.evalInlineBlock = function(iblock){
     iblock.css.display = "inline-block";
     return this.evalBlock(iblock);
   };
 
-  HoriLayoutEvaluator.prototype.evalInlineChild = function(line, child){
+  HoriEvaluator.prototype.evalInlineChild = function(line, child){
     return Html.tagWrap("span", this.evalInlineElements(child, child.elements), {
       "style":Css.toString(line.getCssInline()),
       "class":line.classes.join(" ")
     });
   };
 
-  HoriLayoutEvaluator.prototype.evalRuby = function(line, ruby){
+  HoriEvaluator.prototype.evalRuby = function(line, ruby){
     var body = this.evalRt(line, ruby) + this.evalRb(line, ruby);
     return Html.tagWrap("span", body, {
       "style":Css.toString(ruby.getCssHoriRuby(line)),
@@ -9159,29 +9172,29 @@ var HoriLayoutEvaluator = (function(){
     });
   };
 
-  HoriLayoutEvaluator.prototype.evalRb = function(line, ruby){
+  HoriEvaluator.prototype.evalRb = function(line, ruby){
     return Html.tagWrap("div", this.evalInlineElements(line, ruby.getRbs()), {
       "style":Css.toString(ruby.getCssHoriRb(line)),
       "class":"nehan-rb"
     });
   };
 
-  HoriLayoutEvaluator.prototype.evalRt = function(line, ruby){
+  HoriEvaluator.prototype.evalRt = function(line, ruby){
     return Html.tagWrap("div", ruby.getRtString(), {
       "style":Css.toString(ruby.getCssHoriRt(line)),
       "class":"nehan-rt"
     });
   };
 
-  HoriLayoutEvaluator.prototype.evalWord = function(line, word){
+  HoriEvaluator.prototype.evalWord = function(line, word){
     return word.data;
   };
 
-  HoriLayoutEvaluator.prototype.evalTcy = function(line, tcy){
+  HoriEvaluator.prototype.evalTcy = function(line, tcy){
     return tcy.data;
   };
 
-  HoriLayoutEvaluator.prototype.evalChar = function(line, chr){
+  HoriEvaluator.prototype.evalChar = function(line, chr){
     if(chr.isHalfSpaceChar()){
       return chr.cnv;
     } else if(chr.isKerningChar()){
@@ -9190,7 +9203,7 @@ var HoriLayoutEvaluator = (function(){
     return chr.data;
   };
 
-  HoriLayoutEvaluator.prototype.evalEmpha = function(line, chr, char_body){
+  HoriEvaluator.prototype.evalEmpha = function(line, chr, char_body){
     var char_part = Html.tagWrap("div", char_body, {
       "style":Css.toString(chr.getCssHoriEmphaTarget(line))
     });
@@ -9203,7 +9216,7 @@ var HoriLayoutEvaluator = (function(){
     });
   };
 
-  HoriLayoutEvaluator.prototype.evalKerningChar = function(line, chr){
+  HoriEvaluator.prototype.evalKerningChar = function(line, chr){
     var css = chr.getCssPadding(line);
     if(chr.isKakkoStart()){
       css["margin-left"] = "-0.5em";
@@ -9229,13 +9242,13 @@ var HoriLayoutEvaluator = (function(){
     return chr.data;
   };
 
-  HoriLayoutEvaluator.prototype.evalPaddingChar = function(line, chr){
+  HoriEvaluator.prototype.evalPaddingChar = function(line, chr){
     return Html.tagWrap("span", chr.data, {
       "style": Css.toString(chr.getCssPadding(line))
     });
   };
 
-  return HoriLayoutEvaluator;
+  return HoriEvaluator;
 })();
 
 
@@ -9372,10 +9385,10 @@ var LayoutTest = (function(){
       var tag = new Tag("<body>", script);
       var style = new StyleContext(tag, null);
       var stream = new TokenStream(tag.getContent());
-      return new BlockLayoutGenerator(style, stream);
+      return new BlockGenerator(style, stream);
     },
     getEvaluator : function(){
-      return (Layout.direction === "vert")? new VertLayoutEvaluator() : new HoriLayoutEvaluator();
+      return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
     },
     start : function(name, opt){
       opt = opt || {};

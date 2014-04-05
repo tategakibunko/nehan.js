@@ -130,10 +130,10 @@ var LayoutTest = (function(){
       var tag = new Tag("<body>", script);
       var style = new StyleContext(tag, null);
       var stream = new TokenStream(tag.getContent());
-      return new BlockLayoutGenerator(style, stream);
+      return new BlockGenerator(style, stream);
     },
     getEvaluator : function(){
-      return (Layout.direction === "vert")? new VertLayoutEvaluator() : new HoriLayoutEvaluator();
+      return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
     },
     start : function(name, opt){
       opt = opt || {};
