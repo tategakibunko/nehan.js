@@ -87,7 +87,9 @@ var InlineGenerator = (function(){
 	this.stream.prev();
 	this.setTerminate(true);
 
-	// add line-break to avoid empty-line(return null to parent block, and parent is page-broken).
+	// add line-break to avoid empty-line.
+	// because empty-line is returned as null to parent block generator,
+	// and it causes page-break of parent block generator.
 	context.setLineBreak(true);
 	return null;
       }
