@@ -268,26 +268,26 @@ var StyleContext = (function(){
       return this.flow.getBoxSize(measure, extent);
     },
     getOuterMeasure : function(){
-      return this.getStaticMeasure() || this.getMaxMeasure();
+      return this.getStaticMeasure() || this.getLogicalMaxMeasure();
     },
     getOuterExtent : function(){
-      return this.getStaticExtent() || this.getMaxExtent();
+      return this.getStaticExtent() || this.getLogicalMaxExtent();
     },
     getStaticMeasure : function(){
-      var max_size = this.getMaxMeasure(); // this value is required when static size is set by '%' value.
+      var max_size = this.getLogicalMaxMeasure(); // this value is required when static size is set by '%' value.
       var static_size = this.markup.getAttr(this.flow.getPropMeasure()) || this.markup.getCssAttr("measure");
       return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
     },
     getStaticExtent : function(){
-      var max_size = this.getMaxExtent(); // this value is required when static size is set by '%' value.
+      var max_size = this.getLogicalMaxExtent(); // this value is required when static size is set by '%' value.
       var static_size = this.markup.getAttr(this.flow.getPropExtent()) || this.markup.getCssAttr("extent");
       return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
     },
-    getMaxMeasure : function(){
+    getLogicalMaxMeasure : function(){
       var max_size = this.parent? this.parent.getContentMeasure(this.flow) : Layout[this.flow.getPropMeasure()];
       return max_size;
     },
-    getMaxExtent : function(){
+    getLogicalMaxExtent : function(){
       var max_size = this.parent? this.parent.getContentExtent(this.flow) : Layout[this.flow.getPropExtent()];
       return (this.display === "block")? max_size : this.font.size;
     },

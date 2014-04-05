@@ -33,6 +33,13 @@ var ListItemLayoutGenerator = (function(){
     return new BlockLayoutGenerator(body_style, stream);
   };
 
+  ListItemLayoutGenerator.prototype._alignContentExtent = function(blocks, content_extent){
+    if(this.style.isTextVertical()){
+      return blocks;
+    }
+    return ParallelLayoutGenerator.prototype._alignContentExtent.call(this, blocks, content_extent);
+  };
+
   return ListItemLayoutGenerator;
 })();
   

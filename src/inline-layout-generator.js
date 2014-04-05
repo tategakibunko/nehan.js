@@ -52,9 +52,10 @@ var InlineLayoutGenerator = (function(){
   };
 
   InlineLayoutGenerator.prototype._createLine = function(context){
+    var measure = this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure();
     return this.style.createLine({
       br:context.hasBr(),
-      measure:(this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure()),
+      measure:measure,
       inlineMeasure:context.getInlineCurMeasure(),
       elements:context.getInlineElements(),
       texts:context.getInlineTexts(),

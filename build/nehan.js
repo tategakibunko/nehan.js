@@ -7365,26 +7365,26 @@ var StyleContext = (function(){
       return this.flow.getBoxSize(measure, extent);
     },
     getOuterMeasure : function(){
-      return this.getStaticMeasure() || this.getMaxMeasure();
+      return this.getStaticMeasure() || this.getLogicalMaxMeasure();
     },
     getOuterExtent : function(){
-      return this.getStaticExtent() || this.getMaxExtent();
+      return this.getStaticExtent() || this.getLogicalMaxExtent();
     },
     getStaticMeasure : function(){
-      var max_size = this.getMaxMeasure(); // this value is required when static size is set by '%' value.
+      var max_size = this.getLogicalMaxMeasure(); // this value is required when static size is set by '%' value.
       var static_size = this.markup.getAttr(this.flow.getPropMeasure()) || this.markup.getCssAttr("measure");
       return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
     },
     getStaticExtent : function(){
-      var max_size = this.getMaxExtent(); // this value is required when static size is set by '%' value.
+      var max_size = this.getLogicalMaxExtent(); // this value is required when static size is set by '%' value.
       var static_size = this.markup.getAttr(this.flow.getPropExtent()) || this.markup.getCssAttr("extent");
       return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
     },
-    getMaxMeasure : function(){
+    getLogicalMaxMeasure : function(){
       var max_size = this.parent? this.parent.getContentMeasure(this.flow) : Layout[this.flow.getPropMeasure()];
       return max_size;
     },
-    getMaxExtent : function(){
+    getLogicalMaxExtent : function(){
       var max_size = this.parent? this.parent.getContentExtent(this.flow) : Layout[this.flow.getPropExtent()];
       return (this.display === "block")? max_size : this.font.size;
     },
@@ -7965,7 +7965,14 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype.cloneStyle = function(opt){
-    this.style = this.style.clone(opt);
+    var old_style = this.style;
+    var new_style = this.style.clone(opt);
+    this.style = new_style;
+
+    // if child layout shares the style, rewrite it too.
+    if(this._childLayout && this._childLayout.style === old_style){
+      this._childLayout.style = new_style;
+    }
   };
 
   LayoutGenerator.prototype.setTerminate = function(status){
@@ -8234,9 +8241,10 @@ var InlineLayoutGenerator = (function(){
   };
 
   InlineLayoutGenerator.prototype._createLine = function(context){
+    var measure = this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure();
     return this.style.createLine({
       br:context.hasBr(),
-      measure:(this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure()),
+      measure:measure,
       inlineMeasure:context.getInlineCurMeasure(),
       elements:context.getInlineElements(),
       texts:context.getInlineTexts(),
@@ -8481,7 +8489,6 @@ var FloatLayoutGenerator = (function(){
   };
 
   FloatLayoutGenerator.prototype._yieldFloat = function(context, stack, rest_measure, rest_extent){
-    //console.log("yieldFloat(%d,%d)", rest_measure, rest_extent);
     if(rest_measure <= 0){
       return null;
     }
@@ -8501,7 +8508,7 @@ var FloatLayoutGenerator = (function(){
     */
     var group = stack.pop(); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
     var rest = this._yieldFloat(context, stack, rest_measure - group.getMeasure(flow), group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
-    var group_set = this._wrapFloat(group, rest); // wrap these 2 floated layout as one block.
+    var group_set = this._wrapFloat(group, rest, rest_measure); // wrap these 2 floated layout as one block.
 
     /*
       To understand rest_extent_space, remember that this func is called recursivelly,
@@ -8556,13 +8563,12 @@ var FloatLayoutGenerator = (function(){
     });
   };
 
-  FloatLayoutGenerator.prototype._wrapFloat = function(floated, rest){
+  FloatLayoutGenerator.prototype._wrapFloat = function(floated, rest, wrap_measure){
     var flow = this.style.flow;
-    var measure = floated.getMeasure(flow) + (rest? rest.getBoxMeasure(flow) : 0);
     var extent = floated.getExtent(flow);
     return this.style.createChild("div", {"float":"start"}).createBlock({
       elements:this._sortFloatRest(floated, rest),
-      measure:measure,
+      measure:wrap_measure,
       extent:extent
     });
   };
@@ -8743,6 +8749,13 @@ var ListItemLayoutGenerator = (function(){
     });
 
     return new BlockLayoutGenerator(body_style, stream);
+  };
+
+  ListItemLayoutGenerator.prototype._alignContentExtent = function(blocks, content_extent){
+    if(this.style.isTextVertical()){
+      return blocks;
+    }
+    return ParallelLayoutGenerator.prototype._alignContentExtent.call(this, blocks, content_extent);
   };
 
   return ListItemLayoutGenerator;

@@ -35,7 +35,6 @@ var FloatLayoutGenerator = (function(){
   };
 
   FloatLayoutGenerator.prototype._yieldFloat = function(context, stack, rest_measure, rest_extent){
-    //console.log("yieldFloat(%d,%d)", rest_measure, rest_extent);
     if(rest_measure <= 0){
       return null;
     }
@@ -55,7 +54,7 @@ var FloatLayoutGenerator = (function(){
     */
     var group = stack.pop(); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
     var rest = this._yieldFloat(context, stack, rest_measure - group.getMeasure(flow), group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
-    var group_set = this._wrapFloat(group, rest); // wrap these 2 floated layout as one block.
+    var group_set = this._wrapFloat(group, rest, rest_measure); // wrap these 2 floated layout as one block.
 
     /*
       To understand rest_extent_space, remember that this func is called recursivelly,
@@ -110,13 +109,12 @@ var FloatLayoutGenerator = (function(){
     });
   };
 
-  FloatLayoutGenerator.prototype._wrapFloat = function(floated, rest){
+  FloatLayoutGenerator.prototype._wrapFloat = function(floated, rest, wrap_measure){
     var flow = this.style.flow;
-    var measure = floated.getMeasure(flow) + (rest? rest.getBoxMeasure(flow) : 0);
     var extent = floated.getExtent(flow);
     return this.style.createChild("div", {"float":"start"}).createBlock({
       elements:this._sortFloatRest(floated, rest),
-      measure:measure,
+      measure:wrap_measure,
       extent:extent
     });
   };
