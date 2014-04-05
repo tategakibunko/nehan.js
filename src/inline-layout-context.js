@@ -12,6 +12,12 @@ var InlineLayoutContext = (function(){
     isEmpty : function(){
       return !this.br && this.elements.length === 0;
     },
+    isSpaceLeft : function(){
+      return this.getRestMeasure() > 0;
+    },
+    hasSpaceFor : function(measure){
+      return this.getRestMeasure() >= measure;
+    },
     hasBr : function(){
       return this.br;
     },

@@ -41,6 +41,12 @@ var LayoutContext = (function(){
     isInlineEmpty : function(){
       return this.inline.isEmpty();
     },
+    isInlineSpaceLeft : function(){
+      return this.inline.isSpaceLeft();
+    },
+    hasInlineSpaceFor : function(measure){
+      return this.inline.hasSpaceFor(measure);
+    },
     hasBr : function(){
       return this.inline.hasBr();
     },
