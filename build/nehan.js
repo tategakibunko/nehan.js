@@ -2761,15 +2761,6 @@ var Token = {
   },
   isTcy : function(token){
     return token._type === "tcy";
-  },
-  isInline : function(token){
-    if(this.isText(token)){
-      return true;
-    }
-    if(token.isBlock()){
-      return false;
-    }
-    return token.isInline() || token.isInlineBlock();
   }
 };
 
@@ -7963,7 +7954,7 @@ var LayoutGenerator = (function(){
     this.stream = stream;
     this._childLayout = null;
     this._cachedElements = [];
-    this._terminate = false;
+    this._terminate = false; // used to force terminate generator.
   }
 
   LayoutGenerator.prototype.yield = function(parent_context){
@@ -7980,7 +7971,7 @@ var LayoutGenerator = (function(){
     var new_style = this.style.clone(opt);
     this.style = new_style;
 
-    // if child layout shares the style, rewrite it too.
+    // if child layout shared the same style, rewrite it too.
     if(this._childLayout && this._childLayout.style === old_style){
       this._childLayout.style = new_style;
     }
@@ -8063,6 +8054,30 @@ var LayoutGenerator = (function(){
     );
   };
 
+  LayoutGenerator.prototype._createBlock = function(context){
+    var extent = context.getBlockCurExtent();
+    var elements = context.getBlockElements();
+    if(extent === 0 || elements.length === 0){
+      return null;
+    }
+    return this.style.createBlock({
+      extent:extent,
+      elements:elements
+    });
+  };
+
+  LayoutGenerator.prototype._createLine = function(context){
+    var measure = this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure();
+    return this.style.createLine({
+      br:context.hasBr(), // is line broken by br?
+      measure:measure, // wrapping measure
+      inlineMeasure:context.getInlineCurMeasure(), // actual measure
+      elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
+      texts:context.getInlineTexts(), // elements but text element only.
+      charCount:context.getInlineCharCount()
+    });
+  };
+
   LayoutGenerator.prototype._createStream = function(tag){
     switch(tag.getName()){
     case "ruby": return new RubyTagStream(tag);
@@ -8128,18 +8143,6 @@ var BlockGenerator = (function(){
     return this._createBlock(context);
   };
 
-  BlockGenerator.prototype._createBlock = function(context){
-    var extent = context.getBlockCurExtent();
-    var elements = context.getBlockElements();
-    if(extent === 0 || elements.length === 0){
-      return null;
-    }
-    return this.style.createBlock({
-      extent:extent,
-      elements:elements
-    });
-  };
-
   BlockGenerator.prototype._getNext = function(context){
     if(this.hasCache()){
       var cache = this.popCache(context);
@@ -8188,15 +8191,6 @@ var BlockGenerator = (function(){
     case "ol":
       this.setChildLayout(new ListGenerator(child_style, this._createStream(token)));
       return this.yieldChildLayout(context);
-    case "h1":
-    case "h2":
-    case "h3":
-    case "h4":
-    case "h5":
-    case "h6":
-      this.setChildLayout(new HeaderLayoutGenerator(child_style, this._createStream(token)));
-      return this.yieldChildLayout(context);
-      
     default:
       this.setChildLayout(new BlockGenerator(child_style, this._createStream(token)));
       return this.yieldChildLayout(context);
@@ -8258,18 +8252,6 @@ var InlineGenerator = (function(){
       this.stream.setPos(new_tail.pos + 1); // new stream pos is next pos of new tail.
       this.clearCache(); // stream position changed, so disable cache.
     }
-  };
-
-  InlineGenerator.prototype._createLine = function(context){
-    var measure = this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure();
-    return this.style.createLine({
-      br:context.hasBr(), // is line broken by br?
-      measure:measure, // wrapping measure
-      inlineMeasure:context.getInlineCurMeasure(), // actual measure
-      elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
-      texts:context.getInlineTexts(), // elements but text element only.
-      charCount:context.getInlineCharCount()
-    });
   };
 
   InlineGenerator.prototype._getNext = function(context){
@@ -8867,6 +8849,13 @@ var TableRowGenerator = (function(){
 })();
 
 var SectionRootGenerator = (function(){
+  function SectionRootGenerator(){
+  }
+
+  SectionRootGenerator.prototype = {
+  };
+
+  return SectionRootGenerator;
 })();
 
 

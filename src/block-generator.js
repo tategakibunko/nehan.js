@@ -52,18 +52,6 @@ var BlockGenerator = (function(){
     return this._createBlock(context);
   };
 
-  BlockGenerator.prototype._createBlock = function(context){
-    var extent = context.getBlockCurExtent();
-    var elements = context.getBlockElements();
-    if(extent === 0 || elements.length === 0){
-      return null;
-    }
-    return this.style.createBlock({
-      extent:extent,
-      elements:elements
-    });
-  };
-
   BlockGenerator.prototype._getNext = function(context){
     if(this.hasCache()){
       var cache = this.popCache(context);
@@ -112,15 +100,6 @@ var BlockGenerator = (function(){
     case "ol":
       this.setChildLayout(new ListGenerator(child_style, this._createStream(token)));
       return this.yieldChildLayout(context);
-    case "h1":
-    case "h2":
-    case "h3":
-    case "h4":
-    case "h5":
-    case "h6":
-      this.setChildLayout(new HeaderLayoutGenerator(child_style, this._createStream(token)));
-      return this.yieldChildLayout(context);
-      
     default:
       this.setChildLayout(new BlockGenerator(child_style, this._createStream(token)));
       return this.yieldChildLayout(context);

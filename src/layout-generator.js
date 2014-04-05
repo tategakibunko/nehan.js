@@ -4,7 +4,7 @@ var LayoutGenerator = (function(){
     this.stream = stream;
     this._childLayout = null;
     this._cachedElements = [];
-    this._terminate = false;
+    this._terminate = false; // used to force terminate generator.
   }
 
   LayoutGenerator.prototype.yield = function(parent_context){
@@ -21,7 +21,7 @@ var LayoutGenerator = (function(){
     var new_style = this.style.clone(opt);
     this.style = new_style;
 
-    // if child layout shares the style, rewrite it too.
+    // if child layout shared the same style, rewrite it too.
     if(this._childLayout && this._childLayout.style === old_style){
       this._childLayout.style = new_style;
     }
@@ -102,6 +102,30 @@ var LayoutGenerator = (function(){
       new BlockContext(context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
       new InlineContext(this.style.getContentMeasure())
     );
+  };
+
+  LayoutGenerator.prototype._createBlock = function(context){
+    var extent = context.getBlockCurExtent();
+    var elements = context.getBlockElements();
+    if(extent === 0 || elements.length === 0){
+      return null;
+    }
+    return this.style.createBlock({
+      extent:extent,
+      elements:elements
+    });
+  };
+
+  LayoutGenerator.prototype._createLine = function(context){
+    var measure = this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure();
+    return this.style.createLine({
+      br:context.hasBr(), // is line broken by br?
+      measure:measure, // wrapping measure
+      inlineMeasure:context.getInlineCurMeasure(), // actual measure
+      elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
+      texts:context.getInlineTexts(), // elements but text element only.
+      charCount:context.getInlineCharCount()
+    });
   };
 
   LayoutGenerator.prototype._createStream = function(tag){

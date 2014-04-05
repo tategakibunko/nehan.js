@@ -51,18 +51,6 @@ var InlineGenerator = (function(){
     }
   };
 
-  InlineGenerator.prototype._createLine = function(context){
-    var measure = this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure();
-    return this.style.createLine({
-      br:context.hasBr(), // is line broken by br?
-      measure:measure, // wrapping measure
-      inlineMeasure:context.getInlineCurMeasure(), // actual measure
-      elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
-      texts:context.getInlineTexts(), // elements but text element only.
-      charCount:context.getInlineCharCount()
-    });
-  };
-
   InlineGenerator.prototype._getNext = function(context){
     if(this.hasCache()){
       return this.popCache(context);

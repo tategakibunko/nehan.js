@@ -13,15 +13,6 @@ var Token = {
   },
   isTcy : function(token){
     return token._type === "tcy";
-  },
-  isInline : function(token){
-    if(this.isText(token)){
-      return true;
-    }
-    if(token.isBlock()){
-      return false;
-    }
-    return token.isInline() || token.isInlineBlock();
   }
 };
 
