@@ -2,8 +2,17 @@ var DocumentContext = (function(){
   var __anchors__ = {};
   var __outlines__ = [];
   var __metas__ = {};
+  var __header__ = null;
+  var __document_type__ = "html";
 
   return {
+    setDocumentType : function(tag){
+      // TODO
+      //__document_type__ = tag.getSrc().replace(/<!doctype/gi).replace(">").replace(/\s+/g, "");
+    },
+    setDocumentHeader : function(header){
+      __header__ = header;
+    },
     getOutlineContext : function(markup_name){
       return List.filter(__outlines__, function(outline_context){
 	return outline_context.getMarkupName() === markup_name;

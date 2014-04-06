@@ -5744,8 +5744,17 @@ var DocumentContext = (function(){
   var __anchors__ = {};
   var __outlines__ = [];
   var __metas__ = {};
+  var __header__ = null;
+  var __document_type__ = "html";
 
   return {
+    setDocumentType : function(tag){
+      // TODO
+      //__document_type__ = tag.getSrc().replace(/<!doctype/gi).replace(">").replace(/\s+/g, "");
+    },
+    setDocumentHeader : function(header){
+      __header__ = header;
+    },
     getOutlineContext : function(markup_name){
       return List.filter(__outlines__, function(outline_context){
 	return outline_context.getMarkupName() === markup_name;
@@ -6173,20 +6182,6 @@ var FilteredTokenStream = (function(){
   return FilteredTokenStream;
 })();
 
-var DirectTokenStream = (function(){
-  function DirectTokenStream(tokens){
-    TokenStream.call(this, "");
-    this.tokens = tokens;
-  }
-  Class.extend(DirectTokenStream, TokenStream);
-
-  DirectTokenStream.prototype.isEmpty = function(){
-    return this.tokens.length === 0;
-  };
-
-  return DirectTokenStream;
-})();
-
 var DocumentTokenStream = (function(){
   function DocumentTokenStream(src){
     FilteredTokenStream.call(this, src, function(tag){
@@ -6415,71 +6410,6 @@ var RubyTokenStream = (function(){
   };
 
   return RubyTokenStream;
-})();
-
-
-var DocumentGenerator = (function(){
-  function DocumentGenerator(context){
-    this.context = context;
-    this.generator = this._createGenerator();
-  }
-
-  DocumentGenerator.prototype = {
-    yield : function(){
-      return this.generator.yield();
-    },
-    hasNext : function(){
-      return this.generator.hasNext();
-    },
-    getTitle : function(){
-      return this.context.getTitle();
-    },
-    getMeta : function(name){
-      return this.context.getMeta(name);
-    },
-    hasOutline : function(root_name){
-      return this.generator.hasOutline(root_name);
-    },
-    getOutline : function(root_name){
-      return this.generator.getOutline(root_name);
-    },
-    getOutlineTree : function(root_name){
-      return this.generator.getOutlineTree(root_name);
-    },
-    getOutlineHtml : function(root_name){
-      return this.generator.getOutlineHtml(root_name);
-    },
-    getAnchors : function(){
-      return this.generator.getAnchors();
-    },
-    getAnchorPageNo : function(anchor_name){
-      return this.generator.getAnchorPageNo(anchor_name);
-    },
-    _createGenerator : function(){
-      while(this.context.hasNextToken()){
-	var tag = this.context.getNextToken();
-	switch(tag.getName()){
-	case "!doctype":
-	  this.context.setDocumentType(tag);
-	  break;
-	case "html":
-	  return this._createHtmlGenerator(tag);
-	}
-      }
-      return this._createHtmlGenerator(
-	new Tag("<html>", this.context.getStreamSrc())
-      );
-    },
-    _createHtmlGenerator : function(html_tag){
-      return new HtmlGenerator(
-	this.context.createBlockRoot(
-	  html_tag, new HtmlTokenStream(html_tag.getContentRaw())
-	)
-      );
-    }
-  };
-
-  return DocumentGenerator;
 })();
 
 
@@ -7917,11 +7847,8 @@ var LayoutGenerator = (function(){
     );
   };
 
-  // TODO
   LayoutGenerator.prototype._createStream = function(tag){
     switch(tag.getName()){
-    case "html": return new HtmlTokenStream(tag.getContent());
-    case "head": return new HeadTokenStream(tag.getContent());
     case "ruby": return new RubyTokenStream(tag);
     default: return new TokenStream(tag.getContent());
     } 
@@ -7999,12 +7926,6 @@ var BlockGenerator = (function(){
     // if tag token, inherit style
     var child_style = (token instanceof Tag)? new StyleContext(token, this.style) : this.style;
 
-/*
-    if(child_style.isMeta()){
-      this._parseMeta(token);
-      return this._getNext(context);
-    }
-*/
     // inline text or inline tag
     // stream push back, and delegate current style and stream to InlineGenerator
     if(Token.isText(token) || child_style.isInline()){
@@ -8842,24 +8763,8 @@ var BodyGenerator = (function(){
 })();
 
 var HtmlGenerator = (function(){
-  function HtmlGenerator(style, stream){
-    BlockGenerator.call(this, style, stream);
-  }
-  Class.extend(HtmlGenerator, BlockGenerator);
-
-  HtmlGenerator.prototype._addElement = function(context, element, extent){
-  };
-
-  HtmlGenerator.prototype._onAddElement = function(element){
-  };
-
-  return HtmlGenerator;
-})();
-  
-/*
-var HtmlGenerator = (function(){
-  function HtmlGenerator(context){
-    this.context = context;
+  function HtmlGenerator(text){
+    this.stream = new HtmlTokenStream(text);
     this.generator = this._createGenerator();
   }
 
@@ -8870,53 +8775,34 @@ var HtmlGenerator = (function(){
     hasNext : function(){
       return this.generator.hasNext();
     },
-    hasOutline : function(root_name){
-      return this.generator.hasOutline(root_name);
-    },
-    getOutline : function(root_name){
-      return this.generator.getOutline(root_name);
-    },
-    getOutlineTree : function(root_name){
-      return this.generator.getOutlineTree(root_name);
-    },
-    getOutlineHtml : function(root_name){
-      return this.generator.getOutlineHtml(root_name);
-    },
-    getAnchors : function(){
-      return this.generator.getAnchors();
-    },
-    getAnchorPageNo : function(anchor_name){
-      return this.generator.getAnchorPageNo(anchor_name);
-    },
     _createGenerator : function(){
-      while(this.context.hasNextToken()){
-	var tag = this.context.getNextToken();
+      while(this.stream.hasNext()){
+	var tag = this.stream.get();
 	switch(tag.getName()){
 	case "head":
-	  this._parseHead(this.context.getHeader(), tag.getContentRaw());
+	  this._parseHead(new HeadTokenStream(tag.getContent()));
 	  break;
 	case "body":
 	  return this._createBodyGenerator(tag);
 	}
       }
-      return this._createBodyGenerator(
-	new Tag("<body>", this.context.getStreamSrc())
+      var body_tag = new Tag("<body>", this.context.getStreamSrc());
+      return this._createBodyGenerator(body_tag);
+    },
+    _createBodyGenerator : function(tag){
+      return new BodyGenerator(
+	new StyleContext(tag, null),
+	new TokenStream(tag.getContent())
       );
     },
-    _createBodyGenerator : function(body_tag){
-      return new BodyBlockTreeGenerator(
-	this.context.createBlockRoot(
-	  body_tag, new TokenStream(body_tag.getContentRaw())
-	)
-      );
-    },
-    _parseHead : function(header, content){
+    _parseHead : function(){
       var stream = new HeadTokenStream(content);
+      var header = new DocumentHeader();
       while(stream.hasNext()){
 	var tag = stream.get();
 	switch(tag.getName()){
 	case "title":
-	  header.setTitle(tag.getContentRaw());
+	  header.setTitle(tag.getContent());
 	  break;
 	case "meta":
 	  header.addMeta(tag);
@@ -8932,13 +8818,48 @@ var HtmlGenerator = (function(){
 	  break;
 	}
       }
+      DocumentContext.setDocumentHeader(header);
     }
   };
 
   return HtmlGenerator;
 })();
 
-*/
+
+var DocumentGenerator = (function(){
+  function DocumentGenerator(text){
+    this.stream = new DocumentTokenStream(text);
+    this.generator = this._createGenerator();
+  }
+
+  DocumentGenerator.prototype = {
+    yield : function(){
+      return this.generator.yield();
+    },
+    hasNext : function(){
+      return this.generator.hasNext();
+    },
+    _createGenerator : function(){
+      while(this.stream.hasNext()){
+	var tag = this.stream.get();
+	switch(tag.getName()){
+	case "!doctype":
+	  DocumentContext.setDocumentType(tag);
+	  break;
+	case "html":
+	  return this._createHtmlGenerator(tag);
+	}
+      }
+      var html_tag = new Tag("<html>", this.context.getStreamSrc());
+      return this._createHtmlGenerator(html_tag);
+    },
+    _createHtmlGenerator : function(html_tag){
+      return HtmlGenerator(html_tag.getContent());
+    }
+  };
+
+  return DocumentGenerator;
+})();
 
 
 var LayoutEvaluator = (function(){

@@ -104,11 +104,8 @@ var LayoutGenerator = (function(){
     );
   };
 
-  // TODO
   LayoutGenerator.prototype._createStream = function(tag){
     switch(tag.getName()){
-    case "html": return new HtmlTokenStream(tag.getContent());
-    case "head": return new HeadTokenStream(tag.getContent());
     case "ruby": return new RubyTokenStream(tag);
     default: return new TokenStream(tag.getContent());
     } 

@@ -66,12 +66,6 @@ var BlockGenerator = (function(){
     // if tag token, inherit style
     var child_style = (token instanceof Tag)? new StyleContext(token, this.style) : this.style;
 
-/*
-    if(child_style.isMeta()){
-      this._parseMeta(token);
-      return this._getNext(context);
-    }
-*/
     // inline text or inline tag
     // stream push back, and delegate current style and stream to InlineGenerator
     if(Token.isText(token) || child_style.isInline()){
