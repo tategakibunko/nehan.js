@@ -15,7 +15,7 @@ var PageGroupEvaluator = (function(){
 	return ret;
       });
       var first = results[0];
-      return new EvalResult({
+      return new Page({
 	html:html,
 	groupLength:page_group.getSize(),
 	percent:first.percent,

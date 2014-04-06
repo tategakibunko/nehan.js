@@ -130,7 +130,7 @@ module.exports = function(grunt) {
 	    "src/table-token-stream.js",
 	    "src/ruby-token-stream.js",
 	    "src/page-group-generator.js",
-	    "src/eval-result.js",
+	    "src/page.js",
 	    "src/page-evaluator.js",
 	    "src/page-group-evaluator.js",
 	    "src/page-stream.js",

@@ -5,7 +5,7 @@ var PageEvaluator = (function(){
 
   PageEvaluator.prototype = {
     evaluate : function(body_element){
-      return new EvalResult({
+      return new Page({
 	html:this.evaluator.evaluate(body_element),
 	percent:box.percent,
 	seekPos:box.seekPos,

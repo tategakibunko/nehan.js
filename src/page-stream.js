@@ -32,13 +32,13 @@ var PageStream = (function(){
       }
       return this.get(cur_page_no);
     },
-    // int -> EvalResult
+    // int -> Page
     get : function(page_no){
       var entry = this.buffer[page_no];
-      if(entry instanceof EvalResult){ // already evaluated.
+      if(entry instanceof Page){ // already evaluated.
 	return entry;
       }
-      // if still not evaluated, eval and get EvalResult
+      // if still not evaluated, eval and get Page
       var result = this.evaluator.evaluate(entry);
       this.buffer[page_no] = result; // over write buffer entry by result.
       return result;

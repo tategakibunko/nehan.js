@@ -1,5 +1,5 @@
-var EvalResult = (function(){
-  function EvalResult(opts){
+var Page = (function(){
+  function Page(opt){
     Args.merge(this, {
       html:"",
       groupLength:1,
@@ -8,10 +8,10 @@ var EvalResult = (function(){
       charPos:0,
       charCount:0,
       percent:0
-    }, opts);
+    }, opt);
   }
 
-  EvalResult.prototype = {
+  Page.prototype = {
     isGroup : function(){
       return this.groupLength > 1;
     },
@@ -38,5 +38,5 @@ var EvalResult = (function(){
     }
   };
 
-  return EvalResult;
+  return Page;
 })();
