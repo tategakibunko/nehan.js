@@ -1,5 +1,5 @@
-var FilteredTagStream = (function(){
-  function FilteredTagStream(src, fn){
+var FilteredTokenStream = (function(){
+  function FilteredTokenStream(src, fn){
     TokenStream.call(this, src);
     var order = 0;
     this.tokens = this.getAllIf(function(token){
@@ -12,7 +12,7 @@ var FilteredTagStream = (function(){
       }
     });
   }
-  Class.extend(FilteredTagStream, TokenStream);
+  Class.extend(FilteredTokenStream, TokenStream);
 
-  return FilteredTagStream;
+  return FilteredTokenStream;
 })();

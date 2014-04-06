@@ -1,4 +1,20 @@
 var HtmlGenerator = (function(){
+  function HtmlGenerator(style, stream){
+    BlockGenerator.call(this, style, stream);
+  }
+  Class.extend(HtmlGenerator, BlockGenerator);
+
+  HtmlGenerator.prototype._addElement = function(context, element, extent){
+  };
+
+  HtmlGenerator.prototype._onAddElement = function(element){
+  };
+
+  return HtmlGenerator;
+})();
+  
+/*
+var HtmlGenerator = (function(){
   function HtmlGenerator(context){
     this.context = context;
     this.generator = this._createGenerator();
@@ -52,7 +68,7 @@ var HtmlGenerator = (function(){
       );
     },
     _parseHead : function(header, content){
-      var stream = new HeadTagStream(content);
+      var stream = new HeadTokenStream(content);
       while(stream.hasNext()){
 	var tag = stream.get();
 	switch(tag.getName()){
@@ -78,4 +94,6 @@ var HtmlGenerator = (function(){
 
   return HtmlGenerator;
 })();
+
+*/
 

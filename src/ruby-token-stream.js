@@ -1,13 +1,13 @@
-var RubyTagStream = (function(){
-  function RubyTagStream(markup_ruby){
+var RubyTokenStream = (function(){
+  function RubyTokenStream(markup_ruby){
     TokenStream.call(this, markup_ruby.getContent());
     this.getAll();
     this.tokens = this._parse(markup_ruby);
     this.rewind();
   }
-  Class.extend(RubyTagStream, TokenStream);
+  Class.extend(RubyTokenStream, TokenStream);
 
-  RubyTagStream.prototype._parse = function(markup_ruby){
+  RubyTokenStream.prototype._parse = function(markup_ruby){
     var ret = [];
     while(this.hasNext()){
       ret.push(this._parseRuby(markup_ruby));
@@ -15,7 +15,7 @@ var RubyTagStream = (function(){
     return ret;
   };
 
-  RubyTagStream.prototype._parseRuby = function(markup_ruby){
+  RubyTokenStream.prototype._parseRuby = function(markup_ruby){
     var rbs = [];
     var rt = null;
     while(true){
@@ -34,6 +34,6 @@ var RubyTagStream = (function(){
     return new Ruby(rbs, rt);
   };
 
-  return RubyTagStream;
+  return RubyTokenStream;
 })();
 

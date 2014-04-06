@@ -1,7 +1,7 @@
-var TableTagStream = (function(){
-  function TableTagStream(markup){
+var TableTokenStream = (function(){
+  function TableTokenStream(markup){
     // TODO: caption not supported yet.
-    FilteredTagStream.call(this, markup.getContent(), function(tag){
+    FilteredTokenStream.call(this, markup.getContent(), function(tag){
       var name = tag.getName();
       return (name === "thead" ||
 	      name === "tbody" ||
@@ -11,9 +11,9 @@ var TableTagStream = (function(){
     this.markup = markup;
     this.markup.tableChilds = this.tokens = this._parseTokens(this.markup, this.tokens);
   }
-  Class.extend(TableTagStream, FilteredTagStream);
+  Class.extend(TableTokenStream, FilteredTokenStream);
 
-  TableTagStream.prototype.getPartition = function(box){
+  TableTokenStream.prototype.getPartition = function(box){
     var self = this;
     var partition = new TablePartition();
     var measure = box.getContentMeasure();
@@ -31,7 +31,7 @@ var TableTagStream = (function(){
     return partition;
   };
 
-  TableTagStream.prototype._parseTokens = function(parent_markup, tokens){
+  TableTokenStream.prototype._parseTokens = function(parent_markup, tokens){
     var theads = [], tfoots = [], tbodies = [], self = this;
     var thead = null, tbody = null, tfoot = null;
     var ctx = {row:0, col:0, maxCol:0};
@@ -98,7 +98,7 @@ var TableTagStream = (function(){
     return ret;
   };
 
-  TableTagStream.prototype._parsePartition = function(childs, box){
+  TableTokenStream.prototype._parsePartition = function(childs, box){
     return List.map(childs, function(child){
       var size = child.getTagAttr("measure") || child.getTagAttr("width") || 0;
       if(size){
@@ -108,9 +108,9 @@ var TableTagStream = (function(){
     });
   };
 
-  TableTagStream.prototype._parseRows = function(ctx, parent){
+  TableTokenStream.prototype._parseRows = function(ctx, parent){
     var self = this;
-    var rows = (new FilteredTagStream(parent.getContent(), function(tag){
+    var rows = (new FilteredTokenStream(parent.getContent(), function(tag){
       return tag.getName() === "tr";
     })).getAll();
 
@@ -122,8 +122,8 @@ var TableTagStream = (function(){
     });
   };
 
-  TableTagStream.prototype._parseCols = function(ctx, parent){
-    var cols = (new FilteredTagStream(parent.getContent(), function(tag){
+  TableTokenStream.prototype._parseCols = function(ctx, parent){
+    var cols = (new FilteredTokenStream(parent.getContent(), function(tag){
       var name = tag.getName();
       return (name === "td" || name === "th");
     })).getAll();
@@ -139,7 +139,7 @@ var TableTagStream = (function(){
     return cols;
   };
 
-  return TableTagStream;
+  return TableTokenStream;
 })();
 
 

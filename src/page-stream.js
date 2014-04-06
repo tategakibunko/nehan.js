@@ -145,7 +145,7 @@ var PageStream = (function(){
     _createGenerator : function(text){
       return new DocumentGenerator(
 	new DocumentContext({
-	  stream:new DocumentTagStream(text)
+	  stream:new DocumentTokenStream(text)
 	})
       );
     },

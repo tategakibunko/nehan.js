@@ -6154,8 +6154,8 @@ var TokenStream = (function(){
 })();
 
 
-var FilteredTagStream = (function(){
-  function FilteredTagStream(src, fn){
+var FilteredTokenStream = (function(){
+  function FilteredTokenStream(src, fn){
     TokenStream.call(this, src);
     var order = 0;
     this.tokens = this.getAllIf(function(token){
@@ -6168,9 +6168,9 @@ var FilteredTagStream = (function(){
       }
     });
   }
-  Class.extend(FilteredTagStream, TokenStream);
+  Class.extend(FilteredTokenStream, TokenStream);
 
-  return FilteredTagStream;
+  return FilteredTokenStream;
 })();
 
 var DirectTokenStream = (function(){
@@ -6187,9 +6187,9 @@ var DirectTokenStream = (function(){
   return DirectTokenStream;
 })();
 
-var DocumentTagStream = (function(){
-  function DocumentTagStream(src){
-    FilteredTagStream.call(this, src, function(tag){
+var DocumentTokenStream = (function(){
+  function DocumentTokenStream(src){
+    FilteredTokenStream.call(this, src, function(tag){
       var name = tag.getName();
       return (name === "!doctype" || name === "html");
     });
@@ -6197,27 +6197,27 @@ var DocumentTagStream = (function(){
       this.tokens = [new Tag("html", src)];
     }
   }
-  Class.extend(DocumentTagStream, FilteredTagStream);
+  Class.extend(DocumentTokenStream, FilteredTokenStream);
 
-  return DocumentTagStream;
+  return DocumentTokenStream;
 })();
 
-var HtmlTagStream = (function(){
-  function HtmlTagStream(src){
-    FilteredTagStream.call(this, src, function(tag){
+var HtmlTokenStream = (function(){
+  function HtmlTokenStream(src){
+    FilteredTokenStream.call(this, src, function(tag){
       var name = tag.getName();
       return (name === "head" || name === "body");
     });
   }
-  Class.extend(HtmlTagStream, FilteredTagStream);
+  Class.extend(HtmlTokenStream, FilteredTokenStream);
 
-  return HtmlTagStream;
+  return HtmlTokenStream;
 })();
 
 
-var HeadTagStream = (function(){
-  function HeadTagStream(src){
-    FilteredTagStream.call(this, src, function(tag){
+var HeadTokenStream = (function(){
+  function HeadTokenStream(src){
+    FilteredTokenStream.call(this, src, function(tag){
       var name = tag.getName();
       return (name === "title" ||
 	      name === "meta" ||
@@ -6226,16 +6226,16 @@ var HeadTagStream = (function(){
 	      name === "script");
     });
   }
-  Class.extend(HeadTagStream, FilteredTagStream);
+  Class.extend(HeadTokenStream, FilteredTokenStream);
 
-  return HeadTagStream;
+  return HeadTokenStream;
 })();
 
 
-var TableTagStream = (function(){
-  function TableTagStream(markup){
+var TableTokenStream = (function(){
+  function TableTokenStream(markup){
     // TODO: caption not supported yet.
-    FilteredTagStream.call(this, markup.getContent(), function(tag){
+    FilteredTokenStream.call(this, markup.getContent(), function(tag){
       var name = tag.getName();
       return (name === "thead" ||
 	      name === "tbody" ||
@@ -6245,9 +6245,9 @@ var TableTagStream = (function(){
     this.markup = markup;
     this.markup.tableChilds = this.tokens = this._parseTokens(this.markup, this.tokens);
   }
-  Class.extend(TableTagStream, FilteredTagStream);
+  Class.extend(TableTokenStream, FilteredTokenStream);
 
-  TableTagStream.prototype.getPartition = function(box){
+  TableTokenStream.prototype.getPartition = function(box){
     var self = this;
     var partition = new TablePartition();
     var measure = box.getContentMeasure();
@@ -6265,7 +6265,7 @@ var TableTagStream = (function(){
     return partition;
   };
 
-  TableTagStream.prototype._parseTokens = function(parent_markup, tokens){
+  TableTokenStream.prototype._parseTokens = function(parent_markup, tokens){
     var theads = [], tfoots = [], tbodies = [], self = this;
     var thead = null, tbody = null, tfoot = null;
     var ctx = {row:0, col:0, maxCol:0};
@@ -6332,7 +6332,7 @@ var TableTagStream = (function(){
     return ret;
   };
 
-  TableTagStream.prototype._parsePartition = function(childs, box){
+  TableTokenStream.prototype._parsePartition = function(childs, box){
     return List.map(childs, function(child){
       var size = child.getTagAttr("measure") || child.getTagAttr("width") || 0;
       if(size){
@@ -6342,9 +6342,9 @@ var TableTagStream = (function(){
     });
   };
 
-  TableTagStream.prototype._parseRows = function(ctx, parent){
+  TableTokenStream.prototype._parseRows = function(ctx, parent){
     var self = this;
-    var rows = (new FilteredTagStream(parent.getContent(), function(tag){
+    var rows = (new FilteredTokenStream(parent.getContent(), function(tag){
       return tag.getName() === "tr";
     })).getAll();
 
@@ -6356,8 +6356,8 @@ var TableTagStream = (function(){
     });
   };
 
-  TableTagStream.prototype._parseCols = function(ctx, parent){
-    var cols = (new FilteredTagStream(parent.getContent(), function(tag){
+  TableTokenStream.prototype._parseCols = function(ctx, parent){
+    var cols = (new FilteredTokenStream(parent.getContent(), function(tag){
       var name = tag.getName();
       return (name === "td" || name === "th");
     })).getAll();
@@ -6373,46 +6373,21 @@ var TableTagStream = (function(){
     return cols;
   };
 
-  return TableTagStream;
+  return TableTokenStream;
 })();
 
 
 
-var ListTagStream = (function(){
-  function ListTagStream(src){
-    FilteredTagStream.call(this, src, function(tag){
-      return tag.getName() === "li";
-    });
-  }
-  Class.extend(ListTagStream, FilteredTagStream);
-
-  return ListTagStream;
-})();
-
-
-var DefListTagStream = (function(){
-  function DefListTagStream(src){
-    FilteredTagStream.call(this, src, function(tag){
-      var name = tag.getName();
-      return (name === "dt" || name === "dd");
-    });
-  }
-  Class.extend(DefListTagStream, FilteredTagStream);
-
-  return DefListTagStream;
-})();
-
-
-var RubyTagStream = (function(){
-  function RubyTagStream(markup_ruby){
+var RubyTokenStream = (function(){
+  function RubyTokenStream(markup_ruby){
     TokenStream.call(this, markup_ruby.getContent());
     this.getAll();
     this.tokens = this._parse(markup_ruby);
     this.rewind();
   }
-  Class.extend(RubyTagStream, TokenStream);
+  Class.extend(RubyTokenStream, TokenStream);
 
-  RubyTagStream.prototype._parse = function(markup_ruby){
+  RubyTokenStream.prototype._parse = function(markup_ruby){
     var ret = [];
     while(this.hasNext()){
       ret.push(this._parseRuby(markup_ruby));
@@ -6420,7 +6395,7 @@ var RubyTagStream = (function(){
     return ret;
   };
 
-  RubyTagStream.prototype._parseRuby = function(markup_ruby){
+  RubyTokenStream.prototype._parseRuby = function(markup_ruby){
     var rbs = [];
     var rt = null;
     while(true){
@@ -6439,7 +6414,7 @@ var RubyTagStream = (function(){
     return new Ruby(rbs, rt);
   };
 
-  return RubyTagStream;
+  return RubyTokenStream;
 })();
 
 
@@ -6498,95 +6473,13 @@ var DocumentGenerator = (function(){
     _createHtmlGenerator : function(html_tag){
       return new HtmlGenerator(
 	this.context.createBlockRoot(
-	  html_tag, new HtmlTagStream(html_tag.getContentRaw())
+	  html_tag, new HtmlTokenStream(html_tag.getContentRaw())
 	)
       );
     }
   };
 
   return DocumentGenerator;
-})();
-
-
-var HtmlGenerator = (function(){
-  function HtmlGenerator(context){
-    this.context = context;
-    this.generator = this._createGenerator();
-  }
-
-  HtmlGenerator.prototype = {
-    yield : function(){
-      return this.generator.yield();
-    },
-    hasNext : function(){
-      return this.generator.hasNext();
-    },
-    hasOutline : function(root_name){
-      return this.generator.hasOutline(root_name);
-    },
-    getOutline : function(root_name){
-      return this.generator.getOutline(root_name);
-    },
-    getOutlineTree : function(root_name){
-      return this.generator.getOutlineTree(root_name);
-    },
-    getOutlineHtml : function(root_name){
-      return this.generator.getOutlineHtml(root_name);
-    },
-    getAnchors : function(){
-      return this.generator.getAnchors();
-    },
-    getAnchorPageNo : function(anchor_name){
-      return this.generator.getAnchorPageNo(anchor_name);
-    },
-    _createGenerator : function(){
-      while(this.context.hasNextToken()){
-	var tag = this.context.getNextToken();
-	switch(tag.getName()){
-	case "head":
-	  this._parseHead(this.context.getHeader(), tag.getContentRaw());
-	  break;
-	case "body":
-	  return this._createBodyGenerator(tag);
-	}
-      }
-      return this._createBodyGenerator(
-	new Tag("<body>", this.context.getStreamSrc())
-      );
-    },
-    _createBodyGenerator : function(body_tag){
-      return new BodyBlockTreeGenerator(
-	this.context.createBlockRoot(
-	  body_tag, new TokenStream(body_tag.getContentRaw())
-	)
-      );
-    },
-    _parseHead : function(header, content){
-      var stream = new HeadTagStream(content);
-      while(stream.hasNext()){
-	var tag = stream.get();
-	switch(tag.getName()){
-	case "title":
-	  header.setTitle(tag.getContentRaw());
-	  break;
-	case "meta":
-	  header.addMeta(tag);
-	  break;
-	case "link":
-	  header.addLink(tag);
-	  break;
-	case "style":
-	  header.addStyle(tag);
-	  break;
-	case "script":
-	  header.addScript(tag);
-	  break;
-	}
-      }
-    }
-  };
-
-  return HtmlGenerator;
 })();
 
 
@@ -6834,7 +6727,7 @@ var PageStream = (function(){
     _createGenerator : function(text){
       return new DocumentGenerator(
 	new DocumentContext({
-	  stream:new DocumentTagStream(text)
+	  stream:new DocumentTokenStream(text)
 	})
       );
     },
@@ -7099,6 +6992,7 @@ var StyleContext = (function(){
     if(list_style){
       this.listStyle = list_style;
     }
+    this.isMeta = markup.getCssAttr("meta")? true : false;
     if(this.parent){
       this.parent._appendChild(this);
     }
@@ -7182,6 +7076,9 @@ var StyleContext = (function(){
 	}
       }
       return line;
+    },
+    isMeta : function(){
+      return this.isMeta || false;
     },
     isBlock : function(){
       return this.display === "block";
@@ -8020,9 +7917,12 @@ var LayoutGenerator = (function(){
     );
   };
 
+  // TODO
   LayoutGenerator.prototype._createStream = function(tag){
     switch(tag.getName()){
-    case "ruby": return new RubyTagStream(tag);
+    case "html": return new HtmlTokenStream(tag.getContent());
+    case "head": return new HeadTokenStream(tag.getContent());
+    case "ruby": return new RubyTokenStream(tag);
     default: return new TokenStream(tag.getContent());
     } 
   };
@@ -8099,6 +7999,12 @@ var BlockGenerator = (function(){
     // if tag token, inherit style
     var child_style = (token instanceof Tag)? new StyleContext(token, this.style) : this.style;
 
+/*
+    if(child_style.isMeta()){
+      this._parseMeta(token);
+      return this._getNext(context);
+    }
+*/
     // inline text or inline tag
     // stream push back, and delegate current style and stream to InlineGenerator
     if(Token.isText(token) || child_style.isInline()){
@@ -8887,8 +8793,6 @@ var SectionRootGenerator = (function(){
 
   SectionRootGenerator.prototype._onComplete = function(block){
     DocumentContext.addOutlineContext(this.outlineContext);
-    //var tree = this.outlineContext.outputTree();
-    //var dom_tree = this.outlineContext.outputNode();
   };
 
   return SectionRootGenerator;
@@ -8936,6 +8840,106 @@ var BodyGenerator = (function(){
 
   return BodyGenerator;
 })();
+
+var HtmlGenerator = (function(){
+  function HtmlGenerator(style, stream){
+    BlockGenerator.call(this, style, stream);
+  }
+  Class.extend(HtmlGenerator, BlockGenerator);
+
+  HtmlGenerator.prototype._addElement = function(context, element, extent){
+  };
+
+  HtmlGenerator.prototype._onAddElement = function(element){
+  };
+
+  return HtmlGenerator;
+})();
+  
+/*
+var HtmlGenerator = (function(){
+  function HtmlGenerator(context){
+    this.context = context;
+    this.generator = this._createGenerator();
+  }
+
+  HtmlGenerator.prototype = {
+    yield : function(){
+      return this.generator.yield();
+    },
+    hasNext : function(){
+      return this.generator.hasNext();
+    },
+    hasOutline : function(root_name){
+      return this.generator.hasOutline(root_name);
+    },
+    getOutline : function(root_name){
+      return this.generator.getOutline(root_name);
+    },
+    getOutlineTree : function(root_name){
+      return this.generator.getOutlineTree(root_name);
+    },
+    getOutlineHtml : function(root_name){
+      return this.generator.getOutlineHtml(root_name);
+    },
+    getAnchors : function(){
+      return this.generator.getAnchors();
+    },
+    getAnchorPageNo : function(anchor_name){
+      return this.generator.getAnchorPageNo(anchor_name);
+    },
+    _createGenerator : function(){
+      while(this.context.hasNextToken()){
+	var tag = this.context.getNextToken();
+	switch(tag.getName()){
+	case "head":
+	  this._parseHead(this.context.getHeader(), tag.getContentRaw());
+	  break;
+	case "body":
+	  return this._createBodyGenerator(tag);
+	}
+      }
+      return this._createBodyGenerator(
+	new Tag("<body>", this.context.getStreamSrc())
+      );
+    },
+    _createBodyGenerator : function(body_tag){
+      return new BodyBlockTreeGenerator(
+	this.context.createBlockRoot(
+	  body_tag, new TokenStream(body_tag.getContentRaw())
+	)
+      );
+    },
+    _parseHead : function(header, content){
+      var stream = new HeadTokenStream(content);
+      while(stream.hasNext()){
+	var tag = stream.get();
+	switch(tag.getName()){
+	case "title":
+	  header.setTitle(tag.getContentRaw());
+	  break;
+	case "meta":
+	  header.addMeta(tag);
+	  break;
+	case "link":
+	  header.addLink(tag);
+	  break;
+	case "style":
+	  header.addStyle(tag);
+	  break;
+	case "script":
+	  header.addScript(tag);
+	  break;
+	}
+      }
+    }
+  };
+
+  return HtmlGenerator;
+})();
+
+*/
+
 
 var LayoutEvaluator = (function(){
   function LayoutEvaluator(){

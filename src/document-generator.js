@@ -53,7 +53,7 @@ var DocumentGenerator = (function(){
     _createHtmlGenerator : function(html_tag){
       return new HtmlGenerator(
 	this.context.createBlockRoot(
-	  html_tag, new HtmlTagStream(html_tag.getContentRaw())
+	  html_tag, new HtmlTokenStream(html_tag.getContentRaw())
 	)
       );
     }
