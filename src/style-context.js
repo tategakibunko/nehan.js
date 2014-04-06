@@ -93,14 +93,18 @@ var StyleContext = (function(){
       return style;
     },
     createBlock : function(opt){
+      var elements = opt.elements || [];
       var measure = opt.measure || this.getContentMeasure();
       var extent = this.parent? (opt.extent || this.getContentExtent()) : this.getContentExtent();
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
       var box = new Box(box_size, this);
       box.display = "block";
-      box.elements = opt.elements || [];
+      box.elements = elements;
       box.classes = classes;
+      box.charCount = List.fold(elements, 0, function(total, element){
+	return total + (element? (element.charCount || 0) : 0);
+      });
       if(this.edge){
 	box.edge = this.edge.clone();
       }
@@ -123,6 +127,7 @@ var StyleContext = (function(){
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
       line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.markup.getName());
+      line.charCount = opt.charCount || 0;
 
       // backup other line data. mainly required to restore inline-context.
       if(this.isRootLine()){

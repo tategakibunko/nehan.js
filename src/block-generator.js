@@ -130,6 +130,9 @@ var BlockGenerator = (function(){
   };
 
   BlockGenerator.prototype._addElement = function(context, element, extent){
+    if(element === null){
+      return;
+    }
     if(this.style.isPushed()){
       context.pushBockElement(element, extent);
     } else if(this.style.isPulled()){

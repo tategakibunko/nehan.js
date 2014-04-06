@@ -175,6 +175,7 @@ var LayoutTest = (function(){
       do {
 	var page = generator.yield();
 	if(page){
+	  console.log("body element:%o", page);
 	  var html = evaluator.evaluate(page);
 	  output.appendChild(make_div(html));
 	  raws.push(html);

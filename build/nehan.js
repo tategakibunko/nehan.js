@@ -6413,8 +6413,8 @@ var RubyTokenStream = (function(){
 })();
 
 
-var EvalResult = (function(){
-  function EvalResult(opts){
+var Page = (function(){
+  function Page(opt){
     Args.merge(this, {
       html:"",
       groupLength:1,
@@ -6423,10 +6423,10 @@ var EvalResult = (function(){
       charPos:0,
       charCount:0,
       percent:0
-    }, opts);
+    }, opt);
   }
 
-  EvalResult.prototype = {
+  Page.prototype = {
     isGroup : function(){
       return this.groupLength > 1;
     },
@@ -6453,23 +6453,23 @@ var EvalResult = (function(){
     }
   };
 
-  return EvalResult;
+  return Page;
 })();
 
 var PageEvaluator = (function(){
   function PageEvaluator(){
-    this.blockEvaluator = new BlockTreeEvaluator();
+    this.evaluator = new LayoutEvaluator();
   }
 
   PageEvaluator.prototype = {
-    evaluate : function(box){
-      return new EvalResult({
-	html:this.blockEvaluator.evaluate(box),
-	percent:box.percent,
-	seekPos:box.seekPos,
-	pageNo:box.pageNo,
-	charPos:box.charPos,
-	charCount:box.charCount
+    evaluate : function(body_element){
+      return new Page({
+	html:this.evaluator.evaluate(body_element),
+	percent:body_element.percent,
+	seekPos:body_element.seekPos,
+	pageNo:body_element.pageNo,
+	charPos:body_element.charPos,
+	charCount:body_element.charCount
       });
     }
   };
@@ -6480,7 +6480,7 @@ var PageEvaluator = (function(){
 
 var PageGroupEvaluator = (function(){
   function PageGroupEvaluator(){
-    this.evaluator = new PageEvaluator();
+    this.evaluator = new LayoutEvaluator();
   }
 
   PageGroupEvaluator.prototype = {
@@ -6488,14 +6488,14 @@ var PageGroupEvaluator = (function(){
       var self = this;
       var char_count = 0;
       var html = [];
-      var results = List.map(page_group.getPages(), function(page){
-	var ret = self.evaluator.evaluate(page);
+      var results = List.map(page_group.getPages(), function(body_element){
+	var ret = self.evaluator.evaluate(body_element);
 	char_count += ret.charCount;
 	html.push(ret.html);
 	return ret;
       });
       var first = results[0];
-      return new EvalResult({
+      return new Page({
 	html:html,
 	groupLength:page_group.getSize(),
 	percent:first.percent,
@@ -6530,76 +6530,10 @@ var PageStream = (function(){
     hasNext : function(){
       return this.generator.hasNext();
     },
-    hasOutline : function(root_name){
-      return this.generator.hasOutline(root_name);
-    },
-    getNext : function(){
-      if(!this.hasNext()){
-	return null;
-      }
-      var cur_page_no = this._seekPageNo;
-      if(!this.hasPage(cur_page_no)){
-	var entry = this._yield();
-	this._addBuffer(entry);
-	this._seekPageNo++;
-	this._seekPercent = entry.percent;
-	this._seekPos = entry.seekPos;
-      }
-      return this.get(cur_page_no);
-    },
-    // int -> EvalResult
-    get : function(page_no){
-      var entry = this.buffer[page_no];
-      if(entry instanceof EvalResult){ // already evaluated.
-	return entry;
-      }
-      // if still not evaluated, eval and get EvalResult
-      var result = this.evaluator.evaluate(entry);
-      this.buffer[page_no] = result; // over write buffer entry by result.
-      return result;
-    },
-    getPageCount : function(){
-      return this.buffer.length;
-    },
-    getGroupPageNo : function(cell_page_no){
-      return cell_page_no;
-    },
-    getOutlineTree : function(root_name){
-      return this.generator.getOutlineTree(root_name || "body");
-    },
-    getOutlineNode : function(root_name, opt){
-      var tree = this.getOutlineTree(root_name);
-      var converter = new OutlineConverter(tree, opt || {});
-      return converter.outputNode();
-    },
-    getAnchors : function(){
-      return this.generator.getAnchors();
-    },
-    getAnchorPageNo : function(anchor_name){
-      return this.generator.getAnchorPageNo(anchor_name);
-    },
-    getSeekPageResult : function(){
-      return this.get(this._seekPageNo);
-    },
-    getSeekPageNo : function(){
-      return this._seekPageNo;
-    },
-    getSeekPercent : function(){
-      return this._seekPercent;
-    },
-    getSeekPos : function(){
-      return this._seekPos;
-    },
-    setAnchor : function(name, page_no){
-      this.generator.setAnchor(name, page_no);
-    },
-    getTimeElapsed : function(){
-      return this._timeElapsed;
-    },
     syncGet : function(){
       this._setTimeStart();
       while(this.generator.hasNext()){
-	this.getNext();
+	this._getNext();
       }
       return this._setTimeElapsed();
     },
@@ -6611,6 +6545,52 @@ var PageStream = (function(){
       }, opt || {});
       this._setTimeStart();
       this._asyncGet(opt.wait || 0);
+    },
+    getPageCount : function(){
+      return this.buffer.length;
+    },
+    getGroupPageNo : function(cell_page_no){
+      return cell_page_no;
+    },
+    getSeekPageResult : function(){
+      return this._getPage(this._seekPageNo);
+    },
+    getSeekPageNo : function(){
+      return this._seekPageNo;
+    },
+    getSeekPercent : function(){
+      return this._seekPercent;
+    },
+    getSeekPos : function(){
+      return this._seekPos;
+    },
+    getTimeElapsed : function(){
+      return this._timeElapsed;
+    },
+    // int -> EvalResult
+    _getPage : function(page_no){
+      var entry = this.buffer[page_no];
+      if(entry instanceof EvalResult){ // already evaluated.
+	return entry;
+      }
+      // if still not evaluated, eval and get EvalResult
+      var result = this.evaluator.evaluate(entry);
+      this.buffer[page_no] = result; // over write buffer entry by result.
+      return result;
+    },
+    _getNext : function(){
+      if(!this.hasNext()){
+	return null;
+      }
+      var cur_page_no = this._seekPageNo;
+      if(!this.hasPage(cur_page_no)){
+	var entry = this._yield();
+	this._addBuffer(entry);
+	this._seekPageNo++;
+	this._seekPercent = entry.percent;
+	this._seekPos = entry.seekPos;
+      }
+      return this._getPage(cur_page_no);
     },
     _yield : function(){
       return this.generator.yield();
@@ -6655,11 +6635,14 @@ var PageStream = (function(){
 	.replace(/<rt><\/rt>/gi, ""); // discard empty rt
     },
     _createGenerator : function(text){
-      return new DocumentGenerator(
-	new DocumentContext({
-	  stream:new DocumentTokenStream(text)
-	})
-      );
+      switch(Layout.root){
+      case "document":
+	return new DocumentGenerator(text);
+      case "html":
+	return new HtmlGenerator(text);
+      default:
+	return new BodyGenerator(text);
+      }
     },
     _createEvaluator : function(){
       return new PageEvaluator();
@@ -6725,10 +6708,6 @@ var PageGroupStream = (function(){
   }
   Class.extend(PageGroupStream, PageStream);
   
-  PageGroupStream.prototype.getAnchorPageNo = function(anchor_name){
-    var page_no = PageStream.prototype.getAnchorPageNo.call(this, anchor_name);
-    return this.getGroupPageNo(page_no);
-  };
   // anchors and outline positions of nehan are returned as 'cell_page_pos'.
   // for example, first page group(size=4) consists of [0,1,2,3] cell pages.
   // so cell page nums '0..3' are equivalent to group page no '0'.
@@ -6963,14 +6942,18 @@ var StyleContext = (function(){
       return style;
     },
     createBlock : function(opt){
+      var elements = opt.elements || [];
       var measure = opt.measure || this.getContentMeasure();
       var extent = this.parent? (opt.extent || this.getContentExtent()) : this.getContentExtent();
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
       var box = new Box(box_size, this);
       box.display = "block";
-      box.elements = opt.elements || [];
+      box.elements = elements;
       box.classes = classes;
+      box.charCount = List.fold(elements, 0, function(total, element){
+	return total + (element? (element.charCount || 0) : 0);
+      });
       if(this.edge){
 	box.edge = this.edge.clone();
       }
@@ -6993,6 +6976,7 @@ var StyleContext = (function(){
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
       line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.markup.getName());
+      line.charCount = opt.charCount || 0;
 
       // backup other line data. mainly required to restore inline-context.
       if(this.isRootLine()){
@@ -7990,6 +7974,9 @@ var BlockGenerator = (function(){
   };
 
   BlockGenerator.prototype._addElement = function(context, element, extent){
+    if(element === null){
+      return;
+    }
     if(this.style.isPushed()){
       context.pushBockElement(element, extent);
     } else if(this.style.isPulled()){
@@ -8705,10 +8692,13 @@ var SectionRootGenerator = (function(){
   Class.extend(SectionRootGenerator, BlockGenerator);
 
   SectionRootGenerator.prototype._onCreate = function(block){
+    block.pageNo = this.outlineContext.getPageNo();
+    block.seekPos = this.stream.getSeekPos();
+    block.percent = this.stream.getSeekPercent();
     this.outlineContext.stepPageNo();
   };
 
-  SectionRootGenerator.prototype._onComplete = function(block){
+  SectionRootGenerator.prototype._onComplete = function(){
     DocumentContext.addOutlineContext(this.outlineContext);
   };
 
@@ -9414,6 +9404,7 @@ var LayoutTest = (function(){
       do {
 	var page = generator.yield();
 	if(page){
+	  console.log("body element:%o", page);
 	  var html = evaluator.evaluate(page);
 	  output.appendChild(make_div(html));
 	  raws.push(html);

@@ -7,11 +7,11 @@ var PageEvaluator = (function(){
     evaluate : function(body_element){
       return new Page({
 	html:this.evaluator.evaluate(body_element),
-	percent:box.percent,
-	seekPos:box.seekPos,
-	pageNo:box.pageNo,
-	charPos:box.charPos,
-	charCount:box.charCount
+	percent:body_element.percent,
+	seekPos:body_element.seekPos,
+	pageNo:body_element.pageNo,
+	charPos:body_element.charPos,
+	charCount:body_element.charCount
       });
     }
   };

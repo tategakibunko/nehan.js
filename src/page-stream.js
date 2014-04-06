@@ -18,30 +18,21 @@ var PageStream = (function(){
     hasNext : function(){
       return this.generator.hasNext();
     },
-    getNext : function(){
-      if(!this.hasNext()){
-	return null;
+    syncGet : function(){
+      this._setTimeStart();
+      while(this.generator.hasNext()){
+	this._getNext();
       }
-      var cur_page_no = this._seekPageNo;
-      if(!this.hasPage(cur_page_no)){
-	var entry = this._yield();
-	this._addBuffer(entry);
-	this._seekPageNo++;
-	this._seekPercent = entry.percent;
-	this._seekPos = entry.seekPos;
-      }
-      return this.get(cur_page_no);
+      return this._setTimeElapsed();
     },
-    // int -> Page
-    get : function(page_no){
-      var entry = this.buffer[page_no];
-      if(entry instanceof Page){ // already evaluated.
-	return entry;
-      }
-      // if still not evaluated, eval and get Page
-      var result = this.evaluator.evaluate(entry);
-      this.buffer[page_no] = result; // over write buffer entry by result.
-      return result;
+    asyncGet : function(opt){
+      Args.merge(this, {
+	onComplete : function(time){},
+	onProgress : function(self){},
+	onError : function(self){}
+      }, opt || {});
+      this._setTimeStart();
+      this._asyncGet(opt.wait || 0);
     },
     getPageCount : function(){
       return this.buffer.length;
@@ -50,7 +41,7 @@ var PageStream = (function(){
       return cell_page_no;
     },
     getSeekPageResult : function(){
-      return this.get(this._seekPageNo);
+      return this._getPage(this._seekPageNo);
     },
     getSeekPageNo : function(){
       return this._seekPageNo;
@@ -64,21 +55,30 @@ var PageStream = (function(){
     getTimeElapsed : function(){
       return this._timeElapsed;
     },
-    syncGet : function(){
-      this._setTimeStart();
-      while(this.generator.hasNext()){
-	this.getNext();
+    // int -> EvalResult
+    _getPage : function(page_no){
+      var entry = this.buffer[page_no];
+      if(entry instanceof EvalResult){ // already evaluated.
+	return entry;
       }
-      return this._setTimeElapsed();
+      // if still not evaluated, eval and get EvalResult
+      var result = this.evaluator.evaluate(entry);
+      this.buffer[page_no] = result; // over write buffer entry by result.
+      return result;
     },
-    asyncGet : function(opt){
-      Args.merge(this, {
-	onComplete : function(time){},
-	onProgress : function(self){},
-	onError : function(self){}
-      }, opt || {});
-      this._setTimeStart();
-      this._asyncGet(opt.wait || 0);
+    _getNext : function(){
+      if(!this.hasNext()){
+	return null;
+      }
+      var cur_page_no = this._seekPageNo;
+      if(!this.hasPage(cur_page_no)){
+	var entry = this._yield();
+	this._addBuffer(entry);
+	this._seekPageNo++;
+	this._seekPercent = entry.percent;
+	this._seekPos = entry.seekPos;
+      }
+      return this._getPage(cur_page_no);
     },
     _yield : function(){
       return this.generator.yield();
