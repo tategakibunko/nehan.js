@@ -18,9 +18,6 @@ var PageStream = (function(){
     hasNext : function(){
       return this.generator.hasNext();
     },
-    hasOutline : function(root_name){
-      return this.generator.hasOutline(root_name);
-    },
     getNext : function(){
       if(!this.hasNext()){
 	return null;
@@ -52,20 +49,6 @@ var PageStream = (function(){
     getGroupPageNo : function(cell_page_no){
       return cell_page_no;
     },
-    getOutlineTree : function(root_name){
-      return this.generator.getOutlineTree(root_name || "body");
-    },
-    getOutlineNode : function(root_name, opt){
-      var tree = this.getOutlineTree(root_name);
-      var converter = new OutlineConverter(tree, opt || {});
-      return converter.outputNode();
-    },
-    getAnchors : function(){
-      return this.generator.getAnchors();
-    },
-    getAnchorPageNo : function(anchor_name){
-      return this.generator.getAnchorPageNo(anchor_name);
-    },
     getSeekPageResult : function(){
       return this.get(this._seekPageNo);
     },
@@ -77,9 +60,6 @@ var PageStream = (function(){
     },
     getSeekPos : function(){
       return this._seekPos;
-    },
-    setAnchor : function(name, page_no){
-      this.generator.setAnchor(name, page_no);
     },
     getTimeElapsed : function(){
       return this._timeElapsed;
@@ -143,11 +123,14 @@ var PageStream = (function(){
 	.replace(/<rt><\/rt>/gi, ""); // discard empty rt
     },
     _createGenerator : function(text){
-      return new DocumentGenerator(
-	new DocumentContext({
-	  stream:new DocumentTokenStream(text)
-	})
-      );
+      switch(Layout.root){
+      case "document":
+	return new DocumentGenerator(text);
+      case "html":
+	return new HtmlGenerator(text);
+      default:
+	return new BodyGenerator(text);
+      }
     },
     _createEvaluator : function(){
       return new PageEvaluator();
