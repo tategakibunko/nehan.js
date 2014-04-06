@@ -6548,8 +6548,8 @@ var PageStream = (function(){
     asyncGet : function(opt){
       Args.merge(this, {
 	onComplete : function(time){},
-	onFirstPage : function(page){},
-	onProgress : function(self){},
+	onFirstPage : function(self, page){},
+	onProgress : function(self, tree){},
 	onError : function(self){}
       }, opt || {});
       this._setTimeStart();
@@ -6624,10 +6624,10 @@ var PageStream = (function(){
 
       // tree of first page is evaluated immediately.
       if(tree.pageNo === 0){
-	this.onFirstPage(this.getPage(0));
+	this.onFirstPage(this, this.getPage(0));
       } else {
 	// to speed up parsing, continuous page tree is not evaluated yet.
-	this.onProgress(tree);
+	this.onProgress(this, tree);
       }
       this._seekPageNo++;
       this._seekPercent = tree.percent;
@@ -9413,54 +9413,26 @@ var LayoutTest = (function(){
       var stream = new PageStream(script);
       var output = document.getElementById(opt.output || "result");
       var debug = document.getElementById(opt.debug || "debug");
+      var toc = document.getElementById(opt.toc || "toc");
       stream.asyncGet({
 	// only first page is evaluated immediately.
-	onFirstPage : function(page){
+	onFirstPage : function(caller, page){
 	  output.appendChild(self._makeDiv(page.html));
 	},
-	onProgress : function(tree){
+	onProgress : function(caller, tree){
 	  var page = stream.getPage(tree.pageNo); // tree -> page
 	  output.appendChild(self._makeDiv(page.html));
 	},
 	onComplete : function(time){
 	  output.appendChild(self._makeDiv(time + "msec"));
+
+	  var outline_contexts = DocumentContext.getOutlineContext("body");
+	  if(outline_contexts.length > 0){
+	    var toc_body = (new OutlineContextConverter()).convert(outline_contexts[0]);
+	    toc.appendChild(toc_body);
+	  }
 	}
       });
-    },
-    // old version
-    start1 : function(name, opt){
-      this._setupLayout(opt || {});
-
-      var script = this.getScript(name);
-      var output = document.getElementById(opt.output || "result");
-      var debug = document.getElementById(opt.debug || "debug");
-      var generator = new BodyGenerator(script);
-      var evaluator = this.getEvaluator();
-      
-      output.appendChild(this.makeTitle(name));
-
-      var raws = [];
-      var t1 = new Date();
-      do {
-	var page = generator.yield();
-	if(page){
-	  console.log("body element:%o", page);
-	  var html = evaluator.evaluate(page);
-	  output.appendChild(this.makeDiv(html));
-	  raws.push(html);
-	}
-      } while(page != null);
-      var t2 = new Date();
-
-      output.appendChild(this.makeTime(t1, t2));
-      //debug.value = raws.join("\n\n");
-
-      var outline_contexts = DocumentContext.getOutlineContext("body");
-      if(outline_contexts.length > 0){
-	var cont = outline_contexts[0];
-	var toc_node = (new OutlineContextConverter()).convert(cont);
-	document.getElementById("toc").appendChild(toc_node);
-      }
     }
   };
 })();
