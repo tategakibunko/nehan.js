@@ -17,12 +17,12 @@ var OutlineContext = (function(){
     get : function(index){
       return this.logs[index] || null;
     },
-    outputTree : function(){
-      return OutlineParser.getTree(this);
+    getTocTree : function(){
+      return OutlineParser.getTocTree(this);
     },
-    outputNode : function(opt){
-      var tree = this.outputTree();
-      return OutlineConverter.convert(tree, opt);
+    getTocNode : function(){
+      var tree = this.outputTocTree();
+      return (new OutlineConverter()).convert(tree);
     },
     getPageNo : function(){
       return this.pageNo;

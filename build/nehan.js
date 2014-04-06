@@ -5406,38 +5406,6 @@ var Section = (function(){
 })();
 
 
-var TocContext = (function(){
-  function TocContext(){
-    this.stack = [1];
-  }
-
-  TocContext.prototype = {
-    getTocStack : function(){
-      return this.stack;
-    },
-    getTocId : function(){
-      return this.stack.join(".");
-    },
-    stepNext : function(){
-      var len = this.stack.length;
-      if(len > 0){
-	this.stack[len-1]++;
-      }
-      return this;
-    },
-    startRoot : function(){
-      this.stack.push(1);
-      return this;
-    },
-    endRoot : function(){
-      this.stack.pop();
-      return this;
-    }
-  };
-
-  return TocContext;
-})();
-
 var OutlineContext = (function(){
   function OutlineContext(style){
     this.logs = [];
@@ -5457,12 +5425,12 @@ var OutlineContext = (function(){
     get : function(index){
       return this.logs[index] || null;
     },
-    outputTree : function(){
-      return OutlineParser.getTree(this);
+    getTocTree : function(){
+      return OutlineParser.getTocTree(this);
     },
-    outputNode : function(opt){
-      var tree = this.outputTree();
-      return OutlineConverter.convert(tree, opt);
+    getTocNode : function(){
+      var tree = this.outputTocTree();
+      return (new OutlineConverter()).convert(tree);
     },
     getPageNo : function(){
       return this.pageNo;
@@ -5506,7 +5474,8 @@ var OutlineContext = (function(){
   return OutlineContext;
 })();
 
-var OutlineParser = (function(){
+// parse : context -> section tree
+var OutlineContextParser = (function(){
   var __ptr__ = 0;
   var __outline__ = null;
   var __root__ = null;
@@ -5569,7 +5538,7 @@ var OutlineParser = (function(){
   };
 
   return {
-    getTree : function(outline_context){
+    parse : function(outline_context){
       __ptr__ = 0;
       __outline__ = outline_context;
       __root__ = new Section("section", null, 0);
@@ -5600,22 +5569,28 @@ var OutlineParser = (function(){
   </ol>
 */
 
-var OutlineConverter = (function(){
-  var __opt__ = {};
-  var parse = function(parent, tree, ctx){
+var OutlineContextConverter = (function(){
+  function OutlineContextConverter(){}
+
+  // outline_context -> dom node
+  OutlineContextConverter.prototype.convert = function(outline_context){
+    var root_node = this.createRoot();
+    var outline_tree = OutlineContextParser.parse(outline_context);
+    return this._parse(root_node, outline_tree);
+  };
+  
+  OutlineContextConverter.prototype._parse = function(parent, tree){
     if(tree === null){
       return parent;
     }
-    var toc = create_toc(tree, ctx);
-    var li = create_child(toc);
-    var link = create_link(toc);
+    var toc = this.createToc(tree);
+    var li = this.createChild(toc);
+    var link = this.createLink(toc);
     if(link){
-      link.onclick = function(){
-	return on_click_link(toc);
-      };
+      link.onclick = this.createOnClickLink(toc);
       li.appendChild(link);
     }
-    var page_no_item = create_page_no_item(toc);
+    var page_no_item = this.createPageNoItem(toc);
     if(page_no_item){
       li.appendChild(page_no_item);
     }
@@ -5623,46 +5598,45 @@ var OutlineConverter = (function(){
 
     var child = tree.getChild();
     if(child){
-      ctx = ctx.startRoot();
-      var child_toc = create_toc(child, ctx);
-      var ol = create_root(child_toc);
-      arguments.callee(ol, child, ctx);
+      var child_toc = this.createToc(child);
+      var ol = this.createRoot(child_toc);
+      this._parse(ol, child);
       li.appendChild(ol);
-      ctx = ctx.endRoot();
     }
     var next = tree.getNext();
     if(next){
-      arguments.callee(parent, next, ctx.stepNext());
+      this._parse(parent, next);
     }
     return parent;
   };
 
-  var on_click_link = function(toc){
-    return false;
+  OutlineContextConverter.prototype.createOnClickLink = function(toc){
+    return function(){
+      return false;
+    }
   };
 
-  var create_toc = function(tree, ctx){
+  OutlineContextConverter.prototype.createToc = function(tree){
     return {
       title:tree.getTitle(),
       pageNo:tree.getPageNo(),
-      tocId:ctx.getTocId(),
       headerId:tree.getHeaderId()
     };
   };
 
-  var create_root = function(toc){
+  OutlineContextConverter.prototype.createRoot = function(toc){
     var root = document.createElement("ol");
     root.className = "nehan-toc-root";
     return root;
   };
 
-  var create_child = function(toc){
+  OutlineContextConverter.prototype.createChild = function(toc){
     var li = document.createElement("li");
     li.className = "nehan-toc-item";
     return li;
   };
 
-  var create_link = function(toc){
+  OutlineContextConverter.prototype.createLink = function(toc){
     var link = document.createElement("a");
     var title = toc.title.replace(/<a[^>]+>/gi, "").replace(/<\/a>/gi, "");
     link.href = "#" + toc.pageNo;
@@ -5672,104 +5646,12 @@ var OutlineConverter = (function(){
     return link;
   };
 
-  var create_page_no_item = function(toc){
+  OutlineContextConverter.prototype.createPageNoItem = function(toc){
     return null;
   };
 
-  return {
-    convert : function(tree, opt){
-      __opt__ = opt || {};
-      var root = create_root();
-      var context = new TocContext();
-      return parse(root, tree, context);
-    }
-  };
+  return OutlineContextConverter;
 })();
-
-/*
-var OutlineConverter = (function(){
-  function OutlineConverter(tree, opt){
-    this.tree = tree;
-    Args.copy(this, opt || {});
-  }
-
-  OutlineConverter.prototype = {
-    outputNode : function(){
-      var ctx = new TocContext();
-      return this._parseTree(this, this.createRoot(), this.tree, ctx);
-    },
-    _createToc : function(tree, ctx){
-      return {
-	title:tree.getTitle(),
-	pageNo:tree.getPageNo(),
-	tocId:ctx.getTocId(),
-	headerId:tree.getHeaderId()
-      };
-    },
-    _parseTree : function(self, parent, tree, ctx){
-      if(tree === null){
-	return parent;
-      }
-      var toc = self._createToc(tree, ctx);
-      var li = self.createChild(toc);
-      var link = self.createLink(toc);
-      if(link){
-	link.onclick = function(){
-	  return self.onClickLink(toc);
-	};
-	li.appendChild(link);
-      }
-      var page_no_item = self.createPageNoItem(toc);
-      if(page_no_item){
-	li.appendChild(page_no_item);
-      }
-      parent.appendChild(li);
-
-      var child = tree.getChild();
-      if(child){
-	ctx = ctx.startRoot();
-	var child_toc = self._createToc(child, ctx);
-	var ol = self.createRoot(child_toc);
-	arguments.callee(self, ol, child, ctx);
-	li.appendChild(ol);
-	ctx = ctx.endRoot();
-      }
-      var next = tree.getNext();
-      if(next){
-	arguments.callee(self, parent, next, ctx.stepNext());
-      }
-      return parent;
-    },
-    onClickLink : function(toc){
-      return false;
-    },
-    createRoot: function(toc){
-      var root = document.createElement("ol");
-      root.className = "nehan-toc-root";
-      return root;
-    },
-    createChild : function(toc){
-      var li = document.createElement("li");
-      li.className = "nehan-toc-item";
-      return li;
-    },
-    createLink : function(toc){
-      var link = document.createElement("a");
-      var title = toc.title.replace(/<a[^>]+>/gi, "").replace(/<\/a>/gi, "");
-      link.href = "#" + toc.pageNo;
-      link.innerHTML = title;
-      link.className = "nehan-toc-link";
-      link.id = Css.addNehanTocLinkPrefix(toc.tocId);
-      return link;
-    },
-    createPageNoItem : function(toc){
-      return null;
-    }
-  };
-
-  return OutlineConverter;
-})();
-*/
 
 var DocumentHeader = (function(){
   function DocumentHeader(){
@@ -9596,15 +9478,14 @@ var LayoutTest = (function(){
       var t2 = new Date();
 
       output.appendChild(make_time(t1, t2));
+      //debug.value = raws.join("\n\n");
 
       var outline_contexts = DocumentContext.getOutlineContext("body");
-      if(outline_contexts){
-	console.log("outline contexts:%o", outline_contexts);
-	var toc = document.getElementById("toc");
-	var toc_node = outline_contexts[0].outputNode();
-	toc.appendChild(toc_node);
+      if(outline_contexts.length > 0){
+	var cont = outline_contexts[0];
+	var toc_node = (new OutlineContextConverter()).convert(cont);
+	document.getElementById("toc").appendChild(toc_node);
       }
-      //debug.value = raws.join("\n\n");
     }
   };
 })();
@@ -9617,7 +9498,10 @@ Args.copy(Layout, __engine_args.layout || {});
 Args.copy(Config, __engine_args.config || {});
 
 var __exports = {};
-
+__exports.Class = Class;
+__exports.Env = Env;
+__exports.DocumentContext = DocumentContext;
+__exports.OutlineContextConverter = OutlineContextConverter;
 __exports.createPageStream = function(text, group_size){
   group_size = Math.max(1, group_size || 1);
   return (group_size === 1)? (new PageStream(text)) : (new PageGroupStream(text, group_size));

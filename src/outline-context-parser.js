@@ -1,4 +1,5 @@
-var OutlineParser = (function(){
+// parse : context -> section tree
+var OutlineContextParser = (function(){
   var __ptr__ = 0;
   var __outline__ = null;
   var __root__ = null;
@@ -61,7 +62,7 @@ var OutlineParser = (function(){
   };
 
   return {
-    getTree : function(outline_context){
+    parse : function(outline_context){
       __ptr__ = 0;
       __outline__ = outline_context;
       __root__ = new Section("section", null, 0);

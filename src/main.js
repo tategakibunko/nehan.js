@@ -5,7 +5,10 @@ Args.copy(Layout, __engine_args.layout || {});
 Args.copy(Config, __engine_args.config || {});
 
 var __exports = {};
-
+__exports.Class = Class;
+__exports.Env = Env;
+__exports.DocumentContext = DocumentContext;
+__exports.OutlineContextConverter = OutlineContextConverter;
 __exports.createPageStream = function(text, group_size){
   group_size = Math.max(1, group_size || 1);
   return (group_size === 1)? (new PageStream(text)) : (new PageGroupStream(text, group_size));

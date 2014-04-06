@@ -187,15 +187,14 @@ var LayoutTest = (function(){
       var t2 = new Date();
 
       output.appendChild(make_time(t1, t2));
+      //debug.value = raws.join("\n\n");
 
       var outline_contexts = DocumentContext.getOutlineContext("body");
-      if(outline_contexts){
-	console.log("outline contexts:%o", outline_contexts);
-	var toc = document.getElementById("toc");
-	var toc_node = outline_contexts[0].outputNode();
-	toc.appendChild(toc_node);
+      if(outline_contexts.length > 0){
+	var cont = outline_contexts[0];
+	var toc_node = (new OutlineContextConverter()).convert(cont);
+	document.getElementById("toc").appendChild(toc_node);
       }
-      //debug.value = raws.join("\n\n");
     }
   };
 })();
