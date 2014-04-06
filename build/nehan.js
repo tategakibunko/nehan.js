@@ -7955,10 +7955,6 @@ var BlockGenerator = (function(){
     }
 
     switch(child_style.getMarkupName()){
-    case "body":
-      this.setChildLayout(new BodyGenerator(child_style, child_stream));
-      return this.yieldChildLayout(context);
-
     case "details":
     case "blockquote":
     case "figure":
@@ -8754,8 +8750,9 @@ var HeaderGenerator = (function(){
 
 
 var BodyGenerator = (function(){
-  function BodyGenerator(style, stream){
-    SectionRootGenerator.call(this, style, stream);
+  function BodyGenerator(text){
+    var tag = new Tag("<body>", text);
+    SectionRootGenerator.call(this, new StyleContext(tag, null), new TokenStream(text));
   }
   Class.extend(BodyGenerator, SectionRootGenerator);
 
@@ -8783,20 +8780,15 @@ var HtmlGenerator = (function(){
 	  this._parseHead(new HeadTokenStream(tag.getContent()));
 	  break;
 	case "body":
-	  return this._createBodyGenerator(tag);
+	  return this._createBodyGenerator(tag.getContent());
 	}
       }
-      var body_tag = new Tag("<body>", this.stream.getSrc());
-      return this._createBodyGenerator(body_tag);
+      return this._createBodyGenerator(this.stream.getSrc());
     },
-    _createBodyGenerator : function(tag){
-      return new BodyGenerator(
-	new StyleContext(tag, null),
-	new TokenStream(tag.getContent())
-      );
+    _createBodyGenerator : function(text){
+      return new BodyGenerator(text);
     },
-    _parseHead : function(){
-      var stream = new HeadTokenStream(content);
+    _parseHead : function(stream){
       var header = new DocumentHeader();
       while(stream.hasNext()){
 	var tag = stream.get();
@@ -9383,14 +9375,7 @@ var LayoutTest = (function(){
   return {
     getGenerator : function(name){
       var script = TestScript[name] || TestSnipet[name] || TestText[name] || "undefined script";
-      /*
-      //var tag = new Tag("<html>", "<body>" + script + "</body>");
-      var tag = new Tag("<body>", script);
-      var style = new StyleContext(tag, null);
-      var stream = new TokenStream(tag.getContent());
-      return new BodyGenerator(style, stream);
-      */
-      return new DocumentGenerator(script);
+      return new BodyGenerator(script);
     },
     getEvaluator : function(){
       return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();

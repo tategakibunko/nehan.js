@@ -19,20 +19,15 @@ var HtmlGenerator = (function(){
 	  this._parseHead(new HeadTokenStream(tag.getContent()));
 	  break;
 	case "body":
-	  return this._createBodyGenerator(tag);
+	  return this._createBodyGenerator(tag.getContent());
 	}
       }
-      var body_tag = new Tag("<body>", this.stream.getSrc());
-      return this._createBodyGenerator(body_tag);
+      return this._createBodyGenerator(this.stream.getSrc());
     },
-    _createBodyGenerator : function(tag){
-      return new BodyGenerator(
-	new StyleContext(tag, null),
-	new TokenStream(tag.getContent())
-      );
+    _createBodyGenerator : function(text){
+      return new BodyGenerator(text);
     },
-    _parseHead : function(){
-      var stream = new HeadTokenStream(content);
+    _parseHead : function(stream){
       var header = new DocumentHeader();
       while(stream.hasNext()){
 	var tag = stream.get();

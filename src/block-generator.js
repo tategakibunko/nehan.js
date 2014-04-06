@@ -95,10 +95,6 @@ var BlockGenerator = (function(){
     }
 
     switch(child_style.getMarkupName()){
-    case "body":
-      this.setChildLayout(new BodyGenerator(child_style, child_stream));
-      return this.yieldChildLayout(context);
-
     case "details":
     case "blockquote":
     case "figure":
