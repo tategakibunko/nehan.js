@@ -5,5 +5,10 @@ var BodyGenerator = (function(){
   }
   Class.extend(BodyGenerator, SectionRootGenerator);
 
+  BodyGenerator.prototype._onCreate = function(block){
+    block.pageNo = this.outlineContext.getPageNo();
+    return block;
+  };
+
   return BodyGenerator;
 })();

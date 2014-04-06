@@ -5,10 +5,6 @@ var PageGroupStream = (function(){
   }
   Class.extend(PageGroupStream, PageStream);
   
-  PageGroupStream.prototype.getAnchorPageNo = function(anchor_name){
-    var page_no = PageStream.prototype.getAnchorPageNo.call(this, anchor_name);
-    return this.getGroupPageNo(page_no);
-  };
   // anchors and outline positions of nehan are returned as 'cell_page_pos'.
   // for example, first page group(size=4) consists of [0,1,2,3] cell pages.
   // so cell page nums '0..3' are equivalent to group page no '0'.

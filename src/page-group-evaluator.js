@@ -1,6 +1,6 @@
 var PageGroupEvaluator = (function(){
   function PageGroupEvaluator(){
-    this.evaluator = new PageEvaluator();
+    this.evaluator = new LayoutEvaluator();
   }
 
   PageGroupEvaluator.prototype = {
@@ -8,8 +8,8 @@ var PageGroupEvaluator = (function(){
       var self = this;
       var char_count = 0;
       var html = [];
-      var results = List.map(page_group.getPages(), function(page){
-	var ret = self.evaluator.evaluate(page);
+      var results = List.map(page_group.getPages(), function(body_element){
+	var ret = self.evaluator.evaluate(body_element);
 	char_count += ret.charCount;
 	html.push(ret.html);
 	return ret;

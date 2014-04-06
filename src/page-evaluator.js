@@ -1,12 +1,12 @@
 var PageEvaluator = (function(){
   function PageEvaluator(){
-    this.blockEvaluator = new BlockTreeEvaluator();
+    this.evaluator = new LayoutEvaluator();
   }
 
   PageEvaluator.prototype = {
-    evaluate : function(box){
+    evaluate : function(body_element){
       return new EvalResult({
-	html:this.blockEvaluator.evaluate(box),
+	html:this.evaluator.evaluate(body_element),
 	percent:box.percent,
 	seekPos:box.seekPos,
 	pageNo:box.pageNo,
