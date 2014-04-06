@@ -8883,7 +8883,6 @@ var SectionRootGenerator = (function(){
 
   SectionRootGenerator.prototype._onCreate = function(block){
     this.outlineContext.stepPageNo();
-    console.log("[%s] create page", this.style.getMarkupName());
   };
 
   SectionRootGenerator.prototype._onComplete = function(block){
@@ -9523,17 +9522,17 @@ var LayoutTest = (function(){
 })();
 
 
-Nehan.version = "4.0.11";
+Nehan.version = "5.0.0";
 
 Args.copy(Env, __engine_args.env || {});
 Args.copy(Layout, __engine_args.layout || {});
 Args.copy(Config, __engine_args.config || {});
 
 var __exports = {};
-__exports.Class = Class;
-__exports.Env = Env;
-__exports.DocumentContext = DocumentContext;
-__exports.OutlineContextConverter = OutlineContextConverter;
+Nehan.Class = Class;
+Nehan.Env = Env;
+Nehan.OutlineContextConverter = OutlineContextConverter;
+__exports.documentContext = DocumentContext;
 __exports.createPageStream = function(text, group_size){
   group_size = Math.max(1, group_size || 1);
   return (group_size === 1)? (new PageStream(text)) : (new PageGroupStream(text, group_size));

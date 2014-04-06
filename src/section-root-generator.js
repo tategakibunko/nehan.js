@@ -7,7 +7,6 @@ var SectionRootGenerator = (function(){
 
   SectionRootGenerator.prototype._onCreate = function(block){
     this.outlineContext.stepPageNo();
-    console.log("[%s] create page", this.style.getMarkupName());
   };
 
   SectionRootGenerator.prototype._onComplete = function(block){
