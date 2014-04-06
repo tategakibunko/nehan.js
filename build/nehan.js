@@ -5406,6 +5406,34 @@ var Section = (function(){
 })();
 
 
+var TocContext = (function(){
+  function TocContext(){
+    this.stack = [1];
+  }
+
+  TocContext.prototype = {
+    toString : function(){
+      return this.stack.join(".");
+    },
+    stepNext : function(){
+      if(this.stack.length > 0){
+	this.stack[this.stack.length - 1]++;
+      }
+      return this;
+    },
+    startRoot : function(){
+      this.stack.push(1);
+      return this;
+    },
+    endRoot : function(){
+      this.stack.pop();
+      return this;
+    }
+  };
+
+  return TocContext;
+})();
+
 var OutlineContext = (function(){
   function OutlineContext(style){
     this.logs = [];
@@ -5574,16 +5602,17 @@ var OutlineContextConverter = (function(){
 
   // outline_context -> dom node
   OutlineContextConverter.prototype.convert = function(outline_context){
+    var toc_context = new TocContext();
     var root_node = this.createRoot();
     var outline_tree = OutlineContextParser.parse(outline_context);
-    return this._parse(root_node, outline_tree);
+    return this._parse(toc_context, root_node, outline_tree);
   };
   
-  OutlineContextConverter.prototype._parse = function(parent, tree){
+  OutlineContextConverter.prototype._parse = function(toc_ctx, parent, tree){
     if(tree === null){
       return parent;
     }
-    var toc = this.createToc(tree);
+    var toc = this.createToc(toc_ctx, tree);
     var li = this.createChild(toc);
     var link = this.createLink(toc);
     if(link){
@@ -5598,14 +5627,16 @@ var OutlineContextConverter = (function(){
 
     var child = tree.getChild();
     if(child){
-      var child_toc = this.createToc(child);
+      toc_ctx = toc_ctx.startRoot();
+      var child_toc = this.createToc(toc_ctx, child);
       var ol = this.createRoot(child_toc);
-      this._parse(ol, child);
+      this._parse(toc_ctx, ol, child);
       li.appendChild(ol);
+      toc_ctx = toc_ctx.endRoot();
     }
     var next = tree.getNext();
     if(next){
-      this._parse(parent, next);
+      this._parse(toc_ctx.stepNext(), parent, next);
     }
     return parent;
   };
@@ -5616,8 +5647,9 @@ var OutlineContextConverter = (function(){
     }
   };
 
-  OutlineContextConverter.prototype.createToc = function(tree){
+  OutlineContextConverter.prototype.createToc = function(toc_ctx, tree){
     return {
+      tocPos:toc_ctx.toString(),
       title:tree.getTitle(),
       pageNo:tree.getPageNo(),
       headerId:tree.getHeaderId()
