@@ -13,6 +13,9 @@ var DocumentContext = (function(){
     setDocumentHeader : function(header){
       __header__ = header;
     },
+    getDocumentHeader : function(){
+      return __header__;
+    },
     getOutlineContext : function(markup_name){
       return List.filter(__outlines__, function(outline_context){
 	return outline_context.getMarkupName() === markup_name;

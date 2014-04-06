@@ -1,9 +1,12 @@
 var PageEvaluator = (function(){
   function PageEvaluator(){
-    this.evaluator = new LayoutEvaluator();
+    this.evaluator = this._getEvaluator();
   }
 
   PageEvaluator.prototype = {
+    _getEvaluator : function(){
+      return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
+    },
     evaluate : function(body_element){
       return new Page({
 	html:this.evaluator.evaluate(body_element),

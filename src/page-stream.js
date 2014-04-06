@@ -28,7 +28,8 @@ var PageStream = (function(){
     asyncGet : function(opt){
       Args.merge(this, {
 	onComplete : function(time){},
-	onProgress : function(self){},
+	onFirstPage : function(self, page){},
+	onProgress : function(self, tree){},
 	onError : function(self){}
       }, opt || {});
       this._setTimeStart();
@@ -41,7 +42,7 @@ var PageStream = (function(){
       return cell_page_no;
     },
     getSeekPageResult : function(){
-      return this._getPage(this._seekPageNo);
+      return this.getPage(this._seekPageNo);
     },
     getSeekPageNo : function(){
       return this._seekPageNo;
@@ -55,10 +56,10 @@ var PageStream = (function(){
     getTimeElapsed : function(){
       return this._timeElapsed;
     },
-    // int -> EvalResult
-    _getPage : function(page_no){
+    // int -> Page
+    getPage : function(page_no){
       var entry = this.buffer[page_no];
-      if(entry instanceof EvalResult){ // already evaluated.
+      if(entry instanceof Page){ // already evaluated.
 	return entry;
       }
       // if still not evaluated, eval and get EvalResult
@@ -78,7 +79,7 @@ var PageStream = (function(){
 	this._seekPercent = entry.percent;
 	this._seekPos = entry.seekPos;
       }
-      return this._getPage(cur_page_no);
+      return this.getPage(cur_page_no);
     },
     _yield : function(){
       return this.generator.yield();
@@ -98,18 +99,25 @@ var PageStream = (function(){
 	return;
       }
       var self = this;
-      var entry = this._yield();
-      this._addBuffer(entry);
-      this.onProgress(this);
+      var tree = this._yield();
+      this._addBuffer(tree);
+
+      // tree of first page is evaluated immediately.
+      if(tree.pageNo === 0){
+	this.onFirstPage(this, this.getPage(0));
+      } else {
+	// to speed up parsing, continuous page tree is not evaluated yet.
+	this.onProgress(this, tree);
+      }
       this._seekPageNo++;
-      this._seekPercent = entry.percent;
-      this._seekPos = entry.seekPos;
+      this._seekPercent = tree.percent;
+      this._seekPos = tree.seekPos;
       reqAnimationFrame(function(){
 	self._asyncGet(wait);
       });
     },
-    _addBuffer : function(entry){
-      this.buffer.push(entry);
+    _addBuffer : function(tree){
+      this.buffer.push(tree);
     },
     // common preprocessor
     _createSource : function(text){

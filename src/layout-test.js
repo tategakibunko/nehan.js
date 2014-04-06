@@ -134,41 +134,65 @@ var LayoutTest = (function(){
   };
 
   return {
-    getGenerator : function(name){
-      var script = TestScript[name] || TestSnipet[name] || TestText[name] || "undefined script";
-      return new BodyGenerator(script);
+    getScript : function(name){
+      return TestScript[name] || TestSnipet[name] || TestText[name] || "undefined script";
     },
     getEvaluator : function(){
       return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
     },
-    start : function(name, opt){
-      opt = opt || {};
+    _makeTitle : function(name){
+      var dom = document.createElement("h2");
+      dom.innerHTML = name + " / " + opt.direction;
+      return dom;
+    },
+    _makeDiv : function(html){
+      var dom = document.createElement("div");
+      dom.innerHTML = html;
+      return dom;
+    },
+    _makeTime : function(t1, t2){
+      var sec = t2.getTime() - t1.getTime();
+      var dom = document.createElement("p");
+      dom.innerHTML = (sec / 1000) + "sec";
+      return dom;
+    },
+    _setupLayout : function(opt){
       Layout.width = opt.width || 800;
       Layout.height = opt.height || 500;
       Layout.direction = opt.direction || "vert";
-
+    },
+    start : function(name, opt){
+      this._setupLayout(opt || {});
+      var self = this;
+      var script = this.getScript(name);
+      var stream = new PageStream(script);
       var output = document.getElementById(opt.output || "result");
       var debug = document.getElementById(opt.debug || "debug");
-      var generator = this.getGenerator(name);
-      var evaluator = this.getEvaluator();
-      var make_title = function(name){
-	var dom = document.createElement("h2");
-	dom.innerHTML = name + " / " + opt.direction;
-	return dom;
-      };
-      var make_div = function(html){
-	var dom = document.createElement("div");
-	dom.innerHTML = html;
-	return dom;
-      };
-      var make_time = function(t1, t2){
-	var sec = t2.getTime() - t1.getTime();
-	var dom = document.createElement("p");
-	dom.innerHTML = (sec / 1000) + "sec";
-	return dom;
-      };
+      stream.asyncGet({
+	// only first page is evaluated immediately.
+	onFirstPage : function(caller, page){
+	  output.appendChild(self._makeDiv(page.html));
+	},
+	onProgress : function(caller, tree){
+	  var page = stream.getPage(tree.pageNo); // tree -> page
+	  output.appendChild(self._makeDiv(page.html));
+	},
+	onComplete : function(time){
+	  output.appendChild(self._makeDiv(time + "msec"));
+	}
+      });
+    },
+    // old version
+    start1 : function(name, opt){
+      this._setupLayout(opt || {});
 
-      output.appendChild(make_title(name));
+      var script = this.getScript(name);
+      var output = document.getElementById(opt.output || "result");
+      var debug = document.getElementById(opt.debug || "debug");
+      var generator = new BodyGenerator(script);
+      var evaluator = this.getEvaluator();
+      
+      output.appendChild(this.makeTitle(name));
 
       var raws = [];
       var t1 = new Date();
@@ -177,13 +201,13 @@ var LayoutTest = (function(){
 	if(page){
 	  console.log("body element:%o", page);
 	  var html = evaluator.evaluate(page);
-	  output.appendChild(make_div(html));
+	  output.appendChild(this.makeDiv(html));
 	  raws.push(html);
 	}
       } while(page != null);
       var t2 = new Date();
 
-      output.appendChild(make_time(t1, t2));
+      output.appendChild(this.makeTime(t1, t2));
       //debug.value = raws.join("\n\n");
 
       var outline_contexts = DocumentContext.getOutlineContext("body");

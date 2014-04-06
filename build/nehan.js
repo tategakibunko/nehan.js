@@ -5081,9 +5081,11 @@ var Box = (function(){
 
   Box.prototype = {
     debug : function(title){
-      console.log("[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", title,
-		  this.getContentMeasure(), this.getContentExtent(),
-		  this.getBoxMeasure(), this.getBoxExtent());
+      console.log(
+	"[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", (title || "no title"),
+	this.getContentMeasure(), this.getContentExtent(),
+	this.getBoxMeasure(), this.getBoxExtent()
+      );
     },
     getCssBlock : function(){
       var css = {};
@@ -5754,6 +5756,9 @@ var DocumentContext = (function(){
     },
     setDocumentHeader : function(header){
       __header__ = header;
+    },
+    getDocumentHeader : function(){
+      return __header__;
     },
     getOutlineContext : function(markup_name){
       return List.filter(__outlines__, function(outline_context){
@@ -6458,10 +6463,13 @@ var Page = (function(){
 
 var PageEvaluator = (function(){
   function PageEvaluator(){
-    this.evaluator = new LayoutEvaluator();
+    this.evaluator = this._getEvaluator();
   }
 
   PageEvaluator.prototype = {
+    _getEvaluator : function(){
+      return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
+    },
     evaluate : function(body_element){
       return new Page({
 	html:this.evaluator.evaluate(body_element),
@@ -6540,6 +6548,7 @@ var PageStream = (function(){
     asyncGet : function(opt){
       Args.merge(this, {
 	onComplete : function(time){},
+	onFirstPage : function(page){},
 	onProgress : function(self){},
 	onError : function(self){}
       }, opt || {});
@@ -6553,7 +6562,7 @@ var PageStream = (function(){
       return cell_page_no;
     },
     getSeekPageResult : function(){
-      return this._getPage(this._seekPageNo);
+      return this.getPage(this._seekPageNo);
     },
     getSeekPageNo : function(){
       return this._seekPageNo;
@@ -6567,10 +6576,10 @@ var PageStream = (function(){
     getTimeElapsed : function(){
       return this._timeElapsed;
     },
-    // int -> EvalResult
-    _getPage : function(page_no){
+    // int -> Page
+    getPage : function(page_no){
       var entry = this.buffer[page_no];
-      if(entry instanceof EvalResult){ // already evaluated.
+      if(entry instanceof Page){ // already evaluated.
 	return entry;
       }
       // if still not evaluated, eval and get EvalResult
@@ -6590,7 +6599,7 @@ var PageStream = (function(){
 	this._seekPercent = entry.percent;
 	this._seekPos = entry.seekPos;
       }
-      return this._getPage(cur_page_no);
+      return this.getPage(cur_page_no);
     },
     _yield : function(){
       return this.generator.yield();
@@ -6610,18 +6619,25 @@ var PageStream = (function(){
 	return;
       }
       var self = this;
-      var entry = this._yield();
-      this._addBuffer(entry);
-      this.onProgress(this);
+      var tree = this._yield();
+      this._addBuffer(tree);
+
+      // tree of first page is evaluated immediately.
+      if(tree.pageNo === 0){
+	this.onFirstPage(this.getPage(0));
+      } else {
+	// to speed up parsing, continuous page tree is not evaluated yet.
+	this.onProgress(tree);
+      }
       this._seekPageNo++;
-      this._seekPercent = entry.percent;
-      this._seekPos = entry.seekPos;
+      this._seekPercent = tree.percent;
+      this._seekPos = tree.seekPos;
       reqAnimationFrame(function(){
 	self._asyncGet(wait);
       });
     },
-    _addBuffer : function(entry){
-      this.buffer.push(entry);
+    _addBuffer : function(tree){
+      this.buffer.push(tree);
     },
     // common preprocessor
     _createSource : function(text){
@@ -9363,41 +9379,65 @@ var LayoutTest = (function(){
   };
 
   return {
-    getGenerator : function(name){
-      var script = TestScript[name] || TestSnipet[name] || TestText[name] || "undefined script";
-      return new BodyGenerator(script);
+    getScript : function(name){
+      return TestScript[name] || TestSnipet[name] || TestText[name] || "undefined script";
     },
     getEvaluator : function(){
       return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
     },
-    start : function(name, opt){
-      opt = opt || {};
+    _makeTitle : function(name){
+      var dom = document.createElement("h2");
+      dom.innerHTML = name + " / " + opt.direction;
+      return dom;
+    },
+    _makeDiv : function(html){
+      var dom = document.createElement("div");
+      dom.innerHTML = html;
+      return dom;
+    },
+    _makeTime : function(t1, t2){
+      var sec = t2.getTime() - t1.getTime();
+      var dom = document.createElement("p");
+      dom.innerHTML = (sec / 1000) + "sec";
+      return dom;
+    },
+    _setupLayout : function(opt){
       Layout.width = opt.width || 800;
       Layout.height = opt.height || 500;
       Layout.direction = opt.direction || "vert";
-
+    },
+    start : function(name, opt){
+      this._setupLayout(opt || {});
+      var self = this;
+      var script = this.getScript(name);
+      var stream = new PageStream(script);
       var output = document.getElementById(opt.output || "result");
       var debug = document.getElementById(opt.debug || "debug");
-      var generator = this.getGenerator(name);
-      var evaluator = this.getEvaluator();
-      var make_title = function(name){
-	var dom = document.createElement("h2");
-	dom.innerHTML = name + " / " + opt.direction;
-	return dom;
-      };
-      var make_div = function(html){
-	var dom = document.createElement("div");
-	dom.innerHTML = html;
-	return dom;
-      };
-      var make_time = function(t1, t2){
-	var sec = t2.getTime() - t1.getTime();
-	var dom = document.createElement("p");
-	dom.innerHTML = (sec / 1000) + "sec";
-	return dom;
-      };
+      stream.asyncGet({
+	// only first page is evaluated immediately.
+	onFirstPage : function(page){
+	  output.appendChild(self._makeDiv(page.html));
+	},
+	onProgress : function(tree){
+	  var page = stream.getPage(tree.pageNo); // tree -> page
+	  output.appendChild(self._makeDiv(page.html));
+	},
+	onComplete : function(time){
+	  output.appendChild(self._makeDiv(time + "msec"));
+	}
+      });
+    },
+    // old version
+    start1 : function(name, opt){
+      this._setupLayout(opt || {});
 
-      output.appendChild(make_title(name));
+      var script = this.getScript(name);
+      var output = document.getElementById(opt.output || "result");
+      var debug = document.getElementById(opt.debug || "debug");
+      var generator = new BodyGenerator(script);
+      var evaluator = this.getEvaluator();
+      
+      output.appendChild(this.makeTitle(name));
 
       var raws = [];
       var t1 = new Date();
@@ -9406,13 +9446,13 @@ var LayoutTest = (function(){
 	if(page){
 	  console.log("body element:%o", page);
 	  var html = evaluator.evaluate(page);
-	  output.appendChild(make_div(html));
+	  output.appendChild(this.makeDiv(html));
 	  raws.push(html);
 	}
       } while(page != null);
       var t2 = new Date();
 
-      output.appendChild(make_time(t1, t2));
+      output.appendChild(this.makeTime(t1, t2));
       //debug.value = raws.join("\n\n");
 
       var outline_contexts = DocumentContext.getOutlineContext("body");

@@ -7,9 +7,11 @@ var Box = (function(){
 
   Box.prototype = {
     debug : function(title){
-      console.log("[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", title,
-		  this.getContentMeasure(), this.getContentExtent(),
-		  this.getBoxMeasure(), this.getBoxExtent());
+      console.log(
+	"[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", (title || "no title"),
+	this.getContentMeasure(), this.getContentExtent(),
+	this.getBoxMeasure(), this.getBoxExtent()
+      );
     },
     getCssBlock : function(){
       var css = {};
