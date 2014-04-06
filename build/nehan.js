@@ -8786,7 +8786,7 @@ var HtmlGenerator = (function(){
 	  return this._createBodyGenerator(tag);
 	}
       }
-      var body_tag = new Tag("<body>", this.context.getStreamSrc());
+      var body_tag = new Tag("<body>", this.stream.getSrc());
       return this._createBodyGenerator(body_tag);
     },
     _createBodyGenerator : function(tag){
@@ -8850,11 +8850,11 @@ var DocumentGenerator = (function(){
 	  return this._createHtmlGenerator(tag);
 	}
       }
-      var html_tag = new Tag("<html>", this.context.getStreamSrc());
+      var html_tag = new Tag("<html>", this.stream.getSrc());
       return this._createHtmlGenerator(html_tag);
     },
     _createHtmlGenerator : function(html_tag){
-      return HtmlGenerator(html_tag.getContent());
+      return new HtmlGenerator(html_tag.getContent());
     }
   };
 
@@ -9383,11 +9383,14 @@ var LayoutTest = (function(){
   return {
     getGenerator : function(name){
       var script = TestScript[name] || TestSnipet[name] || TestText[name] || "undefined script";
+      /*
       //var tag = new Tag("<html>", "<body>" + script + "</body>");
       var tag = new Tag("<body>", script);
       var style = new StyleContext(tag, null);
       var stream = new TokenStream(tag.getContent());
       return new BodyGenerator(style, stream);
+      */
+      return new DocumentGenerator(script);
     },
     getEvaluator : function(){
       return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();

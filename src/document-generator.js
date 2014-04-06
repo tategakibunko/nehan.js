@@ -22,11 +22,11 @@ var DocumentGenerator = (function(){
 	  return this._createHtmlGenerator(tag);
 	}
       }
-      var html_tag = new Tag("<html>", this.context.getStreamSrc());
+      var html_tag = new Tag("<html>", this.stream.getSrc());
       return this._createHtmlGenerator(html_tag);
     },
     _createHtmlGenerator : function(html_tag){
-      return HtmlGenerator(html_tag.getContent());
+      return new HtmlGenerator(html_tag.getContent());
     }
   };
 

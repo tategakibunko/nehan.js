@@ -136,11 +136,14 @@ var LayoutTest = (function(){
   return {
     getGenerator : function(name){
       var script = TestScript[name] || TestSnipet[name] || TestText[name] || "undefined script";
+      /*
       //var tag = new Tag("<html>", "<body>" + script + "</body>");
       var tag = new Tag("<body>", script);
       var style = new StyleContext(tag, null);
       var stream = new TokenStream(tag.getContent());
       return new BodyGenerator(style, stream);
+      */
+      return new DocumentGenerator(script);
     },
     getEvaluator : function(){
       return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();

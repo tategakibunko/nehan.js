@@ -22,7 +22,7 @@ var HtmlGenerator = (function(){
 	  return this._createBodyGenerator(tag);
 	}
       }
-      var body_tag = new Tag("<body>", this.context.getStreamSrc());
+      var body_tag = new Tag("<body>", this.stream.getSrc());
       return this._createBodyGenerator(body_tag);
     },
     _createBodyGenerator : function(tag){
