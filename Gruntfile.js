@@ -166,7 +166,6 @@ module.exports = function(grunt) {
 	    "src/layout-evaluator.js",
 	    "src/vert-evaluator.js",
 	    "src/hori-evaluator.js",
-	    "src/layout-test.js",
 	    "src/main.js",
 	    "src/nehan-end.js"
 	  ]

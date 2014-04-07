@@ -1,8 +1,8 @@
 var Layout = {
   root:"document", // 'body' or 'html' or 'document'
-  direction:"vert",
-  hori:"lr-tb", // sorry, rl-tb is not supported yet.
-  vert:"tb-rl", // or "tb-lr"
+  direction:"vert", // or 'hori'
+  hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
+  vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
   width: 800,
   height: 580,
   fontSize:16,

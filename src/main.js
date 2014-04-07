@@ -9,9 +9,6 @@ Nehan.Env = Env;
 // export engine local interfaces
 return {
   documentContext: DocumentContext,
-  testLayout : function(name, opt){
-    LayoutTest.start(name, opt);
-  },
   createPageStream : function(text, group_size){
     group_size = Math.max(1, group_size || 1);
     return (group_size === 1)? (new PageStream(text)) : (new PageGroupStream(text, group_size));

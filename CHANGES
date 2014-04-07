@@ -6,7 +6,12 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 4.0.11 ???
+version 5.0.0 2014/xx/xx
+=========================
+! refactor many futures.
+
+
+version 4.0.11 2014/xx/xx
 =========================
 * fix trident rotation bug.
 * use 'white-space:pre' instead of tag name.
