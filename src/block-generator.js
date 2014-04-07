@@ -136,9 +136,9 @@ var BlockGenerator = (function(){
     if(element === null){
       return;
     }
-    if(this.style.isPushed()){
-      context.pushBockElement(element, extent);
-    } else if(this.style.isPulled()){
+    if(this.style.isPushed() || element.pushed){
+      context.pushBlockElement(element, extent);
+    } else if(this.style.isPulled() || element.pulled){
       context.pullBlockElement(element, extent);
     } else {
       context.addBlockElement(element, extent);

@@ -6865,6 +6865,11 @@ var StyleContext = (function(){
       image.display = this.display;
       image.classes = ["nehan-block", "nehan-image"];
       image.charCount = 0;
+      if(this.pushed){
+	image.pushed = true;
+      } else if(this.pulled){
+	image.pulled = true;
+      }
       if(this.edge){
 	image.edge = this.edge;
       }
@@ -7402,10 +7407,10 @@ var StyleContext = (function(){
       }
     },
     _loadPushedAttr : function(markup){
-      return markup.getCssAttr("pushed") !== null;
+      return markup.getAttr("pushed") !== null;
     },
     _loadPulledAttr : function(markup){
-      return markup.getCssAttr("pulled") !== null;
+      return markup.getAttr("pulled") !== null;
     }
   };
 
@@ -7892,9 +7897,9 @@ var BlockGenerator = (function(){
     if(element === null){
       return;
     }
-    if(this.style.isPushed()){
-      context.pushBockElement(element, extent);
-    } else if(this.style.isPulled()){
+    if(this.style.isPushed() || element.pushed){
+      context.pushBlockElement(element, extent);
+    } else if(this.style.isPulled() || element.pulled){
       context.pullBlockElement(element, extent);
     } else {
       context.addBlockElement(element, extent);
@@ -8791,7 +8796,7 @@ var LayoutEvaluator = (function(){
     evalBlockElements : function(parent, elements){
       var self = this;
       return List.fold(elements, "", function(ret, child){
-	return ret + self.evalBlockElement(parent, child);
+	return ret + (child? self.evalBlockElement(parent, child) : "");
       });
     },
     evalBlockElement : function(parent, element){

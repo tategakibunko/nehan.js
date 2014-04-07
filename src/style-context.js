@@ -121,6 +121,11 @@ var StyleContext = (function(){
       image.display = this.display;
       image.classes = ["nehan-block", "nehan-image"];
       image.charCount = 0;
+      if(this.pushed){
+	image.pushed = true;
+      } else if(this.pulled){
+	image.pulled = true;
+      }
       if(this.edge){
 	image.edge = this.edge;
       }
@@ -658,10 +663,10 @@ var StyleContext = (function(){
       }
     },
     _loadPushedAttr : function(markup){
-      return markup.getCssAttr("pushed") !== null;
+      return markup.getAttr("pushed") !== null;
     },
     _loadPulledAttr : function(markup){
-      return markup.getCssAttr("pulled") !== null;
+      return markup.getAttr("pulled") !== null;
     }
   };
 

@@ -25,7 +25,7 @@ var LayoutEvaluator = (function(){
     evalBlockElements : function(parent, elements){
       var self = this;
       return List.fold(elements, "", function(ret, child){
-	return ret + self.evalBlockElement(parent, child);
+	return ret + (child? self.evalBlockElement(parent, child) : "");
       });
     },
     evalBlockElement : function(parent, element){
