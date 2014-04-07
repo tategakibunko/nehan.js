@@ -10,9 +10,9 @@ var DocumentContext = {
   },
   createOutlineElementsByName : function(section_root_name, callbacks){
     var contexts = this.getOutlineContextsByName(section_root_name);
-    return List.map(contexts, function(context){
+    return List.fold(contexts, [], function(ret, context){
       var tree = OutlineContextParser.parse(context);
-      return SectionTreeConverter.convert(tree, callbacks);
+      return tree? ret.concat(SectionTreeConverter.convert(tree, callbacks)) : ret;
     });
   },
   addOutlineContext : function(outline_context){

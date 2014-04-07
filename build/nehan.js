@@ -5499,20 +5499,8 @@ var OutlineContext = (function(){
 
 // parse : context -> section tree
 var OutlineContextParser = (function(){
-  var __ptr__ = 0;
-  var __context__ = null;
-  var __root__ = null;
-
-  var get_next = function(){
-    return __context__.get(__ptr__++);
-  };
-
-  var rollback = function(){
-    __ptr__ = Math.max(0, __ptr__ - 1);
-  };
-
-  var parse = function(parent){
-    var log = get_next();
+  var _parse = function(context, parent, ptr){
+    var log = context.get(ptr++);
     if(log === null){
       return;
     }
@@ -5522,11 +5510,11 @@ var OutlineContextParser = (function(){
       if(parent){
 	parent.addChild(section);
       }
-      arguments.callee(section);
+      arguments.callee(context, section, ptr);
       break;
 
     case "end-section":
-      arguments.callee(parent.getParent());
+      arguments.callee(context, parent.getParent(), ptr);
       break;
 
     case "set-header":
@@ -5534,39 +5522,38 @@ var OutlineContextParser = (function(){
       if(parent === null){
 	var auto_section = new Section("section", null, log.pageNo);
 	auto_section.setHeader(header);
-	arguments.callee(auto_section);
+	arguments.callee(context, auto_section, ptr);
       } else if(!parent.hasHeader()){
 	parent.setHeader(header);
-	arguments.callee(parent);
+	arguments.callee(context, parent, ptr);
       } else {
 	var rank = log.rank;
 	var parent_rank = parent.getRank();
 	if(rank < parent_rank){ // higher rank
-	  rollback();
-	  arguments.callee(parent.getParent());
+	  ptr = Math.max(0, ptr - 1);
+	  arguments.callee(context, parent.getParent(), ptr);
 	} else if(log.rank == parent_rank){ // same rank
 	  var next_section = new Section("section", parent, log.pageNo);
 	  next_section.setHeader(header);
 	  parent.addNext(next_section);
-	  arguments.callee(next_section);
+	  arguments.callee(context, next_section, ptr);
 	} else { // lower rank
 	  var child_section = new Section("section", parent, log.pageNo);
 	  child_section.setHeader(header);
 	  parent.addChild(child_section);
-	  arguments.callee(child_section);
+	  arguments.callee(context, child_section, ptr);
 	}
       }
       break;
     }
+    return parent;
   };
 
   return {
     parse : function(context){
-      __ptr__ = 0;
-      __context__ = context;
-      __root__ = new Section("section", null, 0);
-      parse(__root__);
-      return __root__;
+      var ptr = 0;
+      var root = new Section("section", null, 0);
+      return _parse(context, root, ptr);
     }
   };
 })();
@@ -5743,9 +5730,9 @@ var DocumentContext = {
   },
   createOutlineElementsByName : function(section_root_name, callbacks){
     var contexts = this.getOutlineContextsByName(section_root_name);
-    return List.map(contexts, function(context){
+    return List.fold(contexts, [], function(ret, context){
       var tree = OutlineContextParser.parse(context);
-      return SectionTreeConverter.convert(tree, callbacks);
+      return tree? ret.concat(SectionTreeConverter.convert(tree, callbacks)) : ret;
     });
   },
   addOutlineContext : function(outline_context){
@@ -6494,9 +6481,6 @@ var PageStream = (function(){
     this.buffer = [];
     this._timeStart = null;
     this._timeElapsed = null;
-    this._seekPageNo = 0;
-    this._seekPercent = 0;
-    this._seekPos = 0;
   }
 
   PageStream.prototype = {
@@ -6507,16 +6491,22 @@ var PageStream = (function(){
       return this.generator.hasNext();
     },
     syncGet : function(){
+      var page_no = 0;
       this._setTimeStart();
-      while(this.generator.hasNext()){
-	this._getNext();
+      while(this.hasNext()){
+	if(!this.hasPage(page_no)){
+	  var tree = this._yield();
+	  this._addBuffer(tree);
+	}
+	var page = this.getPage(page_no);
+	// console.log("sync get(%d):%o", page_no, page);
+	page_no++;
       }
       return this._setTimeElapsed();
     },
     asyncGet : function(opt){
       Args.merge(this, {
 	onComplete : function(time){},
-	onFirstPage : function(self, page){},
 	onProgress : function(self, tree){},
 	onError : function(self){}
       }, opt || {});
@@ -6526,20 +6516,11 @@ var PageStream = (function(){
     getPageCount : function(){
       return this.buffer.length;
     },
+    // getGroupPageNo is called from PageGroupStream.
+    // notice that this stream is constructed by single page,
+    // so cell_page_no is always equals to group_page_no.
     getGroupPageNo : function(cell_page_no){
       return cell_page_no;
-    },
-    getSeekPageResult : function(){
-      return this.getPage(this._seekPageNo);
-    },
-    getSeekPageNo : function(){
-      return this._seekPageNo;
-    },
-    getSeekPercent : function(){
-      return this._seekPercent;
-    },
-    getSeekPos : function(){
-      return this._seekPos;
     },
     getTimeElapsed : function(){
       return this._timeElapsed;
@@ -6554,20 +6535,6 @@ var PageStream = (function(){
       var result = this.evaluator.evaluate(entry);
       this.buffer[page_no] = result; // over write buffer entry by result.
       return result;
-    },
-    _getNext : function(){
-      if(!this.hasNext()){
-	return null;
-      }
-      var cur_page_no = this._seekPageNo;
-      if(!this.hasPage(cur_page_no)){
-	var entry = this._yield();
-	this._addBuffer(entry);
-	this._seekPageNo++;
-	this._seekPercent = entry.percent;
-	this._seekPos = entry.seekPos;
-      }
-      return this.getPage(cur_page_no);
     },
     _yield : function(){
       return this.generator.yield();
@@ -6589,17 +6556,7 @@ var PageStream = (function(){
       var self = this;
       var tree = this._yield();
       this._addBuffer(tree);
-
-      // tree of first page is evaluated immediately.
-      if(tree.pageNo === 0){
-	this.onFirstPage(this, this.getPage(0));
-      } else {
-	// to speed up parsing, continuous page tree is not evaluated yet.
-	this.onProgress(this, tree);
-      }
-      this._seekPageNo++;
-      this._seekPercent = tree.percent;
-      this._seekPos = tree.seekPos;
+      this.onProgress(this, tree);
       reqAnimationFrame(function(){
 	self._asyncGet(wait);
       });
@@ -9339,7 +9296,10 @@ var LayoutTest = (function(){
     "header-test":[
       "<h1>h1h1h1</h1>",
       "<h2>h2h2h2</h2>",
+      "<h2>h2h2h2.2</h2>",
       "<h3>h3h3h3</h3>",
+      "<h2>h2h2h2.3</h2>",
+      "<h3>h3h3h3.2</h3>",
       "<h4>h4h4h4</h4>",
       "<h5>h5h5h5</h5>",
       "<h6>h6h6h6</h6>"
@@ -9361,12 +9321,6 @@ var LayoutTest = (function(){
     _makeDiv : function(html){
       var dom = document.createElement("div");
       dom.innerHTML = html;
-      return dom;
-    },
-    _makeTime : function(t1, t2){
-      var sec = t2.getTime() - t1.getTime();
-      var dom = document.createElement("p");
-      dom.innerHTML = (sec / 1000) + "sec";
       return dom;
     },
     _setupLayout : function(opt){
@@ -9404,36 +9358,37 @@ var LayoutTest = (function(){
 })();
 
 
-Nehan.version = "5.0.0";
-
-Args.copy(Env, __engine_args.env || {});
 Args.copy(Layout, __engine_args.layout || {});
 Args.copy(Config, __engine_args.config || {});
 
-var __exports = {};
+// export browser local interfaces
+Nehan.version = "5.0.0";
 Nehan.Class = Class;
 Nehan.Env = Env;
-__exports.documentContext = DocumentContext;
-__exports.createPageStream = function(text, group_size){
-  group_size = Math.max(1, group_size || 1);
-  return (group_size === 1)? (new PageStream(text)) : (new PageGroupStream(text, group_size));
-};
-__exports.getStyle = function(selector_key){
-  return Selectors.getValue(selector_key);
-};
-__exports.setStyle = function(selector_key, value){
-  Selectors.setValue(selector_key, value);
-  return this;
-};
-__exports.setStyles = function(values){
-  for(var selector_key in values){
-    Selectors.setValue(selector_key, values[selector_key]);
+
+// export engine local interfaces
+return {
+  documentContext: DocumentContext,
+  testLayout : function(name, opt){
+    LayoutTest.start(name, opt);
+  },
+  createPageStream : function(text, group_size){
+    group_size = Math.max(1, group_size || 1);
+    return (group_size === 1)? (new PageStream(text)) : (new PageGroupStream(text, group_size));
+  },
+  getStyle : function(selector_key){
+    return Selectors.getValue(selector_key);
+  },
+  setStyle : function(selector_key, value){
+    Selectors.setValue(selector_key, value);
+    return this;
+  },
+  setStyles : function(values){
+    for(var selector_key in values){
+      Selectors.setValue(selector_key, values[selector_key]);
+    }
+    return this;
   }
-  return this;
 };
-
-__exports.LayoutTest = LayoutTest;
-
-return __exports;
 
 }; // Nehan.setup

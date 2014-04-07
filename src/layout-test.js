@@ -126,7 +126,10 @@ var LayoutTest = (function(){
     "header-test":[
       "<h1>h1h1h1</h1>",
       "<h2>h2h2h2</h2>",
+      "<h2>h2h2h2.2</h2>",
       "<h3>h3h3h3</h3>",
+      "<h2>h2h2h2.3</h2>",
+      "<h3>h3h3h3.2</h3>",
       "<h4>h4h4h4</h4>",
       "<h5>h5h5h5</h5>",
       "<h6>h6h6h6</h6>"
@@ -148,12 +151,6 @@ var LayoutTest = (function(){
     _makeDiv : function(html){
       var dom = document.createElement("div");
       dom.innerHTML = html;
-      return dom;
-    },
-    _makeTime : function(t1, t2){
-      var sec = t2.getTime() - t1.getTime();
-      var dom = document.createElement("p");
-      dom.innerHTML = (sec / 1000) + "sec";
       return dom;
     },
     _setupLayout : function(opt){

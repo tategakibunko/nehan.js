@@ -6,9 +6,6 @@ var PageStream = (function(){
     this.buffer = [];
     this._timeStart = null;
     this._timeElapsed = null;
-    this._seekPageNo = 0;
-    this._seekPercent = 0;
-    this._seekPos = 0;
   }
 
   PageStream.prototype = {
@@ -19,16 +16,22 @@ var PageStream = (function(){
       return this.generator.hasNext();
     },
     syncGet : function(){
+      var page_no = 0;
       this._setTimeStart();
-      while(this.generator.hasNext()){
-	this._getNext();
+      while(this.hasNext()){
+	if(!this.hasPage(page_no)){
+	  var tree = this._yield();
+	  this._addBuffer(tree);
+	}
+	var page = this.getPage(page_no);
+	// console.log("sync get(%d):%o", page_no, page);
+	page_no++;
       }
       return this._setTimeElapsed();
     },
     asyncGet : function(opt){
       Args.merge(this, {
 	onComplete : function(time){},
-	onFirstPage : function(self, page){},
 	onProgress : function(self, tree){},
 	onError : function(self){}
       }, opt || {});
@@ -38,20 +41,11 @@ var PageStream = (function(){
     getPageCount : function(){
       return this.buffer.length;
     },
+    // getGroupPageNo is called from PageGroupStream.
+    // notice that this stream is constructed by single page,
+    // so cell_page_no is always equals to group_page_no.
     getGroupPageNo : function(cell_page_no){
       return cell_page_no;
-    },
-    getSeekPageResult : function(){
-      return this.getPage(this._seekPageNo);
-    },
-    getSeekPageNo : function(){
-      return this._seekPageNo;
-    },
-    getSeekPercent : function(){
-      return this._seekPercent;
-    },
-    getSeekPos : function(){
-      return this._seekPos;
     },
     getTimeElapsed : function(){
       return this._timeElapsed;
@@ -66,20 +60,6 @@ var PageStream = (function(){
       var result = this.evaluator.evaluate(entry);
       this.buffer[page_no] = result; // over write buffer entry by result.
       return result;
-    },
-    _getNext : function(){
-      if(!this.hasNext()){
-	return null;
-      }
-      var cur_page_no = this._seekPageNo;
-      if(!this.hasPage(cur_page_no)){
-	var entry = this._yield();
-	this._addBuffer(entry);
-	this._seekPageNo++;
-	this._seekPercent = entry.percent;
-	this._seekPos = entry.seekPos;
-      }
-      return this.getPage(cur_page_no);
     },
     _yield : function(){
       return this.generator.yield();
@@ -101,17 +81,7 @@ var PageStream = (function(){
       var self = this;
       var tree = this._yield();
       this._addBuffer(tree);
-
-      // tree of first page is evaluated immediately.
-      if(tree.pageNo === 0){
-	this.onFirstPage(this, this.getPage(0));
-      } else {
-	// to speed up parsing, continuous page tree is not evaluated yet.
-	this.onProgress(this, tree);
-      }
-      this._seekPageNo++;
-      this._seekPercent = tree.percent;
-      this._seekPos = tree.seekPos;
+      this.onProgress(this, tree);
       reqAnimationFrame(function(){
 	self._asyncGet(wait);
       });
