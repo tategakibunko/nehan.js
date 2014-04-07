@@ -7,7 +7,6 @@ Args.copy(Config, __engine_args.config || {});
 var __exports = {};
 Nehan.Class = Class;
 Nehan.Env = Env;
-Nehan.OutlineContextConverter = OutlineContextConverter;
 __exports.documentContext = DocumentContext;
 __exports.createPageStream = function(text, group_size){
   group_size = Math.max(1, group_size || 1);

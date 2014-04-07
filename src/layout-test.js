@@ -168,7 +168,7 @@ var LayoutTest = (function(){
       var stream = new PageStream(script);
       var output = document.getElementById(opt.output || "result");
       var debug = document.getElementById(opt.debug || "debug");
-      var toc = document.getElementById(opt.toc || "toc");
+      var toc_root = document.getElementById(opt.toc || "toc");
       stream.asyncGet({
 	// only first page is evaluated immediately.
 	onFirstPage : function(caller, page){
@@ -180,12 +180,10 @@ var LayoutTest = (function(){
 	},
 	onComplete : function(time){
 	  output.appendChild(self._makeDiv(time + "msec"));
-
-	  var outline_contexts = DocumentContext.getOutlineContext("body");
-	  if(outline_contexts.length > 0){
-	    var toc_body = (new OutlineContextConverter()).convert(outline_contexts[0]);
-	    toc.appendChild(toc_body);
-	  }
+	  var toc_nodes = DocumentContext.createOutlineElementsByName("body");
+	  List.iter(toc_nodes, function(toc_node){
+	    toc_root.appendChild(toc_node);
+	  });
 	}
       });
     }

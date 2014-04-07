@@ -5455,13 +5455,6 @@ var OutlineContext = (function(){
     get : function(index){
       return this.logs[index] || null;
     },
-    getTocTree : function(){
-      return OutlineParser.getTocTree(this);
-    },
-    getTocNode : function(){
-      var tree = this.outputTocTree();
-      return (new OutlineConverter()).convert(tree);
-    },
     getPageNo : function(){
       return this.pageNo;
     },
@@ -5507,11 +5500,11 @@ var OutlineContext = (function(){
 // parse : context -> section tree
 var OutlineContextParser = (function(){
   var __ptr__ = 0;
-  var __outline__ = null;
+  var __context__ = null;
   var __root__ = null;
 
   var get_next = function(){
-    return __outline__.get(__ptr__++);
+    return __context__.get(__ptr__++);
   };
 
   var rollback = function(){
@@ -5568,9 +5561,9 @@ var OutlineContextParser = (function(){
   };
 
   return {
-    parse : function(outline_context){
+    parse : function(context){
       __ptr__ = 0;
-      __outline__ = outline_context;
+      __context__ = context;
       __root__ = new Section("section", null, 0);
       parse(__root__);
       return __root__;
@@ -5598,30 +5591,59 @@ var OutlineContextParser = (function(){
    </li>
   </ol>
 */
-
-var OutlineContextConverter = (function(){
-  function OutlineContextConverter(){}
-
-  // outline_context -> dom node
-  OutlineContextConverter.prototype.convert = function(outline_context){
-    var toc_context = new TocContext();
-    var root_node = this.createRoot();
-    var outline_tree = OutlineContextParser.parse(outline_context);
-    return this._parse(toc_context, root_node, outline_tree);
+// section tree -> dom node
+var SectionTreeConverter = (function(){
+  var default_callbacks = {
+    onClickLink : function(toc){
+      console.log("toc clicked!:%o", toc);
+      return false;
+    },
+    createToc : function(toc_ctx, tree){
+      return {
+	tocPos:toc_ctx.toString(),
+	title:tree.getTitle(),
+	pageNo:tree.getPageNo(),
+	headerId:tree.getHeaderId()
+      };
+    },
+    createRoot : function(toc){
+      var root = document.createElement("ol");
+      root.className = "nehan-toc-root";
+      return root;
+    },
+    createChild : function(toc){
+      var li = document.createElement("li");
+      li.className = "nehan-toc-item";
+      return li;
+    },
+    createLink : function(toc){
+      var link = document.createElement("a");
+      var title = toc.title.replace(/<a[^>]+>/gi, "").replace(/<\/a>/gi, "");
+      link.href = "#" + toc.pageNo;
+      link.innerHTML = title;
+      link.className = "nehan-toc-link";
+      link.id = Css.addNehanTocLinkPrefix(toc.tocId);
+      return link;
+    },
+    createPageNoItem : function(toc){
+      return null;
+    }
   };
-  
-  OutlineContextConverter.prototype._parse = function(toc_ctx, parent, tree){
+
+  var parse = function(toc_ctx, parent, tree, callbacks){
     if(tree === null){
       return parent;
     }
-    var toc = this.createToc(toc_ctx, tree);
-    var li = this.createChild(toc);
-    var link = this.createLink(toc);
+    var toc = callbacks.createToc(toc_ctx, tree);
+    var li = callbacks.createChild(toc);
+    var link = callbacks.createLink(toc);
     if(link){
-      link.onclick = this.createOnClickLink(toc);
+      link.onclick = function(){
+	return callbacks.onClickLink(toc);
+      };
       li.appendChild(link);
     }
-    var page_no_item = this.createPageNoItem(toc);
+    var page_no_item = callbacks.createPageNoItem(toc);
     if(page_no_item){
       li.appendChild(page_no_item);
     }
@@ -5630,61 +5652,28 @@ var OutlineContextConverter = (function(){
     var child = tree.getChild();
     if(child){
       toc_ctx = toc_ctx.startRoot();
-      var child_toc = this.createToc(toc_ctx, child);
-      var ol = this.createRoot(child_toc);
-      this._parse(toc_ctx, ol, child);
+      var child_toc = callbacks.createToc(toc_ctx, child);
+      var ol = callbacks.createRoot(child_toc);
+      arguments.callee(toc_ctx, ol, child, callbacks);
       li.appendChild(ol);
       toc_ctx = toc_ctx.endRoot();
     }
     var next = tree.getNext();
     if(next){
-      this._parse(toc_ctx.stepNext(), parent, next);
+      arguments.callee(toc_ctx.stepNext(), parent, next, callbacks);
     }
     return parent;
   };
 
-  OutlineContextConverter.prototype.createOnClickLink = function(toc){
-    return function(){
-      return false;
+  return {
+    // section tree -> dom node
+    convert : function(outline_tree, callbacks){
+      callbacks = Args.merge({}, default_callbacks, callbacks || {});
+      var toc_context = new TocContext();
+      var root_node = callbacks.createRoot();
+      return parse(toc_context, root_node, outline_tree, callbacks);
     }
   };
-
-  OutlineContextConverter.prototype.createToc = function(toc_ctx, tree){
-    return {
-      tocPos:toc_ctx.toString(),
-      title:tree.getTitle(),
-      pageNo:tree.getPageNo(),
-      headerId:tree.getHeaderId()
-    };
-  };
-
-  OutlineContextConverter.prototype.createRoot = function(toc){
-    var root = document.createElement("ol");
-    root.className = "nehan-toc-root";
-    return root;
-  };
-
-  OutlineContextConverter.prototype.createChild = function(toc){
-    var li = document.createElement("li");
-    li.className = "nehan-toc-item";
-    return li;
-  };
-
-  OutlineContextConverter.prototype.createLink = function(toc){
-    var link = document.createElement("a");
-    var title = toc.title.replace(/<a[^>]+>/gi, "").replace(/<\/a>/gi, "");
-    link.href = "#" + toc.pageNo;
-    link.innerHTML = title;
-    link.className = "nehan-toc-link";
-    link.id = Css.addNehanTocLinkPrefix(toc.tocId);
-    return link;
-  };
-
-  OutlineContextConverter.prototype.createPageNoItem = function(toc){
-    return null;
-  };
-
-  return OutlineContextConverter;
 })();
 
 var DocumentHeader = (function(){
@@ -5742,54 +5731,33 @@ var DocumentHeader = (function(){
 })();
 
 
-var DocumentContext = (function(){
-  var __anchors__ = {};
-  var __outlines__ = [];
-  var __metas__ = {};
-  var __header__ = null;
-  var __document_type__ = "html";
-
-  return {
-    setDocumentType : function(tag){
-      // TODO
-      //__document_type__ = tag.getSrc().replace(/<!doctype/gi).replace(">").replace(/\s+/g, "");
-    },
-    setDocumentHeader : function(header){
-      __header__ = header;
-    },
-    getDocumentHeader : function(){
-      return __header__;
-    },
-    getOutlineContext : function(markup_name){
-      return List.filter(__outlines__, function(outline_context){
-	return outline_context.getMarkupName() === markup_name;
-      });
-    },
-    addOutlineContext : function(outline_context){
-      __outlines__.push(outline_context);
-    },
-    addMetaValue : function(name, value){
-      if(typeof __metas__[name] === "undefined"){
-	__metas__[name] = [value];
-	return;
-      }
-      __metas__[name].push(value);
-    },
-    getMetaValue : function(name){
-      return __metas__[name] || null;
-    },
-    addAnchorPageNo : function(name, page_no){
-      __anchors__[name] = page_no;
-    },
-    getAnchorPageNo : function(name){
-      return __anchors__[name] || null;
-    }
+var DocumentContext = {
+  documentType:"html",
+  anchors:{},
+  outlineContexts:[],
+  header:null,
+  getOutlineContextsByName : function(section_root_name){
+    return List.filter(this.outlineContexts, function(context){
+      return context.getMarkupName() === section_root_name;
+    });
+  },
+  createOutlineElementsByName : function(section_root_name, callbacks){
+    var contexts = this.getOutlineContextsByName(section_root_name);
+    return List.map(contexts, function(context){
+      var tree = OutlineContextParser.parse(context);
+      return SectionTreeConverter.convert(tree, callbacks);
+    });
+  },
+  addOutlineContext : function(outline_context){
+    this.outlineContexts.push(outline_context);
+  },
+  addAnchorPageNo : function(name, page_no){
+    this.anchors[name] = page_no;
+  },
+  getAnchorPageNo : function(name){
+    return this.anchors[name] || null;
   }
-})();
-
-
-  
-
+};
 
 var BorderMap = (function(){
   function BorderMap(row_count, max_col){
@@ -8816,7 +8784,7 @@ var HtmlGenerator = (function(){
 	  break;
 	}
       }
-      DocumentContext.setDocumentHeader(header);
+      DocumentContext.header = header;
     }
   };
 
@@ -8842,7 +8810,7 @@ var DocumentGenerator = (function(){
 	var tag = this.stream.get();
 	switch(tag.getName()){
 	case "!doctype":
-	  DocumentContext.setDocumentType(tag);
+	  DocumentContext.documentType = "html"; // TODO
 	  break;
 	case "html":
 	  return this._createHtmlGenerator(tag);
@@ -9413,7 +9381,7 @@ var LayoutTest = (function(){
       var stream = new PageStream(script);
       var output = document.getElementById(opt.output || "result");
       var debug = document.getElementById(opt.debug || "debug");
-      var toc = document.getElementById(opt.toc || "toc");
+      var toc_root = document.getElementById(opt.toc || "toc");
       stream.asyncGet({
 	// only first page is evaluated immediately.
 	onFirstPage : function(caller, page){
@@ -9425,12 +9393,10 @@ var LayoutTest = (function(){
 	},
 	onComplete : function(time){
 	  output.appendChild(self._makeDiv(time + "msec"));
-
-	  var outline_contexts = DocumentContext.getOutlineContext("body");
-	  if(outline_contexts.length > 0){
-	    var toc_body = (new OutlineContextConverter()).convert(outline_contexts[0]);
-	    toc.appendChild(toc_body);
-	  }
+	  var toc_nodes = DocumentContext.createOutlineElementsByName("body");
+	  List.iter(toc_nodes, function(toc_node){
+	    toc_root.appendChild(toc_node);
+	  });
 	}
       });
     }
@@ -9447,7 +9413,6 @@ Args.copy(Config, __engine_args.config || {});
 var __exports = {};
 Nehan.Class = Class;
 Nehan.Env = Env;
-Nehan.OutlineContextConverter = OutlineContextConverter;
 __exports.documentContext = DocumentContext;
 __exports.createPageStream = function(text, group_size){
   group_size = Math.max(1, group_size || 1);

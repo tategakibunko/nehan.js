@@ -117,7 +117,7 @@ module.exports = function(grunt) {
 	    "src/toc-context.js",
 	    "src/outline-context.js",
 	    "src/outline-context-parser.js",
-	    "src/outline-context-converter.js",
+	    "src/section-tree-converter.js",
 	    "src/document-header.js",
 	    "src/document-context.js",
 	    "src/border-map.js",

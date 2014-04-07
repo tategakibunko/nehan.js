@@ -17,13 +17,6 @@ var OutlineContext = (function(){
     get : function(index){
       return this.logs[index] || null;
     },
-    getTocTree : function(){
-      return OutlineParser.getTocTree(this);
-    },
-    getTocNode : function(){
-      var tree = this.outputTocTree();
-      return (new OutlineConverter()).convert(tree);
-    },
     getPageNo : function(){
       return this.pageNo;
     },

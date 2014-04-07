@@ -49,7 +49,7 @@ var HtmlGenerator = (function(){
 	  break;
 	}
       }
-      DocumentContext.setDocumentHeader(header);
+      DocumentContext.header = header;
     }
   };
 

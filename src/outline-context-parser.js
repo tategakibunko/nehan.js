@@ -1,11 +1,11 @@
 // parse : context -> section tree
 var OutlineContextParser = (function(){
   var __ptr__ = 0;
-  var __outline__ = null;
+  var __context__ = null;
   var __root__ = null;
 
   var get_next = function(){
-    return __outline__.get(__ptr__++);
+    return __context__.get(__ptr__++);
   };
 
   var rollback = function(){
@@ -62,9 +62,9 @@ var OutlineContextParser = (function(){
   };
 
   return {
-    parse : function(outline_context){
+    parse : function(context){
       __ptr__ = 0;
-      __outline__ = outline_context;
+      __context__ = context;
       __root__ = new Section("section", null, 0);
       parse(__root__);
       return __root__;
