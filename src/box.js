@@ -32,6 +32,19 @@ var Box = (function(){
       Args.copy(css, this.size.getCss());
       return css;
     },
+    getCssVertBlockImage : function(){
+      var css = {};
+      Args.copy(css, this.size.getCss());
+      Args.copy(css, this.style.flow.getCss());
+      css["display"] = "block";
+      return css;
+    },
+    getCssHoriBlockImage : function(){
+      var css = {};
+      Args.copy(css, this.size.getCss());
+      css["display"] = "block";
+      return css;
+    },
     getCssHoriInlineImage : function(){
       var css = {};
       Args.copy(css, this.size.getCss());

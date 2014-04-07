@@ -9,6 +9,14 @@ var HoriEvaluator = (function(){
     return this.evalBlock(iblock);
   };
 
+  HoriEvaluator.prototype.evalBlockImage = function(image){
+    return Html.tagSingle("img", {
+      "src":image.style.markup.getAttr("src"),
+      "style":Css.toString(image.getCssHoriBlockImage()),
+      "class":image.classes.join(" ")
+    });
+  };
+
   HoriEvaluator.prototype.evalInlineImage = function(line, image){
     return Html.tagSingle("img", {
       "src":image.style.markup.getAttr("src"),

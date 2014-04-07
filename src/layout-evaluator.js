@@ -25,8 +25,14 @@ var LayoutEvaluator = (function(){
     evalBlockElements : function(parent, elements){
       var self = this;
       return List.fold(elements, "", function(ret, child){
-	return ret + self.evaluate(child);
+	return ret + self.evalBlockElement(parent, child);
       });
+    },
+    evalBlockElement : function(parent, element){
+      if(element.style && element.style.getMarkupName() === "img"){
+	return this.evalBlockImage(element);
+      }
+      return this.evaluate(element);
     },
     evalInline : function(line){
       return Html.tagWrap("div", this.evalInlineElements(line, line.elements), {

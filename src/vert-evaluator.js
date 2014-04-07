@@ -12,10 +12,19 @@ var VertEvaluator = (function(){
     return this.evalInline(child);
   };
 
+  VertEvaluator.prototype.evalBlockImage = function(image){
+    return Html.tagSingle("img", {
+      "src":image.style.markup.getAttr("src"),
+      "style":Css.toString(image.getCssVertBlockImage()),
+      "class":image.classes.join(" ")
+    });
+  };
+
   VertEvaluator.prototype.evalInlineImage = function(line, image){
     return Html.tagSingle("img", {
       "src":image.style.markup.getAttr("src"),
-      "style":Css.toString(image.getCssVertInlineImage())
+      "style":Css.toString(image.getCssVertInlineImage()),
+      "class":image.classes.join(" ")
     }) + "<br />";
   };
 

@@ -95,6 +95,9 @@ var BlockGenerator = (function(){
     }
 
     switch(child_style.getMarkupName()){
+    case "img":
+      return child_style.createImage();
+
     case "details":
     case "blockquote":
     case "figure":

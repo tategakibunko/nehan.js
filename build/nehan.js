@@ -5033,6 +5033,19 @@ var Box = (function(){
       Args.copy(css, this.size.getCss());
       return css;
     },
+    getCssVertBlockImage : function(){
+      var css = {};
+      Args.copy(css, this.size.getCss());
+      Args.copy(css, this.style.flow.getCss());
+      css["display"] = "block";
+      return css;
+    },
+    getCssHoriBlockImage : function(){
+      var css = {};
+      Args.copy(css, this.size.getCss());
+      css["display"] = "block";
+      return css;
+    },
     getCssHoriInlineImage : function(){
       var css = {};
       Args.copy(css, this.size.getCss());
@@ -7838,6 +7851,9 @@ var BlockGenerator = (function(){
     }
 
     switch(child_style.getMarkupName()){
+    case "img":
+      return child_style.createImage();
+
     case "details":
     case "blockquote":
     case "figure":
@@ -8000,10 +8016,6 @@ var InlineGenerator = (function(){
     if(token instanceof Tag){
       style = new StyleContext(token, this.style);
 
-      if(style.getMarkupName() === "img"){
-	return style.createImage();
-      }
-
       // inline -> block, force terminate inline
       if(style.isBlock()){
 	this.stream.prev();
@@ -8014,6 +8026,11 @@ var InlineGenerator = (function(){
 	// and it causes page-break of parent block generator.
 	context.setLineBreak(true);
 	return null;
+      }
+
+      // inline image
+      if(style.getMarkupName() === "img"){
+	return style.createImage();
       }
     }
 
@@ -8774,8 +8791,14 @@ var LayoutEvaluator = (function(){
     evalBlockElements : function(parent, elements){
       var self = this;
       return List.fold(elements, "", function(ret, child){
-	return ret + self.evaluate(child);
+	return ret + self.evalBlockElement(parent, child);
       });
+    },
+    evalBlockElement : function(parent, element){
+      if(element.style && element.style.getMarkupName() === "img"){
+	return this.evalBlockImage(element);
+      }
+      return this.evaluate(element);
     },
     evalInline : function(line){
       return Html.tagWrap("div", this.evalInlineElements(line, line.elements), {
@@ -8831,10 +8854,19 @@ var VertEvaluator = (function(){
     return this.evalInline(child);
   };
 
+  VertEvaluator.prototype.evalBlockImage = function(image){
+    return Html.tagSingle("img", {
+      "src":image.style.markup.getAttr("src"),
+      "style":Css.toString(image.getCssVertBlockImage()),
+      "class":image.classes.join(" ")
+    });
+  };
+
   VertEvaluator.prototype.evalInlineImage = function(line, image){
     return Html.tagSingle("img", {
       "src":image.style.markup.getAttr("src"),
-      "style":Css.toString(image.getCssVertInlineImage())
+      "style":Css.toString(image.getCssVertInlineImage()),
+      "class":image.classes.join(" ")
     }) + "<br />";
   };
 
@@ -9042,6 +9074,14 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype.evalInlineBlock = function(iblock){
     iblock.css.display = "inline-block";
     return this.evalBlock(iblock);
+  };
+
+  HoriEvaluator.prototype.evalBlockImage = function(image){
+    return Html.tagSingle("img", {
+      "src":image.style.markup.getAttr("src"),
+      "style":Css.toString(image.getCssHoriBlockImage()),
+      "class":image.classes.join(" ")
+    });
   };
 
   HoriEvaluator.prototype.evalInlineImage = function(line, image){
