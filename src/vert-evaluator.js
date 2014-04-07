@@ -12,6 +12,13 @@ var VertEvaluator = (function(){
     return this.evalInline(child);
   };
 
+  VertEvaluator.prototype.evalInlineImage = function(line, image){
+    return Html.tagSingle("img", {
+      "src":image.style.markup.getAttr("src"),
+      "style":Css.toString(image.getCssVertInlineImage())
+    }) + "<br />";
+  };
+
   VertEvaluator.prototype.evalRuby = function(line, ruby){
     var body = this.evalRb(line, ruby) + this.evalRt(line, ruby);
     return Html.tagWrap("div", body, {

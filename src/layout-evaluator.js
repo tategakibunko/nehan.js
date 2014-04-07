@@ -42,6 +42,9 @@ var LayoutEvaluator = (function(){
     },
     evalInlineElement : function(line, element){
       if(element instanceof Box){
+	if(element.style.getMarkupName() === "img"){
+	  return this.evalInlineImage(line, element);
+	}
 	return this.evalInlineChild(line, element);
       }
       var text = this.evalTextElement(line, element);

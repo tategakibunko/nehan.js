@@ -9,6 +9,13 @@ var HoriEvaluator = (function(){
     return this.evalBlock(iblock);
   };
 
+  HoriEvaluator.prototype.evalInlineImage = function(line, image){
+    return Html.tagSingle("img", {
+      "src":image.style.markup.getAttr("src"),
+      "style":Css.toString(image.getCssHoriInlineImage())
+    });
+  };
+
   HoriEvaluator.prototype.evalInlineChild = function(line, child){
     return Html.tagWrap("span", this.evalInlineElements(child, child.elements), {
       "style":Css.toString(line.getCssInline()),

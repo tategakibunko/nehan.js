@@ -82,6 +82,10 @@ var InlineGenerator = (function(){
     if(token instanceof Tag){
       style = new StyleContext(token, this.style);
 
+      if(style.getMarkupName() === "img"){
+	return style.createImage();
+      }
+
       // inline -> block, force terminate inline
       if(style.isBlock()){
 	this.stream.prev();

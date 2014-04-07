@@ -31,7 +31,7 @@ var PageStream = (function(){
     },
     asyncGet : function(opt){
       Args.merge(this, {
-	onComplete : function(time){},
+	onComplete : function(self, time){},
 	onProgress : function(self, tree){},
 	onError : function(self){}
       }, opt || {});
@@ -74,12 +74,15 @@ var PageStream = (function(){
     },
     _asyncGet : function(wait){
       if(!this.generator.hasNext()){
-	var time = this._setTimeElapsed();
-	this.onComplete(time);
+	this.onComplete(this, this._setTimeElapsed());
 	return;
       }
       var self = this;
       var tree = this._yield();
+      if(tree === null){
+	this.onComplete(this, this._setTimeElapsed());
+	return;
+      }
       this._addBuffer(tree);
       this.onProgress(this, tree);
       reqAnimationFrame(function(){

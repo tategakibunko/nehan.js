@@ -27,6 +27,17 @@ var Box = (function(){
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
+    getCssVertInlineImage : function(){
+      var css = {};
+      Args.copy(css, this.size.getCss());
+      return css;
+    },
+    getCssHoriInlineImage : function(){
+      var css = {};
+      Args.copy(css, this.size.getCss());
+      css["display"] = "inline";
+      return css;
+    },
     getCssVertInlineBox : function(){
       var css = this.getCssBlock();
       css["float"] = "none";

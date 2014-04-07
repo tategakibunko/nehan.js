@@ -5028,6 +5028,17 @@ var Box = (function(){
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
+    getCssVertInlineImage : function(){
+      var css = {};
+      Args.copy(css, this.size.getCss());
+      return css;
+    },
+    getCssHoriInlineImage : function(){
+      var css = {};
+      Args.copy(css, this.size.getCss());
+      css["display"] = "inline";
+      return css;
+    },
     getCssVertInlineBox : function(){
       var css = this.getCssBlock();
       css["float"] = "none";
@@ -6433,7 +6444,7 @@ var PageStream = (function(){
     },
     asyncGet : function(opt){
       Args.merge(this, {
-	onComplete : function(time){},
+	onComplete : function(self, time){},
 	onProgress : function(self, tree){},
 	onError : function(self){}
       }, opt || {});
@@ -6476,12 +6487,15 @@ var PageStream = (function(){
     },
     _asyncGet : function(wait){
       if(!this.generator.hasNext()){
-	var time = this._setTimeElapsed();
-	this.onComplete(time);
+	this.onComplete(this, this._setTimeElapsed());
 	return;
       }
       var self = this;
       var tree = this._yield();
+      if(tree === null){
+	this.onComplete(this, this._setTimeElapsed());
+	return;
+      }
       this._addBuffer(tree);
       this.onProgress(this, tree);
       reqAnimationFrame(function(){
@@ -6830,13 +6844,26 @@ var StyleContext = (function(){
       }
       return box;
     },
+    createImage : function(){
+      var measure = this.getStaticMeasure() || this.getContentMeasure();
+      var extent = this.getStaticExtent() || this.getContentExtent();
+      var box_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent); // image size always considered as horizontal mode.
+      var image = new Box(box_size, this);
+      image.display = this.display;
+      image.classes = ["nehan-block", "nehan-image"];
+      image.charCount = 0;
+      if(this.edge){
+	image.edge = this.edge;
+      }
+      return image;
+    },
     createLine : function(opt){
       var elements = opt.elements || [];
       var child_lines = this._filterChildLines(elements);
       var max_font_size = this._computeMaxLineFontSize(child_lines);
       var max_extent = this._computeMaxLineExtent(child_lines, max_font_size);
       var measure = opt.measure || this.getContentMeasure();
-      var extent = this.isRootLine()? this._computeRootLineExtent(child_lines, max_font_size, max_extent) : this.getAutoLineExtent();
+      var extent = (this.isRootLine() && child_lines.length > 0)? max_extent : this.getAutoLineExtent();
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
       var line = new Box(box_size, this);
@@ -7004,31 +7031,29 @@ var StyleContext = (function(){
     },
     getStaticMeasure : function(){
       var max_size = this.getLogicalMaxMeasure(); // this value is required when static size is set by '%' value.
-      var static_size = this.markup.getCssAttr(this.flow.getPropMeasure()) || this.markup.getCssAttr("measure");
-      return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
+      var static_size = this.markup.getAttr(this.flow.getPropMeasure()) || this.markup.getAttr("measure");
+      return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
     },
     getStaticExtent : function(){
       var max_size = this.getLogicalMaxExtent(); // this value is required when static size is set by '%' value.
-      var static_size = this.markup.getCssAttr(this.flow.getPropExtent()) || this.markup.getCssAttr("extent");
-      return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
+      var static_size = this.markup.getAttr(this.flow.getPropExtent()) || this.markup.getAttr("extent");
+      return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
     },
     getLayoutMeasure : function(){
       var prop = this.flow.getPropMeasure();
-      var size = this.markup.getCssAttr("measure") || this.markup.getCssAttr(prop) || Layout[prop];
+      var size = this.markup.getAttr("measure") || this.markup.getAttr(prop) || Layout[prop];
       return parseInt(size, 10);
     },
     getLayoutExtent : function(){
       var prop = this.flow.getPropExtent();
-      var size = this.markup.getCssAttr("extent") || this.markup.getCssAttr(prop) || Layout[prop];
+      var size = this.markup.getAttr("extent") || this.markup.getAttr(prop) || Layout[prop];
       return parseInt(size, 10);
     },
     getLogicalMaxMeasure : function(){
-      //var max_size = this.parent? this.parent.getContentMeasure(this.flow) : Layout[this.flow.getPropMeasure()];
       var max_size = this.parent? this.parent.getContentMeasure(this.flow) : this.getLayoutMeasure();
       return max_size;
     },
     getLogicalMaxExtent : function(){
-      //var max_size = this.parent? this.parent.getContentExtent(this.flow) : Layout[this.flow.getPropExtent()];
       var max_size = this.parent? this.parent.getContentExtent(this.flow) : this.getLayoutExtent();
       return (this.display === "block")? max_size : this.font.size;
     },
@@ -7162,12 +7187,6 @@ var StyleContext = (function(){
 	return element.style? true : false;
       });
     },
-    _computeRootLineExtent : function(child_lines, max_font_size, max_extent){
-      if(child_lines.length === 0){
-	return this.getAutoLineExtent();
-      }
-      return this.isTextVertical()? max_extent : Math.floor(max_font_size * this.getLineRate());
-    },
     _computeMaxLineFontSize : function(child_lines){
       return List.fold(child_lines, this.getFontSize(), function(ret, line){
 	return Math.max(ret, line.style.getFontSize());
@@ -7189,6 +7208,9 @@ var StyleContext = (function(){
       List.iter(child_lines, function(line){
 	var font_size = line.style.getFontSize();
 	var text_center_offset = text_center - Math.floor(font_size / 2);
+	if(line.style && line.style.markup.getName() === "img"){
+	  return;
+	}
 	if(text_center_offset > 0){
 	  line.edge = line.style.edge? line.style.edge.clone() : new BoxEdge(); // set line.edge(not line.style.edge) to overwrite padding temporally.
 	  line.edge.padding.setAfter(flow, text_center_offset); // set new edge(use line.edge not line.style.edge)
@@ -7978,6 +8000,10 @@ var InlineGenerator = (function(){
     if(token instanceof Tag){
       style = new StyleContext(token, this.style);
 
+      if(style.getMarkupName() === "img"){
+	return style.createImage();
+      }
+
       // inline -> block, force terminate inline
       if(style.isBlock()){
 	this.stream.prev();
@@ -8765,6 +8791,9 @@ var LayoutEvaluator = (function(){
     },
     evalInlineElement : function(line, element){
       if(element instanceof Box){
+	if(element.style.getMarkupName() === "img"){
+	  return this.evalInlineImage(line, element);
+	}
 	return this.evalInlineChild(line, element);
       }
       var text = this.evalTextElement(line, element);
@@ -8800,6 +8829,13 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalInlineChild = function(line, child){
     return this.evalInline(child);
+  };
+
+  VertEvaluator.prototype.evalInlineImage = function(line, image){
+    return Html.tagSingle("img", {
+      "src":image.style.markup.getAttr("src"),
+      "style":Css.toString(image.getCssVertInlineImage())
+    }) + "<br />";
   };
 
   VertEvaluator.prototype.evalRuby = function(line, ruby){
@@ -9006,6 +9042,13 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype.evalInlineBlock = function(iblock){
     iblock.css.display = "inline-block";
     return this.evalBlock(iblock);
+  };
+
+  HoriEvaluator.prototype.evalInlineImage = function(line, image){
+    return Html.tagSingle("img", {
+      "src":image.style.markup.getAttr("src"),
+      "style":Css.toString(image.getCssHoriInlineImage())
+    });
   };
 
   HoriEvaluator.prototype.evalInlineChild = function(line, child){
