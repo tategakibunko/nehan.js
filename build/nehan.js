@@ -51,7 +51,16 @@ var Config = {
 };
 
 var Layout = {
-  root:"document", // 'body' or 'html' or 'document'
+  // define root where content text starts from.
+  // 'body' or 'html' or 'document' are enabled.
+  // 
+  // 1. 'document'
+  //    content text include <!doctype xxx> tag
+  // 2. 'html'
+  //    content text include <head> and <html>.
+  // 3. 'body'
+  //    content text include <body> or content of body itself.
+  root:"document",
   direction:"vert", // or 'hori'
   hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
   vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
@@ -59,9 +68,9 @@ var Layout = {
   height: 580, // layout default height if height prop not set in 'body' style.
   fontSize:16, // layout default font-size if font-size prop not set in 'body' style.
   maxFontSize:64,
-  rubyRate:0.5, // used when Style.rt["font-size"] not defined.
+  rubyRate:0.5, // used when Style.rt["font-size"] is not defined.
   boldRate:0.5,
-  lineRate: 2.0, // in nehan.js, extent size of line is specified by [lineRate] * [largest font_size of currentline].
+  lineRate: 2.0, // in nehan.js, extent size of line is specified by [lineRate] * [largest font_size of current line].
 
   // we need to specify these values(color,font-image-root) to display vertical font-images for browsers not supporting vert writing-mode.
   fontColor:"000000",
@@ -93,7 +102,7 @@ var Layout = {
     return BoxFlows.getByName(this.hori);
   },
   getHoriIndir : function(){
-    return this.hori.split("-")[0];
+    return this.hori.split("-")[0]; // "lr" or "rl"
   },
   getRubyFontSize : function(base_font_size){
     var rt = Style.rt || null;
