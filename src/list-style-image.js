@@ -4,11 +4,6 @@ var ListStyleImage = (function(){
   }
 
   ListStyleImage.prototype = {
-    getMarkerAdvance : function(flow, font_size){
-      var marker_size = this.image[flow.getPropMeasure()] || font_size;
-      var spacing_size = Layout.getListMarkerSpacingSize(font_size);
-      return marker_size + spacing_size;
-    },
     getMarkerHtml : function(count){
       var url = this.image.url;
       var width = this.image.width || Layout.fontSize;

@@ -217,9 +217,6 @@ var StyleContext = (function(){
     getColor : function(){
       return this.color || Layout.fontColor;
     },
-    getRubyRate : function(){
-      return Layout.getRubyRate();
-    },
     getLineRate : function(){
       return this.lineRate || Layout.lineRate || 2;
     },
@@ -290,20 +287,32 @@ var StyleContext = (function(){
     },
     getStaticMeasure : function(){
       var max_size = this.getLogicalMaxMeasure(); // this value is required when static size is set by '%' value.
-      var static_size = this.markup.getAttr(this.flow.getPropMeasure()) || this.markup.getCssAttr("measure");
+      var static_size = this.markup.getCssAttr(this.flow.getPropMeasure()) || this.markup.getCssAttr("measure");
       return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
     },
     getStaticExtent : function(){
       var max_size = this.getLogicalMaxExtent(); // this value is required when static size is set by '%' value.
-      var static_size = this.markup.getAttr(this.flow.getPropExtent()) || this.markup.getCssAttr("extent");
+      var static_size = this.markup.getCssAttr(this.flow.getPropExtent()) || this.markup.getCssAttr("extent");
       return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
     },
+    getLayoutMeasure : function(){
+      var prop = this.flow.getPropMeasure();
+      var size = this.markup.getCssAttr("measure") || this.markup.getCssAttr(prop) || Layout[prop];
+      return parseInt(size, 10);
+    },
+    getLayoutExtent : function(){
+      var prop = this.flow.getPropExtent();
+      var size = this.markup.getCssAttr("extent") || this.markup.getCssAttr(prop) || Layout[prop];
+      return parseInt(size, 10);
+    },
     getLogicalMaxMeasure : function(){
-      var max_size = this.parent? this.parent.getContentMeasure(this.flow) : Layout[this.flow.getPropMeasure()];
+      //var max_size = this.parent? this.parent.getContentMeasure(this.flow) : Layout[this.flow.getPropMeasure()];
+      var max_size = this.parent? this.parent.getContentMeasure(this.flow) : this.getLayoutMeasure();
       return max_size;
     },
     getLogicalMaxExtent : function(){
-      var max_size = this.parent? this.parent.getContentExtent(this.flow) : Layout[this.flow.getPropExtent()];
+      //var max_size = this.parent? this.parent.getContentExtent(this.flow) : Layout[this.flow.getPropExtent()];
+      var max_size = this.parent? this.parent.getContentExtent(this.flow) : this.getLayoutExtent();
       return (this.display === "block")? max_size : this.font.size;
     },
     // 'after' loading all properties, we can compute boundary box size.

@@ -55,14 +55,13 @@ var Layout = {
   direction:"vert", // or 'hori'
   hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
   vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
-  width: 800,
-  height: 580,
-  fontSize:16,
+  width: 800, // layout default width if width prop not set in 'body' style.
+  height: 580, // layout default height if height prop not set in 'body' style.
+  fontSize:16, // layout default font-size if font-size prop not set in 'body' style.
   maxFontSize:64,
   rubyRate:0.5, // used when Style.rt["font-size"] not defined.
   boldRate:0.5,
   lineRate: 2.0, // in nehan.js, extent size of line is specified by [lineRate] * [largest font_size of currentline].
-  listMarkerSpacingRate:0.4, // spacing size of list item(<LI>) marker.
 
   // we need to specify these values(color,font-image-root) to display vertical font-images for browsers not supporting vert writing-mode.
   fontColor:"000000",
@@ -84,38 +83,6 @@ var Layout = {
     "larger":"1.2em",
     "smaller":"0.8em"
   },
-  createRootBox : function(size){
-    var box = new Box(size, null, {
-      type:"body"
-    });
-
-    // set root box properties.
-    box.font = this.getStdFont();
-    box.flow = this.getStdBoxFlow();
-    box.lineRate = this.lineRate;
-    box.textAlign = "start";
-    box.letterSpacing = 0;
-    return box;
-  },
-  createBox : function(size, parent, opt){
-    var box = new Box(size, parent, opt);
-
-    // inherit parent box properties.
-    box.flow = parent.flow;
-    box.lineRate = parent.lineRate;
-    box.textAlign = parent.textAlign;
-    box.font = new Font(parent.font.size);
-    box.color = parent.color;
-    box.letterSpacing = parent.letterSpacing;
-    return box;
-  },
-  getStdPageSize : function(){
-    return new BoxSize(this.width, this.height);
-  },
-  getStdMeasure : function(){
-    var flow = this.getStdBoxFlow();
-    return this[flow.getPropMeasure()];
-  },
   getStdBoxFlow : function(){
     var flow_name = this[this.direction];
     return BoxFlows.getByName(flow_name);
@@ -126,26 +93,8 @@ var Layout = {
   getStdHoriFlow : function(){
     return BoxFlows.getByName(this.hori);
   },
-  getStdFont : function(){
-    var font = new Font(Layout.fontSize);
-    font.family = (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
-    return font;
-  },
-  getListMarkerSpacingSize : function(font_size){
-    font_size = font_size || this.fontSize;
-    return Math.round(font_size * this.listMarkerSpacingRate);
-  },
-  getVertBlockDir : function(){
-    return this.vert.split("-")[1];
-  },
   getHoriIndir : function(){
     return this.hori.split("-")[0];
-  },
-  getRubyRate : function(){
-    if(Style.rt && Style.rt["font-size"]){
-      return parseFloat(Style.rt["font-size"]);
-    }
-    return this.rubyRate || 0.5;
   },
   getRubyFontSize : function(base_font_size){
     var rt = Style.rt || null;
@@ -3740,25 +3689,6 @@ var ListStyleType = (function(){
       }
       var digit = this._getMarkerDigitString(count);
       return digit + "."; // add period as postfix.
-    },
-    getMarkerAdvance : function(flow, font_size, item_count){
-      var font_size_half = Math.round(font_size / 2);
-      var period_size = font_size_half;
-      var marker_spacing_size = Layout.getListMarkerSpacingSize(font_size);
-      var marker_font_size = this.isZenkaku()? font_size : font_size_half;
-      var max_marker_text = this.getMarkerText(item_count);
-      if(this.isNoneList()){
-	return font_size;
-      }
-      if(this.isMarkList()){
-	return font_size + marker_spacing_size;
-      }
-      // zenkaku order is displayed as tcy.
-      // so advance is 'single' font-size plus spacing-size.
-      if(this.isZenkaku() && flow.isTextVertical()){
-	return font_size + marker_spacing_size;
-      }
-      return (max_marker_text.length - 1) * marker_font_size + period_size + marker_spacing_size;
     }
   };
 
@@ -3790,11 +3720,6 @@ var ListStyleImage = (function(){
   }
 
   ListStyleImage.prototype = {
-    getMarkerAdvance : function(flow, font_size){
-      var marker_size = this.image[flow.getPropMeasure()] || font_size;
-      var spacing_size = Layout.getListMarkerSpacingSize(font_size);
-      return marker_size + spacing_size;
-    },
     getMarkerHtml : function(count){
       var url = this.image.url;
       var width = this.image.width || Layout.fontSize;
@@ -3838,12 +3763,6 @@ var ListStyle = (function(){
 	return this.image.getMarkerHtml(count);
       }
       return this.type.getMarkerHtml(count);
-    },
-    getMarkerAdvance : function(flow, font_size, item_count){
-      if(this.image){
-	return this.image.getMarkerAdvance(flow, font_size);
-      }
-      return this.type.getMarkerAdvance(flow, font_size, item_count);
     }
   };
 
@@ -7007,9 +6926,6 @@ var StyleContext = (function(){
     getColor : function(){
       return this.color || Layout.fontColor;
     },
-    getRubyRate : function(){
-      return Layout.getRubyRate();
-    },
     getLineRate : function(){
       return this.lineRate || Layout.lineRate || 2;
     },
@@ -7080,20 +6996,32 @@ var StyleContext = (function(){
     },
     getStaticMeasure : function(){
       var max_size = this.getLogicalMaxMeasure(); // this value is required when static size is set by '%' value.
-      var static_size = this.markup.getAttr(this.flow.getPropMeasure()) || this.markup.getCssAttr("measure");
+      var static_size = this.markup.getCssAttr(this.flow.getPropMeasure()) || this.markup.getCssAttr("measure");
       return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
     },
     getStaticExtent : function(){
       var max_size = this.getLogicalMaxExtent(); // this value is required when static size is set by '%' value.
-      var static_size = this.markup.getAttr(this.flow.getPropExtent()) || this.markup.getCssAttr("extent");
+      var static_size = this.markup.getCssAttr(this.flow.getPropExtent()) || this.markup.getCssAttr("extent");
       return static_size? Math.min(UnitSize.getBoxSize(static_size, this.font.size, max_size), max_size) : null;
     },
+    getLayoutMeasure : function(){
+      var prop = this.flow.getPropMeasure();
+      var size = this.markup.getCssAttr("measure") || this.markup.getCssAttr(prop) || Layout[prop];
+      return parseInt(size, 10);
+    },
+    getLayoutExtent : function(){
+      var prop = this.flow.getPropExtent();
+      var size = this.markup.getCssAttr("extent") || this.markup.getCssAttr(prop) || Layout[prop];
+      return parseInt(size, 10);
+    },
     getLogicalMaxMeasure : function(){
-      var max_size = this.parent? this.parent.getContentMeasure(this.flow) : Layout[this.flow.getPropMeasure()];
+      //var max_size = this.parent? this.parent.getContentMeasure(this.flow) : Layout[this.flow.getPropMeasure()];
+      var max_size = this.parent? this.parent.getContentMeasure(this.flow) : this.getLayoutMeasure();
       return max_size;
     },
     getLogicalMaxExtent : function(){
-      var max_size = this.parent? this.parent.getContentExtent(this.flow) : Layout[this.flow.getPropExtent()];
+      //var max_size = this.parent? this.parent.getContentExtent(this.flow) : Layout[this.flow.getPropExtent()];
+      var max_size = this.parent? this.parent.getContentExtent(this.flow) : this.getLayoutExtent();
       return (this.display === "block")? max_size : this.font.size;
     },
     // 'after' loading all properties, we can compute boundary box size.

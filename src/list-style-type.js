@@ -62,25 +62,6 @@ var ListStyleType = (function(){
       }
       var digit = this._getMarkerDigitString(count);
       return digit + "."; // add period as postfix.
-    },
-    getMarkerAdvance : function(flow, font_size, item_count){
-      var font_size_half = Math.round(font_size / 2);
-      var period_size = font_size_half;
-      var marker_spacing_size = Layout.getListMarkerSpacingSize(font_size);
-      var marker_font_size = this.isZenkaku()? font_size : font_size_half;
-      var max_marker_text = this.getMarkerText(item_count);
-      if(this.isNoneList()){
-	return font_size;
-      }
-      if(this.isMarkList()){
-	return font_size + marker_spacing_size;
-      }
-      // zenkaku order is displayed as tcy.
-      // so advance is 'single' font-size plus spacing-size.
-      if(this.isZenkaku() && flow.isTextVertical()){
-	return font_size + marker_spacing_size;
-      }
-      return (max_marker_text.length - 1) * marker_font_size + period_size + marker_spacing_size;
     }
   };
 

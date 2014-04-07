@@ -24,12 +24,6 @@ var ListStyle = (function(){
 	return this.image.getMarkerHtml(count);
       }
       return this.type.getMarkerHtml(count);
-    },
-    getMarkerAdvance : function(flow, font_size, item_count){
-      if(this.image){
-	return this.image.getMarkerAdvance(flow, font_size);
-      }
-      return this.type.getMarkerAdvance(flow, font_size, item_count);
     }
   };
 
