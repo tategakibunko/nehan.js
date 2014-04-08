@@ -2791,7 +2791,7 @@ var Char = (function(){
     },
     getCssHoriEmphaText : function(line){
       var css = {};
-      css["margin-bottom"] = "-0.5em";
+      css["margin-bottom"] = "-0.5em"; // TODO: this is tmp hack
       return css;
     },
     getCssVertLetterSpacing : function(line){
@@ -3241,9 +3241,8 @@ var Ruby = (function(){
     },
     getCssHoriRt : function(line){
       var css = {};
-      //css["line-height"] = Math.round(1.5 * this.getRtFontSize()) + "px";
       css["font-size"] = this.getRtFontSize() + "px";
-      css["margin-bottom"] = "-0.5em";
+      css["margin-bottom"] = "-0.5em"; // TODO: this is tmp hack
       return css;
     },
     getCssVertRb : function(line){

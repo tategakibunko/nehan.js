@@ -85,7 +85,7 @@ var Char = (function(){
     },
     getCssHoriEmphaText : function(line){
       var css = {};
-      css["margin-bottom"] = "-0.5em";
+      css["margin-bottom"] = "-0.5em"; // TODO: this is tmp hack
       return css;
     },
     getCssVertLetterSpacing : function(line){
