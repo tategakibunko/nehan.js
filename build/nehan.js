@@ -1005,8 +1005,9 @@ var Style = {
   //-------------------------------------------------------
   ".nehan-drop-caps::first-letter":{
     "display":"block",
-    "width":"4em",
-    "height":"4em",
+    "box-sizing":"content-box",
+    "width":"1em",
+    "height":"1em",
     "float":"start",
     "line-rate":1.0,
     "font-size":"4em"
@@ -5034,13 +5035,6 @@ var Box = (function(){
       css["vertical-align"] = "middle";
       return css;
     },
-    /*
-    getCssVertInlineBox : function(){
-      var css = this.getCssBlock();
-      css["float"] = "none";
-      css["margin-left"] = css["margin-right"] = "auto";
-      return css;
-    },*/
     getContentMeasure : function(flow){
       return this.size.getMeasure(flow || this.style.flow);
     },
@@ -6821,7 +6815,7 @@ var StyleContext = (function(){
     },
     createBlock : function(opt){
       var elements = opt.elements || [];
-      var measure = opt.measure || this.getContentMeasure();
+      var measure = opt.measure || this.getStaticMeasure() || this.getContentMeasure();
       var extent = this.parent? (opt.extent || this.getContentExtent()) : this.getContentExtent();
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
