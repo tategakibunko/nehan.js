@@ -239,7 +239,10 @@ var StyleContext = (function(){
       return this.getFontSize() * 3;
     },
     getRubyLineExtent : function(){
-      return Math.floor(this.getFontSize() * (2 + Layout.rubyRate));
+      var base_font_size = this.getFontSize();
+      var base_extent = Math.floor(base_font_size * this.getLineRate());
+      var rt_extent = Layout.getRubyFontSize(base_font_size);
+      return base_extent + rt_extent;
     },
     getAutoLineExtent : function(){
       if(this.isTextEmphaEnable()){
