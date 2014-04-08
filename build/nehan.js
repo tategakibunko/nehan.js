@@ -3241,9 +3241,9 @@ var Ruby = (function(){
     },
     getCssHoriRt : function(line){
       var css = {};
-      css["line-height"] = Math.round(1.5 * this.getRtFontSize()) + "px";
+      //css["line-height"] = Math.round(1.5 * this.getRtFontSize()) + "px";
       css["font-size"] = this.getRtFontSize() + "px";
-      css["vertical-align"] = "bottom";
+      css["margin-bottom"] = "-0.5em";
       return css;
     },
     getCssVertRb : function(line){
@@ -6966,11 +6966,17 @@ var StyleContext = (function(){
     getEmphaLineExtent : function(){
       return this.getFontSize() * 3;
     },
-    getTextLineExtent : function(){
-      return this.getFontSize() * this.getLineRate();
+    getRubyLineExtent : function(){
+      return Math.floor(this.getFontSize() * (2 + Layout.rubyRate));
     },
     getAutoLineExtent : function(){
-      return this.isTextEmphaEnable()? this.getEmphaLineExtent() : this.getTextLineExtent();
+      if(this.isTextEmphaEnable()){
+	return this.getEmphaLineExtent();
+      }
+      if(this.getMarkupName() === "ruby"){
+	return this.getRubyLineExtent();
+      }
+      return Math.floor(this.getFontSize() * this.getLineRate());
     },
     getEdgeMeasure : function(flow){
       return this.edge? this.edge.getMeasureSize(flow || this.flow) : 0;
