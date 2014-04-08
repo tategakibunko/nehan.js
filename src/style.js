@@ -620,6 +620,10 @@ var Style = {
   "!doctype":{
     "single":true
   },
+  "first-line":{
+    //"display":"block !important" // TODO
+    "display":"block"
+  },
   //-------------------------------------------------------
   // rounded corner
   //-------------------------------------------------------
