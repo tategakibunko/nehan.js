@@ -39,6 +39,9 @@ var Layout = {
     "larger":"1.2em",
     "smaller":"0.8em"
   },
+  getStdFontFamily : function(){
+    return (this.direction === "vert")? this.vertFontFamily : this.horiHontFamily;
+  },
   getStdBoxFlow : function(){
     var flow_name = this[this.direction];
     return BoxFlows.getByName(flow_name);

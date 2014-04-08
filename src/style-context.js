@@ -549,6 +549,8 @@ var StyleContext = (function(){
       var font_family = markup.getCssAttr("font-family", "inherit");
       if(font_family !== "inherit"){
 	font.family = font_family;
+      } else if(this.isRoot()){
+	font.family = Layout.getStdFontFamily();
       }
       var font_weight = markup.getCssAttr("font-weight", "inherit");
       if(font_weight !== "inherit"){
