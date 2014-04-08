@@ -110,6 +110,7 @@ var InlineGenerator = (function(){
     case "br":
       context.setLineBreak(true);
       return null;
+
     default:
       this.setChildLayout(new InlineGenerator(style, this._createStream(token)));
       return this.yieldChildLayout(context);

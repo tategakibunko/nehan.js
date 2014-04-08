@@ -98,6 +98,10 @@ var BlockGenerator = (function(){
     case "img":
       return child_style.createImage();
 
+    case "first-line":
+      this.setChildLayout(new FirstLineGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
+
     case "details":
     case "blockquote":
     case "figure":

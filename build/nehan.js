@@ -7852,6 +7852,10 @@ var BlockGenerator = (function(){
     case "img":
       return child_style.createImage();
 
+    case "first-line":
+      this.setChildLayout(new FirstLineGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
+
     case "details":
     case "blockquote":
     case "figure":
@@ -8042,6 +8046,7 @@ var InlineGenerator = (function(){
     case "br":
       context.setLineBreak(true);
       return null;
+
     default:
       this.setChildLayout(new InlineGenerator(style, this._createStream(token)));
       return this.yieldChildLayout(context);
@@ -8109,6 +8114,26 @@ var InlineGenerator = (function(){
   };
 
   return InlineGenerator;
+})();
+
+
+var FirstLineGenerator = (function(){
+  function FirstLineGenerator(style, stream, outline_context){
+    BlockGenerator.call(this, style, stream, outline_context);
+  }
+  Class.extend(FirstLineGenerator, BlockGenerator);
+
+  FirstLineGenerator.prototype._onAddElement = function(element){
+    if(element.display === "inline" && typeof this._first === "undefined"){
+      this._first = true; // flag that first line is already generated.
+      this.style = this.style.parent; // first-line yieled, so switch style to parent one.
+      if(this._childLayout){
+	this._childLayout.style = this.style;
+      }
+    }
+  };
+
+  return FirstLineGenerator;
 })();
 
 
