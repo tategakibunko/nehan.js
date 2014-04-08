@@ -236,7 +236,7 @@ var StyleContext = (function(){
       return this.lineRate || Layout.lineRate || 2;
     },
     getEmphaLineExtent : function(){
-      return this.getFontSize() * 2;
+      return this.getFontSize() * 3;
     },
     getTextLineExtent : function(){
       return this.getFontSize() * this.getLineRate();
@@ -329,12 +329,14 @@ var StyleContext = (function(){
       return (this.display === "block")? max_size : this.font.size;
     },
     getImageMeasure : function(){
-      var measure = (this.getStaticMeasure() || this.getOuterMeasure()) - this.getEdgeMeasure();
-      return Math.max(0, Math.min(measure, this.getLayoutMeasure()));
+      var edge_size = this.getEdgeMeasure();
+      var measure = (this.getStaticMeasure() || this.getOuterMeasure()) - edge_size;
+      return Math.min(measure, this.getLayoutMeasure() - edge_size);
     },
     getImageExtent : function(){
-      var extent = (this.getStaticExtent() || this.getOuterExtent()) - this.getEdgeExtent();
-      return Math.max(0, Math.min(extent, this.getLayoutExtent()));
+      var edge_size = this.getEdgeExtent();
+      var extent = (this.getStaticExtent() || this.getOuterExtent()) - edge_size;
+      return Math.min(extent, this.getLayoutExtent() - edge_size);
     },
     // 'after' loading all properties, we can compute boundary box size.
     getContentSize : function(){
