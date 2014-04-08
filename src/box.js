@@ -25,6 +25,9 @@ var Box = (function(){
       Args.copy(css, this.style.getCssInline()); // base style
       Args.copy(css, this.size.getCss()); // local size
       Args.copy(css, this.css); // some dynamic values
+      if(this.style.isTextHorizontal()){
+	css["line-height"] = "1em";
+      }
       return css;
     },
     getCssHoriInlineImage : function(){

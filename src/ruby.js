@@ -36,8 +36,9 @@ var Ruby = (function(){
     },
     getCssHoriRt : function(line){
       var css = {};
+      var offset = Math.floor((line.style.getFontSize() - this.getRtFontSize()) / 3);
       css["font-size"] = this.getRtFontSize() + "px";
-      css["margin-bottom"] = "-0.5em"; // TODO: this is tmp hack
+      css["line-height"] = "1em";
       return css;
     },
     getCssVertRb : function(line){
