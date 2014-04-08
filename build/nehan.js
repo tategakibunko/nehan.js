@@ -104,7 +104,7 @@ var Layout = {
   getHoriIndir : function(){
     return this.hori.split("-")[0]; // "lr" or "rl"
   },
-  getRubyFontSize : function(base_font_size){
+  getRtFontSize : function(base_font_size){
     var rt = Style.rt || null;
     var rt_font_size = rt? rt["font-size"] : null;
     if(rt === null || rt_font_size === null){
@@ -3217,9 +3217,6 @@ var Ruby = (function(){
     getAdvance : function(flow){
       return this.advanceSize;
     },
-    getExtent : function(font_size){
-      return 3 * this.rubyFontSize + font_size;
-    },
     getRbs : function(){
       return this.rbs;
     },
@@ -3227,7 +3224,7 @@ var Ruby = (function(){
       return this.rt? this.rt.getContent() : "";
     },
     getRtFontSize : function(){
-      return this.rubyFontSize;
+      return this.rtFontSize;
     },
     getCssHoriRuby : function(line){
       var css = {};
@@ -3262,12 +3259,12 @@ var Ruby = (function(){
       return css;
     },
     setMetrics : function(flow, font, letter_spacing){
-      this.rubyFontSize = Layout.getRubyFontSize(font.size);
+      this.rtFontSize = Layout.getRtFontSize(font.size);
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font);
 	return ret + rb.getAdvance(flow, letter_spacing);
       });
-      var advance_rt = this.rubyFontSize * this.getRtString().length;
+      var advance_rt = this.rtFontSize * this.getRtString().length;
       this.advanceSize = advance_rbs;
       if(advance_rt > advance_rbs){
 	var ctx_space = Math.ceil((advance_rt - advance_rbs) / 2);
@@ -6968,7 +6965,7 @@ var StyleContext = (function(){
     getRubyLineExtent : function(){
       var base_font_size = this.getFontSize();
       var base_extent = Math.floor(base_font_size * this.getLineRate());
-      var rt_extent = Layout.getRubyFontSize(base_font_size);
+      var rt_extent = Layout.getRtFontSize(base_font_size);
       return base_extent + rt_extent;
     },
     getAutoLineExtent : function(){

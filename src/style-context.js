@@ -241,7 +241,7 @@ var StyleContext = (function(){
     getRubyLineExtent : function(){
       var base_font_size = this.getFontSize();
       var base_extent = Math.floor(base_font_size * this.getLineRate());
-      var rt_extent = Layout.getRubyFontSize(base_font_size);
+      var rt_extent = Layout.getRtFontSize(base_font_size);
       return base_extent + rt_extent;
     },
     getAutoLineExtent : function(){

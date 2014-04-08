@@ -52,7 +52,7 @@ var Layout = {
   getHoriIndir : function(){
     return this.hori.split("-")[0]; // "lr" or "rl"
   },
-  getRubyFontSize : function(base_font_size){
+  getRtFontSize : function(base_font_size){
     var rt = Style.rt || null;
     var rt_font_size = rt? rt["font-size"] : null;
     if(rt === null || rt_font_size === null){
