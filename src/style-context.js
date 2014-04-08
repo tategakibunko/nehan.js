@@ -108,16 +108,13 @@ var StyleContext = (function(){
       if(this.edge){
 	box.edge = this.edge.clone();
       }
-      if(this.logicalFloat){
-	box.logicalFloat = this.logicalFloat;
-      }
       return box;
     },
     createImage : function(){
-      var measure = this.getStaticMeasure() || this.getContentMeasure();
-      var extent = this.getStaticExtent() || this.getContentExtent();
-      var box_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent); // image size always considered as horizontal mode.
-      var image = new Box(box_size, this);
+      var measure = this.getImageMeasure();
+      var extent = this.getImageExtent();
+      var image_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent); // image size always considered as horizontal mode.
+      var image = new Box(image_size, this);
       image.display = this.display;
       image.classes = ["nehan-block", "nehan-image"];
       image.charCount = 0;
@@ -127,7 +124,7 @@ var StyleContext = (function(){
 	image.pulled = true;
       }
       if(this.edge){
-	image.edge = this.edge;
+	image.edge = this.edge.clone();
       }
       return image;
     },
@@ -138,9 +135,9 @@ var StyleContext = (function(){
       var max_extent = this._computeMaxLineExtent(child_lines, max_font_size);
       var measure = opt.measure || this.getContentMeasure();
       var extent = (this.isRootLine() && child_lines.length > 0)? max_extent : this.getAutoLineExtent();
-      var box_size = this.flow.getBoxSize(measure, extent);
+      var line_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
-      var line = new Box(box_size, this);
+      var line = new Box(line_size, this);
       line.style = this;
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
@@ -330,6 +327,14 @@ var StyleContext = (function(){
     getLogicalMaxExtent : function(){
       var max_size = this.parent? this.parent.getContentExtent(this.flow) : this.getLayoutExtent();
       return (this.display === "block")? max_size : this.font.size;
+    },
+    getImageMeasure : function(){
+      var measure = (this.getStaticMeasure() || this.getOuterMeasure()) - this.getEdgeMeasure();
+      return Math.max(0, Math.min(measure, this.getLayoutMeasure()));
+    },
+    getImageExtent : function(){
+      var extent = (this.getStaticExtent() || this.getOuterExtent()) - this.getEdgeExtent();
+      return Math.max(0, Math.min(extent, this.getLayoutExtent()));
     },
     // 'after' loading all properties, we can compute boundary box size.
     getContentSize : function(){

@@ -470,8 +470,9 @@ var Style = {
   },
   "img":{
     "display":"inline",
-    "box-sizing":"content-box",
-    "single":true
+    //"box-sizing":"content-box",
+    "single":true,
+    "padding":"5px"
   },
   "input":{
     "display":"inline",
@@ -5028,36 +5029,18 @@ var Box = (function(){
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
-    getCssVertInlineImage : function(){
-      var css = {};
-      Args.copy(css, this.size.getCss());
-      return css;
-    },
-    getCssVertBlockImage : function(){
-      var css = {};
-      Args.copy(css, this.size.getCss());
-      Args.copy(css, this.style.flow.getCss());
-      css["display"] = "block";
-      return css;
-    },
-    getCssHoriBlockImage : function(){
-      var css = {};
-      Args.copy(css, this.size.getCss());
-      css["display"] = "block";
-      return css;
-    },
     getCssHoriInlineImage : function(){
-      var css = {};
-      Args.copy(css, this.size.getCss());
-      css["display"] = "inline";
+      var css = this.getCssInline();
+      css["vertical-align"] = "middle";
       return css;
     },
+    /*
     getCssVertInlineBox : function(){
       var css = this.getCssBlock();
       css["float"] = "none";
       css["margin-left"] = css["margin-right"] = "auto";
       return css;
-    },
+    },*/
     getContentMeasure : function(flow){
       return this.size.getMeasure(flow || this.style.flow);
     },
@@ -6852,16 +6835,13 @@ var StyleContext = (function(){
       if(this.edge){
 	box.edge = this.edge.clone();
       }
-      if(this.logicalFloat){
-	box.logicalFloat = this.logicalFloat;
-      }
       return box;
     },
     createImage : function(){
-      var measure = this.getStaticMeasure() || this.getContentMeasure();
-      var extent = this.getStaticExtent() || this.getContentExtent();
-      var box_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent); // image size always considered as horizontal mode.
-      var image = new Box(box_size, this);
+      var measure = this.getImageMeasure();
+      var extent = this.getImageExtent();
+      var image_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent); // image size always considered as horizontal mode.
+      var image = new Box(image_size, this);
       image.display = this.display;
       image.classes = ["nehan-block", "nehan-image"];
       image.charCount = 0;
@@ -6871,7 +6851,7 @@ var StyleContext = (function(){
 	image.pulled = true;
       }
       if(this.edge){
-	image.edge = this.edge;
+	image.edge = this.edge.clone();
       }
       return image;
     },
@@ -6882,9 +6862,9 @@ var StyleContext = (function(){
       var max_extent = this._computeMaxLineExtent(child_lines, max_font_size);
       var measure = opt.measure || this.getContentMeasure();
       var extent = (this.isRootLine() && child_lines.length > 0)? max_extent : this.getAutoLineExtent();
-      var box_size = this.flow.getBoxSize(measure, extent);
+      var line_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
-      var line = new Box(box_size, this);
+      var line = new Box(line_size, this);
       line.style = this;
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
@@ -7074,6 +7054,14 @@ var StyleContext = (function(){
     getLogicalMaxExtent : function(){
       var max_size = this.parent? this.parent.getContentExtent(this.flow) : this.getLayoutExtent();
       return (this.display === "block")? max_size : this.font.size;
+    },
+    getImageMeasure : function(){
+      var measure = (this.getStaticMeasure() || this.getOuterMeasure()) - this.getEdgeMeasure();
+      return Math.max(0, Math.min(measure, this.getLayoutMeasure()));
+    },
+    getImageExtent : function(){
+      var extent = (this.getStaticExtent() || this.getOuterExtent()) - this.getEdgeExtent();
+      return Math.max(0, Math.min(extent, this.getLayoutExtent()));
     },
     // 'after' loading all properties, we can compute boundary box size.
     getContentSize : function(){
@@ -8119,6 +8107,21 @@ var InlineGenerator = (function(){
 })();
 
 
+var LazyBlockGenerator = (function(){
+  function LazyBlockGenerator(style, block){
+    LayoutGenerator.call(this, style, null);
+    this.block = block;
+  }
+  Class.extend(LazyBlockGenerator, LayoutGenerator);
+
+  LazyBlockGenerator.prototype.yield = function(context){
+    this._terminate = true; // yield only once.
+    return this.block;
+  };
+
+  return LazyBlockGenerator;
+})();
+
 var FloatGroup = (function(){
   function FloatGroup(elements, logical_float){
     this.elements = elements || [];
@@ -8368,12 +8371,19 @@ var FloatGenerator = (function(){
   FloatGenerator.prototype._getFloatedGenerators = function(){
     var self = this;
     return List.map(this._getFloatedTags(), function(tag){
-      return new BlockGenerator(
-	new StyleContext(tag, self.style),
-	new TokenStream(tag.getContent()),
-	self.outlineContext
-      );
+      return self._createFloatBlockGenerator(tag)
     });
+  };
+
+  FloatGenerator.prototype._createFloatBlockGenerator = function(tag){
+    var style = new StyleContext(tag, this.style);
+
+    // image tag not having stream(single tag), so use lazy-generator.
+    // lazy generator already holds output result in construction time, but yields it later.
+    if(style.getMarkupName() === "img"){
+      return new LazyBlockGenerator(style, style.createImage());
+    }
+    return new BlockGenerator(style, this._createStream(tag), this.outlineContext);
   };
 
   return FloatGenerator;
@@ -8862,7 +8872,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype.evalBlockImage = function(image){
     return Html.tagSingle("img", {
       "src":image.style.markup.getAttr("src"),
-      "style":Css.toString(image.getCssVertBlockImage()),
+      "style":Css.toString(image.getCssBlock()),
       "class":image.classes.join(" ")
     });
   };
@@ -8870,7 +8880,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype.evalInlineImage = function(line, image){
     return Html.tagSingle("img", {
       "src":image.style.markup.getAttr("src"),
-      "style":Css.toString(image.getCssVertInlineImage()),
+      "style":Css.toString(image.getCssInline()),
       "class":image.classes.join(" ")
     }) + "<br />";
   };
@@ -9084,7 +9094,7 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype.evalBlockImage = function(image){
     return Html.tagSingle("img", {
       "src":image.style.markup.getAttr("src"),
-      "style":Css.toString(image.getCssHoriBlockImage()),
+      "style":Css.toString(image.getCssBlock()),
       "class":image.classes.join(" ")
     });
   };
@@ -9092,7 +9102,8 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype.evalInlineImage = function(line, image){
     return Html.tagSingle("img", {
       "src":image.style.markup.getAttr("src"),
-      "style":Css.toString(image.getCssHoriInlineImage())
+      "style":Css.toString(image.getCssHoriInlineImage()),
+      "class":image.classes.join(" ")
     });
   };
 

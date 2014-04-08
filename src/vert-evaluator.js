@@ -15,7 +15,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype.evalBlockImage = function(image){
     return Html.tagSingle("img", {
       "src":image.style.markup.getAttr("src"),
-      "style":Css.toString(image.getCssVertBlockImage()),
+      "style":Css.toString(image.getCssBlock()),
       "class":image.classes.join(" ")
     });
   };
@@ -23,7 +23,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype.evalInlineImage = function(line, image){
     return Html.tagSingle("img", {
       "src":image.style.markup.getAttr("src"),
-      "style":Css.toString(image.getCssVertInlineImage()),
+      "style":Css.toString(image.getCssInline()),
       "class":image.classes.join(" ")
     }) + "<br />";
   };

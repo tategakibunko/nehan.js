@@ -12,7 +12,7 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype.evalBlockImage = function(image){
     return Html.tagSingle("img", {
       "src":image.style.markup.getAttr("src"),
-      "style":Css.toString(image.getCssHoriBlockImage()),
+      "style":Css.toString(image.getCssBlock()),
       "class":image.classes.join(" ")
     });
   };
@@ -20,7 +20,8 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype.evalInlineImage = function(line, image){
     return Html.tagSingle("img", {
       "src":image.style.markup.getAttr("src"),
-      "style":Css.toString(image.getCssHoriInlineImage())
+      "style":Css.toString(image.getCssHoriInlineImage()),
+      "class":image.classes.join(" ")
     });
   };
 

@@ -27,36 +27,18 @@ var Box = (function(){
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
-    getCssVertInlineImage : function(){
-      var css = {};
-      Args.copy(css, this.size.getCss());
-      return css;
-    },
-    getCssVertBlockImage : function(){
-      var css = {};
-      Args.copy(css, this.size.getCss());
-      Args.copy(css, this.style.flow.getCss());
-      css["display"] = "block";
-      return css;
-    },
-    getCssHoriBlockImage : function(){
-      var css = {};
-      Args.copy(css, this.size.getCss());
-      css["display"] = "block";
-      return css;
-    },
     getCssHoriInlineImage : function(){
-      var css = {};
-      Args.copy(css, this.size.getCss());
-      css["display"] = "inline";
+      var css = this.getCssInline();
+      css["vertical-align"] = "middle";
       return css;
     },
+    /*
     getCssVertInlineBox : function(){
       var css = this.getCssBlock();
       css["float"] = "none";
       css["margin-left"] = css["margin-right"] = "auto";
       return css;
-    },
+    },*/
     getContentMeasure : function(flow){
       return this.size.getMeasure(flow || this.style.flow);
     },

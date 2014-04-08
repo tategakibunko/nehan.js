@@ -153,12 +153,19 @@ var FloatGenerator = (function(){
   FloatGenerator.prototype._getFloatedGenerators = function(){
     var self = this;
     return List.map(this._getFloatedTags(), function(tag){
-      return new BlockGenerator(
-	new StyleContext(tag, self.style),
-	new TokenStream(tag.getContent()),
-	self.outlineContext
-      );
+      return self._createFloatBlockGenerator(tag)
     });
+  };
+
+  FloatGenerator.prototype._createFloatBlockGenerator = function(tag){
+    var style = new StyleContext(tag, this.style);
+
+    // image tag not having stream(single tag), so use lazy-generator.
+    // lazy generator already holds output result in construction time, but yields it later.
+    if(style.getMarkupName() === "img"){
+      return new LazyBlockGenerator(style, style.createImage());
+    }
+    return new BlockGenerator(style, this._createStream(tag), this.outlineContext);
   };
 
   return FloatGenerator;
