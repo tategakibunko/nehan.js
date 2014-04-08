@@ -35,13 +35,6 @@ var Box = (function(){
       css["vertical-align"] = "middle";
       return css;
     },
-    /*
-    getCssVertInlineBox : function(){
-      var css = this.getCssBlock();
-      css["float"] = "none";
-      css["margin-left"] = css["margin-right"] = "auto";
-      return css;
-    },*/
     getContentMeasure : function(flow){
       return this.size.getMeasure(flow || this.style.flow);
     },
