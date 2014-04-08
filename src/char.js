@@ -106,6 +106,7 @@ var Char = (function(){
       css.right = "-0.12em";
       css.height = this.bodySize + "px";
       css["line-height"] = this.bodySize + "px";
+      css.clear = "both";
       return css;
     },
     getHoriScale : function(){

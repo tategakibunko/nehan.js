@@ -2815,7 +2815,7 @@ var Char = (function(){
       css.position = "relative";
       css.top = "-0.1em";
       css.right = "-0.12em";
-      css.height = this.bodySize + "px";
+      //css.height = this.bodySize + "px";
       css["line-height"] = this.bodySize + "px";
       return css;
     },
