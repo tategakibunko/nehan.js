@@ -8,11 +8,6 @@ var TableRowGroupGenerator = (function(){
   }
   Class.extend(TableRowGroupGenerator, BlockGenerator);
 
-  /*
-  TableRowGroupGenerator.prototype.yield = function(context){
-  };
-  */
-
   return TableRowGroupGenerator;
 })();
 

@@ -18,6 +18,7 @@ var TableRowGenerator = (function(){
   };
 
   TableRowGenerator.prototype._getChildStyles = function(style, child_tags){
+    var self = this;
     var child_count = child_tags.length;
     var rest_measure = style.getContentMeasure();
     return List.mapi(child_tags, function(i, tag){

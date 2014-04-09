@@ -700,10 +700,10 @@ var Style = {
     "border-collapse":"inherit",
     "border-style":"solid",
     "padding":{
-      "start":"0.8em",
-      "end":"0.8em",
-      "before":"0.5em",
-      "after":"0.5em"
+      "start":"0.5em",
+      "end":"0.5em",
+      "before":"0.4em",
+      "after":"0.4em"
     }
   },
   "textarea":{
@@ -726,10 +726,10 @@ var Style = {
     "border-collapse":"inherit",
     "border-style":"solid",
     "padding":{
-      "start":"0.8em",
-      "end":"0.8em",
-      "before":"0.5em",
-      "after":"0.5em"
+      "start":"0.5em",
+      "end":"0.5em",
+      "before":"0.4em",
+      "after":"0.4em"
     }
   },
   "thead":{
@@ -6514,7 +6514,7 @@ var StyleContext = (function(){
     createBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
-      var measure = opt.measure || this.getStaticMeasure() || this.getContentMeasure();
+      var measure = opt.measure || this.getStaticContentMeasure() || this.getContentMeasure();
       var extent = this.parent? (opt.extent || this.getContentExtent()) : this.getContentExtent();
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
@@ -6535,7 +6535,7 @@ var StyleContext = (function(){
       var extent = this.getImageExtent();
       var image_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent); // image size always considered as horizontal mode.
       var image = new Box(image_size, this);
-      image.display = this.display;
+      image.display = this.display; // inline/block
       image.classes = ["nehan-block", "nehan-image"];
       image.charCount = 0;
       if(this.pushed){
@@ -6579,7 +6579,19 @@ var StyleContext = (function(){
       return line;
     },
     isBlock : function(){
-      return this.display === "block";
+      switch(this.display){
+      case "block":
+      case "table":
+      case "table-caption":
+      case "table-row":
+      case "table-row-group":
+      case "table-header-group":
+      case "table-footer-group":
+      case "table-cell":
+      case "list-item":
+	return true;
+      }
+      return false;
     },
     isRoot : function(){
       return this.parent === null;
@@ -6591,7 +6603,7 @@ var StyleContext = (function(){
       return this.display === "inline";
     },
     isRootLine : function(){
-      return this.display === "block";
+      return this.isBlock();
     },
     isHeader : function(){
       return this.markup.isHeaderTag();
@@ -6747,6 +6759,14 @@ var StyleContext = (function(){
       var max_size = this.getLogicalMaxExtent(); // this value is required when static size is set by '%' value.
       var static_size = this.markup.getAttr(this.flow.getPropExtent()) || this.markup.getAttr("extent");
       return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
+    },
+    getStaticContentMeasure : function(){
+      var static_size = this.getStaticMeasure();
+      return static_size? Math.max(0, static_size - this.getEdgeMeasure()) : null;
+    },
+    getStaticContentExtent : function(){
+      var static_size = this.getStaticExtent();
+      return static_size? Math.max(0, static_size - this.getEdgeExtent()) : null;
     },
     getLayoutMeasure : function(){
       var prop = this.flow.getPropMeasure();
@@ -8367,22 +8387,6 @@ var TableGenerator = (function(){
     BlockGenerator.call(this, style, stream);
   }
   Class.extend(TableGenerator, BlockGenerator);
-
-/*
-  TableGenerator.prototype.yield = function(context){
-  };
-
-  TableGenerator.prototype._getTableGroupTags = function(context){
-    return this.stream.getWhile(function(token){
-      if(token instanceof Tag){
-	var name = token.getName();
-	return (name === "thead" || name === "tbody" || name === "tfoot" || name === "caption" || name === "tr");
-      }
-      return false;
-    });
-  };
-*/
-
   return TableGenerator;
 })();
 
@@ -8396,11 +8400,6 @@ var TableRowGroupGenerator = (function(){
     BlockGenerator.call(this, style, stream);
   }
   Class.extend(TableRowGroupGenerator, BlockGenerator);
-
-  /*
-  TableRowGroupGenerator.prototype.yield = function(context){
-  };
-  */
 
   return TableRowGroupGenerator;
 })();
@@ -8426,6 +8425,7 @@ var TableRowGenerator = (function(){
   };
 
   TableRowGenerator.prototype._getChildStyles = function(style, child_tags){
+    var self = this;
     var child_count = child_tags.length;
     var rest_measure = style.getContentMeasure();
     return List.mapi(child_tags, function(i, tag){
@@ -8451,14 +8451,11 @@ var TableRowGenerator = (function(){
 
 var TableCellGenerator = (function(){
   function TableCellGenerator(style, stream){
-    this.outlineContext = new OutlineContext();
+    SectionRootGenerator.call(this, style, stream);
+    this.outlineContext = new OutlineContext(style);
   }
   // notice that table-cell is sectioning root, so extends SectionRootGenerator.
   Class.extend(TableCellGenerator, SectionRootGenerator);
-
-  /*
-  TableCellGenerator.prototype.yield = function(context){
-  };*/
 
   return TableCellGenerator;
 })();

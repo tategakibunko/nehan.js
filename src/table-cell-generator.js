@@ -1,13 +1,10 @@
 var TableCellGenerator = (function(){
   function TableCellGenerator(style, stream){
-    this.outlineContext = new OutlineContext();
+    SectionRootGenerator.call(this, style, stream);
+    this.outlineContext = new OutlineContext(style);
   }
   // notice that table-cell is sectioning root, so extends SectionRootGenerator.
   Class.extend(TableCellGenerator, SectionRootGenerator);
-
-  /*
-  TableCellGenerator.prototype.yield = function(context){
-  };*/
 
   return TableCellGenerator;
 })();

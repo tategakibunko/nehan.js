@@ -516,10 +516,10 @@ var Style = {
     "border-collapse":"inherit",
     "border-style":"solid",
     "padding":{
-      "start":"0.8em",
-      "end":"0.8em",
-      "before":"0.5em",
-      "after":"0.5em"
+      "start":"0.5em",
+      "end":"0.5em",
+      "before":"0.4em",
+      "after":"0.4em"
     }
   },
   "textarea":{
@@ -542,10 +542,10 @@ var Style = {
     "border-collapse":"inherit",
     "border-style":"solid",
     "padding":{
-      "start":"0.8em",
-      "end":"0.8em",
-      "before":"0.5em",
-      "after":"0.5em"
+      "start":"0.5em",
+      "end":"0.5em",
+      "before":"0.4em",
+      "after":"0.4em"
     }
   },
   "thead":{
