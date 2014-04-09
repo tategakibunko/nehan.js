@@ -279,12 +279,10 @@ var StyleContext = (function(){
     },
     getOrphansCount : function(){
       // orphans count only enabled to child block element.
-      /*
       if(this.isRoot()){
 	return 0;
-      }*/
+      }
       var count = this.markup.getCssAttr("orphans");
-      console.log("orphans count:%o", count);
       return count? parseInt(count, 10) : 0;
     },
     getChildCount : function(){
