@@ -387,6 +387,7 @@ var StyleContext = (function(){
     },
     getCssInline : function(){
       var css = {};
+      css["line-height"] = "1em";
       if(this.font){
 	Args.copy(css, this.font.getCss());
       }
@@ -396,18 +397,18 @@ var StyleContext = (function(){
       if(this.background){
 	Args.copy(css, this.background.getCss());
       }
-      // top level line need to follow parent blockflow.
-      if(this.parent && this.parent.display === "block"){
-	Args.copy(css, this.flow.getCss());
-      }
+      /*
       if(this.edge && !this.isRootLine()){
 	Args.copy(css, this.edge.getCss());
       }
+      */
+      // top level line need to follow parent blockflow.
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
+      } else {
+	css["text-align"] = "left";
       }
       if(this.flow.isTextVertical()){
-	css["line-height"] = "1em";
 	if(Env.isIphoneFamily){
 	  css["letter-spacing"] = "-0.001em";
 	}
@@ -489,11 +490,16 @@ var StyleContext = (function(){
     },
     _centerizeVertRootLine : function(child_lines, max_font_size, max_extent){
       var flow = this.flow;
+      var base_font_size = this.getFontSize();
       var text_center = Math.floor(max_extent / 2);
 
       List.iter(child_lines, function(line){
 	var font_size = line.style.getFontSize();
 	var text_center_offset = text_center - Math.floor(font_size / 2);
+	// ruby, empha, or all children having different font-size must be fixed because it differs basical line-extent.
+	if(!line.style.isTextEmphaEnable() && line.style.getMarkupName() !== "ruby" && font_size === base_font_size){
+	  return;
+	}
 	if(line.style && line.style.markup.getName() === "img"){
 	  return;
 	}

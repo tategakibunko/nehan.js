@@ -289,9 +289,8 @@ var Style = {
   },
   "img":{
     "display":"inline",
-    //"box-sizing":"content-box",
-    "single":true,
-    "padding":"5px"
+    "box-sizing":"content-box",
+    "single":true
   },
   "input":{
     "display":"inline",

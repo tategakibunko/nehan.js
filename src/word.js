@@ -8,7 +8,9 @@ var Word = (function(){
   Word.prototype = {
     getCssVertTrans : function(line){
       var css = {};
-      css["letter-spacing"] = line.style.letterSpacing + "px";
+      if(line.style.letterSpacing){
+	css["letter-spacing"] = line.style.letterSpacing + "px";
+      }
       css.width = line.style.getFontSize() + "px";
       css.height = this.bodySize + "px";
       css["margin-left"] = "auto";
