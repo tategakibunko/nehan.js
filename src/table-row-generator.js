@@ -13,7 +13,7 @@ var TableRowGenerator = (function(){
     var child_tags = this._getChildTags(stream);
     var child_styles = this._getChildStyles(style, child_tags);
     return List.map(child_styles, function(child_style){
-      return new BlockGenerator(child_style, new TokenStream(child_style.getMarkupContent()), outline_context);
+      return new TableCellGenerator(child_style, new TokenStream(child_style.getMarkupContent()), outline_context);
     });
   };
 

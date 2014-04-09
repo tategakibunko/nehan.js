@@ -86,7 +86,7 @@ var Style = {
     "embeddable":true
   },
   "caption":{
-    "display":"block",
+    "display":"table-caption",
     "text-align":"center",
     "margin":{
       "after":"0.5em"
@@ -100,8 +100,10 @@ var Style = {
     "display":"inline"
   },
   "col":{
+    "display":"table-column"
   },
   "colgroup":{
+    "display":"table-column-group"
   },
   "command":{
   },
@@ -194,6 +196,7 @@ var Style = {
   //-------------------------------------------------------
   "h1":{
     "display":"block",
+    "break-before":"always",
     "line-rate":1.4,
     "font-size":"2.4em",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
@@ -246,6 +249,7 @@ var Style = {
     "font-size":"1.0em"
   },
   "head":{
+    "display":"none"
   },
   "header":{
     "display":"block",
@@ -485,8 +489,7 @@ var Style = {
   // tag / t
   //-------------------------------------------------------
   "table":{
-    //"display":"table",
-    "display":"block",
+    "display":"table",
     "embeddable":true,
     "table-layout":"fixed", // 'auto' not supported yet.
     "background-color":"white",
@@ -502,13 +505,15 @@ var Style = {
     }
   },
   "tbody":{
-    "display":"block"
+    "display":"table-row-group",
+    "border-collapse":"inherit"
   },
   "td":{
-    "display":"block",
+    "display":"table-cell",
     "section-root":true,
     "border-width":"1px",
     "border-color":"#a8a8a8",
+    "border-collapse":"inherit",
     "border-style":"solid",
     "padding":{
       "start":"0.8em",
@@ -523,16 +528,18 @@ var Style = {
     "interactive":true
   },
   "tfoot":{
-    "display":"block",
+    "display":"table-footer-group",
     "border-color":"#a8a8a8",
+    "border-collapse":"inherit",
     "border-style":"solid",
     "font-style":"italic"
   },
   "th":{
-    "display":"block",
+    "display":"table-cell",
     "line-rate":1.4,
     "border-width":"1px",
     "border-color":"#a8a8a8",
+    "border-collapse":"inherit",
     "border-style":"solid",
     "padding":{
       "start":"0.8em",
@@ -542,10 +549,11 @@ var Style = {
     }
   },
   "thead":{
-    "display":"block",
+    "display":"table-header-group",
     "font-weight":"bold",
     "background-color":"#c3d9ff",
     "border-color":"#a8a8a8",
+    "border-collapse":"inherit",
     "border-style":"solid"
   },
   "time":{
@@ -556,6 +564,7 @@ var Style = {
   },
   "tr":{
     "display":"table-row",
+    "border-collapse":"inherit",
     "border-color":"#a8a8a8",
     "border-style":"solid"
   },

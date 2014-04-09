@@ -84,16 +84,32 @@ var BlockGenerator = (function(){
 
     var child_stream = this._createStream(token);
 
-    if(child_style.display === "list-item"){
+    // switch generator by display
+    switch(child_style.display){
+    case "list-item":
       this.setChildLayout(new ListItemGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
-    }
+      
+    case "table":
+      this.setChildLayout(new TableGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
 
-    if(child_style.display === "table-row"){
+    case "table-header-group":
+    case "table-row-group":
+    case "table-footer-group":
+      this.setChildLayout(new TableRowGroupGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
+
+    case "table-row":
       this.setChildLayout(new TableRowGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
+
+    case "table-cell":
+      this.setChildLayout(new TableCellGenerator(child_style, child_stream));
       return this.yieldChildLayout(context);
     }
 
+    // switch generator by markup name
     switch(child_style.getMarkupName()){
     case "img":
       return child_style.createImage();

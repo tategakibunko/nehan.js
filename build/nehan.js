@@ -270,7 +270,7 @@ var Style = {
     "embeddable":true
   },
   "caption":{
-    "display":"block",
+    "display":"table-caption",
     "text-align":"center",
     "margin":{
       "after":"0.5em"
@@ -284,8 +284,10 @@ var Style = {
     "display":"inline"
   },
   "col":{
+    "display":"table-column"
   },
   "colgroup":{
+    "display":"table-column-group"
   },
   "command":{
   },
@@ -378,6 +380,7 @@ var Style = {
   //-------------------------------------------------------
   "h1":{
     "display":"block",
+    "break-before":"always",
     "line-rate":1.4,
     "font-size":"2.4em",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
@@ -430,6 +433,7 @@ var Style = {
     "font-size":"1.0em"
   },
   "head":{
+    "display":"none"
   },
   "header":{
     "display":"block",
@@ -669,8 +673,7 @@ var Style = {
   // tag / t
   //-------------------------------------------------------
   "table":{
-    //"display":"table",
-    "display":"block",
+    "display":"table",
     "embeddable":true,
     "table-layout":"fixed", // 'auto' not supported yet.
     "background-color":"white",
@@ -686,13 +689,15 @@ var Style = {
     }
   },
   "tbody":{
-    "display":"block"
+    "display":"table-row-group",
+    "border-collapse":"inherit"
   },
   "td":{
-    "display":"block",
+    "display":"table-cell",
     "section-root":true,
     "border-width":"1px",
     "border-color":"#a8a8a8",
+    "border-collapse":"inherit",
     "border-style":"solid",
     "padding":{
       "start":"0.8em",
@@ -707,16 +712,18 @@ var Style = {
     "interactive":true
   },
   "tfoot":{
-    "display":"block",
+    "display":"table-footer-group",
     "border-color":"#a8a8a8",
+    "border-collapse":"inherit",
     "border-style":"solid",
     "font-style":"italic"
   },
   "th":{
-    "display":"block",
+    "display":"table-cell",
     "line-rate":1.4,
     "border-width":"1px",
     "border-color":"#a8a8a8",
+    "border-collapse":"inherit",
     "border-style":"solid",
     "padding":{
       "start":"0.8em",
@@ -726,10 +733,11 @@ var Style = {
     }
   },
   "thead":{
-    "display":"block",
+    "display":"table-header-group",
     "font-weight":"bold",
     "background-color":"#c3d9ff",
     "border-color":"#a8a8a8",
+    "border-collapse":"inherit",
     "border-style":"solid"
   },
   "time":{
@@ -740,6 +748,7 @@ var Style = {
   },
   "tr":{
     "display":"table-row",
+    "border-collapse":"inherit",
     "border-color":"#a8a8a8",
     "border-style":"solid"
   },
@@ -800,8 +809,9 @@ var Style = {
     //"display":"block !important" // TODO
     "display":"block"
   },
-  // nehan.js original page break tags, defined to keep compatibility of older nehan.js document.
-  // these must be defined as logical-break-before, logical-break-after in the future.
+  // <page-break>, <pbr>, <end-page> are all same and nehan.js original tag,
+  // defined to keep compatibility of older nehan.js document,
+  // and must be defined as logical-break-before, logical-break-after props in the future.
   "page-break":{
     "display":"block",
     "single":true
@@ -6702,6 +6712,48 @@ var LogicalFloats = {
   }
 };
 
+var LogicalBreak = (function(){
+  function LogicalBreak(value){
+    this.value = value;
+  }
+
+  LogicalBreak.prototype = {
+    isAlways : function(){
+    },
+    isAvoid : function(){
+    },
+    isFirst : function(){
+    },
+    isNth : function(order){
+    }
+  };
+
+  return LogicalBreak;
+})();
+
+
+var LogicalBreaks = {
+  before:{
+    always:(new LogicalBreak("always")),
+    avoid:(new LogicalBreak("avoid")),
+    first:(new LogicalBreak("first")), // correspond to break-before:"left"
+    second:(new LogicalBreak("second")) // correspond to break-before:"right"
+  },
+  after:{
+    always:(new LogicalBreak("always")),
+    avoid:(new LogicalBreak("avoid")),
+    first:(new LogicalBreak("first")), // correspond to break-before:"left"
+    second:(new LogicalBreak("second")) // correspond to break-before:"right"
+  },
+  getBefore : function(value){
+    return this.before[value] || null;
+  },
+  getAfter : function(value){
+    return this.after[value] || null;
+  }
+};
+
+
 var TextAlign = (function(){
   function TextAlign(value){
     this.value = value || "start";
@@ -7879,16 +7931,32 @@ var BlockGenerator = (function(){
 
     var child_stream = this._createStream(token);
 
-    if(child_style.display === "list-item"){
+    // switch generator by display
+    switch(child_style.display){
+    case "list-item":
       this.setChildLayout(new ListItemGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
-    }
+      
+    case "table":
+      this.setChildLayout(new TableGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
 
-    if(child_style.display === "table-row"){
+    case "table-header-group":
+    case "table-row-group":
+    case "table-footer-group":
+      this.setChildLayout(new TableRowGroupGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
+
+    case "table-row":
       this.setChildLayout(new TableRowGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
+
+    case "table-cell":
+      this.setChildLayout(new TableCellGenerator(child_style, child_stream));
       return this.yieldChildLayout(context);
     }
 
+    // switch generator by markup name
     switch(child_style.getMarkupName()){
     case "img":
       return child_style.createImage();
@@ -8562,6 +8630,42 @@ var ParallelGenerator = (function(){
 
 
 
+var SectionRootGenerator = (function(){
+  function SectionRootGenerator(style, stream){
+    BlockGenerator.call(this, style, stream);
+    this.outlineContext = new OutlineContext(style); // create new section root
+  }
+  Class.extend(SectionRootGenerator, BlockGenerator);
+
+  SectionRootGenerator.prototype._onCreate = function(block){
+    block.pageNo = this.outlineContext.getPageNo();
+    block.seekPos = this.stream.getSeekPos();
+    block.percent = this.stream.getSeekPercent();
+    this.outlineContext.stepPageNo();
+  };
+
+  SectionRootGenerator.prototype._onComplete = function(){
+    DocumentContext.addOutlineContext(this.outlineContext);
+  };
+
+  return SectionRootGenerator;
+})();
+
+var SectionContentGenerator = (function(){
+  function SectionContentGenerator(style, stream, outline_context){
+    BlockGenerator.call(this, style, stream, outline_context);
+    this.outlineContext.startSection(this.style.getMarkupName());
+  }
+  Class.extend(SectionContentGenerator, BlockGenerator);
+
+  SectionContentGenerator.prototype._onComplete = function(block){
+    this.context.endSection(this.style.getMarkupName());
+  };
+
+  return SectionContentGenerator;
+})();
+
+
 var ListGenerator = (function(){
   function ListGenerator(style, stream, outline_context){
     BlockGenerator.call(this, style, stream, outline_context);
@@ -8631,42 +8735,47 @@ var ListItemGenerator = (function(){
 // tag : table
 // stream : [thead | tbody | tfoot]
 // yield : [thead | tbody | tfoot]
-// init : create partition map
 var TableGenerator = (function(){
   function TableGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
   Class.extend(TableGenerator, BlockGenerator);
 
+/*
   TableGenerator.prototype.yield = function(context){
   };
 
   TableGenerator.prototype._getTableGroupTags = function(context){
+    return this.stream.getWhile(function(token){
+      if(token instanceof Tag){
+	var name = token.getName();
+	return (name === "thead" || name === "tbody" || name === "tfoot" || name === "caption" || name === "tr");
+      }
+      return false;
+    });
   };
+*/
 
   return TableGenerator;
 })();
 
+
 // parent : table
-// tag : thead | tbody | tfoot
+// tag : tbody, thead, tfoot
 // stream : [tr]
 // yield : [tr]
-var TableGroupLayoutGenerator = (function(){
-  function TableGroupLayoutGenerator(style, stream){
+var TableRowGroupGenerator = (function(){
+  function TableRowGroupGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
-  Class.extend(TableGroupLayoutGenerator, BlockGenerator);
+  Class.extend(TableRowGroupGenerator, BlockGenerator);
 
-  TableGroupLayoutGenerator.prototype.yield = function(context){
+  /*
+  TableRowGroupGenerator.prototype.yield = function(context){
   };
+  */
 
-  TableGroupLayoutGenerator.prototype._getRowTags = function(context){
-    return this.stream.getWhile(function(token){
-      return (token instanceof Tag && token.getName() === "tr");
-    });
-  };
-
-  return TableGroupLayoutGenerator;
+  return TableRowGroupGenerator;
 })();
 
 
@@ -8685,7 +8794,7 @@ var TableRowGenerator = (function(){
     var child_tags = this._getChildTags(stream);
     var child_styles = this._getChildStyles(style, child_tags);
     return List.map(child_styles, function(child_style){
-      return new BlockGenerator(child_style, new TokenStream(child_style.getMarkupContent()), outline_context);
+      return new TableCellGenerator(child_style, new TokenStream(child_style.getMarkupContent()), outline_context);
     });
   };
 
@@ -8713,39 +8822,18 @@ var TableRowGenerator = (function(){
   return TableRowGenerator;
 })();
 
-var SectionRootGenerator = (function(){
-  function SectionRootGenerator(style, stream){
-    BlockGenerator.call(this, style, stream);
-    this.outlineContext = new OutlineContext(style); // create new section root
+var TableCellGenerator = (function(){
+  function TableCellGenerator(style, stream){
+    this.outlineContext = new OutlineContext();
   }
-  Class.extend(SectionRootGenerator, BlockGenerator);
+  // notice that table-cell is sectioning root, so extends SectionRootGenerator.
+  Class.extend(TableCellGenerator, SectionRootGenerator);
 
-  SectionRootGenerator.prototype._onCreate = function(block){
-    block.pageNo = this.outlineContext.getPageNo();
-    block.seekPos = this.stream.getSeekPos();
-    block.percent = this.stream.getSeekPercent();
-    this.outlineContext.stepPageNo();
-  };
+  /*
+  TableCellGenerator.prototype.yield = function(context){
+  };*/
 
-  SectionRootGenerator.prototype._onComplete = function(){
-    DocumentContext.addOutlineContext(this.outlineContext);
-  };
-
-  return SectionRootGenerator;
-})();
-
-var SectionContentGenerator = (function(){
-  function SectionContentGenerator(style, stream, outline_context){
-    BlockGenerator.call(this, style, stream, outline_context);
-    this.outlineContext.startSection(this.style.getMarkupName());
-  }
-  Class.extend(SectionContentGenerator, BlockGenerator);
-
-  SectionContentGenerator.prototype._onComplete = function(block){
-    this.context.endSection(this.style.getMarkupName());
-  };
-
-  return SectionContentGenerator;
+  return TableCellGenerator;
 })();
 
 
