@@ -2595,9 +2595,6 @@ var Tag = (function (){
       var name = this.getName();
       return name === "end-page" || name === "page-break";
     },
-    isMetaTag : function(){
-      return this.getCssAttr("meta") === true;
-    },
     isRoot : function(){
       return this.parent === null;
     },
@@ -6783,7 +6780,6 @@ var StyleContext = (function(){
     if(list_style){
       this.listStyle = list_style;
     }
-    this.isMeta = markup.getCssAttr("meta")? true : false;
     if(this.parent){
       this.parent._appendChild(this);
     }
@@ -6887,9 +6883,6 @@ var StyleContext = (function(){
 	}
       }
       return line;
-    },
-    isMeta : function(){
-      return this.isMeta || false;
     },
     isBlock : function(){
       return this.display === "block";
