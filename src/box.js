@@ -27,6 +27,8 @@ var Box = (function(){
       Args.copy(css, this.css); // some dynamic values
       if(this.style.isTextHorizontal()){
 	css["line-height"] = "1em";
+      } else if(this.style.isInline()){ // child-vertical-inline
+	css["text-align"] = "left";
       }
       return css;
     },
