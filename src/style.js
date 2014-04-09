@@ -616,8 +616,9 @@ var Style = {
     //"display":"block !important" // TODO
     "display":"block"
   },
-  // nehan.js original page break tags, defined to keep compatibility of older nehan.js document.
-  // these must be defined as logical-break-before, logical-break-after in the future.
+  // <page-break>, <pbr>, <end-page> are all same and nehan.js original tag,
+  // defined to keep compatibility of older nehan.js document,
+  // and must be defined as logical-break-before, logical-break-after props in the future.
   "page-break":{
     "display":"block",
     "single":true
