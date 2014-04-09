@@ -152,11 +152,6 @@ var Style = {
   },
   "embed":{
   },
-  // nehan original tag
-  "end-page":{
-    "display":"block",
-    "single":true
-  },
   //-------------------------------------------------------
   // tag / f
   //-------------------------------------------------------
@@ -271,6 +266,10 @@ var Style = {
   },
   "hr.nehan-space":{
     "border-width":"0px"
+  },
+  "hr.nehan-pbr":{
+    "border-width":"0px",
+    "break-after":"always"
   },
   "html":{
     "display":"block"
@@ -403,13 +402,6 @@ var Style = {
     "margin":{
       "after":"1.5em"
     }
-  },
-  // this is nehan local syntax.
-  // as we use <br> to break line,
-  // we use <page-break> to break the page.
-  "page-break":{
-    "display":"block",
-    "single":true
   },
   "param":{
   },

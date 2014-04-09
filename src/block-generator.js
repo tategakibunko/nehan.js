@@ -67,7 +67,7 @@ var BlockGenerator = (function(){
     var child_style = (token instanceof Tag)? new StyleContext(token, this.style) : this.style;
 
     // inline text or inline tag
-    // stream push back, and delegate current style and stream to InlineGenerator
+    // push back stream, and delegate current style and stream to InlineGenerator
     if(Token.isText(token) || child_style.isInline()){
       this.stream.prev();
       this.setChildLayout(new InlineGenerator(this.style, this.stream));
@@ -75,7 +75,7 @@ var BlockGenerator = (function(){
     }
 
     // child block with float
-    // stream push back, and delegate current style and stream to InlineGenerator
+    // push back stream, and delegate current style and stream to FloatGenerator
     if(child_style.isFloated()){
       this.stream.prev();
       this.setChildLayout(new FloatGenerator(this.style, this.stream, this.outlineContext));
@@ -150,6 +150,16 @@ var BlockGenerator = (function(){
     this._onAddElement(element);
   };
 
+  var count_line = function(elements){
+    var callee = arguments.callee;
+    return List.fold(elements, 0, function(ret, element){
+      if(element === null){
+	return ret;
+      }
+      return (element.display === "inline")? ret + 1 : ret + callee(element.elements);
+    });
+  };
+
   BlockGenerator.prototype._createBlock = function(context){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
@@ -160,6 +170,13 @@ var BlockGenerator = (function(){
       extent:extent,
       elements:elements
     });
+
+    // if orphans available, and line count is less than it, cache and page-break temporally.
+    var orphans_count = this.style.getOrphansCount();
+    if(orphans_count > 0 && count_line(block.elements) < orphans_count && this.hasNext()){
+      this.pushCache(block);
+      return null; // temporary page-break;
+    }
     this._onCreate(block);
     if(!this.hasNext()){
       this._onComplete(block);

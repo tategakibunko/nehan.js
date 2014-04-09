@@ -44,13 +44,21 @@ var StyleContext = (function(){
     if(pulled){
       this.pulled = true;
     }
+    var list_style = this._loadListStyle(markup);
+    if(list_style){
+      this.listStyle = list_style;
+    }
     var logical_float = this._loadLogicalFloat(markup);
     if(logical_float){
       this.logicalFloat = logical_float;
     }
-    var list_style = this._loadListStyle(markup);
-    if(list_style){
-      this.listStyle = list_style;
+    var logical_break_before = this._loadLogicalBreakBefore(markup);
+    if(logical_break_before){
+      this.logicalBreakBefore = logical_break;
+    }
+    var logical_break_after = this._loadLogicalBreakAfter(markup);
+    if(logical_break_after){
+      this.logicalBreakAfter = logical_break_after;
     }
     if(this.parent){
       this.parent._appendChild(this);
@@ -268,6 +276,16 @@ var StyleContext = (function(){
     },
     getMarkerHtml : function(order){
       return this.listStyle? this.listStyle.getMarkerHtml(order) : "";
+    },
+    getOrphansCount : function(){
+      // orphans count only enabled to child block element.
+      /*
+      if(this.isRoot()){
+	return 0;
+      }*/
+      var count = this.markup.getCssAttr("orphans");
+      console.log("orphans count:%o", count);
+      return count? parseInt(count, 10) : 0;
     },
     getChildCount : function(){
       return this.childs.length;
@@ -639,6 +657,12 @@ var StyleContext = (function(){
 	return null;
       }
       return LogicalFloats.get(name);
+    },
+    _loadLogicalBreakBefore : function(markup){
+      return null; // TODO
+    },
+    _loadLogicalBreakAfter : function(markup){
+      return null; // TODO
     },
     _loadListStyle : function(markup){
       var list_style_type = markup.getCssAttr("list-style-type", "none");

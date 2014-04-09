@@ -336,11 +336,6 @@ var Style = {
   },
   "embed":{
   },
-  // nehan original tag
-  "end-page":{
-    "display":"block",
-    "single":true
-  },
   //-------------------------------------------------------
   // tag / f
   //-------------------------------------------------------
@@ -455,6 +450,10 @@ var Style = {
   },
   "hr.nehan-space":{
     "border-width":"0px"
+  },
+  "hr.nehan-pbr":{
+    "border-width":"0px",
+    "break-after":"always"
   },
   "html":{
     "display":"block"
@@ -587,13 +586,6 @@ var Style = {
     "margin":{
       "after":"1.5em"
     }
-  },
-  // this is nehan local syntax.
-  // as we use <br> to break line,
-  // we use <page-break> to break the page.
-  "page-break":{
-    "display":"block",
-    "single":true
   },
   "param":{
   },
@@ -6695,6 +6687,48 @@ var LogicalFloats = {
   }
 };
 
+var LogicalBreak = (function(){
+  function LogicalBreak(value){
+    this.value = value;
+  }
+
+  LogicalBreak.prototype = {
+    isAlways : function(){
+    },
+    isAvoid : function(){
+    },
+    isFirst : function(){
+    },
+    isNth : function(order){
+    }
+  };
+
+  return LogicalBreak;
+})();
+
+
+var LogicalBreaks = {
+  before:{
+    always:(new LogicalBreak("always")),
+    avoid:(new LogicalBreak("avoid")),
+    first:(new LogicalBreak("first")), // correspond to break-before:"left"
+    second:(new LogicalBreak("second")) // correspond to break-before:"right"
+  },
+  after:{
+    always:(new LogicalBreak("always")),
+    avoid:(new LogicalBreak("avoid")),
+    first:(new LogicalBreak("first")), // correspond to break-before:"left"
+    second:(new LogicalBreak("second")) // correspond to break-before:"right"
+  },
+  getBefore : function(value){
+    return this.before[value] || null;
+  },
+  getAfter : function(value){
+    return this.after[value] || null;
+  }
+};
+
+
 var TextAlign = (function(){
   function TextAlign(value){
     this.value = value || "start";
@@ -6768,13 +6802,21 @@ var StyleContext = (function(){
     if(pulled){
       this.pulled = true;
     }
+    var list_style = this._loadListStyle(markup);
+    if(list_style){
+      this.listStyle = list_style;
+    }
     var logical_float = this._loadLogicalFloat(markup);
     if(logical_float){
       this.logicalFloat = logical_float;
     }
-    var list_style = this._loadListStyle(markup);
-    if(list_style){
-      this.listStyle = list_style;
+    var logical_break_before = this._loadLogicalBreakBefore(markup);
+    if(logical_break_before){
+      this.logicalBreakBefore = logical_break;
+    }
+    var logical_break_after = this._loadLogicalBreakAfter(markup);
+    if(logical_break_after){
+      this.logicalBreakAfter = logical_break_after;
     }
     if(this.parent){
       this.parent._appendChild(this);
@@ -6992,6 +7034,16 @@ var StyleContext = (function(){
     },
     getMarkerHtml : function(order){
       return this.listStyle? this.listStyle.getMarkerHtml(order) : "";
+    },
+    getOrphansCount : function(){
+      // orphans count only enabled to child block element.
+      /*
+      if(this.isRoot()){
+	return 0;
+      }*/
+      var count = this.markup.getCssAttr("orphans");
+      console.log("orphans count:%o", count);
+      return count? parseInt(count, 10) : 0;
     },
     getChildCount : function(){
       return this.childs.length;
@@ -7363,6 +7415,12 @@ var StyleContext = (function(){
 	return null;
       }
       return LogicalFloats.get(name);
+    },
+    _loadLogicalBreakBefore : function(markup){
+      return null; // TODO
+    },
+    _loadLogicalBreakAfter : function(markup){
+      return null; // TODO
     },
     _loadListStyle : function(markup){
       var list_style_type = markup.getCssAttr("list-style-type", "none");
@@ -7829,7 +7887,7 @@ var BlockGenerator = (function(){
     var child_style = (token instanceof Tag)? new StyleContext(token, this.style) : this.style;
 
     // inline text or inline tag
-    // stream push back, and delegate current style and stream to InlineGenerator
+    // push back stream, and delegate current style and stream to InlineGenerator
     if(Token.isText(token) || child_style.isInline()){
       this.stream.prev();
       this.setChildLayout(new InlineGenerator(this.style, this.stream));
@@ -7837,7 +7895,7 @@ var BlockGenerator = (function(){
     }
 
     // child block with float
-    // stream push back, and delegate current style and stream to InlineGenerator
+    // push back stream, and delegate current style and stream to FloatGenerator
     if(child_style.isFloated()){
       this.stream.prev();
       this.setChildLayout(new FloatGenerator(this.style, this.stream, this.outlineContext));
@@ -7912,6 +7970,16 @@ var BlockGenerator = (function(){
     this._onAddElement(element);
   };
 
+  var count_line = function(elements){
+    var callee = arguments.callee;
+    return List.fold(elements, 0, function(ret, element){
+      if(element === null){
+	return ret;
+      }
+      return (element.display === "inline")? ret + 1 : ret + callee(element.elements);
+    });
+  };
+
   BlockGenerator.prototype._createBlock = function(context){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
@@ -7922,6 +7990,13 @@ var BlockGenerator = (function(){
       extent:extent,
       elements:elements
     });
+
+    // if orphans available, and line count is less than it, cache and page-break temporally.
+    var orphans_count = this.style.getOrphansCount();
+    if(orphans_count > 0 && count_line(block.elements) < orphans_count && this.hasNext()){
+      this.pushCache(block);
+      return null; // temporary page-break;
+    }
     this._onCreate(block);
     if(!this.hasNext()){
       this._onComplete(block);
