@@ -444,8 +444,9 @@ var Style = {
     "margin":{
       "after":"1em"
     },
+    "extent":"1px",
     "border-width":{
-      "after":"1px"
+      "before":"1px"
     }
   },
   "hr.nehan-space":{
@@ -798,6 +799,20 @@ var Style = {
   "first-line":{
     //"display":"block !important" // TODO
     "display":"block"
+  },
+  // nehan.js original page break tags, defined to keep compatibility of older nehan.js document.
+  // these must be defined as logical-break-before, logical-break-after in the future.
+  "page-break":{
+    "display":"block",
+    "single":true
+  },
+  "pbr":{
+    "display":"block",
+    "single":true
+  },
+  "end-page":{
+    "display":"block",
+    "single":true
   },
   //-------------------------------------------------------
   // rounded corner
@@ -6687,48 +6702,6 @@ var LogicalFloats = {
   }
 };
 
-var LogicalBreak = (function(){
-  function LogicalBreak(value){
-    this.value = value;
-  }
-
-  LogicalBreak.prototype = {
-    isAlways : function(){
-    },
-    isAvoid : function(){
-    },
-    isFirst : function(){
-    },
-    isNth : function(order){
-    }
-  };
-
-  return LogicalBreak;
-})();
-
-
-var LogicalBreaks = {
-  before:{
-    always:(new LogicalBreak("always")),
-    avoid:(new LogicalBreak("avoid")),
-    first:(new LogicalBreak("first")), // correspond to break-before:"left"
-    second:(new LogicalBreak("second")) // correspond to break-before:"right"
-  },
-  after:{
-    always:(new LogicalBreak("always")),
-    avoid:(new LogicalBreak("avoid")),
-    first:(new LogicalBreak("first")), // correspond to break-before:"left"
-    second:(new LogicalBreak("second")) // correspond to break-before:"right"
-  },
-  getBefore : function(value){
-    return this.before[value] || null;
-  },
-  getAfter : function(value){
-    return this.after[value] || null;
-  }
-};
-
-
 var TextAlign = (function(){
   function TextAlign(value){
     this.value = value || "start";
@@ -6810,6 +6783,7 @@ var StyleContext = (function(){
     if(logical_float){
       this.logicalFloat = logical_float;
     }
+    /* TODO
     var logical_break_before = this._loadLogicalBreakBefore(markup);
     if(logical_break_before){
       this.logicalBreakBefore = logical_break;
@@ -6817,7 +6791,8 @@ var StyleContext = (function(){
     var logical_break_after = this._loadLogicalBreakAfter(markup);
     if(logical_break_after){
       this.logicalBreakAfter = logical_break_after;
-    }
+    }*/
+
     if(this.parent){
       this.parent._appendChild(this);
     }
@@ -6858,6 +6833,7 @@ var StyleContext = (function(){
       return style;
     },
     createBlock : function(opt){
+      opt = opt || {};
       var elements = opt.elements || [];
       var measure = opt.measure || this.getStaticMeasure() || this.getContentMeasure();
       var extent = this.parent? (opt.extent || this.getContentExtent()) : this.getContentExtent();
@@ -6894,6 +6870,7 @@ var StyleContext = (function(){
       return image;
     },
     createLine : function(opt){
+      opt = opt || {};
       var elements = opt.elements || [];
       var child_lines = this._filterChildLines(elements);
       var max_font_size = this._computeMaxLineFontSize(child_lines);
@@ -7915,6 +7892,12 @@ var BlockGenerator = (function(){
     switch(child_style.getMarkupName()){
     case "img":
       return child_style.createImage();
+
+    case "hr":
+      return child_style.createBlock();
+
+    case "page-break": case "end-page": case "pbr":
+      return null; // page-break
 
     case "first-line":
       this.setChildLayout(new FirstLineGenerator(child_style, child_stream, this.outlineContext));

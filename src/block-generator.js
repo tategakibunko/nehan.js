@@ -98,6 +98,12 @@ var BlockGenerator = (function(){
     case "img":
       return child_style.createImage();
 
+    case "hr":
+      return child_style.createBlock();
+
+    case "page-break": case "end-page": case "pbr":
+      return null; // page-break
+
     case "first-line":
       this.setChildLayout(new FirstLineGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);

@@ -52,6 +52,7 @@ var StyleContext = (function(){
     if(logical_float){
       this.logicalFloat = logical_float;
     }
+    /* TODO
     var logical_break_before = this._loadLogicalBreakBefore(markup);
     if(logical_break_before){
       this.logicalBreakBefore = logical_break;
@@ -59,7 +60,8 @@ var StyleContext = (function(){
     var logical_break_after = this._loadLogicalBreakAfter(markup);
     if(logical_break_after){
       this.logicalBreakAfter = logical_break_after;
-    }
+    }*/
+
     if(this.parent){
       this.parent._appendChild(this);
     }
@@ -100,6 +102,7 @@ var StyleContext = (function(){
       return style;
     },
     createBlock : function(opt){
+      opt = opt || {};
       var elements = opt.elements || [];
       var measure = opt.measure || this.getStaticMeasure() || this.getContentMeasure();
       var extent = this.parent? (opt.extent || this.getContentExtent()) : this.getContentExtent();
@@ -136,6 +139,7 @@ var StyleContext = (function(){
       return image;
     },
     createLine : function(opt){
+      opt = opt || {};
       var elements = opt.elements || [];
       var child_lines = this._filterChildLines(elements);
       var max_font_size = this._computeMaxLineFontSize(child_lines);

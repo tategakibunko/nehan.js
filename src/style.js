@@ -260,8 +260,9 @@ var Style = {
     "margin":{
       "after":"1em"
     },
+    "extent":"1px",
     "border-width":{
-      "after":"1px"
+      "before":"1px"
     }
   },
   "hr.nehan-space":{
@@ -614,6 +615,20 @@ var Style = {
   "first-line":{
     //"display":"block !important" // TODO
     "display":"block"
+  },
+  // nehan.js original page break tags, defined to keep compatibility of older nehan.js document.
+  // these must be defined as logical-break-before, logical-break-after in the future.
+  "page-break":{
+    "display":"block",
+    "single":true
+  },
+  "pbr":{
+    "display":"block",
+    "single":true
+  },
+  "end-page":{
+    "display":"block",
+    "single":true
   },
   //-------------------------------------------------------
   // rounded corner

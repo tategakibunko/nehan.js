@@ -8,6 +8,8 @@ Mark "!": change that can break compatibility with older version
 
 version 5.0.0 2014/xx/xx
 =========================
+o more complex float supported, not only static size float, but also dynamic block element can be floated.
+o support orphans
 ! refactor many futures.
 
 
