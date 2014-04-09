@@ -213,6 +213,9 @@ var StyleContext = (function(){
     getMarkupPos : function(){
       return this.markup.pos;
     },
+    getMarkupAttr : function(name){
+      return this.markup.getAttr(name);
+    },
     getHeaderRank : function(){
       return this.markup.getHeaderRank();
     },

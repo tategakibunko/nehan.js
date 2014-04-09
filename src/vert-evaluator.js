@@ -14,14 +14,14 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalLink = function(line, link){
     return Html.tagWrap("a", this.evalInline(link), {
-      "href":link.style.markup.getAttr("href"),
+      "href":link.style.getMarkupAttr("href"),
       "class":link.classes.join(" ")
     });
   };
 
   VertEvaluator.prototype.evalBlockImage = function(image){
     return Html.tagSingle("img", {
-      "src":image.style.markup.getAttr("src"),
+      "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssBlock()),
       "class":image.classes.join(" ")
     });
@@ -29,7 +29,7 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalInlineImage = function(line, image){
     return Html.tagSingle("img", {
-      "src":image.style.markup.getAttr("src"),
+      "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssInline()),
       "class":image.classes.join(" ")
     }) + "<br />";

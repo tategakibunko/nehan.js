@@ -6937,6 +6937,9 @@ var StyleContext = (function(){
     getMarkupPos : function(){
       return this.markup.pos;
     },
+    getMarkupAttr : function(name){
+      return this.markup.getAttr(name);
+    },
     getHeaderRank : function(){
       return this.markup.getHeaderRank();
     },
@@ -8907,14 +8910,14 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalLink = function(line, link){
     return Html.tagWrap("a", this.evalInline(link), {
-      "href":link.style.markup.getAttr("href"),
+      "href":link.style.getMarkupAttr("href"),
       "class":link.classes.join(" ")
     });
   };
 
   VertEvaluator.prototype.evalBlockImage = function(image){
     return Html.tagSingle("img", {
-      "src":image.style.markup.getAttr("src"),
+      "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssBlock()),
       "class":image.classes.join(" ")
     });
@@ -8922,7 +8925,7 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalInlineImage = function(line, image){
     return Html.tagSingle("img", {
-      "src":image.style.markup.getAttr("src"),
+      "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssInline()),
       "class":image.classes.join(" ")
     }) + "<br />";
@@ -9136,7 +9139,7 @@ var HoriEvaluator = (function(){
 
   HoriEvaluator.prototype.evalBlockImage = function(image){
     return Html.tagSingle("img", {
-      "src":image.style.markup.getAttr("src"),
+      "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssBlock()),
       "class":image.classes.join(" ")
     });
@@ -9144,7 +9147,7 @@ var HoriEvaluator = (function(){
 
   HoriEvaluator.prototype.evalInlineImage = function(line, image){
     return Html.tagSingle("img", {
-      "src":image.style.markup.getAttr("src"),
+      "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssHoriInlineImage()),
       "class":image.classes.join(" ")
     });
@@ -9160,7 +9163,7 @@ var HoriEvaluator = (function(){
 
   HoriEvaluator.prototype.evalLink = function(line, link){
     return Html.tagWrap("a", this.evalInlineElements(link, link.elements), {
-      "href":link.style.markup.getAttr("href"),
+      "href":link.style.getMarkupAttr("href"),
       "class":link.classes.join(" ")
     });
   };
