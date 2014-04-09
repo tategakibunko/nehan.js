@@ -397,11 +397,9 @@ var StyleContext = (function(){
       if(this.background){
 	Args.copy(css, this.background.getCss());
       }
-      /*
       if(this.edge && !this.isRootLine()){
 	Args.copy(css, this.edge.getCss());
       }
-      */
       // top level line need to follow parent blockflow.
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
