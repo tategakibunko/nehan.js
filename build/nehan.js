@@ -6873,9 +6873,9 @@ var StyleContext = (function(){
 	line.inlineMeasure = opt.inlineMeasure || measure;
 	line.texts = opt.texts || [];
 
-	// if vertical line, needs some position fix.
+	// if vertical line, needs some position fix to align baseline.
 	if(this.isTextVertical()){
-	  this._centerizeVertRootLine(child_lines, max_font_size, max_extent);
+	  this._alignVertLine(child_lines, max_font_size, max_extent);
 	}
       }
       return line;
@@ -7212,7 +7212,7 @@ var StyleContext = (function(){
 	return Math.max(ret, line.size.getExtent(flow) + font_center_offset);
       });
     },
-    _centerizeVertRootLine : function(child_lines, max_font_size, max_extent){
+    _alignVertBaseLine : function(child_lines, max_font_size, max_extent){
       var flow = this.flow;
       var base_font_size = this.getFontSize();
       var text_center = Math.floor(max_extent / 2);
