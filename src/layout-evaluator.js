@@ -48,10 +48,11 @@ var LayoutEvaluator = (function(){
     },
     evalInlineElement : function(line, element){
       if(element instanceof Box){
-	if(element.style.getMarkupName() === "img"){
-	  return this.evalInlineImage(line, element);
+	switch(element.style.getMarkupName()){
+	case "img": return this.evalInlineImage(line, element);
+	case "a": return this.evalLink(line, element);
+	default: return this.evalInlineChild(line, element);
 	}
-	return this.evalInlineChild(line, element);
       }
       var text = this.evalTextElement(line, element);
       if(line.style.isTextEmphaEnable()){

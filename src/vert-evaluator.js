@@ -12,6 +12,13 @@ var VertEvaluator = (function(){
     return this.evalInline(child);
   };
 
+  VertEvaluator.prototype.evalLink = function(line, link){
+    return Html.tagWrap("a", this.evalInline(link), {
+      "href":link.style.markup.getAttr("href"),
+      "class":link.classes.join(" ")
+    });
+  };
+
   VertEvaluator.prototype.evalBlockImage = function(image){
     return Html.tagSingle("img", {
       "src":image.style.markup.getAttr("src"),

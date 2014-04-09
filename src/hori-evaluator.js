@@ -25,10 +25,18 @@ var HoriEvaluator = (function(){
     });
   };
 
+  // notice that horizontal inline-child uses <span> wrapping(except for <a>).
   HoriEvaluator.prototype.evalInlineChild = function(line, child){
     return Html.tagWrap("span", this.evalInlineElements(child, child.elements), {
       "style":Css.toString(child.getCssInline()),
       "class":line.classes.join(" ")
+    });
+  };
+
+  HoriEvaluator.prototype.evalLink = function(line, link){
+    return Html.tagWrap("a", this.evalInlineElements(link, link.elements), {
+      "href":link.style.markup.getAttr("href"),
+      "class":link.classes.join(" ")
     });
   };
 

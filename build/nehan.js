@@ -6875,7 +6875,7 @@ var StyleContext = (function(){
 
 	// if vertical line, needs some position fix to align baseline.
 	if(this.isTextVertical()){
-	  this._alignVertLine(child_lines, max_font_size, max_extent);
+	  this._alignVertBaselines(child_lines, max_font_size, max_extent);
 	}
       }
       return line;
@@ -7212,7 +7212,7 @@ var StyleContext = (function(){
 	return Math.max(ret, line.size.getExtent(flow) + font_center_offset);
       });
     },
-    _alignVertBaseLine : function(child_lines, max_font_size, max_extent){
+    _alignVertBaselines : function(child_lines, max_font_size, max_extent){
       var flow = this.flow;
       var base_font_size = this.getFontSize();
       var text_center = Math.floor(max_extent / 2);
@@ -8866,10 +8866,11 @@ var LayoutEvaluator = (function(){
     },
     evalInlineElement : function(line, element){
       if(element instanceof Box){
-	if(element.style.getMarkupName() === "img"){
-	  return this.evalInlineImage(line, element);
+	switch(element.style.getMarkupName()){
+	case "img": return this.evalInlineImage(line, element);
+	case "a": return this.evalLink(line, element);
+	default: return this.evalInlineChild(line, element);
 	}
-	return this.evalInlineChild(line, element);
       }
       var text = this.evalTextElement(line, element);
       if(line.style.isTextEmphaEnable()){
@@ -8904,6 +8905,13 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalInlineChild = function(line, child){
     return this.evalInline(child);
+  };
+
+  VertEvaluator.prototype.evalLink = function(line, link){
+    return Html.tagWrap("a", this.evalInline(link), {
+      "href":link.style.markup.getAttr("href"),
+      "class":link.classes.join(" ")
+    });
   };
 
   VertEvaluator.prototype.evalBlockImage = function(image){
@@ -9144,10 +9152,18 @@ var HoriEvaluator = (function(){
     });
   };
 
+  // notice that horizontal inline-child uses <span> wrapping(except for <a>).
   HoriEvaluator.prototype.evalInlineChild = function(line, child){
     return Html.tagWrap("span", this.evalInlineElements(child, child.elements), {
       "style":Css.toString(child.getCssInline()),
       "class":line.classes.join(" ")
+    });
+  };
+
+  HoriEvaluator.prototype.evalLink = function(line, link){
+    return Html.tagWrap("a", this.evalInlineElements(link, link.elements), {
+      "href":link.style.markup.getAttr("href"),
+      "class":link.classes.join(" ")
     });
   };
 
