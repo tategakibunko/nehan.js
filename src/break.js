@@ -1,9 +1,9 @@
-var LogicalBreak = (function(){
-  function LogicalBreak(value){
+var Break = (function(){
+  function Break(value){
     this.value = value;
   }
 
-  LogicalBreak.prototype = {
+  Break.prototype = {
     isAlways : function(){
     },
     isAvoid : function(){
@@ -14,6 +14,6 @@ var LogicalBreak = (function(){
     }
   };
 
-  return LogicalBreak;
+  return Break;
 })();
 

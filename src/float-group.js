@@ -1,7 +1,7 @@
 var FloatGroup = (function(){
-  function FloatGroup(elements, logical_float){
+  function FloatGroup(elements, float_direction){
     this.elements = elements || [];
-    this.logicalFloat = logical_float || LogicalFloats.get("start");
+    this.floatDirection = float_direction || FloatDirections.get("start");
   }
 
   FloatGroup.prototype = {
@@ -10,10 +10,10 @@ var FloatGroup = (function(){
       this.elements.unshift(element); // keep original stack order
     },
     isFloatStart : function(){
-      return this.logicalFloat.isStart();
+      return this.floatDirection.isStart();
     },
     isFloatEnd : function(){
-      return this.logicalFloat.isEnd();
+      return this.floatDirection.isEnd();
     },
     getElements : function(){
       return this.isFloatStart()? this.elements : List.reverse(this.elements);

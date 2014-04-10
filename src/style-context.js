@@ -48,20 +48,19 @@ var StyleContext = (function(){
     if(list_style){
       this.listStyle = list_style;
     }
-    var logical_float = this._loadLogicalFloat(markup);
-    if(logical_float){
-      this.logicalFloat = logical_float;
+    // keyword 'float' is reserved in js, so we name this prop 'float direction' instead.
+    var float_direction = this._loadFloatDirection(markup);
+    if(float_direction){
+      this.floatDirection = float_direction;
     }
-    /* TODO
-    var logical_break_before = this._loadLogicalBreakBefore(markup);
-    if(logical_break_before){
-      this.logicalBreakBefore = logical_break;
+    var break_before = this._loadBreakBefore(markup);
+    if(break_before){
+      this.breakBefore = break_before;
     }
-    var logical_break_after = this._loadLogicalBreakAfter(markup);
-    if(logical_break_after){
-      this.logicalBreakAfter = logical_break_after;
-    }*/
-
+    var break_after = this._loadBreakAfter(markup);
+    if(break_after){
+      this.breakAfter = break_after;
+    }
     if(this.parent){
       this.parent._appendChild(this);
     }
@@ -165,6 +164,9 @@ var StyleContext = (function(){
 	if(this.isTextVertical()){
 	  this._alignVertBaselines(child_lines, max_font_size, max_extent);
 	}
+	if(this.textAlign && !this.textAlign.isStart()){
+	  this._setTextAlign(line, this.textAlign);
+	}
       }
       return line;
     },
@@ -199,10 +201,10 @@ var StyleContext = (function(){
       return this.markup.isHeaderTag();
     },
     isFloatStart : function(){
-      return this.logicalFloat && this.logicalFloat.isStart();
+      return this.floatDirection && this.floatDirection.isStart();
     },
     isFloatEnd : function(){
-      return this.logicalFloat && this.logicalFloat.isEnd();
+      return this.floatDirection && this.floatDirection.isEnd();
     },
     isFloated : function(){
       return this.isFloatStart() || this.isFloatEnd();
@@ -248,6 +250,9 @@ var StyleContext = (function(){
     },
     getFontFamily : function(){
       return this.font.family || this.flow.isTextVertical()? Layout.vertFontFamily : Layout.horiFontFamily;
+    },
+    getTextAlign : function(){
+      return this.textAlign || TextAligns.get("start");
     },
     getLetterSpacing : function(){
       return this.letterSpacing || 0;
@@ -481,8 +486,8 @@ var StyleContext = (function(){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
       css.display = "block";
-      if(this.logicalFloat){
-	Args.copy(css, this.logicalFloat.getCss(this.flow));
+      if(this.floatDirection){
+	Args.copy(css, this.floatDirection.getCss(this.flow));
       }
       css.overflow = "hidden"; // to avoid margin collapsing
       if(this.zIndex){
@@ -528,6 +533,24 @@ var StyleContext = (function(){
 	var font_center_offset = Math.floor((max_font_size - font_size) / 2);
 	return Math.max(ret, line.size.getExtent(flow) + font_center_offset);
       });
+    },
+    _setTextAlign : function(line, text_align){
+      var content_measure  = line.getContentMeasure(this.flow);
+      var space_measure = content_measure - line.inlineMeasure;
+      if(space_measure <= 0){
+	return;
+      }
+      var padding = new Padding();
+      if(text_align.isCenter()){
+	var start_offset = Math.floor(space_measure / 2);
+	line.size.setMeasure(this.flow, content_measure - start_offset);
+	padding.setStart(this.flow, start_offset);
+	Args.copy(line.css, padding.getCss());
+      } else if(text_align.isEnd()){
+	line.size.setMeasure(this.flow, line.inlineMeasure);
+	padding.setStart(this.flow, space_measure);
+	Args.copy(line.css, padding.getCss());
+      }
     },
     _alignVertBaselines : function(child_lines, max_font_size, max_extent){
       var flow = this.flow;
@@ -640,14 +663,18 @@ var StyleContext = (function(){
       return edge;
     },
     _loadLineRate : function(markup, parent){
-      var value = markup.getCssAttr("line-rate");
-      var parent_line_rate = parent? parent.lineRate : Layout.lineRate;
-      return (value === "inherit")? parent_line_rate : parseFloat(value);
+      var value = markup.getCssAttr("line-rate", "inherit");
+      if(value === "inherit" && parent && parent.lineRate){
+	return parent.lineRate;
+      }
+      return parseFloat(value || Layout.lineRate);
     },
     _loadTextAlign : function(markup, parent){
       var value = markup.getCssAttr("text-align", "inherit");
-      var parent_text_align = parent? parent.textAlign : "start";
-      return (value === "inherit")? parent_text_align : new TextAlign(value);
+      if(value === "inherit" && parent && parent.textAlign){
+	return parent.textAlign;
+      }
+      return TextAligns.get(value || "start");
     },
     _loadTextEmpha : function(markup, parent){
       var parent_color = parent? parent.getColor() : Layout.fontColor;
@@ -673,18 +700,20 @@ var StyleContext = (function(){
     _loadTextEmphaColor : function(markup, parent, color){
       return markup.getCssAttr("text-emphasis-color", color.getValue());
     },
-    _loadLogicalFloat : function(markup){
+    _loadFloatDirection : function(markup){
       var name = markup.getCssAttr("float", "none");
       if(name === "none"){
 	return null;
       }
-      return LogicalFloats.get(name);
+      return FloatDirections.get(name);
     },
-    _loadLogicalBreakBefore : function(markup){
-      return null; // TODO
+    _loadBreakBefore : function(markup){
+      var value = markup.getCssAttr("break-before");
+      return value? Breaks.get(value) : null;
     },
-    _loadLogicalBreakAfter : function(markup){
-      return null; // TODO
+    _loadBreakAfter : function(markup){
+      var value = markup.getCssAttr("break-after");
+      return value? Breaks.get(value) : null;
     },
     _loadListStyle : function(markup){
       var list_style_type = markup.getCssAttr("list-style-type", "none");

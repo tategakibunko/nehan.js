@@ -6297,12 +6297,12 @@ var Kerning = {
   }
 };
 
-var LogicalFloat = (function(){
-  function LogicalFloat(value){
+var FloatDirection = (function(){
+  function FloatDirection(value){
     this.value = value || "none";
   }
 
-  LogicalFloat.prototype = {
+  FloatDirection.prototype = {
     getCss : function(flow){
       var css = {};
       if(flow.isTextHorizontal()){
@@ -6325,26 +6325,25 @@ var LogicalFloat = (function(){
     }
   };
 
-  return LogicalFloat;
+  return FloatDirection;
 })();
 
 
-var LogicalFloats = {
-  start:(new LogicalFloat("start")),
-  end:(new LogicalFloat("end")),
-  none:(new LogicalFloat("none")),
+var FloatDirections = {
+  start:(new FloatDirection("start")),
+  end:(new FloatDirection("end")),
+  none:(new FloatDirection("none")),
   get : function(name){
-    name = name || "none";
-    return this[name];
+    return this[name] || null;
   }
 };
 
-var LogicalBreak = (function(){
-  function LogicalBreak(value){
+var Break = (function(){
+  function Break(value){
     this.value = value;
   }
 
-  LogicalBreak.prototype = {
+  Break.prototype = {
     isAlways : function(){
     },
     isAvoid : function(){
@@ -6355,22 +6354,22 @@ var LogicalBreak = (function(){
     }
   };
 
-  return LogicalBreak;
+  return Break;
 })();
 
 
-var LogicalBreaks = {
+var Breaks = {
   before:{
-    always:(new LogicalBreak("always")),
-    avoid:(new LogicalBreak("avoid")),
-    first:(new LogicalBreak("first")), // correspond to break-before:"left"
-    second:(new LogicalBreak("second")) // correspond to break-before:"right"
+    always:(new Break("always")),
+    avoid:(new Break("avoid")),
+    first:(new Break("first")), // correspond to break-before:"left"
+    second:(new Break("second")) // correspond to break-before:"right"
   },
   after:{
-    always:(new LogicalBreak("always")),
-    avoid:(new LogicalBreak("avoid")),
-    first:(new LogicalBreak("first")), // correspond to break-before:"left"
-    second:(new LogicalBreak("second")) // correspond to break-before:"right"
+    always:(new Break("always")),
+    avoid:(new Break("avoid")),
+    first:(new Break("first")), // correspond to break-before:"left"
+    second:(new Break("second")) // correspond to break-before:"right"
   },
   getBefore : function(value){
     return this.before[value] || null;
@@ -6407,6 +6406,15 @@ var TextAlign = (function(){
   return TextAlign;
 })();
 
+
+var TextAligns = {
+  start:(new TextAlign("start")),
+  end:(new TextAlign("end")),
+  center:(new TextAlign("center")),
+  get : function(value){
+    return this[value] || null;
+  }
+};
 
 var StyleContext = (function(){
 
@@ -6458,20 +6466,19 @@ var StyleContext = (function(){
     if(list_style){
       this.listStyle = list_style;
     }
-    var logical_float = this._loadLogicalFloat(markup);
-    if(logical_float){
-      this.logicalFloat = logical_float;
+    // keyword 'float' is reserved in js, so we name this prop 'float direction' instead.
+    var float_direction = this._loadFloatDirection(markup);
+    if(float_direction){
+      this.floatDirection = float_direction;
     }
-    /* TODO
-    var logical_break_before = this._loadLogicalBreakBefore(markup);
-    if(logical_break_before){
-      this.logicalBreakBefore = logical_break;
+    var break_before = this._loadBreakBefore(markup);
+    if(break_before){
+      this.breakBefore = break_before;
     }
-    var logical_break_after = this._loadLogicalBreakAfter(markup);
-    if(logical_break_after){
-      this.logicalBreakAfter = logical_break_after;
-    }*/
-
+    var break_after = this._loadBreakAfter(markup);
+    if(break_after){
+      this.breakAfter = break_after;
+    }
     if(this.parent){
       this.parent._appendChild(this);
     }
@@ -6575,6 +6582,9 @@ var StyleContext = (function(){
 	if(this.isTextVertical()){
 	  this._alignVertBaselines(child_lines, max_font_size, max_extent);
 	}
+	if(this.textAlign && !this.textAlign.isStart()){
+	  this._setTextAlign(line, this.textAlign);
+	}
       }
       return line;
     },
@@ -6609,10 +6619,10 @@ var StyleContext = (function(){
       return this.markup.isHeaderTag();
     },
     isFloatStart : function(){
-      return this.logicalFloat && this.logicalFloat.isStart();
+      return this.floatDirection && this.floatDirection.isStart();
     },
     isFloatEnd : function(){
-      return this.logicalFloat && this.logicalFloat.isEnd();
+      return this.floatDirection && this.floatDirection.isEnd();
     },
     isFloated : function(){
       return this.isFloatStart() || this.isFloatEnd();
@@ -6658,6 +6668,9 @@ var StyleContext = (function(){
     },
     getFontFamily : function(){
       return this.font.family || this.flow.isTextVertical()? Layout.vertFontFamily : Layout.horiFontFamily;
+    },
+    getTextAlign : function(){
+      return this.textAlign || TextAligns.get("start");
     },
     getLetterSpacing : function(){
       return this.letterSpacing || 0;
@@ -6891,8 +6904,8 @@ var StyleContext = (function(){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
       css.display = "block";
-      if(this.logicalFloat){
-	Args.copy(css, this.logicalFloat.getCss(this.flow));
+      if(this.floatDirection){
+	Args.copy(css, this.floatDirection.getCss(this.flow));
       }
       css.overflow = "hidden"; // to avoid margin collapsing
       if(this.zIndex){
@@ -6938,6 +6951,24 @@ var StyleContext = (function(){
 	var font_center_offset = Math.floor((max_font_size - font_size) / 2);
 	return Math.max(ret, line.size.getExtent(flow) + font_center_offset);
       });
+    },
+    _setTextAlign : function(line, text_align){
+      var content_measure  = line.getContentMeasure(this.flow);
+      var space_measure = content_measure - line.inlineMeasure;
+      if(space_measure <= 0){
+	return;
+      }
+      var padding = new Padding();
+      if(text_align.isCenter()){
+	var start_offset = Math.floor(space_measure / 2);
+	line.size.setMeasure(this.flow, content_measure - start_offset);
+	padding.setStart(this.flow, start_offset);
+	Args.copy(line.css, padding.getCss());
+      } else if(text_align.isEnd()){
+	line.size.setMeasure(this.flow, line.inlineMeasure);
+	padding.setStart(this.flow, space_measure);
+	Args.copy(line.css, padding.getCss());
+      }
     },
     _alignVertBaselines : function(child_lines, max_font_size, max_extent){
       var flow = this.flow;
@@ -7050,14 +7081,18 @@ var StyleContext = (function(){
       return edge;
     },
     _loadLineRate : function(markup, parent){
-      var value = markup.getCssAttr("line-rate");
-      var parent_line_rate = parent? parent.lineRate : Layout.lineRate;
-      return (value === "inherit")? parent_line_rate : parseFloat(value);
+      var value = markup.getCssAttr("line-rate", "inherit");
+      if(value === "inherit" && parent && parent.lineRate){
+	return parent.lineRate;
+      }
+      return parseFloat(value || Layout.lineRate);
     },
     _loadTextAlign : function(markup, parent){
       var value = markup.getCssAttr("text-align", "inherit");
-      var parent_text_align = parent? parent.textAlign : "start";
-      return (value === "inherit")? parent_text_align : new TextAlign(value);
+      if(value === "inherit" && parent && parent.textAlign){
+	return parent.textAlign;
+      }
+      return TextAligns.get(value || "start");
     },
     _loadTextEmpha : function(markup, parent){
       var parent_color = parent? parent.getColor() : Layout.fontColor;
@@ -7083,18 +7118,20 @@ var StyleContext = (function(){
     _loadTextEmphaColor : function(markup, parent, color){
       return markup.getCssAttr("text-emphasis-color", color.getValue());
     },
-    _loadLogicalFloat : function(markup){
+    _loadFloatDirection : function(markup){
       var name = markup.getCssAttr("float", "none");
       if(name === "none"){
 	return null;
       }
-      return LogicalFloats.get(name);
+      return FloatDirections.get(name);
     },
-    _loadLogicalBreakBefore : function(markup){
-      return null; // TODO
+    _loadBreakBefore : function(markup){
+      var value = markup.getCssAttr("break-before");
+      return value? Breaks.get(value) : null;
     },
-    _loadLogicalBreakAfter : function(markup){
-      return null; // TODO
+    _loadBreakAfter : function(markup){
+      var value = markup.getCssAttr("break-after");
+      return value? Breaks.get(value) : null;
     },
     _loadListStyle : function(markup){
       var list_style_type = markup.getCssAttr("list-style-type", "none");
@@ -7932,9 +7969,9 @@ var LazyBlockGenerator = (function(){
 })();
 
 var FloatGroup = (function(){
-  function FloatGroup(elements, logical_float){
+  function FloatGroup(elements, float_direction){
     this.elements = elements || [];
-    this.logicalFloat = logical_float || LogicalFloats.get("start");
+    this.floatDirection = float_direction || FloatDirections.get("start");
   }
 
   FloatGroup.prototype = {
@@ -7943,10 +7980,10 @@ var FloatGroup = (function(){
       this.elements.unshift(element); // keep original stack order
     },
     isFloatStart : function(){
-      return this.logicalFloat.isStart();
+      return this.floatDirection.isStart();
     },
     isFloatEnd : function(){
-      return this.logicalFloat.isEnd();
+      return this.floatDirection.isEnd();
     },
     getElements : function(){
       return this.isFloatStart()? this.elements : List.reverse(this.elements);
@@ -7971,13 +8008,13 @@ var FloatGroup = (function(){
 var FloatGroupStack = (function(){
 
   // [float block] -> FloatGroup
-  var pop_float_group = function(flow, logical_float, blocks){
+  var pop_float_group = function(flow, float_direction, blocks){
     var head = blocks.pop() || null;
     if(head === null){
       return null;
     }
     var extent = head.getBoxExtent(flow);
-    var group = new FloatGroup([head], logical_float);
+    var group = new FloatGroup([head], float_direction);
 
     // group while previous floated-element has smaller extent than the head
     while(true){
@@ -7993,10 +8030,10 @@ var FloatGroupStack = (function(){
   };
 
   // [float block] -> [FloatGroup]
-  var make_float_groups = function(flow, logical_float, blocks){
+  var make_float_groups = function(flow, float_direction, blocks){
     var ret = [];
     do{
-      var group = pop_float_group(flow, logical_float, blocks);
+      var group = pop_float_group(flow, float_direction, blocks);
       if(group){
 	ret.push(group);
       }
@@ -8005,8 +8042,8 @@ var FloatGroupStack = (function(){
   };
 
   function FloatGroupStack(flow, start_blocks, end_blocks){
-    var start_groups = make_float_groups(flow, LogicalFloats.get("start"), start_blocks);
-    var end_groups = make_float_groups(flow, LogicalFloats.get("end"), end_blocks);
+    var start_groups = make_float_groups(flow, FloatDirections.get("start"), start_blocks);
+    var end_groups = make_float_groups(flow, FloatDirections.get("end"), end_blocks);
     this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
       return g1.getExtent(flow) - g2.getExtent(flow);
     });

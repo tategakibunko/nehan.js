@@ -1,9 +1,9 @@
-var LogicalFloat = (function(){
-  function LogicalFloat(value){
+var FloatDirection = (function(){
+  function FloatDirection(value){
     this.value = value || "none";
   }
 
-  LogicalFloat.prototype = {
+  FloatDirection.prototype = {
     getCss : function(flow){
       var css = {};
       if(flow.isTextHorizontal()){
@@ -26,6 +26,6 @@ var LogicalFloat = (function(){
     }
   };
 
-  return LogicalFloat;
+  return FloatDirection;
 })();
 
