@@ -37,7 +37,7 @@ var Selector = (function(){
       return this.spec;
     },
     test : function(style){
-      return SelectorStateMachine.accept(this.parts, style);
+      return SelectorStateMachine.accept(style, this.parts);
     },
     hasPseudoElement : function(){
       return this.key.indexOf("::") >= 0;

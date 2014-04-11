@@ -348,65 +348,8 @@ var StyleContext = (function(){
     getParentChilds : function(){
       return this.parent? this.parent.childs : [];
     },
-    getNext : function(){
+    getNextSibling : function(){
       return null; // TODO
-    },
-    findChildIndex : function(style){
-      return List.indexOf(this.childs, function(child){
-	return child === style;
-      });
-    },
-    findChildsOfType : function(style){
-      var name = style.getMarkupName();
-      return List.filter(this.childs, function(child){
-	return child.getMarkupName() === name;
-      });
-    },
-    findChildIndexOfType : function(style){
-      return List.indexOf(this.findChildsOfType(style), function(child){
-	return child === style;
-      });
-    },
-    findParent : function(parent_type){
-      var ptr = this.parent;
-      while(ptr !== null){
-	if(parent_type.test(ptr)){
-	  return ptr;
-	}
-	ptr = ptr.parent;
-      }
-      return null;
-    },
-    findDirectParent : function(parent_type){
-      var ptr = this.parent;
-      if(ptr === null){
-	return null;
-      }
-      return parent_type.test(ptr)? ptr : null;
-    },
-    // selector 'f1 + f2'
-    findAdjSibling : function(f1, f2){
-      return List.find(this.getParentChilds(), function(child){
-	var next = child.getNext();
-	return next && f1.test(child) && f2.test(next);
-      });
-    },
-    // selector 'f1 ~ f2'
-    findGenSibling : function(f1, f2){
-      var sibling = List.find(this.getParentChilds(), function(child){
-	return f1.test(child);
-      });
-      if(sibling === null){
-	return null;
-      }
-      var ptr = sibling.getNext();
-      while(ptr !== null){
-	if(f2.test(ptr)){
-	  return sibling;
-	}
-	ptr = ptr.getNext();
-      }
-      return null;
     },
     getOuterSize : function(){
       var measure = this.getOuterMeasure();
@@ -570,6 +513,22 @@ var StyleContext = (function(){
 	css["z-index"] = this.zIndex;
       }
       return css;
+    },
+    findChildIndex : function(style){
+      return List.indexOf(this.childs, function(child){
+	return child === style;
+      });
+    },
+    findChildsOfType : function(style){
+      var name = style.getMarkupName();
+      return List.filter(this.childs, function(child){
+	return child.getMarkupName() === name;
+      });
+    },
+    findChildIndexOfType : function(style){
+      return List.indexOf(this.findChildsOfType(style), function(child){
+	return child === style;
+      });
     },
     _initMarkupSelector : function(markup, parent_style){
       if(parent_style){
