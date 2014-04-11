@@ -6863,14 +6863,16 @@ var StyleContext = (function(){
       if(this.background){
 	Args.copy(css, this.background.getCss());
       }
+      // edge of top level line is disabled.
+      // for example, if line is aaa<span>bbb</span>ccc,
+      // parent of 'bbb' is <span>, so it can be edged, but 'aaa' and 'ccc' not,
+      // because it's wrapped by 'anonymous block'.
       if(this.edge && !this.isRootLine()){
 	Args.copy(css, this.edge.getCss());
       }
       // top level line need to follow parent blockflow.
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
-      } else {
-	css["text-align"] = "left";
       }
       if(this.flow.isTextVertical()){
 	if(Env.isIphoneFamily){
