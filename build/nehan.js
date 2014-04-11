@@ -255,8 +255,7 @@ var Style = {
     "section-root":true
   },
   "br":{
-    "display":"inline",
-    "single":true
+    "display":"inline"
   },
   "button":{
     "display":"inline",
@@ -444,7 +443,6 @@ var Style = {
     "box-sizing":"content-box",
     "border-color":"#b8b8b8",
     "border-style":"solid",
-    "single":true,
     "margin":{
       "after":"1em"
     },
@@ -477,13 +475,11 @@ var Style = {
   },
   "img":{
     "display":"inline",
-    "box-sizing":"content-box",
-    "single":true
+    "box-sizing":"content-box"
   },
   "input":{
     "display":"inline",
-    "interactive":true,
-    "single":true
+    "interactive":true
   },
   //-------------------------------------------------------
   // tag / k
@@ -517,8 +513,7 @@ var Style = {
     "display":"block"
   },
   "link":{
-    "meta":true,
-    "single":true
+    "meta":true
   },
   //-------------------------------------------------------
   // tag / m
@@ -535,8 +530,7 @@ var Style = {
     "display":"block"
   },
   "meta":{
-    "meta":true,
-    "single":true
+    "meta":true
   },
   "meter":{
     "display":"inline"
@@ -818,17 +812,14 @@ var Style = {
   // tag / w
   //-------------------------------------------------------
   "wbr":{
-    "display":"inline",
-    "single":true
+    "display":"inline"
   },
   //-------------------------------------------------------
   // tag / others
   //-------------------------------------------------------
   "?xml":{
-    "single":true
   },
   "!doctype":{
-    "single":true
   },
   "first-line":{
     //"display":"block !important" // TODO
@@ -838,16 +829,13 @@ var Style = {
   // defined to keep compatibility of older nehan.js document,
   // and must be defined as logical-break-before, logical-break-after props in the future.
   "page-break":{
-    "display":"block",
-    "single":true
+    "display":"block"
   },
   "pbr":{
-    "display":"block",
-    "single":true
+    "display":"block"
   },
   "end-page":{
-    "display":"block",
-    "single":true
+    "display":"block"
   },
   //-------------------------------------------------------
   // rounded corner
@@ -2475,7 +2463,7 @@ var Tag = (function (){
     this.classes = this._parseClasses(this.tagAttr["class"] || "");
     this.dataset = {}; // dataset with no "data-" prefixes => {id:"10", name:"taro"} 
     this.datasetRaw = {}; // dataset with "data-" prefixes => {"data-id":"10", "data-name":"taro"}
-    this.cssAttrStatic = this._getSelectorValue(); // initialize css-attr, but updated when 'inherit'.
+    this.cssAttrStatic = {}; // updated when 'inherit' called from StyleContext constructor.
     this.cssAttrDynamic = {}; // added by setCssAttr
 
     // initialize inline-style value
@@ -2487,7 +2475,7 @@ var Tag = (function (){
 
   Tag.prototype = {
     inherit : function(parent){
-      if(this._inherited || !this.hasLayout()){
+      if(this._inherited){
 	return this; // avoid duplicate initialize
       }
       this.parent = parent;
@@ -2585,7 +2573,7 @@ var Tag = (function (){
       return this.src;
     },
     getWrapSrc : function(){
-      if(this.isSingleTag()){
+      if(this.contentRaw === ""){
 	return this.src;
       }
       return this.src + this.contentRaw + "</" + this.name + ">";
@@ -2599,10 +2587,6 @@ var Tag = (function (){
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
     },
-    hasLayout : function(){
-      var name = this.getName();
-      return (name != "br" && name != "page-break" && name != "end-page");
-    },
     isPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
@@ -2612,9 +2596,6 @@ var Tag = (function (){
     isAnchorLinkTag : function(){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
-    },
-    isSingleTag : function(){
-      return this.getCssAttr("single") === true;
     },
     isTcyTag : function(){
       return this.getCssAttr("text-combine", "") === "horizontal";
@@ -5077,6 +5058,20 @@ var HtmlLexer = (function (){
   var rex_word = /^([\w!\.\?\/\_:#;"',]+)/;
   var rex_tag = /^(<[^>]+>)/;
   var rex_char_ref = /^(&[^;\s]+;)/;
+  var single_tags = [
+    "?xml",
+    "!doctype",
+    "br",
+    "end-page",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "pbr",
+    "page-break",
+    "wbr"
+  ];
 
   function HtmlLexer(src){
     this.pos = 0;
@@ -5184,10 +5179,10 @@ var HtmlLexer = (function (){
       if(tag.isTcyTag()){
 	return this._parseTcyTag(tag);
       }
-      if(!tag.isSingleTag()){
-	return this._parseChildContentTag(tag);
+      if(List.exists(single_tags, Closure.eq(tag.getName()))){
+	return tag;
       }
-      return tag;
+      return this._parseChildContentTag(tag);
     },
     _parseTcyTag : function(tag){
       var content = this._getTagContent(tag.name);

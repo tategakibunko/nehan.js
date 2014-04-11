@@ -18,7 +18,7 @@ var Tag = (function (){
     this.classes = this._parseClasses(this.tagAttr["class"] || "");
     this.dataset = {}; // dataset with no "data-" prefixes => {id:"10", name:"taro"} 
     this.datasetRaw = {}; // dataset with "data-" prefixes => {"data-id":"10", "data-name":"taro"}
-    this.cssAttrStatic = this._getSelectorValue(); // initialize css-attr, but updated when 'inherit'.
+    this.cssAttrStatic = {}; // updated when 'inherit' called from StyleContext constructor.
     this.cssAttrDynamic = {}; // added by setCssAttr
 
     // initialize inline-style value
@@ -30,7 +30,7 @@ var Tag = (function (){
 
   Tag.prototype = {
     inherit : function(parent){
-      if(this._inherited || !this.hasLayout()){
+      if(this._inherited){
 	return this; // avoid duplicate initialize
       }
       this.parent = parent;
@@ -128,7 +128,7 @@ var Tag = (function (){
       return this.src;
     },
     getWrapSrc : function(){
-      if(this.isSingleTag()){
+      if(this.contentRaw === ""){
 	return this.src;
       }
       return this.src + this.contentRaw + "</" + this.name + ">";
@@ -142,10 +142,6 @@ var Tag = (function (){
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
     },
-    hasLayout : function(){
-      var name = this.getName();
-      return (name != "br" && name != "page-break" && name != "end-page");
-    },
     isPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
@@ -155,9 +151,6 @@ var Tag = (function (){
     isAnchorLinkTag : function(){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
-    },
-    isSingleTag : function(){
-      return this.getCssAttr("single") === true;
     },
     isTcyTag : function(){
       return this.getCssAttr("text-combine", "") === "horizontal";

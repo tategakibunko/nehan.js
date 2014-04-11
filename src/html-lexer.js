@@ -3,6 +3,20 @@ var HtmlLexer = (function (){
   var rex_word = /^([\w!\.\?\/\_:#;"',]+)/;
   var rex_tag = /^(<[^>]+>)/;
   var rex_char_ref = /^(&[^;\s]+;)/;
+  var single_tags = [
+    "?xml",
+    "!doctype",
+    "br",
+    "end-page",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "pbr",
+    "page-break",
+    "wbr"
+  ];
 
   function HtmlLexer(src){
     this.pos = 0;
@@ -110,10 +124,10 @@ var HtmlLexer = (function (){
       if(tag.isTcyTag()){
 	return this._parseTcyTag(tag);
       }
-      if(!tag.isSingleTag()){
-	return this._parseChildContentTag(tag);
+      if(List.exists(single_tags, Closure.eq(tag.getName()))){
+	return tag;
       }
-      return tag;
+      return this._parseChildContentTag(tag);
     },
     _parseTcyTag : function(tag){
       var content = this._getTagContent(tag.name);

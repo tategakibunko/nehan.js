@@ -71,8 +71,7 @@ var Style = {
     "section-root":true
   },
   "br":{
-    "display":"inline",
-    "single":true
+    "display":"inline"
   },
   "button":{
     "display":"inline",
@@ -260,7 +259,6 @@ var Style = {
     "box-sizing":"content-box",
     "border-color":"#b8b8b8",
     "border-style":"solid",
-    "single":true,
     "margin":{
       "after":"1em"
     },
@@ -293,13 +291,11 @@ var Style = {
   },
   "img":{
     "display":"inline",
-    "box-sizing":"content-box",
-    "single":true
+    "box-sizing":"content-box"
   },
   "input":{
     "display":"inline",
-    "interactive":true,
-    "single":true
+    "interactive":true
   },
   //-------------------------------------------------------
   // tag / k
@@ -333,8 +329,7 @@ var Style = {
     "display":"block"
   },
   "link":{
-    "meta":true,
-    "single":true
+    "meta":true
   },
   //-------------------------------------------------------
   // tag / m
@@ -351,8 +346,7 @@ var Style = {
     "display":"block"
   },
   "meta":{
-    "meta":true,
-    "single":true
+    "meta":true
   },
   "meter":{
     "display":"inline"
@@ -634,17 +628,14 @@ var Style = {
   // tag / w
   //-------------------------------------------------------
   "wbr":{
-    "display":"inline",
-    "single":true
+    "display":"inline"
   },
   //-------------------------------------------------------
   // tag / others
   //-------------------------------------------------------
   "?xml":{
-    "single":true
   },
   "!doctype":{
-    "single":true
   },
   "first-line":{
     //"display":"block !important" // TODO
@@ -654,16 +645,13 @@ var Style = {
   // defined to keep compatibility of older nehan.js document,
   // and must be defined as logical-break-before, logical-break-after props in the future.
   "page-break":{
-    "display":"block",
-    "single":true
+    "display":"block"
   },
   "pbr":{
-    "display":"block",
-    "single":true
+    "display":"block"
   },
   "end-page":{
-    "display":"block",
-    "single":true
+    "display":"block"
   },
   //-------------------------------------------------------
   // rounded corner
