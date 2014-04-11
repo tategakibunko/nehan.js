@@ -1,6 +1,6 @@
 var RubyTokenStream = (function(){
   function RubyTokenStream(markup_ruby){
-    TokenStream.call(this, markup_ruby.getContent());
+    TokenStream.call(this, markup_ruby.getContentRaw());
     this.getAll();
     this.tokens = this._parse(markup_ruby);
     this.rewind();

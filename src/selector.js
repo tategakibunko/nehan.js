@@ -1,9 +1,10 @@
+// Selector = TypeSelector | TypeSelector + combinator + Selector
 var Selector = (function(){
   function Selector(key, value){
-    this.key = this._normalizeKey(key);
-    this.value = this._formatValue(value);
-    this.tokens = this._getSelectorTokens(this.key);
-    this.spec = this._countSpec(this.tokens);
+    this.key = this._normalizeKey(key); // selector source like 'h1 > p'
+    this.value = this._formatValue(value); // associated css value object like {font-size:16px}
+    this.parts = this._getSelectorParts(this.key); // [type-selector | combinator]
+    this.spec = this._countSpec(this.parts); // specificity
   }
 
   var set_format_value = function(ret, prop, format_value){
@@ -35,21 +36,21 @@ var Selector = (function(){
     getSpec : function(){
       return this.spec;
     },
-    test : function(markup){
-      return SelectorStateMachine.accept(this.tokens, markup);
+    test : function(style){
+      return SelectorStateMachine.accept(this.parts, style);
     },
-    isPseudoElement : function(){
+    hasPseudoElement : function(){
       return this.key.indexOf("::") >= 0;
     },
-    hasPseudoElement : function(element_name){
+    hasPseudoElementName : function(element_name){
       return this.key.indexOf("::" + element_name) >= 0;
     },
     // count selector 'specificity'
     // see http://www.w3.org/TR/css3-selectors/#specificity
-    _countSpec : function(tokens){
+    _countSpec : function(parts){
       var a = 0, b = 0, c = 0;
-      List.iter(tokens, function(token){
-	if(token instanceof SelectorType){
+      List.iter(parts, function(token){
+	if(token instanceof TypeSelector){
 	  a += token.getIdSpec();
 	  b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();
 	  c += token.getTypeSpec();
@@ -57,7 +58,7 @@ var Selector = (function(){
       });
       return parseInt([a,b,c].join(""), 10); // maybe ok in most case.
     },
-    _getSelectorTokens : function(key){
+    _getSelectorParts : function(key){
       var lexer = new SelectorLexer(key);
       return lexer.getTokens();
     },

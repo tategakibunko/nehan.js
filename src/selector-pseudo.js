@@ -4,29 +4,29 @@ var SelectorPseudo = (function(){
   }
 
   SelectorPseudo.prototype = {
-    isPseudoElement : function(){
+    hasPseudoElement : function(){
       return (this.name === "before" ||
 	      this.name === "after" ||
 	      this.name === "first-letter" ||
 	      this.name === "first-line");
     },
-    test : function(markup){
+    test : function(style){
       switch(this.name){
       // pseudo-element
       case "before": return true;
       case "after": return true;
-      case "first-letter": return !markup.isEmpty();
-      case "first-line": return !markup.isEmpty();
+      case "first-letter": return !style.isEmpty();
+      case "first-line": return !style.isEmpty();
 
       // pseudo-class
-      case "first-child": return markup.isFirstChild();
-      case "last-child": return markup.isLastChild();
-      case "first-of-type": return markup.isFirstOfType();
-      case "last-of-type": return markup.isLastOfType();
-      case "only-child": return markup.isOnlyChild();
-      case "only-of-type": return markup.isOnlyOfType();
-      case "empty": return markup.isEmpty();
-      case "root": return markup.isRoot();
+      case "first-child": return style.isFirstChild();
+      case "last-child": return style.isLastChild();
+      case "first-of-type": return style.isFirstOfType();
+      case "last-of-type": return style.isLastOfType();
+      case "only-child": return style.isOnlyChild();
+      case "only-of-type": return style.isOnlyOfType();
+      case "empty": return style.isEmpty();
+      case "root": return style.isRoot();
       }
       return false;
     },

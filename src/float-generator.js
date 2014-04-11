@@ -165,7 +165,7 @@ var FloatGenerator = (function(){
     if(style.getMarkupName() === "img"){
       return new LazyBlockGenerator(style, style.createImage());
     }
-    return new BlockGenerator(style, this._createStream(tag), this.outlineContext);
+    return new BlockGenerator(style, this._createStream(style, tag), this.outlineContext);
   };
 
   return FloatGenerator;

@@ -112,7 +112,7 @@ var InlineGenerator = (function(){
       return null;
 
     default:
-      this.setChildLayout(new InlineGenerator(style, this._createStream(token)));
+      this.setChildLayout(new InlineGenerator(style, this._createStream(style, token)));
       return this.yieldChildLayout(context);
     }
   };

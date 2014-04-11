@@ -19,7 +19,7 @@ var Ruby = (function(){
       return this.rbs;
     },
     getRtString : function(){
-      return this.rt? this.rt.getContent() : "";
+      return this.rt? this.rt.getContentRaw() : "";
     },
     getRtFontSize : function(){
       return this.rtFontSize;

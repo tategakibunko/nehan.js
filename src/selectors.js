@@ -1,7 +1,9 @@
 var Selectors = (function(){
-  var selectors = [];
-  var selectors_pe = [];
+  var selectors = []; // selector list ordered by specificity desc.
+  var selectors_pe = []; // selector (with pseudo-element) list, ordered by specificity desc.
 
+  // sort selectors by specificity asc.
+  // so higher specificity overwrites lower one.
   var sort_selectors = function(){
     selectors.sort(function(s1,s2){ return s1.spec - s2.spec; });
   };
@@ -11,8 +13,8 @@ var Selectors = (function(){
   };
 
   var update_value = function(selector_key, value){
-    var style_value = Style[selector_key];
-    Args.copy(style_value, value);
+    var style_value = Style[selector_key]; // old style value
+    Args.copy(style_value, value); // overwrite new value to old
     var selector = List.find(selectors.concat(selectors_pe), function(selector){
       return selector.getKey() === selector_key;
     });
@@ -23,26 +25,28 @@ var Selectors = (function(){
 
   var insert_value = function(selector_key, value){
     var selector = new Selector(selector_key, value);
-    if(selector.isPseudoElement()){
+    if(selector.hasPseudoElement()){
       selectors_pe.push(selector);
     } else {
       selectors.push(selector);
     }
+    // to speed up 'init_selectors' function, we did not sort immediatelly after inserting value.
+    // we sort entries after all selector_key and value are registered.
     return selector;
   };
   
-  var get_value = function(markup){
+  var get_value = function(style){
     return List.fold(selectors, {}, function(ret, selector){
-      if(!selector.isPseudoElement() && selector.test(markup)){
+      if(!selector.hasPseudoElement() && selector.test(style)){
 	return Args.copy(ret, selector.getValue());
       }
       return ret;
     });
   };
 
-  var get_value_pe = function(markup, pseudo_element){
+  var get_value_pe = function(parent_style, pseudo_element_name){
     return List.fold(selectors_pe, {}, function(ret, selector){
-      if(selector.hasPseudoElement(pseudo_element) && selector.test(markup)){
+      if(selector.hasPseudoElementName(pseudo_element_name) && selector.test(parent_style || null)){
 	return Args.copy(ret, selector.getValue());
       }
       return ret;
@@ -62,24 +66,29 @@ var Selectors = (function(){
 
   return {
     setValue : function(selector_key, value){
+      // if selector_key already defined, just overwrite it.
       if(Style[selector_key]){
 	update_value(selector_key, value);
 	return;
       }
+      insert_value(selector_key, value);
+
       var selector = insert_value(selector_key, value);
+
+      // notice that 'sort_selectors'(or 'sort_selectors_pe') is not called in 'insert_value'.
       Style[selector_key] = selector.getValue();
-      if(selector.isPseudoElement()){
+      if(selector.hasPseudoElement()){
 	sort_selectors_pe();
-	return;
+      } else {
+	sort_selectors();
       }
-      sort_selectors();
     },
-    // pseudo_element: "first-letter", "first-line", "before", "after"
-    getValuePe : function(markup, pseudo_element){
-      return get_value_pe(markup, pseudo_element);
+    // pseudo_element_name: "first-letter", "first-line", "before", "after"
+    getValuePe : function(parent_style, pseudo_element_name){
+      return get_value_pe(parent_style, pseudo_element_name);
     },
-    getValue : function(markup){
-      return get_value(markup);
+    getValue : function(style){
+      return get_value(style);
     }
   };
 })();

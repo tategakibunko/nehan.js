@@ -2,12 +2,13 @@ var StyleContext = (function(){
 
   // parent : parent style context
   function StyleContext(markup, parent){
-    this.markup = this._inheritMarkup(markup, parent);
-    this.parent = parent;
+    this.markup = markup;
+    this.parent = parent || null;
+    this._initMarkupSelector(markup, parent);
     this.display = this._loadDisplay(markup); // required
     this.flow = this._loadFlow(markup, parent); // required
     this.boxSizing = this._loadBoxSizing(markup); // required
-    this.childs = []; // children for this style, updated by _appendChild
+    this.childs = []; // children for this style, updated by appendChild
     var color = this._loadColor(markup, parent);
     if(color){
       this.color = color;
@@ -65,9 +66,6 @@ var StyleContext = (function(){
     if(break_after){
       this.breakAfter = break_after;
     }
-    if(this.parent){
-      this.parent._appendChild(this);
-    }
   }
 
   StyleContext.prototype = {
@@ -79,6 +77,10 @@ var StyleContext = (function(){
       var tag = this.markup.clone();
       tag.setCssAttrs(css || {}); // set dynamic styles
       return new StyleContext(tag, this.parent || null);
+    },
+    // append child style context
+    appendChild : function(child_style){
+      this.childs.push(child_style);
     },
     // inherit style with tag_name and css(optional).
     createChild : function(tag_name, css){
@@ -234,11 +236,32 @@ var StyleContext = (function(){
     isFirstChild : function(){
       return this.parent? this.parent.getNthChild(0) === this : false;
     },
+    isLastChild : function(){
+      return false; // TODO
+    },
+    isFirstOfType : function(){
+      return false; // TODO
+    },
+    isLastOfType : function(){
+      return false; // TODO
+    },
+    isOnlyChild : function(){
+      return false; // TODO
+    },
+    isOnlyOfType : function(){
+      return false; // TODO
+    },
+    isEmpty : function(){
+      return false; // TODO
+    },
+    hasMarkupClassName : function(class_name){
+      return this.markup.hasClass(class_name);
+    },
     getMarkupName : function(){
       return this.markup.getName();
     },
     getMarkupContent : function(){
-      return this.markup.getContent();
+      return this.markup.getContent(this);
     },
     getMarkupPos : function(){
       return this.markup.pos;
@@ -322,6 +345,12 @@ var StyleContext = (function(){
     getNthChild : function(nth){
       return this.childs[nth] || null;
     },
+    getParentChilds : function(){
+      return this.parent? this.parent.childs : [];
+    },
+    getNext : function(){
+      return null; // TODO
+    },
     findChildIndex : function(style){
       return List.indexOf(this.childs, function(child){
 	return child === style;
@@ -337,6 +366,47 @@ var StyleContext = (function(){
       return List.indexOf(this.findChildsOfType(style), function(child){
 	return child === style;
       });
+    },
+    findParent : function(parent_type){
+      var ptr = this.parent;
+      while(ptr !== null){
+	if(parent_type.test(ptr)){
+	  return ptr;
+	}
+	ptr = ptr.parent;
+      }
+      return null;
+    },
+    findDirectParent : function(parent_type){
+      var ptr = this.parent;
+      if(ptr === null){
+	return null;
+      }
+      return parent_type.test(ptr)? ptr : null;
+    },
+    // selector 'f1 + f2'
+    findAdjSibling : function(f1, f2){
+      return List.find(this.getParentChilds(), function(child){
+	var next = child.getNext();
+	return next && f1.test(child) && f2.test(next);
+      });
+    },
+    // selector 'f1 ~ f2'
+    findGenSibling : function(f1, f2){
+      var sibling = List.find(this.getParentChilds(), function(child){
+	return f1.test(child);
+      });
+      if(sibling === null){
+	return null;
+      }
+      var ptr = sibling.getNext();
+      while(ptr !== null){
+	if(f2.test(ptr)){
+	  return sibling;
+	}
+	ptr = ptr.getNext();
+      }
+      return null;
     },
     getOuterSize : function(){
       var measure = this.getOuterMeasure();
@@ -501,10 +571,11 @@ var StyleContext = (function(){
       }
       return css;
     },
-    _inheritMarkup : function(markup, parent){
-      var parent_markup = parent? parent.markup : null;
-      markup = markup.inherit(parent_markup);
-      //markup = markup.inherit(this, parent);
+    _initMarkupSelector : function(markup, parent_style){
+      if(parent_style){
+	parent_style.appendChild(this);
+      }
+      markup.initSelector(this);
       var onload = markup.getCssAttr("onload");
       if(onload){
 	markup.setCssAttrs(onload(markup) || {});
@@ -517,10 +588,6 @@ var StyleContext = (function(){
       if(nth_of_type){
 	markup.setCssAttrs(nth_of_type(this.getChildIndexOfType(), markup) || {});
       }
-      return markup;
-    },
-    _appendChild : function(child_style){
-      this.childs.push(child_style);
     },
     _filterChildLines : function(elements){
       return List.filter(elements, function(element){

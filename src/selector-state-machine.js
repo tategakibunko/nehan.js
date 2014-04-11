@@ -1,5 +1,5 @@
 var SelectorStateMachine = {
-  accept : function(tokens, markup){
+  accept : function(tokens, style){
     if(tokens.length === 0){
       throw "selector syntax error:" + src;
     }
@@ -10,37 +10,37 @@ var SelectorStateMachine = {
     var push_back = function(){
       pos++;
     };
-    var cur, next, next2, combinator;
+    var f2, tmp, f1, combinator;
     while(pos >= 0){
-      cur = pop();
-      if(cur instanceof SelectorType === false){
+      f2 = pop();
+      if(f2 instanceof TypeSelector === false){
 	throw "selector syntax error:" + src;
       }
-      if(!cur.test(markup)){
+      if(!f2.test(style)){
 	return false;
       }
-      next = pop();
-      if(next === null){
+      tmp = pop();
+      if(tmp === null){
 	return true;
       }
-      if(next instanceof SelectorType){
-	next2 = next;
+      if(tmp instanceof TypeSelector){
+	f1 = tmp;
 	combinator = " "; // descendant combinator
-      } else if(typeof next === "string"){
-	combinator = next;
-	next2 = pop();
-	if(next2 === null || next2 instanceof SelectorType === false){
+      } else if(typeof tmp === "string"){
+	combinator = tmp;
+	f1 = pop();
+	if(f1 === null || f1 instanceof TypeSelector === false){
 	  throw "selector syntax error:" + src;
 	}
       }
       switch(combinator){
-      case " ": markup = SelectorCombinator.findDescendant(markup, next2); break;
-      case ">": markup = SelectorCombinator.findChild(markup, next2); break;
-      case "+": markup = SelectorCombinator.findAdjSibling(markup, cur, next2); break;
-      case "~": markup = SelectorCombinator.findGenSibling(markup, cur, next2); break;
+      case " ": style = style.findParent(f1); break;
+      case ">": style = style.findDirectParent(f1); break;
+      case "+": style = style.findAdjSibling(f1, f2); break;
+      case "~": style = style.findGenSibling(f1, f2); break;
       default: throw "selector syntax error:invalid combinator(" + combinator + ")";
       }
-      if(markup === null){
+      if(style === null){
 	return false;
       }
       push_back();

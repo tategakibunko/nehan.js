@@ -82,7 +82,7 @@ var BlockGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
-    var child_stream = this._createStream(token);
+    var child_stream = this._createStream(child_style, token);
 
     // switch generator by display
     switch(child_style.display){

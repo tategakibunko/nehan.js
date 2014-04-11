@@ -10,7 +10,6 @@ var Tag = (function (){
     this._type = "tag";
     this._inherited = false; // flag to avoid duplicate inheritance
     this.src = src;
-    this.parent = null;
     this.contentRaw = content_raw || "";
     this.name = this._parseName(this.src);
     this.tagAttr = TagAttrParser.parse(this.src);
@@ -29,13 +28,13 @@ var Tag = (function (){
   }
 
   Tag.prototype = {
-    inherit : function(parent){
-      if(this._inherited){
-	return this; // avoid duplicate initialize
+    initSelector : function(style){
+      // avoid duplicate initialize
+      if(this._initialized){
+	return this;
       }
-      this.parent = parent;
-      this.cssAttrStatic = this._getSelectorValue(); // reget css-attr with parent enabled.
-      this._inherited = true;
+      this.cssAttrStatic = this._getSelectorValue(style); // reget css-attr with parent enabled.
+      this._initialized = true;
       return this;
     },
     clone : function(){
@@ -62,9 +61,6 @@ var Tag = (function (){
       this.classes = List.filter(this.classes, function(cls){
 	return cls != klass;
       });
-    },
-    getParent : function(){
-      return this.parent;
     },
     getName : function(){
       return this.name;
@@ -119,10 +115,11 @@ var Tag = (function (){
     getContentRaw : function(){
       return this.contentRaw;
     },
-    getContent : function(){
-      var before = this._getPseudoBefore();
-      var after = this._getPseudoAfter();
-      return this._setPseudoFirst([before, this.contentRaw, after].join(""));
+    getContent : function(style){
+      var before = this._getPseudoBefore(style);
+      var after = this._getPseudoAfter(style);
+      var content = this._setPseudoFirst(style, [before, this.contentRaw, after].join(""));
+      return content;
     },
     getSrc : function(){
       return this.src;
@@ -142,7 +139,7 @@ var Tag = (function (){
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
     },
-    isPseudoElement : function(){
+    hasPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
     isAnchorTag : function(){
@@ -172,17 +169,14 @@ var Tag = (function (){
       var name = this.getName();
       return name === "end-page" || name === "page-break";
     },
-    isRoot : function(){
-      return this.parent === null;
-    },
     isEmpty : function(){
       return this.contentRaw === "";
     },
-    _getSelectorValue : function(){
-      if(this.isPseudoElement()){
-	return Selectors.getValuePe(this.parent, this.getName());
+    _getSelectorValue : function(style){
+      if(this.hasPseudoElement()){
+	return Selectors.getValuePe(style.parent || null, this.getName());
       }
-      return Selectors.getValue(this);
+      return Selectors.getValue(style);
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
@@ -207,10 +201,10 @@ var Tag = (function (){
 	return "." + class_name;
       });
     },
-    _setPseudoFirst : function(content){
-      var first_letter = Selectors.getValuePe(this, "first-letter");
+    _setPseudoFirst : function(style, content){
+      var first_letter = Selectors.getValuePe(style, "first-letter");
       content = Obj.isEmpty(first_letter)? content : this._setPseudoFirstLetter(content);
-      var first_line = Selectors.getValuePe(this, "first-line");
+      var first_line = Selectors.getValuePe(style, "first-line");
       return Obj.isEmpty(first_line)? content : this._setPseudoFirstLine(content);
     },
     _setPseudoFirstLetter : function(content){
@@ -221,12 +215,12 @@ var Tag = (function (){
     _setPseudoFirstLine : function(content){
       return Html.tagWrap("first-line", content);
     },
-    _getPseudoBefore : function(){
-      var attr = Selectors.getValuePe(this, "before");
+    _getPseudoBefore : function(style){
+      var attr = Selectors.getValuePe(style, "before");
       return Obj.isEmpty(attr)? "" : Html.tagWrap("before", attr.content || "");
     },
-    _getPseudoAfter : function(){
-      var attr = Selectors.getValuePe(this, "after");
+    _getPseudoAfter : function(style){
+      var attr = Selectors.getValuePe(style, "after");
       return Obj.isEmpty(attr)? "" : Html.tagWrap("after", attr.content || "");
     },
     // "border:0; margin:0"

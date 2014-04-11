@@ -22,7 +22,7 @@
 var SectionTreeConverter = (function(){
   var default_callbacks = {
     onClickLink : function(toc){
-      console.log("toc clicked!:%o", toc);
+      //console.log("toc clicked!:%o", toc);
       return false;
     },
     createToc : function(toc_ctx, tree){

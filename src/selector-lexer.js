@@ -45,7 +45,7 @@ var SelectorLexer = (function(){
       this.buff = Utils.trim(this.buff.slice(count));
     },
     _parseType : function(str, attrs, pseudo){
-      return new SelectorType({
+      return new TypeSelector({
 	name:this._getName(str),
 	id:this._getId(str),
 	className:this._getClassName(str),

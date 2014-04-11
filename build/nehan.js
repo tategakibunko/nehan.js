@@ -1888,29 +1888,29 @@ var SelectorPseudo = (function(){
   }
 
   SelectorPseudo.prototype = {
-    isPseudoElement : function(){
+    hasPseudoElement : function(){
       return (this.name === "before" ||
 	      this.name === "after" ||
 	      this.name === "first-letter" ||
 	      this.name === "first-line");
     },
-    test : function(markup){
+    test : function(style){
       switch(this.name){
       // pseudo-element
       case "before": return true;
       case "after": return true;
-      case "first-letter": return !markup.isEmpty();
-      case "first-line": return !markup.isEmpty();
+      case "first-letter": return !style.isEmpty();
+      case "first-line": return !style.isEmpty();
 
       // pseudo-class
-      case "first-child": return markup.isFirstChild();
-      case "last-child": return markup.isLastChild();
-      case "first-of-type": return markup.isFirstOfType();
-      case "last-of-type": return markup.isLastOfType();
-      case "only-child": return markup.isOnlyChild();
-      case "only-of-type": return markup.isOnlyOfType();
-      case "empty": return markup.isEmpty();
-      case "root": return markup.isRoot();
+      case "first-child": return style.isFirstChild();
+      case "last-child": return style.isLastChild();
+      case "first-of-type": return style.isFirstOfType();
+      case "last-of-type": return style.isLastOfType();
+      case "only-child": return style.isOnlyChild();
+      case "only-of-type": return style.isOnlyOfType();
+      case "empty": return style.isEmpty();
+      case "root": return style.isRoot();
       }
       return false;
     },
@@ -1923,8 +1923,28 @@ var SelectorPseudo = (function(){
 })();
 
 
-var SelectorType = (function(){
-  function SelectorType(opt){
+/* 
+   single element type selector
+
+   example:
+
+   1. name selector
+     div {font-size:xxx}
+
+   2. class selector
+     div.class{font-size:xxx}
+
+   3. id selector
+     div#id{font-size:xxx}
+
+   4. attribute selector
+     div[name=value]{font-size:xxx}
+
+   5. pseudo-element, pseudo-class selector
+     div::first-line{font-size:xxx}
+*/
+var TypeSelector = (function(){
+  function TypeSelector(opt){
     this.name = opt.name;
     this.id = opt.id;
     this.className = opt.className;
@@ -1932,24 +1952,29 @@ var SelectorType = (function(){
     this.pseudo = opt.pseudo;
   }
   
-  SelectorType.prototype = {
-    test : function(markup){
-      if(markup === null){
+  TypeSelector.prototype = {
+    test : function(style){
+      if(style === null){
 	return false;
       }
-      if(this.name && this.name != "*" && markup.getName() != this.name){
+      // name selector
+      if(this.name && this.name != "*" && style.getMarkupName() != this.name){
 	return false;
       }
-      if(this.className && !markup.hasClass(this.className)){
+      // class selector
+      if(this.className && !style.hasMarkupClassName(this.className)){
 	return false;
       }
-      if(this.id && markup.getTagAttr("id") != this.id){
+      // id selector
+      if(this.id && style.getMarkupAttr("id") != this.id){
 	return false;
       }
-      if(this.attrs.length > 0 && !this._testAttrs(markup)){
+      // attribute selectgor
+      if(this.attrs.length > 0 && !this._testAttrs(style)){
 	return false;
       }
-      if(this.pseudo && !this.pseudo.test(markup)){
+      // pseudo-element, pseudo-class selector
+      if(this.pseudo && !this.pseudo.test(style)){
 	return false;
       }
       return true;
@@ -1965,67 +1990,22 @@ var SelectorType = (function(){
     },
     getPseudoClassSpec : function(){
       if(this.pseudo){
-	return this.pseudo.isPseudoElement()? 0 : 1;
+	return this.pseudo.hasPseudoElement()? 0 : 1;
       }
       return 0;
     },
     getAttrSpec : function(){
       return this.attrs.length;
     },
-    _testAttrs : function(markup){
+    _testAttrs : function(style){
       return List.forall(this.attrs, function(attr){
-	return attr.test(markup);
+	return attr.test(style);
       });
     }
   };
 
-  return SelectorType;
+  return TypeSelector;
 })();
-
-
-var SelectorCombinator = {
-  findDescendant : function(markup, parent_type){
-    markup = markup.getParent();
-    while(markup !== null){
-      if(parent_type.test(markup)){
-	return markup;
-      }
-      markup = markup.getParent();
-    }
-    return null;
-  },
-  findChild : function(markup, parent_type){
-    markup = markup.getParent();
-    if(markup === null){
-      return null;
-    }
-    return parent_type.test(markup)? markup : null;
-  },
-  findAdjSibling : function(markup, cur_type, prev_type){
-    var childs = markup.getParentChilds();
-    return List.find(childs, function(child){
-      var next = child.getNext();
-      return next && prev_type.test(child) && cur_type.test(next);
-    });
-  },
-  findGenSibling : function(markup, cur_type, prev_type){
-    var childs = markup.getParentChilds();
-    var sibling = List.find(childs, function(child){
-      return prev_type.test(child);
-    });
-    if(sibling === null){
-      return null;
-    }
-    markup = sibling.getNext();
-    while(markup !== null){
-      if(cur_type.test(markup)){
-	return sibling;
-      }
-      markup = markup.getNext();
-    }
-    return null;
-  }
-};
 
 
 var SelectorLexer = (function(){
@@ -2075,7 +2055,7 @@ var SelectorLexer = (function(){
       this.buff = Utils.trim(this.buff.slice(count));
     },
     _parseType : function(str, attrs, pseudo){
-      return new SelectorType({
+      return new TypeSelector({
 	name:this._getName(str),
 	id:this._getId(str),
 	className:this._getClassName(str),
@@ -2128,7 +2108,7 @@ var SelectorLexer = (function(){
 
 
 var SelectorStateMachine = {
-  accept : function(tokens, markup){
+  accept : function(tokens, style){
     if(tokens.length === 0){
       throw "selector syntax error:" + src;
     }
@@ -2139,37 +2119,37 @@ var SelectorStateMachine = {
     var push_back = function(){
       pos++;
     };
-    var cur, next, next2, combinator;
+    var f2, tmp, f1, combinator;
     while(pos >= 0){
-      cur = pop();
-      if(cur instanceof SelectorType === false){
+      f2 = pop();
+      if(f2 instanceof TypeSelector === false){
 	throw "selector syntax error:" + src;
       }
-      if(!cur.test(markup)){
+      if(!f2.test(style)){
 	return false;
       }
-      next = pop();
-      if(next === null){
+      tmp = pop();
+      if(tmp === null){
 	return true;
       }
-      if(next instanceof SelectorType){
-	next2 = next;
+      if(tmp instanceof TypeSelector){
+	f1 = tmp;
 	combinator = " "; // descendant combinator
-      } else if(typeof next === "string"){
-	combinator = next;
-	next2 = pop();
-	if(next2 === null || next2 instanceof SelectorType === false){
+      } else if(typeof tmp === "string"){
+	combinator = tmp;
+	f1 = pop();
+	if(f1 === null || f1 instanceof TypeSelector === false){
 	  throw "selector syntax error:" + src;
 	}
       }
       switch(combinator){
-      case " ": markup = SelectorCombinator.findDescendant(markup, next2); break;
-      case ">": markup = SelectorCombinator.findChild(markup, next2); break;
-      case "+": markup = SelectorCombinator.findAdjSibling(markup, cur, next2); break;
-      case "~": markup = SelectorCombinator.findGenSibling(markup, cur, next2); break;
+      case " ": style = style.findParent(f1); break;
+      case ">": style = style.findDirectParent(f1); break;
+      case "+": style = style.findAdjSibling(f1, f2); break;
+      case "~": style = style.findGenSibling(f1, f2); break;
       default: throw "selector syntax error:invalid combinator(" + combinator + ")";
       }
-      if(markup === null){
+      if(style === null){
 	return false;
       }
       push_back();
@@ -2178,12 +2158,13 @@ var SelectorStateMachine = {
   }
 };
 
+// Selector = TypeSelector | TypeSelector + combinator + Selector
 var Selector = (function(){
   function Selector(key, value){
-    this.key = this._normalizeKey(key);
-    this.value = this._formatValue(value);
-    this.tokens = this._getSelectorTokens(this.key);
-    this.spec = this._countSpec(this.tokens);
+    this.key = this._normalizeKey(key); // selector source like 'h1 > p'
+    this.value = this._formatValue(value); // associated css value object like {font-size:16px}
+    this.parts = this._getSelectorParts(this.key); // [type-selector | combinator]
+    this.spec = this._countSpec(this.parts); // specificity
   }
 
   var set_format_value = function(ret, prop, format_value){
@@ -2215,21 +2196,21 @@ var Selector = (function(){
     getSpec : function(){
       return this.spec;
     },
-    test : function(markup){
-      return SelectorStateMachine.accept(this.tokens, markup);
+    test : function(style){
+      return SelectorStateMachine.accept(this.parts, style);
     },
-    isPseudoElement : function(){
+    hasPseudoElement : function(){
       return this.key.indexOf("::") >= 0;
     },
-    hasPseudoElement : function(element_name){
+    hasPseudoElementName : function(element_name){
       return this.key.indexOf("::" + element_name) >= 0;
     },
     // count selector 'specificity'
     // see http://www.w3.org/TR/css3-selectors/#specificity
-    _countSpec : function(tokens){
+    _countSpec : function(parts){
       var a = 0, b = 0, c = 0;
-      List.iter(tokens, function(token){
-	if(token instanceof SelectorType){
+      List.iter(parts, function(token){
+	if(token instanceof TypeSelector){
 	  a += token.getIdSpec();
 	  b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();
 	  c += token.getTypeSpec();
@@ -2237,7 +2218,7 @@ var Selector = (function(){
       });
       return parseInt([a,b,c].join(""), 10); // maybe ok in most case.
     },
-    _getSelectorTokens : function(key){
+    _getSelectorParts : function(key){
       var lexer = new SelectorLexer(key);
       return lexer.getTokens();
     },
@@ -2258,9 +2239,11 @@ var Selector = (function(){
 
 
 var Selectors = (function(){
-  var selectors = [];
-  var selectors_pe = [];
+  var selectors = []; // selector list ordered by specificity desc.
+  var selectors_pe = []; // selector (with pseudo-element) list, ordered by specificity desc.
 
+  // sort selectors by specificity asc.
+  // so higher specificity overwrites lower one.
   var sort_selectors = function(){
     selectors.sort(function(s1,s2){ return s1.spec - s2.spec; });
   };
@@ -2270,8 +2253,8 @@ var Selectors = (function(){
   };
 
   var update_value = function(selector_key, value){
-    var style_value = Style[selector_key];
-    Args.copy(style_value, value);
+    var style_value = Style[selector_key]; // old style value
+    Args.copy(style_value, value); // overwrite new value to old
     var selector = List.find(selectors.concat(selectors_pe), function(selector){
       return selector.getKey() === selector_key;
     });
@@ -2282,26 +2265,28 @@ var Selectors = (function(){
 
   var insert_value = function(selector_key, value){
     var selector = new Selector(selector_key, value);
-    if(selector.isPseudoElement()){
+    if(selector.hasPseudoElement()){
       selectors_pe.push(selector);
     } else {
       selectors.push(selector);
     }
+    // to speed up 'init_selectors' function, we did not sort immediatelly after inserting value.
+    // we sort entries after all selector_key and value are registered.
     return selector;
   };
   
-  var get_value = function(markup){
+  var get_value = function(style){
     return List.fold(selectors, {}, function(ret, selector){
-      if(!selector.isPseudoElement() && selector.test(markup)){
+      if(!selector.hasPseudoElement() && selector.test(style)){
 	return Args.copy(ret, selector.getValue());
       }
       return ret;
     });
   };
 
-  var get_value_pe = function(markup, pseudo_element){
+  var get_value_pe = function(parent_style, pseudo_element_name){
     return List.fold(selectors_pe, {}, function(ret, selector){
-      if(selector.hasPseudoElement(pseudo_element) && selector.test(markup)){
+      if(selector.hasPseudoElementName(pseudo_element_name) && selector.test(parent_style || null)){
 	return Args.copy(ret, selector.getValue());
       }
       return ret;
@@ -2321,24 +2306,29 @@ var Selectors = (function(){
 
   return {
     setValue : function(selector_key, value){
+      // if selector_key already defined, just overwrite it.
       if(Style[selector_key]){
 	update_value(selector_key, value);
 	return;
       }
+      insert_value(selector_key, value);
+
       var selector = insert_value(selector_key, value);
+
+      // notice that 'sort_selectors'(or 'sort_selectors_pe') is not called in 'insert_value'.
       Style[selector_key] = selector.getValue();
-      if(selector.isPseudoElement()){
+      if(selector.hasPseudoElement()){
 	sort_selectors_pe();
-	return;
+      } else {
+	sort_selectors();
       }
-      sort_selectors();
     },
-    // pseudo_element: "first-letter", "first-line", "before", "after"
-    getValuePe : function(markup, pseudo_element){
-      return get_value_pe(markup, pseudo_element);
+    // pseudo_element_name: "first-letter", "first-line", "before", "after"
+    getValuePe : function(parent_style, pseudo_element_name){
+      return get_value_pe(parent_style, pseudo_element_name);
     },
-    getValue : function(markup){
-      return get_value(markup);
+    getValue : function(style){
+      return get_value(style);
     }
   };
 })();
@@ -2444,7 +2434,6 @@ var Tag = (function (){
     this._type = "tag";
     this._inherited = false; // flag to avoid duplicate inheritance
     this.src = src;
-    this.parent = null;
     this.contentRaw = content_raw || "";
     this.name = this._parseName(this.src);
     this.tagAttr = TagAttrParser.parse(this.src);
@@ -2463,13 +2452,13 @@ var Tag = (function (){
   }
 
   Tag.prototype = {
-    inherit : function(parent){
-      if(this._inherited){
-	return this; // avoid duplicate initialize
+    initSelector : function(style){
+      // avoid duplicate initialize
+      if(this._initialized){
+	return this;
       }
-      this.parent = parent;
-      this.cssAttrStatic = this._getSelectorValue(); // reget css-attr with parent enabled.
-      this._inherited = true;
+      this.cssAttrStatic = this._getSelectorValue(style); // reget css-attr with parent enabled.
+      this._initialized = true;
       return this;
     },
     clone : function(){
@@ -2496,9 +2485,6 @@ var Tag = (function (){
       this.classes = List.filter(this.classes, function(cls){
 	return cls != klass;
       });
-    },
-    getParent : function(){
-      return this.parent;
     },
     getName : function(){
       return this.name;
@@ -2553,10 +2539,11 @@ var Tag = (function (){
     getContentRaw : function(){
       return this.contentRaw;
     },
-    getContent : function(){
-      var before = this._getPseudoBefore();
-      var after = this._getPseudoAfter();
-      return this._setPseudoFirst([before, this.contentRaw, after].join(""));
+    getContent : function(style){
+      var before = this._getPseudoBefore(style);
+      var after = this._getPseudoAfter(style);
+      var content = this._setPseudoFirst(style, [before, this.contentRaw, after].join(""));
+      return content;
     },
     getSrc : function(){
       return this.src;
@@ -2576,7 +2563,7 @@ var Tag = (function (){
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
     },
-    isPseudoElement : function(){
+    hasPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
     isAnchorTag : function(){
@@ -2606,17 +2593,14 @@ var Tag = (function (){
       var name = this.getName();
       return name === "end-page" || name === "page-break";
     },
-    isRoot : function(){
-      return this.parent === null;
-    },
     isEmpty : function(){
       return this.contentRaw === "";
     },
-    _getSelectorValue : function(){
-      if(this.isPseudoElement()){
-	return Selectors.getValuePe(this.parent, this.getName());
+    _getSelectorValue : function(style){
+      if(this.hasPseudoElement()){
+	return Selectors.getValuePe(style.parent || null, this.getName());
       }
-      return Selectors.getValue(this);
+      return Selectors.getValue(style);
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
@@ -2641,10 +2625,10 @@ var Tag = (function (){
 	return "." + class_name;
       });
     },
-    _setPseudoFirst : function(content){
-      var first_letter = Selectors.getValuePe(this, "first-letter");
+    _setPseudoFirst : function(style, content){
+      var first_letter = Selectors.getValuePe(style, "first-letter");
       content = Obj.isEmpty(first_letter)? content : this._setPseudoFirstLetter(content);
-      var first_line = Selectors.getValuePe(this, "first-line");
+      var first_line = Selectors.getValuePe(style, "first-line");
       return Obj.isEmpty(first_line)? content : this._setPseudoFirstLine(content);
     },
     _setPseudoFirstLetter : function(content){
@@ -2655,12 +2639,12 @@ var Tag = (function (){
     _setPseudoFirstLine : function(content){
       return Html.tagWrap("first-line", content);
     },
-    _getPseudoBefore : function(){
-      var attr = Selectors.getValuePe(this, "before");
+    _getPseudoBefore : function(style){
+      var attr = Selectors.getValuePe(style, "before");
       return Obj.isEmpty(attr)? "" : Html.tagWrap("before", attr.content || "");
     },
-    _getPseudoAfter : function(){
-      var attr = Selectors.getValuePe(this, "after");
+    _getPseudoAfter : function(style){
+      var attr = Selectors.getValuePe(style, "after");
       return Obj.isEmpty(attr)? "" : Html.tagWrap("after", attr.content || "");
     },
     // "border:0; margin:0"
@@ -3239,7 +3223,7 @@ var Ruby = (function(){
       return this.rbs;
     },
     getRtString : function(){
-      return this.rt? this.rt.getContent() : "";
+      return this.rt? this.rt.getContentRaw() : "";
     },
     getRtFontSize : function(){
       return this.rtFontSize;
@@ -5484,7 +5468,7 @@ var OutlineContextParser = (function(){
 var SectionTreeConverter = (function(){
   var default_callbacks = {
     onClickLink : function(toc){
-      console.log("toc clicked!:%o", toc);
+      //console.log("toc clicked!:%o", toc);
       return false;
     },
     createToc : function(toc_ctx, tree){
@@ -5919,7 +5903,7 @@ var HeadTokenStream = (function(){
 
 var RubyTokenStream = (function(){
   function RubyTokenStream(markup_ruby){
-    TokenStream.call(this, markup_ruby.getContent());
+    TokenStream.call(this, markup_ruby.getContentRaw());
     this.getAll();
     this.tokens = this._parse(markup_ruby);
     this.rewind();
@@ -6429,12 +6413,13 @@ var StyleContext = (function(){
 
   // parent : parent style context
   function StyleContext(markup, parent){
-    this.markup = this._inheritMarkup(markup, parent);
-    this.parent = parent;
+    this.markup = markup;
+    this.parent = parent || null;
+    this._initMarkupSelector(markup, parent);
     this.display = this._loadDisplay(markup); // required
     this.flow = this._loadFlow(markup, parent); // required
     this.boxSizing = this._loadBoxSizing(markup); // required
-    this.childs = []; // children for this style, updated by _appendChild
+    this.childs = []; // children for this style, updated by appendChild
     var color = this._loadColor(markup, parent);
     if(color){
       this.color = color;
@@ -6492,9 +6477,6 @@ var StyleContext = (function(){
     if(break_after){
       this.breakAfter = break_after;
     }
-    if(this.parent){
-      this.parent._appendChild(this);
-    }
   }
 
   StyleContext.prototype = {
@@ -6506,6 +6488,10 @@ var StyleContext = (function(){
       var tag = this.markup.clone();
       tag.setCssAttrs(css || {}); // set dynamic styles
       return new StyleContext(tag, this.parent || null);
+    },
+    // append child style context
+    appendChild : function(child_style){
+      this.childs.push(child_style);
     },
     // inherit style with tag_name and css(optional).
     createChild : function(tag_name, css){
@@ -6661,11 +6647,32 @@ var StyleContext = (function(){
     isFirstChild : function(){
       return this.parent? this.parent.getNthChild(0) === this : false;
     },
+    isLastChild : function(){
+      return false; // TODO
+    },
+    isFirstOfType : function(){
+      return false; // TODO
+    },
+    isLastOfType : function(){
+      return false; // TODO
+    },
+    isOnlyChild : function(){
+      return false; // TODO
+    },
+    isOnlyOfType : function(){
+      return false; // TODO
+    },
+    isEmpty : function(){
+      return false; // TODO
+    },
+    hasMarkupClassName : function(class_name){
+      return this.markup.hasClass(class_name);
+    },
     getMarkupName : function(){
       return this.markup.getName();
     },
     getMarkupContent : function(){
-      return this.markup.getContent();
+      return this.markup.getContent(this);
     },
     getMarkupPos : function(){
       return this.markup.pos;
@@ -6749,6 +6756,12 @@ var StyleContext = (function(){
     getNthChild : function(nth){
       return this.childs[nth] || null;
     },
+    getParentChilds : function(){
+      return this.parent? this.parent.childs : [];
+    },
+    getNext : function(){
+      return null; // TODO
+    },
     findChildIndex : function(style){
       return List.indexOf(this.childs, function(child){
 	return child === style;
@@ -6764,6 +6777,47 @@ var StyleContext = (function(){
       return List.indexOf(this.findChildsOfType(style), function(child){
 	return child === style;
       });
+    },
+    findParent : function(parent_type){
+      var ptr = this.parent;
+      while(ptr !== null){
+	if(parent_type.test(ptr)){
+	  return ptr;
+	}
+	ptr = ptr.parent;
+      }
+      return null;
+    },
+    findDirectParent : function(parent_type){
+      var ptr = this.parent;
+      if(ptr === null){
+	return null;
+      }
+      return parent_type.test(ptr)? ptr : null;
+    },
+    // selector 'f1 + f2'
+    findAdjSibling : function(f1, f2){
+      return List.find(this.getParentChilds(), function(child){
+	var next = child.getNext();
+	return next && f1.test(child) && f2.test(next);
+      });
+    },
+    // selector 'f1 ~ f2'
+    findGenSibling : function(f1, f2){
+      var sibling = List.find(this.getParentChilds(), function(child){
+	return f1.test(child);
+      });
+      if(sibling === null){
+	return null;
+      }
+      var ptr = sibling.getNext();
+      while(ptr !== null){
+	if(f2.test(ptr)){
+	  return sibling;
+	}
+	ptr = ptr.getNext();
+      }
+      return null;
     },
     getOuterSize : function(){
       var measure = this.getOuterMeasure();
@@ -6928,10 +6982,11 @@ var StyleContext = (function(){
       }
       return css;
     },
-    _inheritMarkup : function(markup, parent){
-      var parent_markup = parent? parent.markup : null;
-      markup = markup.inherit(parent_markup);
-      //markup = markup.inherit(this, parent);
+    _initMarkupSelector : function(markup, parent_style){
+      if(parent_style){
+	parent_style.appendChild(this);
+      }
+      markup.initSelector(this);
       var onload = markup.getCssAttr("onload");
       if(onload){
 	markup.setCssAttrs(onload(markup) || {});
@@ -6944,10 +6999,6 @@ var StyleContext = (function(){
       if(nth_of_type){
 	markup.setCssAttrs(nth_of_type(this.getChildIndexOfType(), markup) || {});
       }
-      return markup;
-    },
-    _appendChild : function(child_style){
-      this.childs.push(child_style);
     },
     _filterChildLines : function(elements){
       return List.filter(elements, function(element){
@@ -7538,10 +7589,10 @@ var LayoutGenerator = (function(){
     );
   };
 
-  LayoutGenerator.prototype._createStream = function(tag){
+  LayoutGenerator.prototype._createStream = function(style, tag){
     switch(tag.getName()){
     case "ruby": return new RubyTokenStream(tag);
-    default: return new TokenStream(tag.getContent());
+    default: return new TokenStream(tag.getContent(style));
     } 
   };
 
@@ -7633,7 +7684,7 @@ var BlockGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
-    var child_stream = this._createStream(token);
+    var child_stream = this._createStream(child_style, token);
 
     // switch generator by display
     switch(child_style.display){
@@ -7884,7 +7935,7 @@ var InlineGenerator = (function(){
       return null;
 
     default:
-      this.setChildLayout(new InlineGenerator(style, this._createStream(token)));
+      this.setChildLayout(new InlineGenerator(style, this._createStream(style, token)));
       return this.yieldChildLayout(context);
     }
   };
@@ -8249,7 +8300,7 @@ var FloatGenerator = (function(){
     if(style.getMarkupName() === "img"){
       return new LazyBlockGenerator(style, style.createImage());
     }
-    return new BlockGenerator(style, this._createStream(tag), this.outlineContext);
+    return new BlockGenerator(style, this._createStream(style, tag), this.outlineContext);
   };
 
   return FloatGenerator;
@@ -8565,10 +8616,10 @@ var HtmlGenerator = (function(){
 	var tag = this.stream.get();
 	switch(tag.getName()){
 	case "head":
-	  this._parseHead(new HeadTokenStream(tag.getContent()));
+	  this._parseHead(new HeadTokenStream(tag.getContentRaw()));
 	  break;
 	case "body":
-	  return this._createBodyGenerator(tag.getContent());
+	  return this._createBodyGenerator(tag.getContentRaw());
 	}
       }
       return this._createBodyGenerator(this.stream.getSrc());
@@ -8582,7 +8633,7 @@ var HtmlGenerator = (function(){
 	var tag = stream.get();
 	switch(tag.getName()){
 	case "title":
-	  header.setTitle(tag.getContent());
+	  header.setTitle(tag.getContentRaw());
 	  break;
 	case "meta":
 	  header.addMeta(tag);
@@ -8634,7 +8685,7 @@ var DocumentGenerator = (function(){
       return this._createHtmlGenerator(html_tag);
     },
     _createHtmlGenerator : function(html_tag){
-      return new HtmlGenerator(html_tag.getContent());
+      return new HtmlGenerator(html_tag.getContentRaw());
     }
   };
 
