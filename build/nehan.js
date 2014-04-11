@@ -7158,11 +7158,11 @@ var StyleContext = (function(){
     },
     _loadBreakBefore : function(markup){
       var value = markup.getCssAttr("break-before");
-      return value? Breaks.get(value) : null;
+      return value? Breaks.getBefore(value) : null;
     },
     _loadBreakAfter : function(markup){
       var value = markup.getCssAttr("break-after");
-      return value? Breaks.get(value) : null;
+      return value? Breaks.getAfter(value) : null;
     },
     _loadListStyle : function(markup){
       var list_style_type = markup.getCssAttr("list-style-type", "none");
