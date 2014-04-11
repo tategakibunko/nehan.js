@@ -34,22 +34,21 @@ var Selectors = (function(){
     // we sort entries after all selector_key and value are registered.
     return selector;
   };
-  
+
+  // apply Selector::test to style.
+  // if matches, copy selector value to result object.
+  // offcource, higher specificity overwrite lower one.
   var get_value = function(style){
     return List.fold(selectors, {}, function(ret, selector){
-      if(!selector.hasPseudoElement() && selector.test(style)){
-	return Args.copy(ret, selector.getValue());
-      }
-      return ret;
+      return (selector.hasPseudoElement() || !selector.test(style))? ret :
+	Args.copy(ret, selector.getValue());
     });
   };
 
   var get_value_pe = function(parent_style, pseudo_element_name){
     return List.fold(selectors_pe, {}, function(ret, selector){
-      if(selector.hasPseudoElementName(pseudo_element_name) && selector.test(parent_style || null)){
-	return Args.copy(ret, selector.getValue());
-      }
-      return ret;
+      return (!selector.hasPseudoElementName(pseudo_element_name) || !selector.test(parent_style || null))? ret :
+	Args.copy(ret, selector.getValue());
     });
   };
 
@@ -83,12 +82,14 @@ var Selectors = (function(){
 	sort_selectors();
       }
     },
+    // get style object from those that matches the style-context.
+    getValue : function(style){
+      return get_value(style);
+    },
+    // parent_style: if 'p::first-letter', parent_style context is the style-context of p.
     // pseudo_element_name: "first-letter", "first-line", "before", "after"
     getValuePe : function(parent_style, pseudo_element_name){
       return get_value_pe(parent_style, pseudo_element_name);
-    },
-    getValue : function(style){
-      return get_value(style);
     }
   };
 })();
