@@ -493,7 +493,6 @@ var Style = {
     //"border-spacing":"5px", // TODO: support batch style like "5px 10px".
     "border-width":{
       "start":"1px",
-      "end":"1px",
       "before":"1px"
     },
     "margin":{
@@ -522,10 +521,6 @@ var Style = {
       "after":"0.4em"
     }
   },
-  /*
-  "td:last-child":{
-    "border-width":"0px"
-  },*/
   "textarea":{
     "display":"inline",
     "embeddable":true,
@@ -557,10 +552,6 @@ var Style = {
       "after":"0.4em"
     }
   },
-  /*
-  "th:last-child":{
-    "border-width":"0px"
-  },*/
   "thead":{
     "display":"table-header-group",
     "font-weight":"bold",

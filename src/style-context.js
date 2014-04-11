@@ -504,6 +504,7 @@ var StyleContext = (function(){
     _inheritMarkup : function(markup, parent){
       var parent_markup = parent? parent.markup : null;
       markup = markup.inherit(parent_markup);
+      //markup = markup.inherit(this, parent);
       var onload = markup.getCssAttr("onload");
       if(onload){
 	markup.setCssAttrs(onload(markup) || {});

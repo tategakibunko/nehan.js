@@ -10,13 +10,12 @@ var SelectorLexer = (function(){
   SelectorLexer.prototype = {
     getTokens : function(){
       var tokens = [];
-      var push = function(token){ tokens.push(token); };
       while(this.buff !== ""){
 	var token = this._getNextToken();
 	if(token === null){
 	  break;
 	}
-	push(token);
+	tokens.push(token);
       }
       return tokens;
     },
@@ -79,11 +78,10 @@ var SelectorLexer = (function(){
     },
     _getAttrs : function(){
       var attrs = [];
-      var push = function(attr){ attrs.push(attr); };
       while(true){
 	var attr = this._getByRex(rex_attr);
 	if(attr){
-	  push(new SelectorAttr(attr));
+	  attrs.push(new SelectorAttr(attr));
 	} else {
 	  break;
 	}

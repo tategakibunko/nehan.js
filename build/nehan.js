@@ -677,7 +677,6 @@ var Style = {
     //"border-spacing":"5px", // TODO: support batch style like "5px 10px".
     "border-width":{
       "start":"1px",
-      "end":"1px",
       "before":"1px"
     },
     "margin":{
@@ -706,10 +705,6 @@ var Style = {
       "after":"0.4em"
     }
   },
-  /*
-  "td:last-child":{
-    "border-width":"0px"
-  },*/
   "textarea":{
     "display":"inline",
     "embeddable":true,
@@ -741,10 +736,6 @@ var Style = {
       "after":"0.4em"
     }
   },
-  /*
-  "th:last-child":{
-    "border-width":"0px"
-  },*/
   "thead":{
     "display":"table-header-group",
     "font-weight":"bold",
@@ -2049,13 +2040,12 @@ var SelectorLexer = (function(){
   SelectorLexer.prototype = {
     getTokens : function(){
       var tokens = [];
-      var push = function(token){ tokens.push(token); };
       while(this.buff !== ""){
 	var token = this._getNextToken();
 	if(token === null){
 	  break;
 	}
-	push(token);
+	tokens.push(token);
       }
       return tokens;
     },
@@ -2118,11 +2108,10 @@ var SelectorLexer = (function(){
     },
     _getAttrs : function(){
       var attrs = [];
-      var push = function(attr){ attrs.push(attr); };
       while(true){
 	var attr = this._getByRex(rex_attr);
 	if(attr){
-	  push(new SelectorAttr(attr));
+	  attrs.push(new SelectorAttr(attr));
 	} else {
 	  break;
 	}
@@ -6942,6 +6931,7 @@ var StyleContext = (function(){
     _inheritMarkup : function(markup, parent){
       var parent_markup = parent? parent.markup : null;
       markup = markup.inherit(parent_markup);
+      //markup = markup.inherit(this, parent);
       var onload = markup.getCssAttr("onload");
       if(onload){
 	markup.setCssAttrs(onload(markup) || {});
