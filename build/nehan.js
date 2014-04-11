@@ -677,11 +677,15 @@ var Style = {
     "embeddable":true,
     "table-layout":"fixed", // 'auto' not supported yet.
     "background-color":"white",
-    "border-collapse":"collapse", // 'separate' not supported yet.
+    "border-collapse":"collapse", // 'separate' is not supported yet.
     "border-color":"#a8a8a8",
     "border-style":"solid",
     //"border-spacing":"5px", // TODO: support batch style like "5px 10px".
-    "border-width":"1px",
+    "border-width":{
+      "start":"1px",
+      "end":"1px",
+      "before":"1px"
+    },
     "margin":{
       "start":"0.5em",
       "end":"0.5em",
@@ -695,7 +699,9 @@ var Style = {
   "td":{
     "display":"table-cell",
     "section-root":true,
-    "border-width":"1px",
+    "border-width":{
+      "end":"1px"
+    },
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
     "border-style":"solid",
@@ -706,6 +712,10 @@ var Style = {
       "after":"0.4em"
     }
   },
+  /*
+  "td:last-child":{
+    "border-width":"0px"
+  },*/
   "textarea":{
     "display":"inline",
     "embeddable":true,
@@ -716,12 +726,17 @@ var Style = {
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
     "border-style":"solid",
-    "font-style":"italic"
+    "font-style":"italic",
+    "border-width":{
+      "after":"1px"
+    }
   },
   "th":{
     "display":"table-cell",
     "line-rate":1.4,
-    "border-width":"1px",
+    "border-width":{
+      "end":"1px"
+    },
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
     "border-style":"solid",
@@ -732,13 +747,20 @@ var Style = {
       "after":"0.4em"
     }
   },
+  /*
+  "th:last-child":{
+    "border-width":"0px"
+  },*/
   "thead":{
     "display":"table-header-group",
     "font-weight":"bold",
     "background-color":"#c3d9ff",
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
-    "border-style":"solid"
+    "border-style":"solid",
+    "border-width":{
+      "after":"1px"
+    }
   },
   "time":{
     "display":"inline"
@@ -750,7 +772,10 @@ var Style = {
     "display":"table-row",
     "border-collapse":"inherit",
     "border-color":"#a8a8a8",
-    "border-style":"solid"
+    "border-style":"solid",
+    "border-width":{
+      "after":"1px"
+    }
   },
   "track":{
   },
@@ -4039,7 +4064,7 @@ var Background = (function(){
 	css["background-origin"] = this.origin;
       }
       if(this.color){
-	css["background-color"] = this.color;
+	css["background-color"] = this.color.getCssValue();
       }
       if(this.image){
 	css["background-image"] = this.image;
@@ -6430,6 +6455,10 @@ var StyleContext = (function(){
     if(color){
       this.color = color;
     }
+    var background = this._loadBackground(markup, parent);
+    if(background){
+      this.background = background;
+    }
     var font = this._loadFont(markup, parent);
     if(font){
       this.font = font;
@@ -7154,16 +7183,19 @@ var StyleContext = (function(){
       }
     },
     _loadBackground : function(markup, parent){
-      var background = new Background();
       var bg_color = markup.getCssAttr("background-color");
+      var bg_image = markup.getCssAttr("background-image");
+      var bg_pos = markup.getCssAttr("background-position");
+      if(bg_color === null && bg_image === null && bg_pos === null){
+	return null;
+      }
+      var background = new Background();
       if(bg_color){
 	background.color = new Color(bg_color);
       }
-      var bg_image = markup.getCssAttr("background-image");
       if(bg_image){
 	background.image = bg_image;
       }
-      var bg_pos = markup.getCssAttr("background-position");
       if(bg_pos){
 	background.pos = new BackgroundPos2d(
 	  new BackgroundPos(bg_pos.inline, bg_pos.offset),
@@ -7177,6 +7209,7 @@ var StyleContext = (function(){
 	  new BackgroundRepeat(bg_repeat.block)
 	);
       }
+      return background;
     },
     _loadPushedAttr : function(markup){
       return markup.getAttr("pushed") !== null;

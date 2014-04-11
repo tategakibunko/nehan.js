@@ -12,6 +12,10 @@ var StyleContext = (function(){
     if(color){
       this.color = color;
     }
+    var background = this._loadBackground(markup, parent);
+    if(background){
+      this.background = background;
+    }
     var font = this._loadFont(markup, parent);
     if(font){
       this.font = font;
@@ -736,16 +740,19 @@ var StyleContext = (function(){
       }
     },
     _loadBackground : function(markup, parent){
-      var background = new Background();
       var bg_color = markup.getCssAttr("background-color");
+      var bg_image = markup.getCssAttr("background-image");
+      var bg_pos = markup.getCssAttr("background-position");
+      if(bg_color === null && bg_image === null && bg_pos === null){
+	return null;
+      }
+      var background = new Background();
       if(bg_color){
 	background.color = new Color(bg_color);
       }
-      var bg_image = markup.getCssAttr("background-image");
       if(bg_image){
 	background.image = bg_image;
       }
-      var bg_pos = markup.getCssAttr("background-position");
       if(bg_pos){
 	background.pos = new BackgroundPos2d(
 	  new BackgroundPos(bg_pos.inline, bg_pos.offset),
@@ -759,6 +766,7 @@ var StyleContext = (function(){
 	  new BackgroundRepeat(bg_repeat.block)
 	);
       }
+      return background;
     },
     _loadPushedAttr : function(markup){
       return markup.getAttr("pushed") !== null;

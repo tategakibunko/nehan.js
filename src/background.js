@@ -16,7 +16,7 @@ var Background = (function(){
 	css["background-origin"] = this.origin;
       }
       if(this.color){
-	css["background-color"] = this.color;
+	css["background-color"] = this.color.getCssValue();
       }
       if(this.image){
 	css["background-image"] = this.image;

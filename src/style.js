@@ -493,11 +493,15 @@ var Style = {
     "embeddable":true,
     "table-layout":"fixed", // 'auto' not supported yet.
     "background-color":"white",
-    "border-collapse":"collapse", // 'separate' not supported yet.
+    "border-collapse":"collapse", // 'separate' is not supported yet.
     "border-color":"#a8a8a8",
     "border-style":"solid",
     //"border-spacing":"5px", // TODO: support batch style like "5px 10px".
-    "border-width":"1px",
+    "border-width":{
+      "start":"1px",
+      "end":"1px",
+      "before":"1px"
+    },
     "margin":{
       "start":"0.5em",
       "end":"0.5em",
@@ -511,7 +515,9 @@ var Style = {
   "td":{
     "display":"table-cell",
     "section-root":true,
-    "border-width":"1px",
+    "border-width":{
+      "end":"1px"
+    },
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
     "border-style":"solid",
@@ -522,6 +528,10 @@ var Style = {
       "after":"0.4em"
     }
   },
+  /*
+  "td:last-child":{
+    "border-width":"0px"
+  },*/
   "textarea":{
     "display":"inline",
     "embeddable":true,
@@ -532,12 +542,17 @@ var Style = {
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
     "border-style":"solid",
-    "font-style":"italic"
+    "font-style":"italic",
+    "border-width":{
+      "after":"1px"
+    }
   },
   "th":{
     "display":"table-cell",
     "line-rate":1.4,
-    "border-width":"1px",
+    "border-width":{
+      "end":"1px"
+    },
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
     "border-style":"solid",
@@ -548,13 +563,20 @@ var Style = {
       "after":"0.4em"
     }
   },
+  /*
+  "th:last-child":{
+    "border-width":"0px"
+  },*/
   "thead":{
     "display":"table-header-group",
     "font-weight":"bold",
     "background-color":"#c3d9ff",
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
-    "border-style":"solid"
+    "border-style":"solid",
+    "border-width":{
+      "after":"1px"
+    }
   },
   "time":{
     "display":"inline"
@@ -566,7 +588,10 @@ var Style = {
     "display":"table-row",
     "border-collapse":"inherit",
     "border-color":"#a8a8a8",
-    "border-style":"solid"
+    "border-style":"solid",
+    "border-width":{
+      "after":"1px"
+    }
   },
   "track":{
   },
