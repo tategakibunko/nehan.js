@@ -10,26 +10,26 @@ var StyleContext = (function(){
   function StyleContext(markup, parent, force_css){
     this.markup = markup;
     this.parent = parent || null;
+    this.childs = []; // children for this style, updated by appendChild
     if(parent){
       parent.appendChild(this);
     }
 
     // load selector css
-    // 1. static css by normal selector
-    // 2. static css by dynamic callback selector named by "onload"
+    // 1. load selector css by normal selector
+    // 2. load selector css by dynamic callback selector named by "onload"
     this.selectorCss = this._loadSelectorCss(markup, parent);
-    Args.copy(this.selectorCss, this._loadCallbackCss("onload")); // overwrite selector style by callback function if exists.
+    Args.copy(this.selectorCss, this._loadCallbackCss("onload"));
 
     // load inline css
-    // 1. inline css from markup attr 'style'
-    // 2. inline css from constructor argument 'force_css'
+    // 1. load inline css from markup attr 'style'
+    // 2. load inline css from constructor argument 'force_css' if exists
     this.inlineCss = this._loadInlineCss(markup);
-    Args.copy(this.inlineCss, force_css || {}); // overwrite force css if exists.
+    Args.copy(this.inlineCss, force_css || {});
 
     this.display = this._loadDisplay(markup); // required
     this.flow = this._loadFlow(markup, parent); // required
     this.boxSizing = this._loadBoxSizing(markup); // required
-    this.childs = []; // children for this style, updated by appendChild
     var color = this._loadColor(markup, parent);
     if(color){
       this.color = color;
