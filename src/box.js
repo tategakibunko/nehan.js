@@ -34,6 +34,11 @@ var Box = (function(){
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
+    getCssInlineBlock : function(){
+      var css = this.getCssBlock();
+      css.display = "inline-block";
+      return css;
+    },
     getCssHoriInlineImage : function(){
       var css = this.getCssInline();
       css["vertical-align"] = "middle";

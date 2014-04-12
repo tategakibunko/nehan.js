@@ -4911,6 +4911,11 @@ var Box = (function(){
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
+    getCssInlineBlock : function(){
+      var css = this.getCssBlock();
+      css.display = "inline-block";
+      return css;
+    },
     getCssHoriInlineImage : function(){
       var css = this.getCssInline();
       css["vertical-align"] = "middle";
@@ -8772,10 +8777,8 @@ var LayoutEvaluator = (function(){
       return this.evaluate(element);
     },
     evalInlineBlock : function(iblock){
-      var css = iblock.getCssBlock();
-      css.display = "inline-block";
       return Html.tagWrap("div", this.evalBlockElements(iblock, iblock.elements), Args.copy({
-	"style":Css.toString(css),
+	"style":Css.toString(iblock.getCssInlineBlock()),
 	"class":iblock.classes.join(" ")
       }, iblock.getDatasetAttr()));
     },
