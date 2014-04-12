@@ -1,12 +1,14 @@
 var StyleContext = (function(){
-
+  // margin, padding, border-width not allowed in inline-style,
+  // because it may break box-size consistency.
   var is_inline_style_not_allowed = function(name){
-    return List.exists(["padding", "margin", "border"], function(prop){
+    return List.exists(["padding", "margin", "border-width"], function(prop){
       return name.indexOf(prop) >= 0;
     });
   };
 
   // parent : parent style context
+  // force_css : system css that must be applied.
   function StyleContext(markup, parent, force_css){
     this.markup = markup;
     this.parent = parent || null;
@@ -16,15 +18,17 @@ var StyleContext = (function(){
     }
 
     // load selector css
-    // 1. load selector css by normal selector
-    // 2. load selector css by dynamic callback selector named by "onload"
+    // 1. load from normal selector
+    // 2. load from dynamic callback selector named by "onload"
     this.selectorCss = this._loadSelectorCss(markup, parent);
     Args.copy(this.selectorCss, this._loadCallbackCss("onload"));
 
     // load inline css
-    // 1. load inline css from markup attr 'style'
-    // 2. load inline css from constructor argument 'force_css' if exists
+    // 1. load from markup attr 'style'
+    // 2. load from dynamic callback selector named by "inline"
+    // 3. load from constructor argument 'force_css' if exists
     this.inlineCss = this._loadInlineCss(markup);
+    Args.copy(this.inlineCss, this._loadCallbackCss("inline"));
     Args.copy(this.inlineCss, force_css || {});
 
     this.display = this._loadDisplay(markup); // required
