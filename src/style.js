@@ -690,7 +690,7 @@ var Style = {
   ".nehan-disp-inline":{
     "display":"inline"
   },
-  ".nehan-disp-inline-block":{
+  ".nehan-disp-iblock":{
     "display":"inline-block"
   },
   //-------------------------------------------------------

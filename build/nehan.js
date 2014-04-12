@@ -875,7 +875,7 @@ var Style = {
   ".nehan-disp-inline":{
     "display":"inline"
   },
-  ".nehan-disp-inline-block":{
+  ".nehan-disp-iblock":{
     "display":"inline-block"
   },
   //-------------------------------------------------------
@@ -4892,7 +4892,7 @@ var Box = (function(){
     },
     getDatasetAttr : function(){
       // dataset attr of root anonymous line is already captured by parent box.
-      if(this.display === "inline" && this.style.isBlock()){
+      if(this.display === "inline" && this.style.isRootLine()){
 	return {};
       }
       return this.style.getDatasetAttr();
@@ -6473,7 +6473,7 @@ var StyleContext = (function(){
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
       var box = new Box(box_size, this);
-      box.display = "block";
+      box.display = (this.display === "inline-block")? this.display : "block";
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
@@ -6569,11 +6569,20 @@ var StyleContext = (function(){
     isChildBlock : function(){
       return this.isBlock() && !this.isRoot();
     },
+    isInlineBlock : function(){
+      return this.display === "inline-block";
+    },
     isInline : function(){
       return this.display === "inline";
     },
+    // check if current inline is anonymous line block.
+    // 1. line-object is just under the block element.
+    //  <body>this text is included in anonymous line block</body>
+    //
+    // 2. line-object is just under the inline-block element.
+    //  <div style='display:inline-block'>this text is included in anonymous line block</div>
     isRootLine : function(){
-      return this.isBlock();
+      return this.isBlock() || this.isInlineBlock();
     },
     isFloatStart : function(){
       return this.floatDirection && this.floatDirection.isStart();
@@ -6901,9 +6910,42 @@ var StyleContext = (function(){
 	return this.edge.getExtentSize(this.flow);
       }
     },
+    getCssBlock : function(){
+      var css = {};
+      if(this.font){
+	Args.copy(css, this.font.getCss());
+      }
+      if(this.edge){
+	Args.copy(css, this.edge.getCss());
+      }
+      if(this.parent){
+	Args.copy(css, this.parent.flow.getCss());
+      }
+      if(this.color){
+	Args.copy(css, this.color.getCss());
+      }
+      if(this.background){
+	Args.copy(css, this.background.getCss(this.flow));
+      }
+      if(this.letterSpacing && !this.flow.isTextVertical()){
+	css["letter-spacing"] = this.letterSpacing + "px";
+      }
+      css.display = "block";
+      if(this.floatDirection){
+	Args.copy(css, this.floatDirection.getCss(this.flow));
+      }
+      css.overflow = "hidden"; // to avoid margin collapsing
+      if(this.zIndex){
+	css["z-index"] = this.zIndex;
+      }
+      return css;
+    },
     getCssInline : function(){
       var css = {};
       css["line-height"] = "1em";
+      if(this.parent && this.isRootLine()){
+	Args.copy(css, this.parent.flow.getCss());
+      }
       if(this.font){
 	Args.copy(css, this.font.getCss());
       }
@@ -6932,36 +6974,6 @@ var StyleContext = (function(){
 	  css["margin-left"] = css["margin-right"] = "auto";
 	  css["text-align"] = "center";
 	}
-      }
-      return css;
-    },
-    getCssBlock : function(){
-      var css = {};
-      if(this.font){
-	Args.copy(css, this.font.getCss());
-      }
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
-      if(this.parent){
-	Args.copy(css, this.parent.flow.getCss());
-      }
-      if(this.color){
-	Args.copy(css, this.color.getCss());
-      }
-      if(this.background){
-	Args.copy(css, this.background.getCss(this.flow));
-      }
-      if(this.letterSpacing && !this.flow.isTextVertical()){
-	css["letter-spacing"] = this.letterSpacing + "px";
-      }
-      css.display = "block";
-      if(this.floatDirection){
-	Args.copy(css, this.floatDirection.getCss(this.flow));
-      }
-      css.overflow = "hidden"; // to avoid margin collapsing
-      if(this.zIndex){
-	css["z-index"] = this.zIndex;
       }
       return css;
     },
@@ -7677,16 +7689,18 @@ var BlockGenerator = (function(){
     // if tag token, inherit style
     var child_style = (token instanceof Tag)? new StyleContext(token, this.style) : this.style;
 
-    // inline text or inline tag
-    // push back stream, and delegate current style and stream to InlineGenerator
-    if(Token.isText(token) || child_style.isInline()){
+    // if inline text or child inline or inline-block,
+    // push back stream and delegate current style and stream to InlineGenerator
+    if(Token.isText(token) || child_style.isInline() || child_style.isInlineBlock()){
       this.stream.prev();
-      this.setChildLayout(new InlineGenerator(this.style, this.stream));
+
+      // outline context is required when inline generator yields 'inline-block'.
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
 
-    // child block with float
-    // push back stream, and delegate current style and stream to FloatGenerator
+    // if child block with float
+    // push back stream and delegate current style and stream to FloatGenerator
     if(child_style.isFloated()){
       this.stream.prev();
       this.setChildLayout(new FloatGenerator(this.style, this.stream, this.outlineContext));
@@ -7831,8 +7845,9 @@ var BlockGenerator = (function(){
 
 
 var InlineGenerator = (function(){
-  function InlineGenerator(style, stream){
+  function InlineGenerator(style, stream, outline_context){
     LayoutGenerator.call(this, style, stream);
+    this.outlineContext = outline_context || null;
   }
   Class.extend(InlineGenerator, LayoutGenerator);
 
@@ -7909,29 +7924,6 @@ var InlineGenerator = (function(){
       return null;
     }
 
-    // if tag token, inherit style
-    var style = this.style;
-    if(token instanceof Tag){
-      style = new StyleContext(token, this.style);
-
-      // inline -> block, force terminate inline
-      if(style.isBlock()){
-	this.stream.prev();
-	this.setTerminate(true);
-
-	// add line-break to avoid empty-line.
-	// because empty-line is returned as null to parent block generator,
-	// and it causes page-break of parent block generator.
-	context.setLineBreak(true);
-	return null;
-      }
-
-      // inline image
-      if(style.getMarkupName() === "img"){
-	return style.createImage();
-      }
-    }
-
     // inline text
     if(Token.isText(token)){
       // if tcy, wrap all content and return Tcy object and force generator terminate.
@@ -7942,6 +7934,36 @@ var InlineGenerator = (function(){
       return this._getText(context, token);
     }
 
+    // if tag token, inherit style
+    var child_style = this.style;
+    if(token instanceof Tag){
+      child_style = new StyleContext(token, this.style);
+    }
+
+    // if inline -> block, force terminate inline
+    if(child_style.isBlock()){
+      this.stream.prev();
+      this.setTerminate(true);
+
+      // add line-break to avoid empty-line.
+      // because empty-line is returned as null to parent block generator,
+      // and it causes page-break of parent block generator.
+      context.setLineBreak(true);
+      return null;
+    }
+
+    var child_stream = this._createStream(child_style, token);
+
+    // if inline-block, yield immediately, and return as inline element.
+    if(child_style.isInlineBlock()){
+      return (new BlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
+    }
+
+    // inline image
+    if(child_style.getMarkupName() === "img"){
+      return child_style.createImage();
+    }
+
     // inline tag(child inline)
     switch(token.getName()){
     case "br":
@@ -7949,7 +7971,7 @@ var InlineGenerator = (function(){
       return null;
 
     default:
-      this.setChildLayout(new InlineGenerator(style, this._createStream(style, token)));
+      this.setChildLayout(new InlineGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
   };
@@ -8749,6 +8771,14 @@ var LayoutEvaluator = (function(){
       }
       return this.evaluate(element);
     },
+    evalInlineBlock : function(iblock){
+      var css = iblock.getCssBlock();
+      css.display = "inline-block";
+      return Html.tagWrap("div", this.evalBlockElements(iblock, iblock.elements), Args.copy({
+	"style":Css.toString(css),
+	"class":iblock.classes.join(" ")
+      }, iblock.getDatasetAttr()));
+    },
     evalInline : function(line){
       return Html.tagWrap("div", this.evalInlineElements(line, line.elements), {
 	"style":Css.toString(line.getCssInline()),
@@ -8762,6 +8792,9 @@ var LayoutEvaluator = (function(){
       });
     },
     evalInlineElement : function(line, element){
+      if(element.display === "inline-block"){
+	return this.evalInlineBlock(element);
+      }
       if(element instanceof Box){
 	switch(element.style.getMarkupName()){
 	case "img": return this.evalInlineImage(line, element);
@@ -8795,10 +8828,6 @@ var VertEvaluator = (function(){
     LayoutEvaluator.call(this);
   }
   Class.extend(VertEvaluator, LayoutEvaluator);
-
-  VertEvaluator.prototype.evalInlineBlock = function(iblock){
-    return this.evalBlock(iblock);
-  };
 
   VertEvaluator.prototype.evalInlineChild = function(line, child){
     return this.evalInline(child);
@@ -8849,7 +8878,8 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype.evalRt = function(line, ruby){
     var rt = (new InlineGenerator(
       new StyleContext(ruby.rt, line.style),
-      new TokenStream(ruby.getRtString())
+      new TokenStream(ruby.getRtString()),
+      null // outline context
     )).yield();
     Args.copy(rt.css, ruby.getCssVertRt(line));
     return this.evaluate(rt);
@@ -9032,11 +9062,6 @@ var HoriEvaluator = (function(){
     LayoutEvaluator.call(this);
   }
   Class.extend(HoriEvaluator, LayoutEvaluator);
-
-  HoriEvaluator.prototype.evalInlineBlock = function(iblock){
-    iblock.css.display = "inline-block";
-    return this.evalBlock(iblock);
-  };
 
   HoriEvaluator.prototype.evalBlockImage = function(image){
     return Html.tagSingle("img", Args.copy({

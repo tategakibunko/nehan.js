@@ -4,11 +4,6 @@ var HoriEvaluator = (function(){
   }
   Class.extend(HoriEvaluator, LayoutEvaluator);
 
-  HoriEvaluator.prototype.evalInlineBlock = function(iblock){
-    iblock.css.display = "inline-block";
-    return this.evalBlock(iblock);
-  };
-
   HoriEvaluator.prototype.evalBlockImage = function(image){
     return Html.tagSingle("img", Args.copy({
       "src":image.style.getMarkupAttr("src"),

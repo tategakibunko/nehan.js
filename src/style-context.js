@@ -129,7 +129,7 @@ var StyleContext = (function(){
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
       var box = new Box(box_size, this);
-      box.display = "block";
+      box.display = (this.display === "inline-block")? this.display : "block";
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
@@ -225,11 +225,20 @@ var StyleContext = (function(){
     isChildBlock : function(){
       return this.isBlock() && !this.isRoot();
     },
+    isInlineBlock : function(){
+      return this.display === "inline-block";
+    },
     isInline : function(){
       return this.display === "inline";
     },
+    // check if current inline is anonymous line block.
+    // 1. line-object is just under the block element.
+    //  <body>this text is included in anonymous line block</body>
+    //
+    // 2. line-object is just under the inline-block element.
+    //  <div style='display:inline-block'>this text is included in anonymous line block</div>
     isRootLine : function(){
-      return this.isBlock();
+      return this.isBlock() || this.isInlineBlock();
     },
     isFloatStart : function(){
       return this.floatDirection && this.floatDirection.isStart();
@@ -557,9 +566,42 @@ var StyleContext = (function(){
 	return this.edge.getExtentSize(this.flow);
       }
     },
+    getCssBlock : function(){
+      var css = {};
+      if(this.font){
+	Args.copy(css, this.font.getCss());
+      }
+      if(this.edge){
+	Args.copy(css, this.edge.getCss());
+      }
+      if(this.parent){
+	Args.copy(css, this.parent.flow.getCss());
+      }
+      if(this.color){
+	Args.copy(css, this.color.getCss());
+      }
+      if(this.background){
+	Args.copy(css, this.background.getCss(this.flow));
+      }
+      if(this.letterSpacing && !this.flow.isTextVertical()){
+	css["letter-spacing"] = this.letterSpacing + "px";
+      }
+      css.display = "block";
+      if(this.floatDirection){
+	Args.copy(css, this.floatDirection.getCss(this.flow));
+      }
+      css.overflow = "hidden"; // to avoid margin collapsing
+      if(this.zIndex){
+	css["z-index"] = this.zIndex;
+      }
+      return css;
+    },
     getCssInline : function(){
       var css = {};
       css["line-height"] = "1em";
+      if(this.parent && this.isRootLine()){
+	Args.copy(css, this.parent.flow.getCss());
+      }
       if(this.font){
 	Args.copy(css, this.font.getCss());
       }
@@ -588,36 +630,6 @@ var StyleContext = (function(){
 	  css["margin-left"] = css["margin-right"] = "auto";
 	  css["text-align"] = "center";
 	}
-      }
-      return css;
-    },
-    getCssBlock : function(){
-      var css = {};
-      if(this.font){
-	Args.copy(css, this.font.getCss());
-      }
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
-      if(this.parent){
-	Args.copy(css, this.parent.flow.getCss());
-      }
-      if(this.color){
-	Args.copy(css, this.color.getCss());
-      }
-      if(this.background){
-	Args.copy(css, this.background.getCss(this.flow));
-      }
-      if(this.letterSpacing && !this.flow.isTextVertical()){
-	css["letter-spacing"] = this.letterSpacing + "px";
-      }
-      css.display = "block";
-      if(this.floatDirection){
-	Args.copy(css, this.floatDirection.getCss(this.flow));
-      }
-      css.overflow = "hidden"; // to avoid margin collapsing
-      if(this.zIndex){
-	css["z-index"] = this.zIndex;
       }
       return css;
     },

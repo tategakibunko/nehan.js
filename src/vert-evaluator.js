@@ -4,10 +4,6 @@ var VertEvaluator = (function(){
   }
   Class.extend(VertEvaluator, LayoutEvaluator);
 
-  VertEvaluator.prototype.evalInlineBlock = function(iblock){
-    return this.evalBlock(iblock);
-  };
-
   VertEvaluator.prototype.evalInlineChild = function(line, child){
     return this.evalInline(child);
   };
@@ -57,7 +53,8 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype.evalRt = function(line, ruby){
     var rt = (new InlineGenerator(
       new StyleContext(ruby.rt, line.style),
-      new TokenStream(ruby.getRtString())
+      new TokenStream(ruby.getRtString()),
+      null // outline context
     )).yield();
     Args.copy(rt.css, ruby.getCssVertRt(line));
     return this.evaluate(rt);

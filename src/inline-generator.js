@@ -1,6 +1,7 @@
 var InlineGenerator = (function(){
-  function InlineGenerator(style, stream){
+  function InlineGenerator(style, stream, outline_context){
     LayoutGenerator.call(this, style, stream);
+    this.outlineContext = outline_context || null;
   }
   Class.extend(InlineGenerator, LayoutGenerator);
 
@@ -77,29 +78,6 @@ var InlineGenerator = (function(){
       return null;
     }
 
-    // if tag token, inherit style
-    var style = this.style;
-    if(token instanceof Tag){
-      style = new StyleContext(token, this.style);
-
-      // inline -> block, force terminate inline
-      if(style.isBlock()){
-	this.stream.prev();
-	this.setTerminate(true);
-
-	// add line-break to avoid empty-line.
-	// because empty-line is returned as null to parent block generator,
-	// and it causes page-break of parent block generator.
-	context.setLineBreak(true);
-	return null;
-      }
-
-      // inline image
-      if(style.getMarkupName() === "img"){
-	return style.createImage();
-      }
-    }
-
     // inline text
     if(Token.isText(token)){
       // if tcy, wrap all content and return Tcy object and force generator terminate.
@@ -110,6 +88,36 @@ var InlineGenerator = (function(){
       return this._getText(context, token);
     }
 
+    // if tag token, inherit style
+    var child_style = this.style;
+    if(token instanceof Tag){
+      child_style = new StyleContext(token, this.style);
+    }
+
+    // if inline -> block, force terminate inline
+    if(child_style.isBlock()){
+      this.stream.prev();
+      this.setTerminate(true);
+
+      // add line-break to avoid empty-line.
+      // because empty-line is returned as null to parent block generator,
+      // and it causes page-break of parent block generator.
+      context.setLineBreak(true);
+      return null;
+    }
+
+    var child_stream = this._createStream(child_style, token);
+
+    // if inline-block, yield immediately, and return as inline element.
+    if(child_style.isInlineBlock()){
+      return (new BlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
+    }
+
+    // inline image
+    if(child_style.getMarkupName() === "img"){
+      return child_style.createImage();
+    }
+
     // inline tag(child inline)
     switch(token.getName()){
     case "br":
@@ -117,7 +125,7 @@ var InlineGenerator = (function(){
       return null;
 
     default:
-      this.setChildLayout(new InlineGenerator(style, this._createStream(style, token)));
+      this.setChildLayout(new InlineGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
   };

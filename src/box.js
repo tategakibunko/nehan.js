@@ -15,7 +15,7 @@ var Box = (function(){
     },
     getDatasetAttr : function(){
       // dataset attr of root anonymous line is already captured by parent box.
-      if(this.display === "inline" && this.style.isBlock()){
+      if(this.display === "inline" && this.style.isRootLine()){
 	return {};
       }
       return this.style.getDatasetAttr();

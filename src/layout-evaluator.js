@@ -34,6 +34,14 @@ var LayoutEvaluator = (function(){
       }
       return this.evaluate(element);
     },
+    evalInlineBlock : function(iblock){
+      var css = iblock.getCssBlock();
+      css.display = "inline-block";
+      return Html.tagWrap("div", this.evalBlockElements(iblock, iblock.elements), Args.copy({
+	"style":Css.toString(css),
+	"class":iblock.classes.join(" ")
+      }, iblock.getDatasetAttr()));
+    },
     evalInline : function(line){
       return Html.tagWrap("div", this.evalInlineElements(line, line.elements), {
 	"style":Css.toString(line.getCssInline()),
@@ -47,6 +55,9 @@ var LayoutEvaluator = (function(){
       });
     },
     evalInlineElement : function(line, element){
+      if(element.display === "inline-block"){
+	return this.evalInlineBlock(element);
+      }
       if(element instanceof Box){
 	switch(element.style.getMarkupName()){
 	case "img": return this.evalInlineImage(line, element);
