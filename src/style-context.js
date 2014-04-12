@@ -252,6 +252,10 @@ var StyleContext = (function(){
     isTextHorizontal : function(){
       return this.flow.isTextHorizontal();
     },
+    isPre : function(){
+      var white_space = this.getCssAttr("white-space", "normal");
+      return white_space === "pre";
+    },
     isFirstChild : function(){
       return this.parent? this.parent.getNthChild(0) === this : false;
     },

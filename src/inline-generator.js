@@ -118,6 +118,12 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._getText = function(context, token){
+    // new-line
+    if(token instanceof Char && token.isNewLineChar()){
+      if(this.style.isPre()){
+	return null; // break line at new-line char.
+      }
+    }
     if(!token.hasMetrics()){
       // if charactor token, set kerning before setting metrics.
       // because some additional space is added to it in some case.
