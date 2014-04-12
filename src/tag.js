@@ -1,6 +1,4 @@
 var Tag = (function (){
-  var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
-
   function Tag(src, content_raw){
     this._type = "tag";
     this.src = src;
@@ -60,12 +58,6 @@ var Tag = (function (){
     getContentRaw : function(){
       return this.contentRaw;
     },
-    getContent : function(style){
-      var before = this._getPseudoBefore(style);
-      var after = this._getPseudoAfter(style);
-      var content = this._setPseudoFirst(style, [before, this.contentRaw, after].join(""));
-      return content;
-    },
     getSrc : function(){
       return this.src;
     },
@@ -87,7 +79,7 @@ var Tag = (function (){
     hasAttr : function(name){
       return (typeof this.attr.name !== "undefined");
     },
-    hasPseudoElement : function(){
+    isPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
     isAnchorTag : function(){
@@ -99,12 +91,6 @@ var Tag = (function (){
     },
     isEmpty : function(){
       return this.contentRaw === "";
-    },
-    _getSelectorValue : function(style){
-      if(this.hasPseudoElement()){
-	return Selectors.getValuePe(style.parent || null, this.getName());
-      }
-      return Selectors.getValue(style);
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
@@ -128,28 +114,6 @@ var Tag = (function (){
       return List.map(classes, function(class_name){
 	return "." + class_name;
       });
-    },
-    _setPseudoFirst : function(style, content){
-      var first_letter = Selectors.getValuePe(style, "first-letter");
-      content = Obj.isEmpty(first_letter)? content : this._setPseudoFirstLetter(content);
-      var first_line = Selectors.getValuePe(style, "first-line");
-      return Obj.isEmpty(first_line)? content : this._setPseudoFirstLine(content);
-    },
-    _setPseudoFirstLetter : function(content){
-      return content.replace(rex_first_letter, function(match, p1, p2, p3){
-	return p1 + Html.tagWrap("first-letter", p3);
-      });
-    },
-    _setPseudoFirstLine : function(content){
-      return Html.tagWrap("first-line", content);
-    },
-    _getPseudoBefore : function(style){
-      var attr = Selectors.getValuePe(style, "before");
-      return Obj.isEmpty(attr)? "" : Html.tagWrap("before", attr.content || "");
-    },
-    _getPseudoAfter : function(style){
-      var attr = Selectors.getValuePe(style, "after");
-      return Obj.isEmpty(attr)? "" : Html.tagWrap("after", attr.content || "");
     },
     _parseDataset : function(){
       for(var name in this.attr){

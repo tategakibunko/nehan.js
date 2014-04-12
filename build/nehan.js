@@ -2477,8 +2477,6 @@ var TagAttrParser = (function(){
 })();
 
 var Tag = (function (){
-  var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
-
   function Tag(src, content_raw){
     this._type = "tag";
     this.src = src;
@@ -2538,12 +2536,6 @@ var Tag = (function (){
     getContentRaw : function(){
       return this.contentRaw;
     },
-    getContent : function(style){
-      var before = this._getPseudoBefore(style);
-      var after = this._getPseudoAfter(style);
-      var content = this._setPseudoFirst(style, [before, this.contentRaw, after].join(""));
-      return content;
-    },
     getSrc : function(){
       return this.src;
     },
@@ -2565,7 +2557,7 @@ var Tag = (function (){
     hasAttr : function(name){
       return (typeof this.attr.name !== "undefined");
     },
-    hasPseudoElement : function(){
+    isPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
     isAnchorTag : function(){
@@ -2577,12 +2569,6 @@ var Tag = (function (){
     },
     isEmpty : function(){
       return this.contentRaw === "";
-    },
-    _getSelectorValue : function(style){
-      if(this.hasPseudoElement()){
-	return Selectors.getValuePe(style.parent || null, this.getName());
-      }
-      return Selectors.getValue(style);
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
@@ -2606,28 +2592,6 @@ var Tag = (function (){
       return List.map(classes, function(class_name){
 	return "." + class_name;
       });
-    },
-    _setPseudoFirst : function(style, content){
-      var first_letter = Selectors.getValuePe(style, "first-letter");
-      content = Obj.isEmpty(first_letter)? content : this._setPseudoFirstLetter(content);
-      var first_line = Selectors.getValuePe(style, "first-line");
-      return Obj.isEmpty(first_line)? content : this._setPseudoFirstLine(content);
-    },
-    _setPseudoFirstLetter : function(content){
-      return content.replace(rex_first_letter, function(match, p1, p2, p3){
-	return p1 + Html.tagWrap("first-letter", p3);
-      });
-    },
-    _setPseudoFirstLine : function(content){
-      return Html.tagWrap("first-line", content);
-    },
-    _getPseudoBefore : function(style){
-      var attr = Selectors.getValuePe(style, "before");
-      return Obj.isEmpty(attr)? "" : Html.tagWrap("before", attr.content || "");
-    },
-    _getPseudoAfter : function(style){
-      var attr = Selectors.getValuePe(style, "after");
-      return Obj.isEmpty(attr)? "" : Html.tagWrap("after", attr.content || "");
     },
     _parseDataset : function(){
       for(var name in this.attr){
@@ -6372,6 +6336,8 @@ var TextAligns = {
 };
 
 var StyleContext = (function(){
+  var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+
   // parent : parent style context
   // force_css : system css that must be applied.
   function StyleContext(markup, parent, force_css){
@@ -6718,6 +6684,30 @@ var StyleContext = (function(){
     getMarkupPos : function(){
       return this.markup.pos;
     },
+    getContent : function(markup){
+      var content = markup.getContentRaw();
+      var before = Selectors.getValuePe(this, "before");
+      if(!Obj.isEmpty(before)){
+	content = Html.tagWrap("before", before.content || "") + content;
+      }
+      var after = Selectors.getValuePe(this, "after");
+      if(!Obj.isEmpty(after)){
+	content = content + Html.tagWrap("after", after.content || "");
+      }
+      var first_letter = Selectors.getValuePe(this, "first-letter");
+      if(!Obj.isEmpty(first_letter)){
+	content = content.replace(rex_first_letter, function(match, p1, p2, p3){
+	  return p1 + Html.tagWrap("first-letter", p3);
+	});
+      }
+      var first_line = Selectors.getValuePe(this, "first-line");
+      if(!Obj.isEmpty(first_line)){
+	content = Html.tagWrap("first-line", content);
+      }
+      return content;
+    },
+    _getPseudoAfter : function(){
+    },
     getHeaderRank : function(){
       return this.markup.getHeaderRank();
     },
@@ -7044,7 +7034,7 @@ var StyleContext = (function(){
       });
     },
     _loadSelectorCss : function(markup, parent){
-      if(markup.hasPseudoElement()){
+      if(markup.isPseudoElement()){
 	return Selectors.getValuePe(parent, markup.getName());
       }
       return Selectors.getValue(this);
@@ -7598,10 +7588,11 @@ var LayoutGenerator = (function(){
     );
   };
 
-  LayoutGenerator.prototype._createStream = function(style, tag){
-    switch(tag.getName()){
-    case "ruby": return new RubyTokenStream(tag);
-    default: return new TokenStream(tag.getContent(style));
+  LayoutGenerator.prototype._createStream = function(style, markup){
+    switch(markup.getName()){
+    case "ruby": return new RubyTokenStream(markup);
+    //default: return new TokenStream(markup.getContent(style));
+    default: return new TokenStream(style.getContent(markup));
     } 
   };
 

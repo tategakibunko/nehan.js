@@ -108,10 +108,11 @@ var LayoutGenerator = (function(){
     );
   };
 
-  LayoutGenerator.prototype._createStream = function(style, tag){
-    switch(tag.getName()){
-    case "ruby": return new RubyTokenStream(tag);
-    default: return new TokenStream(tag.getContent(style));
+  LayoutGenerator.prototype._createStream = function(style, markup){
+    switch(markup.getName()){
+    case "ruby": return new RubyTokenStream(markup);
+    //default: return new TokenStream(markup.getContent(style));
+    default: return new TokenStream(style.getContent(markup));
     } 
   };
 

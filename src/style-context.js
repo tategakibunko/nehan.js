@@ -1,4 +1,6 @@
 var StyleContext = (function(){
+  var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+
   // parent : parent style context
   // force_css : system css that must be applied.
   function StyleContext(markup, parent, force_css){
@@ -345,6 +347,30 @@ var StyleContext = (function(){
     getMarkupPos : function(){
       return this.markup.pos;
     },
+    getContent : function(markup){
+      var content = markup.getContentRaw();
+      var before = Selectors.getValuePe(this, "before");
+      if(!Obj.isEmpty(before)){
+	content = Html.tagWrap("before", before.content || "") + content;
+      }
+      var after = Selectors.getValuePe(this, "after");
+      if(!Obj.isEmpty(after)){
+	content = content + Html.tagWrap("after", after.content || "");
+      }
+      var first_letter = Selectors.getValuePe(this, "first-letter");
+      if(!Obj.isEmpty(first_letter)){
+	content = content.replace(rex_first_letter, function(match, p1, p2, p3){
+	  return p1 + Html.tagWrap("first-letter", p3);
+	});
+      }
+      var first_line = Selectors.getValuePe(this, "first-line");
+      if(!Obj.isEmpty(first_line)){
+	content = Html.tagWrap("first-line", content);
+      }
+      return content;
+    },
+    _getPseudoAfter : function(){
+    },
     getHeaderRank : function(){
       return this.markup.getHeaderRank();
     },
@@ -671,7 +697,7 @@ var StyleContext = (function(){
       });
     },
     _loadSelectorCss : function(markup, parent){
-      if(markup.hasPseudoElement()){
+      if(markup.isPseudoElement()){
 	return Selectors.getValuePe(parent, markup.getName());
       }
       return Selectors.getValue(this);
