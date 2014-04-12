@@ -40,6 +40,9 @@ var Tag = (function (){
       }
       return (typeof def_value !== "undefined")? def_value : null;
     },
+    // get dataset by name(camel case)
+    // getDataset('name') => 'taro'
+    // getDataset('familyName') => 'yamada'
     getDataset : function(name, def_value){
       var ret = this.datasetCamel[name];
       if(typeof ret !== "undefined"){
@@ -47,12 +50,8 @@ var Tag = (function (){
       }
       return (typeof def_value !== "undefined")? def_value : null;
     },
-    // dataset name and value object => {id:xxx, name:yyy}
-    getDatasetAttrs : function(){
-      return this.datasetCamel;
-    },
     // dataset name(with "data-" prefix) and value object => {"data-id":xxx, "data-name":yyy}
-    getDatasetAttrsRaw : function(){
+    getDatasetAttrs : function(){
       return this.datasetRaw;
     },
     getContent : function(){
