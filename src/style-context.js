@@ -1,12 +1,4 @@
 var StyleContext = (function(){
-  // margin, padding, border-width not allowed in inline-style,
-  // because it may break box-size consistency.
-  var is_inline_style_not_allowed = function(name){
-    return List.exists(["padding", "margin", "border-width"], function(prop){
-      return name.indexOf(prop) >= 0;
-    });
-  };
-
   // parent : parent style context
   // force_css : system css that must be applied.
   function StyleContext(markup, parent, force_css){
@@ -685,10 +677,8 @@ var StyleContext = (function(){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]).toLowerCase();
-	  if(!is_inline_style_not_allowed(prop)){
-	    var value = Utils.trim(nv[1]);
-	    ret[prop] = value;
-	  }
+	  var value = Utils.trim(nv[1]);
+	  ret[prop] = value;
 	}
 	return ret;
       });
