@@ -17,10 +17,10 @@ var LayoutEvaluator = (function(){
       }
     },
     evalBlock : function(block){
-      return Html.tagWrap("div", this.evalBlockElements(block, block.elements), {
+      return Html.tagWrap("div", this.evalBlockElements(block, block.elements), Args.copy({
 	"style":Css.toString(block.getCssBlock()),
 	"class":block.classes.join(" ")
-      });
+      }, block.getDatasetAttr()));
     },
     evalBlockElements : function(parent, elements){
       var self = this;

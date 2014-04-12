@@ -10,34 +10,37 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype.evalBlockImage = function(image){
-    return Html.tagSingle("img", {
+    return Html.tagSingle("img", Args.copy({
       "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssBlock()),
       "class":image.classes.join(" ")
-    });
+    }, image.getDatasetAttr()));
   };
 
   HoriEvaluator.prototype.evalInlineImage = function(line, image){
-    return Html.tagSingle("img", {
+    return Html.tagSingle("img", Args.copy({
       "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssHoriInlineImage()),
       "class":image.classes.join(" ")
-    });
+    }, image.getDatasetAttr()));
   };
 
   // notice that horizontal inline-child uses <span> wrapping(except for <a>).
   HoriEvaluator.prototype.evalInlineChild = function(line, child){
-    return Html.tagWrap("span", this.evalInlineElements(child, child.elements), {
+    return Html.tagWrap("span", this.evalInlineElements(child, child.elements), Args.copy({
       "style":Css.toString(child.getCssInline()),
       "class":line.classes.join(" ")
-    });
+    }, child.getDatasetAttr()));
   };
 
   HoriEvaluator.prototype.evalLink = function(line, link){
-    return Html.tagWrap("a", this.evalInlineElements(link, link.elements), {
+    var link_content = link.style.getMarkupContent().substring(0, Config.defaultLineTitleLength);
+    var title = link.style.getMarkupAttr("title") || link_content;
+    return Html.tagWrap("a", this.evalInlineElements(link, link.elements), Args.copy({
       "href":link.style.getMarkupAttr("href"),
-      "class":link.classes.join(" ")
-    });
+      "class":link.classes.join(" "),
+      "title":title
+    }, link.getDatasetAttr()));
   };
 
   HoriEvaluator.prototype.evalRuby = function(line, ruby){

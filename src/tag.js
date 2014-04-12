@@ -51,7 +51,7 @@ var Tag = (function (){
       return (typeof def_value !== "undefined")? def_value : null;
     },
     // dataset name(with "data-" prefix) and value object => {"data-id":xxx, "data-name":yyy}
-    getDatasetAttrs : function(){
+    getDatasetAttr : function(){
       return this.datasetRaw;
     },
     getContent : function(){

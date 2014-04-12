@@ -169,7 +169,6 @@ var StyleContext = (function(){
       var line_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
       var line = new Box(line_size, this);
-      line.style = this;
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
       line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.markup.getName());
@@ -330,6 +329,9 @@ var StyleContext = (function(){
     },
     getSelectorCssAttr : function(name){
       return this.selectorCss[name] || null;
+    },
+    getDatasetAttr : function(){
+      return this.markup.getDatasetAttr();
     },
     hasMarkupClassName : function(class_name){
       return this.markup.hasClass(class_name);

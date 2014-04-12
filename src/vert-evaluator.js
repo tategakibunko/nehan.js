@@ -13,26 +13,29 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype.evalLink = function(line, link){
-    return Html.tagWrap("a", this.evalInline(link), {
+    var link_content = link.style.getMarkupContent().substring(0, Config.defaultLineTitleLength);
+    var title = link.style.getMarkupAttr("title") || link_content;
+    return Html.tagWrap("a", this.evalInline(link), Args.copy({
       "href":link.style.getMarkupAttr("href"),
-      "class":link.classes.join(" ")
-    });
+      "class":link.classes.join(" "),
+      "title":title
+    }, link.getDatasetAttr()));
   };
 
   VertEvaluator.prototype.evalBlockImage = function(image){
-    return Html.tagSingle("img", {
+    return Html.tagSingle("img", Args.copy({
       "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssBlock()),
       "class":image.classes.join(" ")
-    });
+    }, image.getDatasetAttr()));
   };
 
   VertEvaluator.prototype.evalInlineImage = function(line, image){
-    return Html.tagSingle("img", {
+    return Html.tagSingle("img", Args.copy({
       "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssInline()),
       "class":image.classes.join(" ")
-    }) + "<br />";
+    }, image.getDatasetAttr())) + "<br />";
   };
 
   VertEvaluator.prototype.evalRuby = function(line, ruby){

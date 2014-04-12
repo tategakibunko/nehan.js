@@ -9,5 +9,6 @@ var Config = {
   useStrictWordMetrics: true,
   iboxEnable:false,
   maxBase:36,
-  lexingBufferLen : 2000
+  lexingBufferLen : 2000,
+  defaultLinkTitleLength : 16
 };

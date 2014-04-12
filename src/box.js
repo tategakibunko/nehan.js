@@ -13,6 +13,13 @@ var Box = (function(){
 	this.getBoxMeasure(), this.getBoxExtent()
       );
     },
+    getDatasetAttr : function(){
+      // dataset attr of root anonymous line is already captured by parent box.
+      if(this.display === "inline" && this.style.isBlock()){
+	return {};
+      }
+      return this.style.getDatasetAttr();
+    },
     getCssBlock : function(){
       var css = {};
       Args.copy(css, this.style.getCssBlock()); // base style

@@ -47,7 +47,8 @@ var Config = {
   useStrictWordMetrics: true,
   iboxEnable:false,
   maxBase:36,
-  lexingBufferLen : 2000
+  lexingBufferLen : 2000,
+  defaultLinkTitleLength : 16
 };
 
 var Layout = {
@@ -2519,6 +2520,8 @@ var Tag = (function (){
       return (typeof def_value !== "undefined")? def_value : null;
     },
     // get dataset by name(camel case)
+    // getDataset('name') => 'taro'
+    // getDataset('familyName') => 'yamada'
     getDataset : function(name, def_value){
       var ret = this.datasetCamel[name];
       if(typeof ret !== "undefined"){
@@ -2527,7 +2530,7 @@ var Tag = (function (){
       return (typeof def_value !== "undefined")? def_value : null;
     },
     // dataset name(with "data-" prefix) and value object => {"data-id":xxx, "data-name":yyy}
-    getDatasetAttrs : function(){
+    getDatasetAttr : function(){
       return this.datasetRaw;
     },
     getContent : function(){
@@ -4887,6 +4890,13 @@ var Box = (function(){
 	this.getBoxMeasure(), this.getBoxExtent()
       );
     },
+    getDatasetAttr : function(){
+      // dataset attr of root anonymous line is already captured by parent box.
+      if(this.display === "inline" && this.style.isBlock()){
+	return {};
+      }
+      return this.style.getDatasetAttr();
+    },
     getCssBlock : function(){
       var css = {};
       Args.copy(css, this.style.getCssBlock()); // base style
@@ -6503,7 +6513,6 @@ var StyleContext = (function(){
       var line_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
       var line = new Box(line_size, this);
-      line.style = this;
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
       line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.markup.getName());
@@ -6664,6 +6673,9 @@ var StyleContext = (function(){
     },
     getSelectorCssAttr : function(name){
       return this.selectorCss[name] || null;
+    },
+    getDatasetAttr : function(){
+      return this.markup.getDatasetAttr();
     },
     hasMarkupClassName : function(class_name){
       return this.markup.hasClass(class_name);
@@ -8720,10 +8732,10 @@ var LayoutEvaluator = (function(){
       }
     },
     evalBlock : function(block){
-      return Html.tagWrap("div", this.evalBlockElements(block, block.elements), {
+      return Html.tagWrap("div", this.evalBlockElements(block, block.elements), Args.copy({
 	"style":Css.toString(block.getCssBlock()),
 	"class":block.classes.join(" ")
-      });
+      }, block.getDatasetAttr()));
     },
     evalBlockElements : function(parent, elements){
       var self = this;
@@ -8793,26 +8805,29 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype.evalLink = function(line, link){
-    return Html.tagWrap("a", this.evalInline(link), {
+    var link_content = link.style.getMarkupContent().substring(0, Config.defaultLineTitleLength);
+    var title = link.style.getMarkupAttr("title") || link_content;
+    return Html.tagWrap("a", this.evalInline(link), Args.copy({
       "href":link.style.getMarkupAttr("href"),
-      "class":link.classes.join(" ")
-    });
+      "class":link.classes.join(" "),
+      "title":title
+    }, link.getDatasetAttr()));
   };
 
   VertEvaluator.prototype.evalBlockImage = function(image){
-    return Html.tagSingle("img", {
+    return Html.tagSingle("img", Args.copy({
       "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssBlock()),
       "class":image.classes.join(" ")
-    });
+    }, image.getDatasetAttr()));
   };
 
   VertEvaluator.prototype.evalInlineImage = function(line, image){
-    return Html.tagSingle("img", {
+    return Html.tagSingle("img", Args.copy({
       "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssInline()),
       "class":image.classes.join(" ")
-    }) + "<br />";
+    }, image.getDatasetAttr())) + "<br />";
   };
 
   VertEvaluator.prototype.evalRuby = function(line, ruby){
@@ -9022,34 +9037,37 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype.evalBlockImage = function(image){
-    return Html.tagSingle("img", {
+    return Html.tagSingle("img", Args.copy({
       "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssBlock()),
       "class":image.classes.join(" ")
-    });
+    }, image.getDatasetAttr()));
   };
 
   HoriEvaluator.prototype.evalInlineImage = function(line, image){
-    return Html.tagSingle("img", {
+    return Html.tagSingle("img", Args.copy({
       "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssHoriInlineImage()),
       "class":image.classes.join(" ")
-    });
+    }, image.getDatasetAttr()));
   };
 
   // notice that horizontal inline-child uses <span> wrapping(except for <a>).
   HoriEvaluator.prototype.evalInlineChild = function(line, child){
-    return Html.tagWrap("span", this.evalInlineElements(child, child.elements), {
+    return Html.tagWrap("span", this.evalInlineElements(child, child.elements), Args.copy({
       "style":Css.toString(child.getCssInline()),
       "class":line.classes.join(" ")
-    });
+    }, child.getDatasetAttr()));
   };
 
   HoriEvaluator.prototype.evalLink = function(line, link){
-    return Html.tagWrap("a", this.evalInlineElements(link, link.elements), {
+    var link_content = link.style.getMarkupContent().substring(0, Config.defaultLineTitleLength);
+    var title = link.style.getMarkupAttr("title") || link_content;
+    return Html.tagWrap("a", this.evalInlineElements(link, link.elements), Args.copy({
       "href":link.style.getMarkupAttr("href"),
-      "class":link.classes.join(" ")
-    });
+      "class":link.classes.join(" "),
+      "title":title
+    }, link.getDatasetAttr()));
   };
 
   HoriEvaluator.prototype.evalRuby = function(line, ruby){
