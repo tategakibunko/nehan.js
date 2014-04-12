@@ -6587,10 +6587,19 @@ var StyleContext = (function(){
       }
       return line;
     },
-    // dynamic change inline-style by 'layout' callback
+    // nehan.js can change inline-style dynamically by setting 'layout' callback in style.
+    //
+    // [example]
+    // engine.setStyle("p.more-than-extent-100", {
+    //   "layout" : function(style, context){
+    //	    if(context.getBlockRestExtent() < 100){
+    //        return {"page-break-before":"always"};
+    //      }
+    //   }
+    // });
+    //
     onLayoutContext : function(context){
       Args.copy(this.inlineCss, this._loadCallbackCss("layout", context));
-      return this;
     },
     isBlock : function(){
       switch(this.display){
@@ -7073,10 +7082,9 @@ var StyleContext = (function(){
 	return ret;
       });
     },
-    _loadCallbackCss : function(name, args){
-      args = args || {};
+    _loadCallbackCss : function(name, context){
       var callback = this.getSelectorCssAttr(name);
-      return (callback && typeof callback === "function")? (callback(this, args) || {}) : {};
+      return (callback && typeof callback === "function")? (callback(this, context || null) || {}) : {};
     },
     _loadDisplay : function(markup){
       return this.getCssAttr("display", "inline");
@@ -7509,6 +7517,9 @@ var LayoutGenerator = (function(){
     this._terminate = false; // used to force terminate generator.
   }
 
+  // 1. create child layout context from parent layout context.
+  // 2. call 'layout' callback defined in style-context if exists.
+  // 3. return _yield that is implemented by child class.
   LayoutGenerator.prototype.yield = function(parent_context){
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
     this.style.onLayoutContext(context);

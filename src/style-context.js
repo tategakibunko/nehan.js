@@ -204,13 +204,13 @@ var StyleContext = (function(){
     // engine.setStyle("p.more-than-extent-100", {
     //   "layout" : function(style, context){
     //	    if(context.getBlockRestExtent() < 100){
-    //        style.setCssAttr("page-break-before", "always");
+    //        return {"page-break-before":"always"};
     //      }
     //   }
     // });
     //
     onLayoutContext : function(context){
-      this._loadCallbackCss("layout", context);
+      Args.copy(this.inlineCss, this._loadCallbackCss("layout", context));
     },
     isBlock : function(){
       switch(this.display){
@@ -693,10 +693,9 @@ var StyleContext = (function(){
 	return ret;
       });
     },
-    _loadCallbackCss : function(name, args){
-      args = args || {};
+    _loadCallbackCss : function(name, context){
       var callback = this.getSelectorCssAttr(name);
-      return (callback && typeof callback === "function")? (callback(this, args) || {}) : {};
+      return (callback && typeof callback === "function")? (callback(this, context || null) || {}) : {};
     },
     _loadDisplay : function(markup){
       return this.getCssAttr("display", "inline");
