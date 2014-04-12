@@ -333,6 +333,11 @@ var StyleContext = (function(){
     getMarkupName : function(){
       return this.markup.getName();
     },
+    // do not call this.getMarkupAtr("id").
+    // because all the id and classNames are "nehan-" prefixed in nehan.js.
+    getMarkupId : function(){
+      return this.markup.id; // if markup is <p id="foo">, markup.id is "nehan-foo".
+    },
     getMarkupContent : function(){
       return this.markup.getContent(this);
     },

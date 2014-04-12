@@ -1966,7 +1966,7 @@ var TypeSelector = (function(){
 	return false;
       }
       // id selector
-      if(this.id && style.getMarkupAttr("id") != this.id){
+      if(this.id && style.getMarkupId() != this.id){
 	return false;
       }
       // attribute selectgor
@@ -2485,7 +2485,7 @@ var Tag = (function (){
     this.contentRaw = content_raw || "";
     this.name = this._parseName(this.src);
     this.attr = TagAttrParser.parse(this.src);
-    this.id = this.attr.id || "";
+    this.id = this._parseId();
     this.classes = this._parseClasses(this.attr["class"] || "");
     this.dataset = {}; // dataset with no "data-" prefixes => {id:"10", name:"taro"} 
     this.datasetRaw = {}; // dataset with "data-" prefixes => {"data-id":"10", "data-name":"taro"}
@@ -6721,6 +6721,11 @@ var StyleContext = (function(){
     },
     getMarkupName : function(){
       return this.markup.getName();
+    },
+    // do not call this.getMarkupAtr("id").
+    // because all the id and classNames are "nehan-" prefixed in nehan.js.
+    getMarkupId : function(){
+      return this.markup.id; // if markup is <p id="foo">, markup.id is "nehan-foo".
     },
     getMarkupContent : function(){
       return this.markup.getContent(this);

@@ -41,7 +41,7 @@ var TypeSelector = (function(){
 	return false;
       }
       // id selector
-      if(this.id && style.getMarkupAttr("id") != this.id){
+      if(this.id && style.getMarkupId() != this.id){
 	return false;
       }
       // attribute selectgor
