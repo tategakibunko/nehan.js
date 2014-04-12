@@ -102,6 +102,11 @@ var InlineGenerator = (function(){
 
     // inline text
     if(Token.isText(token)){
+      // if tcy, wrap all content and return Tcy object and force generator terminate.
+      if(this.style.getTextCombine() === "horizontal"){
+	var tcy = new Tcy(this.style.getMarkupContent());
+	return this._getText(context, tcy);
+      }
       return this._getText(context, token);
     }
 

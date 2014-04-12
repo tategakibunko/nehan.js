@@ -23,9 +23,12 @@ var StyleContext = (function(){
     Args.copy(this.inlineCss, this._loadCallbackCss("inline"));
     Args.copy(this.inlineCss, force_css || {});
 
+    // always required properties
     this.display = this._loadDisplay(); // required
     this.flow = this._loadFlow(); // required
     this.boxSizing = this._loadBoxSizing(); // required
+
+    // optional properties
     var color = this._loadColor();
     if(color){
       this.color = color;
@@ -58,13 +61,9 @@ var StyleContext = (function(){
     if(text_empha){
       this.textEmpha = text_empha;
     }
-    var pushed = this._loadPushedAttr();
-    if(pushed){
-      this.pushed = true;
-    }
-    var pulled = this._loadPulledAttr();
-    if(pulled){
-      this.pulled = true;
+    var text_combine = this._loadTextCombine();
+    if(text_combine){
+      this.textCombine = text_combine;
     }
     var list_style = this._loadListStyle();
     if(list_style){
@@ -147,9 +146,9 @@ var StyleContext = (function(){
       image.display = this.display; // inline/block
       image.classes = ["nehan-block", "nehan-image"];
       image.charCount = 0;
-      if(this.pushed){
+      if(this.isPushed()){
 	image.pushed = true;
-      } else if(this.pulled){
+      } else if(this.isPulled()){
 	image.pulled = true;
       }
       if(this.edge){
@@ -244,10 +243,10 @@ var StyleContext = (function(){
       return this.display === "list-item";
     },
     isPushed : function(){
-      return this.pushed || false;
+      return this.getMarkupAttr("pushed") !== null;
     },
     isPulled : function(){
-      return this.pulled || false;
+      return this.getMarkupAttr("pulled") !== null;
     },
     isTextEmphaEnable : function(){
       return this.textEmpha && this.textEmpha.isEnable();
@@ -357,6 +356,9 @@ var StyleContext = (function(){
     },
     getTextAlign : function(){
       return this.textAlign || TextAligns.get("start");
+    },
+    getTextCombine : function(){
+      return this.textCombine || null;
     },
     getLetterSpacing : function(){
       return this.letterSpacing || 0;
@@ -818,6 +820,9 @@ var StyleContext = (function(){
     _loadTextEmphaColor : function(color){
       return this.getCssAttr("text-emphasis-color", color.getValue());
     },
+    _loadTextCombine : function(){
+      return this.getCssAttr("text-combine");
+    },
     _loadFloatDirection : function(){
       var name = this.getCssAttr("float", "none");
       if(name === "none"){
@@ -879,12 +884,6 @@ var StyleContext = (function(){
 	);
       }
       return background;
-    },
-    _loadPushedAttr : function(){
-      return this.getMarkupAttr("pushed") !== null;
-    },
-    _loadPulledAttr : function(){
-      return this.getMarkupAttr("pulled") !== null;
     }
   };
 

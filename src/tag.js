@@ -97,17 +97,6 @@ var Tag = (function (){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
-    // TODO: this tcy checking must be done by selector value in the future.
-    isTcyTag : function(){
-      // for older version, backword compatibility
-      if(this.name === "tcy" || this.name === "pack"){
-	return true;
-      }
-      if(this.hasClass("nehan-tcy") || this.hasClass("nehan-text-combine")){
-	return true;
-      }
-      return false;
-    },
     isEmpty : function(){
       return this.contentRaw === "";
     },

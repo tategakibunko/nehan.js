@@ -120,11 +120,6 @@ var HtmlLexer = (function (){
     _parseTag : function(tagstr){
       var tag = new Tag(tagstr);
       this._stepBuff(tagstr.length);
-
-      // TODO: this tcy checking must be done by selector value in the future.
-      if(tag.isTcyTag()){
-	return this._parseTcyTag(tag);
-      }
       if(List.exists(single_tags, Closure.eq(tag.getName()))){
 	return tag;
       }
