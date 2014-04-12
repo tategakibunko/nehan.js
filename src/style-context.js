@@ -198,6 +198,20 @@ var StyleContext = (function(){
       }
       return line;
     },
+    // nehan.js can change inline-style dynamically by setting 'layout' callback in style.
+    //
+    // [example]
+    // engine.setStyle("p.more-than-extent-100", {
+    //   "layout" : function(style, context){
+    //	    if(context.getBlockRestExtent() < 100){
+    //        style.setCssAttr("page-break-before", "always");
+    //      }
+    //   }
+    // });
+    //
+    onLayoutContext : function(context){
+      this._loadCallbackCss("layout", context);
+    },
     isBlock : function(){
       switch(this.display){
       case "block":
@@ -679,9 +693,10 @@ var StyleContext = (function(){
 	return ret;
       });
     },
-    _loadCallbackCss : function(name){
+    _loadCallbackCss : function(name, args){
+      args = args || {};
       var callback = this.getSelectorCssAttr(name);
-      return (callback && typeof callback === "function")? (callback(this) || {}) : {};
+      return (callback && typeof callback === "function")? (callback(this, args) || {}) : {};
     },
     _loadDisplay : function(markup){
       return this.getCssAttr("display", "inline");

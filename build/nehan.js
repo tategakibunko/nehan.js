@@ -6587,6 +6587,11 @@ var StyleContext = (function(){
       }
       return line;
     },
+    // dynamic change inline-style by 'layout' callback
+    onLayoutContext : function(context){
+      Args.copy(this.inlineCss, this._loadCallbackCss("layout", context));
+      return this;
+    },
     isBlock : function(){
       switch(this.display){
       case "block":
@@ -7068,9 +7073,10 @@ var StyleContext = (function(){
 	return ret;
       });
     },
-    _loadCallbackCss : function(name){
+    _loadCallbackCss : function(name, args){
+      args = args || {};
       var callback = this.getSelectorCssAttr(name);
-      return (callback && typeof callback === "function")? (callback(this) || {}) : {};
+      return (callback && typeof callback === "function")? (callback(this, args) || {}) : {};
     },
     _loadDisplay : function(markup){
       return this.getCssAttr("display", "inline");
@@ -7505,6 +7511,7 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype.yield = function(parent_context){
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
+    this.style.onLayoutContext(context);
     return this._yield(context);
   };
 
