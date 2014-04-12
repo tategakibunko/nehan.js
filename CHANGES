@@ -8,10 +8,15 @@ Mark "!": change that can break compatibility with older version
 
 version 5.0.0 2014/xx/xx
 =========================
+! refactor many many futures.
 o more complex float supported, not only static size float, but also dynamic block element can be floated.
-o support orphans
-! refactor many futures.
-
+o support "orphans" property
+o now "setStyle" supports not only "onload" but also "inline" or "layout" callbacks.
+o callback style "onload" writes the style value as static selector value,
+  but callback style "inline" is writtein in inline css value.
+o callback style "layout" is called each time when style associated layout is yielded,
+  so you change style value as to layout-context.
+  this layout context is obtained by "second" argument in "layout" callback(first is style-context).
 
 version 4.0.11 2014/xx/xx
 =========================
