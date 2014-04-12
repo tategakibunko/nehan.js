@@ -2485,7 +2485,7 @@ var Tag = (function (){
     this.contentRaw = content_raw || "";
     this.name = this._parseName(this.src);
     this.attr = TagAttrParser.parse(this.src);
-    this.id = this._parseId();
+    this.id = this._parseId(); // add "nehan-" prefix if not started with "nehan-".
     this.classes = this._parseClasses(this.attr["class"] || "");
     this.dataset = {}; // dataset with no "data-" prefixes => {id:"10", name:"taro"} 
     this.datasetRaw = {}; // dataset with "data-" prefixes => {"data-id":"10", "data-name":"taro"}
@@ -6695,6 +6695,9 @@ var StyleContext = (function(){
     // if markup is "<img src='aaa.jpg'>"
     // getMarkupAttr("src") => 'aaa.jpg'
     getMarkupAttr : function(name){
+      if(name === "id"){
+	return this.markup.id;
+      }
       return this.markup.getAttr(name);
     },
     // priority: inline css > selector css
@@ -6722,10 +6725,9 @@ var StyleContext = (function(){
     getMarkupName : function(){
       return this.markup.getName();
     },
-    // do not call this.getMarkupAtr("id").
-    // because all the id and classNames are "nehan-" prefixed in nehan.js.
+    // if markup is <p id="foo">, markup.id is "nehan-foo".
     getMarkupId : function(){
-      return this.markup.id; // if markup is <p id="foo">, markup.id is "nehan-foo".
+      return this.markup.id;
     },
     getMarkupContent : function(){
       return this.markup.getContent(this);

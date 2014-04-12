@@ -7,7 +7,7 @@ var Tag = (function (){
     this.contentRaw = content_raw || "";
     this.name = this._parseName(this.src);
     this.attr = TagAttrParser.parse(this.src);
-    this.id = this._parseId();
+    this.id = this._parseId(); // add "nehan-" prefix if not started with "nehan-".
     this.classes = this._parseClasses(this.attr["class"] || "");
     this.dataset = {}; // dataset with no "data-" prefixes => {id:"10", name:"taro"} 
     this.datasetRaw = {}; // dataset with "data-" prefixes => {"data-id":"10", "data-name":"taro"}

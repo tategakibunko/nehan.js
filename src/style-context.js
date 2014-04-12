@@ -306,6 +306,9 @@ var StyleContext = (function(){
     // if markup is "<img src='aaa.jpg'>"
     // getMarkupAttr("src") => 'aaa.jpg'
     getMarkupAttr : function(name){
+      if(name === "id"){
+	return this.markup.id;
+      }
       return this.markup.getAttr(name);
     },
     // priority: inline css > selector css
@@ -333,10 +336,9 @@ var StyleContext = (function(){
     getMarkupName : function(){
       return this.markup.getName();
     },
-    // do not call this.getMarkupAtr("id").
-    // because all the id and classNames are "nehan-" prefixed in nehan.js.
+    // if markup is <p id="foo">, markup.id is "nehan-foo".
     getMarkupId : function(){
-      return this.markup.id; // if markup is <p id="foo">, markup.id is "nehan-foo".
+      return this.markup.id;
     },
     getMarkupContent : function(){
       return this.markup.getContent(this);
