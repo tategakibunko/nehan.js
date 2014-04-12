@@ -23,63 +23,63 @@ var StyleContext = (function(){
     Args.copy(this.inlineCss, this._loadCallbackCss("inline"));
     Args.copy(this.inlineCss, force_css || {});
 
-    this.display = this._loadDisplay(markup); // required
-    this.flow = this._loadFlow(markup, parent); // required
-    this.boxSizing = this._loadBoxSizing(markup); // required
-    var color = this._loadColor(markup, parent);
+    this.display = this._loadDisplay(); // required
+    this.flow = this._loadFlow(); // required
+    this.boxSizing = this._loadBoxSizing(); // required
+    var color = this._loadColor();
     if(color){
       this.color = color;
     }
-    var background = this._loadBackground(markup, parent);
+    var background = this._loadBackground();
     if(background){
       this.background = background;
     }
-    var font = this._loadFont(markup, parent);
+    var font = this._loadFont();
     if(font){
       this.font = font;
     }
-    var position = this._loadPosition(markup, parent);
+    var position = this._loadPosition();
     if(position){
       this.position = position;
     }
-    var edge = this._loadEdge(markup, this.flow, this.font);
+    var edge = this._loadEdge(this.flow, this.getFontSize());
     if(edge){
       this.edge = edge;
     }
-    var line_rate = this._loadLineRate(markup, parent);
+    var line_rate = this._loadLineRate();
     if(line_rate){
       this.lineRate = line_rate;
     }
-    var text_align = this._loadTextAlign(markup, parent);
+    var text_align = this._loadTextAlign();
     if(text_align){
       this.textAlign = text_align;
     }
-    var text_empha = this._loadTextEmpha(markup, parent);
+    var text_empha = this._loadTextEmpha();
     if(text_empha){
       this.textEmpha = text_empha;
     }
-    var pushed = this._loadPushedAttr(markup);
+    var pushed = this._loadPushedAttr();
     if(pushed){
       this.pushed = true;
     }
-    var pulled = this._loadPulledAttr(markup);
+    var pulled = this._loadPulledAttr();
     if(pulled){
       this.pulled = true;
     }
-    var list_style = this._loadListStyle(markup);
+    var list_style = this._loadListStyle();
     if(list_style){
       this.listStyle = list_style;
     }
     // keyword 'float' is reserved in js, so we name this prop 'float direction' instead.
-    var float_direction = this._loadFloatDirection(markup);
+    var float_direction = this._loadFloatDirection();
     if(float_direction){
       this.floatDirection = float_direction;
     }
-    var break_before = this._loadBreakBefore(markup);
+    var break_before = this._loadBreakBefore();
     if(break_before){
       this.breakBefore = break_before;
     }
-    var break_after = this._loadBreakAfter(markup);
+    var break_after = this._loadBreakAfter();
     if(break_after){
       this.breakAfter = break_after;
     }
@@ -694,12 +694,12 @@ var StyleContext = (function(){
       var callback = this.getSelectorCssAttr(name);
       return (callback && typeof callback === "function")? (callback(this, context || null) || {}) : {};
     },
-    _loadDisplay : function(markup){
+    _loadDisplay : function(){
       return this.getCssAttr("display", "inline");
     },
-    _loadFlow : function(markup, parent){
+    _loadFlow : function(){
       var value = this.getCssAttr("flow", "inherit");
-      var parent_flow = parent? parent.flow : Layout.getStdBoxFlow();
+      var parent_flow = this.parent? this.parent.flow : Layout.getStdBoxFlow();
       if(value === "inherit"){
 	return parent_flow;
       }
@@ -708,7 +708,7 @@ var StyleContext = (function(){
       }
       return BoxFlows.getByName(value);
     },
-    _loadPosition : function(markup){
+    _loadPosition : function(){
       var value = this.getCssAttr("position", "relative");
       return new BoxPosition(value, {
 	top: this.getCssAttr("top", "auto"),
@@ -717,14 +717,14 @@ var StyleContext = (function(){
 	bottom: this.getCssAttr("bottom", "auto")
       });
     },
-    _loadColor : function(markup){
+    _loadColor : function(){
       var value = this.getCssAttr("color", "inherit");
       if(value !== "inherit"){
 	return new Color(value);
       }
     },
-    _loadFont : function(markup, parent){
-      var parent_font_size = parent? parent.font.size : Layout.fontSize;
+    _loadFont : function(){
+      var parent_font_size = this.parent? this.parent.font.size : Layout.fontSize;
       var font = new Font(parent_font_size);
       var font_size = this.getCssAttr("font-size", "inherit");
       if(font_size !== "inherit"){
@@ -733,7 +733,7 @@ var StyleContext = (function(){
       var font_family = this.getCssAttr("font-family", "inherit");
       if(font_family !== "inherit"){
 	font.family = font_family;
-      } else if(parent === null){
+      } else if(this.parent === null){
 	font.family = Layout.getStdFontFamily();
       }
       var font_weight = this.getCssAttr("font-weight", "inherit");
@@ -746,10 +746,10 @@ var StyleContext = (function(){
       }
       return font;
     },
-    _loadBoxSizing : function(markup){
+    _loadBoxSizing : function(){
       return this.getCssAttr("box-sizing", "margin-box");
     },
-    _loadEdge : function(markup, flow, font){
+    _loadEdge : function(flow, font_size){
       var padding = this.getCssAttr("padding");
       var margin = this.getCssAttr("margin");
       var border_width = this.getCssAttr("border-width");
@@ -758,17 +758,17 @@ var StyleContext = (function(){
       }
       var edge = new BoxEdge();
       if(padding){
-	edge.padding.setSize(flow, UnitSize.getEdgeSize(padding, font.size));
+	edge.padding.setSize(flow, UnitSize.getEdgeSize(padding, font_size));
       }
       if(margin){
-	edge.margin.setSize(flow, UnitSize.getEdgeSize(margin, font.size));
+	edge.margin.setSize(flow, UnitSize.getEdgeSize(margin, font_size));
       }
       if(border_width){
-	edge.border.setSize(flow, UnitSize.getEdgeSize(border_width, font.size));
+	edge.border.setSize(flow, UnitSize.getEdgeSize(border_width, font_size));
       }
       var border_radius = this.getCssAttr("border-radius");
       if(border_radius){
-	edge.setBorderRadius(flow, UnitSize.getCornerSize(border_radius, font.size));
+	edge.setBorderRadius(flow, UnitSize.getCornerSize(border_radius, font_size));
       }
       var border_color = this.getCssAttr("border-color");
       if(border_color){
@@ -780,22 +780,22 @@ var StyleContext = (function(){
       }
       return edge;
     },
-    _loadLineRate : function(markup, parent){
+    _loadLineRate : function(){
       var value = this.getCssAttr("line-rate", "inherit");
-      if(value === "inherit" && parent && parent.lineRate){
-	return parent.lineRate;
+      if(value === "inherit" && this.parent && this.parent.lineRate){
+	return this.parent.lineRate;
       }
       return parseFloat(value || Layout.lineRate);
     },
-    _loadTextAlign : function(markup, parent){
+    _loadTextAlign : function(){
       var value = this.getCssAttr("text-align", "inherit");
-      if(value === "inherit" && parent && parent.textAlign){
-	return parent.textAlign;
+      if(value === "inherit" && this.parent && this.parent.textAlign){
+	return this.parent.textAlign;
       }
       return TextAligns.get(value || "start");
     },
-    _loadTextEmpha : function(markup, parent){
-      var parent_color = parent? parent.getColor() : Layout.fontColor;
+    _loadTextEmpha : function(){
+      var parent_color = this.parent? this.parent.getColor() : Layout.fontColor;
       var empha_style = this.getCssAttr("text-emphasis-style", "none");
       if(empha_style === "none" || empha_style === "inherit"){
 	return null;
@@ -808,32 +808,32 @@ var StyleContext = (function(){
 	color:new Color(empha_color)
       });
     },
-    _loadTextEmphaStyle : function(markup, parent){
+    _loadTextEmphaStyle : function(){
       var value = this.getCssAttr("text-emphasis-style", "inherit");
       return (value !== "inherit")? new TextEmphaStyle(value) : null;
     },
-    _loadTextEmphaPos : function(markup, parent){
+    _loadTextEmphaPos : function(){
       return this.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
     },
-    _loadTextEmphaColor : function(markup, parent, color){
+    _loadTextEmphaColor : function(color){
       return this.getCssAttr("text-emphasis-color", color.getValue());
     },
-    _loadFloatDirection : function(markup){
+    _loadFloatDirection : function(){
       var name = this.getCssAttr("float", "none");
       if(name === "none"){
 	return null;
       }
       return FloatDirections.get(name);
     },
-    _loadBreakBefore : function(markup){
+    _loadBreakBefore : function(){
       var value = this.getCssAttr("break-before");
       return value? Breaks.getBefore(value) : null;
     },
-    _loadBreakAfter : function(markup){
+    _loadBreakAfter : function(){
       var value = this.getCssAttr("break-after");
       return value? Breaks.getAfter(value) : null;
     },
-    _loadListStyle : function(markup){
+    _loadListStyle : function(){
       var list_style_type = this.getCssAttr("list-style-type", "none");
       if(list_style_type === "none"){
 	return null;
@@ -845,13 +845,13 @@ var StyleContext = (function(){
 	format:this.getCssAttr("list-style-format")
       });
     },
-    _loadLetterSpacing : function(markup, parent, font){
+    _loadLetterSpacing : function(font_size){
       var letter_spacing = this.getCssAttr("letter-spacing");
       if(letter_spacing){
-	return UnitSize.getUnitSize(letter_spacing, font.size);
+	return UnitSize.getUnitSize(letter_spacing, font_size);
       }
     },
-    _loadBackground : function(markup, parent){
+    _loadBackground : function(){
       var bg_color = this.getCssAttr("background-color");
       var bg_image = this.getCssAttr("background-image");
       var bg_pos = this.getCssAttr("background-position");
@@ -880,10 +880,10 @@ var StyleContext = (function(){
       }
       return background;
     },
-    _loadPushedAttr : function(markup){
+    _loadPushedAttr : function(){
       return this.getMarkupAttr("pushed") !== null;
     },
-    _loadPulledAttr : function(markup){
+    _loadPulledAttr : function(){
       return this.getMarkupAttr("pulled") !== null;
     }
   };
