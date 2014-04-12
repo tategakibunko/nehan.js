@@ -7,9 +7,9 @@ var Tag = (function (){
     this.attr = TagAttrParser.parse(this.src);
     this.id = this._parseId(); // add "nehan-" prefix if not started with "nehan-".
     this.classes = this._parseClasses(this.attr["class"] || "");
-    this.dataset = {}; // dataset with no "data-" prefixes => {id:"10", name:"taro"} 
-    this.datasetRaw = {}; // dataset with "data-" prefixes => {"data-id":"10", "data-name":"taro"}
-    this._parseDataset(); // initialize data-set values
+    this.datasetCamel = {}; // dataset with no "data-" prefixes, and camel case => {name:"taro", familyName:"yamada"} 
+    this.datasetRaw = {}; // dataset with "data-" prefixes => {"data-name":"taro", "data-family-name":"yamada"}
+    this._parseDataset(this.datasetCamel, this.datasetRaw); // parse and set data-set values
   }
 
   Tag.prototype = {
@@ -41,7 +41,7 @@ var Tag = (function (){
       return (typeof def_value !== "undefined")? def_value : null;
     },
     getDataset : function(name, def_value){
-      var ret = this.dataset[name];
+      var ret = this.datasetCamel[name];
       if(typeof ret !== "undefined"){
 	return ret;
       }
@@ -49,7 +49,7 @@ var Tag = (function (){
     },
     // dataset name and value object => {id:xxx, name:yyy}
     getDatasetAttrs : function(){
-      return this.dataset;
+      return this.datasetCamel;
     },
     // dataset name(with "data-" prefix) and value object => {"data-id":xxx, "data-name":yyy}
     getDatasetAttrsRaw : function(){
@@ -115,13 +115,13 @@ var Tag = (function (){
 	return "." + class_name;
       });
     },
-    _parseDataset : function(){
+    _parseDataset : function(dataset_camel, dataset_raw){
       for(var name in this.attr){
 	if(name.indexOf("data-") === 0){
-	  var dataset_name = this._parseDatasetName(name);
+	  var dataset_name = this._parseDatasetName(name); // get camel case name without data prefix.
 	  var dataset_value = this.attr[name];
-	  this.dataset[dataset_name] = dataset_value;
-	  this.datasetRaw[name] = dataset_value;
+	  dataset_camel[dataset_name] = dataset_value; // stored as camel-case-name & value dict.
+	  dataset_raw[name] = dataset_value; // stored as raw-name & value dict.
 	}
       }
     },
