@@ -727,7 +727,7 @@ var StyleContext = (function(){
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]).toLowerCase();
 	  var value = Utils.trim(nv[1]);
-	  ret[prop] = value;
+	  ret[prop] = CssParser.format(prop, value);
 	}
 	return ret;
       });
