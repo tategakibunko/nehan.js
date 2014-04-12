@@ -124,8 +124,8 @@ var StyleContext = (function(){
     createBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
-      var measure = opt.measure || this.getStaticContentMeasure() || this.getContentMeasure();
-      var extent = this.parent? (opt.extent || this.getContentExtent()) : this.getContentExtent();
+      var measure = this.getStaticContentMeasure() || opt.measure || this.getContentMeasure();
+      var extent = this.parent? (this.getStaticContentExtent() || opt.extent || this.getContentExtent()) : this.getContentExtent();
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
       var box = new Box(box_size, this);
