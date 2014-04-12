@@ -13,7 +13,7 @@ var HoriEvaluator = (function(){
     return Html.tagSingle("img", Args.copy({
       "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssBlock()),
-      "title":(image.style.getMarkupAttr("title") || ""),
+      "title":(image.style.getMarkupAttr("title") || "no title"),
       "class":image.classes.join(" ")
     }, image.getDatasetAttr()));
   };
@@ -22,7 +22,7 @@ var HoriEvaluator = (function(){
     return Html.tagSingle("img", Args.copy({
       "src":image.style.getMarkupAttr("src"),
       "style":Css.toString(image.getCssHoriInlineImage()),
-      "title":(image.style.getMarkupAttr("title") || ""),
+      "title":(image.style.getMarkupAttr("title") || "no title"),
       "class":image.classes.join(" ")
     }, image.getDatasetAttr()));
   };
