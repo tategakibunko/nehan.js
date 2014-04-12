@@ -1,8 +1,8 @@
 var Tag = (function (){
-  function Tag(src, content_raw){
+  function Tag(src, content){
     this._type = "tag";
     this.src = src;
-    this.contentRaw = content_raw || "";
+    this.content = content || "";
     this.name = this._parseName(this.src);
     this.attr = TagAttrParser.parse(this.src);
     this.id = this._parseId(); // add "nehan-" prefix if not started with "nehan-".
@@ -14,10 +14,10 @@ var Tag = (function (){
 
   Tag.prototype = {
     clone : function(){
-      return new Tag(this.src, this.contentRaw);
+      return new Tag(this.src, this.content);
     },
-    setContentRaw : function(content_raw){
-      this.contentRaw = content_raw;
+    setContentRaw : function(content){
+      this.content = content;
     },
     addClass : function(klass){
       this.classes.push(klass);
@@ -55,17 +55,17 @@ var Tag = (function (){
     getDatasetAttrsRaw : function(){
       return this.datasetRaw;
     },
-    getContentRaw : function(){
-      return this.contentRaw;
+    getContent : function(){
+      return this.content;
     },
     getSrc : function(){
       return this.src;
     },
     getWrapSrc : function(){
-      if(this.contentRaw === ""){
+      if(this.content === ""){
 	return this.src;
       }
-      return this.src + this.contentRaw + "</" + this.name + ">";
+      return this.src + this.content + "</" + this.name + ">";
     },
     getHeaderRank : function(){
       if(this.getName().match(/h([1-6])/)){
@@ -90,7 +90,7 @@ var Tag = (function (){
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
     isEmpty : function(){
-      return this.contentRaw === "";
+      return this.content === "";
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();

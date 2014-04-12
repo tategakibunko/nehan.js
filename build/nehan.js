@@ -2477,10 +2477,10 @@ var TagAttrParser = (function(){
 })();
 
 var Tag = (function (){
-  function Tag(src, content_raw){
+  function Tag(src, content){
     this._type = "tag";
     this.src = src;
-    this.contentRaw = content_raw || "";
+    this.content = content || "";
     this.name = this._parseName(this.src);
     this.attr = TagAttrParser.parse(this.src);
     this.id = this._parseId(); // add "nehan-" prefix if not started with "nehan-".
@@ -2492,10 +2492,10 @@ var Tag = (function (){
 
   Tag.prototype = {
     clone : function(){
-      return new Tag(this.src, this.contentRaw);
+      return new Tag(this.src, this.content);
     },
-    setContentRaw : function(content_raw){
-      this.contentRaw = content_raw;
+    setContentRaw : function(content){
+      this.content = content;
     },
     addClass : function(klass){
       this.classes.push(klass);
@@ -2533,17 +2533,17 @@ var Tag = (function (){
     getDatasetAttrsRaw : function(){
       return this.datasetRaw;
     },
-    getContentRaw : function(){
-      return this.contentRaw;
+    getContent : function(){
+      return this.content;
     },
     getSrc : function(){
       return this.src;
     },
     getWrapSrc : function(){
-      if(this.contentRaw === ""){
+      if(this.content === ""){
 	return this.src;
       }
-      return this.src + this.contentRaw + "</" + this.name + ">";
+      return this.src + this.content + "</" + this.name + ">";
     },
     getHeaderRank : function(){
       if(this.getName().match(/h([1-6])/)){
@@ -2568,7 +2568,7 @@ var Tag = (function (){
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
     isEmpty : function(){
-      return this.contentRaw === "";
+      return this.content === "";
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
@@ -3153,7 +3153,7 @@ var Ruby = (function(){
       return this.rbs;
     },
     getRtString : function(){
-      return this.rt? this.rt.getContentRaw() : "";
+      return this.rt? this.rt.getContent() : "";
     },
     getRtFontSize : function(){
       return this.rtFontSize;
@@ -5829,7 +5829,7 @@ var HeadTokenStream = (function(){
 
 var RubyTokenStream = (function(){
   function RubyTokenStream(markup_ruby){
-    TokenStream.call(this, markup_ruby.getContentRaw());
+    TokenStream.call(this, markup_ruby.getContent());
     this.getAll();
     this.tokens = this._parse(markup_ruby);
     this.rewind();
@@ -6679,13 +6679,13 @@ var StyleContext = (function(){
       return this.markup.id;
     },
     getMarkupContent : function(){
-      return this.markup.getContent(this);
+      return this.markup.getContent();
     },
     getMarkupPos : function(){
       return this.markup.pos;
     },
     getContent : function(markup){
-      var content = markup.getContentRaw();
+      var content = markup.getContent();
       var before = Selectors.getValuePe(this, "before");
       if(!Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;
@@ -8627,10 +8627,10 @@ var HtmlGenerator = (function(){
 	var tag = this.stream.get();
 	switch(tag.getName()){
 	case "head":
-	  this._parseHead(new HeadTokenStream(tag.getContentRaw()));
+	  this._parseHead(new HeadTokenStream(tag.getContent()));
 	  break;
 	case "body":
-	  return this._createBodyGenerator(tag.getContentRaw());
+	  return this._createBodyGenerator(tag.getContent());
 	}
       }
       return this._createBodyGenerator(this.stream.getSrc());
@@ -8644,7 +8644,7 @@ var HtmlGenerator = (function(){
 	var tag = stream.get();
 	switch(tag.getName()){
 	case "title":
-	  header.setTitle(tag.getContentRaw());
+	  header.setTitle(tag.getContent());
 	  break;
 	case "meta":
 	  header.addMeta(tag);
@@ -8696,7 +8696,7 @@ var DocumentGenerator = (function(){
       return this._createHtmlGenerator(html_tag);
     },
     _createHtmlGenerator : function(html_tag){
-      return new HtmlGenerator(html_tag.getContentRaw());
+      return new HtmlGenerator(html_tag.getContent());
     }
   };
 

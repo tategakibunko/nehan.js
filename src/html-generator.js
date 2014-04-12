@@ -16,10 +16,10 @@ var HtmlGenerator = (function(){
 	var tag = this.stream.get();
 	switch(tag.getName()){
 	case "head":
-	  this._parseHead(new HeadTokenStream(tag.getContentRaw()));
+	  this._parseHead(new HeadTokenStream(tag.getContent()));
 	  break;
 	case "body":
-	  return this._createBodyGenerator(tag.getContentRaw());
+	  return this._createBodyGenerator(tag.getContent());
 	}
       }
       return this._createBodyGenerator(this.stream.getSrc());
@@ -33,7 +33,7 @@ var HtmlGenerator = (function(){
 	var tag = stream.get();
 	switch(tag.getName()){
 	case "title":
-	  header.setTitle(tag.getContentRaw());
+	  header.setTitle(tag.getContent());
 	  break;
 	case "meta":
 	  header.addMeta(tag);

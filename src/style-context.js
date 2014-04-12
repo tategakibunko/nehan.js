@@ -342,13 +342,13 @@ var StyleContext = (function(){
       return this.markup.id;
     },
     getMarkupContent : function(){
-      return this.markup.getContent(this);
+      return this.markup.getContent();
     },
     getMarkupPos : function(){
       return this.markup.pos;
     },
     getContent : function(markup){
-      var content = markup.getContentRaw();
+      var content = markup.getContent();
       var before = Selectors.getValuePe(this, "before");
       if(!Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;
