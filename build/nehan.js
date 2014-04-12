@@ -2478,59 +2478,26 @@ var TagAttrParser = (function(){
 
 var Tag = (function (){
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
-  var is_inline_style_not_allowed = function(name){
-    return List.exists(["padding", "margin", "border"], function(prop){
-      return name.indexOf(prop) >= 0;
-    });
-  };
 
   function Tag(src, content_raw){
     this._type = "tag";
-    this._inherited = false; // flag to avoid duplicate inheritance
     this.src = src;
     this.contentRaw = content_raw || "";
     this.name = this._parseName(this.src);
-    this.tagAttr = TagAttrParser.parse(this.src);
-    this.id = this.tagAttr.id || "";
-    this.classes = this._parseClasses(this.tagAttr["class"] || "");
+    this.attr = TagAttrParser.parse(this.src);
+    this.id = this.attr.id || "";
+    this.classes = this._parseClasses(this.attr["class"] || "");
     this.dataset = {}; // dataset with no "data-" prefixes => {id:"10", name:"taro"} 
     this.datasetRaw = {}; // dataset with "data-" prefixes => {"data-id":"10", "data-name":"taro"}
-    this.cssAttrStatic = {}; // updated when 'inherit' called from StyleContext constructor.
-    this.cssAttrDynamic = {}; // added by setCssAttr
-
-    // initialize inline-style value
-    if(this.tagAttr.style){
-      this._parseInlineStyle(this.tagAttr.style || "");
-    }
     this._parseDataset(); // initialize data-set values
   }
 
   Tag.prototype = {
-    initSelector : function(style){
-      // avoid duplicate initialize
-      if(this._initialized){
-	return this;
-      }
-      this.cssAttrStatic = this._getSelectorValue(style); // reget css-attr with parent enabled.
-      this._initialized = true;
-      return this;
-    },
     clone : function(){
       return new Tag(this.src, this.contentRaw);
     },
     setContentRaw : function(content_raw){
       this.contentRaw = content_raw;
-    },
-    setTagAttr : function(name, value){
-      this.tagAttr[name] = value;
-    },
-    setCssAttr : function(name, value){
-      this.cssAttrDynamic[name] = value;
-    },
-    setCssAttrs : function(obj){
-      for(var prop in obj){
-	this.setCssAttr(prop, obj[prop]);
-      }
     },
     addClass : function(klass){
       this.classes.push(klass);
@@ -2543,33 +2510,11 @@ var Tag = (function (){
     getName : function(){
       return this.name;
     },
-    getAttr : function(name, def_value){
-      var ret = this.getTagAttr(name);
-      if(typeof ret !== "undefined" && ret !== null){
-	return ret;
-      }
-      ret = this.getCssAttr(name);
-      if(typeof ret !== "undefined" && ret !== null){
-	return ret;
-      }
-      return (typeof def_value !== "undefined")? def_value : null;
-    },
     getCssClasses : function(){
       return this.classes.join(" ");
     },
-    getTagAttr : function(name, def_value){
-      var ret = this.tagAttr[name];
-      if(typeof ret !== "undefined"){
-	return ret;
-      }
-      return (typeof def_value !== "undefined")? def_value : null;
-    },
-    getCssAttr : function(name, def_value){
-      var ret = this.cssAttrDynamic[name];
-      if(typeof ret !== "undefined"){
-	return ret;
-      }
-      ret = this.cssAttrStatic[name];
+    getAttr : function(name, def_value){
+      var ret = this.attr[name];
       if(typeof ret !== "undefined"){
 	return ret;
       }
@@ -2617,6 +2562,9 @@ var Tag = (function (){
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
     },
+    hasAttr : function(name){
+      return (typeof this.attr.name !== "undefined");
+    },
     hasPseudoElement : function(){
       return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
@@ -2627,25 +2575,16 @@ var Tag = (function (){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
+    // TODO: this tcy checking must be done by selector value in the future.
     isTcyTag : function(){
-      return this.getCssAttr("text-combine", "") === "horizontal";
-    },
-    isSectionRootTag : function(){
-      return this.getCssAttr("section-root") === true;
-    },
-    isSectionTag : function(){
-      return this.getCssAttr("section") === true;
-    },
-    isBoldTag : function(){
-      var name = this.getName();
-      return name === "b" || name === "strong";
-    },
-    isHeaderTag : function(){
-      return this.getHeaderRank() > 0;
-    },
-    isPageBreakTag : function(){
-      var name = this.getName();
-      return name === "end-page" || name === "page-break";
+      // for older version, backword compatibility
+      if(this.name === "tcy" || this.name === "pack"){
+	return true;
+      }
+      if(this.hasClass("nehan-tcy") || this.hasClass("nehan-text-combine")){
+	return true;
+      }
+      return false;
     },
     isEmpty : function(){
       return this.contentRaw === "";
@@ -2660,8 +2599,8 @@ var Tag = (function (){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
     },
     _parseId : function(){
-      var id = this.tagAttr.id || "";
-      return (id === "")? id : ((this.tagAttr.id.indexOf("nehan-") === 0)? "nehan-" + id : id);
+      var id = this.attr.id || "";
+      return (id === "")? id : ((this.attr.id.indexOf("nehan-") === 0)? "nehan-" + id : id);
     },
     // <p class='hi hey'>
     // => ["hi", "hey"]
@@ -2701,27 +2640,11 @@ var Tag = (function (){
       var attr = Selectors.getValuePe(style, "after");
       return Obj.isEmpty(attr)? "" : Html.tagWrap("after", attr.content || "");
     },
-    // "border:0; margin:0"
-    // => {border:0, margin:0}
-    _parseInlineStyle : function(src){
-      var dynamic_attr = this.cssAttrDynamic;
-      var stmts = (src.indexOf(";") >= 0)? src.split(";") : [src];
-      List.iter(stmts, function(stmt){
-	var nv = stmt.split(":");
-	if(nv.length >= 2){
-	  var prop = Utils.trim(nv[0]).toLowerCase();
-	  if(!is_inline_style_not_allowed(prop)){
-	    var value = Utils.trim(nv[1]);
-	    dynamic_attr[prop] = value;
-	  }
-	}
-      });
-    },
     _parseDataset : function(){
-      for(var name in this.tagAttr){
+      for(var name in this.attr){
 	if(name.indexOf("data-") === 0){
 	  var dataset_name = this._parseDatasetName(name);
-	  var dataset_value = this.tagAttr[name];
+	  var dataset_value = this.attr[name];
 	  this.dataset[dataset_name] = dataset_value;
 	  this.datasetRaw[name] = dataset_value;
 	}
@@ -5203,6 +5126,7 @@ var HtmlLexer = (function (){
       var tag = new Tag(tagstr);
       this._stepBuff(tagstr.length);
 
+      // TODO: this tcy checking must be done by selector value in the future.
       if(tag.isTcyTag()){
 	return this._parseTcyTag(tag);
       }
@@ -6465,11 +6389,32 @@ var TextAligns = {
 
 var StyleContext = (function(){
 
+  var is_inline_style_not_allowed = function(name){
+    return List.exists(["padding", "margin", "border"], function(prop){
+      return name.indexOf(prop) >= 0;
+    });
+  };
+
   // parent : parent style context
-  function StyleContext(markup, parent){
+  function StyleContext(markup, parent, force_css){
     this.markup = markup;
     this.parent = parent || null;
-    this._initMarkupSelector(markup, parent);
+    if(parent){
+      parent.appendChild(this);
+    }
+
+    // load selector css
+    // 1. static css by normal selector
+    // 2. static css by dynamic callback selector named by "onload"
+    this.selectorCss = this._loadSelectorCss(markup, parent);
+    Args.copy(this.selectorCss, this._loadCallbackCss("onload")); // overwrite selector style by callback function if exists.
+
+    // load inline css
+    // 1. inline css from markup attr 'style'
+    // 2. inline css from constructor argument 'force_css'
+    this.inlineCss = this._loadInlineCss(markup);
+    Args.copy(this.inlineCss, force_css || {}); // overwrite force css if exists.
+
     this.display = this._loadDisplay(markup); // required
     this.flow = this._loadFlow(markup, parent); // required
     this.boxSizing = this._loadBoxSizing(markup); // required
@@ -6539,9 +6484,7 @@ var StyleContext = (function(){
       if(this.parent === null){
 	return this.createChild("div", css);
       }
-      var tag = this.markup.clone();
-      tag.setCssAttrs(css || {}); // set dynamic styles
-      return new StyleContext(tag, this.parent || null);
+      return new StyleContext(this.markup.clone(), this.parent, css || {});
     },
     // append child style context
     appendChild : function(child_style){
@@ -6550,8 +6493,7 @@ var StyleContext = (function(){
     // inherit style with tag_name and css(optional).
     createChild : function(tag_name, css){
       var tag = new Tag("<" + tag_name + ">");
-      tag.setCssAttrs(css || {}); // set dynamic styles
-      var style = new StyleContext(tag, this);
+      var style = new StyleContext(tag, this, css || {});
 
       // save 'original' parent to child-style, because sometimes it is required by 'grand-child'.
       // for example, in following code, <li-body> is anonymous block,
@@ -6668,9 +6610,6 @@ var StyleContext = (function(){
     isRootLine : function(){
       return this.isBlock();
     },
-    isHeader : function(){
-      return this.markup.isHeaderTag();
-    },
     isFloatStart : function(){
       return this.floatDirection && this.floatDirection.isStart();
     },
@@ -6719,6 +6658,50 @@ var StyleContext = (function(){
     isEmpty : function(){
       return false; // TODO
     },
+    setCssAttr : function(name, value){
+      this.inlineCss[name] = value;
+    },
+    setCssAttrs : function(obj){
+      for(var prop in obj){
+	this.setCssAttr(prop, obj[prop]);
+      }
+    },
+    // search property from markup attribute -> css
+    getAttr : function(name, def_value){
+      var ret = this.getMarkupAttr(name);
+      if(typeof ret !== "undefined" && ret !== null){
+	return ret;
+      }
+      ret = this.getCssAttr(name);
+      if(typeof ret !== "undefined" && ret !== null){
+	return ret;
+      }
+      return (typeof def_value !== "undefined")? def_value : null;
+    },
+    // if markup is "<img src='aaa.jpg'>"
+    // getMarkupAttr("src") => 'aaa.jpg'
+    getMarkupAttr : function(name){
+      return this.markup.getAttr(name);
+    },
+    // priority: inline css > selector css
+    getCssAttr : function(name, def_value){
+      var ret;
+      ret = this.getInlineCssAttr(name);
+      if(ret !== null){
+	return ret;
+      }
+      ret = this.getSelectorCssAttr(name);
+      if(ret !== null){
+	return ret;
+      }
+      return (typeof def_value !== "undefined")? def_value : null;
+    },
+    getInlineCssAttr : function(name){
+      return this.inlineCss[name] || null;
+    },
+    getSelectorCssAttr : function(name){
+      return this.selectorCss[name] || null;
+    },
     hasMarkupClassName : function(class_name){
       return this.markup.hasClass(class_name);
     },
@@ -6730,9 +6713,6 @@ var StyleContext = (function(){
     },
     getMarkupPos : function(){
       return this.markup.pos;
-    },
-    getMarkupAttr : function(name){
-      return this.markup.getAttr(name);
     },
     getHeaderRank : function(){
       return this.markup.getHeaderRank();
@@ -6795,7 +6775,7 @@ var StyleContext = (function(){
       if(this.isRoot()){
 	return 0;
       }
-      var count = this.markup.getCssAttr("orphans");
+      var count = this.getCssAttr("orphans");
       return count? parseInt(count, 10) : 0;
     },
     getChildCount : function(){
@@ -6829,12 +6809,12 @@ var StyleContext = (function(){
     },
     getStaticMeasure : function(){
       var max_size = this.getLogicalMaxMeasure(); // this value is required when static size is set by '%' value.
-      var static_size = this.markup.getAttr(this.flow.getPropMeasure()) || this.markup.getAttr("measure");
+      var static_size = this.getAttr(this.flow.getPropMeasure()) || this.getAttr("measure");
       return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
     },
     getStaticExtent : function(){
       var max_size = this.getLogicalMaxExtent(); // this value is required when static size is set by '%' value.
-      var static_size = this.markup.getAttr(this.flow.getPropExtent()) || this.markup.getAttr("extent");
+      var static_size = this.getAttr(this.flow.getPropExtent()) || this.getAttr("extent");
       return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
     },
     getStaticContentMeasure : function(){
@@ -6847,12 +6827,12 @@ var StyleContext = (function(){
     },
     getLayoutMeasure : function(){
       var prop = this.flow.getPropMeasure();
-      var size = this.markup.getAttr("measure") || this.markup.getAttr(prop) || Layout[prop];
+      var size = this.getAttr("measure") || this.getAttr(prop) || Layout[prop];
       return parseInt(size, 10);
     },
     getLayoutExtent : function(){
       var prop = this.flow.getPropExtent();
-      var size = this.markup.getAttr("extent") || this.markup.getAttr(prop) || Layout[prop];
+      var size = this.getAttr("extent") || this.getAttr(prop) || Layout[prop];
       return parseInt(size, 10);
     },
     getLogicalMaxMeasure : function(){
@@ -6995,24 +6975,6 @@ var StyleContext = (function(){
 	return child === style;
       });
     },
-    _initMarkupSelector : function(markup, parent_style){
-      if(parent_style){
-	parent_style.appendChild(this);
-      }
-      markup.initSelector(this);
-      var onload = markup.getCssAttr("onload");
-      if(onload){
-	markup.setCssAttrs(onload(markup) || {});
-      }
-      var nth_child = markup.getCssAttr("nth-child");
-      if(nth_child){
-	markup.setCssAttrs(nth_child(this.getChildIndex(), markup) || {});
-      }
-      var nth_of_type = markup.getCssAttr("nth-of-type");
-      if(nth_of_type){
-	markup.setCssAttrs(nth_of_type(this.getChildIndexOfType(), markup) || {});
-      }
-    },
     _filterChildLines : function(elements){
       return List.filter(elements, function(element){
 	return element.style? true : false;
@@ -7062,7 +7024,7 @@ var StyleContext = (function(){
 	if(!line.style.isTextEmphaEnable() && line.style.getMarkupName() !== "ruby" && font_size === base_font_size){
 	  return;
 	}
-	if(line.style && line.style.markup.getName() === "img"){
+	if(line.style && line.style.getMarkupName() === "img"){
 	  return;
 	}
 	if(text_center_offset > 0){
@@ -7074,11 +7036,39 @@ var StyleContext = (function(){
 	}
       });
     },
+    _loadSelectorCss : function(markup, parent){
+      if(markup.hasPseudoElement()){
+	return Selectors.getValuePe(parent, markup.getName());
+      }
+      return Selectors.getValue(this);
+    },
+    _loadInlineCss : function(markup){
+      var style = markup.getAttr("style");
+      if(style === null){
+	return {};
+      }
+      var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];
+      return List.fold(stmts, {}, function(ret, stmt){
+	var nv = stmt.split(":");
+	if(nv.length >= 2){
+	  var prop = Utils.trim(nv[0]).toLowerCase();
+	  if(!is_inline_style_not_allowed(prop)){
+	    var value = Utils.trim(nv[1]);
+	    ret[prop] = value;
+	  }
+	}
+	return ret;
+      });
+    },
+    _loadCallbackCss : function(name){
+      var callback = this.getSelectorCssAttr(name);
+      return (callback && typeof callback === "function")? (callback(this) || {}) : {};
+    },
     _loadDisplay : function(markup){
-      return markup.getCssAttr("display", "inline");
+      return this.getCssAttr("display", "inline");
     },
     _loadFlow : function(markup, parent){
-      var value = markup.getCssAttr("flow", "inherit");
+      var value = this.getCssAttr("flow", "inherit");
       var parent_flow = parent? parent.flow : Layout.getStdBoxFlow();
       if(value === "inherit"){
 	return parent_flow;
@@ -7089,16 +7079,16 @@ var StyleContext = (function(){
       return BoxFlows.getByName(value);
     },
     _loadPosition : function(markup){
-      var value = markup.getCssAttr("position", "relative");
+      var value = this.getCssAttr("position", "relative");
       return new BoxPosition(value, {
-	top: markup.getCssAttr("top", "auto"),
-	left: markup.getCssAttr("left", "auto"),
-	right: markup.getCssAttr("right", "auto"),
-	bottom: markup.getCssAttr("bottom", "auto")
+	top: this.getCssAttr("top", "auto"),
+	left: this.getCssAttr("left", "auto"),
+	right: this.getCssAttr("right", "auto"),
+	bottom: this.getCssAttr("bottom", "auto")
       });
     },
     _loadColor : function(markup){
-      var value = markup.getCssAttr("color", "inherit");
+      var value = this.getCssAttr("color", "inherit");
       if(value !== "inherit"){
 	return new Color(value);
       }
@@ -7106,33 +7096,33 @@ var StyleContext = (function(){
     _loadFont : function(markup, parent){
       var parent_font_size = parent? parent.font.size : Layout.fontSize;
       var font = new Font(parent_font_size);
-      var font_size = markup.getCssAttr("font-size", "inherit");
+      var font_size = this.getCssAttr("font-size", "inherit");
       if(font_size !== "inherit"){
 	font.size = UnitSize.getFontSize(font_size, parent_font_size);
       }
-      var font_family = markup.getCssAttr("font-family", "inherit");
+      var font_family = this.getCssAttr("font-family", "inherit");
       if(font_family !== "inherit"){
 	font.family = font_family;
       } else if(parent === null){
 	font.family = Layout.getStdFontFamily();
       }
-      var font_weight = markup.getCssAttr("font-weight", "inherit");
+      var font_weight = this.getCssAttr("font-weight", "inherit");
       if(font_weight !== "inherit"){
 	font.weight = font_weight;
       }
-      var font_style = markup.getCssAttr("font-style", "inherit");
+      var font_style = this.getCssAttr("font-style", "inherit");
       if(font_style !== "inherit"){
 	font.style = font_style;
       }
       return font;
     },
     _loadBoxSizing : function(markup){
-      return markup.getCssAttr("box-sizing", "margin-box");
+      return this.getCssAttr("box-sizing", "margin-box");
     },
     _loadEdge : function(markup, flow, font){
-      var padding = markup.getCssAttr("padding");
-      var margin = markup.getCssAttr("margin");
-      var border_width = markup.getCssAttr("border-width");
+      var padding = this.getCssAttr("padding");
+      var margin = this.getCssAttr("margin");
+      var border_width = this.getCssAttr("border-width");
       if(padding === null && margin === null && border_width === null){
 	return null;
       }
@@ -7146,29 +7136,29 @@ var StyleContext = (function(){
       if(border_width){
 	edge.border.setSize(flow, UnitSize.getEdgeSize(border_width, font.size));
       }
-      var border_radius = markup.getCssAttr("border-radius");
+      var border_radius = this.getCssAttr("border-radius");
       if(border_radius){
 	edge.setBorderRadius(flow, UnitSize.getCornerSize(border_radius, font.size));
       }
-      var border_color = markup.getCssAttr("border-color");
+      var border_color = this.getCssAttr("border-color");
       if(border_color){
 	edge.setBorderColor(flow, border_color);
       }
-      var border_style = markup.getCssAttr("border-style");
+      var border_style = this.getCssAttr("border-style");
       if(border_style){
 	edge.setBorderStyle(flow, border_style);
       }
       return edge;
     },
     _loadLineRate : function(markup, parent){
-      var value = markup.getCssAttr("line-rate", "inherit");
+      var value = this.getCssAttr("line-rate", "inherit");
       if(value === "inherit" && parent && parent.lineRate){
 	return parent.lineRate;
       }
       return parseFloat(value || Layout.lineRate);
     },
     _loadTextAlign : function(markup, parent){
-      var value = markup.getCssAttr("text-align", "inherit");
+      var value = this.getCssAttr("text-align", "inherit");
       if(value === "inherit" && parent && parent.textAlign){
 	return parent.textAlign;
       }
@@ -7176,12 +7166,12 @@ var StyleContext = (function(){
     },
     _loadTextEmpha : function(markup, parent){
       var parent_color = parent? parent.getColor() : Layout.fontColor;
-      var empha_style = markup.getCssAttr("text-emphasis-style", "none");
+      var empha_style = this.getCssAttr("text-emphasis-style", "none");
       if(empha_style === "none" || empha_style === "inherit"){
 	return null;
       }
-      var empha_pos = markup.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
-      var empha_color = markup.getCssAttr("text-emphasis-color", parent_color);
+      var empha_pos = this.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
+      var empha_color = this.getCssAttr("text-emphasis-color", parent_color);
       return new TextEmpha({
 	style:new TextEmphaStyle(empha_style),
 	pos:new TextEmphaPos(empha_pos),
@@ -7189,52 +7179,52 @@ var StyleContext = (function(){
       });
     },
     _loadTextEmphaStyle : function(markup, parent){
-      var value = markup.getCssAttr("text-emphasis-style", "inherit");
+      var value = this.getCssAttr("text-emphasis-style", "inherit");
       return (value !== "inherit")? new TextEmphaStyle(value) : null;
     },
     _loadTextEmphaPos : function(markup, parent){
-      return markup.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
+      return this.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
     },
     _loadTextEmphaColor : function(markup, parent, color){
-      return markup.getCssAttr("text-emphasis-color", color.getValue());
+      return this.getCssAttr("text-emphasis-color", color.getValue());
     },
     _loadFloatDirection : function(markup){
-      var name = markup.getCssAttr("float", "none");
+      var name = this.getCssAttr("float", "none");
       if(name === "none"){
 	return null;
       }
       return FloatDirections.get(name);
     },
     _loadBreakBefore : function(markup){
-      var value = markup.getCssAttr("break-before");
+      var value = this.getCssAttr("break-before");
       return value? Breaks.getBefore(value) : null;
     },
     _loadBreakAfter : function(markup){
-      var value = markup.getCssAttr("break-after");
+      var value = this.getCssAttr("break-after");
       return value? Breaks.getAfter(value) : null;
     },
     _loadListStyle : function(markup){
-      var list_style_type = markup.getCssAttr("list-style-type", "none");
+      var list_style_type = this.getCssAttr("list-style-type", "none");
       if(list_style_type === "none"){
 	return null;
       }
       return new ListStyle({
 	type:list_style_type,
-	position:markup.getCssAttr("list-style-position", "outside"),
-	image:markup.getCssAttr("list-style-image", "none"),
-	format:markup.getCssAttr("list-style-format")
+	position:this.getCssAttr("list-style-position", "outside"),
+	image:this.getCssAttr("list-style-image", "none"),
+	format:this.getCssAttr("list-style-format")
       });
     },
     _loadLetterSpacing : function(markup, parent, font){
-      var letter_spacing = markup.getCssAttr("letter-spacing");
+      var letter_spacing = this.getCssAttr("letter-spacing");
       if(letter_spacing){
 	return UnitSize.getUnitSize(letter_spacing, font.size);
       }
     },
     _loadBackground : function(markup, parent){
-      var bg_color = markup.getCssAttr("background-color");
-      var bg_image = markup.getCssAttr("background-image");
-      var bg_pos = markup.getCssAttr("background-position");
+      var bg_color = this.getCssAttr("background-color");
+      var bg_image = this.getCssAttr("background-image");
+      var bg_pos = this.getCssAttr("background-position");
       if(bg_color === null && bg_image === null && bg_pos === null){
 	return null;
       }
@@ -7251,7 +7241,7 @@ var StyleContext = (function(){
 	  new BackgroundPos(bg_pos.block, bg_pos.offset)
 	);
       }
-      var bg_repeat = markup.getCssAttr("background-repeat");
+      var bg_repeat = this.getCssAttr("background-repeat");
       if(bg_repeat){
 	background.repeat = new BackgroundRepeat2d(
 	  new BackgroundRepeat(bg_repeat.inline),
@@ -7261,10 +7251,10 @@ var StyleContext = (function(){
       return background;
     },
     _loadPushedAttr : function(markup){
-      return markup.getAttr("pushed") !== null;
+      return this.getMarkupAttr("pushed") !== null;
     },
     _loadPulledAttr : function(markup){
-      return markup.getAttr("pulled") !== null;
+      return this.getMarkupAttr("pulled") !== null;
     }
   };
 
