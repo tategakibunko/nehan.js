@@ -760,7 +760,16 @@ var StyleContext = (function(){
     //
     _loadCallbackCss : function(name, context){
       var callback = this.getSelectorCssAttr(name);
-      return (callback && typeof callback === "function")? (callback(this, context || null) || {}) : {};
+      if(callback === null){
+	return {};
+      }
+      if(typeof callback === "function"){
+	return callback(this, context || null) || {};
+      }
+      if(typeof callback === "object"){
+	return callback;
+      }
+      return {};
     },
     _loadDisplay : function(){
       return this.getCssAttr("display", "inline");
