@@ -4,6 +4,14 @@ var VertEvaluator = (function(){
   }
   Class.extend(VertEvaluator, LayoutEvaluator);
 
+  VertEvaluator.prototype.getFlipEvaluator = function(){
+    return new HoriEvaluator();
+  };
+
+  VertEvaluator.prototype.isFlipBox = function(box){
+    return box.style.isTextHorizontal();
+  };
+
   VertEvaluator.prototype.evalInlineChild = function(line, child){
     return this.evalInline(child);
   };

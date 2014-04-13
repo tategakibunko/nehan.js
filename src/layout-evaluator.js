@@ -1,12 +1,15 @@
 var LayoutEvaluator = (function(){
-  function LayoutEvaluator(){
-  }
+  function LayoutEvaluator(){}
 
   LayoutEvaluator.prototype = {
     evaluate : function(box){
       if(box === null || typeof box === "undefined"){
 	//console.warn("error box:%o", box);
 	return "";
+      }
+      if(this.isFlipBox(box)){
+	var flip_evaluator = this.getFlipEvaluator();
+	return flip_evaluator.evaluate(box);
       }
       // caution: not box.style.display but box.display
       switch(box.display){

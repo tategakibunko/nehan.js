@@ -44,7 +44,7 @@ var BlockGenerator = (function(){
 	break;
       }
     }
-    return this._createBlock(context);
+    return this._createOutput(context);
   };
 
   BlockGenerator.prototype._getNext = function(context){
@@ -85,6 +85,17 @@ var BlockGenerator = (function(){
     }
 
     var child_stream = this._createStream(child_style, token);
+
+    // if child flow is not same as parent flow, clone new parent and yield inside it.
+    // by doing this, this._yield loop can get extent of the element child-generator yields in same axis(flow).
+    if(child_style.isFlipFlow()){
+      child_style.cloneParent("div", {
+	"measure":context.getBlockRestExtent(),
+	"extent":context.getInlineMaxMeasure()
+      });
+      this.setChildLayout(new BlockGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
+    }
 
     // switch generator by display
     switch(child_style.display){
@@ -184,7 +195,7 @@ var BlockGenerator = (function(){
     });
   };
 
-  BlockGenerator.prototype._createBlock = function(context){
+  BlockGenerator.prototype._createOutput = function(context){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){

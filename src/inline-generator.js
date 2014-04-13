@@ -32,7 +32,7 @@ var InlineGenerator = (function(){
     if(!context.hasBr()){
       this._justifyLine(context);
     }
-    return this._createLine(context);
+    return this._createOutput(context);
   };
 
   InlineGenerator.prototype._createChildContext = function(context){
@@ -42,7 +42,7 @@ var InlineGenerator = (function(){
     );
   };
 
-  InlineGenerator.prototype._createLine = function(context){
+  InlineGenerator.prototype._createOutput = function(context){
     var measure = this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure();
     return this.style.createLine({
       br:context.hasBr(), // is line broken by br?

@@ -4,6 +4,14 @@ var HoriEvaluator = (function(){
   }
   Class.extend(HoriEvaluator, LayoutEvaluator);
 
+  HoriEvaluator.prototype.getFlipEvaluator = function(){
+    return new VertEvaluator();
+  };
+
+  HoriEvaluator.prototype.isFlipBox = function(box){
+    return box.style.isTextVertical();
+  };
+
   HoriEvaluator.prototype.evalBlockImage = function(image){
     return Html.tagSingle("img", Args.copy({
       "src":image.style.getMarkupAttr("src"),

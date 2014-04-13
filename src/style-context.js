@@ -4,89 +4,92 @@ var StyleContext = (function(){
   // parent : parent style context
   // force_css : system css that must be applied.
   function StyleContext(markup, parent, force_css){
-    this.markup = markup;
-    this.parent = parent || null;
-    this.childs = []; // children for this style, updated by appendChild
-    if(parent){
-      parent.appendChild(this);
-    }
-
-    // load selector css
-    // 1. load from normal selector
-    // 2. load from dynamic callback selector named by "onload"
-    this.selectorCss = this._loadSelectorCss(markup, parent);
-    Args.copy(this.selectorCss, this._loadCallbackCss("onload"));
-
-    // load inline css
-    // 1. load from markup attr 'style'
-    // 2. load from dynamic callback selector named by "inline"
-    // 3. load from constructor argument 'force_css' if exists
-    this.inlineCss = this._loadInlineCss(markup);
-    Args.copy(this.inlineCss, this._loadCallbackCss("inline"));
-    Args.copy(this.inlineCss, force_css || {});
-
-    // always required properties
-    this.display = this._loadDisplay(); // required
-    this.flow = this._loadFlow(); // required
-    this.boxSizing = this._loadBoxSizing(); // required
-
-    // optional properties
-    var color = this._loadColor();
-    if(color){
-      this.color = color;
-    }
-    var background = this._loadBackground();
-    if(background){
-      this.background = background;
-    }
-    var font = this._loadFont();
-    if(font){
-      this.font = font;
-    }
-    var position = this._loadPosition();
-    if(position){
-      this.position = position;
-    }
-    var edge = this._loadEdge(this.flow, this.getFontSize());
-    if(edge){
-      this.edge = edge;
-    }
-    var line_rate = this._loadLineRate();
-    if(line_rate){
-      this.lineRate = line_rate;
-    }
-    var text_align = this._loadTextAlign();
-    if(text_align){
-      this.textAlign = text_align;
-    }
-    var text_empha = this._loadTextEmpha();
-    if(text_empha){
-      this.textEmpha = text_empha;
-    }
-    var text_combine = this._loadTextCombine();
-    if(text_combine){
-      this.textCombine = text_combine;
-    }
-    var list_style = this._loadListStyle();
-    if(list_style){
-      this.listStyle = list_style;
-    }
-    // keyword 'float' is reserved in js, so we name this prop 'float direction' instead.
-    var float_direction = this._loadFloatDirection();
-    if(float_direction){
-      this.floatDirection = float_direction;
-    }
-    var break_before = this._loadBreakBefore();
-    if(break_before){
-      this.breakBefore = break_before;
-    }
-    var break_after = this._loadBreakAfter();
-    if(break_after){
-      this.breakAfter = break_after;
-    }
+    this._initialize(markup, parent, force_css);
   }
 
   StyleContext.prototype = {
+    _initialize : function(markup, parent, force_css){
+      this.markup = markup;
+      this.parent = parent || null;
+      this.childs = []; // children for this style, updated by appendChild
+      if(parent){
+	parent.appendChild(this);
+      }
+
+      // load selector css
+      // 1. load from normal selector
+      // 2. load from dynamic callback selector named by "onload"
+      this.selectorCss = this._loadSelectorCss(markup, parent);
+      Args.copy(this.selectorCss, this._loadCallbackCss("onload"));
+
+      // load inline css
+      // 1. load from markup attr 'style'
+      // 2. load from dynamic callback selector named by "inline"
+      // 3. load from constructor argument 'force_css' if exists
+      this.inlineCss = this._loadInlineCss(markup);
+      Args.copy(this.inlineCss, this._loadCallbackCss("inline"));
+      Args.copy(this.inlineCss, force_css || {});
+
+      // always required properties
+      this.display = this._loadDisplay(); // required
+      this.flow = this._loadFlow(); // required
+      this.boxSizing = this._loadBoxSizing(); // required
+
+      // optional properties
+      var color = this._loadColor();
+      if(color){
+	this.color = color;
+      }
+      var background = this._loadBackground();
+      if(background){
+	this.background = background;
+      }
+      var font = this._loadFont();
+      if(font){
+	this.font = font;
+      }
+      var position = this._loadPosition();
+      if(position){
+	this.position = position;
+      }
+      var edge = this._loadEdge(this.flow, this.getFontSize());
+      if(edge){
+	this.edge = edge;
+      }
+      var line_rate = this._loadLineRate();
+      if(line_rate){
+	this.lineRate = line_rate;
+      }
+      var text_align = this._loadTextAlign();
+      if(text_align){
+	this.textAlign = text_align;
+      }
+      var text_empha = this._loadTextEmpha();
+      if(text_empha){
+	this.textEmpha = text_empha;
+      }
+      var text_combine = this._loadTextCombine();
+      if(text_combine){
+	this.textCombine = text_combine;
+      }
+      var list_style = this._loadListStyle();
+      if(list_style){
+	this.listStyle = list_style;
+      }
+      // keyword 'float' is reserved in js, so we name this prop 'float direction' instead.
+      var float_direction = this._loadFloatDirection();
+      if(float_direction){
+	this.floatDirection = float_direction;
+      }
+      var break_before = this._loadBreakBefore();
+      if(break_before){
+	this.breakBefore = break_before;
+      }
+      var break_after = this._loadBreakAfter();
+      if(break_after){
+	this.breakAfter = break_after;
+      }
+    },
     clone : function(css){
       // no one can clone root style.
       if(this.parent === null){
@@ -97,6 +100,25 @@ var StyleContext = (function(){
     // append child style context
     appendChild : function(child_style){
       this.childs.push(child_style);
+    },
+    removeChild : function(child_style){
+      var index = List.indexOf(this.childs, Closure.eq(child_style));
+      if(index >= 0){
+	var removed_child = this.childs.splice(index, 1);
+	//console.log("remove child:%o", removed_child);
+	return removed_child;
+      }
+      return null;
+    },
+    // insert new parent between this.style and this.parent.
+    cloneParent : function(tag_name, css){
+      if(this.parent){
+	this.parent.removeChild(this);
+      }
+      var parent_tag = new Tag("<" + tag_name + ">");
+      var new_parent = new StyleContext(parent_tag, this.parent, css || {});
+      this._initialize(this.markup, new_parent); // parent changed, so re-initialize required.
+      return new_parent;
     },
     // inherit style with tag_name and css(optional).
     createChild : function(tag_name, css){
@@ -292,6 +314,9 @@ var StyleContext = (function(){
     isEmpty : function(){
       return false; // TODO
     },
+    isFlipFlow : function(){
+      return this.parent? (this.flow !== this.parent.flow) : false;
+    },
     setCssAttr : function(name, value){
       this.inlineCss[name] = value;
     },
@@ -379,8 +404,6 @@ var StyleContext = (function(){
 	content = Html.tagWrap("first-line", content);
       }
       return content;
-    },
-    _getPseudoAfter : function(){
     },
     getHeaderRank : function(){
       return this.markup.getHeaderRank();
