@@ -9,6 +9,9 @@ Nehan.Env = Env;
 // export engine local interfaces
 return {
   documentContext: DocumentContext,
+  createBodyOutlineElement : function(callbacks){
+    return DocumentContext.createBodyOutlineElement(callbacks);
+  },
   createPageStream : function(text, group_size){
     group_size = Math.max(1, group_size || 1);
     return (group_size === 1)? (new PageStream(text)) : (new PageGroupStream(text, group_size));

@@ -6,7 +6,7 @@ var DocumentContext = {
   // this is shortcut function for getOutlineContextsByName
   // in many case, outline-context is only under "body" context,
   // and this function returns only one outline element just under the "body".
-  createOutlineElement : function(callbacks){
+  createBodyOutlineElement : function(callbacks){
     var elements = this.createOutlineElementsByName("body", callbacks);
     if(elements.length > 0){
       return elements[0];

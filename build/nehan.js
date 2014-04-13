@@ -5584,7 +5584,7 @@ var DocumentContext = {
   // this is shortcut function for getOutlineContextsByName
   // in many case, outline-context is only under "body" context,
   // and this function returns only one outline element just under the "body".
-  createOutlineElement : function(callbacks){
+  createBodyOutlineElement : function(callbacks){
     var elements = this.createOutlineElementsByName("body", callbacks);
     if(elements.length > 0){
       return elements[0];
@@ -9299,6 +9299,9 @@ Nehan.Env = Env;
 // export engine local interfaces
 return {
   documentContext: DocumentContext,
+  createBodyOutlineElement : function(callbacks){
+    return DocumentContext.createBodyOutlineElement(callbacks);
+  },
   createPageStream : function(text, group_size){
     group_size = Math.max(1, group_size || 1);
     return (group_size === 1)? (new PageStream(text)) : (new PageGroupStream(text, group_size));
