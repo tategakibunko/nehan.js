@@ -21,10 +21,14 @@ var StyleContext = (function(){
 	parent.appendChild(this);
       }
 
+      // initialize css values
+      this.selectorCss = {};
+      this.inlineCss = {};
+
       // load selector css
       // 1. load from normal selector
       // 2. load from dynamic callback selector named by "onload"
-      this.selectorCss = this._loadSelectorCss(markup, parent);
+      Args.copy(this.selectorCss, this._loadSelectorCss(markup, parent));
       Args.copy(this.selectorCss, this._loadCallbackCss("onload", args.context || null));
 
       // load inline css
@@ -32,7 +36,7 @@ var StyleContext = (function(){
       // 2. load from dynamic callback selector named by "inline"
       // 3. load from constructor argument 'args.forceCss' if exists.
       //    notice that styles in args.forceCss are 'system required style', so highest priority.
-      this.inlineCss = this._loadInlineCss(markup);
+      Args.copy(this.inlineCss, this._loadInlineCss(markup));
       Args.copy(this.inlineCss, this._loadCallbackCss("inline", args.context || null));
       Args.copy(this.inlineCss, args.forceCss || {});
 
