@@ -2495,7 +2495,7 @@ var Tag = (function (){
     clone : function(){
       return new Tag(this.src, this.content);
     },
-    setContentRaw : function(content){
+    setContent : function(content){
       this.content = content;
     },
     addClass : function(klass){
@@ -5102,7 +5102,7 @@ var HtmlLexer = (function (){
     },
     _parseChildContentTag : function(tag){
       var content = this._getTagContent(tag.name);
-      tag.setContentRaw(Utils.trimCRLF(content));
+      tag.setContent(Utils.trimCRLF(content));
       this._stepBuff(content.length + tag.name.length + 3); // 3 = "</>".length
       return tag;
     },
@@ -6395,13 +6395,18 @@ var StyleContext = (function(){
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
 
   // parent : parent style context
-  // force_css : system css that must be applied.
-  function StyleContext(markup, parent, force_css){
-    this._initialize(markup, parent, force_css);
+  // args :
+  //   1. forceCss
+  //     system css that must be applied.
+  //   2. context
+  //     layout-context at the point of this style-context created.
+  function StyleContext(markup, parent, args){
+    this._initialize(markup, parent, args);
   }
 
   StyleContext.prototype = {
-    _initialize : function(markup, parent, force_css){
+    _initialize : function(markup, parent, args){
+      args = args || {};
       this.markup = markup;
       this.parent = parent || null;
       this.childs = []; // children for this style, updated by appendChild
@@ -6413,15 +6418,16 @@ var StyleContext = (function(){
       // 1. load from normal selector
       // 2. load from dynamic callback selector named by "onload"
       this.selectorCss = this._loadSelectorCss(markup, parent);
-      Args.copy(this.selectorCss, this._loadCallbackCss("onload"));
+      Args.copy(this.selectorCss, this._loadCallbackCss("onload", args.context || null));
 
       // load inline css
       // 1. load from markup attr 'style'
       // 2. load from dynamic callback selector named by "inline"
-      // 3. load from constructor argument 'force_css' if exists
+      // 3. load from constructor argument 'args.forceCss' if exists.
+      //    notice that styles in args.forceCss are 'system required style', so highest priority.
       this.inlineCss = this._loadInlineCss(markup);
-      Args.copy(this.inlineCss, this._loadCallbackCss("inline"));
-      Args.copy(this.inlineCss, force_css || {});
+      Args.copy(this.inlineCss, this._loadCallbackCss("inline", args.context || null));
+      Args.copy(this.inlineCss, args.forceCss || {});
 
       // always required properties
       this.display = this._loadDisplay(); // required
@@ -6488,7 +6494,7 @@ var StyleContext = (function(){
       if(this.parent === null){
 	return this.createChild("div", css);
       }
-      return new StyleContext(this.markup.clone(), this.parent, css || {});
+      return new StyleContext(this.markup.clone(), this.parent, {forceCss:(css || {})});
     },
     // append child style context
     appendChild : function(child_style){
@@ -6504,19 +6510,19 @@ var StyleContext = (function(){
       return null;
     },
     // insert new parent between this.style and this.parent.
-    cloneParent : function(tag_name, css){
+    cloneParent : function(tag_name, parent_css){
       if(this.parent){
 	this.parent.removeChild(this);
       }
       var parent_tag = new Tag("<" + tag_name + ">");
-      var new_parent = new StyleContext(parent_tag, this.parent, css || {});
+      var new_parent = new StyleContext(parent_tag, this.parent, {forceCss:(parent_css || {})});
       this._initialize(this.markup, new_parent); // parent changed, so re-initialize required.
       return new_parent;
     },
     // inherit style with tag_name and css(optional).
     createChild : function(tag_name, css){
       var tag = new Tag("<" + tag_name + ">");
-      var style = new StyleContext(tag, this, css || {});
+      var style = new StyleContext(tag, this, {forceCss:(css || {})});
 
       // save 'original' parent to child-style, because sometimes it is required by 'grand-child'.
       // for example, in following code, <li-body> is anonymous block,
@@ -6604,20 +6610,6 @@ var StyleContext = (function(){
 	}
       }
       return line;
-    },
-    // nehan.js can change inline-style dynamically by setting 'layout' callback in style.
-    //
-    // [example]
-    // engine.setStyle("p.more-than-extent-100", {
-    //   "layout" : function(style, context){
-    //	    if(context.getBlockRestExtent() < 100){
-    //        return {"page-break-before":"always"};
-    //      }
-    //   }
-    // });
-    //
-    onLayoutContext : function(context){
-      Args.copy(this.inlineCss, this._loadCallbackCss("layout", context));
     },
     isBlock : function(){
       switch(this.display){
@@ -7148,6 +7140,17 @@ var StyleContext = (function(){
 	return ret;
       });
     },
+    // nehan.js can change style dynamically by layout-context.
+    //
+    // [example]
+    // engine.setStyle("p.more-than-extent-100", {
+    //   "onload" : function(style, context){
+    //	    if(context.getBlockRestExtent() < 100){
+    //        return {"page-break-before":"always"};
+    //      }
+    //   }
+    // });
+    //
     _loadCallbackCss : function(name, context){
       var callback = this.getSelectorCssAttr(name);
       return (callback && typeof callback === "function")? (callback(this, context || null) || {}) : {};
@@ -7585,7 +7588,6 @@ var LayoutGenerator = (function(){
   // 3. return _yield that is implemented by child class.
   LayoutGenerator.prototype.yield = function(parent_context){
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
-    this.style.onLayoutContext(context);
     return this._yield(context);
   };
 
@@ -7759,7 +7761,7 @@ var BlockGenerator = (function(){
     }
 
     // if tag token, inherit style
-    var child_style = (token instanceof Tag)? new StyleContext(token, this.style) : this.style;
+    var child_style = (token instanceof Tag)? new StyleContext(token, this.style, {context:context}) : this.style;
 
     // if inline text or child inline or inline-block,
     // push back stream and delegate current style and stream to InlineGenerator
@@ -7775,7 +7777,7 @@ var BlockGenerator = (function(){
     // push back stream and delegate current style and stream to FloatGenerator
     if(child_style.isFloated()){
       this.stream.prev();
-      this.setChildLayout(new FloatGenerator(this.style, this.stream, this.outlineContext));
+      this.setChildLayout(new FloatGenerator(this.style, this.stream, context, this.outlineContext));
       return this.yieldChildLayout(context);
     }
 
@@ -8020,7 +8022,7 @@ var InlineGenerator = (function(){
     // if tag token, inherit style
     var child_style = this.style;
     if(token instanceof Tag){
-      child_style = new StyleContext(token, this.style);
+      child_style = new StyleContext(token, this.style, {context:context});
     }
 
     // if inline -> block, force terminate inline
@@ -8262,9 +8264,9 @@ var FloatGenerator = (function(){
   // caution: constructor argument 'style' is the style of parent.
   // so if <body><float1>..</float1><float2>...</float2></body>,
   // style of this contructor is 'body.style'
-  function FloatGenerator(style, stream, outline_context){
+  function FloatGenerator(style, stream, layout_context, outline_context){
     BlockGenerator.call(this, style, stream, outline_context);
-    this.generators = this._getFloatedGenerators();
+    this.generators = this._getFloatedGenerators(layout_context);
 
     // create child generator to yield rest-space of float-elements with logical-float "start".
     // notice that this generator uses 'clone' of original style, because size of space changes by position,
@@ -8403,22 +8405,22 @@ var FloatGenerator = (function(){
     return new FloatGroupStack(this.style.flow, start_blocks, end_blocks);
   };
 
-  FloatGenerator.prototype._getFloatedTags = function(){
+  FloatGenerator.prototype._getFloatedGenerators = function(context){
+    var self = this;
+    return List.map(this._getFloatedTags(context), function(tag){
+      return self._createFloatBlockGenerator(tag, context)
+    });
+  };
+
+  FloatGenerator.prototype._getFloatedTags = function(context){
     var parent_style = this.style;
     return this.stream.getWhile(function(token){
-      return (token instanceof Tag && (new StyleContext(token, parent_style)).isFloated());
+      return (token instanceof Tag && (new StyleContext(token, parent_style, {context:context})).isFloated());
     });
   };
 
-  FloatGenerator.prototype._getFloatedGenerators = function(){
-    var self = this;
-    return List.map(this._getFloatedTags(), function(tag){
-      return self._createFloatBlockGenerator(tag)
-    });
-  };
-
-  FloatGenerator.prototype._createFloatBlockGenerator = function(tag){
-    var style = new StyleContext(tag, this.style);
+  FloatGenerator.prototype._createFloatBlockGenerator = function(tag, context){
+    var style = new StyleContext(tag, this.style, {context:context});
 
     // image tag not having stream(single tag), so use lazy-generator.
     // lazy generator already holds output result in construction time, but yields it later.

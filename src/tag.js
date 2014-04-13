@@ -16,7 +16,7 @@ var Tag = (function (){
     clone : function(){
       return new Tag(this.src, this.content);
     },
-    setContentRaw : function(content){
+    setContent : function(content){
       this.content = content;
     },
     addClass : function(klass){

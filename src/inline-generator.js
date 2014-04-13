@@ -91,7 +91,7 @@ var InlineGenerator = (function(){
     // if tag token, inherit style
     var child_style = this.style;
     if(token instanceof Tag){
-      child_style = new StyleContext(token, this.style);
+      child_style = new StyleContext(token, this.style, {context:context});
     }
 
     // if inline -> block, force terminate inline

@@ -64,7 +64,7 @@ var BlockGenerator = (function(){
     }
 
     // if tag token, inherit style
-    var child_style = (token instanceof Tag)? new StyleContext(token, this.style) : this.style;
+    var child_style = (token instanceof Tag)? new StyleContext(token, this.style, {context:context}) : this.style;
 
     // if inline text or child inline or inline-block,
     // push back stream and delegate current style and stream to InlineGenerator
@@ -80,7 +80,7 @@ var BlockGenerator = (function(){
     // push back stream and delegate current style and stream to FloatGenerator
     if(child_style.isFloated()){
       this.stream.prev();
-      this.setChildLayout(new FloatGenerator(this.style, this.stream, this.outlineContext));
+      this.setChildLayout(new FloatGenerator(this.style, this.stream, context, this.outlineContext));
       return this.yieldChildLayout(context);
     }
 

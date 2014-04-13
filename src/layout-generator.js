@@ -12,7 +12,6 @@ var LayoutGenerator = (function(){
   // 3. return _yield that is implemented by child class.
   LayoutGenerator.prototype.yield = function(parent_context){
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
-    this.style.onLayoutContext(context);
     return this._yield(context);
   };
 

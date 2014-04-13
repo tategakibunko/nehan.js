@@ -2,9 +2,9 @@ var FloatGenerator = (function(){
   // caution: constructor argument 'style' is the style of parent.
   // so if <body><float1>..</float1><float2>...</float2></body>,
   // style of this contructor is 'body.style'
-  function FloatGenerator(style, stream, outline_context){
+  function FloatGenerator(style, stream, layout_context, outline_context){
     BlockGenerator.call(this, style, stream, outline_context);
-    this.generators = this._getFloatedGenerators();
+    this.generators = this._getFloatedGenerators(layout_context);
 
     // create child generator to yield rest-space of float-elements with logical-float "start".
     // notice that this generator uses 'clone' of original style, because size of space changes by position,
@@ -143,22 +143,22 @@ var FloatGenerator = (function(){
     return new FloatGroupStack(this.style.flow, start_blocks, end_blocks);
   };
 
-  FloatGenerator.prototype._getFloatedTags = function(){
+  FloatGenerator.prototype._getFloatedGenerators = function(context){
+    var self = this;
+    return List.map(this._getFloatedTags(context), function(tag){
+      return self._createFloatBlockGenerator(tag, context)
+    });
+  };
+
+  FloatGenerator.prototype._getFloatedTags = function(context){
     var parent_style = this.style;
     return this.stream.getWhile(function(token){
-      return (token instanceof Tag && (new StyleContext(token, parent_style)).isFloated());
+      return (token instanceof Tag && (new StyleContext(token, parent_style, {context:context})).isFloated());
     });
   };
 
-  FloatGenerator.prototype._getFloatedGenerators = function(){
-    var self = this;
-    return List.map(this._getFloatedTags(), function(tag){
-      return self._createFloatBlockGenerator(tag)
-    });
-  };
-
-  FloatGenerator.prototype._createFloatBlockGenerator = function(tag){
-    var style = new StyleContext(tag, this.style);
+  FloatGenerator.prototype._createFloatBlockGenerator = function(tag, context){
+    var style = new StyleContext(tag, this.style, {context:context});
 
     // image tag not having stream(single tag), so use lazy-generator.
     // lazy generator already holds output result in construction time, but yields it later.

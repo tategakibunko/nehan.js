@@ -132,7 +132,7 @@ var HtmlLexer = (function (){
     },
     _parseChildContentTag : function(tag){
       var content = this._getTagContent(tag.name);
-      tag.setContentRaw(Utils.trimCRLF(content));
+      tag.setContent(Utils.trimCRLF(content));
       this._stepBuff(content.length + tag.name.length + 3); // 3 = "</>".length
       return tag;
     },

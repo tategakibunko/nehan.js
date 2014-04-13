@@ -14,8 +14,6 @@ o support "orphans" property
 o now "setStyle" supports not only "onload" but also "inline" or "layout" callbacks.
 o callback style "onload" writes the style value as static style value,
 o callback style "inline" writes the style value as inline style value.
-o callback style "layout" is called each time when the layout style is associated with is yielded,
-  so you can change the style value dynamically by layout-context.
 ! for many future are updated, remove the older test folter, so we must create newer one(TODO).
 
 version 4.0.11 2014/xx/xx
