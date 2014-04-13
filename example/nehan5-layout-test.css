@@ -1,0 +1,46 @@
+body{
+  margin:2em;
+}
+.wrap{
+  width:1200px;
+}
+.nehan-body{
+  background:pink;
+  margin-bottom:1em;
+}
+.nehan-p{
+  background:orange;
+}
+#test-menu{
+  float:left;
+  width:100px;
+  margin:0 10px 0 0;
+  padding:0;
+}
+#test-menu a{
+  display:inline-block;
+  width:100px;
+}
+#test-menu a:hover{
+  background-color:#eaeaea;
+  color:red;
+}
+#test-menu a.active:hover{
+  color:red;
+}
+a.active{
+  color:red;
+  font-weight:bold;
+}
+.results{
+  width:1150px;
+}
+#result-vert{
+  float:left;
+  width:500px;
+  margin-right:20px;
+}
+#result-hori{
+  float:left;
+  width:500px;
+}

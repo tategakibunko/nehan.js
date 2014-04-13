@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <title>nehan5 layout test</title>
+    <meta content="ja" name="content-language">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <meta http-equiv="Content-Script-Type" content="text/javascript">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- styles -->
+    <link href="nehan.css" rel="stylesheet">
+    <link href="nehan5-layout-test.css" rel="stylesheet">
+    <style type="text/css">
+      #source{width:800px; height:200px;}
+    </style>
+
+    <!-- scripts -->
+    <!-- notice that jquery is not required for nehan.js at all.
+	 we use it in 'nehan5-layout-test.js'. -->
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="nehan.js"></script>
+    <script type="text/javascript" src="nehan5-layout-test.js"></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <ul id="test-menu"></ul>
+      <div class="results">
+	<div id="result-vert"></div>
+	<div id="result-hori"></div>
+      </div>
+      <textarea id="source"></textarea>
+    </div>
+  </body>
+</html>
