@@ -1,7 +1,7 @@
 Args.copy(Layout, __engine_args.layout || {});
 Args.copy(Config, __engine_args.config || {});
 
-// export browser local interfaces
+// export global interfaces
 Nehan.version = "5.0.0";
 Nehan.Class = Class;
 Nehan.Env = Env;
