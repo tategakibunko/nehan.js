@@ -3,6 +3,16 @@ var DocumentContext = {
   anchors:{},
   outlineContexts:[],
   header:null,
+  // this is shortcut function for getOutlineContextsByName
+  // in many case, outline-context is only under "body" context,
+  // and this function returns only one outline element just under the "body".
+  createOutlineElement : function(callbacks){
+    var elements = this.createOutlineElementsByName("body", callbacks);
+    if(elements.length > 0){
+      return elements[0];
+    }
+    return null;
+  },
   getOutlineContextsByName : function(section_root_name){
     return List.filter(this.outlineContexts, function(context){
       return context.getMarkupName() === section_root_name;
