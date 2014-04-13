@@ -716,10 +716,7 @@ var Style = {
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
     "border-style":"solid",
-    "font-style":"italic",
-    "border-width":{
-      "after":"1px"
-    }
+    "font-style":"italic"
   },
   "th":{
     "display":"table-cell",
@@ -743,10 +740,7 @@ var Style = {
     "background-color":"#c3d9ff",
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
-    "border-style":"solid",
-    "border-width":{
-      "after":"1px"
-    }
+    "border-style":"solid"
   },
   "time":{
     "display":"inline"
