@@ -26,16 +26,16 @@ var StyleContext = (function(){
       this.inlineCss = {};
 
       // load selector css
-      // 1. load from normal selector
-      // 2. load from dynamic callback selector named by "onload"
+      // 1. load normal selector
+      // 2. load dynamic callback selector 'onload'
       Args.copy(this.selectorCss, this._loadSelectorCss(markup, parent));
       Args.copy(this.selectorCss, this._loadCallbackCss("onload", args.context || null));
 
       // load inline css
-      // 1. load from markup attr 'style'
-      // 2. load from dynamic callback selector named by "inline"
-      // 3. load from constructor argument 'args.forceCss' if exists.
-      //    notice that styles in args.forceCss are 'system required style', so highest priority.
+      // 1. load normal markup attribute 'style'
+      // 2. load dynamic callback selector 'inline'
+      // 3. load constructor argument 'args.forceCss' if exists.
+      //    notice that 'args.forceCss' is 'system required style'(so highest priority is given).
       Args.copy(this.inlineCss, this._loadInlineCss(markup));
       Args.copy(this.inlineCss, this._loadCallbackCss("inline", args.context || null));
       Args.copy(this.inlineCss, args.forceCss || {});
@@ -761,7 +761,6 @@ var StyleContext = (function(){
     //      }
     //   }
     // });
-    //
     _loadCallbackCss : function(name, context){
       var callback = this.getSelectorCssAttr(name);
       if(callback === null){
