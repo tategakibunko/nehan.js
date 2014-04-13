@@ -130,8 +130,6 @@ module.exports = function(grunt) {
 	    "src/page-stream.js",
 	    "src/page-group.js",
 	    "src/page-group-stream.js",
-
-	    // new system sources
 	    "src/kerning.js",
 	    "src/float-direction.js",
 	    "src/float-directions.js",
