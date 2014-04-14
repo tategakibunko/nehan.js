@@ -93,7 +93,7 @@ var Layout = {
     "smaller":"0.8em"
   },
   getStdFontFamily : function(){
-    return (this.direction === "vert")? this.vertFontFamily : this.horiHontFamily;
+    return (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
   },
   getStdBoxFlow : function(){
     var flow_name = this[this.direction];
