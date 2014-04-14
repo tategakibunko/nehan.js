@@ -7617,9 +7617,7 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype.hasNext = function(){
-    console.log("[%s] checking has next", this.style.getMarkupName());
     if(this._terminate){
-      console.log("[%s]force terminate", this.style.getMarkupName());
       return false;
     }
     if(this.hasCache()){
@@ -7731,7 +7729,6 @@ var BlockGenerator = (function(){
     }
     while(true){
       var element = this._getNext(context);
-      console.log("[%s] block element:%o", this.style.getMarkupName(), element);
       if(element === null){
 	break;
       }
@@ -7941,11 +7938,13 @@ var InlineGenerator = (function(){
     }
     while(true){
       var element = this._getNext(context);
-      console.log("[%s] inline element:%o", this.style.getMarkupName(), element);
       if(element === null){
 	break;
       }
       var measure = this._getMeasure(element);
+      if(measure === 0){
+	break;
+      }
       if(!context.hasInlineSpaceFor(measure)){
 	this.pushCache(element);
 	break;

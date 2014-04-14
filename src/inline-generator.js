@@ -11,11 +11,13 @@ var InlineGenerator = (function(){
     }
     while(true){
       var element = this._getNext(context);
-      console.log("[%s] inline element:%o", this.style.getMarkupName(), element);
       if(element === null){
 	break;
       }
       var measure = this._getMeasure(element);
+      if(measure === 0){
+	break;
+      }
       if(!context.hasInlineSpaceFor(measure)){
 	this.pushCache(element);
 	break;
