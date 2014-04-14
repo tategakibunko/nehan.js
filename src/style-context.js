@@ -130,6 +130,10 @@ var StyleContext = (function(){
       this._initialize(this.markup, new_parent); // parent changed, so re-initialize required.
       return new_parent;
     },
+    updateParent : function(parent){
+      this._initialize(this.markup, parent);
+      return this;
+    },
     // inherit style with tag_name and css(optional).
     createChild : function(tag_name, css){
       var tag = new Tag("<" + tag_name + ">");
@@ -310,8 +314,11 @@ var StyleContext = (function(){
     isEmpty : function(){
       return false; // TODO
     },
-    isFlipFlow : function(){
+    hasFlipFlow : function(){
       return this.parent? (this.flow !== this.parent.flow) : false;
+    },
+    hasMarkupClassName : function(class_name){
+      return this.markup.hasClass(class_name);
     },
     setCssAttr : function(name, value){
       this.inlineCss[name] = value;
@@ -362,9 +369,6 @@ var StyleContext = (function(){
     },
     getDatasetAttr : function(){
       return this.markup.getDatasetAttr();
-    },
-    hasMarkupClassName : function(class_name){
-      return this.markup.hasClass(class_name);
     },
     getMarkupName : function(){
       return this.markup.getName();

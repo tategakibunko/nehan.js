@@ -6517,6 +6517,10 @@ var StyleContext = (function(){
       this._initialize(this.markup, new_parent); // parent changed, so re-initialize required.
       return new_parent;
     },
+    updateParent : function(parent){
+      this._initialize(this.markup, parent);
+      return this;
+    },
     // inherit style with tag_name and css(optional).
     createChild : function(tag_name, css){
       var tag = new Tag("<" + tag_name + ">");
@@ -6697,8 +6701,11 @@ var StyleContext = (function(){
     isEmpty : function(){
       return false; // TODO
     },
-    isFlipFlow : function(){
+    hasFlipFlow : function(){
       return this.parent? (this.flow !== this.parent.flow) : false;
+    },
+    hasMarkupClassName : function(class_name){
+      return this.markup.hasClass(class_name);
     },
     setCssAttr : function(name, value){
       this.inlineCss[name] = value;
@@ -6749,9 +6756,6 @@ var StyleContext = (function(){
     },
     getDatasetAttr : function(){
       return this.markup.getDatasetAttr();
-    },
-    hasMarkupClassName : function(class_name){
-      return this.markup.hasClass(class_name);
     },
     getMarkupName : function(){
       return this.markup.getName();
@@ -7682,9 +7686,9 @@ var LayoutGenerator = (function(){
     );
   };
 
-  LayoutGenerator.prototype._createChildContext = function(context){
+  LayoutGenerator.prototype._createChildContext = function(parent_context){
     return new LayoutContext(
-      new BlockContext(context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
+      new BlockContext(parent_context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
       new InlineContext(this.style.getContentMeasure())
     );
   };
@@ -7692,7 +7696,6 @@ var LayoutGenerator = (function(){
   LayoutGenerator.prototype._createStream = function(style, markup){
     switch(markup.getName()){
     case "ruby": return new RubyTokenStream(markup);
-    //default: return new TokenStream(markup.getContent(style));
     default: return new TokenStream(style.getContent(markup));
     } 
   };
@@ -7789,14 +7792,9 @@ var BlockGenerator = (function(){
 
     var child_stream = this._createStream(child_style, token);
 
-    // if child flow is not same as parent flow, clone new parent and yield inside it.
-    // by doing this, this._yield loop can get extent of the element child-generator yields in same axis(flow).
-    if(child_style.isFlipFlow()){
-      child_style.cloneParent("div", {
-	"measure":context.getBlockRestExtent(),
-	"extent":context.getInlineMaxMeasure()
-      });
-      this.setChildLayout(new BlockGenerator(child_style, child_stream, this.outlineContext));
+    // child_style has flip flow
+    if(child_style.hasFlipFlow()){
+      this.setChildLayout(new FlipGenerator(child_style, child_stream, this.outlineContext, context));
       return this.yieldChildLayout(context);
     }
 
@@ -8171,6 +8169,57 @@ var LazyBlockGenerator = (function(){
 
   return LazyBlockGenerator;
 })();
+
+var FlipGenerator = (function(){
+  function FlipGenerator(style, stream, outline_context, layout_context){
+    this.originalParent = style.parent; // original parent before creating clone parent.
+    
+    // this is flip generator, so extent of element this gen yields is measure from the view of parent generator(measure also the same).
+    // so we clone parent to make parent generator capture output-element as original flow.
+    // [before clone parent] original_parent -> this.style
+    // [after  clone parent] original_parent -> new_parent -> this.style
+    style.cloneParent("div", {
+      measure:layout_context.getBlockRestExtent(),
+      extent:layout_context.getInlineMaxMeasure()
+    });
+    BlockGenerator.call(this, style, stream, outline_context);
+  }
+  Class.extend(FlipGenerator, BlockGenerator);
+
+  FlipGenerator.prototype._yield = function(parent_context){
+    // if start context, update parent with new content-size.
+    if(typeof parent_context === "undefined"){
+      this.style.updateParent(
+	this.style.parent.clone({
+	  measure:this.originalParentStyle.getContentExtent(),
+	  extent:this.originalParentStyle.getContentMeasure()
+	})
+      );
+    }
+    return BlockGenerator.prototype._yield.call(this, parent_context);
+  };
+
+  // create flip start context
+  // original parent = parent of parent of this.style(grand parent).
+  // measure of original parent = max_extent
+  // extent of original parent = max_measure
+  FlipGenerator.prototype._createStartContext = function(){
+    return new LayoutContext(
+      new BlockContext(this.originalParent.getContentMeasure()),
+      new InlineContext(this.originalParent.getContentExtent())
+    );
+  };
+
+  FlipGenerator.prototype._createChildContext = function(parent_context){
+    return new LayoutContext(
+      new BlockContext(parent_context.getInlineMaxMeasure()),
+      new InlineContext(parent_context.getBlockRestExtent() - this.style.getContextEdgeMeasure())
+    );
+  };
+
+  return FlipGenerator;
+})();
+
 
 var FloatGroup = (function(){
   function FloatGroup(elements, float_direction){

@@ -146,6 +146,7 @@ module.exports = function(grunt) {
 	    "src/inline-generator.js",
 	    "src/first-line-generator.js",
 	    "src/lazy-block-generator.js",
+	    "src/flip-generator.js",
 	    "src/float-group.js",
 	    "src/float-group-stack.js",
 	    "src/float-generator.js",

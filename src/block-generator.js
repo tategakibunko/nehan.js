@@ -86,14 +86,9 @@ var BlockGenerator = (function(){
 
     var child_stream = this._createStream(child_style, token);
 
-    // if child flow is not same as parent flow, clone new parent and yield inside it.
-    // by doing this, this._yield loop can get extent of the element child-generator yields in same axis(flow).
-    if(child_style.isFlipFlow()){
-      child_style.cloneParent("div", {
-	"measure":context.getBlockRestExtent(),
-	"extent":context.getInlineMaxMeasure()
-      });
-      this.setChildLayout(new BlockGenerator(child_style, child_stream, this.outlineContext));
+    // child_style has flip flow
+    if(child_style.hasFlipFlow()){
+      this.setChildLayout(new FlipGenerator(child_style, child_stream, this.outlineContext, context));
       return this.yieldChildLayout(context);
     }
 

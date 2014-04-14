@@ -100,9 +100,9 @@ var LayoutGenerator = (function(){
     );
   };
 
-  LayoutGenerator.prototype._createChildContext = function(context){
+  LayoutGenerator.prototype._createChildContext = function(parent_context){
     return new LayoutContext(
-      new BlockContext(context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
+      new BlockContext(parent_context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
       new InlineContext(this.style.getContentMeasure())
     );
   };
@@ -110,7 +110,6 @@ var LayoutGenerator = (function(){
   LayoutGenerator.prototype._createStream = function(style, markup){
     switch(markup.getName()){
     case "ruby": return new RubyTokenStream(markup);
-    //default: return new TokenStream(markup.getContent(style));
     default: return new TokenStream(style.getContent(markup));
     } 
   };
