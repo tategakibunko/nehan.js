@@ -39,7 +39,9 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype.hasNext = function(){
+    console.log("[%s] checking has next", this.style.getMarkupName());
     if(this._terminate){
+      console.log("[%s]force terminate", this.style.getMarkupName());
       return false;
     }
     if(this.hasCache()){

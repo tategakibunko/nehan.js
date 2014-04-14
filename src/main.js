@@ -8,6 +8,7 @@ Nehan.Env = Env;
 
 // export engine local interfaces
 return {
+  version:Nehan.version,
   documentContext: DocumentContext,
   createBodyOutlineElement : function(callbacks){
     return DocumentContext.createBodyOutlineElement(callbacks);

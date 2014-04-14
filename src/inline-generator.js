@@ -11,6 +11,7 @@ var InlineGenerator = (function(){
     }
     while(true){
       var element = this._getNext(context);
+      console.log("[%s] inline element:%o", this.style.getMarkupName(), element);
       if(element === null){
 	break;
       }

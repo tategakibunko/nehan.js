@@ -6043,7 +6043,6 @@ var PageStream = (function(){
 	  this._addBuffer(tree);
 	}
 	var page = this.getPage(page_no);
-	// console.log("sync get(%d):%o", page_no, page);
 	page_no++;
       }
       return this._setTimeElapsed();
@@ -6068,6 +6067,10 @@ var PageStream = (function(){
     },
     getTimeElapsed : function(){
       return this._timeElapsed;
+    },
+    // same as getPage, defined to keep compatibility of older version of nehan.js
+    get : function(page_no){
+      return this.getPage(page_no);
     },
     // int -> Page
     getPage : function(page_no){
@@ -6096,14 +6099,14 @@ var PageStream = (function(){
 	this.onComplete(this, this._setTimeElapsed());
 	return;
       }
-      var self = this;
+      // notice that result of yield is not a page object, it's abstruct layout tree,
+      // so you need to call 'getPage' to get actual page object.
       var tree = this._yield();
-      if(tree === null){
-	this.onComplete(this, this._setTimeElapsed());
-	return;
+      if(tree){
+	this._addBuffer(tree);
+	this.onProgress(this, tree);
       }
-      this._addBuffer(tree);
-      this.onProgress(this, tree);
+      var self = this;
       reqAnimationFrame(function(){
 	self._asyncGet(wait);
       });
@@ -7614,7 +7617,9 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype.hasNext = function(){
+    console.log("[%s] checking has next", this.style.getMarkupName());
     if(this._terminate){
+      console.log("[%s]force terminate", this.style.getMarkupName());
       return false;
     }
     if(this.hasCache()){
@@ -7726,6 +7731,7 @@ var BlockGenerator = (function(){
     }
     while(true){
       var element = this._getNext(context);
+      console.log("[%s] block element:%o", this.style.getMarkupName(), element);
       if(element === null){
 	break;
       }
@@ -7935,6 +7941,7 @@ var InlineGenerator = (function(){
     }
     while(true){
       var element = this._getNext(context);
+      console.log("[%s] inline element:%o", this.style.getMarkupName(), element);
       if(element === null){
 	break;
       }
@@ -9313,6 +9320,7 @@ Nehan.Env = Env;
 
 // export engine local interfaces
 return {
+  version:Nehan.version,
   documentContext: DocumentContext,
   createBodyOutlineElement : function(callbacks){
     return DocumentContext.createBodyOutlineElement(callbacks);

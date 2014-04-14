@@ -31,6 +31,7 @@ var BlockGenerator = (function(){
     }
     while(true){
       var element = this._getNext(context);
+      console.log("[%s] block element:%o", this.style.getMarkupName(), element);
       if(element === null){
 	break;
       }
