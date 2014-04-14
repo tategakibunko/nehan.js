@@ -120,20 +120,6 @@ var StyleContext = (function(){
       }
       return null;
     },
-    // insert new parent between this.style and this.parent.
-    cloneParent : function(tag_name, parent_css){
-      if(this.parent){
-	this.parent.removeChild(this);
-      }
-      var parent_tag = new Tag("<" + tag_name + ">");
-      var new_parent = new StyleContext(parent_tag, this.parent, {forceCss:(parent_css || {})})
-      return this.updateParent(new_parent);
-    },
-    // if parent changed, child must be initialized again.
-    updateParent : function(new_parent){
-      this._initialize(this.markup, new_parent);
-      return this;
-    },
     // inherit style with tag_name and css(optional).
     createChild : function(tag_name, css){
       var tag = new Tag("<" + tag_name + ">");
@@ -486,6 +472,9 @@ var StyleContext = (function(){
     },
     getParentChilds : function(){
       return this.parent? this.parent.childs : [];
+    },
+    getParentFlow : function(){
+      return this.parent? this.parent.flow : this.flow;
     },
     getNextSibling : function(){
       return null; // TODO

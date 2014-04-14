@@ -58,7 +58,7 @@ var BlockGenerator = (function(){
     }
 
     // read next token
-    var token = this.stream.get();
+    var token = this.stream? this.stream.get() : null;
     if(token === null){
       return null;
     }

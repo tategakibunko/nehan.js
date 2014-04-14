@@ -6507,20 +6507,6 @@ var StyleContext = (function(){
       }
       return null;
     },
-    // insert new parent between this.style and this.parent.
-    cloneParent : function(tag_name, parent_css){
-      if(this.parent){
-	this.parent.removeChild(this);
-      }
-      var parent_tag = new Tag("<" + tag_name + ">");
-      var new_parent = new StyleContext(parent_tag, this.parent, {forceCss:(parent_css || {})})
-      return this.updateParent(new_parent);
-    },
-    // if parent changed, child must be initialized again.
-    updateParent : function(new_parent){
-      this._initialize(this.markup, new_parent);
-      return this;
-    },
     // inherit style with tag_name and css(optional).
     createChild : function(tag_name, css){
       var tag = new Tag("<" + tag_name + ">");
@@ -6873,6 +6859,9 @@ var StyleContext = (function(){
     },
     getParentChilds : function(){
       return this.parent? this.parent.childs : [];
+    },
+    getParentFlow : function(){
+      return this.parent? this.parent.flow : this.flow;
     },
     getNextSibling : function(){
       return null; // TODO
@@ -7764,7 +7753,7 @@ var BlockGenerator = (function(){
     }
 
     // read next token
-    var token = this.stream.get();
+    var token = this.stream? this.stream.get() : null;
     if(token === null){
       return null;
     }
@@ -8171,49 +8160,19 @@ var LazyBlockGenerator = (function(){
 })();
 
 var FlipGenerator = (function(){
-  function FlipGenerator(style, stream, outline_context, layout_context){
-    this.originalParent = style.parent; // original parent before creating clone parent.
-    
-    // this is flip generator, so extent of element this gen yields is measure from the view of parent generator(measure also the same).
-    // so we clone parent to make parent generator capture output-element as original flow.
-    // [before clone parent] original_parent -> this.style
-    // [after  clone parent] original_parent -> new_parent -> this.style
-    BlockGenerator.call(this, style.cloneParent("div", {
-      measure:layout_context.getBlockRestExtent(),
-      extent:layout_context.getInlineMaxMeasure()
-    }), stream, outline_context);
+  function FlipGenerator(style, stream, outline_context){
+    BlockGenerator.call(this, style, stream, outline_context);
   }
   Class.extend(FlipGenerator, BlockGenerator);
 
-  FlipGenerator.prototype._yield = function(parent_context){
-    // if start context, update parent with new content-size.
-    if(typeof parent_context === "undefined"){
-      this.style.updateParent(
-	this.style.parent.clone({
-	  measure:this.originalParentStyle.getContentExtent(),
-	  extent:this.originalParentStyle.getContentMeasure()
-	})
-      );
-    }
-    return BlockGenerator.prototype._yield.call(this, parent_context);
-  };
-
-  // create flip start context
-  // original parent = parent of parent of this.style(grand parent).
-  // measure of original parent = max_extent
-  // extent of original parent = max_measure
-  FlipGenerator.prototype._createStartContext = function(){
-    return new LayoutContext(
-      new BlockContext(this.originalParent.getContentMeasure()),
-      new InlineContext(this.originalParent.getContentExtent())
-    );
-  };
-
-  FlipGenerator.prototype._createChildContext = function(parent_context){
-    return new LayoutContext(
-      new BlockContext(parent_context.getInlineMaxMeasure()),
-      new InlineContext(parent_context.getBlockRestExtent() - this.style.getContextEdgeMeasure())
-    );
+  FlipGenerator.prototype.yield = function(context){
+    // [measure of this.style] -> [extent of this.style.parent]
+    // [extent of this.style]  -> [measure of this.style.parent]
+    this.cloneStyle({
+      measure:context.getBlockRestExtent(),
+      extent:context.getInlineMaxMeasure()
+    });
+    return BlockGenerator.prototype.yield.call(this);
   };
 
   return FlipGenerator;
