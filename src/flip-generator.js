@@ -6,11 +6,10 @@ var FlipGenerator = (function(){
     // so we clone parent to make parent generator capture output-element as original flow.
     // [before clone parent] original_parent -> this.style
     // [after  clone parent] original_parent -> new_parent -> this.style
-    style.cloneParent("div", {
+    BlockGenerator.call(this, style.cloneParent("div", {
       measure:layout_context.getBlockRestExtent(),
       extent:layout_context.getInlineMaxMeasure()
-    });
-    BlockGenerator.call(this, style, stream, outline_context);
+    }), stream, outline_context);
   }
   Class.extend(FlipGenerator, BlockGenerator);
 

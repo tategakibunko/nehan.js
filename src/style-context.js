@@ -126,12 +126,12 @@ var StyleContext = (function(){
 	this.parent.removeChild(this);
       }
       var parent_tag = new Tag("<" + tag_name + ">");
-      var new_parent = new StyleContext(parent_tag, this.parent, {forceCss:(parent_css || {})});
-      this._initialize(this.markup, new_parent); // parent changed, so re-initialize required.
-      return new_parent;
+      var new_parent = new StyleContext(parent_tag, this.parent, {forceCss:(parent_css || {})})
+      return this.updateParent(new_parent);
     },
-    updateParent : function(parent){
-      this._initialize(this.markup, parent);
+    // if parent changed, child must be initialized again.
+    updateParent : function(new_parent){
+      this._initialize(this.markup, new_parent);
       return this;
     },
     // inherit style with tag_name and css(optional).
