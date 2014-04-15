@@ -2125,8 +2125,8 @@ var SelectorStateMachine = (function(){
   // selector 'f1 + f2'
   var find_adj_sibling = function(style, f1, f2){
     return List.find(style.getParentChilds(), function(child){
-      var slibling = child.getNextSibling();
-      return next && f1.test(child) && f2.test(sibling);
+      var sibling = child.getNextSibling();
+      return sibling && f1.test(child) && f2.test(sibling);
     });
   };
 
@@ -6419,6 +6419,7 @@ var StyleContext = (function(){
       this.parent = parent || null;
       this.markupName = markup.getName();
       this.childs = []; // children for this style, updated by appendChild
+      this.next = null;
       if(parent){
 	parent.appendChild(this);
       }
@@ -6513,6 +6514,9 @@ var StyleContext = (function(){
     },
     // append child style context
     appendChild : function(child_style){
+      if(this.childs.length > 0){
+	List.last(this.childs).next = child_style;
+      }
       this.childs.push(child_style);
     },
     removeChild : function(child_style){
@@ -6881,7 +6885,7 @@ var StyleContext = (function(){
       return this.parent? this.parent.flow : this.flow;
     },
     getNextSibling : function(){
-      return null; // TODO
+      return this.next;
     },
     getOuterSize : function(){
       var measure = this.getOuterMeasure();
@@ -8978,6 +8982,8 @@ var LayoutEvaluator = (function(){
       }
       return text;
     },
+    // if link title is not defined, summary of link content is used.
+    // if link uri has anchor address, add page-no to dataset where the anchor is defined.
     evalLink : function(line, link){
       var title = link.style.getMarkupAttr("title") || link.style.getMarkupContent().substring(0, Config.defaultLinkTitleLength);
       var uri = new Uri(link.style.getMarkupAttr("href"));

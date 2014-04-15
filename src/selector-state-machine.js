@@ -21,8 +21,8 @@ var SelectorStateMachine = (function(){
   // selector 'f1 + f2'
   var find_adj_sibling = function(style, f1, f2){
     return List.find(style.getParentChilds(), function(child){
-      var slibling = child.getNextSibling();
-      return next && f1.test(child) && f2.test(sibling);
+      var sibling = child.getNextSibling();
+      return sibling && f1.test(child) && f2.test(sibling);
     });
   };
 

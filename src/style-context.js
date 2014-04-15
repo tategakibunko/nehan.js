@@ -18,6 +18,7 @@ var StyleContext = (function(){
       this.parent = parent || null;
       this.markupName = markup.getName();
       this.childs = []; // children for this style, updated by appendChild
+      this.next = null;
       if(parent){
 	parent.appendChild(this);
       }
@@ -112,6 +113,9 @@ var StyleContext = (function(){
     },
     // append child style context
     appendChild : function(child_style){
+      if(this.childs.length > 0){
+	List.last(this.childs).next = child_style;
+      }
       this.childs.push(child_style);
     },
     removeChild : function(child_style){
@@ -480,7 +484,7 @@ var StyleContext = (function(){
       return this.parent? this.parent.flow : this.flow;
     },
     getNextSibling : function(){
-      return null; // TODO
+      return this.next;
     },
     getOuterSize : function(){
       var measure = this.getOuterMeasure();
