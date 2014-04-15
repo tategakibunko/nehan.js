@@ -93,6 +93,18 @@ var LayoutGenerator = (function(){
     this._cachedElements = [];
   };
 
+  // called when each time generator yields element of output, and added it.
+  LayoutGenerator.prototype._onAddElement = function(block){
+  };
+
+  // called when each time generator yields output.
+  LayoutGenerator.prototype._onCreate = function(output){
+  };
+
+  // called when generator yields final output.
+  LayoutGenerator.prototype._onComplete = function(output){
+  };
+
   LayoutGenerator.prototype._createStartContext = function(){
     return new LayoutContext(
       new BlockContext(this.style.getContentExtent()),

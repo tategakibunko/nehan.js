@@ -47,7 +47,7 @@ var InlineGenerator = (function(){
 
   InlineGenerator.prototype._createOutput = function(context){
     var measure = this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure();
-    return this.style.createLine({
+    var line = this.style.createLine({
       br:context.hasBr(), // is line broken by br?
       measure:measure, // wrapping measure
       inlineMeasure:context.getInlineCurMeasure(), // actual measure
@@ -55,6 +55,11 @@ var InlineGenerator = (function(){
       texts:context.getInlineTexts(), // elements but text element only.
       charCount:context.getInlineCharCount()
     });
+    this._onCreate(line);
+    if(!this.hasNext()){
+      this._onComplete(line);
+    }
+    return line;
   };
 
   InlineGenerator.prototype._justifyLine = function(context){
@@ -116,13 +121,11 @@ var InlineGenerator = (function(){
       return (new BlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
     }
 
-    // inline image
-    if(child_style.getMarkupName() === "img"){
+    // inline child
+    switch(child_style.getMarkupName()){
+    case "img":
       return child_style.createImage();
-    }
 
-    // inline tag(child inline)
-    switch(token.getName()){
     case "br":
       context.setLineBreak(true);
       return null;
@@ -131,6 +134,10 @@ var InlineGenerator = (function(){
     case "style":
     case "noscript":
       return this._getNext(context); // just skip
+
+    case "a":
+      this.setChildLayout(new LinkGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
 
     default:
       this.setChildLayout(new InlineGenerator(child_style, child_stream, this.outlineContext));
@@ -202,6 +209,7 @@ var InlineGenerator = (function(){
 
   InlineGenerator.prototype._addElement = function(context, element, measure){
     context.addInlineElement(element, measure);
+    this._onAddElement(element);
   };
 
   return InlineGenerator;

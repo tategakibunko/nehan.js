@@ -66,20 +66,11 @@ var Tag = (function (){
       }
       return this.src + this.content + "</" + this.name + ">";
     },
-    getHeaderRank : function(){
-      if(this.getName().match(/h([1-6])/)){
-	return parseInt(RegExp.$1, 10);
-      }
-      return 0;
-    },
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
     },
     hasAttr : function(name){
       return (typeof this.attr.name !== "undefined");
-    },
-    isPseudoElement : function(){
-      return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
     isAnchorTag : function(){
       return this.name === "a" && this.getTagAttr("name") !== null;

@@ -2539,20 +2539,11 @@ var Tag = (function (){
       }
       return this.src + this.content + "</" + this.name + ">";
     },
-    getHeaderRank : function(){
-      if(this.getName().match(/h([1-6])/)){
-	return parseInt(RegExp.$1, 10);
-      }
-      return 0;
-    },
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
     },
     hasAttr : function(name){
       return (typeof this.attr.name !== "undefined");
-    },
-    isPseudoElement : function(){
-      return this.name === "before" || this.name === "after" || this.name === "first-letter" || this.name === "first-line";
     },
     isAnchorTag : function(){
       return this.name === "a" && this.getTagAttr("name") !== null;
@@ -7110,10 +7101,16 @@ var StyleContext = (function(){
       });
     },
     _loadSelectorCss : function(markup, parent){
-      if(markup.isPseudoElement()){
+      switch(markup.getName()){
+      case "before":
+      case "after":
+      case "first-letter":
+      case "first-line":
 	return Selectors.getValuePe(parent, markup.getName());
+
+      default:
+	return Selectors.getValue(this);
       }
-      return Selectors.getValue(this);
     },
     _loadInlineCss : function(markup){
       var style = markup.getAttr("style");
@@ -7678,6 +7675,18 @@ var LayoutGenerator = (function(){
     this._cachedElements = [];
   };
 
+  // called when each time generator yields element of output, and added it.
+  LayoutGenerator.prototype._onAddElement = function(block){
+  };
+
+  // called when each time generator yields output.
+  LayoutGenerator.prototype._onCreate = function(output){
+  };
+
+  // called when generator yields final output.
+  LayoutGenerator.prototype._onComplete = function(output){
+  };
+
   LayoutGenerator.prototype._createStartContext = function(){
     return new LayoutContext(
       new BlockContext(this.style.getContentExtent()),
@@ -7919,15 +7928,6 @@ var BlockGenerator = (function(){
     return block;
   };
 
-  BlockGenerator.prototype._onAddElement = function(block){
-  };
-
-  BlockGenerator.prototype._onCreate = function(block){
-  };
-
-  BlockGenerator.prototype._onComplete = function(block){
-  };
-
   return BlockGenerator;
 })();
 
@@ -7981,7 +7981,7 @@ var InlineGenerator = (function(){
 
   InlineGenerator.prototype._createOutput = function(context){
     var measure = this.style.isRootLine()? this.style.getContentMeasure() : context.getInlineCurMeasure();
-    return this.style.createLine({
+    var line = this.style.createLine({
       br:context.hasBr(), // is line broken by br?
       measure:measure, // wrapping measure
       inlineMeasure:context.getInlineCurMeasure(), // actual measure
@@ -7989,6 +7989,11 @@ var InlineGenerator = (function(){
       texts:context.getInlineTexts(), // elements but text element only.
       charCount:context.getInlineCharCount()
     });
+    this._onCreate(line);
+    if(!this.hasNext()){
+      this._onComplete(line);
+    }
+    return line;
   };
 
   InlineGenerator.prototype._justifyLine = function(context){
@@ -8050,13 +8055,11 @@ var InlineGenerator = (function(){
       return (new BlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
     }
 
-    // inline image
-    if(child_style.getMarkupName() === "img"){
+    // inline child
+    switch(child_style.getMarkupName()){
+    case "img":
       return child_style.createImage();
-    }
 
-    // inline tag(child inline)
-    switch(token.getName()){
     case "br":
       context.setLineBreak(true);
       return null;
@@ -8065,6 +8068,10 @@ var InlineGenerator = (function(){
     case "style":
     case "noscript":
       return this._getNext(context); // just skip
+
+    case "a":
+      this.setChildLayout(new LinkGenerator(child_style, child_stream, this.outlineContext));
+      return this.yieldChildLayout(context);
 
     default:
       this.setChildLayout(new InlineGenerator(child_style, child_stream, this.outlineContext));
@@ -8136,9 +8143,27 @@ var InlineGenerator = (function(){
 
   InlineGenerator.prototype._addElement = function(context, element, measure){
     context.addInlineElement(element, measure);
+    this._onAddElement(element);
   };
 
   return InlineGenerator;
+})();
+
+
+var LinkGenerator = (function(){
+  function LinkGenerator(style, stream, outline_context){
+    InlineGenerator.call(this, style, stream, outline_context);
+  }
+  Class.extend(LinkGenerator, InlineGenerator);
+
+  LinkGenerator.prototype._onComplete = function(output){
+    var anchor_name = style.getMarkupAttr("name");
+    if(anchor_name){
+      DocumentContext.addAnchor(anchor_name);
+    }
+  };
+
+  return LinkGenerator;
 })();
 
 
@@ -8726,10 +8751,17 @@ var HeaderGenerator = (function(){
   }
   Class.extend(HeaderGenerator, BlockGenerator);
 
+  HeaderGenerator.prototype._getHeaderRank = function(block){
+    if(this.style.getMarkupName().match(/h([1-6])/)){
+      return parseInt(RegExp.$1, 10);
+    }
+    return 0;
+  };
+
   HeaderGenerator.prototype._onComplete = function(block){
     var header_id = this.outlineContext.addHeader({
       type:this.style.getMarkupName(),
-      rank:this.style.getHeaderRank(),
+      rank:this._getHeaderRank(),
       title:this.style.getMarkupContent()
     });
     block.id = Css.addNehanHeaderPrefix(header_id);

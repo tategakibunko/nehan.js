@@ -722,10 +722,16 @@ var StyleContext = (function(){
       });
     },
     _loadSelectorCss : function(markup, parent){
-      if(markup.isPseudoElement()){
+      switch(markup.getName()){
+      case "before":
+      case "after":
+      case "first-letter":
+      case "first-line":
 	return Selectors.getValuePe(parent, markup.getName());
+
+      default:
+	return Selectors.getValue(this);
       }
-      return Selectors.getValue(this);
     },
     _loadInlineCss : function(markup){
       var style = markup.getAttr("style");

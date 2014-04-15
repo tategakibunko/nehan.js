@@ -214,15 +214,6 @@ var BlockGenerator = (function(){
     return block;
   };
 
-  BlockGenerator.prototype._onAddElement = function(block){
-  };
-
-  BlockGenerator.prototype._onCreate = function(block){
-  };
-
-  BlockGenerator.prototype._onComplete = function(block){
-  };
-
   return BlockGenerator;
 })();
 
