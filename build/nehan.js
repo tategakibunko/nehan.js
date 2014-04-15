@@ -8066,7 +8066,7 @@ var InlineGenerator = (function(){
     case "script":
     case "style":
     case "noscript":
-      return null;
+      return this._getNext(context); // just skip
 
     default:
       this.setChildLayout(new InlineGenerator(child_style, child_stream, this.outlineContext));
