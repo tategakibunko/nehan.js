@@ -2,7 +2,6 @@ var OutlineContext = (function(){
   function OutlineContext(style){
     this.logs = [];
     this.style = style;
-    this.pageNo = 0;
   }
 
   var __header_id__ = 0; // glocal unique header id
@@ -17,12 +16,6 @@ var OutlineContext = (function(){
     get : function(index){
       return this.logs[index] || null;
     },
-    getPageNo : function(){
-      return this.pageNo;
-    },
-    stepPageNo : function(){
-      this.pageNo++;
-    },
     getMarkupName : function(){
       return this.style.getMarkupName();
     },
@@ -30,7 +23,7 @@ var OutlineContext = (function(){
       this.logs.push({
 	name:"start-section",
 	type:type,
-	pageNo:this.pageNo
+	pageNo:DocumentContext.pageNo
       });
       return this;
     },
@@ -49,7 +42,7 @@ var OutlineContext = (function(){
 	type:opt.type,
 	rank:opt.rank,
 	title:opt.title,
-	pageNo:this.pageNo,
+	pageNo:DocumentContext.pageNo,
 	headerId:header_id
       });
       return header_id;

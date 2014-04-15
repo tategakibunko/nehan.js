@@ -5258,7 +5258,6 @@ var OutlineContext = (function(){
   function OutlineContext(style){
     this.logs = [];
     this.style = style;
-    this.pageNo = 0;
   }
 
   var __header_id__ = 0; // glocal unique header id
@@ -5273,12 +5272,6 @@ var OutlineContext = (function(){
     get : function(index){
       return this.logs[index] || null;
     },
-    getPageNo : function(){
-      return this.pageNo;
-    },
-    stepPageNo : function(){
-      this.pageNo++;
-    },
     getMarkupName : function(){
       return this.style.getMarkupName();
     },
@@ -5286,7 +5279,7 @@ var OutlineContext = (function(){
       this.logs.push({
 	name:"start-section",
 	type:type,
-	pageNo:this.pageNo
+	pageNo:DocumentContext.pageNo
       });
       return this;
     },
@@ -5305,7 +5298,7 @@ var OutlineContext = (function(){
 	type:opt.type,
 	rank:opt.rank,
 	title:opt.title,
-	pageNo:this.pageNo,
+	pageNo:DocumentContext.pageNo,
 	headerId:header_id
       });
       return header_id;
@@ -5572,9 +5565,10 @@ var DocumentHeader = (function(){
 
 var DocumentContext = {
   documentType:"html",
+  documentHeader:null,
+  pageNo:0,
   anchors:{},
   outlineContexts:[],
-  header:null,
   // this is shortcut function for getOutlineContextsByName
   // in many case, outline-context is only under "body" context,
   // and this function returns only one outline element just under the "body".
@@ -5600,13 +5594,14 @@ var DocumentContext = {
   addOutlineContext : function(outline_context){
     this.outlineContexts.push(outline_context);
   },
-  addAnchorPageNo : function(name, page_no){
-    this.anchors[name] = page_no;
+  addAnchor : function(name){
+    this.anchors[name] = this.pageNo;
   },
   getAnchorPageNo : function(name){
     return this.anchors[name] || null;
   }
 };
+
 
 var TokenStream = (function(){
   function TokenStream(src){
@@ -8555,13 +8550,6 @@ var SectionRootGenerator = (function(){
   }
   Class.extend(SectionRootGenerator, BlockGenerator);
 
-  SectionRootGenerator.prototype._onCreate = function(block){
-    block.pageNo = this.outlineContext.getPageNo();
-    block.seekPos = this.stream.getSeekPos();
-    block.percent = this.stream.getSeekPercent();
-    this.outlineContext.stepPageNo();
-  };
-
   SectionRootGenerator.prototype._onComplete = function(){
     DocumentContext.addOutlineContext(this.outlineContext);
   };
@@ -8758,6 +8746,12 @@ var BodyGenerator = (function(){
   }
   Class.extend(BodyGenerator, SectionRootGenerator);
 
+  BodyGenerator.prototype._onCreate = function(block){
+    block.seekPos = this.stream.getSeekPos();
+    block.percent = this.stream.getSeekPercent();
+    block.pageNo = DocumentContext.pageNo++;
+  };
+
   return BodyGenerator;
 })();
 
@@ -8779,7 +8773,7 @@ var HtmlGenerator = (function(){
 	var tag = this.stream.get();
 	switch(tag.getName()){
 	case "head":
-	  this._parseHead(new HeadTokenStream(tag.getContent()));
+	  this._parseDocumentHeader(new HeadTokenStream(tag.getContent()));
 	  break;
 	case "body":
 	  return this._createBodyGenerator(tag.getContent());
@@ -8790,29 +8784,29 @@ var HtmlGenerator = (function(){
     _createBodyGenerator : function(text){
       return new BodyGenerator(text);
     },
-    _parseHead : function(stream){
-      var header = new DocumentHeader();
+    _parseDocumentHeader : function(stream){
+      var document_header = new DocumentHeader();
       while(stream.hasNext()){
 	var tag = stream.get();
 	switch(tag.getName()){
 	case "title":
-	  header.setTitle(tag.getContent());
+	  document_header.setTitle(tag.getContent());
 	  break;
 	case "meta":
-	  header.addMeta(tag);
+	  document_header.addMeta(tag);
 	  break;
 	case "link":
-	  header.addLink(tag);
+	  document_header.addLink(tag);
 	  break;
 	case "style":
-	  header.addStyle(tag);
+	  document_header.addStyle(tag);
 	  break;
 	case "script":
-	  header.addScript(tag);
+	  document_header.addScript(tag);
 	  break;
 	}
       }
-      DocumentContext.header = header;
+      DocumentContext.documentHeader = document_header;
     }
   };
 
@@ -9336,14 +9330,10 @@ Nehan.Env = Env;
 
 // export engine local interfaces
 return {
-  version:Nehan.version,
   documentContext: DocumentContext,
-  createBodyOutlineElement : function(callbacks){
-    return DocumentContext.createBodyOutlineElement(callbacks);
-  },
   createPageStream : function(text, group_size){
     group_size = Math.max(1, group_size || 1);
-    return (group_size === 1)? (new PageStream(text)) : (new PageGroupStream(text, group_size));
+    return (group_size === 1)? new PageStream(text) : new PageGroupStream(text, group_size);
   },
   getStyle : function(selector_key){
     return Selectors.getValue(selector_key);

@@ -16,7 +16,7 @@ var HtmlGenerator = (function(){
 	var tag = this.stream.get();
 	switch(tag.getName()){
 	case "head":
-	  this._parseHead(new HeadTokenStream(tag.getContent()));
+	  this._parseDocumentHeader(new HeadTokenStream(tag.getContent()));
 	  break;
 	case "body":
 	  return this._createBodyGenerator(tag.getContent());
@@ -27,29 +27,29 @@ var HtmlGenerator = (function(){
     _createBodyGenerator : function(text){
       return new BodyGenerator(text);
     },
-    _parseHead : function(stream){
-      var header = new DocumentHeader();
+    _parseDocumentHeader : function(stream){
+      var document_header = new DocumentHeader();
       while(stream.hasNext()){
 	var tag = stream.get();
 	switch(tag.getName()){
 	case "title":
-	  header.setTitle(tag.getContent());
+	  document_header.setTitle(tag.getContent());
 	  break;
 	case "meta":
-	  header.addMeta(tag);
+	  document_header.addMeta(tag);
 	  break;
 	case "link":
-	  header.addLink(tag);
+	  document_header.addLink(tag);
 	  break;
 	case "style":
-	  header.addStyle(tag);
+	  document_header.addStyle(tag);
 	  break;
 	case "script":
-	  header.addScript(tag);
+	  document_header.addScript(tag);
 	  break;
 	}
       }
-      DocumentContext.header = header;
+      DocumentContext.documentHeader = document_header;
     }
   };
 

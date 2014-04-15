@@ -1,8 +1,9 @@
 var DocumentContext = {
   documentType:"html",
+  documentHeader:null,
+  pageNo:0,
   anchors:{},
   outlineContexts:[],
-  header:null,
   // this is shortcut function for getOutlineContextsByName
   // in many case, outline-context is only under "body" context,
   // and this function returns only one outline element just under the "body".
@@ -28,10 +29,11 @@ var DocumentContext = {
   addOutlineContext : function(outline_context){
     this.outlineContexts.push(outline_context);
   },
-  addAnchorPageNo : function(name, page_no){
-    this.anchors[name] = page_no;
+  addAnchor : function(name){
+    this.anchors[name] = this.pageNo;
   },
   getAnchorPageNo : function(name){
     return this.anchors[name] || null;
   }
 };
+
