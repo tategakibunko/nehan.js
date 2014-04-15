@@ -72,6 +72,8 @@ var LayoutEvaluator = (function(){
       }
       return text;
     },
+    // if link title is not defined, summary of link content is used.
+    // if link uri has anchor address, add page-no to dataset where the anchor is defined.
     evalLink : function(line, link){
       var title = link.style.getMarkupAttr("title") || link.style.getMarkupContent().substring(0, Config.defaultLinkTitleLength);
       var uri = new Uri(link.style.getMarkupAttr("href"));
