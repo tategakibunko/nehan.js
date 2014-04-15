@@ -56,11 +56,11 @@ var Layout = {
   // 'body' or 'html' or 'document' are enabled.
   // 
   // 1. 'document'
-  //    content text include <!doctype xxx> tag
+  //    <!doctype xxx> tag is included in content text.
   // 2. 'html'
-  //    content text include <head> and <html>.
+  //    <head> and <html> are included in content text.
   // 3. 'body'
-  //    content text include <body> or content of body itself.
+  //    <body> or content of body itself is included in content text.
   root:"document",
   direction:"vert", // or 'hori'
   hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
