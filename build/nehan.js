@@ -41,7 +41,7 @@ var Config = {
   debug:false,
   kerning:true,
   justify:true,
-  maxRollbackCount : 10,
+  maxRollbackCount : 100,
   minBlockScaleDownRate : 65,
   useVerticalGlyphIfEnable: true,
   useStrictWordMetrics: true,
@@ -5680,8 +5680,11 @@ var TokenStream = (function(){
 	this._doBuffer();
       }
       var token = this.tokens[index];
-      token.pos = index;
-      return token;
+      if(token){
+	token.pos = index;
+	return token;
+      }
+      return null;
     },
     get : function(){
       var token = this.peek();

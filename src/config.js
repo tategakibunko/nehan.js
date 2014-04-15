@@ -3,7 +3,7 @@ var Config = {
   debug:false,
   kerning:true,
   justify:true,
-  maxRollbackCount : 10,
+  maxRollbackCount : 100,
   minBlockScaleDownRate : 65,
   useVerticalGlyphIfEnable: true,
   useStrictWordMetrics: true,
