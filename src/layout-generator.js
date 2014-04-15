@@ -75,7 +75,7 @@ var LayoutGenerator = (function(){
     var cache_count = element.cacheCount || 0;
     if(cache_count > 0){
       if(cache_count >= Config.maxRollbackCount){
-	console.error("too many cache count(%d), force terminate", cache_count);
+	console.error("[%s] too many cache count(%d), force terminate:%o", this.style.getMarkupName(), cache_count, this.style);
 	this.setTerminate(true); // this error sometimes causes infinite loop, so force terminate generator.
 	return;
       }

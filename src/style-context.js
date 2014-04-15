@@ -16,6 +16,7 @@ var StyleContext = (function(){
       args = args || {};
       this.markup = markup;
       this.parent = parent || null;
+      this.markupName = markup.getName();
       this.childs = []; // children for this style, updated by appendChild
       if(parent){
 	parent.appendChild(this);
@@ -99,6 +100,8 @@ var StyleContext = (function(){
       if(break_after){
 	this.breakAfter = break_after;
       }
+      this.staticMeasure = this._loadStaticMeasure();
+      this.staticExtent = this._loadStaticExtent();
     },
     clone : function(css){
       // no one can clone root style.
@@ -491,14 +494,10 @@ var StyleContext = (function(){
       return this.getStaticExtent() || this.getLogicalMaxExtent();
     },
     getStaticMeasure : function(){
-      var max_size = this.getLogicalMaxMeasure(); // this value is required when static size is set by '%' value.
-      var static_size = this.getAttr(this.flow.getPropMeasure()) || this.getAttr("measure");
-      return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
+      return this.staticMeasure;
     },
     getStaticExtent : function(){
-      var max_size = this.getLogicalMaxExtent(); // this value is required when static size is set by '%' value.
-      var static_size = this.getAttr(this.flow.getPropExtent()) || this.getAttr("extent");
-      return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
+      return this.staticExtent;
     },
     getStaticContentMeasure : function(){
       var static_size = this.getStaticMeasure();
@@ -955,6 +954,16 @@ var StyleContext = (function(){
 	);
       }
       return background;
+    },
+    _loadStaticMeasure : function(){
+      var max_size = this.getLogicalMaxMeasure(); // this value is required when static size is set by '%' value.
+      var static_size = this.getAttr(this.flow.getPropMeasure()) || this.getAttr("measure");
+      return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
+    },
+    _loadStaticExtent : function(){
+      var max_size = this.getLogicalMaxExtent(); // this value is required when static size is set by '%' value.
+      var static_size = this.getAttr(this.flow.getPropExtent()) || this.getAttr("extent");
+      return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
     }
   };
 

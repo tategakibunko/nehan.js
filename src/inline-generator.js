@@ -127,6 +127,10 @@ var InlineGenerator = (function(){
       context.setLineBreak(true);
       return null;
 
+    case "script":
+    case "style":
+      return null;
+
     default:
       this.setChildLayout(new InlineGenerator(child_style, child_stream, this.outlineContext));
       return this.yieldChildLayout(context);
