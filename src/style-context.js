@@ -42,10 +42,6 @@ var StyleContext = (function(){
       Args.copy(this.inlineCss, this._loadCallbackCss("inline", args.context || null));
       Args.copy(this.inlineCss, args.forceCss || {});
 
-      if(markup.name === "b"){
-	console.log("[%s]selector css:%o", markup.content, this.selectorCss);
-      }
-
       // always required properties
       this.display = this._loadDisplay(); // required
       this.flow = this._loadFlow(); // required
