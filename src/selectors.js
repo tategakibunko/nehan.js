@@ -40,15 +40,15 @@ var Selectors = (function(){
   // offcource, higher specificity overwrite lower one.
   var get_value = function(style){
     return List.fold(selectors, {}, function(ret, selector){
-      return (selector.hasPseudoElement() || !selector.test(style))? ret :
-	Args.copy(ret, selector.getValue());
+      return selector.test(style)? Args.copy(ret, selector.getValue()) : ret;
     });
   };
 
-  var get_value_pe = function(parent_style, pseudo_element_name){
+  // 'p::first-letter'
+  // => style = 'p', pseudo_element_name = 'first-letter'
+  var get_value_pe = function(style, pseudo_element_name){
     return List.fold(selectors_pe, {}, function(ret, selector){
-      return (!selector.hasPseudoElementName(pseudo_element_name) || !selector.test(parent_style || null))? ret :
-	Args.copy(ret, selector.getValue());
+      return selector.test(style, pseudo_element_name)? Args.copy(ret, selector.getValue()) : ret;
     });
   };
 
@@ -86,10 +86,10 @@ var Selectors = (function(){
     getValue : function(style){
       return get_value(style);
     },
-    // parent_style: if 'p::first-letter', parent_style context is the style-context of p.
+    // style: if 'p::first-letter', style = p
     // pseudo_element_name: "first-letter", "first-line", "before", "after"
-    getValuePe : function(parent_style, pseudo_element_name){
-      return get_value_pe(parent_style, pseudo_element_name);
+    getValuePe : function(style, pseudo_element_name){
+      return get_value_pe(style, pseudo_element_name);
     }
   };
 })();

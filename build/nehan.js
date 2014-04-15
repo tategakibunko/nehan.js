@@ -2122,28 +2122,38 @@ var SelectorStateMachine = (function(){
     return parent_type.test(ptr)? ptr : null;
   };
 
-  // selector 'f1 + f2'
+  // return the style context that matches f1 selector
+  // in the condition that 'style' matches f2 and direct sibling of f1 is 'style'.
+  // this situation described as 'f1 + f2' in css.
   var find_adj_sibling = function(style, f1, f2){
+    // search style that matches f1,
+    // and 'direct sibling' of it matches f2,
+    // and the sibling itself is just equal to 'style'
     return List.find(style.getParentChilds(), function(child){
       var sibling = child.getNextSibling();
-      return sibling && f1.test(child) && f2.test(sibling);
+      return sibling && sibling === style && f1.test(child) && f2.test(sibling);
     });
   };
 
-  // selector 'f1 ~ f2'
+  // return the style context that matches f1 selector
+  // in the condition that 'style' matches f2 and 'style' is found from all siblings after f1.
+  // this situation described as 'f1 ~ f2' in css.
   var find_gen_sibling = function(style, f1, f2){
-    var f1_style = List.find(style.getParentChilds(), function(child){
+    // search style context that matches f1 selector.
+    var style1 = List.find(style.getParentChilds(), function(child){
       return f1.test(child);
     });
-    if(f1_style === null){
+    if(style1 === null){
       return null;
     }
-    var sibling = f1_style.getNextSibling();
+    // search style context that matches f2 selector from 'all siblings' after style1,
+    // and sibling itself is just equal to 'style'.
+    var sibling = style1.getNextSibling();
     while(sibling !== null){
-      if(f2.test(sibling)){
-	return f1_style;
+      if(sibling === style && f2.test(sibling)){
+	return style1;
       }
-      ptr = ptr.getNextSibling();
+      sibling = sibling.getNextSibling();
     }
     return null;
   }
@@ -2244,7 +2254,10 @@ var Selector = (function(){
     getSpec : function(){
       return this.spec;
     },
-    test : function(style){
+    test : function(style, pseudo_element_name){
+      if(pseudo_element_name && !this.hasPseudoElementName(pseudo_element_name)){
+	return false;
+      }
       return SelectorStateMachine.accept(style, this.parts);
     },
     hasPseudoElement : function(){
@@ -2328,15 +2341,15 @@ var Selectors = (function(){
   // offcource, higher specificity overwrite lower one.
   var get_value = function(style){
     return List.fold(selectors, {}, function(ret, selector){
-      return (selector.hasPseudoElement() || !selector.test(style))? ret :
-	Args.copy(ret, selector.getValue());
+      return selector.test(style)? Args.copy(ret, selector.getValue()) : ret;
     });
   };
 
-  var get_value_pe = function(parent_style, pseudo_element_name){
+  // 'p::first-letter'
+  // => style = 'p', pseudo_element_name = 'first-letter'
+  var get_value_pe = function(style, pseudo_element_name){
     return List.fold(selectors_pe, {}, function(ret, selector){
-      return (!selector.hasPseudoElementName(pseudo_element_name) || !selector.test(parent_style || null))? ret :
-	Args.copy(ret, selector.getValue());
+      return selector.test(style, pseudo_element_name)? Args.copy(ret, selector.getValue()) : ret;
     });
   };
 
@@ -2374,10 +2387,10 @@ var Selectors = (function(){
     getValue : function(style){
       return get_value(style);
     },
-    // parent_style: if 'p::first-letter', parent_style context is the style-context of p.
+    // style: if 'p::first-letter', style = p
     // pseudo_element_name: "first-letter", "first-line", "before", "after"
-    getValuePe : function(parent_style, pseudo_element_name){
-      return get_value_pe(parent_style, pseudo_element_name);
+    getValuePe : function(style, pseudo_element_name){
+      return get_value_pe(style, pseudo_element_name);
     }
   };
 })();
@@ -6442,6 +6455,10 @@ var StyleContext = (function(){
       Args.copy(this.inlineCss, this._loadInlineCss(markup));
       Args.copy(this.inlineCss, this._loadCallbackCss("inline", args.context || null));
       Args.copy(this.inlineCss, args.forceCss || {});
+
+      if(markup.name === "b"){
+	console.log("[%s]selector css:%o", markup.content, this.selectorCss);
+      }
 
       // always required properties
       this.display = this._loadDisplay(); // required

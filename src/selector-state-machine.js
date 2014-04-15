@@ -18,28 +18,38 @@ var SelectorStateMachine = (function(){
     return parent_type.test(ptr)? ptr : null;
   };
 
-  // selector 'f1 + f2'
+  // return the style context that matches f1 selector
+  // in the condition that 'style' matches f2 and direct sibling of f1 is 'style'.
+  // this situation described as 'f1 + f2' in css.
   var find_adj_sibling = function(style, f1, f2){
+    // search style that matches f1,
+    // and 'direct sibling' of it matches f2,
+    // and the sibling itself is just equal to 'style'
     return List.find(style.getParentChilds(), function(child){
       var sibling = child.getNextSibling();
-      return sibling && f1.test(child) && f2.test(sibling);
+      return sibling && sibling === style && f1.test(child) && f2.test(sibling);
     });
   };
 
-  // selector 'f1 ~ f2'
+  // return the style context that matches f1 selector
+  // in the condition that 'style' matches f2 and 'style' is found from all siblings after f1.
+  // this situation described as 'f1 ~ f2' in css.
   var find_gen_sibling = function(style, f1, f2){
-    var f1_style = List.find(style.getParentChilds(), function(child){
+    // search style context that matches f1 selector.
+    var style1 = List.find(style.getParentChilds(), function(child){
       return f1.test(child);
     });
-    if(f1_style === null){
+    if(style1 === null){
       return null;
     }
-    var sibling = f1_style.getNextSibling();
+    // search style context that matches f2 selector from 'all siblings' after style1,
+    // and sibling itself is just equal to 'style'.
+    var sibling = style1.getNextSibling();
     while(sibling !== null){
-      if(f2.test(sibling)){
-	return f1_style;
+      if(sibling === style && f2.test(sibling)){
+	return style1;
       }
-      ptr = ptr.getNextSibling();
+      sibling = sibling.getNextSibling();
     }
     return null;
   }

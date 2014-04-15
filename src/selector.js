@@ -36,7 +36,10 @@ var Selector = (function(){
     getSpec : function(){
       return this.spec;
     },
-    test : function(style){
+    test : function(style, pseudo_element_name){
+      if(pseudo_element_name && !this.hasPseudoElementName(pseudo_element_name)){
+	return false;
+      }
       return SelectorStateMachine.accept(style, this.parts);
     },
     hasPseudoElement : function(){
