@@ -104,6 +104,7 @@ module.exports = function(grunt) {
 	    "src/text-empha-style.js",
 	    "src/text-empha-pos.js",
 	    "src/text-empha.js",
+	    "src/uri.js",
 	    "src/box-edge.js",
 	    "src/box-size.js",
 	    "src/box-position.js",

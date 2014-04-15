@@ -16,13 +16,12 @@ var VertEvaluator = (function(){
     return this.evalInline(child);
   };
 
-  VertEvaluator.prototype.evalLink = function(line, link){
-    var link_content = link.style.getMarkupContent().substring(0, Config.defaultLineTitleLength);
-    var title = link.style.getMarkupAttr("title") || link_content;
+  VertEvaluator.prototype.evalLinkElement = function(line, link, opt){
     return Html.tagWrap("a", this.evalInline(link), Args.copy({
-      "href":link.style.getMarkupAttr("href"),
       "class":link.classes.join(" "),
-      "title":title
+      "href":opt.href,
+      "title":opt.title,
+      "data-page":opt.pageNo // enabled if anchor name is included in href.
     }, link.getDatasetAttr()));
   };
 

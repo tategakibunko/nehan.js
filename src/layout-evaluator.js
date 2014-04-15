@@ -72,6 +72,17 @@ var LayoutEvaluator = (function(){
       }
       return text;
     },
+    evalLink : function(line, link){
+      var title = link.style.getMarkupAttr("title") || link.style.getMarkupContent().substring(0, Config.defaultLinkTitleLength);
+      var uri = new Uri(link.style.getMarkupAttr("href"));
+      var anchor_name = uri.getAnchorName();
+      var page_no = anchor_name? DocumentContext.getAnchorPageNo(anchor_name) : "";
+      return this.evalLinkElement(line, link, {
+	title:title,
+	href:uri.getAddress(),
+	pageNo:page_no
+      });
+    },
     evalTextElement : function(line, text){
       switch(text._type){
       case "word": return this.evalWord(line, text);

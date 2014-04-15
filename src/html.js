@@ -10,7 +10,7 @@ var Html = {
   attr : function(args){
     var tmp = [];
     for(var prop in args){
-      if(args[prop]){
+      if(typeof args[prop] !== "undefined" && args[prop] !== ""){
 	tmp.push(prop + "='" + this.escape(args[prop] + "") + "'");
       }
     }

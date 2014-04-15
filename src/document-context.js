@@ -33,7 +33,7 @@ var DocumentContext = {
     this.anchors[name] = this.pageNo;
   },
   getAnchorPageNo : function(name){
-    return this.anchors[name] || null;
+    return this.anchors[name];
   }
 };
 

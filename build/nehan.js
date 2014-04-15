@@ -1494,7 +1494,7 @@ var Html = {
   attr : function(args){
     var tmp = [];
     for(var prop in args){
-      if(args[prop]){
+      if(typeof args[prop] !== "undefined" && args[prop] !== ""){
 	tmp.push(prop + "='" + this.escape(args[prop] + "") + "'");
       }
     }
@@ -4665,6 +4665,28 @@ var TextEmpha = (function(){
 })();
 
 
+var Uri = (function(){
+  function Uri(address){
+    this.address = this._normalize(address);
+  }
+
+  Uri.prototype = {
+    _normalize : function(address){
+      return address.replace(/\s/g, "");
+    },
+    getAddress : function(){
+      return this.address;
+    },
+    getAnchorName : function(){
+      var sharp_pos = this.address.indexOf("#");
+      return (sharp_pos < 0)? "" : this.address.substring(sharp_pos + 1);
+    }
+  };
+
+  return Uri;
+})();
+
+
 var BoxEdge = (function (){
   function BoxEdge(){
     this.padding = new Padding();
@@ -5589,7 +5611,7 @@ var DocumentContext = {
     this.anchors[name] = this.pageNo;
   },
   getAnchorPageNo : function(name){
-    return this.anchors[name] || null;
+    return this.anchors[name];
   }
 };
 
@@ -8157,7 +8179,7 @@ var LinkGenerator = (function(){
   Class.extend(LinkGenerator, InlineGenerator);
 
   LinkGenerator.prototype._onComplete = function(output){
-    var anchor_name = style.getMarkupAttr("name");
+    var anchor_name = this.style.getMarkupAttr("name");
     if(anchor_name){
       DocumentContext.addAnchor(anchor_name);
     }
@@ -8956,6 +8978,17 @@ var LayoutEvaluator = (function(){
       }
       return text;
     },
+    evalLink : function(line, link){
+      var title = link.style.getMarkupAttr("title") || link.style.getMarkupContent().substring(0, Config.defaultLinkTitleLength);
+      var uri = new Uri(link.style.getMarkupAttr("href"));
+      var anchor_name = uri.getAnchorName();
+      var page_no = anchor_name? DocumentContext.getAnchorPageNo(anchor_name) : "";
+      return this.evalLinkElement(line, link, {
+	title:title,
+	href:uri.getAddress(),
+	pageNo:page_no
+      });
+    },
     evalTextElement : function(line, text){
       switch(text._type){
       case "word": return this.evalWord(line, text);
@@ -8989,13 +9022,12 @@ var VertEvaluator = (function(){
     return this.evalInline(child);
   };
 
-  VertEvaluator.prototype.evalLink = function(line, link){
-    var link_content = link.style.getMarkupContent().substring(0, Config.defaultLineTitleLength);
-    var title = link.style.getMarkupAttr("title") || link_content;
+  VertEvaluator.prototype.evalLinkElement = function(line, link, opt){
     return Html.tagWrap("a", this.evalInline(link), Args.copy({
-      "href":link.style.getMarkupAttr("href"),
       "class":link.classes.join(" "),
-      "title":title
+      "href":opt.href,
+      "title":opt.title,
+      "data-page":opt.pageNo // enabled if anchor name is included in href.
     }, link.getDatasetAttr()));
   };
 
@@ -9253,13 +9285,12 @@ var HoriEvaluator = (function(){
     }, child.getDatasetAttr()));
   };
 
-  HoriEvaluator.prototype.evalLink = function(line, link){
-    var link_content = link.style.getMarkupContent().substring(0, Config.defaultLineTitleLength);
-    var title = link.style.getMarkupAttr("title") || link_content;
+  HoriEvaluator.prototype.evalLinkElement = function(line, link, opt){
     return Html.tagWrap("a", this.evalInlineElements(link, link.elements), Args.copy({
-      "href":link.style.getMarkupAttr("href"),
       "class":link.classes.join(" "),
-      "title":title
+      "href":opt.href,
+      "title":opt.title,
+      "data-page":opt.pageNo // enabled if anchor name is included in href.
     }, link.getDatasetAttr()));
   };
 
