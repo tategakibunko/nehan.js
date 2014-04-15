@@ -129,6 +129,7 @@ var InlineGenerator = (function(){
 
     case "script":
     case "style":
+    case "noscript":
       return null;
 
     default:
