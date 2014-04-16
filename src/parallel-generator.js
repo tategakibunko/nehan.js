@@ -14,7 +14,7 @@ var ParallelGenerator = (function(){
       return null;
     }
     var wrap_block = this._wrapBlocks(blocks);
-    var wrap_extent = wrap_block.getBoxExtent(this.style.flow);
+    var wrap_extent = wrap_block.getLayoutExtent(this.style.flow);
     if(!context.hasBlockSpaceFor(wrap_extent)){
       this.pushCache(wrap_block);
       return null;
@@ -45,7 +45,7 @@ var ParallelGenerator = (function(){
   ParallelGenerator.prototype._findMaxBlock = function(blocks){
     var flow = this.style.flow;
     return List.maxobj(blocks, function(block){
-      return block? block.getBoxExtent(flow) : 0;
+      return block? block.getLayoutExtent(flow) : 0;
     });
   };
 
@@ -67,7 +67,7 @@ var ParallelGenerator = (function(){
     var uniformed_blocks = this._alignContentExtent(blocks, max_block.getContentExtent(flow));
     return this.style.createBlock({
       elements:uniformed_blocks,
-      extent:max_block.getBoxExtent(flow)
+      extent:max_block.getLayoutExtent(flow)
     });
   };
 

@@ -15,15 +15,12 @@ var Edge = (function(){
       this.left = 0;
     },
     clone : function(){
-      var edge = new Edge(this.type);
+      var edge = new Edge(this._type);
       edge.top = this.top;
       edge.right = this.right;
       edge.bottom = this.bottom;
       edge.left = this.left;
       return edge;
-    },
-    isEnable : function(){
-      return this.top !== 0 || this.right !== 0 || this.bottom !== 0 || this.left !== 0;
     },
     getDirProp : function(dir){
       return [this._type, dir].join("-");

@@ -199,7 +199,7 @@ var InlineGenerator = (function(){
 
   InlineGenerator.prototype._getMeasure = function(element){
     if(element instanceof Box){
-      return element.getBoxMeasure(this.style.flow);
+      return element.getLayoutMeasure(this.style.flow);
     }
     if(element.getAdvance){
       return element.getAdvance(this.style.flow, this.style.letterSpacing || 0);

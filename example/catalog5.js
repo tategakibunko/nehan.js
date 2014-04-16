@@ -31,7 +31,7 @@ var LayoutTest = (function(){
 	$dom.append($("<p />").html(time + "msec"));
 	$dom.append($("<h2 />").html("outline"));
 	$dom.append(engine.documentContext.createBodyOutlineElement());
-	console.log("finished(%f msec)", time);
+	//console.log("finished(%f msec)", time);
       }
     });
   };

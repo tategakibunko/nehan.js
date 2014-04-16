@@ -1,17 +1,17 @@
 var Script = {
+  "plain":[
+    Snipet["ruby"],
+    "<p>" + Text["long"] + "</p>",
+    "<p>" + Text["middle"] + "</p>",
+    "<p>" + Text["short"] + "</p>"
+  ].join(""),
+
   "A+B":[
     "<div class='nehan-adj-test'><a href='#'>prev</a><b>direct sibling</b>&nbsp;<b>next2</b></div>"
   ].join(""),
 
   "A~B":[
     "<div class='nehan-gen-adj-test'><a href='#'>prev</a><b>direct sibling</b>&nbsp;<b>next2</b></div>"
-  ].join(""),
-
-  "plain":[
-    Snipet["ruby"],
-    "<p>" + Text["long"] + "</p>",
-    "<p>" + Text["middle"] + "</p>",
-    "<p>" + Text["short"] + "</p>"
   ].join(""),
 
   "flip-flow":[

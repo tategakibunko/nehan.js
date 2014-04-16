@@ -6,11 +6,11 @@ var Box = (function(){
   }
 
   Box.prototype = {
-    debug : function(title){
+    debugSize : function(title){
       console.log(
 	"[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", (title || "no title"),
 	this.getContentMeasure(), this.getContentExtent(),
-	this.getBoxMeasure(), this.getBoxExtent()
+	this.getLayoutMeasure(), this.getLayoutExtent()
       );
     },
     getDatasetAttr : function(){
@@ -23,14 +23,20 @@ var Box = (function(){
     getCssBlock : function(){
       var css = {};
       Args.copy(css, this.style.getCssBlock()); // base style
-      Args.copy(css, this.size.getCss()); // local size
+      Args.copy(css, this.size.getCss(this.style.flow)); // content size
+      if(this.edge){
+	Args.copy(css, this.edge.getCss());
+      }
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
     getCssInline : function(){
       var css = {};
       Args.copy(css, this.style.getCssInline()); // base style
-      Args.copy(css, this.size.getCss()); // local size
+      Args.copy(css, this.size.getCss(this.style.flow)); // layout size
+      if(this.edge){
+	Args.copy(css, this.edge.getCss());
+      }
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
@@ -56,21 +62,17 @@ var Box = (function(){
     getContentHeight : function(){
       return this.size.height;
     },
-    getBoxMeasure : function(flow){
-      flow = flow || this.style.flow;
-      var ret = this.getContentMeasure(flow);
-      if(this.edge){
-	ret += this.edge.getMeasureSize(flow);
-      }
-      return ret;
+    getEdgeMeasure : function(flow){
+      return this.edge? this.edge.getMeasureSize(flow) : 0;
     },
-    getBoxExtent : function(flow){
-      flow = flow || this.style.flow;
-      var ret = this.getContentExtent(flow);
-      if(this.edge){
-	ret += this.edge.getExtentSize(flow);
-      }
-      return ret;
+    getEdgeExtent : function(flow){
+      return this.edge? this.edge.getExtentSize(flow) : 0;
+    },
+    getLayoutMeasure : function(flow){
+      return this.getContentMeasure(flow) + this.getEdgeMeasure(flow);
+    },
+    getLayoutExtent : function(flow){
+      return this.getContentExtent(flow) + this.getEdgeExtent(flow);
     },
     clearBorderBefore : function(){
       if(this.edge){

@@ -20,12 +20,12 @@ var FloatGroup = (function(){
     },
     getMeasure : function(flow){
       return List.fold(this.elements, 0, function(measure, element){
-	return measure + element.getBoxMeasure(flow);
+	return measure + element.getLayoutMeasure(flow);
       });
     },
     getExtent : function(flow){
       return List.fold(this.elements, 0, function(extent, element){
-	return Math.max(extent, element.getBoxExtent(flow));
+	return Math.max(extent, element.getLayoutExtent(flow));
       });
     }
   };

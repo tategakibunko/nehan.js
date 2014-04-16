@@ -98,12 +98,13 @@ var FloatGenerator = (function(){
 
   FloatGenerator.prototype._wrapBlock = function(block1, block2){
     var flow = this.style.flow;
-    var measure = block1.getBoxMeasure(flow); // block2 has same measure
-    var extent = block1.getBoxExtent(flow) + (block2? block2.getBoxExtent(flow) : 0);
+    var measure = block1.getLayoutMeasure(flow); // block2 has same measure
+    var extent = block1.getLayoutExtent(flow) + (block2? block2.getLayoutExtent(flow) : 0);
+    var elements = block2? [block1, block2] : [block1];
 
     // wrapping block always float to start direction
     return this.style.createChild("div", {"float":"start"}).createBlock({
-      elements:[block1, block2],
+      elements:elements,
       measure:measure,
       extent:extent
     });

@@ -7,13 +7,13 @@ var FloatGroupStack = (function(){
     if(head === null){
       return null;
     }
-    var extent = head.getBoxExtent(flow);
+    var extent = head.getLayoutExtent(flow);
     var group = new FloatGroup([head], float_direction);
 
     // group while previous floated-element has smaller extent than the head
     while(true){
       var next = blocks.pop();
-      if(next && next.getBoxExtent(flow) <= extent){
+      if(next && next.getLayoutExtent(flow) <= extent){
 	group.add(next);
       } else {
 	blocks.push(next); // push back

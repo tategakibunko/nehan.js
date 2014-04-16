@@ -5,17 +5,6 @@ var BoxFlow = (function(){
   }
 
   BoxFlow.prototype = {
-    getCss : function(){
-      var css = {};
-      Args.copy(css, this.blockflow.getCss());
-      return css;
-    },
-    getName : function(){
-      return [this.inflow.dir, this.blockflow.dir].join("-");
-    },
-    isValid : function(){
-      return this.inflow.isValid() && this.blockflow.isValid();
-    },
     isTextLineFirst : function(){
       if(this.isTextVertical() && this.blockflow.isLeftToRight()){
 	return true;
@@ -30,6 +19,14 @@ var BoxFlow = (function(){
     },
     isTextHorizontal : function(){
       return this.inflow.isHorizontal();
+    },
+    getCss : function(){
+      var css = {};
+      Args.copy(css, this.blockflow.getCss());
+      return css;
+    },
+    getName : function(){
+      return [this.inflow.dir, this.blockflow.dir].join("-");
     },
     getTextHorizontalDir : function(){
       if(this.isTextHorizontal()){
@@ -73,23 +70,11 @@ var BoxFlow = (function(){
     getPropHeight : function(){
       return this.isTextVertical()? "measure" : "extent";
     },
-    getParallelFlipFlow : function(){
-      return BoxFlows.get(this.inflow.dir, this.blockflow.dir, false);
-    },
-    getParallelFlow : function(){
-      return BoxFlows.get(this.inflow.dir, this.blockflow.dir, true);
-    },
     getFlipFlow : function(){
       return this.isTextVertical()? Layout.getStdHoriFlow() : Layout.getStdVertFlow();
     },
-    getFloatedWrapFlow : function(){
-      if(this.isTextVertical()){
-	return this;
-      }
-      return this.getParallelFlow();
-    },
     getBoxSize : function(measure, extent){
-      var size = new BoxSize(0,0);
+      var size = new BoxSize(0, 0);
       size[this.getPropMeasure()] = measure;
       size[this.getPropExtent()] = extent;
       return size;

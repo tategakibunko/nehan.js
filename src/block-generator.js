@@ -15,7 +15,7 @@ var BlockGenerator = (function(){
 
     // if cache is inline, and measure size varies, reget line if need.
     if(this.hasChildLayout() && cache.display === "inline"){
-      if(cache.getBoxMeasure(this.style.flow) <= this.style.getContentMeasure() && cache.br){
+      if(cache.getLayoutMeasure(this.style.flow) <= this.style.getContentMeasure() && cache.br){
 	return cache;
       }
       this._childLayout.stream.setPos(get_line_start_pos(cache)); // rewind stream to the head of line.
@@ -34,7 +34,7 @@ var BlockGenerator = (function(){
       if(element === null){
 	break;
       }
-      var extent = element.getBoxExtent(this.style.flow);
+      var extent = element.getLayoutExtent(this.style.flow);
       if(!context.hasBlockSpaceFor(extent)){
 	this.pushCache(element);
 	break;

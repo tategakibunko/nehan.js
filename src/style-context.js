@@ -172,7 +172,9 @@ var StyleContext = (function(){
     createImage : function(){
       var measure = this.getImageMeasure();
       var extent = this.getImageExtent();
-      var image_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent); // image size always considered as horizontal mode.
+
+      // image size always considered as horizontal mode.
+      var image_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent);
       var image = new Box(image_size, this);
       image.display = this.display; // inline/block
       image.classes = ["nehan-block", "nehan-image"];
@@ -196,12 +198,20 @@ var StyleContext = (function(){
       var measure = opt.measure || this.getContentMeasure();
       var extent = (this.isRootLine() && child_lines.length > 0)? max_extent : this.getAutoLineExtent();
       var line_size = this.flow.getBoxSize(measure, extent);
-      var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
+     var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
       var line = new Box(line_size, this);
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
       line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.markup.getName());
       line.charCount = opt.charCount || 0;
+
+      // edge of top level line is disabled.
+      // for example, if line is aaa<span>bbb</span>ccc,
+      // parent of 'bbb' is <span>, so it can be edged, but 'aaa' and 'ccc' not,
+      // because it's wrapped by 'anonymous block'.
+      if(this.edge && !this.isRootLine()){
+	line.edge = this.edge.clone();
+      }
 
       // backup other line data. mainly required to restore inline-context.
       if(this.isRootLine()){
@@ -287,25 +297,33 @@ var StyleContext = (function(){
       return white_space === "pre";
     },
     isFirstChild : function(){
-      return this.parent? this.parent.getNthChild(0) === this : false;
-    },
-    isLastChild : function(){
-      return false; // TODO
+      var childs = this.getParentChilds();
+      return (childs.length > 0 && childs[0] === this);
     },
     isFirstOfType : function(){
+      var childs = this.getParentChildsOfType(this.getMarkupName());
+      return (childs.length > 0 && childs[0] === this);
+    },
+    // for descent parsing, last child can't be gained,
+    // this pseudo-class is maybe enabled in future release.
+    isLastChild : function(){
+      //return List.last(this.getParentChilds()) === this;
       return false; // TODO
     },
     isLastOfType : function(){
+      //return List.last(this.getParentChildsOfType(this.getMarkupName())) === this;
       return false; // TODO
     },
     isOnlyChild : function(){
-      return false; // TODO
+      var childs = this.getParentChilds();
+      return (childs.length === 1 && childs[0] === this);
     },
     isOnlyOfType : function(){
-      return false; // TODO
+      var childs = this.getParentChildsOfType(this.getMarkupName());
+      return (childs.length === 1 && childs[0] === this);
     },
     isEmpty : function(){
-      return false; // TODO
+      return this.getMarkupContent() === "";
     },
     hasFlipFlow : function(){
       return this.parent? (this.flow !== this.parent.flow) : false;
@@ -376,8 +394,8 @@ var StyleContext = (function(){
     getMarkupPos : function(){
       return this.markup.pos;
     },
-    getContent : function(markup){
-      var content = markup.getContent();
+    getContent : function(){
+      var content = this.markup.getContent();
       var before = Selectors.getValuePe(this, "before");
       if(!Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;
@@ -416,46 +434,11 @@ var StyleContext = (function(){
     getLetterSpacing : function(){
       return this.letterSpacing || 0;
     },
-    getColor : function(){
-      return this.color || Layout.fontColor;
-    },
-    getLineRate : function(){
-      return this.lineRate || Layout.lineRate || 2;
-    },
-    getEmphaLineExtent : function(){
-      return this.getFontSize() * 3;
-    },
-    getRubyLineExtent : function(){
-      var base_font_size = this.getFontSize();
-      var base_extent = Math.floor(base_font_size * this.getLineRate());
-      var rt_extent = Layout.getRtFontSize(base_font_size);
-      return base_extent + rt_extent;
-    },
-    getAutoLineExtent : function(){
-      if(this.isTextEmphaEnable()){
-	return this.getEmphaLineExtent();
-      }
-      if(this.getMarkupName() === "ruby"){
-	return this.getRubyLineExtent();
-      }
-      return Math.floor(this.getFontSize() * this.getLineRate());
-    },
-    getEdgeMeasure : function(flow){
-      return this.edge? this.edge.getMeasureSize(flow || this.flow) : 0;
-    },
-    getEdgeExtent : function(flow){
-      return this.edge? this.edge.getExtentSize(flow || this.flow) : 0;
-    },
-    // same as getEdgeMeasure, but if contextParent exists, obtain from it.
-    getContextEdgeMeasure : function(flow){
-      return this.contextParent? this.contextParent.getEdgeMeasure(flow) : this.getEdgeMeasure(flow);
-    },
-    // same as getEdgeExtent, but if contextParent exists, obtain from it.
-    getContextEdgeExtent : function(flow){
-      return this.contextParent? this.contextParent.getEdgeExtent(flow) : this.getEdgeExtent(flow);
-    },
     getMarkerHtml : function(order){
       return this.listStyle? this.listStyle.getMarkerHtml(order) : "";
+    },
+    getColor : function(){
+      return this.color || Layout.fontColor;
     },
     getOrphansCount : function(){
       // orphans count only enabled to child block element.
@@ -480,22 +463,63 @@ var StyleContext = (function(){
     getParentChilds : function(){
       return this.parent? this.parent.childs : [];
     },
+    getParentChildsOfType : function(markup_name){
+      return List.filter(this.getParentChilds(), function(child){
+	return child.getMarkupName() === markup_name;
+      });
+    },
     getParentFlow : function(){
       return this.parent? this.parent.flow : this.flow;
     },
     getNextSibling : function(){
       return this.next;
     },
-    getOuterSize : function(){
-      var measure = this.getOuterMeasure();
-      var extent = this.getOuterExtent();
-      return this.flow.getBoxSize(measure, extent);
+    getLineRate : function(){
+      return this.lineRate || Layout.lineRate || 2;
+    },
+    getEmphaLineExtent : function(){
+      return this.getFontSize() * 3;
+    },
+    getRubyLineExtent : function(){
+      var base_font_size = this.getFontSize();
+      var base_extent = Math.floor(base_font_size * this.getLineRate());
+      var rt_extent = Layout.getRtFontSize(base_font_size);
+      return base_extent + rt_extent;
+    },
+    getAutoLineExtent : function(){
+      if(this.isTextEmphaEnable()){
+	return this.getEmphaLineExtent();
+      }
+      if(this.getMarkupName() === "ruby"){
+	return this.getRubyLineExtent();
+      }
+      return Math.floor(this.getFontSize() * this.getLineRate());
+    },
+    getEdgeMeasure : function(flow){
+      if(this.contextParent){
+	return this.contextParent.getEdgeMeasure(flow || this.flow);
+      }
+      return this.edge? this.edge.getMeasureSize(flow || this.flow) : 0;
+    },
+    getEdgeExtent : function(flow){
+      if(this.contextParent){
+	return this.contextParent.getEdgeExtent(flow || this.flow);
+      }
+      return this.edge? this.edge.getExtentSize(flow || this.flow) : 0;
+    },
+    // same as getEdgeMeasure, but if contextParent exists, obtain from it.
+    getContextEdgeMeasure : function(flow){
+      return this.contextParent? this.contextParent.getEdgeMeasure(flow) : this.getEdgeMeasure(flow);
+    },
+    // same as getEdgeExtent, but if contextParent exists, obtain from it.
+    getContextEdgeExtent : function(flow){
+      return this.contextParent? this.contextParent.getEdgeExtent(flow) : this.getEdgeExtent(flow);
     },
     getOuterMeasure : function(){
-      return this.getStaticMeasure() || this.getLogicalMaxMeasure();
+      return this.getStaticMeasure() || (this.parent? this.parent.getContentMeasure() : this.getRootMeasure());
     },
     getOuterExtent : function(){
-      return this.getStaticExtent() || this.getLogicalMaxExtent();
+      return this.getStaticExtent() || (this.parent? this.parent.getContentExtent() : this.getRootExtent());
     },
     getStaticMeasure : function(){
       return this.staticMeasure;
@@ -511,83 +535,46 @@ var StyleContext = (function(){
       var static_size = this.getStaticExtent();
       return static_size? Math.max(0, static_size - this.getEdgeExtent()) : null;
     },
-    getLayoutMeasure : function(){
-      var prop = this.flow.getPropMeasure();
-      var size = this.getAttr("measure") || this.getAttr(prop) || Layout[prop];
-      return parseInt(size, 10);
+    getRootMeasure : function(){
+      return Layout[this.flow.getPropMeasure()];
     },
-    getLayoutExtent : function(){
-      var prop = this.flow.getPropExtent();
-      var size = this.getAttr("extent") || this.getAttr(prop) || Layout[prop];
-      return parseInt(size, 10);
+    getRootContentMeasure : function(){
+      return this.getRootMeasure() - this.getEdgeMeasure();
     },
-    getLogicalMaxMeasure : function(){
-      var max_size = this.parent? this.parent.getContentMeasure(this.flow) : this.getLayoutMeasure();
-      return max_size;
+    getRootExtent : function(){
+      return Layout[this.flow.getPropExtent()];
     },
-    getLogicalMaxExtent : function(){
-      var max_size = this.parent? this.parent.getContentExtent(this.flow) : this.getLayoutExtent();
-      return (this.display === "block")? max_size : this.font.size;
+    getRootContentExtent : function(){
+      return this.getRootExtent() - this.getEdgeExtent();
+    },
+    getParentMeasure : function(){
+      return this.parent? this.parent.getOuterMeasure(this.flow) : this.getRootMeasure();
+    },
+    getParentEdgeMeasure : function(){
+      return (this.parent && this.parent.edge)? this.parent.getEdgeMeasure() : 0;
+    },
+    getParentEdgeExtent : function(){
+      return (this.parent && this.parent.edge)? this.parent.getEdgeExtent() : 0;
+    },
+    getParentExtent : function(){
+      return this.parent? this.parent.getOuterExtent(this.flow) : this.getRootExtent();
     },
     getImageMeasure : function(){
-      var edge_size = this.getEdgeMeasure();
-      var measure = (this.getStaticMeasure() || this.getOuterMeasure()) - edge_size;
-      return Math.min(measure, this.getLayoutMeasure() - edge_size);
+      return (this.getStaticMeasure() || this.getOuterMeasure()) - this.getEdgeMeasure();
     },
     getImageExtent : function(){
-      var edge_size = this.getEdgeExtent();
-      var extent = (this.getStaticExtent() || this.getOuterExtent()) - edge_size;
-      return Math.min(extent, this.getLayoutExtent() - edge_size);
-    },
-    // 'after' loading all properties, we can compute boundary box size.
-    getContentSize : function(){
-      var measure = this.getContentMeasure();
-      var extent = this.getContentExtent();
-      return this.flow.getBoxSize(measure, extent);
+      return (this.getStaticExtent() || this.getOuterExtent()) - this.getEdgeExtent();
     },
     getContentMeasure : function(){
-      return this.getOuterMeasure() - this.getEdgeContentMeasure();
+      return this.getOuterMeasure() - this.getEdgeMeasure();
     },
     getContentExtent : function(){
-      return this.getOuterExtent() - this.getEdgeContentExtent();
-    },
-    getEdgeContentMeasure : function(){
-      if(typeof this.edge === "undefined"){
-	return 0;
-      }
-      switch(this.boxSizing){
-      case "content-box":
-	return 0;
-      case "border-box":
-	return this.edge.padding.getMeasureSize(this.flow) + this.edge.border.getMeasureSize(this.flow);
-      case "padding-box":
-	return this.edge.padding.getMeasureSize(this.flow);
-      case "margin-box": default:
-	return this.edge.getMeasureSize(this.flow);
-      }
-    },
-    getEdgeContentExtent : function(){
-      if(typeof this.edge === "undefined"){
-	return 0;
-      }
-      switch(this.boxSizing){
-      case "content-box":
-	return 0;
-      case "border-box":
-	return this.edge.padding.getExtentSize(this.flow) + this.edge.border.getExtentSize(this.flow);
-      case "padding-box":
-	return this.edge.padding.getExtentSize(this.flow);
-      case "margin-box": default:
-	return this.edge.getExtentSize(this.flow);
-      }
+      return this.getOuterExtent() - this.getEdgeExtent();
     },
     getCssBlock : function(){
       var css = {};
       if(this.font){
 	Args.copy(css, this.font.getCss());
-      }
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
       }
       if(this.parent){
 	Args.copy(css, this.parent.flow.getCss());
@@ -625,13 +612,6 @@ var StyleContext = (function(){
       }
       if(this.background){
 	Args.copy(css, this.background.getCss());
-      }
-      // edge of top level line is disabled.
-      // for example, if line is aaa<span>bbb</span>ccc,
-      // parent of 'bbb' is <span>, so it can be edged, but 'aaa' and 'ccc' not,
-      // because it's wrapped by 'anonymous block'.
-      if(this.edge && !this.isRootLine()){
-	Args.copy(css, this.edge.getCss());
       }
       // top level line need to follow parent blockflow.
       if(this.isRootLine()){
@@ -709,19 +689,21 @@ var StyleContext = (function(){
       List.iter(child_lines, function(line){
 	var font_size = line.style.getFontSize();
 	var text_center_offset = text_center - Math.floor(font_size / 2);
-	// ruby, empha, or all children having different font-size must be fixed because it differs basical line-extent.
+	// if not child text element with same font size, ignore.
 	if(!line.style.isTextEmphaEnable() && line.style.getMarkupName() !== "ruby" && font_size === base_font_size){
 	  return;
 	}
+	// baseline is not applicative to image element.
 	if(line.style && line.style.getMarkupName() === "img"){
 	  return;
 	}
+	// child text element with different font-size must be fixed baseline.
 	if(text_center_offset > 0){
 	  line.edge = line.style.edge? line.style.edge.clone() : new BoxEdge(); // set line.edge(not line.style.edge) to overwrite padding temporally.
 	  line.edge.padding.setAfter(flow, text_center_offset); // set new edge(use line.edge not line.style.edge)
 	  line.size.setExtent(flow, max_extent - text_center_offset); // set new size
-	  Args.copy(line.css, line.edge.getCss()); // overwrite edge
-	  Args.copy(line.css, line.size.getCss()); // overwrite size
+	  Args.copy(line.css, line.edge.getCss(flow)); // overwrite edge
+	  Args.copy(line.css, line.size.getCss(flow)); // overwrite size
 	}
       });
     },
@@ -966,12 +948,12 @@ var StyleContext = (function(){
       return background;
     },
     _loadStaticMeasure : function(){
-      var max_size = this.getLogicalMaxMeasure(); // this value is required when static size is set by '%' value.
+      var max_size = this.getRootMeasure(); // this value is required when static size is set by '%' value.
       var static_size = this.getAttr(this.flow.getPropMeasure()) || this.getAttr("measure");
       return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
     },
     _loadStaticExtent : function(){
-      var max_size = this.getLogicalMaxExtent(); // this value is required when static size is set by '%' value.
+      var max_size = this.getRootExtent(); // this value is required when static size is set by '%' value.
       var static_size = this.getAttr(this.flow.getPropExtent()) || this.getAttr("extent");
       return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
     }

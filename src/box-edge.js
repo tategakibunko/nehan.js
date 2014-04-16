@@ -1,52 +1,49 @@
 var BoxEdge = (function (){
   function BoxEdge(){
     this.padding = new Padding();
-    this.margin = new Margin();
     this.border = new Border();
+    this.margin = new Margin();
   }
 
   BoxEdge.prototype = {
-    isEnable : function(){
-      return this.padding.isEnable() || this.margin.isEnable() || this.border.isEnable();
-    },
     clone : function(){
       var edge = new BoxEdge();
       edge.padding = this.padding.clone();
-      edge.margin = this.margin.clone();
       edge.border = this.border.clone();
+      edge.margin = this.margin.clone();
       return edge;
     },
     clear : function(){
       this.padding.clear();
-      this.margin.clear();
       this.border.clear();
+      this.margin.clear();
     },
     getCss : function(){
       var css = {};
       Args.copy(css, this.padding.getCss());
-      Args.copy(css, this.margin.getCss());
       Args.copy(css, this.border.getCss());
+      Args.copy(css, this.margin.getCss());
       return css;
     },
     getWidth : function(){
       var ret = 0;
       ret += this.padding.getWidth();
-      ret += this.margin.getWidth();
       ret += this.border.getWidth();
+      ret += this.margin.getWidth();
       return ret;
     },
     getHeight : function(){
       var ret = 0;
       ret += this.padding.getHeight();
-      ret += this.margin.getHeight();
       ret += this.border.getHeight();
+      ret += this.margin.getHeight();
       return ret;
     },
     getMeasureSize : function(flow){
       var ret = 0;
       ret += this.padding.getMeasureSize(flow);
-      ret += this.margin.getMeasureSize(flow);
       ret += this.border.getMeasureSize(flow);
+      ret += this.margin.getMeasureSize(flow);
       return ret;
     },
     getExtentSize : function(flow){
