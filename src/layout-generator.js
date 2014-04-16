@@ -114,7 +114,7 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){
     return new LayoutContext(
-      new BlockContext(parent_context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
+      new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
       new InlineContext(this.style.getContentMeasure())
     );
   };

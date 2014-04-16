@@ -24,9 +24,6 @@ var Box = (function(){
       var css = {};
       Args.copy(css, this.style.getCssBlock()); // base style
       Args.copy(css, this.size.getCss(this.style.flow)); // content size
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
@@ -34,9 +31,6 @@ var Box = (function(){
       var css = {};
       Args.copy(css, this.style.getCssInline()); // base style
       Args.copy(css, this.size.getCss(this.style.flow)); // layout size
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
@@ -51,10 +45,12 @@ var Box = (function(){
       return css;
     },
     getContentMeasure : function(flow){
-      return this.size.getMeasure(flow || this.style.flow);
+      flow = flow || this.style.flow;
+      return this.size.getMeasure(flow);
     },
     getContentExtent : function(flow){
-      return this.size.getExtent(flow || this.style.flow);
+      flow = flow || this.style.flow;
+      return this.size.getExtent(flow);
     },
     getContentWidth : function(){
       return this.size.width;
@@ -63,15 +59,19 @@ var Box = (function(){
       return this.size.height;
     },
     getEdgeMeasure : function(flow){
+      flow = flow || this.style.flow;
       return this.edge? this.edge.getMeasureSize(flow) : 0;
     },
     getEdgeExtent : function(flow){
+      flow = flow || this.style.flow;
       return this.edge? this.edge.getExtentSize(flow) : 0;
     },
     getLayoutMeasure : function(flow){
+      flow = flow || this.style.flow;
       return this.getContentMeasure(flow) + this.getEdgeMeasure(flow);
     },
     getLayoutExtent : function(flow){
+      flow = flow || this.style.flow;
       return this.getContentExtent(flow) + this.getEdgeExtent(flow);
     },
     clearBorderBefore : function(){

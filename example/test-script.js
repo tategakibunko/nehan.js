@@ -7,11 +7,21 @@ var Script = {
   ].join(""),
 
   "A+B":[
-    "<div class='nehan-adj-test'><a href='#'>prev</a><b>direct sibling</b>&nbsp;<b>next2</b></div>"
+    "<div class='nehan-adj-test'>", [
+      "<a href='#'>prev</a>",
+      "<b>direct sibling</b>",
+      "<b>next sibling</b>"
+    ].join("&nbsp;"),
+    "</div>"
   ].join(""),
 
   "A~B":[
-    "<div class='nehan-gen-adj-test'><a href='#'>prev</a><b>direct sibling</b>&nbsp;<b>next2</b></div>"
+    "<div class='nehan-gen-adj-test'>", [
+      "<a href='#'>prev</a>",
+      "<b>direct sibling</b>",
+      "<b>next sibling</b>"
+    ].join("&nbsp;"),
+    "</div>"
   ].join(""),
 
   "flip-flow":[

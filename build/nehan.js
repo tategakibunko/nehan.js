@@ -4842,9 +4842,6 @@ var Box = (function(){
       var css = {};
       Args.copy(css, this.style.getCssBlock()); // base style
       Args.copy(css, this.size.getCss(this.style.flow)); // content size
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
@@ -4852,9 +4849,6 @@ var Box = (function(){
       var css = {};
       Args.copy(css, this.style.getCssInline()); // base style
       Args.copy(css, this.size.getCss(this.style.flow)); // layout size
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
@@ -4869,10 +4863,12 @@ var Box = (function(){
       return css;
     },
     getContentMeasure : function(flow){
-      return this.size.getMeasure(flow || this.style.flow);
+      flow = flow || this.style.flow;
+      return this.size.getMeasure(flow);
     },
     getContentExtent : function(flow){
-      return this.size.getExtent(flow || this.style.flow);
+      flow = flow || this.style.flow;
+      return this.size.getExtent(flow);
     },
     getContentWidth : function(){
       return this.size.width;
@@ -4881,15 +4877,19 @@ var Box = (function(){
       return this.size.height;
     },
     getEdgeMeasure : function(flow){
+      flow = flow || this.style.flow;
       return this.edge? this.edge.getMeasureSize(flow) : 0;
     },
     getEdgeExtent : function(flow){
+      flow = flow || this.style.flow;
       return this.edge? this.edge.getExtentSize(flow) : 0;
     },
     getLayoutMeasure : function(flow){
+      flow = flow || this.style.flow;
       return this.getContentMeasure(flow) + this.getEdgeMeasure(flow);
     },
     getLayoutExtent : function(flow){
+      flow = flow || this.style.flow;
       return this.getContentExtent(flow) + this.getEdgeExtent(flow);
     },
     clearBorderBefore : function(){
@@ -6496,14 +6496,12 @@ var StyleContext = (function(){
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
       var box = new Box(box_size, this);
       box.display = (this.display === "inline-block")? this.display : "block";
+      box.edge = this.edge || null; // for Box::getLayoutExtent, Box::getLayoutMeasure
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
 	return total + (element? (element.charCount || 0) : 0);
       });
-      if(this.edge){
-	box.edge = this.edge.clone();
-      }
       return box;
     },
     createImage : function(){
@@ -6514,15 +6512,13 @@ var StyleContext = (function(){
       var image_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent);
       var image = new Box(image_size, this);
       image.display = this.display; // inline/block
+      image.edge = this.edge || null;
       image.classes = ["nehan-block", "nehan-image"];
       image.charCount = 0;
       if(this.isPushed()){
 	image.pushed = true;
       } else if(this.isPulled()){
 	image.pulled = true;
-      }
-      if(this.edge){
-	image.edge = this.edge.clone();
       }
       return image;
     },
@@ -6535,20 +6531,13 @@ var StyleContext = (function(){
       var measure = opt.measure || this.getContentMeasure();
       var extent = (this.isRootLine() && child_lines.length > 0)? max_extent : this.getAutoLineExtent();
       var line_size = this.flow.getBoxSize(measure, extent);
-     var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
+      var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
       var line = new Box(line_size, this);
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
       line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.markup.getName());
       line.charCount = opt.charCount || 0;
-
-      // edge of top level line is disabled.
-      // for example, if line is aaa<span>bbb</span>ccc,
-      // parent of 'bbb' is <span>, so it can be edged, but 'aaa' and 'ccc' not,
-      // because it's wrapped by 'anonymous block'.
-      if(this.edge && !this.isRootLine()){
-	line.edge = this.edge.clone();
-      }
+      line.edge = (this.edge && !this.isRootLine())? this.edge : null;
 
       // backup other line data. mainly required to restore inline-context.
       if(this.isRootLine()){
@@ -6844,14 +6833,6 @@ var StyleContext = (function(){
       }
       return this.edge? this.edge.getExtentSize(flow || this.flow) : 0;
     },
-    // same as getEdgeMeasure, but if contextParent exists, obtain from it.
-    getContextEdgeMeasure : function(flow){
-      return this.contextParent? this.contextParent.getEdgeMeasure(flow) : this.getEdgeMeasure(flow);
-    },
-    // same as getEdgeExtent, but if contextParent exists, obtain from it.
-    getContextEdgeExtent : function(flow){
-      return this.contextParent? this.contextParent.getEdgeExtent(flow) : this.getEdgeExtent(flow);
-    },
     getOuterMeasure : function(){
       return this.getStaticMeasure() || (this.parent? this.parent.getContentMeasure() : this.getRootMeasure());
     },
@@ -6885,7 +6866,7 @@ var StyleContext = (function(){
       return this.getRootExtent() - this.getEdgeExtent();
     },
     getParentMeasure : function(){
-      return this.parent? this.parent.getOuterMeasure(this.flow) : this.getRootMeasure();
+     return this.parent? this.parent.getOuterMeasure(this.flow) : this.getRootMeasure();
     },
     getParentEdgeMeasure : function(){
       return (this.parent && this.parent.edge)? this.parent.getEdgeMeasure() : 0;
@@ -6910,6 +6891,7 @@ var StyleContext = (function(){
     },
     getCssBlock : function(){
       var css = {};
+      css.display = "block";
       if(this.font){
 	Args.copy(css, this.font.getCss());
       }
@@ -6925,7 +6907,9 @@ var StyleContext = (function(){
       if(this.letterSpacing && !this.flow.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
-      css.display = "block";
+      if(this.edge){
+	Args.copy(css, this.edge.getCss());
+      }
       if(this.floatDirection){
 	Args.copy(css, this.floatDirection.getCss(this.flow));
       }
@@ -6953,6 +6937,13 @@ var StyleContext = (function(){
       // top level line need to follow parent blockflow.
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
+      }
+      // edge of top level line is disabled.
+      // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
+      // anonymous line block('aaa' and 'ccc') is already edged by <p> in block level.
+      // so if line is anonymous, edge must be ignored.
+      if(!this.isRootLine() && this.edge){
+	Args.copy(css, this.edge.getCss());
       }
       if(this.flow.isTextVertical()){
 	if(Env.isIphoneFamily){
@@ -7285,13 +7276,15 @@ var StyleContext = (function(){
       return background;
     },
     _loadStaticMeasure : function(){
+      var prop = this.flow.getPropMeasure();
       var max_size = this.getRootMeasure(); // this value is required when static size is set by '%' value.
-      var static_size = this.getAttr(this.flow.getPropMeasure()) || this.getAttr("measure");
+      var static_size = this.getAttr(prop) || this.getAttr("measure") || this.getCssAttr(prop) || this.getCssAttr("measure");
       return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
     },
     _loadStaticExtent : function(){
+      var prop = this.flow.getPropExtent();
       var max_size = this.getRootExtent(); // this value is required when static size is set by '%' value.
-      var static_size = this.getAttr(this.flow.getPropExtent()) || this.getAttr("extent");
+      var static_size = this.getAttr(prop) || this.getAttr("extent") || this.getCssAttr(prop) || this.getCssAttr("extent");
       return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
     }
   };
@@ -7640,7 +7633,7 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){
     return new LayoutContext(
-      new BlockContext(parent_context.getBlockRestExtent() - this.style.getContextEdgeExtent()),
+      new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
       new InlineContext(this.style.getContentMeasure())
     );
   };
