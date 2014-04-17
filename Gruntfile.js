@@ -90,8 +90,6 @@ module.exports = function(grunt) {
 	    "src/box-flows.js",
 	    "src/box-rect.js",
 	    "src/box-corner.js",
-	    "src/box-sizing.js",
-	    "src/box-sizings.js",
 	    "src/font.js",
 	    "src/edge.js",
 	    "src/radius-2d.js",
