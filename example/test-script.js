@@ -84,7 +84,7 @@ var Script = {
     "</tr>",
     "</tfoot>",
     "</table>"
-  ].join(""),
+  ].join("\n"),
 
   "page-break":[
     Text["middle"],

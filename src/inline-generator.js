@@ -145,10 +145,13 @@ var InlineGenerator = (function(){
 
   InlineGenerator.prototype._getText = function(context, token){
     // new-line
-    if(token instanceof Char && token.isNewLineChar()){
+    if(Token.isNewLine(token)){
       if(this.style.isPre()){
 	return null; // break line at new-line char.
       }
+      // if not pre, skip continuous new-line
+      this.stream.skipUntil(Token.isNewLine);
+      return this._getNext(context);
     }
     if(!token.hasMetrics()){
       // if charactor token, set kerning before setting metrics.

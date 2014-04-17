@@ -13,6 +13,9 @@ var Token = {
   },
   isTcy : function(token){
     return token._type === "tcy";
+  },
+  isNewLine : function(token){
+    return token instanceof Char && token.isNewLineChar();
   }
 };
 

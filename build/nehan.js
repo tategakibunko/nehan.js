@@ -2634,6 +2634,9 @@ var Token = {
   },
   isTcy : function(token){
     return token._type === "tcy";
+  },
+  isNewLine : function(token){
+    return token instanceof Char && token.isNewLineChar();
   }
 };
 
@@ -7573,6 +7576,11 @@ var BlockGenerator = (function(){
     // if inline text or child inline or inline-block,
     // push back stream and delegate current style and stream to InlineGenerator
     if(Token.isText(token) || child_style.isInline() || child_style.isInlineBlock()){
+      // skip new-line token in block level.
+      if(Token.isNewLine(token)){
+	this.stream.skipUntil(Token.isNewLine)
+	return this._getNext(context);
+      }
       this.stream.prev();
 
       // outline context is required when inline generator yields 'inline-block'.
@@ -7869,10 +7877,13 @@ var InlineGenerator = (function(){
 
   InlineGenerator.prototype._getText = function(context, token){
     // new-line
-    if(token instanceof Char && token.isNewLineChar()){
+    if(Token.isNewLine(token)){
       if(this.style.isPre()){
 	return null; // break line at new-line char.
       }
+      // if not pre, skip continuous new-line
+      this.stream.skipUntil(Token.isNewLine);
+      return this._getNext(context);
     }
     if(!token.hasMetrics()){
       // if charactor token, set kerning before setting metrics.
