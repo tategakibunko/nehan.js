@@ -1,0 +1,220 @@
+.nehan-reader-screen{
+  margin-bottom: 1em;
+  border:1px solid #aaa;
+  -moz-border-radius:5px;
+  -khtml-border-radius:5px;
+  -webkit-border-radius:5px;
+  border-radius:5px;
+}
+.nehan-reader-left,
+.nehan-reader-right{
+  float:left;
+}
+.nehan-reader-left{
+  border-right:1px solid #8a8a8a;
+}
+.nehan-reader-row-top{
+  border-bottom:1px solid #aaa;
+}
+.nehan-reader-clearfix{
+  clear:both;
+  line-height:0;
+  font-size:0;
+}
+.nehan-reader-nombre{
+  font-family:Georgia,Verdana,Chicago;
+  text-align:center;
+}
+.nehan-reader-pager{
+  height:30px;
+  text-align:center;
+  margin-bottom:1.5em;
+}
+input.nehan-reader-page-no{
+  font-family:Georgia,Verdana,Chicago;
+  width:30px;
+  margin:10px;
+  vertical-align:middle;
+}
+.nehan-reader-page-count{
+  font-weight:bold;
+  color:#626262;
+  font-family:Georgia,Verdana,Chicago;
+  margin:10px;
+}
+.nehan-reader-slash{
+  font-family:Georgia,Verdana,Chicago;
+}
+.nehan-reader-pager-seq .nehan-reader-next,
+.nehan-reader-pager-seq .nehan-reader-prev{
+  float:left;
+}
+.nehan-toc-clicked{
+  color:red;
+}
+a.nehan-toc-clicked{
+  font-weight:bold;
+}
+a.nehan-toc-clicked:hover{
+  color:red;
+}
+
+/*
+  CSS3-Progress-bars
+  Copyright (c) 2011 Josh Sullivan
+
+  url: http://dipperstove.com/design/css3-progress-bars.html
+  github: https://github.com/jsullivan/CSS3-Progress-bars 
+*/
+.nehan-reader-progress{
+  display:block;
+  float:left;
+  height:20px;
+  background-color:#a0a0a0;
+  padding:5px;
+  margin:0 5px;
+}
+.nehan-reader-progress-box{
+  height:20px;
+  background-color:#777;
+  border-bottom:1px solid #d0d0d0;
+}
+.nehan-reader-progress-bar{
+  height:19px;
+  background:white;
+  border-top:1px solid #fff;
+  border-top:1px solid #999;
+}
+
+/*!
+ * CSS3 Google Buttons
+ *
+ * Heavily inspired by css3-github-buttons, Twitter Bootstrap, and
+ * of course, Google. I don't claim ownership over any of this.
+ *
+ * Constructed by Tim O'Donnell (http://github.com/todc)
+ */
+html{
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+a:focus {
+  outline: thin dotted;
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+}
+a:hover, a:active {
+  outline: 0;
+}
+.nehan-reader-pager-button {
+  position: relative;
+  display: inline-block;
+  overflow: visible;
+
+  /* add for nehan reader */
+  margin: 0 5px;
+  width: 70px;
+  
+  padding: 8px 12px;
+  cursor: pointer;
+  outline: none;
+  border: 1px solid #aaaaaa;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+
+  background-color: #ececec;
+  *background-color: #e6e6e6;
+  background-image: -moz-linear-gradient(top, #fafafa, #e1e1e1);
+  background-image: -ms-linear-gradient(top, #fafafa, #e1e1e1);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#fafafa), to(#e1e1e1));
+  background-image: -webkit-linear-gradient(top, #fafafa, #e1e1e1);
+  background-image: -o-linear-gradient(top, #fafafa, #e1e1e1);
+  background-image: linear-gradient(top, #fafafa, #e1e1e1);
+
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fafafa', endColorstr='#e1e1e1', GradientType=0);
+  -webkit-background-clip: padding;
+  -moz-background-clip: padding;
+  background-clip: padding;
+  /* IE hacks */
+
+  zoom: 1;
+  z-index: 1;
+  *display: inline;
+  font: bold 12px Helvetica, Arial, sans-serif;
+  line-height: 12px;
+  color: #444444;
+  min-width: 42px;
+  text-align: center;
+  text-shadow: 0 1px 0 #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nehan-reader-pager-button:hover,
+.nehan-reader-pager-button:focus,
+.nehan-reader-pager-button:active,
+.nehan-reader-pager-button.active {
+  color: #333;
+  text-decoration: none;
+  border-color: #9a9a9a;
+  background-color: #dadada;
+  *background-color: #d9d9d9;
+  background-image: -moz-linear-gradient(top, #f8f8f8, #d1d1d1);
+  background-image: -ms-linear-gradient(top, #f8f8f8, #d1d1d1);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f8f8f8), to(#d1d1d1));
+  background-image: -webkit-linear-gradient(top, #f8f8f8, #d1d1d1);
+  background-image: -o-linear-gradient(top, #f8f8f8, #d1d1d1);
+  background-image: linear-gradient(top, #f8f8f8, #d1d1d1);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f8f8f8', endColorstr='#d1d1d1', GradientType=0);
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  outline: none;
+}
+
+.nehan-reader-pager-button:active, .nehan-reader-pager-button.active {
+  background-color: #f4f4f4;
+  background-image: -moz-linear-gradient(top, #f6f6f6, #d1d1d1);
+  background-image: -ms-linear-gradient(top, #f6f6f6, #d1d1d1);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f6f6f6), to(#d1d1d1));
+  background-image: -webkit-linear-gradient(top, #f6f6f6, #d1d1d1);
+  background-image: -o-linear-gradient(top, #f6f6f6, #d1d1d1);
+  background-image: linear-gradient(top, #f6f6f6, #d1d1d1);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f6f6f6', endColorstr='#d1d1d1', GradientType=0);
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.nehan-reader-pager-button:focus {
+  /* Blue border on button focus. */
+
+  border-color: #4D90FE;
+}
+.nehan-reader-pager-button.checked {
+  color: #333;
+  text-shadow: none;
+  border: 1px solid #ccc;
+  background-color: #e8e8e8;
+  background-image: -moz-linear-gradient(top, #eeeeee, #e0e0e0);
+  background-image: -ms-linear-gradient(top, #eeeeee, #e0e0e0);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#eeeeee), to(#e0e0e0));
+  background-image: -webkit-linear-gradient(top, #eeeeee, #e0e0e0);
+  background-image: -o-linear-gradient(top, #eeeeee, #e0e0e0);
+  background-image: linear-gradient(top, #eeeeee, #e0e0e0);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#e0e0e0', GradientType=0);
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+/* overrides extra padding on button elements in Firefox */
+.nehan-reader-pager-button::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+
