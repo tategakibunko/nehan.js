@@ -53,7 +53,11 @@ var InlineGenerator = (function(){
       texts:context.getInlineTexts(), // elements but text element only.
       charCount:context.getInlineCharCount()
     });
+
+    // call _onCreate callback for 'each' output
     this._onCreate(line);
+
+    // call _onComplete callback for 'final' output
     if(!this.hasNext()){
       this._onComplete(line);
     }
