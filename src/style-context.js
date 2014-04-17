@@ -173,8 +173,8 @@ var StyleContext = (function(){
       return box;
     },
     createImage : function(){
-      var measure = this.contentMeasure;
-      var extent = this.contentExtent;
+      var measure = this.staticMeasure || this.font.size;
+      var extent = this.staticExtent || this.font.size;
 
       // image size always considered as horizontal mode.
       var image_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent);
