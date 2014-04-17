@@ -24,6 +24,9 @@ var Box = (function(){
       var css = {};
       Args.copy(css, this.style.getCssBlock()); // base style
       Args.copy(css, this.size.getCss(this.style.flow)); // content size
+      if(this.edge){
+	Args.copy(css, this.edge.getCss());
+      }
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
@@ -31,6 +34,9 @@ var Box = (function(){
       var css = {};
       Args.copy(css, this.style.getCssInline()); // base style
       Args.copy(css, this.size.getCss(this.style.flow)); // layout size
+      if(this.edge){
+	Args.copy(css, this.edge.getCss());
+      }
       Args.copy(css, this.css); // some dynamic values
       return css;
     },

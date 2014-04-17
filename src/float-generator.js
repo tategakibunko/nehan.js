@@ -103,19 +103,17 @@ var FloatGenerator = (function(){
     var elements = block2? [block1, block2] : [block1];
 
     // wrapping block always float to start direction
-    return this.style.createChild("div", {"float":"start"}).createBlock({
+    return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
       elements:elements,
-      measure:measure,
       extent:extent
     });
   };
 
-  FloatGenerator.prototype._wrapFloat = function(floated, rest, wrap_measure){
+  FloatGenerator.prototype._wrapFloat = function(floated, rest, measure){
     var flow = this.style.flow;
     var extent = floated.getExtent(flow);
-    return this.style.createChild("div", {"float":"start"}).createBlock({
+    return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
       elements:this._sortFloatRest(floated, rest),
-      measure:wrap_measure,
       extent:extent
     });
   };

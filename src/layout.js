@@ -39,6 +39,12 @@ var Layout = {
     "larger":"1.2em",
     "smaller":"0.8em"
   },
+  getMeasure : function(flow){
+    return this[flow.getPropMeasure()];
+  },
+  getExtent : function(flow){
+    return this[flow.getPropExtent()];
+  },
   getStdFontFamily : function(){
     return (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
   },

@@ -53,6 +53,18 @@ var BoxEdge = (function (){
       ret += this.border.getExtentSize(flow);
       return ret;
     },
+    getInnerMeasureSize : function(flow){
+      var ret = 0;
+      ret += this.padding.getMeasureSize(flow);
+      ret += this.border.getMeasureSize(flow);
+      return ret;
+    },
+    getInnerExtentSize : function(flow){
+      var ret = 0;
+      ret += this.padding.getExtentSize(flow);
+      ret += this.border.getExtentSize(flow);
+      return ret;
+    },
     setAll : function(prop, flow, value){
       this[prop].setAll(flow, value);
     },

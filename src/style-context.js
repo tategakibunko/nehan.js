@@ -101,8 +101,27 @@ var StyleContext = (function(){
       if(break_after){
 	this.breakAfter = break_after;
       }
+
       this.staticMeasure = this._loadStaticMeasure();
       this.staticExtent = this._loadStaticExtent();
+      this.outerMeasure = this.staticMeasure || (this.parent? this.parent.contentMeasure : Layout.getMeasure(this.flow));
+      this.outerExtent = this.staticExtent || (this.parent? this.parent.contentExtent : Layout.getExtent(this.flow));
+      this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
+      this.contentExtent = this._computeContentExtent(this.outerExtent);
+    },
+    _computeContentMeasure : function(outer_measure){
+      switch(this.boxSizing){
+      case "margin-box": return outer_measure - this.getEdgeMeasure();
+      case "border-box": return outer_measure - this.getInnerEdgeMeasure();
+      case "content-box": default: return outer_measure;
+      }
+    },
+    _computeContentExtent : function(outer_extent){
+      switch(this.boxSizing){
+      case "margin-box": return outer_extent - this.getEdgeExtent();
+      case "border-box": return outer_extent - this.getInnerEdgeExtent();
+      case "content-box": default: return outer_extent;
+      }
     },
     clone : function(css){
       // no one can clone root style.
@@ -153,11 +172,18 @@ var StyleContext = (function(){
     createBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
-      var measure = this.getStaticContentMeasure() || opt.measure || this.getContentMeasure();
+      var measure = this.contentMeasure;
       var extent = this.parent? (this.getStaticContentExtent() || opt.extent || this.getContentExtent()) : this.getContentExtent();
+      //var extent = (this.parent === null || typeof opt.extent === "undefined")? this.contentExtent : opt.extent;
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
       var box = new Box(box_size, this);
+      if(this.flow.isTextVertical() && this.contentMeasure !== measure){
+	console.log(
+	  "[%s](m,e) = (%d,%d), (m+,e+) = (%d, %d) => (%d, %d), box-sizing = %s",
+	  this.markup.name, this.contentMeasure, this.contentExtent, this.outerMeasure, this.outerExtent, measure, extent, this.boxSizing
+	);
+      }
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = this.edge || null; // for Box::getLayoutExtent, Box::getLayoutMeasure
       box.elements = elements;
@@ -200,6 +226,11 @@ var StyleContext = (function(){
       line.elements = opt.elements || [];
       line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.markup.getName());
       line.charCount = opt.charCount || 0;
+
+      // edge of top level line is disabled.
+      // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
+      // anonymous line block('aaa' and 'ccc') is already edged by <p> in block level.
+      // so if line is anonymous, edge must be ignored.
       line.edge = (this.edge && !this.isRootLine())? this.edge : null;
 
       // backup other line data. mainly required to restore inline-context.
@@ -484,17 +515,24 @@ var StyleContext = (function(){
       }
       return Math.floor(this.getFontSize() * this.getLineRate());
     },
+    getEdge : function(){
+      return this.contextParent? this.contextParent.getEdge() : (this.edge || null);
+    },
     getEdgeMeasure : function(flow){
-      if(this.contextParent){
-	return this.contextParent.getEdgeMeasure(flow || this.flow);
-      }
-      return this.edge? this.edge.getMeasureSize(flow || this.flow) : 0;
+      var edge = this.getEdge();
+      return edge? edge.getMeasureSize(flow || this.flow) : 0;
     },
     getEdgeExtent : function(flow){
-      if(this.contextParent){
-	return this.contextParent.getEdgeExtent(flow || this.flow);
-      }
-      return this.edge? this.edge.getExtentSize(flow || this.flow) : 0;
+      var edge = this.getEdge();
+      return edge? edge.getExtentSize(flow || this.flow) : 0;
+    },
+    getInnerEdgeMeasure : function(){
+      var edge = this.getEdge();
+      return edge? edge.getInnerMeasureSize() : 0;
+    },
+    getInnerEdgeExtent : function(){
+      var edge = this.getEdge();
+      return edge? edge.getInnerExtentSize() : 0;
     },
     getOuterMeasure : function(){
       return this.getStaticMeasure() || (this.parent? this.parent.getContentMeasure() : this.getRootMeasure());
@@ -552,6 +590,8 @@ var StyleContext = (function(){
     getContentExtent : function(){
       return this.getOuterExtent() - this.getEdgeExtent();
     },
+    // notice that box-size, box-edge is box local variable,
+    // so style of box-size(content-size) and edge-size are generated at Box::getCssBlock
     getCssBlock : function(){
       var css = {};
       css.display = "block";
@@ -570,9 +610,6 @@ var StyleContext = (function(){
       if(this.letterSpacing && !this.flow.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
       if(this.floatDirection){
 	Args.copy(css, this.floatDirection.getCss(this.flow));
       }
@@ -582,6 +619,8 @@ var StyleContext = (function(){
       }
       return css;
     },
+    // notice that line-size, line-edge is box local variable,
+    // so style of line-size(content-size) and edge-size are generated at Box::getCssInline
     getCssInline : function(){
       var css = {};
       css["line-height"] = "1em";
@@ -600,13 +639,6 @@ var StyleContext = (function(){
       // top level line need to follow parent blockflow.
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
-      }
-      // edge of top level line is disabled.
-      // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
-      // anonymous line block('aaa' and 'ccc') is already edged by <p> in block level.
-      // so if line is anonymous, edge must be ignored.
-      if(!this.isRootLine() && this.edge){
-	Args.copy(css, this.edge.getCss());
       }
       if(this.flow.isTextVertical()){
 	if(Env.isIphoneFamily){
