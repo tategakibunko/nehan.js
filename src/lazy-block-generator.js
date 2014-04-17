@@ -6,6 +6,9 @@ var LazyBlockGenerator = (function(){
   Class.extend(LazyBlockGenerator, LayoutGenerator);
 
   LazyBlockGenerator.prototype.yield = function(context){
+    if(this._terminate){
+      return null;
+    }
     this._terminate = true; // yield only once.
     return this.block;
   };
