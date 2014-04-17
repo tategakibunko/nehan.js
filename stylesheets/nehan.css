@@ -20,6 +20,8 @@
 .nehan-text-line{
   overflow:visible;
 }
+.nehan-inline-tb-rl a.nehan-a,
+.nehan-inline-tb-lr a.nehan-a,
 .nehan-text-line-vert a,
 .nehan-text-line-vert a:hover{
   text-decoration:none !important;

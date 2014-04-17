@@ -36,97 +36,6 @@
 	<p>nehan.js is dynamic layout engine to generate paged-media in non-blocking way.</p>
       </section>
 
-      <!-- demo -->
-      <section>
-	<h2><a name="demo" class="anchor" href="#demo"><span class="octicon octicon-link"></span></a>Demo</h2>
-	<p>
-	  This demo is using <a target="_blank" href="http://tategakibunko.github.io/jquery.nehan/">jquery.nehan</a>.
-	</p>
-
-<!-- demo start -->
-<div class="nehan-book" style="display:none">
-<h2>wraparounding</h2>
-
-<p><img src='images/64x64.gif' width='64' height='64' class='nehan-float-end nehan-gap-start'/>
-lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-<img src='images/128x128.gif' width='128' height='128' class='nehan-float-start nehan-gap-end'/>
-lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in.</p>
-<page-break>
-
-<h2>mixed layout</h2>
-<div class="nehan-flow-tb-rl nehan-float-start nehan-gap-end" width="260" height="260">
-<ruby>日本<rt>にほん</rt></ruby>国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された<ruby>国会<rt>こっかい</rt></ruby>における代表者を通じて行動し、<ruby>子孫<rt>しそん</rt></ruby>のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす<ruby><rb>恵沢</rb><rt>けいたく</rt></ruby>を確保し、政府の行為によって再び<ruby><rb>戦争</rb><rt>せんそう</rt></ruby>の<ruby><rb>惨禍</rb><rt>さんか</rt></ruby>が起ることのないやうにすることを決意し、ここに<ruby><rb>主権</rb><rt>しゅけん</rt></ruby>が国民に存することを宣言し、この憲法を確定する。
-</div>
-
-<p>
-lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-</p>
-<page-break>
-<h2>table paging</h2>
-
-<table>
-<thead>
-<tr><th>head1</th><th>head2</th></tr>
-</thead>
-<tbody>
-<tr><td>lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</td><td>body2</td></tr>
-<tr><td>body3</td><td>body4</td></tr>
-<tr><td>body5</td><td>body6</td></tr>
-<tr><td>body7</td><td>body8</td></tr>
-</tbody>
-<tfoot>
-<tr><td>foot1</td><td>foot2</td></tr>
-</tfoot>
-</table>
-<page-break>
-
-<h2>unordered list</h2>
-
-<ul>
-<li>lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
-<li>lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
-<li>abc ded ghi</li>
-</ul>
-
-<ul class='nehan-ls-none'>
-<li>lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
-<li>lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
-<li>abc ded ghi</li>
-</ul>
-
-<page-break>
-<h2>ordered list</h2>
-
-<ol>
-<li>first
-<ol>
-<li>lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
-<li>lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
-<li>abc def ghi</li>
-</ol></li>
-<li>second</li>
-<li>third</li>
-</ol>
-
-<page-break>
-<h2>definition list</h2>
-
-<dl>
-<dt>term1</dt>
-<dd>lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit</dd>
-<dt>term2</dt>
-<dd>lorem ipsum dolor sit amet, consectetur adipisicing elit</dd>
-<dt>term3</dt>
-<dd>abc ded ghi</dd>
-<dt>term4</dt>
-<dd>lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit</dd>
-<dt>term5</dt>
-<dd>lorem ipsum dolor sit amet, consectetur adipisicing elit</dd>
-</dl>
-</div><!-- demo end -->
-      </section>
-
-
       <!-- install -->
       <section>
         <h2><a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h2>
@@ -178,15 +87,11 @@ var stream = engine.createPageStream("hello, nehan.js!");
 <pre class="prettyprint lang-js">
 stream.asyncGet({
   // called when each single pages are successfully calculated.
-  // argument caller is same as stream.
-  onProgress : function(caller){
-    var percent = caller.getSeekPercent(); // percentage position of this page.
-    var page_no = caller.getSeekPageNo(); // page no(starts from zero) of this page.
-    var page_result = caller.get(page_no); // get page result object of this page.
-    var page_html = page_result.getHtml(); // html of this page.
-    console.log(page_html);
+  onProgress : function(stream, tree){
+    var page = stream.getPage(tree.pageNo); // get page object of this page.
+    console.log(page.html);
   },
-  onComplete : function(time){
+  onComplete : function(stream, time){
     console.log("finished! %f msec", time);
   }
 });
@@ -203,7 +108,7 @@ var time = stream.syncGet();
 console.log("finished! %f msec", time);
 
 for(var i = 0; i < stream.getPageCount(); i++){
-   var page = stream.get(i);
+   var page = stream.getPage(i);
    console.log(page.html);
 }
 </pre>
@@ -218,16 +123,16 @@ for(var i = 0; i < stream.getPageCount(); i++){
 <h3>example / logical float</h3>
 <p>use <strong>nehan-float-start</strong> and <strong>nehan-float-end</strong> to float static block element.</p>
 <pre class="prettyprint lang-html">
-&lt;img width="128" height="128" src="128x128.gif" class="nehan-float-start nehan-gap-end"&gt;
+&lt;img width="64" height="64" src="64x64.gif" class="nehan-float-start nehan-disp-block nehan-gap-end"&gt;
 lorem ipsum dolor sit amet, consectetur adipisicing elit,
-&lt;img width="64" height="64" src="64x64.gif" class="nehan-float-end"&gt;
+&lt;img width="64" height="64" src="64x64.gif" class="nehan-float-end nehan-disp-block nehan-gap-start"&gt;
 lorem ipsum dolor sit amet, consectetur adipisicing elit,
 </pre>
 
 <div class="nehan-book" style="display:none">
-<img width="128" height="128" src="images/128x128.gif" class="nehan-float-start nehan-gap-end">
+<img width="64" height="64" src="images/64x64.gif" class="nehan-float-start nehan-disp-block nehan-gap-end">
 lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-<img width="64" height="64" src="images/64x64.gif" class="nehan-float-end">
+<img width="64" height="64" src="images/64x64.gif" class="nehan-float-end nehan-disp-block nehan-gap-start">
 lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 </div>
 <hr />
@@ -257,21 +162,6 @@ lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit a
 <div class='nehan-flow-flip'><ruby>日本<rt>にほん</rt></ruby>国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された<ruby>国会<rt>こっかい</rt></ruby>における代表者を通じて行動し、われらとわれらの<ruby><rb>子孫</rb><rt>しそん</rt></ruby>のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす<ruby><rb>恵沢</rb><rt>けいたく</rt></ruby>を確保し、政府の行為によって再び<ruby><rb>戦争</rb><rt>せんそう</rt></ruby>の<ruby><rb>惨禍</rb><rt>さんか</rt></ruby>が起ることのないやうにすることを決意し、ここに<ruby><rb>主権</rb><rt>しゅけん</rt></ruby>が国民に存することを宣言し、この憲法を確定する。</div>
 </div>
 
-<p>This is example using <code>nehan-flow-tb-rl</code> with static size</p>
-
-<pre class="prettyprint lang-html">
-&lt;div class='nehan-flow-tb-rl nehan-float-end' width="200" height="200"&gt;&lt;ruby&gt;日本&lt;rt&gt;にほん&lt;/rt&gt;&lt;/ruby&gt;国民は正当に&lt;/div&gt;
-&lt;p&gt;lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/p&gt;
-</pre>
-
-<div style="display:none" class="nehan-book">
-<div class='nehan-flow-tb-rl nehan-float-end' width="200" height="200">
-<ruby>日本<rt>にほん</rt></ruby>国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された<ruby>国会<rt>こっかい</rt></ruby>における代表者を通じて行動し、われらとわれらの<ruby><rb>子孫</rb><rt>しそん</rt></ruby>のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす<ruby><rb>恵沢</rb><rt>けいたく</rt></ruby>を確保し、政府の行為によって再び<ruby><rb>戦争</rb><rt>せんそう</rt></ruby>の<ruby><rb>惨禍</rb><rt>さんか</rt></ruby>が起ることのないやうにすることを決意し、ここに<ruby><rb>主権</rb><rt>しゅけん</rt></ruby>が国民に存することを宣言し、この憲法を確定する。</div>
-
-<p>
-lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit. lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit. lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor.
-</p>
-</div>
 <hr />
 <!---------------------------------------->
 
@@ -364,23 +254,12 @@ lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit a
 <div style="display:none" class="nehan-book">
 <p>Even if table layout can be pagerize!!</p>
 <table>
-<thead>
-<tr><th width="200">head1</th><th>head2</th></tr>
-</thead>
+<thead><tr><th>head1</th><th>head2</th></tr></thead>
 <tbody>
-<tr>
-<td>lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.</td>
-<td><ruby>日本<rt>にほん</rt></ruby>国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された<ruby>国会<rt>こっかい</rt></ruby>における代表者を通じて行動し、われらとわれらの<ruby><rb>子孫</rb><rt>しそん</rt></ruby>のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす<ruby><rb>恵沢</rb><rt>けいたく</rt></ruby>を確保し、政府の行為によって再び<ruby><rb>戦争</rb><rt>せんそう</rt></ruby>の<ruby><rb>惨禍</rb><rt>さんか</rt></ruby>が起ることのないやうにすることを決意し、ここに<ruby><rb>主権</rb><rt>しゅけん</rt></ruby>が国民に存することを宣言し、この憲法を確定する。</td>
-</tr>
-</tbody>
-<tr><td>body3</td><td>body4</td></tr>
-<tr><td>body5</td><td>body6</td></tr>
-<tr><td>body7</td><td>body8</td></tr>
-<tfoot>
-<tr><td>foot1</td><td>foot2</td></tr>
-</tfoot>
-</table>
-</div>
+<tr><td>lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore.</td><td><ruby>日本<rt>にほん</rt></ruby>国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された<ruby>国会<rt>こっかい</rt></ruby>における代表者を通じて行動し、われらとわれらの<ruby><rb>子孫</rb><rt>しそん</rt></ruby>のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす<ruby><rb>恵沢</rb><rt>けいたく</rt></ruby>を確保し、政府の行為によって再び<ruby><rb>戦争</rb><rt>せんそう</rt></ruby>の<ruby><rb>惨禍</rb><rt>さんか</rt></ruby>が起ることのないやうにすることを決意し、ここに<ruby><rb>主権</rb><rt>しゅけん</rt></ruby>が国民に存することを宣言し、この憲法を確定する。</td></tr>
+<tr><td>body3</td><td>body4</td></tr><tr><td>body5</td><td>body6</td></tr><tr><td>body7</td><td>body8</td></tr>
+</tbody><tfoot><tr><td>foot1</td><td>foot2</td></tr></tfoot>
+</table></div>
 
 <hr />
 <!---------------------------------------->
@@ -438,7 +317,7 @@ var stream = engine.createPageStream("&lt;h1&gt;first&lt;/h1&gt;&lt;h1&gt;second
 stream.asyncGet({
   onComplete: function(time){
     // you can get outline dom node like this.
-    var outline_node = stream.getOutlineNode("body", {
+    var outline_node = engine.documentContext.createBodyOutlineElement({
       createRoot : function(){
         return document.createElement("ol");
       },
@@ -468,15 +347,15 @@ stream.asyncGet({
 <!-- push -->
 <h3>example / static block push</h3>
 
-<p>Attribute <code>push</code> is used to push the block to the tail of a page.</p>
+<p>Attribute <code>pushed</code> is used to push the block element to the tail of a page.</p>
 
 <pre class="prettyprint lang-html">
-&lt;img src="images/256x256.gif" width="256" height="256" push&gt;
+&lt;img src="images/256x256.gif" class="nehan-disp-block" width="256" height="256" pushed&gt;
 &lt;p&gt;lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/p&gt;
 </pre>
 
 <div style="display:none" class="nehan-book">
-<img src="images/256x256.gif" width="256" height="256" push>
+<img src="images/256x256.gif" class="nehan-disp-block" width="256" height="256" pushed>
 <p>lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit</p>
 </div>
 <hr />
@@ -485,16 +364,16 @@ stream.asyncGet({
 <!-- pull -->
 <h3>example / static block pull</h3>
 
-<p>Attribute <code>pull</code> is used to pull the block to the head of a page.</p>
+<p>Attribute <code>pulled</code> is used to pull the block element to the head of a page.</p>
 
 <pre class="prettyprint lang-html">
 &lt;p&gt;lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit&lt;/p&gt;
-&lt;img src="images/256x256.gif" width="256" height="256" pull&gt;
+&lt;img src="images/256x256.gif" class="nehan-disp-block" width="256" height="256" pulled&gt;
 </pre>
 
 <div style="display:none" class="nehan-book">
 <p>lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit</p>
-<img src="images/256x256.gif" width="256" height="256" pull>
+<img src="images/256x256.gif" class="nehan-disp-block" width="256" height="256" pulled>
 </div>
 <hr />
 <!---------------------------------------->
@@ -797,7 +676,7 @@ stream.asyncGet({
     <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
     <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
     <script src="javascripts/nehan.min.js"></script>
-    <script src="javascripts/jquery.nehan.min.js"></script>
+    <script src="javascripts/jquery.nehan.js"></script>
     <script src="javascripts/custom.js"></script>
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
