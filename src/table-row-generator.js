@@ -20,10 +20,10 @@ var TableRowGenerator = (function(){
   TableRowGenerator.prototype._getChildStyles = function(style, child_tags){
     var self = this;
     var child_count = child_tags.length;
-    var rest_measure = style.getContentMeasure();
+    var rest_measure = style.contentMeasure;
     return List.mapi(child_tags, function(i, tag){
       var default_style = new StyleContext(tag, style);
-      var static_measure = default_style.getStaticMeasure();
+      var static_measure = default_style.staticMeasure;
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_count - i));
       rest_measure -= measure;
       return default_style.clone({

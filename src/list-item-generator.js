@@ -23,7 +23,7 @@ var ListItemGenerator = (function(){
 
   ListItemGenerator.prototype._createListBodyGenerator = function(style, stream, outline_context){
     var marker_size = style.parent.markerSize;
-    var measure = style.getContentMeasure() - marker_size.getMeasure(style.flow);
+    var measure = style.contentMeasure - marker_size.getMeasure(style.flow);
     var body_style = style.createChild("li-body", {
       "float":"start",
       "class":"nehan-li-body",

@@ -196,7 +196,7 @@ var StyleContext = (function(){
       var child_lines = this._filterChildLines(elements);
       var max_font_size = this._computeMaxLineFontSize(child_lines);
       var max_extent = this._computeMaxLineExtent(child_lines, max_font_size);
-      var measure = (this.parent && opt.measure && this.staticMeasure === null)? opt.measure : this.contentMeasure;
+      var measure = (this.parent && opt.measure && this.staticMeasure === null && !this.isRootLine())? opt.measure : this.contentMeasure;
       var extent = (this.isRootLine() && child_lines.length > 0)? max_extent : this.getAutoLineExtent();
       var line_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
@@ -215,7 +215,7 @@ var StyleContext = (function(){
       // backup other line data. mainly required to restore inline-context.
       if(this.isRootLine()){
 	line.br = opt.br || false;
-	line.inlineMeasure = opt.inlineMeasure || measure;
+	line.inlineMeasure = opt.measure || this.contentMeasure;
 	line.texts = opt.texts || [];
 
 	// if vertical line, needs some position fix to align baseline.
@@ -513,56 +513,6 @@ var StyleContext = (function(){
       var edge = this.getEdge();
       return edge? edge.getInnerExtentSize() : 0;
     },
-    getOuterMeasure : function(){
-      return this.getStaticMeasure() || (this.parent? this.parent.getContentMeasure() : this.getRootMeasure());
-    },
-    getOuterExtent : function(){
-      return this.getStaticExtent() || (this.parent? this.parent.getContentExtent() : this.getRootExtent());
-    },
-    getStaticMeasure : function(){
-      return this.staticMeasure;
-    },
-    getStaticExtent : function(){
-      return this.staticExtent;
-    },
-    getStaticContentMeasure : function(){
-      var static_size = this.getStaticMeasure();
-      return static_size? Math.max(0, static_size - this.getEdgeMeasure()) : null;
-    },
-    getStaticContentExtent : function(){
-      var static_size = this.getStaticExtent();
-      return static_size? Math.max(0, static_size - this.getEdgeExtent()) : null;
-    },
-    getRootMeasure : function(){
-      return Layout[this.flow.getPropMeasure()];
-    },
-    getRootContentMeasure : function(){
-      return this.getRootMeasure() - this.getEdgeMeasure();
-    },
-    getRootExtent : function(){
-      return Layout[this.flow.getPropExtent()];
-    },
-    getRootContentExtent : function(){
-      return this.getRootExtent() - this.getEdgeExtent();
-    },
-    getParentMeasure : function(){
-     return this.parent? this.parent.getOuterMeasure(this.flow) : this.getRootMeasure();
-    },
-    getParentEdgeMeasure : function(){
-      return (this.parent && this.parent.edge)? this.parent.getEdgeMeasure() : 0;
-    },
-    getParentEdgeExtent : function(){
-      return (this.parent && this.parent.edge)? this.parent.getEdgeExtent() : 0;
-    },
-    getParentExtent : function(){
-      return this.parent? this.parent.getOuterExtent(this.flow) : this.getRootExtent();
-    },
-    getContentMeasure : function(){
-      return this.getOuterMeasure() - this.getEdgeMeasure();
-    },
-    getContentExtent : function(){
-      return this.getOuterExtent() - this.getEdgeExtent();
-    },
     // notice that box-size, box-edge is box local variable,
     // so style of box-size(content-size) and edge-size are generated at Box::getCssBlock
     getCssBlock : function(){
@@ -675,7 +625,6 @@ var StyleContext = (function(){
     },
     _setTextAlign : function(line, text_align){
       var content_measure  = line.getContentMeasure(this.flow);
-      //var content_measure  = line.contentMeasure;
       var space_measure = content_measure - line.inlineMeasure;
       if(space_measure <= 0){
 	return;
@@ -960,13 +909,15 @@ var StyleContext = (function(){
     },
     _loadStaticMeasure : function(){
       var prop = this.flow.getPropMeasure();
-      var max_size = this.getRootMeasure(); // this value is required when static size is set by '%' value.
+      //var max_size = this.getRootMeasure(); // this value is required when static size is set by '%' value.
+      var max_size = Layout.getMeasure(this.flow); // this value is required when static size is set by '%' value.
       var static_size = this.getAttr(prop) || this.getAttr("measure") || this.getCssAttr(prop) || this.getCssAttr("measure");
       return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
     },
     _loadStaticExtent : function(){
       var prop = this.flow.getPropExtent();
-      var max_size = this.getRootExtent(); // this value is required when static size is set by '%' value.
+      //var max_size = this.getRootExtent(); // this value is required when static size is set by '%' value.
+      var max_size = Layout.getExtent(this.flow); // this value is required when static size is set by '%' value.
       var static_size = this.getAttr(prop) || this.getAttr("extent") || this.getCssAttr(prop) || this.getCssAttr("extent");
       return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
     }
