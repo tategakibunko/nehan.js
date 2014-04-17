@@ -62,6 +62,13 @@ var Snipet = {
     "</ol>"
   ].join(""),
 
+  "dl":[
+    "<dl>",
+    "<dt>hoge</dt>",
+    "<dd>" + Text["long"] + "</dd>",
+    "</dl>"
+  ].join(""),
+
   "dummy":""
 };
 

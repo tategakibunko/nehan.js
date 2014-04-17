@@ -439,14 +439,6 @@ var StyleContext = (function(){
     getColor : function(){
       return this.color || Layout.fontColor;
     },
-    getOrphansCount : function(){
-      // orphans count only enabled to child block element.
-      if(this.isRoot()){
-	return 0;
-      }
-      var count = this.getCssAttr("orphans");
-      return count? parseInt(count, 10) : 0;
-    },
     getChildCount : function(){
       return this.childs.length;
     },

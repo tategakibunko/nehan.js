@@ -185,16 +185,6 @@ var BlockGenerator = (function(){
     this._onAddElement(element);
   };
 
-  var count_line = function(elements){
-    var callee = arguments.callee;
-    return List.fold(elements, 0, function(ret, element){
-      if(element === null){
-	return ret;
-      }
-      return (element.display === "inline")? ret + 1 : ret + callee(element.elements);
-    });
-  };
-
   BlockGenerator.prototype._createOutput = function(context){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
@@ -206,13 +196,10 @@ var BlockGenerator = (function(){
       elements:elements
     });
 
-    // if orphans available, and line count is less than it, cache and page-break temporally.
-    var orphans_count = this.style.getOrphansCount();
-    if(orphans_count > 0 && count_line(block.elements) < orphans_count && this.hasNext()){
-      this.pushCache(block);
-      return null; // temporary page-break;
-    }
+    // call _onCreate callback for 'each' output
     this._onCreate(block);
+
+    // call _onComplete callback for 'final' output
     if(!this.hasNext()){
       this._onComplete(block);
     }

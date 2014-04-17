@@ -6,16 +6,69 @@ var Script = {
     "<p>" + Text["short"] + "</p>"
   ].join(""),
 
-  "A+B":[
+  "float":[
+    Snipet["float"],
+    Snipet["ruby"],
+    Text["long"],
+    Snipet["ruby"],
+    Text["middle"],
+    Snipet["ruby"],
+    Text["long"],
+    Snipet["float"],
+    Text["long"],
+    Text["middle"],
+    Text["long"],
+    "<img class='nehan-disp-block nehan-float-start' src='128x128.gif' width='128' height='128' />",
+    Text["long"],
+    "<img class='nehan-disp-block nehan-float-end' src='128x128.gif' width='128' height='128' />",
+    Text["long"]
+  ].join(""),
+
+  "table":[
+    "<table>",
+    "<thead>",
+    "<tr>",
+    "<th>head1</th><th>head2</th><th>head3</th>",
+    "</tr>",
+    "</thead>",
+
+    "<tbody>",
+    "<tr>",
+    "<td>" + Text["long"] + "</td><td>hige</td><td>hage</td>",
+    "</tr>",
+    "<tr>",
+    "<td>ohoho</td><td>ahaha</td><td>hihihi</td>",
+    "</tr>",
+    "<tr>",
+    "<td>123</td><td>456</td><td>789</td>",
+    "</tr>",
+    "</tbody>",
+
+    "<tfoot>",
+    "<tr>",
+    "<td>foot1</td>",
+    "<td>foot2</td>",
+    "</tr>",
+    "</tfoot>",
+    "</table>"
+  ].join("\n"),
+
+  "list":[
+    Snipet["ul"],
+    Snipet["ol"],
+    Snipet["dl"]
+  ].join(""),
+
+  "A+B, A~B":[
+    "<h2>adj test</h2>",
     "<div class='nehan-adj-test'>", [
       "<a href='#'>prev</a>",
       "<b>direct sibling</b>",
       "<b>next sibling</b>"
     ].join("&nbsp;"),
-    "</div>"
-  ].join(""),
+    "</div>",
 
-  "A~B":[
+    "<h2>gen adj test</h2>",
     "<div class='nehan-gen-adj-test'>", [
       "<a href='#'>prev</a>",
       "<b>direct sibling</b>",
@@ -57,35 +110,6 @@ var Script = {
     "</pre>"
   ].join("\n"),
 
-  "table":[
-    "<table>",
-    "<thead>",
-    "<tr>",
-    "<th>head1</th><th>head2</th><th>head3</th>",
-    "</tr>",
-    "</thead>",
-
-    "<tbody>",
-    "<tr>",
-    "<td>" + Text["long"] + "</td><td>hige</td><td>hage</td>",
-    "</tr>",
-    "<tr>",
-    "<td>ohoho</td><td>ahaha</td><td>hihihi</td>",
-    "</tr>",
-    "<tr>",
-    "<td>123</td><td>456</td><td>789</td>",
-    "</tr>",
-    "</tbody>",
-
-    "<tfoot>",
-    "<tr>",
-    "<td>foot1</td>",
-    "<td>foot2</td>",
-    "</tr>",
-    "</tfoot>",
-    "</table>"
-  ].join("\n"),
-
   "page-break":[
     Text["middle"],
     "<page-break>",
@@ -102,18 +126,6 @@ var Script = {
     Text["short"],
     "<hr class='nehan-space'>",
     Text["short"]
-  ].join(""),
-
-  "orphans":[
-    "<p class='nehan-orphans-3'>" + Text["long"] + Text["long"] + Text["middle"] + Text["middle"] + "</p>",
-    "<p class='nehan-orphans-3'>" + Text["long"] + "</p>",
-    "<p class='nehan-orphans-3'>" + Text["long"] + "</p>",
-    "<p class='nehan-orphans-3'>" + Text["long"] + "</p>"
-  ].join(""),
-  
-  "bold":[
-    "<b>太字</b>です。",
-    "<em>イーエム</em>です。"
   ].join(""),
 
   "kerning":[
@@ -167,32 +179,6 @@ var Script = {
     "これは<span class='nehan-empha-sesame-filled'>圏点</span>です。"
   ].join("<br>"),
 
-  "ul":Snipet["ul"],
-
-  "ol":Snipet["ol"],
-
-  "float":[
-    Snipet["float"],
-    Snipet["ruby"],
-    Text["long"],
-    Snipet["ruby"],
-    Text["middle"],
-    Snipet["ruby"],
-    Text["long"],
-    Snipet["float"],
-    Text["long"],
-    Text["middle"],
-    Text["long"],
-    ""
-  ].join(""),
-
-  "dl":[
-    "<dl>",
-    "<dt>hoge</dt>",
-    "<dd>" + Text["long"] + "</dd>",
-    "</dl>"
-  ].join(""),
-
   "header":[
     "<h1>h1h1h1</h1>",
     "<h2>h2h2h2</h2>",
@@ -219,37 +205,20 @@ var Script = {
     "</section>"
   ].join(""),
 
-  "image-float":[
-    "<img class='nehan-disp-block nehan-float-start' src='128x128.gif' width='128' height='128' />",
-    Text["long"],
-    "<img class='nehan-disp-block nehan-float-end' src='128x128.gif' width='128' height='128' />",
-    Text["long"]
-  ].join(""),
-
-  "image-push":[
+  "push-pull":[
     "<img class='nehan-disp-block' src='256x256.gif' width='256' height='256' pushed />",
-    Text["long"]
-  ].join(""),
-
-  "image-pull":[
+    Text["long"],
+    "<page-break>",
     Text["long"],
     "<img class='nehan-disp-block' src='256x256.gif' width='256' height='256' pulled />"
   ].join(""),
 
-  "image":[
-    "<img src='128x128.gif' width='128' height='128' />",
-    Text["long"],
-    "<img class='nehan-disp-block' src='256x256.gif' width='256' height='256'/>",
-    Text["long"]
-  ].join(""),
-
-  "first-letter":[
+  "pseudo-first":[
+    "<h2>first letter</h2>",
     "<div class='nehan-drop-caps'>",
     Text["long"],
-    "</div>"
-  ].join(""),
-
-  "first-line":[
+    "</div>",
+    "<h2>first line</h2>",
     "<div class='nehan-first-line-larger'>",
     Text["long"],
     "</div>"

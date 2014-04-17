@@ -9,9 +9,6 @@ var TestStyles = {
     "display":"block",
     "font-size":"1.6em"
   },
-  ".nehan-orphans-3":{
-    "orphans":3
-  },
   ".nehan-my-callback":{
     "onload":function(style, context){
       var rest_extent = context.getBlockRestExtent();
