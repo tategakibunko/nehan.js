@@ -7522,8 +7522,7 @@ var LayoutGenerator = (function(){
   }
 
   // 1. create child layout context from parent layout context.
-  // 2. call 'layout' callback defined in style-context if exists.
-  // 3. return _yield that is implemented by child class.
+  // 2. call _yield implemented in inherited class.
   LayoutGenerator.prototype.yield = function(parent_context){
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
     return this._yield(context);
