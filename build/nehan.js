@@ -7681,6 +7681,8 @@ var BlockGenerator = (function(){
     } else {
       context.addBlockElement(element, extent);
     }
+
+    // call _onAddElement callback for each 'element' of output.
     this._onAddElement(element);
   };
 
@@ -7925,6 +7927,8 @@ var InlineGenerator = (function(){
 
   InlineGenerator.prototype._addElement = function(context, element, measure){
     context.addInlineElement(element, measure);
+
+    // call _onAddElement callback for each 'element' of output.
     this._onAddElement(element);
   };
 
