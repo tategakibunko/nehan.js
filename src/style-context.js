@@ -109,20 +109,6 @@ var StyleContext = (function(){
       this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
       this.contentExtent = this._computeContentExtent(this.outerExtent);
     },
-    _computeContentMeasure : function(outer_measure){
-      switch(this.boxSizing){
-      case "margin-box": return outer_measure - this.getEdgeMeasure();
-      case "border-box": return outer_measure - this.getInnerEdgeMeasure();
-      case "content-box": default: return outer_measure;
-      }
-    },
-    _computeContentExtent : function(outer_extent){
-      switch(this.boxSizing){
-      case "margin-box": return outer_extent - this.getEdgeExtent();
-      case "border-box": return outer_extent - this.getInnerEdgeExtent();
-      case "content-box": default: return outer_extent;
-      }
-    },
     clone : function(css){
       // no one can clone root style.
       if(this.parent === null){
@@ -173,17 +159,10 @@ var StyleContext = (function(){
       opt = opt || {};
       var elements = opt.elements || [];
       var measure = this.contentMeasure;
-      var extent = this.parent? (this.getStaticContentExtent() || opt.extent || this.getContentExtent()) : this.getContentExtent();
-      //var extent = (this.parent === null || typeof opt.extent === "undefined")? this.contentExtent : opt.extent;
+      var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
       var box = new Box(box_size, this);
-      if(this.flow.isTextVertical() && this.contentMeasure !== measure){
-	console.log(
-	  "[%s](m,e) = (%d,%d), (m+,e+) = (%d, %d) => (%d, %d), box-sizing = %s",
-	  this.markup.name, this.contentMeasure, this.contentExtent, this.outerMeasure, this.outerExtent, measure, extent, this.boxSizing
-	);
-      }
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = this.edge || null; // for Box::getLayoutExtent, Box::getLayoutMeasure
       box.elements = elements;
@@ -194,8 +173,8 @@ var StyleContext = (function(){
       return box;
     },
     createImage : function(){
-      var measure = this.getImageMeasure();
-      var extent = this.getImageExtent();
+      var measure = this.contentMeasure;
+      var extent = this.contentExtent;
 
       // image size always considered as horizontal mode.
       var image_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent);
@@ -217,7 +196,7 @@ var StyleContext = (function(){
       var child_lines = this._filterChildLines(elements);
       var max_font_size = this._computeMaxLineFontSize(child_lines);
       var max_extent = this._computeMaxLineExtent(child_lines, max_font_size);
-      var measure = opt.measure || this.getContentMeasure();
+      var measure = (this.parent && opt.measure && this.staticMeasure === null)? opt.measure : this.contentMeasure;
       var extent = (this.isRootLine() && child_lines.length > 0)? max_extent : this.getAutoLineExtent();
       var line_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
@@ -578,12 +557,6 @@ var StyleContext = (function(){
     getParentExtent : function(){
       return this.parent? this.parent.getOuterExtent(this.flow) : this.getRootExtent();
     },
-    getImageMeasure : function(){
-      return (this.getStaticMeasure() || this.getOuterMeasure()) - this.getEdgeMeasure();
-    },
-    getImageExtent : function(){
-      return (this.getStaticExtent() || this.getOuterExtent()) - this.getEdgeExtent();
-    },
     getContentMeasure : function(){
       return this.getOuterMeasure() - this.getEdgeMeasure();
     },
@@ -672,6 +645,20 @@ var StyleContext = (function(){
 	return element.style? true : false;
       });
     },
+    _computeContentMeasure : function(outer_measure){
+      switch(this.boxSizing){
+      case "margin-box": return outer_measure - this.getEdgeMeasure();
+      case "border-box": return outer_measure - this.getInnerEdgeMeasure();
+      case "content-box": default: return outer_measure;
+      }
+    },
+    _computeContentExtent : function(outer_extent){
+      switch(this.boxSizing){
+      case "margin-box": return outer_extent - this.getEdgeExtent();
+      case "border-box": return outer_extent - this.getInnerEdgeExtent();
+      case "content-box": default: return outer_extent;
+      }
+    },
     _computeMaxLineFontSize : function(child_lines){
       return List.fold(child_lines, this.getFontSize(), function(ret, line){
 	return Math.max(ret, line.style.getFontSize());
@@ -688,6 +675,7 @@ var StyleContext = (function(){
     },
     _setTextAlign : function(line, text_align){
       var content_measure  = line.getContentMeasure(this.flow);
+      //var content_measure  = line.contentMeasure;
       var space_measure = content_measure - line.inlineMeasure;
       if(space_measure <= 0){
 	return;
