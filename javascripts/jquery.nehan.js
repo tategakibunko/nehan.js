@@ -868,11 +868,11 @@ var Reader = (function(){
     _onError : function(stream){
       this.onError(stream);
     },
-    _cacheResult : function(page_result){
-      var html = this._outputScreenHtml(page_result);
+    _cacheResult : function(page){
+      var html = this._outputScreenHtml(page);
       this.status.addScreenCache({
 	html:html,
-	result:page_result
+	result:page
       });
     },
     _updateScreen : function(){
@@ -900,8 +900,8 @@ var Reader = (function(){
 	return false;
       });
     },
-    _outputScreenHtml : function(page_result){
-      var page_no = page_result.getPageNo();
+    _outputScreenHtml : function(page){
+      var page_no = page.pageNo;
       var cell_order = this.status.getCellOrder();
       var facing_page_order = this.status.getFacingPageOrder(page_no);
 
@@ -915,8 +915,8 @@ var Reader = (function(){
       this.template.setValue("right_page_no", facing_page_order.right);
       this.template.setValue("left_page_no", facing_page_order.left);
 
-      for(var i = 0; i < page_result.getGroupCount(); i++){
-	this.template.setValue(cell_order[i], page_result.getHtml(i));
+      for(var i = 0; i < page.getGroupSize(); i++){
+	this.template.setValue(cell_order[i], page.getGroupHtml(i));
       }
 
       return this.template.render();
