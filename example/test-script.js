@@ -225,6 +225,11 @@ var Script = {
     "<div class='nehan-first-line-larger'>",
     Text["long"],
     "</div>"
+  ].join(""),
+
+  "before-after":[
+    "<div class='nehan-test-before'>test for before</div>",
+    "<div class='nehan-test-after'>test for after</div>"
   ].join("")
 };
 

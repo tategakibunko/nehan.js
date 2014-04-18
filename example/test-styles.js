@@ -1,4 +1,20 @@
 var TestStyles = {
+  ".nehan-test-before::before":{
+    "display":"inline",
+    "color":"darkred",
+    "padding":{
+      "end":"5px"
+    },
+    content:"this is inserted by before"
+  },
+  ".nehan-test-after::after":{
+    "display":"inline",
+    "color":"green",
+    "padding":{
+      "start":"5px"
+    },
+    content:"this is inserted by after"
+  },
   ".nehan-gen-adj-test a~b":{
     "color":"green"
   },
