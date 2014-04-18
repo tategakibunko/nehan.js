@@ -22,7 +22,7 @@ var Script = {
     Text["long"],
     "<img class='nehan-disp-block nehan-float-end' src='128x128.gif' width='128' height='128' />",
     Text["long"],
-    "<img class='nehan-float-start nehan-disp-block nehan-gap-end' width='128' height='128' src='128x128.gif' />",
+    "<img class='nehan-disp-block nehan-float-start nehan-gap-end' width='128' height='128' src='128x128.gif' />",
     "<p>あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをんあいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをんあいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん</p>",
     "<p>あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをんあいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをんあいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん</p>"
   ].join(""),

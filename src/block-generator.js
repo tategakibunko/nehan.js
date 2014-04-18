@@ -87,7 +87,8 @@ var BlockGenerator = (function(){
     }
 
     // if child inline, start child inline generator with first child of child inline-generator(grand child).
-    if(child_style.isInline()){
+    // but ignore if child_style is floated, because it's must be yielded by float-generator(mainly floated image).
+    if(child_style.isInline() && !child_style.isFloated()){
       var first_inline_stream = this._createStream(child_style, token);
       var first_inline_generator = new InlineGenerator(child_style, first_inline_stream, this.outlineContext);
       this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_inline_generator));
