@@ -6392,12 +6392,11 @@ var StyleContext = (function(){
       return box;
     },
     createImage : function(){
-      var measure = this.staticMeasure || this.font.size;
-      var extent = this.staticExtent || this.font.size;
-      var classes = ["nehan-block", "nehan-image"].concat(this.markup.classes);
-
       // image size always considered as horizontal mode.
-      var image_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent);
+      var width = this.getMarkupAttr("width")? parseInt(this.getMarkupAttr("width"), 10) : (this.staticMeasure || this.font.size);
+      var height = this.getMarkupAttr("height")? parseInt(this.getMarkupAttr("height"), 10) : (this.staticExtent || this.font.size);
+      var classes = ["nehan-block", "nehan-image"].concat(this.markup.classes);
+      var image_size = new BoxSize(width, height);
       var image = new Box(image_size, this);
       image.display = this.display; // inline/block
       image.edge = this.edge || null;
