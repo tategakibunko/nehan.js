@@ -102,19 +102,52 @@ var StyleContext = (function(){
 	this.breakAfter = break_after;
       }
 
+      // static size is defined in selector or tag attr, hightest priority
       this.staticMeasure = this._loadStaticMeasure();
       this.staticExtent = this._loadStaticExtent();
-      this.outerMeasure = this.staticMeasure || (this.parent? this.parent.contentMeasure : Layout.getMeasure(this.flow));
-      this.outerExtent = this.staticExtent || (this.parent? this.parent.contentExtent : Layout.getExtent(this.flow));
+
+      // context size(outer size and content size) is defined by
+      // 1. current static size
+      // 2. parent size
+      // 3. current edge size.
+      this.initContextSize(this.staticMeasure, this.staticExtent);
+    },
+    // [context size] = [outer size] and [content size].
+    //
+    // (a) outer size
+    //   1. if direct size is given, use it as outer size.
+    //   2. else if parent exists, current outer size is the content size of parent.
+    //   3. else if parent not exists(root), use root layout size.
+    //
+    // (b) content size
+    //   1. if edge exists, content size = [outer size] - [edge size]
+    //   2. else(no edge),  content size = [outer size]
+    initContextSize : function(measure, extent){
+      this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : Layout.getMeasure(this.flow));
+      this.outerExtent = extent || (this.parent? this.parent.contentExtent : Layout.getExtent(this.flow));
       this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
       this.contentExtent = this._computeContentExtent(this.outerExtent);
     },
+    // if update static size, update context size too.
+    updateStaticSize : function(measure, extent){
+      this.staticMeasure = measure;
+      this.staticExtent = extent;
+      this.updateContextSize(measure, extent);
+    },
+    // if update context size, update all context size of children too.
+    updateContextSize : function(measure, extent){
+      this.initContextSize(measure, extent);
+      List.iter(this.childs, function(child){
+	child.updateContextSize(null, null);
+      });
+    },
+    // clone style-context with temporary css
     clone : function(css){
       // no one can clone root style.
       if(this.parent === null){
 	return this.createChild("div", css);
       }
-      return new StyleContext(this.markup.clone(), this.parent, {forceCss:(css || {})});
+      return new StyleContext(this.markup, this.parent, {forceCss:(css || {})});
     },
     // append child style context
     appendChild : function(child_style){

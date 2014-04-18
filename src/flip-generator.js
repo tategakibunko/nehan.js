@@ -7,10 +7,7 @@ var FlipGenerator = (function(){
   FlipGenerator.prototype.yield = function(context){
     // [measure of this.style] -> [extent of this.style.parent]
     // [extent of this.style]  -> [measure of this.style.parent]
-    this.cloneStyle({
-      measure:context.getBlockRestExtent(),
-      extent:context.getInlineMaxMeasure()
-    });
+    this.style.updateContextSize(context.getBlockRestExtent(), context.getInlineMaxMeasure());
     return BlockGenerator.prototype.yield.call(this);
   };
 

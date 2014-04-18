@@ -119,11 +119,7 @@ var FloatGenerator = (function(){
   };
   
   FloatGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
-    this._childLayout.cloneStyle({
-      "float":"start",
-      measure:measure,
-      extent:extent
-    });
+    this._childLayout.style.updateContextSize(measure, extent);
     return this.yieldChildLayout();
   };
   

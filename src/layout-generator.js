@@ -18,17 +18,6 @@ var LayoutGenerator = (function(){
     throw "LayoutGenerator::_yield must be implemented in child class";
   };
 
-  LayoutGenerator.prototype.cloneStyle = function(opt){
-    var old_style = this.style;
-    var new_style = this.style.clone(opt);
-    this.style = new_style;
-
-    // if child layout shared the same style, rewrite it too.
-    if(this._childLayout && this._childLayout.style === old_style){
-      this._childLayout.style = new_style;
-    }
-  };
-
   LayoutGenerator.prototype.setTerminate = function(status){
     this._terminate = status;
   };
