@@ -9,7 +9,8 @@ var LayoutTest = (function(){
 	direction:(opt.direction || "vert"),
 	fontSize:(opt.fontSize || 16),
 	width:(opt.width || 500),
-	height:(opt.height || 450)
+	//height:(opt.height || 450)
+	height:400
       }
     });
 

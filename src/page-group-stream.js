@@ -1,7 +1,6 @@
 var PageGroupStream = (function(){
   function PageGroupStream(text, group_size){
-    PageStream.call(this, text);
-    this.groupSize = group_size;
+    PageStream.call(this, text, group_size);
   }
   Class.extend(PageGroupStream, PageStream);
   
@@ -12,23 +11,25 @@ var PageGroupStream = (function(){
     return Math.round(cell_page_no / this.groupSize);
   };
 
+  // () -> [tree]
   PageGroupStream.prototype._yield = function(){
-    var group = new PageGroup(this.groupSize);
-    var add = function(page){
-      group.add(page);
-    };
-    for(var i = 0; i < this.groupSize; i++){
-      if(!this.generator.hasNext()){
-	break;
+    var trees = [], push = function(tree){
+      if(tree){
+	trees.push(tree);
       }
-      add(this.generator.yield());
+    };
+    while(trees.length < this.groupSize && this.hasNext()){
+      push(this.generator.yield());
     }
-    group.commit();
-    return group;
+    return trees;
+  };
+
+  PageGroupStream.prototype._isEvaluated = function(entry){
+    return (entry instanceof PageGroup);
   };
 
   PageGroupStream.prototype._createEvaluator = function(){
-    return new PageGroupEvaluator();
+    return new PageGroupEvaluator(this.groupSize);
   };
 
   return PageGroupStream;

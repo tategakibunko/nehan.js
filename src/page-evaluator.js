@@ -15,7 +15,7 @@ var PageEvaluator = (function(){
 	pageNo:body_element.pageNo,
 	charPos:body_element.charPos,
 	charCount:body_element.charCount
-      }) : {};
+      }) : null;
     }
   };
 

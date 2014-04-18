@@ -65,7 +65,8 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._justifyLine = function(context){
-    var next_head = this.peekLastCache(); // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
+    // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
+    var next_head = this.peekLastCache() || this.stream.peek();
     var new_tail = context.justify(next_head); // if justify is occured, new_tail token is gained.
     if(new_tail){
       this.stream.setPos(new_tail.pos + 1); // new stream pos is next pos of new tail.

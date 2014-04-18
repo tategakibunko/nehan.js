@@ -1,6 +1,7 @@
 var PageStream = (function(){
-  function PageStream(text){
+  function PageStream(text, group_size){
     this.text = this._createSource(text);
+    this.groupSize = group_size;
     this.generator = this._createGenerator(this.text);
     this.evaluator = this._createEvaluator();
     this.buffer = [];
@@ -56,16 +57,20 @@ var PageStream = (function(){
     // int -> Page
     getPage : function(page_no){
       var entry = this.buffer[page_no];
-      if(entry instanceof Page){ // already evaluated.
-	return entry;
+      if(this._isEvaluated(entry)){
+	return entry; // already evaluated
       }
       // if still not evaluated, eval and get EvalResult
       var result = this.evaluator.evaluate(entry);
       this.buffer[page_no] = result; // over write buffer entry by result.
       return result;
     },
+    // () -> tree
     _yield : function(){
       return this.generator.yield();
+    },
+    _isEvaluated : function(entry){
+      return (entry instanceof Page);
     },
     _setTimeStart : function(){
       this._timeStart = (new Date()).getTime();

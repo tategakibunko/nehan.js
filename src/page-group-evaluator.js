@@ -1,30 +1,17 @@
 var PageGroupEvaluator = (function(){
-  function PageGroupEvaluator(){
-    this.evaluator = new LayoutEvaluator();
+  function PageGroupEvaluator(group_size){
+    this.groupSize = group_size;
+    PageEvaluator.call(this);
   }
+  Class.extend(PageGroupEvaluator, PageEvaluator);
 
-  PageGroupEvaluator.prototype = {
-    evaluate : function(page_group){
-      var self = this;
-      var char_count = 0;
-      var html = [];
-      var results = List.map(page_group.getPages(), function(body_element){
-	var ret = self.evaluator.evaluate(body_element);
-	char_count += ret.charCount;
-	html.push(ret.html);
-	return ret;
-      });
-      var first = results[0];
-      return new Page({
-	html:html,
-	groupLength:page_group.getSize(),
-	percent:first.percent,
-	seekPos:first.seekPos,
-	pageNo:first.pageNo,
-	charPos:first.charPos,
-	charCount:char_count
-      });
-    }
+  // [tree] -> PageGroup
+  PageGroupEvaluator.prototype.evaluate = function(trees){
+    var self = this;
+    var pages = List.map(trees, function(tree){
+      return PageEvaluator.prototype.evaluate.call(self, tree);
+    });
+    return new PageGroup(this.groupSize, pages);
   };
 
   return PageGroupEvaluator;

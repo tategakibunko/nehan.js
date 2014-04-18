@@ -5754,7 +5754,6 @@ var Page = (function(){
   function Page(opt){
     Args.merge(this, {
       html:"",
-      groupLength:1,
       seekPos:0,
       pageNo:0,
       charPos:0,
@@ -5764,34 +5763,17 @@ var Page = (function(){
   }
 
   Page.prototype = {
-    isGroup : function(){
-      return this.groupLength > 1;
-    },
-    getPercent : function(){
-      return this.percent;
-    },
-    getPageNo : function(){
-      return this.pageNo;
-    },
-    getGroupCount : function(){
-      return this.groupLength;
-    },
-    getPageCount : function(){
-      if(this.isGroup() && this.html instanceof Array){
-	return this.html.length;
-      }
+    getGroupSize : function(){
       return 1;
     },
-    getHtml : function(pos){
-      if(this.isGroup()){
-	return this.html[pos] || "";
-      }
+    getGroupHtml : function(pos){
       return this.html;
     }
   };
 
   return Page;
 })();
+
 
 var PageEvaluator = (function(){
   function PageEvaluator(){
@@ -5810,7 +5792,7 @@ var PageEvaluator = (function(){
 	pageNo:body_element.pageNo,
 	charPos:body_element.charPos,
 	charCount:body_element.charCount
-      }) : {};
+      }) : null;
     }
   };
 
@@ -5819,40 +5801,28 @@ var PageEvaluator = (function(){
 
 
 var PageGroupEvaluator = (function(){
-  function PageGroupEvaluator(){
-    this.evaluator = new LayoutEvaluator();
+  function PageGroupEvaluator(group_size){
+    this.groupSize = group_size;
+    PageEvaluator.call(this);
   }
+  Class.extend(PageGroupEvaluator, PageEvaluator);
 
-  PageGroupEvaluator.prototype = {
-    evaluate : function(page_group){
-      var self = this;
-      var char_count = 0;
-      var html = [];
-      var results = List.map(page_group.getPages(), function(body_element){
-	var ret = self.evaluator.evaluate(body_element);
-	char_count += ret.charCount;
-	html.push(ret.html);
-	return ret;
-      });
-      var first = results[0];
-      return new Page({
-	html:html,
-	groupLength:page_group.getSize(),
-	percent:first.percent,
-	seekPos:first.seekPos,
-	pageNo:first.pageNo,
-	charPos:first.charPos,
-	charCount:char_count
-      });
-    }
+  // [tree] -> PageGroup
+  PageGroupEvaluator.prototype.evaluate = function(trees){
+    var self = this;
+    var pages = List.map(trees, function(tree){
+      return PageEvaluator.prototype.evaluate.call(self, tree);
+    });
+    return new PageGroup(this.groupSize, pages);
   };
 
   return PageGroupEvaluator;
 })();
 
 var PageStream = (function(){
-  function PageStream(text){
+  function PageStream(text, group_size){
     this.text = this._createSource(text);
+    this.groupSize = group_size;
     this.generator = this._createGenerator(this.text);
     this.evaluator = this._createEvaluator();
     this.buffer = [];
@@ -5908,16 +5878,20 @@ var PageStream = (function(){
     // int -> Page
     getPage : function(page_no){
       var entry = this.buffer[page_no];
-      if(entry instanceof Page){ // already evaluated.
-	return entry;
+      if(this._isEvaluated(entry)){
+	return entry; // already evaluated
       }
       // if still not evaluated, eval and get EvalResult
       var result = this.evaluator.evaluate(entry);
       this.buffer[page_no] = result; // over write buffer entry by result.
       return result;
     },
+    // () -> tree
     _yield : function(){
       return this.generator.yield();
+    },
+    _isEvaluated : function(entry){
+      return (entry instanceof Page);
     },
     _setTimeStart : function(){
       this._timeStart = (new Date()).getTime();
@@ -5978,48 +5952,27 @@ var PageStream = (function(){
 
 
 var PageGroup = (function(){
-  function PageGroup(size){
-    this.trees = [];
-    this.size = size;
+  function PageGroup(group_size, pages){
+    var first = pages[0];
+    Page.call(this, {
+      percent:first.percent,
+      pageNo:first.pageNo,
+      seekPos:first.seekPos,
+      charPos:first.charPos,
+      charCount:List.sum(pages, function(page){ return page.charCount; })
+    });
+    this.groupSize = group_size;
+    this.pages = pages;
   }
+  Class.extend(PageGroup, Page);
 
-  PageGroup.prototype = {
-    add : function(tree){
-      if(this.isComplete()){
-	throw "overflow";
-      }
-      this.trees.push(tree);
-    },
-    commit : function(){
-      var first = this.getFirst();
-      this.percent = first.percent;
-      this.seekPos = first.seekPos;
-      this.pageNo = first.pageNo;
-    },
-    isEmpty : function(){
-      return this.trees.length === 0;
-    },
-    isComplete : function(){
-      return this.trees.length >= this.size;
-    },
-    getFirst : function(){
-      return this.trees[0];
-    },
-    getLast : function(){
-      return this.trees[this.trees.length - 1];
-    },
-    get : function(pos){
-      return this.trees[pos];
-    },
-    getPages : function(){
-      return this.trees;
-    },
-    getSize : function(){
-      return this.size;
-    },
-    getLength : function(){
-      return this.trees.length;
-    }
+  PageGroup.prototype.getGroupSize = function(){
+    return this.groupSize;
+  };
+
+  PageGroup.prototype.getGroupHtml = function(pos){
+    var page = this.pages[pos] || null;
+    return page? page.html : "";
   };
 
   return PageGroup;
@@ -6027,8 +5980,7 @@ var PageGroup = (function(){
 
 var PageGroupStream = (function(){
   function PageGroupStream(text, group_size){
-    PageStream.call(this, text);
-    this.groupSize = group_size;
+    PageStream.call(this, text, group_size);
   }
   Class.extend(PageGroupStream, PageStream);
   
@@ -6039,23 +5991,25 @@ var PageGroupStream = (function(){
     return Math.round(cell_page_no / this.groupSize);
   };
 
+  // () -> [tree]
   PageGroupStream.prototype._yield = function(){
-    var group = new PageGroup(this.groupSize);
-    var add = function(page){
-      group.add(page);
-    };
-    for(var i = 0; i < this.groupSize; i++){
-      if(!this.generator.hasNext()){
-	break;
+    var trees = [], push = function(tree){
+      if(tree){
+	trees.push(tree);
       }
-      add(this.generator.yield());
+    };
+    while(trees.length < this.groupSize && this.hasNext()){
+      push(this.generator.yield());
     }
-    group.commit();
-    return group;
+    return trees;
+  };
+
+  PageGroupStream.prototype._isEvaluated = function(entry){
+    return (entry instanceof PageGroup);
   };
 
   PageGroupStream.prototype._createEvaluator = function(){
-    return new PageGroupEvaluator();
+    return new PageGroupEvaluator(this.groupSize);
   };
 
   return PageGroupStream;
@@ -7778,7 +7732,8 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._justifyLine = function(context){
-    var next_head = this.peekLastCache(); // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
+    // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
+    var next_head = this.peekLastCache() || this.stream.peek();
     var new_tail = context.justify(next_head); // if justify is occured, new_tail token is gained.
     if(new_tail){
       this.stream.setPos(new_tail.pos + 1); // new stream pos is next pos of new tail.
@@ -9164,7 +9119,7 @@ return {
   documentContext: DocumentContext,
   createPageStream : function(text, group_size){
     group_size = Math.max(1, group_size || 1);
-    return (group_size === 1)? new PageStream(text) : new PageGroupStream(text, group_size);
+    return (group_size === 1)? new PageStream(text, 1) : new PageGroupStream(text, group_size);
   },
   getStyle : function(selector_key){
     return Selectors.getValue(selector_key);

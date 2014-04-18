@@ -1,46 +1,25 @@
 var PageGroup = (function(){
-  function PageGroup(size){
-    this.trees = [];
-    this.size = size;
+  function PageGroup(group_size, pages){
+    var first = pages[0];
+    Page.call(this, {
+      percent:first.percent,
+      pageNo:first.pageNo,
+      seekPos:first.seekPos,
+      charPos:first.charPos,
+      charCount:List.sum(pages, function(page){ return page.charCount; })
+    });
+    this.groupSize = group_size;
+    this.pages = pages;
   }
+  Class.extend(PageGroup, Page);
 
-  PageGroup.prototype = {
-    add : function(tree){
-      if(this.isComplete()){
-	throw "overflow";
-      }
-      this.trees.push(tree);
-    },
-    commit : function(){
-      var first = this.getFirst();
-      this.percent = first.percent;
-      this.seekPos = first.seekPos;
-      this.pageNo = first.pageNo;
-    },
-    isEmpty : function(){
-      return this.trees.length === 0;
-    },
-    isComplete : function(){
-      return this.trees.length >= this.size;
-    },
-    getFirst : function(){
-      return this.trees[0];
-    },
-    getLast : function(){
-      return this.trees[this.trees.length - 1];
-    },
-    get : function(pos){
-      return this.trees[pos];
-    },
-    getPages : function(){
-      return this.trees;
-    },
-    getSize : function(){
-      return this.size;
-    },
-    getLength : function(){
-      return this.trees.length;
-    }
+  PageGroup.prototype.getGroupSize = function(){
+    return this.groupSize;
+  };
+
+  PageGroup.prototype.getGroupHtml = function(pos){
+    var page = this.pages[pos] || null;
+    return page? page.html : "";
   };
 
   return PageGroup;

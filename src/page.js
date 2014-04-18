@@ -2,7 +2,6 @@ var Page = (function(){
   function Page(opt){
     Args.merge(this, {
       html:"",
-      groupLength:1,
       seekPos:0,
       pageNo:0,
       charPos:0,
@@ -12,31 +11,14 @@ var Page = (function(){
   }
 
   Page.prototype = {
-    isGroup : function(){
-      return this.groupLength > 1;
-    },
-    getPercent : function(){
-      return this.percent;
-    },
-    getPageNo : function(){
-      return this.pageNo;
-    },
-    getGroupCount : function(){
-      return this.groupLength;
-    },
-    getPageCount : function(){
-      if(this.isGroup() && this.html instanceof Array){
-	return this.html.length;
-      }
+    getGroupSize : function(){
       return 1;
     },
-    getHtml : function(pos){
-      if(this.isGroup()){
-	return this.html[pos] || "";
-      }
+    getGroupHtml : function(pos){
       return this.html;
     }
   };
 
   return Page;
 })();
+
