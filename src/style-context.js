@@ -194,7 +194,7 @@ var StyleContext = (function(){
       var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
       var box_size = this.flow.getBoxSize(measure, extent);
-      var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
+      var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.classes);
       var box = new Box(box_size, this);
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = this.edge || null; // for Box::getLayoutExtent, Box::getLayoutMeasure
@@ -208,13 +208,14 @@ var StyleContext = (function(){
     createImage : function(){
       var measure = this.staticMeasure || this.font.size;
       var extent = this.staticExtent || this.font.size;
+      var classes = ["nehan-block", "nehan-image"].concat(this.markup.classes);
 
       // image size always considered as horizontal mode.
       var image_size = BoxFlows.getByName("lr-tb").getBoxSize(measure, extent);
       var image = new Box(image_size, this);
       image.display = this.display; // inline/block
       image.edge = this.edge || null;
-      image.classes = ["nehan-block", "nehan-image"];
+      image.classes = classes;
       image.charCount = 0;
       if(this.isPushed()){
 	image.pushed = true;
@@ -232,11 +233,11 @@ var StyleContext = (function(){
       var measure = (this.parent && opt.measure && this.staticMeasure === null && !this.isRootLine())? opt.measure : this.contentMeasure;
       var extent = (this.isRootLine() && child_lines.length > 0)? max_extent : this.getAutoLineExtent();
       var line_size = this.flow.getBoxSize(measure, extent);
-      var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()];
+      var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.classes);
       var line = new Box(line_size, this);
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
-      line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.markup.getName());
+      line.classes = classes;
       line.charCount = opt.charCount || 0;
 
       // edge of top level line is disabled.
