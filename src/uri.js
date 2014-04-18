@@ -1,6 +1,6 @@
 var Uri = (function(){
   function Uri(address){
-    this.address = this._normalize(address);
+    this.address = this._normalize(address || "");
   }
 
   Uri.prototype = {
