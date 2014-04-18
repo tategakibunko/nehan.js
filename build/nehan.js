@@ -7491,7 +7491,7 @@ var BlockGenerator = (function(){
     if(!context.isBlockSpaceLeft()){
       return null;
     }
-    while(true){
+    while(this.hasNext()){
       var element = this._getNext(context);
       if(element === null){
 	break;
@@ -7685,7 +7685,7 @@ var InlineGenerator = (function(){
     if(!context.isInlineSpaceLeft()){
       return null;
     }
-    while(true){
+    while(this.hasNext()){
       var element = this._getNext(context);
       if(element === null){
 	break;
@@ -7769,6 +7769,7 @@ var InlineGenerator = (function(){
     if(Token.isText(token)){
       // if tcy, wrap all content and return Tcy object and force generator terminate.
       if(this.style.getTextCombine() === "horizontal"){
+	this.setTerminate(true);
 	var tcy = new Tcy(this.style.getMarkupContent());
 	return this._getText(context, tcy);
       }
@@ -8356,10 +8357,13 @@ var ListGenerator = (function(){
   }
   Class.extend(ListGenerator, BlockGenerator);
 
+  // before yield list layout, we have to calclate max marker size by total child_count(item_count).
   ListGenerator.prototype._getMarkerSize = function(item_count){
-    var max_marker_text = this.style.getMarkerHtml(item_count);
-    var gen = new InlineGenerator(this.style, new TokenStream(max_marker_text));
-    var line = gen.yield();
+    var max_marker_html = this.style.getMarkerHtml(item_count);
+    // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
+    // and we have to avoid 'appendChild' from child-generator of this tmp generator.
+    var tmp_gen = new InlineGenerator(this.style.clone(), new TokenStream(max_marker_html));
+    var line = tmp_gen.yield();
     var marker_measure = line? line.inlineMeasure + Math.floor(this.style.getFontSize() / 2) : this.style.getFontSize();
     var marker_extent = line? line.size.getExtent(this.style.flow) : this.style.getFontSize();
     return this.style.flow.getBoxSize(marker_measure, marker_extent);

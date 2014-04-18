@@ -29,7 +29,7 @@ var BlockGenerator = (function(){
     if(!context.isBlockSpaceLeft()){
       return null;
     }
-    while(true){
+    while(this.hasNext()){
       var element = this._getNext(context);
       if(element === null){
 	break;

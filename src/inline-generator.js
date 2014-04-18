@@ -9,7 +9,7 @@ var InlineGenerator = (function(){
     if(!context.isInlineSpaceLeft()){
       return null;
     }
-    while(true){
+    while(this.hasNext()){
       var element = this._getNext(context);
       if(element === null){
 	break;
@@ -93,6 +93,7 @@ var InlineGenerator = (function(){
     if(Token.isText(token)){
       // if tcy, wrap all content and return Tcy object and force generator terminate.
       if(this.style.getTextCombine() === "horizontal"){
+	this.setTerminate(true);
 	var tcy = new Tcy(this.style.getMarkupContent());
 	return this._getText(context, tcy);
       }

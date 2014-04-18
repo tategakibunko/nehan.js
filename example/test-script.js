@@ -1,4 +1,11 @@
 var Script = {
+  "tmp":[
+    "<ol class='nehan-lst-lower-greek'>",
+    "<li>あいうえお</li>",
+    "<li>かきくけこ</li>",
+    "</ol>"
+  ].join("\n"),
+
   "plain":[
     Snipet["ruby"],
     "<p>" + Text["long"] + "</p>",
