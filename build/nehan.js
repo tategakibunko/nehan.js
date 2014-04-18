@@ -7550,17 +7550,27 @@ var BlockGenerator = (function(){
       return null;
     }
 
-    // if tag token, inherit style
-    var child_style = (token instanceof Tag)? new StyleContext(token, this.style, {context:context}) : this.style;
-
-    // if inline text or child inline or inline-block,
-    // push back stream and delegate current style and stream to InlineGenerator
-    if(Token.isText(token) || child_style.isInline() || child_style.isInlineBlock()){
+    // if text, push back stream and restart current style and stream as child inline generator.
+    if(Token.isText(token)){
       // skip while-space token in block level.
       if(Token.isWhiteSpace(token)){
 	this.stream.skipUntil(Token.isWhiteSpace);
 	return this._getNext(context);
       }
+      this.stream.prev();
+
+      // outline context is required when inline generator yields 'inline-block'.
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext));
+      return this.yieldChildLayout(context);
+    }
+
+    // if tag token, inherit style
+    var child_style = new StyleContext(token, this.style, {context:context});
+
+    // if child inline or inline-block
+    // remove child_style from parent, push back stream, and restart current style and stream as child inline generator.
+    if(child_style.isInline() || child_style.isInlineBlock()){
+      this.style.removeChild(child_style);
       this.stream.prev();
 
       // outline context is required when inline generator yields 'inline-block'.
