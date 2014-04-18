@@ -197,10 +197,11 @@ var InlineGenerator = (function(){
     }
     // if advance is lager than max_measure,
     // we must cut this word into some parts.
-    var part = token.cutMeasure(this.style.font.size, rest_measure); // get sliced word
+    var part = token.cutMeasure(this.style.getFontSize(), rest_measure); // get sliced word
     part.setMetrics(this.style.flow, this.style.font); // metrics for first half
     token.setMetrics(this.style.flow, this.style.font); // metrics for second half
     this.stream.prev(); // re-parse this token because rest part is still exists.
+    part.bodySize = Math.min(rest_measure, part.bodySize);
     return part;
   };
 

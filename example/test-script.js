@@ -1,4 +1,8 @@
 var Script = {
+  "tmp":[
+    "<a href='http://blog.livedoor.jp/matomerunnjyai/archives/4891150.html'>http://blog.livedoor.jp/matomerunnjyai/archives/4891150.html</a>"
+  ].join(""),
+
   "plain":[
     Snipet["ruby"],
     "<p>" + Text["long"] + "</p>",

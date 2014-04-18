@@ -89,7 +89,7 @@ var Word = (function(){
       var half_size = Math.round(font_size / 2);
       var this_half_count = Math.round(this.bodySize / half_size);
       var measure_half_count = Math.round(measure / half_size);
-      if(this_half_count <= measure_half_count){
+      if(this_half_count < measure_half_count){
 	return this;
       }
       var str_part = this.data.substring(0, measure_half_count);
