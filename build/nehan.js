@@ -7559,8 +7559,6 @@ var BlockGenerator = (function(){
 	return this._getNext(context);
       }
       this.stream.prev();
-
-      // outline context is required when inline generator yields 'inline-block'.
       this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext));
       return this.yieldChildLayout(context);
     }
@@ -7568,14 +7566,19 @@ var BlockGenerator = (function(){
     // if tag token, inherit style
     var child_style = new StyleContext(token, this.style, {context:context});
 
-    // if child inline or inline-block
-    // remove child_style from parent, push back stream, and restart current style and stream as child inline generator.
-    if(child_style.isInline() || child_style.isInlineBlock()){
-      this.style.removeChild(child_style);
-      this.stream.prev();
+    // if child inline-block, start child inline generator with first child of child inline-block-generator(grand child).
+    if(child_style.isInlineBlock()){
+      var first_inline_block_stream = this._createStream(child_style, token);
+      var first_inline_block_generator = new BlockGenerator(child_style, first_inline_block_stream, this.outlineContext);
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_inline_block_generator));
+      return this.yieldChildLayout(context);
+    }
 
-      // outline context is required when inline generator yields 'inline-block'.
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext));
+    // if child inline, start child inline generator with first child of child inline-generator(grand child).
+    if(child_style.isInline()){
+      var first_inline_stream = this._createStream(child_style, token);
+      var first_inline_generator = new InlineGenerator(child_style, first_inline_stream, this.outlineContext);
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_inline_generator));
       return this.yieldChildLayout(context);
     }
 
@@ -7711,9 +7714,12 @@ var BlockGenerator = (function(){
 
 
 var InlineGenerator = (function(){
-  function InlineGenerator(style, stream, outline_context){
+  function InlineGenerator(style, stream, outline_context, child_generator){
     LayoutGenerator.call(this, style, stream);
     this.outlineContext = outline_context || null;
+    if(child_generator){
+      this.setChildLayout(child_generator);
+    }
   }
   Class.extend(InlineGenerator, LayoutGenerator);
 
