@@ -110,7 +110,7 @@ var LayoutGenerator = (function(){
   LayoutGenerator.prototype._createStream = function(style, markup){
     switch(markup.getName()){
     case "ruby": return new RubyTokenStream(markup);
-    default: return new TokenStream(style.getContent(markup));
+    default: return new TokenStream(style.getContent());
     } 
   };
 

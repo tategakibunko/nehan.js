@@ -391,6 +391,9 @@ var StyleContext = (function(){
       }
       return this.markup.getAttr(name);
     },
+    getMarkupDataset : function(name, def_val){
+      return this.markup.getDataset(name, def_val);
+    },
     // priority: inline css > selector css
     getCssAttr : function(name, def_value){
       var ret;
