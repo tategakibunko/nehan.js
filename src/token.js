@@ -16,6 +16,9 @@ var Token = {
   },
   isNewLine : function(token){
     return token instanceof Char && token.isNewLineChar();
+  },
+  isWhiteSpace : function(token){
+    return token instanceof Char && token.isWhiteSpaceChar();
   }
 };
 

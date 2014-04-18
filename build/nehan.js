@@ -2637,6 +2637,9 @@ var Token = {
   },
   isNewLine : function(token){
     return token instanceof Char && token.isNewLineChar();
+  },
+  isWhiteSpace : function(token){
+    return token instanceof Char && token.isWhiteSpaceChar();
   }
 };
 
@@ -2939,6 +2942,12 @@ var Char = (function(){
     },
     isNewLineChar : function(){
       return this.data === "\n";
+    },
+    isSpaceChar : function(){
+      return this.data === " " || this.data === "&nbsp;" || this.data === "\u3000" || this.data === "\t";
+    },
+    isWhiteSpaceChar : function(){
+      return this.isNewLineChar() || this.isSpaceChar();
     },
     isImgChar : function(){
       return (typeof this.img != "undefined");
@@ -7522,9 +7531,9 @@ var BlockGenerator = (function(){
     // if inline text or child inline or inline-block,
     // push back stream and delegate current style and stream to InlineGenerator
     if(Token.isText(token) || child_style.isInline() || child_style.isInlineBlock()){
-      // skip new-line token in block level.
-      if(Token.isNewLine(token)){
-	this.stream.skipUntil(Token.isNewLine)
+      // skip while-space token in block level.
+      if(Token.isWhiteSpace(token)){
+	this.stream.skipUntil(Token.isWhiteSpace);
 	return this._getNext(context);
       }
       this.stream.prev();

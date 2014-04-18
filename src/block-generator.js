@@ -69,9 +69,9 @@ var BlockGenerator = (function(){
     // if inline text or child inline or inline-block,
     // push back stream and delegate current style and stream to InlineGenerator
     if(Token.isText(token) || child_style.isInline() || child_style.isInlineBlock()){
-      // skip new-line token in block level.
-      if(Token.isNewLine(token)){
-	this.stream.skipUntil(Token.isNewLine)
+      // skip while-space token in block level.
+      if(Token.isWhiteSpace(token)){
+	this.stream.skipUntil(Token.isWhiteSpace);
 	return this._getNext(context);
       }
       this.stream.prev();
