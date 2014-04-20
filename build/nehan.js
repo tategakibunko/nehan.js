@@ -6434,7 +6434,7 @@ var StyleContext = (function(){
       } else if(this.markup.name === "ruby"){
 	max_extent = Math.max(max_extent, this.getRubyLineExtent());
       } else {
-	max_extent = Math.max(max_extent, this.font.size * this.getLineRate());
+	max_extent = Math.max(max_extent, this.getAutoLineExtent());
       }
       var measure = (this.parent && opt.measure && this.staticMeasure === null && !this.isRootLine())? opt.measure : this.contentMeasure;
       var line_size = this.flow.getBoxSize(measure, max_extent);
@@ -6723,12 +6723,6 @@ var StyleContext = (function(){
       return base_extent + rt_extent;
     },
     getAutoLineExtent : function(){
-      if(this.isTextEmphaEnable()){
-	return this.getEmphaLineExtent();
-      }
-      if(this.getMarkupName() === "ruby"){
-	return this.getRubyLineExtent();
-      }
       return Math.floor(this.getFontSize() * this.getLineRate());
     },
     getEdge : function(){
