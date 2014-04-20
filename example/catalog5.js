@@ -54,11 +54,10 @@ var LayoutTest = (function(){
 	direction:"vert"
       });
 
-      /*
       run_test($hori, {
 	name:test_name,
 	direction:"hori"
-      });*/
+      });
 
       return false;
     });
