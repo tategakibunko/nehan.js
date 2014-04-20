@@ -6200,6 +6200,9 @@ var StyleContext = (function(){
     });
     return ret;
   };
+  var disabled_markups = [
+    "script", "noscript", "style", "input", "iframe"
+  ];
 
   // parent : parent style context
   // args :
@@ -6467,6 +6470,9 @@ var StyleContext = (function(){
 	}
       }
       return line;
+    },
+    isDisabled : function(){
+      return List.exists(disabled_markups, Closure.eq(this.getMarkupName()));
     },
     isBlock : function(){
       switch(this.display){
@@ -6858,7 +6864,7 @@ var StyleContext = (function(){
 
       // before align, align all children to same extent.
       List.iter(elements, function(element){
-	if(element instanceof Box){
+	if(element instanceof Box && element.style.getMarkupName() !== "img"){
 	  element.size.setExtent(flow, max_extent);
 	}
       });
@@ -7586,6 +7592,10 @@ var BlockGenerator = (function(){
     // if tag token, inherit style
     var child_style = new StyleContext(token, this.style, {context:context});
 
+    if(child_style.isDisabled()){
+      return this._getNext(context); // just skip
+    }
+
     // if child inline-block, start child inline generator with first child of child inline-block-generator(grand child).
     if(child_style.isInlineBlock()){
       var first_inline_block_stream = this._createStream(child_style, token);
@@ -7606,7 +7616,13 @@ var BlockGenerator = (function(){
 
     // if child inline, delete current style and stream to child inline-generator started with grand_child_generator.
     if(child_style.isInline()){
-      var grand_child_generator = new InlineGenerator(child_style, child_stream, this.outlineContext);
+      var grand_child_generator;
+      // if inline img, no content text is included in img tag, so we yield it by lazy generator.
+      if(child_style.getMarkupName() === "img"){
+	grand_child_generator = new LazyGenerator(child_style, child_style.createImage());
+      } else {
+	grand_child_generator = new InlineGenerator(child_style, child_stream, this.outlineContext);
+      }
       this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, grand_child_generator));
       return this.yieldChildLayout(context);
     }
@@ -7846,6 +7862,10 @@ var InlineGenerator = (function(){
       child_style = new StyleContext(token, this.style, {context:context});
     }
 
+    if(child_style.isDisabled()){
+      return this._getNext(context); // just skip
+    }
+
     // if inline -> block, force terminate inline
     if(child_style.isBlock()){
       this.stream.prev();
@@ -7873,11 +7893,6 @@ var InlineGenerator = (function(){
     case "br":
       context.setLineBreak(true);
       return null;
-
-    case "script":
-    case "style":
-    case "noscript":
-      return this._getNext(context); // just skip
 
     case "a":
       this.setChildLayout(new LinkGenerator(child_style, child_stream, this.outlineContext));
@@ -8005,14 +8020,18 @@ var FirstLineGenerator = (function(){
 })();
 
 
-var LazyBlockGenerator = (function(){
-  function LazyBlockGenerator(style, block){
+var LazyGenerator = (function(){
+  function LazyGenerator(style, block){
     LayoutGenerator.call(this, style, null);
     this.block = block;
   }
-  Class.extend(LazyBlockGenerator, LayoutGenerator);
+  Class.extend(LazyGenerator, LayoutGenerator);
 
-  LazyBlockGenerator.prototype.yield = function(context){
+  LazyGenerator.prototype.hasNext = function(){
+    return this._terminate === false;
+  };
+
+  LazyGenerator.prototype.yield = function(context){
     if(this._terminate){
       return null;
     }
@@ -8020,7 +8039,7 @@ var LazyBlockGenerator = (function(){
     return this.block;
   };
 
-  return LazyBlockGenerator;
+  return LazyGenerator;
 })();
 
 var FlipGenerator = (function(){

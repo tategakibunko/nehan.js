@@ -111,6 +111,10 @@ var InlineGenerator = (function(){
       child_style = new StyleContext(token, this.style, {context:context});
     }
 
+    if(child_style.isDisabled()){
+      return this._getNext(context); // just skip
+    }
+
     // if inline -> block, force terminate inline
     if(child_style.isBlock()){
       this.stream.prev();
@@ -138,11 +142,6 @@ var InlineGenerator = (function(){
     case "br":
       context.setLineBreak(true);
       return null;
-
-    case "script":
-    case "style":
-    case "noscript":
-      return this._getNext(context); // just skip
 
     case "a":
       this.setChildLayout(new LinkGenerator(child_style, child_stream, this.outlineContext));

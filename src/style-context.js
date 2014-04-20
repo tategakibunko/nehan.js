@@ -14,6 +14,9 @@ var StyleContext = (function(){
     });
     return ret;
   };
+  var disabled_markups = [
+    "script", "noscript", "style", "input", "iframe"
+  ];
 
   // parent : parent style context
   // args :
@@ -281,6 +284,9 @@ var StyleContext = (function(){
 	}
       }
       return line;
+    },
+    isDisabled : function(){
+      return List.exists(disabled_markups, Closure.eq(this.getMarkupName()));
     },
     isBlock : function(){
       switch(this.display){
@@ -672,7 +678,7 @@ var StyleContext = (function(){
 
       // before align, align all children to same extent.
       List.iter(elements, function(element){
-	if(element instanceof Box){
+	if(element instanceof Box && element.style.getMarkupName() !== "img"){
 	  element.size.setExtent(flow, max_extent);
 	}
       });
