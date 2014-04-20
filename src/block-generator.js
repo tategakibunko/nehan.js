@@ -86,16 +86,7 @@ var BlockGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
-    // if child inline, start child inline generator with first child of child inline-generator(grand child).
-    // but ignore if child_style is floated, because it's must be yielded by float-generator(mainly floated image).
-    if(child_style.isInline() && !child_style.isFloated()){
-      var first_inline_stream = this._createStream(child_style, token);
-      var first_inline_generator = new InlineGenerator(child_style, first_inline_stream, this.outlineContext);
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_inline_generator));
-      return this.yieldChildLayout(context);
-    }
-
-    // if child block with float
+    // if child style(both inline or block) is floated
     // push back stream and delegate current style and stream to FloatGenerator
     if(child_style.isFloated()){
       this.stream.prev();
@@ -105,7 +96,14 @@ var BlockGenerator = (function(){
 
     var child_stream = this._createStream(child_style, token);
 
-    // child_style has flip flow
+    // if child inline, delete current style and stream to child inline-generator started with grand_child_generator.
+    if(child_style.isInline()){
+      var grand_child_generator = new InlineGenerator(child_style, child_stream, this.outlineContext);
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, grand_child_generator));
+      return this.yieldChildLayout(context);
+    }
+
+    // if child_style has flip flow
     if(child_style.hasFlipFlow()){
       this.setChildLayout(new FlipGenerator(child_style, child_stream, this.outlineContext, context));
       return this.yieldChildLayout(context);
@@ -142,6 +140,7 @@ var BlockGenerator = (function(){
       return child_style.createImage();
 
     case "hr":
+      // create block with no elements, but with edge(border).
       return child_style.createBlock();
 
     case "page-break": case "end-page": case "pbr":

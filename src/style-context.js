@@ -1,5 +1,20 @@
 var StyleContext = (function(){
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+  var is_need_to_align = function(line){
+    if(line instanceof Box === false){
+      return false;
+    }
+    if(line.style.isTextEmphaEnable()){
+      return true;
+    }
+    if(line.style.getMarkupName() === "ruby"){
+      return true;
+    }
+    if(line.elements.length > 0){
+      return List.exists(line.elements, arguments.callee);
+    }
+    return false;
+  };
 
   // parent : parent style context
   // args :
@@ -226,18 +241,25 @@ var StyleContext = (function(){
     createLine : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
-      var child_lines = this._filterChildLines(elements);
-      var max_font_size = this._computeMaxLineFontSize(child_lines);
-      var max_extent = this._computeMaxLineExtent(child_lines, max_font_size);
+      var max_font_size = opt.maxFontSize || this.getFontSize();
+      var max_extent = opt.maxExtent || 0;
+      if(this.isTextEmphaEnable()){
+	max_extent = Math.max(max_extent, this.getEmphaLineExtent());
+      } else if(this.markup.name === "ruby"){
+	max_extent = Math.max(max_extent, this.getRubyLineExtent());
+      } else {
+	max_extent = Math.max(max_extent, this.font.size * this.getLineRate());
+      }
       var measure = (this.parent && opt.measure && this.staticMeasure === null && !this.isRootLine())? opt.measure : this.contentMeasure;
-      var extent = (this.isRootLine() && child_lines.length > 0)? max_extent : this.getAutoLineExtent();
-      var line_size = this.flow.getBoxSize(measure, extent);
+      var line_size = this.flow.getBoxSize(measure, max_extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.classes);
       var line = new Box(line_size, this);
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
       line.classes = classes;
       line.charCount = opt.charCount || 0;
+      line.maxFontSize = max_font_size;
+      line.maxExtent = max_extent;
 
       // edge of top level line is disabled.
       // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
@@ -253,7 +275,8 @@ var StyleContext = (function(){
 
 	// if vertical line, needs some position fix to align baseline.
 	if(this.isTextVertical()){
-	  this._alignVertBaselines(child_lines, max_font_size, max_extent);
+	  var align_targets = List.filter(elements, is_need_to_align);
+	  this._alignVertBaselines(align_targets, max_font_size, max_extent);
 	}
 	if(this.textAlign && !this.textAlign.isStart()){
 	  this._setTextAlign(line, this.textAlign);
@@ -316,7 +339,7 @@ var StyleContext = (function(){
       return this.getMarkupAttr("pulled") !== null;
     },
     isTextEmphaEnable : function(){
-      return this.textEmpha && this.textEmpha.isEnable();
+      return (this.textEmpha && this.textEmpha.isEnable())? true : false;
     },
     isTextVertical : function(){
       return this.flow.isTextVertical();
@@ -618,11 +641,6 @@ var StyleContext = (function(){
 	return child === style;
       });
     },
-    _filterChildLines : function(elements){
-      return List.filter(elements, function(element){
-	return element.style? true : false;
-      });
-    },
     _computeContentMeasure : function(outer_measure){
       switch(this.boxSizing){
       case "margin-box": return outer_measure - this.getEdgeMeasure();
@@ -636,20 +654,6 @@ var StyleContext = (function(){
       case "border-box": return outer_extent - this.getInnerEdgeExtent();
       case "content-box": default: return outer_extent;
       }
-    },
-    _computeMaxLineFontSize : function(child_lines){
-      return List.fold(child_lines, this.getFontSize(), function(ret, line){
-	return Math.max(ret, line.style.getFontSize());
-      });
-    },
-    // get inline max_extent size after centerizing each font.
-    _computeMaxLineExtent : function(child_lines, max_font_size){
-      var flow = this.flow;
-      return List.fold(child_lines, this.getAutoLineExtent(), function(ret, line){
-	var font_size = line.style.getFontSize();
-	var font_center_offset = Math.floor((max_font_size - font_size) / 2);
-	return Math.max(ret, line.size.getExtent(flow) + font_center_offset);
-      });
     },
     _setTextAlign : function(line, text_align){
       var content_measure  = line.getContentMeasure(this.flow);
@@ -669,22 +673,15 @@ var StyleContext = (function(){
 	Args.copy(line.css, padding.getCss());
       }
     },
-    _alignVertBaselines : function(child_lines, max_font_size, max_extent){
+    _alignVertBaselines : function(align_targets, max_font_size, max_extent){
       var flow = this.flow;
       var base_font_size = this.getFontSize();
-      var text_center = Math.floor(max_extent / 2);
+      var text_center = Math.floor(max_extent / 2); // center line offset
 
-      List.iter(child_lines, function(line){
-	var font_size = line.style.getFontSize();
-	var text_center_offset = text_center - Math.floor(font_size / 2);
-	// if not child text element with same font size, ignore.
-	if(!line.style.isTextEmphaEnable() && line.style.getMarkupName() !== "ruby" && font_size === base_font_size){
-	  return;
-	}
-	// baseline is not applicative to image element.
-	if(line.style && line.style.getMarkupName() === "img"){
-	  return;
-	}
+      List.iter(align_targets, function(line){
+	var font_size = line.maxFontSize || line.style.getFontSize();
+	var text_center_offset = text_center - Math.floor(font_size / 2); // text displayed at half font-size minus from center line.
+
 	// child text element with different font-size must be fixed baseline.
 	if(text_center_offset > 0){
 	  line.edge = line.style.edge? line.style.edge.clone() : new BoxEdge(); // set line.edge(not line.style.edge) to overwrite padding temporally.

@@ -1,3 +1,5 @@
+// style of first line generator is enabled until first line is yielded.
+// after yielding first line, parent style is inherited.
 var FirstLineGenerator = (function(){
   function FirstLineGenerator(style, stream, outline_context){
     BlockGenerator.call(this, style, stream, outline_context);

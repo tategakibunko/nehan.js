@@ -74,6 +74,12 @@ var LayoutContext = (function(){
     getInlineMaxMeasure : function(){
       return this.inline.getMaxMeasure();
     },
+    getInlineMaxExtent : function(){
+      return this.inline.getMaxExtent();
+    },
+    getInlineMaxFontSize : function(){
+      return this.inline.getMaxFontSize();
+    },
     getInlineCharCount : function(){
       return this.inline.getCharCount();
     },

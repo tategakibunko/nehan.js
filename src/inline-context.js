@@ -3,9 +3,11 @@ var InlineContext = (function(){
     this.charCount = 0;
     this.curMeasure = 0;
     this.maxMeasure = max_measure; // const
+    this.maxExtent = 0;
+    this.maxFontSize = 0;
     this.elements = [];
     this.texts = [];
-    this.br = false;
+    this.br = false; // is line-break included in line?
   }
 
   InlineContext.prototype = {
@@ -31,6 +33,15 @@ var InlineContext = (function(){
 	if(element.getCharCount){
 	  this.charCount += element.getCharCount();
 	}
+      } else if(element instanceof Box){
+	if(element.maxExtent){
+	  this.maxExtent = Math.max(this.maxExtent, element.maxExtent);
+	} else {
+	  this.maxExtent = Math.max(this.maxExtent, element.getLayoutExtent());
+	}
+	if(element.maxFontSize){
+	  this.maxFontSize = Math.max(this.maxFontSize, element.maxFontSize);
+	}
       }
       this.curMeasure += measure;
     },
@@ -51,6 +62,12 @@ var InlineContext = (function(){
     },
     getMaxMeasure : function(){
       return this.maxMeasure;
+    },
+    getMaxExtent : function(){
+      return this.maxExtent;
+    },
+    getMaxFontSize : function(){
+      return this.maxFontSize;
     },
     getCharCount : function(){
       return this.charCount;

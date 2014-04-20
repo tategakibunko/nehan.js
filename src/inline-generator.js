@@ -54,7 +54,9 @@ var InlineGenerator = (function(){
       measure:context.getInlineCurMeasure(), // actual measure
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       texts:context.getInlineTexts(), // elements but text element only.
-      charCount:context.getInlineCharCount()
+      charCount:context.getInlineCharCount(),
+      maxExtent:context.getInlineMaxExtent(),
+      maxFontSize:context.getInlineMaxFontSize()
     });
 
     // call _onCreate callback for 'each' output

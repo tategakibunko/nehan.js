@@ -6186,6 +6186,21 @@ var TextAligns = {
 
 var StyleContext = (function(){
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+  var is_need_to_align = function(line){
+    if(line instanceof Box === false){
+      return false;
+    }
+    if(line.style.isTextEmphaEnable()){
+      return true;
+    }
+    if(line.style.getMarkupName() === "ruby"){
+      return true;
+    }
+    if(line.elements.length > 0){
+      return List.exists(line.elements, arguments.callee);
+    }
+    return false;
+  };
 
   // parent : parent style context
   // args :
@@ -6412,18 +6427,25 @@ var StyleContext = (function(){
     createLine : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
-      var child_lines = this._filterChildLines(elements);
-      var max_font_size = this._computeMaxLineFontSize(child_lines);
-      var max_extent = this._computeMaxLineExtent(child_lines, max_font_size);
+      var max_font_size = opt.maxFontSize || this.getFontSize();
+      var max_extent = opt.maxExtent || 0;
+      if(this.isTextEmphaEnable()){
+	max_extent = Math.max(max_extent, this.getEmphaLineExtent());
+      } else if(this.markup.name === "ruby"){
+	max_extent = Math.max(max_extent, this.getRubyLineExtent());
+      } else {
+	max_extent = Math.max(max_extent, this.font.size * this.getLineRate());
+      }
       var measure = (this.parent && opt.measure && this.staticMeasure === null && !this.isRootLine())? opt.measure : this.contentMeasure;
-      var extent = (this.isRootLine() && child_lines.length > 0)? max_extent : this.getAutoLineExtent();
-      var line_size = this.flow.getBoxSize(measure, extent);
+      var line_size = this.flow.getBoxSize(measure, max_extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.classes);
       var line = new Box(line_size, this);
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
       line.classes = classes;
       line.charCount = opt.charCount || 0;
+      line.maxFontSize = max_font_size;
+      line.maxExtent = max_extent;
 
       // edge of top level line is disabled.
       // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
@@ -6439,7 +6461,8 @@ var StyleContext = (function(){
 
 	// if vertical line, needs some position fix to align baseline.
 	if(this.isTextVertical()){
-	  this._alignVertBaselines(child_lines, max_font_size, max_extent);
+	  var align_targets = List.filter(elements, is_need_to_align);
+	  this._alignVertBaselines(align_targets, max_font_size, max_extent);
 	}
 	if(this.textAlign && !this.textAlign.isStart()){
 	  this._setTextAlign(line, this.textAlign);
@@ -6502,7 +6525,7 @@ var StyleContext = (function(){
       return this.getMarkupAttr("pulled") !== null;
     },
     isTextEmphaEnable : function(){
-      return this.textEmpha && this.textEmpha.isEnable();
+      return (this.textEmpha && this.textEmpha.isEnable())? true : false;
     },
     isTextVertical : function(){
       return this.flow.isTextVertical();
@@ -6804,11 +6827,6 @@ var StyleContext = (function(){
 	return child === style;
       });
     },
-    _filterChildLines : function(elements){
-      return List.filter(elements, function(element){
-	return element.style? true : false;
-      });
-    },
     _computeContentMeasure : function(outer_measure){
       switch(this.boxSizing){
       case "margin-box": return outer_measure - this.getEdgeMeasure();
@@ -6822,20 +6840,6 @@ var StyleContext = (function(){
       case "border-box": return outer_extent - this.getInnerEdgeExtent();
       case "content-box": default: return outer_extent;
       }
-    },
-    _computeMaxLineFontSize : function(child_lines){
-      return List.fold(child_lines, this.getFontSize(), function(ret, line){
-	return Math.max(ret, line.style.getFontSize());
-      });
-    },
-    // get inline max_extent size after centerizing each font.
-    _computeMaxLineExtent : function(child_lines, max_font_size){
-      var flow = this.flow;
-      return List.fold(child_lines, this.getAutoLineExtent(), function(ret, line){
-	var font_size = line.style.getFontSize();
-	var font_center_offset = Math.floor((max_font_size - font_size) / 2);
-	return Math.max(ret, line.size.getExtent(flow) + font_center_offset);
-      });
     },
     _setTextAlign : function(line, text_align){
       var content_measure  = line.getContentMeasure(this.flow);
@@ -6855,22 +6859,15 @@ var StyleContext = (function(){
 	Args.copy(line.css, padding.getCss());
       }
     },
-    _alignVertBaselines : function(child_lines, max_font_size, max_extent){
+    _alignVertBaselines : function(align_targets, max_font_size, max_extent){
       var flow = this.flow;
       var base_font_size = this.getFontSize();
-      var text_center = Math.floor(max_extent / 2);
+      var text_center = Math.floor(max_extent / 2); // center line offset
 
-      List.iter(child_lines, function(line){
-	var font_size = line.style.getFontSize();
-	var text_center_offset = text_center - Math.floor(font_size / 2);
-	// if not child text element with same font size, ignore.
-	if(!line.style.isTextEmphaEnable() && line.style.getMarkupName() !== "ruby" && font_size === base_font_size){
-	  return;
-	}
-	// baseline is not applicative to image element.
-	if(line.style && line.style.getMarkupName() === "img"){
-	  return;
-	}
+      List.iter(align_targets, function(line){
+	var font_size = line.maxFontSize || line.style.getFontSize();
+	var text_center_offset = text_center - Math.floor(font_size / 2); // text displayed at half font-size minus from center line.
+
 	// child text element with different font-size must be fixed baseline.
 	if(text_center_offset > 0){
 	  line.edge = line.style.edge? line.style.edge.clone() : new BoxEdge(); // set line.edge(not line.style.edge) to overwrite padding temporally.
@@ -7217,6 +7214,12 @@ var LayoutContext = (function(){
     getInlineMaxMeasure : function(){
       return this.inline.getMaxMeasure();
     },
+    getInlineMaxExtent : function(){
+      return this.inline.getMaxExtent();
+    },
+    getInlineMaxFontSize : function(){
+      return this.inline.getMaxFontSize();
+    },
     getInlineCharCount : function(){
       return this.inline.getCharCount();
     },
@@ -7282,9 +7285,11 @@ var InlineContext = (function(){
     this.charCount = 0;
     this.curMeasure = 0;
     this.maxMeasure = max_measure; // const
+    this.maxExtent = 0;
+    this.maxFontSize = 0;
     this.elements = [];
     this.texts = [];
-    this.br = false;
+    this.br = false; // is line-break included in line?
   }
 
   InlineContext.prototype = {
@@ -7310,6 +7315,15 @@ var InlineContext = (function(){
 	if(element.getCharCount){
 	  this.charCount += element.getCharCount();
 	}
+      } else if(element instanceof Box){
+	if(element.maxExtent){
+	  this.maxExtent = Math.max(this.maxExtent, element.maxExtent);
+	} else {
+	  this.maxExtent = Math.max(this.maxExtent, element.getLayoutExtent());
+	}
+	if(element.maxFontSize){
+	  this.maxFontSize = Math.max(this.maxFontSize, element.maxFontSize);
+	}
       }
       this.curMeasure += measure;
     },
@@ -7330,6 +7344,12 @@ var InlineContext = (function(){
     },
     getMaxMeasure : function(){
       return this.maxMeasure;
+    },
+    getMaxExtent : function(){
+      return this.maxExtent;
+    },
+    getMaxFontSize : function(){
+      return this.maxFontSize;
     },
     getCharCount : function(){
       return this.charCount;
@@ -7573,16 +7593,7 @@ var BlockGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
-    // if child inline, start child inline generator with first child of child inline-generator(grand child).
-    // but ignore if child_style is floated, because it's must be yielded by float-generator(mainly floated image).
-    if(child_style.isInline() && !child_style.isFloated()){
-      var first_inline_stream = this._createStream(child_style, token);
-      var first_inline_generator = new InlineGenerator(child_style, first_inline_stream, this.outlineContext);
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_inline_generator));
-      return this.yieldChildLayout(context);
-    }
-
-    // if child block with float
+    // if child style(both inline or block) is floated
     // push back stream and delegate current style and stream to FloatGenerator
     if(child_style.isFloated()){
       this.stream.prev();
@@ -7592,7 +7603,14 @@ var BlockGenerator = (function(){
 
     var child_stream = this._createStream(child_style, token);
 
-    // child_style has flip flow
+    // if child inline, delete current style and stream to child inline-generator started with grand_child_generator.
+    if(child_style.isInline()){
+      var grand_child_generator = new InlineGenerator(child_style, child_stream, this.outlineContext);
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, grand_child_generator));
+      return this.yieldChildLayout(context);
+    }
+
+    // if child_style has flip flow
     if(child_style.hasFlipFlow()){
       this.setChildLayout(new FlipGenerator(child_style, child_stream, this.outlineContext, context));
       return this.yieldChildLayout(context);
@@ -7629,6 +7647,7 @@ var BlockGenerator = (function(){
       return child_style.createImage();
 
     case "hr":
+      // create block with no elements, but with edge(border).
       return child_style.createBlock();
 
     case "page-break": case "end-page": case "pbr":
@@ -7769,7 +7788,9 @@ var InlineGenerator = (function(){
       measure:context.getInlineCurMeasure(), // actual measure
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       texts:context.getInlineTexts(), // elements but text element only.
-      charCount:context.getInlineCharCount()
+      charCount:context.getInlineCharCount(),
+      maxExtent:context.getInlineMaxExtent(),
+      maxFontSize:context.getInlineMaxFontSize()
     });
 
     // call _onCreate callback for 'each' output
@@ -7961,6 +7982,8 @@ var LinkGenerator = (function(){
 })();
 
 
+// style of first line generator is enabled until first line is yielded.
+// after yielding first line, parent style is inherited.
 var FirstLineGenerator = (function(){
   function FirstLineGenerator(style, stream, outline_context){
     BlockGenerator.call(this, style, stream, outline_context);

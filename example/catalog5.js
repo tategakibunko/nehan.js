@@ -53,7 +53,7 @@ var LayoutTest = (function(){
 	script:script,
 	direction:"vert"
       });
-      
+
       run_test($hori, {
 	name:test_name,
 	direction:"hori"
