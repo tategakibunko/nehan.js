@@ -676,25 +676,23 @@ var StyleContext = (function(){
       var base_font_size = this.getFontSize();
       var text_center = Math.floor(max_extent / 2); // center line offset
 
-      // before align, align all children to same extent.
+      // before align baseline, align all extents of children to max_extent.
       List.iter(elements, function(element){
-	if(element instanceof Box && element.style.getMarkupName() !== "img"){
+	if(element instanceof Box && element.style.getMarkupName() !== "img" && element.style.display !== "inline-block"){
 	  element.size.setExtent(flow, max_extent);
 	}
       });
 
-      // pickup decorated elements that has different base line(ruby or empha)
+      // pickup decorated elements that has different baseline(ruby or empha)
       var decorated_elements = get_decorated_inline_elements(elements);
       List.iter(decorated_elements, function(element){
 	var font_size = element.style.getFontSize();
 	var text_center_offset = text_center - Math.floor(font_size / 2); // text displayed at half font-size minus from center line.
-	
-	// child text element with different font-size must be fixed baseline.
 	if(text_center_offset > 0){
 	  var edge = element.style.edge? element.style.edge.clone() : new BoxEdge();
 	  edge.padding.setAfter(flow, text_center_offset); // set offset to padding
 
-	  // set this edge to dynamic css of element, it has higher priority than css of element.style.getCssInline()
+	  // set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
 	  Args.copy(element.css, edge.getCss(flow));
 	}
       });
@@ -705,6 +703,7 @@ var StyleContext = (function(){
       case "after":
       case "first-letter":
       case "first-line":
+	// notice that parent style is the style base of pseudo-element.
 	return Selectors.getValuePe(parent, markup.getName());
 
       default:

@@ -158,7 +158,7 @@ var FloatGenerator = (function(){
     // image tag not having stream(single tag), so use lazy-generator.
     // lazy generator already holds output result in construction time, but yields it later.
     if(style.getMarkupName() === "img"){
-      return new LazyBlockGenerator(style, style.createImage());
+      return new LazyGenerator(style, style.createImage());
     }
     return new BlockGenerator(style, this._createStream(style, tag), this.outlineContext);
   };
