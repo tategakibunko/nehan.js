@@ -6186,20 +6186,19 @@ var TextAligns = {
 
 var StyleContext = (function(){
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
-  var is_need_to_align = function(line){
-    if(line instanceof Box === false){
-      return false;
-    }
-    if(line.style.isTextEmphaEnable()){
-      return true;
-    }
-    if(line.style.getMarkupName() === "ruby"){
-      return true;
-    }
-    if(line.elements.length > 0){
-      return List.exists(line.elements, arguments.callee);
-    }
-    return false;
+  var get_decorated_inline_elements = function(elements){
+    var ret = [];
+    List.iter(elements, function(element){
+      if(element instanceof Box === false){
+	return;
+      }
+      if(element.style.isTextEmphaEnable() || element.style.getMarkupName() === "ruby"){
+	ret.push(element);
+      } else if(element.elements){
+	ret = ret.concat(get_decorated_inline_elements(element.elements));
+      }
+    });
+    return ret;
   };
 
   // parent : parent style context
@@ -6459,10 +6458,9 @@ var StyleContext = (function(){
 	line.inlineMeasure = opt.measure || this.contentMeasure;
 	line.texts = opt.texts || [];
 
-	// if vertical line, needs some position fix to align baseline.
+	// if vertical line, needs some position fix for decorated element(ruby, empha) to align baseline.
 	if(this.isTextVertical()){
-	  var align_targets = List.filter(elements, is_need_to_align);
-	  this._alignVertBaselines(align_targets, max_font_size, max_extent);
+	  this._setVertBaseline(elements, max_font_size, max_extent);
 	}
 	if(this.textAlign && !this.textAlign.isStart()){
 	  this._setTextAlign(line, this.textAlign);
@@ -6853,22 +6851,31 @@ var StyleContext = (function(){
 	Args.copy(line.css, padding.getCss());
       }
     },
-    _alignVertBaselines : function(align_targets, max_font_size, max_extent){
+    _setVertBaseline : function(elements, max_font_size, max_extent){
       var flow = this.flow;
       var base_font_size = this.getFontSize();
       var text_center = Math.floor(max_extent / 2); // center line offset
 
-      List.iter(align_targets, function(line){
-	var font_size = line.maxFontSize || line.style.getFontSize();
-	var text_center_offset = text_center - Math.floor(font_size / 2); // text displayed at half font-size minus from center line.
+      // before align, align all children to same extent.
+      List.iter(elements, function(element){
+	if(element instanceof Box){
+	  element.size.setExtent(flow, max_extent);
+	}
+      });
 
+      // pickup decorated elements that has different base line(ruby or empha)
+      var decorated_elements = get_decorated_inline_elements(elements);
+      List.iter(decorated_elements, function(element){
+	var font_size = element.style.getFontSize();
+	var text_center_offset = text_center - Math.floor(font_size / 2); // text displayed at half font-size minus from center line.
+	
 	// child text element with different font-size must be fixed baseline.
 	if(text_center_offset > 0){
-	  line.edge = line.style.edge? line.style.edge.clone() : new BoxEdge(); // set line.edge(not line.style.edge) to overwrite padding temporally.
-	  line.edge.padding.setAfter(flow, text_center_offset); // set new edge(use line.edge not line.style.edge)
-	  line.size.setExtent(flow, max_extent - text_center_offset); // set new size
-	  Args.copy(line.css, line.edge.getCss(flow)); // overwrite edge
-	  Args.copy(line.css, line.size.getCss(flow)); // overwrite size
+	  var edge = element.style.edge? element.style.edge.clone() : new BoxEdge();
+	  edge.padding.setAfter(flow, text_center_offset); // set offset to padding
+
+	  // set this edge to dynamic css of element, it has higher priority than css of element.style.getCssInline()
+	  Args.copy(element.css, edge.getCss(flow));
 	}
       });
     },
