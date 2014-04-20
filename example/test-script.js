@@ -1,9 +1,4 @@
 var Script = {
-  "tmp":[
-    "<img src='nl.gif' width='16' height='16' />",
-    Text["middle"]
-  ].join(""),
-
   "plain":[
     Snipet["ruby"],
     "<p>" + Text["long"] + "</p>",
