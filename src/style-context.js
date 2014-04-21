@@ -177,7 +177,6 @@ var StyleContext = (function(){
       var index = List.indexOf(this.childs, Closure.eq(child_style));
       if(index >= 0){
 	var removed_child = this.childs.splice(index, 1);
-	//console.log("remove child:%o", removed_child);
 	return removed_child;
       }
       return null;

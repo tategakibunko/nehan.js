@@ -4807,13 +4807,6 @@ var Box = (function(){
   }
 
   Box.prototype = {
-    debugSize : function(title){
-      console.log(
-	"[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", (title || "no title"),
-	this.getContentMeasure(), this.getContentExtent(),
-	this.getLayoutMeasure(), this.getLayoutExtent()
-      );
-    },
     getDatasetAttr : function(){
       // dataset attr of root anonymous line is already captured by parent box.
       if(this.display === "inline" && this.style.isRootLine()){
@@ -5365,7 +5358,6 @@ var OutlineContextParser = (function(){
 var SectionTreeConverter = (function(){
   var default_callbacks = {
     onClickLink : function(toc){
-      //console.log("toc clicked!:%o", toc);
       return false;
     },
     createToc : function(toc_ctx, tree){
@@ -6374,7 +6366,6 @@ var StyleContext = (function(){
       var index = List.indexOf(this.childs, Closure.eq(child_style));
       if(index >= 0){
 	var removed_child = this.childs.splice(index, 1);
-	//console.log("remove child:%o", removed_child);
 	return removed_child;
       }
       return null;

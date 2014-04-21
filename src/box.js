@@ -6,13 +6,6 @@ var Box = (function(){
   }
 
   Box.prototype = {
-    debugSize : function(title){
-      console.log(
-	"[%s](m,e) = (%d,%d), (m+,e+) = (%d,%d)", (title || "no title"),
-	this.getContentMeasure(), this.getContentExtent(),
-	this.getLayoutMeasure(), this.getLayoutExtent()
-      );
-    },
     getDatasetAttr : function(){
       // dataset attr of root anonymous line is already captured by parent box.
       if(this.display === "inline" && this.style.isRootLine()){
