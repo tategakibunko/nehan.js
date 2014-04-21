@@ -47,7 +47,7 @@ var StyleContext = (function(){
       // load selector css
       // 1. load normal selector
       // 2. load dynamic callback selector 'onload'
-      Args.copy(this.selectorCss, this._loadSelectorCss(markup, parent, args.context || null));
+      Args.copy(this.selectorCss, this._loadSelectorCss(markup, parent));
       Args.copy(this.selectorCss, this._loadCallbackCss("onload", args.context || null));
 
       // load inline css
@@ -704,17 +704,17 @@ var StyleContext = (function(){
 	}
       });
     },
-    _loadSelectorCss : function(markup, parent, context){
+    _loadSelectorCss : function(markup, parent){
       switch(markup.getName()){
       case "before":
       case "after":
       case "first-letter":
       case "first-line":
 	// notice that parent style is the style base of pseudo-element.
-	return Selectors.getValuePe(parent, markup.getName(), context);
+	return Selectors.getValuePe(parent, markup.getName());
 
       default:
-	return Selectors.getValue(this, context);
+	return Selectors.getValue(this);
       }
     },
     _loadInlineCss : function(markup){
