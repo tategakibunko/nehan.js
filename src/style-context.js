@@ -47,7 +47,7 @@ var StyleContext = (function(){
       // load selector css
       // 1. load normal selector
       // 2. load dynamic callback selector 'onload'
-      Args.copy(this.selectorCss, this._loadSelectorCss(markup, parent));
+      Args.copy(this.selectorCss, this._loadSelectorCss(markup, parent, args.context || null));
       Args.copy(this.selectorCss, this._loadCallbackCss("onload", args.context || null));
 
       // load inline css
@@ -421,16 +421,24 @@ var StyleContext = (function(){
     getMarkupDataset : function(name, def_val){
       return this.markup.getDataset(name, def_val);
     },
+    _evalCssAttr : function(name, value){
+      // if value is function, call it with style-context(this),
+      // and need to format because it's thunk object and not initialized yet.
+      if(typeof value === "function"){
+	return CssParser.format(name, value(this));
+      }
+      return value; // already formatted
+    },
     // priority: inline css > selector css
     getCssAttr : function(name, def_value){
       var ret;
       ret = this.getInlineCssAttr(name);
       if(ret !== null){
-	return ret;
+	return this._evalCssAttr(name, ret);
       }
       ret = this.getSelectorCssAttr(name);
       if(ret !== null){
-	return ret;
+	return this._evalCssAttr(name, ret);
       }
       return (typeof def_value !== "undefined")? def_value : null;
     },
@@ -697,17 +705,17 @@ var StyleContext = (function(){
 	}
       });
     },
-    _loadSelectorCss : function(markup, parent){
+    _loadSelectorCss : function(markup, parent, context){
       switch(markup.getName()){
       case "before":
       case "after":
       case "first-letter":
       case "first-line":
 	// notice that parent style is the style base of pseudo-element.
-	return Selectors.getValuePe(parent, markup.getName());
+	return Selectors.getValuePe(parent, markup.getName(), context);
 
       default:
-	return Selectors.getValue(this);
+	return Selectors.getValue(this, context);
       }
     },
     _loadInlineCss : function(markup){

@@ -1,4 +1,14 @@
 var TestStyles = {
+  ".nehan-test-stripe li":{
+    "color":function(style){
+      var nth = style.getChildIndex();
+      return (nth % 2 === 0)? "white" : "orange";
+    },
+    "onload":function(style, context){
+      var nth = style.getChildIndex();
+      return (nth % 2 === 0)? {"background-color":"red"} : {"background-color":"blue"};
+    }
+  },
   ".nehan-test-before::before":{
     "display":"inline",
     "color":"darkred",

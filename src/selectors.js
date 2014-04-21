@@ -64,6 +64,11 @@ var Selectors = (function(){
   init_selectors();
 
   return {
+    // selector_key: selector string
+    // [example] => 'p.some', 'li.foo'
+    //
+    // value: associated selector value object.
+    // [example] => {'color':'black', 'font-size':'16px'}
     setValue : function(selector_key, value){
       // if selector_key already defined, just overwrite it.
       if(Style[selector_key]){
@@ -82,12 +87,18 @@ var Selectors = (function(){
 	sort_selectors();
       }
     },
-    // get style object from those that matches the style-context.
+    // get selector css that matches to the style context.
+    //
+    // style: style context
     getValue : function(style){
       return get_value(style);
     },
-    // style: if 'p::first-letter', style = p
-    // pseudo_element_name: "first-letter", "first-line", "before", "after"
+    // get selector css that matches to the pseudo element of some style context.
+    // notice that if selector_key is "p::first-letter",
+    // pseudo-element is "first-letter" and style-context is "p".
+    //
+    // style: 'parent' style of pseudo-element
+    // pseudo_element_name: "first-letter", "first-line", "before", "after" are available
     getValuePe : function(style, pseudo_element_name){
       return get_value_pe(style, pseudo_element_name);
     }

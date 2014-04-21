@@ -1,4 +1,13 @@
 var Script = {
+  "functional":[
+    "<ul class='nehan-test-stripe'>",
+    "<li>even</li>",
+    "<li>odd</li>",
+    "<li>even</li>",
+    "<li>odd</li>",
+    "</ul>"
+  ].join("\n"),
+
   "plain":[
     Snipet["ruby"],
     "<p>" + Text["long"] + "</p>",
