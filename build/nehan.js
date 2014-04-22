@@ -7616,15 +7616,15 @@ var BlockGenerator = (function(){
       return this._getNext(context); // just skip
     }
 
-    // if child inline-block, start child inline generator with first child of child inline-block-generator(grand child).
+    // if child inline-block, start child inline generator with first_generator.
     if(child_style.isInlineBlock()){
-      var first_inline_block_stream = this._createStream(child_style, token);
-      var first_inline_block_generator = new BlockGenerator(child_style, first_inline_block_stream, this.outlineContext);
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_inline_block_generator));
+      var first_stream = this._createStream(child_style, token);
+      var first_generator = new BlockGenerator(child_style, first_stream, this.outlineContext);
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_generator));
       return this.yieldChildLayout(context);
     }
 
-    // if child style(both inline or block) is floated
+    // if child style(both inline or block) is floated,
     // push back stream and delegate current style and stream to FloatGenerator
     if(child_style.isFloated()){
       this.stream.prev();
@@ -7634,16 +7634,16 @@ var BlockGenerator = (function(){
 
     var child_stream = this._createStream(child_style, token);
 
-    // if child inline, delete current style and stream to child inline-generator started with grand_child_generator.
+    // if child inline, delegate current style and stream to child inline-generator with first_generator.
     if(child_style.isInline()){
-      var grand_child_generator;
+      var first_generator;
       // if inline img, no content text is included in img tag, so we yield it by lazy generator.
       if(child_style.getMarkupName() === "img"){
-	grand_child_generator = new LazyGenerator(child_style, child_style.createImage());
+	first_generator = new LazyGenerator(child_style, child_style.createImage());
       } else {
-	grand_child_generator = new InlineGenerator(child_style, child_stream, this.outlineContext);
+	first_generator = new InlineGenerator(child_style, child_stream, this.outlineContext);
       }
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, grand_child_generator));
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_generator));
       return this.yieldChildLayout(context);
     }
 
