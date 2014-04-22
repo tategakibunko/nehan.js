@@ -42,9 +42,9 @@ var StyleContext = (function(){
 	parent.appendChild(this);
       }
 
-      // initialize selector context
+      // create selector context.
       // this value is given as argument of functional css value
-      this.selectorContext = this._createSelectorContext(args.layoutContext || null);
+      this.selectorContext = new SelectorContext(this, args.layoutContext || null);
 
       // initialize css values
       this.selectorCss = {};
@@ -54,7 +54,7 @@ var StyleContext = (function(){
       // 1. load normal selector
       // 2. load dynamic callback selector 'onload'
       Args.copy(this.selectorCss, this._loadSelectorCss(markup, parent));
-      Args.copy(this.selectorCss, this._loadCallbackCss("onload", args.layoutContext || null));
+      Args.copy(this.selectorCss, this._loadCallbackCss("onload"));
 
       // load inline css
       // 1. load normal markup attribute 'style'
@@ -415,11 +415,11 @@ var StyleContext = (function(){
     },
     // if markup is "<img src='aaa.jpg'>"
     // getMarkupAttr("src") => 'aaa.jpg'
-    getMarkupAttr : function(name){
+    getMarkupAttr : function(name, def_value){
       if(name === "id"){
 	return this.markup.id;
       }
-      return this.markup.getAttr(name);
+      return this.markup.getAttr(name, def_value);
     },
     getMarkupDataset : function(name, def_val){
       return this.markup.getDataset(name, def_val);
@@ -640,19 +640,6 @@ var StyleContext = (function(){
       }
       return css;
     },
-    _createSelectorContext : function(layout_context){
-      return {
-	markup:this.markup,
-	layout:{
-	  restExtent:(layout_context? layout_context.getBlockRestExtent() : null),
-	  restMeasure:(layout_context? layout_context.getInlineRestMeasure() : null)
-	},
-	pseudoClass:{
-	  childIndex:this.getChildIndex(),
-	  childIndexOfType:this.getChildIndexOfType()
-	}
-      };
-    },
     _computeContentMeasure : function(outer_measure){
       switch(this.boxSizing){
       case "margin-box": return outer_measure - this.getEdgeMeasure();
@@ -750,7 +737,7 @@ var StyleContext = (function(){
     //      }
     //   }
     // });
-    _loadCallbackCss : function(name, context){
+    _loadCallbackCss : function(name){
       var callback = this.getSelectorCssAttr(name);
       if(callback === null || typeof callback !== "function"){
 	return {};

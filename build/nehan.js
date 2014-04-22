@@ -2533,9 +2533,6 @@ var Tag = (function (){
     getName : function(){
       return this.name;
     },
-    getCssClasses : function(){
-      return this.classes.join(" ");
-    },
     getAttr : function(name, def_value){
       var ret = this.attr[name];
       if(typeof ret !== "undefined"){
@@ -6187,6 +6184,43 @@ var TextAligns = {
   }
 };
 
+var SelectorContext = (function(){
+  function SelectorContext(style, layout_context){
+    this._style = style;
+    this._layoutContext = layout_context || null;
+  }
+
+  SelectorContext.prototype = {
+    setMarkupContent : function(content){
+      this._style.markup.content = content;
+    },
+    getMarkupContent : function(){
+      return this._style.getMarkupContent();
+    },
+    getMarkupAttr : function(name, def_value){
+      return this._style.getMarkupAttr(name, def_value);
+    },
+    getMarkupDataset : function(name, def_value){
+      return this._style.getMarkupDataset(name, def_value);
+    },
+    getRestMeasure : function(){
+      return this._layoutContext? this._layoutContext.getInlineRestMeasure() : null;
+    },
+    getRestExtent : function(){
+      return this._layoutContext? this._layoutContext.getBlockRestExtent() : null;
+    },
+    getChildIndex : function(){
+      return this._style.getChildIndex();
+    },
+    getChildIndexOfType : function(){
+      return this._style.getChildIndexOfType;
+    }
+  };
+
+  return SelectorContext;
+})();
+
+
 var StyleContext = (function(){
   var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
   var get_decorated_inline_elements = function(elements){
@@ -6231,9 +6265,9 @@ var StyleContext = (function(){
 	parent.appendChild(this);
       }
 
-      // initialize selector context
+      // create selector context.
       // this value is given as argument of functional css value
-      this.selectorContext = this._createSelectorContext(args.layoutContext || null);
+      this.selectorContext = new SelectorContext(this, args.layoutContext || null);
 
       // initialize css values
       this.selectorCss = {};
@@ -6243,7 +6277,7 @@ var StyleContext = (function(){
       // 1. load normal selector
       // 2. load dynamic callback selector 'onload'
       Args.copy(this.selectorCss, this._loadSelectorCss(markup, parent));
-      Args.copy(this.selectorCss, this._loadCallbackCss("onload", args.layoutContext || null));
+      Args.copy(this.selectorCss, this._loadCallbackCss("onload"));
 
       // load inline css
       // 1. load normal markup attribute 'style'
@@ -6604,11 +6638,11 @@ var StyleContext = (function(){
     },
     // if markup is "<img src='aaa.jpg'>"
     // getMarkupAttr("src") => 'aaa.jpg'
-    getMarkupAttr : function(name){
+    getMarkupAttr : function(name, def_value){
       if(name === "id"){
 	return this.markup.id;
       }
-      return this.markup.getAttr(name);
+      return this.markup.getAttr(name, def_value);
     },
     getMarkupDataset : function(name, def_val){
       return this.markup.getDataset(name, def_val);
@@ -6829,19 +6863,6 @@ var StyleContext = (function(){
       }
       return css;
     },
-    _createSelectorContext : function(layout_context){
-      return {
-	markup:this.markup,
-	layout:{
-	  restExtent:(layout_context? layout_context.getBlockRestExtent() : null),
-	  restMeasure:(layout_context? layout_context.getInlineRestMeasure() : null)
-	},
-	pseudoClass:{
-	  childIndex:this.getChildIndex(),
-	  childIndexOfType:this.getChildIndexOfType()
-	}
-      };
-    },
     _computeContentMeasure : function(outer_measure){
       switch(this.boxSizing){
       case "margin-box": return outer_measure - this.getEdgeMeasure();
@@ -6939,7 +6960,7 @@ var StyleContext = (function(){
     //      }
     //   }
     // });
-    _loadCallbackCss : function(name, context){
+    _loadCallbackCss : function(name){
       var callback = this.getSelectorCssAttr(name);
       if(callback === null || typeof callback !== "function"){
 	return {};

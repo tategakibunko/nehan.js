@@ -30,9 +30,6 @@ var Tag = (function (){
     getName : function(){
       return this.name;
     },
-    getCssClasses : function(){
-      return this.classes.join(" ");
-    },
     getAttr : function(name, def_value){
       var ret = this.attr[name];
       if(typeof ret !== "undefined"){
