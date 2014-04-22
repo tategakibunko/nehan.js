@@ -2128,38 +2128,21 @@ var SelectorStateMachine = (function(){
     return parent_type.test(ptr)? ptr : null;
   };
 
-  // return the style context that matches f1 selector
-  // in the condition that 'style' matches f2 and direct sibling of f1 is 'style'.
-  // this situation described as 'f1 + f2' in css.
-  var find_adj_sibling = function(style, f1, f2){
-    // search style that matches f1,
-    // and 'direct sibling' of it matches f2,
-    // and the sibling itself is just equal to 'style'
-    return List.find(style.getParentChilds(), function(child){
-      var sibling = child.getNextSibling();
-      return sibling && sibling === style && f1.test(child) && f2.test(sibling);
-    });
+  // search adjacent sibling forom 'style' that matches f1 selector.
+  var find_adj_sibling = function(style, f1){
+    var sibling_index = style.getChildIndex();
+    var prev_sibling = style.getParentNthChild(sibling_index - 1) || null;
+    return (prev_sibling && f1.test(prev_sibling))? prev_sibling : null;
   };
 
-  // return the style context that matches f1 selector
-  // in the condition that 'style' matches f2 and 'style' is found from all siblings after f1.
-  // this situation described as 'f1 ~ f2' in css.
-  var find_gen_sibling = function(style, f1, f2){
-    // search style context that matches f1 selector.
-    var style1 = List.find(style.getParentChilds(), function(child){
-      return f1.test(child);
-    });
-    if(style1 === null){
-      return null;
-    }
-    // search style context that matches f2 selector from 'all siblings' after style1,
-    // and sibling itself is just equal to 'style'.
-    var sibling = style1.getNextSibling();
-    while(sibling !== null){
-      if(sibling === style && f2.test(sibling)){
-	return style1;
+  // search style context that matches f1 selector from all preceding siblings of 'style'.
+  var find_prev_sibling = function(style, f1){
+    var sibling_index = style.getChildIndex();
+    for(var i = 0; i < sibling_index; i++){
+      var prev_sibling = style.getParentNthChild(i);
+      if(prev_sibling && f1.test(prev_sibling)){
+	return prev_sibling;
       }
-      sibling = sibling.getNextSibling();
     }
     return null;
   }
@@ -2203,13 +2186,13 @@ var SelectorStateMachine = (function(){
 	// test f1 combinator f2 by style-context
 	// notice that f2 is selector subject and 'style' is style-context of f2.
 	switch(combinator){
-	case " ": style = find_parent(style, f1); break; // f2 = style-context itself.
-	case ">": style = find_direct_parent(style, f1); break; // f2 = style-context itself.
-	case "+": style = find_adj_sibling(style, f1, f2); break; // find f1+f2 in the context of style(subject = f2).
-	case "~": style = find_gen_sibling(style, f1, f2); break; // find f1~f2 in the context of style(subject = f1).
+	case " ": style = find_parent(style, f1); break; // search parent context that matches f1.
+	case ">": style = find_direct_parent(style, f1); break; // search direct parent context that matches f1.
+	case "+": style = find_adj_sibling(style, f1); break; // find adjacent sibling context that matches f1.
+	case "~": style = find_prev_sibling(style, f1); break; // find previous sibling context that matches f1.
 	default: throw "selector syntax error:invalid combinator(" + combinator + ")";
 	}
-	// can't find style-context that matches f1 combinator f2.
+	// can't find style-context that matches [f1 combinator f2]
 	if(style === null){
 	  return false;
 	}
@@ -2478,8 +2461,6 @@ var TagAttrParser = (function(){
     return attr;
   };
 
-  // <img src='/path/to/img' title='aaa' />
-  // => "src='/path/to/img title='aaa'"
   var normalize = function(src){
     return src
       .replace(/<[\S]+/, "") // cut tag start
@@ -6756,6 +6737,9 @@ var StyleContext = (function(){
     },
     getParentChilds : function(){
       return this.parent? this.parent.childs : [];
+    },
+    getParentNthChild : function(nth){
+      return this.parent? this.parent.getNthChild(nth) : null;
     },
     getParentChildsOfType : function(markup_name){
       return List.filter(this.getParentChilds(), function(child){

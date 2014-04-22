@@ -534,6 +534,9 @@ var StyleContext = (function(){
     getParentChilds : function(){
       return this.parent? this.parent.childs : [];
     },
+    getParentNthChild : function(nth){
+      return this.parent? this.parent.getNthChild(nth) : null;
+    },
     getParentChildsOfType : function(markup_name){
       return List.filter(this.getParentChilds(), function(child){
 	return child.getMarkupName() === markup_name;

@@ -64,8 +64,6 @@ var TagAttrParser = (function(){
     return attr;
   };
 
-  // <img src='/path/to/img' title='aaa' />
-  // => "src='/path/to/img title='aaa'"
   var normalize = function(src){
     return src
       .replace(/<[\S]+/, "") // cut tag start
