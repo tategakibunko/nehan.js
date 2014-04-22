@@ -13,9 +13,6 @@ return {
     group_size = Math.max(1, group_size || 1);
     return (group_size === 1)? new PageStream(text, 1) : new PageGroupStream(text, group_size);
   },
-  getStyle : function(selector_key){
-    return Selectors.getValue(selector_key);
-  },
   setStyle : function(selector_key, value){
     Selectors.setValue(selector_key, value);
     return this;
