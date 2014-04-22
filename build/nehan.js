@@ -5811,14 +5811,11 @@ var PageGroupEvaluator = (function(){
 })();
 
 var PageStream = (function(){
-  function PageStream(text, group_size){
+  function PageStream(text){
     this.text = this._createSource(text);
-    this.groupSize = group_size;
+    this.buffer = [];
     this.generator = this._createGenerator(this.text);
     this.evaluator = this._createEvaluator();
-    this.buffer = [];
-    this._timeStart = null;
-    this._timeElapsed = null;
   }
 
   PageStream.prototype = {
@@ -5839,7 +5836,7 @@ var PageStream = (function(){
 	var page = this.getPage(page_no);
 	page_no++;
       }
-      return this._setTimeElapsed();
+      return this._getTimeElapsed();
     },
     asyncGet : function(opt){
       Args.merge(this, {
@@ -5858,9 +5855,6 @@ var PageStream = (function(){
     // so cell_page_no is always equals to group_page_no.
     getGroupPageNo : function(cell_page_no){
       return cell_page_no;
-    },
-    getTimeElapsed : function(){
-      return this._timeElapsed;
     },
     // same as getPage, defined to keep compatibility of older version of nehan.js
     get : function(page_no){
@@ -5888,13 +5882,12 @@ var PageStream = (function(){
       this._timeStart = (new Date()).getTime();
       return this._timeStart;
     },
-    _setTimeElapsed : function(){
-      this._timeElapsed = (new Date()).getTime() - this._timeStart;
-      return this._timeElapsed;
+    _getTimeElapsed : function(){
+      return (new Date()).getTime() - this._timeStart;
     },
     _asyncGet : function(wait){
       if(!this.generator.hasNext()){
-	this.onComplete(this, this._setTimeElapsed());
+	this.onComplete(this, this._getTimeElapsed());
 	return;
       }
       // notice that result of yield is not a page object, it's abstruct layout tree,
@@ -5912,10 +5905,8 @@ var PageStream = (function(){
     _addBuffer : function(tree){
       this.buffer.push(tree);
     },
-    // common preprocessor
     _createSource : function(text){
       return text
-	.replace(/(<\/[a-zA-Z0-9\-]+>)[\s]+</g, "$1<") // discard white-space between close tag and next tag.
 	.replace(/\t/g, "") // discard TAB
 	.replace(/<!--[\s\S]*?-->/g, "") // discard comment
 	.replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
@@ -5971,7 +5962,11 @@ var PageGroup = (function(){
 
 var PageGroupStream = (function(){
   function PageGroupStream(text, group_size){
-    PageStream.call(this, text, group_size);
+    this.text = this._createSource(text);
+    this.buffer = [];
+    this.groupSize = group_size;
+    this.generator = this._createGenerator(this.text);
+    this.evaluator = this._createEvaluator(group_size);
   }
   Class.extend(PageGroupStream, PageStream);
   
@@ -5999,8 +5994,8 @@ var PageGroupStream = (function(){
     return (entry instanceof PageGroup);
   };
 
-  PageGroupStream.prototype._createEvaluator = function(){
-    return new PageGroupEvaluator(this.groupSize);
+  PageGroupStream.prototype._createEvaluator = function(group_size){
+    return new PageGroupEvaluator(group_size);
   };
 
   return PageGroupStream;
@@ -9231,7 +9226,7 @@ return {
   documentContext: DocumentContext,
   createPageStream : function(text, group_size){
     group_size = Math.max(1, group_size || 1);
-    return (group_size === 1)? new PageStream(text, 1) : new PageGroupStream(text, group_size);
+    return (group_size <= 1)? new PageStream(text) : new PageGroupStream(text, group_size);
   },
   setStyle : function(selector_key, value){
     Selectors.setValue(selector_key, value);

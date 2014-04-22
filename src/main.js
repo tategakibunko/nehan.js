@@ -11,7 +11,7 @@ return {
   documentContext: DocumentContext,
   createPageStream : function(text, group_size){
     group_size = Math.max(1, group_size || 1);
-    return (group_size === 1)? new PageStream(text, 1) : new PageGroupStream(text, group_size);
+    return (group_size <= 1)? new PageStream(text) : new PageGroupStream(text, group_size);
   },
   setStyle : function(selector_key, value){
     Selectors.setValue(selector_key, value);

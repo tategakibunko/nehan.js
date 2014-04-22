@@ -1,6 +1,10 @@
 var PageGroupStream = (function(){
   function PageGroupStream(text, group_size){
-    PageStream.call(this, text, group_size);
+    this.text = this._createSource(text);
+    this.buffer = [];
+    this.groupSize = group_size;
+    this.generator = this._createGenerator(this.text);
+    this.evaluator = this._createEvaluator(group_size);
   }
   Class.extend(PageGroupStream, PageStream);
   
@@ -28,8 +32,8 @@ var PageGroupStream = (function(){
     return (entry instanceof PageGroup);
   };
 
-  PageGroupStream.prototype._createEvaluator = function(){
-    return new PageGroupEvaluator(this.groupSize);
+  PageGroupStream.prototype._createEvaluator = function(group_size){
+    return new PageGroupEvaluator(group_size);
   };
 
   return PageGroupStream;
