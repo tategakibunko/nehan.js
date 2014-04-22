@@ -22,7 +22,7 @@ var StyleContext = (function(){
   // args :
   //   1. forceCss
   //     system css that must be applied.
-  //   2. context
+  //   2. layoutContext
   //     layout-context at the point of this style-context created.
   function StyleContext(markup, parent, args){
     this._initialize(markup, parent, args);
@@ -32,13 +32,19 @@ var StyleContext = (function(){
     _initialize : function(markup, parent, args){
       args = args || {};
       this.markup = markup;
-      this.parent = parent || null;
       this.markupName = markup.getName();
-      this.childs = []; // children for this style, updated by appendChild
+      this.parent = parent || null;
+      this.childs = [];
       this.next = null;
+
+      // initialize tree
       if(parent){
 	parent.appendChild(this);
       }
+
+      // initialize selector context
+      // this value is given as argument of functional css value
+      this.selectorContext = this._createSelectorContext(args.layoutContext || null);
 
       // initialize css values
       this.selectorCss = {};
@@ -48,15 +54,13 @@ var StyleContext = (function(){
       // 1. load normal selector
       // 2. load dynamic callback selector 'onload'
       Args.copy(this.selectorCss, this._loadSelectorCss(markup, parent));
-      Args.copy(this.selectorCss, this._loadCallbackCss("onload", args.context || null));
+      Args.copy(this.selectorCss, this._loadCallbackCss("onload", args.layoutContext || null));
 
       // load inline css
       // 1. load normal markup attribute 'style'
-      // 2. load dynamic callback selector 'inline'
-      // 3. load constructor argument 'args.forceCss' if exists.
-      //    notice that 'args.forceCss' is 'system required style'(so highest priority is given).
+      // 2. load constructor argument 'args.forceCss' if exists.
+      //    notice it is 'system required style', so it has highest priority.
       Args.copy(this.inlineCss, this._loadInlineCss(markup));
-      Args.copy(this.inlineCss, this._loadCallbackCss("inline", args.context || null));
       Args.copy(this.inlineCss, args.forceCss || {});
 
       // always required properties
@@ -424,7 +428,7 @@ var StyleContext = (function(){
       // if value is function, call it with style-context(this),
       // and need to format because it's thunk object and not initialized yet.
       if(typeof value === "function"){
-	return CssParser.format(name, value(this));
+	return CssParser.format(name, value(this.selectorContext));
       }
       return value; // already formatted
     },
@@ -513,10 +517,16 @@ var StyleContext = (function(){
       return this.childs.length;
     },
     getChildIndex : function(){
-      return this.parent? this.parent.findChildIndex(this) : 0;
+      var self = this;
+      return List.indexOf(this.getParentChilds(), function(child){
+	return child === self;
+      });
     },
     getChildIndexOfType : function(){
-      return this.parent? this.parent.findChildIndexOfType(this) : 0;
+      var self = this;
+      return List.indexOf(this.getParentChildsOfType(this.getMarkupName()), function(child){
+	return child === self;
+      });
     },
     getNthChild : function(nth){
       return this.childs[nth] || null;
@@ -630,21 +640,18 @@ var StyleContext = (function(){
       }
       return css;
     },
-    findChildIndex : function(style){
-      return List.indexOf(this.childs, function(child){
-	return child === style;
-      });
-    },
-    findChildsOfType : function(style){
-      var name = style.getMarkupName();
-      return List.filter(this.childs, function(child){
-	return child.getMarkupName() === name;
-      });
-    },
-    findChildIndexOfType : function(style){
-      return List.indexOf(this.findChildsOfType(style), function(child){
-	return child === style;
-      });
+    _createSelectorContext : function(layout_context){
+      return {
+	markup:this.markup,
+	layout:{
+	  restExtent:(layout_context? layout_context.getBlockRestExtent() : null),
+	  restMeasure:(layout_context? layout_context.getInlineRestMeasure() : null)
+	},
+	pseudoClass:{
+	  childIndex:this.getChildIndex(),
+	  childIndexOfType:this.getChildIndexOfType()
+	}
+      };
     },
     _computeContentMeasure : function(outer_measure){
       switch(this.boxSizing){
@@ -745,16 +752,14 @@ var StyleContext = (function(){
     // });
     _loadCallbackCss : function(name, context){
       var callback = this.getSelectorCssAttr(name);
-      if(callback === null){
+      if(callback === null || typeof callback !== "function"){
 	return {};
       }
-      if(typeof callback === "function"){
-	return callback(this, context || null) || {};
+      var ret = callback(this.selectorContext) || {};
+      for(var prop in ret){
+	ret[prop] = this._evalCssAttr(prop, ret[prop]);
       }
-      if(typeof callback === "object"){
-	return callback;
-      }
-      return {};
+      return ret;
     },
     _loadDisplay : function(){
       return this.getCssAttr("display", "inline");

@@ -1,9 +1,9 @@
-var SelectorPseudo = (function(){
-  function SelectorPseudo(expr){
+var PseudoSelector = (function(){
+  function PseudoSelector(expr){
     this.name = this._normalize(expr);
   }
 
-  SelectorPseudo.prototype = {
+  PseudoSelector.prototype = {
     hasPseudoElement : function(){
       return (this.name === "before" ||
 	      this.name === "after" ||
@@ -35,6 +35,6 @@ var SelectorPseudo = (function(){
     }
   };
 
-  return SelectorPseudo;
+  return PseudoSelector;
 })();
 

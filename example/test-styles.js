@@ -1,11 +1,11 @@
 var TestStyles = {
   ".nehan-test-stripe li":{
-    "color":function(style){
-      var nth = style.getChildIndex();
+    "color":function(context){
+      var nth = context.pseudoClass.childIndex;
       return (nth % 2 === 0)? "white" : "orange";
     },
-    "onload":function(style, context){
-      var nth = style.getChildIndex();
+    "onload":function(context){
+      var nth = context.pseudoClass.childIndex;
       return (nth % 2 === 0)? {"background-color":"red"} : {"background-color":"blue"};
     }
   },
@@ -36,16 +36,16 @@ var TestStyles = {
     "font-size":"1.6em"
   },
   ".nehan-my-callback":{
-    "onload":function(style, context){
-      var rest_extent = context.getBlockRestExtent();
-      style.markup.setContent([
-	style.markup.getContent(),
+    "onload":function(context){
+      var rest_extent = context.layout.restExtent;
+      context.markup.setContent([
+	context.markup.getContent(),
 	"<p>this is added by onload(rest extent = " + rest_extent + " at this point)</p>"
       ].join(""));
     },
     "inline":function(style, context){
-      style.markup.setContent([
-	style.markup.getContent(),
+      context.markup.setContent([
+	context.markup.getContent(),
 	"<p>this is added by inline</p>"
       ].join(""));
     }

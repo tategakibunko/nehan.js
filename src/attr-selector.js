@@ -1,5 +1,5 @@
-var SelectorAttr = (function(){
-  function SelectorAttr(expr){
+var AttrSelector = (function(){
+  function AttrSelector(expr){
     this.expr = this._normalize(expr);
     this.left = this.op = this.right = null;
     this._parseExpr(this.expr);
@@ -8,7 +8,7 @@ var SelectorAttr = (function(){
   var rex_symbol = /[^=^~|$*\s]+/;
   var op_symbols = ["|=", "~=", "^=", "$=", "*=", "="];
 
-  SelectorAttr.prototype = {
+  AttrSelector.prototype = {
     _normalize : function(expr){
       return expr.replace(/\[/g, "").replace(/\]/g, "");
     },
@@ -35,57 +35,57 @@ var SelectorAttr = (function(){
 	this.right = Utils.cutQuote(Utils.trim(expr));
       }
     },
-    _testHasAttr : function(markup){
-      return markup.getTagAttr(this.left) !== null;
+    _testHasAttr : function(style){
+      return style.getMarkupAttr(this.left) !== null;
     },
-    _testEqual : function(markup){
-      var value = markup.getTagAttr(this.left);
+    _testEqual : function(style){
+      var value = style.getMarkupAttr(this.left);
       return value === this.right;
     },
-    _testCaretEqual : function(markup){
-      var value = markup.getTagAttr(this.left);
+    _testCaretEqual : function(style){
+      var value = style.getMarkupAttr(this.left);
       var rex = new RegExp("^" + this.right);
       return rex.test(value);
     },
-    _testDollarEqual : function(markup){
-      var value = markup.getTagAttr(this.left);
+    _testDollarEqual : function(style){
+      var value = style.getMarkupAttr(this.left);
       var rex = new RegExp(this.right + "$");
       return rex.test(value);
     },
-    _testTildeEqual : function(markup){
-      var values = markup.getTagAttr(this.left).split(/\s+/);
+    _testTildeEqual : function(style){
+      var values = style.getMarkupAttr(this.left).split(/\s+/);
       return List.exists(values, Closure.eq(this.right));
     },
-    _testPipeEqual : function(markup){
-      var value = markup.getTagAttr(this.left);
+    _testPipeEqual : function(style){
+      var value = style.getMarkupAttr(this.left);
       return value == this.right || value.indexOf(this.right + "-") >= 0;
     },
-    _testStarEqual : function(markup){
-      var value = markup.getTagAttr(this.left);
+    _testStarEqual : function(style){
+      var value = style.getMarkupAttr(this.left);
       return value.indexOf(this.right) >= 0;
     },
-    _testOp : function(markup){
+    _testOp : function(style){
       switch(this.op){
-      case "=":  return this._testEqual(markup);
-      case "^=": return this._testCaretEqual(markup);
-      case "$=": return this._testDollarEqual(markup);
-      case "|=": return this._testPipeEqual(markup);
-      case "~=": return this._testTildeEqual(markup);
-      case "*=": return this._testStarEqual(markup);
+      case "=":  return this._testEqual(style);
+      case "^=": return this._testCaretEqual(style);
+      case "$=": return this._testDollarEqual(style);
+      case "|=": return this._testPipeEqual(style);
+      case "~=": return this._testTildeEqual(style);
+      case "*=": return this._testStarEqual(style);
       }
       throw "undefined operation:" + this.op;
     },
-    test : function(markup){
+    test : function(style){
       if(this.op && this.left && this.right){
-	return this._testOp(markup);
+	return this._testOp(style);
       }
       if(this.left){
-	return this._testHasAttr(markup);
+	return this._testHasAttr(style);
       }
       return false;
     }
   };
 
-  return SelectorAttr;
+  return AttrSelector;
 })();
 

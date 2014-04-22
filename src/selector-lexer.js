@@ -50,7 +50,7 @@ var SelectorLexer = (function(){
 	id:this._getId(str),
 	className:this._getClassName(str),
 	attrs:attrs,
-	pseudo:(pseudo? (new SelectorPseudo(pseudo)) : null)
+	pseudo:(pseudo? (new PseudoSelector(pseudo)) : null)
       });
     },
     _getByRex : function(rex){
@@ -81,7 +81,7 @@ var SelectorLexer = (function(){
       while(true){
 	var attr = this._getByRex(rex_attr);
 	if(attr){
-	  attrs.push(new SelectorAttr(attr));
+	  attrs.push(new AttrSelector(attr));
 	} else {
 	  break;
 	}

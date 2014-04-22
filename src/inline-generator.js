@@ -108,7 +108,7 @@ var InlineGenerator = (function(){
     // if tag token, inherit style
     var child_style = this.style;
     if(token instanceof Tag){
-      child_style = new StyleContext(token, this.style, {context:context});
+      child_style = new StyleContext(token, this.style, {layoutContext:context});
     }
 
     if(child_style.isDisabled()){

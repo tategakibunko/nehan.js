@@ -148,12 +148,12 @@ var FloatGenerator = (function(){
   FloatGenerator.prototype._getFloatedTags = function(context){
     var parent_style = this.style;
     return this.stream.getWhile(function(token){
-      return (token instanceof Tag && (new StyleContext(token, parent_style, {context:context})).isFloated());
+      return (token instanceof Tag && (new StyleContext(token, parent_style, {layoutContext:context})).isFloated());
     });
   };
 
   FloatGenerator.prototype._createFloatBlockGenerator = function(tag, context){
-    var style = new StyleContext(tag, this.style, {context:context});
+    var style = new StyleContext(tag, this.style, {layoutContext:context});
 
     // image tag not having stream(single tag), so use lazy-generator.
     // lazy generator already holds output result in construction time, but yields it later.
