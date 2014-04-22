@@ -2183,8 +2183,9 @@ var SelectorStateMachine = (function(){
 	    throw "selector syntax error:" + src;
 	  }
 	}
-	// test f1 combinator f2 by style-context
-	// notice that f2 is selector subject and 'style' is style-context of f2.
+	// test [f1 combinator f2]
+	// notice that f2 is already accepted at this point, so next we check [f1 combinator] parts.
+	// if style-context that matches [f1 combinator] is found, update 'style' to it, and next loop.
 	switch(combinator){
 	case " ": style = find_parent(style, f1); break; // search parent context that matches f1.
 	case ">": style = find_direct_parent(style, f1); break; // search direct parent context that matches f1.
