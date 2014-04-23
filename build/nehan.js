@@ -2065,7 +2065,10 @@ var SelectorLexer = (function(){
       case "+": case "~": case ">": // combinator
 	this._stepBuff(1);
 	return c1;
-      default: // selector-type
+      case ":": // pseudo without type-selector
+	var pseudo = this._getPseudo();
+	return this._parseType("body", [], pseudo);
+      default: // type-selecor
 	var type = this._getType();
 	if(type){
 	  var attrs = this._getAttrs();
@@ -2073,7 +2076,7 @@ var SelectorLexer = (function(){
 	  return this._parseType(type, attrs, pseudo);
 	}
       }
-      throw "invalid selector:" + this.buff;
+      throw "invalid selector:[" + this.buff + "]";
     },
     _normalize : function(src){
       return Utils.trim(src).replace(/\s+/g, " ");

@@ -265,6 +265,20 @@ var Script = {
     "<img class='nehan-disp-block' src='256x256.gif' width='256' height='256' pulled />"
   ].join(""),
 
+  "pseudo-class":[
+    "<h2>pseudo root</h2>",
+    "this is root sentence",
+    "<h2>pseudo first</h2>",
+    "<div class='nehan-test-pseudo'>",
+    "<ul>",
+    "<li>first</li>",
+    "<li>second</li>",
+    "</ul>",
+    "<p>first of type</p>",
+    "<blockquote>only of type</blockquote>",
+    "</div>"
+  ].join("\n"),
+
   "pseudo-element":[
     "<h2>first letter</h2>",
     "<div class='nehan-drop-caps'>",

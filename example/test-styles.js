@@ -1,4 +1,15 @@
 var TestStyles = {
+  ".nehan-test-pseudo li:first-child":{
+    "color":"green"
+  },
+  ".nehan-test-pseudo p:first-of-type":{
+    "font-weight":"bold",
+    "color":"red"
+  },
+  ".nehan-test-pseudo blockquote:only-of-type":{
+    "color":"white",
+    "background-color":"gray"
+  },
   ".nehan-gen-adj-test a~b":{
     "color":"green"
   },
