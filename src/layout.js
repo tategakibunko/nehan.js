@@ -13,8 +13,8 @@ var Layout = {
   hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
   vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
   pagingDirection:{
-    hori:"lr",
-    vert:"rl"
+    hori:"lr", // paging direction 'left to right'
+    vert:"rl"  // paging direction 'right to left'
   },
   width: 800, // layout default width if width prop not set in 'body' style.
   height: 580, // layout default height if height prop not set in 'body' style.
