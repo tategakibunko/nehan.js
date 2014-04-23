@@ -42,6 +42,7 @@ var Config = {
   kerning:true,
   justify:true,
   maxRollbackCount : 40,
+  maxPageCount: 10000,
   minBlockScaleDownRate : 65,
   useVerticalGlyphIfEnable: true,
   useStrictWordMetrics: true,
@@ -8697,6 +8698,12 @@ var BodyGenerator = (function(){
     block.seekPos = this.stream.getSeekPos();
     block.percent = this.stream.getSeekPercent();
     block.pageNo = DocumentContext.pageNo++;
+
+    // sometimes layout engine causes inlinite loop,
+    // so terminate generator by restricting page count.
+    if(DocumentContext.pageNo > Config.maxPageCount){
+      this.setTerminate(true);
+    }
   };
 
   return BodyGenerator;

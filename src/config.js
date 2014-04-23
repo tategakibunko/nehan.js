@@ -4,6 +4,7 @@ var Config = {
   kerning:true,
   justify:true,
   maxRollbackCount : 40,
+  maxPageCount: 10000,
   minBlockScaleDownRate : 65,
   useVerticalGlyphIfEnable: true,
   useStrictWordMetrics: true,
