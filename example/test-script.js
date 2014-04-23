@@ -1,15 +1,4 @@
 var Script = {
-  "tfoot":[
-    "<table>",
-    "<tfoot>",
-    "<tr>",
-    "<td>foot1</td>",
-    "<td>foot2</td>",
-    "</tr>",
-    "</tfoot>",
-    "</table>"
-  ].join("\n"),
-
   "selector":[
     "<h2>adj sibling</h2>",
     "<div class='nehan-adj-test'>", [
