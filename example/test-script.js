@@ -1,25 +1,46 @@
 var Script = {
   "selector":[
+    // adjacent sibling selector(A+B) test
     "<h2>adj sibling</h2>",
     "<div class='nehan-adj-test'>", [
-      "<a href='#'>prev</a>",
-      "<b>direct sibling</b>",
-      "<b>next sibling</b>"
+      "<a href='#'>one</a>",
+      "<b>two</b>",
+      "<b>three</b>"
     ].join("&nbsp;"),
     "</div>",
 
+    // generic sibling selector(A~B) test
     "<h2>gen sibling</h2>",
     "<div class='nehan-gen-adj-test'>", [
-      "<a href='#'>prev</a>",
-      "<b>direct sibling</b>",
-      "<b>next sibling</b>"
+      "<a href='#'>one</a>",
+      "<b>two</b>",
+      "<b>three</b>"
     ].join("&nbsp;"),
     "</div>",
 
-    "<h2>attr selector</h2>",
-    "<p><a href='#red'>red link</a></p>",
-    "<p><a href='#blue'>blue link</a></p>"
-  ].join(""),
+    // attribute selector test
+    // example from:https://developer.mozilla.org/ja/docs/Web/CSS/Attribute_selectors
+    "<h2>attr selector test</h2>",
+    "<div>",
+    "<a href='http://example.com'>英語</a> ",
+    "<span lang='en-us en-gb en-au en-nz'>Hello World!</span>",
+    "</div>",
+
+    "<div>",
+    "<a href='#portuguese'>ポルトガル語</a> ",
+    "<span lang='pt'>Olá Mundo!</span>",
+    "</div>",
+
+    "<div>",
+    "<a href='http://example.cn'>中国語（簡体）</a> ",
+    "<span lang='zh-CN'>世界您好！</span>",
+    "</div>",
+
+    "<div>",
+    "<a href='http://example.cn'>中国語（繁体）</a> ",
+    "<span lang='zh-TW'>世界您好！</span>",
+    "</div>"
+  ].join("\n"),
 
   "functional":[
     "<ul class='nehan-test-stripe'>",

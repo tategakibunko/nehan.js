@@ -1,9 +1,30 @@
 var TestStyles = {
-  "a[href=#red]":{
+  ".nehan-gen-adj-test a~b":{
+    "color":"green"
+  },
+  ".nehan-adj-test a+b":{
     "color":"red"
   },
-  "a[href=#blue]":{
-    "color":"blue"
+  "span[lang]":{
+    "font-weight":"bold"
+  },
+  "span[lang=pt]":{
+    "color":"green"
+  },
+  "span[lang~=en-us]":{
+    "color": "blue"
+  },
+  "span[lang|=zh]":{
+    "color": "red"
+  },
+  "a[href^=#]":{
+    "background-color":"gold"
+  },
+  "a[href$=.cn]":{
+    "color": "red"
+  },
+  "a[href*=example]":{
+    "background-color":"#CCCCCC"
   },
   ".nehan-test-stripe li":{
     "color":function(context){
@@ -30,12 +51,6 @@ var TestStyles = {
       "start":"5px"
     },
     content:"this is inserted by after"
-  },
-  ".nehan-gen-adj-test a~b":{
-    "color":"green"
-  },
-  ".nehan-adj-test a+b":{
-    "color":"red"
   },
   ".nehan-first-line-larger::first-line":{
     "display":"block",
