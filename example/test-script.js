@@ -265,18 +265,18 @@ var Script = {
     "<img class='nehan-disp-block' src='256x256.gif' width='256' height='256' pulled />"
   ].join(""),
 
-  "pseudo-first":[
+  "pseudo-element":[
     "<h2>first letter</h2>",
     "<div class='nehan-drop-caps'>",
     Text["long"],
     "</div>",
+    "<br />",
     "<h2>first line</h2>",
     "<div class='nehan-first-line-larger'>",
     Text["long"],
-    "</div>"
-  ].join(""),
-
-  "before-after":[
+    "</div>",
+    "<br />",
+    "<h2>before, after</h2>",
     "<div class='nehan-test-before'>test for before</div>",
     "<div class='nehan-test-after'>test for after</div>"
   ].join(""),

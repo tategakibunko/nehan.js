@@ -7669,11 +7669,6 @@ var BlockGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
-    // if br in block-level, skip it.
-    if(token instanceof Tag && token.getName() === "br"){
-      return this._getNext(context);
-    }
-
     // if tag token, inherit style
     var child_style = new StyleContext(token, this.style, {layoutContext:context});
 
