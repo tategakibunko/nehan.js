@@ -65,6 +65,10 @@ var Layout = {
   direction:"vert", // or 'hori'
   hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
   vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
+  pagingDirection:{
+    hori:"lr",
+    vert:"rl"
+  },
   width: 800, // layout default width if width prop not set in 'body' style.
   height: 580, // layout default height if height prop not set in 'body' style.
   fontSize:16, // layout default font-size if font-size prop not set in 'body' style.
@@ -97,6 +101,9 @@ var Layout = {
   },
   getExtent : function(flow){
     return this[flow.getPropExtent()];
+  },
+  getPagingDirection : function(){
+    return this.pagingDirection[this.direction];
   },
   getStdFontFamily : function(){
     return (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
@@ -1846,12 +1853,13 @@ var AttrSelector = (function(){
       return rex.test(value);
     },
     _testTildeEqual : function(style){
-      var values = style.getMarkupAttr(this.left).split(/\s+/);
+      var value = style.getMarkupAttr(this.left);
+      var values = value? value.split(/\s+/) : [];
       return List.exists(values, Closure.eq(this.right));
     },
     _testPipeEqual : function(style){
       var value = style.getMarkupAttr(this.left);
-      return value == this.right || value.indexOf(this.right + "-") >= 0;
+      return value? (value == this.right || value.indexOf(this.right + "-") >= 0) : false;
     },
     _testStarEqual : function(style){
       var value = style.getMarkupAttr(this.left);
@@ -6090,10 +6098,16 @@ var Break = (function(){
 
   Break.prototype = {
     isAlways : function(){
+      return this.value === "always";
     },
     isAvoid : function(){
+      return this.value === "avoid";
     },
     isFirst : function(){
+      return (Layout.getPagingDirection() === "lr")? (this.value === "left") : (this.value === "right");
+    },
+    isSecond : function(){
+      return (Layout.getPagingDirection() === "lr")? (this.value === "right") : (this.value === "left");
     },
     isNth : function(order){
     }
@@ -6107,12 +6121,16 @@ var Breaks = {
   before:{
     always:(new Break("always")),
     avoid:(new Break("avoid")),
+    left:(new Break("left")),
+    right:(new Break("right")),
     first:(new Break("first")), // correspond to break-before:"left"
     second:(new Break("second")) // correspond to break-before:"right"
   },
   after:{
     always:(new Break("always")),
     avoid:(new Break("avoid")),
+    left:(new Break("left")),
+    right:(new Break("right")),
     first:(new Break("first")), // correspond to break-before:"left"
     second:(new Break("second")) // correspond to break-before:"right"
   },
@@ -6423,16 +6441,18 @@ var StyleContext = (function(){
       box.charCount = List.fold(elements, 0, function(total, element){
 	return total + (element? (element.charCount || 0) : 0);
       });
+      box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
       return box;
     },
-    createImage : function(){
+    createImage : function(opt){
+      opt = opt || {};
       // image size always considered as horizontal mode.
       var width = this.getMarkupAttr("width")? parseInt(this.getMarkupAttr("width"), 10) : (this.staticMeasure || this.font.size);
       var height = this.getMarkupAttr("height")? parseInt(this.getMarkupAttr("height"), 10) : (this.staticExtent || this.font.size);
       var classes = ["nehan-block", "nehan-image"].concat(this.markup.classes);
       var image_size = new BoxSize(width, height);
       var image = new Box(image_size, this);
-      image.display = this.display; // inline/block
+      image.display = this.display; // inline, block, inline-block
       image.edge = this.edge || null;
       image.classes = classes;
       image.charCount = 0;
@@ -6441,6 +6461,7 @@ var StyleContext = (function(){
       } else if(this.isPulled()){
 	image.pulled = true;
       }
+      image.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
       return image;
     },
     createLine : function(opt){
@@ -6557,6 +6578,9 @@ var StyleContext = (function(){
     isPre : function(){
       var white_space = this.getCssAttr("white-space", "normal");
       return white_space === "pre";
+    },
+    isBreakAfter : function(){
+      return this.breakAfter? !this.breakAfter.isAvoid() : false;
     },
     isFirstChild : function(){
       var childs = this.getParentChilds();
@@ -7582,7 +7606,7 @@ var BlockGenerator = (function(){
 	break;
       }
       this._addElement(context, element, extent);
-      if(!context.isBlockSpaceLeft()){
+      if(!context.isBlockSpaceLeft() || context.hasBreakAfter()){
 	break;
       }
     }
@@ -7701,6 +7725,7 @@ var BlockGenerator = (function(){
       return child_style.createBlock();
 
     case "page-break": case "end-page": case "pbr":
+      context.setBreakAfter(true);
       return null; // page-break
 
     case "first-line":
@@ -7745,6 +7770,9 @@ var BlockGenerator = (function(){
     if(element === null){
       return;
     }
+    if(element.breakAfter){
+      context.setBreakAfter(true);
+    }
     if(this.style.isPushed() || element.pushed){
       context.pushBlockElement(element, extent);
     } else if(this.style.isPulled() || element.pulled){
@@ -7765,7 +7793,8 @@ var BlockGenerator = (function(){
     }
     var block = this.style.createBlock({
       extent:extent,
-      elements:elements
+      elements:elements,
+      breakAfter:context.hasBreakAfter()
     });
 
     // call _onCreate callback for 'each' output

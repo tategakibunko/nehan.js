@@ -223,16 +223,18 @@ var StyleContext = (function(){
       box.charCount = List.fold(elements, 0, function(total, element){
 	return total + (element? (element.charCount || 0) : 0);
       });
+      box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
       return box;
     },
-    createImage : function(){
+    createImage : function(opt){
+      opt = opt || {};
       // image size always considered as horizontal mode.
       var width = this.getMarkupAttr("width")? parseInt(this.getMarkupAttr("width"), 10) : (this.staticMeasure || this.font.size);
       var height = this.getMarkupAttr("height")? parseInt(this.getMarkupAttr("height"), 10) : (this.staticExtent || this.font.size);
       var classes = ["nehan-block", "nehan-image"].concat(this.markup.classes);
       var image_size = new BoxSize(width, height);
       var image = new Box(image_size, this);
-      image.display = this.display; // inline/block
+      image.display = this.display; // inline, block, inline-block
       image.edge = this.edge || null;
       image.classes = classes;
       image.charCount = 0;
@@ -241,6 +243,7 @@ var StyleContext = (function(){
       } else if(this.isPulled()){
 	image.pulled = true;
       }
+      image.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
       return image;
     },
     createLine : function(opt){
@@ -357,6 +360,9 @@ var StyleContext = (function(){
     isPre : function(){
       var white_space = this.getCssAttr("white-space", "normal");
       return white_space === "pre";
+    },
+    isBreakAfter : function(){
+      return this.breakAfter? !this.breakAfter.isAvoid() : false;
     },
     isFirstChild : function(){
       var childs = this.getParentChilds();

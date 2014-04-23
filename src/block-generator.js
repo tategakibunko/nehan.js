@@ -40,7 +40,7 @@ var BlockGenerator = (function(){
 	break;
       }
       this._addElement(context, element, extent);
-      if(!context.isBlockSpaceLeft()){
+      if(!context.isBlockSpaceLeft() || context.hasBreakAfter()){
 	break;
       }
     }
@@ -159,6 +159,7 @@ var BlockGenerator = (function(){
       return child_style.createBlock();
 
     case "page-break": case "end-page": case "pbr":
+      context.setBreakAfter(true);
       return null; // page-break
 
     case "first-line":
@@ -203,6 +204,9 @@ var BlockGenerator = (function(){
     if(element === null){
       return;
     }
+    if(element.breakAfter){
+      context.setBreakAfter(true);
+    }
     if(this.style.isPushed() || element.pushed){
       context.pushBlockElement(element, extent);
     } else if(this.style.isPulled() || element.pulled){
@@ -223,7 +227,8 @@ var BlockGenerator = (function(){
     }
     var block = this.style.createBlock({
       extent:extent,
-      elements:elements
+      elements:elements,
+      breakAfter:context.hasBreakAfter()
     });
 
     // call _onCreate callback for 'each' output

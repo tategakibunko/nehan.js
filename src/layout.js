@@ -12,6 +12,10 @@ var Layout = {
   direction:"vert", // or 'hori'
   hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
   vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
+  pagingDirection:{
+    hori:"lr",
+    vert:"rl"
+  },
   width: 800, // layout default width if width prop not set in 'body' style.
   height: 580, // layout default height if height prop not set in 'body' style.
   fontSize:16, // layout default font-size if font-size prop not set in 'body' style.
@@ -44,6 +48,9 @@ var Layout = {
   },
   getExtent : function(flow){
     return this[flow.getPropExtent()];
+  },
+  getPagingDirection : function(){
+    return this.pagingDirection[this.direction];
   },
   getStdFontFamily : function(){
     return (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;

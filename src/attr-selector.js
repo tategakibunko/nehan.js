@@ -53,12 +53,13 @@ var AttrSelector = (function(){
       return rex.test(value);
     },
     _testTildeEqual : function(style){
-      var values = style.getMarkupAttr(this.left).split(/\s+/);
+      var value = style.getMarkupAttr(this.left);
+      var values = value? value.split(/\s+/) : [];
       return List.exists(values, Closure.eq(this.right));
     },
     _testPipeEqual : function(style){
       var value = style.getMarkupAttr(this.left);
-      return value == this.right || value.indexOf(this.right + "-") >= 0;
+      return value? (value == this.right || value.indexOf(this.right + "-") >= 0) : false;
     },
     _testStarEqual : function(style){
       var value = style.getMarkupAttr(this.left);

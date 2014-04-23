@@ -5,10 +5,16 @@ var Break = (function(){
 
   Break.prototype = {
     isAlways : function(){
+      return this.value === "always";
     },
     isAvoid : function(){
+      return this.value === "avoid";
     },
     isFirst : function(){
+      return (Layout.getPagingDirection() === "lr")? (this.value === "left") : (this.value === "right");
+    },
+    isSecond : function(){
+      return (Layout.getPagingDirection() === "lr")? (this.value === "right") : (this.value === "left");
     },
     isNth : function(order){
     }

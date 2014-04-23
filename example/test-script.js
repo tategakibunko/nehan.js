@@ -157,14 +157,14 @@ var Script = {
   ].join("\n"),
 
   "page-break":[
-    Text["middle"],
+    "page one",
     "<page-break>",
-    Text["middle"],
+    "page two",
     "<end-page>",
-    Text["middle"],
+    "page three",
     "<pbr>",
-    Text["middle"]
-  ].join(""),
+    "page four"
+  ].join("\n"),
 
   "hr":[
     Text["short"],
