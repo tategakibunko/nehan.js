@@ -16,6 +16,12 @@ var LayoutContext = (function(){
     hasBlockSpaceFor : function(extent){
       return this.block.hasSpaceFor(extent);
     },
+    hasBreakAfter : function(){
+      return this.block.hasBreakAfter();
+    },
+    setBreakAfter : function(status){
+      this.block.setBreakAfter(status);
+    },
     addBlockElement : function(element, extent){
       this.block.addElement(element, extent);
     },

@@ -5,6 +5,7 @@ var BlockContext = (function(){
     this.pushedElements = [];
     this.elements = [];
     this.pulledElements = [];
+    this.breakAfter = false;
   }
 
   BlockContext.prototype = {
@@ -13,6 +14,12 @@ var BlockContext = (function(){
     },
     hasSpaceFor : function(extent){
       return this.getRestExtent() >= extent;
+    },
+    hasBreakAfter : function(){
+      return this.breakAfter;
+    },
+    setBreakAfter : function(status){
+      this.breakAfter = status;
     },
     addElement : function(element, extent){
       this.elements.push(element);
