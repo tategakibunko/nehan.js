@@ -169,8 +169,14 @@ var InlineGenerator = (function(){
       return this._getText(context, token); // read as normal text
     }
 
-    // if not pre, use first white-space only, and skip continuous ones.
+    // if not pre, skip continuous white-spaces.
     this.stream.skipUntil(Token.isNewLine);
+
+    // if white-space is new-line, ignore it.
+    if(Token.isNewLine(token)){
+      return this._getNext(context);
+    }
+    // if white-space is not new-line, use first one.
     return this._getText(context, token);
   };
 
