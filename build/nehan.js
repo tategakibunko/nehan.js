@@ -33,8 +33,8 @@ if(!Nehan){
 }
 
 // this function ends at the tail of this source.
-Nehan.setup = function(_engine_args){
-var __engine_args = _engine_args || {};
+Nehan.setup = function(engine_args){
+var __engine_args = engine_args || {};
 
 var Config = {
   lang:"ja-JP",
@@ -51,6 +51,7 @@ var Config = {
   lexingBufferLen : 2000,
   defaultLinkTitleLength : 16
 };
+
 
 var Layout = {
   // define root where content text starts from.
@@ -137,6 +138,7 @@ var Layout = {
     return this.fontColor;
   }
 };
+
 
 var Env = (function(){
   var nav = navigator.appName;
@@ -9321,13 +9323,14 @@ var HoriEvaluator = (function(){
 
 
 
-Args.copy(Layout, __engine_args.layout || {});
-Args.copy(Config, __engine_args.config || {});
-
 // export global interfaces
 Nehan.version = "5.0.0";
 Nehan.Class = Class;
 Nehan.Env = Env;
+
+// set engine args
+Args.copy(Config, __engine_args.config || {});
+Args.copy(Layout, __engine_args.layout || {});
 
 // export engine local interfaces
 return {

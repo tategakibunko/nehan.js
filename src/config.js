@@ -13,3 +13,4 @@ var Config = {
   lexingBufferLen : 2000,
   defaultLinkTitleLength : 16
 };
+

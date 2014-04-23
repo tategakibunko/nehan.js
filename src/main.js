@@ -1,10 +1,11 @@
-Args.copy(Layout, __engine_args.layout || {});
-Args.copy(Config, __engine_args.config || {});
-
 // export global interfaces
 Nehan.version = "5.0.0";
 Nehan.Class = Class;
 Nehan.Env = Env;
+
+// set engine args
+Args.copy(Config, __engine_args.config || {});
+Args.copy(Layout, __engine_args.layout || {});
 
 // export engine local interfaces
 return {
