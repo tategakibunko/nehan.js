@@ -83,8 +83,9 @@ var BlockGenerator = (function(){
     // if tag token, inherit style
     var child_style = new StyleContext(token, this.style, {layoutContext:context});
 
+    // if disabled style, just skip
     if(child_style.isDisabled()){
-      return this._getNext(context); // just skip
+      return this._getNext(context);
     }
 
     // if child inline-block, start child inline generator with first_generator.

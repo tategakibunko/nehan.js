@@ -163,7 +163,13 @@ var Script = {
     "<end-page>",
     "page three",
     "<pbr>",
-    "page four"
+    "page four",
+    "<hr class='nehan-break-after'/>",
+    "page five",
+    "<div style='break-before:always'>page six</div>",
+    "<div class='nehan-break-before'>page seven</div>",
+    "<div class='nehan-break-after'>page seven2</div>",
+    "page eight"
   ].join("\n"),
 
   "hr":[

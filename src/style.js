@@ -270,10 +270,6 @@ var Style = {
   "hr.nehan-space":{
     "border-width":"0px"
   },
-  "hr.nehan-pbr":{
-    "border-width":"0px",
-    "break-after":"always"
-  },
   "html":{
     "display":"block"
   },
@@ -836,6 +832,15 @@ var Style = {
   },
   ".nehan-empha-sesame-open":{
     "text-emphasis-style":"open sesame"
+  },
+  //-------------------------------------------------------
+  // break
+  //-------------------------------------------------------
+  ".nehan-break-before":{
+    "break-before":"always"
+  },
+  ".nehan-break-after":{
+    "break-after":"always"
   },
   //-------------------------------------------------------
   // other utility classes

@@ -469,10 +469,6 @@ var Style = {
   "hr.nehan-space":{
     "border-width":"0px"
   },
-  "hr.nehan-pbr":{
-    "border-width":"0px",
-    "break-after":"always"
-  },
   "html":{
     "display":"block"
   },
@@ -1035,6 +1031,15 @@ var Style = {
   },
   ".nehan-empha-sesame-open":{
     "text-emphasis-style":"open sesame"
+  },
+  //-------------------------------------------------------
+  // break
+  //-------------------------------------------------------
+  ".nehan-break-before":{
+    "break-before":"always"
+  },
+  ".nehan-break-after":{
+    "break-after":"always"
   },
   //-------------------------------------------------------
   // other utility classes
@@ -6580,6 +6585,9 @@ var StyleContext = (function(){
       var white_space = this.getCssAttr("white-space", "normal");
       return white_space === "pre";
     },
+    isBreakBefore : function(){
+      return this.breakBefore? !this.breakBefore.isAvoid() : false;
+    },
     isBreakAfter : function(){
       return this.breakAfter? !this.breakAfter.isAvoid() : false;
     },
@@ -6694,6 +6702,9 @@ var StyleContext = (function(){
     },
     getContent : function(){
       var content = this.markup.getContent();
+      if(this.isBreakBefore()){
+	content = "<page-break>" + content;
+      }
       var before = Selectors.getValuePe(this, "before");
       if(!Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;
@@ -7650,8 +7661,9 @@ var BlockGenerator = (function(){
     // if tag token, inherit style
     var child_style = new StyleContext(token, this.style, {layoutContext:context});
 
+    // if disabled style, just skip
     if(child_style.isDisabled()){
-      return this._getNext(context); // just skip
+      return this._getNext(context);
     }
 
     // if child inline-block, start child inline generator with first_generator.
