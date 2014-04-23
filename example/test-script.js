@@ -1,4 +1,37 @@
 var Script = {
+  "tfoot":[
+    "<table>",
+    "<tfoot>",
+    "<tr>",
+    "<td>foot1</td>",
+    "<td>foot2</td>",
+    "</tr>",
+    "</tfoot>",
+    "</table>"
+  ].join("\n"),
+
+  "selector":[
+    "<h2>adj sibling</h2>",
+    "<div class='nehan-adj-test'>", [
+      "<a href='#'>prev</a>",
+      "<b>direct sibling</b>",
+      "<b>next sibling</b>"
+    ].join("&nbsp;"),
+    "</div>",
+
+    "<h2>gen sibling</h2>",
+    "<div class='nehan-gen-adj-test'>", [
+      "<a href='#'>prev</a>",
+      "<b>direct sibling</b>",
+      "<b>next sibling</b>"
+    ].join("&nbsp;"),
+    "</div>",
+
+    "<h2>attr selector</h2>",
+    "<p><a href='#red'>red link</a></p>",
+    "<p><a href='#blue'>blue link</a></p>"
+  ].join(""),
+
   "functional":[
     "<ul class='nehan-test-stripe'>",
     "<li>even</li>",
@@ -78,24 +111,6 @@ var Script = {
     Snipet["ul"],
     Snipet["ol"],
     Snipet["dl"]
-  ].join(""),
-
-  "A+B, A~B":[
-    "<h2>adj test</h2>",
-    "<div class='nehan-adj-test'>", [
-      "<a href='#'>prev</a>",
-      "<b>direct sibling</b>",
-      "<b>next sibling</b>"
-    ].join("&nbsp;"),
-    "</div>",
-
-    "<h2>gen adj test</h2>",
-    "<div class='nehan-gen-adj-test'>", [
-      "<a href='#'>prev</a>",
-      "<b>direct sibling</b>",
-      "<b>next sibling</b>"
-    ].join("&nbsp;"),
-    "</div>"
   ].join(""),
 
   "flip-flow":[

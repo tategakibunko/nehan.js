@@ -1,4 +1,10 @@
 var TestStyles = {
+  "a[href=#red]":{
+    "color":"red"
+  },
+  "a[href=#blue]":{
+    "color":"blue"
+  },
   ".nehan-test-stripe li":{
     "color":function(context){
       var nth = context.getChildIndex();

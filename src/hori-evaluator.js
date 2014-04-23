@@ -39,7 +39,7 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype.evalLinkElement = function(line, link, opt){
-    return Html.tagWrap("a", this.evalInlineElements(link, link.elements), Args.copy({
+    return Html.tagWrap("a", this.evalInlineChild(line, link), Args.copy({
       "class":link.classes.join(" "),
       "href":opt.href,
       "title":opt.title,

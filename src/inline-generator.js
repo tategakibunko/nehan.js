@@ -98,9 +98,11 @@ var InlineGenerator = (function(){
     if(Token.isText(token)){
       // if tcy, wrap all content and return Tcy object and force generator terminate.
       if(this.style.getTextCombine() === "horizontal"){
-	this.setTerminate(true);
-	var tcy = new Tcy(this.style.getMarkupContent());
-	return this._getText(context, tcy);
+	return this._getTcy(context, token);
+      }
+      // if white-space
+      if(Token.isWhiteSpace(token)){
+	return this._getWhiteSpace(context, token);
       }
       return this._getText(context, token);
     }
@@ -153,16 +155,26 @@ var InlineGenerator = (function(){
     }
   };
 
-  InlineGenerator.prototype._getText = function(context, token){
-    // new-line
-    if(Token.isNewLine(token)){
-      if(this.style.isPre()){
+  InlineGenerator.prototype._getTcy = function(context, token){
+    this.setTerminate(true);
+    var tcy = new Tcy(this.style.getMarkupContent());
+    return this._getText(context, tcy);
+  };
+
+  InlineGenerator.prototype._getWhiteSpace = function(context, token){
+    if(this.style.isPre()){
+      if(Token.isNewLine(token)){
 	return null; // break line at new-line char.
       }
-      // if not pre, skip continuous new-line
-      this.stream.skipUntil(Token.isNewLine);
-      return this._getNext(context);
+      return this._getText(context, token); // read as normal text
     }
+
+    // if not pre, use first white-space only, and skip continuous ones.
+    this.stream.skipUntil(Token.isNewLine);
+    return this._getText(context, token);
+  };
+
+  InlineGenerator.prototype._getText = function(context, token){
     if(!token.hasMetrics()){
       // if charactor token, set kerning before setting metrics.
       // because some additional space is added to it in some case.

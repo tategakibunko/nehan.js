@@ -296,10 +296,10 @@ var StyleContext = (function(){
       case "block":
       case "table":
       case "table-caption":
+      case "table-header-group": // <thead>
+      case "table-row-group": // <tbody>
+      case "table-footer-group": // <tfoot>
       case "table-row":
-      case "table-row-group":
-      case "table-header-group":
-      case "table-footer-group":
       case "table-cell":
       case "list-item":
 	return true;

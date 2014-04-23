@@ -34,7 +34,7 @@ var TableRowGenerator = (function(){
   };
 
   TableRowGenerator.prototype._getChildTags = function(stream){
-    return stream.getWhile(function(token){
+    return stream.getAllIf(function(token){
       return (token instanceof Tag && (token.getName() === "td" || token.getName() === "th"));
     });
   };
