@@ -672,6 +672,18 @@ var Style = {
     "font-size": Layout.fontSizeAbs.smaller
   },
   //-------------------------------------------------------
+  // box-sizing classes
+  //-------------------------------------------------------
+  ".nehan-content-box":{
+    "box-sizing":"content-box"
+  },
+  ".nehan-border-box":{
+    "box-sizing":"border-box"
+  },
+  ".nehan-margin-box":{
+    "box-sizing":"margin-box"
+  },
+  //-------------------------------------------------------
   // display classes
   //-------------------------------------------------------
   ".nehan-disp-block":{

@@ -871,6 +871,18 @@ var Style = {
     "font-size": Layout.fontSizeAbs.smaller
   },
   //-------------------------------------------------------
+  // box-sizing classes
+  //-------------------------------------------------------
+  ".nehan-content-box":{
+    "box-sizing":"content-box"
+  },
+  ".nehan-border-box":{
+    "box-sizing":"border-box"
+  },
+  ".nehan-margin-box":{
+    "box-sizing":"margin-box"
+  },
+  //-------------------------------------------------------
   // display classes
   //-------------------------------------------------------
   ".nehan-disp-block":{
@@ -6448,6 +6460,7 @@ var StyleContext = (function(){
 	return total + (element? (element.charCount || 0) : 0);
       });
       box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
+      box.pastedContent = opt.pastedContent || null;
       return box;
     },
     createImage : function(opt){
@@ -6571,6 +6584,9 @@ var StyleContext = (function(){
     },
     isPulled : function(){
       return this.getMarkupAttr("pulled") !== null;
+    },
+    isPasted : function(){
+      return this.getMarkupAttr("pasted") !== null;
     },
     isTextEmphaEnable : function(){
       return (this.textEmpha && this.textEmpha.isEnable())? true : false;
@@ -7680,6 +7696,16 @@ var BlockGenerator = (function(){
       this.stream.prev();
       this.setChildLayout(new FloatGenerator(this.style, this.stream, context, this.outlineContext));
       return this.yieldChildLayout(context);
+    }
+
+    // if child style with 'pasted' attribute,
+    // yield immediatelly with pasted content.
+    // notice that this is nehan.js original attribute,
+    // to show some html(like form, input etc) that nehan.js can't layout.
+    if(child_style.isPasted()){
+      return child_style.createBlock({
+	pastedContent:child_style.getContent()
+      });
     }
 
     var child_stream = this._createStream(child_style, token);
@@ -8845,7 +8871,7 @@ var LayoutEvaluator = (function(){
     },
     evalBlockElements : function(parent, elements){
       var self = this;
-      return List.fold(elements, "", function(ret, child){
+      return parent.pastedContent? parent.pastedContent : List.fold(elements, "", function(ret, child){
 	return ret + (child? self.evalBlockElement(parent, child) : "");
       });
     },

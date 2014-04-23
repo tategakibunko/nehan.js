@@ -279,6 +279,14 @@ var Script = {
   "before-after":[
     "<div class='nehan-test-before'>test for before</div>",
     "<div class='nehan-test-after'>test for after</div>"
-  ].join("")
+  ].join(""),
+
+  "pasted":[
+    "<p>this is normal1</p>",
+    "<div class='nehan-content-box nehan-gap-after' style='width:200px; height:200px; background-color:gold' pasted>",
+    "this is pasted content",
+    "</div>",
+    "<p>this is normal2</p>"
+  ].join("\n")
 };
 

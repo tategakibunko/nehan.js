@@ -104,6 +104,16 @@ var BlockGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
+    // if child style with 'pasted' attribute,
+    // yield immediatelly with pasted content.
+    // notice that this is nehan.js original attribute,
+    // to show some html(like form, input etc) that nehan.js can't layout.
+    if(child_style.isPasted()){
+      return child_style.createBlock({
+	pastedContent:child_style.getContent()
+      });
+    }
+
     var child_stream = this._createStream(child_style, token);
 
     // if child inline, delegate current style and stream to child inline-generator with first_generator.

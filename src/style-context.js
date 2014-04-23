@@ -224,6 +224,7 @@ var StyleContext = (function(){
 	return total + (element? (element.charCount || 0) : 0);
       });
       box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
+      box.pastedContent = opt.pastedContent || null;
       return box;
     },
     createImage : function(opt){
@@ -347,6 +348,9 @@ var StyleContext = (function(){
     },
     isPulled : function(){
       return this.getMarkupAttr("pulled") !== null;
+    },
+    isPasted : function(){
+      return this.getMarkupAttr("pasted") !== null;
     },
     isTextEmphaEnable : function(){
       return (this.textEmpha && this.textEmpha.isEnable())? true : false;
