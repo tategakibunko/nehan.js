@@ -33,7 +33,7 @@
 
   // [example]
   // change backgroiund-color by child index.
-  ".stribe-list li":{
+  ".stripe-list li":{
     "background-color":function(context){
       return (context.getChildIndex() % 2 === 0)? "pink" : "white";
     }
