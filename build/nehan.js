@@ -1061,7 +1061,6 @@ var Style = {
   ".nehan-drop-caps::first-letter":{
     "display":"inline-block",
     "box-sizing":"content-box",
-    "measure":"1em",
     "extent":"1em",
     "float":"start",
     "line-rate":1.0,
@@ -6501,8 +6500,8 @@ var StyleContext = (function(){
 	max_extent = Math.max(max_extent, this.getAutoLineExtent());
       }
       var measure = (this.parent && opt.measure && this.staticMeasure === null && !this.isRootLine())? opt.measure : this.contentMeasure;
-      if(this.display === "inline-block" && opt.measure){
-	measure = opt.measure;
+      if(this.display === "inline-block"){
+	measure = this.staticMeasure || opt.measure;
       }
       var line_size = this.flow.getBoxSize(measure, max_extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.classes);
@@ -8462,6 +8461,8 @@ var FloatGenerator = (function(){
     // lazy generator already holds output result in construction time, but yields it later.
     if(style.getMarkupName() === "img"){
       return new LazyGenerator(style, style.createImage());
+    } else if(style.display === "inline-block"){
+      return new InlineBlockGenerator(style, this._createStream(style, tag), this.outlineContext);
     }
     return new BlockGenerator(style, this._createStream(style, tag), this.outlineContext);
   };

@@ -159,6 +159,8 @@ var FloatGenerator = (function(){
     // lazy generator already holds output result in construction time, but yields it later.
     if(style.getMarkupName() === "img"){
       return new LazyGenerator(style, style.createImage());
+    } else if(style.display === "inline-block"){
+      return new InlineBlockGenerator(style, this._createStream(style, tag), this.outlineContext);
     }
     return new BlockGenerator(style, this._createStream(style, tag), this.outlineContext);
   };

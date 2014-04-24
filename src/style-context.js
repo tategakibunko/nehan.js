@@ -260,8 +260,8 @@ var StyleContext = (function(){
 	max_extent = Math.max(max_extent, this.getAutoLineExtent());
       }
       var measure = (this.parent && opt.measure && this.staticMeasure === null && !this.isRootLine())? opt.measure : this.contentMeasure;
-      if(this.display === "inline-block" && opt.measure){
-	measure = opt.measure;
+      if(this.display === "inline-block"){
+	measure = this.staticMeasure || opt.measure;
       }
       var line_size = this.flow.getBoxSize(measure, max_extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.classes);
