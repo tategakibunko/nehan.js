@@ -203,12 +203,14 @@ var Env = (function(){
   Important notices about style.js
   ================================
 
-  1. camel case property is not allowed.
+  1. camel case property is not allowed
+  -------------------------------------
 
     OK: {font-size:"16px"}
     NG: {fontSize:"16px"}
 
-  2. some properties uses 'logical' properties.
+  2. some properties uses 'logical' properties
+  --------------------------------------------
 
     [examples]
     Assume that Layout.direction is "hori" and Layout["hori"] is "lr-tb".
@@ -217,9 +219,49 @@ var Env = (function(){
     ex2. {float:"start"} // => {float:"left"}.
     ex3. {measure:"100px", extent:"50px"} // => {width:"100px", height:"50px"}
 
-  3. special properties in nehan.js
+  3. all class names must start with "nehan-" prefix
+  --------------------------------------------------
 
-  (a) line-rate:(float)
+     to avoid css collision that is not layouted by nehan.js,
+     our css names must be prefixed by "nehan-".
+
+  4. about functional css value
+  ------------------------------
+
+  you can use functional css value in each css property.
+
+  (4.1) callback argument 'context' in functional css value is 'SelectorContext'
+
+  // [example]
+  // change backgroiund-color by child index.
+  ".stribe-list li":{
+    "background-color":function(context){
+      return (context.getChildIndex() % 2 === 0)? "pink" : "white";
+    }
+  }
+
+  (4.2) callback argument 'context' in 'onload' is 'SelectorCallbackContext'
+
+  this context is 'extended class' of 'SelectorContext', with some extra interfaces
+  that can touch css object, because 'onload' is called after all css of matched elements are loaded.
+
+  // [example]
+  // force image metrics to square sizing if width and height is not same.
+  ".nehan-must-be-squares img":{
+    "onload":function(context){
+      var width = context.getCssAttr("width", 100);
+      var height = context.getCssAttr("height", 100);
+      if(width !== height){
+	var larger = Math.max(width, height);
+	return {width:larger, height:larger};
+      }
+    }
+  }
+
+ 5. special properties in nehan.js
+  ----------------------------------
+
+  (5.1) line-rate:(float)
 
   In normal html, size of 'line-height:1.0em' is determined by
   font size of 'parent' block.
@@ -230,7 +272,7 @@ var Env = (function(){
   Assume that font-size of parent block is 16px, and max font size of
   current line is 32px, line-height:1.0em is 16px, but line-rate:1.0em is 32px.
 
-  (b) box-sizing:[content-box | border-box | margin-box(default)]
+  (5.2) box-sizing:[content-box | border-box | margin-box(default)]
 
   In box-sizing, 'margin-box' is special value in nehan.js, and is box-sizing default value.
   In margin-box, even if margin is included in box-size.
@@ -240,7 +282,7 @@ var Env = (function(){
   So if you represent margin/border/padding(called in edge in nehan.js),
   the only way is 'eliminating content space'.
 
-  (c) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
+  (5.3) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
 
   This property represent document-mode in nehan.js.
 
