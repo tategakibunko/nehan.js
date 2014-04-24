@@ -1,5 +1,24 @@
 /*
-  About 'line-rate' property in nehan.
+  Important notices about style.js
+  ================================
+
+  1. camel case property is not allowed.
+
+    OK: {font-size:"16px"}
+    NG: {fontSize:"16px"}
+
+  2. some properties uses 'logical' properties.
+
+    [examples]
+    Assume that Layout.direction is "hori" and Layout["hori"] is "lr-tb".
+
+    ex1. {margin:{before:"10px"}} // => {margin:{top:"10px"}}
+    ex2. {float:"start"} // => {float:"left"}.
+    ex3. {measure:"100px", extent:"50px"} // => {width:"100px", height:"50px"}
+
+  3. special properties in nehan.js
+
+  (a) line-rate:(float)
 
   In normal html, size of 'line-height:1.0em' is determined by
   font size of 'parent' block.
@@ -9,7 +28,30 @@
 
   Assume that font-size of parent block is 16px, and max font size of
   current line is 32px, line-height:1.0em is 16px, but line-rate:1.0em is 32px.
- */
+
+  (b) box-sizing:[content-box | border-box | margin-box(default)]
+
+  In box-sizing, 'margin-box' is special value in nehan.js, and is box-sizing default value.
+  In margin-box, even if margin is included in box-size.
+
+  Why? In normal html, outer size of box can be expanded,
+  but in paged layout, outer size is strictly fixed.
+  So if you represent margin/border/padding(called in edge in nehan.js),
+  the only way is 'eliminating content space'.
+
+  (c) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
+
+  This property represent document-mode in nehan.js.
+
+  'lr-tb' means inline flows 'left to right', block flows 'top to bottom'.
+
+  'tb-rl' means inline flows 'top to bottom', block flows 'right to left', and so on.
+
+  'flip' means toggle Layout["hori"] and Layout["vert"].
+  for example, assume that Layout["hori"] is "lr-tb", and Layout["vert"] is "tb-rl",
+  and current document direction(Layout.direction) is "hori",
+  flow:"flip" means Layout["vert"], "tb-rl".
+*/
 var Style = {
   //-------------------------------------------------------
   // tag / a
@@ -861,13 +903,11 @@ var Style = {
   ".nehan-drop-caps::first-letter":{
     "display":"inline-block",
     "box-sizing":"content-box",
+    //"measure":"1em",
     "extent":"1em",
     "float":"start",
     "line-rate":1.0,
     "font-size":"4em"
-  },
-  ".nehan-line-no-ruby":{
-    "line-rate":1.0
   },
   ".nehan-gap-start":{
     "margin":{
