@@ -195,7 +195,8 @@ var Style = {
   //-------------------------------------------------------
   "h1":{
     "display":"block",
-    "break-before":"always",
+    // in html4, page-break-before is 'always' by default.
+    //"break-before":"always",
     "line-rate":1.4,
     "font-size":"2.4em",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
