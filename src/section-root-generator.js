@@ -5,7 +5,7 @@ var SectionRootGenerator = (function(){
   }
   Class.extend(SectionRootGenerator, BlockGenerator);
 
-  SectionRootGenerator.prototype._onComplete = function(){
+  SectionRootGenerator.prototype._onComplete = function(context, block){
     DocumentContext.addOutlineContext(this.outlineContext);
   };
 

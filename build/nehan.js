@@ -1061,7 +1061,7 @@ var Style = {
   ".nehan-drop-caps::first-letter":{
     "display":"inline-block",
     "box-sizing":"content-box",
-    //"measure":"1em",
+    "measure":"1em",
     "extent":"1em",
     "float":"start",
     "line-rate":1.0,
@@ -6501,6 +6501,9 @@ var StyleContext = (function(){
 	max_extent = Math.max(max_extent, this.getAutoLineExtent());
       }
       var measure = (this.parent && opt.measure && this.staticMeasure === null && !this.isRootLine())? opt.measure : this.contentMeasure;
+      if(this.display === "inline-block" && opt.measure){
+	measure = opt.measure;
+      }
       var line_size = this.flow.getBoxSize(measure, max_extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.classes);
       var line = new Box(line_size, this);
@@ -7565,11 +7568,11 @@ var LayoutGenerator = (function(){
   };
 
   // called when each time generator yields output.
-  LayoutGenerator.prototype._onCreate = function(output){
+  LayoutGenerator.prototype._onCreate = function(context, output){
   };
 
   // called when generator yields final output.
-  LayoutGenerator.prototype._onComplete = function(output){
+  LayoutGenerator.prototype._onComplete = function(context, output){
   };
 
   LayoutGenerator.prototype._createStartContext = function(){
@@ -7692,9 +7695,9 @@ var BlockGenerator = (function(){
 
     // if child inline-block, start child inline generator with first_generator.
     if(child_style.isInlineBlock()){
-      var first_stream = this._createStream(child_style, token);
-      var first_generator = new BlockGenerator(child_style, first_stream, this.outlineContext);
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_generator));
+      var iblock_stream = this._createStream(child_style, token);
+      var iblock_generator = new InlineBlockGenerator(child_style, iblock_stream, this.outlineContext);
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, iblock_generator));
       return this.yieldChildLayout(context);
     }
 
@@ -7837,11 +7840,11 @@ var BlockGenerator = (function(){
     });
 
     // call _onCreate callback for 'each' output
-    this._onCreate(block);
+    this._onCreate(context, block);
 
     // call _onComplete callback for 'final' output
     if(!this.hasNext()){
-      this._onComplete(block);
+      this._onComplete(context, block);
     }
     return block;
   };
@@ -7912,11 +7915,11 @@ var InlineGenerator = (function(){
     });
 
     // call _onCreate callback for 'each' output
-    this._onCreate(line);
+    this._onCreate(context, line);
 
     // call _onComplete callback for 'final' output
     if(!this.hasNext()){
-      this._onComplete(line);
+      this._onComplete(context, line);
     }
     return line;
   };
@@ -7983,9 +7986,9 @@ var InlineGenerator = (function(){
 
     var child_stream = this._createStream(child_style, token);
 
-    // if inline-block, yield immediately, and return as inline element.
+    // if inline-block, yield immediately, and return as child inline element.
     if(child_style.isInlineBlock()){
-      return (new BlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
+      return (new InlineBlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
     }
 
     // inline child
@@ -8100,13 +8103,39 @@ var InlineGenerator = (function(){
 })();
 
 
+var InlineBlockGenerator = (function (){
+  function InlineBlockGenerator(style, stream, outline_context){
+    BlockGenerator.call(this, style, stream, outline_context);
+  }
+  Class.extend(InlineBlockGenerator, BlockGenerator);
+
+  InlineBlockGenerator.prototype._onCreate = function(context, block){
+    var max_inline = List.maxobj(block.elements, function(element){
+      return element.getContentMeasure();
+    });
+    if(max_inline){
+      block.size.setMeasure(this.style.flow, max_inline.getContentMeasure());
+    }
+    return block;
+  };
+
+  InlineBlockGenerator.prototype._createChildContext = function(parent_context){
+    return new LayoutContext(
+      new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
+      new InlineContext(parent_context.getInlineRestMeasure() - this.style.getEdgeMeasure())
+    );
+  };
+
+  return InlineBlockGenerator;
+})();
+
 var LinkGenerator = (function(){
   function LinkGenerator(style, stream, outline_context){
     InlineGenerator.call(this, style, stream, outline_context);
   }
   Class.extend(LinkGenerator, InlineGenerator);
 
-  LinkGenerator.prototype._onComplete = function(output){
+  LinkGenerator.prototype._onComplete = function(context, output){
     var anchor_name = this.style.getMarkupAttr("name");
     if(anchor_name){
       DocumentContext.addAnchor(anchor_name);
@@ -8526,7 +8555,7 @@ var SectionRootGenerator = (function(){
   }
   Class.extend(SectionRootGenerator, BlockGenerator);
 
-  SectionRootGenerator.prototype._onComplete = function(){
+  SectionRootGenerator.prototype._onComplete = function(context, block){
     DocumentContext.addOutlineContext(this.outlineContext);
   };
 
@@ -8540,7 +8569,7 @@ var SectionContentGenerator = (function(){
   }
   Class.extend(SectionContentGenerator, BlockGenerator);
 
-  SectionContentGenerator.prototype._onComplete = function(block){
+  SectionContentGenerator.prototype._onComplete = function(context, block){
     this.outlineContext.endSection(this.style.getMarkupName());
   };
 
@@ -8712,7 +8741,7 @@ var HeaderGenerator = (function(){
     return 0;
   };
 
-  HeaderGenerator.prototype._onComplete = function(block){
+  HeaderGenerator.prototype._onComplete = function(context, block){
     var header_id = this.outlineContext.addHeader({
       type:this.style.getMarkupName(),
       rank:this._getHeaderRank(),
@@ -8732,7 +8761,7 @@ var BodyGenerator = (function(){
   }
   Class.extend(BodyGenerator, SectionRootGenerator);
 
-  BodyGenerator.prototype._onCreate = function(block){
+  BodyGenerator.prototype._onCreate = function(context, block){
     block.seekPos = this.stream.getSeekPos();
     block.percent = this.stream.getSeekPercent();
     block.pageNo = DocumentContext.pageNo++;

@@ -86,11 +86,11 @@ var LayoutGenerator = (function(){
   };
 
   // called when each time generator yields output.
-  LayoutGenerator.prototype._onCreate = function(output){
+  LayoutGenerator.prototype._onCreate = function(context, output){
   };
 
   // called when generator yields final output.
-  LayoutGenerator.prototype._onComplete = function(output){
+  LayoutGenerator.prototype._onComplete = function(context, output){
   };
 
   LayoutGenerator.prototype._createStartContext = function(){

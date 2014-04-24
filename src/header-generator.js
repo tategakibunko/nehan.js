@@ -11,7 +11,7 @@ var HeaderGenerator = (function(){
     return 0;
   };
 
-  HeaderGenerator.prototype._onComplete = function(block){
+  HeaderGenerator.prototype._onComplete = function(context, block){
     var header_id = this.outlineContext.addHeader({
       type:this.style.getMarkupName(),
       rank:this._getHeaderRank(),

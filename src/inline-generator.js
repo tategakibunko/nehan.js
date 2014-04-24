@@ -60,11 +60,11 @@ var InlineGenerator = (function(){
     });
 
     // call _onCreate callback for 'each' output
-    this._onCreate(line);
+    this._onCreate(context, line);
 
     // call _onComplete callback for 'final' output
     if(!this.hasNext()){
-      this._onComplete(line);
+      this._onComplete(context, line);
     }
     return line;
   };
@@ -131,9 +131,9 @@ var InlineGenerator = (function(){
 
     var child_stream = this._createStream(child_style, token);
 
-    // if inline-block, yield immediately, and return as inline element.
+    // if inline-block, yield immediately, and return as child inline element.
     if(child_style.isInlineBlock()){
-      return (new BlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
+      return (new InlineBlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
     }
 
     // inline child

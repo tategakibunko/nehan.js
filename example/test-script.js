@@ -145,7 +145,9 @@ var Script = {
   ].join(""),
 
   "iblock":[
-    "<div style='background-color:red' width='200' height='200' class='nehan-disp-iblock'>hello<br/>iblock</div>",
+    "<div style='background-color:red' class='nehan-disp-iblock' width='100' height='100'>hello<br/>iblock</div>",
+    Text["middle"],
+    "<div style='background-color:gold' class='nehan-disp-iblock' width='100' height='100'>iblock2</div>",
     Text["middle"]
   ].join(""),
 
@@ -284,17 +286,17 @@ var Script = {
     "<div class='nehan-drop-caps'>",
     Text["long"],
     "</div>",
-    "<br />",
+    "<page-break />",
     "<h2>first letter2</h2>",
     "<div class='nehan-drop-caps'>",
     Text["lipsum"],
     "</div>",
-    "<br />",
+    "<page-break />",
     "<h2>first line</h2>",
     "<div class='nehan-first-line-larger'>",
     Text["long"],
     "</div>",
-    "<br />",
+    "<page-break />",
     "<h2>before, after</h2>",
     "<div class='nehan-test-before'>test for before</div>",
     "<div class='nehan-test-after'>test for after</div>"

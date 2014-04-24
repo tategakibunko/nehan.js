@@ -5,7 +5,7 @@ var BodyGenerator = (function(){
   }
   Class.extend(BodyGenerator, SectionRootGenerator);
 
-  BodyGenerator.prototype._onCreate = function(block){
+  BodyGenerator.prototype._onCreate = function(context, block){
     block.seekPos = this.stream.getSeekPos();
     block.percent = this.stream.getSeekPercent();
     block.pageNo = DocumentContext.pageNo++;

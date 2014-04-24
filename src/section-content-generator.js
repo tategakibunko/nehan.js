@@ -5,7 +5,7 @@ var SectionContentGenerator = (function(){
   }
   Class.extend(SectionContentGenerator, BlockGenerator);
 
-  SectionContentGenerator.prototype._onComplete = function(block){
+  SectionContentGenerator.prototype._onComplete = function(context, block){
     this.outlineContext.endSection(this.style.getMarkupName());
   };
 

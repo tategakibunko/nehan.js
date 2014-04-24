@@ -4,7 +4,7 @@ var LinkGenerator = (function(){
   }
   Class.extend(LinkGenerator, InlineGenerator);
 
-  LinkGenerator.prototype._onComplete = function(output){
+  LinkGenerator.prototype._onComplete = function(context, output){
     var anchor_name = this.style.getMarkupAttr("name");
     if(anchor_name){
       DocumentContext.addAnchor(anchor_name);
