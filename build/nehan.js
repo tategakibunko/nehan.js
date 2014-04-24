@@ -1059,9 +1059,9 @@ var Style = {
   // other utility classes
   //-------------------------------------------------------
   ".nehan-drop-caps::first-letter":{
-    "display":"block",
+    "display":"inline-block",
     "box-sizing":"content-box",
-    "measure":"1em",
+    //"measure":"1em",
     "extent":"1em",
     "float":"start",
     "line-rate":1.0,
@@ -7682,19 +7682,19 @@ var BlockGenerator = (function(){
       return this._getNext(context);
     }
 
-    // if child inline-block, start child inline generator with first_generator.
-    if(child_style.isInlineBlock()){
-      var first_stream = this._createStream(child_style, token);
-      var first_generator = new BlockGenerator(child_style, first_stream, this.outlineContext);
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_generator));
-      return this.yieldChildLayout(context);
-    }
-
     // if child style(both inline or block) is floated,
     // push back stream and delegate current style and stream to FloatGenerator
     if(child_style.isFloated()){
       this.stream.prev();
       this.setChildLayout(new FloatGenerator(this.style, this.stream, context, this.outlineContext));
+      return this.yieldChildLayout(context);
+    }
+
+    // if child inline-block, start child inline generator with first_generator.
+    if(child_style.isInlineBlock()){
+      var first_stream = this._createStream(child_style, token);
+      var first_generator = new BlockGenerator(child_style, first_stream, this.outlineContext);
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_generator));
       return this.yieldChildLayout(context);
     }
 
