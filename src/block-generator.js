@@ -93,7 +93,7 @@ var BlockGenerator = (function(){
 
     // if child inline-block, start child inline generator with first_generator.
     if(child_style.isInlineBlock()){
-      var iblock_stream = this._createStream(child_style, token);
+      var iblock_stream = this._createStream(child_style);
       var iblock_generator = new InlineBlockGenerator(child_style, iblock_stream, this.outlineContext);
       this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, iblock_generator));
       return this.yieldChildLayout(context);
@@ -109,7 +109,7 @@ var BlockGenerator = (function(){
       });
     }
 
-    var child_stream = this._createStream(child_style, token);
+    var child_stream = this._createStream(child_style);
 
     // if child inline, delegate current style and stream to child inline-generator with first_generator.
     if(child_style.isInline()){

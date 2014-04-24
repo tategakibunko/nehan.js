@@ -129,7 +129,7 @@ var InlineGenerator = (function(){
       return null;
     }
 
-    var child_stream = this._createStream(child_style, token);
+    var child_stream = this._createStream(child_style);
 
     // if inline-block, yield immediately, and return as child inline element.
     if(child_style.isInlineBlock()){

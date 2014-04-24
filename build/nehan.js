@@ -200,7 +200,26 @@ var Env = (function(){
 
 
 /*
-  About 'line-rate' property in nehan.
+  Important notices about style.js
+  ================================
+
+  1. camel case property is not allowed.
+
+    OK: {font-size:"16px"}
+    NG: {fontSize:"16px"}
+
+  2. some properties uses 'logical' properties.
+
+    [examples]
+    Assume that Layout.direction is "hori" and Layout["hori"] is "lr-tb".
+
+    ex1. {margin:{before:"10px"}} // => {margin:{top:"10px"}}
+    ex2. {float:"start"} // => {float:"left"}.
+    ex3. {measure:"100px", extent:"50px"} // => {width:"100px", height:"50px"}
+
+  3. special properties in nehan.js
+
+  (a) line-rate:(float)
 
   In normal html, size of 'line-height:1.0em' is determined by
   font size of 'parent' block.
@@ -210,7 +229,30 @@ var Env = (function(){
 
   Assume that font-size of parent block is 16px, and max font size of
   current line is 32px, line-height:1.0em is 16px, but line-rate:1.0em is 32px.
- */
+
+  (b) box-sizing:[content-box | border-box | margin-box(default)]
+
+  In box-sizing, 'margin-box' is special value in nehan.js, and is box-sizing default value.
+  In margin-box, even if margin is included in box-size.
+
+  Why? In normal html, outer size of box can be expanded,
+  but in paged layout, outer size is strictly fixed.
+  So if you represent margin/border/padding(called in edge in nehan.js),
+  the only way is 'eliminating content space'.
+
+  (c) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
+
+  This property represent document-mode in nehan.js.
+
+  'lr-tb' means inline flows 'left to right', block flows 'top to bottom'.
+
+  'tb-rl' means inline flows 'top to bottom', block flows 'right to left', and so on.
+
+  'flip' means toggle Layout["hori"] and Layout["vert"].
+  for example, assume that Layout["hori"] is "lr-tb", and Layout["vert"] is "tb-rl",
+  and current document direction(Layout.direction) is "hori",
+  flow:"flip" means Layout["vert"], "tb-rl".
+*/
 var Style = {
   //-------------------------------------------------------
   // tag / a
@@ -1062,13 +1104,11 @@ var Style = {
   ".nehan-drop-caps::first-letter":{
     "display":"inline-block",
     "box-sizing":"content-box",
+    //"measure":"1em",
     "extent":"1em",
     "float":"start",
     "line-rate":1.0,
     "font-size":"4em"
-  },
-  ".nehan-line-no-ruby":{
-    "line-rate":1.0
   },
   ".nehan-gap-start":{
     "margin":{
@@ -5636,6 +5676,21 @@ var TokenStream = (function(){
       }
       return ret;
     },
+    // break if fn(x) return null.
+    mapWhile : function(fn){
+      var ret = [], token, output;
+      while(this.hasNext()){
+	token = this.get();
+	output = fn(token);
+	if(token && output){
+	  ret.push(output);
+	} else {
+	  this.prev();
+	  break;
+	}
+      }
+      return ret;
+    },
     skipUntil : function(fn){
       while(this.hasNext()){
 	var token = this.get();
@@ -7620,9 +7675,9 @@ var LayoutGenerator = (function(){
     );
   };
 
-  LayoutGenerator.prototype._createStream = function(style, markup){
-    switch(markup.getName()){
-    case "ruby": return new RubyTokenStream(markup);
+  LayoutGenerator.prototype._createStream = function(style){
+    switch(style.getMarkupName()){
+    case "ruby": return new RubyTokenStream(style.markup);
     default: return new TokenStream(style.getContent());
     } 
   };
@@ -7726,7 +7781,7 @@ var BlockGenerator = (function(){
 
     // if child inline-block, start child inline generator with first_generator.
     if(child_style.isInlineBlock()){
-      var iblock_stream = this._createStream(child_style, token);
+      var iblock_stream = this._createStream(child_style);
       var iblock_generator = new InlineBlockGenerator(child_style, iblock_stream, this.outlineContext);
       this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, iblock_generator));
       return this.yieldChildLayout(context);
@@ -7742,7 +7797,7 @@ var BlockGenerator = (function(){
       });
     }
 
-    var child_stream = this._createStream(child_style, token);
+    var child_stream = this._createStream(child_style);
 
     // if child inline, delegate current style and stream to child inline-generator with first_generator.
     if(child_style.isInline()){
@@ -8015,7 +8070,7 @@ var InlineGenerator = (function(){
       return null;
     }
 
-    var child_stream = this._createStream(child_style, token);
+    var child_stream = this._createStream(child_style);
 
     // if inline-block, yield immediately, and return as child inline element.
     if(child_style.isInlineBlock()){
@@ -8199,6 +8254,8 @@ var FirstLineGenerator = (function(){
 })();
 
 
+// lazy generator holds pre-yielded block in construction,
+// and output it once when yielded later.
 var LazyGenerator = (function(){
   function LazyGenerator(style, block){
     LayoutGenerator.call(this, style, null);
@@ -8474,29 +8531,35 @@ var FloatGenerator = (function(){
 
   FloatGenerator.prototype._getFloatedGenerators = function(context){
     var self = this;
-    return List.map(this._getFloatedTags(context), function(tag){
-      return self._createFloatBlockGenerator(tag, context)
+    return List.map(this._getFloatedStyles(context), function(style){
+      return self._createFloatBlockGenerator(style, context)
     });
   };
 
-  FloatGenerator.prototype._getFloatedTags = function(context){
+  FloatGenerator.prototype._getFloatedStyles = function(context){
     var parent_style = this.style;
-    return this.stream.getWhile(function(token){
-      return (token instanceof Tag && (new StyleContext(token, parent_style, {layoutContext:context})).isFloated());
+    return this.stream.mapWhile(function(token){
+      if(!Token.isTag(token)){
+	return null;
+      }
+      var child_style = new StyleContext(token, parent_style, {layoutContext:context});
+      if(child_style.isFloated()){
+	return child_style;
+      }
+      parent_style.removeChild(child_style);
+      return null;
     });
   };
 
-  FloatGenerator.prototype._createFloatBlockGenerator = function(tag, context){
-    var style = new StyleContext(tag, this.style, {layoutContext:context});
-
+  FloatGenerator.prototype._createFloatBlockGenerator = function(style, context){
     // image tag not having stream(single tag), so use lazy-generator.
     // lazy generator already holds output result in construction time, but yields it later.
     if(style.getMarkupName() === "img"){
       return new LazyGenerator(style, style.createImage());
     } else if(style.display === "inline-block"){
-      return new InlineBlockGenerator(style, this._createStream(style, tag), this.outlineContext);
+      return new InlineBlockGenerator(style, this._createStream(style), this.outlineContext);
     }
-    return new BlockGenerator(style, this._createStream(style, tag), this.outlineContext);
+    return new BlockGenerator(style, this._createStream(style), this.outlineContext);
   };
 
   return FloatGenerator;

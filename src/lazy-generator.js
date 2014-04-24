@@ -1,3 +1,5 @@
+// lazy generator holds pre-yielded block in construction,
+// and output it once when yielded later.
 var LazyGenerator = (function(){
   function LazyGenerator(style, block){
     LayoutGenerator.call(this, style, null);

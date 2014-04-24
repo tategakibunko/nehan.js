@@ -91,6 +91,21 @@ var TokenStream = (function(){
       }
       return ret;
     },
+    // break if fn(x) return null.
+    mapWhile : function(fn){
+      var ret = [], token, output;
+      while(this.hasNext()){
+	token = this.get();
+	output = fn(token);
+	if(token && output){
+	  ret.push(output);
+	} else {
+	  this.prev();
+	  break;
+	}
+      }
+      return ret;
+    },
     skipUntil : function(fn){
       while(this.hasNext()){
 	var token = this.get();

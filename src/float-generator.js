@@ -140,29 +140,35 @@ var FloatGenerator = (function(){
 
   FloatGenerator.prototype._getFloatedGenerators = function(context){
     var self = this;
-    return List.map(this._getFloatedTags(context), function(tag){
-      return self._createFloatBlockGenerator(tag, context)
+    return List.map(this._getFloatedStyles(context), function(style){
+      return self._createFloatBlockGenerator(style, context)
     });
   };
 
-  FloatGenerator.prototype._getFloatedTags = function(context){
+  FloatGenerator.prototype._getFloatedStyles = function(context){
     var parent_style = this.style;
-    return this.stream.getWhile(function(token){
-      return (token instanceof Tag && (new StyleContext(token, parent_style, {layoutContext:context})).isFloated());
+    return this.stream.mapWhile(function(token){
+      if(!Token.isTag(token)){
+	return null;
+      }
+      var child_style = new StyleContext(token, parent_style, {layoutContext:context});
+      if(child_style.isFloated()){
+	return child_style;
+      }
+      parent_style.removeChild(child_style);
+      return null;
     });
   };
 
-  FloatGenerator.prototype._createFloatBlockGenerator = function(tag, context){
-    var style = new StyleContext(tag, this.style, {layoutContext:context});
-
+  FloatGenerator.prototype._createFloatBlockGenerator = function(style, context){
     // image tag not having stream(single tag), so use lazy-generator.
     // lazy generator already holds output result in construction time, but yields it later.
     if(style.getMarkupName() === "img"){
       return new LazyGenerator(style, style.createImage());
     } else if(style.display === "inline-block"){
-      return new InlineBlockGenerator(style, this._createStream(style, tag), this.outlineContext);
+      return new InlineBlockGenerator(style, this._createStream(style), this.outlineContext);
     }
-    return new BlockGenerator(style, this._createStream(style, tag), this.outlineContext);
+    return new BlockGenerator(style, this._createStream(style), this.outlineContext);
   };
 
   return FloatGenerator;
