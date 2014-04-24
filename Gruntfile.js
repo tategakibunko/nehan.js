@@ -137,6 +137,7 @@ module.exports = function(grunt) {
 	    "src/text-align.js",
 	    "src/text-aligns.js",
 	    "src/selector-context.js",
+	    "src/selector-callback-context.js",
 	    "src/style-context.js",
 	    "src/layout-context.js",
 	    "src/block-context.js",

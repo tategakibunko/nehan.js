@@ -46,6 +46,12 @@ var StyleContext = (function(){
       // this value is given as argument of functional css value
       this.selectorContext = new SelectorContext(this, args.layoutContext || null);
 
+      // create selector callback context,
+      // this context is passed to "onload" callback.
+      // unlike selector-context, this context has reference to selector css,
+      // because 'onload' callback is called after loading selector css.
+      this.callbackContext = new SelectorCallbackContext(this, args.layoutContext || null);
+
       // initialize css values
       this.selectorCss = {};
       this.inlineCss = {};
@@ -752,19 +758,23 @@ var StyleContext = (function(){
     // nehan.js can change style dynamically by layout-context.
     //
     // [example]
-    // engine.setStyle("p.more-than-extent-100", {
-    //   "onload" : function(style, context){
-    //	    if(context.getBlockRestExtent() < 100){
+    // engine.setStyle("p", {
+    //   "onload" : function(context){
+    //      var min_extent = parseInt(context.getMarkupDataset("minExtent"), 10);
+    //	    if(context.getRestExtent() < min_extent){
     //        return {"page-break-before":"always"};
     //      }
     //   }
     // });
+    //
+    // then markup "<p data-min-extent='100'>text</p>" will be broken before
+    // if rest extent is less than 100.
     _loadCallbackCss : function(name){
       var callback = this.getSelectorCssAttr(name);
       if(callback === null || typeof callback !== "function"){
 	return {};
       }
-      var ret = callback(this.selectorContext) || {};
+      var ret = callback(this.callbackContext) || {};
       for(var prop in ret){
 	ret[prop] = this._evalCssAttr(prop, ret[prop]);
       }
