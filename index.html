@@ -178,15 +178,18 @@ var engine = Nehan.setup({
     <p>See <a href="#styling">styling</a> for more details.</p>
 <pre class="prettyprint lang-js">
 engine.setStyles({
+  // always break the page before h1.
   "h1":{
     "break-before":"always",
     "font-size":"32px"
   },
+  // if external link, highlight background-color.
   "a[href^=#]":{
     "background-color":"gold"
   },
-  // all class name must be started with 'nehan-' prefix.
-  ".nehan-drop-caps":{
+  // make first-letter larger and floated to start.
+  // notice that in nehan.js, all class names must be started with 'nehan-'.
+  ".nehan-drop-caps::first-letter":{
     "display":"inline-block",
     "box-sizing":"content-box",
     "float":"start",
