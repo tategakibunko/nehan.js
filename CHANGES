@@ -6,11 +6,11 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.0.0 2014/04/18
+version 5.0.0 2014/04/25
 =========================
 o more complex float supported, not only static size float, but also dynamic block element can be floated.
-o now "setStyle" supports not only "onload" but also "inline" callbacks.
-  whie callback style "onload" define style of 'static style' value, "inline" define style as 'inline style' value.
+! callback argument for functional value and callback is changed,
+  SelectorContext is for functional css value, and SelectorCallbackContext is for 'onload' callback.
 ! for many future are updated, remove the older test folter, so we must create newer one(TODO).
 
 version 4.0.11 2014/xx/xx
