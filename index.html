@@ -276,9 +276,9 @@ stream.asyncGet({
 	    <h4>some properties uses 'logical' properties</h4>
 	    <p>Assume that Layout.direction is "hori" and Layout["hori"] is "lr-tb".</p>
 <pre class="prettyprint lang-js">
-ex1. {margin:{before:"10px"}} // {margin:{top:"10px"}}
-ex2. {float:"start"} //{float:"left"}.
-ex3. {measure:"100px", extent:"50px"} // {width:"100px", height:"50px"}
+{margin:{before:"10px"}} // same as {margin:{top:"10px"}}
+{float:"start"} // same as {float:"left"}.
+{measure:"100px", extent:"50px"} // same as {width:"100px", height:"50px"}
 </pre>
 	  </li>
 
