@@ -326,26 +326,26 @@ ex3. {measure:"100px", extent:"50px"} // {width:"100px", height:"50px"}
 	      <li>
 		<h5>line-rate:(float)</h5>
 		<p>In normal html, size of 'line-height:1.0em' is determined by font size of 'parent' block.</p>
-		<p>In contrast, property line-rate is determined by max font size of 'current line'.</p>
+		<p>In contrast, property <strong>line-rate</strong> is determined by max font size of 'current line'.</p>
 		<p>Assume that font-size of parent block is 16px, and max font size of current line is 32px, line-height:1.0em is 16px, but line-rate:1.0em is 32px.</p>
 	      </li>
 	      
 	      <li>
 		<h5>box-sizing:[content-box | border-box | margin-box(default)]</h5>
-		<p>In box-sizing, 'margin-box' is special value in nehan.js, and is box-sizing default value.</p>
+		<p>In box-sizing, <strong>margin-box</strong> is special value in nehan.js, and is box-sizing default value.</p>
 		<p>In margin-box, even if margin is included in box-size.</p>
 		<p>Why? In normal html, outer size of box can be expanded, but in paged layout, outer size is strictly fixed.</p>
 		<p>So if you represent margin/border/padding(called in edge in nehan.js), the only way is 'eliminating content space'.</p>
 	      </li>
 
 	      <li>
-		<h5>flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]</h5>
+		<h5>flow:[lr-tb | tb-rl | tb-lr | flip]</h5>
 		<p>This property represent document-mode in nehan.js.</p>
-		<p>'lr-tb' means inline flows 'left to right', block flows 'top to bottom'.</p>
-		<p>'tb-rl' means inline flows 'top to bottom', block flows 'right to left', and so on.</p>
-		<p>'flip' means toggle Layout["hori"] and Layout["vert"].</p>
+		<p><code>lr-tb</code> means inline flows 'left to right', block flows 'top to bottom'.</p>
+		<p><code>tb-rl</code> means inline flows 'top to bottom', block flows 'right to left', and so on.</p>
+		<p><code>flip</code> means toggle Layout["hori"] and Layout["vert"].</p>
 		<p>for example, assume that Layout["hori"] is "lr-tb", and Layout["vert"] is "tb-rl",</p>
-		<p>and current document direction(Layout.direction) is "hori", flow:"flip" means Layout["vert"], "tb-rl".</p>
+		<p>and current document direction(Layout.direction) is "hori", flow:"flip" means "tb-rl".</p>
 	      </li>
 	    </ol>
 	  </li>
@@ -481,7 +481,7 @@ ex3. {measure:"100px", extent:"50px"} // {width:"100px", height:"50px"}
 	    <tr>
 	      <td>font-weight</td>
 	      <td><p>{"font-weight":"bold"}</p></td>
-	      <td>desc</td>
+	      <td></td>
 	    </tr>
 
 	    <tr>
@@ -490,7 +490,7 @@ ex3. {measure:"100px", extent:"50px"} // {width:"100px", height:"50px"}
 		<p>{"font-style":"italic"}</p>
 		<p>{"font-style":"normal"}</p>
 	      </td>
-	      <td>desc</td>
+	      <td></td>
 	    </tr>
 
 	    <!-- g --->
