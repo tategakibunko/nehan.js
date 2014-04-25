@@ -43,20 +43,6 @@
 
 
 
-      <!-- install -->
-      <section>
-        <h2><a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h2>
-	<p>Include css, js in the <code>&lt;head&gt;</code>.</p>
-<pre class="prettyprint lang-html">
-&lt;link href="/path/to/nehan.css" type="text/css" rel="stylesheet"&gt;
-&lt;script src="/path/to/nehan.js" type="text/javascript"&gt;&lt;/script&gt;
-</pre>
-      </section>
-
-
-
-
-
       <!-- demo -->
       <section>
         <h2><a name="demo" class="anchor" href="#demo"><span class="octicon octicon-link"></span></a>Demo</h2>
@@ -163,6 +149,14 @@ second page
 
 <ol>
   <li>
+    <h3>Include css, js in the <code>&lt;head&gt;</code>.</h3>
+<pre class="prettyprint lang-html">
+&lt;link href="/path/to/nehan.css" type="text/css" rel="stylesheet"&gt;
+&lt;script src="/path/to/nehan.js" type="text/javascript"&gt;&lt;/script&gt;
+</pre>
+  </li>
+
+  <li>
     <h3>Generate layout engine with layout settings.</h3>
 <pre class="prettyprint lang-js">
 var engine = Nehan.setup({
@@ -180,7 +174,7 @@ var engine = Nehan.setup({
 
   <li>
     <h3>Setting styles</h3>
-    <p>If you want to define custum css class name, all class name must be started with '<code>nehan-</code>' prefix.</p>
+    <p>Your own styles can be defined by using <code>setStyle</code>(or setStyles).</p>
     <p>See <a href="#styling">styling</a> for more details.</p>
 <pre class="prettyprint lang-js">
 engine.setStyles({
