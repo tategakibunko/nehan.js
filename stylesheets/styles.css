@@ -27,6 +27,10 @@ h1 {
 h2 {
   color:#393939;
 }
+h1, h2{
+  padding-bottom:5px;
+  border-bottom:1px solid #ccc;
+}
 
 h3, h4, h5, h6 {
   color:#494949;
@@ -96,9 +100,12 @@ img {
 }
 
 header {
+  margin-bottom:50px;
+  /*
   width:270px;
   float:left;
   position:fixed;
+  */
 }
 
 header ul {
@@ -160,8 +167,9 @@ header ul a strong {
 }
 
 section {
+  /*
   width:500px;
-  float:right;
+  float:right;*/
   padding-bottom:50px;
 }
 
@@ -177,10 +185,11 @@ hr {
 }
 
 footer {
+  /*
   width:270px;
   float:left;
   position:fixed;
-  bottom:50px;
+  bottom:50px;*/
 }
 
 @media print, screen and (max-width: 960px) {
