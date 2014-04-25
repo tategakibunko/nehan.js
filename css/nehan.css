@@ -17,13 +17,9 @@
 .nehan-body a img {
   border:none;
 }
-.nehan-text-line{
-  overflow:visible;
-}
 .nehan-inline-tb-rl a,
-.nehan-inline-tb-lr a,
-.nehan-text-line-vert a,
-.nehan-text-line-vert a:hover{
+.nehan-inline-tb-lr a {
+  overflow:visible;
   text-decoration:none !important;
 }
 .nehan-body a{
@@ -50,8 +46,4 @@
 .nehan-vert-ie{
   writing-mode:tb-rl;
   float:left;
-}
-.nehan-text-line-hori.nehan-first-letter,
-.nehan-text-line-hori .nehan-ruby .nehan-rt{
-  line-height:1em !important;
 }
