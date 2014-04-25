@@ -7,8 +7,11 @@ var BodyGenerator = (function(){
 
   BodyGenerator.prototype._onCreate = function(context, block){
     block.seekPos = this.stream.getSeekPos();
+    block.charPos = DocumentContext.charPos;
     block.percent = this.stream.getSeekPercent();
     block.pageNo = DocumentContext.pageNo++;
+
+    DocumentContext.charPos += block.charCount || 0;
 
     // sometimes layout engine causes inlinite loop,
     // so terminate generator by restricting page count.

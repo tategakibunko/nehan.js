@@ -2,6 +2,7 @@ var DocumentContext = {
   documentType:"html",
   documentHeader:null,
   pageNo:0,
+  charPos:0,
   anchors:{},
   outlineContexts:[],
   // this is shortcut function for getOutlineContextsByName
