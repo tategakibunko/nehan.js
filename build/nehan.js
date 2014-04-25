@@ -7331,14 +7331,12 @@ var StyleContext = (function(){
     },
     _loadStaticMeasure : function(){
       var prop = this.flow.getPropMeasure();
-      //var max_size = this.getRootMeasure(); // this value is required when static size is set by '%' value.
       var max_size = Layout.getMeasure(this.flow); // this value is required when static size is set by '%' value.
       var static_size = this.getAttr(prop) || this.getAttr("measure") || this.getCssAttr(prop) || this.getCssAttr("measure");
       return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
     },
     _loadStaticExtent : function(){
       var prop = this.flow.getPropExtent();
-      //var max_size = this.getRootExtent(); // this value is required when static size is set by '%' value.
       var max_size = Layout.getExtent(this.flow); // this value is required when static size is set by '%' value.
       var static_size = this.getAttr(prop) || this.getAttr("extent") || this.getCssAttr(prop) || this.getCssAttr("extent");
       return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
