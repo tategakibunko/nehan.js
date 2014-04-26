@@ -3,7 +3,6 @@ var ListStyle = (function(){
     this.type = new ListStyleType(opt.type || "none");
     this.position = new ListStylePos(opt.position || "outside");
     this.image = (opt.image !== "none")? new ListStyleImage(opt.image) : null;
-    this.format = opt.format || null;
   }
 
   ListStyle.prototype = {
@@ -17,9 +16,6 @@ var ListStyle = (function(){
       return (this.image !== null);
     },
     getMarkerHtml : function(count){
-      if(this.format !== null){
-	return (typeof this.format === "function")? this.format(count) : this.format;
-      }
       if(this.image !== null){
 	return this.image.getMarkerHtml(count);
       }

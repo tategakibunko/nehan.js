@@ -12,13 +12,50 @@ var StyleContext = (function(){
     "iframe"
   ];
 
-  // css properties just copied as it is.
-  var __unmanaged_css_properties = [
-    "background",
-    "background-repeat",
-    "background-image",
-    "background-position",
-    "background-color"
+  // these properties must be under control of layout engine.
+  var __managed_css_properties = [
+    "border-color",
+    "border-radius",
+    "border-style",
+    "border-width",
+    "box-sizing",
+    "break-after",
+    "break-before",
+    "color",
+    "display",
+    "extent",
+    "embeddable", // flag
+    "float",
+    "flow",
+    "font-family",
+    "font-size",
+    "font-style",
+    "font-weight",
+    "height",
+    "interactive", // flag
+    "letter-spacing",
+    "line-rate",
+    "list-style-type",
+    "list-style-position",
+    "list-style-image",
+    "margin",
+    "measure",
+    "meta", // flag
+    "onload",
+    "padding",
+    "position",
+    "section", // flag
+    "section-root", // flag
+    "text-align",
+    "text-emphasis-style",
+    "text-emphasis-position",
+    "text-emphasis-color",
+    "text-combine",
+    "width"
+  ];
+
+  // properties that is not enabled even if it' unmanaged property.
+  var __ignored_css_properties = [
   ];
 
   var get_decorated_inline_elements = function(elements){
@@ -73,19 +110,26 @@ var StyleContext = (function(){
       // initialize css values
       this.selectorCss = {};
       this.inlineCss = {};
+      this.unmanagedCss = {};
 
-      // load selector css
-      // 1. load normal selector
+      // load selector css values
+      // 1. load selector css
       // 2. load dynamic callback selector 'onload'
       Args.copy(this.selectorCss, this._loadSelectorCss(markup, parent));
       Args.copy(this.selectorCss, this._loadCallbackCss("onload"));
 
-      // load inline css
+      // load inline css values
       // 1. load normal markup attribute 'style'
       // 2. load constructor argument 'args.forceCss' if exists.
       //    notice it is 'system required style', so it has highest priority.
       Args.copy(this.inlineCss, this._loadInlineCss(markup));
       Args.copy(this.inlineCss, args.forceCss || {});
+
+      // load unmanaged css values
+      // 1. filter all unmanaged css values from selector css
+      // 2. filter all unmanaged css values from inline css
+      Args.copy(this.unmanagedCss, this._loadUnmanagedCss(this.selectorCss));
+      Args.copy(this.unmanagedCss, this._loadUnmanagedCss(this.inlineCss));
 
       // always required properties
       this.display = this._loadDisplay(); // required
@@ -653,7 +697,7 @@ var StyleContext = (function(){
       if(this.zIndex){
 	css["z-index"] = this.zIndex;
       }
-      Args.copy(css, this.getCssUnmanaged());
+      Args.copy(css, this.unmanagedCss);
       css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
@@ -684,18 +728,7 @@ var StyleContext = (function(){
 	  css["text-align"] = "center";
 	}
       }
-      Args.copy(css, this.getCssUnmanaged());
-      return css;
-    },
-    getCssUnmanaged : function(){
-      var css = {}, self = this;
-      // copy unmanaged css
-      List.iter(__unmanaged_css_properties, function(prop){
-	var value = self.getCssAttr(prop);
-	if(value){
-	  css[prop] = value;
-	}
-      });
+      Args.copy(css, this.unmanagedCss);
       return css;
     },
     _computeContentMeasure : function(outer_measure){
@@ -850,6 +883,17 @@ var StyleContext = (function(){
 	ret[prop] = this._evalCssAttr(prop, ret[prop]);
       }
       return ret;
+    },
+    _loadUnmanagedCss : function(selector_css){
+      var css = {};
+      for(var prop in selector_css){
+	// prop is not both in managed grop and ignored group.
+	if(!List.exists(__managed_css_properties, Closure.eq(prop)) &&
+	   !List.exists(__ignored_css_properties, Closure.eq(prop))){
+	  css[prop] = selector_css[prop];
+	}
+      }
+      return css;
     },
     _loadDisplay : function(){
       return this.getCssAttr("display", "inline");
@@ -1007,8 +1051,7 @@ var StyleContext = (function(){
       return new ListStyle({
 	type:list_style_type,
 	position:this.getCssAttr("list-style-position", "outside"),
-	image:this.getCssAttr("list-style-image", "none"),
-	format:this.getCssAttr("list-style-format")
+	image:this.getCssAttr("list-style-image", "none")
       });
     },
     _loadLetterSpacing : function(font_size){
