@@ -5,7 +5,13 @@ Nehan.Env = Env;
 
 // set engine args
 Args.copy(Config, __engine_args.config || {});
-Args.copy(Layout, __engine_args.layout || {});
+Args.copy2(Layout, __engine_args.layout || {});
+
+// set first styles
+var __first_styles = __engine_args.style || {};
+for(var selector_key in __first_styles){
+  Selectors.setValue(selector_key, __first_styles[selector_key]);
+}
 
 // export engine local interfaces
 return {

@@ -538,7 +538,7 @@ var StyleContext = (function(){
       return this.font.size;
     },
     getFontFamily : function(){
-      return this.font.family || this.flow.isTextVertical()? Layout.vertFontFamily : Layout.horiFontFamily;
+      return this.font.family || Layout.fontFamily;
     },
     getTextAlign : function(){
       return this.textAlign || TextAligns.get("start");
@@ -897,7 +897,7 @@ var StyleContext = (function(){
       if(font_family !== "inherit"){
 	font.family = font_family;
       } else if(this.parent === null){
-	font.family = Layout.getStdFontFamily();
+	font.family = Layout.fontFamily;
       }
       var font_weight = this.getCssAttr("font-weight", "inherit");
       if(font_weight !== "inherit"){

@@ -1,7 +1,6 @@
 var BlockFlow = (function(){
-  function BlockFlow(dir, multicol){
+  function BlockFlow(dir){
     Flow.call(this, dir);
-    this.multicol = multicol || false;
   }
 
   Class.extend(BlockFlow, Flow);
@@ -18,8 +17,8 @@ var BlockFlow = (function(){
     var css = {};
     if(this.isHorizontal()){
       css["float"] = (this.dir === "lr")? "left" : "right";
-    } else if(this.isVertical() && this.multicol){
-      css["float"] = (Layout.getHoriIndir() === "lr")? "left" : "right";
+    } else if(this.isVertical()){
+      css["float"] = (this.dir === "lr")? "left" : "right";
     }
     return css;
   };

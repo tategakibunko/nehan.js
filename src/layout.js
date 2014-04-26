@@ -10,28 +10,32 @@ var Layout = {
   //    <body> or content of body itself is included in content text.
   root:"document",
   direction:"vert", // or 'hori'
-  hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
-  vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
+  boxFlow:{
+    hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
+    vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
+  },
   pagingDirection:{
     hori:"lr", // paging direction 'left to right'
     vert:"rl"  // paging direction 'right to left'
   },
-  width: 800, // layout default width if width prop not set in 'body' style.
-  height: 580, // layout default height if height prop not set in 'body' style.
-  fontSize:16, // layout default font-size if font-size prop not set in 'body' style.
+  width: 800, // root width
+  height: 580, // root height
+  fontSize:16, // root fontSize
   maxFontSize:64,
   rubyRate:0.5, // used when Style.rt["font-size"] is not defined.
-  boldRate:0.5,
-  lineRate: 2.0, // in nehan.js, extent size of line is specified by [lineRate] * [largest font_size of current line].
+  boldRate:0.5, // used to calculate sketchy bold metrics in the environment with no canvas element.
+  lineRate: 2.0, // in nehan.js, extent size of line is specified by [lineRate] * [max-font-size of current-line].
 
   // we need to specify these values(color,font-image-root) to display vertical font-images for browsers not supporting vert writing-mode.
   fontColor:"000000",
   linkColor:"0000FF",
   fontImgRoot:"http://nehan.googlecode.com/hg/char-img",
 
-  // these font-fmailies are needed to calculate proper text-metrics.
-  vertFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
-  horiFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+  // font name is required to be managed to calculate proper text-metrics.
+  fontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
+  //fontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+
+  // font sizes defined by name
   fontSizeNames:{
     "xx-large":"33px",
     "x-large":"24px",
@@ -52,21 +56,15 @@ var Layout = {
   getPagingDirection : function(){
     return this.pagingDirection[this.direction];
   },
-  getStdFontFamily : function(){
-    return (this.direction === "vert")? this.vertFontFamily : this.horiFontFamily;
-  },
   getStdBoxFlow : function(){
-    var flow_name = this[this.direction];
+    var flow_name = this.boxFlow[this.direction];
     return BoxFlows.getByName(flow_name);
   },
   getStdVertFlow : function(){
-    return BoxFlows.getByName(this.vert);
+    return BoxFlows.getByName(this.boxFlow.vert);
   },
   getStdHoriFlow : function(){
-    return BoxFlows.getByName(this.hori);
-  },
-  getHoriIndir : function(){
-    return this.hori.split("-")[0]; // "lr" or "rl"
+    return BoxFlows.getByName(this.boxFlow.hori);
   },
   getRtFontSize : function(base_font_size){
     var rt = Style.rt || null;
