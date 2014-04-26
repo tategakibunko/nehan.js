@@ -1,5 +1,5 @@
 // export global interfaces
-Nehan.version = "5.0.0";
+Nehan.version = "5.0.1";
 Nehan.Class = Class;
 Nehan.Env = Env;
 
