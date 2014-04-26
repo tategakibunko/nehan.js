@@ -730,31 +730,31 @@ var Style = {
   // font-size classes
   //-------------------------------------------------------
   ".nehan-xx-large":{
-    "font-size": Layout.fontSizeAbs["xx-large"]
+    "font-size": Layout.fontSizeNames["xx-large"]
   },
   ".nehan-x-large":{
-    "font-size": Layout.fontSizeAbs["x-large"]
+    "font-size": Layout.fontSizeNames["x-large"]
   },
   ".nehan-large":{
-    "font-size": Layout.fontSizeAbs.large
+    "font-size": Layout.fontSizeNames.large
   },
   ".nehan-medium":{
-    "font-size": Layout.fontSizeAbs.medium
+    "font-size": Layout.fontSizeNames.medium
   },
   ".nehan-small":{
-    "font-size": Layout.fontSizeAbs.small
+    "font-size": Layout.fontSizeNames.small
   },
   ".nehan-x-small":{
-    "font-size": Layout.fontSizeAbs["x-small"]
+    "font-size": Layout.fontSizeNames["x-small"]
   },
   ".nehan-xx-small":{
-    "font-size": Layout.fontSizeAbs["xx-small"]
+    "font-size": Layout.fontSizeNames["xx-small"]
   },
   ".nehan-larger":{
-    "font-size": Layout.fontSizeAbs.larger
+    "font-size": Layout.fontSizeNames.larger
   },
   ".nehan-smaller":{
-    "font-size": Layout.fontSizeAbs.smaller
+    "font-size": Layout.fontSizeNames.smaller
   },
   //-------------------------------------------------------
   // box-sizing classes

@@ -87,7 +87,7 @@ var Layout = {
   // these font-fmailies are needed to calculate proper text-metrics.
   vertFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
   horiFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-  fontSizeAbs:{
+  fontSizeNames:{
     "xx-large":"33px",
     "x-large":"24px",
     "large":"18px",
@@ -931,31 +931,31 @@ var Style = {
   // font-size classes
   //-------------------------------------------------------
   ".nehan-xx-large":{
-    "font-size": Layout.fontSizeAbs["xx-large"]
+    "font-size": Layout.fontSizeNames["xx-large"]
   },
   ".nehan-x-large":{
-    "font-size": Layout.fontSizeAbs["x-large"]
+    "font-size": Layout.fontSizeNames["x-large"]
   },
   ".nehan-large":{
-    "font-size": Layout.fontSizeAbs.large
+    "font-size": Layout.fontSizeNames.large
   },
   ".nehan-medium":{
-    "font-size": Layout.fontSizeAbs.medium
+    "font-size": Layout.fontSizeNames.medium
   },
   ".nehan-small":{
-    "font-size": Layout.fontSizeAbs.small
+    "font-size": Layout.fontSizeNames.small
   },
   ".nehan-x-small":{
-    "font-size": Layout.fontSizeAbs["x-small"]
+    "font-size": Layout.fontSizeNames["x-small"]
   },
   ".nehan-xx-small":{
-    "font-size": Layout.fontSizeAbs["xx-small"]
+    "font-size": Layout.fontSizeNames["xx-small"]
   },
   ".nehan-larger":{
-    "font-size": Layout.fontSizeAbs.larger
+    "font-size": Layout.fontSizeNames.larger
   },
   ".nehan-smaller":{
-    "font-size": Layout.fontSizeAbs.smaller
+    "font-size": Layout.fontSizeNames.smaller
   },
   //-------------------------------------------------------
   // box-sizing classes
@@ -6705,6 +6705,9 @@ var StyleContext = (function(){
     getParentFlow : function(){
       return this.parent? this.parent.flow : this.flow;
     },
+    getParentConentMeasure : function(){
+      return this.parent? this.parent.contentMeasure : this.contentMeasure;
+    },
     getNextSibling : function(){
       return this.next;
     },
@@ -6829,7 +6832,7 @@ var StyleContext = (function(){
     },
     _computeFontSize : function(val, unit_size){
       var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
-      var size = Layout.fontSizeAbs[str] || str;
+      var size = Layout.fontSizeNames[str] || str;
       return this._computeUnitSize(size, unit_size);
     },
     _computeUnitSize : function(val, unit_size){
@@ -6846,21 +6849,14 @@ var StyleContext = (function(){
 	return Math.round(parseInt(str, 10) * 4 / 3);
       }
       if(str.indexOf("%") > 0){
-	return Math.round(unit_size * parseInt(str, 10) / 100);
+	var max_size = this.getParentContentMeasure();
+	return Math.round(max_size * parseInt(str, 10) / 100);
       }
       var px = parseInt(str, 10);
       return isNaN(px)? 0 : px;
     },
-    _computeBoxSize : function(val, unit_size, max_size){
-      var str = (typeof val === "string")? val : String(val);
-      if(str.indexOf("%") > 0){
-	var scaled_size = Math.round(max_size * parseInt(str, 10) / 100);
-	return Math.min(max_size, scaled_size); // restrict less than maxMeasure
-      }
-      return this._computeUnitSize(val, unit_size);
-    },
     _computeCornerSize : function(val, unit_size){
-      var ret = {};
+      var ret = {}, max_size = this.getParentContent
       for(var prop in val){
 	ret[prop] = [0, 0];
 	ret[prop][0] = this._computeUnitSize(val[prop][0], unit_size);
@@ -7140,15 +7136,13 @@ var StyleContext = (function(){
     },
     _loadStaticMeasure : function(){
       var prop = this.flow.getPropMeasure();
-      var max_size = Layout.getMeasure(this.flow); // this value is required when static size is set by '%' value.
       var static_size = this.getAttr(prop) || this.getAttr("measure") || this.getCssAttr(prop) || this.getCssAttr("measure");
-      return static_size? this._computeBoxSize(static_size, this.font.size, max_size) : null;
+      return static_size? this._computeUnitSize(static_size, this.font.size) : null;
     },
     _loadStaticExtent : function(){
       var prop = this.flow.getPropExtent();
-      var max_size = Layout.getExtent(this.flow); // this value is required when static size is set by '%' value.
       var static_size = this.getAttr(prop) || this.getAttr("extent") || this.getCssAttr(prop) || this.getCssAttr("extent");
-      return static_size? this._computeBoxSize(static_size, this.font.size, max_size) : null;
+      return static_size? this._computeUnitSize(static_size, this.font.size) : null;
     }
   };
 
