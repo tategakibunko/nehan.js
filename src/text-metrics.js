@@ -15,7 +15,7 @@ var TextMetrics = (function(){
       return context && (typeof context.measureText !== "undefined");
     },
     getMetrics : function(font, text){
-      context.font = font.toString();
+      context.font = font.toString(); // to get accurate metrics, font info is required.
       return context.measureText(text);
     },
     getMeasure : function(font, text){
