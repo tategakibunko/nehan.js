@@ -129,7 +129,7 @@ var Layout = {
     if(rt === null || rt_font_size === null){
       return Math.round(this.rubyRate * base_font_size);
     }
-    return UnitSize.getUnitSize(rt_font_size, base_font_size);
+    return StyleContext.prototype._computeUnitSize.call(this, rt_font_size, base_font_size);
   },
   getPaletteFontColor : function(color){
     if(color.getValue().toLowerCase() !== this.fontColor.toLowerCase()){
@@ -1408,57 +1408,6 @@ var Obj = {
   }
 };
 
-var UnitSize = {
-  getFontSize : function(val, unit_size){
-    var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
-    var size = Layout.fontSizeAbs[str] || str;
-    return this.getUnitSize(size, unit_size);
-  },
-  getUnitSize : function(val, unit_size){
-    var str = String(val);
-    if(str.indexOf("rem") > 0){
-      var rem_scale = parseFloat(str.replace("rem",""));
-      return Math.round(Layout.fontSize * rem_scale); // use root font-size
-    }
-    if(str.indexOf("em") > 0){
-      var em_scale = parseFloat(str.replace("em",""));
-      return Math.round(unit_size * em_scale);
-    }
-    if(str.indexOf("pt") > 0){
-      return Math.round(parseInt(str, 10) * 4 / 3);
-    }
-    if(str.indexOf("%") > 0){
-      return Math.round(unit_size * parseInt(str, 10) / 100);
-    }
-    var px = parseInt(str, 10);
-    return isNaN(px)? 0 : px;
-  },
-  getBoxSize : function(val, unit_size, max_size){
-    var str = (typeof val === "string")? val : String(val);
-    if(str.indexOf("%") > 0){
-      var scaled_size = Math.round(max_size * parseInt(str, 10) / 100);
-      return Math.min(max_size, scaled_size); // restrict less than maxMeasure
-    }
-    return this.getUnitSize(val, unit_size);
-  },
-  getCornerSize : function(val, unit_size){
-    var ret = {};
-    for(var prop in val){
-      ret[prop] = [0, 0];
-      ret[prop][0] = this.getUnitSize(val[prop][0], unit_size);
-      ret[prop][1] = this.getUnitSize(val[prop][1], unit_size);
-    }
-    return ret;
-  },
-  getEdgeSize : function(val, unit_size){
-    var ret = {};
-    for(var prop in val){
-      ret[prop] = this.getUnitSize(val[prop], unit_size);
-    }
-    return ret;
-  }
-};
-
 var Utils = {
   trimHeadCRLF : function(str){
     return str.replace(/^\n+/, "");
@@ -1671,39 +1620,46 @@ var Args = {
 };
 
 /*
-  supported css properties
-  ==============================
+  there are css properties that are required to calculate accurate paged-layout,
+  and we call them 'managed css properties'.
 
-  background-color
-  background-image
-  background-repeat
-  background-position
+  managed css properties
+  ======================
+  after(nehan.js local property, same as 'bottom' if lr-tb)
+  before(nehan.js local property, same as 'top' if lr-tb)
   border
-  border-color
-  border-radius
-  border-style
   border-width
+  border-radius(rounded corner after/before is cleared if page is devided into multiple pages)
   box-sizing
-  color
+  break-after
+  break-before
+  color(required to switch charactor image src for some client)
   display
-  font-family
-  font-size
-  font-style
-  font-weight
+  end(nehan.js local property, same as 'right' if lr-tb)
+  extent(nehan.js local property)
   float
-  flow(nehan sepcial property)
-  line-rate(nehan special property)
+  flow(nehan.js local property)
+  font
+  font-size
+  font-family(required to get accurate text-metrics especially latin words)
+  height
+  letter-spacing
+  line-rate(nehan.js local property)
   list-style
   list-style-image
   list-style-position
   list-style-type
   margin
+  measure(nehan.js local property)
   padding
+  position
+  start(nehan.js local property, same as 'left' if lr-tb)
   text-align
-  text-combine(horizontal only)
+  text-combine
   text-emphasis-style
   white-space
- */
+  width
+*/
 var CssParser = (function(){
   var normalize = function(value){
     return Utils.trim(String(value))
@@ -1713,10 +1669,6 @@ var CssParser = (function(){
 
   var split_space = function(value){
     return (value.indexOf(" ") < 0)? [value] : value.split(/\s+/);
-  };
-
-  var split_slash = function(value){
-    return (value.indexOf("/") < 0)? [value] : value.split("/");
   };
 
   var get_map_2d = function(len){
@@ -1757,18 +1709,8 @@ var CssParser = (function(){
     return List.zipObj(props, values_4d);
   };
 
-  var make_corner_4d = function(values){
-    var props = Const.cssBoxCornersLogical; // len = 4
-    var values_4d = make_values_4d(values); // len = 4
-    return List.zipObj(props, values_4d);
-  };
-
   var parse_4d = function(value){
     return make_edge_4d(split_space(value));
-  };
-
-  var parse_corner_2d = function(value){
-    return make_values_2d(split_space(value));
   };
 
   var parse_corner_4d = function(value){
@@ -1786,12 +1728,6 @@ var CssParser = (function(){
     var arg_len = values.length;
     if(arg_len >= 1){
       ret.push({"border-width":parse_4d(values[0])});
-    }
-    if(arg_len >= 2){
-      ret.push({"border-style":parse_4d(values[1])});
-    }
-    if(arg_len >= 3){
-      ret.push({"border-color":parse_4d(values[2])});
     }
     return ret;
   };
@@ -1820,39 +1756,6 @@ var CssParser = (function(){
     return {}; // TODO
   };
 
-  var parse_background_pos = function(value){
-    var values = split_space(value);
-    var arg_len = values.length;
-    if(arg_len === 1){ // 1
-      return {
-	inline:{pos:values[0], offset:0},
-	block:{pos:"center", offset:0}
-      };
-    } else if(2 <= arg_len && arg_len < 4){ // 2, 3
-      return {
-	inline:{pos:values[0], offset:0},
-	block:{pos:values[1], offset:0}
-      };
-    } else if(arg_len >= 4){ // 4 ...
-      return {
-	inline:{pos:values[0], offset:values[1]},
-	block:{pos:values[2], offset:values[3]}
-      };
-    }
-    return null;
-  };
-
-  var parse_background_repeat = function(value){
-    var values = split_space(value);
-    var arg_len = values.length;
-    if(arg_len === 1){
-      return {inline:values[0], block:values[0]};
-    } else if(arg_len >= 2){
-      return {inline:values[0], block:values[1]};
-    }
-    return null;
-  };
-
   var format = function(prop, value){
     switch(typeof value){
     case "function": case "object": case "boolean":
@@ -1860,21 +1763,15 @@ var CssParser = (function(){
     }
     value = normalize(value); // number, string
     switch(prop){
-    case "background":
-      return parse_background_abbr(value);
-    case "background-position":
-      return parse_background_pos(value);
-    case "background-repeat":
-      return parse_background_repeat(value);
     case "border":
       return parse_border_abbr(value);
-    case "border-color":
+    case "border-width":
       return parse_4d(value);
     case "border-radius":
       return parse_corner_4d(value);
-    case "border-style":
+    case "border-color":
       return parse_4d(value);
-    case "border-width":
+    case "border-style":
       return parse_4d(value);
     case "font":
       return parse_font_abbr(value);
@@ -1884,7 +1781,7 @@ var CssParser = (function(){
       return parse_4d(value);
     case "padding":
       return parse_4d(value);
-    default: return value;
+    default: return value; // unmanaged properties is treated as it is.
     }
   };
 
@@ -3672,7 +3569,7 @@ var TextMetrics = (function(){
       return context && (typeof context.measureText !== "undefined");
     },
     getMetrics : function(font, text){
-      context.font = font.toString();
+      context.font = font.toString(); // to get accurate metrics, font info is required.
       return context.measureText(text);
     },
     getMeasure : function(font, text){
@@ -3927,148 +3824,6 @@ var InlineFlow = (function(){
   };
 
   return InlineFlow;
-})();
-
-
-var BackgroundPos = (function(){
-  function BackgroundPos(pos, offset){
-    this.pos = pos || "center";
-    this.offset = offset || 0;
-  }
-
-  BackgroundPos.prototype = {
-    getCssValue : function(flow){
-      var ret = [flow.getProp(this.pos)];
-      if(this.offset){
-	ret.push(this.offset);
-      }
-      return ret.join(" ");
-    }
-  };
-
-  return BackgroundPos;
-})();
-
-
-var BackgroundPos2d = (function(){
-  function BackgroundPos2d(inline, block){
-    this.inline = inline;
-    this.block = block;
-  }
-
-  BackgroundPos2d.prototype = {
-    getCssValue : function(flow){
-      return [
-	this.inline.getCssValue(flow),
-	this.block.getCssValue(flow)
-      ].join(" ");
-    },
-    getCss : function(flow){
-      var css = {};
-      css["background-pos"] = this.getCssValue(flow);
-      return css;
-    }
-  };
-
-  return BackgroundPos2d;
-})();
-
-
-var BackgroundRepeat = (function(){
-  function BackgroundRepeat(value){
-    this.value = value;
-  }
-
-  BackgroundRepeat.prototype = {
-    isSingleValue : function(){
-      return (this.value === "repeat-x" ||
-	      this.value === "repeat-y" ||
-	      this.value === "repeat-inline" ||
-	      this.value === "repeat-block");
-    },
-    getCssValue : function(flow){
-      var is_vert = flow.isTextVertical();
-      switch(this.value){
-      case "repeat-inline": case "repeat-x":
-	return is_vert? "repeat-y" : "repeat-x";
-      case "repeat-block": case "repeat-y":
-	return is_vert? "repeat-x" : "repeat-y";
-      default:
-	return this.value;
-      }
-    }
-  };
-
-  return BackgroundRepeat;
-})();
-
-
-var BackgroundRepeat2d = (function(){
-  // inline: BackgroundRepeat
-  // block: BackgroundRepeat
-  function BackgroundRepeat2d(inline, block){
-    this.inline = inline;
-    this.block = block;
-  }
-
-  BackgroundRepeat2d.prototype = {
-    _getRepeatValue : function(flow, value){
-      var is_vert = flow.isTextVertical();
-      switch(value){
-      case "repeat-inline": case "repeat-x":
-	return is_vert? "repeat-y" : "repeat-x";
-      case "repeat-block": case "repeat-y":
-	return is_vert? "repeat-x" : "repeat-y";
-      default:
-	return value;
-      }
-    },
-    getCssValue : function(flow){
-      var values = [this.inline];
-      if(!this.inline.isSingleValue()){
-	values.push(this.block);
-      }
-      return List.map(values, function(value){
-	return value.getCssValue(flow);
-      }).join(" ");
-    }
-  };
-
-  return BackgroundRepeat2d;
-})();
-
-
-var Background = (function(){
-  function Background(){
-  }
-
-  Background.prototype = {
-    getCss : function(flow){
-      var css = {};
-      if(this.pos){
-	Args.copy(css, this.pos.getCss(flow));
-      }
-      if(this.repeat){
-	css["background-repeat"] = this.repeat.getCssValue(flow);
-	//Args.copy(css, this.repeat.getCss(flow));
-      }
-      if(this.origin){
-	css["background-origin"] = this.origin;
-      }
-      if(this.color){
-	css["background-color"] = this.color.getCssValue();
-      }
-      if(this.image){
-	css["background-image"] = this.image;
-      }
-      if(this.attachment){
-	css["background-attachment"] = this.attachment;
-      }
-      return css;
-    }
-  };
-
-  return Background;
 })();
 
 
@@ -4863,26 +4618,29 @@ var BoxSize = (function(){
 })();
 
 var BoxPosition = (function(){
-  function BoxPosition(position, offset){
-    offset = offset || {};
+  function BoxPosition(position){
     this.position = position;
-    this.top = (typeof offset.top !== "undefined")? offset.top : "auto";
-    this.left = (typeof offset.left !== "undefined")? offset.left : "auto";
-    this.right = (typeof offset.right !== "undefined")? offset.right : "auto";
-    this.bottom = (typeof offset.bottom !== "undefined")? offset.bottom : "auto";
   }
 
   BoxPosition.prototype = {
     isAbsolute : function(){
       return this.position === "absolute";
     },
-    getCss : function(){
+    getCss : function(flow){
       var css = {};
       css.position = this.position;
-      css.top = this.top;
-      css.left = this.left;
-      css.right = this.right;
-      css.bottom = this.bottom;
+      if(this.start){
+	css[flow.getPropStart()] = this.start + "px";
+      }
+      if(this.end){
+	css[flow.getPropEnd()] = this.end + "px";
+      }
+      if(this.before){
+	css[flow.getPropBefore()] = this.before + "px";
+      }
+      if(this.after){
+	css[flow.getPropAfter()] = this.after + "px";
+      }
       return css;
     }
   };
@@ -6359,7 +6117,28 @@ var SelectorCallbackContext = (function(){
 
 
 var StyleContext = (function(){
-  var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+
+  // to fetch first text part from content html.
+  var __rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+  
+  // these markups are not parsed, just ignored.
+  var __disabled_markups = [
+    "script",
+    "noscript",
+    "style",
+    "input",
+    "iframe"
+  ];
+
+  // css properties just copied as it is.
+  var __unmanaged_css_properties = [
+    "background",
+    "background-repeat",
+    "background-image",
+    "background-position",
+    "background-color"
+  ];
+
   var get_decorated_inline_elements = function(elements){
     var ret = [];
     List.iter(elements, function(element){
@@ -6374,9 +6153,6 @@ var StyleContext = (function(){
     });
     return ret;
   };
-  var disabled_markups = [
-    "script", "noscript", "style", "input", "iframe"
-  ];
 
   // parent : parent style context
   // args :
@@ -6438,10 +6214,6 @@ var StyleContext = (function(){
       var color = this._loadColor();
       if(color){
 	this.color = color;
-      }
-      var background = this._loadBackground();
-      if(background){
-	this.background = background;
       }
       var font = this._loadFont();
       if(font){
@@ -6662,7 +6434,7 @@ var StyleContext = (function(){
       return line;
     },
     isDisabled : function(){
-      return List.exists(disabled_markups, Closure.eq(this.getMarkupName()));
+      return List.exists(__disabled_markups, Closure.eq(this.getMarkupName()));
     },
     isBlock : function(){
       switch(this.display){
@@ -6729,6 +6501,9 @@ var StyleContext = (function(){
     },
     isTextHorizontal : function(){
       return this.flow.isTextHorizontal();
+    },
+    isPositionAbsolute : function(){
+      return this.position.isAbsolute();
     },
     isPre : function(){
       var white_space = this.getCssAttr("white-space", "normal");
@@ -6864,7 +6639,7 @@ var StyleContext = (function(){
       }
       var first_letter = Selectors.getValuePe(this, "first-letter");
       if(!Obj.isEmpty(first_letter)){
-	content = content.replace(rex_first_letter, function(match, p1, p2, p3){
+	content = content.replace(__rex_first_letter, function(match, p1, p2, p3){
 	  return p1 + Html.tagWrap("first-letter", p3);
 	});
       }
@@ -6981,19 +6756,20 @@ var StyleContext = (function(){
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
-      if(this.background){
-	Args.copy(css, this.background.getCss(this.flow));
-      }
       if(this.letterSpacing && !this.flow.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
       if(this.floatDirection){
 	Args.copy(css, this.floatDirection.getCss(this.flow));
       }
-      css.overflow = "hidden"; // to avoid margin collapsing
+      if(this.position){
+	Args.copy(css, this.position.getCss());
+      }
       if(this.zIndex){
 	css["z-index"] = this.zIndex;
       }
+      Args.copy(css, this.getCssUnmanaged());
+      css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
     // notice that line-size, line-edge is box local variable,
@@ -7010,9 +6786,6 @@ var StyleContext = (function(){
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
-      if(this.background){
-	Args.copy(css, this.background.getCss());
-      }
       // top level line need to follow parent blockflow.
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
@@ -7026,6 +6799,18 @@ var StyleContext = (function(){
 	  css["text-align"] = "center";
 	}
       }
+      Args.copy(css, this.getCssUnmanaged());
+      return css;
+    },
+    getCssUnmanaged : function(){
+      var css = {}, self = this;
+      // copy unmanaged css
+      List.iter(__unmanaged_css_properties, function(prop){
+	var value = self.getCssAttr(prop);
+	if(value){
+	  css[prop] = value;
+	}
+      });
       return css;
     },
     _computeContentMeasure : function(outer_measure){
@@ -7041,6 +6826,54 @@ var StyleContext = (function(){
       case "border-box": return outer_extent - this.getInnerEdgeExtent();
       case "content-box": default: return outer_extent;
       }
+    },
+    _computeFontSize : function(val, unit_size){
+      var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
+      var size = Layout.fontSizeAbs[str] || str;
+      return this._computeUnitSize(size, unit_size);
+    },
+    _computeUnitSize : function(val, unit_size){
+      var str = String(val);
+      if(str.indexOf("rem") > 0){
+	var rem_scale = parseFloat(str.replace("rem",""));
+	return Math.round(Layout.fontSize * rem_scale); // use root font-size
+      }
+      if(str.indexOf("em") > 0){
+	var em_scale = parseFloat(str.replace("em",""));
+	return Math.round(unit_size * em_scale);
+      }
+      if(str.indexOf("pt") > 0){
+	return Math.round(parseInt(str, 10) * 4 / 3);
+      }
+      if(str.indexOf("%") > 0){
+	return Math.round(unit_size * parseInt(str, 10) / 100);
+      }
+      var px = parseInt(str, 10);
+      return isNaN(px)? 0 : px;
+    },
+    _computeBoxSize : function(val, unit_size, max_size){
+      var str = (typeof val === "string")? val : String(val);
+      if(str.indexOf("%") > 0){
+	var scaled_size = Math.round(max_size * parseInt(str, 10) / 100);
+	return Math.min(max_size, scaled_size); // restrict less than maxMeasure
+      }
+      return this._computeUnitSize(val, unit_size);
+    },
+    _computeCornerSize : function(val, unit_size){
+      var ret = {};
+      for(var prop in val){
+	ret[prop] = [0, 0];
+	ret[prop][0] = this._computeUnitSize(val[prop][0], unit_size);
+	ret[prop][1] = this._computeUnitSize(val[prop][1], unit_size);
+      }
+      return ret;
+    },
+    _computeEdgeSize : function(val, unit_size){
+      var ret = {};
+      for(var prop in val){
+	ret[prop] = this._computeUnitSize(val[prop], unit_size);
+      }
+      return ret;
     },
     _setTextAlign : function(line, text_align){
       var content_measure  = line.getContentMeasure(this.flow);
@@ -7155,13 +6988,18 @@ var StyleContext = (function(){
       return BoxFlows.getByName(value);
     },
     _loadPosition : function(){
-      var value = this.getCssAttr("position", "relative");
-      return new BoxPosition(value, {
-	top: this.getCssAttr("top", "auto"),
-	left: this.getCssAttr("left", "auto"),
-	right: this.getCssAttr("right", "auto"),
-	bottom: this.getCssAttr("bottom", "auto")
-      });
+      var value = this.getCssAttr("position", "static");
+      if(value === "start"){
+	return null;
+      }
+      var position = new BoxPosition(value);
+      /* TODO
+      var start = this.getCssAttr("start");
+      var end = this.getCssAttr("end");
+      var before = this.getCssAttr("before");
+      var after = this.getCssAttr("after");
+      */
+      return position;
     },
     _loadColor : function(){
       var value = this.getCssAttr("color", "inherit");
@@ -7174,7 +7012,7 @@ var StyleContext = (function(){
       var font = new Font(parent_font_size);
       var font_size = this.getCssAttr("font-size", "inherit");
       if(font_size !== "inherit"){
-	font.size = UnitSize.getFontSize(font_size, parent_font_size);
+	font.size = this._computeFontSize(font_size, parent_font_size);
       }
       var font_family = this.getCssAttr("font-family", "inherit");
       if(font_family !== "inherit"){
@@ -7204,17 +7042,17 @@ var StyleContext = (function(){
       }
       var edge = new BoxEdge();
       if(padding){
-	edge.padding.setSize(flow, UnitSize.getEdgeSize(padding, font_size));
+	edge.padding.setSize(flow, this._computeEdgeSize(padding, font_size));
       }
       if(margin){
-	edge.margin.setSize(flow, UnitSize.getEdgeSize(margin, font_size));
+	edge.margin.setSize(flow, this._computeEdgeSize(margin, font_size));
       }
       if(border_width){
-	edge.border.setSize(flow, UnitSize.getEdgeSize(border_width, font_size));
+	edge.border.setSize(flow, this._computeEdgeSize(border_width, font_size));
       }
       var border_radius = this.getCssAttr("border-radius");
       if(border_radius){
-	edge.setBorderRadius(flow, UnitSize.getCornerSize(border_radius, font_size));
+	edge.setBorderRadius(flow, this._computeCornerSize(border_radius, font_size));
       }
       var border_color = this.getCssAttr("border-color");
       if(border_color){
@@ -7297,49 +7135,20 @@ var StyleContext = (function(){
     _loadLetterSpacing : function(font_size){
       var letter_spacing = this.getCssAttr("letter-spacing");
       if(letter_spacing){
-	return UnitSize.getUnitSize(letter_spacing, font_size);
+	return this._computeUnitSize(letter_spacing, font_size);
       }
-    },
-    _loadBackground : function(){
-      var bg_color = this.getCssAttr("background-color");
-      var bg_image = this.getCssAttr("background-image");
-      var bg_pos = this.getCssAttr("background-position");
-      if(bg_color === null && bg_image === null && bg_pos === null){
-	return null;
-      }
-      var background = new Background();
-      if(bg_color){
-	background.color = new Color(bg_color);
-      }
-      if(bg_image){
-	background.image = bg_image;
-      }
-      if(bg_pos){
-	background.pos = new BackgroundPos2d(
-	  new BackgroundPos(bg_pos.inline, bg_pos.offset),
-	  new BackgroundPos(bg_pos.block, bg_pos.offset)
-	);
-      }
-      var bg_repeat = this.getCssAttr("background-repeat");
-      if(bg_repeat){
-	background.repeat = new BackgroundRepeat2d(
-	  new BackgroundRepeat(bg_repeat.inline),
-	  new BackgroundRepeat(bg_repeat.block)
-	);
-      }
-      return background;
     },
     _loadStaticMeasure : function(){
       var prop = this.flow.getPropMeasure();
       var max_size = Layout.getMeasure(this.flow); // this value is required when static size is set by '%' value.
       var static_size = this.getAttr(prop) || this.getAttr("measure") || this.getCssAttr(prop) || this.getCssAttr("measure");
-      return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
+      return static_size? this._computeBoxSize(static_size, this.font.size, max_size) : null;
     },
     _loadStaticExtent : function(){
       var prop = this.flow.getPropExtent();
       var max_size = Layout.getExtent(this.flow); // this value is required when static size is set by '%' value.
       var static_size = this.getAttr(prop) || this.getAttr("extent") || this.getCssAttr(prop) || this.getCssAttr("extent");
-      return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
+      return static_size? this._computeBoxSize(static_size, this.font.size, max_size) : null;
     }
   };
 

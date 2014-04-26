@@ -1,5 +1,26 @@
 var StyleContext = (function(){
-  var rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+
+  // to fetch first text part from content html.
+  var __rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+  
+  // these markups are not parsed, just ignored.
+  var __disabled_markups = [
+    "script",
+    "noscript",
+    "style",
+    "input",
+    "iframe"
+  ];
+
+  // css properties just copied as it is.
+  var __unmanaged_css_properties = [
+    "background",
+    "background-repeat",
+    "background-image",
+    "background-position",
+    "background-color"
+  ];
+
   var get_decorated_inline_elements = function(elements){
     var ret = [];
     List.iter(elements, function(element){
@@ -14,9 +35,6 @@ var StyleContext = (function(){
     });
     return ret;
   };
-  var disabled_markups = [
-    "script", "noscript", "style", "input", "iframe"
-  ];
 
   // parent : parent style context
   // args :
@@ -78,10 +96,6 @@ var StyleContext = (function(){
       var color = this._loadColor();
       if(color){
 	this.color = color;
-      }
-      var background = this._loadBackground();
-      if(background){
-	this.background = background;
       }
       var font = this._loadFont();
       if(font){
@@ -302,7 +316,7 @@ var StyleContext = (function(){
       return line;
     },
     isDisabled : function(){
-      return List.exists(disabled_markups, Closure.eq(this.getMarkupName()));
+      return List.exists(__disabled_markups, Closure.eq(this.getMarkupName()));
     },
     isBlock : function(){
       switch(this.display){
@@ -369,6 +383,9 @@ var StyleContext = (function(){
     },
     isTextHorizontal : function(){
       return this.flow.isTextHorizontal();
+    },
+    isPositionAbsolute : function(){
+      return this.position.isAbsolute();
     },
     isPre : function(){
       var white_space = this.getCssAttr("white-space", "normal");
@@ -504,7 +521,7 @@ var StyleContext = (function(){
       }
       var first_letter = Selectors.getValuePe(this, "first-letter");
       if(!Obj.isEmpty(first_letter)){
-	content = content.replace(rex_first_letter, function(match, p1, p2, p3){
+	content = content.replace(__rex_first_letter, function(match, p1, p2, p3){
 	  return p1 + Html.tagWrap("first-letter", p3);
 	});
       }
@@ -621,19 +638,20 @@ var StyleContext = (function(){
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
-      if(this.background){
-	Args.copy(css, this.background.getCss(this.flow));
-      }
       if(this.letterSpacing && !this.flow.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
       if(this.floatDirection){
 	Args.copy(css, this.floatDirection.getCss(this.flow));
       }
-      css.overflow = "hidden"; // to avoid margin collapsing
+      if(this.position){
+	Args.copy(css, this.position.getCss());
+      }
       if(this.zIndex){
 	css["z-index"] = this.zIndex;
       }
+      Args.copy(css, this.getCssUnmanaged());
+      css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
     // notice that line-size, line-edge is box local variable,
@@ -650,9 +668,6 @@ var StyleContext = (function(){
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
-      if(this.background){
-	Args.copy(css, this.background.getCss());
-      }
       // top level line need to follow parent blockflow.
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
@@ -666,6 +681,18 @@ var StyleContext = (function(){
 	  css["text-align"] = "center";
 	}
       }
+      Args.copy(css, this.getCssUnmanaged());
+      return css;
+    },
+    getCssUnmanaged : function(){
+      var css = {}, self = this;
+      // copy unmanaged css
+      List.iter(__unmanaged_css_properties, function(prop){
+	var value = self.getCssAttr(prop);
+	if(value){
+	  css[prop] = value;
+	}
+      });
       return css;
     },
     _computeContentMeasure : function(outer_measure){
@@ -681,6 +708,54 @@ var StyleContext = (function(){
       case "border-box": return outer_extent - this.getInnerEdgeExtent();
       case "content-box": default: return outer_extent;
       }
+    },
+    _computeFontSize : function(val, unit_size){
+      var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
+      var size = Layout.fontSizeAbs[str] || str;
+      return this._computeUnitSize(size, unit_size);
+    },
+    _computeUnitSize : function(val, unit_size){
+      var str = String(val);
+      if(str.indexOf("rem") > 0){
+	var rem_scale = parseFloat(str.replace("rem",""));
+	return Math.round(Layout.fontSize * rem_scale); // use root font-size
+      }
+      if(str.indexOf("em") > 0){
+	var em_scale = parseFloat(str.replace("em",""));
+	return Math.round(unit_size * em_scale);
+      }
+      if(str.indexOf("pt") > 0){
+	return Math.round(parseInt(str, 10) * 4 / 3);
+      }
+      if(str.indexOf("%") > 0){
+	return Math.round(unit_size * parseInt(str, 10) / 100);
+      }
+      var px = parseInt(str, 10);
+      return isNaN(px)? 0 : px;
+    },
+    _computeBoxSize : function(val, unit_size, max_size){
+      var str = (typeof val === "string")? val : String(val);
+      if(str.indexOf("%") > 0){
+	var scaled_size = Math.round(max_size * parseInt(str, 10) / 100);
+	return Math.min(max_size, scaled_size); // restrict less than maxMeasure
+      }
+      return this._computeUnitSize(val, unit_size);
+    },
+    _computeCornerSize : function(val, unit_size){
+      var ret = {};
+      for(var prop in val){
+	ret[prop] = [0, 0];
+	ret[prop][0] = this._computeUnitSize(val[prop][0], unit_size);
+	ret[prop][1] = this._computeUnitSize(val[prop][1], unit_size);
+      }
+      return ret;
+    },
+    _computeEdgeSize : function(val, unit_size){
+      var ret = {};
+      for(var prop in val){
+	ret[prop] = this._computeUnitSize(val[prop], unit_size);
+      }
+      return ret;
     },
     _setTextAlign : function(line, text_align){
       var content_measure  = line.getContentMeasure(this.flow);
@@ -795,13 +870,18 @@ var StyleContext = (function(){
       return BoxFlows.getByName(value);
     },
     _loadPosition : function(){
-      var value = this.getCssAttr("position", "relative");
-      return new BoxPosition(value, {
-	top: this.getCssAttr("top", "auto"),
-	left: this.getCssAttr("left", "auto"),
-	right: this.getCssAttr("right", "auto"),
-	bottom: this.getCssAttr("bottom", "auto")
-      });
+      var value = this.getCssAttr("position", "static");
+      if(value === "start"){
+	return null;
+      }
+      var position = new BoxPosition(value);
+      /* TODO
+      var start = this.getCssAttr("start");
+      var end = this.getCssAttr("end");
+      var before = this.getCssAttr("before");
+      var after = this.getCssAttr("after");
+      */
+      return position;
     },
     _loadColor : function(){
       var value = this.getCssAttr("color", "inherit");
@@ -814,7 +894,7 @@ var StyleContext = (function(){
       var font = new Font(parent_font_size);
       var font_size = this.getCssAttr("font-size", "inherit");
       if(font_size !== "inherit"){
-	font.size = UnitSize.getFontSize(font_size, parent_font_size);
+	font.size = this._computeFontSize(font_size, parent_font_size);
       }
       var font_family = this.getCssAttr("font-family", "inherit");
       if(font_family !== "inherit"){
@@ -844,17 +924,17 @@ var StyleContext = (function(){
       }
       var edge = new BoxEdge();
       if(padding){
-	edge.padding.setSize(flow, UnitSize.getEdgeSize(padding, font_size));
+	edge.padding.setSize(flow, this._computeEdgeSize(padding, font_size));
       }
       if(margin){
-	edge.margin.setSize(flow, UnitSize.getEdgeSize(margin, font_size));
+	edge.margin.setSize(flow, this._computeEdgeSize(margin, font_size));
       }
       if(border_width){
-	edge.border.setSize(flow, UnitSize.getEdgeSize(border_width, font_size));
+	edge.border.setSize(flow, this._computeEdgeSize(border_width, font_size));
       }
       var border_radius = this.getCssAttr("border-radius");
       if(border_radius){
-	edge.setBorderRadius(flow, UnitSize.getCornerSize(border_radius, font_size));
+	edge.setBorderRadius(flow, this._computeCornerSize(border_radius, font_size));
       }
       var border_color = this.getCssAttr("border-color");
       if(border_color){
@@ -937,49 +1017,20 @@ var StyleContext = (function(){
     _loadLetterSpacing : function(font_size){
       var letter_spacing = this.getCssAttr("letter-spacing");
       if(letter_spacing){
-	return UnitSize.getUnitSize(letter_spacing, font_size);
+	return this._computeUnitSize(letter_spacing, font_size);
       }
-    },
-    _loadBackground : function(){
-      var bg_color = this.getCssAttr("background-color");
-      var bg_image = this.getCssAttr("background-image");
-      var bg_pos = this.getCssAttr("background-position");
-      if(bg_color === null && bg_image === null && bg_pos === null){
-	return null;
-      }
-      var background = new Background();
-      if(bg_color){
-	background.color = new Color(bg_color);
-      }
-      if(bg_image){
-	background.image = bg_image;
-      }
-      if(bg_pos){
-	background.pos = new BackgroundPos2d(
-	  new BackgroundPos(bg_pos.inline, bg_pos.offset),
-	  new BackgroundPos(bg_pos.block, bg_pos.offset)
-	);
-      }
-      var bg_repeat = this.getCssAttr("background-repeat");
-      if(bg_repeat){
-	background.repeat = new BackgroundRepeat2d(
-	  new BackgroundRepeat(bg_repeat.inline),
-	  new BackgroundRepeat(bg_repeat.block)
-	);
-      }
-      return background;
     },
     _loadStaticMeasure : function(){
       var prop = this.flow.getPropMeasure();
       var max_size = Layout.getMeasure(this.flow); // this value is required when static size is set by '%' value.
       var static_size = this.getAttr(prop) || this.getAttr("measure") || this.getCssAttr(prop) || this.getCssAttr("measure");
-      return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
+      return static_size? this._computeBoxSize(static_size, this.font.size, max_size) : null;
     },
     _loadStaticExtent : function(){
       var prop = this.flow.getPropExtent();
       var max_size = Layout.getExtent(this.flow); // this value is required when static size is set by '%' value.
       var static_size = this.getAttr(prop) || this.getAttr("extent") || this.getCssAttr(prop) || this.getCssAttr("extent");
-      return static_size? UnitSize.getBoxSize(static_size, this.font.size, max_size) : null;
+      return static_size? this._computeBoxSize(static_size, this.font.size, max_size) : null;
     }
   };
 

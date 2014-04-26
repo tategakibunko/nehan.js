@@ -1,24 +1,27 @@
 var BoxPosition = (function(){
-  function BoxPosition(position, offset){
-    offset = offset || {};
+  function BoxPosition(position){
     this.position = position;
-    this.top = (typeof offset.top !== "undefined")? offset.top : "auto";
-    this.left = (typeof offset.left !== "undefined")? offset.left : "auto";
-    this.right = (typeof offset.right !== "undefined")? offset.right : "auto";
-    this.bottom = (typeof offset.bottom !== "undefined")? offset.bottom : "auto";
   }
 
   BoxPosition.prototype = {
     isAbsolute : function(){
       return this.position === "absolute";
     },
-    getCss : function(){
+    getCss : function(flow){
       var css = {};
       css.position = this.position;
-      css.top = this.top;
-      css.left = this.left;
-      css.right = this.right;
-      css.bottom = this.bottom;
+      if(this.start){
+	css[flow.getPropStart()] = this.start + "px";
+      }
+      if(this.end){
+	css[flow.getPropEnd()] = this.end + "px";
+      }
+      if(this.before){
+	css[flow.getPropBefore()] = this.before + "px";
+      }
+      if(this.after){
+	css[flow.getPropAfter()] = this.after + "px";
+      }
       return css;
     }
   };

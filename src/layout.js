@@ -74,7 +74,7 @@ var Layout = {
     if(rt === null || rt_font_size === null){
       return Math.round(this.rubyRate * base_font_size);
     }
-    return UnitSize.getUnitSize(rt_font_size, base_font_size);
+    return StyleContext.prototype._computeUnitSize.call(this, rt_font_size, base_font_size);
   },
   getPaletteFontColor : function(color){
     if(color.getValue().toLowerCase() !== this.fontColor.toLowerCase()){

@@ -1,37 +1,44 @@
 /*
-  supported css properties
-  ==============================
+  there are css properties that are required to calculate accurate paged-layout,
+  and we call them 'managed css properties'.
 
-  background-color
-  background-image
-  background-repeat
-  background-position
+  managed css properties
+  ======================
+  after(nehan.js local property, same as 'bottom' if lr-tb)
+  before(nehan.js local property, same as 'top' if lr-tb)
   border
-  border-color
-  border-radius
-  border-style
   border-width
+  border-radius(rounded corner after/before is cleared if page is devided into multiple pages)
   box-sizing
-  color
+  break-after
+  break-before
+  color(required to switch charactor image src for some client)
   display
-  font-family
-  font-size
-  font-style
-  font-weight
+  end(nehan.js local property, same as 'right' if lr-tb)
+  extent(nehan.js local property)
   float
-  flow(nehan sepcial property)
-  line-rate(nehan special property)
+  flow(nehan.js local property)
+  font
+  font-size
+  font-family(required to get accurate text-metrics especially latin words)
+  height
+  letter-spacing
+  line-rate(nehan.js local property)
   list-style
   list-style-image
   list-style-position
   list-style-type
   margin
+  measure(nehan.js local property)
   padding
+  position
+  start(nehan.js local property, same as 'left' if lr-tb)
   text-align
-  text-combine(horizontal only)
+  text-combine
   text-emphasis-style
   white-space
- */
+  width
+*/
 var CssParser = (function(){
   var normalize = function(value){
     return Utils.trim(String(value))
@@ -41,10 +48,6 @@ var CssParser = (function(){
 
   var split_space = function(value){
     return (value.indexOf(" ") < 0)? [value] : value.split(/\s+/);
-  };
-
-  var split_slash = function(value){
-    return (value.indexOf("/") < 0)? [value] : value.split("/");
   };
 
   var get_map_2d = function(len){
@@ -85,18 +88,8 @@ var CssParser = (function(){
     return List.zipObj(props, values_4d);
   };
 
-  var make_corner_4d = function(values){
-    var props = Const.cssBoxCornersLogical; // len = 4
-    var values_4d = make_values_4d(values); // len = 4
-    return List.zipObj(props, values_4d);
-  };
-
   var parse_4d = function(value){
     return make_edge_4d(split_space(value));
-  };
-
-  var parse_corner_2d = function(value){
-    return make_values_2d(split_space(value));
   };
 
   var parse_corner_4d = function(value){
@@ -114,12 +107,6 @@ var CssParser = (function(){
     var arg_len = values.length;
     if(arg_len >= 1){
       ret.push({"border-width":parse_4d(values[0])});
-    }
-    if(arg_len >= 2){
-      ret.push({"border-style":parse_4d(values[1])});
-    }
-    if(arg_len >= 3){
-      ret.push({"border-color":parse_4d(values[2])});
     }
     return ret;
   };
@@ -148,39 +135,6 @@ var CssParser = (function(){
     return {}; // TODO
   };
 
-  var parse_background_pos = function(value){
-    var values = split_space(value);
-    var arg_len = values.length;
-    if(arg_len === 1){ // 1
-      return {
-	inline:{pos:values[0], offset:0},
-	block:{pos:"center", offset:0}
-      };
-    } else if(2 <= arg_len && arg_len < 4){ // 2, 3
-      return {
-	inline:{pos:values[0], offset:0},
-	block:{pos:values[1], offset:0}
-      };
-    } else if(arg_len >= 4){ // 4 ...
-      return {
-	inline:{pos:values[0], offset:values[1]},
-	block:{pos:values[2], offset:values[3]}
-      };
-    }
-    return null;
-  };
-
-  var parse_background_repeat = function(value){
-    var values = split_space(value);
-    var arg_len = values.length;
-    if(arg_len === 1){
-      return {inline:values[0], block:values[0]};
-    } else if(arg_len >= 2){
-      return {inline:values[0], block:values[1]};
-    }
-    return null;
-  };
-
   var format = function(prop, value){
     switch(typeof value){
     case "function": case "object": case "boolean":
@@ -188,21 +142,15 @@ var CssParser = (function(){
     }
     value = normalize(value); // number, string
     switch(prop){
-    case "background":
-      return parse_background_abbr(value);
-    case "background-position":
-      return parse_background_pos(value);
-    case "background-repeat":
-      return parse_background_repeat(value);
     case "border":
       return parse_border_abbr(value);
-    case "border-color":
+    case "border-width":
       return parse_4d(value);
     case "border-radius":
       return parse_corner_4d(value);
-    case "border-style":
+    case "border-color":
       return parse_4d(value);
-    case "border-width":
+    case "border-style":
       return parse_4d(value);
     case "font":
       return parse_font_abbr(value);
@@ -212,7 +160,7 @@ var CssParser = (function(){
       return parse_4d(value);
     case "padding":
       return parse_4d(value);
-    default: return value;
+    default: return value; // unmanaged properties is treated as it is.
     }
   };
 
