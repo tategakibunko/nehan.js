@@ -4718,10 +4718,16 @@ var Box = (function(){
     },
     getLayoutMeasure : function(flow){
       flow = flow || this.style.flow;
+      if(this.style.isPositionAbsolute()){
+	return 0;
+      }
       return this.getContentMeasure(flow) + this.getEdgeMeasure(flow);
     },
     getLayoutExtent : function(flow){
       flow = flow || this.style.flow;
+      if(this.style.isPositionAbsolute()){
+	return 0;
+      }
       return this.getContentExtent(flow) + this.getEdgeExtent(flow);
     },
     clearBorderBefore : function(){
@@ -6989,12 +6995,13 @@ var StyleContext = (function(){
 	return null;
       }
       var position = new BoxPosition(value);
-      /* TODO
-      var start = this.getCssAttr("start");
-      var end = this.getCssAttr("end");
-      var before = this.getCssAttr("before");
-      var after = this.getCssAttr("after");
-      */
+      var self = this;
+      List.iter(Const.cssBoxDirsLogical, function(dir){
+	var value = self.getCssAttr(dir, "auto");
+	if(value !== "auto"){
+	  position[value] = self._computeUnitSize(start, self.font.size);
+	}
+      });
       return position;
     },
     _loadColor : function(){

@@ -67,10 +67,16 @@ var Box = (function(){
     },
     getLayoutMeasure : function(flow){
       flow = flow || this.style.flow;
+      if(this.style.isPositionAbsolute()){
+	return 0;
+      }
       return this.getContentMeasure(flow) + this.getEdgeMeasure(flow);
     },
     getLayoutExtent : function(flow){
       flow = flow || this.style.flow;
+      if(this.style.isPositionAbsolute()){
+	return 0;
+      }
       return this.getContentExtent(flow) + this.getEdgeExtent(flow);
     },
     clearBorderBefore : function(){

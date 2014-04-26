@@ -871,12 +871,13 @@ var StyleContext = (function(){
 	return null;
       }
       var position = new BoxPosition(value);
-      /* TODO
-      var start = this.getCssAttr("start");
-      var end = this.getCssAttr("end");
-      var before = this.getCssAttr("before");
-      var after = this.getCssAttr("after");
-      */
+      var self = this;
+      List.iter(Const.cssBoxDirsLogical, function(dir){
+	var value = self.getCssAttr(dir, "auto");
+	if(value !== "auto"){
+	  position[value] = self._computeUnitSize(start, self.font.size);
+	}
+      });
       return position;
     },
     _loadColor : function(){
