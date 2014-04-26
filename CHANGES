@@ -6,6 +6,11 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 5.0.1 2014/??/??
+=========================
+o css property 'position' is added to managed css value.
+! now module UnitSize is included in StyleContext class.
+
 version 5.0.0 2014/04/25
 =========================
 o more complex float supported, not only static size float, but also dynamic block element can be floated.
