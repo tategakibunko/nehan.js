@@ -6711,7 +6711,7 @@ var StyleContext = (function(){
     getParentFlow : function(){
       return this.parent? this.parent.flow : this.flow;
     },
-    getParentConentMeasure : function(){
+    getParentContentMeasure : function(){
       return this.parent? this.parent.contentMeasure : this.contentMeasure;
     },
     getNextSibling : function(){
@@ -6862,7 +6862,7 @@ var StyleContext = (function(){
       return isNaN(px)? 0 : px;
     },
     _computeCornerSize : function(val, unit_size){
-      var ret = {}, max_size = this.getParentContent
+      var ret = {};
       for(var prop in val){
 	ret[prop] = [0, 0];
 	ret[prop][0] = this._computeUnitSize(val[prop][0], unit_size);
