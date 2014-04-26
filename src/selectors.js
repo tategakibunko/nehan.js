@@ -52,6 +52,25 @@ var Selectors = (function(){
     });
   };
 
+  var set_value = function(selector_key, value){
+    // if selector_key already defined, just overwrite it.
+    if(Style[selector_key]){
+      update_value(selector_key, value);
+      return;
+    }
+    insert_value(selector_key, value);
+
+    var selector = insert_value(selector_key, value);
+
+    // notice that 'sort_selectors'(or 'sort_selectors_pe') is not called in 'insert_value'.
+    Style[selector_key] = selector.getValue();
+    if(selector.hasPseudoElement()){
+      sort_selectors_pe();
+    } else {
+      sort_selectors();
+    }
+  };
+
   var init_selectors = function(){
     // initialize selector list
     Obj.iter(Style, function(obj, key, value){
@@ -70,21 +89,11 @@ var Selectors = (function(){
     // value: associated selector value object.
     // [example] => {'color':'black', 'font-size':'16px'}
     setValue : function(selector_key, value){
-      // if selector_key already defined, just overwrite it.
-      if(Style[selector_key]){
-	update_value(selector_key, value);
-	return;
-      }
-      insert_value(selector_key, value);
-
-      var selector = insert_value(selector_key, value);
-
-      // notice that 'sort_selectors'(or 'sort_selectors_pe') is not called in 'insert_value'.
-      Style[selector_key] = selector.getValue();
-      if(selector.hasPseudoElement()){
-	sort_selectors_pe();
-      } else {
-	sort_selectors();
+      set_value(selector_key, value);
+    },
+    setValues : function(values){
+      for(var selector_key in values){
+	set_value(selector_key, values[selector_key]);
       }
     },
     // get selector css that matches to the style context.
