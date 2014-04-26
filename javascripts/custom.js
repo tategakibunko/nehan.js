@@ -16,7 +16,6 @@ $(function(){
       });
     },
     onComplete: function(reader){
-      console.log("reader:%o", reader);
       var outline = reader.getOutlineNode("ul");
       if(outline){
 	outline.classList.add("book-outline");
