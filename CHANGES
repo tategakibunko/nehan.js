@@ -9,6 +9,7 @@ Mark "!": change that can break compatibility with older version
 version 5.0.1 2014/??/??
 =========================
 o css property 'position' is added to managed css value.
+o global style interfaces Nehan.setStyle(or Nehan.setStyles) are added.
 ! now module UnitSize is included in StyleContext class.
 
 version 5.0.0 2014/04/25
