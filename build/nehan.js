@@ -6763,7 +6763,7 @@ var StyleContext = (function(){
       return this.listStyle? this.listStyle.getMarkerHtml(order) : "";
     },
     getColor : function(){
-      return this.color || Layout.fontColor;
+      return this.color || (this.parent? this.parent.getColor() : new Color(Layout.fontColor));
     },
     getChildCount : function(){
       return this.childs.length;
@@ -7168,17 +7168,16 @@ var StyleContext = (function(){
       return TextAligns.get(value || "start");
     },
     _loadTextEmpha : function(){
-      var parent_color = this.parent? this.parent.getColor() : Layout.fontColor;
       var empha_style = this.getCssAttr("text-emphasis-style", "none");
       if(empha_style === "none" || empha_style === "inherit"){
 	return null;
       }
       var empha_pos = this.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
-      var empha_color = this.getCssAttr("text-emphasis-color", parent_color);
+      var empha_color = this.getCssAttr("text-emphasis-color");
       return new TextEmpha({
 	style:new TextEmphaStyle(empha_style),
 	pos:new TextEmphaPos(empha_pos),
-	color:new Color(empha_color)
+	color:(empha_color? new Color(empha_color) : this.getColor())
       });
     },
     _loadTextEmphaStyle : function(){
