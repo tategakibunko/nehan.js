@@ -1,4 +1,4 @@
-// Selector = TypeSelector | TypeSelector + combinator + Selector
+// Selector = [TypeSelector | TypeSelector + combinator + Selector]
 var Selector = (function(){
   function Selector(key, value){
     this.key = this._normalizeKey(key); // selector source like 'h1 > p'
@@ -24,23 +24,30 @@ var Selector = (function(){
   };
 
   Selector.prototype = {
+    test : function(style, pseudo_element_name){
+      if(pseudo_element_name && !this.hasPseudoElementName(pseudo_element_name)){
+	return false;
+      }
+      return SelectorStateMachine.accept(style, this.parts);
+    },
+    updateValue : function(value){
+      for(var prop in value){
+	var fmt_value = CssParser.format(prop, value[prop]);
+	if(typeof this.value[prop] === "object" && typeof fmt_value === "object"){
+	  Args.copy(this.value[prop], fmt_value);
+	} else {
+	  this.value[prop] = fmt_value;
+	}
+      }
+    },
     getKey : function(){
       return this.key;
     },
     getValue : function(){
       return this.value;
     },
-    setValue : function(value){
-      this.value = value;
-    },
     getSpec : function(){
       return this.spec;
-    },
-    test : function(style, pseudo_element_name){
-      if(pseudo_element_name && !this.hasPseudoElementName(pseudo_element_name)){
-	return false;
-      }
-      return SelectorStateMachine.accept(style, this.parts);
     },
     hasPseudoElement : function(){
       return this.key.indexOf("::") >= 0;

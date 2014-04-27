@@ -32,6 +32,23 @@ if(!Nehan){
   Nehan = {};
 }
 
+// glocal style
+Nehan.style = {};
+
+Nehan.setStyle = function(selector_key, value){
+  var entry = Nehan.style[selector_key] || {};
+  for(var prop in value){
+    entry[prop] = value[prop];
+  }
+  Nehan.style[selector_key] = entry;
+};
+
+Nehan.setStyles = function(values){
+  for(var selector_key in values){
+    Nehan.setStyle(selector_key, values[selector_key]);
+  }
+};
+
 // this function ends at the tail of this source.
 Nehan.setup = function(engine_args){
 var __engine_args = engine_args || {};
@@ -348,6 +365,7 @@ var Style = {
   },
   "body":{
     "display":"block",
+    "box-sizing":"content-box",
     "section-root":true
   },
   "br":{
@@ -2212,7 +2230,7 @@ var SelectorStateMachine = (function(){
 })();
 
 
-// Selector = TypeSelector | TypeSelector + combinator + Selector
+// Selector = [TypeSelector | TypeSelector + combinator + Selector]
 var Selector = (function(){
   function Selector(key, value){
     this.key = this._normalizeKey(key); // selector source like 'h1 > p'
@@ -2238,23 +2256,30 @@ var Selector = (function(){
   };
 
   Selector.prototype = {
+    test : function(style, pseudo_element_name){
+      if(pseudo_element_name && !this.hasPseudoElementName(pseudo_element_name)){
+	return false;
+      }
+      return SelectorStateMachine.accept(style, this.parts);
+    },
+    updateValue : function(value){
+      for(var prop in value){
+	var fmt_value = CssParser.format(prop, value[prop]);
+	if(typeof this.value[prop] === "object" && typeof fmt_value === "object"){
+	  Args.copy(this.value[prop], fmt_value);
+	} else {
+	  this.value[prop] = fmt_value;
+	}
+      }
+    },
     getKey : function(){
       return this.key;
     },
     getValue : function(){
       return this.value;
     },
-    setValue : function(value){
-      this.value = value;
-    },
     getSpec : function(){
       return this.spec;
-    },
-    test : function(style, pseudo_element_name){
-      if(pseudo_element_name && !this.hasPseudoElementName(pseudo_element_name)){
-	return false;
-      }
-      return SelectorStateMachine.accept(style, this.parts);
     },
     hasPseudoElement : function(){
       return this.key.indexOf("::") >= 0;
@@ -2309,15 +2334,22 @@ var Selectors = (function(){
     selectors_pe.sort(function(s1,s2){ return s1.spec - s2.spec; });
   };
 
-  var update_value = function(selector_key, value){
-    var style_value = Style[selector_key]; // old style value
-    Args.copy(style_value, value); // overwrite new value to old
-    var selector = List.find(selectors.concat(selectors_pe), function(selector){
+  var is_pe_key = function(selector_key){
+    return selector_key.indexOf("::") >= 0;
+  };
+
+  var find_selector = function(selector_key){
+    var dst_selectors = is_pe_key(selector_key)? selectors_pe : selectors;
+    return List.find(dst_selectors, function(selector){
       return selector.getKey() === selector_key;
     });
-    if(selector){
-      selector.setValue(style_value);
-    }
+  };
+
+  var update_value = function(selector_key, value){
+    var style_value = Style[selector_key]; // old style value, must be found
+    Args.copy(style_value, value); // overwrite new value to old
+    var selector = find_selector(selector_key); // selector object for selector_key, must be found
+    selector.updateValue(style_value);
   };
 
   var insert_value = function(selector_key, value){
@@ -9341,6 +9373,7 @@ Nehan.Env = Env;
 // set engine args
 Args.copy(Config, __engine_args.config || {});
 Args.copy2(Layout, __engine_args.layout || {});
+Selectors.setValues(Nehan.style || {});
 Selectors.setValues(__engine_args.style || {});
 
 // export engine local interfaces
@@ -9350,10 +9383,12 @@ return {
     group_size = Math.max(1, group_size || 1);
     return (group_size <= 1)? new PageStream(text) : new PageGroupStream(text, group_size);
   },
+  // set engine local style
   setStyle : function(selector_key, value){
     Selectors.setValue(selector_key, value);
     return this;
   },
+  // set engine local styles
   setStyles : function(values){
     Selectors.setValues(values);
     return this;

@@ -12,15 +12,22 @@ var Selectors = (function(){
     selectors_pe.sort(function(s1,s2){ return s1.spec - s2.spec; });
   };
 
-  var update_value = function(selector_key, value){
-    var style_value = Style[selector_key]; // old style value
-    Args.copy(style_value, value); // overwrite new value to old
-    var selector = List.find(selectors.concat(selectors_pe), function(selector){
+  var is_pe_key = function(selector_key){
+    return selector_key.indexOf("::") >= 0;
+  };
+
+  var find_selector = function(selector_key){
+    var dst_selectors = is_pe_key(selector_key)? selectors_pe : selectors;
+    return List.find(dst_selectors, function(selector){
       return selector.getKey() === selector_key;
     });
-    if(selector){
-      selector.setValue(style_value);
-    }
+  };
+
+  var update_value = function(selector_key, value){
+    var style_value = Style[selector_key]; // old style value, must be found
+    Args.copy(style_value, value); // overwrite new value to old
+    var selector = find_selector(selector_key); // selector object for selector_key, must be found
+    selector.updateValue(style_value);
   };
 
   var insert_value = function(selector_key, value){
