@@ -50,6 +50,22 @@ var CssParser = (function(){
     return (value.indexOf(" ") < 0)? [value] : value.split(/\s+/);
   };
 
+  var split_slash = function(value){
+    return (value.indexOf("/") < 0)? [value] : value.split("/");
+  };
+
+  // props: [a,b,c]
+  // values:[1,2,3]
+  // => {a:1, b:2, c:3}
+  var zip_obj = function(props, values){
+    var ret = {};
+    if(props.length !== values.length){
+      throw "invalid args:zip_obj";
+    }
+    List.iteri(props, function(i, prop){ ret[prop] = values[i]; });
+    return ret;
+  };
+
   var get_map_2d = function(len){
     return Const.css2dIndex[Math.min(len, 2)] || [];
   };
@@ -86,6 +102,12 @@ var CssParser = (function(){
     var props = Const.cssBoxDirsLogical; // len = 4
     var values_4d = make_values_4d(values); // len = 4
     return List.zipObj(props, values_4d);
+  };
+
+  var make_corner_4d = function(values){
+    var props = Const.cssBoxCornersLogical; // len = 4
+    var values_4d = make_values_4d(values); // len = 4
+    return zip_obj(props, values_4d);
   };
 
   var parse_4d = function(value){
