@@ -152,7 +152,7 @@ var Style = {
   },
   "body":{
     "display":"block",
-    "box-sizing":"content-box",
+    //"box-sizing":"content-box",
     "section-root":true
   },
   "br":{
