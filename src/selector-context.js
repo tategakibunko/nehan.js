@@ -8,6 +8,9 @@ var SelectorContext = (function(){
     setMarkupContent : function(content){
       this._style.markup.content = content;
     },
+    getParentStyle : function(){
+      return this._style.parent;
+    },
     getMarkupContent : function(){
       return this._style.getMarkupContent();
     },
