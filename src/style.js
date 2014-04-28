@@ -404,7 +404,7 @@ var Style = {
       "after":"0.6em"
     }
   },
-  "li-mark":{
+  "li-marker":{
     "display":"block"
   },
   "li-body":{

@@ -617,7 +617,7 @@ var Style = {
       "after":"0.6em"
     }
   },
-  "li-mark":{
+  "li-marker":{
     "display":"block"
   },
   "li-body":{
@@ -8650,7 +8650,7 @@ var ListItemGenerator = (function(){
     var measure = marker_size.getMeasure(style.flow);
     var marker_style = style.createChild("li-marker", {
       "float":"start",
-      "class":"nehan-li-mark",
+      "class":"nehan-li-marker",
       "measure":measure
     });
 
@@ -8670,9 +8670,6 @@ var ListItemGenerator = (function(){
   };
 
   ListItemGenerator.prototype._alignContentExtent = function(blocks, content_extent){
-    if(this.style.isTextVertical()){
-      return blocks;
-    }
     return ParallelGenerator.prototype._alignContentExtent.call(this, blocks, content_extent);
   };
 
