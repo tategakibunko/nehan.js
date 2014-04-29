@@ -79,6 +79,9 @@ var Tag = (function (){
     isCloseTag : function(){
       return this.name.charAt(0) === "/";
     },
+    isSingleTag : function(){
+      return this._single || false;
+    },
     isEmpty : function(){
       return this.content === "";
     },

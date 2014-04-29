@@ -2633,6 +2633,9 @@ var Tag = (function (){
     isCloseTag : function(){
       return this.name.charAt(0) === "/";
     },
+    isSingleTag : function(){
+      return this._single || false;
+    },
     isEmpty : function(){
       return this.content === "";
     },
@@ -4948,6 +4951,7 @@ var HtmlLexer = (function (){
       var tag = new Tag(tagstr);
       this._stepBuff(tagstr.length);
       if(List.exists(__single_tags, Closure.eq(tag.getName()))){
+	tag._single = true;
 	return tag;
       }
       return this._parseChildContentTag(tag);
@@ -5798,6 +5802,9 @@ var PageStream = (function(){
     hasNext : function(){
       return this.generator.hasNext();
     },
+    setTerminate : function(status){
+      this.generator.setTerminate(status);
+    },
     syncGet : function(){
       var page_no = 0;
       this._setTimeStart();
@@ -6577,7 +6584,7 @@ var StyleContext = (function(){
       if(this.markup.isCloseTag()){
 	return true;
       }
-      if(this.display === "block" && this.isMarkupEmpty() && this.getContent() === ""){
+      if(!this.markup.isSingleTag() && this.isMarkupEmpty() && this.getContent() === ""){
 	return true;
       }
       return false;
@@ -8152,7 +8159,9 @@ var InlineGenerator = (function(){
     var part = token.cutMeasure(this.style.getFontSize(), rest_measure); // get sliced word
     part.setMetrics(this.style.flow, this.style.font); // metrics for first half
     token.setMetrics(this.style.flow, this.style.font); // metrics for second half
-    this.stream.prev(); // re-parse this token because rest part is still exists.
+    if(token.data !== "" && token.bodySize > 0){
+      this.stream.prev(); // re-parse this token because rest part is still exists.
+    }
     part.bodySize = Math.min(rest_measure, part.bodySize); // sometimes overflows. more accurate logic is required in the future.
     return part;
   };
@@ -8874,6 +8883,9 @@ var HtmlGenerator = (function(){
     hasNext : function(){
       return this.generator.hasNext();
     },
+    setTerminate : function(status){
+      this.generator.setTerminate(status);
+    },
     _createGenerator : function(){
       while(this.stream.hasNext()){
 	var tag = this.stream.get();
@@ -8932,6 +8944,9 @@ var DocumentGenerator = (function(){
     },
     hasNext : function(){
       return this.generator.hasNext();
+    },
+    setTerminate : function(status){
+      this.generator.setTerminate(status);
     },
     _createGenerator : function(){
       while(this.stream.hasNext()){

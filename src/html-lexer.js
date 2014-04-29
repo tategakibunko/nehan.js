@@ -152,6 +152,7 @@ var HtmlLexer = (function (){
       var tag = new Tag(tagstr);
       this._stepBuff(tagstr.length);
       if(List.exists(__single_tags, Closure.eq(tag.getName()))){
+	tag._single = true;
 	return tag;
       }
       return this._parseChildContentTag(tag);

@@ -222,7 +222,9 @@ var InlineGenerator = (function(){
     var part = token.cutMeasure(this.style.getFontSize(), rest_measure); // get sliced word
     part.setMetrics(this.style.flow, this.style.font); // metrics for first half
     token.setMetrics(this.style.flow, this.style.font); // metrics for second half
-    this.stream.prev(); // re-parse this token because rest part is still exists.
+    if(token.data !== "" && token.bodySize > 0){
+      this.stream.prev(); // re-parse this token because rest part is still exists.
+    }
     part.bodySize = Math.min(rest_measure, part.bodySize); // sometimes overflows. more accurate logic is required in the future.
     return part;
   };

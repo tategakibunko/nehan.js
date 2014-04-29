@@ -11,6 +11,9 @@ var DocumentGenerator = (function(){
     hasNext : function(){
       return this.generator.hasNext();
     },
+    setTerminate : function(status){
+      this.generator.setTerminate(status);
+    },
     _createGenerator : function(){
       while(this.stream.hasNext()){
 	var tag = this.stream.get();

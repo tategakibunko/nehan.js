@@ -13,6 +13,9 @@ var PageStream = (function(){
     hasNext : function(){
       return this.generator.hasNext();
     },
+    setTerminate : function(status){
+      this.generator.setTerminate(status);
+    },
     syncGet : function(){
       var page_no = 0;
       this._setTimeStart();
