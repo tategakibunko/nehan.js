@@ -9,7 +9,8 @@ var StyleContext = (function(){
     "noscript",
     "style",
     "input",
-    "iframe"
+    "iframe",
+    "form"
   ];
 
   // these properties must be under control of layout engine.
@@ -366,6 +367,12 @@ var StyleContext = (function(){
       if(this.contentMeasure <= 0 || this.contentExtent <= 0){
 	return true;
       }
+      if(this.markup.isCloseTag()){
+	return true;
+      }
+      if(this.display === "block" && this.isMarkupEmpty() && this.getContent() === ""){
+	return true;
+      }
       return false;
     },
     isBlock : function(){
@@ -473,8 +480,8 @@ var StyleContext = (function(){
       var childs = this.getParentChildsOfType(this.getMarkupName());
       return (childs.length === 1 && childs[0] === this);
     },
-    isEmpty : function(){
-      return this.getMarkupContent() === "";
+    isMarkupEmpty : function(){
+      return this.markup.isEmpty();
     },
     hasFlipFlow : function(){
       return this.parent? (this.flow !== this.parent.flow) : false;

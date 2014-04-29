@@ -1943,8 +1943,8 @@ var PseudoSelector = (function(){
       // pseudo-element
       case "before": return true;
       case "after": return true;
-      case "first-letter": return !style.isEmpty();
-      case "first-line": return !style.isEmpty();
+      case "first-letter": return !style.isMarkupEmpty();
+      case "first-line": return !style.isMarkupEmpty();
 
       // pseudo-class
       case "first-child": return style.isFirstChild();
@@ -1953,7 +1953,7 @@ var PseudoSelector = (function(){
       case "last-of-type": return style.isLastOfType();
       case "only-child": return style.isOnlyChild();
       case "only-of-type": return style.isOnlyOfType();
-      case "empty": return style.isEmpty();
+      case "empty": return style.isMarkupEmpty();
       case "root": return style.isRoot();
       }
       return false;
@@ -2629,6 +2629,9 @@ var Tag = (function (){
     isAnchorLinkTag : function(){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
+    },
+    isCloseTag : function(){
+      return this.name.charAt(0) === "/";
     },
     isEmpty : function(){
       return this.content === "";
@@ -6213,7 +6216,8 @@ var StyleContext = (function(){
     "noscript",
     "style",
     "input",
-    "iframe"
+    "iframe",
+    "form"
   ];
 
   // these properties must be under control of layout engine.
@@ -6570,6 +6574,12 @@ var StyleContext = (function(){
       if(this.contentMeasure <= 0 || this.contentExtent <= 0){
 	return true;
       }
+      if(this.markup.isCloseTag()){
+	return true;
+      }
+      if(this.display === "block" && this.isMarkupEmpty() && this.getContent() === ""){
+	return true;
+      }
       return false;
     },
     isBlock : function(){
@@ -6677,8 +6687,8 @@ var StyleContext = (function(){
       var childs = this.getParentChildsOfType(this.getMarkupName());
       return (childs.length === 1 && childs[0] === this);
     },
-    isEmpty : function(){
-      return this.getMarkupContent() === "";
+    isMarkupEmpty : function(){
+      return this.markup.isEmpty();
     },
     hasFlipFlow : function(){
       return this.parent? (this.flow !== this.parent.flow) : false;

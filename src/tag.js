@@ -76,6 +76,9 @@ var Tag = (function (){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
+    isCloseTag : function(){
+      return this.name.charAt(0) === "/";
+    },
     isEmpty : function(){
       return this.content === "";
     },

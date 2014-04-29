@@ -15,8 +15,8 @@ var PseudoSelector = (function(){
       // pseudo-element
       case "before": return true;
       case "after": return true;
-      case "first-letter": return !style.isEmpty();
-      case "first-line": return !style.isEmpty();
+      case "first-letter": return !style.isMarkupEmpty();
+      case "first-line": return !style.isMarkupEmpty();
 
       // pseudo-class
       case "first-child": return style.isFirstChild();
@@ -25,7 +25,7 @@ var PseudoSelector = (function(){
       case "last-of-type": return style.isLastOfType();
       case "only-child": return style.isOnlyChild();
       case "only-of-type": return style.isOnlyOfType();
-      case "empty": return style.isEmpty();
+      case "empty": return style.isMarkupEmpty();
       case "root": return style.isRoot();
       }
       return false;
