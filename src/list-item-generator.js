@@ -8,7 +8,7 @@ var ListItemGenerator = (function(){
   Class.extend(ListItemGenerator, ParallelGenerator);
 
   ListItemGenerator.prototype._createListMarkGenerator = function(style, outline_context){
-    var marker_size = style.parent.markerSize;
+    var marker_size = style.parent.markerSize || style.flow.getBoxSize(Layout.fontSize * 2, Layout.fontSize);
     var item_order = style.getChildIndex();
     var marker_text = style.parent.getMarkerHtml(item_order + 1);
     var measure = marker_size.getMeasure(style.flow);
@@ -22,7 +22,7 @@ var ListItemGenerator = (function(){
   };
 
   ListItemGenerator.prototype._createListBodyGenerator = function(style, stream, outline_context){
-    var marker_size = style.parent.markerSize;
+    var marker_size = style.parent.markerSize || style.flow.getBoxSize(Layout.fontSize * 2, Layout.fontSize);
     var measure = style.contentMeasure - marker_size.getMeasure(style.flow);
     var body_style = style.createChild("li-body", {
       "float":"start",

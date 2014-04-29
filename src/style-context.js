@@ -360,7 +360,13 @@ var StyleContext = (function(){
       return line;
     },
     isDisabled : function(){
-      return List.exists(__disabled_markups, Closure.eq(this.getMarkupName()));
+      if(List.exists(__disabled_markups, Closure.eq(this.getMarkupName()))){
+	return true;
+      }
+      if(this.contentMeasure <= 0 || this.contentExtent <= 0){
+	return true;
+      }
+      return false;
     },
     isBlock : function(){
       switch(this.display){
