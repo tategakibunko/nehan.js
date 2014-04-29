@@ -4839,12 +4839,12 @@ var HtmlLexer = (function (){
     if(recur_pos < 0 || close_pos < recur_pos){
       return close_pos;
     }
-    var restart_pos = recur_pos + tag_name.length + 2;
+    var restart_pos = recur_pos + tag_name.length + 2; // 2 = "<>".length
     var close_pos2 = arguments.callee(buff.substring(restart_pos), tag_name, open_tag_rex, close_tag);
     if(close_pos2 < 0){
       return -1;
     }
-    var restart_pos2 = restart_pos + close_pos2 + tag_name.length + 3;
+    var restart_pos2 = restart_pos + close_pos2 + tag_name.length + 3; // 3 = "</>".length
     return restart_pos2 + arguments.callee(buff.substring(restart_pos2), tag_name, open_tag_rex, close_tag);
   };
 
