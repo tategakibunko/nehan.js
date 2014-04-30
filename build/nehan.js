@@ -8279,6 +8279,11 @@ var FlipGenerator = (function(){
   }
   Class.extend(FlipGenerator, BlockGenerator);
 
+  // content size varies in flip-generator, so use FloatRestGenerator::popCache.
+  FlipGenerator.prototype.popCache = function(context){
+    return FloatRestGenerator.prototype.popCache.call(this, context);
+  };
+
   FlipGenerator.prototype.yield = function(context){
     // [measure of this.style] -> [extent of this.style.parent]
     // [extent of this.style]  -> [measure of this.style.parent]
