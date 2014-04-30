@@ -5,7 +5,22 @@ var Box = (function(){
     this.css = {};
   }
 
+  var __filter_text = function(elements){
+    return List.fold(elements, [], function(ret, element){
+      if(element instanceof Box){
+	return ret.concat(__filter_text(element.elements || []));
+      }
+      return ret.concat(element);
+    });
+  };
+
   Box.prototype = {
+    toLineString : function(){
+      var texts = __filter_text(this.elements || []);
+      return List.fold(texts, "", function(ret, text){
+	return ret + (text? (text.data || "") : "");
+      });
+    },
     getDatasetAttr : function(){
       // dataset attr of root anonymous line is already captured by parent box.
       if(this.display === "inline" && this.style.isRootLine()){

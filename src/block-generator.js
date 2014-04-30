@@ -5,26 +5,6 @@ var BlockGenerator = (function(){
   }
   Class.extend(BlockGenerator, LayoutGenerator);
 
-  var get_line_start_pos = function(line){
-    var head = line.elements[0];
-    return (head instanceof Box)? head.style.getMarkupPos() : head.pos;
-  };
-
-  BlockGenerator.prototype.popCache = function(context){
-    var cache = LayoutGenerator.prototype.popCache.call(this);
-
-    // if cache is inline, and measure size varies, reget line if need.
-    if(this.hasChildLayout() && cache.display === "inline"){
-      if(cache.getLayoutMeasure(this.style.flow) <= this.style.contentMeasure && cache.br){
-	return cache;
-      }
-      this._childLayout.stream.setPos(get_line_start_pos(cache)); // rewind stream to the head of line.
-      this._childLayout.clearCache(); // stream rewinded, so cache must be destroyed.
-      return this.yieldChildLayout(context);
-    }
-    return cache;
-  };
-
   BlockGenerator.prototype._yield = function(context){
     if(!context.isBlockSpaceLeft()){
       return null;
@@ -52,9 +32,10 @@ var BlockGenerator = (function(){
       var cache = this.popCache(context);
       return cache;
     }
-    
+
     if(this.hasChildLayout()){
-      return this.yieldChildLayout(context);
+      var child = this.yieldChildLayout(context);
+      return child;
     }
 
     // read next token
@@ -91,7 +72,7 @@ var BlockGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
-    // if child inline-block, start child inline generator with first_generator.
+    // if child inline-block, start child inline generator with first iblock generator.
     if(child_style.isInlineBlock()){
       var iblock_stream = this._createStream(child_style);
       var iblock_generator = new InlineBlockGenerator(child_style, iblock_stream, this.outlineContext);
