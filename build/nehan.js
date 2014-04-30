@@ -6996,7 +6996,8 @@ var StyleContext = (function(){
     _computeFontSize : function(val, unit_size){
       var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
       var size = Layout.fontSizeNames[str] || str;
-      return this._computeUnitSize(size, unit_size);
+      var font_size = this._computeUnitSize(size, unit_size);
+      return Math.min(font_size, Layout.maxFontSize);
     },
     _computeUnitSize : function(val, unit_size){
       var str = String(val);
