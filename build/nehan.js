@@ -58,12 +58,13 @@ var Config = {
   debug:false,
   kerning:true,
   justify:true,
-  maxRollbackCount : 40,
-  maxPageCount: 10000,
-  useVerticalGlyphIfEnable: true,
-  useStrictWordMetrics: true,
-  lexingBufferLen : 2000,
-  defaultLinkTitleLength : 16
+  maxRollbackCount:40,
+  maxPageCount:10000,
+  useVerticalGlyphIfEnable:true,
+  useStrictWordMetrics:true,
+  enableAutoCloseTag:false,
+  lexingBufferLen:2000,
+  defaultLinkTitleLength:16
 };
 
 
@@ -4941,18 +4942,23 @@ var HtmlLexer = (function (){
       var close_tag = "</" + tag_name + ">"; // tag name is already lower-cased by preprocessor.
       var close_pos = __find_close_pos(this.buff, tag_name, open_tag_rex, close_tag);
 
-      // if close pos not found,
+      if(close_pos >= 0){
+	return {closed:true, content:this.buff.substring(0, close_pos)};
+      }
+
+      // if close pos not found and Config.enableAutoClose is true,
       // 1. return the text until next same start tag.
       // 2. or else, return whole rest buff.
       // (TODO): this is not strict lexing, especially when dt, dd, td, etc.
-      if(close_pos < 0){
+      if(Config.enableAutoCloseTag){
 	var next_open_match = this.buff.match(open_tag_rex);
 	if(next_open_match){
 	  return {closed:false, content:this.buff.substring(0, nexd_open_match.index)};
 	}
-	return {closed:false, content:this.buff};
       }
-      return {closed:true, content:this.buff.substring(0, close_pos)};
+
+      // all other case, return whole rest buffer.
+      return {closed:false, content:this.buff};
     },
     _getTagContent : function(tag_name){
       try {
