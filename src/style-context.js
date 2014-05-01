@@ -370,7 +370,7 @@ var StyleContext = (function(){
       if(this.markup.isCloseTag()){
 	return true;
       }
-      if(!this.markup.isSingleTag() && this.isMarkupEmpty() && this.getContent() === ""){
+      if(!this.markup.isSingleTag() && this.isBlock() && this.isMarkupEmpty() && this.getContent() === ""){
 	return true;
       }
       return false;
@@ -546,6 +546,9 @@ var StyleContext = (function(){
     },
     getSelectorCssAttr : function(name){
       return this.selectorCss[name] || null;
+    },
+    setDataset : function(name_sneak, value){
+      this.markup.setDataset(name_sneak, value);
     },
     getDatasetAttr : function(){
       return this.markup.getDatasetAttr();

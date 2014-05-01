@@ -137,6 +137,7 @@ var InlineGenerator = (function(){
       return (new InlineBlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
     }
 
+
     // inline child
     switch(child_style.getMarkupName()){
     case "img":
@@ -146,12 +147,9 @@ var InlineGenerator = (function(){
       context.setLineBreak(true);
       return null;
 
-    case "a":
-      this.setChildLayout(new LinkGenerator(child_style, child_stream, this.outlineContext));
-      return this.yieldChildLayout(context);
-
     default:
-      this.setChildLayout(new InlineGenerator(child_style, child_stream, this.outlineContext));
+      var child_generator = this._createChildInlineGenerator(child_style, child_stream, this.outlineContext);
+      this.setChildLayout(child_generator);
       return this.yieldChildLayout(context);
     }
   };

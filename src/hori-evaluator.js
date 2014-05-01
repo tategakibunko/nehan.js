@@ -4,12 +4,12 @@ var HoriEvaluator = (function(){
   }
   Class.extend(HoriEvaluator, LayoutEvaluator);
 
-  HoriEvaluator.prototype.getFlipEvaluator = function(){
-    return new VertEvaluator();
+  HoriEvaluator.prototype.isFlipTree = function(tree){
+    return tree.style.isTextVertical();
   };
 
-  HoriEvaluator.prototype.isFlipBox = function(box){
-    return box.style.isTextVertical();
+  HoriEvaluator.prototype.evalFlip = function(tree){
+    return (new VertEvaluator()).evaluate(tree);
   };
 
   HoriEvaluator.prototype.evalBlockImage = function(image){

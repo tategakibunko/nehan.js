@@ -37,6 +37,10 @@ var Tag = (function (){
       }
       return (typeof def_value !== "undefined")? def_value : null;
     },
+    setDataset : function(name_sneak, value){
+      this.datasetRaw[name_sneak] = value;
+      this.datasetCamel[Utils.getCamelName(name_sneak)] = value;
+    },
     // get dataset by name(camel case)
     // getDataset('name') => 'taro'
     // getDataset('familyName') => 'yamada'

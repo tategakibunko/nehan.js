@@ -61,6 +61,7 @@ var BlockGenerator = (function(){
 
     // if disabled style, just skip
     if(child_style.isDisabled()){
+      console.log("disabled child style:%o", child_style);
       return this._getNext(context);
     }
 
@@ -99,7 +100,8 @@ var BlockGenerator = (function(){
       if(child_style.getMarkupName() === "img"){
 	first_generator = new LazyGenerator(child_style, child_style.createImage());
       } else {
-	first_generator = new InlineGenerator(child_style, child_stream, this.outlineContext);
+	//first_generator = new InlineGenerator(child_style, child_stream, this.outlineContext);
+	first_generator = this._createChildInlineGenerator(child_style, child_stream, this.outlineContext);
       }
       this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_generator));
       return this.yieldChildLayout(context);

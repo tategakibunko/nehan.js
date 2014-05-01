@@ -114,6 +114,16 @@ var LayoutGenerator = (function(){
     } 
   };
 
+  LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, outline_context){
+    switch(style.getMarkupName()){
+    case "a":
+      return new LinkGenerator(style, stream, outline_context);
+
+    default:
+      return new InlineGenerator(style, stream, outline_context);
+    }
+  };
+
   return LayoutGenerator;
 })();
 

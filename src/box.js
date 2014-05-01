@@ -21,6 +21,9 @@ var Box = (function(){
 	return ret + (text? (text.data || "") : "");
       });
     },
+    setDataset : function(name_sneak, value){
+      this.style.markup.setDataset(name_sneak, value);
+    },
     getDatasetAttr : function(){
       // dataset attr of root anonymous line is already captured by parent box.
       if(this.display === "inline" && this.style.isRootLine()){
