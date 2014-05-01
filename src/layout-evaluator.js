@@ -15,7 +15,11 @@ var LayoutEvaluator = (function(){
 	dom.innerHTML = opt.content;
       }
       for(var prop in css){
-	dom.style[Utils.camelize(prop)] = css[prop];
+	if(prop === "float"){
+	  dom.style.cssFloat = css[prop];
+	} else {
+	  dom.style[Utils.camelize(prop)] = css[prop];
+	}
       }
       for(var name in dataset){
 	dom.dataset[Utils.camelize(name)] = dataset[name];
