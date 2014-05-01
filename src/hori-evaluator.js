@@ -63,13 +63,17 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype.evalTcy = function(line, tcy){
-    return document.createTextNode(tcy.data);
+    return document.createTextNode(Html.unescape(tcy.data));
   };
 
   HoriEvaluator.prototype.evalChar = function(line, chr){
     if(chr.isHalfSpaceChar()){
-      document.createTextNode(chr.data);
-    } else if(chr.isKerningChar()){
+      return document.createTextNode(chr.data);
+    }
+    if(chr.isCharRef()){
+      return document.createTextNode(Html.unescape(chr.data));
+    }
+    if(chr.isKerningChar()){
       return this.evalKerningChar(line, chr);
     }
     return document.createTextNode(chr.data);

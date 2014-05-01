@@ -1569,6 +1569,15 @@ var Html = {
       .replace(/'/g, "&#039;")
       .replace(/"/g, "&quot;");
   },
+  unescape : function(str) {
+    var div = document.createElement("div");
+    div.innerHTML = str.replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/ /g, "&nbsp;")
+      .replace(/\r/g, "&#13;")
+      .replace(/\n/g, "&#10;");
+    return div.textContent || div.innerText;
+  },
   attr : function(args){
     var tmp = [];
     for(var prop in args){
@@ -9470,13 +9479,17 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype.evalTcy = function(line, tcy){
-    return document.createTextNode(tcy.data);
+    return document.createTextNode(Html.unescape(tcy.data));
   };
 
   HoriEvaluator.prototype.evalChar = function(line, chr){
     if(chr.isHalfSpaceChar()){
-      document.createTextNode(chr.data);
-    } else if(chr.isKerningChar()){
+      return document.createTextNode(chr.data);
+    }
+    if(chr.isCharRef()){
+      return document.createTextNode(Html.unescape(chr.data));
+    }
+    if(chr.isKerningChar()){
       return this.evalKerningChar(line, chr);
     }
     return document.createTextNode(chr.data);
