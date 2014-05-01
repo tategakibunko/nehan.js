@@ -31,7 +31,6 @@ var DocumentContext = {
     this.outlineContexts.push(outline_context);
   },
   addAnchor : function(name){
-    console.log("add anchor:%s", name);
     this.anchors[name] = this.pageNo;
   },
   getAnchorPageNo : function(name){
