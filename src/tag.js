@@ -39,7 +39,7 @@ var Tag = (function (){
     },
     setDataset : function(name_sneak, value){
       this.datasetRaw[name_sneak] = value;
-      this.datasetCamel[Utils.getCamelName(name_sneak)] = value;
+      this.datasetCamel[Utils.camelize(name_sneak)] = value;
     },
     // get dataset by name(camel case)
     // getDataset('name') => 'taro'
@@ -126,7 +126,7 @@ var Tag = (function (){
     // "data-family-name" => "familyName"
     _parseDatasetName : function(prop){
       var hyp_name = prop.slice(5); // 5 is "data-".length
-      return Utils.getCamelName(hyp_name);
+      return Utils.camelize(hyp_name);
     }
   };
 

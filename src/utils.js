@@ -29,9 +29,9 @@ var Utils = {
     p2 = (p2==="")? "" : (p2[0] === "/")? p2.substring(1, p2.length) : p2;
     return p1 + p2;
   },
-  getCamelName : function(hyp_name){
+  camelize : function(name){
     var self = this;
-    return List.mapi(hyp_name.split("-"), function(i, part){
+    return (name.indexOf("-") < 0)? name : List.mapi(name.split("-"), function(i, part){
       return (i === 0)? part : self.capitalize(part);
     }).join("");
   }

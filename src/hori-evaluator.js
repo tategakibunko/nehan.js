@@ -12,22 +12,16 @@ var HoriEvaluator = (function(){
     return (new VertEvaluator()).evaluate(tree);
   };
 
+  HoriEvaluator.prototype.evalChildInlineTreeWrap = function(tree, css){
+    return this.evalTreeWrap(tree, css, "span");
+  };
+
   HoriEvaluator.prototype.evalBlockImage = function(image){
-    return Html.tagSingle("img", Args.copy({
-      "src":image.style.getMarkupAttr("src"),
-      "style":Css.toString(image.getCssBlock()),
-      "title":(image.style.getMarkupAttr("title") || "no title"),
-      "class":image.classes.join(" ")
-    }, image.getDatasetAttr()));
+    return this.evalImageBody(image, image.getCssBlock());
   };
 
   HoriEvaluator.prototype.evalInlineImage = function(line, image){
-    return Html.tagSingle("img", Args.copy({
-      "src":image.style.getMarkupAttr("src"),
-      "style":Css.toString(image.getCssHoriInlineImage()),
-      "title":(image.style.getMarkupAttr("title") || "no title"),
-      "class":image.classes.join(" ")
-    }, image.getDatasetAttr()));
+    return this.evalImageBody(image, image.getCssHoriInlineImage());
   };
 
   // notice that horizontal inline-child uses <span> wrapping(except for <a>).
@@ -38,100 +32,102 @@ var HoriEvaluator = (function(){
     }, child.getDatasetAttr()));
   };
 
-  HoriEvaluator.prototype.evalLinkElement = function(line, link, opt){
-    return Html.tagWrap("a", this.evalInlineChild(line, link), Args.copy({
-      "class":link.classes.join(" "),
-      "href":opt.href,
-      "title":opt.title,
-      "data-page":opt.pageNo // enabled if anchor name is included in href.
-    }, link.getDatasetAttr()));
-  };
-
   HoriEvaluator.prototype.evalRuby = function(line, ruby){
-    var body = this.evalRt(line, ruby) + this.evalRb(line, ruby);
-    return Html.tagWrap("span", body, {
-      "style":Css.toString(ruby.getCssHoriRuby(line)),
-      "class":"nehan-ruby-body"
+    var span = this._createElement("span", {
+      className:"nehan-ruby-body",
+      css:ruby.getCssHoriRuby(line)
     });
+    span.appendChild(this.evalRt(line, ruby));
+    span.appendChild(this.evalRb(line, ruby));
+    return span;
   };
 
   HoriEvaluator.prototype.evalRb = function(line, ruby){
-    return Html.tagWrap("div", this.evalInlineElements(line, ruby.getRbs()), {
-      "style":Css.toString(ruby.getCssHoriRb(line)),
-      "class":"nehan-rb"
+    var dom = this._createElement("div", {
+      css:ruby.getCssHoriRb(line),
+      className:"nehan-rb"
     });
+    return this.evalTree(dom, line, ruby.getRbs());
   };
 
   HoriEvaluator.prototype.evalRt = function(line, ruby){
-    return Html.tagWrap("div", ruby.getRtString(), {
-      "style":Css.toString(ruby.getCssHoriRt(line)),
-      "class":"nehan-rt"
+    return this._createElement("div", {
+      content:ruby.getRtString(),
+      className:"nehan-rt",
+      css:ruby.getCssHoriRt(line)
     });
   };
 
   HoriEvaluator.prototype.evalWord = function(line, word){
-    return word.data;
+    return document.createTextNode(word.data);
   };
 
   HoriEvaluator.prototype.evalTcy = function(line, tcy){
-    return tcy.data;
+    return document.createTextNode(tcy.data);
   };
 
   HoriEvaluator.prototype.evalChar = function(line, chr){
     if(chr.isHalfSpaceChar()){
-      return chr.cnv;
+      document.createTextNode(chr.data);
     } else if(chr.isKerningChar()){
       return this.evalKerningChar(line, chr);
     }
-    return chr.data;
+    return document.createTextNode(chr.data);
   };
 
   HoriEvaluator.prototype.evalEmpha = function(line, chr, char_body){
-    var char_part = Html.tagWrap("div", char_body, {
-      "style":Css.toString(chr.getCssHoriEmphaTarget(line))
+    var char_part = this._createElement("div", {
+      content:char_body.textContent,
+      css:chr.getCssHoriEmphaTarget(line)
     });
-    var empha_part = Html.tagWrap("div", line.style.textEmpha.getText(), {
-      "style":Css.toString(chr.getCssHoriEmphaText(line))
+    var empha_part = this._createElement("div", {
+      content:line.style.textEmpha.getText(),
+      css:chr.getCssHoriEmphaText(line)
     });
-    // TODO: check text-emphasis-position is over or under
-    return Html.tagWrap("span", empha_part + char_part, {
-      "style":Css.toString(line.style.textEmpha.getCssHoriEmphaWrap(line, chr))
+    var wrap = this._createElement("span", {
+      css:line.style.textEmpha.getCssHoriEmphaWrap(line, chr)
     });
+    wrap.appendChild(empha_part);
+    wrap.appendChild(char_part);
+    return wrap;
   };
 
   HoriEvaluator.prototype.evalKerningChar = function(line, chr){
     var css = chr.getCssPadding(line);
     if(chr.isKakkoStart()){
       css["margin-left"] = "-0.5em";
-      return Html.tagWrap("span", chr.data, {
-	"style": Css.toString(css),
-	"class":"nehan-char-kakko-start"
+      return this._createElement("span", {
+	content:chr.data,
+	className:"nehan-char-kakko-start",
+	css:css
       });
     }
     if(chr.isKakkoEnd()){
       css["margin-right"] = "-0.5em";
-      return Html.tagWrap("span", chr.data, {
-	"style": Css.toString(css),
-	"class":"nehan-char-kakko-end"
+      return this._createElement("span", {
+	content:chr.data,
+	className:"nehan-char-kakko-end",
+	css:css
       });
     }
     if(chr.isKutenTouten()){
       css["margin-right"] = "-0.5em";
-      return Html.tagWrap("span", chr.data, {
-	"style": Css.toString(css),
-	"class":"nehan-char-kuto"
+      return this._createElement("span", {
+	content:chr.data,
+	className:"nehan-char-kuto",
+	css:css
       });
     }
-    return chr.data;
+    return document.createTextNode(chr.data);
   };
 
   HoriEvaluator.prototype.evalPaddingChar = function(line, chr){
-    return Html.tagWrap("span", chr.data, {
-      "style": Css.toString(chr.getCssPadding(line))
+    return this._createElement("span", {
+      content:chr.data,
+      css:chr.getCssPadding(line)
     });
   };
 
   return HoriEvaluator;
 })();
-
 

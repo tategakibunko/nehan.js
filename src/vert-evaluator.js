@@ -13,21 +13,18 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype.evalBlockImage = function(image){
-    return Html.tagSingle("img", Args.copy({
-      "src":image.style.getMarkupAttr("src"),
-      "style":Css.toString(image.getCssBlock()),
-      "title":(image.style.getMarkupAttr("title") || "no title"),
-      "class":image.classes.join(" ")
-    }, image.getDatasetAttr()));
+    return this.evalImageBody(image, image.getCssBlock());
+  };
+
+  VertEvaluator.prototype.evalChildInlineTreeWrap = function(tree, css){
+    return this.evalTreeWrap(tree, css);
   };
 
   VertEvaluator.prototype.evalInlineImage = function(line, image){
-    return Html.tagSingle("img", Args.copy({
-      "src":image.style.getMarkupAttr("src"),
-      "style":Css.toString(image.getCssInline()),
-      "title":(image.style.getMarkupAttr("title") || "no title"),
-      "class":image.classes.join(" ")
-    }, image.getDatasetAttr())) + "<br />";
+    var wrap = this._createElement("div");
+    var body = this.evalImageBody(image, image.getCssInline());
+    wrap.appendChild(body);
+    return wrap;
   };
 
   VertEvaluator.prototype.evalRuby = function(line, ruby){
@@ -40,14 +37,11 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype.evalRb = function(line, ruby){
-    var self = this, rb = this._createElement("div", {
+    var dom = this._createElement("div", {
       css:ruby.getCssVertRb(line),
       className:"nehan-rb"
     });
-    return List.fold(ruby.getRbs(), rb, function(ret, rb_text){
-      ret.appendChild(self.evalInlineElement(line, rb_text));
-      return ret;
-    });
+    return this.evalTree(dom, line, ruby.getRbs());
   };
 
   VertEvaluator.prototype.evalRt = function(line, ruby){
@@ -74,44 +68,37 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype.evalWordTransform = function(line, word){
-    /*
-    var div_wrap = document.createElement("div");
-    var div_word = document.createElement("div");
-    div_word.className = "nehan-rotate-90";
-    div_word.innerHTML = word.data;
-    this._setStyle(div_word, word.getCssVertTransBody(line));
-    this._setStyle(div_wrap, word.getCssVertTrans(line));
-    div_wrap.appendChild(div_word);
-    return div_wrap;
-    */
     var div_wrap = this._createElement("div", {
       css:word.getCssVertTrans(line)
     });
     var div_word = this._createElement("div", {
+      content:word.data,
       className:"nehan-rotate-90",
       css:word.getCssVertTransBody(line)
     });
-    div_word.innerHTML = word.data;
     div_wrap.appendChild(div_word);
     return div_wrap;
   };
 
   VertEvaluator.prototype.evalWordTransformTrident = function(line, word){
-    var body = Html.tagWrap("div", word.data, {
-      // trident rotation needs some hack.
-      //"class": "nehan-rotate-90",
-      "style": Css.toString(word.getCssVertTransBodyTrident(line))
+    var div_wrap = this._createElement("div", {
+      css:word.getCssVertTrans(line)
     });
-    return Html.tagWrap("div", body, {
-      "style": Css.toString(word.getCssVertTrans(line))
+    var div_word = this._createElement("div", {
+      content:word.data,
+      //className:"nehan-rotate-90",
+      css:word.getCssVertTransBodyTrident(line)
     });
+    div_wrap.appendChild(div_word);
+    return div_wrap;
   };
 
   VertEvaluator.prototype.evalWordIE = function(line, word){
-    return Html.tagWrap("div", word.data, {
-      "class": "nehan-vert-ie",
-      "style": Css.toString(word.getCssVertTransIE(line))
-    }) + Const.clearFix;
+    return this._createElement("div", {
+      content:word.data,
+      className:"nehan-vert-ie",
+      css:word.getCssVertTransIE(line)
+    }); // NOTE(or TODO):clearfix in older version after this code
   };
 
   VertEvaluator.prototype.evalRotateChar = function(line, chr){
@@ -125,21 +112,24 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype.evalRotateCharTransform = function(line, chr){
-    return Html.tagWrap("div", chr.data, {
-      "class":"nehan-rotate-90"
+    return this._createElement("div", {
+      content:chr.data,
+      className:"nehan-rotate-90"
     });
   };
 
   VertEvaluator.prototype.evalRotateCharIE = function(line, chr){
-    return Html.tagWrap("div", chr.data, {
-      "style":Css.toString(chr.getCssVertRotateCharIE(line)),
-      "class":"nehan-vert-ie"
-    }) + Const.clearFix;
+    return this._createElement("div", {
+      content:chr.data,
+      className:"nehan-vert-ie",
+      css:chr.getCssVertRotateCharIE(line)
+    }); // NOTE(or TODO):clearfix in older version after this code
   };
 
   VertEvaluator.prototype.evalTcy = function(line, tcy){
-    return Html.tagWrap("div", tcy.data, {
-      "class": "nehan-tcy"
+    return this._createElement("div", {
+      content:tcy.data,
+      className:"nehan-tcy"
     });
   };
 
@@ -166,38 +156,42 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype.evalCharWithBr = function(line, chr){
-    var div = document.createElement("div");
-    div.appendChild(document.createTextNode(chr.data));
-    //div.appendChild(document.createElement("br"));
-    return div;
-    //return chr.data + "<br />";
+    return this._createElement("div", {
+      content:chr.data
+    });
   };
 
   VertEvaluator.prototype.evalCharLetterSpacing = function(line, chr){
-    return Html.tagWrap("div", chr.data, {
-      "style":Css.toString(chr.getCssVertLetterSpacing(line))
+    return this._createElement("div", {
+      content:chr.data,
+      css:chr.getCssVertLetterSpacing(line)
     });
   };
 
   VertEvaluator.prototype.evalEmpha = function(line, chr, char_body){
-    char_body = char_body.replace("<br />", "");
-    var char_body2 = Html.tagWrap("span", char_body, {
-      "class":"nehan-empha-src",
-      "style":Css.toString(chr.getCssVertEmphaTarget(line))
+    var char_body2 = this._createElement("span", {
+      content:char_body.innerHTML,
+      className:"nehan-empha-src",
+      css:chr.getCssVertEmphaTarget(line)
     });
-    var empha_body = Html.tagWrap("span", line.style.textEmpha.getText(), {
-      "class":"nehan-empha-text",
-      "style":Css.toString(chr.getCssVertEmphaText(line))
+    var empha_body = this._createElement("span", {
+      content:line.style.textEmpha.getText(),
+      className:"nehan-empha-text",
+      css:chr.getCssVertEmphaText(line)
     });
-    return Html.tagWrap("div", char_body2 + empha_body, {
-      "class":"nehan-empha-wrap",
-      "style":Css.toString(line.style.textEmpha.getCssVertEmphaWrap(line, chr))
+    var wrap = this._createElement("div", {
+      className:"nehan-empha-wrap",
+      css:line.style.textEmpha.getCssVertEmphaWrap(line, chr)
     });
+    wrap.appendChild(char_body2);
+    wrap.appendChild(empha_body);
+    return wrap;
   };
 
   VertEvaluator.prototype.evalPaddingChar = function(line, chr){
-    return Html.tagWrap("div", chr.data, {
-      style:Css.toString(chr.getCssPadding(line))
+    return this._createElement("div", {
+      content:chr.data,
+      css:chr.getCssPadding(line)
     });
   };
 
@@ -205,43 +199,41 @@ var VertEvaluator = (function(){
     var color = line.color || new Color(Layout.fontColor);
     var font_rgb = color.getRgb();
     var palette_color = Palette.getColor(font_rgb).toUpperCase();
-    return Html.tagSingle("img", {
-      "class":"nehan-img-char",
-      src:chr.getImgSrc(palette_color),
-      style:Css.toString(chr.getCssVertImgChar(line))
-    }) + Const.clearFix;
+    return this._createElement("img", {
+      className:"nehan-img-char",
+      attr:{
+	src:chr.getImgSrc(palette_color)
+      },
+      css:chr.getCssVertImgChar(line)
+    });
   };
 
   VertEvaluator.prototype.evalVerticalGlyph = function(line, chr){
-    return Html.tagWrap("div", chr.data, {
-      "class":"nehan-vert-glyph",
-      "style":Css.toString(chr.getCssVertGlyph(line))
+    return this._createElement("div", {
+      content:chr.data,
+      className:"nehan-vert-glyph",
+      css:chr.getCssVertGlyph(line)
     });
   };
 
   VertEvaluator.prototype.evalCnvChar = function(line, chr){
-    return chr.cnv + "<br />";
+    return this._createElement("div", {
+      content:chr.cnv
+    });
   };
 
   VertEvaluator.prototype.evalSmallKana = function(line, chr){
     var tag_name = (line.style.textEmpha && line.style.textEmpha.isEnable())? "span" : "div";
-    return Html.tagWrap(tag_name, chr.data, {
-      style:Css.toString(chr.getCssVertSmallKana())
+    return this._createElement(tag_name, {
+      content:chr.data,
+      css:chr.getCssVertSmallKana()
     });
   };
 
   VertEvaluator.prototype.evalHalfSpaceChar = function(line, chr){
-    var font_size = line.style.getFontSize();
-    var half = Math.round(font_size / 2);
-    return Html.tagWrap("div", "&nbsp;", {
-      style:Css.toString(chr.getCssVertHalfSpaceChar(line))
-    });
-  };
-
-  VertEvaluator.prototype.evalInlineBox = function(line, box){
-    var body = (box._type === "img")? this.parentEvaluator.evalImageContent(box) : box.content;
-    return Html.tagWrap("div", body, {
-      "style":Css.toString(box.getCssVertInlineBox())
+    return this._createElement("div", {
+      content:"&nbsp;",
+      css:chr.getCssVertHalfSpaceChar(line)
     });
   };
 

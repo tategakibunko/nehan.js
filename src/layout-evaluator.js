@@ -11,16 +11,24 @@ var LayoutEvaluator = (function(){
       if(opt.className){
 	dom.className = opt.className;
       }
+      if(opt.content){
+	dom.innerHTML = opt.content;
+      }
       for(var prop in css){
-	dom.style[Utils.getCamelName(prop)] = css[prop];
+	dom.style[Utils.camelize(prop)] = css[prop];
       }
       for(var name in dataset){
-	dom.dataset[Utils.getCamelName(name)] = dataset[name];
+	dom.dataset[Utils.camelize(name)] = dataset[name];
       }
       for(var attr_name in attr){
 	dom[attr_name] = attr[attr_name];
       }
       return dom;
+    },
+    _createClearFix : function(){
+      return this._createElement("div", {
+	css:{clear:"both"}
+      });
     },
     evaluate : function(tree){
       if(this.isFlipTree(tree)){
@@ -32,28 +40,28 @@ var LayoutEvaluator = (function(){
 	if(tree.style && tree.style.getMarkupName() === "img"){
 	  return this.evalBlockImage(tree);
 	}
-	return this.evalTreeRoot(tree, tree.getCssBlock());
-      case "inline": return this.evalTreeRoot(tree, tree.getCssInline());
-      case "inline-block": return this.evalTreeRoot(tree, tree.getCssInlineBlock());
+	return this.evalTreeWrap(tree, tree.getCssBlock());
+      case "inline": return this.evalTreeWrap(tree, tree.getCssInline());
+      case "inline-block": return this.evalTreeWrap(tree, tree.getCssInlineBlock());
       default: return "";
       }
     },
-    evalTreeRoot : function(tree, css){
-      var div = this._createElement("div", {
+    evalTreeWrap : function(tree, css, tag_name){
+      var div = this._createElement(tag_name || "div", {
+	content:(tree.pastedContent || null),
 	className:tree.classes.join(" "),
 	css:css,
 	dataset:tree.getDatasetAttr()
       });
       if(tree.pastedContent){
-	div.innerHTML = tree.pastedContent;
 	return div;
       }
-      return this.evalTreeChildren(div, tree);
+      return this.evalTree(div, tree, tree.elements);
     },
-    evalTreeChildren : function(dom, tree){
+    evalTree : function(dom, tree, childs){
       var self = this;
-      return List.fold(tree.elements, dom, function(_dom, element){
-	dom.appendChild(self.evalTreeChild(tree, element));
+      return List.fold(childs, dom, function(ret, child){
+	dom.appendChild(self.evalTreeChild(tree, child));
 	return dom;
       });
     },
@@ -68,7 +76,7 @@ var LayoutEvaluator = (function(){
 	switch(element.style.getMarkupName()){
 	case "img": return this.evalInlineImage(line, element);
 	case "a": return this.evalLink(line, element);
-	default: return this.evalTreeRoot(element, element.getCssInline());
+	default: return this.evalChildInlineTreeWrap(element, element.getCssInline());
 	}
       }
       var text = this.evalTextElement(line, element);
@@ -83,9 +91,7 @@ var LayoutEvaluator = (function(){
       var self = this;
       var uri = new Uri(link.style.getMarkupAttr("href"));
       var anchor_name = uri.getAnchorName();
-      console.log("anchor_name:%s", anchor_name);
       var page_no = anchor_name? DocumentContext.getAnchorPageNo(anchor_name) : null;
-      console.log("ancho page no:%o", page_no);
       if(page_no !== null){
 	link.setDataset("page", page_no);
       }
@@ -97,7 +103,18 @@ var LayoutEvaluator = (function(){
 	  title:link.style.getMarkupAttr("title", "no title")
 	}
       });
-      return this.evalTreeChildren(dom, link);
+      return this.evalTree(dom, link, link.elements);
+    },
+    evalImageBody : function(image, css){
+      return this._createElement("img", {
+	css:css,
+	className:image.classes.join(" "),
+	dataset:image.getDatasetAttr(),
+	attr:{
+	  src:image.style.getMarkupAttr("src"),
+	  title:(image.style.getMarkupAttr("title") || "no title")
+	}
+      });
     },
     evalTextElement : function(line, text){
       switch(text._type){
