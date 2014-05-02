@@ -550,8 +550,8 @@ var StyleContext = (function(){
     getSelectorCssAttr : function(name){
       return this.selectorCss[name] || null;
     },
-    setDataset : function(name_sneak, value){
-      this.markup.setDataset(name_sneak, value);
+    setDataset : function(name, value){
+      this.markup.setDataset(name, value);
     },
     getDatasetAttr : function(){
       return this.markup.getDatasetAttr();

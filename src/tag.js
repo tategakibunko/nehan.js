@@ -43,9 +43,9 @@ var Tag = (function (){
     setAttr : function(name, value){
       this.attr[name] = value;
     },
-    setDataset : function(name_sneak, value){
-      this.datasetRaw[name_sneak] = value;
-      this.datasetCamel[Utils.camelize(name_sneak)] = value;
+    setDataset : function(name, value){
+      this.datasetRaw[name] = value;
+      this.datasetCamel[Utils.camelize(name)] = value;
     },
     // get dataset by name(camel case)
     // getDataset('name') => 'taro'
@@ -57,7 +57,7 @@ var Tag = (function (){
       }
       return (typeof def_value !== "undefined")? def_value : null;
     },
-    // dataset name(with "data-" prefix) and value object => {"data-id":xxx, "data-name":yyy}
+    // {"data-id":xxx, "data-name":yyy}
     getDatasetAttr : function(){
       return this.datasetRaw;
     },
@@ -121,18 +121,12 @@ var Tag = (function (){
     _parseDataset : function(dataset_camel, dataset_raw){
       for(var name in this.attr){
 	if(name.indexOf("data-") === 0){
-	  var dataset_name = this._parseDatasetName(name); // get camel case name without data prefix.
+	  var dataset_name = name.slice(5);
 	  var dataset_value = this.attr[name];
-	  dataset_camel[dataset_name] = dataset_value; // stored as camel-case-name & value dict.
-	  dataset_raw[name] = dataset_value; // stored as raw-name & value dict.
+	  dataset_camel[Utils.camelize(dataset_name)] = dataset_value; // stored as camel-case-name & value dict.
+	  dataset_raw[dataset_name] = dataset_value; // stored as raw-name & value dict.
 	}
       }
-    },
-    // "data-name" => "name"
-    // "data-family-name" => "familyName"
-    _parseDatasetName : function(prop){
-      var hyp_name = prop.slice(5); // 5 is "data-".length
-      return Utils.camelize(hyp_name);
     }
   };
 

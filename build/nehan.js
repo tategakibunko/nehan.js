@@ -2607,9 +2607,9 @@ var Tag = (function (){
     setAttr : function(name, value){
       this.attr[name] = value;
     },
-    setDataset : function(name_sneak, value){
-      this.datasetRaw[name_sneak] = value;
-      this.datasetCamel[Utils.camelize(name_sneak)] = value;
+    setDataset : function(name, value){
+      this.datasetRaw[name] = value;
+      this.datasetCamel[Utils.camelize(name)] = value;
     },
     // get dataset by name(camel case)
     // getDataset('name') => 'taro'
@@ -2621,7 +2621,7 @@ var Tag = (function (){
       }
       return (typeof def_value !== "undefined")? def_value : null;
     },
-    // dataset name(with "data-" prefix) and value object => {"data-id":xxx, "data-name":yyy}
+    // {"data-id":xxx, "data-name":yyy}
     getDatasetAttr : function(){
       return this.datasetRaw;
     },
@@ -2685,18 +2685,12 @@ var Tag = (function (){
     _parseDataset : function(dataset_camel, dataset_raw){
       for(var name in this.attr){
 	if(name.indexOf("data-") === 0){
-	  var dataset_name = this._parseDatasetName(name); // get camel case name without data prefix.
+	  var dataset_name = name.slice(5);
 	  var dataset_value = this.attr[name];
-	  dataset_camel[dataset_name] = dataset_value; // stored as camel-case-name & value dict.
-	  dataset_raw[name] = dataset_value; // stored as raw-name & value dict.
+	  dataset_camel[Utils.camelize(dataset_name)] = dataset_value; // stored as camel-case-name & value dict.
+	  dataset_raw[dataset_name] = dataset_value; // stored as raw-name & value dict.
 	}
       }
-    },
-    // "data-name" => "name"
-    // "data-family-name" => "familyName"
-    _parseDatasetName : function(prop){
-      var hyp_name = prop.slice(5); // 5 is "data-".length
-      return Utils.camelize(hyp_name);
     }
   };
 
@@ -4743,8 +4737,8 @@ var Box = (function(){
 	return ret + (text? (text.data || "") : "");
       });
     },
-    setDataset : function(name_sneak, value){
-      this.style.markup.setDataset(name_sneak, value);
+    setDataset : function(name, value){
+      this.style.markup.setDataset(name, value);
     },
     getDatasetAttr : function(){
       // dataset attr of root anonymous line is already captured by parent box.
@@ -6219,6 +6213,9 @@ var SelectorContext = (function(){
     getParentStyle : function(){
       return this._style.parent;
     },
+    getMarkup : function(){
+      return this._style.markup;
+    },
     getMarkupContent : function(){
       return this._style.getMarkupContent();
     },
@@ -6819,8 +6816,8 @@ var StyleContext = (function(){
     getSelectorCssAttr : function(name){
       return this.selectorCss[name] || null;
     },
-    setDataset : function(name_sneak, value){
-      this.markup.setDataset(name_sneak, value);
+    setDataset : function(name, value){
+      this.markup.setDataset(name, value);
     },
     getDatasetAttr : function(){
       return this.markup.getDatasetAttr();
@@ -9083,6 +9080,7 @@ var LayoutEvaluator = (function(){
 	}
       }
       for(var data_name in dataset){
+	console.log("dataset:%s to %o", data_name, dom);
 	dom.dataset[Utils.camelize(data_name)] = dataset[data_name];
       }
       for(var attr_name in attr){
@@ -9180,6 +9178,7 @@ var LayoutEvaluator = (function(){
 	css:css,
 	className:image.classes.join(" "),
 	dataset:image.getDatasetAttr(),
+	events:image.getEvents(),
 	attr:{
 	  src:image.style.getMarkupAttr("src"),
 	  title:(image.style.getMarkupAttr("title") || "no title")

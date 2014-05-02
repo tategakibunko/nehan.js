@@ -11,6 +11,9 @@ var SelectorContext = (function(){
     getParentStyle : function(){
       return this._style.parent;
     },
+    getMarkup : function(){
+      return this._style.markup;
+    },
     getMarkupContent : function(){
       return this._style.getMarkupContent();
     },
