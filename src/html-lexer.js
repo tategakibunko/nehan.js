@@ -149,7 +149,6 @@ var HtmlLexer = (function (){
       try {
 	return this._getTagContentAux(tag_name);
       } catch (e){
-	//console.error("_getTagContent:%o", e);
 	return {closed:false, content:""};
       }
     },

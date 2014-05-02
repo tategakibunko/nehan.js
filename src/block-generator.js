@@ -61,7 +61,6 @@ var BlockGenerator = (function(){
 
     // if disabled style, just skip
     if(child_style.isDisabled()){
-      console.log("disabled child style:%o", child_style);
       return this._getNext(context);
     }
 

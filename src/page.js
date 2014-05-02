@@ -1,7 +1,7 @@
 var Page = (function(){
   function Page(opt){
     Args.merge(this, {
-      html:"",
+      element:null,
       seekPos:0,
       pageNo:0,
       charPos:0,
@@ -14,8 +14,8 @@ var Page = (function(){
     getGroupSize : function(){
       return 1;
     },
-    getGroupHtml : function(pos){
-      return this.html;
+    getGroup : function(pos){
+      return this.element;
     }
   };
 

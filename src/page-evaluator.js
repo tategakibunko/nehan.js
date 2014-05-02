@@ -7,14 +7,14 @@ var PageEvaluator = (function(){
     _getEvaluator : function(){
       return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
     },
-    evaluate : function(body_element){
-      return body_element? new Page({
-	html:this.evaluator.evaluate(body_element),
-	percent:body_element.percent,
-	seekPos:body_element.seekPos,
-	pageNo:body_element.pageNo,
-	charPos:body_element.charPos,
-	charCount:body_element.charCount
+    evaluate : function(tree){
+      return tree? new Page({
+	element:this.evaluator.evaluate(tree),
+	percent:tree.percent,
+	seekPos:tree.seekPos,
+	pageNo:tree.pageNo,
+	charPos:tree.charPos,
+	charCount:tree.charCount
       }) : null;
     }
   };

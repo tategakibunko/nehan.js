@@ -17,9 +17,9 @@ var PageGroup = (function(){
     return this.groupSize;
   };
 
-  PageGroup.prototype.getGroupHtml = function(pos){
+  PageGroup.prototype.getGroup = function(pos){
     var page = this.pages[pos] || null;
-    return page? page.html : "";
+    return page? page.element : null;
   };
 
   return PageGroup;

@@ -4993,7 +4993,6 @@ var HtmlLexer = (function (){
       try {
 	return this._getTagContentAux(tag_name);
       } catch (e){
-	//console.error("_getTagContent:%o", e);
 	return {closed:false, content:""};
       }
     },
@@ -5771,7 +5770,7 @@ var RubyTokenStream = (function(){
 var Page = (function(){
   function Page(opt){
     Args.merge(this, {
-      html:"",
+      element:null,
       seekPos:0,
       pageNo:0,
       charPos:0,
@@ -5784,8 +5783,8 @@ var Page = (function(){
     getGroupSize : function(){
       return 1;
     },
-    getGroupHtml : function(pos){
-      return this.html;
+    getGroup : function(pos){
+      return this.element;
     }
   };
 
@@ -5802,14 +5801,14 @@ var PageEvaluator = (function(){
     _getEvaluator : function(){
       return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
     },
-    evaluate : function(body_element){
-      return body_element? new Page({
-	html:this.evaluator.evaluate(body_element),
-	percent:body_element.percent,
-	seekPos:body_element.seekPos,
-	pageNo:body_element.pageNo,
-	charPos:body_element.charPos,
-	charCount:body_element.charCount
+    evaluate : function(tree){
+      return tree? new Page({
+	element:this.evaluator.evaluate(tree),
+	percent:tree.percent,
+	seekPos:tree.seekPos,
+	pageNo:tree.pageNo,
+	charPos:tree.charPos,
+	charCount:tree.charCount
       }) : null;
     }
   };
@@ -5982,9 +5981,9 @@ var PageGroup = (function(){
     return this.groupSize;
   };
 
-  PageGroup.prototype.getGroupHtml = function(pos){
+  PageGroup.prototype.getGroup = function(pos){
     var page = this.pages[pos] || null;
-    return page? page.html : "";
+    return page? page.element : null;
   };
 
   return PageGroup;
@@ -7812,7 +7811,6 @@ var BlockGenerator = (function(){
 
     // if disabled style, just skip
     if(child_style.isDisabled()){
-      console.log("disabled child style:%o", child_style);
       return this._getNext(context);
     }
 
