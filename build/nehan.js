@@ -9080,7 +9080,6 @@ var LayoutEvaluator = (function(){
 	}
       }
       for(var data_name in dataset){
-	console.log("dataset:%s to %o", data_name, dom);
 	dom.dataset[Utils.camelize(data_name)] = dataset[data_name];
       }
       for(var attr_name in attr){
