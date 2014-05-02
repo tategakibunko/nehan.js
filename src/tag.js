@@ -19,6 +19,9 @@ var Tag = (function (){
     setContent : function(content){
       this.content = content;
     },
+    setAlias : function(name){
+      this.alias = name;
+    },
     addClass : function(klass){
       this.classes.push(klass);
     },
@@ -28,7 +31,7 @@ var Tag = (function (){
       });
     },
     getName : function(){
-      return this.name;
+      return this.alias || this.name;
     },
     getAttr : function(name, def_value){
       var ret = this.attr[name];
@@ -36,6 +39,9 @@ var Tag = (function (){
 	return ret;
       }
       return (typeof def_value !== "undefined")? def_value : null;
+    },
+    setAttr : function(name, value){
+      this.attr[name] = value;
     },
     setDataset : function(name_sneak, value){
       this.datasetRaw[name_sneak] = value;
