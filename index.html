@@ -223,7 +223,7 @@ stream.asyncGet({
   // called when each single pages are successfully calculated.
   onProgress : function(stream, tree){
     var page = stream.getPage(tree.pageNo); // get page object of this page.
-    console.log(page.html);
+    console.log(page.element);
   },
   onComplete : function(stream, time){
     console.log("finished! %f msec", time);
