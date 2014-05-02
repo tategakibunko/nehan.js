@@ -7,6 +7,9 @@ var Uri = (function(){
     _normalize : function(address){
       return address.replace(/\s/g, "");
     },
+    hasAnchorName : function(){
+      return this.address.indexOf("#") >= 0;
+    },
     getAddress : function(){
       return this.address;
     },

@@ -32,11 +32,11 @@ var LayoutEvaluator = (function(){
     _createElementRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
-	content:(tree.pastedContent || null),
-	className:tree.classes.join(" "),
+	content:(opt.content || tree.pastedContent || null),
+	className:(opt.className || tree.classes.join(" ")),
 	attr:(opt.attr || {}),
-	css:tree.getCssRoot(),
-	dataset:tree.getDatasetAttr()
+	css:(opt.css || tree.getCssRoot()),
+	dataset:(opt.dataset || tree.getDatasetAttr())
       });
     },
     evaluate : function(tree){
@@ -52,8 +52,12 @@ var LayoutEvaluator = (function(){
       var root = opt.root || this._createElementRoot(tree, opt);
       return tree.pastedContent? root : List.fold(elements, root, function(ret, child){
 	root.appendChild(self.evalChildElement(tree, child));
+	self._appendExtraElementFor(root, child);
 	return root;
       });
+    },
+    _appendExtraElementFor : function(element){
+      // do nothing except vert-evaluator for normal text element.
     },
     evalChildElement : function(parent, child){
       switch(parent.display){
@@ -85,20 +89,16 @@ var LayoutEvaluator = (function(){
       }
     },
     evalInlineChildText : function(parent, element){
-      var text = this.evalTextElement(parent, element);
       if(parent.style.isTextEmphaEnable()){
-	return this.evalEmpha(parent, element, text);
+	return this.evalEmpha(parent, element);
       }
-      return text;
+      return this.evalTextElement(parent, element);
     },
-    // if link title is not defined, summary of link content is used.
     // if link uri has anchor address, add page-no to dataset where the anchor is defined.
     evalLink : function(parent, link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
-      var anchor_name = uri.getAnchorName();
-      var page_no = anchor_name? DocumentContext.getAnchorPageNo(anchor_name) : null;
-      if(page_no !== null){
-	link.setDataset("page", page_no);
+      if(uri.hasAnchorName()){
+	link.setDataset("page", DocumentContext.getAnchorPageNo(uri.getAnchorName()));
       }
       return this.evalTree(link, {
 	name:"a",

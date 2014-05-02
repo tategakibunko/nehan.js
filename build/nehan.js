@@ -4538,6 +4538,9 @@ var Uri = (function(){
     _normalize : function(address){
       return address.replace(/\s/g, "");
     },
+    hasAnchorName : function(){
+      return this.address.indexOf("#") >= 0;
+    },
     getAddress : function(){
       return this.address;
     },
@@ -9079,11 +9082,11 @@ var LayoutEvaluator = (function(){
     _createElementRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
-	content:(tree.pastedContent || null),
-	className:tree.classes.join(" "),
+	content:(opt.content || tree.pastedContent || null),
+	className:(opt.className || tree.classes.join(" ")),
 	attr:(opt.attr || {}),
-	css:tree.getCssRoot(),
-	dataset:tree.getDatasetAttr()
+	css:(opt.css || tree.getCssRoot()),
+	dataset:(opt.dataset || tree.getDatasetAttr())
       });
     },
     evaluate : function(tree){
@@ -9099,8 +9102,12 @@ var LayoutEvaluator = (function(){
       var root = opt.root || this._createElementRoot(tree, opt);
       return tree.pastedContent? root : List.fold(elements, root, function(ret, child){
 	root.appendChild(self.evalChildElement(tree, child));
+	self._appendExtraElementFor(root, child);
 	return root;
       });
+    },
+    _appendExtraElementFor : function(element){
+      // do nothing except vert-evaluator for normal text element.
     },
     evalChildElement : function(parent, child){
       switch(parent.display){
@@ -9132,20 +9139,16 @@ var LayoutEvaluator = (function(){
       }
     },
     evalInlineChildText : function(parent, element){
-      var text = this.evalTextElement(parent, element);
       if(parent.style.isTextEmphaEnable()){
-	return this.evalEmpha(parent, element, text);
+	return this.evalEmpha(parent, element);
       }
-      return text;
+      return this.evalTextElement(parent, element);
     },
-    // if link title is not defined, summary of link content is used.
     // if link uri has anchor address, add page-no to dataset where the anchor is defined.
     evalLink : function(parent, link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
-      var anchor_name = uri.getAnchorName();
-      var page_no = anchor_name? DocumentContext.getAnchorPageNo(anchor_name) : null;
-      if(page_no !== null){
-	link.setDataset("page", page_no);
+      if(uri.hasAnchorName()){
+	link.setDataset("page", DocumentContext.getAnchorPageNo(uri.getAnchorName()));
       }
       return this.evalTree(link, {
 	name:"a",
@@ -9192,6 +9195,12 @@ var VertEvaluator = (function(){
     LayoutEvaluator.call(this);
   }
   Class.extend(VertEvaluator, LayoutEvaluator);
+
+  VertEvaluator.prototype._appendExtraElementFor = function(root, element){
+    if(element.withBr){
+      root.appendChild(document.createElement("br"));
+    }
+  };
 
   VertEvaluator.prototype.isFlipTree = function(tree){
     return tree.style.isTextHorizontal();
@@ -9346,10 +9355,11 @@ var VertEvaluator = (function(){
     return this.evalCharWithBr(line, chr);
   };
 
+  // to inherit style of parent wrap, we text with <br> to keep elements in 'inline-level'.
+  // for example, if we use <div>, parent bg-color is not inherited.
   VertEvaluator.prototype.evalCharWithBr = function(line, chr){
-    return this._createElement("div", {
-      content:chr.data
-    });
+    chr.withBr = true;
+    return document.createTextNode(Html.unescape(chr.data));
   };
 
   VertEvaluator.prototype.evalCharLetterSpacing = function(line, chr){
@@ -9359,9 +9369,9 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype.evalEmpha = function(line, chr, char_body){
-    var char_body2 = this._createElement("span", {
-      content:char_body.innerHTML,
+  VertEvaluator.prototype.evalEmpha = function(line, chr){
+    var char_body = this._createElement("span", {
+      content:chr.data,
       className:"nehan-empha-src",
       css:chr.getCssVertEmphaTarget(line)
     });
@@ -9374,7 +9384,7 @@ var VertEvaluator = (function(){
       className:"nehan-empha-wrap",
       css:line.style.textEmpha.getCssVertEmphaWrap(line, chr)
     });
-    wrap.appendChild(char_body2);
+    wrap.appendChild(char_body);
     wrap.appendChild(empha_body);
     return wrap;
   };
@@ -9515,9 +9525,10 @@ var HoriEvaluator = (function(){
     return document.createTextNode(chr.data);
   };
 
-  HoriEvaluator.prototype.evalEmpha = function(line, chr, char_body){
+  HoriEvaluator.prototype.evalEmpha = function(line, chr){
     var char_part = this._createElement("div", {
-      content:char_body.textContent,
+      //content:char_body.textContent,
+      content:chr.data,
       css:chr.getCssHoriEmphaTarget(line)
     });
     var empha_part = this._createElement("div", {

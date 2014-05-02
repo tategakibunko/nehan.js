@@ -81,9 +81,9 @@ var HoriEvaluator = (function(){
     return document.createTextNode(chr.data);
   };
 
-  HoriEvaluator.prototype.evalEmpha = function(line, chr, char_body){
+  HoriEvaluator.prototype.evalEmpha = function(line, chr){
     var char_part = this._createElement("div", {
-      content:char_body.textContent,
+      content:chr.data,
       css:chr.getCssHoriEmphaTarget(line)
     });
     var empha_part = this._createElement("div", {

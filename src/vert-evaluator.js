@@ -4,6 +4,12 @@ var VertEvaluator = (function(){
   }
   Class.extend(VertEvaluator, LayoutEvaluator);
 
+  VertEvaluator.prototype._appendExtraElementFor = function(root, element){
+    if(element.withBr){
+      root.appendChild(document.createElement("br"));
+    }
+  };
+
   VertEvaluator.prototype.isFlipTree = function(tree){
     return tree.style.isTextHorizontal();
   };
@@ -157,10 +163,11 @@ var VertEvaluator = (function(){
     return this.evalCharWithBr(line, chr);
   };
 
+  // to inherit style of parent wrap, we text with <br> to keep elements in 'inline-level'.
+  // for example, if we use <div>, parent bg-color is not inherited.
   VertEvaluator.prototype.evalCharWithBr = function(line, chr){
-    return this._createElement("div", {
-      content:chr.data
-    });
+    chr.withBr = true;
+    return document.createTextNode(Html.unescape(chr.data));
   };
 
   VertEvaluator.prototype.evalCharLetterSpacing = function(line, chr){
@@ -170,9 +177,9 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype.evalEmpha = function(line, chr, char_body){
-    var char_body2 = this._createElement("span", {
-      content:char_body.innerHTML,
+  VertEvaluator.prototype.evalEmpha = function(line, chr){
+    var char_body = this._createElement("span", {
+      content:chr.data,
       className:"nehan-empha-src",
       css:chr.getCssVertEmphaTarget(line)
     });
@@ -185,7 +192,7 @@ var VertEvaluator = (function(){
       className:"nehan-empha-wrap",
       css:line.style.textEmpha.getCssVertEmphaWrap(line, chr)
     });
-    wrap.appendChild(char_body2);
+    wrap.appendChild(char_body);
     wrap.appendChild(empha_body);
     return wrap;
   };
