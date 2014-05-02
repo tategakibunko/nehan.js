@@ -16,8 +16,8 @@ var VertEvaluator = (function(){
     return this.evalImageBody(image, image.getCssBlock());
   };
 
-  VertEvaluator.prototype.evalChildInlineTreeWrap = function(tree, css){
-    return this.evalTreeWrap(tree, css);
+  VertEvaluator.prototype.evalInlineChildTree = function(tree){
+    return this.evalTree(tree);
   };
 
   VertEvaluator.prototype.evalInlineImage = function(line, image){
@@ -37,11 +37,13 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype.evalRb = function(line, ruby){
-    var dom = this._createElement("div", {
-      css:ruby.getCssVertRb(line),
-      className:"nehan-rb"
+    return this.evalTree(line, {
+      elements:ruby.getRbs(),
+      root:this._createElement("div", {
+	css:ruby.getCssVertRb(line),
+	className:"nehan-rb"
+      })
     });
-    return this.evalTree(dom, line, ruby.getRbs());
   };
 
   VertEvaluator.prototype.evalRt = function(line, ruby){

@@ -12,8 +12,8 @@ var HoriEvaluator = (function(){
     return (new VertEvaluator()).evaluate(tree);
   };
 
-  HoriEvaluator.prototype.evalChildInlineTreeWrap = function(tree, css){
-    return this.evalTreeWrap(tree, css, "span");
+  HoriEvaluator.prototype.evalInlineChildTree = function(tree){
+    return this.evalTree(tree, {name:"span"});
   };
 
   HoriEvaluator.prototype.evalBlockImage = function(image){
@@ -43,11 +43,13 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype.evalRb = function(line, ruby){
-    var dom = this._createElement("div", {
-      css:ruby.getCssHoriRb(line),
-      className:"nehan-rb"
+    return this.evalTree(line, {
+      elements:ruby.getRbs(),
+      root:this._createElement("div", {
+	css:ruby.getCssHoriRb(line),
+	className:"nehan-rb"
+      })
     });
-    return this.evalTree(dom, line, ruby.getRbs());
   };
 
   HoriEvaluator.prototype.evalRt = function(line, ruby){

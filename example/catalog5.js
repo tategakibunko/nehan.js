@@ -26,7 +26,9 @@ var LayoutTest = (function(){
     engine.createPageStream(script).asyncGet({
       onProgress : function(stream, tree){
 	var page = stream.getPage(tree.pageNo); // tree -> page
-	$dom.append($("<div />").html(page.html));
+	//$dom.append($("<div />").html(page.html));
+	console.log(page.html);
+	$dom.append(page.html);
       },
       onComplete : function(stream, time){
 	$dom.append($("<p />").html(time + "msec"));

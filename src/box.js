@@ -31,6 +31,13 @@ var Box = (function(){
       }
       return this.style.getDatasetAttr();
     },
+    getCssRoot : function(){
+      switch(this.display){
+      case "block": return this.getCssBlock();
+      case "inline": return this.getCssInline();
+      case "inline-block": return this.getCssInlineBlock();
+      }
+    },
     getCssBlock : function(){
       var css = {};
       Args.copy(css, this.style.getCssBlock()); // base style
