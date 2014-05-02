@@ -7,6 +7,7 @@ var LayoutEvaluator = (function(){
       var css = opt.css || {};
       var dataset = opt.dataset || {};
       var attr = opt.attr || {};
+      var events = opt.events || {};
       var dom = document.createElement(name);
       if(opt.className){
 	dom.className = opt.className;
@@ -27,12 +28,17 @@ var LayoutEvaluator = (function(){
       for(var attr_name in attr){
 	dom[attr_name] = attr[attr_name];
       }
+      for(var event_name in events){
+	if(typeof events[event_name] === "function"){
+	  dom[event_name] = events[event_name];
+	}
+      }
       return dom;
     },
     _createElementRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
-	tree:tree,
+	events:(opt.events || tree.getEvents()),
 	content:(opt.content || tree.pastedContent || null),
 	className:(opt.className || tree.classes.join(" ")),
 	attr:(opt.attr || {}),

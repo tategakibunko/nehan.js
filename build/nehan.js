@@ -4747,6 +4747,9 @@ var Box = (function(){
       }
       return this.style.getDatasetAttr();
     },
+    getEvents : function(){
+      return this.style.getCssAttr("events") || {};
+    },
     getCssRoot : function(){
       switch(this.display){
       case "block": return this.getCssBlock();
@@ -6782,6 +6785,9 @@ var StyleContext = (function(){
       return this.markup.getDataset(name, def_val);
     },
     _evalCssAttr : function(name, value){
+      if(name === "events"){
+	return value; // function set, so return as it is.
+      }
       // if value is function, call it with style-context(this),
       // and need to format because it's thunk object and not initialized yet.
       if(typeof value === "function"){
@@ -9057,6 +9063,7 @@ var LayoutEvaluator = (function(){
       var css = opt.css || {};
       var dataset = opt.dataset || {};
       var attr = opt.attr || {};
+      var events = opt.events || {};
       var dom = document.createElement(name);
       if(opt.className){
 	dom.className = opt.className;
@@ -9077,12 +9084,17 @@ var LayoutEvaluator = (function(){
       for(var attr_name in attr){
 	dom[attr_name] = attr[attr_name];
       }
+      for(var event_name in events){
+	if(typeof events[event_name] === "function"){
+	  dom[event_name] = events[event_name];
+	}
+      }
       return dom;
     },
     _createElementRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
-	tree:tree,
+	events:(opt.events || tree.getEvents()),
 	content:(opt.content || tree.pastedContent || null),
 	className:(opt.className || tree.classes.join(" ")),
 	attr:(opt.attr || {}),

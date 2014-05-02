@@ -521,6 +521,9 @@ var StyleContext = (function(){
       return this.markup.getDataset(name, def_val);
     },
     _evalCssAttr : function(name, value){
+      if(name === "events"){
+	return value; // function set, so return as it is.
+      }
       // if value is function, call it with style-context(this),
       // and need to format because it's thunk object and not initialized yet.
       if(typeof value === "function"){

@@ -31,6 +31,9 @@ var Box = (function(){
       }
       return this.style.getDatasetAttr();
     },
+    getEvents : function(){
+      return this.style.getCssAttr("events") || {};
+    },
     getCssRoot : function(){
       switch(this.display){
       case "block": return this.getCssBlock();
