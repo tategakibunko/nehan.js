@@ -9082,6 +9082,7 @@ var LayoutEvaluator = (function(){
     _createElementRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
+	tree:tree,
 	content:(opt.content || tree.pastedContent || null),
 	className:(opt.className || tree.classes.join(" ")),
 	attr:(opt.attr || {}),
@@ -9527,7 +9528,6 @@ var HoriEvaluator = (function(){
 
   HoriEvaluator.prototype.evalEmpha = function(line, chr){
     var char_part = this._createElement("div", {
-      //content:char_body.textContent,
       content:chr.data,
       css:chr.getCssHoriEmphaTarget(line)
     });
