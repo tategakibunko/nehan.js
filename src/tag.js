@@ -57,7 +57,8 @@ var Tag = (function (){
       }
       return (typeof def_value !== "undefined")? def_value : null;
     },
-    // {"data-id":xxx, "data-name":yyy}
+    // return sneak case attrs
+    // => {"name":"taro", "family-name":"yamada"}
     getDatasetAttr : function(){
       return this.datasetRaw;
     },
