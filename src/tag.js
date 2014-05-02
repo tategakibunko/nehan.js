@@ -8,8 +8,8 @@ var Tag = (function (){
     this.id = this._parseId(); // add "nehan-" prefix if not started with "nehan-".
     this.classes = this._parseClasses(this.attr["class"] || "");
     this.datasetCamel = {}; // dataset with no "data-" prefixes, and camel case => {name:"taro", familyName:"yamada"} 
-    this.datasetRaw = {}; // dataset with "data-" prefixes => {"data-name":"taro", "data-family-name":"yamada"}
-    this._parseDataset(this.datasetCamel, this.datasetRaw); // parse and set data-set values
+    this.datasetSneak = {}; // dataset with "data-" prefixes => {"data-name":"taro", "data-family-name":"yamada"}
+    this._parseDataset(this.datasetCamel, this.datasetSneak); // parse and set data-set values
   }
 
   Tag.prototype = {
@@ -44,14 +44,12 @@ var Tag = (function (){
       this.attr[name] = value;
     },
     setDataset : function(name, value){
-      this.datasetRaw[name] = value;
+      this.datasetSneak[name] = value;
       this.datasetCamel[Utils.camelize(name)] = value;
     },
-    // get dataset by name(camel case)
-    // getDataset('name') => 'taro'
     // getDataset('familyName') => 'yamada'
-    getDataset : function(name, def_value){
-      var ret = this.datasetCamel[name];
+    getDataset : function(camel_name, def_value){
+      var ret = this.datasetCamel[camel_name];
       if(typeof ret !== "undefined"){
 	return ret;
       }
@@ -60,7 +58,7 @@ var Tag = (function (){
     // return sneak case attrs
     // => {"name":"taro", "family-name":"yamada"}
     getDatasetAttr : function(){
-      return this.datasetRaw;
+      return this.datasetSneak;
     },
     getContent : function(){
       return this.content;
@@ -119,13 +117,17 @@ var Tag = (function (){
 	return "." + class_name;
       });
     },
-    _parseDataset : function(dataset_camel, dataset_raw){
+    // parse all attributes that are started by "data-", and store both to
+    // 1. sneak cased dict(dataset_sneak)
+    // 2. camel cased dict(dataset_camel)
+    _parseDataset : function(dataset_camel, dataset_sneak){
       for(var name in this.attr){
 	if(name.indexOf("data-") === 0){
-	  var dataset_name = name.slice(5);
-	  var dataset_value = this.attr[name];
-	  dataset_camel[Utils.camelize(dataset_name)] = dataset_value; // stored as camel-case-name & value dict.
-	  dataset_raw[dataset_name] = dataset_value; // stored as raw-name & value dict.
+	  var value = this.attr[name];
+	  var sneak_name = name.slice(5); // "data-family-name" -> "family-name"
+	  var camel_name = Utils.camelize(sneak_name); // "family-name" -> "familyName"
+	  dataset_sneak[sneak_name] = value;
+	  dataset_camel[camel_name] = value;
 	}
       }
     }
