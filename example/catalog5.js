@@ -27,7 +27,7 @@ var LayoutTest = (function(){
       onProgress : function(stream, tree){
 	var page = stream.getPage(tree.pageNo); // tree -> page
 	//$dom.append($("<div />").html(page.html));
-	$dom.append(page.html);
+	$dom.append(page.element);
       },
       onComplete : function(stream, time){
 	$dom.append($("<p />").html(time + "msec"));
