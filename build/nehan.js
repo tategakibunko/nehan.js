@@ -2572,6 +2572,7 @@ var Tag = (function (){
     this.content = content || "";
     this.name = this._parseName(this.src);
     this.attrs = TagAttrParser.parse(this.src);
+    this.dataset = this._parseDataset(this.attrs);
     this.id = this._parseId(this.attrs["id"] || ""); // add "nehan-" prefix if not started with "nehan-".
     this.classes = this._parseClasses(this.attrs["class"] || ""); // add "nehan-" prefix for each class if not started with "nehan-".
   }
@@ -2607,21 +2608,11 @@ var Tag = (function (){
     setAttr : function(name, value){
       this.attrs[name] = value;
     },
-    setDataBySneakName : function(sneak_name, value){
-      this.dataset.setBySneakName(sneak_name, value);
+    getData : function(name){
+      return this.dataset[name] || null;
     },
-    getDataBySneakName : function(sneak_name){
-      return this.dataset.getBySneakName(sneak_name);
-    },
-    // getDataset('familyName') => 'yamada'
-    getDataByCamelName : function(camel_name){
-      return this.dataset.getByCamelName(camel_name);
-    },
-    iterDatasetByCamelName : function(fn){
-      this.dataset.iterByCamelName(fn);
-    },
-    iterDatasetBySneakName : function(fn){
-      this.dataset.iterBySneakName(fn);
+    setData : function(name, value){
+      this.dataset[name] = value;
     },
     getContent : function(){
       return this.content;
@@ -2680,6 +2671,15 @@ var Tag = (function (){
       return List.map(classes, function(class_name){
 	return "." + class_name;
       });
+    },
+    _parseDataset : function(attrs){
+      var dataset = {};
+      for(var name in attrs){
+	if(name.indexOf("data-") === 0){
+	  dataset[Utils.camelize(name.slice(5))] = attrs[name];
+	}
+      }
+      return dataset;
     }
   };
 
@@ -6768,9 +6768,6 @@ var StyleContext = (function(){
       }
       return this.markup.getAttr(name, def_value);
     },
-    getMarkupDataset : function(){
-      return this.markup.dataset;
-    },
     _evalCssAttr : function(name, value){
       if(name === "events"){
 	return value; // function set, so return as it is.
@@ -6800,12 +6797,6 @@ var StyleContext = (function(){
     },
     getSelectorCssAttr : function(name){
       return this.selectorCss[name] || null;
-    },
-    setDataset : function(name, value){
-      this.markup.setDataset(name, value);
-    },
-    getDatasetAttr : function(){
-      return this.markup.getDatasetAttr();
     },
     getMarkupName : function(){
       return this.markup.getName();
@@ -7135,7 +7126,7 @@ var StyleContext = (function(){
     // [example]
     // engine.setStyle("p", {
     //   "onload" : function(context){
-    //      var min_extent = parseInt(context.getMarkupDataset("minExtent"), 10);
+    //      var min_extent = parseInt(context.getMarkup().getData("minExtent"), 10);
     //	    if(context.getRestExtent() < min_extent){
     //        return {"page-break-before":"always"};
     //      }

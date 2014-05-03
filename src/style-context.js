@@ -520,9 +520,6 @@ var StyleContext = (function(){
       }
       return this.markup.getAttr(name, def_value);
     },
-    getMarkupDataset : function(){
-      return this.markup.dataset;
-    },
     _evalCssAttr : function(name, value){
       if(name === "events"){
 	return value; // function set, so return as it is.
@@ -552,12 +549,6 @@ var StyleContext = (function(){
     },
     getSelectorCssAttr : function(name){
       return this.selectorCss[name] || null;
-    },
-    setDataset : function(name, value){
-      this.markup.setDataset(name, value);
-    },
-    getDatasetAttr : function(){
-      return this.markup.getDatasetAttr();
     },
     getMarkupName : function(){
       return this.markup.getName();
@@ -887,7 +878,7 @@ var StyleContext = (function(){
     // [example]
     // engine.setStyle("p", {
     //   "onload" : function(context){
-    //      var min_extent = parseInt(context.getMarkupDataset("minExtent"), 10);
+    //      var min_extent = parseInt(context.getMarkup().getData("minExtent"), 10);
     //	    if(context.getRestExtent() < min_extent){
     //        return {"page-break-before":"always"};
     //      }
