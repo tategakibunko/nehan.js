@@ -4739,6 +4739,9 @@ var Box = (function(){
     getClassName : function(){
       return this.classes? this.classes.join(" ") : "";
     },
+    getContent : function(){
+      return this.content || null;
+    },
     getEvents : function(){
       return this.style.getCssAttr("events") || {};
     },
@@ -6538,7 +6541,7 @@ var StyleContext = (function(){
 	return total + (element? (element.charCount || 0) : 0);
       });
       box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
-      box.pastedContent = opt.pastedContent || null;
+      box.content = opt.content || null;
       return box;
     },
     createImage : function(opt){
@@ -7825,7 +7828,7 @@ var BlockGenerator = (function(){
     // to show some html(like form, input etc) that nehan.js can't layout.
     if(child_style.isPasted()){
       return child_style.createBlock({
-	pastedContent:child_style.getContent()
+	content:child_style.getContent()
       });
     }
 
@@ -9114,7 +9117,7 @@ var LayoutEvaluator = (function(){
 	className:tree.getClassName(),
 	attrs:tree.getAttrs(),
 	events:tree.getEvents(),
-	content:(opt.content || tree.pastedContent || null),
+	content:(opt.content || tree.getContent()),
 	styles:(opt.css || tree.getCssRoot())
       });
     },
