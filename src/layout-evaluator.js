@@ -24,11 +24,15 @@ var LayoutEvaluator = (function(){
 	  dom.style[Utils.camelize(style_name)] = styles[style_name];
 	}
       }
+      // notice that class(className in style object) is given by variable "Box::classes".
+      // why? because
+      // 1. markup of anonymous line is shared by parent block, but both are given different class names.
+      // 2. sometimes we add some special class name like "nehan-div", "nehan-body", "nehan-p"... etc.
       for(var attr_name in attrs){
-	if(attr_name.indexOf("data-") >= 0){
+	if(attr_name.indexOf("data-") === 0){
 	  var camel_name = Utils.camelize(attr_name.slice(5));
 	  dom.dataset[camel_name] = attrs[attr_name];
-	} else {
+	} else if(attr_name !== "class"){ // already set by opt.className
 	  dom[attr_name] = attrs[attr_name];
 	}
       }

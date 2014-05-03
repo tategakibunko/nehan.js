@@ -13,6 +13,7 @@ var BlockFlow = (function(){
     }
   };
 
+  // notice that "float" property is converted into "cssFloat" in evaluation time.
   BlockFlow.prototype.getCss = function(){
     var css = {};
     if(this.isHorizontal()){
