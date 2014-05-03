@@ -56,10 +56,12 @@ var LayoutEvaluator = (function(){
       var elements = List.filter(opt.elements || tree.elements, function(element){ return element !== null; });
       var root = opt.root || this.evalTreeRoot(tree, opt);
       return root.innerHTML? root : List.fold(elements, root, function(ret, child){
-	root.appendChild(self.evalChildElement(tree, child));
-	var extra = self.evalExtraElement(child);
-	if(extra){
-	  root.appendChild(extra);
+	root.appendChild(self.evalTreeChild(tree, child));
+	if(child.withBr){ // annotated to add extra br element
+	  root.appendChild(document.createElement("br"));
+	}
+	if(child.withClearFix){ // annotated to add extra clear fix element
+	  root.appendChild(self._createClearFix());
 	}
 	return root;
       });
@@ -75,19 +77,7 @@ var LayoutEvaluator = (function(){
 	styles:(opt.css || tree.getCssRoot())
       });
     },
-    // eval extra element if exists,
-    // mainly used to add <br> element after single character in vertical-mode,
-    // or append clear-fix in other case.
-    evalExtraElement : function(element){
-      if(element.withBr){
-	return document.createElement("br");
-      }
-      if(element.withClearFix){
-	return this._createClearFix();
-      }
-      return null;
-    },
-    evalChildElement : function(parent, child){
+    evalTreeChild : function(parent, child){
       switch(parent.display){
       case "inline":
 	if(child instanceof Box){
