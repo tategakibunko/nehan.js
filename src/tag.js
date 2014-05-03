@@ -11,6 +11,8 @@ var Tag = (function (){
     this.dataset = this._parseDataset(this.attrs);
     this.id = this._parseId(this.attrs["id"] || ""); // add "nehan-" prefix if not started with "nehan-".
     this.classes = this._parseClasses(this.attrs["class"] || ""); // add "nehan-" prefix for each class if not started with "nehan-".
+    this.attrs["class"] = this.classes.join(" ");
+    this.attrs["id"] = this.id;
   }
 
   Tag.prototype = {
@@ -35,11 +37,8 @@ var Tag = (function (){
       return this.alias || this.name;
     },
     getAttr : function(name, def_value){
-      var ret = this.attrs[name];
-      if(typeof ret !== "undefined"){
-	return ret;
-      }
-      return (typeof def_value !== "undefined")? def_value : null;
+      def_value = (typeof def_value === "undefined")? null : def_value;
+      return (typeof this.attrs[name] === "undefined")? def_value : this.attrs[name];
     },
     setAttr : function(name, value){
       this.attrs[name] = value;
