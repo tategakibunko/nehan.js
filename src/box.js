@@ -72,12 +72,8 @@ var Box = (function(){
     },
     getCssInlineBlock : function(){
       var css = this.getCssBlock();
+      delete css["float"];
       css.display = "inline-block";
-      return css;
-    },
-    getCssHoriInlineImage : function(){
-      var css = this.getCssInline();
-      css["vertical-align"] = "middle";
       return css;
     },
     getContentMeasure : function(flow){

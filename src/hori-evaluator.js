@@ -16,14 +16,6 @@ var HoriEvaluator = (function(){
     return this.evalTree(tree, {name:"span"});
   };
 
-  HoriEvaluator.prototype.evalBlockImage = function(image){
-    return this.evalImageBody(image, image.getCssBlock());
-  };
-
-  HoriEvaluator.prototype.evalInlineImage = function(line, image){
-    return this.evalImageBody(image, image.getCssHoriInlineImage());
-  };
-
   HoriEvaluator.prototype.evalRuby = function(line, ruby){
     var span = this._createElement("span", {
       className:"nehan-ruby-body",

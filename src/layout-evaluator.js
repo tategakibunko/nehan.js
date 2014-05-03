@@ -53,7 +53,7 @@ var LayoutEvaluator = (function(){
     evalTree : function(tree, opt){
       opt = opt || {};
       var self = this;
-      var elements = opt.elements || tree.elements;
+      var elements = List.filter(opt.elements || tree.elements, function(element){ return element !== null; });
       var root = opt.root || this.evalTreeRoot(tree, opt);
       return root.innerHTML? root : List.fold(elements, root, function(ret, child){
 	root.appendChild(self.evalChildElement(tree, child));
@@ -101,7 +101,9 @@ var LayoutEvaluator = (function(){
     evalBlockChildElement : function(parent, element){
       switch(element.style.getMarkupName()){
       case "img":
-	return this.evalBlockImage(element);
+	return this.evalImage(element);
+      case "a":
+	return this.evalLink(element);
       default:
 	return this.evaluate(element);
       }
@@ -111,7 +113,7 @@ var LayoutEvaluator = (function(){
       case "img":
 	return this.evalInlineImage(parent, element);
       case "a":
-	return this.evalLink(parent, element);
+	return this.evalLink(element);
       default:
 	return this.evalInlineChildTree(element);
       }
@@ -122,16 +124,19 @@ var LayoutEvaluator = (function(){
       }
       return this.evalTextElement(parent, element);
     },
+    evalImage : function(image){
+      return this.evalTreeRoot(image, {name:"img"});
+    },
+    evalInlineImage : function(line, image){
+      return this.evalImage(image);
+    },
     // if link uri has anchor address, add page-no to dataset where the anchor is defined.
-    evalLink : function(parent, link){
+    evalLink : function(link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
       if(uri.hasAnchorName()){
 	link.setAttr("data-page", DocumentContext.getAnchorPageNo(uri.getAnchorName()));
       }
       return this.evalTree(link, {name:"a"});
-    },
-    evalImageBody : function(image, styles){
-      return this.evalTreeRoot(image, {name:"img", styles:styles});
     },
     evalTextElement : function(line, text){
       switch(text._type){

@@ -4777,12 +4777,8 @@ var Box = (function(){
     },
     getCssInlineBlock : function(){
       var css = this.getCssBlock();
+      delete css["float"];
       css.display = "inline-block";
-      return css;
-    },
-    getCssHoriInlineImage : function(){
-      var css = this.getCssInline();
-      css["vertical-align"] = "middle";
       return css;
     },
     getContentMeasure : function(flow){
@@ -9099,7 +9095,7 @@ var LayoutEvaluator = (function(){
     evalTree : function(tree, opt){
       opt = opt || {};
       var self = this;
-      var elements = opt.elements || tree.elements;
+      var elements = List.filter(opt.elements || tree.elements, function(element){ return element !== null; });
       var root = opt.root || this.evalTreeRoot(tree, opt);
       return root.innerHTML? root : List.fold(elements, root, function(ret, child){
 	root.appendChild(self.evalChildElement(tree, child));
@@ -9147,7 +9143,9 @@ var LayoutEvaluator = (function(){
     evalBlockChildElement : function(parent, element){
       switch(element.style.getMarkupName()){
       case "img":
-	return this.evalBlockImage(element);
+	return this.evalImage(element);
+      case "a":
+	return this.evalLink(element);
       default:
 	return this.evaluate(element);
       }
@@ -9157,7 +9155,7 @@ var LayoutEvaluator = (function(){
       case "img":
 	return this.evalInlineImage(parent, element);
       case "a":
-	return this.evalLink(parent, element);
+	return this.evalLink(element);
       default:
 	return this.evalInlineChildTree(element);
       }
@@ -9168,16 +9166,19 @@ var LayoutEvaluator = (function(){
       }
       return this.evalTextElement(parent, element);
     },
+    evalImage : function(image){
+      return this.evalTreeRoot(image, {name:"img"});
+    },
+    evalInlineImage : function(line, image){
+      return this.evalImage(image);
+    },
     // if link uri has anchor address, add page-no to dataset where the anchor is defined.
-    evalLink : function(parent, link){
+    evalLink : function(link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
       if(uri.hasAnchorName()){
 	link.setAttr("data-page", DocumentContext.getAnchorPageNo(uri.getAnchorName()));
       }
       return this.evalTree(link, {name:"a"});
-    },
-    evalImageBody : function(image, styles){
-      return this.evalTreeRoot(image, {name:"img", styles:styles});
     },
     evalTextElement : function(line, text){
       switch(text._type){
@@ -9214,19 +9215,13 @@ var VertEvaluator = (function(){
     return (new HoriEvaluator()).evaluate(tree);
   };
 
-  VertEvaluator.prototype.evalBlockImage = function(image){
-    return this.evalImageBody(image, image.getCssBlock());
-  };
-
   VertEvaluator.prototype.evalInlineChildTree = function(tree){
     return this.evalTree(tree);
   };
 
   VertEvaluator.prototype.evalInlineImage = function(line, image){
-    var wrap = this._createElement("div");
-    var body = this.evalImageBody(image, image.getCssInline());
-    wrap.appendChild(body);
-    return wrap;
+    image.withBr = true;
+    return this.evalTreeRoot(image, {name:"img", styles:image.getCssInline()});
   };
 
   VertEvaluator.prototype.evalRuby = function(line, ruby){
@@ -9462,14 +9457,6 @@ var HoriEvaluator = (function(){
 
   HoriEvaluator.prototype.evalInlineChildTree = function(tree){
     return this.evalTree(tree, {name:"span"});
-  };
-
-  HoriEvaluator.prototype.evalBlockImage = function(image){
-    return this.evalImageBody(image, image.getCssBlock());
-  };
-
-  HoriEvaluator.prototype.evalInlineImage = function(line, image){
-    return this.evalImageBody(image, image.getCssHoriInlineImage());
   };
 
   HoriEvaluator.prototype.evalRuby = function(line, ruby){

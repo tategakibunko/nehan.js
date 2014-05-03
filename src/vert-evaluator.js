@@ -12,19 +12,13 @@ var VertEvaluator = (function(){
     return (new HoriEvaluator()).evaluate(tree);
   };
 
-  VertEvaluator.prototype.evalBlockImage = function(image){
-    return this.evalImageBody(image, image.getCssBlock());
-  };
-
   VertEvaluator.prototype.evalInlineChildTree = function(tree){
     return this.evalTree(tree);
   };
 
   VertEvaluator.prototype.evalInlineImage = function(line, image){
-    var wrap = this._createElement("div");
-    var body = this.evalImageBody(image, image.getCssInline());
-    wrap.appendChild(body);
-    return wrap;
+    image.withBr = true;
+    return this.evalTreeRoot(image, {name:"img", styles:image.getCssInline()});
   };
 
   VertEvaluator.prototype.evalRuby = function(line, ruby){
