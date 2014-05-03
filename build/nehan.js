@@ -4780,7 +4780,9 @@ var Box = (function(){
     },
     getCssInlineBlock : function(){
       var css = this.getCssBlock();
-      delete css["float"];
+      if(!this.style.isFloated()){
+	delete css["float"];
+      }
       css.display = "inline-block";
       return css;
     },
