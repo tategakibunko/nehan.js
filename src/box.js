@@ -21,13 +21,6 @@ var Box = (function(){
 	return ret + (text? (text.data || "") : "");
       });
     },
-    setAttr : function(name, value){
-      // attributes of anonymous line is already captured by parent element.
-      if(this.display === "inline" && this.style.isRootLine()){
-	return {};
-      }
-      this.style.setMarkupAttr(name, value);
-    },
     getId : function(){
       return this.style.markup.id || null;
     },
@@ -41,7 +34,11 @@ var Box = (function(){
       return this.style.getCssAttr("events") || {};
     },
     getAttrs : function(){
-      return this.style.markup.attrs || {}; // TODO
+      // attributes of anonymous line is already captured by parent element.
+      if(this.display === "inline" && this.style.isRootLine()){
+	return {};
+      }
+      return this.style.markup.attrs || {};
     },
     getCssRoot : function(){
       switch(this.display){

@@ -124,7 +124,10 @@ var LayoutEvaluator = (function(){
     evalLink : function(link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
       if(uri.hasAnchorName()){
-	link.setAttr("data-page", DocumentContext.getAnchorPageNo(uri.getAnchorName()));
+	var anchor_name = uri.getAnchorName();
+	var page_no = DocumentContext.getAnchorPageNo(anchor_name);
+	link.classes.push("nehan-anchor-link");
+	link.style.markup.setAttr("data-page", page_no);
       }
       return this.evalTree(link, {name:"a"});
     },

@@ -2607,6 +2607,9 @@ var Tag = (function (){
     },
     setAttr : function(name, value){
       this.attrs[name] = value;
+      if(name.indexOf("data-") === 0){
+	this.dataset[this._parseDataName(name)] = value;
+      }
     },
     getData : function(name){
       return this.dataset[name] || null;
@@ -2676,10 +2679,13 @@ var Tag = (function (){
       var dataset = {};
       for(var name in attrs){
 	if(name.indexOf("data-") === 0){
-	  dataset[Utils.camelize(name.slice(5))] = attrs[name];
+	  dataset[this._parseDataName(name)] = attrs[name];
 	}
       }
       return dataset;
+    },
+    _parseDataName : function(name){
+      return Utils.camelize(name.slice(5));
     }
   };
 
@@ -4726,13 +4732,6 @@ var Box = (function(){
 	return ret + (text? (text.data || "") : "");
       });
     },
-    setAttr : function(name, value){
-      // attributes of anonymous line is already captured by parent element.
-      if(this.display === "inline" && this.style.isRootLine()){
-	return {};
-      }
-      this.style.setMarkupAttr(name, value);
-    },
     getId : function(){
       return this.style.markup.id || null;
     },
@@ -4746,7 +4745,11 @@ var Box = (function(){
       return this.style.getCssAttr("events") || {};
     },
     getAttrs : function(){
-      return this.style.markup.attrs || {}; // TODO
+      // attributes of anonymous line is already captured by parent element.
+      if(this.display === "inline" && this.style.isRootLine()){
+	return {};
+      }
+      return this.style.markup.attrs || {};
     },
     getCssRoot : function(){
       switch(this.display){
@@ -9157,7 +9160,10 @@ var LayoutEvaluator = (function(){
     evalLink : function(link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
       if(uri.hasAnchorName()){
-	link.setAttr("data-page", DocumentContext.getAnchorPageNo(uri.getAnchorName()));
+	var anchor_name = uri.getAnchorName();
+	var page_no = DocumentContext.getAnchorPageNo(anchor_name);
+	link.classes.push("nehan-anchor-link");
+	link.style.markup.setAttr("data-page", page_no);
       }
       return this.evalTree(link, {name:"a"});
     },

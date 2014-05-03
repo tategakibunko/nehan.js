@@ -43,6 +43,9 @@ var Tag = (function (){
     },
     setAttr : function(name, value){
       this.attrs[name] = value;
+      if(name.indexOf("data-") === 0){
+	this.dataset[this._parseDataName(name)] = value;
+      }
     },
     getData : function(name){
       return this.dataset[name] || null;
@@ -112,10 +115,13 @@ var Tag = (function (){
       var dataset = {};
       for(var name in attrs){
 	if(name.indexOf("data-") === 0){
-	  dataset[Utils.camelize(name.slice(5))] = attrs[name];
+	  dataset[this._parseDataName(name)] = attrs[name];
 	}
       }
       return dataset;
+    },
+    _parseDataName : function(name){
+      return Utils.camelize(name.slice(5));
     }
   };
 
