@@ -2562,18 +2562,18 @@ var TagAttrParser = (function(){
   };
 })();
 
+// Important Notice:
+// to avoid name-conflicts about existing name space of stylesheet,
+// all class names and id in nehan.js are forced to be prefixed by "nehan-".
 var Tag = (function (){
   function Tag(src, content){
     this._type = "tag";
     this.src = src;
     this.content = content || "";
     this.name = this._parseName(this.src);
-    this.attr = TagAttrParser.parse(this.src);
-    this.id = this._parseId(); // add "nehan-" prefix if not started with "nehan-".
-    this.classes = this._parseClasses(this.attr["class"] || "");
-    this.datasetCamel = {}; // dataset with no "data-" prefixes, and camel case => {name:"taro", familyName:"yamada"} 
-    this.datasetSneak = {}; // dataset with "data-" prefixes => {"data-name":"taro", "data-family-name":"yamada"}
-    this._parseDataset(this.datasetCamel, this.datasetSneak); // parse and set data-set values
+    this.attrs = TagAttrParser.parse(this.src);
+    this.id = this._parseId(this.attrs["id"] || ""); // add "nehan-" prefix if not started with "nehan-".
+    this.classes = this._parseClasses(this.attrs["class"] || ""); // add "nehan-" prefix for each class if not started with "nehan-".
   }
 
   Tag.prototype = {
@@ -2598,31 +2598,30 @@ var Tag = (function (){
       return this.alias || this.name;
     },
     getAttr : function(name, def_value){
-      var ret = this.attr[name];
+      var ret = this.attrs[name];
       if(typeof ret !== "undefined"){
 	return ret;
       }
       return (typeof def_value !== "undefined")? def_value : null;
     },
     setAttr : function(name, value){
-      this.attr[name] = value;
+      this.attrs[name] = value;
     },
-    setDataset : function(name, value){
-      this.datasetSneak[name] = value;
-      this.datasetCamel[Utils.camelize(name)] = value;
+    setDataBySneakName : function(sneak_name, value){
+      this.dataset.setBySneakName(sneak_name, value);
+    },
+    getDataBySneakName : function(sneak_name){
+      return this.dataset.getBySneakName(sneak_name);
     },
     // getDataset('familyName') => 'yamada'
-    getDataset : function(camel_name, def_value){
-      var ret = this.datasetCamel[camel_name];
-      if(typeof ret !== "undefined"){
-	return ret;
-      }
-      return (typeof def_value !== "undefined")? def_value : null;
+    getDataByCamelName : function(camel_name){
+      return this.dataset.getByCamelName(camel_name);
     },
-    // return sneak case attrs
-    // => {"name":"taro", "family-name":"yamada"}
-    getDatasetAttr : function(){
-      return this.datasetSneak;
+    iterDatasetByCamelName : function(fn){
+      this.dataset.iterByCamelName(fn);
+    },
+    iterDatasetBySneakName : function(fn){
+      this.dataset.iterBySneakName(fn);
     },
     getContent : function(){
       return this.content;
@@ -2640,7 +2639,7 @@ var Tag = (function (){
       return List.exists(this.classes, Closure.eq(klass));
     },
     hasAttr : function(name){
-      return (typeof this.attr.name !== "undefined");
+      return (typeof this.attrs.name !== "undefined");
     },
     isAnchorTag : function(){
       return this.name === "a" && this.getTagAttr("name") !== null;
@@ -2661,39 +2660,26 @@ var Tag = (function (){
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
     },
-    _parseId : function(){
-      var id = this.attr.id || "";
-      return (id === "")? id : ((this.attr.id.indexOf("nehan-") === 0)? "nehan-" + id : id);
+    // <p id='foo'>
+    // => "nehan-foo"
+    _parseId : function(id_value){
+      return id_value? ((id_value.indexOf("nehan-") < 0)? "nehan-" + id_value : id_value) : null;
     },
     // <p class='hi hey'>
-    // => ["hi", "hey"]
+    // => ["nehan-hi", "nehan-hey"]
     _parseClasses : function(class_value){
       class_value = Utils.trim(class_value.replace(/\s+/g, " "));
       var classes = (class_value === "")? [] : class_value.split(/\s+/);
       return List.map(classes, function(klass){
-	return (klass.indexOf("nehan-") === 0)? klass : "nehan-" + klass;
+	return (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
       });
     },
     // <p class='hi hey'>
-    // => [".hi", ".hey"]
+    // => [".nehan-hi", ".nehan-hey"]
     _parseCssClasses : function(classes){
       return List.map(classes, function(class_name){
 	return "." + class_name;
       });
-    },
-    // parse all attributes that are started by "data-", and store both to
-    // 1. sneak cased dict(dataset_sneak)
-    // 2. camel cased dict(dataset_camel)
-    _parseDataset : function(dataset_camel, dataset_sneak){
-      for(var name in this.attr){
-	if(name.indexOf("data-") === 0){
-	  var value = this.attr[name];
-	  var sneak_name = name.slice(5); // "data-family-name" -> "family-name"
-	  var camel_name = Utils.camelize(sneak_name); // "family-name" -> "familyName"
-	  dataset_sneak[sneak_name] = value;
-	  dataset_camel[camel_name] = value;
-	}
-      }
     }
   };
 
@@ -4740,18 +4726,24 @@ var Box = (function(){
 	return ret + (text? (text.data || "") : "");
       });
     },
-    setDataset : function(name, value){
-      this.style.markup.setDataset(name, value);
-    },
-    getDatasetAttr : function(){
-      // dataset attr of root anonymous line is already captured by parent box.
+    setAttr : function(name, value){
+      // attributes of anonymous line is already captured by parent element.
       if(this.display === "inline" && this.style.isRootLine()){
 	return {};
       }
-      return this.style.getDatasetAttr();
+      this.style.setMarkupAttr(name, value);
+    },
+    getId : function(){
+      return this.style.markup.id || null;
+    },
+    getClassName : function(){
+      return this.classes? this.classes.join(" ") : "";
     },
     getEvents : function(){
       return this.style.getCssAttr("events") || {};
+    },
+    getAttrs : function(){
+      return this.style.markup.attrs || {}; // TODO
     },
     getCssRoot : function(){
       switch(this.display){
@@ -6210,23 +6202,11 @@ var SelectorContext = (function(){
   }
 
   SelectorContext.prototype = {
-    setMarkupContent : function(content){
-      this._style.markup.content = content;
-    },
     getParentStyle : function(){
       return this._style.parent;
     },
     getMarkup : function(){
       return this._style.markup;
-    },
-    getMarkupContent : function(){
-      return this._style.getMarkupContent();
-    },
-    getMarkupAttr : function(name, def_value){
-      return this._style.getMarkupAttr(name, def_value);
-    },
-    getMarkupDataset : function(name, def_value){
-      return this._style.getMarkupDataset(name, def_value);
     },
     getRestMeasure : function(){
       return this._layoutContext? this._layoutContext.getInlineRestMeasure() : null;
@@ -6766,6 +6746,9 @@ var StyleContext = (function(){
 	this.setCssAttr(prop, obj[prop]);
       }
     },
+    setMarkupAttr : function(name, value){
+      this.markup.setAttr(name, value);
+    },
     // search property from markup attribute -> css
     getAttr : function(name, def_value){
       var ret = this.getMarkupAttr(name);
@@ -6786,8 +6769,8 @@ var StyleContext = (function(){
       }
       return this.markup.getAttr(name, def_value);
     },
-    getMarkupDataset : function(name, def_val){
-      return this.markup.getDataset(name, def_val);
+    getMarkupDataset : function(){
+      return this.markup.dataset;
     },
     _evalCssAttr : function(name, value){
       if(name === "events"){
@@ -9064,29 +9047,33 @@ var LayoutEvaluator = (function(){
   LayoutEvaluator.prototype = {
     _createElement : function(name, opt){
       var opt = opt || {};
-      var css = opt.css || {};
-      var dataset = opt.dataset || {};
-      var attr = opt.attr || {};
+      var styles = opt.styles || {};
+      var attrs = opt.attrs || {};
       var events = opt.events || {};
       var dom = document.createElement(name);
+      if(opt.id){
+	dom.id = opt.id;
+      }
       if(opt.className){
 	dom.className = opt.className;
       }
       if(opt.content){
 	dom.innerHTML = opt.content;
       }
-      for(var css_prop in css){
-	if(css_prop === "float"){
-	  dom.style.cssFloat = css[css_prop];
+      for(var style_name in styles){
+	if(style_name === "float"){
+	  dom.style.cssFloat = styles[style_name];
 	} else {
-	  dom.style[Utils.camelize(css_prop)] = css[css_prop];
+	  dom.style[Utils.camelize(style_name)] = styles[style_name];
 	}
       }
-      for(var data_name in dataset){
-	dom.dataset[Utils.camelize(data_name)] = dataset[data_name];
-      }
-      for(var attr_name in attr){
-	dom[attr_name] = attr[attr_name];
+      for(var attr_name in attrs){
+	if(attr_name.indexOf("data-") >= 0){
+	  var camel_name = Utils.camelize(attr_name.slice(5));
+	  dom.dataset[camel_name] = attrs[attr_name];
+	} else {
+	  dom[attr_name] = attrs[attr_name];
+	}
       }
       for(var event_name in events){
 	if(typeof events[event_name] === "function"){
@@ -9095,16 +9082,10 @@ var LayoutEvaluator = (function(){
       }
       return dom;
     },
-    _createElementRoot : function(tree, opt){
-      opt = opt || {};
-      return this._createElement(opt.name || "div", {
-	events:(opt.events || tree.getEvents()),
-	content:(opt.content || tree.pastedContent || null),
-	className:(opt.className || tree.classes.join(" ")),
-	attr:(opt.attr || {}),
-	css:(opt.css || tree.getCssRoot()),
-	dataset:(opt.dataset || tree.getDatasetAttr())
-      });
+    _createClearFix : function(clear){
+      var div = document.createElement("div");
+      div.style.clear = clear || "both";
+      return div;
     },
     evaluate : function(tree){
       if(this.isFlipTree(tree)){
@@ -9116,15 +9097,38 @@ var LayoutEvaluator = (function(){
       opt = opt || {};
       var self = this;
       var elements = opt.elements || tree.elements;
-      var root = opt.root || this._createElementRoot(tree, opt);
-      return tree.pastedContent? root : List.fold(elements, root, function(ret, child){
+      var root = opt.root || this.evalTreeRoot(tree, opt);
+      return root.innerHTML? root : List.fold(elements, root, function(ret, child){
 	root.appendChild(self.evalChildElement(tree, child));
-	self._appendExtraElementFor(root, child);
+	var extra = self.evalExtraElement(child);
+	if(extra){
+	  root.appendChild(extra);
+	}
 	return root;
       });
     },
-    _appendExtraElementFor : function(element){
-      // do nothing except vert-evaluator for normal text element.
+    evalTreeRoot : function(tree, opt){
+      opt = opt || {};
+      return this._createElement(opt.name || "div", {
+	id:tree.getId(),
+	className:tree.getClassName(),
+	attrs:tree.getAttrs(),
+	events:tree.getEvents(),
+	content:(opt.content || tree.pastedContent || null),
+	styles:(opt.css || tree.getCssRoot())
+      });
+    },
+    // eval extra element if exists,
+    // mainly used to add <br> element after single character in vertical-mode,
+    // or append clear-fix in other case.
+    evalExtraElement : function(element){
+      if(element.withBr){
+	return document.createElement("br");
+      }
+      if(element.withClearFix){
+	return this._createClearFix();
+      }
+      return null;
     },
     evalChildElement : function(parent, child){
       switch(parent.display){
@@ -9165,27 +9169,12 @@ var LayoutEvaluator = (function(){
     evalLink : function(parent, link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
       if(uri.hasAnchorName()){
-	link.setDataset("page", DocumentContext.getAnchorPageNo(uri.getAnchorName()));
+	link.setAttr("data-page", DocumentContext.getAnchorPageNo(uri.getAnchorName()));
       }
-      return this.evalTree(link, {
-	name:"a",
-	attr:{
-	  href:uri.getAddress(),
-	  title:link.style.getMarkupAttr("title", "no title")
-	}
-      });
+      return this.evalTree(link, {name:"a"});
     },
-    evalImageBody : function(image, css){
-      return this._createElement("img", {
-	css:css,
-	className:image.classes.join(" "),
-	dataset:image.getDatasetAttr(),
-	events:image.getEvents(),
-	attr:{
-	  src:image.style.getMarkupAttr("src"),
-	  title:(image.style.getMarkupAttr("title") || "no title")
-	}
-      });
+    evalImageBody : function(image, styles){
+      return this.evalTreeRoot(image, {name:"img", styles:styles});
     },
     evalTextElement : function(line, text){
       switch(text._type){
@@ -9213,12 +9202,6 @@ var VertEvaluator = (function(){
     LayoutEvaluator.call(this);
   }
   Class.extend(VertEvaluator, LayoutEvaluator);
-
-  VertEvaluator.prototype._appendExtraElementFor = function(root, element){
-    if(element.withBr){
-      root.appendChild(document.createElement("br"));
-    }
-  };
 
   VertEvaluator.prototype.isFlipTree = function(tree){
     return tree.style.isTextHorizontal();
@@ -9256,7 +9239,7 @@ var VertEvaluator = (function(){
     return this.evalTree(line, {
       elements:ruby.getRbs(),
       root:this._createElement("div", {
-	css:ruby.getCssVertRb(line),
+	styles:ruby.getCssVertRb(line),
 	className:"nehan-rb"
       })
     });
@@ -9287,12 +9270,12 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalWordTransform = function(line, word){
     var div_wrap = this._createElement("div", {
-      css:word.getCssVertTrans(line)
+      styles:word.getCssVertTrans(line)
     });
     var div_word = this._createElement("div", {
       content:word.data,
       className:"nehan-rotate-90",
-      css:word.getCssVertTransBody(line)
+      styles:word.getCssVertTransBody(line)
     });
     div_wrap.appendChild(div_word);
     return div_wrap;
@@ -9300,12 +9283,12 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalWordTransformTrident = function(line, word){
     var div_wrap = this._createElement("div", {
-      css:word.getCssVertTrans(line)
+      styles:word.getCssVertTrans(line)
     });
     var div_word = this._createElement("div", {
       content:word.data,
       //className:"nehan-rotate-90",
-      css:word.getCssVertTransBodyTrident(line)
+      styles:word.getCssVertTransBodyTrident(line)
     });
     div_wrap.appendChild(div_word);
     return div_wrap;
@@ -9315,7 +9298,7 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:word.data,
       className:"nehan-vert-ie",
-      css:word.getCssVertTransIE(line)
+      styles:word.getCssVertTransIE(line)
     }); // NOTE(or TODO):clearfix in older version after this code
   };
 
@@ -9340,7 +9323,7 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:chr.data,
       className:"nehan-vert-ie",
-      css:chr.getCssVertRotateCharIE(line)
+      styles:chr.getCssVertRotateCharIE(line)
     }); // NOTE(or TODO):clearfix in older version after this code
   };
 
@@ -9383,7 +9366,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype.evalCharLetterSpacing = function(line, chr){
     return this._createElement("div", {
       content:chr.data,
-      css:chr.getCssVertLetterSpacing(line)
+      styles:chr.getCssVertLetterSpacing(line)
     });
   };
 
@@ -9391,16 +9374,16 @@ var VertEvaluator = (function(){
     var char_body = this._createElement("span", {
       content:chr.data,
       className:"nehan-empha-src",
-      css:chr.getCssVertEmphaTarget(line)
+      styles:chr.getCssVertEmphaTarget(line)
     });
     var empha_body = this._createElement("span", {
       content:line.style.textEmpha.getText(),
       className:"nehan-empha-text",
-      css:chr.getCssVertEmphaText(line)
+      styles:chr.getCssVertEmphaText(line)
     });
     var wrap = this._createElement("div", {
       className:"nehan-empha-wrap",
-      css:line.style.textEmpha.getCssVertEmphaWrap(line, chr)
+      styles:line.style.textEmpha.getCssVertEmphaWrap(line, chr)
     });
     wrap.appendChild(char_body);
     wrap.appendChild(empha_body);
@@ -9410,7 +9393,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype.evalPaddingChar = function(line, chr){
     return this._createElement("div", {
       content:chr.data,
-      css:chr.getCssPadding(line)
+      styles:chr.getCssPadding(line)
     });
   };
 
@@ -9423,7 +9406,7 @@ var VertEvaluator = (function(){
       attr:{
 	src:chr.getImgSrc(palette_color)
       },
-      css:chr.getCssVertImgChar(line)
+      styles:chr.getCssVertImgChar(line)
     });
   };
 
@@ -9431,7 +9414,7 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:chr.data,
       className:"nehan-vert-glyph",
-      css:chr.getCssVertGlyph(line)
+      styles:chr.getCssVertGlyph(line)
     });
   };
 
@@ -9445,14 +9428,14 @@ var VertEvaluator = (function(){
     var tag_name = (line.style.textEmpha && line.style.textEmpha.isEnable())? "span" : "div";
     return this._createElement(tag_name, {
       content:chr.data,
-      css:chr.getCssVertSmallKana()
+      styles:chr.getCssVertSmallKana()
     });
   };
 
   VertEvaluator.prototype.evalHalfSpaceChar = function(line, chr){
     return this._createElement("div", {
       content:"&nbsp;",
-      css:chr.getCssVertHalfSpaceChar(line)
+      styles:chr.getCssVertHalfSpaceChar(line)
     });
   };
 
@@ -9486,18 +9469,10 @@ var HoriEvaluator = (function(){
     return this.evalImageBody(image, image.getCssHoriInlineImage());
   };
 
-  // notice that horizontal inline-child uses <span> wrapping(except for <a>).
-  HoriEvaluator.prototype.evalInlineChild = function(line, child){
-    return Html.tagWrap("span", this.evalInlineElements(child, child.elements), Args.copy({
-      "style":Css.toString(child.getCssInline()),
-      "class":line.classes.join(" ")
-    }, child.getDatasetAttr()));
-  };
-
   HoriEvaluator.prototype.evalRuby = function(line, ruby){
     var span = this._createElement("span", {
       className:"nehan-ruby-body",
-      css:ruby.getCssHoriRuby(line)
+      styles:ruby.getCssHoriRuby(line)
     });
     span.appendChild(this.evalRt(line, ruby));
     span.appendChild(this.evalRb(line, ruby));
@@ -9508,7 +9483,7 @@ var HoriEvaluator = (function(){
     return this.evalTree(line, {
       elements:ruby.getRbs(),
       root:this._createElement("div", {
-	css:ruby.getCssHoriRb(line),
+	styles:ruby.getCssHoriRb(line),
 	className:"nehan-rb"
       })
     });
@@ -9518,7 +9493,7 @@ var HoriEvaluator = (function(){
     return this._createElement("div", {
       content:ruby.getRtString(),
       className:"nehan-rt",
-      css:ruby.getCssHoriRt(line)
+      styles:ruby.getCssHoriRt(line)
     });
   };
 
@@ -9546,14 +9521,14 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype.evalEmpha = function(line, chr){
     var char_part = this._createElement("div", {
       content:chr.data,
-      css:chr.getCssHoriEmphaTarget(line)
+      styles:chr.getCssHoriEmphaTarget(line)
     });
     var empha_part = this._createElement("div", {
       content:line.style.textEmpha.getText(),
-      css:chr.getCssHoriEmphaText(line)
+      styles:chr.getCssHoriEmphaText(line)
     });
     var wrap = this._createElement("span", {
-      css:line.style.textEmpha.getCssHoriEmphaWrap(line, chr)
+      styles:line.style.textEmpha.getCssHoriEmphaWrap(line, chr)
     });
     wrap.appendChild(empha_part);
     wrap.appendChild(char_part);
@@ -9561,29 +9536,29 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype.evalKerningChar = function(line, chr){
-    var css = chr.getCssPadding(line);
+    var styles = chr.getCssPadding(line);
     if(chr.isKakkoStart()){
-      css["margin-left"] = "-0.5em";
+      styles["margin-left"] = "-0.5em";
       return this._createElement("span", {
 	content:chr.data,
 	className:"nehan-char-kakko-start",
-	css:css
+	styles:styles
       });
     }
     if(chr.isKakkoEnd()){
-      css["margin-right"] = "-0.5em";
+      styles["margin-right"] = "-0.5em";
       return this._createElement("span", {
 	content:chr.data,
 	className:"nehan-char-kakko-end",
-	css:css
+	styles:styles
       });
     }
     if(chr.isKutenTouten()){
-      css["margin-right"] = "-0.5em";
+      styles["margin-right"] = "-0.5em";
       return this._createElement("span", {
 	content:chr.data,
 	className:"nehan-char-kuto",
-	css:css
+	styles:styles
       });
     }
     return document.createTextNode(chr.data);
@@ -9592,7 +9567,7 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype.evalPaddingChar = function(line, chr){
     return this._createElement("span", {
       content:chr.data,
-      css:chr.getCssPadding(line)
+      styles:chr.getCssPadding(line)
     });
   };
 

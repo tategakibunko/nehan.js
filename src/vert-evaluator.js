@@ -4,12 +4,6 @@ var VertEvaluator = (function(){
   }
   Class.extend(VertEvaluator, LayoutEvaluator);
 
-  VertEvaluator.prototype._appendExtraElementFor = function(root, element){
-    if(element.withBr){
-      root.appendChild(document.createElement("br"));
-    }
-  };
-
   VertEvaluator.prototype.isFlipTree = function(tree){
     return tree.style.isTextHorizontal();
   };
@@ -46,7 +40,7 @@ var VertEvaluator = (function(){
     return this.evalTree(line, {
       elements:ruby.getRbs(),
       root:this._createElement("div", {
-	css:ruby.getCssVertRb(line),
+	styles:ruby.getCssVertRb(line),
 	className:"nehan-rb"
       })
     });
@@ -77,12 +71,12 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalWordTransform = function(line, word){
     var div_wrap = this._createElement("div", {
-      css:word.getCssVertTrans(line)
+      styles:word.getCssVertTrans(line)
     });
     var div_word = this._createElement("div", {
       content:word.data,
       className:"nehan-rotate-90",
-      css:word.getCssVertTransBody(line)
+      styles:word.getCssVertTransBody(line)
     });
     div_wrap.appendChild(div_word);
     return div_wrap;
@@ -90,12 +84,12 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalWordTransformTrident = function(line, word){
     var div_wrap = this._createElement("div", {
-      css:word.getCssVertTrans(line)
+      styles:word.getCssVertTrans(line)
     });
     var div_word = this._createElement("div", {
       content:word.data,
       //className:"nehan-rotate-90",
-      css:word.getCssVertTransBodyTrident(line)
+      styles:word.getCssVertTransBodyTrident(line)
     });
     div_wrap.appendChild(div_word);
     return div_wrap;
@@ -105,7 +99,7 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:word.data,
       className:"nehan-vert-ie",
-      css:word.getCssVertTransIE(line)
+      styles:word.getCssVertTransIE(line)
     }); // NOTE(or TODO):clearfix in older version after this code
   };
 
@@ -130,7 +124,7 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:chr.data,
       className:"nehan-vert-ie",
-      css:chr.getCssVertRotateCharIE(line)
+      styles:chr.getCssVertRotateCharIE(line)
     }); // NOTE(or TODO):clearfix in older version after this code
   };
 
@@ -173,7 +167,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype.evalCharLetterSpacing = function(line, chr){
     return this._createElement("div", {
       content:chr.data,
-      css:chr.getCssVertLetterSpacing(line)
+      styles:chr.getCssVertLetterSpacing(line)
     });
   };
 
@@ -181,16 +175,16 @@ var VertEvaluator = (function(){
     var char_body = this._createElement("span", {
       content:chr.data,
       className:"nehan-empha-src",
-      css:chr.getCssVertEmphaTarget(line)
+      styles:chr.getCssVertEmphaTarget(line)
     });
     var empha_body = this._createElement("span", {
       content:line.style.textEmpha.getText(),
       className:"nehan-empha-text",
-      css:chr.getCssVertEmphaText(line)
+      styles:chr.getCssVertEmphaText(line)
     });
     var wrap = this._createElement("div", {
       className:"nehan-empha-wrap",
-      css:line.style.textEmpha.getCssVertEmphaWrap(line, chr)
+      styles:line.style.textEmpha.getCssVertEmphaWrap(line, chr)
     });
     wrap.appendChild(char_body);
     wrap.appendChild(empha_body);
@@ -200,7 +194,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype.evalPaddingChar = function(line, chr){
     return this._createElement("div", {
       content:chr.data,
-      css:chr.getCssPadding(line)
+      styles:chr.getCssPadding(line)
     });
   };
 
@@ -213,7 +207,7 @@ var VertEvaluator = (function(){
       attr:{
 	src:chr.getImgSrc(palette_color)
       },
-      css:chr.getCssVertImgChar(line)
+      styles:chr.getCssVertImgChar(line)
     });
   };
 
@@ -221,7 +215,7 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:chr.data,
       className:"nehan-vert-glyph",
-      css:chr.getCssVertGlyph(line)
+      styles:chr.getCssVertGlyph(line)
     });
   };
 
@@ -235,14 +229,14 @@ var VertEvaluator = (function(){
     var tag_name = (line.style.textEmpha && line.style.textEmpha.isEnable())? "span" : "div";
     return this._createElement(tag_name, {
       content:chr.data,
-      css:chr.getCssVertSmallKana()
+      styles:chr.getCssVertSmallKana()
     });
   };
 
   VertEvaluator.prototype.evalHalfSpaceChar = function(line, chr){
     return this._createElement("div", {
       content:"&nbsp;",
-      css:chr.getCssVertHalfSpaceChar(line)
+      styles:chr.getCssVertHalfSpaceChar(line)
     });
   };
 

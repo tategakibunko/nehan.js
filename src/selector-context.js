@@ -5,23 +5,11 @@ var SelectorContext = (function(){
   }
 
   SelectorContext.prototype = {
-    setMarkupContent : function(content){
-      this._style.markup.content = content;
-    },
     getParentStyle : function(){
       return this._style.parent;
     },
     getMarkup : function(){
       return this._style.markup;
-    },
-    getMarkupContent : function(){
-      return this._style.getMarkupContent();
-    },
-    getMarkupAttr : function(name, def_value){
-      return this._style.getMarkupAttr(name, def_value);
-    },
-    getMarkupDataset : function(name, def_value){
-      return this._style.getMarkupDataset(name, def_value);
     },
     getRestMeasure : function(){
       return this._layoutContext? this._layoutContext.getInlineRestMeasure() : null;

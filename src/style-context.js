@@ -289,7 +289,7 @@ var StyleContext = (function(){
 	return total + (element? (element.charCount || 0) : 0);
       });
       box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
-      box.pastedContent = opt.pastedContent || null;
+      box.content = opt.content || null;
       return box;
     },
     createImage : function(opt){
@@ -497,6 +497,9 @@ var StyleContext = (function(){
 	this.setCssAttr(prop, obj[prop]);
       }
     },
+    setMarkupAttr : function(name, value){
+      this.markup.setAttr(name, value);
+    },
     // search property from markup attribute -> css
     getAttr : function(name, def_value){
       var ret = this.getMarkupAttr(name);
@@ -517,8 +520,8 @@ var StyleContext = (function(){
       }
       return this.markup.getAttr(name, def_value);
     },
-    getMarkupDataset : function(name, def_val){
-      return this.markup.getDataset(name, def_val);
+    getMarkupDataset : function(){
+      return this.markup.dataset;
     },
     _evalCssAttr : function(name, value){
       if(name === "events"){

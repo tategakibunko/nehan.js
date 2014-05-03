@@ -21,18 +21,27 @@ var Box = (function(){
 	return ret + (text? (text.data || "") : "");
       });
     },
-    setDataset : function(name, value){
-      this.style.markup.setDataset(name, value);
-    },
-    getDatasetAttr : function(){
-      // dataset attr of root anonymous line is already captured by parent box.
+    setAttr : function(name, value){
+      // attributes of anonymous line is already captured by parent element.
       if(this.display === "inline" && this.style.isRootLine()){
 	return {};
       }
-      return this.style.getDatasetAttr();
+      this.style.setMarkupAttr(name, value);
+    },
+    getId : function(){
+      return this.style.markup.id || null;
+    },
+    getClassName : function(){
+      return this.classes? this.classes.join(" ") : "";
+    },
+    getContent : function(){
+      return this.content || null;
     },
     getEvents : function(){
       return this.style.getCssAttr("events") || {};
+    },
+    getAttrs : function(){
+      return this.style.markup.attrs || {}; // TODO
     },
     getCssRoot : function(){
       switch(this.display){

@@ -4,29 +4,33 @@ var LayoutEvaluator = (function(){
   LayoutEvaluator.prototype = {
     _createElement : function(name, opt){
       var opt = opt || {};
-      var css = opt.css || {};
-      var dataset = opt.dataset || {};
-      var attr = opt.attr || {};
+      var styles = opt.styles || {};
+      var attrs = opt.attrs || {};
       var events = opt.events || {};
       var dom = document.createElement(name);
+      if(opt.id){
+	dom.id = opt.id;
+      }
       if(opt.className){
 	dom.className = opt.className;
       }
       if(opt.content){
 	dom.innerHTML = opt.content;
       }
-      for(var css_prop in css){
-	if(css_prop === "float"){
-	  dom.style.cssFloat = css[css_prop];
+      for(var style_name in styles){
+	if(style_name === "float"){
+	  dom.style.cssFloat = styles[style_name];
 	} else {
-	  dom.style[Utils.camelize(css_prop)] = css[css_prop];
+	  dom.style[Utils.camelize(style_name)] = styles[style_name];
 	}
       }
-      for(var data_name in dataset){
-	dom.dataset[Utils.camelize(data_name)] = dataset[data_name];
-      }
-      for(var attr_name in attr){
-	dom[attr_name] = attr[attr_name];
+      for(var attr_name in attrs){
+	if(attr_name.indexOf("data-") >= 0){
+	  var camel_name = Utils.camelize(attr_name.slice(5));
+	  dom.dataset[camel_name] = attrs[attr_name];
+	} else {
+	  dom[attr_name] = attrs[attr_name];
+	}
       }
       for(var event_name in events){
 	if(typeof events[event_name] === "function"){
@@ -35,16 +39,10 @@ var LayoutEvaluator = (function(){
       }
       return dom;
     },
-    _createElementRoot : function(tree, opt){
-      opt = opt || {};
-      return this._createElement(opt.name || "div", {
-	events:(opt.events || tree.getEvents()),
-	content:(opt.content || tree.pastedContent || null),
-	className:(opt.className || tree.classes.join(" ")),
-	attr:(opt.attr || {}),
-	css:(opt.css || tree.getCssRoot()),
-	dataset:(opt.dataset || tree.getDatasetAttr())
-      });
+    _createClearFix : function(clear){
+      var div = document.createElement("div");
+      div.style.clear = clear || "both";
+      return div;
     },
     evaluate : function(tree){
       if(this.isFlipTree(tree)){
@@ -56,15 +54,38 @@ var LayoutEvaluator = (function(){
       opt = opt || {};
       var self = this;
       var elements = opt.elements || tree.elements;
-      var root = opt.root || this._createElementRoot(tree, opt);
-      return tree.pastedContent? root : List.fold(elements, root, function(ret, child){
+      var root = opt.root || this.evalTreeRoot(tree, opt);
+      return root.innerHTML? root : List.fold(elements, root, function(ret, child){
 	root.appendChild(self.evalChildElement(tree, child));
-	self._appendExtraElementFor(root, child);
+	var extra = self.evalExtraElement(child);
+	if(extra){
+	  root.appendChild(extra);
+	}
 	return root;
       });
     },
-    _appendExtraElementFor : function(element){
-      // do nothing except vert-evaluator for normal text element.
+    evalTreeRoot : function(tree, opt){
+      opt = opt || {};
+      return this._createElement(opt.name || "div", {
+	id:tree.getId(),
+	className:tree.getClassName(),
+	attrs:tree.getAttrs(),
+	events:tree.getEvents(),
+	content:(opt.content || tree.getContent()),
+	styles:(opt.css || tree.getCssRoot())
+      });
+    },
+    // eval extra element if exists,
+    // mainly used to add <br> element after single character in vertical-mode,
+    // or append clear-fix in other case.
+    evalExtraElement : function(element){
+      if(element.withBr){
+	return document.createElement("br");
+      }
+      if(element.withClearFix){
+	return this._createClearFix();
+      }
+      return null;
     },
     evalChildElement : function(parent, child){
       switch(parent.display){
@@ -105,27 +126,12 @@ var LayoutEvaluator = (function(){
     evalLink : function(parent, link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
       if(uri.hasAnchorName()){
-	link.setDataset("page", DocumentContext.getAnchorPageNo(uri.getAnchorName()));
+	link.setAttr("data-page", DocumentContext.getAnchorPageNo(uri.getAnchorName()));
       }
-      return this.evalTree(link, {
-	name:"a",
-	attr:{
-	  href:uri.getAddress(),
-	  title:link.style.getMarkupAttr("title", "no title")
-	}
-      });
+      return this.evalTree(link, {name:"a"});
     },
-    evalImageBody : function(image, css){
-      return this._createElement("img", {
-	css:css,
-	className:image.classes.join(" "),
-	dataset:image.getDatasetAttr(),
-	events:image.getEvents(),
-	attr:{
-	  src:image.style.getMarkupAttr("src"),
-	  title:(image.style.getMarkupAttr("title") || "no title")
-	}
-      });
+    evalImageBody : function(image, styles){
+      return this.evalTreeRoot(image, {name:"img", styles:styles});
     },
     evalTextElement : function(line, text){
       switch(text._type){

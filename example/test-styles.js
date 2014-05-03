@@ -69,9 +69,10 @@ var TestStyles = {
   },
   ".nehan-my-callback":{
     "onload":function(context){
+      var markup = context.getMarkup();
       var rest_extent = context.getRestExtent();
-      context.setMarkupContent([
-	context.getMarkupContent(),
+      markup.setContent([
+	markup.getContent(),
 	"<p>this is added by onload(rest extent = " + rest_extent + " at this point)</p>"
       ].join(""));
     }

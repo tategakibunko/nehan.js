@@ -86,7 +86,7 @@ var BlockGenerator = (function(){
     // to show some html(like form, input etc) that nehan.js can't layout.
     if(child_style.isPasted()){
       return child_style.createBlock({
-	pastedContent:child_style.getContent()
+	content:child_style.getContent()
       });
     }
 

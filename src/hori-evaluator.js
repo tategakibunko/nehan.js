@@ -24,18 +24,10 @@ var HoriEvaluator = (function(){
     return this.evalImageBody(image, image.getCssHoriInlineImage());
   };
 
-  // notice that horizontal inline-child uses <span> wrapping(except for <a>).
-  HoriEvaluator.prototype.evalInlineChild = function(line, child){
-    return Html.tagWrap("span", this.evalInlineElements(child, child.elements), Args.copy({
-      "style":Css.toString(child.getCssInline()),
-      "class":line.classes.join(" ")
-    }, child.getDatasetAttr()));
-  };
-
   HoriEvaluator.prototype.evalRuby = function(line, ruby){
     var span = this._createElement("span", {
       className:"nehan-ruby-body",
-      css:ruby.getCssHoriRuby(line)
+      styles:ruby.getCssHoriRuby(line)
     });
     span.appendChild(this.evalRt(line, ruby));
     span.appendChild(this.evalRb(line, ruby));
@@ -46,7 +38,7 @@ var HoriEvaluator = (function(){
     return this.evalTree(line, {
       elements:ruby.getRbs(),
       root:this._createElement("div", {
-	css:ruby.getCssHoriRb(line),
+	styles:ruby.getCssHoriRb(line),
 	className:"nehan-rb"
       })
     });
@@ -56,7 +48,7 @@ var HoriEvaluator = (function(){
     return this._createElement("div", {
       content:ruby.getRtString(),
       className:"nehan-rt",
-      css:ruby.getCssHoriRt(line)
+      styles:ruby.getCssHoriRt(line)
     });
   };
 
@@ -84,14 +76,14 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype.evalEmpha = function(line, chr){
     var char_part = this._createElement("div", {
       content:chr.data,
-      css:chr.getCssHoriEmphaTarget(line)
+      styles:chr.getCssHoriEmphaTarget(line)
     });
     var empha_part = this._createElement("div", {
       content:line.style.textEmpha.getText(),
-      css:chr.getCssHoriEmphaText(line)
+      styles:chr.getCssHoriEmphaText(line)
     });
     var wrap = this._createElement("span", {
-      css:line.style.textEmpha.getCssHoriEmphaWrap(line, chr)
+      styles:line.style.textEmpha.getCssHoriEmphaWrap(line, chr)
     });
     wrap.appendChild(empha_part);
     wrap.appendChild(char_part);
@@ -99,29 +91,29 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype.evalKerningChar = function(line, chr){
-    var css = chr.getCssPadding(line);
+    var styles = chr.getCssPadding(line);
     if(chr.isKakkoStart()){
-      css["margin-left"] = "-0.5em";
+      styles["margin-left"] = "-0.5em";
       return this._createElement("span", {
 	content:chr.data,
 	className:"nehan-char-kakko-start",
-	css:css
+	styles:styles
       });
     }
     if(chr.isKakkoEnd()){
-      css["margin-right"] = "-0.5em";
+      styles["margin-right"] = "-0.5em";
       return this._createElement("span", {
 	content:chr.data,
 	className:"nehan-char-kakko-end",
-	css:css
+	styles:styles
       });
     }
     if(chr.isKutenTouten()){
-      css["margin-right"] = "-0.5em";
+      styles["margin-right"] = "-0.5em";
       return this._createElement("span", {
 	content:chr.data,
 	className:"nehan-char-kuto",
-	css:css
+	styles:styles
       });
     }
     return document.createTextNode(chr.data);
@@ -130,7 +122,7 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype.evalPaddingChar = function(line, chr){
     return this._createElement("span", {
       content:chr.data,
-      css:chr.getCssPadding(line)
+      styles:chr.getCssPadding(line)
     });
   };
 

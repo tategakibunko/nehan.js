@@ -1,15 +1,15 @@
+// Important Notice:
+// to avoid name-conflicts about existing name space of stylesheet,
+// all class names and id in nehan.js are forced to be prefixed by "nehan-".
 var Tag = (function (){
   function Tag(src, content){
     this._type = "tag";
     this.src = src;
     this.content = content || "";
     this.name = this._parseName(this.src);
-    this.attr = TagAttrParser.parse(this.src);
-    this.id = this._parseId(); // add "nehan-" prefix if not started with "nehan-".
-    this.classes = this._parseClasses(this.attr["class"] || "");
-    this.datasetCamel = {}; // dataset with no "data-" prefixes, and camel case => {name:"taro", familyName:"yamada"} 
-    this.datasetSneak = {}; // dataset with "data-" prefixes => {"data-name":"taro", "data-family-name":"yamada"}
-    this._parseDataset(this.datasetCamel, this.datasetSneak); // parse and set data-set values
+    this.attrs = TagAttrParser.parse(this.src);
+    this.id = this._parseId(this.attrs["id"] || ""); // add "nehan-" prefix if not started with "nehan-".
+    this.classes = this._parseClasses(this.attrs["class"] || ""); // add "nehan-" prefix for each class if not started with "nehan-".
   }
 
   Tag.prototype = {
@@ -34,31 +34,30 @@ var Tag = (function (){
       return this.alias || this.name;
     },
     getAttr : function(name, def_value){
-      var ret = this.attr[name];
+      var ret = this.attrs[name];
       if(typeof ret !== "undefined"){
 	return ret;
       }
       return (typeof def_value !== "undefined")? def_value : null;
     },
     setAttr : function(name, value){
-      this.attr[name] = value;
+      this.attrs[name] = value;
     },
-    setDataset : function(name, value){
-      this.datasetSneak[name] = value;
-      this.datasetCamel[Utils.camelize(name)] = value;
+    setDataBySneakName : function(sneak_name, value){
+      this.dataset.setBySneakName(sneak_name, value);
+    },
+    getDataBySneakName : function(sneak_name){
+      return this.dataset.getBySneakName(sneak_name);
     },
     // getDataset('familyName') => 'yamada'
-    getDataset : function(camel_name, def_value){
-      var ret = this.datasetCamel[camel_name];
-      if(typeof ret !== "undefined"){
-	return ret;
-      }
-      return (typeof def_value !== "undefined")? def_value : null;
+    getDataByCamelName : function(camel_name){
+      return this.dataset.getByCamelName(camel_name);
     },
-    // return sneak case attrs
-    // => {"name":"taro", "family-name":"yamada"}
-    getDatasetAttr : function(){
-      return this.datasetSneak;
+    iterDatasetByCamelName : function(fn){
+      this.dataset.iterByCamelName(fn);
+    },
+    iterDatasetBySneakName : function(fn){
+      this.dataset.iterBySneakName(fn);
     },
     getContent : function(){
       return this.content;
@@ -76,7 +75,7 @@ var Tag = (function (){
       return List.exists(this.classes, Closure.eq(klass));
     },
     hasAttr : function(name){
-      return (typeof this.attr.name !== "undefined");
+      return (typeof this.attrs.name !== "undefined");
     },
     isAnchorTag : function(){
       return this.name === "a" && this.getTagAttr("name") !== null;
@@ -97,39 +96,26 @@ var Tag = (function (){
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
     },
-    _parseId : function(){
-      var id = this.attr.id || "";
-      return (id === "")? id : ((this.attr.id.indexOf("nehan-") === 0)? "nehan-" + id : id);
+    // <p id='foo'>
+    // => "nehan-foo"
+    _parseId : function(id_value){
+      return id_value? ((id_value.indexOf("nehan-") < 0)? "nehan-" + id_value : id_value) : null;
     },
     // <p class='hi hey'>
-    // => ["hi", "hey"]
+    // => ["nehan-hi", "nehan-hey"]
     _parseClasses : function(class_value){
       class_value = Utils.trim(class_value.replace(/\s+/g, " "));
       var classes = (class_value === "")? [] : class_value.split(/\s+/);
       return List.map(classes, function(klass){
-	return (klass.indexOf("nehan-") === 0)? klass : "nehan-" + klass;
+	return (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
       });
     },
     // <p class='hi hey'>
-    // => [".hi", ".hey"]
+    // => [".nehan-hi", ".nehan-hey"]
     _parseCssClasses : function(classes){
       return List.map(classes, function(class_name){
 	return "." + class_name;
       });
-    },
-    // parse all attributes that are started by "data-", and store both to
-    // 1. sneak cased dict(dataset_sneak)
-    // 2. camel cased dict(dataset_camel)
-    _parseDataset : function(dataset_camel, dataset_sneak){
-      for(var name in this.attr){
-	if(name.indexOf("data-") === 0){
-	  var value = this.attr[name];
-	  var sneak_name = name.slice(5); // "data-family-name" -> "family-name"
-	  var camel_name = Utils.camelize(sneak_name); // "family-name" -> "familyName"
-	  dataset_sneak[sneak_name] = value;
-	  dataset_camel[camel_name] = value;
-	}
-      }
     }
   };
 
