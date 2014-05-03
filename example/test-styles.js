@@ -25,6 +25,7 @@ var TestStyles = {
 	tips[tip_title] = tip_content;
       }
       markup.setAlias("a");
+      markup.setAttr("href", "#");
       markup.setContent(tip_title);
       return {
 	"color":"red",

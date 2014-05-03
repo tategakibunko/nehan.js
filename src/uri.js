@@ -7,15 +7,17 @@ var Uri = (function(){
     _normalize : function(address){
       return address.replace(/\s/g, "");
     },
-    hasAnchorName : function(){
-      return this.address.indexOf("#") >= 0;
-    },
     getAddress : function(){
       return this.address;
     },
     getAnchorName : function(){
       var sharp_pos = this.address.indexOf("#");
-      return (sharp_pos < 0)? "" : this.address.substring(sharp_pos + 1);
+      if(sharp_pos < 0){
+	return "";
+      }
+      var anchor_name = this.address.substring(sharp_pos + 1);
+      console.log("anchor name:%s", anchor_name);
+      return (anchor_name.length > 0)? anchor_name : "";
     }
   };
 

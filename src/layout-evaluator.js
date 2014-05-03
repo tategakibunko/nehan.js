@@ -127,8 +127,8 @@ var LayoutEvaluator = (function(){
     // if link uri has anchor address, add page-no to dataset where the anchor is defined.
     evalLink : function(link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
-      if(uri.hasAnchorName()){
-	var anchor_name = uri.getAnchorName();
+      var anchor_name = uri.getAnchorName();
+      if(anchor_name){
 	var page_no = DocumentContext.getAnchorPageNo(anchor_name);
 	link.classes.push("nehan-anchor-link");
 	link.style.markup.setAttr("data-page", page_no);
