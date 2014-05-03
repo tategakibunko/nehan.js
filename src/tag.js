@@ -12,7 +12,9 @@ var Tag = (function (){
     this.id = this._parseId(this.attrs["id"] || ""); // add "nehan-" prefix if not started with "nehan-".
     this.classes = this._parseClasses(this.attrs["class"] || ""); // add "nehan-" prefix for each class if not started with "nehan-".
     this.attrs["class"] = this.classes.join(" ");
-    this.attrs["id"] = this.id;
+    if(this.id){
+      this.attrs.id = this.id;
+    }
   }
 
   Tag.prototype = {

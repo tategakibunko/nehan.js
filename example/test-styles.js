@@ -1,4 +1,37 @@
+var tips = {};
+
 var TestStyles = {
+  "tip":{
+    display:"inline",
+    events:{
+      onclick:function(e){
+	var event = e || event;
+	var $target = $(event.target);
+	var tip_title = $target.attr("title");
+	var tip_content = tips[tip_title];
+	if(tip_content){
+	  alert(tip_content);
+	} else {
+	  console.error("tip title %s is not registerd!", tip_title);
+	}
+	return false;
+      }
+    },
+    onload:function(context){
+      var markup = context.getMarkup();
+      var tip_title = markup.getAttr("title");
+      var tip_content = markup.getContent();
+      if(tip_title){
+	tips[tip_title] = tip_content;
+      }
+      markup.setAlias("a");
+      markup.setContent(tip_title);
+      return {
+	"color":"red",
+	"background-color":"gold"
+      };
+    }
+  },
   ".nehan-test-pseudo li:first-child":{
     "color":"green"
   },

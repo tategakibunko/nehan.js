@@ -1,4 +1,8 @@
 var Script = {
+  "tip":[
+    "<tip title='click here'>tip content</tip>"
+  ].join(""),
+
   "selector":[
     // adjacent sibling selector(A+B) test
     "<h2>adj sibling</h2>",
