@@ -9142,12 +9142,9 @@ var LayoutEvaluator = (function(){
       Args.copy(dom.dataset, dataset); // dataset attributes(defined in TagAttrs::dataset)
 
       for(var event_name in events){
-	if(typeof events[event_name] === "function"){
-	  console.log("attach event(%s) to %o", event_name, dom);
-	  addEvent(dom, event_name, function(e){
-	    events[event_name](e || event);
-	  });
-	}
+	addEvent(dom, event_name, function(e){
+	  events[event_name](e || event);
+	});
       }
       return dom;
     },
