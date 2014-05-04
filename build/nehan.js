@@ -7812,6 +7812,17 @@ var BlockGenerator = (function(){
     return this._createOutput(context);
   };
 
+  BlockGenerator.prototype.popCache = function(context){
+    var cache = LayoutGenerator.prototype.popCache.call(this);
+
+    // if cache is inline, and measure size varies, reget line if need.
+    if(cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br){
+      this._childLayout.rollback(cache);
+      return this.yieldChildLayout(context);
+    }
+    return cache;
+  };
+
   BlockGenerator.prototype._getNext = function(context){
     if(this.hasCache()){
       var cache = this.popCache(context);
@@ -8028,6 +8039,11 @@ var InlineGenerator = (function(){
   }
   Class.extend(InlineGenerator, LayoutGenerator);
 
+  var __get_line_start_pos = function(line){
+    var head = line.elements[0];
+    return (head instanceof Box)? head.style.getMarkupPos() : head.pos;
+  };
+
   InlineGenerator.prototype._yield = function(context){
     if(!context.isInlineSpaceLeft()){
       return null;
@@ -8051,6 +8067,20 @@ var InlineGenerator = (function(){
       }
     }
     return this._createOutput(context);
+  };
+
+  LayoutGenerator.prototype.rollback = function(parent_cache){
+    if(this.stream === null){
+      return;
+    }
+    this.stream.setPos(__get_line_start_pos(parent_cache)); // rewind stream to the head of line.
+
+    var cache = this.popCache();
+
+    // inline child is always inline, so repeat this rollback while cache exists.
+    if(this._childLayout && cache){
+      this._childLayout.rollback(cache);
+    }
   };
 
   InlineGenerator.prototype._createChildContext = function(context){
@@ -8479,36 +8509,6 @@ var FloatGroupStack = (function(){
 })();
 
 
-var FloatRestGenerator = (function(){
-  function FloatRestGenerator(style, stream, outline_context){
-    BlockGenerator.call(this, style, stream, outline_context);
-  }
-  Class.extend(FloatRestGenerator, BlockGenerator);
-
-  var get_line_start_pos = function(line){
-    var head = line.elements[0];
-    return (head instanceof Box)? head.style.getMarkupPos() : head.pos;
-  };
-
-  FloatRestGenerator.prototype.popCache = function(context){
-    var cache = LayoutGenerator.prototype.popCache.call(this);
-
-    // if cache is inline, and measure size varies, reget line if need.
-    if(this.hasChildLayout() && cache.display === "inline"){
-      if(cache.getLayoutMeasure(this.style.flow) <= this.style.contentMeasure && cache.br){
-	return cache;
-      }
-      this._childLayout.stream.setPos(get_line_start_pos(cache)); // rewind stream to the head of line.
-      this._childLayout.clearCache(); // stream rewinded, so cache must be destroyed.
-      return this.yieldChildLayout(context);
-    }
-    return cache;
-  };
-
-  return FloatRestGenerator;
-})();
-
-
 var FloatGenerator = (function(){
   // caution: constructor argument 'style' is the style of parent.
   // so if <body><float1>..</float1><float2>...</float2></body>,
@@ -8521,7 +8521,7 @@ var FloatGenerator = (function(){
     // notice that this generator uses 'clone' of original style, because content size changes by position,
     // but on the other hand, original style is referenced by float-elements as their parent style.
     // so we must keep original style immutable.
-    this.setChildLayout(new FloatRestGenerator(style.clone({"float":"start"}), stream, outline_context));
+    this.setChildLayout(new BlockGenerator(style.clone({"float":"start"}), stream, outline_context));
   }
   Class.extend(FloatGenerator, LayoutGenerator);
 

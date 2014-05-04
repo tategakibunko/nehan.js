@@ -8,6 +8,11 @@ var InlineGenerator = (function(){
   }
   Class.extend(InlineGenerator, LayoutGenerator);
 
+  var __get_line_start_pos = function(line){
+    var head = line.elements[0];
+    return (head instanceof Box)? head.style.getMarkupPos() : head.pos;
+  };
+
   InlineGenerator.prototype._yield = function(context){
     if(!context.isInlineSpaceLeft()){
       return null;
@@ -31,6 +36,20 @@ var InlineGenerator = (function(){
       }
     }
     return this._createOutput(context);
+  };
+
+  LayoutGenerator.prototype.rollback = function(parent_cache){
+    if(this.stream === null){
+      return;
+    }
+    this.stream.setPos(__get_line_start_pos(parent_cache)); // rewind stream to the head of line.
+
+    var cache = this.popCache();
+
+    // inline child is always inline, so repeat this rollback while cache exists.
+    if(this._childLayout && cache){
+      this._childLayout.rollback(cache);
+    }
   };
 
   InlineGenerator.prototype._createChildContext = function(context){

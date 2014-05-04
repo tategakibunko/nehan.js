@@ -10,7 +10,7 @@ var FloatGenerator = (function(){
     // notice that this generator uses 'clone' of original style, because content size changes by position,
     // but on the other hand, original style is referenced by float-elements as their parent style.
     // so we must keep original style immutable.
-    this.setChildLayout(new FloatRestGenerator(style.clone({"float":"start"}), stream, outline_context));
+    this.setChildLayout(new BlockGenerator(style.clone({"float":"start"}), stream, outline_context));
   }
   Class.extend(FloatGenerator, LayoutGenerator);
 

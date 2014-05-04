@@ -147,7 +147,7 @@ module.exports = function(grunt) {
 	    "src/flip-generator.js",
 	    "src/float-group.js",
 	    "src/float-group-stack.js",
-	    "src/float-rest-generator.js",
+	    //"src/float-rest-generator.js",
 	    "src/float-generator.js",
 	    "src/parallel-generator.js",
 	    "src/section-root-generator.js",

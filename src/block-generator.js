@@ -27,6 +27,17 @@ var BlockGenerator = (function(){
     return this._createOutput(context);
   };
 
+  BlockGenerator.prototype.popCache = function(context){
+    var cache = LayoutGenerator.prototype.popCache.call(this);
+
+    // if cache is inline, and measure size varies, reget line if need.
+    if(cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br){
+      this._childLayout.rollback(cache);
+      return this.yieldChildLayout(context);
+    }
+    return cache;
+  };
+
   BlockGenerator.prototype._getNext = function(context){
     if(this.hasCache()){
       var cache = this.popCache(context);
