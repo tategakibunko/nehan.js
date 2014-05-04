@@ -15,7 +15,10 @@
    4. attribute selector
      div[name=value]{font-size:xxx}
 
-   5. pseudo-element, pseudo-class selector
+   5. pseudo-class selector
+     li:first-child{font-weight:bold}
+
+   6. pseudo-element selector
      div::first-line{font-size:xxx}
 */
 var TypeSelector = (function(){
