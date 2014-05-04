@@ -2562,6 +2562,98 @@ var TagAttrParser = (function(){
   };
 })();
 
+var TagAttrs = (function(){
+  function TagAttrs(src){
+    var attrs_raw = TagAttrParser.parse(src);
+    this.classes = this._parseClasses(attrs_raw);
+    this.attrs = this._parseAttrs(attrs_raw, this.classes);
+    this.dataset = this._parseDataset(attrs_raw);
+  }
+
+  var __data_name_of = function(name){
+    return Utils.camelize(name.slice(5));
+  };
+
+  TagAttrs.prototype = {
+    hasAttr : function(name){
+      return (typeof this.attrs.name !== "undefined");
+    },
+    hasClass : function(klass){
+      return List.exists(this.classes, Closure.eq(klass));
+    },
+    addClass : function(klass){
+      klass = (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
+      if(!this.hasClass(klass)){
+	this.classes.push(klass);
+	this.setAttr("class", [this.getAttr("class"), klass].join(" "));
+      }
+      return this.classes;
+    },
+    removeClass : function(klass){
+      this.classes = List.filter(this.classes, function(cls){
+	return cls != klass;
+      });
+      this.setAttr("class", this.classes.join(" "));
+      return this.classes;
+    },
+    getAttr : function(name, def_value){
+      def_value = (typeof def_value === "undefined")? null : def_value;
+      return (typeof this.attrs[name] === "undefined")? def_value : this.attrs[name];
+    },
+    getData : function(name, def_value){
+      def_value = (typeof def_value === "undefined")? null : def_value;
+      return (typeof this.dataset[name] === "undefined")? def_value : this.dataset[name];
+    },
+    setAttr : function(name, value){
+      if(name.indexOf("data-") === 0){
+	this.setData(__data_name_of(name), value);
+      } else {
+	this.attrs[name] = value;
+      }
+    },
+    setData : function(name, value){
+      this.dataset[name] = value;
+    },
+    // <p class='hi hey'>
+    // => ["nehan-hi", "nehan-hey"]
+    _parseClasses : function(attrs_raw){
+      var class_name = attrs_raw["class"] || "";
+      class_name = Utils.trim(class_name.replace(/\s+/g, " "));
+      var classes = (class_name === "")? [] : class_name.split(/\s+/);
+      return List.map(classes, function(klass){
+	return (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
+      });
+    },
+    _parseAttrs : function(attrs_raw, classes){
+      var attrs = {};
+      for(var name in attrs_raw){
+	if(name.indexOf("data-") < 0){
+	  attrs[name] = attrs_raw[name];
+	} else if(name === "id"){
+	  attrs[name] = "nehan-" + attrs_raw[name]; // force add prefix "nehan-".
+	} else if(name === "class"){
+	  attrs[name] = classes.join(" ");
+	} else {
+	  attrs[name] = attrs_raw[name];
+	}
+      }
+      return attrs;
+    },
+    _parseDataset : function(attrs_raw){
+      var dataset = {};
+      for(var name in attrs_raw){
+	if(name.indexOf("data-") === 0){
+	  dataset[__data_name_of(name)] = attrs_raw[name];
+	}
+      }
+      return dataset;
+    }
+  };
+
+  return TagAttrs;
+})();
+
+
 // Important Notice:
 // to avoid name-conflicts about existing name space of stylesheet,
 // all class names and id in nehan.js are forced to be prefixed by "nehan-".
@@ -2571,14 +2663,7 @@ var Tag = (function (){
     this.src = src;
     this.content = content || "";
     this.name = this._parseName(this.src);
-    this.attrs = TagAttrParser.parse(this.src);
-    this.dataset = this._parseDataset(this.attrs);
-    this.id = this._parseId(this.attrs["id"] || ""); // add "nehan-" prefix if not started with "nehan-".
-    this.classes = this._parseClasses(this.attrs["class"] || ""); // add "nehan-" prefix for each class if not started with "nehan-".
-    this.attrs["class"] = this.classes.join(" ");
-    if(this.id){
-      this.attrs.id = this.id;
-    }
+    this.attrs = new TagAttrs(this.src);
   }
 
   Tag.prototype = {
@@ -2591,32 +2676,26 @@ var Tag = (function (){
     setAlias : function(name){
       this.alias = name;
     },
+    setAttr : function(name, value){
+      this.attrs.setAttr(name, value);
+    },
+    setData : function(name, value){
+      this.attrs.setData(name, value);
+    },
     addClass : function(klass){
-      this.classes.push(klass);
+      this.attrs.addClass(klass);
     },
     removeClass : function(klass){
-      this.classes = List.filter(this.classes, function(cls){
-	return cls != klass;
-      });
+      this.attrs.removeClass(klass);
     },
     getName : function(){
       return this.alias || this.name;
     },
     getAttr : function(name, def_value){
-      def_value = (typeof def_value === "undefined")? null : def_value;
-      return (typeof this.attrs[name] === "undefined")? def_value : this.attrs[name];
+      return this.attrs.getAttr(name, def_value);
     },
-    setAttr : function(name, value){
-      this.attrs[name] = value;
-      if(name.indexOf("data-") === 0){
-	this.dataset[this._parseDataName(name)] = value;
-      }
-    },
-    getData : function(name){
-      return this.dataset[name] || null;
-    },
-    setData : function(name, value){
-      this.dataset[name] = value;
+    getData : function(name, def_value){
+      return this.attrs.getData(name, def_value);
     },
     getContent : function(){
       return this.content;
@@ -2631,10 +2710,10 @@ var Tag = (function (){
       return this.src + this.content + "</" + this.name + ">";
     },
     hasClass : function(klass){
-      return List.exists(this.classes, Closure.eq(klass));
+      return this.attrs.hasClass(klass);
     },
     hasAttr : function(name){
-      return (typeof this.attrs.name !== "undefined");
+      return this.attrs.hasAttr(name);
     },
     isAnchorTag : function(){
       return this.name === "a" && this.getTagAttr("name") !== null;
@@ -2654,39 +2733,6 @@ var Tag = (function (){
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
-    },
-    // <p id='foo'>
-    // => "nehan-foo"
-    _parseId : function(id_value){
-      return id_value? ((id_value.indexOf("nehan-") < 0)? "nehan-" + id_value : id_value) : null;
-    },
-    // <p class='hi hey'>
-    // => ["nehan-hi", "nehan-hey"]
-    _parseClasses : function(class_value){
-      class_value = Utils.trim(class_value.replace(/\s+/g, " "));
-      var classes = (class_value === "")? [] : class_value.split(/\s+/);
-      return List.map(classes, function(klass){
-	return (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
-      });
-    },
-    // <p class='hi hey'>
-    // => [".nehan-hi", ".nehan-hey"]
-    _parseCssClasses : function(classes){
-      return List.map(classes, function(class_name){
-	return "." + class_name;
-      });
-    },
-    _parseDataset : function(attrs){
-      var dataset = {};
-      for(var name in attrs){
-	if(name.indexOf("data-") === 0){
-	  dataset[this._parseDataName(name)] = attrs[name];
-	}
-      }
-      return dataset;
-    },
-    _parseDataName : function(name){
-      return Utils.camelize(name.slice(5));
     }
   };
 
@@ -4544,7 +4590,6 @@ var Uri = (function(){
 	return "";
       }
       var anchor_name = this.address.substring(sharp_pos + 1);
-      console.log("anchor name:%s", anchor_name);
       return (anchor_name.length > 0)? anchor_name : "";
     }
   };
@@ -4730,14 +4775,14 @@ var Box = (function(){
   };
 
   Box.prototype = {
+    isAnonymousLine : function(){
+      return this.display === "inline" && this.style.isRootLine();
+    },
     toLineString : function(){
       var texts = __filter_text(this.elements || []);
       return List.fold(texts, "", function(ret, text){
 	return ret + (text? (text.data || "") : "");
       });
-    },
-    getId : function(){
-      return this.style.markup.id || null;
     },
     getClassName : function(){
       return this.classes? this.classes.join(" ") : "";
@@ -4746,14 +4791,18 @@ var Box = (function(){
       return this.content || null;
     },
     getEvents : function(){
+      // events of anonymous line is already captured by parent element.
+      if(this.isAnonymousLine()){
+	return {};
+      }
       return this.style.getCssAttr("events") || {};
     },
     getAttrs : function(){
       // attributes of anonymous line is already captured by parent element.
-      if(this.display === "inline" && this.style.isRootLine()){
-	return {};
+      if(this.isAnonymousLine()){
+	return null;
       }
-      return this.style.markup.attrs || {};
+      return this.style.markup.attrs;
     },
     getCssRoot : function(){
       switch(this.display){
@@ -9043,11 +9092,26 @@ var DocumentGenerator = (function(){
 var LayoutEvaluator = (function(){
   function LayoutEvaluator(){}
 
+  var addEvent = (function(){
+    if(document.addEventListener){
+      return function(node, type, handler){
+	node.addEventListener(type, handler, false);
+      };
+    } else if(document.attachEvent){
+      return function(node, type, handler){
+	node.attachEvent('on' + type, function(evt){
+          handler.call(node, evt);
+	});
+      };
+    }
+  })();
+
   LayoutEvaluator.prototype = {
     _createElement : function(name, opt){
       var opt = opt || {};
       var styles = opt.styles || {};
-      var attrs = opt.attrs || {};
+      var attrs = opt.attrs? opt.attrs.attrs : {};
+      var dataset = opt.attrs? opt.attrs.dataset : {};
       var events = opt.events || {};
       var dom = document.createElement(name);
       if(opt.id){
@@ -9070,17 +9134,19 @@ var LayoutEvaluator = (function(){
       // why? because
       // 1. markup of anonymous line is shared by parent block, but both are given different class names.
       // 2. sometimes we add some special class name like "nehan-div", "nehan-body", "nehan-p"... etc.
-      for(var attr_name in attrs){
-	if(attr_name.indexOf("data-") === 0){
-	  var camel_name = Utils.camelize(attr_name.slice(5));
-	  dom.dataset[camel_name] = attrs[attr_name];
-	} else if(attr_name !== "class"){ // already set by opt.className
+      for(var attr_name in attrs){ // pure attributes(without dataset defined in TagAttrs::attrs)
+	if(attr_name !== "class"){ // "class" attribute is already set by opt.className
 	  dom[attr_name] = attrs[attr_name];
 	}
       }
+      Args.copy(dom.dataset, dataset); // dataset attributes(defined in TagAttrs::dataset)
+
       for(var event_name in events){
 	if(typeof events[event_name] === "function"){
-	  dom[event_name] = events[event_name];
+	  console.log("attach event(%s) to %o", event_name, dom);
+	  addEvent(dom, event_name, function(e){
+	    events[event_name](e || event);
+	  });
 	}
       }
       return dom;
@@ -9115,7 +9181,6 @@ var LayoutEvaluator = (function(){
     evalTreeRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
-	id:tree.getId(),
 	className:tree.getClassName(),
 	attrs:tree.getAttrs(),
 	events:tree.getEvents(),

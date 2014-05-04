@@ -1,11 +1,26 @@
 var LayoutEvaluator = (function(){
   function LayoutEvaluator(){}
 
+  var addEvent = (function(){
+    if(document.addEventListener){
+      return function(node, type, handler){
+	node.addEventListener(type, handler, false);
+      };
+    } else if(document.attachEvent){
+      return function(node, type, handler){
+	node.attachEvent('on' + type, function(evt){
+          handler.call(node, evt);
+	});
+      };
+    }
+  })();
+
   LayoutEvaluator.prototype = {
     _createElement : function(name, opt){
       var opt = opt || {};
       var styles = opt.styles || {};
-      var attrs = opt.attrs || {};
+      var attrs = opt.attrs? opt.attrs.attrs : {};
+      var dataset = opt.attrs? opt.attrs.dataset : {};
       var events = opt.events || {};
       var dom = document.createElement(name);
       if(opt.id){
@@ -28,17 +43,19 @@ var LayoutEvaluator = (function(){
       // why? because
       // 1. markup of anonymous line is shared by parent block, but both are given different class names.
       // 2. sometimes we add some special class name like "nehan-div", "nehan-body", "nehan-p"... etc.
-      for(var attr_name in attrs){
-	if(attr_name.indexOf("data-") === 0){
-	  var camel_name = Utils.camelize(attr_name.slice(5));
-	  dom.dataset[camel_name] = attrs[attr_name];
-	} else if(attr_name !== "class"){ // already set by opt.className
+      for(var attr_name in attrs){ // pure attributes(without dataset defined in TagAttrs::attrs)
+	if(attr_name !== "class"){ // "class" attribute is already set by opt.className
 	  dom[attr_name] = attrs[attr_name];
 	}
       }
+      Args.copy(dom.dataset, dataset); // dataset attributes(defined in TagAttrs::dataset)
+
       for(var event_name in events){
 	if(typeof events[event_name] === "function"){
-	  dom[event_name] = events[event_name];
+	  console.log("attach event(%s) to %o", event_name, dom);
+	  addEvent(dom, event_name, function(e){
+	    events[event_name](e || event);
+	  });
 	}
       }
       return dom;
@@ -73,7 +90,6 @@ var LayoutEvaluator = (function(){
     evalTreeRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
-	id:tree.getId(),
 	className:tree.getClassName(),
 	attrs:tree.getAttrs(),
 	events:tree.getEvents(),

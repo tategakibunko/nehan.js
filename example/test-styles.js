@@ -1,18 +1,13 @@
-var tips = {};
-
 var TestStyles = {
   "tip":{
     display:"inline",
     events:{
-      onclick:function(e){
-	var event = e || event;
+      click:function(event){
 	var $target = $(event.target);
-	var tip_title = $target.attr("title");
-	var tip_content = tips[tip_title];
-	if(tip_content){
-	  alert(tip_content);
-	} else {
-	  console.error("tip title %s is not registerd!", tip_title);
+	var tip_title = $target.data("title");
+	var tip_content = $target.data("content");
+	if(tip_title && tip_content){
+	  console.log("tip(%s) = %s", tip_title, tip_content);
 	}
 	return false;
       }
@@ -21,11 +16,9 @@ var TestStyles = {
       var markup = context.getMarkup();
       var tip_title = markup.getAttr("title");
       var tip_content = markup.getContent();
-      if(tip_title){
-	tips[tip_title] = tip_content;
-      }
-      markup.setAlias("a");
-      markup.setAttr("href", "#");
+      //markup.setAlias("a");
+      markup.setData("title", tip_title);
+      markup.setData("content", tip_content);
       markup.setContent(tip_title);
       return {
 	"color":"red",

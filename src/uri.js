@@ -16,7 +16,6 @@ var Uri = (function(){
 	return "";
       }
       var anchor_name = this.address.substring(sharp_pos + 1);
-      console.log("anchor name:%s", anchor_name);
       return (anchor_name.length > 0)? anchor_name : "";
     }
   };

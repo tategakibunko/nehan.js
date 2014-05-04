@@ -15,14 +15,14 @@ var Box = (function(){
   };
 
   Box.prototype = {
+    isAnonymousLine : function(){
+      return this.display === "inline" && this.style.isRootLine();
+    },
     toLineString : function(){
       var texts = __filter_text(this.elements || []);
       return List.fold(texts, "", function(ret, text){
 	return ret + (text? (text.data || "") : "");
       });
-    },
-    getId : function(){
-      return this.style.markup.id || null;
     },
     getClassName : function(){
       return this.classes? this.classes.join(" ") : "";
@@ -31,14 +31,18 @@ var Box = (function(){
       return this.content || null;
     },
     getEvents : function(){
+      // events of anonymous line is already captured by parent element.
+      if(this.isAnonymousLine()){
+	return {};
+      }
       return this.style.getCssAttr("events") || {};
     },
     getAttrs : function(){
       // attributes of anonymous line is already captured by parent element.
-      if(this.display === "inline" && this.style.isRootLine()){
-	return {};
+      if(this.isAnonymousLine()){
+	return null;
       }
-      return this.style.markup.attrs || {};
+      return this.style.markup.attrs;
     },
     getCssRoot : function(){
       switch(this.display){
