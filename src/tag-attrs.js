@@ -62,17 +62,15 @@ var TagAttrs = (function(){
     },
     _parseAttrs : function(attrs_raw, classes){
       var attrs = {};
-      for(var name in attrs_raw){
-	if(name.indexOf("data-") < 0){
-	  attrs[name] = attrs_raw[name];
-	} else if(name === "id"){
-	  attrs[name] = "nehan-" + attrs_raw[name]; // force add prefix "nehan-".
+      Obj.iter(attrs_raw, function(name, value){
+	if(name === "id"){ // force add prefix "nehan-".
+	  attrs[name] = (value.indexOf("nehan-") === 0)? value : "nehan-" + value;
 	} else if(name === "class"){
 	  attrs[name] = classes.join(" ");
-	} else {
-	  attrs[name] = attrs_raw[name];
+	} else if(name.indexOf("data-") < 0){
+	  attrs[name] = value;
 	}
-      }
+      });
       return attrs;
     },
     _parseDataset : function(attrs_raw){

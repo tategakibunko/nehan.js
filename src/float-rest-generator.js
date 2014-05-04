@@ -9,6 +9,10 @@ var FloatRestGenerator = (function(){
     return (head instanceof Box)? head.style.getMarkupPos() : head.pos;
   };
 
+  FloatRestGenerator.prototype.pushCache = function(element){
+    LayoutGenerator.prototype.pushCache.call(this, element);
+  };
+
   FloatRestGenerator.prototype.popCache = function(context){
     var cache = LayoutGenerator.prototype.popCache.call(this);
 
