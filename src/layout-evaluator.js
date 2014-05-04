@@ -1,7 +1,7 @@
 var LayoutEvaluator = (function(){
   function LayoutEvaluator(){}
 
-  var addEvent = (function(){
+  var __add_event = (function(){
     if(document.addEventListener){
       return function(node, type, handler){
 	node.addEventListener(type, handler, false);
@@ -32,29 +32,35 @@ var LayoutEvaluator = (function(){
       if(opt.content){
 	dom.innerHTML = opt.content;
       }
-      for(var style_name in styles){
+
+      // font-family -> fontFamily(use camel case by default)
+      // float -> cssFloat(special case)
+      Obj.iter(styles, function(style_name, value){
 	if(style_name === "float"){
-	  dom.style.cssFloat = styles[style_name];
+	  dom.style.cssFloat = value;
 	} else {
-	  dom.style[Utils.camelize(style_name)] = styles[style_name];
+	  dom.style[Utils.camelize(style_name)] = value;
 	}
-      }
+      });
+
       // notice that class(className in style object) is given by variable "Box::classes".
       // why? because
       // 1. markup of anonymous line is shared by parent block, but both are given different class names.
       // 2. sometimes we add some special class name like "nehan-div", "nehan-body", "nehan-p"... etc.
-      for(var attr_name in attrs){ // pure attributes(without dataset defined in TagAttrs::attrs)
+      Obj.iter(attrs, function(attr_name, value){ // pure attributes(without dataset defined in TagAttrs::attrs)
 	if(attr_name !== "class"){ // "class" attribute is already set by opt.className
-	  dom[attr_name] = attrs[attr_name];
+	  dom[attr_name] = value;
 	}
-      }
-      Args.copy(dom.dataset, dataset); // dataset attributes(defined in TagAttrs::dataset)
+      });
 
-      for(var event_name in events){
-	addEvent(dom, event_name, function(e){
-	  events[event_name](e || event);
+      // dataset attributes(defined in TagAttrs::dataset)
+      Args.copy(dom.dataset, dataset);
+
+      Obj.iter(events, function(event_name, fn){
+	__add_event(dom, event_name, function(e){
+	  return fn(e || event);
 	});
-      }
+      });
       return dom;
     },
     _createClearFix : function(clear){

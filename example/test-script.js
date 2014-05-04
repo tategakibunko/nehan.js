@@ -1,7 +1,24 @@
 var Script = {
-  "tip":[
-    "<tip title='click here'>tip content</tip>"
-  ].join(""),
+  "pasted2":[
+    "<p>this is normal1</p>",
+    "<div class='nehan-content-box nehan-gap-after' style='width:200px; height:200px; background-color:gold' pasted>",
+    "this is pasted content",
+    "</div>",
+    "<p>this is normal2</p>",
+    "<div class='nehan-content-box nehan-disp-block' style='measure:400px; extent:200px' pasted>",
+    "<pre class='prettyprint lang-js'>",
+    "var a = new String('hoge');",
+    "var b = function(){ alert('hoge'); };",
+    "</pre>",
+    "</div>"
+  ].join("\n"),
+
+  "custom-tag-test":[
+    "<h3>in vertical mode, handler for rotated word has some trouble</h3>",
+    "<p><tip title='click here'>tip content</tip></p>",
+    "<h3>normal text works well</h3>",
+    "<p><tip title='タイトル'>チップの内容</tip></p>"
+  ].join("\n"),
 
   "selector":[
     // adjacent sibling selector(A+B) test
@@ -311,7 +328,12 @@ var Script = {
     "<div class='nehan-content-box nehan-gap-after' style='width:200px; height:200px; background-color:gold' pasted>",
     "this is pasted content",
     "</div>",
-    "<p>this is normal2</p>"
+    "<p>this is normal2</p>",
+    "<div class='nehan-content-box nehan-gap-after' style='extent:200px' pasted>",
+    "<pre class='prettyprint lang-js'>",
+    "var a = new String('hoge');",
+    "</pre>",
+    "</div>"
   ].join("\n")
 };
 

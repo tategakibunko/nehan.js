@@ -22,7 +22,7 @@ var Obj = {
   // fn : obj -> prop -> value -> ?
   iter : function(obj, fn){
     for(var prop in obj){
-      fn(obj, prop, obj[prop]);
+      fn(prop, obj[prop]);
     }
   }
 };

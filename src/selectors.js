@@ -80,7 +80,7 @@ var Selectors = (function(){
 
   var init_selectors = function(){
     // initialize selector list
-    Obj.iter(Style, function(obj, key, value){
+    Obj.iter(Style, function(key, value){
       insert_value(key, value);
     });
     sort_selectors();

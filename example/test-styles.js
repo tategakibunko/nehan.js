@@ -1,13 +1,22 @@
 var TestStyles = {
   "tip":{
     display:"inline",
+    color:"red",
+    background:"gold",
     events:{
+      mouseover:function(event){
+	var $target = $(event.target);
+	$target.css("font-weight", "bold");
+      },
+      mouseout:function(event){
+	var $target = $(event.target);
+	$target.css("font-weight", "normal");
+      },
       click:function(event){
 	var $target = $(event.target);
-	var tip_title = $target.data("title");
 	var tip_content = $target.data("content");
-	if(tip_title && tip_content){
-	  console.log("tip(%s) = %s", tip_title, tip_content);
+	if(tip_content){
+	  alert(tip_content);
 	}
 	return false;
       }
@@ -16,14 +25,9 @@ var TestStyles = {
       var markup = context.getMarkup();
       var tip_title = markup.getAttr("title");
       var tip_content = markup.getContent();
-      //markup.setAlias("a");
       markup.setData("title", tip_title);
       markup.setData("content", tip_content);
       markup.setContent(tip_title);
-      return {
-	"color":"red",
-	"background-color":"gold"
-      };
     }
   },
   ".nehan-test-pseudo li:first-child":{
