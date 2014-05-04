@@ -7816,7 +7816,7 @@ var BlockGenerator = (function(){
     var cache = LayoutGenerator.prototype.popCache.call(this);
 
     // if cache is inline, and measure size varies, reget line if need.
-    if(cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br){
+    if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br){
       this._childLayout.rollback(cache);
       return this.yieldChildLayout(context);
     }
@@ -8073,7 +8073,8 @@ var InlineGenerator = (function(){
     if(this.stream === null){
       return;
     }
-    this.stream.setPos(__get_line_start_pos(parent_cache)); // rewind stream to the head of line.
+    var start_pos = (parent_cache instanceof Box)? __get_line_start_pos(parent_cache) : parent_cache.pos;
+    this.stream.setPos(start_pos); // rewind stream to the head of line.
 
     var cache = this.popCache();
 

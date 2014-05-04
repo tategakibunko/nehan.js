@@ -31,7 +31,7 @@ var BlockGenerator = (function(){
     var cache = LayoutGenerator.prototype.popCache.call(this);
 
     // if cache is inline, and measure size varies, reget line if need.
-    if(cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br){
+    if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br){
       this._childLayout.rollback(cache);
       return this.yieldChildLayout(context);
     }
