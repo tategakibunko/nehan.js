@@ -944,10 +944,7 @@ var Style = {
   // other utility classes
   //-------------------------------------------------------
   ".nehan-drop-caps::first-letter":{
-    // TODO:
-    // in current status(ver 5.0.2), iblock with float has some trouble...
-    //"display":"inline-block",
-    "display":"block",
+    "display":"inline-block",
     "box-sizing":"content-box",
     "measure":"1em",
     "extent":"1em",
