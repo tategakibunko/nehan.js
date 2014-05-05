@@ -122,7 +122,93 @@ var LayoutGenerator = (function(){
     } 
   };
 
-  LayoutGenerator.prototype._createChildBlockGenerator = function(style, stream, outline_context){
+  LayoutGenerator.prototype._createChildBlockGenerator = function(style, stream, context, outline_context){
+    // if child style is floated,
+    // push back stream and delegate current style and stream to FloatGenerator.
+    if(style.isFloated()){
+      this.style.removeChild(style);
+      this.stream.prev();
+      return new FloatGenerator(this.style, this.stream, context, outline_context);
+    }
+
+    if(style.hasFlipFlow()){
+      return new FlipGenerator(style, stream, outline_context, context);
+    }
+
+    // if child style with 'pasted' attribute, yield block with direct content by LazyGenerator.
+    // notice that this is nehan.js original attribute,
+    // is required to show some html(like form, input etc) that can't be handled by nehan.js.
+    if(style.isPasted()){
+      return new LazyGenerator(style, style.createBlock({content:style.getContent()}));
+    }
+
+    // switch generator by display
+    switch(style.display){
+    case "list-item":
+      return new ListItemGenerator(style, stream, outline_context);
+
+    case "table":
+      return new TableGenerator(style, stream, outline_context);
+
+    case "table-header-group":
+    case "table-row-group":
+    case "table-footer-group":
+      return new TableRowGroupGenerator(style, stream, outline_context);
+
+    case "table-row":
+      return new TableRowGenerator(style, stream, outline_context);
+
+    case "table-cell":
+      return new TableCellGenerator(style, stream);
+    }
+
+    // switch generator by markup name
+    switch(style.getMarkupName()){
+    case "img":
+      return new LazyGenerator(style, style.createImage());
+
+    case "hr":
+      // create block with no elements, but with edge(border).
+      return new LazyGenerator(style, style.createBlock());
+
+    case "page-break": case "end-page": case "pbr":
+      // to penetrate layout-break to parent layout,
+      // breaking-flag is set to block-context.
+      context.setBreakAfter(true);
+
+      // break-generator always yields null to break parent loop.
+      return new LazyGenerator(style, null);
+
+    case "first-line":
+      return new FirstLineGenerator(style, stream, outline_context);
+
+    case "details":
+    case "blockquote":
+    case "figure":
+    case "fieldset":
+      return new SectionRootGenerator(style, stream);
+
+    case "section":
+    case "article":
+    case "nav":
+    case "aside":
+      return new SectionContentGenerator(style, stream, outline_context);
+
+    case "h1":
+    case "h2":
+    case "h3":
+    case "h4":
+    case "h5":
+    case "h6":
+      return new HeaderGenerator(style, stream, outline_context);
+
+    case "ul":
+    case "ol":
+      return new ListGenerator(style, stream, outline_context);
+
+    default:
+      return new BlockGenerator(style, stream, outline_context);
+    }
   };
 
   LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, outline_context){
