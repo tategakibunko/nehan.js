@@ -2,9 +2,9 @@ var FloatGenerator = (function(){
   // caution: constructor argument 'style' is the style of parent.
   // so if <body><float1>..</float1><float2>...</float2></body>,
   // style of this contructor is 'body.style'
-  function FloatGenerator(style, stream, layout_context, outline_context){
+  function FloatGenerator(style, stream, outline_context, floated_generators){
     BlockGenerator.call(this, style, stream, outline_context);
-    this.generators = this._getFloatedGenerators(layout_context);
+    this.generators = floated_generators;
 
     // create child generator to yield rest-space of float-elements with logical-float "start".
     // notice that this generator uses 'clone' of original style, because content size changes by position,
@@ -136,33 +136,6 @@ var FloatGenerator = (function(){
       }
     });
     return new FloatGroupStack(this.style.flow, start_blocks, end_blocks);
-  };
-
-  FloatGenerator.prototype._getFloatedGenerators = function(context){
-    var self = this, parent_style = this.style;
-    return this.stream.mapWhile(function(token){
-      if(!Token.isTag(token)){
-	return null;
-      }
-      var child_style = new StyleContext(token, parent_style, {layoutContext:context});
-      if(child_style.isFloated()){
-	return self._createFloatBlockGenerator(child_style, context);
-      }
-      parent_style.removeChild(child_style);
-      return null;
-    });
-  };
-
-  FloatGenerator.prototype._createFloatBlockGenerator = function(style, context){
-    // image tag not having stream(single tag), so use lazy-generator.
-    // lazy generator already holds output result in construction time, but yields it later.
-    if(style.getMarkupName() === "img"){
-      return new LazyGenerator(style, style.createImage());
-    }
-    if(style.display === "inline-block"){
-      return new InlineBlockGenerator(style, this._createStream(style), this.outlineContext);
-    }
-    return new BlockGenerator(style, this._createStream(style), this.outlineContext);
   };
 
   return FloatGenerator;

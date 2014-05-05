@@ -122,15 +122,25 @@ var LayoutGenerator = (function(){
     } 
   };
 
-  LayoutGenerator.prototype._createChildBlockGenerator = function(style, stream, context, outline_context){
-    // if child style is floated,
-    // push back stream and delegate current style and stream to FloatGenerator.
-    if(style.isFloated()){
-      this.style.removeChild(style);
-      this.stream.prev();
-      return new FloatGenerator(this.style, this.stream, context, outline_context);
-    }
+  LayoutGenerator.prototype._createFloatGenerator = function(context, outline_context, first_float_gen){
+    var self = this, parent_style = this.style;
+    var rest_float_gens = this.stream.mapWhile(function(token){
+      if(!Token.isTag(token)){
+	return null;
+      }
+      var child_style = new StyleContext(token, parent_style, {layoutContext:context});
+      if(!child_style.isFloated()){
+	parent_style.removeChild(child_style);
+	return null;
+      }
+      var child_stream = self._createStream(child_style);
+      return self._createChildBlockGenerator(child_style, child_stream, context, outline_context);
+    });
+    var floated_generators = [first_float_gen].concat(rest_float_gens);
+    return new FloatGenerator(this.style, this.stream, outline_context, floated_generators);
+  };
 
+  LayoutGenerator.prototype._createChildBlockGenerator = function(style, stream, context, outline_context){
     if(style.hasFlipFlow()){
       return new FlipGenerator(style, stream, outline_context, context);
     }
@@ -212,6 +222,9 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, outline_context){
+    if(style.isInlineBlock()){
+      return new InlineBlockGenerator(style, stream, outline_context);
+    }
     switch(style.getMarkupName()){
     case "img":
       // if inline img, no content text is included in img tag, so we yield it by lazy generator.

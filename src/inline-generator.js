@@ -138,9 +138,15 @@ var InlineGenerator = (function(){
       return this._getNext(context); // just skip
     }
 
-    // if inline -> block, force terminate inline
-    if(child_style.isBlock()){
-      this.setParentChildLayout(this._createChildBlockGenerator(child_style, this._createStream(child_style), context, this.outlineContext));
+    var child_stream = this._createStream(child_style);
+
+    // if inline -> block(or floated layout), force terminate inline
+    if(child_style.isBlock() || child_style.isFloated()){
+      var child_gen = this._createChildBlockGenerator(child_style, child_stream, context, this.outlineContext);
+      if(child_style.isFloated()){
+	child_gen = this._createFloatGenerator(context, this.outlineContext, child_gen);
+      }
+      this.setParentChildLayout(child_gen);
       this.setTerminate(true);
 
       // add line-break to avoid empty-line.
@@ -150,13 +156,10 @@ var InlineGenerator = (function(){
       return null;
     }
 
-    var child_stream = this._createStream(child_style);
-
     // if inline-block, yield immediately, and return as child inline element.
     if(child_style.isInlineBlock()){
       return (new InlineBlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
     }
-
 
     // inline child
     switch(child_style.getMarkupName()){
