@@ -2675,7 +2675,13 @@ var Tag = (function (){
       return new Tag(this.src, this.content);
     },
     setContent : function(content){
+      if(this._fixed){
+	return;
+      }
       this.content = content;
+    },
+    setContentImmutable : function(status){
+      this._fixed = status;
     },
     setAlias : function(name){
       this.alias = name;
