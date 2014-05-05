@@ -1,4 +1,10 @@
 var TestStyles = {
+  ".nehan-test-hoge":{
+    onload:function(context){
+      var markup = context.getMarkup();
+      markup.setContent(markup.getContent() + "う");
+    }
+  },
   "tip":{
     display:"inline",
     color:"red",

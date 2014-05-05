@@ -2,6 +2,7 @@ var LayoutGenerator = (function(){
   function LayoutGenerator(style, stream){
     this.style = style;
     this.stream = stream;
+    this._parentLayout = null;
     this._childLayout = null;
     this._cachedElements = [];
     this._terminate = false; // used to force terminate generator.
@@ -22,8 +23,15 @@ var LayoutGenerator = (function(){
     this._terminate = status;
   };
 
+  LayoutGenerator.prototype.setParentChildLayout = function(generator){
+    if(this._parentLayout){
+      this._parentLayout.setChildLayout(generator);
+    }
+  };
+
   LayoutGenerator.prototype.setChildLayout = function(generator){
     this._childLayout = generator;
+    generator._parentLayout = this;
   };
 
   LayoutGenerator.prototype.hasNext = function(){
@@ -114,11 +122,16 @@ var LayoutGenerator = (function(){
     } 
   };
 
+  LayoutGenerator.prototype._createChildBlockGenerator = function(style, stream, outline_context){
+  };
+
   LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, outline_context){
     switch(style.getMarkupName()){
+    case "img":
+      // if inline img, no content text is included in img tag, so we yield it by lazy generator.
+      return new LazyGenerator(style, style.createImage());
     case "a":
       return new LinkGenerator(style, stream, outline_context);
-
     default:
       return new InlineGenerator(style, stream, outline_context);
     }

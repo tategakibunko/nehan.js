@@ -141,6 +141,8 @@ var InlineGenerator = (function(){
     // if inline -> block, force terminate inline
     if(child_style.isBlock()){
       this.stream.prev();
+      // TMP test
+      //this._parentLayout.setChildLayout(new BlockGenerator(child_style, this._createStream(child_style), this.outlineContext));
       this.setTerminate(true);
 
       // add line-break to avoid empty-line.

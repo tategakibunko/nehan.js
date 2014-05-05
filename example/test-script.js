@@ -1,4 +1,9 @@
 var Script = {
+  "tmp":[
+    "あ",
+    "<p class='nehan-test-hoge'>い</p>"
+  ].join(""),
+
   "selector":[
     // adjacent sibling selector(A+B) test
     "<h2>adj sibling</h2>",

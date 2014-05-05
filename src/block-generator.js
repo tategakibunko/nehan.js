@@ -105,14 +105,7 @@ var BlockGenerator = (function(){
 
     // if child inline, delegate current style and stream to child inline-generator with first_generator.
     if(child_style.isInline()){
-      var first_generator;
-      // if inline img, no content text is included in img tag, so we yield it by lazy generator.
-      if(child_style.getMarkupName() === "img"){
-	first_generator = new LazyGenerator(child_style, child_style.createImage());
-      } else {
-	//first_generator = new InlineGenerator(child_style, child_stream, this.outlineContext);
-	first_generator = this._createChildInlineGenerator(child_style, child_stream, this.outlineContext);
-      }
+      var first_generator = this._createChildInlineGenerator(child_style, child_stream, this.outlineContext);
       this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_generator));
       return this.yieldChildLayout(context);
     }

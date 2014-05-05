@@ -7660,6 +7660,7 @@ var LayoutGenerator = (function(){
   function LayoutGenerator(style, stream){
     this.style = style;
     this.stream = stream;
+    this._parentLayout = null;
     this._childLayout = null;
     this._cachedElements = [];
     this._terminate = false; // used to force terminate generator.
@@ -7680,8 +7681,15 @@ var LayoutGenerator = (function(){
     this._terminate = status;
   };
 
+  LayoutGenerator.prototype.setParentChildLayout = function(generator){
+    if(this._parentLayout){
+      this._parentLayout.setChildLayout(generator);
+    }
+  };
+
   LayoutGenerator.prototype.setChildLayout = function(generator){
     this._childLayout = generator;
+    generator._parentLayout = this;
   };
 
   LayoutGenerator.prototype.hasNext = function(){
@@ -7772,11 +7780,16 @@ var LayoutGenerator = (function(){
     } 
   };
 
+  LayoutGenerator.prototype._createChildBlockGenerator = function(style, stream, outline_context){
+  };
+
   LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, outline_context){
     switch(style.getMarkupName()){
+    case "img":
+      // if inline img, no content text is included in img tag, so we yield it by lazy generator.
+      return new LazyGenerator(style, style.createImage());
     case "a":
       return new LinkGenerator(style, stream, outline_context);
-
     default:
       return new InlineGenerator(style, stream, outline_context);
     }
@@ -7893,14 +7906,7 @@ var BlockGenerator = (function(){
 
     // if child inline, delegate current style and stream to child inline-generator with first_generator.
     if(child_style.isInline()){
-      var first_generator;
-      // if inline img, no content text is included in img tag, so we yield it by lazy generator.
-      if(child_style.getMarkupName() === "img"){
-	first_generator = new LazyGenerator(child_style, child_style.createImage());
-      } else {
-	//first_generator = new InlineGenerator(child_style, child_stream, this.outlineContext);
-	first_generator = this._createChildInlineGenerator(child_style, child_stream, this.outlineContext);
-      }
+      var first_generator = this._createChildInlineGenerator(child_style, child_stream, this.outlineContext);
       this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_generator));
       return this.yieldChildLayout(context);
     }
@@ -8175,6 +8181,8 @@ var InlineGenerator = (function(){
     // if inline -> block, force terminate inline
     if(child_style.isBlock()){
       this.stream.prev();
+      // TMP test
+      //this._parentLayout.setChildLayout(new BlockGenerator(child_style, this._createStream(child_style), this.outlineContext));
       this.setTerminate(true);
 
       // add line-break to avoid empty-line.
