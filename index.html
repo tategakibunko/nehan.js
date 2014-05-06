@@ -285,16 +285,18 @@ stream.asyncGet({
 	  </li>
 
 	  <li>
-	    <h4>all class names must be started with "nehan-" prefix.</h4>
-	    <p>to avoid css collision that is not layouted by nehan.js, our css names must be prefixed by <code>"nehan-"</code>.</p>
+	    <h4>all id name and class names are added "nehan-" prefix.</h4>
+	    <p>to avoid css collision that is not layouted by nehan.js, all id and class names are automatically prefixed by <code>"nehan-"</code>.</p>
 	  </li>
 
 	  <li>
 	    <h4>about functional css value</h4>
-	    <p>you can use functional css value in each css property.</p>
+	    <p>Unlike static css file, you can use functional css value for each css property.</p>
 	    <ol>
 	      <li>
-		<h5>callback argument 'context' in functional css value is 'SelectorContext'</h5>
+		<h5>functional css vaue</h5>
+		<p>Callback argument 'context' in functional css value is 'SelectorContext'</p>
+		<p>It can access some <strong>pseudo like</strong> value like nth-child, nth-of-type etc.</p>
 <pre class="prettyprint lang-js">
 // change backgroiund-color by child index.
 ".nehan-stripe-list li":{
@@ -305,9 +307,11 @@ stream.asyncGet({
 </pre>
 	      </li>
 	      <li>
-		<h5>callback argument 'context' in 'onload' is 'SelectorCallbackContext'</h5>
-		<p>this context is 'extended class' of 'SelectorContext', with some extra interfaces</p>
-		<p>that can touch css object, because 'onload' is called after all css of matched elements are loaded.</p>
+		<h5>special callback functional value <span style="color:red">onload</span></h5>
+		<p>This callback is called after all css properties of this selector are loaded.</p>
+		<p>Type of callback argument is <code>SelectorCallbackContext</code>.</p>
+		<p>This context is 'extended class' of 'SelectorContext', with some extra interfaces that can touch css object, <br />
+		  because 'onload' is called after all css of matched elements are loaded.</p>
 		<pre class="prettyprint lang-js">
 // force image metrics to square sizing if width and height is not same.
 ".nehan-must-be-square img":{
@@ -318,6 +322,19 @@ stream.asyncGet({
       var larger = Math.max(width, height);
       return {width:larger, height:larger};
     }
+  }
+}
+		</pre>
+	      </li>
+
+	      <li>
+		<h5>special callback value <span style="color:red">oncreate</span></h5>
+		<p>Special callback <code>oncreate</code> is called after layout tree is evaluated and dom element is created.</p>
+		<p>Argument of this callback is dom element that is created for this selector.</p>
+		<pre class="prettyprint lang-js">
+"a.nehan-test-onclick":{
+  "oncreate":function(dom){
+    dom.onclick = function(){ alert("click!"); };
   }
 }
 		</pre>
