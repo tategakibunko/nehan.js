@@ -57,6 +57,7 @@ var StyleContext = (function(){
 
   // properties that is not enabled even if it' unmanaged property.
   var __ignored_css_properties = [
+    "line-height" // trouble with vertical-mode
   ];
 
   var get_decorated_inline_elements = function(elements){
