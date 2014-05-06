@@ -182,6 +182,7 @@ engine.setStyles({
     "box-sizing":"content-box",
     "float":"start",
     "font-size":"4em",
+    "measure":"1em",
     "extent":"1em"
   },
   // functional value
@@ -201,6 +202,16 @@ engine.setStyles({
 	var larger = Math.max(width, height);
 	return {width:larger, height:larger};
       }
+    }
+  },
+  // special callback argument 'oncreate', called after layout tree is evaluated,
+  // and dom element is actually created.
+  "a.nehan-test-onclick":{
+    "background-color":"gold",
+    "oncreate":function(dom){
+      dom.onclick = function(){
+        alert("click!");
+      };
     }
   }
 });
