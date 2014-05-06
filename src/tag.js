@@ -38,6 +38,9 @@ var Tag = (function (){
     removeClass : function(klass){
       this.attrs.removeClass(klass);
     },
+    getClasses : function(){
+      return this.attrs.classes;
+    },
     getName : function(){
       return this.alias || this.name;
     },

@@ -43,7 +43,6 @@ var LayoutEvaluator = (function(){
 
       // call oncreate callback if exists.
       if(opt.oncreate){
-	console.log("fn:%o", opt.oncreate);
 	opt.oncreate(dom);
       }
       return dom;

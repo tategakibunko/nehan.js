@@ -2695,6 +2695,9 @@ var Tag = (function (){
     removeClass : function(klass){
       this.attrs.removeClass(klass);
     },
+    getClasses : function(){
+      return this.attrs.classes;
+    },
     getName : function(){
       return this.alias || this.name;
     },
@@ -6593,7 +6596,7 @@ var StyleContext = (function(){
       var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
       var box_size = this.flow.getBoxSize(measure, extent);
-      var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.classes);
+      var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box = new Box(box_size, this);
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = this.edge || null; // for Box::getLayoutExtent, Box::getLayoutMeasure
@@ -6611,7 +6614,7 @@ var StyleContext = (function(){
       // image size always considered as horizontal mode.
       var width = this.getMarkupAttr("width")? parseInt(this.getMarkupAttr("width"), 10) : (this.staticMeasure || this.font.size);
       var height = this.getMarkupAttr("height")? parseInt(this.getMarkupAttr("height"), 10) : (this.staticExtent || this.font.size);
-      var classes = ["nehan-block", "nehan-image"].concat(this.markup.classes);
+      var classes = ["nehan-block", "nehan-image"].concat(this.markup.getClasses());
       var image_size = new BoxSize(width, height);
       var image = new Box(image_size, this);
       image.display = this.display; // inline, block, inline-block
@@ -6643,7 +6646,7 @@ var StyleContext = (function(){
 	measure = this.staticMeasure || opt.measure;
       }
       var line_size = this.flow.getBoxSize(measure, max_extent);
-      var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.classes);
+      var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.getClasses());
       var line = new Box(line_size, this);
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = opt.elements || [];
@@ -9124,7 +9127,6 @@ var LayoutEvaluator = (function(){
 
       // call oncreate callback if exists.
       if(opt.oncreate){
-	console.log("fn:%o", opt.oncreate);
 	opt.oncreate(dom);
       }
       return dom;
