@@ -5,14 +5,15 @@ var TestStyles = {
     background:"gold",
     oncreate:function(dom){
       $(dom).click(function(){
-	console.log($(this).data("content"));
+	alert($(this).data("content"));
       });
     },
     onload:function(context){
       var markup = context.getMarkup();
       var tip_title = markup.getAttr("title");
       var tip_content = markup.getContent();
-      //markup.setAlias("a");
+      markup.setAlias("a");
+      markup.setAttr("href", "#" + tip_title);
       markup.setData("title", tip_title);
       markup.setData("content", tip_content);
       markup.setContent(tip_title);
