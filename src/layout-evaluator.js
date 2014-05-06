@@ -1,27 +1,12 @@
 var LayoutEvaluator = (function(){
   function LayoutEvaluator(){}
 
-  var __add_event = (function(){
-    if(document.addEventListener){
-      return function(node, type, handler){
-	node.addEventListener(type, handler, false);
-      };
-    } else if(document.attachEvent){
-      return function(node, type, handler){
-	node.attachEvent('on' + type, function(evt){
-          handler.call(node, evt);
-	});
-      };
-    }
-  })();
-
   LayoutEvaluator.prototype = {
     _createElement : function(name, opt){
       var opt = opt || {};
       var styles = opt.styles || {};
       var attrs = opt.attrs? opt.attrs.attrs : {};
       var dataset = opt.attrs? opt.attrs.dataset : {};
-      var events = opt.events || {};
       var dom = document.createElement(name);
       if(opt.id){
 	dom.id = opt.id;
@@ -56,11 +41,11 @@ var LayoutEvaluator = (function(){
       // dataset attributes(defined in TagAttrs::dataset)
       Args.copy(dom.dataset, dataset);
 
-      Obj.iter(events, function(event_name, fn){
-	__add_event(dom, event_name, function(e){
-	  return fn(e || event);
-	});
-      });
+      // call oncreate callback if exists.
+      if(opt.oncreate){
+	console.log("fn:%o", opt.oncreate);
+	opt.oncreate(dom);
+      }
       return dom;
     },
     _createClearFix : function(clear){
@@ -95,7 +80,7 @@ var LayoutEvaluator = (function(){
       return this._createElement(opt.name || "div", {
 	className:tree.getClassName(),
 	attrs:tree.getAttrs(),
-	events:tree.getEvents(),
+	oncreate:tree.getOnCreate(),
 	content:(opt.content || tree.getContent()),
 	styles:(opt.css || tree.getCssRoot())
       });

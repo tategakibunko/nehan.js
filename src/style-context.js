@@ -522,8 +522,8 @@ var StyleContext = (function(){
       return this.markup.getAttr(name, def_value);
     },
     _evalCssAttr : function(name, value){
-      if(name === "events"){
-	return value; // function set, so return as it is.
+      if(name === "oncreate"){
+	return value; // special callback function(called when layout tree is evaluated), so return as it is.
       }
       // if value is function, call it with style-context(this),
       // and need to format because it's thunk object and not initialized yet.

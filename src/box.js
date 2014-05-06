@@ -30,12 +30,12 @@ var Box = (function(){
     getContent : function(){
       return this.content || null;
     },
-    getEvents : function(){
-      // events of anonymous line is already captured by parent element.
+    getOnCreate : function(){
+      // on create of anonymous line is already captured by parent element.
       if(this.isAnonymousLine()){
-	return {};
+	return null;
       }
-      return this.style.getCssAttr("events") || {};
+      return this.style.getCssAttr("oncreate");
     },
     getAttrs : function(){
       // attributes of anonymous line is already captured by parent element.
