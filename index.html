@@ -186,14 +186,14 @@ engine.setStyles({
     "extent":"1em"
   },
   // functional value
-  // context:SelectorContext
+  // context:SelectorPropContext
   ".nehan-stripe-list li":{
     "background-color":function(context){
       return (context.getChildIndex() % 2 === 0)? "pink" : "white";
     }
   },
   // special callback argument 'onload', called after loading all css about this selector.
-  // context:SelectorCallbackContext
+  // context:SelectorContext
   ".nehan-must-be-square img":{
     "onload":function(context){
       var width = context.getCssAttr("width", 100);
@@ -295,7 +295,7 @@ stream.asyncGet({
 	    <ol>
 	      <li>
 		<h5>functional css vaue</h5>
-		<p>Callback argument 'context' in functional css value is 'SelectorContext'</p>
+		<p>Callback argument 'context' in functional css value is 'SelectorPropContext'</p>
 		<p>It can access some <strong>pseudo like</strong> value like nth-child, nth-of-type etc.</p>
 <pre class="prettyprint lang-js">
 // change backgroiund-color by child index.
@@ -309,7 +309,7 @@ stream.asyncGet({
 	      <li>
 		<h5>special callback functional value <span style="color:red">onload</span></h5>
 		<p>This callback is called after all css properties of this selector are loaded.</p>
-		<p>Type of callback argument is <code>SelectorCallbackContext</code>.</p>
+		<p>Type of callback argument is <code>SelectorContext</code>.</p>
 		<p>This context is 'extended class' of 'SelectorContext', with some extra interfaces that can touch css object, <br />
 		  because 'onload' is called after all css of matched elements are loaded.</p>
 		<pre class="prettyprint lang-js">
