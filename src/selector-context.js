@@ -1,28 +1,17 @@
+// this context object is passed to "onload" callback.
+// unlike SelectorPropContext, this context has reference to all css values associated with the selector key.
 var SelectorContext = (function(){
   function SelectorContext(style, layout_context){
-    this._style = style;
-    this._layoutContext = layout_context || null;
+    SelectorPropContext.call(this, style, layout_context);
   }
+  Class.extend(SelectorContext, SelectorPropContext);
 
-  SelectorContext.prototype = {
-    getParentStyle : function(){
-      return this._style.parent;
-    },
-    getMarkup : function(){
-      return this._style.markup;
-    },
-    getRestMeasure : function(){
-      return this._layoutContext? this._layoutContext.getInlineRestMeasure() : null;
-    },
-    getRestExtent : function(){
-      return this._layoutContext? this._layoutContext.getBlockRestExtent() : null;
-    },
-    getChildIndex : function(){
-      return this._style.getChildIndex();
-    },
-    getChildIndexOfType : function(){
-      return this._style.getChildIndexOfType;
-    }
+  SelectorContext.prototype.getCssAttr = function(name, def_value){
+    return this._style.getCssAttr(name, def_value);
+  };
+
+  SelectorContext.prototype.setCssAttr = function(name, value){
+    this._style.inlineCss[name] = value;
   };
 
   return SelectorContext;

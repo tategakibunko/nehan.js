@@ -1,13 +1,12 @@
 var TestStyles = {
   "tip":{
-    display:"inline",
-    color:"red",
-    background:"gold",
-    oncreate:function(dom){
-      $(dom).click(function(){
-	alert($(this).data("content"));
-      });
+    "display":"inline",
+    "background-color":"gold",
+    // normal functional css property
+    color:function(context){
+      return context.getParentStyle().isTextVertical()? "red" : "green";
     },
+    // special callback called after all associated css value including this selector.
     onload:function(context){
       var markup = context.getMarkup();
       var tip_title = markup.getAttr("title");
@@ -17,6 +16,12 @@ var TestStyles = {
       markup.setData("title", tip_title);
       markup.setData("content", tip_content);
       markup.setContent(tip_title);
+    },
+    // special callback called when abstruct layout tree is converted into dom-element.
+    oncreate:function(dom){
+      $(dom).click(function(){
+	alert($(this).data("content"));
+      });
     }
   },
   ".nehan-test-pseudo li:first-child":{
@@ -62,7 +67,7 @@ var TestStyles = {
       var nth = context.getChildIndex();
       return (nth % 2 === 0)? "white" : "orange";
     },
-    "onload":function(context){
+    onload:function(context){
       var nth = context.getChildIndex();
       return (nth % 2 === 0)? {"background-color":"red"} : {"background-color":"blue"};
     }
@@ -88,7 +93,7 @@ var TestStyles = {
     "font-size":"1.6em"
   },
   ".nehan-my-callback":{
-    "onload":function(context){
+    onload:function(context){
       var markup = context.getMarkup();
       var rest_extent = context.getRestExtent();
       markup.setContent([

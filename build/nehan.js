@@ -243,7 +243,7 @@ var Env = (function(){
 
   you can use functional css value in each css property.
 
-  (4.1) callback argument 'context' in functional css value is 'SelectorContext'
+  (4.1) callback argument 'context' in functional css value is 'SelectorPropContext'
 
   // [example]
   // change backgroiund-color by child index.
@@ -253,9 +253,9 @@ var Env = (function(){
     }
   }
 
-  (4.2) callback argument 'context' in 'onload' is 'SelectorCallbackContext'
+  (4.2) callback argument 'context' in 'onload' is 'SelectorContext'
 
-  this context is 'extended class' of 'SelectorContext', with some extra interfaces
+  this context is 'extended class' of 'SelectorPropContext', with some extra interfaces
   that can touch css object, because 'onload' is called after all css of matched elements are loaded.
 
   // [example]
@@ -6262,13 +6262,13 @@ var TextAligns = {
   }
 };
 
-var SelectorContext = (function(){
-  function SelectorContext(style, layout_context){
+var SelectorPropContext = (function(){
+  function SelectorPropContext(style, layout_context){
     this._style = style;
     this._layoutContext = layout_context || null;
   }
 
-  SelectorContext.prototype = {
+  SelectorPropContext.prototype = {
     getParentStyle : function(){
       return this._style.parent;
     },
@@ -6289,28 +6289,27 @@ var SelectorContext = (function(){
     }
   };
 
-  return SelectorContext;
+  return SelectorPropContext;
 })();
 
 
 // this context object is passed to "onload" callback.
-// unlike selector-context, this context has reference to selector css,
-// because 'onload' callback is called after loading selector css.
-var SelectorCallbackContext = (function(){
-  function SelectorCallbackContext(style, layout_context){
-    SelectorContext.call(this, style, layout_context);
+// unlike SelectorPropContext, this context has reference to all css values associated with the selector key.
+var SelectorContext = (function(){
+  function SelectorContext(style, layout_context){
+    SelectorPropContext.call(this, style, layout_context);
   }
-  Class.extend(SelectorCallbackContext, SelectorContext);
+  Class.extend(SelectorContext, SelectorPropContext);
 
-  SelectorCallbackContext.prototype.getCssAttr = function(name, def_value){
+  SelectorContext.prototype.getCssAttr = function(name, def_value){
     return this._style.getCssAttr(name, def_value);
   };
 
-  SelectorCallbackContext.prototype.setCssAttr = function(name, value){
-    this._style.selectorCss[name] = value;
+  SelectorContext.prototype.setCssAttr = function(name, value){
+    this._style.inlineCss[name] = value;
   };
 
-  return SelectorCallbackContext;
+  return SelectorContext;
 })();
 
 
@@ -6376,7 +6375,25 @@ var StyleContext = (function(){
     "line-height" // trouble with vertical-mode
   ];
 
-  var get_decorated_inline_elements = function(elements){
+  var __is_ignored_css_prop = function(prop){
+    return List.exists(__ignored_css_properties, Closure.eq(prop));
+  };
+
+  var __is_managed_css_prop = function(prop){
+    return List.exists(__managed_css_properties, Closure.eq(prop));
+  };
+
+  var __filter_unmanaged_css = function(selector_css){
+    var css = {};
+    Obj.iter(selector_css, function(prop, value){
+      if(!__is_managed_css_prop(prop) && !__is_ignored_css_prop(prop)){
+	css[prop] = value;
+      }
+    });
+    return css;
+  };
+
+  var __filter_decorated_inline_elements = function(elements){
     var ret = [];
     List.iter(elements, function(element){
       if(element instanceof Box === false){
@@ -6385,7 +6402,7 @@ var StyleContext = (function(){
       if(element.style.isTextEmphaEnable() || element.style.getMarkupName() === "ruby"){
 	ret.push(element);
       } else if(element.elements){
-	ret = ret.concat(get_decorated_inline_elements(element.elements));
+	ret = ret.concat(__filter_decorated_inline_elements(element.elements));
       }
     });
     return ret;
@@ -6415,15 +6432,16 @@ var StyleContext = (function(){
 	parent.appendChild(this);
       }
 
-      // create selector context.
-      // this value is given as argument of functional css value
-      this.selectorContext = new SelectorContext(this, args.layoutContext || null);
+      // create context for each functional css property.
+      this.selectorContext = new SelectorPropContext(this, args.layoutContext || null);
 
       // create selector callback context,
       // this context is passed to "onload" callback.
-      // unlike selector-context, this context has reference to selector css,
+      // unlike selector-context, this context has reference to all css values associated with this style.
       // because 'onload' callback is called after loading selector css.
-      this.callbackContext = new SelectorCallbackContext(this, args.layoutContext || null);
+      // notice that at this phase, css values are not converted into internal style object.
+      // so by updating css value, you can update calculation of internal style object.
+      this.callbackContext = new SelectorContext(this, args.layoutContext || null);
 
       // initialize css values
       this.selectorCss = {};
@@ -6439,15 +6457,16 @@ var StyleContext = (function(){
       // load inline css values
       // 1. load normal markup attribute 'style'
       // 2. load constructor argument 'args.forceCss' if exists.
-      //    notice it is 'system required style', so it has highest priority.
+      //    notice that 'args.forceCss' is given highest priority because it is system required style.
       Args.copy(this.inlineCss, this._loadInlineCss(markup));
       Args.copy(this.inlineCss, args.forceCss || {});
 
       // load unmanaged css values
+      // unmanaged css is css properties that are directlly passed to dom.style object.
       // 1. filter all unmanaged css values from selector css
       // 2. filter all unmanaged css values from inline css
-      Args.copy(this.unmanagedCss, this._loadUnmanagedCss(this.selectorCss));
-      Args.copy(this.unmanagedCss, this._loadUnmanagedCss(this.inlineCss));
+      Args.copy(this.unmanagedCss, __filter_unmanaged_css(this.selectorCss));
+      Args.copy(this.unmanagedCss, __filter_unmanaged_css(this.inlineCss));
 
       // always required properties
       this.display = this._loadDisplay(); // required
@@ -6515,16 +6534,16 @@ var StyleContext = (function(){
       // 3. current edge size.
       this.initContextSize(this.staticMeasure, this.staticExtent);
     },
-    // [context size] = [outer size] and [content size].
+    // [context_size] = (outer_size, content_size)
     //
-    // (a) outer size
-    //   1. if direct size is given, use it as outer size.
-    //   2. else if parent exists, current outer size is the content size of parent.
-    //   3. else if parent not exists(root), use root layout size.
+    // (a) outer_size
+    //   1. if direct size is given, use it as outer_size.
+    //   2. else if parent exists, current outer_size is the content_size of parent.
+    //   3. else if parent not exists(root), use template layout size defined in layout.js.
     //
-    // (b) content size
-    //   1. if edge exists, content size = [outer size] - [edge size]
-    //   2. else(no edge),  content size = [outer size]
+    // (b) content_size
+    //   1. if edge(margin/padding/border) is defined, content_size = [outer_size] - [edge_size]
+    //   2. else(no edge),  content_size = [outer_size]
     initContextSize : function(measure, extent){
       this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : Layout.getMeasure(this.flow));
       this.outerExtent = extent || (this.parent? this.parent.contentExtent : Layout.getExtent(this.flow));
@@ -6806,17 +6825,6 @@ var StyleContext = (function(){
     hasMarkupClassName : function(class_name){
       return this.markup.hasClass(class_name);
     },
-    setCssAttr : function(name, value){
-      this.inlineCss[name] = value;
-    },
-    setCssAttrs : function(obj){
-      for(var prop in obj){
-	this.setCssAttr(prop, obj[prop]);
-      }
-    },
-    setMarkupAttr : function(name, value){
-      this.markup.setAttr(name, value);
-    },
     // search property from markup attribute -> css
     getAttr : function(name, def_value){
       var ret = this.getMarkupAttr(name);
@@ -6838,11 +6846,12 @@ var StyleContext = (function(){
       return this.markup.getAttr(name, def_value);
     },
     _evalCssAttr : function(name, value){
+      // "oncreate" not return style, it's a hook, called when this style is converted into dom element.
+      // so leave it as it is.
       if(name === "oncreate"){
-	return value; // special callback function(called when layout tree is evaluated), so return as it is.
+	return value; 
       }
-      // if value is function, call it with style-context(this),
-      // and need to format because it's thunk object and not initialized yet.
+      // if value is function, call with selector context, and format the returned value.
       if(typeof value === "function"){
 	return CssParser.format(name, value(this.selectorContext));
       }
@@ -7148,7 +7157,7 @@ var StyleContext = (function(){
       });
 
       // pickup decorated elements that has different baseline(ruby or empha)
-      var decorated_elements = get_decorated_inline_elements(elements);
+      var decorated_elements = __filter_decorated_inline_elements(elements);
       List.iter(decorated_elements, function(element){
 	var font_size = element.style.getFontSize();
 	var text_center_offset = text_center - Math.floor(font_size / 2); // text displayed at half font-size minus from center line.
@@ -7214,17 +7223,6 @@ var StyleContext = (function(){
 	ret[prop] = this._evalCssAttr(prop, ret[prop]);
       }
       return ret;
-    },
-    _loadUnmanagedCss : function(selector_css){
-      var css = {};
-      for(var prop in selector_css){
-	// prop is not both in managed grop and ignored group.
-	if(!List.exists(__managed_css_properties, Closure.eq(prop)) &&
-	   !List.exists(__ignored_css_properties, Closure.eq(prop))){
-	  css[prop] = selector_css[prop];
-	}
-      }
-      return css;
     },
     _loadDisplay : function(){
       return this.getCssAttr("display", "inline");

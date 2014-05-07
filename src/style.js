@@ -29,7 +29,7 @@
 
   you can use functional css value in each css property.
 
-  (4.1) callback argument 'context' in functional css value is 'SelectorContext'
+  (4.1) callback argument 'context' in functional css value is 'SelectorPropContext'
 
   // [example]
   // change backgroiund-color by child index.
@@ -39,9 +39,9 @@
     }
   }
 
-  (4.2) callback argument 'context' in 'onload' is 'SelectorCallbackContext'
+  (4.2) callback argument 'context' in 'onload' is 'SelectorContext'
 
-  this context is 'extended class' of 'SelectorContext', with some extra interfaces
+  this context is 'extended class' of 'SelectorPropContext', with some extra interfaces
   that can touch css object, because 'onload' is called after all css of matched elements are loaded.
 
   // [example]
