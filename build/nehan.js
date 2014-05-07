@@ -2695,6 +2695,9 @@ var Tag = (function (){
     removeClass : function(klass){
       this.attrs.removeClass(klass);
     },
+    getId : function(){
+      return this.attrs.id;
+    },
     getClasses : function(){
       return this.attrs.classes;
     },
@@ -6846,7 +6849,7 @@ var StyleContext = (function(){
       return this.markup.getAttr(name, def_value);
     },
     _evalCssAttr : function(name, value){
-      // "oncreate" not return style, it's a hook, called when this style is converted into dom element.
+      // "oncreate" not return style, it's a hook called after this style is converted into dom element.
       // so leave it as it is.
       if(name === "oncreate"){
 	return value; 
@@ -6881,7 +6884,7 @@ var StyleContext = (function(){
     },
     // if markup is <p id="foo">, markup.id is "nehan-foo".
     getMarkupId : function(){
-      return this.markup.id;
+      return this.markup.getId();
     },
     getMarkupContent : function(){
       return this.markup.getContent();
