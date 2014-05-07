@@ -2,13 +2,13 @@ var TestStyles = {
   "tip":{
     "display":"inline",
     "background-color":"gold",
-    // normal functional css property
-    color:function(context){
-      return context.getParentStyle().isTextVertical()? "red" : "green";
+    color:function(pcontext){
+      return pcontext.getParentStyle().isTextVertical()? "red" : "green";
     },
-    // special callback called after all associated css value including this selector.
-    onload:function(context){
-      var markup = context.getMarkup();
+    // <tip title='cilck me'>some text</tip>
+    // => <a href='#' data-title='click me' data-content='some text'>click me</a>
+    onload:function(scontext){
+      var markup = scontext.getMarkup();
       var tip_title = markup.getAttr("title");
       var tip_content = markup.getContent();
       markup.setAlias("a");
@@ -17,7 +17,6 @@ var TestStyles = {
       markup.setData("content", tip_content);
       markup.setContent(tip_title);
     },
-    // special callback called when abstruct layout tree is converted into dom-element.
     oncreate:function(dom){
       $(dom).click(function(){
 	alert($(this).data("content"));
@@ -63,12 +62,12 @@ var TestStyles = {
     "background-color":"#CCCCCC"
   },
   ".nehan-test-stripe li":{
-    "color":function(context){
-      var nth = context.getChildIndex();
+    "color":function(pcontext){
+      var nth = pcontext.getChildIndex();
       return (nth % 2 === 0)? "white" : "orange";
     },
-    onload:function(context){
-      var nth = context.getChildIndex();
+    onload:function(scontext){
+      var nth = scontext.getChildIndex();
       return (nth % 2 === 0)? {"background-color":"red"} : {"background-color":"blue"};
     }
   },
@@ -93,9 +92,9 @@ var TestStyles = {
     "font-size":"1.6em"
   },
   ".nehan-my-callback":{
-    onload:function(context){
-      var markup = context.getMarkup();
-      var rest_extent = context.getRestExtent();
+    onload:function(scontext){
+      var markup = scontext.getMarkup();
+      var rest_extent = scontext.getRestExtent();
       markup.setContent([
 	markup.getContent(),
 	"<p>this is added by onload(rest extent = " + rest_extent + " at this point)</p>"

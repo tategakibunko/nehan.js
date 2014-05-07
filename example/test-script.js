@@ -317,9 +317,7 @@ var Script = {
   ].join("\n"),
 
   "custom-tag-test":[
-    "<h3>in vertical mode, handler for rotated word has some trouble</h3>",
     "<p><tip title='click here'>tip content</tip></p>",
-    "<h3>normal text works well</h3>",
     "<p><tip title='タイトル'>チップの内容</tip></p>"
   ].join("\n")
 };
