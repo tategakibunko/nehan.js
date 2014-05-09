@@ -53,8 +53,8 @@ var LayoutContext = (function(){
     hasInlineSpaceFor : function(measure){
       return this.inline.hasSpaceFor(measure);
     },
-    hasBr : function(){
-      return this.inline.hasBr();
+    hasLineBreak : function(){
+      return this.inline.hasLineBreak();
     },
     setLineBreak : function(status){
       this.inline.setLineBreak(status);

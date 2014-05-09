@@ -367,7 +367,7 @@ var StyleContext = (function(){
 
       // backup other line data. mainly required to restore inline-context.
       if(this.isRootLine()){
-	line.br = opt.br || false;
+	line.lineBreak = opt.lineBreak || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;
 	line.texts = opt.texts || [];
 

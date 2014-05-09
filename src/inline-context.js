@@ -7,12 +7,12 @@ var InlineContext = (function(){
     this.maxFontSize = 0;
     this.elements = [];
     this.texts = [];
-    this.br = false; // is line-break included in line?
+    this.lineBreak = false; // is line-break included in line?
   }
 
   InlineContext.prototype = {
     isEmpty : function(){
-      return !this.br && this.elements.length === 0;
+      return !this.lineBreak && this.elements.length === 0;
     },
     isSpaceLeft : function(){
       return this.getRestMeasure() > 0;
@@ -20,11 +20,11 @@ var InlineContext = (function(){
     hasSpaceFor : function(measure){
       return this.getRestMeasure() >= measure;
     },
-    hasBr : function(){
-      return this.br;
+    hasLineBreak : function(){
+      return this.lineBreak;
     },
     setLineBreak : function(status){
-      this.br = status;
+      this.lineBreak = status;
     },
     addElement : function(element, measure){
       this.elements.push(element);
