@@ -1,12 +1,4 @@
 var Script = {
-  "tmp":[
-    "1",
-    "<div style='break-before:always'>2</div>",
-    "<div class='nehan-break-before'>3-1</div>",
-    "<div class='nehan-break-after'>3-2</div>",
-    "4"
-  ].join("\n"),
-
   "selector":[
     // adjacent sibling selector(A+B) test
     "<h2>adj sibling</h2>",
