@@ -18,20 +18,23 @@ var BlockContext = (function(){
     hasBreakAfter : function(){
       return this.breakAfter;
     },
-    setBreakAfter : function(status){
-      this.breakAfter = status;
+    _onAddElement : function(element, extent){
+      this.curExtent += extent;
+      if(element.breakAfter){
+	this.breakAfter = true;
+      }
     },
     addElement : function(element, extent){
       this.elements.push(element);
-      this.curExtent += extent;
+      this._onAddElement(element, extent);
     },
     pushElement : function(element, extent){
       this.pushedElements.push(element);
-      this.curExtent += extent;
+      this._onAddElement(element, extent);
     },
     pullElement : function(element, extent){
       this.pulledElements.unshift(element);
-      this.curExtent += extent;
+      this._onAddElement(element, extent);
     },
     getCurExtent : function(){
       return this.curExtent;

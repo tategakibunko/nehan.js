@@ -368,6 +368,7 @@ var StyleContext = (function(){
       // backup other line data. mainly required to restore inline-context.
       if(this.isRootLine()){
 	line.lineBreak = opt.lineBreak || false;
+	line.breakAfter = opt.breakAfter || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;
 	line.texts = opt.texts || [];
 
@@ -468,6 +469,14 @@ var StyleContext = (function(){
     isPre : function(){
       var white_space = this.getCssAttr("white-space", "normal");
       return white_space === "pre";
+    },
+    isPageBreak : function(){
+      switch(this.getMarkupName()){
+      case "page-break": case "end-page": case "pbr":
+	return true;
+      default:
+	return false;
+      }
     },
     isBreakBefore : function(){
       return this.breakBefore? !this.breakBefore.isAvoid() : false;

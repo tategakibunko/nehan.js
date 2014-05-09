@@ -8,11 +8,12 @@ var InlineContext = (function(){
     this.elements = [];
     this.texts = [];
     this.lineBreak = false; // is line-break included in line?
+    this.breakAfter = false; // is break-after incuded in line?
   }
 
   InlineContext.prototype = {
     isEmpty : function(){
-      return !this.lineBreak && this.elements.length === 0;
+      return !this.lineBreak && !this.breakAfter && this.elements.length === 0;
     },
     isSpaceLeft : function(){
       return this.getRestMeasure() > 0;
@@ -25,6 +26,12 @@ var InlineContext = (function(){
     },
     setLineBreak : function(status){
       this.lineBreak = status;
+    },
+    hasBreakAfter : function(){
+      return this.breakAfter;
+    },
+    setBreakAfter : function(status){
+      this.breakAfter = status;
     },
     addElement : function(element, measure){
       this.elements.push(element);
@@ -41,6 +48,9 @@ var InlineContext = (function(){
 	}
 	if(element.maxFontSize){
 	  this.maxFontSize = Math.max(this.maxFontSize, element.maxFontSize);
+	}
+	if(element.breakAfter){
+	  this.breakAfter = true;
 	}
       }
       this.curMeasure += measure;

@@ -181,14 +181,6 @@ var LayoutGenerator = (function(){
       // create block with no elements, but with edge(border).
       return new LazyGenerator(style, style.createBlock());
 
-    case "page-break": case "end-page": case "pbr":
-      // to penetrate layout-break to parent layout,
-      // breaking-flag is set to block-context.
-      context.setBreakAfter(true);
-
-      // break-generator always yields null to break parent loop.
-      return new LazyGenerator(style, null);
-
     case "first-line":
       return new FirstLineGenerator(style, stream, outline_context);
 
@@ -221,7 +213,7 @@ var LayoutGenerator = (function(){
     }
   };
 
-  LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, outline_context){
+  LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, context, outline_context){
     if(style.isInlineBlock()){
       return new InlineBlockGenerator(style, stream, outline_context);
     }

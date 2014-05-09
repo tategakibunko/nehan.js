@@ -61,7 +61,7 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createOutput = function(context){
-    // no br, no element
+    // no like-break, no page-break, no element
     if(context.isInlineEmpty()){
       return null;
     }
@@ -70,7 +70,8 @@ var InlineGenerator = (function(){
       this._justifyLine(context);
     }
     var line = this.style.createLine({
-      lineBreak:context.hasLineBreak(), // is line broken by br?
+      lineBreak:context.hasLineBreak(), // is line break included in?
+      breakAfter:context.hasBreakAfter(), // is break after included in?
       measure:context.getInlineCurMeasure(), // actual measure
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       texts:context.getInlineTexts(), // elements but text element only.
@@ -170,8 +171,12 @@ var InlineGenerator = (function(){
       context.setLineBreak(true);
       return null;
 
+    case "page-break": case "end-page": case "pbr":
+      context.setBreakAfter(true);
+      return null;
+
     default:
-      var child_generator = this._createChildInlineGenerator(child_style, child_stream, this.outlineContext);
+      var child_generator = this._createChildInlineGenerator(child_style, child_stream, context, this.outlineContext);
       this.setChildLayout(child_generator);
       return this.yieldChildLayout(context);
     }

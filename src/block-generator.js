@@ -84,10 +84,15 @@ var BlockGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
+    // if page-break tag is found in block context, just return null.
+    if(child_style.isPageBreak()){
+      return null;
+    }
+
     // if child inline or child inline-block,
     // delegate current style and stream to child inline-generator with first child inline generator.
     if(child_style.isInlineBlock() || child_style.isInline()){
-      var first_inline_gen = this._createChildInlineGenerator(child_style, child_stream, this.outlineContext);
+      var first_inline_gen = this._createChildInlineGenerator(child_style, child_stream, context, this.outlineContext);
       this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_inline_gen));
       return this.yieldChildLayout(context);
     }
@@ -100,9 +105,6 @@ var BlockGenerator = (function(){
   BlockGenerator.prototype._addElement = function(context, element, extent){
     if(element === null){
       return;
-    }
-    if(element.breakAfter){
-      context.setBreakAfter(true);
     }
     if(this.style.isPushed() || element.pushed){
       context.pushBlockElement(element, extent);

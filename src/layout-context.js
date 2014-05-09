@@ -17,10 +17,7 @@ var LayoutContext = (function(){
       return this.block.hasSpaceFor(extent);
     },
     hasBreakAfter : function(){
-      return this.block.hasBreakAfter();
-    },
-    setBreakAfter : function(status){
-      this.block.setBreakAfter(status);
+      return this.block.hasBreakAfter() || this.inline.hasBreakAfter() || false;
     },
     addBlockElement : function(element, extent){
       this.block.addElement(element, extent);
@@ -58,6 +55,9 @@ var LayoutContext = (function(){
     },
     setLineBreak : function(status){
       this.inline.setLineBreak(status);
+    },
+    setBreakAfter : function(status){
+      this.inline.setBreakAfter(status);
     },
     addInlineElement : function(element, measure){
       this.inline.addElement(element, measure);
