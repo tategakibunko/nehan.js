@@ -712,13 +712,13 @@ var Style = {
   // defined to keep compatibility of older nehan.js document,
   // and must be defined as logical-break-before, logical-break-after props in the future.
   "page-break":{
-    "display":"inline"
+    "display":"block"
   },
   "pbr":{
-    "display":"inline"
+    "display":"block"
   },
   "end-page":{
-    "display":"inline"
+    "display":"block"
   },
   //-------------------------------------------------------
   // rounded corner
