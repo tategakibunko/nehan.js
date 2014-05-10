@@ -3,8 +3,10 @@ var Char = (function(){
     this.data = c1;
     this._type = "char";
     this.isRef = is_ref || false;
-    if(!this.isRef){
-      this._setup(c1.charCodeAt(0));
+    if(this.isRef){
+      this._setupRef(c1);
+    } else {
+      this._setupNormal(c1.charCodeAt(0));
     }
   }
   var kuten = ["\u3002","."];
@@ -164,7 +166,15 @@ var Char = (function(){
     _setRotate : function(angle){
       this.rotate = angle;
     },
-    _setup : function(code){
+    _setupRef : function(c1){
+      switch(c1){
+      case "&lt;":
+	Env.isTransformEnable? this._setRotate(90) : this._setImg("kakko7", 0.5); break;
+      case "&gt;":
+	Env.isTransformEnable? this._setRotate(90) : this._setImg("kakko8", 0.5); break;
+      }
+    },
+    _setupNormal : function(code){
       switch(code){
       case 32: // half scape char
 	this._setCnv("&nbsp;", 0.5, 0.5); break;
@@ -198,13 +208,9 @@ var Char = (function(){
 	this._setImg("kakko6", 0.5); break;
       case 65308:
 	this._setImg("kakko7", 0.5); break;
-      case 60:
-	this._setImg("kakko7", 0.5); break;
       case 12296:
 	this._setImg("kakko7", 0.5); break;
       case 65310:
-	this._setImg("kakko8", 0.5); break;
-      case 62:
 	this._setImg("kakko8", 0.5); break;
       case 12297:
 	this._setImg("kakko8", 0.5); break;
@@ -328,7 +334,7 @@ var Char = (function(){
       return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
     },
     isVertGlyphEnable : function(){
-      return !this.isTenten() && Config.useVerticalGlyphIfEnable && Env.isVerticalGlyphEnable;
+      return Config.useVerticalGlyphIfEnable && Env.isVerticalGlyphEnable;
     },
     isTenten : function(){
       return this.img && this.img === "tenten";
