@@ -101,10 +101,14 @@ var FloatGenerator = (function(){
     var measure = block1.getLayoutMeasure(flow); // block2 has same measure
     var extent = block1.getLayoutExtent(flow) + (block2? block2.getLayoutExtent(flow) : 0);
     var elements = block2? [block1, block2] : [block1];
+    var break_after = List.exists(elements, function(element){
+      return (element && element.breakAfter)? true : false;
+    });
 
     // wrapping block always float to start direction
     return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
       elements:elements,
+      breakAfter:break_after,
       extent:extent
     });
   };
@@ -112,8 +116,13 @@ var FloatGenerator = (function(){
   FloatGenerator.prototype._wrapFloat = function(floated, rest, measure){
     var flow = this.style.flow;
     var extent = floated.getExtent(flow);
+    var elements = this._sortFloatRest(floated, rest);
+    var break_after = List.exists(elements, function(element){
+      return (element && element.breakAfter)? true : false;
+    });
     return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
-      elements:this._sortFloatRest(floated, rest),
+      elements:elements,
+      breakAfter:break_after,
       extent:extent
     });
   };

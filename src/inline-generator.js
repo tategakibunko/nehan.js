@@ -162,6 +162,12 @@ var InlineGenerator = (function(){
       return (new InlineBlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
     }
 
+    // if <page-break>, <end-page>, <pbr>, set break flag and line-break.
+    if(child_style.isPageBreak()){
+      context.setBreakAfter(true);
+      return null;
+    }
+
     // inline child
     switch(child_style.getMarkupName()){
     case "img":
@@ -169,10 +175,6 @@ var InlineGenerator = (function(){
 
     case "br":
       context.setLineBreak(true);
-      return null;
-
-    case "page-break": case "end-page": case "pbr":
-      context.setBreakAfter(true);
       return null;
 
     default:

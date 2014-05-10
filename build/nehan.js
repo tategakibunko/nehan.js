@@ -7914,6 +7914,8 @@ var LayoutGenerator = (function(){
       return new LazyGenerator(style, style.createImage());
     case "a":
       return new LinkGenerator(style, stream, outline_context);
+    case "page-break": case "end-page": case "pbr":
+      return new BreakAfterGenerator(style);
     default:
       return new InlineGenerator(style, stream, outline_context);
     }
@@ -8007,11 +8009,6 @@ var BlockGenerator = (function(){
       var first_float_gen = this._createChildBlockGenerator(child_style, child_stream, context, this.outlineContext);
       this.setChildLayout(this._createFloatGenerator(context, this.outlineContext, first_float_gen));
       return this.yieldChildLayout(context);
-    }
-
-    // if page-break tag is found in block context, just return null.
-    if(child_style.isPageBreak()){
-      return null;
     }
 
     // if child inline or child inline-block,
@@ -8233,6 +8230,12 @@ var InlineGenerator = (function(){
       return (new InlineBlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
     }
 
+    // if <page-break>, <end-page>, <pbr>, set break flag and line-break.
+    if(child_style.isPageBreak()){
+      context.setBreakAfter(true);
+      return null;
+    }
+
     // inline child
     switch(child_style.getMarkupName()){
     case "img":
@@ -8240,10 +8243,6 @@ var InlineGenerator = (function(){
 
     case "br":
       context.setLineBreak(true);
-      return null;
-
-    case "page-break": case "end-page": case "pbr":
-      context.setBreakAfter(true);
       return null;
 
     default:
@@ -8418,29 +8417,48 @@ var FirstLineGenerator = (function(){
 })();
 
 
-// lazy generator holds pre-yielded block in construction,
-// and output it once when yielded later.
+// lazy generator holds pre-yielded output in construction, and yields it once.
 var LazyGenerator = (function(){
-  function LazyGenerator(style, block){
+  function LazyGenerator(style, output){
     LayoutGenerator.call(this, style, null);
-    this.block = block;
+    this.output = output; // only output this gen yields.
   }
   Class.extend(LazyGenerator, LayoutGenerator);
 
   LazyGenerator.prototype.hasNext = function(){
-    return this._terminate === false;
+    return !this._terminate;
   };
 
   LazyGenerator.prototype.yield = function(context){
-    if(this._terminate){
+    if(this._terminate){ // already yielded
       return null;
     }
     this._terminate = true; // yield only once.
-    return this.block;
+    return this.output;
   };
 
   return LazyGenerator;
 })();
+
+var BreakAfterGenerator = (function(){
+  function BreakAfterGenerator(style){
+    InlineGenerator.call(this, style, null, null);
+  }
+  Class.extend(BreakAfterGenerator, InlineGenerator);
+
+  BreakAfterGenerator.prototype.hasNext = function(){
+    return !this._terminate;
+  };
+
+  BreakAfterGenerator.prototype._yield = function(context){
+    context.setBreakAfter(true);
+    this._terminate = true;
+    return null;
+  }
+
+  return BreakAfterGenerator;
+})();
+
 
 var FlipGenerator = (function(){
   function FlipGenerator(style, stream, outline_context){
@@ -8656,10 +8674,14 @@ var FloatGenerator = (function(){
     var measure = block1.getLayoutMeasure(flow); // block2 has same measure
     var extent = block1.getLayoutExtent(flow) + (block2? block2.getLayoutExtent(flow) : 0);
     var elements = block2? [block1, block2] : [block1];
+    var break_after = List.exists(elements, function(element){
+      return (element && element.breakAfter)? true : false;
+    });
 
     // wrapping block always float to start direction
     return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
       elements:elements,
+      breakAfter:break_after,
       extent:extent
     });
   };
@@ -8667,8 +8689,13 @@ var FloatGenerator = (function(){
   FloatGenerator.prototype._wrapFloat = function(floated, rest, measure){
     var flow = this.style.flow;
     var extent = floated.getExtent(flow);
+    var elements = this._sortFloatRest(floated, rest);
+    var break_after = List.exists(elements, function(element){
+      return (element && element.breakAfter)? true : false;
+    });
     return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
-      elements:this._sortFloatRest(floated, rest),
+      elements:elements,
+      breakAfter:break_after,
       extent:extent
     });
   };

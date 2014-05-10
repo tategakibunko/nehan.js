@@ -84,11 +84,6 @@ var BlockGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
-    // if page-break tag is found in block context, just return null.
-    if(child_style.isPageBreak()){
-      return null;
-    }
-
     // if child inline or child inline-block,
     // delegate current style and stream to child inline-generator with first child inline generator.
     if(child_style.isInlineBlock() || child_style.isInline()){

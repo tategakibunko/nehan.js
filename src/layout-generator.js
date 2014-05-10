@@ -223,6 +223,8 @@ var LayoutGenerator = (function(){
       return new LazyGenerator(style, style.createImage());
     case "a":
       return new LinkGenerator(style, stream, outline_context);
+    case "page-break": case "end-page": case "pbr":
+      return new BreakAfterGenerator(style);
     default:
       return new InlineGenerator(style, stream, outline_context);
     }
