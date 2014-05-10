@@ -382,6 +382,12 @@ var StyleContext = (function(){
       }
       return line;
     },
+    createBreakLine : function(){
+      var line = new Box(this.flow.getBoxSize(this.contentMeasure, 0), this);
+      line.breakAfter = true;
+      line.elements = [];
+      return line;
+    },
     isDisabled : function(){
       if(List.exists(__disabled_markups, Closure.eq(this.getMarkupName()))){
 	return true;

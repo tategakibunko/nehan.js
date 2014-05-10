@@ -11,7 +11,7 @@ var BreakAfterGenerator = (function(){
   BreakAfterGenerator.prototype._yield = function(context){
     context.setBreakAfter(true);
     this._terminate = true;
-    return null;
+    return this.style.createBreakLine();
   }
 
   return BreakAfterGenerator;
