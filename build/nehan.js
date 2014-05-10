@@ -95,6 +95,7 @@ var Layout = {
   rubyRate:0.5, // used when Style.rt["font-size"] is not defined.
   boldRate:0.5, // used to calculate sketchy bold metrics in the environment with no canvas element.
   lineRate: 2.0, // in nehan.js, extent size of line is specified by [lineRate] * [max-font-size of current-line].
+  vertWordSpaceRate: 0.25, // extra space rate for vertical word in vertical mode.
 
   // we need to specify these values(color,font-image-root) to display vertical font-images for browsers not supporting vert writing-mode.
   fontColor:"000000",
@@ -3168,16 +3169,19 @@ var Word = (function(){
       css.height = this.bodySize + "px";
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
+      css["font-family"] = "monospace";
       return css;
     },
     getCssVertTransBody : function(line){
       var css = {};
-      css["font-family"] = line.style.getFontFamily();
+      //css["font-family"] = line.style.getFontFamily();
+      css["font-family"] = "monospace";
       return css;
     },
     getCssVertTransBodyTrident : function(line){
       var css = {};
-      css["font-family"] = line.style.getFontFamily();
+      css["font-family"] = "monospace";
+      //css["font-family"] = line.style.getFontFamily();
       css.width = line.style.getFontSize() + "px";
       css.height = this.bodySize + "px";
       css["transform-origin"] = "50% 50%";
@@ -3193,6 +3197,7 @@ var Word = (function(){
     },
     getCssVertTransIE : function(line){
       var css = {}, font_size = line.style.getFontSize();
+      css["font-family"] = "monospace";
       css["float"] = "left";
       css["writing-mode"] = "tb-rl";
       css["letter-spacing"] = (line.style.letterSpacing || 0) + "px";
@@ -3708,7 +3713,8 @@ var TextMetrics = (function(){
     },
     getMeasure : function(font, text){
       var metrics = this.getMetrics(font, text);
-      return metrics.width;
+      var space = Math.floor(Layout.vertWordSpaceRate * font.size);
+      return metrics.width + space;
     }
   };
 })();

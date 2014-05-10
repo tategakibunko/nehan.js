@@ -20,7 +20,8 @@ var TextMetrics = (function(){
     },
     getMeasure : function(font, text){
       var metrics = this.getMetrics(font, text);
-      return metrics.width;
+      var space = Math.floor(Layout.vertWordSpaceRate * font.size);
+      return metrics.width + space;
     }
   };
 })();
