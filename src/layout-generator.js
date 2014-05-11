@@ -23,12 +23,6 @@ var LayoutGenerator = (function(){
     this._terminate = status;
   };
 
-  LayoutGenerator.prototype.setParentChildLayout = function(generator){
-    if(this._parentLayout){
-      this._parentLayout.setChildLayout(generator);
-    }
-  };
-
   LayoutGenerator.prototype.setChildLayout = function(generator){
     this._childLayout = generator;
     generator._parentLayout = this;

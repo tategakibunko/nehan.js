@@ -7732,12 +7732,6 @@ var LayoutGenerator = (function(){
     this._terminate = status;
   };
 
-  LayoutGenerator.prototype.setParentChildLayout = function(generator){
-    if(this._parentLayout){
-      this._parentLayout.setChildLayout(generator);
-    }
-  };
-
   LayoutGenerator.prototype.setChildLayout = function(generator){
     this._childLayout = generator;
     generator._parentLayout = this;
@@ -8233,8 +8227,7 @@ var InlineGenerator = (function(){
       if(child_style.isFloated()){
 	child_gen = this._createFloatGenerator(context, this.outlineContext, child_gen);
       }
-      this.setParentChildLayout(child_gen);
-      this.setTerminate(true);
+      this._breakInline(child_gen);
 
       // add line-break to avoid empty-line.
       // because empty-line is returned as null to parent block generator,
@@ -8261,6 +8254,18 @@ var InlineGenerator = (function(){
       var child_generator = this._createChildInlineGenerator(child_style, child_stream, context, this.outlineContext);
       this.setChildLayout(child_generator);
       return this.yieldChildLayout(context);
+    }
+  };
+
+  InlineGenerator.prototype._breakInline = function(block_gen){
+    this.setTerminate(true);
+    if(this._parentLayout === null){
+      return;
+    }
+    if(this._parentLayout instanceof InlineGenerator){
+      this._parentLayout._breakInline(block_gen);
+    } else {
+      this._parentLayout.setChildLayout(block_gen);
     }
   };
 
