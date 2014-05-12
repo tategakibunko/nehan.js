@@ -280,8 +280,7 @@ var Char = (function(){
       case 8212: // Em dash(Generao Punctuation)
 	this._setRotate(90); break;
       case 12540:
-	//this._setImg("onbiki", 1); break;
-	this._setCnv("&#63752;"); break;
+	this._setImg("onbiki", 1); break;
       case 45: // Hyphen-minus(Basic Latin)
 	this._setCnv("&#65372;"); break;
       case 8213: // Horizontal bar(General Punctuation)
