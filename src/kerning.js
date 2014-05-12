@@ -1,3 +1,5 @@
+// notice charactors that can be shurinked is already shurinked in it's body size calculation in nehan.js.
+// so this module only 'add' the space to start/end direction, that are not requiered to be shurinked.
 var Kerning = {
   set : function(cur_char, prev_text, next_text){
     if(cur_char.isKakkoStart()){
