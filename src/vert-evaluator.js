@@ -109,14 +109,14 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalRotateCharTransform = function(line, chr){
     return this._createElement("div", {
-      content:chr.data,
+      content:chr.getData(),
       className:"nehan-rotate-90"
     });
   };
 
   VertEvaluator.prototype.evalRotateCharIE = function(line, chr){
     return this._createElement("div", {
-      content:chr.data,
+      content:chr.getData(),
       className:"nehan-vert-ie",
       styles:chr.getCssVertRotateCharIE(line)
     }); // NOTE(or TODO):clearfix in older version after this code
@@ -137,8 +137,6 @@ var VertEvaluator = (function(){
       return this.evalImgChar(line, chr);
     } else if(chr.isHalfSpaceChar(chr)){
       return this.evalHalfSpaceChar(line, chr);
-    } else if(chr.isCnvChar()){
-      return this.evalCnvChar(line, chr);
     } else if(chr.isRotateChar()){
       return this.evalRotateChar(line, chr);
     } else if(chr.isSmallKana()){
@@ -155,19 +153,19 @@ var VertEvaluator = (function(){
   // for example, if we use <div>, parent bg-color is not inherited.
   VertEvaluator.prototype.evalCharWithBr = function(line, chr){
     chr.withBr = true;
-    return document.createTextNode(Html.unescape(chr.data));
+    return document.createTextNode(Html.unescape(chr.getData()));
   };
 
   VertEvaluator.prototype.evalCharLetterSpacing = function(line, chr){
     return this._createElement("div", {
-      content:chr.data,
+      content:chr.getData(),
       styles:chr.getCssVertLetterSpacing(line)
     });
   };
 
   VertEvaluator.prototype.evalEmpha = function(line, chr){
     var char_body = this._createElement("span", {
-      content:chr.data,
+      content:chr.getData(),
       className:"nehan-empha-src",
       styles:chr.getCssVertEmphaTarget(line)
     });
@@ -187,7 +185,7 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalPaddingChar = function(line, chr){
     return this._createElement("div", {
-      content:chr.data,
+      content:chr.getData(),
       styles:chr.getCssPadding(line)
     });
   };
@@ -207,22 +205,16 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype.evalVerticalGlyph = function(line, chr){
     return this._createElement("div", {
-      content:chr.data,
+      content:chr.getData(),
       className:"nehan-vert-glyph",
       styles:chr.getCssVertGlyph(line)
-    });
-  };
-
-  VertEvaluator.prototype.evalCnvChar = function(line, chr){
-    return this._createElement("div", {
-      content:chr.cnv
     });
   };
 
   VertEvaluator.prototype.evalSmallKana = function(line, chr){
     var tag_name = (line.style.textEmpha && line.style.textEmpha.isEnable())? "span" : "div";
     return this._createElement(tag_name, {
-      content:chr.data,
+      content:chr.getData(),
       styles:chr.getCssVertSmallKana()
     });
   };
