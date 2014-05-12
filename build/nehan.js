@@ -1622,6 +1622,7 @@ var Closure = {
 
 var Args = {
   copy : function(dst, args){
+    dst = dst || {};
     for(var prop in args){
       dst[prop] = args[prop];
     }
@@ -3061,8 +3062,7 @@ var Char = (function(){
       case 8212: // Em dash(Generao Punctuation)
 	this._setRotate(90); break;
       case 12540:
-	//this._setImg("onbiki", 1); break;
-	this._setCnv("&#63752;"); break;
+	this._setImg("onbiki", 1); break;
       case 45: // Hyphen-minus(Basic Latin)
 	this._setCnv("&#65372;"); break;
       case 8213: // Horizontal bar(General Punctuation)
@@ -9163,7 +9163,7 @@ var LayoutEvaluator = (function(){
     _createElement : function(name, opt){
       var opt = opt || {};
       var styles = opt.styles || {};
-      var attrs = opt.attrs? opt.attrs.attrs : {};
+      var attrs = opt.attrs? ((opt.attrs instanceof TagAttrs)? opt.attrs.attrs : opt.attrs) : {};
       var dataset = opt.attrs? opt.attrs.dataset : {};
       var dom = document.createElement(name);
       if(opt.id){
@@ -9515,7 +9515,7 @@ var VertEvaluator = (function(){
     var palette_color = Palette.getColor(font_rgb).toUpperCase();
     return this._createElement("img", {
       className:"nehan-img-char",
-      attr:{
+      attrs:{
 	src:chr.getImgSrc(palette_color)
       },
       styles:chr.getCssVertImgChar(line)

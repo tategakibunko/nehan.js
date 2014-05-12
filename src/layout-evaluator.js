@@ -5,7 +5,7 @@ var LayoutEvaluator = (function(){
     _createElement : function(name, opt){
       var opt = opt || {};
       var styles = opt.styles || {};
-      var attrs = opt.attrs? opt.attrs.attrs : {};
+      var attrs = opt.attrs? ((opt.attrs instanceof TagAttrs)? opt.attrs.attrs : opt.attrs) : {};
       var dataset = opt.attrs? opt.attrs.dataset : {};
       var dom = document.createElement(name);
       if(opt.id){

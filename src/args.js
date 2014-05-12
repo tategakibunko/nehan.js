@@ -1,5 +1,6 @@
 var Args = {
   copy : function(dst, args){
+    dst = dst || {};
     for(var prop in args){
       dst[prop] = args[prop];
     }

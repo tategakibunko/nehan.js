@@ -196,7 +196,7 @@ var VertEvaluator = (function(){
     var palette_color = Palette.getColor(font_rgb).toUpperCase();
     return this._createElement("img", {
       className:"nehan-img-char",
-      attr:{
+      attrs:{
 	src:chr.getImgSrc(palette_color)
       },
       styles:chr.getCssVertImgChar(line)
