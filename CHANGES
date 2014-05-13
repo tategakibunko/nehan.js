@@ -6,11 +6,10 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.0.1 2014/??/??
+version 5.0.1 2014/05/13
 =========================
 o now 'oncreate' property is enabled for selector value,
   called when layout is evaluated and dom element is created.
-o css property 'position' is added to managed css value.
 o global style interfaces Nehan.setStyle(or Nehan.setStyles) are added.
 ! now module UnitSize is included in StyleContext class.
 
