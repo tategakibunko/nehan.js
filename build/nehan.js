@@ -63,8 +63,7 @@ var Config = {
   useVerticalGlyphIfEnable:true,
   useStrictWordMetrics:true,
   enableAutoCloseTag:false,
-  lexingBufferLen:2000,
-  defaultLinkTitleLength:16
+  lexingBufferLen:2000
 };
 
 
