@@ -1,14 +1,15 @@
 var PageStream = (function(){
   function PageStream(text){
     this.text = this._createSource(text);
-    this.buffer = [];
+    this._trees = [];
+    this._pages = [];
     this.generator = this._createGenerator(this.text);
     this.evaluator = this._createEvaluator();
   }
 
   PageStream.prototype = {
     hasPage : function(page_no){
-      return (typeof this.buffer[page_no] != "undefined");
+      return (typeof this._trees[page_no] != "undefined");
     },
     hasNext : function(){
       return this.generator.hasNext();
@@ -39,13 +40,7 @@ var PageStream = (function(){
       this._asyncGet(opt.wait || 0);
     },
     getPageCount : function(){
-      return this.buffer.length;
-    },
-    // getGroupPageNo is called from PageGroupStream.
-    // notice that this stream is constructed by single page,
-    // so cell_page_no is always equals to group_page_no.
-    getGroupPageNo : function(cell_page_no){
-      return cell_page_no;
+      return this._trees.length;
     },
     // same as getPage, defined to keep compatibility of older version of nehan.js
     get : function(page_no){
@@ -53,21 +48,23 @@ var PageStream = (function(){
     },
     // int -> Page
     getPage : function(page_no){
-      var entry = this.buffer[page_no];
-      if(this._isEvaluated(entry)){
-	return entry; // already evaluated
+      if(this._pages[page_no]){
+	return this._pages[page_no];
       }
-      // if still not evaluated, eval and get EvalResult
-      var result = this.evaluator.evaluate(entry);
-      this.buffer[page_no] = result; // over write buffer entry by result.
-      return result;
+      var tree = this._trees[page_no] || null;
+      if(tree === null){
+	return null;
+      }
+      var page = this.evaluator.evaluate(tree);
+      this._pages[page_no] = page;
+      return page;
+    },
+    getTree : function(page_no){
+      return this._trees[page_no] || null;
     },
     // () -> tree
     _yield : function(){
       return this.generator.yield();
-    },
-    _isEvaluated : function(entry){
-      return (entry instanceof Page);
     },
     _setTimeStart : function(){
       this._timeStart = (new Date()).getTime();
@@ -85,7 +82,7 @@ var PageStream = (function(){
       // so you need to call 'getPage' to get actual page object.
       var tree = this._yield();
       if(tree){
-	this._addBuffer(tree);
+	this._addTree(tree);
 	this.onProgress(this, tree);
       }
       var self = this;
@@ -93,8 +90,8 @@ var PageStream = (function(){
 	self._asyncGet(wait);
       });
     },
-    _addBuffer : function(tree){
-      this.buffer.push(tree);
+    _addTree : function(tree){
+      this._trees.push(tree);
     },
     _createSource : function(text){
       return text

@@ -12,9 +12,11 @@ Selectors.setValues(__engine_args.style || {});
 // export engine local interfaces
 return {
   documentContext: DocumentContext,
-  createPageStream : function(text, group_size){
-    group_size = Math.max(1, group_size || 1);
-    return (group_size <= 1)? new PageStream(text) : new PageGroupStream(text, group_size);
+  createPageLayouter : function(text, doms){
+    return new PageLayouter(text, doms);
+  },
+  createPageStream : function(text){
+    return new PageStream(text);
   },
   // set engine local style
   setStyle : function(selector_key, value){

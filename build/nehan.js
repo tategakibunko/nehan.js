@@ -5900,36 +5900,18 @@ var PageEvaluator = (function(){
 })();
 
 
-var PageGroupEvaluator = (function(){
-  function PageGroupEvaluator(group_size){
-    this.groupSize = group_size;
-    PageEvaluator.call(this);
-  }
-  Class.extend(PageGroupEvaluator, PageEvaluator);
-
-  // [tree] -> PageGroup
-  PageGroupEvaluator.prototype.evaluate = function(trees){
-    var self = this;
-    var pages = List.map(trees, function(tree){
-      return PageEvaluator.prototype.evaluate.call(self, tree);
-    });
-    return new PageGroup(this.groupSize, pages);
-  };
-
-  return PageGroupEvaluator;
-})();
-
 var PageStream = (function(){
   function PageStream(text){
     this.text = this._createSource(text);
-    this.buffer = [];
+    this._trees = [];
+    this._pages = [];
     this.generator = this._createGenerator(this.text);
     this.evaluator = this._createEvaluator();
   }
 
   PageStream.prototype = {
     hasPage : function(page_no){
-      return (typeof this.buffer[page_no] != "undefined");
+      return (typeof this._trees[page_no] != "undefined");
     },
     hasNext : function(){
       return this.generator.hasNext();
@@ -5960,13 +5942,7 @@ var PageStream = (function(){
       this._asyncGet(opt.wait || 0);
     },
     getPageCount : function(){
-      return this.buffer.length;
-    },
-    // getGroupPageNo is called from PageGroupStream.
-    // notice that this stream is constructed by single page,
-    // so cell_page_no is always equals to group_page_no.
-    getGroupPageNo : function(cell_page_no){
-      return cell_page_no;
+      return this._trees.length;
     },
     // same as getPage, defined to keep compatibility of older version of nehan.js
     get : function(page_no){
@@ -5974,21 +5950,23 @@ var PageStream = (function(){
     },
     // int -> Page
     getPage : function(page_no){
-      var entry = this.buffer[page_no];
-      if(this._isEvaluated(entry)){
-	return entry; // already evaluated
+      if(this._pages[page_no]){
+	return this._pages[page_no];
       }
-      // if still not evaluated, eval and get EvalResult
-      var result = this.evaluator.evaluate(entry);
-      this.buffer[page_no] = result; // over write buffer entry by result.
-      return result;
+      var tree = this._trees[page_no] || null;
+      if(tree === null){
+	return null;
+      }
+      var page = this.evaluator.evaluate(tree);
+      this._pages[page_no] = page;
+      return page;
+    },
+    getTree : function(page_no){
+      return this._trees[page_no] || null;
     },
     // () -> tree
     _yield : function(){
       return this.generator.yield();
-    },
-    _isEvaluated : function(entry){
-      return (entry instanceof Page);
     },
     _setTimeStart : function(){
       this._timeStart = (new Date()).getTime();
@@ -6006,7 +5984,7 @@ var PageStream = (function(){
       // so you need to call 'getPage' to get actual page object.
       var tree = this._yield();
       if(tree){
-	this._addBuffer(tree);
+	this._addTree(tree);
 	this.onProgress(this, tree);
       }
       var self = this;
@@ -6014,8 +5992,8 @@ var PageStream = (function(){
 	self._asyncGet(wait);
       });
     },
-    _addBuffer : function(tree){
-      this.buffer.push(tree);
+    _addTree : function(tree){
+      this._trees.push(tree);
     },
     _createSource : function(text){
       return text
@@ -6045,72 +6023,31 @@ var PageStream = (function(){
 })();
 
 
-var PageGroup = (function(){
-  function PageGroup(group_size, pages){
-    var first = pages[0];
-    Page.call(this, {
-      percent:first.percent,
-      pageNo:first.pageNo,
-      seekPos:first.seekPos,
-      charPos:first.charPos,
-      charCount:List.sum(pages, function(page){ return page.charCount; })
-    });
-    this.groupSize = group_size;
-    this.pages = pages;
+var PageLayouter = (function(){
+  function PageLayouter(text, layouts){
+    this.stream = new PageStream(text);
+    this.layouts = layouts;
   }
-  Class.extend(PageGroup, Page);
 
-  PageGroup.prototype.getGroupSize = function(){
-    return this.groupSize;
-  };
-
-  PageGroup.prototype.getGroup = function(pos){
-    var page = this.pages[pos] || null;
-    return page? page.element : null;
-  };
-
-  return PageGroup;
-})();
-
-var PageGroupStream = (function(){
-  function PageGroupStream(text, group_size){
-    this.text = this._createSource(text);
-    this.buffer = [];
-    this.groupSize = group_size;
-    this.generator = this._createGenerator(this.text);
-    this.evaluator = this._createEvaluator(group_size);
-  }
-  Class.extend(PageGroupStream, PageStream);
-  
-  // anchors and outline positions of nehan are returned as 'cell_page_pos'.
-  // for example, first page group(size=4) consists of [0,1,2,3] cell pages.
-  // so cell page nums '0..3' are equivalent to group page no '0'.
-  PageGroupStream.prototype.getGroupPageNo = function(cell_page_no){
-    return Math.round(cell_page_no / this.groupSize);
-  };
-
-  // () -> [tree]
-  PageGroupStream.prototype._yield = function(){
-    var trees = [], push = function(tree){
-      if(tree){
-	trees.push(tree);
+  PageLayouter.prototype = {
+    asyncGet : function(opt){
+      this.stream.asyncGet(opt);
+    },
+    show : function(page_no, setter){
+      var layout_count = this.layouts.length;
+      var start_page_no = page_no * layout_count;
+      for(var i = 0; i < layout_count; i++){
+	var layout = this.layouts[i];
+	var page = this.stream.getPage(start_page_no + i);
+	if(page){
+	  layout.innerHTML = "";
+	  layout.appendChild(page.element);
+	}
       }
-    };
-    while(trees.length < this.groupSize && this.hasNext()){
-      push(this.generator.yield());
     }
-    return trees;
   };
 
-  PageGroupStream.prototype._isEvaluated = function(entry){
-    return (entry instanceof PageGroup);
-  };
-
-  PageGroupStream.prototype._createEvaluator = function(group_size){
-    return new PageGroupEvaluator(group_size);
-  };
-
-  return PageGroupStream;
+  return PageLayouter;
 })();
 
 
@@ -9691,9 +9628,11 @@ Selectors.setValues(__engine_args.style || {});
 // export engine local interfaces
 return {
   documentContext: DocumentContext,
-  createPageStream : function(text, group_size){
-    group_size = Math.max(1, group_size || 1);
-    return (group_size <= 1)? new PageStream(text) : new PageGroupStream(text, group_size);
+  createPageLayouter : function(text, doms){
+    return new PageLayouter(text, doms);
+  },
+  createPageStream : function(text){
+    return new PageStream(text);
   },
   // set engine local style
   setStyle : function(selector_key, value){
