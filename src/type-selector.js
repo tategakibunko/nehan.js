@@ -23,11 +23,11 @@
 */
 var TypeSelector = (function(){
   function TypeSelector(opt){
-    this.name = opt.name;
-    this.id = opt.id;
-    this.className = opt.className;
-    this.attrs = opt.attrs;
-    this.pseudo = opt.pseudo;
+    this.name = opt.name || null;
+    this.id = opt.id || null;
+    this.className = opt.className || null;
+    this.attrs = opt.attrs || [];
+    this.pseudo = opt.pseudo || null;
   }
   
   TypeSelector.prototype = {

@@ -43,6 +43,7 @@ var StyleContext = (function(){
     "measure",
     "meta", // flag
     "onload",
+    "oncreate",
     "padding",
     "position",
     "section", // flag

@@ -2004,11 +2004,11 @@ var PseudoSelector = (function(){
 */
 var TypeSelector = (function(){
   function TypeSelector(opt){
-    this.name = opt.name;
-    this.id = opt.id;
-    this.className = opt.className;
-    this.attrs = opt.attrs;
-    this.pseudo = opt.pseudo;
+    this.name = opt.name || null;
+    this.id = opt.id || null;
+    this.className = opt.className || null;
+    this.attrs = opt.attrs || [];
+    this.pseudo = opt.pseudo || null;
   }
   
   TypeSelector.prototype = {
@@ -2097,15 +2097,24 @@ var SelectorLexer = (function(){
       case "+": case "~": case ">": // combinator
 	this._stepBuff(1);
 	return c1;
-      case ":": // pseudo without type-selector
-	var pseudo = this._getPseudo();
-	return this._parseType("body", [], pseudo);
+      case ":": // pseudo without type
+	var pseudo = this._getByRex(rex_pseudo);
+	return new TypeSelector({
+	  name:"body",
+	  pseudo:(new PseudoSelector(pseudo))
+	});
       default: // type-selecor
-	var type = this._getType();
+	var type = this._getByRex(rex_type);
 	if(type){
 	  var attrs = this._getAttrs();
-	  var pseudo = this._getPseudo();
-	  return this._parseType(type, attrs, pseudo);
+	  var pseudo = this._getByRex(rex_pseudo);
+	  return new TypeSelector({
+	    name:this._getName(type),
+	    id:this._getId(type),
+	    className:this._getClassName(type),
+	    attrs:attrs,
+	    pseudo:(pseudo? (new PseudoSelector(pseudo)) : null)
+	  });
 	}
       }
       throw "invalid selector:[" + this.buff + "]";
@@ -2115,15 +2124,6 @@ var SelectorLexer = (function(){
     },
     _stepBuff : function(count){
       this.buff = Utils.trim(this.buff.slice(count));
-    },
-    _parseType : function(str, attrs, pseudo){
-      return new TypeSelector({
-	name:this._getName(str),
-	id:this._getId(str),
-	className:this._getClassName(str),
-	attrs:attrs,
-	pseudo:(pseudo? (new PseudoSelector(pseudo)) : null)
-      });
     },
     _getByRex : function(rex){
       var ret = null;
@@ -2145,9 +2145,6 @@ var SelectorLexer = (function(){
       var parts = str.split(".");
       return (parts.length >= 2)? parts[1] : "";
     },
-    _getType : function(){
-      return this._getByRex(rex_type);
-    },
     _getAttrs : function(){
       var attrs = [];
       while(true){
@@ -2159,9 +2156,6 @@ var SelectorLexer = (function(){
 	}
       }
       return attrs;
-    },
-    _getPseudo : function(){
-      return this._getByRex(rex_pseudo);
     }
   };
 
@@ -6282,6 +6276,7 @@ var StyleContext = (function(){
     "measure",
     "meta", // flag
     "onload",
+    "oncreate",
     "padding",
     "position",
     "section", // flag
