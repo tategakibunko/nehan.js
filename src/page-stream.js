@@ -23,9 +23,8 @@ var PageStream = (function(){
       while(this.hasNext()){
 	if(!this.hasPage(page_no)){
 	  var tree = this._yield();
-	  this._addBuffer(tree);
+	  this._addTree(tree);
 	}
-	var page = this.getPage(page_no);
 	page_no++;
       }
       return this._getTimeElapsed();
