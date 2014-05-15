@@ -5862,15 +5862,6 @@ var Page = (function(){
     }, opt);
   }
 
-  Page.prototype = {
-    getGroupSize : function(){
-      return 1;
-    },
-    getGroup : function(pos){
-      return this.element;
-    }
-  };
-
   return Page;
 })();
 
@@ -6020,34 +6011,6 @@ var PageStream = (function(){
   };
 
   return PageStream;
-})();
-
-
-var PageLayouter = (function(){
-  function PageLayouter(text, layouts){
-    this.stream = new PageStream(text);
-    this.layouts = layouts;
-  }
-
-  PageLayouter.prototype = {
-    asyncGet : function(opt){
-      this.stream.asyncGet(opt);
-    },
-    show : function(page_no, setter){
-      var layout_count = this.layouts.length;
-      var start_page_no = page_no * layout_count;
-      for(var i = 0; i < layout_count; i++){
-	var layout = this.layouts[i];
-	var page = this.stream.getPage(start_page_no + i);
-	if(page){
-	  layout.innerHTML = "";
-	  layout.appendChild(page.element);
-	}
-      }
-    }
-  };
-
-  return PageLayouter;
 })();
 
 
@@ -9628,9 +9591,6 @@ Selectors.setValues(__engine_args.style || {});
 // export engine local interfaces
 return {
   documentContext: DocumentContext,
-  createPageLayouter : function(text, doms){
-    return new PageLayouter(text, doms);
-  },
   createPageStream : function(text){
     return new PageStream(text);
   },

@@ -12,9 +12,6 @@ Selectors.setValues(__engine_args.style || {});
 // export engine local interfaces
 return {
   documentContext: DocumentContext,
-  createPageLayouter : function(text, doms){
-    return new PageLayouter(text, doms);
-  },
   createPageStream : function(text){
     return new PageStream(text);
   },

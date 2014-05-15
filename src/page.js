@@ -10,15 +10,6 @@ var Page = (function(){
     }, opt);
   }
 
-  Page.prototype = {
-    getGroupSize : function(){
-      return 1;
-    },
-    getGroup : function(pos){
-      return this.element;
-    }
-  };
-
   return Page;
 })();
 

@@ -120,7 +120,6 @@ module.exports = function(grunt) {
 	    "src/page.js",
 	    "src/page-evaluator.js",
 	    "src/page-stream.js",
-	    "src/page-layouter.js",
 	    "src/kerning.js",
 	    "src/float-direction.js",
 	    "src/float-directions.js",
