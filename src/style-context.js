@@ -153,6 +153,7 @@ var StyleContext = (function(){
       // 2. filter all unmanaged css values from inline css
       Args.copy(this.unmanagedCss, __filter_unmanaged_css(this.selectorCss));
       Args.copy(this.unmanagedCss, __filter_unmanaged_css(this.inlineCss));
+      Args.copy(this.unmanagedCss, this._loadUnmanagedCss(this.unmanagedCss));
 
       // always required properties
       this.display = this._loadDisplay(); // required
@@ -922,6 +923,13 @@ var StyleContext = (function(){
       var ret = callback(this.callbackContext) || {};
       for(var prop in ret){
 	ret[prop] = this._evalCssAttr(prop, ret[prop]);
+      }
+      return ret;
+    },
+    _loadUnmanagedCss : function(unmanaged_css){
+      var ret = {};
+      for(var prop in unmanaged_css){
+	ret[prop] = this._evalCssAttr(prop, unmanaged_css[prop]);
       }
       return ret;
     },
