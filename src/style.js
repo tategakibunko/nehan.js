@@ -156,6 +156,7 @@ var Style = {
     "section-root":true
   },
   "br":{
+    "single":true,
     "display":"inline"
   },
   "button":{
@@ -342,6 +343,7 @@ var Style = {
   },
   "hr":{
     "display":"block",
+    "single":true,
     "box-sizing":"content-box",
     "border-color":"#b8b8b8",
     "border-style":"solid",
@@ -373,10 +375,12 @@ var Style = {
   },
   "img":{
     "display":"inline",
+    "single":true,
     "box-sizing":"content-box"
   },
   "input":{
     "display":"inline",
+    "single":true,
     "interactive":true
   },
   //-------------------------------------------------------
@@ -411,7 +415,8 @@ var Style = {
     "display":"block"
   },
   "link":{
-    "meta":true
+    "meta":true,
+    "single":true
   },
   //-------------------------------------------------------
   // tag / m
@@ -428,7 +433,8 @@ var Style = {
     "display":"block"
   },
   "meta":{
-    "meta":true
+    "meta":true,
+    "single":true
   },
   "meter":{
     "display":"inline"
@@ -695,14 +701,17 @@ var Style = {
   // tag / w
   //-------------------------------------------------------
   "wbr":{
-    "display":"inline"
+    "display":"inline",
+    "single":true
   },
   //-------------------------------------------------------
   // tag / others
   //-------------------------------------------------------
   "?xml":{
+    "single":true
   },
   "!doctype":{
+    "single":true
   },
   "first-line":{
     //"display":"block !important" // TODO
@@ -712,12 +721,15 @@ var Style = {
   // defined to keep compatibility of older nehan.js document,
   // and must be defined as logical-break-before, logical-break-after props in the future.
   "page-break":{
+    "single":true,
     "display":"inline"
   },
   "pbr":{
+    "single":true,
     "display":"inline"
   },
   "end-page":{
+    "single":true,
     "display":"inline"
   },
   //-------------------------------------------------------

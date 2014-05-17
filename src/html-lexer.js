@@ -21,21 +21,6 @@ var HtmlLexer = (function (){
     "tfoot"
   ];*/
 
-  var __single_tags = [
-    "?xml",
-    "!doctype",
-    "br",
-    "end-page",
-    "hr",
-    "img",
-    "input",
-    "link",
-    "meta",
-    "pbr",
-    "page-break",
-    "wbr"
-  ];
-
   var __find_close_pos = function(buff, tag_name, open_tag_rex, close_tag){
     var close_pos = buff.indexOf(close_tag);
     if(close_pos < 0){
@@ -155,7 +140,8 @@ var HtmlLexer = (function (){
     _parseTag : function(tagstr){
       var tag = new Tag(tagstr);
       this._stepBuff(tagstr.length);
-      if(List.exists(__single_tags, Closure.eq(tag.getName()))){
+      var tag_name = tag.getName();
+      if(Style[tag_name] && Style[tag_name].single){
 	tag._single = true;
 	return tag;
       }
