@@ -3029,9 +3029,9 @@ var Char = (function(){
       case 12305:
 	this._setImg("kakko18", 0.5); break;
       case 65306:
-	this._setImg("tenten", 0.5, 1); break;
+	this._setImg("tenten", 1, 1); break;
       case 58:
-	this._setImg("tenten", 0.5, 1); break;
+	this._setImg("tenten", 1, 1); break;
       case 12290:
 	this._setImg("kuten", 0.5); break;
       case 65377:
