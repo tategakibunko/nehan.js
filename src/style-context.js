@@ -360,6 +360,7 @@ var StyleContext = (function(){
       line.charCount = opt.charCount || 0;
       line.maxFontSize = max_font_size;
       line.maxExtent = max_extent;
+      line.content = opt.content || null;
 
       // edge of top level line is disabled.
       // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.

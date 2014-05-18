@@ -211,6 +211,9 @@ var LayoutGenerator = (function(){
     if(style.isInlineBlock()){
       return new InlineBlockGenerator(style, stream, outline_context);
     }
+    if(style.isPasted()){
+      return new LazyGenerator(style, style.createLine({content:style.getContent()}));
+    }
     switch(style.getMarkupName()){
     case "img":
       // if inline img, no content text is included in img tag, so we yield it by lazy generator.
