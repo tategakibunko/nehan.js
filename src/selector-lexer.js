@@ -4,7 +4,7 @@ var SelectorLexer = (function(){
   }
 
   var rex_name = /^[\w-_\*!\?]+/;
-  var rex_rexed_name = /^\/[^\/]+\//;
+  var rex_name_rex = /^\/[^\/]+\//;
   var rex_id = /^#[\w-_]+/;
   var rex_class = /^\.[\w-_]+/;
   var rex_attr = /^\[[^\]]+\]/;
@@ -53,14 +53,15 @@ var SelectorLexer = (function(){
       return ret;
     },
     _getTypeSelector : function(){
-      var name = this._getName() || this._getRexedName();
+      var name = this._getName();
+      var name_rex = (name === null)? this._getNameRex() : null;
       var id = this._getId();
       var klass = this._getClass();
       var attrs = this._getAttrs();
       var pseudo = this._getPseudo();
       return new TypeSelector({
-	name:((name && typeof name === "string")? name : null),
-	rexedName:((name && name instanceof RegExp)? name : null),
+	name:name,
+	nameRex:name_rex,
 	id:id,
 	className:klass,
 	attrs:attrs,
@@ -73,12 +74,12 @@ var SelectorLexer = (function(){
     // type name defined by regexp
     // "/h[1-6]/.nehan-some-class span"
     // => /h[16]/
-    _getRexedName : function(){
-      var rexed_name = this._getByRex(rex_rexed_name);
-      if(rexed_name === null){
+    _getNameRex : function(){
+      var name_rex = this._getByRex(rex_name_rex);
+      if(name_rex === null){
 	return null;
       }
-      return new RegExp(rexed_name.replace(/[\/]/g, ""));
+      return new RegExp(name_rex.replace(/[\/]/g, ""));
     },
     _getName : function(){
       return this._getByRex(rex_name);

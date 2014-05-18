@@ -5,6 +5,7 @@
 
    1. name selector
      div {font-size:xxx}
+     /h[1-6]/ {font-weight:xxx}
 
    2. class selector
      div.class{font-size:xxx}
@@ -24,6 +25,7 @@
 var TypeSelector = (function(){
   function TypeSelector(opt){
     this.name = opt.name || null;
+    this.nameRex = opt.nameRex || null;
     this.id = opt.id || null;
     this.className = opt.className || null;
     this.attrs = opt.attrs || [];
@@ -37,6 +39,10 @@ var TypeSelector = (function(){
       }
       // name selector
       if(this.name && this.name != "*" && style.getMarkupName() != this.name){
+	return false;
+      }
+      // name selector(by rex)
+      if(this.nameRex && !this.nameRex.test(style.getMarkupName())){
 	return false;
       }
       // class selector
@@ -57,23 +63,26 @@ var TypeSelector = (function(){
       }
       return true;
     },
+    getNameSpec : function(){
+      if(this.nameRex){
+	return 1;
+      }
+      return (this.name !== "*" && this.name !== "") ? 1 : 0;
+    },
     getIdSpec : function(){
       return this.id? 1 : 0;
     },
     getClassSpec : function(){
       return this.className? 1 : 0;
     },
-    getTypeSpec : function(){
-      return (this.name !== "*" && this.name !== "") ? 1 : 0;
+    getAttrSpec : function(){
+      return this.attrs.length;
     },
     getPseudoClassSpec : function(){
       if(this.pseudo){
 	return this.pseudo.hasPseudoElement()? 0 : 1;
       }
       return 0;
-    },
-    getAttrSpec : function(){
-      return this.attrs.length;
     },
     _testAttrs : function(style){
       return List.forall(this.attrs, function(attr){

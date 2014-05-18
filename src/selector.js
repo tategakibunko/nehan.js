@@ -63,7 +63,7 @@ var Selector = (function(){
 	if(token instanceof TypeSelector){
 	  a += token.getIdSpec();
 	  b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();
-	  c += token.getTypeSpec();
+	  c += token.getNameSpec();
 	}
       });
       return parseInt([a,b,c].join(""), 10); // maybe ok in most case.
