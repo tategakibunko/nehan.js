@@ -73,6 +73,7 @@ var Selector = (function(){
       return lexer.getTokens();
     },
     _normalizeKey : function(key){
+      key = (key instanceof RegExp)? "/" + key.source + "/" : key;
       return Utils.trim(key).toLowerCase().replace(/\s+/g, " ");
     },
     _formatValue : function(value){
