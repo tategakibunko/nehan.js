@@ -141,7 +141,7 @@ var HtmlLexer = (function (){
       var tag = new Tag(tagstr);
       this._stepBuff(tagstr.length);
       var tag_name = tag.getName();
-      if(Style[tag_name] && Style[tag_name].single){
+      if(LexingRule.isSingleTag(tag_name)){
 	tag._single = true;
 	return tag;
       }

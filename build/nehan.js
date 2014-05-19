@@ -35,6 +35,10 @@ if(!Nehan){
 // glocal style
 Nehan.style = {};
 
+// global single tag names
+Nehan.__single_tags__ = [];
+Nehan.__single_tags_rex__ = [];
+
 Nehan.setStyle = function(selector_key, value){
   var entry = Nehan.style[selector_key] || {};
   for(var prop in value){
@@ -47,6 +51,14 @@ Nehan.setStyles = function(values){
   for(var selector_key in values){
     Nehan.setStyle(selector_key, values[selector_key]);
   }
+};
+
+Nehan.addSingleTag = function(tag_name){
+  Nehan.__single_tags__.push(tag_name);
+};
+
+Nehan.addSingleTagRex = function(rex){
+  Nehan.__single_tags_rex__.push(rex);
 };
 
 // this function ends at the tail of this source.
@@ -212,6 +224,64 @@ var Env = (function(){
 })();
 
 
+var LexingRule = (function(){
+  var __single_tags__ = [
+    "br",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "wbr",
+    "?xml",
+    "!doctype",
+    "page-break",
+    "end-page",
+    "pbr"
+  ];
+
+  var __single_tags_rex__ = [];
+
+  var __is_single_tag = function(tag_name){
+    return List.exists(__single_tags__, Closure.eq(tag_name));
+  };
+
+  var __is_single_tag_rex = function(tag_name){
+    return List.exists(__single_tags_rex__, function(rex){
+      return rex.test(tag_name);
+    });
+  };
+
+  var __find_single_tag_rex_by_rex = function(rex){
+    return List.exists(__single_tags_rex__, function(rex_){
+      return rex.source === rex_.source;
+    });
+  };
+
+  return {
+    isSingleTag : function(tag_name){
+      return __is_single_tag(tag_name) || __is_single_tag_rex(tag_name) || false;
+    },
+    addSingleTag : function(tag_name){
+      if(!__is_single_tag(tag_name)){
+	__single_tags__.push(tag_name);
+      }
+    },
+    addSingleTagAll : function(tag_names){
+      return List.iter(tag_names, this.addSingleTag);
+    },
+    addSingleTagRex : function(rex){
+      if(!__find_single_tag_rex_by_rex(rex)){
+	__single_tags_rex__.push(rex);
+      }
+    },
+    addSingleTagRexAll : function(rexes){
+      return List.iter(rexes, this.addSingleTagRex);
+    }
+  };
+})();
+
+
 /*
   Important notices about style.js
   ================================
@@ -370,7 +440,6 @@ var Style = {
     "section-root":true
   },
   "br":{
-    "single":true,
     "display":"inline"
   },
   "button":{
@@ -557,7 +626,6 @@ var Style = {
   },
   "hr":{
     "display":"block",
-    "single":true,
     "box-sizing":"content-box",
     "border-color":"#b8b8b8",
     "border-style":"solid",
@@ -589,12 +657,10 @@ var Style = {
   },
   "img":{
     "display":"inline",
-    "single":true,
     "box-sizing":"content-box"
   },
   "input":{
     "display":"inline",
-    "single":true,
     "interactive":true
   },
   //-------------------------------------------------------
@@ -629,8 +695,7 @@ var Style = {
     "display":"block"
   },
   "link":{
-    "meta":true,
-    "single":true
+    "meta":true
   },
   //-------------------------------------------------------
   // tag / m
@@ -647,8 +712,7 @@ var Style = {
     "display":"block"
   },
   "meta":{
-    "meta":true,
-    "single":true
+    "meta":true
   },
   "meter":{
     "display":"inline"
@@ -915,17 +979,14 @@ var Style = {
   // tag / w
   //-------------------------------------------------------
   "wbr":{
-    "display":"inline",
-    "single":true
+    "display":"inline"
   },
   //-------------------------------------------------------
   // tag / others
   //-------------------------------------------------------
   "?xml":{
-    "single":true
   },
   "!doctype":{
-    "single":true
   },
   "first-line":{
     //"display":"block !important" // TODO
@@ -935,15 +996,12 @@ var Style = {
   // defined to keep compatibility of older nehan.js document,
   // and must be defined as logical-break-before, logical-break-after props in the future.
   "page-break":{
-    "single":true,
     "display":"inline"
   },
   "pbr":{
-    "single":true,
     "display":"inline"
   },
   "end-page":{
-    "single":true,
     "display":"inline"
   },
   //-------------------------------------------------------
@@ -2019,7 +2077,7 @@ var TypeSelector = (function(){
     this.name = opt.name || null;
     this.nameRex = opt.nameRex || null;
     this.id = opt.id || null;
-    this.className = opt.className || null;
+    this.className = opt.className || null; // TODO: multiple class names
     this.attrs = opt.attrs || [];
     this.pseudo = opt.pseudo || null;
   }
@@ -2030,11 +2088,11 @@ var TypeSelector = (function(){
 	return false;
       }
       // name selector
-      if(this.name && this.name != "*" && style.getMarkupName() != this.name){
+      if(this.name && !this.testName(style.getMarkupName())){
 	return false;
       }
       // name selector(by rex)
-      if(this.nameRex && !this.nameRex.test(style.getMarkupName())){
+      if(this.nameRex && !this.testNameRex(style.getMarkupName())){
 	return false;
       }
       // class selector
@@ -2054,6 +2112,21 @@ var TypeSelector = (function(){
 	return false;
       }
       return true;
+    },
+    testName : function(markup_name){
+      if(this.name === null){
+	return false;
+      }
+      if(this.name === "*"){
+	return true;
+      }
+      return markup_name === this.name;
+    },
+    testNameRex : function(markup_name){
+      if(this.nameRex === null){
+	return false;
+      }
+      return this.nameRex.test(markup_name);
     },
     getNameSpec : function(){
       if(this.nameRex){
@@ -5102,7 +5175,7 @@ var HtmlLexer = (function (){
       var tag = new Tag(tagstr);
       this._stepBuff(tagstr.length);
       var tag_name = tag.getName();
-      if(Style[tag_name] && Style[tag_name].single){
+      if(LexingRule.isSingleTag(tag_name)){
 	tag._single = true;
 	return tag;
       }
@@ -9619,12 +9692,17 @@ Nehan.Env = Env;
 // set engine args
 Args.copy(Config, __engine_args.config || {});
 Args.copy2(Layout, __engine_args.layout || {});
-Selectors.setValues(Nehan.style || {});
-Selectors.setValues(__engine_args.style || {});
+Selectors.setValues(Nehan.style || {}); // copy global style
+Selectors.setValues(__engine_args.style || {}); // copy engine local style
+
+// copy global single tags by regexp
+LexingRule.addSingleTagAll(Nehan.__single_tags__);
+LexingRule.addSingleTagRexAll(Nehan.__single_tags_rex__);
 
 // export engine local interfaces
 return {
   documentContext: DocumentContext,
+  lexingRule : LexingRule,
   createPageStream : function(text){
     return new PageStream(text);
   },

@@ -39,6 +39,7 @@ module.exports = function(grunt) {
 	    "src/config.js",
 	    "src/layout.js",
 	    "src/env.js",
+	    "src/lexing-rule.js",
 	    "src/style.js",
 	    "src/class.js",
 	    "src/list.js",
