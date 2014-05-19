@@ -44,6 +44,9 @@ var Tag = (function (){
     getClasses : function(){
       return this.attrs.classes;
     },
+    getClassesRaw : function(){
+      return this.attrs.getClassesRaw();
+    },
     getName : function(){
       return this.alias || this.name;
     },

@@ -1,3 +1,4 @@
+// TODO: create hashset by js.
 var LexingRule = (function(){
   var __single_tags__ = [
     "br",

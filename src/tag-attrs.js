@@ -40,6 +40,11 @@ var TagAttrs = (function(){
       def_value = (typeof def_value === "undefined")? null : def_value;
       return (typeof this.dataset[name] === "undefined")? def_value : this.dataset[name];
     },
+    getClassesRaw : function(){
+      return List.map(this.classes, function(klass){
+	return klass.replace("nehan-", "");
+      });
+    },
     setAttr : function(name, value){
       if(name.indexOf("data-") === 0){
 	this.setData(__data_name_of(name), value);
