@@ -32,6 +32,7 @@
 }
 .nehan-rotate-90{
   word-break:normal;
+  word-wrap:normal;
   overflow:visible;
   -webkit-transform : rotate(90deg);
   -webkit-transform-origin : 50% 50%;
