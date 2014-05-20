@@ -2078,7 +2078,7 @@ var TypeSelector = (function(){
     this.name = opt.name || null;
     this.nameRex = opt.nameRex || null;
     this.id = opt.id || null;
-    this.className = opt.className || null; // TODO: multiple class names
+    this.classes = opt.classes || [];
     this.attrs = opt.attrs || [];
     this.pseudo = opt.pseudo || null;
   }
@@ -2097,7 +2097,7 @@ var TypeSelector = (function(){
 	return false;
       }
       // class selector
-      if(this.className && !style.hasMarkupClassName(this.className)){
+      if(this.classes.length > 0 && !this.testClassNames(style.getMarkupClasses())){
 	return false;
       }
       // id selector
@@ -2129,6 +2129,11 @@ var TypeSelector = (function(){
       }
       return this.nameRex.test(markup_name);
     },
+    testClassNames : function(markup_classes){
+      return List.forall(this.classes, function(klass){
+	return List.exists(markup_classes, Closure.eq(klass));
+      });
+    },
     getNameSpec : function(){
       if(this.nameRex){
 	return 1;
@@ -2142,7 +2147,7 @@ var TypeSelector = (function(){
       return this.id? 1 : 0;
     },
     getClassSpec : function(){
-      return this.className? 1 : 0;
+      return (this.classes.length > 0) ? this.classes.length : 0;
     },
     getAttrSpec : function(){
       return this.attrs.length;
@@ -2222,14 +2227,14 @@ var SelectorLexer = (function(){
       var name = this._getName();
       var name_rex = (name === null)? this._getNameRex() : null;
       var id = this._getId();
-      var klass = this._getClass();
+      var classes = this._getClasses();
       var attrs = this._getAttrs();
       var pseudo = this._getPseudo();
       return new TypeSelector({
 	name:name,
 	nameRex:name_rex,
 	id:id,
-	className:klass,
+	classes:classes,
 	attrs:attrs,
 	pseudo:pseudo
       });
@@ -2253,6 +2258,17 @@ var SelectorLexer = (function(){
     _getId : function(){
       var id = this._getByRex(rex_id);
       return id? id.substring(1) : null;
+    },
+    _getClasses : function(){
+      var classes = [];
+      while(true){
+	var klass = this._getClass();
+	if(klass === null){
+	  break;
+	}
+	classes.push(klass);
+      }
+      return classes;
     },
     _getClass : function(){
       var klass = this._getByRex(rex_class);
@@ -6873,9 +6889,6 @@ var StyleContext = (function(){
     hasFlipFlow : function(){
       return this.parent? (this.flow !== this.parent.flow) : false;
     },
-    hasMarkupClassName : function(class_name){
-      return this.markup.hasClass(class_name);
-    },
     // search property from markup attribute -> css
     getAttr : function(name, def_value){
       var ret = this.getMarkupAttr(name);
@@ -6933,6 +6946,9 @@ var StyleContext = (function(){
     // if markup is <p id="foo">, markup.id is "nehan-foo".
     getMarkupId : function(){
       return this.markup.getId();
+    },
+    getMarkupClasses : function(){
+      return this.markup.getClasses();
     },
     getMarkupContent : function(){
       return this.markup.getContent();

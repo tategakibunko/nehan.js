@@ -27,7 +27,7 @@ var TypeSelector = (function(){
     this.name = opt.name || null;
     this.nameRex = opt.nameRex || null;
     this.id = opt.id || null;
-    this.className = opt.className || null; // TODO: multiple class names
+    this.classes = opt.classes || [];
     this.attrs = opt.attrs || [];
     this.pseudo = opt.pseudo || null;
   }
@@ -46,7 +46,7 @@ var TypeSelector = (function(){
 	return false;
       }
       // class selector
-      if(this.className && !style.hasMarkupClassName(this.className)){
+      if(this.classes.length > 0 && !this.testClassNames(style.getMarkupClasses())){
 	return false;
       }
       // id selector
@@ -78,6 +78,11 @@ var TypeSelector = (function(){
       }
       return this.nameRex.test(markup_name);
     },
+    testClassNames : function(markup_classes){
+      return List.forall(this.classes, function(klass){
+	return List.exists(markup_classes, Closure.eq(klass));
+      });
+    },
     getNameSpec : function(){
       if(this.nameRex){
 	return 1;
@@ -91,7 +96,7 @@ var TypeSelector = (function(){
       return this.id? 1 : 0;
     },
     getClassSpec : function(){
-      return this.className? 1 : 0;
+      return (this.classes.length > 0) ? this.classes.length : 0;
     },
     getAttrSpec : function(){
       return this.attrs.length;

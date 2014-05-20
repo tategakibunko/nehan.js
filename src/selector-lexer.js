@@ -56,14 +56,14 @@ var SelectorLexer = (function(){
       var name = this._getName();
       var name_rex = (name === null)? this._getNameRex() : null;
       var id = this._getId();
-      var klass = this._getClass();
+      var classes = this._getClasses();
       var attrs = this._getAttrs();
       var pseudo = this._getPseudo();
       return new TypeSelector({
 	name:name,
 	nameRex:name_rex,
 	id:id,
-	className:klass,
+	classes:classes,
 	attrs:attrs,
 	pseudo:pseudo
       });
@@ -87,6 +87,17 @@ var SelectorLexer = (function(){
     _getId : function(){
       var id = this._getByRex(rex_id);
       return id? id.substring(1) : null;
+    },
+    _getClasses : function(){
+      var classes = [];
+      while(true){
+	var klass = this._getClass();
+	if(klass === null){
+	  break;
+	}
+	classes.push(klass);
+      }
+      return classes;
     },
     _getClass : function(){
       var klass = this._getByRex(rex_class);

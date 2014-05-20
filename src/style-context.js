@@ -525,9 +525,6 @@ var StyleContext = (function(){
     hasFlipFlow : function(){
       return this.parent? (this.flow !== this.parent.flow) : false;
     },
-    hasMarkupClassName : function(class_name){
-      return this.markup.hasClass(class_name);
-    },
     // search property from markup attribute -> css
     getAttr : function(name, def_value){
       var ret = this.getMarkupAttr(name);
@@ -585,6 +582,9 @@ var StyleContext = (function(){
     // if markup is <p id="foo">, markup.id is "nehan-foo".
     getMarkupId : function(){
       return this.markup.getId();
+    },
+    getMarkupClasses : function(){
+      return this.markup.getClasses();
     },
     getMarkupContent : function(){
       return this.markup.getContent();
