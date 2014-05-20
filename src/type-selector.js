@@ -16,6 +16,7 @@
 
    4. attribute selector
      div[name=value]{font-size:xxx}
+     div[name1=value1][name1^=xxx]{color:yyy}
 
    5. pseudo-class selector
      li:first-child{font-weight:bold}
