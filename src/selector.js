@@ -32,11 +32,14 @@ var Selector = (function(){
     },
     updateValue : function(value){
       for(var prop in value){
-	var fmt_value = CssParser.format(prop, value[prop]);
-	if(typeof this.value[prop] === "object" && typeof fmt_value === "object"){
-	  Args.copy(this.value[prop], fmt_value);
+	var old_value = this.value[prop] || null;
+	var new_value = CssParser.format(prop, value[prop]);
+	if(old_value === null){
+	  this.value[prop] = new_value;
+	} else if(typeof old_value === "object" && typeof new_value === "object"){
+	  Args.copy(old_value, new_value);
 	} else {
-	  this.value[prop] = fmt_value;
+	  old_value = new_value;
 	}
       }
     },
