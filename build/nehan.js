@@ -2060,6 +2060,7 @@ var PseudoSelector = (function(){
 
    2. class selector
      div.class{font-size:xxx}
+     div.class1.class2{color:yyy}
 
    3. id selector
      div#id{font-size:xxx}
@@ -2278,11 +2279,10 @@ var SelectorLexer = (function(){
       var attrs = [];
       while(true){
 	var attr = this._getByRex(rex_attr);
-	if(attr){
-	  attrs.push(new AttrSelector(attr));
-	} else {
+	if(attr === null){
 	  break;
 	}
+	attrs.push(new AttrSelector(attr));
       }
       return attrs;
     },

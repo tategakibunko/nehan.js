@@ -9,6 +9,7 @@
 
    2. class selector
      div.class{font-size:xxx}
+     div.class1.class2{color:yyy}
 
    3. id selector
      div#id{font-size:xxx}

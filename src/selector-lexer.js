@@ -107,11 +107,10 @@ var SelectorLexer = (function(){
       var attrs = [];
       while(true){
 	var attr = this._getByRex(rex_attr);
-	if(attr){
-	  attrs.push(new AttrSelector(attr));
-	} else {
+	if(attr === null){
 	  break;
 	}
+	attrs.push(new AttrSelector(attr));
       }
       return attrs;
     },
