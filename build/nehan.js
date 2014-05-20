@@ -2133,7 +2133,7 @@ var TypeSelector = (function(){
       if(this.nameRex){
 	return 1;
       }
-      if(this.name === null || this.name === "*" || this.name === ""){
+      if(this.name === null || this.name === "*"){
 	return 0;
       }
       return 1;
