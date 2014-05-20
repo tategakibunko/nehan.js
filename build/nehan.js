@@ -2147,7 +2147,7 @@ var TypeSelector = (function(){
       return this.id? 1 : 0;
     },
     getClassSpec : function(){
-      return (this.classes.length > 0) ? this.classes.length : 0;
+      return this.classes.length;
     },
     getAttrSpec : function(){
       return this.attrs.length;
