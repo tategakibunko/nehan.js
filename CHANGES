@@ -10,6 +10,7 @@ version 5.0.2 2014/??/??
 =========================
 o regexp name selector is supported.
 o to define custom single tag, add lexing-rule interfaces(setSingleTag, setSingleTagRex).
+o enabled selector of multiple css classes like 'div.nehan-xxx.nehan-yyy.nehan-zzz'.
 * eval unmanaged css props before store
 
 version 5.0.1 2014/05/13
