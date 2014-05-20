@@ -2133,7 +2133,10 @@ var TypeSelector = (function(){
       if(this.nameRex){
 	return 1;
       }
-      return (this.name !== "*" && this.name !== "") ? 1 : 0;
+      if(this.name === null || this.name === "*" || this.name === ""){
+	return 0;
+      }
+      return 1;
     },
     getIdSpec : function(){
       return this.id? 1 : 0;
