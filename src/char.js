@@ -309,7 +309,7 @@ var Char = (function(){
       return this.data === "\n";
     },
     isSpaceChar : function(){
-      return this.data === " " || this.data === "&nbsp;" || this.data === "\u3000" || this.data === "\t";
+      return (this.data === " " || this.data === "&nbsp;" || this.data === "\t");
     },
     isWhiteSpaceChar : function(){
       return this.isNewLineChar() || this.isSpaceChar();
