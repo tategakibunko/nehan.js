@@ -32,12 +32,12 @@ var HtmlLexer = (function (){
       return close_pos;
     }
     var restart_pos = recur_pos + tag_name.length + 2; // 2 = "<>".length
-    var close_pos2 = arguments.callee(buff.substring(restart_pos), tag_name, open_tag_rex, close_tag);
+    var close_pos2 = __find_close_pos(buff.substring(restart_pos), tag_name, open_tag_rex, close_tag);
     if(close_pos2 < 0){
       return -1;
     }
     var restart_pos2 = restart_pos + close_pos2 + tag_name.length + 3; // 3 = "</>".length
-    return restart_pos2 + arguments.callee(buff.substring(restart_pos2), tag_name, open_tag_rex, close_tag);
+    return restart_pos2 + __find_close_pos(buff.substring(restart_pos2), tag_name, open_tag_rex, close_tag);
   };
 
   function HtmlLexer(src){
@@ -104,7 +104,7 @@ var HtmlLexer = (function (){
     _getChar : function(){
       return this.buff.substring(0,1);
     },
-    _getTagContentAux : function(tag_name){
+    _getTagContent : function(tag_name){
       // why we added [\\s|>] for open_tag_rex?
       // because if we choose pattern only "<" + tag_name,
       // "<p" matches both "<p" and "<pre".
@@ -129,13 +129,6 @@ var HtmlLexer = (function (){
 
       // all other case, return whole rest buffer.
       return {closed:false, content:this.buff};
-    },
-    _getTagContent : function(tag_name){
-      try {
-	return this._getTagContentAux(tag_name);
-      } catch (e){
-	return {closed:false, content:""};
-      }
     },
     _parseTag : function(tagstr){
       var tag = new Tag(tagstr);

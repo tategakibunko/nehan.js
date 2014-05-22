@@ -1,13 +1,17 @@
 var Args = {
   copy : function(dst, args){
     dst = dst || {};
-    for(var prop in args){
+    var keys = Object.keys(args);
+    for(var i = 0, len = keys.length; i < len; i++){
+      var prop = keys[i];
       dst[prop] = args[prop];
     }
     return dst;
   },
   copy2 : function(dst, args){
-    for(var prop in args){
+    var keys = Object.keys(args);
+    for(var i = 0, len = keys.length; i < len; i++){
+      var prop = keys[i];
       if(typeof dst[prop] === "object"){
 	this.copy2(dst[prop], args[prop]);
       } else {
@@ -16,8 +20,10 @@ var Args = {
     }
   },
   merge : function(dst, defaults, args){
-    for(var prop in defaults){
-      dst[prop] = (typeof args[prop] == "undefined")? defaults[prop] : args[prop];
+    var keys = Object.keys(defaults);
+    for(var i = 0, len = keys.length; i < len; i++){
+      var prop = keys[i];
+      dst[prop] = (typeof args[prop] === "undefined")? defaults[prop] : args[prop];
     }
     return dst;
   }
