@@ -169,12 +169,21 @@ var Char = (function(){
     _setRotate : function(angle){
       this.rotate = angle;
     },
+    _setRotateOrImg : function(angle, img, vscale){
+      if(Env.isTransformEnable){
+	this._setRotate(angle);
+	return;
+      }
+      this._setImg(img, vscale);
+    },
     _setupRef : function(c1){
       switch(c1){
       case "&lt;":
-	Env.isTransformEnable? this._setRotate(90) : this._setImg("kakko7", 0.5); break;
+	this._setRotateOrImg(90, "kakko7", 0.5);
+	break;
       case "&gt;":
-	Env.isTransformEnable? this._setRotate(90) : this._setImg("kakko8", 0.5); break;
+	this._setRotateOrImg(90, "kakko8", 0.5);
+	break;
       }
     },
     _setupNormal : function(code){
