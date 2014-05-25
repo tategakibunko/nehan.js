@@ -12,7 +12,7 @@ var BreakAfterGenerator = (function(){
     context.setBreakAfter(true);
     this._terminate = true;
     return this.style.createBreakLine();
-  }
+  };
 
   return BreakAfterGenerator;
 })();
