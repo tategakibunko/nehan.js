@@ -37,7 +37,7 @@ var Word = (function(){
       css["line-height"] = this.bodySize + "px";
       var trans = Math.floor((this.bodySize - line.style.getFontSize()) / 2);
       if(trans > 0){
-	css["transform"] = "rotate(90deg) translate(-" + trans + "px, 0)";
+	css.transform = "rotate(90deg) translate(-" + trans + "px, 0)";
       }
       return css;
     },

@@ -35,7 +35,7 @@ var SelectorStateMachine = (function(){
       }
     }
     return null;
-  }
+  };
 
   return {
     // return true if all the selector-tokens(TypeSelector or combinator) matches the style-context.
@@ -92,6 +92,6 @@ var SelectorStateMachine = (function(){
       }
       return true; // all accepted
     }
-  }
+  };
 })();
 

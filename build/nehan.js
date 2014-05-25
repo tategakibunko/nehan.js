@@ -2334,7 +2334,7 @@ var SelectorStateMachine = (function(){
       }
     }
     return null;
-  }
+  };
 
   return {
     // return true if all the selector-tokens(TypeSelector or combinator) matches the style-context.
@@ -2391,7 +2391,7 @@ var SelectorStateMachine = (function(){
       }
       return true; // all accepted
     }
-  }
+  };
 })();
 
 
@@ -3353,7 +3353,7 @@ var Word = (function(){
       css["line-height"] = this.bodySize + "px";
       var trans = Math.floor((this.bodySize - line.style.getFontSize()) / 2);
       if(trans > 0){
-	css["transform"] = "rotate(90deg) translate(-" + trans + "px, 0)";
+	css.transform = "rotate(90deg) translate(-" + trans + "px, 0)";
       }
       return css;
     },
@@ -7145,14 +7145,16 @@ var StyleContext = (function(){
       switch(this.boxSizing){
       case "margin-box": return outer_measure - this.getEdgeMeasure();
       case "border-box": return outer_measure - this.getInnerEdgeMeasure();
-      case "content-box": default: return outer_measure;
+      case "content-box": return outer_measure;
+      default: return outer_measure;
       }
     },
     _computeContentExtent : function(outer_extent){
       switch(this.boxSizing){
       case "margin-box": return outer_extent - this.getEdgeExtent();
       case "border-box": return outer_extent - this.getInnerEdgeExtent();
-      case "content-box": default: return outer_extent;
+      case "content-box": return outer_extent;
+      default: return outer_extent;
       }
     },
     _computeFontSize : function(val, unit_size){

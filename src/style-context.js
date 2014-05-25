@@ -777,14 +777,16 @@ var StyleContext = (function(){
       switch(this.boxSizing){
       case "margin-box": return outer_measure - this.getEdgeMeasure();
       case "border-box": return outer_measure - this.getInnerEdgeMeasure();
-      case "content-box": default: return outer_measure;
+      case "content-box": return outer_measure;
+      default: return outer_measure;
       }
     },
     _computeContentExtent : function(outer_extent){
       switch(this.boxSizing){
       case "margin-box": return outer_extent - this.getEdgeExtent();
       case "border-box": return outer_extent - this.getInnerEdgeExtent();
-      case "content-box": default: return outer_extent;
+      case "content-box": return outer_extent;
+      default: return outer_extent;
       }
     },
     _computeFontSize : function(val, unit_size){
