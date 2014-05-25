@@ -3,8 +3,8 @@ var Selector = (function(){
   function Selector(key, value){
     this.key = this._normalizeKey(key); // selector source like 'h1 > p'
     this.value = this._formatValue(value); // associated css value object like {font-size:16px}
-    this.parts = this._getSelectorParts(this.key); // [type-selector | combinator]
-    this.spec = this._countSpec(this.parts); // specificity
+    this.elements = this._getSelectorElements(this.key); // [type-selector | combinator]
+    this.spec = this._countSpec(this.elements); // count specificity
   }
 
   var set_format_value = function(ret, prop, format_value){
@@ -25,10 +25,11 @@ var Selector = (function(){
 
   Selector.prototype = {
     test : function(style){
-      return SelectorStateMachine.accept(style, this.parts);
+      return SelectorStateMachine.accept(style, this.elements);
     },
-    testPseudoElement : function(style, pseudo_element_name){
-      return this.hasPseudoElementName(pseudo_element_name) && this.test(style);
+    // element_name: "before", "after", "first-line", "first-letter"
+    testPseudoElement : function(style, element_name){
+      return this.hasPseudoElementName(element_name) && this.test(style);
     },
     updateValue : function(value){
       for(var prop in value){
@@ -60,9 +61,9 @@ var Selector = (function(){
     },
     // count selector 'specificity'
     // see http://www.w3.org/TR/css3-selectors/#specificity
-    _countSpec : function(parts){
+    _countSpec : function(elements){
       var a = 0, b = 0, c = 0;
-      List.iter(parts, function(token){
+      List.iter(elements, function(token){
 	if(token instanceof TypeSelector){
 	  a += token.getIdSpec();
 	  b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();
@@ -71,7 +72,7 @@ var Selector = (function(){
       });
       return parseInt([a,b,c].join(""), 10); // maybe ok in most case.
     },
-    _getSelectorParts : function(key){
+    _getSelectorElements : function(key){
       var lexer = new SelectorLexer(key);
       return lexer.getTokens();
     },
