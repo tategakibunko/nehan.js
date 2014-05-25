@@ -74,7 +74,7 @@ var Box = (function(){
     getCssInlineBlock : function(){
       var css = this.getCssBlock();
       if(!this.style.isFloated()){
-	delete css["float"];
+	delete css["css-float"];
       }
       css.display = "inline-block";
       return css;

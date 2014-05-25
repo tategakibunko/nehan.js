@@ -2993,7 +2993,7 @@ var Char = (function(){
     },
     getCssVertRotateCharIE : function(line){
       var css = {}, font_size = line.style.getFontSize();
-      css["float"] = "left";
+      css["css-float"] = "left";
       css["writing-mode"] = "tb-rl";
       css["padding-left"] = Math.round(font_size / 2) + "px";
       css["line-height"] = font_size + "px";
@@ -3354,7 +3354,7 @@ var Word = (function(){
     getCssVertTransIE : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css["font-family"] = "monospace";
-      css["float"] = "left";
+      css["css-float"] = "left";
       css["writing-mode"] = "tb-rl";
       css["letter-spacing"] = (line.style.letterSpacing || 0) + "px";
       css["padding-left"] = Math.round(font_size / 2) + "px";
@@ -3476,7 +3476,7 @@ var Ruby = (function(){
     },
     getCssVertRt : function(line){
       var css = {};
-      css["float"] = "left";
+      css["css-float"] = "left";
       return css;
     },
     getCssHoriRt : function(line){
@@ -3488,7 +3488,7 @@ var Ruby = (function(){
     },
     getCssVertRb : function(line){
       var css = {};
-      css["float"] = "left";
+      css["css-float"] = "left";
       if(this.padding){
 	Args.copy(css, this.padding.getCss());
       }
@@ -4062,9 +4062,9 @@ var BlockFlow = (function(){
   BlockFlow.prototype.getCss = function(){
     var css = {};
     if(this.isHorizontal()){
-      css["float"] = (this.dir === "lr")? "left" : "right";
+      css["css-float"] = (this.dir === "lr")? "left" : "right";
     } else if(this.isVertical()){
-      css["float"] = (this.dir === "lr")? "left" : "right";
+      css["css-float"] = (this.dir === "lr")? "left" : "right";
     }
     return css;
   };
@@ -5009,7 +5009,7 @@ var Box = (function(){
     getCssInlineBlock : function(){
       var css = this.getCssBlock();
       if(!this.style.isFloated()){
-	delete css["float"];
+	delete css["css-float"];
       }
       css.display = "inline-block";
       return css;
@@ -6190,9 +6190,9 @@ var FloatDirection = (function(){
       var css = {};
       if(flow.isTextHorizontal()){
 	if(this.isStart()){
-	  css["float"] = "left";
+	  css["css-float"] = "left";
 	} else if(this.isEnd()){
-	  css["float"] = "right";
+	  css["css-float"] = "right";
 	}
       }
       return css;
@@ -9202,7 +9202,7 @@ var LayoutEvaluator = (function(){
 
   LayoutEvaluator.prototype = {
     _createElement : function(name, opt){
-      var opt = opt || {};
+      opt = opt || {};
       var styles = opt.styles || {};
       var attrs = opt.attrs? ((opt.attrs instanceof TagAttrs)? opt.attrs.attrs : opt.attrs) : {};
       var dataset = opt.attrs? opt.attrs.dataset : {};
@@ -9217,14 +9217,9 @@ var LayoutEvaluator = (function(){
 	dom.innerHTML = opt.content;
       }
 
-      // font-family -> fontFamily(use camel case by default)
-      // float -> cssFloat(special case)
+      // store css value to dom.style[<camelized-css-property>]
       Obj.iter(styles, function(style_name, value){
-	if(style_name === "float"){
-	  dom.style.cssFloat = value;
-	} else {
-	  dom.style[Utils.camelize(style_name)] = value;
-	}
+	dom.style[Utils.camelize(style_name)] = value;
       });
 
       // notice that class(className in style object) is given by variable "Box::classes".

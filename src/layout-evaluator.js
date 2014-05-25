@@ -3,7 +3,7 @@ var LayoutEvaluator = (function(){
 
   LayoutEvaluator.prototype = {
     _createElement : function(name, opt){
-      var opt = opt || {};
+      opt = opt || {};
       var styles = opt.styles || {};
       var attrs = opt.attrs? ((opt.attrs instanceof TagAttrs)? opt.attrs.attrs : opt.attrs) : {};
       var dataset = opt.attrs? opt.attrs.dataset : {};
@@ -18,14 +18,9 @@ var LayoutEvaluator = (function(){
 	dom.innerHTML = opt.content;
       }
 
-      // font-family -> fontFamily(use camel case by default)
-      // float -> cssFloat(special case)
+      // store css value to dom.style[<camelized-css-property>]
       Obj.iter(styles, function(style_name, value){
-	if(style_name === "float"){
-	  dom.style.cssFloat = value;
-	} else {
-	  dom.style[Utils.camelize(style_name)] = value;
-	}
+	dom.style[Utils.camelize(style_name)] = value;
       });
 
       // notice that class(className in style object) is given by variable "Box::classes".

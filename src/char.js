@@ -67,7 +67,7 @@ var Char = (function(){
     },
     getCssVertRotateCharIE : function(line){
       var css = {}, font_size = line.style.getFontSize();
-      css["float"] = "left";
+      css["css-float"] = "left";
       css["writing-mode"] = "tb-rl";
       css["padding-left"] = Math.round(font_size / 2) + "px";
       css["line-height"] = font_size + "px";

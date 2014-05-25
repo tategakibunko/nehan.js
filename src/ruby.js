@@ -31,7 +31,7 @@ var Ruby = (function(){
     },
     getCssVertRt : function(line){
       var css = {};
-      css["float"] = "left";
+      css["css-float"] = "left";
       return css;
     },
     getCssHoriRt : function(line){
@@ -43,7 +43,7 @@ var Ruby = (function(){
     },
     getCssVertRb : function(line){
       var css = {};
-      css["float"] = "left";
+      css["css-float"] = "left";
       if(this.padding){
 	Args.copy(css, this.padding.getCss());
       }

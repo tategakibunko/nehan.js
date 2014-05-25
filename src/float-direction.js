@@ -8,9 +8,9 @@ var FloatDirection = (function(){
       var css = {};
       if(flow.isTextHorizontal()){
 	if(this.isStart()){
-	  css["float"] = "left";
+	  css["css-float"] = "left";
 	} else if(this.isEnd()){
-	  css["float"] = "right";
+	  css["css-float"] = "right";
 	}
       }
       return css;

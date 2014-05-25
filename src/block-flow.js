@@ -17,9 +17,9 @@ var BlockFlow = (function(){
   BlockFlow.prototype.getCss = function(){
     var css = {};
     if(this.isHorizontal()){
-      css["float"] = (this.dir === "lr")? "left" : "right";
+      css["css-float"] = (this.dir === "lr")? "left" : "right";
     } else if(this.isVertical()){
-      css["float"] = (this.dir === "lr")? "left" : "right";
+      css["css-float"] = (this.dir === "lr")? "left" : "right";
     }
     return css;
   };

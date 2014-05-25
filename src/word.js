@@ -44,7 +44,7 @@ var Word = (function(){
     getCssVertTransIE : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css["font-family"] = "monospace";
-      css["float"] = "left";
+      css["css-float"] = "left";
       css["writing-mode"] = "tb-rl";
       css["letter-spacing"] = (line.style.letterSpacing || 0) + "px";
       css["padding-left"] = Math.round(font_size / 2) + "px";
