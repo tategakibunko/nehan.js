@@ -2245,7 +2245,7 @@ var SelectorLexer = (function(){
       });
     },
     _getName : function(){
-      return this._getByRex(rex_type_name);
+      return this._getByRex(rex_name);
     },
     // type name defined by regexp
     // "/h[1-6]/.nehan-some-class span"
@@ -2256,9 +2256,6 @@ var SelectorLexer = (function(){
 	return null;
       }
       return new RegExp(name_rex.replace(/[\/]/g, ""));
-    },
-    _getName : function(){
-      return this._getByRex(rex_name);
     },
     _getId : function(){
       var id = this._getByRex(rex_id);
@@ -7731,10 +7728,9 @@ var InlineContext = (function(){
       return List.last(this.texts);
     },
     justify : function(head){
-      var last = this.texts.length - 1;
-      var ptr = last;
+      var last = this.texts.length - 1, ptr = last, tail;
       while(ptr >= 0){
-	var tail = this.texts[ptr];
+	tail = this.texts[ptr];
 	if(head && head.isHeadNg && head.isHeadNg() || tail.isTailNg && tail.isTailNg()){
 	  head = tail;
 	  ptr--;

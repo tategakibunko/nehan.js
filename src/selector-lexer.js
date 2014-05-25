@@ -69,7 +69,7 @@ var SelectorLexer = (function(){
       });
     },
     _getName : function(){
-      return this._getByRex(rex_type_name);
+      return this._getByRex(rex_name);
     },
     // type name defined by regexp
     // "/h[1-6]/.nehan-some-class span"
@@ -80,9 +80,6 @@ var SelectorLexer = (function(){
 	return null;
       }
       return new RegExp(name_rex.replace(/[\/]/g, ""));
-    },
-    _getName : function(){
-      return this._getByRex(rex_name);
     },
     _getId : function(){
       var id = this._getByRex(rex_id);

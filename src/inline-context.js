@@ -86,10 +86,9 @@ var InlineContext = (function(){
       return List.last(this.texts);
     },
     justify : function(head){
-      var last = this.texts.length - 1;
-      var ptr = last;
+      var last = this.texts.length - 1, ptr = last, tail;
       while(ptr >= 0){
-	var tail = this.texts[ptr];
+	tail = this.texts[ptr];
 	if(head && head.isHeadNg && head.isHeadNg() || tail.isTailNg && tail.isTailNg()){
 	  head = tail;
 	  ptr--;
