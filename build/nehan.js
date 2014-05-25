@@ -2424,11 +2424,11 @@ var Selector = (function(){
   };
 
   Selector.prototype = {
-    test : function(style, pseudo_element_name){
-      if(pseudo_element_name && !this.hasPseudoElementName(pseudo_element_name)){
-	return false;
-      }
+    test : function(style){
       return SelectorStateMachine.accept(style, this.parts);
+    },
+    testPseudoElement : function(style, pseudo_element_name){
+      return this.hasPseudoElementName(pseudo_element_name) && this.test(style);
     },
     updateValue : function(value){
       for(var prop in value){
@@ -2549,7 +2549,7 @@ var Selectors = (function(){
   // => style = 'p', pseudo_element_name = 'first-letter'
   var get_value_pe = function(style, pseudo_element_name){
     return List.fold(selectors_pe, {}, function(ret, selector){
-      return selector.test(style, pseudo_element_name)? Args.copy(ret, selector.getValue()) : ret;
+      return selector.testPseudoElement(style, pseudo_element_name)? Args.copy(ret, selector.getValue()) : ret;
     });
   };
 

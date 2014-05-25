@@ -24,11 +24,11 @@ var Selector = (function(){
   };
 
   Selector.prototype = {
-    test : function(style, pseudo_element_name){
-      if(pseudo_element_name && !this.hasPseudoElementName(pseudo_element_name)){
-	return false;
-      }
+    test : function(style){
       return SelectorStateMachine.accept(style, this.parts);
+    },
+    testPseudoElement : function(style, pseudo_element_name){
+      return this.hasPseudoElementName(pseudo_element_name) && this.test(style);
     },
     updateValue : function(value){
       for(var prop in value){

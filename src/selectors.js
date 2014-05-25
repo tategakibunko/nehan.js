@@ -55,7 +55,7 @@ var Selectors = (function(){
   // => style = 'p', pseudo_element_name = 'first-letter'
   var get_value_pe = function(style, pseudo_element_name){
     return List.fold(selectors_pe, {}, function(ret, selector){
-      return selector.test(style, pseudo_element_name)? Args.copy(ret, selector.getValue()) : ret;
+      return selector.testPseudoElement(style, pseudo_element_name)? Args.copy(ret, selector.getValue()) : ret;
     });
   };
 
