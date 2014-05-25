@@ -169,7 +169,7 @@ var Env = (function(){
   var nav = navigator.appName;
   var ua = navigator.userAgent.toLowerCase();
   var is_pure_trident = ua.indexOf("trident") >= 0 && ua.indexOf("msie") < 0;
-  var browser, version, is_transform_enable, tmp_match;
+  var browser, version, tmp_match;
   if(is_pure_trident){
     browser = "msie";
     tmp_match = ua.match(/rv:([\.\d]+)/i);
@@ -8615,9 +8615,9 @@ var FloatGroupStack = (function(){
 
   // [float block] -> [FloatGroup]
   var make_float_groups = function(flow, float_direction, blocks){
-    var ret = [];
+    var ret = [], group;
     do{
-      var group = pop_float_group(flow, float_direction, blocks);
+      group = pop_float_group(flow, float_direction, blocks);
       if(group){
 	ret.push(group);
       }

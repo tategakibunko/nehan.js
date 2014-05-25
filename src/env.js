@@ -2,7 +2,7 @@ var Env = (function(){
   var nav = navigator.appName;
   var ua = navigator.userAgent.toLowerCase();
   var is_pure_trident = ua.indexOf("trident") >= 0 && ua.indexOf("msie") < 0;
-  var browser, version, is_transform_enable, tmp_match;
+  var browser, version, tmp_match;
   if(is_pure_trident){
     browser = "msie";
     tmp_match = ua.match(/rv:([\.\d]+)/i);

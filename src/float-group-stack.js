@@ -25,9 +25,9 @@ var FloatGroupStack = (function(){
 
   // [float block] -> [FloatGroup]
   var make_float_groups = function(flow, float_direction, blocks){
-    var ret = [];
+    var ret = [], group;
     do{
-      var group = pop_float_group(flow, float_direction, blocks);
+      group = pop_float_group(flow, float_direction, blocks);
       if(group){
 	ret.push(group);
       }
