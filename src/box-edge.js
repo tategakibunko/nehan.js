@@ -1,8 +1,9 @@
 var BoxEdge = (function (){
-  function BoxEdge(){
-    this.padding = new Padding();
-    this.border = new Border();
-    this.margin = new Margin();
+  function BoxEdge(opt){
+    opt = opt || {};
+    this.padding = opt.padding || new Padding();
+    this.border = opt.border || new Border();
+    this.margin = opt.margin || new Margin();
   }
 
   BoxEdge.prototype = {

@@ -998,35 +998,64 @@ var StyleContext = (function(){
       return this.getCssAttr("box-sizing", "margin-box");
     },
     _loadEdge : function(flow, font_size){
-      var padding = this.getCssAttr("padding");
-      var margin = this.getCssAttr("margin");
-      var border_width = this.getCssAttr("border-width");
-      if(padding === null && margin === null && border_width === null){
+      var padding = this._loadPadding(flow, font_size);
+      var margin = this._loadMargin(flow, font_size);
+      var border = this._loadBorder(flow, font_size);
+      if(padding === null && margin === null && border === null){
 	return null;
       }
-      var edge = new BoxEdge();
-      if(padding){
-	edge.padding.setSize(flow, this._computeEdgeSize(padding, font_size));
+      return new BoxEdge({
+	padding:padding,
+	margin:margin,
+	border:border
+      });
+    },
+    _loadEdgeSize : function(font_size, prop){
+      var edge_size = this.getCssAttr(prop);
+      if(edge_size === null){
+	return null;
       }
-      if(margin){
-	edge.margin.setSize(flow, this._computeEdgeSize(margin, font_size));
+      return this._computeEdgeSize(edge_size, font_size);
+    },
+    _loadPadding : function(flow, font_size){
+      var edge_size = this._loadEdgeSize(font_size, "padding");
+      if(edge_size === null){
+	return null;
       }
-      if(border_width){
-	edge.border.setSize(flow, this._computeEdgeSize(border_width, font_size));
+      var padding = new Padding();
+      padding.setSize(flow, edge_size);
+      return padding;
+    },
+    _loadMargin : function(flow, font_size){
+      var edge_size = this._loadEdgeSize(font_size, "margin");
+      if(edge_size === null){
+	return null;
       }
+      var margin = new Margin();
+      margin.setSize(flow, edge_size);
+      return margin;
+    },
+    _loadBorder : function(flow, font_size){
+      var edge_size = this._loadEdgeSize(font_size, "border-width");
+      if(edge_size === null){
+	return null;
+      }
+      var border = new Border();
+      border.setSize(flow, edge_size);
+
       var border_radius = this.getCssAttr("border-radius");
       if(border_radius){
-	edge.setBorderRadius(flow, this._computeCornerSize(border_radius, font_size));
+	border.setRadius(flow, this._computeCornerSize(border_radius, font_size));
       }
       var border_color = this.getCssAttr("border-color");
       if(border_color){
-	edge.setBorderColor(flow, border_color);
+	border.setColor(flow, border_color);
       }
       var border_style = this.getCssAttr("border-style");
       if(border_style){
-	edge.setBorderStyle(flow, border_style);
+	border.setStyle(flow, border_style);
       }
-      return edge;
+      return border;
     },
     _loadLineRate : function(){
       var value = this.getCssAttr("line-rate", "inherit");
