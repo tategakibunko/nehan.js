@@ -319,6 +319,15 @@ var Script = {
   "custom-tag-test":[
     "<p><tip title='click here'>tip content</tip></p>",
     "<p><tip title='タイトル'>チップの内容</tip></p>"
+  ].join("\n"),
+
+  "margin-cancel":[
+    "<div style='margin:0 0 2em 0'>block1</div>",
+    "<div style='margin:1em 0 0 0'>block2</div>",
+    "<div style='margin:0 0 1em 0'>block1</div>",
+    "<div style='margin:1em 0 0 0'>block2</div>",
+    "<div style='margin:0 0 1em 0'>block1</div>",
+    "<div style='margin:2em 0 0 0'>block2</div>"
   ].join("\n")
 };
 
