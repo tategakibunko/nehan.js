@@ -1036,7 +1036,30 @@ var StyleContext = (function(){
       }
       var margin = new Margin();
       margin.setSize(flow, edge_size);
+
+      // cancel margin between previous sibling and cur element if
+      // 1. prev sibling element with edge exists.
+      // 2. both prev and cur have display "block".
+      // 3. both prev and cur have same box flow.
+      // 4. both prev and cur is not floated element.
+      // 5. prev has margin-after and cur has margin-before.
+      if(this.prev && this.prev.display === "block" && !this.prev.isFloated() && this.prev.edge &&
+	 this.flow === this.prev.flow &&
+	 this.display === "block" && !this.isFloated() &&
+	 (this.prev.edge.margin.getAfter(this.flow) > 0) &&
+	 (margin.getBefore(this.flow) > 0)){
+	this._cancelMargin(this.flow, margin, this.prev.edge.margin);
+      }
       return margin;
+    },
+    _cancelMargin : function(flow, cur_margin, prev_margin){
+      var after = prev_margin.getAfter(flow);
+      var before = cur_margin.getBefore(flow);
+      if(after >= before){
+	cur_margin.setBefore(flow, 0);
+      } else {
+	cur_margin.setBefore(flow, before - after);
+      }
     },
     _loadBorder : function(flow, font_size){
       var edge_size = this._loadEdgeSize(font_size, "border-width");
