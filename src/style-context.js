@@ -556,7 +556,7 @@ var StyleContext = (function(){
       }
       // if value is function, call with selector context, and format the returned value.
       if(typeof value === "function"){
-	return CssParser.format(name, value(this.selectorContext)).value;
+	return CssParser.format(name, value(this.selectorContext));
       }
       return value; // already formatted
     },
@@ -902,8 +902,7 @@ var StyleContext = (function(){
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]).toLowerCase();
 	  var value = Utils.trim(nv[1]);
-	  var fmt_value = CssParser.format(prop, value);
-	  ret[fmt_value.prop] = fmt_value.value;
+	  ret[prop] = CssParser.format(prop, value);
 	}
 	return ret;
       });

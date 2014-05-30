@@ -1877,18 +1877,7 @@ var CssParser = (function(){
     return {}; // TODO
   };
 
-  var format_prop = function(prop){
-    // subdivided property is formated as unified value,
-    // so property is renamed to unified one.
-    if(prop.indexOf("margin-") >= 0 ||
-       prop.indexOf("padding-") >= 0 ||
-       prop.indexOf("border-width-") >= 0){
-      return prop.split("-")[0];
-    }
-    return prop;
-  };
-
-  var format_value = function(prop, value){
+  var format = function(prop, value){
     switch(typeof value){
     case "function": case "object": case "boolean":
       return value;
@@ -1914,16 +1903,6 @@ var CssParser = (function(){
     case "padding":
       return parse_4d(value);
 
-    // subdivided properties
-    case "margin-before": case "padding-before": case "border-width-before":
-      return {before:value, end:0, after:0, start:0};
-    case "margin-end": case "padding-end": case "border-width-end":
-      return {before:0, end:value, after:0, start:0};
-    case "margin-after": case "padding-after": case "border-width-after":
-      return {before:0, end:0, after:value, start:0};
-    case "margin-start": case "padding-start": case "border-width-start":
-      return {before:0, end:0, after:0, start:value};
-
     // unmanaged properties is treated as it is.
     default: return value;
     }
@@ -1931,9 +1910,7 @@ var CssParser = (function(){
 
   return {
     format : function(prop, value){
-      var prop = format_prop(prop);
-      var value = format_value(prop, value);
-      return {prop:prop, value:value};
+      return format(prop, value);
     }
   };
 })();
@@ -2454,11 +2431,11 @@ var Selector = (function(){
 	var old_value = this.value[prop] || null;
 	var new_value = CssParser.format(prop, value[prop]);
 	if(old_value === null){
-	  this.value[new_value.prop] = new_value.value;
+	  this.value[prop] = new_value;
 	} else if(typeof old_value === "object" && typeof new_value === "object"){
-	  Args.copy(old_value, new_value.value);
+	  Args.copy(old_value, new_value);
 	} else {
-	  old_value = new_value.value;
+	  old_value = new_value;
 	}
       }
     },
@@ -2501,8 +2478,7 @@ var Selector = (function(){
     _formatValue : function(value){
       var ret = {};
       for(var prop in value){
-	var fmt_value = CssParser.format(prop, value[prop]);
-	set_format_value(ret, fmt_value.prop, fmt_value.value);
+	set_format_value(ret, prop, CssParser.format(prop, value[prop]));
       }
       return ret;
     }
@@ -6947,7 +6923,7 @@ var StyleContext = (function(){
       }
       // if value is function, call with selector context, and format the returned value.
       if(typeof value === "function"){
-	return CssParser.format(name, value(this.selectorContext)).value;
+	return CssParser.format(name, value(this.selectorContext));
       }
       return value; // already formatted
     },
@@ -7293,8 +7269,7 @@ var StyleContext = (function(){
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]).toLowerCase();
 	  var value = Utils.trim(nv[1]);
-	  var fmt_value = CssParser.format(prop, value);
-	  ret[fmt_value.prop] = fmt_value.value;
+	  ret[prop] = CssParser.format(prop, value);
 	}
 	return ret;
       });
