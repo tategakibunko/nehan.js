@@ -1900,6 +1900,8 @@ var CssParser = (function(){
       return parse_list_style_abbr(value);
     case "margin":
       return parse_4d(value);
+      // TODO
+      // [margin/padding/border-width]-[before/end/after/start]
     case "padding":
       return parse_4d(value);
     default: return value; // unmanaged properties is treated as it is.
