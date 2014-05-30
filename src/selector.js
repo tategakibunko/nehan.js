@@ -36,11 +36,11 @@ var Selector = (function(){
 	var old_value = this.value[prop] || null;
 	var new_value = CssParser.format(prop, value[prop]);
 	if(old_value === null){
-	  this.value[prop] = new_value;
+	  this.value[new_value.prop] = new_value.value;
 	} else if(typeof old_value === "object" && typeof new_value === "object"){
-	  Args.copy(old_value, new_value);
+	  Args.copy(old_value, new_value.value);
 	} else {
-	  old_value = new_value;
+	  old_value = new_value.value;
 	}
       }
     },
@@ -83,7 +83,8 @@ var Selector = (function(){
     _formatValue : function(value){
       var ret = {};
       for(var prop in value){
-	set_format_value(ret, prop, CssParser.format(prop, value[prop]));
+	var fmt_value = CssParser.format(prop, value[prop]);
+	set_format_value(ret, fmt_value.prop, fmt_value.value);
       }
       return ret;
     }

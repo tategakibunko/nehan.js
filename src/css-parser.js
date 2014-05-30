@@ -157,7 +157,18 @@ var CssParser = (function(){
     return {}; // TODO
   };
 
-  var format = function(prop, value){
+  var format_prop = function(prop){
+    // subdivided property is formated as unified value,
+    // so property is renamed to unified one.
+    if(prop.indexOf("margin-") >= 0 ||
+       prop.indexOf("padding-") >= 0 ||
+       prop.indexOf("border-width-") >= 0){
+      return prop.split("-")[0];
+    }
+    return prop;
+  };
+
+  var format_value = function(prop, value){
     switch(typeof value){
     case "function": case "object": case "boolean":
       return value;
@@ -180,21 +191,29 @@ var CssParser = (function(){
       return parse_list_style_abbr(value);
     case "margin":
       return parse_4d(value);
-      // TODO
-      // [margin/padding/border-width]-[before/end/after/start]
     case "padding":
       return parse_4d(value);
-    default: return value; // unmanaged properties is treated as it is.
+
+    // subdivided properties
+    case "margin-before": case "padding-before": case "border-width-before":
+      return {before:value, end:0, after:0, start:0};
+    case "margin-end": case "padding-end": case "border-width-end":
+      return {before:0, end:value, after:0, start:0};
+    case "margin-after": case "padding-after": case "border-width-after":
+      return {before:0, end:0, after:value, start:0};
+    case "margin-start": case "padding-start": case "border-width-start":
+      return {before:0, end:0, after:0, start:value};
+
+    // unmanaged properties is treated as it is.
+    default: return value;
     }
   };
 
   return {
     format : function(prop, value){
-      try {
-	return format(prop, value);
-      } catch(e){
-	return {};
-      }
+      var prop = format_prop(prop);
+      var value = format_value(prop, value);
+      return {prop:prop, value:value};
     }
   };
 })();

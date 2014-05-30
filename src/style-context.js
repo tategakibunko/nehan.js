@@ -552,11 +552,11 @@ var StyleContext = (function(){
       // "oncreate" not return style, it's a hook called after this style is converted into dom element.
       // so leave it as it is.
       if(name === "oncreate"){
-	return value; 
+	return value;
       }
       // if value is function, call with selector context, and format the returned value.
       if(typeof value === "function"){
-	return CssParser.format(name, value(this.selectorContext));
+	return CssParser.format(name, value(this.selectorContext)).value;
       }
       return value; // already formatted
     },
@@ -902,7 +902,8 @@ var StyleContext = (function(){
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]).toLowerCase();
 	  var value = Utils.trim(nv[1]);
-	  ret[prop] = CssParser.format(prop, value);
+	  var fmt_value = CssParser.format(prop, value);
+	  ret[fmt_value.prop] = fmt_value.value;
 	}
 	return ret;
       });
