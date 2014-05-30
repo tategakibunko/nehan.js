@@ -1,13 +1,4 @@
 var Script = {
-  "tmp":[
-    "<div style='margin-after:2em'>block1</div>",
-    "<div style='margin-before:1em'>block2</div>",
-    "<div style='margin-after:1em'>block1</div>",
-    "<div style='margin-before:1em'>block2</div>",
-    "<div style='margin-after:1em'>block1</div>",
-    "<div style='margin-before:2em'>block2</div>"
-  ].join("\n"),
-
   "selector":[
     // adjacent sibling selector(A+B) test
     "<h2>adj sibling</h2>",
