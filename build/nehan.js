@@ -6480,7 +6480,8 @@ var StyleContext = (function(){
       this.markupName = markup.getName();
       this.parent = parent || null;
       this.childs = [];
-      this.next = null;
+      this.next = null; // next sibling
+      this.prev = null; // prev sibling
 
       // initialize tree
       if(parent){
@@ -6630,7 +6631,9 @@ var StyleContext = (function(){
     // append child style context
     appendChild : function(child_style){
       if(this.childs.length > 0){
-	List.last(this.childs).next = child_style;
+	var last_child = List.last(this.childs);
+	last_child.next = child_style;
+	child_style.prev = last_child;
       }
       this.childs.push(child_style);
     },
