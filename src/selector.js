@@ -17,15 +17,15 @@ var Selector = (function(){
     },
     updateValue : function(value){
       for(var prop in value){
-	var new_value = CssParser.formatValue(prop, value[prop]);
-	var new_prop = CssParser.formatProp(prop);
-	var old_value = this.value[new_prop] || null;
+	var fmt_value = CssParser.formatValue(prop, value[prop]);
+	var fmt_prop = CssParser.formatProp(prop);
+	var old_value = this.value[fmt_prop] || null;
 	if(old_value === null){
-	  this.value[new_prop] = new_value;
-	} else if(typeof old_value === "object" && typeof new_value === "object"){
-	  Args.copy(old_value, new_value);
+	  this.value[fmt_prop] = fmt_value;
+	} else if(typeof old_value === "object" && typeof fmt_value === "object"){
+	  Args.copy(old_value, fmt_value);
 	} else {
-	  old_value = new_value; // direct value or function
+	  old_value = fmt_value; // direct value or function
 	}
       }
     },
