@@ -556,11 +556,14 @@ var StyleContext = (function(){
       }
       // if value is function, call with selector context, and format the returned value.
       if(typeof value === "function"){
-	return CssParser.format(name, value(this.selectorContext));
+	return CssParser.formatValue(name, value(this.selectorContext));
       }
       return value; // already formatted
     },
     // priority: inline css > selector css
+    // notice that subdivided properties like 'margin-before' as [name] are always not found,
+    // even if you defined them in setStyle(s).
+    // because all subdivided properties are already converted into unified name in loading process.
     getCssAttr : function(name, def_value){
       var ret;
       ret = this.getInlineCssAttr(name);
@@ -902,7 +905,9 @@ var StyleContext = (function(){
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]).toLowerCase();
 	  var value = Utils.trim(nv[1]);
-	  ret[prop] = CssParser.format(prop, value);
+	  var fmt_prop = CssParser.formatProp(prop);
+	  var fmt_value = CssParser.formatValue(prop, value);
+	  ret[fmt_prop] = fmt_value;
 	}
 	return ret;
       });

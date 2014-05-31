@@ -157,15 +157,27 @@ var CssParser = (function(){
     return {}; // TODO
   };
 
-  var format = function(prop, value){
+  // all subdivided properties are evaluated as unified value.
+  // for example, 'margin-before:1em' => 'margin:1em 0 0 0'.
+  // so subdivided properties must be renamed to unified property('margin-before' => 'margin').
+  var format_prop = function(prop){
+    if(prop.indexOf("margin-") >= 0 || prop.indexOf("padding-") >= 0 || prop.indexOf("border-width-") >= 0){
+      return prop.split("-")[0];
+    }
+    return prop;
+  };
+
+  var format_value = function(prop, value){
     switch(typeof value){
     case "function": case "object": case "boolean":
       return value;
     }
     value = normalize(value); // number, string
     switch(prop){
+      /* TODO: border abbr
     case "border":
       return parse_border_abbr(value);
+      */
     case "border-width":
       return parse_4d(value);
     case "border-radius":
@@ -174,14 +186,30 @@ var CssParser = (function(){
       return parse_4d(value);
     case "border-style":
       return parse_4d(value);
+
+      /* TODO: font abbr
     case "font":
       return parse_font_abbr(value);
+      */
+
+      /* TODO: list-style abbr
     case "list-style":
       return parse_list_style_abbr(value);
+      */
     case "margin":
       return parse_4d(value);
     case "padding":
       return parse_4d(value);
+
+    // subdivided properties
+    case "margin-before": case "padding-before": case "border-width-before":
+      return {before:value, end:0, after:0, start:0};
+    case "margin-end": case "padding-end": case "border-width-end":
+      return {before:0, end:value, after:0, start:0};
+    case "margin-after": case "padding-after": case "border-width-after":
+      return {before:0, end:0, after:value, start:0};
+    case "margin-start": case "padding-start": case "border-width-start":
+      return {before:0, end:0, after:0, start:value};      
 
     // unmanaged properties is treated as it is.
     default: return value;
@@ -189,8 +217,11 @@ var CssParser = (function(){
   };
 
   return {
-    format : function(prop, value){
-      return format(prop, value);
+    formatProp : function(prop){
+      return format_prop(prop);
+    },
+    formatValue : function(prop, value){
+      return format_value(prop, value);
     }
   };
 })();

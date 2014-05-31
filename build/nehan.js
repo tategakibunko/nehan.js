@@ -1009,7 +1009,12 @@ var Style = {
   // rounded corner
   //-------------------------------------------------------
   ".nehan-rounded":{
-    "padding":["1.6em", "1.0em", "1.6em", "1.0em"],
+    "padding":{
+      before:"1.6em",
+      end:"1.0em",
+      after:"1.6em",
+      start:"1.0em"
+    },
     "border-radius":"10px"
   },
   //-------------------------------------------------------
@@ -1877,15 +1882,27 @@ var CssParser = (function(){
     return {}; // TODO
   };
 
-  var format = function(prop, value){
+  // all subdivided properties are evaluated as unified value.
+  // for example, 'margin-before:1em' => 'margin:1em 0 0 0'.
+  // so subdivided properties must be renamed to unified property('margin-before' => 'margin').
+  var format_prop = function(prop){
+    if(prop.indexOf("margin-") >= 0 || prop.indexOf("padding-") >= 0 || prop.indexOf("border-width-") >= 0){
+      return prop.split("-")[0];
+    }
+    return prop;
+  };
+
+  var format_value = function(prop, value){
     switch(typeof value){
     case "function": case "object": case "boolean":
       return value;
     }
     value = normalize(value); // number, string
     switch(prop){
+      /* TODO: border abbr
     case "border":
       return parse_border_abbr(value);
+      */
     case "border-width":
       return parse_4d(value);
     case "border-radius":
@@ -1894,14 +1911,30 @@ var CssParser = (function(){
       return parse_4d(value);
     case "border-style":
       return parse_4d(value);
+
+      /* TODO: font abbr
     case "font":
       return parse_font_abbr(value);
+      */
+
+      /* TODO: list-style abbr
     case "list-style":
       return parse_list_style_abbr(value);
+      */
     case "margin":
       return parse_4d(value);
     case "padding":
       return parse_4d(value);
+
+    // subdivided properties
+    case "margin-before": case "padding-before": case "border-width-before":
+      return {before:value, end:0, after:0, start:0};
+    case "margin-end": case "padding-end": case "border-width-end":
+      return {before:0, end:value, after:0, start:0};
+    case "margin-after": case "padding-after": case "border-width-after":
+      return {before:0, end:0, after:value, start:0};
+    case "margin-start": case "padding-start": case "border-width-start":
+      return {before:0, end:0, after:0, start:value};      
 
     // unmanaged properties is treated as it is.
     default: return value;
@@ -1909,8 +1942,11 @@ var CssParser = (function(){
   };
 
   return {
-    format : function(prop, value){
-      return format(prop, value);
+    formatProp : function(prop){
+      return format_prop(prop);
+    },
+    formatValue : function(prop, value){
+      return format_value(prop, value);
     }
   };
 })();
@@ -2402,22 +2438,6 @@ var Selector = (function(){
     this.spec = this._countSpec(this.elements); // count specificity
   }
 
-  var set_format_value = function(ret, prop, format_value){
-    if(format_value instanceof Array){
-      set_format_values(ret, format_value);
-    } else {
-      ret[prop] = format_value;
-    }
-  };
-
-  var set_format_values = function(ret, format_values){
-    List.iter(format_values, function(fmt_value){
-      for(var prop in fmt_value){
-	set_format_value(ret, prop, fmt_value[prop]);
-      }
-    });
-  };
-
   Selector.prototype = {
     test : function(style){
       return SelectorStateMachine.accept(style, this.elements);
@@ -2428,14 +2448,15 @@ var Selector = (function(){
     },
     updateValue : function(value){
       for(var prop in value){
-	var old_value = this.value[prop] || null;
-	var new_value = CssParser.format(prop, value[prop]);
+	var new_value = CssParser.formatValue(prop, value[prop]);
+	var new_prop = CssParser.formatProp(prop);
+	var old_value = this.value[new_prop] || null;
 	if(old_value === null){
-	  this.value[prop] = new_value;
+	  this.value[new_prop] = new_value;
 	} else if(typeof old_value === "object" && typeof new_value === "object"){
 	  Args.copy(old_value, new_value);
 	} else {
-	  old_value = new_value;
+	  old_value = new_value; // direct value or function
 	}
       }
     },
@@ -2478,7 +2499,9 @@ var Selector = (function(){
     _formatValue : function(value){
       var ret = {};
       for(var prop in value){
-	set_format_value(ret, prop, CssParser.format(prop, value[prop]));
+	var fmt_prop = CssParser.formatProp(prop);
+	var fmt_value = CssParser.formatValue(prop, value[prop]);
+	ret[fmt_prop] = fmt_value;
       }
       return ret;
     }
@@ -6923,11 +6946,14 @@ var StyleContext = (function(){
       }
       // if value is function, call with selector context, and format the returned value.
       if(typeof value === "function"){
-	return CssParser.format(name, value(this.selectorContext));
+	return CssParser.formatValue(name, value(this.selectorContext));
       }
       return value; // already formatted
     },
     // priority: inline css > selector css
+    // notice that subdivided properties like 'margin-before' as [name] are always not found,
+    // even if you defined them in setStyle(s).
+    // because all subdivided properties are already converted into unified name in loading process.
     getCssAttr : function(name, def_value){
       var ret;
       ret = this.getInlineCssAttr(name);
@@ -7269,7 +7295,9 @@ var StyleContext = (function(){
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]).toLowerCase();
 	  var value = Utils.trim(nv[1]);
-	  ret[prop] = CssParser.format(prop, value);
+	  var fmt_prop = CssParser.formatProp(prop);
+	  var fmt_value = CssParser.formatValue(prop, value);
+	  ret[fmt_prop] = fmt_value;
 	}
 	return ret;
       });

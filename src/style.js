@@ -724,7 +724,12 @@ var Style = {
   // rounded corner
   //-------------------------------------------------------
   ".nehan-rounded":{
-    "padding":["1.6em", "1.0em", "1.6em", "1.0em"],
+    "padding":{
+      before:"1.6em",
+      end:"1.0em",
+      after:"1.6em",
+      start:"1.0em"
+    },
     "border-radius":"10px"
   },
   //-------------------------------------------------------

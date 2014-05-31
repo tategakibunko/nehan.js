@@ -7,22 +7,6 @@ var Selector = (function(){
     this.spec = this._countSpec(this.elements); // count specificity
   }
 
-  var set_format_value = function(ret, prop, format_value){
-    if(format_value instanceof Array){
-      set_format_values(ret, format_value);
-    } else {
-      ret[prop] = format_value;
-    }
-  };
-
-  var set_format_values = function(ret, format_values){
-    List.iter(format_values, function(fmt_value){
-      for(var prop in fmt_value){
-	set_format_value(ret, prop, fmt_value[prop]);
-      }
-    });
-  };
-
   Selector.prototype = {
     test : function(style){
       return SelectorStateMachine.accept(style, this.elements);
@@ -33,14 +17,15 @@ var Selector = (function(){
     },
     updateValue : function(value){
       for(var prop in value){
-	var old_value = this.value[prop] || null;
-	var new_value = CssParser.format(prop, value[prop]);
+	var new_value = CssParser.formatValue(prop, value[prop]);
+	var new_prop = CssParser.formatProp(prop);
+	var old_value = this.value[new_prop] || null;
 	if(old_value === null){
-	  this.value[prop] = new_value;
+	  this.value[new_prop] = new_value;
 	} else if(typeof old_value === "object" && typeof new_value === "object"){
 	  Args.copy(old_value, new_value);
 	} else {
-	  old_value = new_value;
+	  old_value = new_value; // direct value or function
 	}
       }
     },
@@ -83,7 +68,9 @@ var Selector = (function(){
     _formatValue : function(value){
       var ret = {};
       for(var prop in value){
-	set_format_value(ret, prop, CssParser.format(prop, value[prop]));
+	var fmt_prop = CssParser.formatProp(prop);
+	var fmt_value = CssParser.formatValue(prop, value[prop]);
+	ret[fmt_prop] = fmt_value;
       }
       return ret;
     }
