@@ -101,7 +101,7 @@ var BlockGenerator = (function(){
     if(element === null){
       return;
     }
-    context.addBlockElement(element);
+    context.addBlockElement(element, extent);
     this._onAddElement(element);
   };
 
