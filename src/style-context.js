@@ -238,12 +238,12 @@ var StyleContext = (function(){
       this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
       this.contentExtent = this._computeContentExtent(this.outerExtent);
     },
-    // if update context size, update all context size of children too.
+    // force update context size.
     updateContextSize : function(measure, extent){
+      if(this.staticMeasure && this.staticExtent){
+	return;
+      }
       this.initContextSize(measure, extent);
-      List.iter(this.childs, function(child){
-	child.updateContextSize(null, null);
-      });
     },
     // clone style-context with temporary css
     clone : function(css){
