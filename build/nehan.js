@@ -6628,12 +6628,6 @@ var StyleContext = (function(){
       this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
       this.contentExtent = this._computeContentExtent(this.outerExtent);
     },
-    // if update static size, update context size too.
-    updateStaticSize : function(measure, extent){
-      this.staticMeasure = measure;
-      this.staticExtent = extent;
-      this.updateContextSize(measure, extent);
-    },
     // if update context size, update all context size of children too.
     updateContextSize : function(measure, extent){
       this.initContextSize(measure, extent);
