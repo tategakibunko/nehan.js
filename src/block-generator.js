@@ -101,15 +101,7 @@ var BlockGenerator = (function(){
     if(element === null){
       return;
     }
-    if(element.pushed){
-      context.pushBlockElement(element, extent);
-    } else if(element.pulled){
-      context.pullBlockElement(element, extent);
-    } else {
-      context.addBlockElement(element, extent);
-    }
-
-    // call _onAddElement callback for each 'element' of output.
+    context.addBlockElement(element);
     this._onAddElement(element);
   };
 

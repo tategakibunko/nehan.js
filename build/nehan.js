@@ -7595,12 +7595,6 @@ var LayoutContext = (function(){
     addBlockElement : function(element, extent){
       this.block.addElement(element, extent);
     },
-    pushBlockElement : function(element, extent){
-      this.block.pushElement(element, extent);
-    },
-    pullBlockElement : function(element, extent){
-      this.block.pullElement(element, extent);
-    },
     getBlockElements : function(){
       return this.block.getElements();
     },
@@ -7691,23 +7685,18 @@ var BlockContext = (function(){
     hasBreakAfter : function(){
       return this.breakAfter;
     },
-    _onAddElement : function(element, extent){
+    addElement : function(element, extent){
       this.curExtent += extent;
       if(element.breakAfter){
 	this.breakAfter = true;
       }
-    },
-    addElement : function(element, extent){
-      this.elements.push(element);
-      this._onAddElement(element, extent);
-    },
-    pushElement : function(element, extent){
-      this.pushedElements.push(element);
-      this._onAddElement(element, extent);
-    },
-    pullElement : function(element, extent){
-      this.pulledElements.unshift(element);
-      this._onAddElement(element, extent);
+      if(element.pushed){
+	this.pushedElements.push(element);
+      } else if(element.pulled){
+	this.pulledElements.unshift(element);
+      } else {
+	this.elements.push(element);
+      }
     },
     getCurExtent : function(){
       return this.curExtent;
@@ -8179,15 +8168,7 @@ var BlockGenerator = (function(){
     if(element === null){
       return;
     }
-    if(element.pushed){
-      context.pushBlockElement(element, extent);
-    } else if(element.pulled){
-      context.pullBlockElement(element, extent);
-    } else {
-      context.addBlockElement(element, extent);
-    }
-
-    // call _onAddElement callback for each 'element' of output.
+    context.addBlockElement(element);
     this._onAddElement(element);
   };
 

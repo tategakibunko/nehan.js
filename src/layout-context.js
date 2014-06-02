@@ -22,12 +22,6 @@ var LayoutContext = (function(){
     addBlockElement : function(element, extent){
       this.block.addElement(element, extent);
     },
-    pushBlockElement : function(element, extent){
-      this.block.pushElement(element, extent);
-    },
-    pullBlockElement : function(element, extent){
-      this.block.pullElement(element, extent);
-    },
     getBlockElements : function(){
       return this.block.getElements();
     },
