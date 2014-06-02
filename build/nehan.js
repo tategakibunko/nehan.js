@@ -9816,9 +9816,16 @@ LexingRule.addSingleTagRexAll(Nehan.__single_tags_rex__);
 // export engine local interfaces
 return {
   documentContext: DocumentContext,
-  lexingRule : LexingRule,
   createPageStream : function(text){
     return new PageStream(text);
+  },
+  // register engine local single tag name
+  addSingleTag : function(name){
+    LexingRule.addSingleTag(name);
+  },
+  // register engine local single tag name by rex
+  addSingleTagRex : function(rex){
+    LexingRule.addSingleTagRex(name);
   },
   // set engine local style
   setStyle : function(selector_key, value){
