@@ -6706,6 +6706,11 @@ var StyleContext = (function(){
       });
       box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
       box.content = opt.content || null;
+      if(this.isPushed()){
+	box.pushed = true;
+      } else if(this.isPulled()){
+	box.pulled = true;
+      }
       return box;
     },
     createImage : function(opt){
@@ -8174,9 +8179,9 @@ var BlockGenerator = (function(){
     if(element === null){
       return;
     }
-    if(this.style.isPushed() || element.pushed){
+    if(element.pushed){
       context.pushBlockElement(element, extent);
-    } else if(this.style.isPulled() || element.pulled){
+    } else if(element.pulled){
       context.pullBlockElement(element, extent);
     } else {
       context.addBlockElement(element, extent);

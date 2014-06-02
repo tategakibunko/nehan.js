@@ -316,6 +316,11 @@ var StyleContext = (function(){
       });
       box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
       box.content = opt.content || null;
+      if(this.isPushed()){
+	box.pushed = true;
+      } else if(this.isPulled()){
+	box.pulled = true;
+      }
       return box;
     },
     createImage : function(opt){
