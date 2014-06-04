@@ -240,10 +240,7 @@ var StyleContext = (function(){
     },
     // force update context size.
     updateContextSize : function(measure, extent){
-      if(this.staticMeasure && this.staticExtent){
-	return;
-      }
-      this.initContextSize(measure, extent);
+      this.initContextSize(this.staticMeasure || measure, this.staticExtent || extent);
     },
     // clone style-context with temporary css
     clone : function(css){
