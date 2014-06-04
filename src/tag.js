@@ -7,7 +7,7 @@ var Tag = (function (){
     this.src = src;
     this.content = content || "";
     this.name = this._parseName(this.src);
-    this.attrs = new TagAttrs(this.src);
+    this.attrs = this._parseTagAttrs(this.name, this.src);
   }
 
   Tag.prototype = {
@@ -90,8 +90,27 @@ var Tag = (function (){
     isEmpty : function(){
       return this.content === "";
     },
+    _getTagAttrSrc : function(src){
+      return src
+	.replace(/<[\S]+/, "") // cut tag start
+	.replace(/^\s+/, "") // cut head space
+	.replace("/>", "") // cut tag tail(single tag)
+	.replace(">", "") // cut tag tail(normal tag)
+	.replace(/\s+$/, "") // cut tail space
+	.replace(/\n/g, " ") // conv from multi line to single space
+	.replace(/[　|\s]+/g, " ") // conv from multi space to single space
+	.replace(/\s+=/g, "=") // cut multi space before '='
+	.replace(/=\s+/g, "="); // cut multi space after '='
+    },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
+    },
+    _parseTagAttrs : function(tag_name, tag_src){
+      var attr_src = this._getTagAttrSrc(tag_src);
+      if(tag_name.length + 2 === attr_src.length){
+	return new TagAttrs("");
+      }
+      return new TagAttrs(attr_src);
     }
   };
 

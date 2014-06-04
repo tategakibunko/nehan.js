@@ -1,6 +1,6 @@
 var TagAttrs = (function(){
   function TagAttrs(src){
-    var attrs_raw = TagAttrParser.parse(src);
+    var attrs_raw = src? (new TagAttrParser(src)).parse() : {};
     this.classes = this._parseClasses(attrs_raw);
     this.attrs = this._parseAttrs(attrs_raw, this.classes);
     this.dataset = this._parseDataset(attrs_raw);

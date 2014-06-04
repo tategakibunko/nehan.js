@@ -2640,41 +2640,19 @@ var Selectors = (function(){
   };
 })();
 
-/*
 var TagAttrLexer = (function(){
-  var __normalize = function(src){
-    return src
-      .replace(/<[\S]+/, "") // cut tag start
-      .replace(/^\s+/, "") // cut head space
-      .replace("/>", "") // cut tag tail(single tag)
-      .replace(">", "") // cut tag tail(normal tag)
-      .replace(/\s+$/, "") // cut tail space
-      .replace(/\n/g, " ") // conv from multi line to single space
-      .replace(/[　|\s]+/g, " ") // conv from multi space to single space
-      .replace(/\s+=/g, "=") // cut multi space before '='
-      .replace(/=\s+/g, "="); // cut multi space after '='
-  };
-
   var __rex_symbol = /[^=\s]+/;
 
+  // lexer src is attribute parts of original tag source.
+  // so if tag source is "<div class='nehan-float-start'>",
+  // then lexer src is "class='nehan-float-start'".
   function TagAttrLexer(src){
-    this.src = __normalize(src);
+    this.buff = src;
   }
 
   TagAttrLexer.prototype = {
     isEnd : function(){
-      return this.src === "";
-    },
-    _peek : function(){
-      return this.src? this.src.charAt(0) : null;
-    },
-    _step : function(length){
-      this.src = this.src.substring(length);
-    },
-    _getSymbol : function(){
-      if(this.src.match(__rex_symbol)){
-	var str = RegExp.$1;
-      }
+      return this.buff === "";
     },
     get : function(){
       var c1 = this._peek();
@@ -2682,110 +2660,100 @@ var TagAttrLexer = (function(){
 	return null;
       }
       switch(c1){
-      case "=": return {type:"equal"};
-      case " ": return this.get(); // skip space
-      default: return this._getSymbol(); 
+      case "=":
+	this._step(1);
+	return c1;
+      case "'": case "\"":
+	return this._getLiteral(c1);
+      case " ":
+	this._step(1);
+	return this.get(); // skip space
+      default:
+	return this._getSymbol();
       }
+    },
+    _peek : function(){
+      return this.buff? this.buff.charAt(0) : null;
+    },
+    _step : function(length){
+      this.buff = this.buff.substring(length);
+    },
+    _getSymbol : function(){
+      var symbol = HtmlLexer.prototype._getByRex.call(this, __rex_symbol);
+      if(symbol){
+	this._step(symbol.length);
+      }
+      return symbol;
+    },
+    _getLiteral : function(quote_char){
+      var quote_end_pos = this.buff.indexOf(quote_char, 1);
+      if(quote_end_pos < 0){
+	throw "TagAttrLexer::syntax error(literal not closed)";
+      }
+      var literal = this.buff.substring(1, quote_end_pos);
+      this._step(quote_end_pos + 1);
+      return literal;
     }
   };
 
   return TagAttrLexer;
 })();
-*/
+
 
 var TagAttrParser = (function(){
-  var parse = function(src, attr){
-    var peek = function(){
-      return src.charAt(0);
-    };
+  function TagAttrParser(src){
+    this._lexer = new TagAttrLexer(src);
+    this._attrs = {};
+    this._left = null;
+  }
 
-    var step = function(count){
-      src = src.substring(count);
-    };
-
-    var get_symbol = function(delimiters){
-      var delim_pos = -1;
-      List.iter(delimiters, function(delim){
-	var pos = src.indexOf(delim, 1);
-	if(delim_pos < 0 || pos < delim_pos){
-	  delim_pos = pos;
+  TagAttrParser.prototype = {
+    parse : function(){
+      while(!this._isEnd()){
+	this._parseAttr();
+      }
+      return this._attrs;
+    },
+    _isEnd : function(){
+      return this._left === null && this._lexer.isEnd();
+    },
+    _parseAttr : function(){
+      var token = this._lexer.get();
+      if(token === null){
+	if(this._left){
+	  this._attrs[this._left] = true;
+	  this._left = null;
 	}
-      });
-      return ((delim_pos >= 0)? src.substring(0, delim_pos) : src).toLowerCase();
-    };
-
-    var get_quoted_value = function(quote_str){
-      var quote_pos = src.indexOf(quote_str, 1);
-      return (quote_pos >= 1)? src.substring(1, quote_pos) : src;
-    };
-
-    var get_attr = function(left){
-      if(src === ""){
-	if(left){
-	  //console.log("single[%s]", left);
-	  attr[left] = true;
+      } else if(token === "="){
+	if(this._left === null){
+	  throw "TagAttrParser::syntax error(" + src + ")";
 	}
+	var right = this._lexer.get();
+	this._attrs[this._left] = right? this._parseRight(right) : true;
+	this._left = null;
 	return;
-      }
-      var s1 = peek();
-      //console.log("s1[%s], left[%s]", s1, left);
-      var value;
-      if(s1 === " "){
-	step(1);
-	arguments.callee(left);
-      } else if(s1 === "="){
-	step(1);
-	if(src.length > 0){
-	  var s2 = peek();
-	  if(s2 === "\"" || s2 === "'"){
-	    value = get_quoted_value(s2);
-	    step(value.length + 2);
-	  } else {
-	    value = get_symbol([" "]);
-	    step(value.length);
-	  }
-	  attr[left] = value;
-	}
-      } else if(left){
-	//console.log("single'[%s]", left);
-	attr[left] = true; // treat as single attribute
+      } else if(this._left){
+	this._attrs[this._left] = true;
+	this._left = token;
       } else {
-	left = get_symbol([" ", "="]);
-	step(left.length);
-	arguments.callee(left);
+	this._left = token;
       }
-    };
-
-    while(src !== ""){
-      get_attr();
-    }
-    return attr;
-  };
-
-  var normalize = function(src){
-    return src
-      .replace(/<[\S]+/, "") // cut tag start
-      .replace(/^\s+/, "") // cut head space
-      .replace("/>", "") // cut tag tail(close tag)
-      .replace(">", "") // cut tag tail(open tag)
-      .replace(/\s+$/, "") // cut tail space
-      .replace(/\n/g, " ") // conv from multi line to single space
-      .replace(/[　|\s]+/g, " ") // conv from multi space to single space
-      .replace(/\s+=/g, "=") // cut multi space before '='
-      .replace(/=\s+/g, "="); // cut multi space after '='
-  };
-
-  return {
-    parse : function(src){
-      src = normalize(src);
-      return parse(src, {});
+    },
+    _parseRight : function(token){
+      switch(token){
+      case "true": return true;
+      case "false": return false;
+      default: return token;
+      }
     }
   };
+
+  return TagAttrParser;
 })();
 
 var TagAttrs = (function(){
   function TagAttrs(src){
-    var attrs_raw = TagAttrParser.parse(src);
+    var attrs_raw = src? (new TagAttrParser(src)).parse() : {};
     this.classes = this._parseClasses(attrs_raw);
     this.attrs = this._parseAttrs(attrs_raw, this.classes);
     this.dataset = this._parseDataset(attrs_raw);
@@ -2887,7 +2855,7 @@ var Tag = (function (){
     this.src = src;
     this.content = content || "";
     this.name = this._parseName(this.src);
-    this.attrs = new TagAttrs(this.src);
+    this.attrs = this._parseTagAttrs(this.name, this.src);
   }
 
   Tag.prototype = {
@@ -2970,8 +2938,27 @@ var Tag = (function (){
     isEmpty : function(){
       return this.content === "";
     },
+    _getTagAttrSrc : function(src){
+      return src
+	.replace(/<[\S]+/, "") // cut tag start
+	.replace(/^\s+/, "") // cut head space
+	.replace("/>", "") // cut tag tail(single tag)
+	.replace(">", "") // cut tag tail(normal tag)
+	.replace(/\s+$/, "") // cut tail space
+	.replace(/\n/g, " ") // conv from multi line to single space
+	.replace(/[　|\s]+/g, " ") // conv from multi space to single space
+	.replace(/\s+=/g, "=") // cut multi space before '='
+	.replace(/=\s+/g, "="); // cut multi space after '='
+    },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
+    },
+    _parseTagAttrs : function(tag_name, tag_src){
+      var attr_src = this._getTagAttrSrc(tag_src);
+      if(tag_name.length + 2 === attr_src.length){
+	return new TagAttrs("");
+      }
+      return new TagAttrs(attr_src);
     }
   };
 

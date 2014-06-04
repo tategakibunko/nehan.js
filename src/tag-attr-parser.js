@@ -1,89 +1,50 @@
 var TagAttrParser = (function(){
-  var parse = function(src, attr){
-    var peek = function(){
-      return src.charAt(0);
-    };
+  function TagAttrParser(src){
+    this._lexer = new TagAttrLexer(src);
+    this._attrs = {};
+    this._left = null;
+  }
 
-    var step = function(count){
-      src = src.substring(count);
-    };
-
-    var get_symbol = function(delimiters){
-      var delim_pos = -1;
-      List.iter(delimiters, function(delim){
-	var pos = src.indexOf(delim, 1);
-	if(delim_pos < 0 || pos < delim_pos){
-	  delim_pos = pos;
+  TagAttrParser.prototype = {
+    parse : function(){
+      while(!this._isEnd()){
+	this._parseAttr();
+      }
+      return this._attrs;
+    },
+    _isEnd : function(){
+      return this._left === null && this._lexer.isEnd();
+    },
+    _parseAttr : function(){
+      var token = this._lexer.get();
+      if(token === null){
+	if(this._left){
+	  this._attrs[this._left] = true;
+	  this._left = null;
 	}
-      });
-      return ((delim_pos >= 0)? src.substring(0, delim_pos) : src).toLowerCase();
-    };
-
-    var get_quoted_value = function(quote_str){
-      var quote_pos = src.indexOf(quote_str, 1);
-      return (quote_pos >= 1)? src.substring(1, quote_pos) : src;
-    };
-
-    var get_attr = function(left){
-      if(src === ""){
-	if(left){
-	  //console.log("single[%s]", left);
-	  attr[left] = true;
+      } else if(token === "="){
+	if(this._left === null){
+	  throw "TagAttrParser::syntax error(" + src + ")";
 	}
+	var right = this._lexer.get();
+	this._attrs[this._left] = right? this._parseRight(right) : true;
+	this._left = null;
 	return;
-      }
-      var s1 = peek();
-      //console.log("s1[%s], left[%s]", s1, left);
-      var value;
-      if(s1 === " "){
-	step(1);
-	arguments.callee(left);
-      } else if(s1 === "="){
-	step(1);
-	if(src.length > 0){
-	  var s2 = peek();
-	  if(s2 === "\"" || s2 === "'"){
-	    value = get_quoted_value(s2);
-	    step(value.length + 2);
-	  } else {
-	    value = get_symbol([" "]);
-	    step(value.length);
-	  }
-	  attr[left] = value;
-	}
-      } else if(left){
-	//console.log("single'[%s]", left);
-	attr[left] = true; // treat as single attribute
+      } else if(this._left){
+	this._attrs[this._left] = true;
+	this._left = token;
       } else {
-	left = get_symbol([" ", "="]);
-	step(left.length);
-	arguments.callee(left);
+	this._left = token;
       }
-    };
-
-    while(src !== ""){
-      get_attr();
-    }
-    return attr;
-  };
-
-  var normalize = function(src){
-    return src
-      .replace(/<[\S]+/, "") // cut tag start
-      .replace(/^\s+/, "") // cut head space
-      .replace("/>", "") // cut tag tail(close tag)
-      .replace(">", "") // cut tag tail(open tag)
-      .replace(/\s+$/, "") // cut tail space
-      .replace(/\n/g, " ") // conv from multi line to single space
-      .replace(/[　|\s]+/g, " ") // conv from multi space to single space
-      .replace(/\s+=/g, "=") // cut multi space before '='
-      .replace(/=\s+/g, "="); // cut multi space after '='
-  };
-
-  return {
-    parse : function(src){
-      src = normalize(src);
-      return parse(src, {});
+    },
+    _parseRight : function(token){
+      switch(token){
+      case "true": return true;
+      case "false": return false;
+      default: return token;
+      }
     }
   };
+
+  return TagAttrParser;
 })();
