@@ -1240,7 +1240,13 @@ var Style = {
     "extent":"1em",
     "float":"start",
     "line-rate":1.0,
-    "font-size":"4em"
+    "font-size":"4em",
+    // set 'line-height:1em' if horizotal mode.
+    "onload":function(context){
+      if(context.isTextHorizontal()){
+	context.setCssAttr("line-height", "1em");
+      }
+    }
   },
   ".nehan-gap-start":{
     "margin":{
@@ -6344,8 +6350,21 @@ var SelectorPropContext = (function(){
   }
 
   SelectorPropContext.prototype = {
+    isTextVertical : function(){
+      var parent_flow = this.getParentFlow();
+      var flow_name = this.getCssAttr("flow", parent_flow.getName());
+      var flow = BoxFlows.getByName(flow_name);
+      return (flow && flow.isTextVertical())? true : false;
+    },
+    isTextHorizontal : function(){
+      return this.isTextVertical() === false;
+    },
     getParentStyle : function(){
       return this._style.parent;
+    },
+    getParentFlow : function(){
+      var parent = this.getParentStyle();
+      return parent? parent.flow : Layout.getStdBoxFlow();
     },
     getMarkup : function(){
       return this._style.markup;
@@ -6446,9 +6465,8 @@ var StyleContext = (function(){
     "width"
   ];
 
-  // properties that is not enabled even if it' unmanaged property.
+  // properties that is not enabled even if it is unmanaged property.
   var __ignored_css_properties = [
-    "line-height" // trouble with vertical-mode
   ];
 
   var __is_ignored_css_prop = function(prop){
@@ -7139,7 +7157,6 @@ var StyleContext = (function(){
     // so style of line-size(content-size) and edge-size are generated at Box::getCssInline
     getCssInline : function(){
       var css = {};
-      css["line-height"] = "1em";
       if(this.parent && this.isRootLine()){
 	Args.copy(css, this.parent.flow.getCss());
       }
@@ -7154,6 +7171,7 @@ var StyleContext = (function(){
 	Args.copy(css, this.flow.getCss());
       }
       if(this.flow.isTextVertical()){
+	css["line-height"] = "1em";
 	if(Env.isIphoneFamily){
 	  css["letter-spacing"] = "-0.001em";
 	}

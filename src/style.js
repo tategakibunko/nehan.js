@@ -955,7 +955,13 @@ var Style = {
     "extent":"1em",
     "float":"start",
     "line-rate":1.0,
-    "font-size":"4em"
+    "font-size":"4em",
+    // set 'line-height:1em' if horizotal mode.
+    "onload":function(context){
+      if(context.isTextHorizontal()){
+	context.setCssAttr("line-height", "1em");
+      }
+    }
   },
   ".nehan-gap-start":{
     "margin":{

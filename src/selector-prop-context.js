@@ -5,8 +5,21 @@ var SelectorPropContext = (function(){
   }
 
   SelectorPropContext.prototype = {
+    isTextVertical : function(){
+      var parent_flow = this.getParentFlow();
+      var flow_name = this.getCssAttr("flow", parent_flow.getName());
+      var flow = BoxFlows.getByName(flow_name);
+      return (flow && flow.isTextVertical())? true : false;
+    },
+    isTextHorizontal : function(){
+      return this.isTextVertical() === false;
+    },
     getParentStyle : function(){
       return this._style.parent;
+    },
+    getParentFlow : function(){
+      var parent = this.getParentStyle();
+      return parent? parent.flow : Layout.getStdBoxFlow();
     },
     getMarkup : function(){
       return this._style.markup;
