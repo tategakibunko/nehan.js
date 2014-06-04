@@ -2640,6 +2640,59 @@ var Selectors = (function(){
   };
 })();
 
+/*
+var TagAttrLexer = (function(){
+  var __normalize = function(src){
+    return src
+      .replace(/<[\S]+/, "") // cut tag start
+      .replace(/^\s+/, "") // cut head space
+      .replace("/>", "") // cut tag tail(single tag)
+      .replace(">", "") // cut tag tail(normal tag)
+      .replace(/\s+$/, "") // cut tail space
+      .replace(/\n/g, " ") // conv from multi line to single space
+      .replace(/[　|\s]+/g, " ") // conv from multi space to single space
+      .replace(/\s+=/g, "=") // cut multi space before '='
+      .replace(/=\s+/g, "="); // cut multi space after '='
+  };
+
+  var __rex_symbol = /[^=\s]+/;
+
+  function TagAttrLexer(src){
+    this.src = __normalize(src);
+  }
+
+  TagAttrLexer.prototype = {
+    isEnd : function(){
+      return this.src === "";
+    },
+    _peek : function(){
+      return this.src? this.src.charAt(0) : null;
+    },
+    _step : function(length){
+      this.src = this.src.substring(length);
+    },
+    _getSymbol : function(){
+      if(this.src.match(__rex_symbol)){
+	var str = RegExp.$1;
+      }
+    },
+    get : function(){
+      var c1 = this._peek();
+      if(c1 === null){
+	return null;
+      }
+      switch(c1){
+      case "=": return {type:"equal"};
+      case " ": return this.get(); // skip space
+      default: return this._getSymbol(); 
+      }
+    }
+  };
+
+  return TagAttrLexer;
+})();
+*/
+
 var TagAttrParser = (function(){
   var parse = function(src, attr){
     var peek = function(){
@@ -2669,11 +2722,13 @@ var TagAttrParser = (function(){
     var get_attr = function(left){
       if(src === ""){
 	if(left){
+	  //console.log("single[%s]", left);
 	  attr[left] = true;
 	}
 	return;
       }
       var s1 = peek();
+      //console.log("s1[%s], left[%s]", s1, left);
       var value;
       if(s1 === " "){
 	step(1);
@@ -2692,7 +2747,8 @@ var TagAttrParser = (function(){
 	  attr[left] = value;
 	}
       } else if(left){
-	attr[left] = true; // value empty attribute
+	//console.log("single'[%s]", left);
+	attr[left] = true; // treat as single attribute
       } else {
 	left = get_symbol([" ", "="]);
 	step(left.length);
@@ -2713,7 +2769,7 @@ var TagAttrParser = (function(){
       .replace("/>", "") // cut tag tail(close tag)
       .replace(">", "") // cut tag tail(open tag)
       .replace(/\s+$/, "") // cut tail space
-      .replace(/\n/g, "") // conv from multi line to single line
+      .replace(/\n/g, " ") // conv from multi line to single space
       .replace(/[　|\s]+/g, " ") // conv from multi space to single space
       .replace(/\s+=/g, "=") // cut multi space before '='
       .replace(/=\s+/g, "="); // cut multi space after '='
@@ -5105,9 +5161,9 @@ var Box = (function(){
 
 var HtmlLexer = (function (){
   var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
-  var __rex_word = /^([\w!\.\?\/\_:#;"',]+)/;
-  var __rex_tag = /^(<[^>]+>)/;
-  var __rex_char_ref = /^(&[^;\s]+;)/;
+  var __rex_word = /^[\w!\.\?\/\_:#;"',]+/;
+  var __rex_tag = /^<[^>]+>/;
+  var __rex_char_ref = /^&[^;\s]+;/;
 
   /*
   var __close_abbr_tags = [
@@ -5184,22 +5240,29 @@ var HtmlLexer = (function (){
       if(this.buff === ""){
 	return null;
       }
-      if(this.buff.match(__rex_tag)){
-	return this._parseTag(RegExp.$1);
+      var rex_str;
+      rex_str = this._getByRex(__rex_tag);
+      if(rex_str){
+	return this._parseTag(rex_str);
       }
-      if(this.buff.match(__rex_word)){
-	var str = RegExp.$1;
-	if(str.length === 1){
-	  return this._parseChar(str);
-	} else if(str.length === 2 && str.match(__rex_tcy)){
-	  return this._parseTcy(str);
+      rex_str = this._getByRex(__rex_word);
+      if(rex_str){
+	if(rex_str.length === 1){
+	  return this._parseChar(rex_str);
+	} else if(rex_str.length === 2 && rex_str.match(__rex_tcy)){
+	  return this._parseTcy(rex_str);
 	}
-	return this._parseWord(str);
+	return this._parseWord(rex_str);
       }
-      if(this.buff.match(__rex_char_ref)){
-	return this._parseCharRef(RegExp.$1);
+      rex_str = this._getByRex(__rex_char_ref);
+      if(rex_str){
+	return this._parseCharRef(rex_str);
       }
       return this._parseChar(this._getChar());
+    },
+    _getByRex : function(rex){
+      var rex_result = this.buff.match(rex);
+      return rex_result? rex_result[0] : null;
     },
     _getRb : function(){
       var rb = this.buffRb.substring(0, 1);

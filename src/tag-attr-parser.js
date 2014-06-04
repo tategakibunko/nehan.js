@@ -1,3 +1,56 @@
+/*
+var TagAttrLexer = (function(){
+  var __normalize = function(src){
+    return src
+      .replace(/<[\S]+/, "") // cut tag start
+      .replace(/^\s+/, "") // cut head space
+      .replace("/>", "") // cut tag tail(single tag)
+      .replace(">", "") // cut tag tail(normal tag)
+      .replace(/\s+$/, "") // cut tail space
+      .replace(/\n/g, " ") // conv from multi line to single space
+      .replace(/[　|\s]+/g, " ") // conv from multi space to single space
+      .replace(/\s+=/g, "=") // cut multi space before '='
+      .replace(/=\s+/g, "="); // cut multi space after '='
+  };
+
+  var __rex_symbol = /[^=\s]+/;
+
+  function TagAttrLexer(src){
+    this.src = __normalize(src);
+  }
+
+  TagAttrLexer.prototype = {
+    isEnd : function(){
+      return this.src === "";
+    },
+    _peek : function(){
+      return this.src? this.src.charAt(0) : null;
+    },
+    _step : function(length){
+      this.src = this.src.substring(length);
+    },
+    _getSymbol : function(){
+      if(this.src.match(__rex_symbol)){
+	var str = RegExp.$1;
+      }
+    },
+    get : function(){
+      var c1 = this._peek();
+      if(c1 === null){
+	return null;
+      }
+      switch(c1){
+      case "=": return {type:"equal"};
+      case " ": return this.get(); // skip space
+      default: return this._getSymbol(); 
+      }
+    }
+  };
+
+  return TagAttrLexer;
+})();
+*/
+
 var TagAttrParser = (function(){
   var parse = function(src, attr){
     var peek = function(){
@@ -27,11 +80,13 @@ var TagAttrParser = (function(){
     var get_attr = function(left){
       if(src === ""){
 	if(left){
+	  //console.log("single[%s]", left);
 	  attr[left] = true;
 	}
 	return;
       }
       var s1 = peek();
+      //console.log("s1[%s], left[%s]", s1, left);
       var value;
       if(s1 === " "){
 	step(1);
@@ -50,7 +105,8 @@ var TagAttrParser = (function(){
 	  attr[left] = value;
 	}
       } else if(left){
-	attr[left] = true; // value empty attribute
+	//console.log("single'[%s]", left);
+	attr[left] = true; // treat as single attribute
       } else {
 	left = get_symbol([" ", "="]);
 	step(left.length);
@@ -71,7 +127,7 @@ var TagAttrParser = (function(){
       .replace("/>", "") // cut tag tail(close tag)
       .replace(">", "") // cut tag tail(open tag)
       .replace(/\s+$/, "") // cut tail space
-      .replace(/\n/g, "") // conv from multi line to single line
+      .replace(/\n/g, " ") // conv from multi line to single space
       .replace(/[　|\s]+/g, " ") // conv from multi space to single space
       .replace(/\s+=/g, "=") // cut multi space before '='
       .replace(/=\s+/g, "="); // cut multi space after '='

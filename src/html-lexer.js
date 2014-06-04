@@ -1,8 +1,8 @@
 var HtmlLexer = (function (){
   var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
-  var __rex_word = /^([\w!\.\?\/\_:#;"',]+)/;
-  var __rex_tag = /^(<[^>]+>)/;
-  var __rex_char_ref = /^(&[^;\s]+;)/;
+  var __rex_word = /^[\w!\.\?\/\_:#;"',]+/;
+  var __rex_tag = /^<[^>]+>/;
+  var __rex_char_ref = /^&[^;\s]+;/;
 
   /*
   var __close_abbr_tags = [
@@ -79,22 +79,29 @@ var HtmlLexer = (function (){
       if(this.buff === ""){
 	return null;
       }
-      if(this.buff.match(__rex_tag)){
-	return this._parseTag(RegExp.$1);
+      var rex_str;
+      rex_str = this._getByRex(__rex_tag);
+      if(rex_str){
+	return this._parseTag(rex_str);
       }
-      if(this.buff.match(__rex_word)){
-	var str = RegExp.$1;
-	if(str.length === 1){
-	  return this._parseChar(str);
-	} else if(str.length === 2 && str.match(__rex_tcy)){
-	  return this._parseTcy(str);
+      rex_str = this._getByRex(__rex_word);
+      if(rex_str){
+	if(rex_str.length === 1){
+	  return this._parseChar(rex_str);
+	} else if(rex_str.length === 2 && rex_str.match(__rex_tcy)){
+	  return this._parseTcy(rex_str);
 	}
-	return this._parseWord(str);
+	return this._parseWord(rex_str);
       }
-      if(this.buff.match(__rex_char_ref)){
-	return this._parseCharRef(RegExp.$1);
+      rex_str = this._getByRex(__rex_char_ref);
+      if(rex_str){
+	return this._parseCharRef(rex_str);
       }
       return this._parseChar(this._getChar());
+    },
+    _getByRex : function(rex){
+      var rex_result = this.buff.match(rex);
+      return rex_result? rex_result[0] : null;
     },
     _getRb : function(){
       var rb = this.buffRb.substring(0, 1);
