@@ -6512,7 +6512,7 @@ var StyleContext = (function(){
 
   // properties that is not enabled even if it is unmanaged property.
   var __ignored_unmanaged_css_props = [
-    "line-height"
+    "line-height" // unmanaged line-height is not welcome.
   ];
 
   var __is_ignored_unmanaged_css_prop = function(prop){
