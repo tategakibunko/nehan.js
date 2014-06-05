@@ -738,7 +738,7 @@ var StyleContext = (function(){
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
-      if(this.letterSpacing && !this.flow.isTextVertical()){
+      if(this.letterSpacing && !this.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
       if(this.floatDirection){
@@ -758,20 +758,17 @@ var StyleContext = (function(){
     // so style of line-size(content-size) and edge-size are generated at Box::getCssInline
     getCssInline : function(){
       var css = {};
-      if(this.parent && this.isRootLine()){
-	Args.copy(css, this.parent.flow.getCss());
-      }
       if(this.font){
 	Args.copy(css, this.font.getCss());
       }
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
-      // top level line need to follow parent blockflow.
+      // anonymous line block need to follow parent blockflow.
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
       }
-      if(this.flow.isTextVertical()){
+      if(this.isTextVertical()){
 	css["line-height"] = "1em";
 	if(Env.isIphoneFamily){
 	  css["letter-spacing"] = "-0.001em";
@@ -781,8 +778,8 @@ var StyleContext = (function(){
 	  css["text-align"] = "center";
 	}
       } else {
-	// if line-height defined, enable it only when horizontal inline.
-	// this logic is for drop-caps for horizontal.
+	// if line-height is defined, enable only when horizontal mode.
+	// this logic is required for drop-caps of horizontal mode.
 	// TODO: more simple solution.
 	var line_height = this.getCssAttr("line-height");
 	if(line_height){
