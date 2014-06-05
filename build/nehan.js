@@ -1241,7 +1241,7 @@ var Style = {
     "float":"start",
     "line-rate":1.0,
     "font-size":"4em",
-    // set 'line-height:1em' if horizotal mode.
+    // set 'line-height:1em' to inline css if horizotal mode.
     "onload":function(context){
       if(context.isTextHorizontal()){
 	context.setCssAttr("line-height", "1em");
@@ -6468,7 +6468,7 @@ var StyleContext = (function(){
   ];
 
   // these properties must be under control of layout engine.
-  var __managed_css_properties = [
+  var __managed_css_props = [
     "border-color",
     "border-radius",
     "border-style",
@@ -6511,21 +6511,22 @@ var StyleContext = (function(){
   ];
 
   // properties that is not enabled even if it is unmanaged property.
-  var __ignored_css_properties = [
+  var __ignored_unmanaged_css_props = [
+    "line-height"
   ];
 
-  var __is_ignored_css_prop = function(prop){
-    return List.exists(__ignored_css_properties, Closure.eq(prop));
+  var __is_ignored_unmanaged_css_prop = function(prop){
+    return List.exists(__ignored_unmanaged_css_props, Closure.eq(prop));
   };
 
   var __is_managed_css_prop = function(prop){
-    return List.exists(__managed_css_properties, Closure.eq(prop));
+    return List.exists(__managed_css_props, Closure.eq(prop));
   };
 
   var __filter_unmanaged_css = function(selector_css){
     var css = {};
     Obj.iter(selector_css, function(prop, value){
-      if(!__is_managed_css_prop(prop) && !__is_ignored_css_prop(prop)){
+      if(!__is_managed_css_prop(prop) && !__is_ignored_unmanaged_css_prop(prop)){
 	css[prop] = value;
       }
     });
@@ -7232,6 +7233,14 @@ var StyleContext = (function(){
 	if(this.markup.getName() !== "ruby"){
 	  css["margin-left"] = css["margin-right"] = "auto";
 	  css["text-align"] = "center";
+	}
+      } else {
+	// if line-height defined, enable it only when horizontal inline.
+	// this logic is for drop-caps for horizontal.
+	// TODO: more simple solution.
+	var line_height = this.getCssAttr("line-height");
+	if(line_height){
+	  css["line-height"] = this._computeUnitSize(line_height, this.font.size) + "px";
 	}
       }
       Args.copy(css, this.unmanagedCss);
