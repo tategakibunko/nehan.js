@@ -2648,11 +2648,12 @@ var TagAttrLexer = (function(){
   // then lexer src is "class='nehan-float-start'".
   function TagAttrLexer(src){
     this.buff = src;
+    this._error = false;
   }
 
   TagAttrLexer.prototype = {
     isEnd : function(){
-      return this.buff === "";
+      return this._error || (this.buff === "");
     },
     get : function(){
       var c1 = this._peek();
@@ -2688,7 +2689,9 @@ var TagAttrLexer = (function(){
     _getLiteral : function(quote_char){
       var quote_end_pos = this.buff.indexOf(quote_char, 1);
       if(quote_end_pos < 0){
-	throw "TagAttrLexer::syntax error(literal not closed)";
+	console.error("TagAttrLexer::syntax error:literal not closed(%s)", this.buff);
+	this._error = true;
+	return null;
       }
       var literal = this.buff.substring(1, quote_end_pos);
       this._step(quote_end_pos + 1);
