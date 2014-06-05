@@ -107,7 +107,7 @@ var Tag = (function (){
     },
     _parseTagAttrs : function(tag_name, tag_src){
       var attr_src = this._getTagAttrSrc(tag_src);
-      if(tag_name.length + 2 === attr_src.length){
+      if(tag_name.length === attr_src.length){
 	return new TagAttrs("");
       }
       return new TagAttrs(attr_src);
