@@ -2721,12 +2721,12 @@ var TagAttrParser = (function(){
       var token = this._lexer.get();
       if(token === null){
 	if(this._left){
-	  this._attrs[this._left] = "true"
+	  this._attrs[this._left] = "true";
 	  this._left = null;
 	}
       } else if(token === "="){
 	if(this._left === null){
-	  throw "TagAttrParser::syntax error(" + src + ")";
+	  throw "TagAttrParser::syntax error(=)";
 	}
 	this._attrs[this._left] = this._lexer.get() || "true";
 	this._left = null;
