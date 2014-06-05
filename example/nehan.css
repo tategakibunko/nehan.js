@@ -13,15 +13,14 @@
   font-size:100%;
   font:inherit;
   vertical-align:baseline;
+  text-align:inherit;
 }
 .nehan-body a img {
   border:none;
 }
-.nehan-text-line{
+.nehan-inline-tb-rl a,
+.nehan-inline-tb-lr a {
   overflow:visible;
-}
-.nehan-text-line-vert a,
-.nehan-text-line-vert a:hover{
   text-decoration:none !important;
 }
 .nehan-body a{
@@ -33,6 +32,7 @@
 }
 .nehan-rotate-90{
   word-break:normal;
+  word-wrap:normal;
   overflow:visible;
   -webkit-transform : rotate(90deg);
   -webkit-transform-origin : 50% 50%;
@@ -48,8 +48,4 @@
 .nehan-vert-ie{
   writing-mode:tb-rl;
   float:left;
-}
-.nehan-text-line-hori.nehan-first-letter,
-.nehan-text-line-hori .nehan-ruby .nehan-rt{
-  line-height:1em !important;
 }
