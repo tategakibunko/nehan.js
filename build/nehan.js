@@ -6695,6 +6695,8 @@ var StyleContext = (function(){
     // force update context size, called from generator of floating-rest-generator.
     forceUpdateContextSize : function(measure, extent){
       this.initContextSize(measure, extent);
+
+      // force re-culculate context-size of children based on new context-size of parent.
       List.iter(this.childs, function(child){
 	child.forceUpdateContextSize(null, null);
       });
