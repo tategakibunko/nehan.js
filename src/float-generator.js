@@ -128,7 +128,7 @@ var FloatGenerator = (function(){
   };
   
   FloatGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
-    this._childLayout.style.updateContextSize(measure, extent);
+    this._childLayout.style.forceUpdateContextSize(measure, extent);
     return this.yieldChildLayout();
   };
   

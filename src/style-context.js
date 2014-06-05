@@ -237,9 +237,16 @@ var StyleContext = (function(){
       this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
       this.contentExtent = this._computeContentExtent(this.outerExtent);
     },
-    // force update context size.
+    // update context size, but static size is preferred.
     updateContextSize : function(measure, extent){
-      this.initContextSize(this.staticMeasure || measure, this.staticExtent || extent);
+      this.forceUpdateContextSize(this.staticMeasure || measure, this.staticExtent || extent);
+    },
+    // force update context size, called from generator of floating-rest-generator.
+    forceUpdateContextSize : function(measure, extent){
+      this.initContextSize(measure, extent);
+      List.iter(this.childs, function(child){
+	child.forceUpdateContextSize(null, null);
+      });
     },
     // clone style-context with temporary css
     clone : function(css){
