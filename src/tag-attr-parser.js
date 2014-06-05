@@ -19,29 +19,21 @@ var TagAttrParser = (function(){
       var token = this._lexer.get();
       if(token === null){
 	if(this._left){
-	  this._attrs[this._left] = true;
+	  this._attrs[this._left] = "true"
 	  this._left = null;
 	}
       } else if(token === "="){
 	if(this._left === null){
 	  throw "TagAttrParser::syntax error(" + src + ")";
 	}
-	var right = this._lexer.get();
-	this._attrs[this._left] = right? this._parseRight(right) : true;
+	this._attrs[this._left] = this._lexer.get() || "true";
 	this._left = null;
 	return;
       } else if(this._left){
-	this._attrs[this._left] = true;
+	this._attrs[this._left] = "true";
 	this._left = token;
       } else {
 	this._left = token;
-      }
-    },
-    _parseRight : function(token){
-      switch(token){
-      case "true": return true;
-      case "false": return false;
-      default: return token;
       }
     }
   };
