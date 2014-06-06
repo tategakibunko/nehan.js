@@ -958,9 +958,7 @@ var Style = {
     "font-size":"4em",
     // set 'line-height:1em' to inline css if horizotal mode.
     "onload":function(context){
-      if(context.isTextHorizontal()){
-	context.setCssAttr("line-height", "1em");
-      }
+      return context.isTextHorizontal()? {"line-height":"1em"} : {};
     }
   },
   ".nehan-gap-start":{

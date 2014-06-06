@@ -56,29 +56,6 @@ var StyleContext = (function(){
     "width"
   ];
 
-  // properties that is not enabled even if it is unmanaged property.
-  var __ignored_unmanaged_css_props = [
-    "line-height" // unmanaged line-height is not welcome.
-  ];
-
-  var __is_ignored_unmanaged_css_prop = function(prop){
-    return List.exists(__ignored_unmanaged_css_props, Closure.eq(prop));
-  };
-
-  var __is_managed_css_prop = function(prop){
-    return List.exists(__managed_css_props, Closure.eq(prop));
-  };
-
-  var __filter_unmanaged_css = function(selector_css){
-    var css = {};
-    Obj.iter(selector_css, function(prop, value){
-      if(!__is_managed_css_prop(prop) && !__is_ignored_unmanaged_css_prop(prop)){
-	css[prop] = value;
-      }
-    });
-    return css;
-  };
-
   var __filter_decorated_inline_elements = function(elements){
     var ret = [];
     List.iter(elements, function(element){
@@ -211,6 +188,9 @@ var StyleContext = (function(){
       // 2. parent size
       // 3. current edge size.
       this.initContextSize(this.staticMeasure, this.staticExtent);
+
+      // disable some unmanaged css properties depending on loaded style values.
+      this._disableUnmanagedCssProps(this.unmanagedCss);
     },
     // [context_size] = (outer_size, content_size)
     //
@@ -932,12 +912,15 @@ var StyleContext = (function(){
       });
     },
     _loadUnmanagedCss : function(managed_css){
-      // line-height is not always welcome for vertical-mode.
-      var ng_props = ["line-height"];
-      var skip_props = __managed_css_props.concat(skip_props);
       return managed_css.filter(function(prop, value){
-	return !List.exists(skip_props, Closure.eq(prop));
+	return !List.exists(__managed_css_props, Closure.eq(prop));
       });
+    },
+    _disableUnmanagedCssProps : function(unmanaged_css){
+      if(this.isTextVertical()){
+	// line-height prop is always not welcome for vertical-mode.
+	unmanaged_css.remove("line-height");
+      }
     },
     _loadDisplay : function(){
       return this.getCssAttr("display", "inline");

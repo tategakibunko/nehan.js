@@ -32,6 +32,9 @@ var HashSet = (function(){
       for(var prop in values){
 	this.add(prop, values[prop]);
       }
+    },
+    remove : function(name){
+      delete this._values[name];
     }
   };
 
