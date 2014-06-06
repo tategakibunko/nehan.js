@@ -6500,13 +6500,11 @@ var SelectorContext = (function(){
   Class.extend(SelectorContext, SelectorPropContext);
 
   SelectorContext.prototype.getCssAttr = function(name, def_value){
-    // TODO: define public interface to StyleContext
     return this._style.getCssAttr(name, def_value);
   };
 
   SelectorContext.prototype.setCssAttr = function(name, value){
-    // TODO: define public interface to StyleContext
-    this._style.managedCss.add(name, value);
+    this._style.setCssAttr(name, value);
   };
 
   return SelectorContext;
@@ -6570,6 +6568,10 @@ var StyleContext = (function(){
     "text-combine",
     "width"
   ];
+
+  var __is_managed_css_prop = function(prop){
+    return List.exists(__managed_css_props, Closure.eq(prop));
+  };
 
   var __filter_decorated_inline_elements = function(elements){
     var ret = [];
@@ -7050,6 +7052,13 @@ var StyleContext = (function(){
       }
       return value; // already formatted
     },
+    setCssAttr : function(name, value){
+      if(__is_managed_css_prop(name)){
+	this.managedCss.add(name, value);
+      } else {
+	this.unmanagedCss.add(name, value);
+      }
+    },
     // priority: inline css > selector css
     // notice that subdivided properties like 'margin-before' as [name] are always not found,
     // even if you defined them in setStyle(s).
@@ -7428,7 +7437,7 @@ var StyleContext = (function(){
     },
     _loadUnmanagedCss : function(managed_css){
       return managed_css.filter(function(prop, value){
-	return !List.exists(__managed_css_props, Closure.eq(prop));
+	return !__is_managed_css_prop(prop);
       });
     },
     _disableUnmanagedCssProps : function(unmanaged_css){

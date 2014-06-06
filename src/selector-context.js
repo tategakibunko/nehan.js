@@ -7,13 +7,11 @@ var SelectorContext = (function(){
   Class.extend(SelectorContext, SelectorPropContext);
 
   SelectorContext.prototype.getCssAttr = function(name, def_value){
-    // TODO: define public interface to StyleContext
     return this._style.getCssAttr(name, def_value);
   };
 
   SelectorContext.prototype.setCssAttr = function(name, value){
-    // TODO: define public interface to StyleContext
-    this._style.managedCss.add(name, value);
+    this._style.setCssAttr(name, value);
   };
 
   return SelectorContext;
