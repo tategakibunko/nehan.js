@@ -1762,6 +1762,7 @@ var HashSet = (function(){
       this._values[name] = old_value? this.merge(old_value, value) : value;
     },
     addValues : function(values){
+      values = values || {};
       for(var prop in values){
 	this.add(prop, values[prop]);
       }
@@ -2002,13 +2003,13 @@ var CssParser = (function(){
 
     // subdivided properties
     case "margin-before": case "padding-before": case "border-width-before":
-      return {before:value, end:0, after:0, start:0};
+      return {before:value};
     case "margin-end": case "padding-end": case "border-width-end":
-      return {before:0, end:value, after:0, start:0};
+      return {end:value};
     case "margin-after": case "padding-after": case "border-width-after":
-      return {before:0, end:0, after:value, start:0};
+      return {after:value};
     case "margin-start": case "padding-start": case "border-width-start":
-      return {before:0, end:0, after:0, start:value};      
+      return {start:value};      
 
     // unmanaged properties is treated as it is.
     default: return value;

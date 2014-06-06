@@ -29,6 +29,7 @@ var HashSet = (function(){
       this._values[name] = old_value? this.merge(old_value, value) : value;
     },
     addValues : function(values){
+      values = values || {};
       for(var prop in values){
 	this.add(prop, values[prop]);
       }
