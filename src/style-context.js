@@ -135,12 +135,12 @@ var StyleContext = (function(){
 
       // load managed css from
       // 1. load selector css.
-      // 2. load dynamic callback css(onload) from selector css.
-      // 3. load inline css from 'style' property of markup.
+      // 2. load inline css from 'style' property of markup.
+      // 3. load dynamic callback css(onload) from selector css.
       // 4. load system required css(args.forceCss).
       this.managedCss.addValues(this._loadSelectorCss(markup, parent));
-      this.managedCss.addValues(this._loadCallbackCss(this.managedCss, "onload"));
       this.managedCss.addValues(this._loadInlineCss(markup));
+      this.managedCss.addValues(this._loadCallbackCss(this.managedCss, "onload"));
       this.managedCss.addValues(args.forceCss, {});
 
       // load unmanaged css from managed css
