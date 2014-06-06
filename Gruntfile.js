@@ -52,6 +52,8 @@ module.exports = function(grunt) {
 	    "src/html.js",
 	    "src/closure.js",
 	    "src/args.js",
+	    "src/hash-set.js",
+	    "src/css-hash-set.js",
 	    "src/css-parser.js",
 	    "src/attr-selector.js",
 	    "src/pseudo-selector.js",

@@ -5,21 +5,17 @@ var Obj = {
     }
     return true;
   },
-  // fn : obj -> ?
-  map : function(obj, fn){
+  // fn : prop -> value -> bool
+  filter : function(obj, fn){
     var ret = {};
-    for(var prop in obj){
-      ret[prop] = fn(obj[prop]);
-    }
+    this.iter(obj, function(prop, value){
+      if(fn(prop, value)){
+	ret[prop] = value;
+      }
+    });
     return ret;
   },
-  // fn : prop -> value -> ?
-  each : function(obj, fn){
-    for(var prop in obj){
-      fn(prop, obj[prop]);
-    }
-  },
-  // fn : obj -> prop -> value -> ?
+  // fn : prop -> value -> unit
   iter : function(obj, fn){
     for(var prop in obj){
       fn(prop, obj[prop]);

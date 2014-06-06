@@ -6,15 +6,6 @@ var BoxRect = {
       }
     });
   },
-  map : function(obj, fn){
-    if(obj instanceof Array){
-      return List.map(obj, fn);
-    }
-    if(typeof obj === "object"){
-      return Obj.map(obj, fn);
-    }
-    return fn(obj);
-  },
   setValue : function(dst, flow, value){
     if(typeof value.start != "undefined"){
       this.setStart(dst, flow, value.start);

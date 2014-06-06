@@ -1482,21 +1482,17 @@ var Obj = {
     }
     return true;
   },
-  // fn : obj -> ?
-  map : function(obj, fn){
+  // fn : prop -> value -> bool
+  filter : function(obj, fn){
     var ret = {};
-    for(var prop in obj){
-      ret[prop] = fn(obj[prop]);
-    }
+    this.iter(obj, function(prop, value){
+      if(fn(prop, value)){
+	ret[prop] = value;
+      }
+    });
     return ret;
   },
-  // fn : prop -> value -> ?
-  each : function(obj, fn){
-    for(var prop in obj){
-      fn(prop, obj[prop]);
-    }
-  },
-  // fn : obj -> prop -> value -> ?
+  // fn : prop -> value -> unit
   iter : function(obj, fn){
     for(var prop in obj){
       fn(prop, obj[prop]);
@@ -1728,6 +1724,63 @@ var Args = {
     return dst;
   }
 };
+
+var HashSet = (function(){
+  function HashSet(values){
+    this._values = {};
+    if(values){
+      this.addValues(values);
+    }
+  }
+
+  HashSet.prototype = {
+    iter : function(fn){
+      Obj.iter(this._values, fn);
+    },
+    filter : function(fn){
+      return Obj.filter(this._values, fn);
+    },
+    // return merged value when conflict.
+    // simply overwrite by default.
+    merge : function(old_value, new_value){
+      return new_value;
+    },
+    add : function(name, value){
+      var old_value = this._values[name] || null;
+      this._values[name] = old_value? this.merge(old_value, value) : value;
+    },
+    addValues : function(values){
+      for(var prop in values){
+	this.add(prop, values[prop]);
+      }
+    }
+  };
+
+  return HashSet;
+})();
+
+
+
+
+var CssHashSet = (function(){
+  function CssHashSet(values){
+    HashSet.prototype.call(this, values || null);
+  }
+  Class.extend(CssHashSet, HashSet);
+
+  // merge css value
+  // 1. if old_value is object, merge each properties.
+  // 2. other case, simplly overwrite new_value to old_value(even if new_value is function).
+  CssHashSet.prototype.merge = function(old_value, new_value){
+    if(typeof old_value === "object"){
+      Args.copy(old_value, new_value);
+      return old_value;
+    }
+    return new_value;
+  };
+
+  return CssHashSet;
+})();
 
 /*
   there are css properties that are required to calculate accurate paged-layout,
@@ -4297,15 +4350,6 @@ var BoxRect = {
 	fn(dir, obj[dir]);
       }
     });
-  },
-  map : function(obj, fn){
-    if(obj instanceof Array){
-      return List.map(obj, fn);
-    }
-    if(typeof obj === "object"){
-      return Obj.map(obj, fn);
-    }
-    return fn(obj);
   },
   setValue : function(dst, flow, value){
     if(typeof value.start != "undefined"){
