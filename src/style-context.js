@@ -690,13 +690,13 @@ var StyleContext = (function(){
       var edge = this.getEdge();
       return edge? edge.getExtentSize(flow || this.flow) : 0;
     },
-    getInnerEdgeMeasure : function(){
+    getInnerEdgeMeasure : function(flow){
       var edge = this.getEdge();
-      return edge? edge.getInnerMeasureSize() : 0;
+      return edge? edge.getInnerMeasureSize(flow || this.flow) : 0;
     },
-    getInnerEdgeExtent : function(){
+    getInnerEdgeExtent : function(flow){
       var edge = this.getEdge();
-      return edge? edge.getInnerExtentSize() : 0;
+      return edge? edge.getInnerExtentSize(flow || this.flow) : 0;
     },
     // notice that box-size, box-edge is box local variable,
     // so style of box-size(content-size) and edge-size are generated at Box::getCssBlock

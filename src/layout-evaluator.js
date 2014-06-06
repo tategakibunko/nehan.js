@@ -38,7 +38,7 @@ var LayoutEvaluator = (function(){
 
       // call oncreate callback if exists.
       if(opt.oncreate){
-	opt.oncreate(dom);
+	opt.oncreate(dom, opt.context || null);
       }
       return dom;
     },
@@ -76,7 +76,8 @@ var LayoutEvaluator = (function(){
 	attrs:tree.getAttrs(),
 	oncreate:tree.getOnCreate(),
 	content:(opt.content || tree.getContent()),
-	styles:(opt.css || tree.getCssRoot())
+	styles:(opt.css || tree.getCssRoot()),
+	context:tree.style
       });
     },
     evalTreeChild : function(parent, child){
