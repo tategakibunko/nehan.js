@@ -6455,15 +6455,6 @@ var SelectorPropContext = (function(){
   }
 
   SelectorPropContext.prototype = {
-    isTextVertical : function(){
-      var parent_flow = this.getParentFlow();
-      var flow_name = this.getCssAttr("flow", parent_flow.getName());
-      var flow = BoxFlows.getByName(flow_name);
-      return (flow && flow.isTextVertical())? true : false;
-    },
-    isTextHorizontal : function(){
-      return this.isTextVertical() === false;
-    },
     getParentStyle : function(){
       return this._style.parent;
     },
@@ -6499,6 +6490,19 @@ var SelectorContext = (function(){
     SelectorPropContext.call(this, style, layout_context);
   }
   Class.extend(SelectorContext, SelectorPropContext);
+
+  // this function called before initializing style objects in this._style.
+  // so this._style.flow is not ready at this time, that is, we need to get the 'flow' in manual.
+  SelectorContext.prototype.isTextVertical = function(){
+    var parent_flow = this.getParentFlow();
+    var flow_name = this.getCssAttr("flow", parent_flow.getName());
+    var flow = BoxFlows.getByName(flow_name);
+    return (flow && flow.isTextVertical())? true : false;
+  };
+
+  SelectorContext.prototype.isTextHorizontal = function(){
+    return this.isTextVertical() === false;
+  };
 
   SelectorContext.prototype.getCssAttr = function(name, def_value){
     return this._style.getCssAttr(name, def_value);
@@ -7442,7 +7446,7 @@ var StyleContext = (function(){
     },
     _disableUnmanagedCssProps : function(unmanaged_css){
       if(this.isTextVertical()){
-	// line-height prop is always not welcome for vertical-mode.
+	// unmanaged 'line-height' is not welcome for vertical-mode.
 	unmanaged_css.remove("line-height");
       }
     },

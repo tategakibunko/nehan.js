@@ -928,7 +928,7 @@ var StyleContext = (function(){
     },
     _disableUnmanagedCssProps : function(unmanaged_css){
       if(this.isTextVertical()){
-	// line-height prop is always not welcome for vertical-mode.
+	// unmanaged 'line-height' is not welcome for vertical-mode.
 	unmanaged_css.remove("line-height");
       }
     },
