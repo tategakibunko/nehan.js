@@ -7059,7 +7059,6 @@ var StyleContext = (function(){
 	this.unmanagedCss.add(name, value);
       }
     },
-    // priority: inline css > selector css
     // notice that subdivided properties like 'margin-before' as [name] are always not found,
     // even if you defined them in setStyle(s).
     // because all subdivided properties are already converted into unified name in loading process.
