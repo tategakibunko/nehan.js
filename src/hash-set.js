@@ -18,6 +18,12 @@ var HashSet = (function(){
     merge : function(old_value, new_value){
       return new_value;
     },
+    get : function(name){
+      return this._values[name] || null;
+    },
+    getValues : function(){
+      return this._values;
+    },
     add : function(name, value){
       var old_value = this._values[name] || null;
       this._values[name] = old_value? this.merge(old_value, value) : value;

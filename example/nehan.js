@@ -1482,6 +1482,14 @@ var Obj = {
     }
     return true;
   },
+  // fn : prop -> value -> obj
+  map : function(obj, fn){
+    var ret = {};
+    this.iter(obj, function(prop, value){
+      ret[prop] = fn(prop, value);
+    });
+    return ret;
+  },
   // fn : prop -> value -> bool
   filter : function(obj, fn){
     var ret = {};
@@ -1745,6 +1753,12 @@ var HashSet = (function(){
     merge : function(old_value, new_value){
       return new_value;
     },
+    get : function(name){
+      return this._values[name] || null;
+    },
+    getValues : function(){
+      return this._values;
+    },
     add : function(name, value){
       var old_value = this._values[name] || null;
       this._values[name] = old_value? this.merge(old_value, value) : value;
@@ -1764,7 +1778,7 @@ var HashSet = (function(){
 
 var CssHashSet = (function(){
   function CssHashSet(values){
-    HashSet.prototype.call(this, values || null);
+    HashSet.call(this, values || null);
   }
   Class.extend(CssHashSet, HashSet);
 
@@ -6485,11 +6499,13 @@ var SelectorContext = (function(){
   Class.extend(SelectorContext, SelectorPropContext);
 
   SelectorContext.prototype.getCssAttr = function(name, def_value){
+    // TODO: define public interface to StyleContext
     return this._style.getCssAttr(name, def_value);
   };
 
   SelectorContext.prototype.setCssAttr = function(name, value){
-    this._style.inlineCss[name] = value;
+    // TODO: define public interface to StyleContext
+    this._style.managedCss.add(name, value);
   };
 
   return SelectorContext;
@@ -6628,31 +6644,21 @@ var StyleContext = (function(){
       // so by updating css value, you can update calculation of internal style object.
       this.callbackContext = new SelectorContext(this, args.layoutContext || null);
 
-      // initialize css values
-      this.selectorCss = {};
-      this.inlineCss = {};
-      this.unmanagedCss = {};
+      this.managedCss = new CssHashSet();
+      this.unmanagedCss = new CssHashSet();
 
-      // load selector css values
-      // 1. load selector css
-      // 2. load dynamic callback selector 'onload'
-      Args.copy(this.selectorCss, this._loadSelectorCss(markup, parent));
-      Args.copy(this.selectorCss, this._loadCallbackCss("onload"));
+      // load managed css from
+      // 1. load selector css.
+      // 2. load dynamic callback css(onload) from selector css.
+      // 3. load inline css from 'style' property of markup.
+      // 4. load system required css(args.forceCss).
+      this.managedCss.addValues(this._loadSelectorCss(markup, parent));
+      this.managedCss.addValues(this._loadCallbackCss(this.managedCss, "onload"));
+      this.managedCss.addValues(this._loadInlineCss(markup));
+      this.managedCss.addValues(args.forceCss, {});
 
-      // load inline css values
-      // 1. load normal markup attribute 'style'
-      // 2. load constructor argument 'args.forceCss' if exists.
-      //    notice that 'args.forceCss' is given highest priority because it is system required style.
-      Args.copy(this.inlineCss, this._loadInlineCss(markup));
-      Args.copy(this.inlineCss, args.forceCss || {});
-
-      // load unmanaged css values
-      // unmanaged css is css properties that are directlly passed to dom.style object.
-      // 1. filter all unmanaged css values from selector css
-      // 2. filter all unmanaged css values from inline css
-      Args.copy(this.unmanagedCss, __filter_unmanaged_css(this.selectorCss));
-      Args.copy(this.unmanagedCss, __filter_unmanaged_css(this.inlineCss));
-      Args.copy(this.unmanagedCss, this._loadUnmanagedCss(this.unmanagedCss));
+      // load unmanaged css from managed css
+      this.unmanagedCss.addValues(this._loadUnmanagedCss(this.managedCss));
 
       // always required properties
       this.display = this._loadDisplay(); // required
@@ -7069,21 +7075,15 @@ var StyleContext = (function(){
     // because all subdivided properties are already converted into unified name in loading process.
     getCssAttr : function(name, def_value){
       var ret;
-      ret = this.getInlineCssAttr(name);
+      ret = this.managedCss.get(name);
       if(ret !== null){
 	return this._evalCssAttr(name, ret);
       }
-      ret = this.getSelectorCssAttr(name);
+      ret = this.unmanagedCss.get(name);
       if(ret !== null){
 	return this._evalCssAttr(name, ret);
       }
       return (typeof def_value !== "undefined")? def_value : null;
-    },
-    getInlineCssAttr : function(name){
-      return this.inlineCss[name] || null;
-    },
-    getSelectorCssAttr : function(name){
-      return this.selectorCss[name] || null;
     },
     getMarkupName : function(){
       return this.markup.getName();
@@ -7248,7 +7248,7 @@ var StyleContext = (function(){
       if(this.zIndex){
 	css["z-index"] = this.zIndex;
       }
-      Args.copy(css, this.unmanagedCss);
+      Args.copy(css, this.unmanagedCss.getValues());
       css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
@@ -7284,7 +7284,7 @@ var StyleContext = (function(){
 	  css["line-height"] = this._computeUnitSize(line_height, this.font.size) + "px";
 	}
       }
-      Args.copy(css, this.unmanagedCss);
+      Args.copy(css, this.unmanagedCss.getValues());
       return css;
     },
     _computeContentMeasure : function(outer_measure){
@@ -7402,6 +7402,31 @@ var StyleContext = (function(){
 	return Selectors.getValue(this);
       }
     },
+    // nehan.js can change style dynamically by layout-context.
+    //
+    // [example]
+    // engine.setStyle("p", {
+    //   "onload" : function(context){
+    //      var min_extent = parseInt(context.getMarkup().getData("minExtent"), 10);
+    //	    if(context.getRestExtent() < min_extent){
+    //        return {"page-break-before":"always"};
+    //      }
+    //   }
+    // });
+    //
+    // then markup "<p data-min-extent='100'>text</p>" will be broken before
+    // if rest extent is less than 100.
+    _loadCallbackCss : function(managed_css, name){
+      var callback = managed_css.get(name);
+      if(callback === null || typeof callback !== "function"){
+	return {};
+      }
+      var ret = callback(this.callbackContext) || {};
+      for(var prop in ret){
+	ret[prop] = this._evalCssAttr(prop, ret[prop]);
+      }
+      return ret;
+    },
     _loadInlineCss : function(markup){
       var style = markup.getAttr("style");
       if(style === null){
@@ -7420,37 +7445,13 @@ var StyleContext = (function(){
 	return ret;
       });
     },
-    // nehan.js can change style dynamically by layout-context.
-    //
-    // [example]
-    // engine.setStyle("p", {
-    //   "onload" : function(context){
-    //      var min_extent = parseInt(context.getMarkup().getData("minExtent"), 10);
-    //	    if(context.getRestExtent() < min_extent){
-    //        return {"page-break-before":"always"};
-    //      }
-    //   }
-    // });
-    //
-    // then markup "<p data-min-extent='100'>text</p>" will be broken before
-    // if rest extent is less than 100.
-    _loadCallbackCss : function(name){
-      var callback = this.getSelectorCssAttr(name);
-      if(callback === null || typeof callback !== "function"){
-	return {};
-      }
-      var ret = callback(this.callbackContext) || {};
-      for(var prop in ret){
-	ret[prop] = this._evalCssAttr(prop, ret[prop]);
-      }
-      return ret;
-    },
-    _loadUnmanagedCss : function(unmanaged_css){
-      var ret = {};
-      for(var prop in unmanaged_css){
-	ret[prop] = this._evalCssAttr(prop, unmanaged_css[prop]);
-      }
-      return ret;
+    _loadUnmanagedCss : function(managed_css){
+      // line-height is not always welcome for vertical-mode.
+      var ng_props = ["line-height"];
+      var skip_props = __managed_css_props.concat(skip_props);
+      return managed_css.filter(function(prop, value){
+	return !List.exists(skip_props, Closure.eq(prop));
+      });
     },
     _loadDisplay : function(){
       return this.getCssAttr("display", "inline");

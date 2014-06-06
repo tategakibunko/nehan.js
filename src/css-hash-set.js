@@ -1,6 +1,6 @@
 var CssHashSet = (function(){
   function CssHashSet(values){
-    HashSet.prototype.call(this, values || null);
+    HashSet.call(this, values || null);
   }
   Class.extend(CssHashSet, HashSet);
 
