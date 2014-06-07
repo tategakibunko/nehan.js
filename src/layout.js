@@ -18,9 +18,9 @@ var Layout = {
     hori:"lr", // paging direction 'left to right'
     vert:"rl"  // paging direction 'right to left'
   },
-  width: 800, // root width
-  height: 580, // root height
-  fontSize:16, // root fontSize
+  width: screen.width, // root width, used when style.body.width not defined.
+  height: screen.height, // root height, used when style.body.height not defined.
+  fontSize:16, // root fontSize, used when style.body["font-size"] not defined.
   maxFontSize:64,
   rubyRate:0.5, // used when Style.rt["font-size"] is not defined.
   boldRate:0.5, // used to calculate sketchy bold metrics in the environment with no canvas element.

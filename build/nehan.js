@@ -99,9 +99,9 @@ var Layout = {
     hori:"lr", // paging direction 'left to right'
     vert:"rl"  // paging direction 'right to left'
   },
-  width: 800, // root width
-  height: 580, // root height
-  fontSize:16, // root fontSize
+  width: screen.width, // root width, used when style.body.width not defined.
+  height: screen.height, // root height, used when style.body.height not defined.
+  fontSize:16, // root fontSize, used when style.body["font-size"] not defined.
   maxFontSize:64,
   rubyRate:0.5, // used when Style.rt["font-size"] is not defined.
   boldRate:0.5, // used to calculate sketchy bold metrics in the environment with no canvas element.
@@ -7176,8 +7176,14 @@ var StyleContext = (function(){
     getParentFlow : function(){
       return this.parent? this.parent.flow : this.flow;
     },
+    getParentFontSize : function(){
+      return this.parent? this.parent.getFontSize() : Layout.fontSize;
+    },
     getParentContentMeasure : function(){
-      return this.parent? this.parent.contentMeasure : this.contentMeasure;
+      return this.parent? this.parent.contentMeasure : Layout.getMeasure(this.flow);
+    },
+    getParentContentExtent : function(){
+      return this.parent? this.parent.contentExtent : Layout.getExtent(this.flow);
     },
     getNextSibling : function(){
       return this.next;
@@ -7300,10 +7306,11 @@ var StyleContext = (function(){
     _computeFontSize : function(val, unit_size){
       var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
       var size = Layout.fontSizeNames[str] || str;
-      var font_size = this._computeUnitSize(size, unit_size);
+      var max_size = this.getParentFontSize();
+      var font_size = this._computeUnitSize(size, unit_size, max_size);
       return Math.min(font_size, Layout.maxFontSize);
     },
-    _computeUnitSize : function(val, unit_size){
+    _computeUnitSize : function(val, unit_size, max_size){
       var str = String(val);
       if(str.indexOf("rem") > 0){
 	var rem_scale = parseFloat(str.replace("rem",""));
@@ -7317,7 +7324,6 @@ var StyleContext = (function(){
 	return Math.round(parseInt(str, 10) * 4 / 3);
       }
       if(str.indexOf("%") > 0){
-	var max_size = this.getParentContentMeasure();
 	return Math.round(max_size * parseInt(str, 10) / 100);
       }
       var px = parseInt(str, 10);
@@ -7668,13 +7674,15 @@ var StyleContext = (function(){
     },
     _loadStaticMeasure : function(){
       var prop = this.flow.getPropMeasure();
+      var max_size = this.getParentContentMeasure();
       var static_size = this.getAttr(prop) || this.getAttr("measure") || this.getCssAttr(prop) || this.getCssAttr("measure");
-      return static_size? this._computeUnitSize(static_size, this.font.size) : null;
+      return static_size? this._computeUnitSize(static_size, this.font.size, max_size) : null;
     },
     _loadStaticExtent : function(){
       var prop = this.flow.getPropExtent();
+      var max_size = this.getParentContentExtent();
       var static_size = this.getAttr(prop) || this.getAttr("extent") || this.getCssAttr(prop) || this.getCssAttr("extent");
-      return static_size? this._computeUnitSize(static_size, this.font.size) : null;
+      return static_size? this._computeUnitSize(static_size, this.font.size, max_size) : null;
     }
   };
 
