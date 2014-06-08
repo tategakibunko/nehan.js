@@ -29,6 +29,11 @@ var Tag = (function (){
     setAttr : function(name, value){
       this.attrs.setAttr(name, value);
     },
+    setAttrs : function(attrs){
+      for(var name in attrs){
+	this.setAttr(name, attrs[name]);
+      }
+    },
     setData : function(name, value){
       this.attrs.setData(name, value);
     },

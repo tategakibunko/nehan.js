@@ -2941,6 +2941,11 @@ var Tag = (function (){
     setAttr : function(name, value){
       this.attrs.setAttr(name, value);
     },
+    setAttrs : function(attrs){
+      for(var name in attrs){
+	this.setAttr(name, attrs[name]);
+      }
+    },
     setData : function(name, value){
       this.attrs.setData(name, value);
     },
@@ -6740,7 +6745,10 @@ var StyleContext = (function(){
 
       // force re-culculate context-size of children based on new context-size of parent.
       List.iter(this.childs, function(child){
-	child.forceUpdateContextSize(null, null);
+	// if child has context parent, keep original parent size.
+	if(typeof child.contextParent === "undefined"){
+	  child.forceUpdateContextSize(null, null);
+	}
       });
     },
     // clone style-context with temporary css
@@ -6769,8 +6777,9 @@ var StyleContext = (function(){
       return null;
     },
     // inherit style with tag_name and css(optional).
-    createChild : function(tag_name, css){
+    createChild : function(tag_name, css, tag_attr){
       var tag = new Tag("<" + tag_name + ">");
+      tag.setAttrs(tag_attr || {});
       var style = new StyleContext(tag, this, {forceCss:(css || {})});
 
       // save 'original' parent to child-style, because sometimes it is required by 'grand-child'.
@@ -6794,7 +6803,7 @@ var StyleContext = (function(){
     createBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
-      var measure = this.staticMeasure || this.contentMeasure;
+      var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
@@ -9130,8 +9139,9 @@ var ListItemGenerator = (function(){
     var measure = marker_size.getMeasure(style.flow);
     var marker_style = style.createChild("li-marker", {
       "float":"start",
-      "class":"nehan-li-marker",
       "measure":measure
+    }, {
+      "class":"nehan-li-marker"
     });
     return new BlockGenerator(marker_style, new TokenStream(marker_text), outline_context);
   };
@@ -9141,8 +9151,9 @@ var ListItemGenerator = (function(){
     var measure = style.contentMeasure - marker_size.getMeasure(style.flow);
     var body_style = style.createChild("li-body", {
       "float":"start",
-      "class":"nehan-li-body",
       "measure":measure
+    }, {
+      "class":"nehan-li-body"
     });
     return new BlockGenerator(body_style, stream, outline_context);
   };

@@ -222,7 +222,10 @@ var StyleContext = (function(){
 
       // force re-culculate context-size of children based on new context-size of parent.
       List.iter(this.childs, function(child){
-	child.forceUpdateContextSize(null, null);
+	// if child has context parent, keep original parent size.
+	if(typeof child.contextParent === "undefined"){
+	  child.forceUpdateContextSize(null, null);
+	}
       });
     },
     // clone style-context with temporary css
@@ -251,8 +254,9 @@ var StyleContext = (function(){
       return null;
     },
     // inherit style with tag_name and css(optional).
-    createChild : function(tag_name, css){
+    createChild : function(tag_name, css, tag_attr){
       var tag = new Tag("<" + tag_name + ">");
+      tag.setAttrs(tag_attr || {});
       var style = new StyleContext(tag, this, {forceCss:(css || {})});
 
       // save 'original' parent to child-style, because sometimes it is required by 'grand-child'.
@@ -276,7 +280,7 @@ var StyleContext = (function(){
     createBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
-      var measure = this.staticMeasure || this.contentMeasure;
+      var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());

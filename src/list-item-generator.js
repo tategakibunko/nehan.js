@@ -14,8 +14,9 @@ var ListItemGenerator = (function(){
     var measure = marker_size.getMeasure(style.flow);
     var marker_style = style.createChild("li-marker", {
       "float":"start",
-      "class":"nehan-li-marker",
       "measure":measure
+    }, {
+      "class":"nehan-li-marker"
     });
     return new BlockGenerator(marker_style, new TokenStream(marker_text), outline_context);
   };
@@ -25,8 +26,9 @@ var ListItemGenerator = (function(){
     var measure = style.contentMeasure - marker_size.getMeasure(style.flow);
     var body_style = style.createChild("li-body", {
       "float":"start",
-      "class":"nehan-li-body",
       "measure":measure
+    }, {
+      "class":"nehan-li-body"
     });
     return new BlockGenerator(body_style, stream, outline_context);
   };
