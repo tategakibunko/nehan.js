@@ -9149,10 +9149,6 @@ var ListItemGenerator = (function(){
     return new BlockGenerator(body_style, stream, outline_context);
   };
 
-  ListItemGenerator.prototype._alignContentExtent = function(blocks, content_extent){
-    return ParallelGenerator.prototype._alignContentExtent.call(this, blocks, content_extent);
-  };
-
   return ListItemGenerator;
 })();
   
