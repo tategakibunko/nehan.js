@@ -17,7 +17,6 @@ var ListItemGenerator = (function(){
       "class":"nehan-li-marker",
       "measure":measure
     });
-
     return new BlockGenerator(marker_style, new TokenStream(marker_text), outline_context);
   };
 
@@ -29,7 +28,6 @@ var ListItemGenerator = (function(){
       "class":"nehan-li-body",
       "measure":measure
     });
-
     return new BlockGenerator(body_style, stream, outline_context);
   };
 
