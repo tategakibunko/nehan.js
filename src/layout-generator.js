@@ -116,7 +116,7 @@ var LayoutGenerator = (function(){
     } 
   };
 
-  LayoutGenerator.prototype._createFloatGenerator = function(context, outline_context, first_float_gen){
+  LayoutGenerator.prototype._createFloatGenerator = function(context, first_float_gen){
     var self = this, parent_style = this.style;
     var rest_float_gens = this.stream.mapWhile(function(token){
       if(!Token.isTag(token)){
@@ -128,15 +128,15 @@ var LayoutGenerator = (function(){
 	return null;
       }
       var child_stream = self._createStream(child_style);
-      return self._createChildBlockGenerator(child_style, child_stream, context, outline_context);
+      return self._createChildBlockGenerator(child_style, child_stream, context);
     });
     var floated_generators = [first_float_gen].concat(rest_float_gens);
-    return new FloatGenerator(this.style, this.stream, outline_context, floated_generators);
+    return new FloatGenerator(this.style, this.stream, floated_generators);
   };
 
-  LayoutGenerator.prototype._createChildBlockGenerator = function(style, stream, context, outline_context){
+  LayoutGenerator.prototype._createChildBlockGenerator = function(style, stream, context){
     if(style.hasFlipFlow()){
-      return new FlipGenerator(style, stream, outline_context, context);
+      return new FlipGenerator(style, stream, context);
     }
 
     // if child style with 'pasted' attribute, yield block with direct content by LazyGenerator.
@@ -149,18 +149,18 @@ var LayoutGenerator = (function(){
     // switch generator by display
     switch(style.display){
     case "list-item":
-      return new ListItemGenerator(style, stream, outline_context);
+      return new ListItemGenerator(style, stream);
 
     case "table":
-      return new TableGenerator(style, stream, outline_context);
+      return new TableGenerator(style, stream);
 
     case "table-header-group":
     case "table-row-group":
     case "table-footer-group":
-      return new TableRowGroupGenerator(style, stream, outline_context);
+      return new TableRowGroupGenerator(style, stream);
 
     case "table-row":
-      return new TableRowGenerator(style, stream, outline_context);
+      return new TableRowGenerator(style, stream);
 
     case "table-cell":
       return new TableCellGenerator(style, stream);
@@ -176,7 +176,7 @@ var LayoutGenerator = (function(){
       return new LazyGenerator(style, style.createBlock());
 
     case "first-line":
-      return new FirstLineGenerator(style, stream, outline_context);
+      return new FirstLineGenerator(style, stream);
 
     case "details":
     case "blockquote":
@@ -188,7 +188,7 @@ var LayoutGenerator = (function(){
     case "article":
     case "nav":
     case "aside":
-      return new SectionContentGenerator(style, stream, outline_context);
+      return new SectionContentGenerator(style, stream);
 
     case "h1":
     case "h2":
@@ -196,20 +196,20 @@ var LayoutGenerator = (function(){
     case "h4":
     case "h5":
     case "h6":
-      return new HeaderGenerator(style, stream, outline_context);
+      return new HeaderGenerator(style, stream);
 
     case "ul":
     case "ol":
-      return new ListGenerator(style, stream, outline_context);
+      return new ListGenerator(style, stream);
 
     default:
-      return new BlockGenerator(style, stream, outline_context);
+      return new BlockGenerator(style, stream);
     }
   };
 
-  LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, context, outline_context){
+  LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, context){
     if(style.isInlineBlock()){
-      return new InlineBlockGenerator(style, stream, outline_context);
+      return new InlineBlockGenerator(style, stream);
     }
     if(style.isPasted()){
       return new LazyGenerator(style, style.createLine({content:style.getContent()}));
@@ -219,11 +219,11 @@ var LayoutGenerator = (function(){
       // if inline img, no content text is included in img tag, so we yield it by lazy generator.
       return new LazyGenerator(style, style.createImage());
     case "a":
-      return new LinkGenerator(style, stream, outline_context);
+      return new LinkGenerator(style, stream);
     case "page-break": case "end-page": case "pbr":
       return new BreakAfterGenerator(style);
     default:
-      return new InlineGenerator(style, stream, outline_context);
+      return new InlineGenerator(style, stream);
     }
   };
 

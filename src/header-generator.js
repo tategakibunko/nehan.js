@@ -1,6 +1,6 @@
 var HeaderGenerator = (function(){
-  function HeaderGenerator(style, stream, outline_context){
-    BlockGenerator.call(this, style, stream, outline_context);
+  function HeaderGenerator(style, stream){
+    BlockGenerator.call(this, style, stream);
   }
   Class.extend(HeaderGenerator, BlockGenerator);
 
@@ -12,7 +12,7 @@ var HeaderGenerator = (function(){
   };
 
   HeaderGenerator.prototype._onComplete = function(context, block){
-    var header_id = this.outlineContext.addHeader({
+    var header_id = this.style.startHeaderContext({
       type:this.style.getMarkupName(),
       rank:this._getHeaderRank(),
       title:this.style.getMarkupContent()

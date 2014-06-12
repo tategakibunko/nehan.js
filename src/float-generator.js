@@ -2,15 +2,15 @@ var FloatGenerator = (function(){
   // caution: constructor argument 'style' is the style of parent.
   // so if <body><float1>..</float1><float2>...</float2></body>,
   // style of this contructor is 'body.style'
-  function FloatGenerator(style, stream, outline_context, floated_generators){
-    BlockGenerator.call(this, style, stream, outline_context);
+  function FloatGenerator(style, stream, floated_generators){
+    BlockGenerator.call(this, style, stream);
     this.generators = floated_generators;
 
     // create child generator to yield rest-space of float-elements with logical-float "start".
     // notice that this generator uses 'clone' of original style, because content size changes by position,
     // but on the other hand, original style is referenced by float-elements as their parent style.
     // so we must keep original style immutable.
-    this.setChildLayout(new BlockGenerator(style.clone({"float":"start"}), stream, outline_context));
+    this.setChildLayout(new BlockGenerator(style.clone({"float":"start"}), stream));
   }
   Class.extend(FloatGenerator, LayoutGenerator);
 

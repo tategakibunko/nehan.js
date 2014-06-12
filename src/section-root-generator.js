@@ -1,12 +1,12 @@
 var SectionRootGenerator = (function(){
   function SectionRootGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
-    this.outlineContext = new OutlineContext(style); // create new section root
+    this.style.startOutlineContext(); // create new section root
   }
   Class.extend(SectionRootGenerator, BlockGenerator);
 
   SectionRootGenerator.prototype._onComplete = function(context, block){
-    DocumentContext.addOutlineContext(this.outlineContext);
+    this.style.endOutlineContext();
   };
 
   return SectionRootGenerator;

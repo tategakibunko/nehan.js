@@ -3,8 +3,8 @@
 // stream : [td | th]
 // yield : parallel([td | th])
 var TableRowGenerator = (function(){
-  function TableRowGenerator(style, stream, outline_context){
-    var generators = this._getGenerators(style, stream, outline_context);
+  function TableRowGenerator(style, stream){
+    var generators = this._getGenerators(style, stream);
     ParallelGenerator.call(this, style, generators);
   }
   Class.extend(TableRowGenerator, ParallelGenerator);
@@ -13,7 +13,7 @@ var TableRowGenerator = (function(){
     var child_tags = this._getChildTags(stream);
     var child_styles = this._getChildStyles(style, child_tags);
     return List.map(child_styles, function(child_style){
-      return new TableCellGenerator(child_style, new TokenStream(child_style.getMarkupContent()), outline_context);
+      return new TableCellGenerator(child_style, new TokenStream(child_style.getMarkupContent()));
     });
   };
 

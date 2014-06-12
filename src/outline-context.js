@@ -1,7 +1,7 @@
 var OutlineContext = (function(){
-  function OutlineContext(style){
+  function OutlineContext(markup_name){
     this.logs = [];
-    this.style = style;
+    this.markupName = markup_name;
   }
 
   var __header_id__ = 0; // glocal unique header id
@@ -17,7 +17,7 @@ var OutlineContext = (function(){
       return this.logs[index] || null;
     },
     getMarkupName : function(){
-      return this.style.getMarkupName();
+      return this.markupName;
     },
     startSection : function(type){
       this.logs.push({

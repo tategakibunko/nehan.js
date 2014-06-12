@@ -1,6 +1,6 @@
 var ListGenerator = (function(){
-  function ListGenerator(style, stream, outline_context){
-    BlockGenerator.call(this, style, stream, outline_context);
+  function ListGenerator(style, stream){
+    BlockGenerator.call(this, style, stream);
     this.style.markerSize = this._getMarkerSize(this.stream.getTokenCount());
   }
   Class.extend(ListGenerator, BlockGenerator);

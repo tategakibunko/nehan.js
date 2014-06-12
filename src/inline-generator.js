@@ -1,7 +1,6 @@
 var InlineGenerator = (function(){
-  function InlineGenerator(style, stream, outline_context, child_generator){
+  function InlineGenerator(style, stream, child_generator){
     LayoutGenerator.call(this, style, stream);
-    this.outlineContext = outline_context || null;
     if(child_generator){
       this.setChildLayout(child_generator);
     }

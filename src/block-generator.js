@@ -1,7 +1,6 @@
 var BlockGenerator = (function(){
-  function BlockGenerator(style, stream, outline_context){
+  function BlockGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
-    this.outlineContext = outline_context;
   }
   Class.extend(BlockGenerator, LayoutGenerator);
 
@@ -63,7 +62,7 @@ var BlockGenerator = (function(){
 	return this._getNext(context);
       }
       this.stream.prev();
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext));
+      this.setChildLayout(new InlineGenerator(this.style, this.stream));
       return this.yieldChildLayout(context);
     }
 
@@ -79,8 +78,8 @@ var BlockGenerator = (function(){
     var child_stream = this._createStream(child_style);
 
     if(child_style.isFloated()){
-      var first_float_gen = this._createChildBlockGenerator(child_style, child_stream, context, this.outlineContext);
-      this.setChildLayout(this._createFloatGenerator(context, this.outlineContext, first_float_gen));
+      var first_float_gen = this._createChildBlockGenerator(child_style, child_stream, context);
+      this.setChildLayout(this._createFloatGenerator(context, first_float_gen));
       return this.yieldChildLayout(context);
     }
 
@@ -88,12 +87,12 @@ var BlockGenerator = (function(){
     // delegate current style and stream to child inline-generator with first child inline generator.
     if(child_style.isInlineBlock() || child_style.isInline()){
       var first_inline_gen = this._createChildInlineGenerator(child_style, child_stream, context, this.outlineContext);
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, this.outlineContext, first_inline_gen));
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, first_inline_gen));
       return this.yieldChildLayout(context);
     }
 
     // other case, start child block generator
-    this.setChildLayout(this._createChildBlockGenerator(child_style, child_stream, context, this.outlineContext));
+    this.setChildLayout(this._createChildBlockGenerator(child_style, child_stream, context));
     return this.yieldChildLayout(context);
   };
 

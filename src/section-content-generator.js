@@ -1,12 +1,12 @@
 var SectionContentGenerator = (function(){
-  function SectionContentGenerator(style, stream, outline_context){
-    BlockGenerator.call(this, style, stream, outline_context);
-    this.outlineContext.startSection(this.style.getMarkupName());
+  function SectionContentGenerator(style, stream){
+    BlockGenerator.call(this, style, stream);
+    this.style.startSectionContext();
   }
   Class.extend(SectionContentGenerator, BlockGenerator);
 
   SectionContentGenerator.prototype._onComplete = function(context, block){
-    this.outlineContext.endSection(this.style.getMarkupName());
+    this.style.endSectionContext();
   };
 
   return SectionContentGenerator;

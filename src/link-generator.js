@@ -6,8 +6,8 @@ var LinkGenerator = (function(){
     }
   };
 
-  function LinkGenerator(style, stream, outline_context){
-    InlineGenerator.call(this, style, stream, outline_context);
+  function LinkGenerator(style, stream){
+    InlineGenerator.call(this, style, stream);
     __add_anchor(style); // set anchor at this point
   }
   Class.extend(LinkGenerator, InlineGenerator);

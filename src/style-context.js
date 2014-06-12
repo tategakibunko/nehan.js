@@ -196,6 +196,29 @@ var StyleContext = (function(){
       // disable some unmanaged css properties depending on loaded style values.
       this._disableUnmanagedCssProps(this.unmanagedCss);
     },
+    getOutlineContext : function(){
+      return this.outlineContext || this.parent.getOutlineContext();
+    },
+    startOutlineContext : function(){
+      this.outlineContext = new OutlineContext(this.getMarkupName());
+    },
+    endOutlineContext : function(){
+      DocumentContext.addOutlineContext(this.getOutlineContext());
+    },
+    startSectionContext : function(){
+      this.getOutlineContext().startSection(this.getMarkupName());
+    },
+    endSectionContext : function(){
+      this.getOutlineContext().endSection(this.getMarkupName());
+    },
+    // return header id
+    startHeaderContext : function(opt){
+      return this.getOutlineContext().addHeader({
+	type:opt.type,
+	rank:opt.rank,
+	title:opt.title
+      });
+    },
     // [context_size] = (outer_size, content_size)
     //
     // (a) outer_size

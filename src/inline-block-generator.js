@@ -1,6 +1,6 @@
 var InlineBlockGenerator = (function (){
-  function InlineBlockGenerator(style, stream, outline_context){
-    BlockGenerator.call(this, style, stream, outline_context);
+  function InlineBlockGenerator(style, stream){
+    BlockGenerator.call(this, style, stream);
   }
   Class.extend(InlineBlockGenerator, BlockGenerator);
 

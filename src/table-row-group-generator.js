@@ -3,8 +3,8 @@
 // stream : [tr]
 // yield : [tr]
 var TableRowGroupGenerator = (function(){
-  function TableRowGroupGenerator(style, stream, outline_context){
-    BlockGenerator.call(this, style, stream, outline_context);
+  function TableRowGroupGenerator(style, stream){
+    BlockGenerator.call(this, style, stream);
   }
   Class.extend(TableRowGroupGenerator, BlockGenerator);
 

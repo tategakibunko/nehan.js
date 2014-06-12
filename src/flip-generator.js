@@ -1,6 +1,6 @@
 var FlipGenerator = (function(){
-  function FlipGenerator(style, stream, outline_context){
-    BlockGenerator.call(this, style, stream, outline_context);
+  function FlipGenerator(style, stream){
+    BlockGenerator.call(this, style, stream);
   }
   Class.extend(FlipGenerator, BlockGenerator);
 
