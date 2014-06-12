@@ -142,9 +142,9 @@ var InlineGenerator = (function(){
 
     // if inline -> block(or floated layout), force terminate inline
     if(child_style.isBlock() || child_style.isFloated()){
-      var child_gen = this._createChildBlockGenerator(child_style, child_stream, context, this.outlineContext);
+      var child_gen = this._createChildBlockGenerator(child_style, child_stream, context);
       if(child_style.isFloated()){
-	child_gen = this._createFloatGenerator(context, this.outlineContext, child_gen);
+	child_gen = this._createFloatGenerator(context, child_gen);
       }
       this._breakInline(child_gen);
 
@@ -157,7 +157,7 @@ var InlineGenerator = (function(){
 
     // if inline-block, yield immediately, and return as child inline element.
     if(child_style.isInlineBlock()){
-      return (new InlineBlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
+      return (new InlineBlockGenerator(child_style, child_stream)).yield(context);
     }
 
     // inline child
@@ -170,7 +170,7 @@ var InlineGenerator = (function(){
       return null;
 
     default:
-      var child_generator = this._createChildInlineGenerator(child_style, child_stream, context, this.outlineContext);
+      var child_generator = this._createChildInlineGenerator(child_style, child_stream, context);
       this.setChildLayout(child_generator);
       return this.yieldChildLayout(context);
     }

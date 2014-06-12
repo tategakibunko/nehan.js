@@ -8304,7 +8304,7 @@ var BlockGenerator = (function(){
     // if child inline or child inline-block,
     // delegate current style and stream to child inline-generator with first child inline generator.
     if(child_style.isInlineBlock() || child_style.isInline()){
-      var first_inline_gen = this._createChildInlineGenerator(child_style, child_stream, context, this.outlineContext);
+      var first_inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
       this.setChildLayout(new InlineGenerator(this.style, this.stream, first_inline_gen));
       return this.yieldChildLayout(context);
     }
@@ -8492,9 +8492,9 @@ var InlineGenerator = (function(){
 
     // if inline -> block(or floated layout), force terminate inline
     if(child_style.isBlock() || child_style.isFloated()){
-      var child_gen = this._createChildBlockGenerator(child_style, child_stream, context, this.outlineContext);
+      var child_gen = this._createChildBlockGenerator(child_style, child_stream, context);
       if(child_style.isFloated()){
-	child_gen = this._createFloatGenerator(context, this.outlineContext, child_gen);
+	child_gen = this._createFloatGenerator(context, child_gen);
       }
       this._breakInline(child_gen);
 
@@ -8507,7 +8507,7 @@ var InlineGenerator = (function(){
 
     // if inline-block, yield immediately, and return as child inline element.
     if(child_style.isInlineBlock()){
-      return (new InlineBlockGenerator(child_style, child_stream, this.outlineContext)).yield(context);
+      return (new InlineBlockGenerator(child_style, child_stream)).yield(context);
     }
 
     // inline child
@@ -8520,7 +8520,7 @@ var InlineGenerator = (function(){
       return null;
 
     default:
-      var child_generator = this._createChildInlineGenerator(child_style, child_stream, context, this.outlineContext);
+      var child_generator = this._createChildInlineGenerator(child_style, child_stream, context);
       this.setChildLayout(child_generator);
       return this.yieldChildLayout(context);
     }
@@ -9220,7 +9220,7 @@ var TableRowGenerator = (function(){
   }
   Class.extend(TableRowGenerator, ParallelGenerator);
 
-  TableRowGenerator.prototype._getGenerators = function(style, stream, outline_context){
+  TableRowGenerator.prototype._getGenerators = function(style, stream){
     var child_tags = this._getChildTags(stream);
     var child_styles = this._getChildStyles(style, child_tags);
     return List.map(child_styles, function(child_style){

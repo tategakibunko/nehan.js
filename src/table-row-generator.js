@@ -9,7 +9,7 @@ var TableRowGenerator = (function(){
   }
   Class.extend(TableRowGenerator, ParallelGenerator);
 
-  TableRowGenerator.prototype._getGenerators = function(style, stream, outline_context){
+  TableRowGenerator.prototype._getGenerators = function(style, stream){
     var child_tags = this._getChildTags(stream);
     var child_styles = this._getChildStyles(style, child_tags);
     return List.map(child_styles, function(child_style){
