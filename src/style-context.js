@@ -101,7 +101,7 @@ var StyleContext = (function(){
       }
 
       // create context for each functional css property.
-      this.selectorContext = new SelectorPropContext(this, args.layoutContext || null);
+      this.selectorPropContext = new SelectorPropContext(this, args.layoutContext || null);
 
       // create selector callback context,
       // this context is passed to "onload" callback.
@@ -109,7 +109,7 @@ var StyleContext = (function(){
       // because 'onload' callback is called after loading selector css.
       // notice that at this phase, css values are not converted into internal style object.
       // so by updating css value, you can update calculation of internal style object.
-      this.callbackContext = new SelectorContext(this, args.layoutContext || null);
+      this.selectorContext = new SelectorContext(this, args.layoutContext || null);
 
       this.managedCss = new CssHashSet();
       this.unmanagedCss = new CssHashSet();
@@ -562,7 +562,7 @@ var StyleContext = (function(){
       }
       // if value is function, call with selector context, and format the returned value.
       if(typeof value === "function"){
-	return CssParser.formatValue(name, value(this.selectorContext));
+	return CssParser.formatValue(name, value(this.selectorPropContext));
       }
       return value; // already formatted
     },
@@ -930,7 +930,7 @@ var StyleContext = (function(){
       if(callback === null || typeof callback !== "function"){
 	return {};
       }
-      var ret = callback(this.callbackContext) || {};
+      var ret = callback(this.selectorContext) || {};
       for(var prop in ret){
 	ret[prop] = this._evalCssAttr(prop, ret[prop]);
       }
