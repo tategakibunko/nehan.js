@@ -6,9 +6,9 @@ if(!Nehan){
 // glocal style
 Nehan.style = {};
 
-// global single tag names
-Nehan.__single_tags__ = [];
-Nehan.__single_tags_rex__ = [];
+// global single tags
+Nehan.__single_tag_names__ = [];
+Nehan.__single_tag_rexes__ = [];
 
 Nehan.setStyle = function(selector_key, value){
   var entry = Nehan.style[selector_key] || {};
@@ -24,12 +24,12 @@ Nehan.setStyles = function(values){
   }
 };
 
-Nehan.addSingleTag = function(tag_name){
-  Nehan.__single_tags__.push(tag_name);
+Nehan.addSingleTagByName = function(tag_name){
+  Nehan.__single_tag_names__.push(tag_name);
 };
 
-Nehan.addSingleTagRex = function(rex){
-  Nehan.__single_tags_rex__.push(rex);
+Nehan.addSingleTagByRex = function(rex){
+  Nehan.__single_tag_rexes__.push(rex);
 };
 
 // this function ends at the tail of this source.

@@ -31,7 +31,7 @@ var LayoutTest = (function(){
       onComplete : function(stream, time){
 	$dom.append($("<p />").html(time + "msec"));
 	$dom.append($("<h2 />").html("outline"));
-	$dom.append(engine.documentContext.createBodyOutlineElement());
+	$dom.append(engine.createOutlineElement());
 	//prettyPrint();
 	//console.log("finished(%f msec)", time);
       }

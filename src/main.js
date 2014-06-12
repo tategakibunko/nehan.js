@@ -9,22 +9,30 @@ Args.copy2(Layout, __engine_args.layout || {});
 Selectors.setValues(Nehan.style || {}); // copy global style
 Selectors.setValues(__engine_args.style || {}); // copy engine local style
 
-// copy global single tags
-LexingRule.addSingleTagAll(Nehan.__single_tags__);
-LexingRule.addSingleTagRexAll(Nehan.__single_tags_rex__);
+// register global single tags
+List.iter(Nehan.__single_tag_names__, LexingRule.addSingleTagByName);
+List.iter(Nehan.__single_tag_rexes__, LexingRule.addSingleTagByRex);
 
 // export engine local interfaces
 return {
-  documentContext: DocumentContext,
   createPageStream : function(text){
     return new PageStream(text);
   },
-  // register engine local single tag name
-  addSingleTag : function(name){
-    LexingRule.addSingleTag(name);
+  // create outline element of "<body>",
+  // if multiple body exists, only first one is returned.
+  // about callback argument, see 'src/section-tree-converter.js'.
+  createOutlineElement : function(callbacks){
+    return DocumentContext.createBodyOutlineElement(callbacks);
   },
-  // register engine local single tag name by rex
-  addSingleTagRex : function(rex){
+  getAnchorPageNo : function(anchor_name){
+    return DocumentContext.getAnchorPageNo(anchor_name);
+  },
+  // register engine local single tag by name
+  addSingleTagByName : function(name){
+    LexingRule.addSingleTagByName(name);
+  },
+  // register engine local single tag by rex
+  addSingleTagByRex : function(rex){
     LexingRule.addSingleTagRex(name);
   },
   // set engine local style
