@@ -9969,7 +9969,7 @@ Args.copy2(Layout, __engine_args.layout || {});
 Selectors.setValues(Nehan.style || {}); // copy global style
 Selectors.setValues(__engine_args.style || {}); // copy engine local style
 
-// copy global single tags by regexp
+// copy global single tags
 LexingRule.addSingleTagAll(Nehan.__single_tags__);
 LexingRule.addSingleTagRexAll(Nehan.__single_tags_rex__);
 
