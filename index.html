@@ -237,7 +237,7 @@ stream.asyncGet({
   onComplete : function(stream, time){
     console.log("finished! %f msec", time);
     // you can create outline element via engine.documentContext.
-    var toc = engine.documentContext.createBodyOutlineElement({
+    var toc = engine.createOutlineElement({
       onClickLink : function(toc){
         console.log("click toc:%o", toc);
       }
