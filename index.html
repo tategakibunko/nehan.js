@@ -146,16 +146,16 @@ engine.setStyles({
     "flow":"lr-tb", // normal horizontal mode
     //"flow":"tb-rl", // japanese vertical mode
     //"flow":"tb-lr", // chinese vertical mode
+    //"width":800, // direct size
+    //"width":"80%", // percentage size from parent(screen.width at this case)
     "width":function(context){
-      return Math.floor(screen.width * 70 / 100);  
+      return Math.floor(screen.width * 70 / 100); // you can return size by funciton.
     },
-    "height":function(context){
-      return Math.floor(screen.width * 55 / 100);  
-    },
+    "height":"60%",
     "font-family":"'Hiragino Mincho Pro','HiraMinProN-W3','IPA Mincho','Meiryo','MS Mincho',monospace",
     "font-size":function(context){
-      ver height = Math.floor(screen.width * 55 / 100);  
-      return Math.floor(height / 25);
+      ver height = Math.floor(screen.width * 60 / 100);
+      return Math.max(12, Math.floor(height / 25));
     }
   },
   // always break the page before h1.
