@@ -117,6 +117,35 @@ var Script = {
     "</table>"
   ].join("\n"),
 
+  "table-auto":[
+    "<table style='table-layout:auto'>",
+    "<thead>",
+    "<tr>",
+    "<th>head1</th><th>head2</th><th>head3</th>",
+    "</tr>",
+    "</thead>",
+
+    "<tbody>",
+    "<tr>",
+    "<td>" + Text["long"] + "</td><td>hige</td><td>hoge</td>",
+    "</tr>",
+    "<tr>",
+    "<td>ohoho</td><td>ahaha</td><td>" + Text["middle"] + "</td>",
+    "</tr>",
+    "<tr>",
+    "<td>123</td><td>456</td><td>789</td>",
+    "</tr>",
+    "</tbody>",
+
+    "<tfoot>",
+    "<tr>",
+    "<td>foot1</td>",
+    "<td>foot2</td>",
+    "</tr>",
+    "</tfoot>",
+    "</table>"
+  ].join("\n"),
+
   "list":[
     Snipet["ul"],
     Snipet["ol"],

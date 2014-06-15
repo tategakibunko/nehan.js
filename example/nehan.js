@@ -6585,6 +6585,7 @@ var TablePartitionParser = {
     var min_part_size = Math.floor(style.contentMeasure / (partition_count * 2));
     var size = max_line.length * style.getFontSize();
     size = Math.max(min_part_size, Math.min(size, max_part_size));
+    size = Math.max(style.getFontSize(), size);
     return new PartitionUnit({size:size, isImportant:false});
   },
   _getCellStream : function(tag){
