@@ -567,7 +567,8 @@ var Style = {
   "table":{
     "display":"table",
     "embeddable":true,
-    "table-layout":"fixed", // 'auto' not supported yet.
+    //"table-layout":"fixed",
+    "table-layout":"auto",
     "background-color":"white",
     "border-collapse":"collapse", // 'separate' is not supported yet.
     "border-color":"#a8a8a8",

@@ -182,7 +182,6 @@ var StyleContext = (function(){
       if(break_after){
 	this.breakAfter = break_after;
       }
-
       // static size is defined in selector or tag attr, hightest priority
       this.staticMeasure = this._loadStaticMeasure();
       this.staticExtent = this._loadStaticExtent();
@@ -192,6 +191,11 @@ var StyleContext = (function(){
       // 2. parent size
       // 3. current edge size.
       this.initContextSize(this.staticMeasure, this.staticExtent);
+
+      // load partition set after context size is calculated.
+      if(this.display === "table" && this.getCssAttr("table-layout") === "auto"){
+	this.partitionSet = PartitionSetParser.parse(this, new TokenStream(this.getContent()));
+      }
 
       // disable some unmanaged css properties depending on loaded style values.
       this._disableUnmanagedCssProps(this.unmanagedCss);
@@ -652,6 +656,9 @@ var StyleContext = (function(){
     },
     getColor : function(){
       return this.color || (this.parent? this.parent.getColor() : new Color(Layout.fontColor));
+    },
+    getPartitionSet : function(){
+      return this.partitionSet || (this.parent? this.parent.getPartitionSet() : null);
     },
     getChildCount : function(){
       return this.childs.length;

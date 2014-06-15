@@ -845,7 +845,8 @@ var Style = {
   "table":{
     "display":"table",
     "embeddable":true,
-    "table-layout":"fixed", // 'auto' not supported yet.
+    //"table-layout":"fixed",
+    "table-layout":"auto",
     "background-color":"white",
     "border-collapse":"collapse", // 'separate' is not supported yet.
     "border-color":"#a8a8a8",
@@ -6446,6 +6447,156 @@ var TextAligns = {
   }
 };
 
+var PartitionUnit = (function(){
+  function PartitionUnit(opt){
+    this.size = opt.size || 0;
+    this.isImportant = opt.isImportant || false;
+  }
+
+  PartitionUnit.prototype = {
+    mergeTo : function(punit){
+      if(this.isImportant && !punit.isImportant){
+	return this;
+      } else if(!this.isImportant && punit.isImportant){
+	return punit;
+      } else {
+	return (this.size > punit.size)? this : punit;
+      }
+    }
+  };
+
+  return PartitionUnit;
+})();
+
+
+var Partition = (function(){
+  function Partition(parts){
+    this._parts = parts || [];
+  }
+
+  Partition.prototype = {
+    get : function(index){
+      return this._parts[index] || null;
+    },
+    mergeTo : function(partition){
+      var merged_parts = List.mapi(this._parts, function(i, part){
+	return part.mergeTo(partition.get(i));
+      });
+      return new Partition(merged_parts);
+    },
+    add : function(size, is_important){
+      this._parts.push(new PartitionUnit({
+	size:size,
+	isImportant:is_imporatnt
+      }));
+    },
+    mapMeasure : function(max_measure){
+      var sum = List.fold(this._parts, 0, function(ret, part){ return ret + part.size; });
+      return List.map(this._parts, function(part){
+	return Math.floor(max_measure * part.size / sum);
+      });
+    }
+  };
+
+  return Partition;
+})();
+
+
+// key : column count of table row
+// value : Partition
+var PartitionSet = (function(){
+  function PartitionSet(max_measure){
+    HashSet.call(this);
+    this.maxMeasure = max_measure || 0;
+  }
+  Class.extend(PartitionSet, HashSet);
+
+  PartitionSet.prototype.addSet = function(partition_set){
+    var self = this;
+    partition_set.iter(function(key, value){
+      self.add(key, value);
+    });
+    return this;
+  };
+
+  PartitionSet.prototype.merge = function(old_part, new_part){
+    return old_part.mergeTo(new_part);
+  };
+
+  // key : column_count
+  PartitionSet.prototype.getSizes = function(column_count){
+    var partition = this.get(column_count);
+    return partition.mapMeasure(this.maxMeasure);
+  };
+
+  PartitionSet.prototype.getSize = function(column_count, index){
+    var sizes = this.getSizes(column_count);
+    return sizes[index] || 0;
+  };
+
+  return PartitionSet;
+})();
+
+
+var PartitionSetParser = {
+  _getPartition : function(style, cell_tags){
+    var self = this;
+    var partition_units = List.map(cell_tags, function(cell_tag){
+      return self._getPartitionUnit(style, cell_tag);
+    });
+    return new Partition(partition_units);
+  },
+  _getPartitionUnit : function(style, cell_tag){
+    var measure = cell_tag.getAttr("measure") || cell_tag.getAttr("width") || null;
+    if(measure){
+      return new PartitionUnit({size:measure, isImportant:true});
+    }
+    var content = cell_tag.getContent();
+    var lines = cell_tag.getContent().split("\n");
+    var max_line = List.maxobj(lines, function(line){ return line.length; });
+    var max_part_size = Math.floor(style.contentMeasure / 2);
+    var size = Math.min(max_line.length * style.getFontSize(), max_part_size);
+    return new PartitionUnit({size:size, isImportant:false});
+  },
+  _getCellStream : function(tag){
+    return new FilteredTokenStream(tag.getContent(), function(token){
+      return Token.isTag(token) && (token.getName() === "td" || token.getName() === "th");
+    });
+  },
+  _getRowStream : function(tag){
+    return new FilteredTokenStream(tag.getContent(), function(token){
+      return Token.isTag(token) && token.getName() === "tr";
+    });
+  },
+  parse : function(style, stream){
+    var pset = new PartitionSet(style.contentMeasure);
+    while(stream.hasNext()){
+      var token = stream.get();
+      if(token === null){
+	break;
+      }
+      if(!Token.isTag(token)){
+	continue;
+      }
+      switch(token.getName()){
+      case "tbody": case "thead": case "tfoot":
+	var pset2 = this.parse(style, this._getRowStream(token));
+	pset.addSet(pset2);
+	break;
+
+      case "tr":
+	var cell_tags = this._getCellStream(token).getAll();
+	var cell_count = cell_tags.length;
+	var partition = this._getPartition(style, cell_tags);
+	pset.add(cell_count, partition);
+	break;
+      }
+    }
+    return pset;
+  }
+};
+
+
 var SelectorPropContext = (function(){
   function SelectorPropContext(style, layout_context){
     this._style = style;
@@ -6698,7 +6849,6 @@ var StyleContext = (function(){
       if(break_after){
 	this.breakAfter = break_after;
       }
-
       // static size is defined in selector or tag attr, hightest priority
       this.staticMeasure = this._loadStaticMeasure();
       this.staticExtent = this._loadStaticExtent();
@@ -6708,6 +6858,11 @@ var StyleContext = (function(){
       // 2. parent size
       // 3. current edge size.
       this.initContextSize(this.staticMeasure, this.staticExtent);
+
+      // load partition set after context size is calculated.
+      if(this.display === "table" && this.getCssAttr("table-layout") === "auto"){
+	this.partitionSet = PartitionSetParser.parse(this, new TokenStream(this.getContent()));
+      }
 
       // disable some unmanaged css properties depending on loaded style values.
       this._disableUnmanagedCssProps(this.unmanagedCss);
@@ -7168,6 +7323,9 @@ var StyleContext = (function(){
     },
     getColor : function(){
       return this.color || (this.parent? this.parent.getColor() : new Color(Layout.fontColor));
+    },
+    getPartitionSet : function(){
+      return this.partitionSet || (this.parent? this.parent.getPartitionSet() : null);
     },
     getChildCount : function(){
       return this.childs.length;
@@ -9176,6 +9334,15 @@ var ListItemGenerator = (function(){
 })();
   
 
+/*
+  type partion_set = (col_count, partition) HashSet.t
+  and col_count = int
+  and partition = [partition_unit]
+  and partition_unit = PartitionUnit(size, is_important)
+  and size = int
+  and is_important = bool
+*/
+
 // tag : table
 // stream : [thead | tbody | tfoot]
 // yield : [thead | tbody | tfoot]
@@ -9184,6 +9351,7 @@ var TableGenerator = (function(){
     BlockGenerator.call(this, style, stream);
   }
   Class.extend(TableGenerator, BlockGenerator);
+
   return TableGenerator;
 })();
 
@@ -9202,7 +9370,7 @@ var TableRowGroupGenerator = (function(){
 })();
 
 
-// parent : thead | tbody | tfoot
+// parent : table | thead | tbody | tfoot
 // tag : tr | th
 // stream : [td | th]
 // yield : parallel([td | th])
@@ -9223,12 +9391,16 @@ var TableRowGenerator = (function(){
 
   TableRowGenerator.prototype._getChildStyles = function(style, child_tags){
     var self = this;
-    var child_count = child_tags.length;
+    var cell_count = child_tags.length;
     var rest_measure = style.contentMeasure;
+    var part_set = style.getPartitionSet();
     return List.mapi(child_tags, function(i, tag){
       var default_style = new StyleContext(tag, style);
       var static_measure = default_style.staticMeasure;
-      var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_count - i));
+      var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (cell_count - i));
+      if(part_set){
+	measure = part_set.getSize(cell_count, i);
+      }
       rest_measure -= measure;
       return default_style.clone({
 	"float":"start",
