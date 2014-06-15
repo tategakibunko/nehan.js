@@ -134,7 +134,7 @@ module.exports = function(grunt) {
 	    "src/partition-unit.js",
 	    "src/partition.js",
 	    "src/partition-set.js",
-	    "src/partition-set-parser.js",
+	    "src/table-partition-parser.js",
 	    "src/selector-prop-context.js",
 	    "src/selector-context.js",
 	    "src/style-context.js",

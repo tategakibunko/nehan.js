@@ -194,7 +194,7 @@ var StyleContext = (function(){
 
       // load partition set after context size is calculated.
       if(this.display === "table" && this.getCssAttr("table-layout") === "auto"){
-	this.partitionSet = PartitionSetParser.parse(this, new TokenStream(this.getContent()));
+	this.tablePartition = TablePartitionParser.parse(this, new TokenStream(this.getContent()));
       }
 
       // disable some unmanaged css properties depending on loaded style values.
@@ -657,8 +657,8 @@ var StyleContext = (function(){
     getColor : function(){
       return this.color || (this.parent? this.parent.getColor() : new Color(Layout.fontColor));
     },
-    getPartitionSet : function(){
-      return this.partitionSet || (this.parent? this.parent.getPartitionSet() : null);
+    getTablePartition : function(){
+      return this.tablePartition || (this.parent? this.parent.getTablePartition() : null);
     },
     getChildCount : function(){
       return this.childs.length;

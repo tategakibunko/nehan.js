@@ -21,13 +21,13 @@ var TableRowGenerator = (function(){
     var self = this;
     var cell_count = child_tags.length;
     var rest_measure = style.contentMeasure;
-    var part_set = style.getPartitionSet();
+    var partition = style.getTablePartition();
     return List.mapi(child_tags, function(i, tag){
       var default_style = new StyleContext(tag, style);
       var static_measure = default_style.staticMeasure;
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (cell_count - i));
-      if(part_set){
-	measure = part_set.getSize(cell_count, i);
+      if(partition){
+	measure = partition.getSize(cell_count, i);
       }
       rest_measure -= measure;
       return default_style.clone({
