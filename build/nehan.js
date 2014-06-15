@@ -6618,6 +6618,9 @@ var SelectorPropContext = (function(){
     getMarkup : function(){
       return this._style.markup;
     },
+    getDocumentHeader : function(){
+      return DocumentContext.documentHeader;
+    },
     getRestMeasure : function(){
       return this._layoutContext? this._layoutContext.getInlineRestMeasure() : null;
     },
