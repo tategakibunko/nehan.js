@@ -36,17 +36,22 @@ var TablePartitionParser = {
   _getPartitionUnit : function(style, cell_tag, partition_count){
     var measure = cell_tag.getAttr("measure") || cell_tag.getAttr("width") || null;
     if(measure){
-      return new PartitionUnit({size:measure, isImportant:true});
+      return new PartitionUnit({weight:measure, isImportant:true});
     }
     var content = cell_tag.getContent();
     var lines = cell_tag.getContent().split("\n");
+    // this sizing algorithem is not strict, but still effective,
+    // especially for text only table.
     var max_line = List.maxobj(lines, function(line){ return line.length; });
-    var max_part_size = Math.floor(style.contentMeasure / 2);
-    var min_part_size = Math.floor(style.contentMeasure / (partition_count * 2));
-    var size = max_line.length * style.getFontSize();
-    size = Math.max(min_part_size, Math.min(size, max_part_size));
-    size = Math.max(style.getFontSize(), size);
-    return new PartitionUnit({size:size, isImportant:false});
+    var max_weight = Math.floor(style.contentMeasure / 2);
+    var min_weight = Math.floor(style.contentMeasure / (partition_count * 2));
+    var weight = max_line.length * style.getFontSize();
+    // less than 50% of parent size, but more than 50% of average partition size.
+    weight = Math.max(min_weight, Math.min(weight, max_weight));
+
+    // but confirm that weight is more than single font size of parent style.
+    weight = Math.max(style.getFontSize(), weight);
+    return new PartitionUnit({weight:weight, isImportant:false});
   },
   _getCellStream : function(tag){
     return new FilteredTokenStream(tag.getContent(), function(token){

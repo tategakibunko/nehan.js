@@ -3,7 +3,7 @@ var Config = {
   debug:false,
   kerning:true,
   justify:true,
-  maxRollbackCount:40,
+  maxRollbackCount:20,
   maxPageCount:10000,
   useVerticalGlyphIfEnable:true,
   useStrictWordMetrics:true,

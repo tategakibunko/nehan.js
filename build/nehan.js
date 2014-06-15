@@ -70,7 +70,7 @@ var Config = {
   debug:false,
   kerning:true,
   justify:true,
-  maxRollbackCount:40,
+  maxRollbackCount:20,
   maxPageCount:10000,
   useVerticalGlyphIfEnable:true,
   useStrictWordMetrics:true,
@@ -102,7 +102,9 @@ var Layout = {
   width: screen.width, // root width, used when style.body.width not defined.
   height: screen.height, // root height, used when style.body.height not defined.
   fontSize:16, // root fontSize, used when style.body["font-size"] not defined.
+  minFontSize:12,
   maxFontSize:64,
+  minTableCellSize:32, // if table size auto, all cell must be larger than this value.
   rubyRate:0.5, // used when Style.rt["font-size"] is not defined.
   boldRate:0.5, // used to calculate sketchy bold metrics in the environment with no canvas element.
   lineRate: 2.0, // in nehan.js, extent size of line is specified by [lineRate] * [max-font-size of current-line].
@@ -6449,18 +6451,21 @@ var TextAligns = {
 
 var PartitionUnit = (function(){
   function PartitionUnit(opt){
-    this.size = opt.size || 0;
+    this.weight = opt.weight || 0;
     this.isImportant = opt.isImportant || false;
   }
 
   PartitionUnit.prototype = {
+    getSize : function(measure, total_weight){
+      return Math.floor(measure * this.weight / total_weight);
+    },
     mergeTo : function(punit){
       if(this.isImportant && !punit.isImportant){
 	return this;
       } else if(!this.isImportant && punit.isImportant){
 	return punit;
       } else {
-	return (this.size > punit.size)? this : punit;
+	return (this.weight > punit.weight)? this : punit;
       }
     }
   };
@@ -6470,31 +6475,60 @@ var PartitionUnit = (function(){
 
 
 var Partition = (function(){
-  function Partition(parts){
-    this._parts = parts || [];
+  function Partition(punits){
+    this._punits = punits || []; // partition units
   }
+
+  var __levelize = function(sizes, min_size){
+    var delta_total = List.fold(sizes, 0, function(ret, size){
+      return (size < min_size)?  ret + (min_size - size) : ret;
+    });
+    // all elements has enough space for min_size.
+    if(delta_total === 0){
+      return sizes;
+    }
+    var larger_part_count = List.filter(sizes, function(size){ return size > min_size; }).length;
+    if(larger_part_count === 0){
+      return sizes; // can't levelize because there is no rest space.
+    }
+    var delta_minus_avg = Math.floor(delta_total / larger_part_count);
+    return List.map(sizes, function(size){
+      return (size < min_size)? min_size : size - delta_minus_avg;
+    });
+  };
 
   Partition.prototype = {
     get : function(index){
-      return this._parts[index] || null;
+      return this._punits[index] || null;
     },
-    mergeTo : function(partition){
-      var merged_parts = List.mapi(this._parts, function(i, part){
-	return part.mergeTo(partition.get(i));
+    getLength : function(){
+      return this._punits.length;
+    },
+    getTotalWeight : function(){
+      return List.fold(this._punits, 0, function(ret, punit){
+	return ret + punit.weight;
       });
-      return new Partition(merged_parts);
     },
-    add : function(size, is_important){
-      this._parts.push(new PartitionUnit({
-	size:size,
-	isImportant:is_imporatnt
-      }));
+    // merge(this._punits[0], partition._punits[0]),
+    // merge(this._punits[1], partition._punits[1]),
+    // ...
+    // merge(this._punits[n-1], partition._punits[n-1])
+    mergeTo : function(partition){
+      if(this.getLength() !== partition.getLength()){
+	throw "Partition::mergeTo:invalid merge target(length not matched)";
+      }
+      var merged_punits =  List.mapi(this._punits, function(i, punit){
+	return punit.mergeTo(partition.get(i));
+      });
+      return new Partition(merged_punits);
     },
     mapMeasure : function(measure){
-      var sum = List.fold(this._parts, 0, function(ret, part){ return ret + part.size; });
-      return List.map(this._parts, function(part){
-	return Math.floor(measure * part.size / sum);
+      var total_weight = this.getTotalWeight();
+      var min_size = Layout.minTableCellSize;
+      var sizes =  List.map(this._punits, function(punit){
+	return punit.getSize(measure, total_weight);
       });
+      return __levelize(sizes, min_size);
     }
   };
 
@@ -6576,17 +6610,22 @@ var TablePartitionParser = {
   _getPartitionUnit : function(style, cell_tag, partition_count){
     var measure = cell_tag.getAttr("measure") || cell_tag.getAttr("width") || null;
     if(measure){
-      return new PartitionUnit({size:measure, isImportant:true});
+      return new PartitionUnit({weight:measure, isImportant:true});
     }
     var content = cell_tag.getContent();
     var lines = cell_tag.getContent().split("\n");
+    // this sizing algorithem is not strict, but still effective,
+    // especially for text only table.
     var max_line = List.maxobj(lines, function(line){ return line.length; });
-    var max_part_size = Math.floor(style.contentMeasure / 2);
-    var min_part_size = Math.floor(style.contentMeasure / (partition_count * 2));
-    var size = max_line.length * style.getFontSize();
-    size = Math.max(min_part_size, Math.min(size, max_part_size));
-    size = Math.max(style.getFontSize(), size);
-    return new PartitionUnit({size:size, isImportant:false});
+    var max_weight = Math.floor(style.contentMeasure / 2);
+    var min_weight = Math.floor(style.contentMeasure / (partition_count * 2));
+    var weight = max_line.length * style.getFontSize();
+    // less than 50% of parent size, but more than 50% of average partition size.
+    weight = Math.max(min_weight, Math.min(weight, max_weight));
+
+    // but confirm that weight is more than single font size of parent style.
+    weight = Math.max(style.getFontSize(), weight);
+    return new PartitionUnit({weight:weight, isImportant:false});
   },
   _getCellStream : function(tag){
     return new FilteredTokenStream(tag.getContent(), function(token){

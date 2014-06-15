@@ -21,7 +21,9 @@ var Layout = {
   width: screen.width, // root width, used when style.body.width not defined.
   height: screen.height, // root height, used when style.body.height not defined.
   fontSize:16, // root fontSize, used when style.body["font-size"] not defined.
+  minFontSize:12,
   maxFontSize:64,
+  minTableCellSize:32, // if table size auto, all cell must be larger than this value.
   rubyRate:0.5, // used when Style.rt["font-size"] is not defined.
   boldRate:0.5, // used to calculate sketchy bold metrics in the environment with no canvas element.
   lineRate: 2.0, // in nehan.js, extent size of line is specified by [lineRate] * [max-font-size of current-line].

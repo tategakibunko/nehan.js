@@ -118,6 +118,7 @@ var Script = {
   ].join("\n"),
 
   "table-auto":[
+    // table1(long, short, middle)
     "<table style='table-layout:auto'>",
     "<thead>",
     "<tr>",
@@ -130,19 +131,50 @@ var Script = {
     "<td>" + Text["long"] + "</td><td>hige</td><td>hoge</td>",
     "</tr>",
     "<tr>",
-    "<td>ohoho</td><td>ahaha</td><td>" + Text["middle"] + "</td>",
+    "<td>ohoho</td><td>ahaha</td><td>あいうえおかきく</td>",
     "</tr>",
     "<tr>",
     "<td>123</td><td>456</td><td>789</td>",
     "</tr>",
     "</tbody>",
 
-    "<tfoot>",
+    "</table>",
+
+    // table2(long, short, short)
+    "<table style='table-layout:auto'>",
+    "<thead>",
     "<tr>",
-    "<td>foot1</td>",
-    "<td>foot2</td>",
+    "<th>head4</th><th>head5</th><th>head6</th>",
     "</tr>",
-    "</tfoot>",
+    "</thead>",
+
+    "<tbody>",
+    "<tr>",
+    "<td>" + Text["long"] + "</td><td>hige</td><td>hoge</td>",
+    "</tr>",
+    "<tr>",
+    "<td>ohoho</td><td>ahaha</td><td>hehehe</td>",
+    "</tr>",
+    "</tbody>",
+    "</table>",
+    
+    // table3(long, short, long)
+    "<table style='table-layout:auto'>",
+    "<thead>",
+    "<tr>",
+    "<th>head7</th><th>head8</th><th>head9</th>",
+    "</tr>",
+    "</thead>",
+
+    "<tbody>",
+    "<tr>",
+    "<td>" + Text["long"] + "</td><td>hige</td><td>hoge</td>",
+    "</tr>",
+    "<tr>",
+    "<td>ohoho</td><td>ahaha</td><td>" + Text["long"] + "</td>",
+    "</tr>",
+    "</tbody>",
+
     "</table>"
   ].join("\n"),
 
