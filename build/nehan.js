@@ -6490,10 +6490,10 @@ var Partition = (function(){
 	isImportant:is_imporatnt
       }));
     },
-    mapMeasure : function(max_measure){
+    mapMeasure : function(measure){
       var sum = List.fold(this._parts, 0, function(ret, part){ return ret + part.size; });
       return List.map(this._parts, function(part){
-	return Math.floor(max_measure * part.size / sum);
+	return Math.floor(measure * part.size / sum);
       });
     }
   };
@@ -6505,9 +6505,9 @@ var Partition = (function(){
 // key : column count of table row
 // value : Partition
 var PartitionSet = (function(){
-  function PartitionSet(max_measure){
+  function PartitionSet(measure){
     HashSet.call(this);
-    this.maxMeasure = max_measure || 0;
+    this.measure = measure || 0;
   }
   Class.extend(PartitionSet, HashSet);
 
@@ -6526,7 +6526,7 @@ var PartitionSet = (function(){
   // key : column_count
   PartitionSet.prototype.getSizes = function(column_count){
     var partition = this.get(column_count);
-    return partition.mapMeasure(this.maxMeasure);
+    return partition.mapMeasure(this.measure);
   };
 
   PartitionSet.prototype.getSize = function(column_count, index){

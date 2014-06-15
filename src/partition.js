@@ -19,10 +19,10 @@ var Partition = (function(){
 	isImportant:is_imporatnt
       }));
     },
-    mapMeasure : function(max_measure){
+    mapMeasure : function(measure){
       var sum = List.fold(this._parts, 0, function(ret, part){ return ret + part.size; });
       return List.map(this._parts, function(part){
-	return Math.floor(max_measure * part.size / sum);
+	return Math.floor(measure * part.size / sum);
       });
     }
   };
