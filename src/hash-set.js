@@ -18,6 +18,13 @@ var HashSet = (function(){
     merge : function(old_value, new_value){
       return new_value;
     },
+    union : function(set){
+      var self = this;
+      set.iter(function(key, value){
+	self.add(key, value);
+      });
+      return this;
+    },
     get : function(name){
       return this._values[name] || null;
     },

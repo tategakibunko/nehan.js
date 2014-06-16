@@ -1747,6 +1747,13 @@ var HashSet = (function(){
     merge : function(old_value, new_value){
       return new_value;
     },
+    union : function(set){
+      var self = this;
+      set.iter(function(key, value){
+	self.add(key, value);
+      });
+      return this;
+    },
     get : function(name){
       return this._values[name] || null;
     },
@@ -6555,13 +6562,6 @@ var PartitionSet = (function(){
   }
   Class.extend(PartitionSet, HashSet);
 
-  PartitionSet.prototype.addSet = function(partition_set){
-    var self = this;
-    partition_set.iter(function(key, value){
-      self.add(key, value);
-    });
-  };
-
   PartitionSet.prototype.merge = function(old_part, new_part){
     return old_part.mergeTo(new_part);
   };
@@ -6595,7 +6595,7 @@ var TablePartitionParser = {
       switch(token.getName()){
       case "tbody": case "thead": case "tfoot":
 	var pset2 = this.parse(style, this._getRowStream(token));
-	pset.addSet(pset2);
+	pset = pset.union(pset2);
 	break;
 
       case "tr":

@@ -12,7 +12,7 @@ var TablePartitionParser = {
       switch(token.getName()){
       case "tbody": case "thead": case "tfoot":
 	var pset2 = this.parse(style, this._getRowStream(token));
-	pset.addSet(pset2);
+	pset = pset.union(pset2);
 	break;
 
       case "tr":

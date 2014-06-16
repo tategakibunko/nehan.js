@@ -7,13 +7,6 @@ var PartitionSet = (function(){
   }
   Class.extend(PartitionSet, HashSet);
 
-  PartitionSet.prototype.addSet = function(partition_set){
-    var self = this;
-    partition_set.iter(function(key, value){
-      self.add(key, value);
-    });
-  };
-
   PartitionSet.prototype.merge = function(old_part, new_part){
     return old_part.mergeTo(new_part);
   };
