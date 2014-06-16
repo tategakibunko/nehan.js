@@ -12,7 +12,6 @@ var PartitionSet = (function(){
     partition_set.iter(function(key, value){
       self.add(key, value);
     });
-    return this;
   };
 
   PartitionSet.prototype.merge = function(old_part, new_part){

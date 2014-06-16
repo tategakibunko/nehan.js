@@ -4,20 +4,30 @@ var Partition = (function(){
   }
 
   var __levelize = function(sizes, min_size){
-    var delta_total = List.fold(sizes, 0, function(ret, size){
-      return (size < min_size)?  ret + (min_size - size) : ret;
-    });
-    // all elements has enough space for min_size.
-    if(delta_total === 0){
+    // filter parts that is smaller than min_size.
+    var smaller_parts = List.filter(sizes, function(size){ return size < min_size; });
+
+    // if all elements has enough space for min_size, nothing to do.
+    if(smaller_parts.length === 0){
       return sizes;
     }
-    var larger_part_count = List.filter(sizes, function(size){ return size > min_size; }).length;
-    if(larger_part_count === 0){
-      return sizes; // can't levelize because there is no rest space.
+
+    // total size that must be added to small parts.
+    var delta_plus_total = List.fold(smaller_parts, 0, function(ret, size){ return ret + (min_size - size); });
+
+    // filter parts that has enough space.
+    var larger_parts = List.filter(sizes, function(size){
+      return size - min_size >= min_size; // check if size is greater equal to min_size even if min_size is subtracted.
+    });
+
+    // if there are no enough rest space, nothing to do.
+    if(larger_parts.length === 0){
+      return sizes;
     }
-    var delta_minus_avg = Math.floor(delta_total / larger_part_count);
+
+    var delta_minus_avg = Math.floor(delta_plus_total / larger_parts.length);
     return List.map(sizes, function(size){
-      return (size < min_size)? min_size : size - delta_minus_avg;
+      return (size < min_size)? min_size : ((size - min_size >= min_size)? size - delta_minus_avg : size);
     });
   };
 

@@ -174,7 +174,21 @@ var Script = {
     "<td>ohoho</td><td>ahaha</td><td>" + Text["long"] + "</td>",
     "</tr>",
     "</tbody>",
+    "</table>",
 
+    // table4(long, too short, long, middle)
+    "<table style='table-layout:auto'>",
+    "<thead>",
+    "<tr>",
+    "<th>long1</th><th>0</th><th>long2</th><th>middle1</th>",
+    "</tr>",
+    "</thead>",
+
+    "<tbody>",
+    "<tr>",
+    "<td>" + Text["long"] + "</td><td>a</td><td>" + Text["long"] + "</td><td>" + Text["middle"] + "</td>",
+    "</tr>",
+    "</tbody>",
     "</table>"
   ].join("\n"),
 
