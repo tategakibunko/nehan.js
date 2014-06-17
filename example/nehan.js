@@ -1754,10 +1754,6 @@ var HashSet = (function(){
     get : function(name){
       return this._values[name] || null;
     },
-    // this function is used when performance matters.
-    getValues : function(){
-      return this._values;
-    },
     add : function(name, value){
       var old_value = this._values[name] || null;
       this._values[name] = old_value? this.merge(old_value, value) : value;
@@ -1796,6 +1792,10 @@ var CssHashSet = (function(){
       return old_value;
     }
     return new_value;
+  };
+
+  CssHashSet.prototype.copyValuesTo = function(dst){
+    return Args.copy(dst, this._values);
   };
 
   return CssHashSet;
@@ -7486,7 +7486,8 @@ var StyleContext = (function(){
       if(this.zIndex){
 	css["z-index"] = this.zIndex;
       }
-      Args.copy(css, this.unmanagedCss.getValues());
+      //Args.copy(css, this.unmanagedCss.getValues());
+      this.unmanagedCss.copyValuesTo(css);
       css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
@@ -7522,7 +7523,8 @@ var StyleContext = (function(){
 	  css["line-height"] = this._computeUnitSize(line_height, this.font.size) + "px";
 	}
       }
-      Args.copy(css, this.unmanagedCss.getValues());
+      //Args.copy(css, this.unmanagedCss.getValues());
+      this.unmanagedCss.copyValuesTo(css);
       return css;
     },
     _computeContentMeasure : function(outer_measure){

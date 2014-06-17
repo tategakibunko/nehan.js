@@ -25,10 +25,6 @@ var HashSet = (function(){
     get : function(name){
       return this._values[name] || null;
     },
-    // this function is used when performance matters.
-    getValues : function(){
-      return this._values;
-    },
     add : function(name, value){
       var old_value = this._values[name] || null;
       this._values[name] = old_value? this.merge(old_value, value) : value;

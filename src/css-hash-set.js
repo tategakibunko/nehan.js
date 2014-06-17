@@ -15,5 +15,9 @@ var CssHashSet = (function(){
     return new_value;
   };
 
+  CssHashSet.prototype.copyValuesTo = function(dst){
+    return Args.copy(dst, this._values);
+  };
+
   return CssHashSet;
 })();
