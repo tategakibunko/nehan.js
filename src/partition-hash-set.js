@@ -10,6 +10,9 @@ var PartitionHashSet = (function(){
     return old_part.mergeTo(new_part);
   };
 
+  // [arugments]
+  // opt.partitionCount : int
+  // opt.measure : int
   PartitionHashSet.prototype.getSizes = function(opt){
     var partition = this.get(opt.partitionCount);
     return partition.mapMeasure(opt.measure);
