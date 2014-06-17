@@ -58,11 +58,10 @@ var Partition = (function(){
     },
     mapMeasure : function(measure){
       var total_weight = this.getTotalWeight();
-      var min_size = Layout.minTableCellSize;
       var sizes =  List.map(this._punits, function(punit){
 	return punit.getSize(measure, total_weight);
       });
-      return __levelize(sizes, min_size);
+      return __levelize(sizes, Layout.minTableCellSize);
     }
   };
 
