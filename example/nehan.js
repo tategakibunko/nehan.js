@@ -6459,7 +6459,7 @@ var TextAligns = {
 var PartitionUnit = (function(){
   function PartitionUnit(opt){
     this.weight = opt.weight || 0;
-    this.isImportant = opt.isImportant || false;
+    this.isStatic = opt.isStatic || false;
   }
 
   PartitionUnit.prototype = {
@@ -6467,13 +6467,13 @@ var PartitionUnit = (function(){
       return Math.floor(measure * this.weight / total_weight);
     },
     mergeTo : function(punit){
-      if(this.isImportant && !punit.isImportant){
+      if(this.isStatic && !punit.isStatic){
 	return this;
-      } else if(!this.isImportant && punit.isImportant){
-	return punit;
-      } else {
-	return (this.weight > punit.weight)? this : punit;
       }
+      if(!this.isStatic && punit.isStatic){
+	return punit;
+      }
+      return (this.weight > punit.weight)? this : punit;
     }
   };
 
@@ -6614,7 +6614,7 @@ var TablePartitionParser = {
   _getPartitionUnit : function(style, cell_tag, partition_count){
     var measure = cell_tag.getAttr("measure") || cell_tag.getAttr("width") || null;
     if(measure){
-      return new PartitionUnit({weight:measure, isImportant:true});
+      return new PartitionUnit({weight:measure, isStatic:true});
     }
     var content = cell_tag.getContent();
     var lines = cell_tag.getContent().split("\n");
@@ -6629,7 +6629,7 @@ var TablePartitionParser = {
 
     // but confirm that weight is more than single font size of parent style.
     weight = Math.max(style.getFontSize(), weight);
-    return new PartitionUnit({weight:weight, isImportant:false});
+    return new PartitionUnit({weight:weight, isStatic:false});
   },
   _getCellStream : function(tag){
     return new FilteredTokenStream(tag.getContent(), function(token){

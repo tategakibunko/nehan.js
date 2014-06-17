@@ -36,7 +36,7 @@ var TablePartitionParser = {
   _getPartitionUnit : function(style, cell_tag, partition_count){
     var measure = cell_tag.getAttr("measure") || cell_tag.getAttr("width") || null;
     if(measure){
-      return new PartitionUnit({weight:measure, isImportant:true});
+      return new PartitionUnit({weight:measure, isStatic:true});
     }
     var content = cell_tag.getContent();
     var lines = cell_tag.getContent().split("\n");
@@ -51,7 +51,7 @@ var TablePartitionParser = {
 
     // but confirm that weight is more than single font size of parent style.
     weight = Math.max(style.getFontSize(), weight);
-    return new PartitionUnit({weight:weight, isImportant:false});
+    return new PartitionUnit({weight:weight, isStatic:false});
   },
   _getCellStream : function(tag){
     return new FilteredTokenStream(tag.getContent(), function(token){

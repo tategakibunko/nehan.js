@@ -1,7 +1,7 @@
 var PartitionUnit = (function(){
   function PartitionUnit(opt){
     this.weight = opt.weight || 0;
-    this.isImportant = opt.isImportant || false;
+    this.isStatic = opt.isStatic || false;
   }
 
   PartitionUnit.prototype = {
@@ -9,13 +9,13 @@ var PartitionUnit = (function(){
       return Math.floor(measure * this.weight / total_weight);
     },
     mergeTo : function(punit){
-      if(this.isImportant && !punit.isImportant){
+      if(this.isStatic && !punit.isStatic){
 	return this;
-      } else if(!this.isImportant && punit.isImportant){
-	return punit;
-      } else {
-	return (this.weight > punit.weight)? this : punit;
       }
+      if(!this.isStatic && punit.isStatic){
+	return punit;
+      }
+      return (this.weight > punit.weight)? this : punit;
     }
   };
 
