@@ -6532,7 +6532,7 @@ var Partition = (function(){
     // merge(this._punits[n-1], partition._punits[n-1])
     mergeTo : function(partition){
       if(this.getLength() !== partition.getLength()){
-	throw "Partition::mergeTo:invalid merge target(length not matched)";
+	throw "Partition::mergeTo, invalid merge target(length not same)";
       }
       var merged_punits =  List.mapi(this._punits, function(i, punit){
 	return punit.mergeTo(partition.get(i));
