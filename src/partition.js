@@ -17,7 +17,7 @@ var Partition = (function(){
 
     // filter parts that has enough space.
     var larger_parts = List.filter(sizes, function(size){
-      return size - min_size >= min_size; // check if size is greater equal to min_size even if min_size is subtracted.
+      return size - min_size >= min_size; // check if size is more than min_size and over even if min_size is subtracted.
     });
 
     // if there are no enough rest space, nothing to do.
