@@ -20,12 +20,10 @@ var Selector = (function(){
 	var fmt_value = CssParser.formatValue(prop, value[prop]);
 	var fmt_prop = CssParser.formatProp(prop);
 	var old_value = this.value[fmt_prop] || null;
-	if(old_value === null){
-	  this.value[fmt_prop] = fmt_value;
-	} else if(typeof old_value === "object" && typeof fmt_value === "object"){
+	if(typeof old_value === "object" && typeof fmt_value === "object"){
 	  Args.copy(old_value, fmt_value);
 	} else {
-	  old_value = fmt_value; // direct value or function
+	  this.value[fmt_prop] = fmt_value; // direct value or function
 	}
       }
     },
