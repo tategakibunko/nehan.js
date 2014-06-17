@@ -7486,7 +7486,6 @@ var StyleContext = (function(){
       if(this.zIndex){
 	css["z-index"] = this.zIndex;
       }
-      //Args.copy(css, this.unmanagedCss.getValues());
       this.unmanagedCss.copyValuesTo(css);
       css.overflow = "hidden"; // to avoid margin collapsing
       return css;
@@ -7523,7 +7522,6 @@ var StyleContext = (function(){
 	  css["line-height"] = this._computeUnitSize(line_height, this.font.size) + "px";
 	}
       }
-      //Args.copy(css, this.unmanagedCss.getValues());
       this.unmanagedCss.copyValuesTo(css);
       return css;
     },
