@@ -1,9 +1,6 @@
 var HashSet = (function(){
-  function HashSet(values){
+  function HashSet(){
     this._values = {};
-    if(values){
-      this.addValues(values);
-    }
   }
 
   HashSet.prototype = {
@@ -28,6 +25,7 @@ var HashSet = (function(){
     get : function(name){
       return this._values[name] || null;
     },
+    // this function is used when performance matters.
     getValues : function(){
       return this._values;
     },
@@ -35,6 +33,8 @@ var HashSet = (function(){
       var old_value = this._values[name] || null;
       this._values[name] = old_value? this.merge(old_value, value) : value;
     },
+    // this function is used when performance matters,
+    // instead of using this.union(new HashSet(values))
     addValues : function(values){
       values = values || {};
       for(var prop in values){

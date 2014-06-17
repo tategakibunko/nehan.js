@@ -1728,11 +1728,8 @@ var Args = {
 };
 
 var HashSet = (function(){
-  function HashSet(values){
+  function HashSet(){
     this._values = {};
-    if(values){
-      this.addValues(values);
-    }
   }
 
   HashSet.prototype = {
@@ -1757,6 +1754,7 @@ var HashSet = (function(){
     get : function(name){
       return this._values[name] || null;
     },
+    // this function is used when performance matters.
     getValues : function(){
       return this._values;
     },
@@ -1764,6 +1762,8 @@ var HashSet = (function(){
       var old_value = this._values[name] || null;
       this._values[name] = old_value? this.merge(old_value, value) : value;
     },
+    // this function is used when performance matters,
+    // instead of using this.union(new HashSet(values))
     addValues : function(values){
       values = values || {};
       for(var prop in values){
@@ -1782,8 +1782,8 @@ var HashSet = (function(){
 
 
 var CssHashSet = (function(){
-  function CssHashSet(values){
-    HashSet.call(this, values || null);
+  function CssHashSet(){
+    HashSet.call(this);
   }
   Class.extend(CssHashSet, HashSet);
 
@@ -6553,37 +6553,37 @@ var Partition = (function(){
 })();
 
 
-// key : column count of table row
+// key : partition count
 // value : Partition
-var PartitionSet = (function(){
-  function PartitionSet(measure){
+var PartitionHashSet = (function(){
+  function PartitionHashSet(measure){
     HashSet.call(this);
     this.measure = measure || 0;
   }
-  Class.extend(PartitionSet, HashSet);
+  Class.extend(PartitionHashSet, HashSet);
 
-  PartitionSet.prototype.merge = function(old_part, new_part){
+  PartitionHashSet.prototype.merge = function(old_part, new_part){
     return old_part.mergeTo(new_part);
   };
 
   // key : column_count
-  PartitionSet.prototype.getSizes = function(column_count){
+  PartitionHashSet.prototype.getSizes = function(column_count){
     var partition = this.get(column_count);
     return partition.mapMeasure(this.measure);
   };
 
-  PartitionSet.prototype.getSize = function(column_count, index){
+  PartitionHashSet.prototype.getSize = function(column_count, index){
     var sizes = this.getSizes(column_count);
     return sizes[index] || 0;
   };
 
-  return PartitionSet;
+  return PartitionHashSet;
 })();
 
 
 var TablePartitionParser = {
   parse : function(style, stream){
-    var pset = new PartitionSet(style.contentMeasure);
+    var pset = new PartitionHashSet(style.contentMeasure);
     while(stream.hasNext()){
       var token = stream.get();
       if(token === null){
