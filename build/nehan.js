@@ -6565,14 +6565,13 @@ var PartitionHashSet = (function(){
     return old_part.mergeTo(new_part);
   };
 
-  // key : column_count
-  PartitionHashSet.prototype.getSizes = function(column_count){
-    var partition = this.get(column_count);
+  PartitionHashSet.prototype.getSizes = function(part_count){
+    var partition = this.get(part_count);
     return partition.mapMeasure(this.measure);
   };
 
-  PartitionHashSet.prototype.getSize = function(column_count, index){
-    var sizes = this.getSizes(column_count);
+  PartitionHashSet.prototype.getSize = function(part_count, index){
+    var sizes = this.getSizes(part_count);
     return sizes[index] || 0;
   };
 
