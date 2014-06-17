@@ -1,6 +1,6 @@
 var TablePartitionParser = {
   parse : function(style, stream){
-    var pset = new PartitionHashSet(style.contentMeasure);
+    var pset = new PartitionHashSet();
     while(stream.hasNext()){
       var token = stream.get();
       if(token === null){

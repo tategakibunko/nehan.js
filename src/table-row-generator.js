@@ -9,25 +9,28 @@ var TableRowGenerator = (function(){
   }
   Class.extend(TableRowGenerator, ParallelGenerator);
 
-  TableRowGenerator.prototype._getGenerators = function(style, stream){
+  TableRowGenerator.prototype._getGenerators = function(style_tr, stream){
     var child_tags = this._getChildTags(stream);
-    var child_styles = this._getChildStyles(style, child_tags);
+    var child_styles = this._getChildStyles(style_tr, child_tags);
     return List.map(child_styles, function(child_style){
       return new TableCellGenerator(child_style, new TokenStream(child_style.getMarkupContent()));
     });
   };
 
-  TableRowGenerator.prototype._getChildStyles = function(style, child_tags){
+  TableRowGenerator.prototype._getChildStyles = function(style_tr, child_tags){
     var self = this;
-    var cell_count = child_tags.length;
-    var rest_measure = style.contentMeasure;
-    var partition = style.getTablePartition();
+    var rest_measure = style_tr.contentMeasure;
+    var partition = style_tr.getTablePartition();
+    var part_sizes = partition? partition.getSizes({
+      partitionCount:child_tags.length,
+      measure:style_tr.contentMeasure
+    }) : [];
     return List.mapi(child_tags, function(i, tag){
-      var default_style = new StyleContext(tag, style);
+      var default_style = new StyleContext(tag, style_tr);
       var static_measure = default_style.staticMeasure;
-      var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (cell_count - i));
-      if(partition){
-	measure = partition.getSize(cell_count, i);
+      var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_tags.length - i));
+      if(part_sizes.length > 0){
+	measure = part_sizes[i];
       }
       rest_measure -= measure;
       return default_style.clone({
