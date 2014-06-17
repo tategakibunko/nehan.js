@@ -6615,7 +6615,7 @@ var TablePartitionParser = {
       return new PartitionUnit({weight:measure, isStatic:true});
     }
     var content = cell_tag.getContent();
-    var lines = cell_tag.getContent().split("\n");
+    var lines = cell_tag.getContent().replace(/<br \/>/g, "\n").replace(/<br>/g, "\n").split("\n");
     // this sizing algorithem is not strict, but still effective,
     // especially for text only table.
     var max_line = List.maxobj(lines, function(line){ return line.length; });
