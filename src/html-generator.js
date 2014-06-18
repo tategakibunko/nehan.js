@@ -52,7 +52,7 @@ var HtmlGenerator = (function(){
 	  break;
 	}
       }
-      DocumentContext.documentHeader = document_header;
+      DocumentContext.setDocumentHeader(document_header);
     }
   };
 

@@ -19,7 +19,7 @@ var DocumentGenerator = (function(){
 	var tag = this.stream.get();
 	switch(tag.getName()){
 	case "!doctype":
-	  DocumentContext.documentType = "html"; // TODO
+	  DocumentContext.setDocumentType("html"); // TODO
 	  break;
 	case "html":
 	  return this._createHtmlGenerator(tag);

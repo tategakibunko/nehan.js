@@ -5833,45 +5833,72 @@ var DocumentHeader = (function(){
 })();
 
 
-var DocumentContext = {
-  documentType:"html",
-  documentHeader:null,
-  pageNo:0,
-  charPos:0,
-  anchors:{},
-  outlineContexts:[],
-  // this is shortcut function for getOutlineContextsByName
-  // in many case, outline-context is only under "body" context,
-  // and this function returns only one outline element just under the "body".
-  createBodyOutlineElement : function(callbacks){
-    var elements = this.createOutlineElementsByName("body", callbacks);
-    if(elements.length > 0){
-      return elements[0];
+var DocumentContext = (function(){
+  var __document_type = "html";
+  var __document_header = null;
+  var __page_no = 0;
+  var __char_pos = 0;
+  var __anchors = {};
+  var __outline_contexts = [];
+
+  return {
+    setDocumentType : function(document_type){
+      __document_type = document_type;
+    },
+    getDocumentType : function(){
+      return __document_type;
+    },
+    setDocumentHeader : function(document_header){
+      __document_header = document_header;
+    },
+    getDocumentHeader : function(){
+      return __document_header;
+    },
+    stepCharPos : function(char_pos){
+      __char_pos += char_pos;
+    },
+    getCharPos : function(){
+      return __char_pos;
+    },
+    stepPageNo : function(){
+      __page_no++;
+    },
+    getPageNo : function(){
+      return __page_no;
+    },
+    // this is shortcut function for getOutlineContextsByName
+    // in many case, outline-context is only under "body" context,
+    // and this function returns only one outline element just under the "body".
+    createBodyOutlineElement : function(callbacks){
+      var elements = this.createOutlineElementsByName("body", callbacks);
+      if(elements.length > 0){
+	return elements[0];
+      }
+      return null;
+    },
+    getOutlineContextsByName : function(section_root_name){
+      return List.filter(__outline_contexts, function(context){
+	return context.getMarkupName() === section_root_name;
+      });
+    },
+    createOutlineElementsByName : function(section_root_name, callbacks){
+      var contexts = this.getOutlineContextsByName(section_root_name);
+      return List.fold(contexts, [], function(ret, context){
+	var tree = OutlineContextParser.parse(context);
+	return tree? ret.concat(SectionTreeConverter.convert(tree, callbacks)) : ret;
+      });
+    },
+    addOutlineContext : function(outline_context){
+      __outline_contexts.push(outline_context);
+    },
+    addAnchor : function(name){
+      __anchors[name] = __page_no;
+    },
+    getAnchorPageNo : function(name){
+      return (typeof __anchors[name] === "undefined")? null : __anchors[name];
     }
-    return null;
-  },
-  getOutlineContextsByName : function(section_root_name){
-    return List.filter(this.outlineContexts, function(context){
-      return context.getMarkupName() === section_root_name;
-    });
-  },
-  createOutlineElementsByName : function(section_root_name, callbacks){
-    var contexts = this.getOutlineContextsByName(section_root_name);
-    return List.fold(contexts, [], function(ret, context){
-      var tree = OutlineContextParser.parse(context);
-      return tree? ret.concat(SectionTreeConverter.convert(tree, callbacks)) : ret;
-    });
-  },
-  addOutlineContext : function(outline_context){
-    this.outlineContexts.push(outline_context);
-  },
-  addAnchor : function(name){
-    this.anchors[name] = this.pageNo;
-  },
-  getAnchorPageNo : function(name){
-    return (typeof this.anchors[name] === "undefined")? null : this.anchors[name];
-  }
-};
+  };
+})();
 
 
 var TokenStream = (function(){
@@ -6660,7 +6687,7 @@ var SelectorPropContext = (function(){
       return this._style.markup;
     },
     getDocumentHeader : function(){
-      return DocumentContext.documentHeader;
+      return DocumentContext.getDocumentHeader();
     },
     getRestMeasure : function(){
       return this._layoutContext? this._layoutContext.getInlineRestMeasure() : null;
@@ -9515,15 +9542,16 @@ var BodyGenerator = (function(){
 
   BodyGenerator.prototype._onCreate = function(context, block){
     block.seekPos = this.stream.getSeekPos();
-    block.charPos = DocumentContext.charPos;
+    block.charPos = DocumentContext.getCharPos();
     block.percent = this.stream.getSeekPercent();
-    block.pageNo = DocumentContext.pageNo++;
+    block.pageNo = DocumentContext.getPageNo();
 
-    DocumentContext.charPos += block.charCount || 0;
+    DocumentContext.stepCharPos(block.charCount || 0);
+    DocumentContext.stepPageNo();
 
     // sometimes layout engine causes inlinite loop,
     // so terminate generator by restricting page count.
-    if(DocumentContext.pageNo > Config.maxPageCount){
+    if(DocumentContext.getPageNo() >= Config.maxPageCount){
       this.setTerminate(true);
     }
   };
@@ -9585,7 +9613,7 @@ var HtmlGenerator = (function(){
 	  break;
 	}
       }
-      DocumentContext.documentHeader = document_header;
+      DocumentContext.setDocumentHeader(document_header);
     }
   };
 
@@ -9614,7 +9642,7 @@ var DocumentGenerator = (function(){
 	var tag = this.stream.get();
 	switch(tag.getName()){
 	case "!doctype":
-	  DocumentContext.documentType = "html"; // TODO
+	  DocumentContext.setDocumentType("html"); // TODO
 	  break;
 	case "html":
 	  return this._createHtmlGenerator(tag);
