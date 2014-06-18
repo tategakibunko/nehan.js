@@ -23,7 +23,7 @@ var OutlineContext = (function(){
       this.logs.push({
 	name:"start-section",
 	type:type,
-	pageNo:DocumentContext.pageNo
+	pageNo:DocumentContext.getPageNo()
       });
       return this;
     },
@@ -42,7 +42,7 @@ var OutlineContext = (function(){
 	type:opt.type,
 	rank:opt.rank,
 	title:opt.title,
-	pageNo:DocumentContext.pageNo,
+	pageNo:DocumentContext.getPageNo(),
 	headerId:header_id
       });
       return header_id;
