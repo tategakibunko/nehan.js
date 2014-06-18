@@ -4,11 +4,6 @@ var OutlineContext = (function(){
     this.markupName = markup_name;
   }
 
-  var __header_id__ = 0; // glocal unique header id
-  var gen_header_id = function(){
-    return __header_id__++;
-  };
-
   OutlineContext.prototype = {
     isEmpty : function(){
       return this.logs.length === 0;
@@ -36,7 +31,7 @@ var OutlineContext = (function(){
     },
     addHeader : function(opt){
       // header id is used to associate header box object with outline.
-      var header_id = gen_header_id();
+      var header_id = DocumentContext.genHeaderId();
       this.logs.push({
 	name:"set-header",
 	type:opt.type,

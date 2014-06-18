@@ -5531,11 +5531,6 @@ var OutlineContext = (function(){
     this.markupName = markup_name;
   }
 
-  var __header_id__ = 0; // glocal unique header id
-  var gen_header_id = function(){
-    return __header_id__++;
-  };
-
   OutlineContext.prototype = {
     isEmpty : function(){
       return this.logs.length === 0;
@@ -5563,7 +5558,7 @@ var OutlineContext = (function(){
     },
     addHeader : function(opt){
       // header id is used to associate header box object with outline.
-      var header_id = gen_header_id();
+      var header_id = DocumentContext.genHeaderId();
       this.logs.push({
 	name:"set-header",
 	type:opt.type,
@@ -5840,6 +5835,7 @@ var DocumentContext = (function(){
   var __char_pos = 0;
   var __anchors = {};
   var __outline_contexts = [];
+  var __header_id = 0; // unique header-id
 
   var __get_outline_contexts_by_name = function(section_root_name){
     return List.filter(__outline_contexts, function(context){
@@ -5890,6 +5886,9 @@ var DocumentContext = (function(){
     },
     getAnchorPageNo : function(name){
       return (typeof __anchors[name] === "undefined")? null : __anchors[name];
+    },
+    genHeaderId : function(){
+      return __header_id++;
     },
     // this is shortcut function for __create_outline_elements_by_name("body", callbacks).
     // in many case, outline-context is only under "body" context,

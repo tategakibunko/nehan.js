@@ -5,6 +5,7 @@ var DocumentContext = (function(){
   var __char_pos = 0;
   var __anchors = {};
   var __outline_contexts = [];
+  var __header_id = 0; // unique header-id
 
   var __get_outline_contexts_by_name = function(section_root_name){
     return List.filter(__outline_contexts, function(context){
@@ -55,6 +56,9 @@ var DocumentContext = (function(){
     },
     getAnchorPageNo : function(name){
       return (typeof __anchors[name] === "undefined")? null : __anchors[name];
+    },
+    genHeaderId : function(){
+      return __header_id++;
     },
     // this is shortcut function for __create_outline_elements_by_name("body", callbacks).
     // in many case, outline-context is only under "body" context,
