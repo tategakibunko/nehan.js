@@ -12,7 +12,7 @@ Available on IE8+, Firefox3.5+, Google Chrome4+, Safari3+, Opera10+ etc.
 
 Include css, js in the ``<head>``
 
-```
+```html
 <link href="/path/to/nehan.css" type="text/css" rel="stylesheet">
 <script src="/path/to/nehan.js" type="text/javascript"></script>
 ```
