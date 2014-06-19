@@ -6683,18 +6683,18 @@ var SelectorPropContext = (function(){
   }
 
   SelectorPropContext.prototype = {
-    getParentStyle : function(){
+    getParentStyleContext : function(){
       return this._style.parent;
     },
     getParentFlow : function(){
-      var parent = this.getParentStyle();
+      var parent = this.getParentStyleContext();
       return parent? parent.flow : Layout.getStdBoxFlow();
     },
     getMarkup : function(){
       return this._style.markup;
     },
-    getDocumentHeader : function(){
-      return DocumentContext.getDocumentHeader();
+    getDocumentContext : function(){
+      return DocumentContext;
     },
     getRestMeasure : function(){
       return this._layoutContext? this._layoutContext.getInlineRestMeasure() : null;
