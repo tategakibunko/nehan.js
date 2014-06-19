@@ -5843,14 +5843,17 @@ var DocumentContext = (function(){
     });
   };
 
+  var __convert_outline_context_to_element = function(context, callbacks){
+    var tree = OutlineContextParser.parse(context);
+    return tree? SectionTreeConverter.convert(tree, callbacks) : null;
+  };
+
   var __create_outline_elements_by_name = function(section_root_name, callbacks){
     var contexts = __get_outline_contexts_by_name(section_root_name);
-    if(contexts.length === 0){
-      return null;
-    }
-    // if multiple outline-context exists for one section_root_name, use first one only.
-    var tree = OutlineContextParser.parse(contexts[0]);
-    return tree? SectionTreeConverter.convert(tree, callbacks) : null;
+    return List.fold(contexts, [], function(ret, context){
+      var element = __convert_outline_context_to_element(context, callbacks);
+      return element? ret.concat(element) : ret;
+    });
   };
 
   return {
@@ -5891,11 +5894,13 @@ var DocumentContext = (function(){
       return __header_id++;
     },
     // this is shortcut function for __create_outline_elements_by_name("body", callbacks).
-    // in many case, outline-context is only under "body" context,
-    // and this function returns only one outline element just under the "body".
+    // if many outline elements exists(that is, multiple '<body>' exists), use first one only.
     createBodyOutlineElement : function(callbacks){
-      return __create_outline_elements_by_name("body", callbacks);
+      var elements = __create_outline_elements_by_name("body", callbacks);
+      return (elements.length === 0)? null : elements[0];
     },
+    // create outline element for [section_root_name], returns multiple elements,
+    // because there may be multiple section root(<figure>, <fieldset> ... etc) in document.
     createOutlineElementsByName : function(section_root_name, callbacks){
       return __create_outline_elements_by_name(section_root_name, callbacks);
     }
