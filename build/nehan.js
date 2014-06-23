@@ -6802,7 +6802,8 @@ var StyleContext = (function(){
     "text-emphasis-position",
     "text-emphasis-color",
     "text-combine",
-    "width"
+    "width",
+    "word-break"
   ];
 
   var __is_managed_css_prop = function(prop){
@@ -6930,6 +6931,10 @@ var StyleContext = (function(){
       var break_after = this._loadBreakAfter();
       if(break_after){
 	this.breakAfter = break_after;
+      }
+      var word_break = this._loadWordBreak();
+      if(word_break){
+	this.wordBreak = word_break;
       }
       // static size is defined in selector or tag attr, hightest priority
       this.staticMeasure = this._loadStaticMeasure();
@@ -7920,6 +7925,9 @@ var StyleContext = (function(){
       var value = this.getCssAttr("break-after");
       return value? Breaks.getAfter(value) : null;
     },
+    _loadWordBreak : function(){
+      return this.getCssAttr("word-break");
+    },
     _loadListStyle : function(){
       var list_style_type = this.getCssAttr("list-style-type", "none");
       if(list_style_type === "none"){
@@ -8832,7 +8840,7 @@ var InlineGenerator = (function(){
     var rest_measure = context.getInlineRestMeasure();
     var advance = token.getAdvance(this.style.flow, this.style.letterSpacing || 0);
     
-    // if advance of this word is less than max-measure, just return.
+    // if there is enought space for this word, just return.
     if(advance <= rest_measure){
       token.setDevided(false);
       return token;
