@@ -13,6 +13,7 @@ o to define custom single tag, add lexing-rule interfaces(setSingleTag, setSingl
 o enabled selector of multiple css classes like 'div.nehan-xxx.nehan-yyy.nehan-zzz'.
 o enabled margin cancel.
 o support 'auto' as 'table-layout'.
+o support word-break property.
 * eval unmanaged css props before store
 
 version 5.0.1 2014/05/13
