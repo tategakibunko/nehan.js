@@ -249,7 +249,7 @@ var InlineGenerator = (function(){
     var rest_measure = context.getInlineRestMeasure();
     var advance = token.getAdvance(this.style.flow, this.style.letterSpacing || 0);
     
-    // if there is enought space for this word, just return.
+    // if there is enough space for this word, just return.
     if(advance <= rest_measure){
       token.setDevided(false);
       return token;
