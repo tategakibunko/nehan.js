@@ -254,14 +254,16 @@ var InlineGenerator = (function(){
       token.setDevided(false);
       return token;
     }
-    // if word size is less than max_measure, and 'word-berak' is not 'break-all', just break.
+    // at this point, this word is larger than rest space.
+    // but if this word size is less than max_measure and 'word-berak' is not 'break-all',
+    // just break line and show it at the head of next line.
     if(advance <= context.getInlineMaxMeasure() && !this.style.isWordBreakAll()){
       this.stream.prev();
       return null;
     }
     // at this point, situations are
-    // 1. advance is lager than rest_measure and 'word-break' is 'break-all'.
-    // 2. word itself is larger than max_measure.
+    // 1. advance is larger than rest_measure and 'word-break' is set to 'break-all'.
+    // 2. or word itself is larger than max_measure.
     // in these case, we must cut this word into some parts.
     var part = token.cutMeasure(this.style.getFontSize(), rest_measure); // get sliced word
     part.setMetrics(this.style.flow, this.style.font); // metrics for first half
