@@ -364,7 +364,7 @@ var Script = {
     "<page-break />",
     "<h2>first letter2</h2>",
     "<div class='nehan-drop-caps'>",
-    Text["lipsum"],
+    Text["lorem"],
     "</div>",
     "<page-break />",
     "<h2>first line</h2>",
@@ -403,6 +403,13 @@ var Script = {
     "<div style='margin-before:1em'>block2</div>",
     "<div style='margin-after:1em'>block1</div>",
     "<div style='margin-before:2em'>block2</div>"
+  ].join("\n"),
+
+  "word-break":[
+    "<h2>word break all</h2>",
+    "<p style='word-break:break-all'>" + Text["lorem"] + "</p>",
+    "<h2>word break normal</h2>",
+    "<p>" + Text["lorem"] + "</p>"
   ].join("\n")
 };
 
