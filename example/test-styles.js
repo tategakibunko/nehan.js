@@ -3,7 +3,7 @@ var TestStyles = {
     "display":"inline",
     "background-color":"gold",
     color:function(pcontext){
-      return pcontext.getParentStyle().isTextVertical()? "red" : "green";
+      return pcontext.getParentStyleContext().isTextVertical()? "red" : "green";
     },
     // <tip title='cilck me'>some text</tip>
     // => <a href='#' data-title='click me' data-content='some text'>click me</a>

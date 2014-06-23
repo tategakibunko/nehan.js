@@ -540,6 +540,9 @@ var StyleContext = (function(){
     isMarkupEmpty : function(){
       return this.markup.isEmpty();
     },
+    isWordBreakAll : function(){
+      return this.wordBreak && this.wordBreak === "break-all";
+    },
     hasFlipFlow : function(){
       return this.parent? (this.flow !== this.parent.flow) : false;
     },
