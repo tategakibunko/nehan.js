@@ -947,6 +947,18 @@ var Style = {
     "break-after":"always"
   },
   //-------------------------------------------------------
+  // word-break
+  //-------------------------------------------------------
+  ".nehan-wb-all":{
+    "word-break":"break-all"
+  },
+  ".nehan-wb-normal":{
+    "word-break":"normal"
+  },
+  ".nehan-wb-keep":{
+    "word-break":"keep-all"
+  },
+  //-------------------------------------------------------
   // other utility classes
   //-------------------------------------------------------
   ".nehan-drop-caps::first-letter":{
