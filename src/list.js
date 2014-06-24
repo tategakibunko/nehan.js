@@ -30,14 +30,14 @@ var List = {
   map : function(lst, fn){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
-      ret[i] = fn(lst[i]);
+      ret.push(fn(lst[i]));
     }
     return ret;
   },
   mapi : function(lst, fn){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
-      ret[i] = fn(i, lst[i]);
+      ret.push(fn(i, lst[i]));
     }
     return ret;
   },
