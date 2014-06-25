@@ -2,7 +2,7 @@
 
 ## Introduction
 
-nehan.js is dynamic html layout engine written in javascript, especially focused on generating **paged media** in non-blocking way.
+nehan.js is dynamic html layout engine written in javascript, especially focused on generating **paged media** asynchronously.
 
 Almost all html5 tags are supported, and further more, vertical layout(lr-tb, rl-tb) supported.
 
