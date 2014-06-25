@@ -8,7 +8,6 @@
    description: create link that shows popup message when clicked.
    tag_name: tip
    close_tag: required
-   dependencies: jQuery
 
    attributes:
      - title: tip title
@@ -38,10 +37,5 @@ Nehan.setStyle("tip", {
       alert(tip_content);
       return false;
     };
-    /*
-    $(dom).click(function(){
-      alert(dom.data("content"));
-      return false;
-    });*/
   }
 });
