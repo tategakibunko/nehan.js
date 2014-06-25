@@ -15,7 +15,7 @@ o enabled margin cancel.
 o support 'auto' as 'table-layout'.
 o support word-break property.
 o add plugins directory.
-o add plugins(font-awesome, speak).
+o add plugins(font-awesome, speak, tip).
 * eval unmanaged css props before store
 
 version 5.0.1 2014/05/13
