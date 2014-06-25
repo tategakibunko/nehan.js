@@ -17,6 +17,10 @@ Include css, js in the ``<head>``
 <script src="/path/to/nehan.js" type="text/javascript"></script>
 ```
 
+## Demo & Document
+
+Demo and document is [here](http://tategakibunko.github.io/nehan.js).
+
 ## Quick Start
 
 ```javascript
@@ -90,10 +94,6 @@ page_stream.asyncGet({
   }
 });
 ```
-
-## Demo & Document
-
-Demo and document is [here](http://tategakibunko.github.io/nehan.js).
 
 ## jQuery plugin
 
