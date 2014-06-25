@@ -7374,8 +7374,8 @@ var StyleContext = (function(){
     getMarkupContent : function(){
       return this.markup.getContent();
     },
-    getMarkupPos : function(){
-      return this.markup.pos;
+    getMarkupData : function(name){
+      return this.markup.getData(name);
     },
     getContent : function(){
       var content = this.markup.getContent();

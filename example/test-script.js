@@ -391,7 +391,7 @@ var Script = {
     "</div>"
   ].join("\n"),
 
-  "custom-tag-test":[
+  "nehan-tip-test":[
     "<p><tip title='click here'>tip content</tip></p>",
     "<p><tip title='タイトル'>チップの内容</tip></p>"
   ].join("\n"),
@@ -412,7 +412,7 @@ var Script = {
     "<p>" + Text["lorem"] + "</p>"
   ].join("\n"),
 
-  "speak":[
+  "nehan-speak-test":[
     "<speak name='太郎'>" + Text["middle"] + "</speak>",
     "<speak src='128x128.gif'>" + Text["long"] + "</speak>"
   ].join("\n")

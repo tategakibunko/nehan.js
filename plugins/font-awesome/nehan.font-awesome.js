@@ -18,10 +18,10 @@
 */
 Nehan.addSingleTagByName("fa");
 Nehan.setStyle("fa", {
-  display:"inline",
-  width:"1em",
-  height:"1em",
-  onload:function(ctx){
+  "display":"inline",
+  "width":"1em",
+  "height":"1em",
+  "onload":function(ctx){
     var markup = ctx.getMarkup();
     var icon_names = markup.getAttr("name").replace(/\s+/g, " ").split(" ");
     var fa_icon_names = ["fa"];

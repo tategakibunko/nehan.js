@@ -1,28 +1,4 @@
 var TestStyles = {
-  "tip":{
-    "display":"inline",
-    "background-color":"gold",
-    color:function(pcontext){
-      return pcontext.getParentStyleContext().isTextVertical()? "red" : "green";
-    },
-    // <tip title='cilck me'>some text</tip>
-    // => <a href='#' data-title='click me' data-content='some text'>click me</a>
-    onload:function(scontext){
-      var markup = scontext.getMarkup();
-      var tip_title = markup.getAttr("title");
-      var tip_content = markup.getContent();
-      markup.setAlias("a");
-      markup.setAttr("href", "#" + tip_title);
-      markup.setData("title", tip_title);
-      markup.setData("content", tip_content);
-      markup.setContent(tip_title);
-    },
-    oncreate:function(dom){
-      $(dom).click(function(){
-	alert($(this).data("content"));
-      });
-    }
-  },
   ".nehan-test-pseudo li:first-child":{
     "color":"green"
   },

@@ -20,16 +20,16 @@ Nehan.setStyles({
   "speak":{
     "display":"table",
     "border-color":"transparent",
-    "onload":function(scontext){
-      var markup = scontext.getMarkup();
+    "onload":function(selector_context){
+      var markup = selector_context.getMarkup();
       var text = markup.getContent();
       var img = markup.getAttr("src");
       var size = markup.getAttr("size", 100);
       var name = markup.getAttr("name", "no name");
 
       // if image is enabled but enough space is not left, break current page.
-      if(img && scontext.getRestExtent() < size){
-	scontext.setCssAttr("break-before", "always");
+      if(img && selector_context.getRestExtent() < size){
+	selector_context.setCssAttr("break-before", "always");
       }
       // image is prefered(name is skipped even if it's enabled).
       if(img){
