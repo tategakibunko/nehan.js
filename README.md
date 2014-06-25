@@ -79,14 +79,14 @@ engine.setStyles({
 var page_stream = engine.createPageStream("<h1>hello, nehan.js</h1>");
 
 // get target dom.
-var dst_target = document.getElementById("my-page-document");
+var target_dom = document.getElementById("my-page-document");
 
 // start parsing
 page_stream.asyncGet({
   // called when each abstract layout tree is generated.
   onProgress: function(stream, tree){
-    var page = stream.getPage(tree.pageNo); // tree -> page
-    dst_target.appendChild(page.element);
+    var page = stream.getPage(tree.pageNo); // tree -> page object
+    target_dom.appendChild(page.element);
   },
   // called when all pages are generated.
   onComplete: function(stream, time){
@@ -94,10 +94,6 @@ page_stream.asyncGet({
   }
 });
 ```
-
-## jQuery plugin
-
-jQuery plugin is [here](http://tategakibunko.github.io/jquery.nehan).
 
 ## License
 
