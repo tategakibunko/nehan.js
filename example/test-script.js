@@ -410,6 +410,11 @@ var Script = {
     "<p style='word-break:break-all'>" + Text["lorem"] + "</p>",
     "<h2>word break normal</h2>",
     "<p>" + Text["lorem"] + "</p>"
+  ].join("\n"),
+
+  "speak":[
+    "<speak name='太郎'>" + Text["middle"] + "</speak>",
+    "<speak src='128x128.gif'>" + Text["long"] + "</speak>"
   ].join("\n")
 };
 

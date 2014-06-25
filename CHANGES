@@ -14,6 +14,8 @@ o enabled selector of multiple css classes like 'div.nehan-xxx.nehan-yyy.nehan-z
 o enabled margin cancel.
 o support 'auto' as 'table-layout'.
 o support word-break property.
+o add plugins directory.
+o add plugins(font-awesome, speak).
 * eval unmanaged css props before store
 
 version 5.0.1 2014/05/13

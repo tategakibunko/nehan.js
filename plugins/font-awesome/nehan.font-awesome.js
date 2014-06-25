@@ -6,9 +6,15 @@
    plugin name: nehan-font-awesome
    description: shortcut tag for font-awesome(http://fortawesome.github.io/Font-Awesome/)
    tag_name: fa
-   tag_type: single(close tag is not required)
-   usage: <fa name="{icon_name}">
-   example: <fa name="star">, <fa name="user">, <fa name="spin spinner">
+   close_tag: not required
+
+   attributes:
+     - name: icon name, prefix 'fa-' is not required.
+
+   example:
+     <fa name="star">
+     <fa name="user">
+     <fa name="spin spinner">
 */
 Nehan.addSingleTagByName("fa");
 Nehan.setStyle("fa", {
