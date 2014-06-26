@@ -17,6 +17,14 @@ Include css, js in the ``<head>``
 <script src="/path/to/nehan.js" type="text/javascript"></script>
 ```
 
+## Screenshot
+
+### horizontal paged media in jekyll-nehan
+<img src="https://raw.github.com/tategakibunko/jekyll-nehan/master/assets/sshot-hori.png" width="300" height="160" />
+
+### vertical paged media in jekyll-nehan
+<img src="https://raw.github.com/tategakibunko/jekyll-nehan/master/assets/sshot-vert.png" width="300" height="160" />
+
 ## Demo & Document
 
 See [demo and document](http://tategakibunko.github.io/nehan.js).
