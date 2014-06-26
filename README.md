@@ -65,9 +65,9 @@ page_stream.asyncGet({
 });
 ```
 
-### Set engine local style
+### Styling(engine local style)
 
-Engine local style is only available for the engine.
+Engine local style is only available for the single engine.
 
 ```javascript
 // create layout engine.
@@ -128,7 +128,7 @@ Notice that camel case is not allowed for css properties.
 - "font-size":16 => OK
 - "fontSize":16 => NG
 
-## set engine global style
+## Styling(global style)
 
 Instead of <code>engine.setStyle</code>, <code>Nehan.setStyle</code> is used to set **global style**.
 
