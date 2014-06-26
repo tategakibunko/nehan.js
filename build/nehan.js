@@ -2353,12 +2353,18 @@ var SelectorLexer = (function(){
       return ret;
     },
     _getTypeSelector : function(){
+      var buff_len_before = this.buff.length;
       var name = this._getName();
       var name_rex = (name === null)? this._getNameRex() : null;
       var id = this._getId();
       var classes = this._getClasses();
       var attrs = this._getAttrs();
       var pseudo = this._getPseudo();
+
+      // if size of this.buff is not changed, there is no selector element.
+      if(this.buff.length === buff_len_before){
+	throw "invalid selector:[" + this.buff + "]";
+      }
       return new TypeSelector({
 	name:name,
 	nameRex:name_rex,
