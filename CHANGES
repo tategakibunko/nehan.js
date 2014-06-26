@@ -6,7 +6,7 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.0.2 2014/??/??
+version 5.0.2 2014/06/26
 =========================
 o regexp name selector is supported.
 o to define custom single tag, add lexing-rule interfaces(setSingleTag, setSingleTagRex).
