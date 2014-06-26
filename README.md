@@ -21,10 +21,10 @@ Include css, js in the ``<head>``
 
 These screenshots are layout result of [jekyll-nehan](https://github.com/tategakibunko/jekyll-nehan).
 
-### horizontal paged media
+### 1. horizontal paged media
 <img src="https://raw.github.com/tategakibunko/jekyll-nehan/master/assets/sshot-hori.png" width="300" height="160" />
 
-### vertical paged media
+### 2. vertical paged media
 <img src="https://raw.github.com/tategakibunko/jekyll-nehan/master/assets/sshot-vert.png" width="300" height="160" />
 
 ## Demo & Document
