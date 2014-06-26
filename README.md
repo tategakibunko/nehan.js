@@ -19,10 +19,12 @@ Include css, js in the ``<head>``
 
 ## Screenshot
 
-1. horizontal paged media in jekyll-nehan
+These screenshots are layout result of [jekyll-nehan](https://github.com/tategakibunko/jekyll-nehan).
+
+### horizontal paged media
 <img src="https://raw.github.com/tategakibunko/jekyll-nehan/master/assets/sshot-hori.png" width="300" height="160" />
 
-2. vertical paged media in jekyll-nehan
+### vertical paged media
 <img src="https://raw.github.com/tategakibunko/jekyll-nehan/master/assets/sshot-vert.png" width="300" height="160" />
 
 ## Demo & Document
