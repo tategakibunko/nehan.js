@@ -57,6 +57,8 @@ page_stream.asyncGet({
 
 ### Set engine local style
 
+Engine local style is only available for the engine.
+
 ```javascript
 // create layout engine.
 var engine = Nehan.setup();
@@ -110,11 +112,11 @@ engine.setStyles({
 });
 ```
 
+### important notice about css properties in nehan.js
 Notice that camel case is not allowed for css properties.
 
 - "font-size":16 => OK
 - "fontSize":16 => NG
-
 
 ## set engine global style
 
