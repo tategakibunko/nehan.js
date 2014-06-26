@@ -27,7 +27,41 @@ See [demo and document](http://tategakibunko.github.io/nehan.js).
 // create layout engine.
 var engine = Nehan.setup();
 
-// define engine local style.
+// set body size(= page size)
+engine.setStyle("body", {
+  "flow":"lr-tb", // or "tb-rl"(vertical)
+  "font-size":16,
+  "width":640,
+  "height":480
+});
+
+// generate page stream from engine.
+var page_stream = engine.createPageStream("<h1>hello, nehan.js</h1>");
+
+// get target dom.
+var target_dom = document.getElementById("my-page-document");
+
+// start parsing
+page_stream.asyncGet({
+  // called when each abstract layout tree is generated.
+  onProgress: function(stream, tree){
+    var page = stream.getPage(tree.pageNo); // tree -> page object
+    target_dom.appendChild(page.element);
+  },
+  // called when all pages are generated.
+  onComplete: function(stream, time){
+    console.log("finished!! => %fmsec", time);
+  }
+});
+```
+
+### Set engine local style
+
+```javascript
+// create layout engine.
+var engine = Nehan.setup();
+
+// set engine local style.
 engine.setStyles({
   // notice that 'body size' = 'page size'.
   "body":{
@@ -74,23 +108,32 @@ engine.setStyles({
     }
   }
 });
+```
 
-// generate page stream from engine.
-var page_stream = engine.createPageStream("<h1>hello, nehan.js</h1>");
+Notice that camel case is not allowed for css properties.
 
-// get target dom.
-var target_dom = document.getElementById("my-page-document");
+- "font-size":16 => OK
+- "fontSize":16 => NG
 
-// start parsing
-page_stream.asyncGet({
-  // called when each abstract layout tree is generated.
-  onProgress: function(stream, tree){
-    var page = stream.getPage(tree.pageNo); // tree -> page object
-    target_dom.appendChild(page.element);
+
+## set engine global style
+
+Instead of <code>engine.setStyle</code>, <code>Nehan.setStyle</code> is used to set **global style**.
+
+Global styles are shared by all engines created in same window.
+
+```javascript
+Nehan.setStyle("body", {
+  "font-size":16
+});
+
+// multiple values by setStyles.
+Nehan.setStyles({
+  "body":{
+    "color":"#ccc"
   },
-  // called when all pages are generated.
-  onComplete: function(stream, time){
-    console.log("finished!! => %fmsec", time);
+  "h1":{
+    "font-size":"3em"
   }
 });
 ```
