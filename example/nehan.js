@@ -2373,7 +2373,7 @@ var SelectorLexer = (function(){
     },
     // type name defined by regexp
     // "/h[1-6]/.nehan-some-class span"
-    // => /h[16]/
+    // => /h[1-6]/
     _getNameRex : function(){
       var name_rex = this._getByRex(__rex_name_by_rex);
       if(name_rex === null){
