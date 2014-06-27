@@ -170,7 +170,8 @@ module.exports = function(grunt) {
 	    "src/vert-evaluator.js",
 	    "src/hori-evaluator.js",
 	    "src/nehan-setup-main.js",
-	    "src/nehan-setup-end.js"
+	    "src/nehan-setup-end.js",
+	    "src/nehan-page-element.js"
 	  ]
 	}
       },
