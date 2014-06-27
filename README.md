@@ -34,6 +34,7 @@ These screenshots are layout result of [jekyll-nehan](https://github.com/tategak
 ## Quick Start 1 (for simple single page layout)
 
 ```javascript
+// NehanPagedElement is available for Nehan.version >= 5.0.3
 var pe = Nehan.createPagedElement();
 
 // before calling setContent, set 'body' style of this paged-element.
