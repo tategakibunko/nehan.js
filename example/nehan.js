@@ -10304,15 +10304,15 @@ return {
 
 }; // Nehan.setup
 
-var NehanPageElement = (function(){
-  function NehanPageElement(engine_args){
+var NehanPagedElement = (function(){
+  function NehanPagedElement(engine_args){
     this.pageNo = 0;
     this.element = document.createElement("div");
     this.engine = Nehan.setup(engine_args);
     this._pageStream = null;
   }
 
-  NehanPageElement.prototype = {
+  NehanPagedElement.prototype = {
     getEngine : function(){
       return this.engine;
     },
@@ -10328,7 +10328,7 @@ var NehanPageElement = (function(){
     getPage : function(page_no){
       return this._pageStream? this._pageStream.getPage(page_no) : null;
     },
-    getPageElement : function(page_no){
+    getPagedElement : function(page_no){
       var page = this.getPage(page_no);
       return page? page.element : null;
     },
@@ -10382,9 +10382,9 @@ var NehanPageElement = (function(){
     }
   };
   
-  return NehanPageElement;
+  return NehanPagedElement;
 })();
 
-Nehan.createPageElement = function(engine_args){
-  return new NehanPageElement(engine_args || {});
+Nehan.createPagedElement = function(engine_args){
+  return new NehanPagedElement(engine_args || {});
 };

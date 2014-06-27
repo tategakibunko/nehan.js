@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <title>nehan5 page-element test</title>
+    <meta content="ja" name="content-language">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <meta http-equiv="Content-Script-Type" content="text/javascript">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- styles -->
+    <link href="nehan.css" rel="stylesheet">
+  </head>
+  <body>
+    <div>
+      <button id="next">next</button>
+      <button id="prev">prev</button>
+    </div>
+    <div id="result"></div>
+    <div id="outline"></div>
+
+    <!-- scripts -->
+    <script type="text/javascript" src="nehan.js"></script>
+    <script type="text/javascript">
+      var result = document.getElementById("result");
+      var outline = document.getElementById("outline");
+      var pe = Nehan.createPageElement();
+      var content = [
+        "<h1>hello, nehan.js</h1>",
+        "<p>this is sample entry</p>",
+        "<ol>",
+	"<li>list child</li>",
+	"<li>list child</li>",
+	"<li>list child</li>",
+	"<li>list child</li>",
+	"<li>list child</li>",
+	"<li>list child</li>",
+	"<li>list child</li>",
+	"<li>list child</li>",
+	"<li>list child</li>",
+	"<li>list child</li>",
+	"<li>list child</li>",
+	"<li>list child</li>",
+	"</ol>"
+      ].join("\n");
+
+      pe.setStyle("body", {
+        "flow":"tb-rl",
+        "color":"#505050",
+        "background-color":"#f0f0f0",
+        "width":640,
+        "height":480,
+        "font-size":20
+      });
+
+      pe.setStyle("h1", {
+        "color":"darkred"
+      });
+
+      pe.setContent(content, {
+        onComplete : function(time){
+          outline.appendChild(pe.engine.createOutlineElement());
+        }
+      });
+
+      document.getElementById("next").onclick = function(){
+        pe.setNextPage();
+      };
+
+      document.getElementById("prev").onclick = function(){
+        pe.setPrevPage();
+      };
+
+      result.appendChild(pe.getElement());
+    </script>
+  </body>
+</html>
