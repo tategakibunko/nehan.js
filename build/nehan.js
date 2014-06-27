@@ -4230,8 +4230,6 @@ var BlockFlow = (function(){
     var css = {};
     if(this.isHorizontal()){
       css["css-float"] = (this.dir === "lr")? "left" : "right";
-    } else if(this.isVertical()){
-      css["css-float"] = (this.dir === "lr")? "left" : "right";
     }
     return css;
   };
