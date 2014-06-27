@@ -21,8 +21,8 @@ module.exports = function(grunt) {
 	  "src/*.js"
 	],
 	filter:function(filepath){
-	  return (filepath.indexOf("nehan-start.js") < 0 && // special script to start global closure.
-		  filepath.indexOf("nehan-end.js") < 0 && // special script to close global closure.
+	  return (filepath.indexOf("nehan-setup-start.js") < 0 && // special script to start global closure.
+		  filepath.indexOf("nehan-setup-end.js") < 0 && // special script to close global closure.
 		  filepath.indexOf("class.js") < 0); // class inheritance script by John Resig, uses some tricky technique.
 	}
       },
@@ -35,7 +35,7 @@ module.exports = function(grunt) {
 	files:{
 	  "build/<%= pkg.name %>.js":[
 	    "COPYING",
-	    "src/nehan-start.js",
+	    "src/nehan-setup-start.js",
 	    "src/config.js",
 	    "src/layout.js",
 	    "src/env.js",
@@ -169,8 +169,8 @@ module.exports = function(grunt) {
 	    "src/layout-evaluator.js",
 	    "src/vert-evaluator.js",
 	    "src/hori-evaluator.js",
-	    "src/main.js",
-	    "src/nehan-end.js"
+	    "src/nehan-setup-main.js",
+	    "src/nehan-setup-end.js"
 	  ]
 	}
       },
