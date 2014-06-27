@@ -415,6 +415,15 @@ var Script = {
   "nehan-speak-test":[
     "<speak name='太郎'>" + Text["middle"] + "</speak>",
     "<speak src='128x128.gif'>" + Text["long"] + "</speak>"
+  ].join("\n"),
+
+  "nehan-gravator-test":[
+    "<h2>my gravator</h2>",
+    "<gravator size='64' email='someone@example.com'>",
+    "<div>" + Text["middle"] + "</div>",
+    "<h2>my gravator floated</h2>",
+    "<gravator class='nehan-float-start nehan-disp-block' size='64' email='someone@example.com'>",
+    "<div>" + Text["middle"] + "</div>"
   ].join("\n")
 };
 
