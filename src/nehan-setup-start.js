@@ -32,7 +32,9 @@ Nehan.addSingleTagByRex = function(rex){
   Nehan.__single_tag_rexes__.push(rex);
 };
 
-// this function return the engine module ends at nehan-setup-end.js, 
-// to enclose local style, layout, config, outline etc in a closure.
+// this function return the engine module(ends at nehan-setup-end.js),
+// enclosing local variable(style, layout, config, document-context etc).
+// so each module returned by this function has independent environment.
+// this is usefull to show multiple layout(vertical and horizontal) in a single page.
 Nehan.setup = function(engine_args){
 var __engine_args = engine_args || {};
