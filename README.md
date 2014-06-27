@@ -31,7 +31,7 @@ These screenshots are layout result of [jekyll-nehan](https://github.com/tategak
 ### 2. vertical paged media
 <img src="https://raw.github.com/tategakibunko/jekyll-nehan/master/assets/sshot-vert.png" width="300" height="160" />
 
-## Quick Start 1 (for simple page layouy)
+## Quick Start 1 (for simple single page layout)
 
 ```javascript
 var pe = Nehan.createPagedElement();
