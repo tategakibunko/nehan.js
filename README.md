@@ -17,6 +17,10 @@ Include css, js in the ``<head>``
 <script src="/path/to/nehan.js" type="text/javascript"></script>
 ```
 
+## Demo & Document
+
+See [demo and document](http://tategakibunko.github.io/nehan.js).
+
 ## Screenshot
 
 These screenshots are layout result of [jekyll-nehan](https://github.com/tategakibunko/jekyll-nehan).
@@ -27,11 +31,36 @@ These screenshots are layout result of [jekyll-nehan](https://github.com/tategak
 ### 2. vertical paged media
 <img src="https://raw.github.com/tategakibunko/jekyll-nehan/master/assets/sshot-vert.png" width="300" height="160" />
 
-## Demo & Document
+## Quick Start 1 (for simple page layouy)
 
-See [demo and document](http://tategakibunko.github.io/nehan.js).
+```javascript
+var pe = Nehan.createPagedElement();
 
-## Quick Start
+// before calling setContent, set 'body' style of this paged-element.
+// notice that you can't use camel-cased css property.
+pe.setStyle("body", {
+  "flow":"lr-tb",
+  //"flow":"tb-rl", // for Japanese vertical
+  "font-size":16, // use 'font-size' instead of 'fontSize'!
+  "width":640,
+  "height":480
+});
+
+// by setContent, paged-media is asynchronously generated.
+pe.setContent("<h1>hello, nehan.js</h1>", {
+  onProgress : function(tree){}, // tree.pageNo, tree.percent is available.
+  onComplete : function(time){}
+});
+
+// set paged-media element to some target dom.
+document.getElementById("result").appendChild(pe.getElement());
+
+// set next/prev callback to some clickable target.
+document.getElementById("next").onclick = function(){ pe.setNextPage() };
+document.getElementById("prev").onclick = function(){ pe.setPrevPage() };
+```
+
+## Quick Start 2 (more flexible way)
 
 ```javascript
 // create layout engine.
@@ -130,7 +159,7 @@ Notice that camel case is not allowed for css properties.
 
 ## Styling(global style)
 
-Instead of <code>engine.setStyle</code>, <code>Nehan.setStyle</code> is used to set **global style**.
+Instead of <code>engine.setStyle</code> or <code>pe.setStyle</code>, <code>Nehan.setStyle</code> is used to set **global style**.
 
 Global styles are shared by all engines created in same window.
 
