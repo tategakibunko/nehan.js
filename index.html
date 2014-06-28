@@ -41,7 +41,7 @@
 <img width="128" height="128" src="images/128x128.gif" class="nehan-float-start nehan-disp-block nehan-gap-end">
 <div class="nehan-drop-caps">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
 <img width="128" height="128" src="images/128x128.gif" class="nehan-float-end nehan-disp-block">
-<div style="break-after:always">lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</div>
+<div class="nehan-break-after">lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</div>
 
 <h3>flip flow</h3>
 <p>lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet, consectetur adipisicing elit. lorem ipsum dolor sit amet, consectetur adipisicing elit lorem ipsum dolor sit amet.</p>
@@ -95,7 +95,7 @@
 <p class="nehan-ta-center">aligned to center</p>
 <p class="nehan-ta-end">aligned to end</p>
 
-<h3>text combine</h3>
+<h3 class="nehan-break-before">text combine</h3>
 <div class="nehan-flow-flip">
 平成<span class='nehan-tcy'>25</span>年<span class='nehan-tcy'>1</span>月<span class='nehan-text-combine'>10</span>日
 </div>
@@ -114,30 +114,53 @@
 </div><!-- nehan-book -->
       </section><!-- demo -->
 
-      <!-- getting started -->
+      <!-- install -->
       <section>
-        <h2><a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h2>
+        <h2><a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h2>
+	<p>Include css, js in the <code>&lt;head&gt;</code>.</p>
 
-<ol>
-  <li>
-    <h3>Include css, js in the <code>&lt;head&gt;</code>.</h3>
 <pre class="prettyprint lang-html">
 &lt;link href="/path/to/nehan.css" type="text/css" rel="stylesheet"&gt;
 &lt;script src="/path/to/nehan.js" type="text/javascript"&gt;&lt;/script&gt;
 </pre>
-  </li>
+      </section><!-- install -->
 
-  <li>
-    <h3>Generate layout engine.</h3>
+      <!-- quick start -->
+      <section>
+        <h2><a name="quick-start" class="anchor" href="#quick-start"><span class="octicon octicon-link"></span></a>Quick Start</h2>
+	<p>Here is super simple example of single page layout using <b>NehanPagedElement</b> class.</p>
+<pre class="prettyprint lang-js">
+var pe = Nehan.createPagedElement();
+pe.setStyle("body", {
+  "flow":"lr-tb", // or 'tb-rl'
+  "width":640,
+  "height":480,
+  "font-size":16 // camel-case fontSize is not allowed!
+});
+
+pe.setContent("&lt;h1&gt;hello, nehan.js&lt;/h1&gt;");
+document.getElementById("my-paged-element-target").appendChild(pe.getElement());
+document.getElementById("next-button").onclick = function(){ pe.setNextPage(); };
+document.getElementById("prev-button").onclick = function(){ pe.setPrevPage(); };
+</pre>
+      </section><!-- quick start -->
+
+      <!-- getting started -->
+      <section>
+        <h2><a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h2>
+	<p>Here is more precise example using engine interfaces.</p>
+	<ol>
+	  <li>
+	    <h3>Generate layout engine.</h3>
 <pre class="prettyprint lang-js">
 var engine = Nehan.setup();
 </pre>
-</li>
+	  </li>
 
-  <li>
-    <h3>Setting styles</h3>
-    <p>Your own styles can be defined by using <code>setStyle</code>(or setStyles).</p>
-    <p>See <a href="#styling">styling</a> for more details.</p>
+	  <li>
+	    <h3>Setting styles</h3>
+	    <p>Your own styles can be defined by using <code>setStyle</code>(or setStyles).</p>
+	    <p>See <a href="#styling">styling</a> for more details.</p>
 <pre class="prettyprint lang-js">
 engine.setStyles({
   // define root page size(=body).
@@ -214,19 +237,19 @@ engine.setStyles({
   }
 });
 </pre>
-  </li>
+	  </li>
 
-  <li>
-    <h3>Create page stream</h3>
+	  <li>
+	    <h3>Create page stream</h3>
 
 <pre class="prettyprint lang-js">
 var stream = engine.createPageStream("hello, nehan.js!");
 </pre>
   </li>
-
-  <li>
-    <h3>Yielding page</h3>
-    <p>Stream is created, now you can yield paged-media by <code>asyncGet</code>.</p>
+	  
+	  <li>
+	    <h3>Yielding page</h3>
+	    <p>Stream is created, now you can yield paged-media by <code>asyncGet</code>.</p>
 <pre class="prettyprint lang-js">
 stream.asyncGet({
   // called when each single pages are successfully calculated.
@@ -245,8 +268,8 @@ stream.asyncGet({
   }
 });
 </pre>
-  </li>
-</ol>
+	  </li>
+	</ol>
       </section><!-- getting started -->
 
       <!-- styling -->
