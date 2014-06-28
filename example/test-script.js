@@ -377,18 +377,12 @@ var Script = {
     "<div class='nehan-test-after'>test for after</div>"
   ].join(""),
 
-  "pasted":[
+  "pasted-attribute":[
     "<p>this is normal1</p>",
     "<div class='nehan-content-box nehan-gap-after' style='width:200px; height:200px; background-color:gold' pasted>",
     "this is pasted content",
     "</div>",
-    "<p>this is normal2</p>",
-    "<div class='nehan-content-box nehan-disp-block' style='extent:200px' pasted>",
-    "<pre class='prettyprint lang-js'>",
-    "var a = new String('hoge');",
-    "var b = function(){ alert('hoge'); };",
-    "</pre>",
-    "</div>"
+    "<p>this is normal2</p>"
   ].join("\n"),
 
   "nehan-tip-test":[
@@ -424,6 +418,12 @@ var Script = {
     "<h2>my gravator floated</h2>",
     "<gravator class='nehan-float-start nehan-disp-block' size='64' email='someone@example.com'>",
     "<div>" + Text["middle"] + "</div>"
+  ].join("\n"),
+
+  "nehan-pasted-test":[
+    "<pasted size='150x200'>",
+    "<p>this is pasted content!!!</p>",
+    "</pasted>"
   ].join("\n")
 };
 

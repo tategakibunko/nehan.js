@@ -10,6 +10,7 @@ version 5.0.3
 =========================
 o new interface 'Nehan.createPagedElement' is created. more abstract layer and easy to use.
 o add plugin for gravator(nehan.gravator.js)
+o add plugin(utility tag <pasted>)
 
 
 version 5.0.2 2014/06/26
