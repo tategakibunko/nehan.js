@@ -4,10 +4,6 @@ var LayoutContext = (function(){
     this.inline = inline;
   }
 
-  // extra document information
-  var __header_id__ = 0;
-  var __anchors__ = {};
-
   LayoutContext.prototype = {
     // block-level
     isBlockSpaceLeft : function(){
