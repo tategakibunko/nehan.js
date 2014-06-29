@@ -1,4 +1,4 @@
-// nehan.pastedjs
+// nehan.pasted.js
 // Copyright(c) 2014-, Watanabe Masaki
 // license: MIT
 
