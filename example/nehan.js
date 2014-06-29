@@ -3745,7 +3745,7 @@ var Color = (function(){
 })();
 
 var Colors = (function(){
-  var color_names = {
+  var __color_names = {
     "aliceblue":"f0f8ff",
     "antiquewhite":"faebd7",
     "aqua":"00ffff",
@@ -3894,7 +3894,7 @@ var Colors = (function(){
     get : function(value){
       value = value.replace(/#/g, "").toLowerCase();
       if(!rex_hex_color.test(value)){
-	return color_names[value] || value;
+	return __color_names[value] || value;
       }
       if(value.length === 3){
 	return value[0] + value[0] + value[1] + value[1] + value[2] + value[2];
