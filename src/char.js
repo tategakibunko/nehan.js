@@ -9,7 +9,7 @@ var Char = (function(){
       this._setupNormal(c1.charCodeAt(0));
     }
   }
-  var kuten = ["\u3002","."];
+  var __kuten = ["\u3002","."];
   var touten = ["\u3001", ","];
   var kakko_start = ["\uff62","\u300c","\u300e","\u3010","\uff3b","\uff08","\u300a","\u3008","\u226a","\uff1c","\uff5b","\x7b","\x5b","\x28"];
   var kakko_end = ["\u300d","\uff63","\u300f","\u3011","\uff3d","\uff09","\u300b","\u3009","\u226b","\uff1e","\uff5d","\x7d","\x5d","\x29"];
@@ -372,7 +372,7 @@ var Char = (function(){
       return this.isKakkoStart() || this.isKakkoEnd();
     },
     isKuten : function(){
-      return List.mem(kuten, this.data);
+      return List.mem(__kuten, this.data);
     },
     isTouten : function(){
       return List.mem(touten, this.data);
