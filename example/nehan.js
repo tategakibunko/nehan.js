@@ -2431,7 +2431,7 @@ var SelectorLexer = (function(){
 
 
 var SelectorStateMachine = (function(){
-  var find_parent = function(style, parent_type){
+  var __find_parent = function(style, parent_type){
     var ptr = style.parent;
     while(ptr !== null){
       if(parent_type.test(ptr)){
@@ -2442,7 +2442,7 @@ var SelectorStateMachine = (function(){
     return null;
   };
 
-  var find_direct_parent = function(style, parent_type){
+  var __find_direct_parent = function(style, parent_type){
     var ptr = style.parent;
     if(ptr === null){
       return null;
@@ -2451,14 +2451,14 @@ var SelectorStateMachine = (function(){
   };
 
   // search adjacent sibling forom 'style' that matches f1 selector.
-  var find_adj_sibling = function(style, f1){
+  var __find_adj_sibling = function(style, f1){
     var sibling_index = style.getChildIndex();
     var prev_sibling = style.getParentNthChild(sibling_index - 1) || null;
     return (prev_sibling && f1.test(prev_sibling))? prev_sibling : null;
   };
 
   // search style context that matches f1 selector from all preceding siblings of 'style'.
-  var find_prev_sibling = function(style, f1){
+  var __find_prev_sibling = function(style, f1){
     var sibling_index = style.getChildIndex();
     for(var i = 0; i < sibling_index; i++){
       var prev_sibling = style.getParentNthChild(i);
@@ -2509,10 +2509,10 @@ var SelectorStateMachine = (function(){
 	// notice that f2 is already accepted at this point, so next we check [f1 combinator] parts.
 	// if style-context that matches [f1 combinator] is found, update 'style' to it, and next loop.
 	switch(combinator){
-	case " ": style = find_parent(style, f1); break; // search parent context that matches f1.
-	case ">": style = find_direct_parent(style, f1); break; // search direct parent context that matches f1.
-	case "+": style = find_adj_sibling(style, f1); break; // find adjacent sibling context that matches f1.
-	case "~": style = find_prev_sibling(style, f1); break; // find previous sibling context that matches f1.
+	case " ": style = __find_parent(style, f1); break; // search parent context that matches f1.
+	case ">": style = __find_direct_parent(style, f1); break; // search direct parent context that matches f1.
+	case "+": style = __find_adj_sibling(style, f1); break; // find adjacent sibling context that matches f1.
+	case "~": style = __find_prev_sibling(style, f1); break; // find previous sibling context that matches f1.
 	default: throw "selector syntax error:invalid combinator(" + combinator + ")";
 	}
 	// can't find style-context that matches [f1 combinator f2]
