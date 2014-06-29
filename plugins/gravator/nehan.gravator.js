@@ -7,6 +7,7 @@
    description: shortcut tag for gravator(http://www.gravator.com/) icon.
    tag_name: gravator
    close_tag: not required
+   dependencies: Javascript-MD5(https://github.com/blueimp/JavaScript-MD5), for md5 hash of email.
 
    attributes:
      - email {String}: gravator email address
