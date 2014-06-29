@@ -8538,13 +8538,14 @@ var BlockGenerator = (function(){
       return null;
     }
 
+    // skip while-space in block-level.
+    if(Token.isWhiteSpace(token)){
+      this.stream.skipUntil(Token.isWhiteSpace);
+      return this._getNext(context);
+    }
+
     // if text, push back stream and restart current style and stream as child inline generator.
     if(Token.isText(token)){
-      // skip while-space token in block level.
-      if(Token.isWhiteSpace(token)){
-	this.stream.skipUntil(Token.isWhiteSpace);
-	return this._getNext(context);
-      }
       this.stream.prev();
       this.setChildLayout(new InlineGenerator(this.style, this.stream));
       return this.yieldChildLayout(context);
