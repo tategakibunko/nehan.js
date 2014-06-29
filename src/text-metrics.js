@@ -1,22 +1,22 @@
 // more strict metrics using canvas
 var TextMetrics = (function(){
-  var canvas = document.createElement("canvas");
-  canvas.style.width = Math.max(Layout.width, Layout.height) + "px";
-  canvas.style.height = Layout.maxFontSize + "px";
+  var __canvas = document.createElement("canvas");
+  __canvas.style.width = Math.max(Layout.width, Layout.height) + "px";
+  __canvas.style.height = Layout.maxFontSize + "px";
 
-  var context;
-  if(canvas.getContext){
-    context = canvas.getContext("2d");
-    context.textAlign = "left";
+  var __canvas_context;
+  if(__canvas.getContext){
+    __canvas_context = __canvas.getContext("2d");
+    __canvas_context.textAlign = "left";
   }
 
   return {
     isEnable : function(){
-      return context && (typeof context.measureText !== "undefined");
+      return __canvas_context && (typeof __canvas_context.measureText !== "undefined");
     },
     getMetrics : function(font, text){
-      context.font = font.toString(); // to get accurate metrics, font info is required.
-      return context.measureText(text);
+      __canvas_context.font = font.toString(); // to get accurate metrics, font info is required.
+      return __canvas_context.measureText(text);
     },
     getMeasure : function(font, text){
       var metrics = this.getMetrics(font, text);
