@@ -23,6 +23,9 @@ Nehan.setStyle("gravator", {
     var src_tmpl = "http://www.gravatar.com/avatar/{{md5}}?s={{size}}&d=identicon";
     var email = markup.getAttr("email");
     var size = markup.getAttr("size", 128);
+    if(typeof md5 === "undefined"){
+      throw "nehan.gravator.js: md5 function is not defined";
+    }
     var src = src_tmpl.replace(/{{md5}}/, md5(email)).replace(/{{size}}/, size);
     markup.setAlias("img");
     markup.setAttr("width", size);
