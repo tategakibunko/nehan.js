@@ -9079,7 +9079,7 @@ var FloatGroup = (function(){
 var FloatGroupStack = (function(){
 
   // [float block] -> FloatGroup
-  var pop_float_group = function(flow, float_direction, blocks){
+  var __pop_float_group = function(flow, float_direction, blocks){
     var head = blocks.pop() || null;
     if(head === null){
       return null;
@@ -9101,10 +9101,10 @@ var FloatGroupStack = (function(){
   };
 
   // [float block] -> [FloatGroup]
-  var make_float_groups = function(flow, float_direction, blocks){
+  var __make_float_groups = function(flow, float_direction, blocks){
     var ret = [], group;
     do{
-      group = pop_float_group(flow, float_direction, blocks);
+      group = __pop_float_group(flow, float_direction, blocks);
       if(group){
 	ret.push(group);
       }
@@ -9113,8 +9113,8 @@ var FloatGroupStack = (function(){
   };
 
   function FloatGroupStack(flow, start_blocks, end_blocks){
-    var start_groups = make_float_groups(flow, FloatDirections.get("start"), start_blocks);
-    var end_groups = make_float_groups(flow, FloatDirections.get("end"), end_blocks);
+    var start_groups = __make_float_groups(flow, FloatDirections.get("start"), start_blocks);
+    var end_groups = __make_float_groups(flow, FloatDirections.get("end"), end_blocks);
     this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
       return g1.getExtent(flow) - g2.getExtent(flow);
     });
