@@ -159,8 +159,8 @@ var VertEvaluator = (function(){
     return this.evalCharWithBr(line, chr);
   };
 
-  // to inherit style of parent wrap, we text with <br> to keep elements in 'inline-level'.
-  // for example, if we use <div>, parent bg-color is not inherited.
+  // to inherit style of parent, we use <br> to keep elements in 'inline-level'.
+  // for example, if we use <div> instead, parent bg-color is not inherited.
   VertEvaluator.prototype.evalCharWithBr = function(line, chr){
     chr.withBr = true;
     return document.createTextNode(Html.unescape(chr.getData()));
