@@ -3,7 +3,7 @@ var ListStyleType = (function(){
     this.type = type;
   }
 
-  var marker_text = {
+  var __marker_text = {
     "disc": "&#x2022;",
     "circle":"&#x25CB;",
     "square":"&#x25A0;"
@@ -58,7 +58,7 @@ var ListStyleType = (function(){
 	return Const.space;
       }
       if(this.isMarkList()){
-	return marker_text[this.type] || "";
+	return __marker_text[this.type] || "";
       }
       var digit = this._getMarkerDigitString(count);
       return digit + "."; // add period as postfix.
