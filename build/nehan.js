@@ -9044,7 +9044,10 @@ var FloatGroup = (function(){
 
   FloatGroup.prototype = {
     add : function(element){
-      // [f1,f2], [] => [f1], [f2] => [], [f1, f2]
+      // float-stack | float-group
+      //    [f1,f2]  |  []
+      // => [f1]     |  [f2]
+      // => []       |  [f1, f2]
       this.elements.unshift(element); // keep original stack order
     },
     isFloatStart : function(){
