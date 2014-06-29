@@ -1,6 +1,6 @@
 var TextEmphaStyle = (function(){
-  var default_empha_style = "filled dot";
-  var empha_marks = {
+  var __default_empha_style = "filled dot";
+  var __empha_marks = {
     // dot
     "filled dot":"&#x2022;",
     "open dot":"&#x25e6;",
@@ -34,7 +34,7 @@ var TextEmphaStyle = (function(){
       this.value = value;
     },
     getText : function(){
-      return empha_marks[this.value] || this.value || empha_marks[default_empha_style];
+      return __empha_marks[this.value] || this.value || __empha_marks[__default_empha_style];
     },
     getCss : function(){
       var css = {};
