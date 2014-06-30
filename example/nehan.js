@@ -3946,7 +3946,7 @@ var Palette = (function(){
 
 
 var Cardinal = (function(){
-  var table = {
+  var __table = {
     "lower-alpha":[
       "a","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"
     ],
@@ -3982,14 +3982,14 @@ var Cardinal = (function(){
     ]
   };
 
-  var aliases = {
+  var __aliases = {
     "upper-latin":"upper-alpha",
     "lower-latin":"lower-alpha"
   };
 
   return {
     getTableByName : function(name){
-      return table[aliases[name] || name];
+      return __table[__aliases[name] || name];
     },
     getBaseByName : function(name){
       var table = this.getTableByName(name);
