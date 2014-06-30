@@ -9712,7 +9712,7 @@ var LayoutEvaluator = (function(){
   LayoutEvaluator.prototype = {
     evaluate : function(tree){
       if(this._isFlipTree(tree)){
-	return this.evalFlip(tree);
+	return this._evalFlip(tree);
       }
       return this._evaluate(tree);
     },
@@ -9765,9 +9765,9 @@ var LayoutEvaluator = (function(){
       opt = opt || {};
       var self = this;
       var elements = List.filter(opt.elements || tree.elements, function(element){ return element !== null; });
-      var root = opt.root || this.evalTreeRoot(tree, opt);
+      var root = opt.root || this._evalTreeRoot(tree, opt);
       return root.innerHTML? root : List.fold(elements, root, function(ret, child){
-	root.appendChild(self.evalTreeChild(tree, child));
+	root.appendChild(self._evalTreeChild(tree, child));
 	if(child.withBr){ // annotated to add extra br element
 	  root.appendChild(document.createElement("br"));
 	}
@@ -9777,7 +9777,7 @@ var LayoutEvaluator = (function(){
 	return root;
       });
     },
-    evalTreeRoot : function(tree, opt){
+    _evalTreeRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
 	className:tree.getClassName(),
@@ -9788,51 +9788,51 @@ var LayoutEvaluator = (function(){
 	context:tree.style
       });
     },
-    evalTreeChild : function(parent, child){
+    _evalTreeChild : function(parent, child){
       switch(parent.display){
       case "inline":
 	if(child instanceof Box){
-	  return this.evalInlineChildElement(parent, child);
+	  return this._evalInlineChildElement(parent, child);
 	}
-	return this.evalInlineChildText(parent, child);
+	return this._evalInlineChildText(parent, child);
       default:
-	return this.evalBlockChildElement(parent, child);
+	return this._evalBlockChildElement(parent, child);
       }
     },
-    evalBlockChildElement : function(parent, element){
+    _evalBlockChildElement : function(parent, element){
       switch(element.style.getMarkupName()){
       case "img":
-	return this.evalImage(element);
+	return this._evalImage(element);
       case "a":
-	return this.evalLink(element);
+	return this._evalLink(element);
       default:
 	return this.evaluate(element);
       }
     },
-    evalInlineChildElement : function(parent, element){
+    _evalInlineChildElement : function(parent, element){
       switch(element.style.getMarkupName()){
       case "img":
-	return this.evalInlineImage(parent, element);
+	return this._evalInlineImage(parent, element);
       case "a":
-	return this.evalLink(element);
+	return this._evalLink(element);
       default:
-	return this.evalInlineChildTree(element);
+	return this._evalInlineChildTree(element);
       }
     },
-    evalInlineChildText : function(parent, element){
+    _evalInlineChildText : function(parent, element){
       if(parent.style.isTextEmphaEnable()){
-	return this.evalEmpha(parent, element);
+	return this._evalEmpha(parent, element);
       }
-      return this.evalTextElement(parent, element);
+      return this._evalTextElement(parent, element);
     },
-    evalImage : function(image){
-      return this.evalTreeRoot(image, {name:"img"});
+    _evalImage : function(image){
+      return this._evalTreeRoot(image, {name:"img"});
     },
-    evalInlineImage : function(line, image){
-      return this.evalImage(image);
+    _evalInlineImage : function(line, image){
+      return this._evalImage(image);
     },
     // if link uri has anchor address, add page-no to dataset where the anchor is defined.
-    evalLink : function(link){
+    _evalLink : function(link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
       var anchor_name = uri.getAnchorName();
       if(anchor_name){
@@ -9842,16 +9842,16 @@ var LayoutEvaluator = (function(){
       }
       return this._evaluate(link, {name:"a"});
     },
-    evalTextElement : function(line, text){
+    _evalTextElement : function(line, text){
       switch(text._type){
       case "word":
-	return this.evalWord(line, text);
+	return this._evalWord(line, text);
       case "char":
-	return this.evalChar(line, text);
+	return this._evalChar(line, text);
       case "tcy":
-	return this.evalTcy(line, text);
+	return this._evalTcy(line, text);
       case "ruby":
-	return this.evalRuby(line, text);
+	return this._evalRuby(line, text);
       default:
 	console.error("invalid text element:%o", text);
 	throw "invalid text element"; 
@@ -9873,30 +9873,30 @@ var VertEvaluator = (function(){
     return tree.style.isTextHorizontal();
   };
 
-  VertEvaluator.prototype.evalFlip = function(tree){
+  VertEvaluator.prototype._evalFlip = function(tree){
     return (new HoriEvaluator()).evaluate(tree);
   };
 
-  VertEvaluator.prototype.evalInlineChildTree = function(tree){
+  VertEvaluator.prototype._evalInlineChildTree = function(tree){
     return this._evaluate(tree);
   };
 
-  VertEvaluator.prototype.evalInlineImage = function(line, image){
+  VertEvaluator.prototype._evalInlineImage = function(line, image){
     image.withBr = true;
-    return this.evalTreeRoot(image, {name:"img", styles:image.getCssInline()});
+    return this._evalTreeRoot(image, {name:"img", styles:image.getCssInline()});
   };
 
-  VertEvaluator.prototype.evalRuby = function(line, ruby){
+  VertEvaluator.prototype._evalRuby = function(line, ruby){
     var div = this._createElement("div", {
       className:"nehan-ruby-body",
       context:line.style
     });
-    div.appendChild(this.evalRb(line, ruby));
-    div.appendChild(this.evalRt(line, ruby));
+    div.appendChild(this._evalRb(line, ruby));
+    div.appendChild(this._evalRt(line, ruby));
     return div;
   };
 
-  VertEvaluator.prototype.evalRb = function(line, ruby){
+  VertEvaluator.prototype._evalRb = function(line, ruby){
     return this._evaluate(line, {
       elements:ruby.getRbs(),
       root:this._createElement("div", {
@@ -9907,7 +9907,7 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype.evalRt = function(line, ruby){
+  VertEvaluator.prototype._evalRt = function(line, ruby){
     var rt = (new InlineGenerator(
       new StyleContext(ruby.rt, line.style),
       new TokenStream(ruby.getRtString()),
@@ -9917,20 +9917,20 @@ var VertEvaluator = (function(){
     return this.evaluate(rt);
   };
 
-  VertEvaluator.prototype.evalWord = function(line, word){
+  VertEvaluator.prototype._evalWord = function(line, word){
     if(Env.isTransformEnable){
       if(Env.isTrident){
-	return this.evalWordTransformTrident(line, word);
+	return this._evalWordTransformTrident(line, word);
       }
-      return this.evalWordTransform(line, word);
+      return this._evalWordTransform(line, word);
     } else if(Env.isIE){
-      return this.evalWordIE(line, word);
+      return this._evalWordIE(line, word);
     } else {
       return "";
     }
   };
 
-  VertEvaluator.prototype.evalWordTransform = function(line, word){
+  VertEvaluator.prototype._evalWordTransform = function(line, word){
     var div_wrap = this._createElement("div", {
       styles:word.getCssVertTrans(line),
       context:line.style
@@ -9945,7 +9945,7 @@ var VertEvaluator = (function(){
     return div_wrap;
   };
 
-  VertEvaluator.prototype.evalWordTransformTrident = function(line, word){
+  VertEvaluator.prototype._evalWordTransformTrident = function(line, word){
     var div_wrap = this._createElement("div", {
       styles:word.getCssVertTrans(line),
       context:line.style
@@ -9960,7 +9960,7 @@ var VertEvaluator = (function(){
     return div_wrap;
   };
 
-  VertEvaluator.prototype.evalWordIE = function(line, word){
+  VertEvaluator.prototype._evalWordIE = function(line, word){
     return this._createElement("div", {
       content:word.data,
       className:"nehan-vert-ie",
@@ -9969,17 +9969,17 @@ var VertEvaluator = (function(){
     }); // NOTE(or TODO):clearfix in older version after this code
   };
 
-  VertEvaluator.prototype.evalRotateChar = function(line, chr){
+  VertEvaluator.prototype._evalRotateChar = function(line, chr){
     if(Env.isTransformEnable){
-      return this.evalRotateCharTransform(line, chr);
+      return this._evalRotateCharTransform(line, chr);
     } else if(Env.isIE){
-      return this.evalRotateCharIE(line, chr);
+      return this._evalRotateCharIE(line, chr);
     } else {
-      return this.evalCharWithBr(line, chr);
+      return this._evalCharWithBr(line, chr);
     }
   };
 
-  VertEvaluator.prototype.evalRotateCharTransform = function(line, chr){
+  VertEvaluator.prototype._evalRotateCharTransform = function(line, chr){
     return this._createElement("div", {
       content:chr.getData(),
       className:"nehan-rotate-90",
@@ -9987,7 +9987,7 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype.evalRotateCharIE = function(line, chr){
+  VertEvaluator.prototype._evalRotateCharIE = function(line, chr){
     return this._createElement("div", {
       content:chr.getData(),
       className:"nehan-vert-ie",
@@ -9996,7 +9996,7 @@ var VertEvaluator = (function(){
     }); // NOTE(or TODO):clearfix in older version after this code
   };
 
-  VertEvaluator.prototype.evalTcy = function(line, tcy){
+  VertEvaluator.prototype._evalTcy = function(line, tcy){
     return this._createElement("div", {
       content:tcy.data,
       className:"nehan-tcy",
@@ -10004,34 +10004,34 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype.evalChar = function(line, chr){
+  VertEvaluator.prototype._evalChar = function(line, chr){
     if(chr.isImgChar()){
       if(chr.isVertGlyphEnable()){
-	return this.evalVerticalGlyph(line, chr);
+	return this._evalVerticalGlyph(line, chr);
       }
-      return this.evalImgChar(line, chr);
+      return this._evalImgChar(line, chr);
     } else if(chr.isHalfSpaceChar(chr)){
-      return this.evalHalfSpaceChar(line, chr);
+      return this._evalHalfSpaceChar(line, chr);
     } else if(chr.isRotateChar()){
-      return this.evalRotateChar(line, chr);
+      return this._evalRotateChar(line, chr);
     } else if(chr.isSmallKana()){
-      return this.evalSmallKana(line, chr);
+      return this._evalSmallKana(line, chr);
     } else if(chr.isPaddingEnable()){
-      return this.evalPaddingChar(line, chr);
+      return this._evalPaddingChar(line, chr);
     } else if(line.letterSpacing){
-      return this.evalCharLetterSpacing(line, chr);
+      return this._evalCharLetterSpacing(line, chr);
     }
-    return this.evalCharWithBr(line, chr);
+    return this._evalCharWithBr(line, chr);
   };
 
   // to inherit style of parent, we use <br> to keep elements in 'inline-level'.
   // for example, if we use <div> instead, parent bg-color is not inherited.
-  VertEvaluator.prototype.evalCharWithBr = function(line, chr){
+  VertEvaluator.prototype._evalCharWithBr = function(line, chr){
     chr.withBr = true;
     return document.createTextNode(Html.unescape(chr.getData()));
   };
 
-  VertEvaluator.prototype.evalCharLetterSpacing = function(line, chr){
+  VertEvaluator.prototype._evalCharLetterSpacing = function(line, chr){
     return this._createElement("div", {
       content:chr.getData(),
       styles:chr.getCssVertLetterSpacing(line),
@@ -10039,7 +10039,7 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype.evalEmpha = function(line, chr){
+  VertEvaluator.prototype._evalEmpha = function(line, chr){
     var char_body = this._createElement("span", {
       content:chr.getData(),
       className:"nehan-empha-src",
@@ -10062,7 +10062,7 @@ var VertEvaluator = (function(){
     return wrap;
   };
 
-  VertEvaluator.prototype.evalPaddingChar = function(line, chr){
+  VertEvaluator.prototype._evalPaddingChar = function(line, chr){
     return this._createElement("div", {
       content:chr.getData(),
       styles:chr.getCssPadding(line),
@@ -10070,7 +10070,7 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype.evalImgChar = function(line, chr){
+  VertEvaluator.prototype._evalImgChar = function(line, chr){
     var color = line.color || new Color(Layout.fontColor);
     var font_rgb = color.getRgb();
     var palette_color = Palette.getColor(font_rgb).toUpperCase();
@@ -10084,7 +10084,7 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype.evalVerticalGlyph = function(line, chr){
+  VertEvaluator.prototype._evalVerticalGlyph = function(line, chr){
     return this._createElement("div", {
       content:chr.getData(),
       className:"nehan-vert-glyph",
@@ -10093,7 +10093,7 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype.evalSmallKana = function(line, chr){
+  VertEvaluator.prototype._evalSmallKana = function(line, chr){
     var tag_name = (line.style.textEmpha && line.style.textEmpha.isEnable())? "span" : "div";
     return this._createElement(tag_name, {
       content:chr.getData(),
@@ -10102,7 +10102,7 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype.evalHalfSpaceChar = function(line, chr){
+  VertEvaluator.prototype._evalHalfSpaceChar = function(line, chr){
     return this._createElement("div", {
       content:"&nbsp;",
       styles:chr.getCssVertHalfSpaceChar(line),
@@ -10124,26 +10124,26 @@ var HoriEvaluator = (function(){
     return tree.style.isTextVertical();
   };
 
-  HoriEvaluator.prototype.evalFlip = function(tree){
+  HoriEvaluator.prototype._evalFlip = function(tree){
     return (new VertEvaluator()).evaluate(tree);
   };
 
-  HoriEvaluator.prototype.evalInlineChildTree = function(tree){
+  HoriEvaluator.prototype._evalInlineChildTree = function(tree){
     return this._evaluate(tree, {name:"span"});
   };
 
-  HoriEvaluator.prototype.evalRuby = function(line, ruby){
+  HoriEvaluator.prototype._evalRuby = function(line, ruby){
     var span = this._createElement("span", {
       className:"nehan-ruby-body",
       styles:ruby.getCssHoriRuby(line),
       context:line.style
     });
-    span.appendChild(this.evalRt(line, ruby));
-    span.appendChild(this.evalRb(line, ruby));
+    span.appendChild(this._evalRt(line, ruby));
+    span.appendChild(this._evalRb(line, ruby));
     return span;
   };
 
-  HoriEvaluator.prototype.evalRb = function(line, ruby){
+  HoriEvaluator.prototype._evalRb = function(line, ruby){
     return this._evaluate(line, {
       elements:ruby.getRbs(),
       root:this._createElement("div", {
@@ -10154,7 +10154,7 @@ var HoriEvaluator = (function(){
     });
   };
 
-  HoriEvaluator.prototype.evalRt = function(line, ruby){
+  HoriEvaluator.prototype._evalRt = function(line, ruby){
     return this._createElement("div", {
       content:ruby.getRtString(),
       className:"nehan-rt",
@@ -10163,15 +10163,15 @@ var HoriEvaluator = (function(){
     });
   };
 
-  HoriEvaluator.prototype.evalWord = function(line, word){
+  HoriEvaluator.prototype._evalWord = function(line, word){
     return document.createTextNode(word.data);
   };
 
-  HoriEvaluator.prototype.evalTcy = function(line, tcy){
+  HoriEvaluator.prototype._evalTcy = function(line, tcy){
     return document.createTextNode(Html.unescape(tcy.data));
   };
 
-  HoriEvaluator.prototype.evalChar = function(line, chr){
+  HoriEvaluator.prototype._evalChar = function(line, chr){
     if(chr.isHalfSpaceChar()){
       return document.createTextNode(chr.data);
     }
@@ -10179,12 +10179,12 @@ var HoriEvaluator = (function(){
       return document.createTextNode(Html.unescape(chr.data));
     }
     if(chr.isKerningChar()){
-      return this.evalKerningChar(line, chr);
+      return this._evalKerningChar(line, chr);
     }
     return document.createTextNode(chr.data);
   };
 
-  HoriEvaluator.prototype.evalEmpha = function(line, chr){
+  HoriEvaluator.prototype._evalEmpha = function(line, chr){
     var char_part = this._createElement("div", {
       content:chr.data,
       styles:chr.getCssHoriEmphaTarget(line),
@@ -10204,7 +10204,7 @@ var HoriEvaluator = (function(){
     return wrap;
   };
 
-  HoriEvaluator.prototype.evalKerningChar = function(line, chr){
+  HoriEvaluator.prototype._evalKerningChar = function(line, chr){
     var styles = chr.getCssPadding(line);
     if(chr.isKakkoStart()){
       styles["margin-left"] = "-0.5em";
@@ -10236,7 +10236,7 @@ var HoriEvaluator = (function(){
     return document.createTextNode(chr.data);
   };
 
-  HoriEvaluator.prototype.evalPaddingChar = function(line, chr){
+  HoriEvaluator.prototype._evalPaddingChar = function(line, chr){
     return this._createElement("span", {
       content:chr.data,
       styles:chr.getCssPadding(line),

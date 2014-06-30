@@ -8,26 +8,26 @@ var HoriEvaluator = (function(){
     return tree.style.isTextVertical();
   };
 
-  HoriEvaluator.prototype.evalFlip = function(tree){
+  HoriEvaluator.prototype._evalFlip = function(tree){
     return (new VertEvaluator()).evaluate(tree);
   };
 
-  HoriEvaluator.prototype.evalInlineChildTree = function(tree){
+  HoriEvaluator.prototype._evalInlineChildTree = function(tree){
     return this._evaluate(tree, {name:"span"});
   };
 
-  HoriEvaluator.prototype.evalRuby = function(line, ruby){
+  HoriEvaluator.prototype._evalRuby = function(line, ruby){
     var span = this._createElement("span", {
       className:"nehan-ruby-body",
       styles:ruby.getCssHoriRuby(line),
       context:line.style
     });
-    span.appendChild(this.evalRt(line, ruby));
-    span.appendChild(this.evalRb(line, ruby));
+    span.appendChild(this._evalRt(line, ruby));
+    span.appendChild(this._evalRb(line, ruby));
     return span;
   };
 
-  HoriEvaluator.prototype.evalRb = function(line, ruby){
+  HoriEvaluator.prototype._evalRb = function(line, ruby){
     return this._evaluate(line, {
       elements:ruby.getRbs(),
       root:this._createElement("div", {
@@ -38,7 +38,7 @@ var HoriEvaluator = (function(){
     });
   };
 
-  HoriEvaluator.prototype.evalRt = function(line, ruby){
+  HoriEvaluator.prototype._evalRt = function(line, ruby){
     return this._createElement("div", {
       content:ruby.getRtString(),
       className:"nehan-rt",
@@ -47,15 +47,15 @@ var HoriEvaluator = (function(){
     });
   };
 
-  HoriEvaluator.prototype.evalWord = function(line, word){
+  HoriEvaluator.prototype._evalWord = function(line, word){
     return document.createTextNode(word.data);
   };
 
-  HoriEvaluator.prototype.evalTcy = function(line, tcy){
+  HoriEvaluator.prototype._evalTcy = function(line, tcy){
     return document.createTextNode(Html.unescape(tcy.data));
   };
 
-  HoriEvaluator.prototype.evalChar = function(line, chr){
+  HoriEvaluator.prototype._evalChar = function(line, chr){
     if(chr.isHalfSpaceChar()){
       return document.createTextNode(chr.data);
     }
@@ -63,12 +63,12 @@ var HoriEvaluator = (function(){
       return document.createTextNode(Html.unescape(chr.data));
     }
     if(chr.isKerningChar()){
-      return this.evalKerningChar(line, chr);
+      return this._evalKerningChar(line, chr);
     }
     return document.createTextNode(chr.data);
   };
 
-  HoriEvaluator.prototype.evalEmpha = function(line, chr){
+  HoriEvaluator.prototype._evalEmpha = function(line, chr){
     var char_part = this._createElement("div", {
       content:chr.data,
       styles:chr.getCssHoriEmphaTarget(line),
@@ -88,7 +88,7 @@ var HoriEvaluator = (function(){
     return wrap;
   };
 
-  HoriEvaluator.prototype.evalKerningChar = function(line, chr){
+  HoriEvaluator.prototype._evalKerningChar = function(line, chr){
     var styles = chr.getCssPadding(line);
     if(chr.isKakkoStart()){
       styles["margin-left"] = "-0.5em";
@@ -120,7 +120,7 @@ var HoriEvaluator = (function(){
     return document.createTextNode(chr.data);
   };
 
-  HoriEvaluator.prototype.evalPaddingChar = function(line, chr){
+  HoriEvaluator.prototype._evalPaddingChar = function(line, chr){
     return this._createElement("span", {
       content:chr.data,
       styles:chr.getCssPadding(line),

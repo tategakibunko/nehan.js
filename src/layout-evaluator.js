@@ -4,7 +4,7 @@ var LayoutEvaluator = (function(){
   LayoutEvaluator.prototype = {
     evaluate : function(tree){
       if(this._isFlipTree(tree)){
-	return this.evalFlip(tree);
+	return this._evalFlip(tree);
       }
       return this._evaluate(tree);
     },
@@ -57,9 +57,9 @@ var LayoutEvaluator = (function(){
       opt = opt || {};
       var self = this;
       var elements = List.filter(opt.elements || tree.elements, function(element){ return element !== null; });
-      var root = opt.root || this.evalTreeRoot(tree, opt);
+      var root = opt.root || this._evalTreeRoot(tree, opt);
       return root.innerHTML? root : List.fold(elements, root, function(ret, child){
-	root.appendChild(self.evalTreeChild(tree, child));
+	root.appendChild(self._evalTreeChild(tree, child));
 	if(child.withBr){ // annotated to add extra br element
 	  root.appendChild(document.createElement("br"));
 	}
@@ -69,7 +69,7 @@ var LayoutEvaluator = (function(){
 	return root;
       });
     },
-    evalTreeRoot : function(tree, opt){
+    _evalTreeRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
 	className:tree.getClassName(),
@@ -80,51 +80,51 @@ var LayoutEvaluator = (function(){
 	context:tree.style
       });
     },
-    evalTreeChild : function(parent, child){
+    _evalTreeChild : function(parent, child){
       switch(parent.display){
       case "inline":
 	if(child instanceof Box){
-	  return this.evalInlineChildElement(parent, child);
+	  return this._evalInlineChildElement(parent, child);
 	}
-	return this.evalInlineChildText(parent, child);
+	return this._evalInlineChildText(parent, child);
       default:
-	return this.evalBlockChildElement(parent, child);
+	return this._evalBlockChildElement(parent, child);
       }
     },
-    evalBlockChildElement : function(parent, element){
+    _evalBlockChildElement : function(parent, element){
       switch(element.style.getMarkupName()){
       case "img":
-	return this.evalImage(element);
+	return this._evalImage(element);
       case "a":
-	return this.evalLink(element);
+	return this._evalLink(element);
       default:
 	return this.evaluate(element);
       }
     },
-    evalInlineChildElement : function(parent, element){
+    _evalInlineChildElement : function(parent, element){
       switch(element.style.getMarkupName()){
       case "img":
-	return this.evalInlineImage(parent, element);
+	return this._evalInlineImage(parent, element);
       case "a":
-	return this.evalLink(element);
+	return this._evalLink(element);
       default:
-	return this.evalInlineChildTree(element);
+	return this._evalInlineChildTree(element);
       }
     },
-    evalInlineChildText : function(parent, element){
+    _evalInlineChildText : function(parent, element){
       if(parent.style.isTextEmphaEnable()){
-	return this.evalEmpha(parent, element);
+	return this._evalEmpha(parent, element);
       }
-      return this.evalTextElement(parent, element);
+      return this._evalTextElement(parent, element);
     },
-    evalImage : function(image){
-      return this.evalTreeRoot(image, {name:"img"});
+    _evalImage : function(image){
+      return this._evalTreeRoot(image, {name:"img"});
     },
-    evalInlineImage : function(line, image){
-      return this.evalImage(image);
+    _evalInlineImage : function(line, image){
+      return this._evalImage(image);
     },
     // if link uri has anchor address, add page-no to dataset where the anchor is defined.
-    evalLink : function(link){
+    _evalLink : function(link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
       var anchor_name = uri.getAnchorName();
       if(anchor_name){
@@ -134,16 +134,16 @@ var LayoutEvaluator = (function(){
       }
       return this._evaluate(link, {name:"a"});
     },
-    evalTextElement : function(line, text){
+    _evalTextElement : function(line, text){
       switch(text._type){
       case "word":
-	return this.evalWord(line, text);
+	return this._evalWord(line, text);
       case "char":
-	return this.evalChar(line, text);
+	return this._evalChar(line, text);
       case "tcy":
-	return this.evalTcy(line, text);
+	return this._evalTcy(line, text);
       case "ruby":
-	return this.evalRuby(line, text);
+	return this._evalRuby(line, text);
       default:
 	console.error("invalid text element:%o", text);
 	throw "invalid text element"; 
