@@ -13,7 +13,7 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype.evalInlineChildTree = function(tree){
-    return this.evalTree(tree, {name:"span"});
+    return this._evaluate(tree, {name:"span"});
   };
 
   HoriEvaluator.prototype.evalRuby = function(line, ruby){
@@ -28,7 +28,7 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype.evalRb = function(line, ruby){
-    return this.evalTree(line, {
+    return this._evaluate(line, {
       elements:ruby.getRbs(),
       root:this._createElement("div", {
 	styles:ruby.getCssHoriRb(line),

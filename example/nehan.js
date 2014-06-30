@@ -9759,9 +9759,9 @@ var LayoutEvaluator = (function(){
       if(this.isFlipTree(tree)){
 	return this.evalFlip(tree);
       }
-      return this.evalTree(tree);
+      return this._evaluate(tree);
     },
-    evalTree : function(tree, opt){
+    _evaluate : function(tree, opt){
       opt = opt || {};
       var self = this;
       var elements = List.filter(opt.elements || tree.elements, function(element){ return element !== null; });
@@ -9840,7 +9840,7 @@ var LayoutEvaluator = (function(){
 	link.classes.push("nehan-anchor-link");
 	link.style.markup.setAttr("data-page", page_no);
       }
-      return this.evalTree(link, {name:"a"});
+      return this._evaluate(link, {name:"a"});
     },
     evalTextElement : function(line, text){
       switch(text._type){
@@ -9878,7 +9878,7 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype.evalInlineChildTree = function(tree){
-    return this.evalTree(tree);
+    return this._evaluate(tree);
   };
 
   VertEvaluator.prototype.evalInlineImage = function(line, image){
@@ -9897,7 +9897,7 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype.evalRb = function(line, ruby){
-    return this.evalTree(line, {
+    return this._evaluate(line, {
       elements:ruby.getRbs(),
       root:this._createElement("div", {
 	styles:ruby.getCssVertRb(line),
@@ -10129,7 +10129,7 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype.evalInlineChildTree = function(tree){
-    return this.evalTree(tree, {name:"span"});
+    return this._evaluate(tree, {name:"span"});
   };
 
   HoriEvaluator.prototype.evalRuby = function(line, ruby){
@@ -10144,7 +10144,7 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype.evalRb = function(line, ruby){
-    return this.evalTree(line, {
+    return this._evaluate(line, {
       elements:ruby.getRbs(),
       root:this._createElement("div", {
 	styles:ruby.getCssHoriRb(line),

@@ -13,7 +13,7 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype.evalInlineChildTree = function(tree){
-    return this.evalTree(tree);
+    return this._evaluate(tree);
   };
 
   VertEvaluator.prototype.evalInlineImage = function(line, image){
@@ -32,7 +32,7 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype.evalRb = function(line, ruby){
-    return this.evalTree(line, {
+    return this._evaluate(line, {
       elements:ruby.getRbs(),
       root:this._createElement("div", {
 	styles:ruby.getCssVertRb(line),

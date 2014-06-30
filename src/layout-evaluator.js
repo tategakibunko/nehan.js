@@ -51,9 +51,9 @@ var LayoutEvaluator = (function(){
       if(this.isFlipTree(tree)){
 	return this.evalFlip(tree);
       }
-      return this.evalTree(tree);
+      return this._evaluate(tree);
     },
-    evalTree : function(tree, opt){
+    _evaluate : function(tree, opt){
       opt = opt || {};
       var self = this;
       var elements = List.filter(opt.elements || tree.elements, function(element){ return element !== null; });
@@ -132,7 +132,7 @@ var LayoutEvaluator = (function(){
 	link.classes.push("nehan-anchor-link");
 	link.style.markup.setAttr("data-page", page_no);
       }
-      return this.evalTree(link, {name:"a"});
+      return this._evaluate(link, {name:"a"});
     },
     evalTextElement : function(line, text){
       switch(text._type){
