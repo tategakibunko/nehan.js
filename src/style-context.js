@@ -795,7 +795,7 @@ var StyleContext = (function(){
       }
       if(this.isTextVertical()){
 	css["line-height"] = "1em";
-	if(Env.isIphoneFamily){
+	if(Env.isAppleMobileFamily){
 	  css["letter-spacing"] = "-0.001em";
 	}
 	if(this.markup.getName() !== "ruby"){

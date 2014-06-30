@@ -30,9 +30,9 @@ var Env = (function(){
   var is_iphone = ua.indexOf("iphone") != -1;
   var is_ipod = ua.indexOf("ipod") != -1;
   var is_ipad = ua.indexOf("ipad") != -1;
-  var is_iphone_family = (is_iphone || is_ipod || is_ipad);
+  var is_apple_mobile_family = (is_iphone || is_ipod || is_ipad);
   var is_android_family = ua.indexOf("android") != -1;
-  var is_smart_phone = is_iphone_family || is_android_family;
+  var is_smart_phone = is_apple_mobile_family || is_android_family;
   var is_webkit = ua.indexOf("webkit") != -1;
   var is_transform_enable = is_pure_trident || !(is_ie && version <= 8);
   var is_chrome_vert_glyph_enable = is_chrome && (is_win || is_mac) && version >= 24;
@@ -48,7 +48,7 @@ var Env = (function(){
     isIphone : is_iphone,
     isIpod : is_ipod,
     isIpad : is_ipad,
-    isIphoneFamily : is_iphone_family,
+    isAppleMobileFamily : is_apple_mobile_family,
     isAndroidFamily : is_android_family,
     isSmartPhone : is_smart_phone,
     isTransformEnable : is_transform_enable,
