@@ -9752,7 +9752,7 @@ var LayoutEvaluator = (function(){
 
       // call oncreate callback if exists.
       if(opt.oncreate){
-	opt.oncreate(dom, opt.context || null);
+	opt.oncreate(dom, opt.styleContext || null);
       }
       return dom;
     },
@@ -9785,7 +9785,7 @@ var LayoutEvaluator = (function(){
 	oncreate:tree.getOnCreate(),
 	content:(opt.content || tree.getContent()),
 	styles:(opt.css || tree.getCssRoot()),
-	context:tree.style
+	styleContext:tree.style
       });
     },
     _evalTreeChild : function(parent, child){
@@ -9889,7 +9889,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalRuby = function(line, ruby){
     var div = this._createElement("div", {
       className:"nehan-ruby-body",
-      context:line.style
+      styleContext:line.style
     });
     div.appendChild(this._evalRb(line, ruby));
     div.appendChild(this._evalRt(line, ruby));
@@ -9902,7 +9902,7 @@ var VertEvaluator = (function(){
       root:this._createElement("div", {
 	styles:ruby.getCssVertRb(line),
 	className:"nehan-rb",
-	context:line.style
+	styleContext:line.style
       })
     });
   };
@@ -9933,13 +9933,13 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalWordTransform = function(line, word){
     var div_wrap = this._createElement("div", {
       styles:word.getCssVertTrans(line),
-      context:line.style
+      styleContext:line.style
     });
     var div_word = this._createElement("div", {
       content:word.data,
       className:"nehan-rotate-90",
       styles:word.getCssVertTransBody(line),
-      context:line.style
+      styleContext:line.style
     });
     div_wrap.appendChild(div_word);
     return div_wrap;
@@ -9948,13 +9948,13 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalWordTransformTrident = function(line, word){
     var div_wrap = this._createElement("div", {
       styles:word.getCssVertTrans(line),
-      context:line.style
+      styleContext:line.style
     });
     var div_word = this._createElement("div", {
       content:word.data,
       //className:"nehan-rotate-90",
       styles:word.getCssVertTransBodyTrident(line),
-      context:line.style
+      styleContext:line.style
     });
     div_wrap.appendChild(div_word);
     return div_wrap;
@@ -9965,7 +9965,7 @@ var VertEvaluator = (function(){
       content:word.data,
       className:"nehan-vert-ie",
       styles:word.getCssVertTransIE(line),
-      context:line.style
+      styleContext:line.style
     }); // NOTE(or TODO):clearfix in older version after this code
   };
 
@@ -9983,7 +9983,7 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:chr.getData(),
       className:"nehan-rotate-90",
-      context:line.style
+      styleContext:line.style
     });
   };
 
@@ -9992,7 +9992,7 @@ var VertEvaluator = (function(){
       content:chr.getData(),
       className:"nehan-vert-ie",
       styles:chr.getCssVertRotateCharIE(line),
-      context:line.style
+      styleContext:line.style
     }); // NOTE(or TODO):clearfix in older version after this code
   };
 
@@ -10000,7 +10000,7 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:tcy.data,
       className:"nehan-tcy",
-      context:line.style
+      styleContext:line.style
     });
   };
 
@@ -10035,7 +10035,7 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:chr.getData(),
       styles:chr.getCssVertLetterSpacing(line),
-      context:line.style
+      styleContext:line.style
     });
   };
 
@@ -10044,18 +10044,18 @@ var VertEvaluator = (function(){
       content:chr.getData(),
       className:"nehan-empha-src",
       styles:chr.getCssVertEmphaTarget(line),
-      context:line.style
+      styleContext:line.style
     });
     var empha_body = this._createElement("span", {
       content:line.style.textEmpha.getText(),
       className:"nehan-empha-text",
       styles:chr.getCssVertEmphaText(line),
-      context:line.style
+      styleContext:line.style
     });
     var wrap = this._createElement("div", {
       className:"nehan-empha-wrap",
       styles:line.style.textEmpha.getCssVertEmphaWrap(line, chr),
-      context:line.style
+      styleContext:line.style
     });
     wrap.appendChild(char_body);
     wrap.appendChild(empha_body);
@@ -10066,7 +10066,7 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:chr.getData(),
       styles:chr.getCssPadding(line),
-      context:line.style
+      styleContext:line.style
     });
   };
 
@@ -10080,7 +10080,7 @@ var VertEvaluator = (function(){
 	src:chr.getImgSrc(palette_color)
       },
       styles:chr.getCssVertImgChar(line),
-      context:line.style
+      styleContext:line.style
     });
   };
 
@@ -10089,7 +10089,7 @@ var VertEvaluator = (function(){
       content:chr.getData(),
       className:"nehan-vert-glyph",
       styles:chr.getCssVertGlyph(line),
-      context:line.style
+      styleContext:line.style
     });
   };
 
@@ -10098,7 +10098,7 @@ var VertEvaluator = (function(){
     return this._createElement(tag_name, {
       content:chr.getData(),
       styles:chr.getCssVertSmallKana(),
-      context:line.style
+      styleContext:line.style
     });
   };
 
@@ -10106,7 +10106,7 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:"&nbsp;",
       styles:chr.getCssVertHalfSpaceChar(line),
-      context:line.style
+      styleContext:line.style
     });
   };
 
@@ -10136,7 +10136,7 @@ var HoriEvaluator = (function(){
     var span = this._createElement("span", {
       className:"nehan-ruby-body",
       styles:ruby.getCssHoriRuby(line),
-      context:line.style
+      styleContext:line.style
     });
     span.appendChild(this._evalRt(line, ruby));
     span.appendChild(this._evalRb(line, ruby));
@@ -10149,7 +10149,7 @@ var HoriEvaluator = (function(){
       root:this._createElement("div", {
 	styles:ruby.getCssHoriRb(line),
 	className:"nehan-rb",
-	context:line.style
+	styleContext:line.style
       })
     });
   };
@@ -10159,7 +10159,7 @@ var HoriEvaluator = (function(){
       content:ruby.getRtString(),
       className:"nehan-rt",
       styles:ruby.getCssHoriRt(line),
-      context:line.style
+      styleContext:line.style
     });
   };
 
@@ -10188,16 +10188,16 @@ var HoriEvaluator = (function(){
     var char_part = this._createElement("div", {
       content:chr.data,
       styles:chr.getCssHoriEmphaTarget(line),
-      context:line.style
+      styleContext:line.style
     });
     var empha_part = this._createElement("div", {
       content:line.style.textEmpha.getText(),
       styles:chr.getCssHoriEmphaText(line),
-      context:line.style
+      styleContext:line.style
     });
     var wrap = this._createElement("span", {
       styles:line.style.textEmpha.getCssHoriEmphaWrap(line, chr),
-      context:line.style
+      styleContext:line.style
     });
     wrap.appendChild(empha_part);
     wrap.appendChild(char_part);
@@ -10212,7 +10212,7 @@ var HoriEvaluator = (function(){
 	content:chr.data,
 	className:"nehan-char-kakko-start",
 	styles:styles,
-	context:line.style
+	styleContext:line.style
       });
     }
     if(chr.isKakkoEnd()){
@@ -10221,7 +10221,7 @@ var HoriEvaluator = (function(){
 	content:chr.data,
 	className:"nehan-char-kakko-end",
 	styles:styles,
-	context:line.style
+	styleContext:line.style
       });
     }
     if(chr.isKutenTouten()){
@@ -10230,7 +10230,7 @@ var HoriEvaluator = (function(){
 	content:chr.data,
 	className:"nehan-char-kuto",
 	styles:styles,
-	context:line.style
+	styleContext:line.style
       });
     }
     return document.createTextNode(chr.data);
@@ -10240,7 +10240,7 @@ var HoriEvaluator = (function(){
     return this._createElement("span", {
       content:chr.data,
       styles:chr.getCssPadding(line),
-      context:line.style
+      styleContext:line.style
     });
   };
 
