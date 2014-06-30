@@ -8,10 +8,6 @@ var VertEvaluator = (function(){
     return tree.style.isTextHorizontal();
   };
 
-  VertEvaluator.prototype._evalFlip = function(tree){
-    return (new HoriEvaluator()).evaluate(tree);
-  };
-
   VertEvaluator.prototype._evalInlineChildTree = function(tree){
     return this._evaluate(tree);
   };

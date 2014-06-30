@@ -9712,7 +9712,7 @@ var LayoutEvaluator = (function(){
   LayoutEvaluator.prototype = {
     evaluate : function(tree){
       if(this._isFlipTree(tree)){
-	return this._evalFlip(tree);
+	return this._evaluateFlip(tree);
       }
       return this._evaluate(tree);
     },
@@ -9776,6 +9776,10 @@ var LayoutEvaluator = (function(){
 	}
 	return root;
       });
+    },
+    _evaluateFlip : function(tree){
+      var evaluator = tree.style.isTextVertical()? new VertEvaluator() : new HoriEvaluator();
+      return evaluator.evaluate(tree);
     },
     _evalTreeRoot : function(tree, opt){
       opt = opt || {};
@@ -9871,10 +9875,6 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._isFlipTree = function(tree){
     return tree.style.isTextHorizontal();
-  };
-
-  VertEvaluator.prototype._evalFlip = function(tree){
-    return (new HoriEvaluator()).evaluate(tree);
   };
 
   VertEvaluator.prototype._evalInlineChildTree = function(tree){
@@ -10124,10 +10124,6 @@ var HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._isFlipTree = function(tree){
     return tree.style.isTextVertical();
-  };
-
-  HoriEvaluator.prototype._evalFlip = function(tree){
-    return (new VertEvaluator()).evaluate(tree);
   };
 
   HoriEvaluator.prototype._evalInlineChildTree = function(tree){

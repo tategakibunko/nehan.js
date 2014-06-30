@@ -8,10 +8,6 @@ var HoriEvaluator = (function(){
     return tree.style.isTextVertical();
   };
 
-  HoriEvaluator.prototype._evalFlip = function(tree){
-    return (new VertEvaluator()).evaluate(tree);
-  };
-
   HoriEvaluator.prototype._evalInlineChildTree = function(tree){
     return this._evaluate(tree, {name:"span"});
   };

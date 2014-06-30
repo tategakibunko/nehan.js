@@ -4,7 +4,7 @@ var LayoutEvaluator = (function(){
   LayoutEvaluator.prototype = {
     evaluate : function(tree){
       if(this._isFlipTree(tree)){
-	return this._evalFlip(tree);
+	return this._evaluateFlip(tree);
       }
       return this._evaluate(tree);
     },
@@ -68,6 +68,10 @@ var LayoutEvaluator = (function(){
 	}
 	return root;
       });
+    },
+    _evaluateFlip : function(tree){
+      var evaluator = tree.style.isTextVertical()? new VertEvaluator() : new HoriEvaluator();
+      return evaluator.evaluate(tree);
     },
     _evalTreeRoot : function(tree, opt){
       opt = opt || {};
