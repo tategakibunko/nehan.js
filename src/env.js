@@ -35,7 +35,8 @@ var Env = (function(){
   var is_smart_phone = is_apple_mobile_family || is_android_family;
   var is_webkit = ua.indexOf("webkit") != -1;
   var is_transform_enable = is_pure_trident || !(is_ie && version <= 8);
-  var is_chrome_vert_glyph_enable = is_chrome && (is_win || is_mac) && version >= 24;
+  //var is_chrome_vert_glyph_enable = is_chrome && (is_win || is_mac) && version >= 24;
+  var is_chrome_vert_glyph_enable = is_chrome && version >= 24;
   var is_safari_vert_glyph_enable = is_safari && version >= 5;
   var is_vertical_glyph_enable = is_chrome_vert_glyph_enable || is_safari_vert_glyph_enable;
 
