@@ -2,6 +2,12 @@ var LayoutEvaluator = (function(){
   function LayoutEvaluator(){}
 
   LayoutEvaluator.prototype = {
+    evaluate : function(tree){
+      if(this._isFlipTree(tree)){
+	return this.evalFlip(tree);
+      }
+      return this._evaluate(tree);
+    },
     _createElement : function(name, opt){
       opt = opt || {};
       var styles = opt.styles || {};
@@ -46,12 +52,6 @@ var LayoutEvaluator = (function(){
       var div = document.createElement("div");
       div.style.clear = clear || "both";
       return div;
-    },
-    evaluate : function(tree){
-      if(this.isFlipTree(tree)){
-	return this.evalFlip(tree);
-      }
-      return this._evaluate(tree);
     },
     _evaluate : function(tree, opt){
       opt = opt || {};

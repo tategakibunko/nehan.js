@@ -9756,7 +9756,7 @@ var LayoutEvaluator = (function(){
       return div;
     },
     evaluate : function(tree){
-      if(this.isFlipTree(tree)){
+      if(this._isFlipTree(tree)){
 	return this.evalFlip(tree);
       }
       return this._evaluate(tree);
@@ -9869,7 +9869,7 @@ var VertEvaluator = (function(){
   }
   Class.extend(VertEvaluator, LayoutEvaluator);
 
-  VertEvaluator.prototype.isFlipTree = function(tree){
+  VertEvaluator.prototype._isFlipTree = function(tree){
     return tree.style.isTextHorizontal();
   };
 
@@ -10120,7 +10120,7 @@ var HoriEvaluator = (function(){
   }
   Class.extend(HoriEvaluator, LayoutEvaluator);
 
-  HoriEvaluator.prototype.isFlipTree = function(tree){
+  HoriEvaluator.prototype._isFlipTree = function(tree){
     return tree.style.isTextVertical();
   };
 

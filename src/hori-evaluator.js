@@ -4,7 +4,7 @@ var HoriEvaluator = (function(){
   }
   Class.extend(HoriEvaluator, LayoutEvaluator);
 
-  HoriEvaluator.prototype.isFlipTree = function(tree){
+  HoriEvaluator.prototype._isFlipTree = function(tree){
     return tree.style.isTextVertical();
   };
 

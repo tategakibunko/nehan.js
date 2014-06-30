@@ -4,7 +4,7 @@ var VertEvaluator = (function(){
   }
   Class.extend(VertEvaluator, LayoutEvaluator);
 
-  VertEvaluator.prototype.isFlipTree = function(tree){
+  VertEvaluator.prototype._isFlipTree = function(tree){
     return tree.style.isTextHorizontal();
   };
 
