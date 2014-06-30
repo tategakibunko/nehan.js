@@ -24,11 +24,13 @@
 
         <p class="view"><a href="https://github.com/tategakibunko/nehan.js">View the Project on GitHub <small>tategakibunko/nehan.js</small></a></p>
 
+	<!--
         <ul>
           <li><a href="https://github.com/tategakibunko/nehan.js/zipball/master">Download <strong>ZIP File</strong></a></li>
           <li><a href="https://github.com/tategakibunko/nehan.js/tarball/master">Download <strong>TAR Ball</strong></a></li>
           <li><a href="https://github.com/tategakibunko/nehan.js">View On <strong>GitHub</strong></a></li>
         </ul>
+	-->
       </header>
 
       <!-- demo -->
@@ -128,7 +130,7 @@
       <!-- quick start -->
       <section>
         <h2><a name="quick-start" class="anchor" href="#quick-start"><span class="octicon octicon-link"></span></a>Quick Start</h2>
-	<p>Here is super simple example of single page layout using <b>NehanPagedElement</b> class.</p>
+	<p>Here is super simple example of single page layout using <code>NehanPagedElement</code> class.</p>
 <pre class="prettyprint lang-js">
 var pe = Nehan.createPagedElement();
 pe.setStyle("body", {
@@ -283,11 +285,6 @@ stream.asyncGet({
 
 	<ol>
 	  <li>
-	    <h4>not all properties is supported.</h4>
-	    <p>See <a href="#css-properties">supported properties</a>.</p>
-	  </li>
-
-	  <li>
 	    <h4>camel case property is not allowed</h4>
 <pre class="prettyprint lang-js">
 {font-size:"16px"} // OK
@@ -297,12 +294,49 @@ stream.asyncGet({
 
 	  <li>
 	    <h4>some properties are defined by 'logical' value</h4>
-	    <p>Assume that Layout.direction is "hori" and Layout["hori"] is "lr-tb".</p>
+	    <p>Following properties are defined by 'logical' value.</p>
+	    <table>
+	      <thead><tr><th>property</th><th>available values</th></tr></thead>
+	      <tbody>
+		<tr>
+		  <td>float</td>
+		  <td>start, end</td>
+		</tr>
+		<tr>
+		  <td>margin</td>
+		  <td>start, end, before, after</td>
+		</tr>
+		<tr>
+		  <td>padding</td>
+		  <td>start, end, before, after</td>
+		</tr>
+		<tr>
+		  <td>border-width</td>
+		  <td>start, end, before, after</td>
+		</tr>
+		<tr>
+		  <td>measure</td>
+		  <td>normal size value like px, em, % format.</td>
+		</tr>
+		<tr>
+		  <td>extent</td>
+		  <td>normal size value like px, em, % format.</td>
+		</tr>
+	      </tbody>
+	    </table>
+
+	    <p>See following example.</p>
 <pre class="prettyprint lang-js">
-{margin:{before:"10px"}} // same as {margin:{top:"10px"}}
-{float:"start"} // same as {float:"left"}.
-{measure:"100px", extent:"50px"} // same as {width:"100px", height:"50px"}
+Nehan.setStyle("div.some-class", {
+  margin:{before:"10px"},
+  float:"start",
+  measure:"100px",
+  extent:"50px"
+});
 </pre>
+	    <p>In this example,</p>
+	    <p>If document is horizontal mode(flow = 'lr-tb'), margin.before is 'top', and float.start is 'left', measure is 'width', extent is 'height'.</p>
+	    <p>If document is vertical mode(flow = 'tb-rl'), margin.before is 'right', and float.start is 'top', measure is 'height', extent measn 'width'.</p>
 	  </li>
 
 	  <li>
@@ -321,8 +355,8 @@ stream.asyncGet({
 <pre class="prettyprint lang-js">
 // change backgroiund-color by child index.
 ".nehan-stripe-list li":{
-  "background-color":function(context){
-    return (context.getChildIndex() % 2 === 0)? "pink" : "white";
+  "background-color":function(property_context){
+    return (property_context.getChildIndex() % 2 === 0)? "pink" : "white";
   }
 }
 </pre>
@@ -336,9 +370,9 @@ stream.asyncGet({
 		<pre class="prettyprint lang-js">
 // force image metrics to square sizing if width and height is not same.
 ".nehan-must-be-square img":{
-  "onload":function(context){
-    var width = context.getCssAttr("width", 100);
-    var height = context.getCssAttr("height", 100);
+  "onload":function(selector_context){
+    var width = selector_context.getCssAttr("width", 100);
+    var height = selector_context.getCssAttr("height", 100);
     if(width !== height){
       var larger = Math.max(width, height);
       return {width:larger, height:larger};
@@ -354,7 +388,7 @@ stream.asyncGet({
 		<p>Argument of this callback is dom element that is created for this selector.</p>
 		<pre class="prettyprint lang-js">
 "a.nehan-test-onclick":{
-  "oncreate":function(dom){
+  "oncreate":function(dom, style_context){
     dom.onclick = function(){ alert("click!"); };
   }
 }
@@ -374,7 +408,7 @@ stream.asyncGet({
 	      
 	      <li>
 		<h5>box-sizing:[content-box | border-box | margin-box(default)]</h5>
-		<p>In box-sizing, <strong>margin-box</strong> is special value in nehan.js, and is box-sizing default value.</p>
+		<p>In box-sizing, <code>margin-box</code> is special value in nehan.js, and is box-sizing default value.</p>
 		<p>In margin-box, even if margin is included in box-size.</p>
 		<p>Why? In normal html, outer size of box can be expanded, but in paged layout, outer size is strictly fixed.</p>
 		<p>So if you represent margin/border/padding(called in edge in nehan.js), the only way is 'eliminating content space'.</p>
@@ -393,7 +427,7 @@ stream.asyncGet({
 	  </li>
 	</ol>
 
-
+<!--
 	<a name="css-properties"></a>
 	<h3>supported css properties</h3>
 	<p>here is all supported css properties in nehan.js</p>
@@ -401,8 +435,6 @@ stream.asyncGet({
 	<table>
 	  <thead><tr><th>property</th><th>example</th><th>description</th></tr></thead>
 	  <tbody>
-	    <!-- a --->
-	    <!-- b --->
 	    <tr>
 	      <td>background-color</td>
 	      <td>
@@ -453,7 +485,6 @@ stream.asyncGet({
 	    </tr>
 
 
-	    <!-- c --->
 	    <tr>
 	      <td>color</td>
 	      <td>
@@ -463,14 +494,12 @@ stream.asyncGet({
 	      <td></td>
 	    </tr>
 
-	    <!-- d --->
 	    <tr>
 	      <td>display</td>
 	      <td><p>{"display":"block"}</p></td>
 	      <td></td>
 	    </tr>
 
-	    <!-- e --->
 	    <tr>
 	      <td>extent</td>
 	      <td></td>
@@ -481,7 +510,6 @@ stream.asyncGet({
 	      </td>
 	    </tr>
 
-	    <!-- f --->
 	    <tr>
 	      <td>float</td>
 	      <td>
@@ -536,8 +564,6 @@ stream.asyncGet({
 	      <td></td>
 	    </tr>
 
-	    <!-- g --->
-	    <!-- h --->
 	    <tr>
 	      <td>height</td>
 	      <td>
@@ -548,10 +574,6 @@ stream.asyncGet({
 	      <td></td>
 	    </tr>
 
-	    <!-- i --->
-	    <!-- j --->
-	    <!-- k --->
-	    <!-- l --->
 	    <tr>
 	      <td>line-rate</td>
 	      <td><p>{"line-rate":"2.0em"}</p></td>
@@ -568,7 +590,6 @@ stream.asyncGet({
 	      <td>see style.js and search ".nehan-lst-xxx" to find other availables.</td>
 	    </tr>
 
-	    <!-- m --->
 	    <tr>
 	      <td>margin</td>
 	      <td>
@@ -587,9 +608,6 @@ stream.asyncGet({
 	      </td>
 	    </tr>
 
-	    <!-- n --->
-	    <!-- o --->
-	    <!-- p --->
 	    <tr>
 	      <td>padding</td>
 	      <td>
@@ -598,10 +616,6 @@ stream.asyncGet({
 	      <td></td>
 	    </tr>
 
-	    <!-- q --->
-	    <!-- r --->
-	    <!-- s --->
-	    <!-- t --->
 	    <tr>
 	      <td>text-align</td>
 	      <td>
@@ -629,9 +643,6 @@ stream.asyncGet({
 	      <td>start | center | end</td>
 	    </tr>
 
-	    <!-- u --->
-	    <!-- v --->
-	    <!-- w --->
 	    <tr>
 	      <td>white-space</td>
 	      <td>
@@ -650,14 +661,10 @@ stream.asyncGet({
 	      </td>
 	      <td></td>
 	    </tr>
-
-	    <!-- x --->
-	    <!-- y --->
-	    <!-- z --->
 	  </tbody>
 	</table>
-
       </section>
+-->
 
       <!-- license -->
       <section>
