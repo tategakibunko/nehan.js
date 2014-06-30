@@ -9764,8 +9764,8 @@ var LayoutEvaluator = (function(){
     _evaluate : function(tree, opt){
       opt = opt || {};
       var self = this;
-      var elements = List.filter(opt.elements || tree.elements, function(element){ return element !== null; });
-      var root = opt.root || this._evalTreeRoot(tree, opt);
+      var elements = List.filter(tree.elements, function(element){ return element !== null; });
+      var root = this._evalTreeRoot(tree, opt);
       return root.innerHTML? root : List.fold(elements, root, function(ret, child){
 	root.appendChild(self._evalTreeChild(tree, child));
 	if(child.withBr){ // annotated to add extra br element
@@ -9897,13 +9897,12 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalRb = function(line, ruby){
-    return this._evaluate(line, {
-      elements:ruby.getRbs(),
-      root:this._createElement("div", {
-	styles:ruby.getCssVertRb(line),
-	className:"nehan-rb",
-	styleContext:line.style
-      })
+    var rb_style = new StyleContext(new Tag("<rb>"), line.style);
+    var rb_line = rb_style.createLine({
+      elements:ruby.getRbs()
+    });
+    return this._evaluate(rb_line, {
+      css:ruby.getCssVertRb(line)
     });
   };
 
@@ -10144,13 +10143,12 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalRb = function(line, ruby){
-    return this._evaluate(line, {
-      elements:ruby.getRbs(),
-      root:this._createElement("div", {
-	styles:ruby.getCssHoriRb(line),
-	className:"nehan-rb",
-	styleContext:line.style
-      })
+    var rb_style = new StyleContext(new Tag("<rb>"), line.style);
+    var rb_line = rb_style.createLine({
+      elements:ruby.getRbs()
+    });
+    return this._evaluate(rb_line, {
+      css:ruby.getCssHoriRb(line)
     });
   };
 

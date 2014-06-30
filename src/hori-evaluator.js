@@ -28,13 +28,12 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalRb = function(line, ruby){
-    return this._evaluate(line, {
-      elements:ruby.getRbs(),
-      root:this._createElement("div", {
-	styles:ruby.getCssHoriRb(line),
-	className:"nehan-rb",
-	styleContext:line.style
-      })
+    var rb_style = new StyleContext(new Tag("<rb>"), line.style);
+    var rb_line = rb_style.createLine({
+      elements:ruby.getRbs()
+    });
+    return this._evaluate(rb_line, {
+      css:ruby.getCssHoriRb(line)
     });
   };
 
