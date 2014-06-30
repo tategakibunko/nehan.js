@@ -1,12 +1,8 @@
 var HoriEvaluator = (function(){
   function HoriEvaluator(){
-    LayoutEvaluator.call(this);
+    LayoutEvaluator.call(this, "hori");
   }
   Class.extend(HoriEvaluator, LayoutEvaluator);
-
-  HoriEvaluator.prototype._isFlipTree = function(tree){
-    return tree.style.isTextVertical();
-  };
 
   HoriEvaluator.prototype._evalInlineChildTree = function(tree){
     return this._evaluate(tree, {name:"span"});

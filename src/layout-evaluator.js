@@ -1,12 +1,21 @@
 var LayoutEvaluator = (function(){
-  function LayoutEvaluator(){}
+  function LayoutEvaluator(direction){
+    this.direction = direction;
+  }
 
   LayoutEvaluator.prototype = {
     evaluate : function(tree){
-      if(this._isFlipTree(tree)){
-	return this._evaluateFlip(tree);
+      return this._getEvaluator(tree)._evaluate(tree);
+    },
+    _getEvaluator : function(tree){
+      var is_vert = tree.style.isTextVertical();
+      if(this.direction === "vert" && !is_vert){
+	return new HoriEvaluator();
       }
-      return this._evaluate(tree);
+      if(this.direction === "hori" && is_vert){
+	return new VertEvaluator();
+      }
+      return this;
     },
     _createElement : function(name, opt){
       opt = opt || {};
@@ -68,10 +77,6 @@ var LayoutEvaluator = (function(){
 	}
 	return root;
       });
-    },
-    _evaluateFlip : function(tree){
-      var evaluator = tree.style.isTextVertical()? new VertEvaluator() : new HoriEvaluator();
-      return evaluator.evaluate(tree);
     },
     _evalTreeRoot : function(tree, opt){
       opt = opt || {};

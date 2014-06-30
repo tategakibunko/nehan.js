@@ -1,12 +1,8 @@
 var VertEvaluator = (function(){
   function VertEvaluator(){
-    LayoutEvaluator.call(this);
+    LayoutEvaluator.call(this, "vert");
   }
   Class.extend(VertEvaluator, LayoutEvaluator);
-
-  VertEvaluator.prototype._isFlipTree = function(tree){
-    return tree.style.isTextHorizontal();
-  };
 
   VertEvaluator.prototype._evalInlineChildTree = function(tree){
     return this._evaluate(tree);
