@@ -49,7 +49,7 @@ var VertEvaluator = (function(){
       null // outline context
     )).yield();
     Args.copy(rt.css, ruby.getCssVertRt(line));
-    return this.evaluate(rt);
+    return this._evaluate(rt);
   };
 
   VertEvaluator.prototype._evalWord = function(line, word){
