@@ -10,7 +10,7 @@ var LayoutEvaluator = (function(){
     },
     _createElement : function(name, opt){
       opt = opt || {};
-      var styles = opt.styles || {};
+      var css = opt.css || {};
       var attrs = opt.attrs? ((opt.attrs instanceof TagAttrs)? opt.attrs.attrs : opt.attrs) : {};
       var dataset = opt.attrs? opt.attrs.dataset : {};
       var dom = document.createElement(name);
@@ -25,7 +25,7 @@ var LayoutEvaluator = (function(){
       }
 
       // store css value to dom.style[<camelized-css-property>]
-      Obj.iter(styles, function(style_name, value){
+      Obj.iter(css, function(style_name, value){
 	dom.style[Utils.camelize(style_name)] = value;
       });
 
@@ -76,7 +76,7 @@ var LayoutEvaluator = (function(){
 	attrs:tree.getAttrs(),
 	oncreate:tree.getOnCreate(),
 	content:(opt.content || tree.getContent()),
-	styles:(opt.css || tree.getCssRoot()),
+	css:(opt.css || tree.getCssRoot()),
 	styleContext:tree.style
       });
     },

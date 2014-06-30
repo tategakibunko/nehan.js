@@ -19,7 +19,7 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype._evalRuby = function(line, ruby){
     var span = this._createElement("span", {
       className:"nehan-ruby-body",
-      styles:ruby.getCssHoriRuby(line),
+      css:ruby.getCssHoriRuby(line),
       styleContext:line.style
     });
     span.appendChild(this._evalRt(line, ruby));
@@ -41,7 +41,7 @@ var HoriEvaluator = (function(){
     return this._createElement("div", {
       content:ruby.getRtString(),
       className:"nehan-rt",
-      styles:ruby.getCssHoriRt(line),
+      css:ruby.getCssHoriRt(line),
       styleContext:line.style
     });
   };
@@ -70,16 +70,16 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype._evalEmpha = function(line, chr){
     var char_part = this._createElement("div", {
       content:chr.data,
-      styles:chr.getCssHoriEmphaTarget(line),
+      css:chr.getCssHoriEmphaTarget(line),
       styleContext:line.style
     });
     var empha_part = this._createElement("div", {
       content:line.style.textEmpha.getText(),
-      styles:chr.getCssHoriEmphaText(line),
+      css:chr.getCssHoriEmphaText(line),
       styleContext:line.style
     });
     var wrap = this._createElement("span", {
-      styles:line.style.textEmpha.getCssHoriEmphaWrap(line, chr),
+      css:line.style.textEmpha.getCssHoriEmphaWrap(line, chr),
       styleContext:line.style
     });
     wrap.appendChild(empha_part);
@@ -88,31 +88,31 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalKerningChar = function(line, chr){
-    var styles = chr.getCssPadding(line);
+    var css = chr.getCssPadding(line);
     if(chr.isKakkoStart()){
-      styles["margin-left"] = "-0.5em";
+      css["margin-left"] = "-0.5em";
       return this._createElement("span", {
 	content:chr.data,
 	className:"nehan-char-kakko-start",
-	styles:styles,
+	css:css,
 	styleContext:line.style
       });
     }
     if(chr.isKakkoEnd()){
-      styles["margin-right"] = "-0.5em";
+      css["margin-right"] = "-0.5em";
       return this._createElement("span", {
 	content:chr.data,
 	className:"nehan-char-kakko-end",
-	styles:styles,
+	css:css,
 	styleContext:line.style
       });
     }
     if(chr.isKutenTouten()){
-      styles["margin-right"] = "-0.5em";
+      css["margin-right"] = "-0.5em";
       return this._createElement("span", {
 	content:chr.data,
 	className:"nehan-char-kuto",
-	styles:styles,
+	css:css,
 	styleContext:line.style
       });
     }
@@ -122,7 +122,7 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype._evalPaddingChar = function(line, chr){
     return this._createElement("span", {
       content:chr.data,
-      styles:chr.getCssPadding(line),
+      css:chr.getCssPadding(line),
       styleContext:line.style
     });
   };
