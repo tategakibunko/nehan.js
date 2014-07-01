@@ -48,11 +48,11 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalWord = function(line, word){
     if(Env.isTransformEnable){
-      if(Env.isTrident){
+      if(Env.client.isTrident()){
 	return this._evalWordTransformTrident(line, word);
       }
       return this._evalWordTransform(line, word);
-    } else if(Env.isIE){
+    } else if(Env.client.isIE()){
       return this._evalWordIE(line, word);
     } else {
       return "";
@@ -101,7 +101,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalRotateChar = function(line, chr){
     if(Env.isTransformEnable){
       return this._evalRotateCharTransform(line, chr);
-    } else if(Env.isIE){
+    } else if(Env.client.isIE()){
       return this._evalRotateCharIE(line, chr);
     } else {
       return this._evalCharWithBr(line, chr);
