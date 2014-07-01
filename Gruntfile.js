@@ -38,6 +38,7 @@ module.exports = function(grunt) {
 	    "src/nehan-setup-start.js",
 	    "src/config.js",
 	    "src/layout.js",
+	    "src/client.js",
 	    "src/env.js",
 	    "src/lexing-rule.js",
 	    "src/style.js",
