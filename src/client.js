@@ -49,37 +49,40 @@ var Client = (function(){
     _parseUserAgent : function(user_agent){
       // in latest agent style of MSIE, 'Trident' is specified but 'MSIE' is not.
       if(user_agent.indexOf("trident") >= 0 && user_agent.indexOf("msie") < 0){
-	this._parsePureTrident(user_agent);
+	this.name = "msie";
+	this.version = this._parseVersionPureTrident(user_agent);
 	return;
       }
       // normal desktop agent styles
       if(user_agent.match(/(opera|chrome|safari|firefox|msie)\/?\s*(\.?\d+(?:\.\d+)*)/)){
-	this._parseNormalClient(user_agent, RegExp.$1.toLowerCase(), parseInt(RegExp.$2, 10));
+	this.name = RegExp.$1.toLowerCase();
+	this.version = this._parseVersionNormalClient(user_agent, parseInt(RegExp.$2, 10));
 	return;
       }
       // if iphone/ipad/ipod, and user agent is not normal desktop style
       if(this.isAppleMobileFamily()){
-	this._parseAppleMobileFamily(user_agent);
+	this.name = "safari";
+	this.version = this._parseVersionAppleMobileFamily(user_agent);
 	return;
       }
     },
-    _parsePureTrident : function(user_agent){
-      var rv_matched = user_agent.match(/rv:([\.\d]+)/i);
-      this.name = "msie";
-      this.version = rv_matched? parseInt(rv_matched[1], 10) : "";
-    },
-    _parseNormalClient : function(user_agent, tmp_name, tmp_version){
-      this.name = tmp_name;
-      this.version = tmp_version;
-      if(user_agent.match(/version\/([\.\d]+)/i)){
-	this.version = parseInt(RegExp.$1, 10);
+    _parseVersionPureTrident : function(user_agent){
+      if(user_agent.match(/rv:([\.\d]+)/)){
+	return parseInt(RegExp.$1, 10);
       }
+      return this.version;
     },
-    _parseAppleMobileFamily : function(user_agent){
+    _parseVersionNormalClient : function(user_agent, tmp_version){
+      if(user_agent.match(/version\/([\.\d]+)/)){
+	return parseInt(RegExp.$1, 10);
+      }
+      return tmp_version;
+    },
+    _parseVersionAppleMobileFamily : function(user_agent){
       if(user_agent.match(/os ([\d_]+) like/)){
-	this.name = "safari"; // safari(maybe!)
-	this.version = parseInt(RegExp.$1, 10); // [iOS major version] = [safari major version]
+	return parseInt(RegExp.$1, 10); // [iOS major version] = [safari major version]
       }
+      return this.version;
     }
   };
 
