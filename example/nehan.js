@@ -7155,7 +7155,7 @@ var StyleContext = (function(){
       var elements = opt.elements || [];
       var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
-      var edge = this.edge || null; // for Box::getLayoutExtent, Box::getLayoutMeasure
+      var edge = this.edge || null;
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box = new Box(box_size, this);
@@ -7163,7 +7163,7 @@ var StyleContext = (function(){
 	edge.clear();
       }
       box.display = (this.display === "inline-block")? this.display : "block";
-      box.edge = edge;
+      box.edge = edge; // for Box::getLayoutExtent, Box::getLayoutMeasure
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
