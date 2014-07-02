@@ -250,7 +250,6 @@ var StyleContext = (function(){
     },
     // force update context size, called from generator of floating-rest-generator.
     forceUpdateContextSize : function(measure, extent){
-      this._isFloated = measure < this.contentMeasure; // floated generator has always smaller measure.
       this.initContextSize(measure, extent);
 
       // force re-culculate context-size of children based on new context-size of parent.
@@ -316,8 +315,8 @@ var StyleContext = (function(){
       var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
       var edge = this.edge || null;
-      var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
+      var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = edge; // for Box::getLayoutExtent, Box::getLayoutMeasure

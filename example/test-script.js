@@ -1,5 +1,10 @@
 var Script = {
-  "tmp":"<p class='nehan-drop-caps'>" + Text["long"] + "</p>",
+  "tmp":[
+    "<img class='nehan-disp-block nehan-float-start nehan-gap-end' width='128' height='128' src='128x128.gif' />",
+    "<p>あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをんあいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをんあいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん</p>",
+    //"<p class='nehan-drop-caps'>" + Text["long"] + "</p>",
+    //"<p>" + Text["short"] + "</p>"
+  ].join("\n"),
   
   "selector":[
     // adjacent sibling selector(A+B) test
