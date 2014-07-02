@@ -7085,12 +7085,13 @@ var StyleContext = (function(){
       this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
       this.contentExtent = this._computeContentExtent(this.outerExtent);
     },
-    // update context size, but static size is preferred.
+    // update context size, but static size is preferred, called from flip-generator.
     updateContextSize : function(measure, extent){
       this.forceUpdateContextSize(this.staticMeasure || measure, this.staticExtent || extent);
     },
     // force update context size, called from generator of floating-rest-generator.
     forceUpdateContextSize : function(measure, extent){
+      this._isFloated = measure < this.contentMeasure; // floated generator has always smaller measure.
       this.initContextSize(measure, extent);
 
       // force re-culculate context-size of children based on new context-size of parent.
