@@ -7159,9 +7159,6 @@ var StyleContext = (function(){
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box = new Box(box_size, this);
-      if(edge){ // TMP!!
-	edge.clear();
-      }
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = edge; // for Box::getLayoutExtent, Box::getLayoutMeasure
       box.elements = elements;
