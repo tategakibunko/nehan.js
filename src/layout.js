@@ -22,7 +22,7 @@ var Layout = {
   height: screen.height, // root height, used when style.body.height not defined.
   fontSize:16, // root fontSize, used when style.body["font-size"] not defined.
   minFontSize:12,
-  maxFontSize:64,
+  maxFontSize:90,
   minTableCellSize:48, // if table-layout is set to 'auto', all sizes of cell are larger than this value.
   rubyRate:0.5, // used when Style.rt["font-size"] is not defined.
   boldRate:0.5, // used to calculate sketchy bold metrics in the environment with no canvas element.

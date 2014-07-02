@@ -106,7 +106,7 @@ var Layout = {
   height: screen.height, // root height, used when style.body.height not defined.
   fontSize:16, // root fontSize, used when style.body["font-size"] not defined.
   minFontSize:12,
-  maxFontSize:64,
+  maxFontSize:90,
   minTableCellSize:48, // if table-layout is set to 'auto', all sizes of cell are larger than this value.
   rubyRate:0.5, // used when Style.rt["font-size"] is not defined.
   boldRate:0.5, // used to calculate sketchy bold metrics in the environment with no canvas element.
@@ -4533,6 +4533,12 @@ var Edge = (function(){
       this.bottom = 0;
       this.left = 0;
     },
+    clearBefore : function(flow){
+      this[flow.getPropBefore()] = 0;
+    },
+    clearAfter : function(flow){
+      this[flow.getPropAfter()] = 0;
+    },
     clone : function(){
       var edge = new Edge(this._type);
       edge.top = this.top;
@@ -5040,6 +5046,20 @@ var BoxEdge = (function (){
       ret += this.border.getExtentSize(flow);
       return ret;
     },
+    getBefore : function(flow){
+      var ret = 0;
+      ret += this.padding.getBefore(flow);
+      ret += this.border.getBefore(flow);
+      ret += this.margin.getBefore(flow);
+      return ret;
+    },
+    getAfter : function(flow){
+      var ret = 0;
+      ret += this.padding.getAfter(flow);
+      ret += this.border.getAfter(flow);
+      ret += this.margin.getAfter(flow);
+      return ret;
+    },
     setAll : function(prop, flow, value){
       this[prop].setAll(flow, value);
     },
@@ -5051,6 +5071,16 @@ var BoxEdge = (function (){
     },
     setBorderStyle : function(flow, value){
       this.border.setStyle(flow, value);
+    },
+    clearBefore : function(flow){
+      this.padding.clearBefore(flow);
+      this.border.clearBefore(flow);
+      this.margin.clearBefore(flow);
+    },
+    clearAfter : function(flow){
+      this.padding.clearAfter(flow);
+      this.border.clearAfter(flow);
+      this.margin.clearAfter(flow);
     },
     clearBorderStart : function(flow){
       this.border.clearStart(flow);
@@ -7125,11 +7155,15 @@ var StyleContext = (function(){
       var elements = opt.elements || [];
       var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
+      var edge = this.edge || null; // for Box::getLayoutExtent, Box::getLayoutMeasure
       var box_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box = new Box(box_size, this);
+      if(edge){ // TMP!!
+	edge.clear();
+      }
       box.display = (this.display === "inline-block")? this.display : "block";
-      box.edge = this.edge || null; // for Box::getLayoutExtent, Box::getLayoutMeasure
+      box.edge = edge;
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){

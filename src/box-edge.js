@@ -66,6 +66,20 @@ var BoxEdge = (function (){
       ret += this.border.getExtentSize(flow);
       return ret;
     },
+    getBefore : function(flow){
+      var ret = 0;
+      ret += this.padding.getBefore(flow);
+      ret += this.border.getBefore(flow);
+      ret += this.margin.getBefore(flow);
+      return ret;
+    },
+    getAfter : function(flow){
+      var ret = 0;
+      ret += this.padding.getAfter(flow);
+      ret += this.border.getAfter(flow);
+      ret += this.margin.getAfter(flow);
+      return ret;
+    },
     setAll : function(prop, flow, value){
       this[prop].setAll(flow, value);
     },
@@ -77,6 +91,16 @@ var BoxEdge = (function (){
     },
     setBorderStyle : function(flow, value){
       this.border.setStyle(flow, value);
+    },
+    clearBefore : function(flow){
+      this.padding.clearBefore(flow);
+      this.border.clearBefore(flow);
+      this.margin.clearBefore(flow);
+    },
+    clearAfter : function(flow){
+      this.padding.clearAfter(flow);
+      this.border.clearAfter(flow);
+      this.margin.clearAfter(flow);
     },
     clearBorderStart : function(flow){
       this.border.clearStart(flow);

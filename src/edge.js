@@ -14,6 +14,12 @@ var Edge = (function(){
       this.bottom = 0;
       this.left = 0;
     },
+    clearBefore : function(flow){
+      this[flow.getPropBefore()] = 0;
+    },
+    clearAfter : function(flow){
+      this[flow.getPropAfter()] = 0;
+    },
     clone : function(){
       var edge = new Edge(this._type);
       edge.top = this.top;

@@ -1,4 +1,6 @@
 var Script = {
+  "tmp":"<p class='nehan-drop-caps'>" + Text["long"] + "</p>",
+  
   "selector":[
     // adjacent sibling selector(A+B) test
     "<h2>adj sibling</h2>",
