@@ -8326,6 +8326,7 @@ var LayoutGenerator = (function(){
     this._parentLayout = null;
     this._childLayout = null;
     this._cachedElements = [];
+    this._yieldCount = 0;
     this._terminate = false; // used to force terminate generator.
   }
 
@@ -8333,7 +8334,9 @@ var LayoutGenerator = (function(){
   // 2. call _yield implemented in inherited class.
   LayoutGenerator.prototype.yield = function(parent_context){
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
-    return this._yield(context);
+    var result = this._yield(context);
+    this._yieldCount++;
+    return result;
   };
 
   LayoutGenerator.prototype._yield = function(context){
