@@ -45,7 +45,7 @@ var Snipet = {
     "<li>" + Text["middle"] + "</li>",
     "<li>" + Text["long"] + "</li>",
     "</ul>"
-  ].join(""),
+  ].join("\n"),
 
   "ol":[
     "<ol>",
@@ -96,7 +96,7 @@ var Snipet = {
     "<li>かきくけこ</li>",
     "<li>さしすせそ</li>",
     "</ol>"
-  ].join(""),
+  ].join("\n"),
 
   "dl":[
     "<dl>",

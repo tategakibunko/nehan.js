@@ -54,7 +54,12 @@ var ParallelGenerator = (function(){
     var generators = this.generators;
     return List.mapi(blocks, function(i, block){
       if(block === null){
-	return generators[i].style.createBlock({elements:[], extent:content_extent});
+	return generators[i].style.createBlock({
+	  isFirst:generators[i].isFirstOutput(),
+	  isLast:true,
+	  elements:[],
+	  extent:content_extent
+	});
       }
       return block.resizeExtent(flow, content_extent);
     });
@@ -66,6 +71,8 @@ var ParallelGenerator = (function(){
     var max_block = this._findMaxBlock(blocks);
     var uniformed_blocks = this._alignContentExtent(blocks, max_block.getContentExtent(flow));
     return this.style.createBlock({
+      isFirst:this.isFirstOutput(),
+      isLast:!this.hasNext(),
       elements:uniformed_blocks,
       extent:max_block.getLayoutExtent(flow)
     });

@@ -55,6 +55,10 @@ var LayoutGenerator = (function(){
     return this._cachedElements.length > 0;
   };
 
+  LayoutGenerator.prototype.isFirstOutput = function(){
+    return this._yieldCount === 0;
+  };
+
   LayoutGenerator.prototype.yieldChildLayout = function(context){
     var next = this._childLayout.yield(context);
     return next;
@@ -99,17 +103,19 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createStartContext = function(){
+    //console.log("[%s] create start context", this.style.getMarkupName());
     return new LayoutContext(
       new BlockContext(this.style.contentExtent),
       new InlineContext(this.style.contentMeasure)
-    );
+    ).debug(this.style.getMarkupName() + " start");
   };
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){
+    //console.log("[%s] create child context", this.style.getMarkupName());
     return new LayoutContext(
       new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
       new InlineContext(this.style.contentMeasure)
-    );
+    ).debug(this.style.getMarkupName() + " child start");
   };
 
   LayoutGenerator.prototype._createStream = function(style){

@@ -309,11 +309,33 @@ var StyleContext = (function(){
       style.contextParent = this.parent; 
       return style;
     },
+    createContextEdge : function(opt){
+      var edge = this.getEdge();
+      if(edge === null){
+	return null;
+      }
+      // ignore table child
+      if(this.display.indexOf("table-") >= 0){
+	return edge;
+      }
+      if(opt.isFirst && opt.isLast){
+	return edge;
+      }
+      var edge_ = edge.clone();
+      if(!opt.isFirst){
+	edge_.clearBefore(this.flow);
+      }
+      if(!opt.isLast){
+	edge_.clearAfter(this.flow);
+      }
+      return edge_;
+    },
     createBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
       var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
+      //var edge = this.createContextEdge(opt);
       var edge = this.edge || null;
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);

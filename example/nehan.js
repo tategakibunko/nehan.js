@@ -7150,11 +7150,33 @@ var StyleContext = (function(){
       style.contextParent = this.parent; 
       return style;
     },
+    createContextEdge : function(opt){
+      var edge = this.getEdge();
+      if(edge === null){
+	return null;
+      }
+      // ignore table child
+      if(this.display.indexOf("table-") >= 0){
+	return edge;
+      }
+      if(opt.isFirst && opt.isLast){
+	return edge;
+      }
+      var edge_ = edge.clone();
+      if(!opt.isFirst){
+	edge_.clearBefore(this.flow);
+      }
+      if(!opt.isLast){
+	edge_.clearAfter(this.flow);
+      }
+      return edge_;
+    },
     createBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
       var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
+      //var edge = this.createContextEdge(opt);
       var edge = this.edge || null;
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);
@@ -8069,6 +8091,11 @@ var LayoutContext = (function(){
   }
 
   LayoutContext.prototype = {
+    debug : function(title){
+      title = title || "layout context";
+      console.log("[%s](m = %d, e = %d)", title, this.inline.maxMeasure, this.block.maxExtent);
+      return this;
+    },
     // block-level
     isBlockSpaceLeft : function(){
       return this.block.isSpaceLeft();
@@ -8376,6 +8403,10 @@ var LayoutGenerator = (function(){
     return this._cachedElements.length > 0;
   };
 
+  LayoutGenerator.prototype.isFirstOutput = function(){
+    return this._yieldCount === 0;
+  };
+
   LayoutGenerator.prototype.yieldChildLayout = function(context){
     var next = this._childLayout.yield(context);
     return next;
@@ -8420,17 +8451,19 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createStartContext = function(){
+    //console.log("[%s] create start context", this.style.getMarkupName());
     return new LayoutContext(
       new BlockContext(this.style.contentExtent),
       new InlineContext(this.style.contentMeasure)
-    );
+    ).debug(this.style.getMarkupName() + " start");
   };
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){
+    //console.log("[%s] create child context", this.style.getMarkupName());
     return new LayoutContext(
       new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
       new InlineContext(this.style.contentMeasure)
-    );
+    ).debug(this.style.getMarkupName() + " child start");
   };
 
   LayoutGenerator.prototype._createStream = function(style){
@@ -8671,8 +8704,8 @@ var BlockGenerator = (function(){
     var block = this.style.createBlock({
       extent:extent,
       elements:elements,
-      isFirst:(this._yieldCount === 0),
-      isLast:(this.hasNext() === false),
+      isFirst:this.isFirstOutput(),
+      isLast:!this.hasNext(),
       breakAfter:context.hasBreakAfter()
     });
 
@@ -9424,7 +9457,12 @@ var ParallelGenerator = (function(){
     var generators = this.generators;
     return List.mapi(blocks, function(i, block){
       if(block === null){
-	return generators[i].style.createBlock({elements:[], extent:content_extent});
+	return generators[i].style.createBlock({
+	  isFirst:generators[i].isFirstOutput(),
+	  isLast:true,
+	  elements:[],
+	  extent:content_extent
+	});
       }
       return block.resizeExtent(flow, content_extent);
     });
@@ -9436,6 +9474,8 @@ var ParallelGenerator = (function(){
     var max_block = this._findMaxBlock(blocks);
     var uniformed_blocks = this._alignContentExtent(blocks, max_block.getContentExtent(flow));
     return this.style.createBlock({
+      isFirst:this.isFirstOutput(),
+      isLast:!this.hasNext(),
       elements:uniformed_blocks,
       extent:max_block.getLayoutExtent(flow)
     });

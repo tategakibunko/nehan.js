@@ -77,7 +77,12 @@ var LayoutTest = (function(){
 	append_test_item(test_name);
       }
 
-      $test_menu.find("a").first().click();
+      if(location.href.indexOf("#") < 0){
+	$test_menu.find("a").first().click();
+      } else {
+	var test_name = location.href.split("#")[1];
+	$test_menu.find("a[href=#" + test_name + "]").click();
+      }
     } // start
   };
 })();

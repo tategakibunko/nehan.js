@@ -114,8 +114,8 @@ var BlockGenerator = (function(){
     var block = this.style.createBlock({
       extent:extent,
       elements:elements,
-      isFirst:(this._yieldCount === 0),
-      isLast:(this.hasNext() === false),
+      isFirst:this.isFirstOutput(),
+      isLast:!this.hasNext(),
       breakAfter:context.hasBreakAfter()
     });
 

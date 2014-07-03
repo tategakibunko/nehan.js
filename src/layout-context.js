@@ -5,6 +5,11 @@ var LayoutContext = (function(){
   }
 
   LayoutContext.prototype = {
+    debug : function(title){
+      title = title || "layout context";
+      console.log("[%s](m = %d, e = %d)", title, this.inline.maxMeasure, this.block.maxExtent);
+      return this;
+    },
     // block-level
     isBlockSpaceLeft : function(){
       return this.block.isSpaceLeft();
