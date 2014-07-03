@@ -13,14 +13,14 @@ var BlockContext = (function(){
     isSpaceLeft : function(){
       return this.getRestExtent() > 0;
     },
-    hasSpaceFor : function(extent){
-      return this.getRestExtent() >= extent;
+    hasSpaceFor : function(extent, block_opt){
+      return this.getRestExtent() >= this.getContextExtent(extent, block_opt || {});
     },
     hasBreakAfter : function(){
       return this.breakAfter;
     },
-    addElement : function(element, extent){
-      this.curExtent += extent;
+    addElement : function(element, extent, block_opt){
+      this.curExtent += this.getContextExtent(extent, block_opt || {});
       if(element.breakAfter){
 	this.breakAfter = true;
       }
@@ -37,6 +37,20 @@ var BlockContext = (function(){
     },
     getRestExtent : function(){
       return this.maxExtent - this.curExtent;
+    },
+    getContextExtent : function(extent, block_opt){
+      return extent + this.getEdgeExtent(block_opt || {});
+    },
+    getEdgeExtent : function(block_opt){
+      var edge_extent = 0;
+      block_opt = block_opt || {};
+      if(block_opt.isFirst){
+	edge_extent += this.extentEdges.before;
+      }
+      if(block_opt.isLast){
+	edge_extent += this.extentEdges.after;
+      }
+      return edge_extent;
     },
     getMaxExtent : function(){
       return this.maxExtent;

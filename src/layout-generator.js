@@ -72,7 +72,7 @@ var LayoutGenerator = (function(){
     var cache_count = element.cacheCount || 0;
     if(cache_count > 0){
       if(cache_count >= Config.maxRollbackCount){
-	console.error("[%s] too many cache count(%d), force terminate:%o", this.style.getMarkupName(), cache_count, this.style);
+	console.error("[%s] too many retry:%o", this.style.getMarkupName(), this.style);
 	this.setTerminate(true); // this error sometimes causes infinite loop, so force terminate generator.
 	return;
       }
@@ -103,19 +103,17 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createStartContext = function(){
-    //console.log("[%s] create start context", this.style.getMarkupName());
     return new LayoutContext(
-      new BlockContext(this.style.contentExtent),
+      new BlockContext(this.style.outerExtent, this.style.getExtentEdges()),
       new InlineContext(this.style.contentMeasure)
-    ).debug(this.style.getMarkupName() + " start");
+    ); //.debug(this.style.getMarkupName() + " start");
   };
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){
-    //console.log("[%s] create child context", this.style.getMarkupName());
     return new LayoutContext(
-      new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
+      new BlockContext(parent_context.getBlockRestExtent(), this.style.getExtentEdges()),
       new InlineContext(this.style.contentMeasure)
-    ).debug(this.style.getMarkupName() + " child start");
+    ); //.debug(this.style.getMarkupName() + " child start");
   };
 
   LayoutGenerator.prototype._createStream = function(style){

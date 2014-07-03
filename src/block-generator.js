@@ -8,17 +8,19 @@ var BlockGenerator = (function(){
     if(!context.isBlockSpaceLeft()){
       return null;
     }
+    var is_first = this.isFirstOutput();
     while(this.hasNext()){
       var element = this._getNext(context);
       if(element === null){
 	break;
       }
       var extent = element.getLayoutExtent(this.style.flow);
-      if(!context.hasBlockSpaceFor(extent)){
+      if(!context.hasBlockSpaceFor(extent, {isFirst:is_first, isLast:!this.hasNext()})){
 	this.pushCache(element);
+	this._isLast = true; // next yield is treated as last
 	break;
       }
-      this._addElement(context, element, extent);
+      this._addElement(context, element, extent, {isFirst:is_first, isLast:(this._isLast || false)});
       if(!context.isBlockSpaceLeft() || context.hasBreakAfter()){
 	break;
       }
@@ -97,11 +99,11 @@ var BlockGenerator = (function(){
     return this.yieldChildLayout(context);
   };
 
-  BlockGenerator.prototype._addElement = function(context, element, extent){
+  BlockGenerator.prototype._addElement = function(context, element, extent, block_opt){
     if(element === null){
       return;
     }
-    context.addBlockElement(element, extent);
+    context.addBlockElement(element, extent, block_opt);
     this._onAddElement(element);
   };
 
@@ -115,7 +117,7 @@ var BlockGenerator = (function(){
       extent:extent,
       elements:elements,
       isFirst:this.isFirstOutput(),
-      isLast:!this.hasNext(),
+      isLast:!this.hasNext(), // no cache, no stream exists.
       breakAfter:context.hasBreakAfter()
     });
 

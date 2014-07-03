@@ -7095,10 +7095,13 @@ var StyleContext = (function(){
 
       // force re-culculate context-size of children based on new context-size of parent.
       List.iter(this.childs, function(child){
+	child.forceUpdateContextSize(null, null);
+	/*
 	// if child has context parent, keep original parent size.
 	if(typeof child.contextParent === "undefined"){
 	  child.forceUpdateContextSize(null, null);
 	}
+	*/
       });
     },
     // clone style-context with temporary css
@@ -7147,8 +7150,19 @@ var StyleContext = (function(){
       // but <ul>.style is required by <ul2> to get it's accurate content-size.
       // so child anonymous style(<li-mark>, <li-body> in this case) needs to save it's 'original' parent(<ul>.style in this case) as 'contextParent'
       // in addition to <li>.style.
-      style.contextParent = this.parent; 
+      // style.contextParent = this.parent; 
       return style;
+    },
+    // calclate max marker size by total child_count(item_count).
+    setListItemCount : function(item_count){
+      var max_marker_html = this.getListMarkerHtml(item_count);
+      // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
+      // and we have to avoid 'appendChild' from child-generator of this tmp generator.
+      var tmp_gen = new InlineGenerator(this.clone(), new TokenStream(max_marker_html));
+      var line = tmp_gen.yield();
+      var marker_measure = line? line.inlineMeasure + Math.floor(this.getFontSize() / 2) : this.getFontSize();
+      var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
+      this.listMarkerSize = this.flow.getBoxSize(marker_measure, marker_extent);
     },
     getExtentEdges : function(){
       var edge = this.getEdge();
@@ -7164,10 +7178,6 @@ var StyleContext = (function(){
       var edge = this.getEdge();
       if(edge === null){
 	return null;
-      }
-      // ignore table child
-      if(this.display.indexOf("table-") >= 0){
-	return edge;
       }
       if(opt.isFirst && opt.isLast){
 	return edge;
@@ -7186,8 +7196,7 @@ var StyleContext = (function(){
       var elements = opt.elements || [];
       var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
-      //var edge = this.createContextEdge(opt);
-      var edge = this.edge || null;
+      var edge = this.createContextEdge(opt);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
@@ -7536,8 +7545,11 @@ var StyleContext = (function(){
     getLetterSpacing : function(){
       return this.letterSpacing || 0;
     },
-    getMarkerHtml : function(order){
-      return this.listStyle? this.listStyle.getMarkerHtml(order) : "";
+    getListMarkerHtml : function(order){
+      return this.listStyle? this.listStyle.getMarkerHtml(order) : (this.parent? this.parent.getListMarkerHtml(order) : "");
+    },
+    getListMarkerSize : function(){
+      return this.listMarkerSize? this.listMarkerSize : (this.parent? this.parent.getListMarkerSize() : this.getFontSize());
     },
     getColor : function(){
       return this.color || (this.parent? this.parent.getColor() : new Color(Layout.fontColor));
@@ -7605,7 +7617,8 @@ var StyleContext = (function(){
       return Math.floor(this.getFontSize() * this.getLineRate());
     },
     getEdge : function(){
-      return this.contextParent? this.contextParent.getEdge() : (this.edge || null);
+      return this.edge || null;
+      //return this.contextParent? this.contextParent.getEdge() : (this.edge || null);
     },
     getEdgeMeasure : function(flow){
       var edge = this.getEdge();
@@ -8110,14 +8123,14 @@ var LayoutContext = (function(){
     isBlockSpaceLeft : function(){
       return this.block.isSpaceLeft();
     },
-    hasBlockSpaceFor : function(extent){
-      return this.block.hasSpaceFor(extent);
+    hasBlockSpaceFor : function(extent, opt){
+      return this.block.hasSpaceFor(extent, opt);
     },
     hasBreakAfter : function(){
       return this.block.hasBreakAfter() || this.inline.hasBreakAfter() || false;
     },
-    addBlockElement : function(element, extent){
-      this.block.addElement(element, extent);
+    addBlockElement : function(element, extent, opt){
+      this.block.addElement(element, extent, opt);
     },
     getBlockElements : function(){
       return this.block.getElements();
@@ -8204,14 +8217,14 @@ var BlockContext = (function(){
     isSpaceLeft : function(){
       return this.getRestExtent() > 0;
     },
-    hasSpaceFor : function(extent){
-      return this.getRestExtent() >= extent;
+    hasSpaceFor : function(extent, block_opt){
+      return this.getRestExtent() >= this.getContextExtent(extent, block_opt || {});
     },
     hasBreakAfter : function(){
       return this.breakAfter;
     },
-    addElement : function(element, extent){
-      this.curExtent += extent;
+    addElement : function(element, extent, block_opt){
+      this.curExtent += this.getContextExtent(extent, block_opt || {});
       if(element.breakAfter){
 	this.breakAfter = true;
       }
@@ -8228,6 +8241,20 @@ var BlockContext = (function(){
     },
     getRestExtent : function(){
       return this.maxExtent - this.curExtent;
+    },
+    getContextExtent : function(extent, block_opt){
+      return extent + this.getEdgeExtent(block_opt || {});
+    },
+    getEdgeExtent : function(block_opt){
+      var edge_extent = 0;
+      block_opt = block_opt || {};
+      if(block_opt.isFirst){
+	edge_extent += this.extentEdges.before;
+      }
+      if(block_opt.isLast){
+	edge_extent += this.extentEdges.after;
+      }
+      return edge_extent;
     },
     getMaxExtent : function(){
       return this.maxExtent;
@@ -8431,7 +8458,7 @@ var LayoutGenerator = (function(){
     var cache_count = element.cacheCount || 0;
     if(cache_count > 0){
       if(cache_count >= Config.maxRollbackCount){
-	console.error("[%s] too many cache count(%d), force terminate:%o", this.style.getMarkupName(), cache_count, this.style);
+	console.error("[%s] too many retry:%o", this.style.getMarkupName(), this.style);
 	this.setTerminate(true); // this error sometimes causes infinite loop, so force terminate generator.
 	return;
       }
@@ -8462,19 +8489,17 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createStartContext = function(){
-    //console.log("[%s] create start context", this.style.getMarkupName());
     return new LayoutContext(
-      new BlockContext(this.style.contentExtent),
+      new BlockContext(this.style.outerExtent, this.style.getExtentEdges()),
       new InlineContext(this.style.contentMeasure)
-    ).debug(this.style.getMarkupName() + " start");
+    ); //.debug(this.style.getMarkupName() + " start");
   };
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){
-    //console.log("[%s] create child context", this.style.getMarkupName());
     return new LayoutContext(
-      new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
+      new BlockContext(parent_context.getBlockRestExtent(), this.style.getExtentEdges()),
       new InlineContext(this.style.contentMeasure)
-    ).debug(this.style.getMarkupName() + " child start");
+    ); //.debug(this.style.getMarkupName() + " child start");
   };
 
   LayoutGenerator.prototype._createStream = function(style){
@@ -8609,17 +8634,19 @@ var BlockGenerator = (function(){
     if(!context.isBlockSpaceLeft()){
       return null;
     }
+    var is_first = this.isFirstOutput();
     while(this.hasNext()){
       var element = this._getNext(context);
       if(element === null){
 	break;
       }
       var extent = element.getLayoutExtent(this.style.flow);
-      if(!context.hasBlockSpaceFor(extent)){
+      if(!context.hasBlockSpaceFor(extent, {isFirst:is_first, isLast:!this.hasNext()})){
 	this.pushCache(element);
+	this._isLast = true; // next yield is treated as last
 	break;
       }
-      this._addElement(context, element, extent);
+      this._addElement(context, element, extent, {isFirst:is_first, isLast:(this._isLast || false)});
       if(!context.isBlockSpaceLeft() || context.hasBreakAfter()){
 	break;
       }
@@ -8698,11 +8725,11 @@ var BlockGenerator = (function(){
     return this.yieldChildLayout(context);
   };
 
-  BlockGenerator.prototype._addElement = function(context, element, extent){
+  BlockGenerator.prototype._addElement = function(context, element, extent, block_opt){
     if(element === null){
       return;
     }
-    context.addBlockElement(element, extent);
+    context.addBlockElement(element, extent, block_opt);
     this._onAddElement(element);
   };
 
@@ -8716,7 +8743,7 @@ var BlockGenerator = (function(){
       extent:extent,
       elements:elements,
       isFirst:this.isFirstOutput(),
-      isLast:!this.hasNext(),
+      isLast:!this.hasNext(), // no cache, no stream exists.
       breakAfter:context.hasBreakAfter()
     });
 
@@ -9470,7 +9497,7 @@ var ParallelGenerator = (function(){
       if(block === null){
 	return generators[i].style.createBlock({
 	  isFirst:generators[i].isFirstOutput(),
-	  isLast:true,
+	  isLast:!generators[i].hasNext(),
 	  elements:[],
 	  extent:content_extent
 	});
@@ -9529,21 +9556,9 @@ var SectionContentGenerator = (function(){
 var ListGenerator = (function(){
   function ListGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
-    this.style.markerSize = this._getMarkerSize(this.stream.getTokenCount());
+    this.style.setListItemCount(this.stream.getTokenCount());
   }
   Class.extend(ListGenerator, BlockGenerator);
-
-  // before yield list layout, we have to calclate max marker size by total child_count(item_count).
-  ListGenerator.prototype._getMarkerSize = function(item_count){
-    var max_marker_html = this.style.getMarkerHtml(item_count);
-    // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
-    // and we have to avoid 'appendChild' from child-generator of this tmp generator.
-    var tmp_gen = new InlineGenerator(this.style.clone(), new TokenStream(max_marker_html));
-    var line = tmp_gen.yield();
-    var marker_measure = line? line.inlineMeasure + Math.floor(this.style.getFontSize() / 2) : this.style.getFontSize();
-    var marker_extent = line? line.size.getExtent(this.style.flow) : this.style.getFontSize();
-    return this.style.flow.getBoxSize(marker_measure, marker_extent);
-  };
 
   return ListGenerator;
 })();
@@ -9559,9 +9574,9 @@ var ListItemGenerator = (function(){
   Class.extend(ListItemGenerator, ParallelGenerator);
 
   ListItemGenerator.prototype._createListMarkGenerator = function(style){
-    var marker_size = style.parent.markerSize || style.flow.getBoxSize(Layout.fontSize * 2, Layout.fontSize);
+    var marker_size = style.getListMarkerSize();
     var item_order = style.getChildIndex();
-    var marker_text = style.parent.getMarkerHtml(item_order + 1);
+    var marker_text = style.getListMarkerHtml(item_order + 1);
     var measure = marker_size.getMeasure(style.flow);
     var marker_style = style.createChild("li-marker", {
       "float":"start",
@@ -9573,7 +9588,7 @@ var ListItemGenerator = (function(){
   };
 
   ListItemGenerator.prototype._createListBodyGenerator = function(style, stream){
-    var marker_size = style.parent.markerSize || style.flow.getBoxSize(Layout.fontSize * 2, Layout.fontSize);
+    var marker_size = style.getListMarkerSize();
     var measure = style.contentMeasure - marker_size.getMeasure(style.flow);
     var body_style = style.createChild("li-body", {
       "float":"start",

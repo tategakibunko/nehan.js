@@ -56,7 +56,7 @@ var ParallelGenerator = (function(){
       if(block === null){
 	return generators[i].style.createBlock({
 	  isFirst:generators[i].isFirstOutput(),
-	  isLast:true,
+	  isLast:!generators[i].hasNext(),
 	  elements:[],
 	  extent:content_extent
 	});

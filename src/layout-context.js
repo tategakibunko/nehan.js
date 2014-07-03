@@ -14,14 +14,14 @@ var LayoutContext = (function(){
     isBlockSpaceLeft : function(){
       return this.block.isSpaceLeft();
     },
-    hasBlockSpaceFor : function(extent){
-      return this.block.hasSpaceFor(extent);
+    hasBlockSpaceFor : function(extent, opt){
+      return this.block.hasSpaceFor(extent, opt);
     },
     hasBreakAfter : function(){
       return this.block.hasBreakAfter() || this.inline.hasBreakAfter() || false;
     },
-    addBlockElement : function(element, extent){
-      this.block.addElement(element, extent);
+    addBlockElement : function(element, extent, opt){
+      this.block.addElement(element, extent, opt);
     },
     getBlockElements : function(){
       return this.block.getElements();

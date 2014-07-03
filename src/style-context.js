@@ -254,10 +254,13 @@ var StyleContext = (function(){
 
       // force re-culculate context-size of children based on new context-size of parent.
       List.iter(this.childs, function(child){
+	child.forceUpdateContextSize(null, null);
+	/*
 	// if child has context parent, keep original parent size.
 	if(typeof child.contextParent === "undefined"){
 	  child.forceUpdateContextSize(null, null);
 	}
+	*/
       });
     },
     // clone style-context with temporary css
@@ -306,8 +309,19 @@ var StyleContext = (function(){
       // but <ul>.style is required by <ul2> to get it's accurate content-size.
       // so child anonymous style(<li-mark>, <li-body> in this case) needs to save it's 'original' parent(<ul>.style in this case) as 'contextParent'
       // in addition to <li>.style.
-      style.contextParent = this.parent; 
+      // style.contextParent = this.parent; 
       return style;
+    },
+    // calclate max marker size by total child_count(item_count).
+    setListItemCount : function(item_count){
+      var max_marker_html = this.getListMarkerHtml(item_count);
+      // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
+      // and we have to avoid 'appendChild' from child-generator of this tmp generator.
+      var tmp_gen = new InlineGenerator(this.clone(), new TokenStream(max_marker_html));
+      var line = tmp_gen.yield();
+      var marker_measure = line? line.inlineMeasure + Math.floor(this.getFontSize() / 2) : this.getFontSize();
+      var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
+      this.listMarkerSize = this.flow.getBoxSize(marker_measure, marker_extent);
     },
     getExtentEdges : function(){
       var edge = this.getEdge();
@@ -323,10 +337,6 @@ var StyleContext = (function(){
       var edge = this.getEdge();
       if(edge === null){
 	return null;
-      }
-      // ignore table child
-      if(this.display.indexOf("table-") >= 0){
-	return edge;
       }
       if(opt.isFirst && opt.isLast){
 	return edge;
@@ -345,8 +355,7 @@ var StyleContext = (function(){
       var elements = opt.elements || [];
       var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
-      //var edge = this.createContextEdge(opt);
-      var edge = this.edge || null;
+      var edge = this.createContextEdge(opt);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
@@ -695,8 +704,11 @@ var StyleContext = (function(){
     getLetterSpacing : function(){
       return this.letterSpacing || 0;
     },
-    getMarkerHtml : function(order){
-      return this.listStyle? this.listStyle.getMarkerHtml(order) : "";
+    getListMarkerHtml : function(order){
+      return this.listStyle? this.listStyle.getMarkerHtml(order) : (this.parent? this.parent.getListMarkerHtml(order) : "");
+    },
+    getListMarkerSize : function(){
+      return this.listMarkerSize? this.listMarkerSize : (this.parent? this.parent.getListMarkerSize() : this.getFontSize());
     },
     getColor : function(){
       return this.color || (this.parent? this.parent.getColor() : new Color(Layout.fontColor));
@@ -764,7 +776,8 @@ var StyleContext = (function(){
       return Math.floor(this.getFontSize() * this.getLineRate());
     },
     getEdge : function(){
-      return this.contextParent? this.contextParent.getEdge() : (this.edge || null);
+      return this.edge || null;
+      //return this.contextParent? this.contextParent.getEdge() : (this.edge || null);
     },
     getEdgeMeasure : function(flow){
       var edge = this.getEdge();
