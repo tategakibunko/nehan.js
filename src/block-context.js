@@ -1,11 +1,12 @@
 var BlockContext = (function(){
-  function BlockContext(max_extent){
+  function BlockContext(max_extent, extent_edges){
     this.curExtent = 0;
     this.maxExtent = max_extent; // const
     this.pushedElements = [];
     this.elements = [];
     this.pulledElements = [];
     this.breakAfter = false;
+    this.extentEdges = extent_edges || {before:0, after:0};
   }
 
   BlockContext.prototype = {

@@ -309,6 +309,16 @@ var StyleContext = (function(){
       style.contextParent = this.parent; 
       return style;
     },
+    getExtentEdges : function(){
+      var edge = this.getEdge();
+      if(edge === null){
+	return {before:0, after:0};
+      }
+      return {
+	before:edge.getBefore(this.flow),
+	after:edge.getAfter(this.flow)
+      };
+    },
     createContextEdge : function(opt){
       var edge = this.getEdge();
       if(edge === null){
