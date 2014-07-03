@@ -7096,12 +7096,6 @@ var StyleContext = (function(){
       // force re-culculate context-size of children based on new context-size of parent.
       List.iter(this.childs, function(child){
 	child.forceUpdateContextSize(null, null);
-	/*
-	// if child has context parent, keep original parent size.
-	if(typeof child.contextParent === "undefined"){
-	  child.forceUpdateContextSize(null, null);
-	}
-	*/
       });
     },
     // clone style-context with temporary css
@@ -7133,25 +7127,7 @@ var StyleContext = (function(){
     createChild : function(tag_name, css, tag_attr){
       var tag = new Tag("<" + tag_name + ">");
       tag.setAttrs(tag_attr || {});
-      var style = new StyleContext(tag, this, {forceCss:(css || {})});
-
-      // save 'original' parent to child-style, because sometimes it is required by 'grand-child'.
-      // for example, in following code, <li-body> is anonymous block,
-      // and parent style of <li-body> is <li>.style, and parent of <ul2> is <li-body>.style.
-      //
-      // <ul>
-      //   <li>
-      //     <li-mark>1.</li-mark>
-      //     <li-body><ul2>...</ul2></li-body>
-      //   </li>
-      // </ul>
-      // 
-      // <li-body> is created by <li>.style.createChild("div"), so not have original parent style(<ul>.style) as it's parent style.
-      // but <ul>.style is required by <ul2> to get it's accurate content-size.
-      // so child anonymous style(<li-mark>, <li-body> in this case) needs to save it's 'original' parent(<ul>.style in this case) as 'contextParent'
-      // in addition to <li>.style.
-      // style.contextParent = this.parent; 
-      return style;
+      return new StyleContext(tag, this, {forceCss:(css || {})});
     },
     // calclate max marker size by total child_count(item_count).
     setListItemCount : function(item_count){
@@ -7618,7 +7594,6 @@ var StyleContext = (function(){
     },
     getEdge : function(){
       return this.edge || null;
-      //return this.contextParent? this.contextParent.getEdge() : (this.edge || null);
     },
     getEdgeMeasure : function(flow){
       var edge = this.getEdge();
