@@ -8,13 +8,37 @@ var BlockGenerator = (function(){
     if(!context.isBlockSpaceLeft()){
       return null;
     }
+    var edges = this.style.getExtentEdges();
+    var is_first_output = this.stream.isHead();
+    var sub_edges = {before:0, after:0};
     while(this.hasNext()){
       var element = this._getNext(context);
       if(element === null){
 	break;
       }
       var extent = element.getLayoutExtent(this.style.flow);
+
+      // element overflow, but we try to the size after reducing before/after edge.
       if(!context.hasBlockSpaceFor(extent)){
+	// 1. if not first output, we can reduce before edge.
+	// bacause first edge is added to only before edge of 'first' block.
+	if(!is_first_output){
+	  sub_edges.before = edges.before;
+	}
+	// 2. if more element exists in this generator, we can reduce after edge,
+	// because after edge is added to after edge of 'final' block.
+	if(this.hasNext()){
+	  sub_edges.after = edges.after;
+	}
+	var extent2 = extent - sub_edges.before - sub_edges.after;
+
+	// element is included after before or after edges are removed?
+	if(extent2 < extent && context.hasBlockSpaceFor(extent2)){
+	  this._addElement(context, element, extent);
+	  break;
+	}
+	sub_edges.before = 0;
+	sub_edges.after = 0;
 	this.pushCache(element);
 	break;
       }
@@ -23,7 +47,7 @@ var BlockGenerator = (function(){
 	break;
       }
     }
-    return this._createOutput(context);
+    return this._createOutput(context, sub_edges);
   };
 
   BlockGenerator.prototype.popCache = function(context){
@@ -105,7 +129,7 @@ var BlockGenerator = (function(){
     this._onAddElement(element);
   };
 
-  BlockGenerator.prototype._createOutput = function(context){
+  BlockGenerator.prototype._createOutput = function(context, sub_edges){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
@@ -114,7 +138,8 @@ var BlockGenerator = (function(){
     var block = this.style.createBlock({
       extent:extent,
       elements:elements,
-      breakAfter:context.hasBreakAfter()
+      breakAfter:context.hasBreakAfter(),
+      subEdges:sub_edges || {}
     });
 
     // call _onCreate callback for 'each' output

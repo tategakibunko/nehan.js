@@ -65,7 +65,6 @@ var ParallelGenerator = (function(){
 
   ParallelGenerator.prototype._wrapBlocks = function(blocks){
     var flow = this.style.flow;
-    var generators = this.generators;
     var max_block = this._findMaxBlock(blocks);
     var uniformed_blocks = this._alignContentExtent(blocks, max_block.getContentExtent(flow));
     return this.style.createBlock({

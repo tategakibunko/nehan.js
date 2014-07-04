@@ -315,10 +315,20 @@ var StyleContext = (function(){
       var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
+      var edge = this.edge || null;
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
+      if(edge && opt.subEdges && (opt.subEdges.before || opt.subEdges.after)){
+	edge = edge.clone();
+	if(opt.subEdges.before){
+	  edge.clearBefore(this.flow);
+	}
+	if(opt.subEdges.after){
+	  edge.clearAfter(this.flow);
+	}
+      }
       box.display = (this.display === "inline-block")? this.display : "block";
-      box.edge = this.edge || null; // for Box::getLayoutExtent, Box::getLayoutMeasure
+      box.edge = edge; // for Box::getLayoutExtent, Box::getLayoutMeasure
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
@@ -740,6 +750,13 @@ var StyleContext = (function(){
     getEdgeExtent : function(flow){
       var edge = this.edge || null;
       return edge? edge.getExtent(flow || this.flow) : 0;
+    },
+    getExtentEdges : function(flow){
+      var edge = this.edge || null;
+      var flow = flow || this.flow;
+      var before = edge? edge.getBefore(flow) : 0;
+      var after = edge? edge.getAfter(flow) : 0;
+      return {before:before, after:after};
     },
     getInnerEdgeMeasure : function(flow){
       var edge = this.edge || null;
