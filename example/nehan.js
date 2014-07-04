@@ -6933,7 +6933,17 @@ var StyleContext = (function(){
       this.markup = markup;
       this.markupName = markup.getName();
       this.parent = parent || null;
+      
+      // notice that 'this.childs' is not children of each page.
+      // for example, assume that <body> consists 2 page(<div1>, <div2>).
+      //
+      // <body><div1>page1</div1><div2>page2</div2></body>
+      //
+      // at this case, global chilren of <body> is <div1> and <div2>.
+      // but for '<body> of page1', <div1> is the only child, and <div2> is for '<body> of page2' also.
+      // so we may create 'contextChilds' to distinguish these difference.
       this.childs = [];
+
       this.next = null; // next sibling
       this.prev = null; // prev sibling
 
@@ -7140,44 +7150,16 @@ var StyleContext = (function(){
       var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
       this.listMarkerSize = this.flow.getBoxSize(marker_measure, marker_extent);
     },
-    getExtentEdges : function(){
-      var edge = this.getEdge();
-      if(edge === null){
-	return {before:0, after:0};
-      }
-      return {
-	before:edge.getBefore(this.flow),
-	after:edge.getAfter(this.flow)
-      };
-    },
-    createContextEdge : function(opt){
-      var edge = this.getEdge();
-      if(edge === null){
-	return null;
-      }
-      if(opt.isFirst && opt.isLast){
-	return edge;
-      }
-      var edge_ = edge.clone();
-      if(!opt.isFirst){
-	edge_.clearBefore(this.flow);
-      }
-      if(!opt.isLast){
-	edge_.clearAfter(this.flow);
-      }
-      return edge_;
-    },
     createBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
       var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
-      var edge = this.createContextEdge(opt);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
       box.display = (this.display === "inline-block")? this.display : "block";
-      box.edge = edge; // for Box::getLayoutExtent, Box::getLayoutMeasure
+      box.edge = this.edge || null; // for Box::getLayoutExtent, Box::getLayoutMeasure
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
@@ -7592,23 +7574,20 @@ var StyleContext = (function(){
     getAutoLineExtent : function(){
       return Math.floor(this.getFontSize() * this.getLineRate());
     },
-    getEdge : function(){
-      return this.edge || null;
-    },
     getEdgeMeasure : function(flow){
-      var edge = this.getEdge();
+      var edge = this.edge || null;
       return edge? edge.getMeasureSize(flow || this.flow) : 0;
     },
     getEdgeExtent : function(flow){
-      var edge = this.getEdge();
+      var edge = this.edge || null;
       return edge? edge.getExtentSize(flow || this.flow) : 0;
     },
     getInnerEdgeMeasure : function(flow){
-      var edge = this.getEdge();
+      var edge = this.edge || null;
       return edge? edge.getInnerMeasureSize(flow || this.flow) : 0;
     },
     getInnerEdgeExtent : function(flow){
-      var edge = this.getEdge();
+      var edge = this.edge || null;
       return edge? edge.getInnerExtentSize(flow || this.flow) : 0;
     },
     // notice that box-size, box-edge is box local variable,
@@ -8089,11 +8068,6 @@ var LayoutContext = (function(){
   }
 
   LayoutContext.prototype = {
-    debug : function(title){
-      title = title || "layout context";
-      console.log("[%s](m = %d, e = %d)", title, this.inline.maxMeasure, this.block.maxExtent);
-      return this;
-    },
     // block-level
     isBlockSpaceLeft : function(){
       return this.block.isSpaceLeft();
@@ -8104,8 +8078,8 @@ var LayoutContext = (function(){
     hasBreakAfter : function(){
       return this.block.hasBreakAfter() || this.inline.hasBreakAfter() || false;
     },
-    addBlockElement : function(element, extent, opt){
-      this.block.addElement(element, extent, opt);
+    addBlockElement : function(element, extent){
+      this.block.addElement(element, extent);
     },
     getBlockElements : function(){
       return this.block.getElements();
@@ -8178,28 +8152,27 @@ var LayoutContext = (function(){
 
 
 var BlockContext = (function(){
-  function BlockContext(max_extent, extent_edges){
+  function BlockContext(max_extent){
     this.curExtent = 0;
     this.maxExtent = max_extent; // const
     this.pushedElements = [];
     this.elements = [];
     this.pulledElements = [];
     this.breakAfter = false;
-    this.extentEdges = extent_edges || {before:0, after:0};
   }
 
   BlockContext.prototype = {
     isSpaceLeft : function(){
       return this.getRestExtent() > 0;
     },
-    hasSpaceFor : function(extent, block_opt){
-      return this.getRestExtent() >= this.getContextExtent(extent, block_opt || {});
+    hasSpaceFor : function(extent){
+      return this.getRestExtent() >= extent;
     },
     hasBreakAfter : function(){
       return this.breakAfter;
     },
-    addElement : function(element, extent, block_opt){
-      this.curExtent += this.getContextExtent(extent, block_opt || {});
+    addElement : function(element, extent){
+      this.curExtent += extent;
       if(element.breakAfter){
 	this.breakAfter = true;
       }
@@ -8216,20 +8189,6 @@ var BlockContext = (function(){
     },
     getRestExtent : function(){
       return this.maxExtent - this.curExtent;
-    },
-    getContextExtent : function(extent, block_opt){
-      return extent + this.getEdgeExtent(block_opt || {});
-    },
-    getEdgeExtent : function(block_opt){
-      var edge_extent = 0;
-      block_opt = block_opt || {};
-      if(block_opt.isFirst){
-	edge_extent += this.extentEdges.before;
-      }
-      if(block_opt.isLast){
-	edge_extent += this.extentEdges.after;
-      }
-      return edge_extent;
     },
     getMaxExtent : function(){
       return this.maxExtent;
@@ -8366,7 +8325,6 @@ var LayoutGenerator = (function(){
     this._parentLayout = null;
     this._childLayout = null;
     this._cachedElements = [];
-    this._yieldCount = 0;
     this._terminate = false; // used to force terminate generator.
   }
 
@@ -8374,9 +8332,7 @@ var LayoutGenerator = (function(){
   // 2. call _yield implemented in inherited class.
   LayoutGenerator.prototype.yield = function(parent_context){
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
-    var result = this._yield(context);
-    this._yieldCount++;
-    return result;
+    return this._yield(context);
   };
 
   LayoutGenerator.prototype._yield = function(context){
@@ -8414,10 +8370,6 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype.hasCache = function(){
     return this._cachedElements.length > 0;
-  };
-
-  LayoutGenerator.prototype.isFirstOutput = function(){
-    return this._yieldCount === 0;
   };
 
   LayoutGenerator.prototype.yieldChildLayout = function(context){
@@ -8465,16 +8417,16 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createStartContext = function(){
     return new LayoutContext(
-      new BlockContext(this.style.outerExtent, this.style.getExtentEdges()),
+      new BlockContext(this.style.contentExtent),
       new InlineContext(this.style.contentMeasure)
-    ); //.debug(this.style.getMarkupName() + " start");
+    );
   };
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){
     return new LayoutContext(
-      new BlockContext(parent_context.getBlockRestExtent(), this.style.getExtentEdges()),
+      new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
       new InlineContext(this.style.contentMeasure)
-    ); //.debug(this.style.getMarkupName() + " child start");
+    );
   };
 
   LayoutGenerator.prototype._createStream = function(style){
@@ -8609,19 +8561,17 @@ var BlockGenerator = (function(){
     if(!context.isBlockSpaceLeft()){
       return null;
     }
-    var is_first = this.isFirstOutput();
     while(this.hasNext()){
       var element = this._getNext(context);
       if(element === null){
 	break;
       }
       var extent = element.getLayoutExtent(this.style.flow);
-      if(!context.hasBlockSpaceFor(extent, {isFirst:is_first, isLast:!this.hasNext()})){
+      if(!context.hasBlockSpaceFor(extent)){
 	this.pushCache(element);
-	this._isLast = true; // next yield is treated as last
 	break;
       }
-      this._addElement(context, element, extent, {isFirst:is_first, isLast:(this._isLast || false)});
+      this._addElement(context, element, extent);
       if(!context.isBlockSpaceLeft() || context.hasBreakAfter()){
 	break;
       }
@@ -8700,11 +8650,11 @@ var BlockGenerator = (function(){
     return this.yieldChildLayout(context);
   };
 
-  BlockGenerator.prototype._addElement = function(context, element, extent, block_opt){
+  BlockGenerator.prototype._addElement = function(context, element, extent){
     if(element === null){
       return;
     }
-    context.addBlockElement(element, extent, block_opt);
+    context.addBlockElement(element, extent);
     this._onAddElement(element);
   };
 
@@ -8717,8 +8667,6 @@ var BlockGenerator = (function(){
     var block = this.style.createBlock({
       extent:extent,
       elements:elements,
-      isFirst:this.isFirstOutput(),
-      isLast:!this.hasNext(), // no cache, no stream exists.
       breakAfter:context.hasBreakAfter()
     });
 
@@ -9471,8 +9419,6 @@ var ParallelGenerator = (function(){
     return List.mapi(blocks, function(i, block){
       if(block === null){
 	return generators[i].style.createBlock({
-	  isFirst:generators[i].isFirstOutput(),
-	  isLast:!generators[i].hasNext(),
 	  elements:[],
 	  extent:content_extent
 	});
@@ -9487,8 +9433,6 @@ var ParallelGenerator = (function(){
     var max_block = this._findMaxBlock(blocks);
     var uniformed_blocks = this._alignContentExtent(blocks, max_block.getContentExtent(flow));
     return this.style.createBlock({
-      isFirst:this.isFirstOutput(),
-      isLast:!this.hasNext(),
       elements:uniformed_blocks,
       extent:max_block.getLayoutExtent(flow)
     });
@@ -9531,6 +9475,8 @@ var SectionContentGenerator = (function(){
 var ListGenerator = (function(){
   function ListGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
+
+    // by setting max item count, 'this.style.listMarkerSize' is created.
     this.style.setListItemCount(this.stream.getTokenCount());
   }
   Class.extend(ListGenerator, BlockGenerator);

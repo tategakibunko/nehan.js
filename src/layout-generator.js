@@ -5,7 +5,6 @@ var LayoutGenerator = (function(){
     this._parentLayout = null;
     this._childLayout = null;
     this._cachedElements = [];
-    this._yieldCount = 0;
     this._terminate = false; // used to force terminate generator.
   }
 
@@ -13,9 +12,7 @@ var LayoutGenerator = (function(){
   // 2. call _yield implemented in inherited class.
   LayoutGenerator.prototype.yield = function(parent_context){
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
-    var result = this._yield(context);
-    this._yieldCount++;
-    return result;
+    return this._yield(context);
   };
 
   LayoutGenerator.prototype._yield = function(context){
@@ -53,10 +50,6 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype.hasCache = function(){
     return this._cachedElements.length > 0;
-  };
-
-  LayoutGenerator.prototype.isFirstOutput = function(){
-    return this._yieldCount === 0;
   };
 
   LayoutGenerator.prototype.yieldChildLayout = function(context){
@@ -104,16 +97,16 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createStartContext = function(){
     return new LayoutContext(
-      new BlockContext(this.style.outerExtent, this.style.getExtentEdges()),
+      new BlockContext(this.style.contentExtent),
       new InlineContext(this.style.contentMeasure)
-    ); //.debug(this.style.getMarkupName() + " start");
+    );
   };
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){
     return new LayoutContext(
-      new BlockContext(parent_context.getBlockRestExtent(), this.style.getExtentEdges()),
+      new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
       new InlineContext(this.style.contentMeasure)
-    ); //.debug(this.style.getMarkupName() + " child start");
+    );
   };
 
   LayoutGenerator.prototype._createStream = function(style){

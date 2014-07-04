@@ -92,7 +92,17 @@ var StyleContext = (function(){
       this.markup = markup;
       this.markupName = markup.getName();
       this.parent = parent || null;
+      
+      // notice that 'this.childs' is not children of each page.
+      // for example, assume that <body> consists 2 page(<div1>, <div2>).
+      //
+      // <body><div1>page1</div1><div2>page2</div2></body>
+      //
+      // at this case, global chilren of <body> is <div1> and <div2>.
+      // but for '<body> of page1', <div1> is the only child, and <div2> is for '<body> of page2' also.
+      // so we may create 'contextChilds' to distinguish these difference.
       this.childs = [];
+
       this.next = null; // next sibling
       this.prev = null; // prev sibling
 
@@ -299,44 +309,16 @@ var StyleContext = (function(){
       var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
       this.listMarkerSize = this.flow.getBoxSize(marker_measure, marker_extent);
     },
-    getExtentEdges : function(){
-      var edge = this.getEdge();
-      if(edge === null){
-	return {before:0, after:0};
-      }
-      return {
-	before:edge.getBefore(this.flow),
-	after:edge.getAfter(this.flow)
-      };
-    },
-    createContextEdge : function(opt){
-      var edge = this.getEdge();
-      if(edge === null){
-	return null;
-      }
-      if(opt.isFirst && opt.isLast){
-	return edge;
-      }
-      var edge_ = edge.clone();
-      if(!opt.isFirst){
-	edge_.clearBefore(this.flow);
-      }
-      if(!opt.isLast){
-	edge_.clearAfter(this.flow);
-      }
-      return edge_;
-    },
     createBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
       var measure = this.contentMeasure;
       var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
-      var edge = this.createContextEdge(opt);
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
       box.display = (this.display === "inline-block")? this.display : "block";
-      box.edge = edge; // for Box::getLayoutExtent, Box::getLayoutMeasure
+      box.edge = this.edge || null; // for Box::getLayoutExtent, Box::getLayoutMeasure
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
@@ -751,23 +733,20 @@ var StyleContext = (function(){
     getAutoLineExtent : function(){
       return Math.floor(this.getFontSize() * this.getLineRate());
     },
-    getEdge : function(){
-      return this.edge || null;
-    },
     getEdgeMeasure : function(flow){
-      var edge = this.getEdge();
+      var edge = this.edge || null;
       return edge? edge.getMeasureSize(flow || this.flow) : 0;
     },
     getEdgeExtent : function(flow){
-      var edge = this.getEdge();
+      var edge = this.edge || null;
       return edge? edge.getExtentSize(flow || this.flow) : 0;
     },
     getInnerEdgeMeasure : function(flow){
-      var edge = this.getEdge();
+      var edge = this.edge || null;
       return edge? edge.getInnerMeasureSize(flow || this.flow) : 0;
     },
     getInnerEdgeExtent : function(flow){
-      var edge = this.getEdge();
+      var edge = this.edge || null;
       return edge? edge.getInnerExtentSize(flow || this.flow) : 0;
     },
     // notice that box-size, box-edge is box local variable,

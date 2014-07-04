@@ -5,11 +5,6 @@ var LayoutContext = (function(){
   }
 
   LayoutContext.prototype = {
-    debug : function(title){
-      title = title || "layout context";
-      console.log("[%s](m = %d, e = %d)", title, this.inline.maxMeasure, this.block.maxExtent);
-      return this;
-    },
     // block-level
     isBlockSpaceLeft : function(){
       return this.block.isSpaceLeft();
@@ -20,8 +15,8 @@ var LayoutContext = (function(){
     hasBreakAfter : function(){
       return this.block.hasBreakAfter() || this.inline.hasBreakAfter() || false;
     },
-    addBlockElement : function(element, extent, opt){
-      this.block.addElement(element, extent, opt);
+    addBlockElement : function(element, extent){
+      this.block.addElement(element, extent);
     },
     getBlockElements : function(){
       return this.block.getElements();
