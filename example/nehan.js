@@ -6933,7 +6933,7 @@ var StyleContext = (function(){
       this.markup = markup;
       this.markupName = markup.getName();
       this.parent = parent || null;
-      
+
       // notice that 'this.childs' is not children of each page.
       // for example, assume that <body> consists 2 page(<div1>, <div2>).
       //
