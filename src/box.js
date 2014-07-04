@@ -95,11 +95,11 @@ var Box = (function(){
     },
     getEdgeMeasure : function(flow){
       flow = flow || this.style.flow;
-      return this.edge? this.edge.getMeasureSize(flow) : 0;
+      return this.edge? this.edge.getMeasure(flow) : 0;
     },
     getEdgeExtent : function(flow){
       flow = flow || this.style.flow;
-      return this.edge? this.edge.getExtentSize(flow) : 0;
+      return this.edge? this.edge.getExtent(flow) : 0;
     },
     getLayoutMeasure : function(flow){
       flow = flow || this.style.flow;

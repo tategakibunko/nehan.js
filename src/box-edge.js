@@ -40,30 +40,30 @@ var BoxEdge = (function (){
       ret += this.margin.getHeight();
       return ret;
     },
-    getMeasureSize : function(flow){
+    getMeasure : function(flow){
       var ret = 0;
-      ret += this.padding.getMeasureSize(flow);
-      ret += this.border.getMeasureSize(flow);
-      ret += this.margin.getMeasureSize(flow);
+      ret += this.padding.getMeasure(flow);
+      ret += this.border.getMeasure(flow);
+      ret += this.margin.getMeasure(flow);
       return ret;
     },
-    getExtentSize : function(flow){
+    getExtent : function(flow){
       var ret = 0;
-      ret += this.padding.getExtentSize(flow);
-      ret += this.margin.getExtentSize(flow);
-      ret += this.border.getExtentSize(flow);
+      ret += this.padding.getExtent(flow);
+      ret += this.margin.getExtent(flow);
+      ret += this.border.getExtent(flow);
       return ret;
     },
     getInnerMeasureSize : function(flow){
       var ret = 0;
-      ret += this.padding.getMeasureSize(flow);
-      ret += this.border.getMeasureSize(flow);
+      ret += this.padding.getMeasure(flow);
+      ret += this.border.getMeasure(flow);
       return ret;
     },
     getInnerExtentSize : function(flow){
       var ret = 0;
-      ret += this.padding.getExtentSize(flow);
-      ret += this.border.getExtentSize(flow);
+      ret += this.padding.getExtent(flow);
+      ret += this.border.getExtent(flow);
       return ret;
     },
     getBefore : function(flow){

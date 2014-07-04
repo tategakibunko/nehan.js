@@ -4567,10 +4567,10 @@ var Edge = (function(){
     getHeight : function(){
       return this.top + this.bottom;
     },
-    getMeasureSize : function(flow){
+    getMeasure : function(flow){
       return flow.isTextVertical()? this.getHeight() : this.getWidth();
     },
-    getExtentSize : function(flow){
+    getExtent : function(flow){
       return flow.isBlockflowVertical()? this.getHeight() : this.getWidth();
     },
     setSize : function(flow, size){
@@ -5020,30 +5020,30 @@ var BoxEdge = (function (){
       ret += this.margin.getHeight();
       return ret;
     },
-    getMeasureSize : function(flow){
+    getMeasure : function(flow){
       var ret = 0;
-      ret += this.padding.getMeasureSize(flow);
-      ret += this.border.getMeasureSize(flow);
-      ret += this.margin.getMeasureSize(flow);
+      ret += this.padding.getMeasure(flow);
+      ret += this.border.getMeasure(flow);
+      ret += this.margin.getMeasure(flow);
       return ret;
     },
-    getExtentSize : function(flow){
+    getExtent : function(flow){
       var ret = 0;
-      ret += this.padding.getExtentSize(flow);
-      ret += this.margin.getExtentSize(flow);
-      ret += this.border.getExtentSize(flow);
+      ret += this.padding.getExtent(flow);
+      ret += this.margin.getExtent(flow);
+      ret += this.border.getExtent(flow);
       return ret;
     },
     getInnerMeasureSize : function(flow){
       var ret = 0;
-      ret += this.padding.getMeasureSize(flow);
-      ret += this.border.getMeasureSize(flow);
+      ret += this.padding.getMeasure(flow);
+      ret += this.border.getMeasure(flow);
       return ret;
     },
     getInnerExtentSize : function(flow){
       var ret = 0;
-      ret += this.padding.getExtentSize(flow);
-      ret += this.border.getExtentSize(flow);
+      ret += this.padding.getExtent(flow);
+      ret += this.border.getExtent(flow);
       return ret;
     },
     getBefore : function(flow){
@@ -5260,11 +5260,11 @@ var Box = (function(){
     },
     getEdgeMeasure : function(flow){
       flow = flow || this.style.flow;
-      return this.edge? this.edge.getMeasureSize(flow) : 0;
+      return this.edge? this.edge.getMeasure(flow) : 0;
     },
     getEdgeExtent : function(flow){
       flow = flow || this.style.flow;
-      return this.edge? this.edge.getExtentSize(flow) : 0;
+      return this.edge? this.edge.getExtent(flow) : 0;
     },
     getLayoutMeasure : function(flow){
       flow = flow || this.style.flow;
@@ -7576,11 +7576,11 @@ var StyleContext = (function(){
     },
     getEdgeMeasure : function(flow){
       var edge = this.edge || null;
-      return edge? edge.getMeasureSize(flow || this.flow) : 0;
+      return edge? edge.getMeasure(flow || this.flow) : 0;
     },
     getEdgeExtent : function(flow){
       var edge = this.edge || null;
-      return edge? edge.getExtentSize(flow || this.flow) : 0;
+      return edge? edge.getExtent(flow || this.flow) : 0;
     },
     getInnerEdgeMeasure : function(flow){
       var edge = this.edge || null;

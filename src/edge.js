@@ -48,10 +48,10 @@ var Edge = (function(){
     getHeight : function(){
       return this.top + this.bottom;
     },
-    getMeasureSize : function(flow){
+    getMeasure : function(flow){
       return flow.isTextVertical()? this.getHeight() : this.getWidth();
     },
-    getExtentSize : function(flow){
+    getExtent : function(flow){
       return flow.isBlockflowVertical()? this.getHeight() : this.getWidth();
     },
     setSize : function(flow, size){

@@ -735,11 +735,11 @@ var StyleContext = (function(){
     },
     getEdgeMeasure : function(flow){
       var edge = this.edge || null;
-      return edge? edge.getMeasureSize(flow || this.flow) : 0;
+      return edge? edge.getMeasure(flow || this.flow) : 0;
     },
     getEdgeExtent : function(flow){
       var edge = this.edge || null;
-      return edge? edge.getExtentSize(flow || this.flow) : 0;
+      return edge? edge.getExtent(flow || this.flow) : 0;
     },
     getInnerEdgeMeasure : function(flow){
       var edge = this.edge || null;
