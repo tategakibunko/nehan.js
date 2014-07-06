@@ -8600,10 +8600,10 @@ var BlockGenerator = (function(){
 	if(this.hasNext()){
 	  sub_edges.after = edges.after;
 	}
-	var extent2 = extent - sub_edges.before - sub_edges.after;
+	var shorten_extent = extent - sub_edges.before - sub_edges.after;
 
-	// element is included after before or after edges are removed?
-	if(extent2 < extent && context.hasBlockSpaceFor(extent2)){
+	// is element is actually shorten and enough space is left for it?
+	if(shorten_extent < extent && context.hasBlockSpaceFor(shorten_extent)){
 	  this._addElement(context, element, extent);
 	  break;
 	}
