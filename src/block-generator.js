@@ -18,15 +18,15 @@ var BlockGenerator = (function(){
       }
       var extent = element.getLayoutExtent(this.style.flow);
 
-      // element overflow, but we try to the size after reducing before/after edge.
+      // element overflow, but we can try to add this element by reducing the size of before/after edge.
       if(!context.hasBlockSpaceFor(extent)){
 	// 1. if not first output, we can reduce before edge.
-	// bacause first edge is added to only before edge of 'first' block.
+	// bacause first edge is available to only before edge of 'first' block.
 	if(!is_first_output){
 	  sub_edges.before = edges.before;
 	}
 	// 2. if more element exists in this generator, we can reduce after edge,
-	// because after edge is added to after edge of 'final' block.
+	// because after edge is available to after edge of 'final' block.
 	if(this.hasNext()){
 	  sub_edges.after = edges.after;
 	}
