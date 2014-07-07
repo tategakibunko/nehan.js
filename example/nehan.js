@@ -4539,20 +4539,12 @@ var Edge = (function(){
     clearAfter : function(flow){
       this[flow.getPropAfter()] = 0;
     },
-    clone : function(){
-      var edge;
-      switch(this._type){
-	case "border": edge = new Border(); break;
-	case "padding": edge = new Padding(); break;
-	case "margin": edge = new Margin(); break;
-	default: throw "Invalid edge type";
-      }
-      //var edge = new Edge(this._type);
-      edge.top = this.top;
-      edge.right = this.right;
-      edge.bottom = this.bottom;
-      edge.left = this.left;
-      return edge;
+    copyTo : function(dst){
+      var self = this;
+      List.iter(Const.cssBoxDirs, function(dir){
+	dst[dir] = self[dir];
+      });
+      return dst;
     },
     getDirProp : function(dir){
       return [this._type, dir].join("-");
@@ -4777,6 +4769,10 @@ var Padding = (function(){
   }
   Class.extend(Padding, Edge);
 
+  Padding.prototype.clone = function(){
+    return this.copyTo(new Padding());
+  };
+
   return Padding;
 })();
 
@@ -4786,6 +4782,10 @@ var Margin = (function(){
     Edge.call(this, "margin");
   }
   Class.extend(Margin, Edge);
+
+  Margin.prototype.clone = function(){
+    return this.copyTo(new Margin());
+  };
 
   return Margin;
 })();
@@ -4798,7 +4798,7 @@ var Border = (function(){
   Class.extend(Border, Edge);
 
   Border.prototype.clone = function(){
-    var border = Edge.prototype.clone.call(this);
+    var border = this.copyTo(new Border());
     if(this.radius){
       // TODO
       // border.radius = this.radius.clone();

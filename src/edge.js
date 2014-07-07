@@ -20,20 +20,12 @@ var Edge = (function(){
     clearAfter : function(flow){
       this[flow.getPropAfter()] = 0;
     },
-    clone : function(){
-      var edge;
-      switch(this._type){
-	case "border": edge = new Border(); break;
-	case "padding": edge = new Padding(); break;
-	case "margin": edge = new Margin(); break;
-	default: throw "Invalid edge type";
-      }
-      //var edge = new Edge(this._type);
-      edge.top = this.top;
-      edge.right = this.right;
-      edge.bottom = this.bottom;
-      edge.left = this.left;
-      return edge;
+    copyTo : function(dst){
+      var self = this;
+      List.iter(Const.cssBoxDirs, function(dir){
+	dst[dir] = self[dir];
+      });
+      return dst;
     },
     getDirProp : function(dir){
       return [this._type, dir].join("-");

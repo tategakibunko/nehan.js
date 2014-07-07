@@ -4,6 +4,10 @@ var Padding = (function(){
   }
   Class.extend(Padding, Edge);
 
+  Padding.prototype.clone = function(){
+    return this.copyTo(new Padding());
+  };
+
   return Padding;
 })();
 

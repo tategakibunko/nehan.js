@@ -5,7 +5,7 @@ var Border = (function(){
   Class.extend(Border, Edge);
 
   Border.prototype.clone = function(){
-    var border = Edge.prototype.clone.call(this);
+    var border = this.copyTo(new Border());
     if(this.radius){
       // TODO
       // border.radius = this.radius.clone();
