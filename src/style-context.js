@@ -764,9 +764,10 @@ var StyleContext = (function(){
     getBlockContextEdge : function(flow){
       var edge = this.edge || null;
       var flow = flow || this.flow;
-      var before = edge? edge.getBefore(flow) : 0;
-      var after = edge? edge.getAfter(flow) : 0;
-      return {before:before, after:after};
+      return {
+	before:(edge? edge.getBefore(flow) : 0),
+	after:(edge? edge.getAfter(flow) : 0)
+      };
     },
     getInnerEdgeMeasure : function(flow){
       var edge = this.edge || null;

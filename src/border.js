@@ -4,6 +4,26 @@ var Border = (function(){
   }
   Class.extend(Border, Edge);
 
+  Border.prototype.clone = function(){
+    var border = Edge.prototype.clone.call(this);
+    if(this.radius){
+      // TODO
+      // border.radius = this.radius.clone();
+      border.radius = this.radius;
+    }
+    if(this.style){
+      // TODO
+      // border.style = this.style.clone();
+      border.style = this.style;
+    }
+    if(this.color){
+      // TODO
+      // border.color = this.color.clone();
+      border.color = this.color;
+    }
+    return border;
+  };
+
   Border.prototype.clearBefore = function(flow){
     this.setBefore(flow, 0);
     if(this.radius){

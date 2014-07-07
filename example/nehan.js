@@ -4540,7 +4540,14 @@ var Edge = (function(){
       this[flow.getPropAfter()] = 0;
     },
     clone : function(){
-      var edge = new Edge(this._type);
+      var edge;
+      switch(this._type){
+	case "border": edge = new Border(); break;
+	case "padding": edge = new Padding(); break;
+	case "margin": edge = new Margin(); break;
+	default: throw "Invalid edge type";
+      }
+      //var edge = new Edge(this._type);
       edge.top = this.top;
       edge.right = this.right;
       edge.bottom = this.bottom;
@@ -4789,6 +4796,26 @@ var Border = (function(){
     Edge.call(this, "border");
   }
   Class.extend(Border, Edge);
+
+  Border.prototype.clone = function(){
+    var border = Edge.prototype.clone.call(this);
+    if(this.radius){
+      // TODO
+      // border.radius = this.radius.clone();
+      border.radius = this.radius;
+    }
+    if(this.style){
+      // TODO
+      // border.style = this.style.clone();
+      border.style = this.style;
+    }
+    if(this.color){
+      // TODO
+      // border.color = this.color.clone();
+      border.color = this.color;
+    }
+    return border;
+  };
 
   Border.prototype.clearBefore = function(flow){
     this.setBefore(flow, 0);
@@ -7605,9 +7632,10 @@ var StyleContext = (function(){
     getBlockContextEdge : function(flow){
       var edge = this.edge || null;
       var flow = flow || this.flow;
-      var before = edge? edge.getBefore(flow) : 0;
-      var after = edge? edge.getAfter(flow) : 0;
-      return {before:before, after:after};
+      return {
+	before:(edge? edge.getBefore(flow) : 0),
+	after:(edge? edge.getAfter(flow) : 0)
+      };
     },
     getInnerEdgeMeasure : function(flow){
       var edge = this.edge || null;

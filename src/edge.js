@@ -21,7 +21,14 @@ var Edge = (function(){
       this[flow.getPropAfter()] = 0;
     },
     clone : function(){
-      var edge = new Edge(this._type);
+      var edge;
+      switch(this._type){
+	case "border": edge = new Border(); break;
+	case "padding": edge = new Padding(); break;
+	case "margin": edge = new Margin(); break;
+	default: throw "Invalid edge type";
+      }
+      //var edge = new Edge(this._type);
       edge.top = this.top;
       edge.right = this.right;
       edge.bottom = this.bottom;
