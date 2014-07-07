@@ -8608,23 +8608,26 @@ var BlockGenerator = (function(){
     if(!context.hasBlockSpaceFor(1, !this.hasNext())){
       return null;
     }
-    while(this.hasNext()){
+    while(true){
+      if(!this.hasNext()){
+	return this._createOutput(context, context.getBlockCancelEdge(true));
+      }
       var element = this._getNext(context);
+      var is_last_block = !this.hasNext();
+      var cancel_edge = context.getBlockCancelEdge(is_last_block);
       if(element === null){
-	break;
+	return this._createOutput(context, cancel_edge);
       }
       var extent = element.getLayoutExtent(this.style.flow);
-      if(!context.hasBlockSpaceFor(extent, !this.hasNext())){
-	var cancel_edge = context.getBlockCancelEdge(!this.hasNext()); // get cancel edge before caching
+      if(!context.hasBlockSpaceFor(extent, is_last_block)){
 	this.pushCache(element);
 	return this._createOutput(context, cancel_edge);
       }
       this._addElement(context, element, extent);
-      if(!context.hasBlockSpaceFor(1, !this.hasNext()) || context.hasBreakAfter()){
-	break;
+      if(!context.hasBlockSpaceFor(1, is_last_block) || context.hasBreakAfter()){
+	return this._createOutput(context, cancel_edge);
       }
     }
-    return this._createOutput(context, context.getBlockCancelEdge(!this.hasNext()));
   };
 
   BlockGenerator.prototype.popCache = function(context){
