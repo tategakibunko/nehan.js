@@ -6,9 +6,6 @@ var LayoutContext = (function(){
 
   LayoutContext.prototype = {
     // block-level
-    isBlockSpaceLeft : function(){
-      return this.block.isSpaceLeft();
-    },
     hasBlockSpaceFor : function(extent, opt){
       return this.block.hasSpaceFor(extent, opt);
     },
@@ -36,9 +33,6 @@ var LayoutContext = (function(){
     // inline-level
     isInlineEmpty : function(){
       return this.inline.isEmpty();
-    },
-    isInlineSpaceLeft : function(){
-      return this.inline.isSpaceLeft();
     },
     hasInlineSpaceFor : function(measure){
       return this.inline.hasSpaceFor(measure);

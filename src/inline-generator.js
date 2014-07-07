@@ -13,7 +13,7 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._yield = function(context){
-    if(!context.isInlineSpaceLeft()){
+    if(!context.hasInlineSpaceFor(1)){
       return null;
     }
     while(this.hasNext()){
@@ -30,7 +30,7 @@ var InlineGenerator = (function(){
 	break;
       }
       this._addElement(context, element, measure);
-      if(!context.isInlineSpaceLeft()){
+      if(!context.hasInlineSpaceFor(1)){
 	break;
       }
     }

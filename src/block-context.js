@@ -12,9 +12,6 @@ var BlockContext = (function(){
   }
 
   BlockContext.prototype = {
-    isSpaceLeft : function(){
-      return this.getRestExtent() > 0;
-    },
     hasSpaceFor : function(extent, is_last_block){
       is_last_block = is_last_block || false;
       var cancel_size = this.getCancelSize(is_last_block);

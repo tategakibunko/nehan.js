@@ -15,9 +15,6 @@ var InlineContext = (function(){
     isEmpty : function(){
       return !this.lineBreak && !this.breakAfter && this.elements.length === 0;
     },
-    isSpaceLeft : function(){
-      return this.getRestMeasure() > 0;
-    },
     hasSpaceFor : function(measure){
       return this.getRestMeasure() >= measure;
     },

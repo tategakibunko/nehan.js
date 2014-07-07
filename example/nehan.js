@@ -8096,9 +8096,6 @@ var LayoutContext = (function(){
 
   LayoutContext.prototype = {
     // block-level
-    isBlockSpaceLeft : function(){
-      return this.block.isSpaceLeft();
-    },
     hasBlockSpaceFor : function(extent, opt){
       return this.block.hasSpaceFor(extent, opt);
     },
@@ -8126,9 +8123,6 @@ var LayoutContext = (function(){
     // inline-level
     isInlineEmpty : function(){
       return this.inline.isEmpty();
-    },
-    isInlineSpaceLeft : function(){
-      return this.inline.isSpaceLeft();
     },
     hasInlineSpaceFor : function(measure){
       return this.inline.hasSpaceFor(measure);
@@ -8195,9 +8189,6 @@ var BlockContext = (function(){
   }
 
   BlockContext.prototype = {
-    isSpaceLeft : function(){
-      return this.getRestExtent() > 0;
-    },
     hasSpaceFor : function(extent, is_last_block){
       is_last_block = is_last_block || false;
       var cancel_size = this.getCancelSize(is_last_block);
@@ -8270,9 +8261,6 @@ var InlineContext = (function(){
   InlineContext.prototype = {
     isEmpty : function(){
       return !this.lineBreak && !this.breakAfter && this.elements.length === 0;
-    },
-    isSpaceLeft : function(){
-      return this.getRestMeasure() > 0;
     },
     hasSpaceFor : function(measure){
       return this.getRestMeasure() >= measure;
@@ -8617,7 +8605,7 @@ var BlockGenerator = (function(){
   Class.extend(BlockGenerator, LayoutGenerator);
 
   BlockGenerator.prototype._yield = function(context){
-    if(!context.isBlockSpaceLeft()){
+    if(!context.hasBlockSpaceFor(1, !this.hasNext())){
       return null;
     }
     while(this.hasNext()){
@@ -8632,7 +8620,7 @@ var BlockGenerator = (function(){
 	return this._createOutput(context, cancel_edge);
       }
       this._addElement(context, element, extent);
-      if(!context.isBlockSpaceLeft() || context.hasBreakAfter()){
+      if(!context.hasBlockSpaceFor(1, !this.hasNext()) || context.hasBreakAfter()){
 	break;
       }
     }
@@ -8760,7 +8748,7 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._yield = function(context){
-    if(!context.isInlineSpaceLeft()){
+    if(!context.hasInlineSpaceFor(1)){
       return null;
     }
     while(this.hasNext()){
@@ -8777,7 +8765,7 @@ var InlineGenerator = (function(){
 	break;
       }
       this._addElement(context, element, measure);
-      if(!context.isInlineSpaceLeft()){
+      if(!context.hasInlineSpaceFor(1)){
 	break;
       }
     }

@@ -5,7 +5,7 @@ var BlockGenerator = (function(){
   Class.extend(BlockGenerator, LayoutGenerator);
 
   BlockGenerator.prototype._yield = function(context){
-    if(!context.isBlockSpaceLeft()){
+    if(!context.hasBlockSpaceFor(1, !this.hasNext())){
       return null;
     }
     while(this.hasNext()){
@@ -20,7 +20,7 @@ var BlockGenerator = (function(){
 	return this._createOutput(context, cancel_edge);
       }
       this._addElement(context, element, extent);
-      if(!context.isBlockSpaceLeft() || context.hasBreakAfter()){
+      if(!context.hasBlockSpaceFor(1, !this.hasNext()) || context.hasBreakAfter()){
 	break;
       }
     }
