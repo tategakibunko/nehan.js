@@ -7114,7 +7114,9 @@ var StyleContext = (function(){
       if(this.parent === null){
 	return this.createChild("div", css);
       }
-      return new StyleContext(this.markup, this.parent, {forceCss:(css || {})});
+      var clone_style = new StyleContext(this.markup, this.parent, {forceCss:(css || {})});
+      clone_style.parent.removeChild(clone_style);
+      return clone_style;
     },
     // append child style context
     appendChild : function(child_style){
@@ -7126,7 +7128,9 @@ var StyleContext = (function(){
       this.childs.push(child_style);
     },
     removeChild : function(child_style){
-      var index = List.indexOf(this.childs, Closure.eq(child_style));
+      var index = List.indexOf(this.childs, function(child){
+	return child === child_style;
+      });
       if(index >= 0){
 	var removed_child = this.childs.splice(index, 1);
 	return removed_child;
@@ -7592,7 +7596,7 @@ var StyleContext = (function(){
       var edge = this.edge || null;
       return edge? edge.getExtent(flow || this.flow) : 0;
     },
-    getExtentEdges : function(flow){
+    getBlockContextEdge : function(flow){
       var edge = this.edge || null;
       var flow = flow || this.flow;
       var before = edge? edge.getBefore(flow) : 0;
@@ -8110,6 +8114,9 @@ var LayoutContext = (function(){
     getBlockRestExtent : function(){
       return this.block.getRestExtent();
     },
+    getBlockCancelEdge : function(is_last_block){
+      return this.block.getCancelEdge(is_last_block);
+    },
     // inline-level
     isInlineEmpty : function(){
       return this.inline.isEmpty();
@@ -8169,21 +8176,26 @@ var LayoutContext = (function(){
 
 
 var BlockContext = (function(){
-  function BlockContext(max_extent){
+  function BlockContext(max_extent, opt){
+    opt = opt || {};
     this.curExtent = 0;
     this.maxExtent = max_extent; // const
     this.pushedElements = [];
     this.elements = [];
     this.pulledElements = [];
     this.breakAfter = false;
+    this.contextEdge = opt.contextEdge || {before:0, after:0};
+    this.isFirstBlock = (typeof opt.isFirstBlock === "undefined")? true : opt.isFirstBlock;
   }
 
   BlockContext.prototype = {
     isSpaceLeft : function(){
       return this.getRestExtent() > 0;
     },
-    hasSpaceFor : function(extent){
-      return this.getRestExtent() >= extent;
+    hasSpaceFor : function(extent, is_last_block){
+      is_last_block = is_last_block || false;
+      var cancel_size = this.getCancelSize(is_last_block);
+      return this.getRestExtent() >= (extent - cancel_size);
     },
     hasBreakAfter : function(){
       return this.breakAfter;
@@ -8200,6 +8212,21 @@ var BlockContext = (function(){
       } else {
 	this.elements.push(element);
       }
+    },
+    getCancelEdge : function(is_last_block){
+      return {
+	// if not first output, we can reduce before edge.
+	// bacause first edge is only available to 'first' block.
+	before:(this.isFirstBlock? 0 : this.contextEdge.before),
+	
+	// if not last output, we can reduce after edge,
+	// because after edge is only available to 'last' block.
+	after:(is_last_block? 0 : this.contextEdge.after)
+      };
+    },
+    getCancelSize : function(is_last_block){
+      var cancel_edge = this.getCancelEdge(is_last_block);
+      return cancel_edge.before + cancel_edge.after;
     },
     getCurExtent : function(){
       return this.curExtent;
@@ -8434,14 +8461,23 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createStartContext = function(){
     return new LayoutContext(
-      new BlockContext(this.style.contentExtent),
+      new BlockContext(this.style.contentExtent, {
+	isFirstBlock:true,
+	contextEdge:this.style.getBlockContextEdge()
+      }),
       new InlineContext(this.style.contentMeasure)
     );
   };
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){
+    var context_edge = this.style.getBlockContextEdge();
+    var is_first_block = this.stream? this.stream.isHead() : true;
+    var max_extent = parent_context.getBlockRestExtent() - context_edge.before - context_edge.after;
     return new LayoutContext(
-      new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
+      new BlockContext(max_extent, {
+	isFirstBlock:is_first_block,
+	contextEdge:context_edge
+      }),
       new InlineContext(this.style.contentMeasure)
     );
   };
@@ -8578,46 +8614,22 @@ var BlockGenerator = (function(){
     if(!context.isBlockSpaceLeft()){
       return null;
     }
-    var edges = this.style.getExtentEdges();
-    var is_first_output = this.stream.isHead();
-    var sub_edges = {before:0, after:0};
     while(this.hasNext()){
       var element = this._getNext(context);
       if(element === null){
 	break;
       }
       var extent = element.getLayoutExtent(this.style.flow);
-
-      // element overflow, but we can try to add this element by reducing the size of before/after edge.
-      if(!context.hasBlockSpaceFor(extent)){
-	// 1. if not first output, we can reduce before edge.
-	// bacause first edge is only available to 'first' block.
-	if(!is_first_output){
-	  sub_edges.before = edges.before;
-	}
-	// 2. if more element exists in this generator, we can reduce after edge,
-	// because after edge is only available to 'final' block.
-	if(this.hasNext()){
-	  sub_edges.after = edges.after;
-	}
-	var shorten_extent = extent - sub_edges.before - sub_edges.after;
-
-	// is element is actually shorten and enough space is left for it?
-	if(shorten_extent < extent && context.hasBlockSpaceFor(shorten_extent)){
-	  this._addElement(context, element, extent);
-	  break;
-	}
-	sub_edges.before = 0;
-	sub_edges.after = 0;
+      if(!context.hasBlockSpaceFor(extent, !this.hasNext())){
 	this.pushCache(element);
-	break;
+	return this._createOutput(context, {before:0, after:0});
       }
       this._addElement(context, element, extent);
       if(!context.isBlockSpaceLeft() || context.hasBreakAfter()){
 	break;
       }
     }
-    return this._createOutput(context, sub_edges);
+    return this._createOutput(context, context.getBlockCancelEdge(!this.hasNext()));
   };
 
   BlockGenerator.prototype.popCache = function(context){

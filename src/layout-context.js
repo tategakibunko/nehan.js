@@ -30,6 +30,9 @@ var LayoutContext = (function(){
     getBlockRestExtent : function(){
       return this.block.getRestExtent();
     },
+    getBlockCancelEdge : function(is_last_block){
+      return this.block.getCancelEdge(is_last_block);
+    },
     // inline-level
     isInlineEmpty : function(){
       return this.inline.isEmpty();

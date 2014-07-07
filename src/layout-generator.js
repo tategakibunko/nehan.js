@@ -97,14 +97,23 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createStartContext = function(){
     return new LayoutContext(
-      new BlockContext(this.style.contentExtent),
+      new BlockContext(this.style.contentExtent, {
+	isFirstBlock:true,
+	contextEdge:this.style.getBlockContextEdge()
+      }),
       new InlineContext(this.style.contentMeasure)
     );
   };
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){
+    var context_edge = this.style.getBlockContextEdge();
+    var is_first_block = this.stream? this.stream.isHead() : true;
+    var max_extent = parent_context.getBlockRestExtent() - context_edge.before - context_edge.after;
     return new LayoutContext(
-      new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
+      new BlockContext(max_extent, {
+	isFirstBlock:is_first_block,
+	contextEdge:context_edge
+      }),
       new InlineContext(this.style.contentMeasure)
     );
   };

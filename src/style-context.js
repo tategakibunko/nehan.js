@@ -273,7 +273,9 @@ var StyleContext = (function(){
       if(this.parent === null){
 	return this.createChild("div", css);
       }
-      return new StyleContext(this.markup, this.parent, {forceCss:(css || {})});
+      var clone_style = new StyleContext(this.markup, this.parent, {forceCss:(css || {})});
+      clone_style.parent.removeChild(clone_style);
+      return clone_style;
     },
     // append child style context
     appendChild : function(child_style){
@@ -285,7 +287,9 @@ var StyleContext = (function(){
       this.childs.push(child_style);
     },
     removeChild : function(child_style){
-      var index = List.indexOf(this.childs, Closure.eq(child_style));
+      var index = List.indexOf(this.childs, function(child){
+	return child === child_style;
+      });
       if(index >= 0){
 	var removed_child = this.childs.splice(index, 1);
 	return removed_child;
@@ -751,7 +755,7 @@ var StyleContext = (function(){
       var edge = this.edge || null;
       return edge? edge.getExtent(flow || this.flow) : 0;
     },
-    getExtentEdges : function(flow){
+    getBlockContextEdge : function(flow){
       var edge = this.edge || null;
       var flow = flow || this.flow;
       var before = edge? edge.getBefore(flow) : 0;

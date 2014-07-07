@@ -8,46 +8,22 @@ var BlockGenerator = (function(){
     if(!context.isBlockSpaceLeft()){
       return null;
     }
-    var edges = this.style.getExtentEdges();
-    var is_first_output = this.stream.isHead();
-    var sub_edges = {before:0, after:0};
     while(this.hasNext()){
       var element = this._getNext(context);
       if(element === null){
 	break;
       }
       var extent = element.getLayoutExtent(this.style.flow);
-
-      // element overflow, but we can try to add this element by reducing the size of before/after edge.
-      if(!context.hasBlockSpaceFor(extent)){
-	// 1. if not first output, we can reduce before edge.
-	// bacause first edge is only available to 'first' block.
-	if(!is_first_output){
-	  sub_edges.before = edges.before;
-	}
-	// 2. if more element exists in this generator, we can reduce after edge,
-	// because after edge is only available to 'final' block.
-	if(this.hasNext()){
-	  sub_edges.after = edges.after;
-	}
-	var shorten_extent = extent - sub_edges.before - sub_edges.after;
-
-	// is element is actually shorten and enough space is left for it?
-	if(shorten_extent < extent && context.hasBlockSpaceFor(shorten_extent)){
-	  this._addElement(context, element, extent);
-	  break;
-	}
-	sub_edges.before = 0;
-	sub_edges.after = 0;
+      if(!context.hasBlockSpaceFor(extent, !this.hasNext())){
 	this.pushCache(element);
-	break;
+	return this._createOutput(context, {before:0, after:0});
       }
       this._addElement(context, element, extent);
       if(!context.isBlockSpaceLeft() || context.hasBreakAfter()){
 	break;
       }
     }
-    return this._createOutput(context, sub_edges);
+    return this._createOutput(context, context.getBlockCancelEdge(!this.hasNext()));
   };
 
   BlockGenerator.prototype.popCache = function(context){
