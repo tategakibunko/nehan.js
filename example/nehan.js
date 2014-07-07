@@ -7163,7 +7163,7 @@ var StyleContext = (function(){
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
       box.display = (this.display === "inline-block")? this.display : "block";
-      box.edge = this._createBlockContextEdge(this.edge || null, opt.cancelEdge); // for Box::getLayoutExtent, Box::getLayoutMeasure
+      box.edge = this._createBlockContextEdge(this.edge || null, opt.cancelEdge || null); // for Box::getLayoutExtent, Box::getLayoutMeasure
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
@@ -8627,8 +8627,9 @@ var BlockGenerator = (function(){
       }
       var extent = element.getLayoutExtent(this.style.flow);
       if(!context.hasBlockSpaceFor(extent, !this.hasNext())){
+	var cancel_edge = context.getBlockCancelEdge(!this.hasNext()); // get cancel edge before caching
 	this.pushCache(element);
-	break;
+	return this._createOutput(context, cancel_edge);
       }
       this._addElement(context, element, extent);
       if(!context.isBlockSpaceLeft() || context.hasBreakAfter()){

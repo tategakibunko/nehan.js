@@ -15,8 +15,9 @@ var BlockGenerator = (function(){
       }
       var extent = element.getLayoutExtent(this.style.flow);
       if(!context.hasBlockSpaceFor(extent, !this.hasNext())){
+	var cancel_edge = context.getBlockCancelEdge(!this.hasNext()); // get cancel edge before caching
 	this.pushCache(element);
-	break;
+	return this._createOutput(context, cancel_edge);
       }
       this._addElement(context, element, extent);
       if(!context.isBlockSpaceLeft() || context.hasBreakAfter()){
