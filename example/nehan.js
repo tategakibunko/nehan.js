@@ -8629,7 +8629,7 @@ var BlockGenerator = (function(){
       var extent = element.getLayoutExtent(this.style.flow);
       if(!context.hasBlockSpaceFor(extent, !this.hasNext())){
 	this.pushCache(element);
-	return this._createOutput(context, {before:0, after:0});
+	return this._createOutput(context, context.getBlockCancelEdge(!this.hasNext()));
       }
       this._addElement(context, element, extent);
       if(!context.isBlockSpaceLeft() || context.hasBreakAfter()){
