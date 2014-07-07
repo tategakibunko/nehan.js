@@ -7163,12 +7163,12 @@ var StyleContext = (function(){
       var edge = this.edge || null;
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
-      if(edge && opt.subEdges && (opt.subEdges.before || opt.subEdges.after)){
+      if(edge && opt.cancelEdge && (opt.cancelEdge.before || opt.cancelEdge.after)){
 	edge = edge.clone();
-	if(opt.subEdges.before){
+	if(opt.cancelEdge.before){
 	  edge.clearBefore(this.flow);
 	}
-	if(opt.subEdges.after){
+	if(opt.cancelEdge.after){
 	  edge.clearAfter(this.flow);
 	}
       }
@@ -8711,7 +8711,7 @@ var BlockGenerator = (function(){
     this._onAddElement(element);
   };
 
-  BlockGenerator.prototype._createOutput = function(context, sub_edges){
+  BlockGenerator.prototype._createOutput = function(context, cancel_edge){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
@@ -8721,7 +8721,7 @@ var BlockGenerator = (function(){
       extent:extent,
       elements:elements,
       breakAfter:context.hasBreakAfter(),
-      subEdges:sub_edges || {}
+      cancelEdge:cancel_edge || null
     });
 
     // call _onCreate callback for 'each' output

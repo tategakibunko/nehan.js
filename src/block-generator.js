@@ -105,7 +105,7 @@ var BlockGenerator = (function(){
     this._onAddElement(element);
   };
 
-  BlockGenerator.prototype._createOutput = function(context, sub_edges){
+  BlockGenerator.prototype._createOutput = function(context, cancel_edge){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
@@ -115,7 +115,7 @@ var BlockGenerator = (function(){
       extent:extent,
       elements:elements,
       breakAfter:context.hasBreakAfter(),
-      subEdges:sub_edges || {}
+      cancelEdge:cancel_edge || null
     });
 
     // call _onCreate callback for 'each' output

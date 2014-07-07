@@ -322,12 +322,12 @@ var StyleContext = (function(){
       var edge = this.edge || null;
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
-      if(edge && opt.subEdges && (opt.subEdges.before || opt.subEdges.after)){
+      if(edge && opt.cancelEdge && (opt.cancelEdge.before || opt.cancelEdge.after)){
 	edge = edge.clone();
-	if(opt.subEdges.before){
+	if(opt.cancelEdge.before){
 	  edge.clearBefore(this.flow);
 	}
-	if(opt.subEdges.after){
+	if(opt.cancelEdge.after){
 	  edge.clearAfter(this.flow);
 	}
       }
