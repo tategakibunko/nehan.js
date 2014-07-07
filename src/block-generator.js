@@ -10,22 +10,21 @@ var BlockGenerator = (function(){
     }
     while(true){
       if(!this.hasNext()){
-	return this._createOutput(context, context.getBlockCancelEdge(true));
+	return this._createOutput(context, true); // output last block
       }
       var element = this._getNext(context);
       var is_last_block = !this.hasNext();
-      var cancel_edge = context.getBlockCancelEdge(is_last_block);
       if(element === null){
-	return this._createOutput(context, cancel_edge);
+	return this._createOutput(context, is_last_block);
       }
       var extent = element.getLayoutExtent(this.style.flow);
       if(!context.hasBlockSpaceFor(extent, is_last_block)){
 	this.pushCache(element);
-	return this._createOutput(context, cancel_edge);
+	return this._createOutput(context, is_last_block);
       }
       this._addElement(context, element, extent);
       if(!context.hasBlockSpaceFor(1, is_last_block) || context.hasBreakAfter()){
-	return this._createOutput(context, cancel_edge);
+	return this._createOutput(context, is_last_block);
       }
     }
   };
@@ -109,7 +108,7 @@ var BlockGenerator = (function(){
     this._onAddElement(element);
   };
 
-  BlockGenerator.prototype._createOutput = function(context, cancel_edge){
+  BlockGenerator.prototype._createOutput = function(context, is_last_block){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
@@ -119,7 +118,7 @@ var BlockGenerator = (function(){
       extent:extent,
       elements:elements,
       breakAfter:context.hasBreakAfter(),
-      cancelEdge:cancel_edge || null
+      cancelEdge:context.getBlockCancelEdge(is_last_block)
     });
 
     // call _onCreate callback for 'each' output
