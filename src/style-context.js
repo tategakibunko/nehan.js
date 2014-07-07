@@ -322,14 +322,8 @@ var StyleContext = (function(){
       var edge = this.edge || null;
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
-      if(edge && opt.cancelEdge && (opt.cancelEdge.before || opt.cancelEdge.after)){
-	edge = edge.clone();
-	if(opt.cancelEdge.before){
-	  edge.clearBefore(this.flow);
-	}
-	if(opt.cancelEdge.after){
-	  edge.clearAfter(this.flow);
-	}
+      if(edge && opt.cancelEdge){
+	edge = this._createCancelEdge(edge, opt.cancelEdge);
       }
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = edge; // for Box::getLayoutExtent, Box::getLayoutMeasure
@@ -346,6 +340,19 @@ var StyleContext = (function(){
 	box.pulled = true;
       }
       return box;
+    },
+    _createCancelEdge : function(edge, cancel_edge){
+      if(cancel_edge.before === 0 && cancel_edge.after === 0){
+	return edge;
+      }
+      edge = edge.clone();
+      if(cancel_edge.before){
+	edge.clearBefore(this.flow);
+      }
+      if(cancel_edge.after){
+	edge.clearAfter(this.flow);
+      }
+      return edge;
     },
     createImage : function(opt){
       opt = opt || {};
