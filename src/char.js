@@ -37,7 +37,9 @@ var Char = (function(){
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
       if(this.isKakkoStart()){
-	if(!padding_enable){
+	if(this.data === "\x28"){ // left parenthis
+	  css["height"] = "0.5em"; // it's temporary fix, so maybe need to be refactored.
+	} else if(!padding_enable){
 	  css["margin-top"] = "-0.5em";
 	}
       } else {

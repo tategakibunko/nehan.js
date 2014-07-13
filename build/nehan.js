@@ -3167,7 +3167,9 @@ var Char = (function(){
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
       if(this.isKakkoStart()){
-	if(!padding_enable){
+	if(this.data === "\x28"){ // left parenthis
+	  css["height"] = "0.5em"; // it's temporary fix, so maybe need to be refactored.
+	} else if(!padding_enable){
 	  css["margin-top"] = "-0.5em";
 	}
       } else {
@@ -6458,6 +6460,14 @@ var Kerning = {
       cur_char.spaceRateEnd = space_rate;
     }
   },
+  // if previous text is not exists or previous text is not left brace(or paren etc),
+  // add space to start direction.
+  //
+  // [example]
+  //   (  => [SPACE](
+  //   a( => a[SPACE](
+  //   (( => ((
+  //   {( => {(
   _getTextSpaceStart : function(cur_char, prev_text){
     if(prev_text === null){
       return 0.5;
@@ -6467,6 +6477,14 @@ var Kerning = {
     }
     return 0.5;
   },
+  // if next text is not exists or next text is not right brace(or paren etc),
+  // add space to end direction.
+  //
+  // [example]
+  //   )  => )[SPACE]
+  //   )a => )[SPACE]a
+  //   )) => ))
+  //   )} => )}
   _getTextSpaceEnd : function(cur_char, next_text){
     if(next_text === null){
       return 0.5;
