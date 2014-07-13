@@ -23,9 +23,11 @@ var Kerning = {
   // if previous text is not exists or previous text is not left brace(or paren etc),
   // add space to start direction.
   //
-  // [example]
+  // [example:add space]
   //   (  => [SPACE](
   //   a( => a[SPACE](
+  //
+  // [example:do nothing]
   //   (( => ((
   //   {( => {(
   _getTextSpaceStart : function(cur_char, prev_text){
@@ -40,9 +42,11 @@ var Kerning = {
   // if next text is not exists or next text is not right brace(or paren etc),
   // add space to end direction.
   //
-  // [example]
+  // [example:add space]
   //   )  => )[SPACE]
   //   )a => )[SPACE]a
+  //
+  // [example:do nothing]
   //   )) => ))
   //   )} => )}
   _getTextSpaceEnd : function(cur_char, next_text){
