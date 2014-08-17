@@ -10505,9 +10505,11 @@ var NehanPagedElement = (function(){
     },
     setStyle : function(name, value){
       this.engine.setStyle(name, value);
+      return this;
     },
     setStyles : function(values){
       this.engine.setStyles(values);
+      return this;
     },
     setContent : function(content, opt){
       var self = this;
@@ -10528,6 +10530,7 @@ var NehanPagedElement = (function(){
 	  }
 	}
       });
+      return this;
     },
     setPage : function(page_no){
       var page = this.getPage(page_no);
