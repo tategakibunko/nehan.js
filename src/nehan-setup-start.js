@@ -37,4 +37,5 @@ Nehan.addSingleTagByRex = function(rex){
 // so each module returned by this function has independent environment.
 // this is usefull to show multiple layout(vertical and horizontal) in a single page.
 Nehan.setup = function(engine_args){
+"use strict";
 var __engine_args = engine_args || {};
