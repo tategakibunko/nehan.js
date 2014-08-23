@@ -5873,13 +5873,13 @@ var SectionTreeConverter = (function(){
       toc_ctx = toc_ctx.startRoot();
       var child_toc = callbacks.createToc(toc_ctx, child);
       var ol = callbacks.createRoot(child_toc);
-      arguments.callee(toc_ctx, ol, child, callbacks);
+      parse(toc_ctx, ol, child, callbacks);
       li.appendChild(ol);
       toc_ctx = toc_ctx.endRoot();
     }
     var next = tree.getNext();
     if(next){
-      arguments.callee(toc_ctx.stepNext(), parent, next, callbacks);
+      parse(toc_ctx.stepNext(), parent, next, callbacks);
     }
     return parent;
   };
