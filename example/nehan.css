@@ -18,6 +18,13 @@
 .nehan-body a img {
   border:none;
 }
+.nehan.inline.nehan-inline-lr-tb{
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:hidden;
+  -webkit-text-overflow:clip;
+  -o-text-overflow:clip;
+}
 .nehan-inline-tb-rl a,
 .nehan-inline-tb-lr a {
   overflow:visible;
