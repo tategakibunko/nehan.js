@@ -18,7 +18,7 @@
 .nehan-body a img {
   border:none;
 }
-.nehan.inline.nehan-inline-lr-tb{
+.nehan-inline.nehan-inline-lr-tb{
   overflow:hidden;
   white-space:nowrap;
   text-overflow:hidden;
