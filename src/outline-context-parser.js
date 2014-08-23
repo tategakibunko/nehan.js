@@ -11,11 +11,11 @@ var OutlineContextParser = (function(){
       if(parent){
 	parent.addChild(section);
       }
-      arguments.callee(context, section, ptr);
+      _parse(context, section, ptr);
       break;
 
     case "end-section":
-      arguments.callee(context, parent.getParent(), ptr);
+      _parse(context, parent.getParent(), ptr);
       break;
 
     case "set-header":
@@ -23,26 +23,26 @@ var OutlineContextParser = (function(){
       if(parent === null){
 	var auto_section = new Section("section", null, log.pageNo);
 	auto_section.setHeader(header);
-	arguments.callee(context, auto_section, ptr);
+	_parse(context, auto_section, ptr);
       } else if(!parent.hasHeader()){
 	parent.setHeader(header);
-	arguments.callee(context, parent, ptr);
+	_parse(context, parent, ptr);
       } else {
 	var rank = log.rank;
 	var parent_rank = parent.getRank();
 	if(rank < parent_rank){ // higher rank
 	  ptr = Math.max(0, ptr - 1);
-	  arguments.callee(context, parent.getParent(), ptr);
+	  _parse(context, parent.getParent(), ptr);
 	} else if(log.rank == parent_rank){ // same rank
 	  var next_section = new Section("section", parent, log.pageNo);
 	  next_section.setHeader(header);
 	  parent.addNext(next_section);
-	  arguments.callee(context, next_section, ptr);
+	  _parse(context, next_section, ptr);
 	} else { // lower rank
 	  var child_section = new Section("section", parent, log.pageNo);
 	  child_section.setHeader(header);
 	  parent.addChild(child_section);
-	  arguments.callee(context, child_section, ptr);
+	  _parse(context, child_section, ptr);
 	}
       }
       break;
