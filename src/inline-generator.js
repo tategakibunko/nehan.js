@@ -90,6 +90,11 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._justifyLine = function(context){
+    // before justify, skip until <br> exists to avoid double line-break.
+    var stream_next = this.stream? this.stream.peek() : null;
+    if(stream_next && Token.isTag(stream_next) && stream_next.getName() === "br"){
+      this.stream.get(); // skip <br>
+    }
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var next_head = this.peekLastCache() || this.stream.peek();
     var new_tail = context.justify(next_head); // if justify is occured, new_tail token is gained.
