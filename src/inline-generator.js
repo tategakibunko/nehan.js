@@ -90,7 +90,7 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._justifyLine = function(context){
-    // before justify, skip until <br> exists to avoid double line-break.
+    // before justify, skip single <br> to avoid double line-break.
     var stream_next = this.stream? this.stream.peek() : null;
     if(stream_next && Token.isTag(stream_next) && stream_next.getName() === "br"){
       this.stream.get(); // skip <br>
