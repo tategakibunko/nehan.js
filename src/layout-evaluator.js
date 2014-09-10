@@ -43,8 +43,13 @@ var LayoutEvaluator = (function(){
       // 1. markup of anonymous line is shared by parent block, but both are given different class names.
       // 2. sometimes we add some special class name like "nehan-div", "nehan-body", "nehan-p"... etc.
       Obj.iter(attrs, function(attr_name, value){ // pure attributes(without dataset defined in TagAttrs::attrs)
-	if(attr_name !== "class"){ // "class" attribute is already set by opt.className
-	  dom[attr_name] = value;
+	// "style" is readonly and "class" is already set by opt.className.
+	if(attr_name !== "style" && attr_name !== "class"){
+	  try {
+	    dom[attr_name] = value;
+	  } catch(e){
+	    console.error("try to set %o to %s but failed.", value, attr_name);
+	  }
 	}
       });
 
