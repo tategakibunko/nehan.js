@@ -3067,6 +3067,9 @@ var Tag = (function (){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
+    isPageBreakTag : function(){
+      return this.name === "page-break" || this.name === "end-page" || this.name === "pbr";
+    },
     isCloseTag : function(){
       return this.name.charAt(0) === "/";
     },
@@ -7457,6 +7460,12 @@ var StyleContext = (function(){
     hasFlipFlow : function(){
       return this.parent? (this.flow !== this.parent.flow) : false;
     },
+    clearBreakBefore : function(){
+      this.breakBefore = null;
+    },
+    clearBreakAfter : function(){
+      this.breakAfter = null;
+    },
     // search property from markup attribute -> css
     getAttr : function(name, def_value){
       var ret = this.getMarkupAttr(name);
@@ -7532,9 +7541,6 @@ var StyleContext = (function(){
     },
     getContent : function(){
       var content = this.markup.getContent();
-      if(this.isBreakBefore()){
-	content = "<page-break>" + content;
-      }
       var before = Selectors.getValuePe(this, "before");
       if(!Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;
@@ -8657,6 +8663,12 @@ var BlockGenerator = (function(){
 
   BlockGenerator.prototype._yield = function(context){
     if(!context.hasBlockSpaceFor(1, !this.hasNext())){
+      return null;
+    }
+
+    // if break-before available, page-break but only once.
+    if(this.style.isBreakBefore()){
+      this.style.clearBreakBefore();
       return null;
     }
     while(true){

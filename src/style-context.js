@@ -566,6 +566,12 @@ var StyleContext = (function(){
     hasFlipFlow : function(){
       return this.parent? (this.flow !== this.parent.flow) : false;
     },
+    clearBreakBefore : function(){
+      this.breakBefore = null;
+    },
+    clearBreakAfter : function(){
+      this.breakAfter = null;
+    },
     // search property from markup attribute -> css
     getAttr : function(name, def_value){
       var ret = this.getMarkupAttr(name);
@@ -641,9 +647,6 @@ var StyleContext = (function(){
     },
     getContent : function(){
       var content = this.markup.getContent();
-      if(this.isBreakBefore()){
-	content = "<page-break>" + content;
-      }
       var before = Selectors.getValuePe(this, "before");
       if(!Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;

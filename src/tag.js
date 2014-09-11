@@ -86,6 +86,9 @@ var Tag = (function (){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
+    isPageBreakTag : function(){
+      return this.name === "page-break" || this.name === "end-page" || this.name === "pbr";
+    },
     isCloseTag : function(){
       return this.name.charAt(0) === "/";
     },

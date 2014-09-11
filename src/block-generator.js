@@ -8,6 +8,12 @@ var BlockGenerator = (function(){
     if(!context.hasBlockSpaceFor(1, !this.hasNext())){
       return null;
     }
+
+    // if break-before available, page-break but only once.
+    if(this.style.isBreakBefore()){
+      this.style.clearBreakBefore();
+      return null;
+    }
     while(true){
       if(!this.hasNext()){
 	return this._createOutput(context, true); // output last block
