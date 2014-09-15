@@ -9348,6 +9348,9 @@ var FloatGenerator = (function(){
     if(this._hasNextFloat()){
       return true;
     }
+    if(this._termFloat && !this.hasCache()){
+      return false;
+    }
     return LayoutGenerator.prototype.hasNext.call(this);
   };
 
@@ -9361,10 +9364,11 @@ var FloatGenerator = (function(){
     var stack = this._yieldFloatStack(context);
     var rest_measure = context.getInlineRestMeasure();
     var rest_extent = context.getBlockRestExtent();
-    return this._yieldFloat(context, stack, rest_measure, rest_extent);
+    var start_measure = rest_measure;
+    return this._yieldFloat(context, stack, start_measure, rest_measure, rest_extent);
   };
 
-  FloatGenerator.prototype._yieldFloat = function(context, stack, rest_measure, rest_extent){
+  FloatGenerator.prototype._yieldFloat = function(context, stack, start_measure, rest_measure, rest_extent){
     if(rest_measure <= 0){
       return null;
     }
@@ -9383,7 +9387,8 @@ var FloatGenerator = (function(){
       --------------------------
     */
     var group = stack.pop(); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
-    var rest = this._yieldFloat(context, stack, rest_measure - group.getMeasure(flow), group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
+    var rest_rest_measure = rest_measure - group.getMeasure(flow); // rest of 'rest measure'
+    var rest = this._yieldFloat(context, stack, start_measure, rest_rest_measure, group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
     var group_set = this._wrapFloat(group, rest, rest_measure); // wrap these 2 floated layout as one block.
 
     /*
@@ -9401,8 +9406,11 @@ var FloatGenerator = (function(){
     */
     var rest_extent_space = rest_extent - group.getExtent(flow);
 
-    // no more space left in block-flow direction, or no more stream.
-    if(rest_extent_space <= 0 || !this.stream.hasNext()){
+    // 1. no more block-flow space is left.
+    // 2. no more continuous output.
+    // 3. floated area is already done(start_measure == rest_measure).
+    if(rest_extent_space <= 0 || !this.stream.hasNext() || start_measure == rest_measure){
+      this._termFloat = true;
       return group_set;
     }
 
