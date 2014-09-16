@@ -41,11 +41,19 @@ var FloatGroupStack = (function(){
     this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
       return g1.getExtent(flow) - g2.getExtent(flow);
     });
+    var max_group = List.maxobj(this.stack, function(group){
+      return group.getExtent(flow);
+    });
+    //console.log("max group from %o is %o", this.stack, max_group);
+    this.extent = max_group? max_group.getExtent(flow) : 0;
   }
 
   FloatGroupStack.prototype = {
     isEmpty : function(){
       return this.stack.length === 0;
+    },
+    getExtent : function(){
+      return this.extent;
     },
     pop : function(){
       return this.stack.pop() || null;

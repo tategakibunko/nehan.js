@@ -127,19 +127,24 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createFloatGenerator = function(context, first_float_gen){
     var self = this, parent_style = this.style;
-    var rest_float_gens = this.stream.mapWhile(function(token){
+    var floated_generators = [first_float_gen];
+    var tokens = this.stream.iterWhile(function(token){
+      if(Token.isWhiteSpace(token)){
+	return true; // continue
+      }
       if(!Token.isTag(token)){
-	return null;
+	return false;
       }
       var child_style = new StyleContext(token, parent_style, {layoutContext:context});
       if(!child_style.isFloated()){
 	parent_style.removeChild(child_style);
-	return null;
+	return false;
       }
       var child_stream = self._createStream(child_style);
-      return self._createChildBlockGenerator(child_style, child_stream, context);
+      var generator = self._createChildBlockGenerator(child_style, child_stream, context);
+      floated_generators.push(generator);
+      return true; // continue
     });
-    var floated_generators = [first_float_gen].concat(rest_float_gens);
     return new FloatGenerator(this.style, this.stream, floated_generators);
   };
 

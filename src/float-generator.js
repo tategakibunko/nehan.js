@@ -31,9 +31,10 @@ var FloatGenerator = (function(){
   };
 
   FloatGenerator.prototype._yield = function(context){
+    //console.log("FloatGen::_yield");
     var stack = this._yieldFloatStack(context);
     var rest_measure = context.getInlineRestMeasure();
-    var rest_extent = context.getBlockRestExtent();
+    var rest_extent = stack.getExtent();
     var start_measure = rest_measure;
     return this._yieldFloat(context, stack, start_measure, rest_measure, rest_extent);
   };
@@ -46,6 +47,7 @@ var FloatGenerator = (function(){
 
     // no more floated layout, just yield rest area.
     if(stack.isEmpty()){
+      //console.log("space found, yield to (m,e) = (%d, %d)", rest_measure, rest_extent);
       return this._yieldFloatSpace(context, rest_measure, rest_extent);
     }
     /*
@@ -75,12 +77,29 @@ var FloatGenerator = (function(){
       ----------------------------
     */
     var rest_extent_space = rest_extent - group.getExtent(flow);
+    //console.log("rest extent space = %d, peek - 1 = %o, peek = %o, peek + 1 = %o", rest_extent_space, this.stream.peek(-1), this.stream.peek(), this.stream.peek(1));
 
-    // 1. no more block-flow space is left.
-    // 2. no more continuous output.
-    // 3. floated area is already done(start_measure == rest_measure).
-    if(rest_extent_space <= 0 || !this.stream.hasNext() || start_measure == rest_measure){
+    // float generator is terminated when
+    // 1. rest space is all sweeped, and cursor is now at original inline start position.
+    // 2. simply stream data is exhausted.
+    if(!this._hasNextFloat() && (start_measure === rest_measure || !this.stream.hasNext())){
+      //console.log("float end, start_m = %d, rest_m = %d, stream has next:%o", start_measure, rest_measure, this.stream.hasNext());
       this._termFloat = true;
+
+      // delegate cache and child to original parent.
+      this._parentLayout._cachedElements = this._childLayout._cachedElements;
+      this._parentLayout._childLayout = this._childLayout._childLayout || null;
+      if(this._parentLayout._childLayout){
+	this._parentLayout._childLayout.style.forceUpdateContextSize(start_measure, rest_extent_space);
+	this._parentLayout._childLayout._parentLayout = this._parentLayout;
+      }
+      return group_set;
+    }
+
+    // if no more rest extent is left, continuous layout is displayed in next page.
+    if(rest_extent_space <= 0){
+      //console.log("<<<< no more rest extent is left, continuout block is displayed in next page. hasNext = %o", this.hasNext());
+      group_set.breakAfter = true;
       return group_set;
     }
 
@@ -95,6 +114,10 @@ var FloatGenerator = (function(){
       --------------------------
     */
     // if there is space in block-flow direction, yield rest space and wrap tfloated-set and rest-space as one.
+    /*
+    console.log("rest extent space is left, we build it in new measure size, rest_measure = %d, rest_extent_space = %d, hasNext = %o",
+		rest_measure, rest_extent_space, this.hasNext());
+    */
     var space = this._yieldFloatSpace(context, rest_measure, rest_extent_space);
     return this._wrapBlock(group_set, space);
   };
@@ -144,6 +167,7 @@ var FloatGenerator = (function(){
     var start_blocks = [], end_blocks = [];
     List.iter(this.generators, function(gen){
       var block = gen.yield(context);
+      //console.log("floated target %o yielded block %o, hasNext %o", gen, block, gen.hasNext());
       if(block){
 	if(gen.style.isFloatStart()){
 	  start_blocks.push(block);
