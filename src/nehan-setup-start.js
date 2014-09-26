@@ -1,9 +1,6 @@
-;var Nehan;
-if(!Nehan){
-  Nehan = {};
-}
+;var Nehan = Nehan || {};
 
-// glocal style
+// global style
 Nehan.style = {};
 
 // global single tags
