@@ -10462,7 +10462,7 @@ var HoriEvaluator = (function(){
 
 
 // export global interfaces
-Nehan.version = "5.0.2";
+Nehan.version = "5.0.4";
 Nehan.Class = Class;
 Nehan.Env = Env;
 
