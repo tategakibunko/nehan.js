@@ -430,6 +430,9 @@ var StyleContext = (function(){
       return line;
     },
     isDisabled : function(){
+      if(this.display === "none"){
+	return true;
+      }
       if(List.exists(__disabled_markups, Closure.eq(this.getMarkupName()))){
 	return true;
       }

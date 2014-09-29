@@ -778,6 +778,9 @@ var Style = {
   //-------------------------------------------------------
   // display classes
   //-------------------------------------------------------
+  ".nehan-disp-none":{
+    "display":"none"
+  },
   ".nehan-disp-block":{
     "display":"block"
   },
