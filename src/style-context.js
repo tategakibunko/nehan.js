@@ -810,7 +810,7 @@ var StyleContext = (function(){
 	css["z-index"] = this.zIndex;
       }
       this.unmanagedCss.copyValuesTo(css);
-      css.overflow = "hidden"; // to avoid margin collapsing
+      //css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
     // notice that line-size, line-edge is box local variable,

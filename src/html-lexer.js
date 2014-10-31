@@ -51,6 +51,7 @@ var HtmlLexer = (function (){
 	.replace(/(<\/[^>]+>)/g, function(p1){
 	  return p1.toLowerCase();
 	}) // convert close tag to lower case(for innerHTML of IE)
+	//.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
 	.replace(/^[ \n]+/, "") // shorten head space
 	.replace(/\s+$/, "") // discard tail space
 	.replace(/\r/g, ""); // discard CR

@@ -5385,6 +5385,7 @@ var HtmlLexer = (function (){
 	.replace(/(<\/[^>]+>)/g, function(p1){
 	  return p1.toLowerCase();
 	}) // convert close tag to lower case(for innerHTML of IE)
+	//.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
 	.replace(/^[ \n]+/, "") // shorten head space
 	.replace(/\s+$/, "") // discard tail space
 	.replace(/\r/g, ""); // discard CR
@@ -7686,7 +7687,7 @@ var StyleContext = (function(){
 	css["z-index"] = this.zIndex;
       }
       this.unmanagedCss.copyValuesTo(css);
-      css.overflow = "hidden"; // to avoid margin collapsing
+      //css.overflow = "hidden"; // to avoid margin collapsing
       return css;
     },
     // notice that line-size, line-edge is box local variable,
