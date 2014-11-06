@@ -169,7 +169,7 @@ var Char = (function(){
       this.rotate = angle;
     },
     _setRotateOrImg : function(angle, img, vscale){
-      if(Env.isTransformEnable){
+      if(Nehan.Env.isTransformEnable){
 	this._setRotate(angle);
 	return;
       }
@@ -347,7 +347,7 @@ var Char = (function(){
       return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
     },
     isVertGlyphEnable : function(){
-      return Config.useVerticalGlyphIfEnable && Env.isVerticalGlyphEnable;
+      return Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
     },
     isTenten : function(){
       return this.img && this.img === "tenten";

@@ -27,7 +27,113 @@
  OTHER DEALINGS IN THE SOFTWARE.
 */
 
-;var Nehan = Nehan || {};
+var Nehan = Nehan || {};
+Nehan.version = "5.0.4";
+
+Nehan.Client = (function(){
+  function Client(){
+    this.userAgent = navigator.userAgent.toLowerCase();
+    this.name = navigator.appName.toLowerCase();
+    this.version = parseInt(navigator.appVersion, 10);
+    this._parseUserAgent(this.userAgent);
+  }
+
+  Client.prototype = {
+    isWindows : function(){
+      return this.userAgent.indexOf("windows") >= 0;
+    },
+    isMacintosh : function(){
+      return this.userAgent.indexOf("macintosh") >= 0;
+    },
+    isIphone : function(){
+      return this.userAgent.indexOf("iphone") >= 0;
+    },
+    isIpod : function(){
+      return this.userAgent.indexOf("ipod") >= 0;
+    },
+    isIpad : function(){
+      return this.userAgent.indexOf("ipad") >= 0;
+    },
+    isAppleMobileFamily : function(){
+      return this.isIphone() || this.isIpod() || this.isIpad();
+    },
+    isAndroid : function(){
+      return this.userAgent.indexOf("android") >= 0;
+    },
+    isSmartPhone : function(){
+      return this.isAppleMobileFamily() || this.isAndroid();
+    },
+    isWebkit : function(){
+      return this.userAgent.indexOf("webkit") >= 0;
+    },
+    isIE : function(){
+      return this.name === "msie";
+    },
+    isTrident : function(){
+      return this.isIE() && this.version >= 11;
+    },
+    isChrome : function(){
+      return this.name === "chrome";
+    },
+    isSafari : function(){
+      return this.name === "safari";
+    },
+    _parseUserAgent : function(user_agent){
+      // in latest agent style of MSIE, 'Trident' is specified but 'MSIE' is not.
+      if(user_agent.indexOf("trident") >= 0 && user_agent.indexOf("msie") < 0){
+	this.name = "msie";
+	this.version = this._parseVersionPureTrident(user_agent);
+	return;
+      }
+      // normal desktop agent styles
+      if(user_agent.match(/(opera|chrome|safari|firefox|msie)\/?\s*(\.?\d+(?:\.\d+)*)/)){
+	this.name = RegExp.$1.toLowerCase();
+	this.version = this._parseVersionNormalClient(user_agent, parseInt(RegExp.$2, 10));
+	return;
+      }
+      // if iphone/ipad/ipod, and user agent is not normal desktop style
+      if(this.isAppleMobileFamily()){
+	this.name = "safari";
+	this.version = this._parseVersionAppleMobileFamily(user_agent);
+	return;
+      }
+    },
+    _parseVersionPureTrident : function(user_agent){
+      if(user_agent.match(/rv:([\.\d]+)/)){
+	return parseInt(RegExp.$1, 10);
+      }
+      return this.version;
+    },
+    _parseVersionNormalClient : function(user_agent, tmp_version){
+      if(user_agent.match(/version\/([\.\d]+)/)){
+	return parseInt(RegExp.$1, 10);
+      }
+      return tmp_version;
+    },
+    _parseVersionAppleMobileFamily : function(user_agent){
+      if(user_agent.match(/os ([\d_]+) like/)){
+	return parseInt(RegExp.$1, 10); // [iOS major version] = [safari major version]
+      }
+      return this.version;
+    }
+  };
+
+  return Client;
+})();
+
+Nehan.Env = (function(){
+  var __client = new Nehan.Client();
+  var __is_transform_enable = !(__client.isIE() && __client.version <= 8);
+  var __is_chrome_vert_glyph_enable = __client.isChrome() && __client.version >= 24;
+  var __is_safari_vert_glyph_enable = __client.isSafari() && __client.version >= 5;
+  var __is_vertical_glyph_enable = __is_chrome_vert_glyph_enable || __is_safari_vert_glyph_enable;
+
+  return {
+    client:__client,
+    isTransformEnable : __is_transform_enable,
+    isVerticalGlyphEnable : __is_vertical_glyph_enable
+  };
+})();
 
 // global style
 Nehan.style = {};
@@ -167,111 +273,6 @@ var Layout = {
   }
 };
 
-
-var Client = (function(){
-  function Client(){
-    this.userAgent = navigator.userAgent.toLowerCase();
-    this.name = navigator.appName.toLowerCase();
-    this.version = parseInt(navigator.appVersion, 10);
-    this._parseUserAgent(this.userAgent);
-  }
-
-  Client.prototype = {
-    isWindows : function(){
-      return this.userAgent.indexOf("windows") >= 0;
-    },
-    isMacintosh : function(){
-      return this.userAgent.indexOf("macintosh") >= 0;
-    },
-    isIphone : function(){
-      return this.userAgent.indexOf("iphone") >= 0;
-    },
-    isIpod : function(){
-      return this.userAgent.indexOf("ipod") >= 0;
-    },
-    isIpad : function(){
-      return this.userAgent.indexOf("ipad") >= 0;
-    },
-    isAppleMobileFamily : function(){
-      return this.isIphone() || this.isIpod() || this.isIpad();
-    },
-    isAndroid : function(){
-      return this.userAgent.indexOf("android") >= 0;
-    },
-    isSmartPhone : function(){
-      return this.isAppleMobileFamily() || this.isAndroid();
-    },
-    isWebkit : function(){
-      return this.userAgent.indexOf("webkit") >= 0;
-    },
-    isIE : function(){
-      return this.name === "msie";
-    },
-    isTrident : function(){
-      return this.isIE() && this.version >= 11;
-    },
-    isChrome : function(){
-      return this.name === "chrome";
-    },
-    isSafari : function(){
-      return this.name === "safari";
-    },
-    _parseUserAgent : function(user_agent){
-      // in latest agent style of MSIE, 'Trident' is specified but 'MSIE' is not.
-      if(user_agent.indexOf("trident") >= 0 && user_agent.indexOf("msie") < 0){
-	this.name = "msie";
-	this.version = this._parseVersionPureTrident(user_agent);
-	return;
-      }
-      // normal desktop agent styles
-      if(user_agent.match(/(opera|chrome|safari|firefox|msie)\/?\s*(\.?\d+(?:\.\d+)*)/)){
-	this.name = RegExp.$1.toLowerCase();
-	this.version = this._parseVersionNormalClient(user_agent, parseInt(RegExp.$2, 10));
-	return;
-      }
-      // if iphone/ipad/ipod, and user agent is not normal desktop style
-      if(this.isAppleMobileFamily()){
-	this.name = "safari";
-	this.version = this._parseVersionAppleMobileFamily(user_agent);
-	return;
-      }
-    },
-    _parseVersionPureTrident : function(user_agent){
-      if(user_agent.match(/rv:([\.\d]+)/)){
-	return parseInt(RegExp.$1, 10);
-      }
-      return this.version;
-    },
-    _parseVersionNormalClient : function(user_agent, tmp_version){
-      if(user_agent.match(/version\/([\.\d]+)/)){
-	return parseInt(RegExp.$1, 10);
-      }
-      return tmp_version;
-    },
-    _parseVersionAppleMobileFamily : function(user_agent){
-      if(user_agent.match(/os ([\d_]+) like/)){
-	return parseInt(RegExp.$1, 10); // [iOS major version] = [safari major version]
-      }
-      return this.version;
-    }
-  };
-
-  return Client;
-})();
-
-var Env = (function(){
-  var __client = new Client();
-  var __is_transform_enable = !(__client.isIE() && __client.version <= 8);
-  var __is_chrome_vert_glyph_enable = __client.isChrome() && __client.version >= 24;
-  var __is_safari_vert_glyph_enable = __client.isSafari() && __client.version >= 5;
-  var __is_vertical_glyph_enable = __is_chrome_vert_glyph_enable || __is_safari_vert_glyph_enable;
-
-  return {
-    client:__client,
-    isTransformEnable : __is_transform_enable,
-    isVerticalGlyphEnable : __is_vertical_glyph_enable
-  };
-})();
 
 var LexingRule = (function(){
   var __single_tag_names__ = [
@@ -3303,7 +3304,7 @@ var Char = (function(){
       this.rotate = angle;
     },
     _setRotateOrImg : function(angle, img, vscale){
-      if(Env.isTransformEnable){
+      if(Nehan.Env.isTransformEnable){
 	this._setRotate(angle);
 	return;
       }
@@ -3481,7 +3482,7 @@ var Char = (function(){
       return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
     },
     isVertGlyphEnable : function(){
-      return Config.useVerticalGlyphIfEnable && Env.isVerticalGlyphEnable;
+      return Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
     },
     isTenten : function(){
       return this.img && this.img === "tenten";
@@ -7706,7 +7707,7 @@ var StyleContext = (function(){
       }
       if(this.isTextVertical()){
 	css["line-height"] = "1em";
-	if(Env.client.isAppleMobileFamily()){
+	if(Nehan.Env.client.isAppleMobileFamily()){
 	  css["letter-spacing"] = "-0.001em";
 	}
 	if(this.markup.getName() !== "ruby"){
@@ -10141,12 +10142,12 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalWord = function(line, word){
-    if(Env.isTransformEnable){
-      if(Env.client.isTrident()){
+    if(Nehan.Env.isTransformEnable){
+      if(Nehan.Env.client.isTrident()){
 	return this._evalWordTransformTrident(line, word);
       }
       return this._evalWordTransform(line, word);
-    } else if(Env.client.isIE()){
+    } else if(Nehan.Env.client.isIE()){
       return this._evalWordIE(line, word);
     } else {
       return "";
@@ -10193,9 +10194,9 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalRotateChar = function(line, chr){
-    if(Env.isTransformEnable){
+    if(Nehan.Env.isTransformEnable){
       return this._evalRotateCharTransform(line, chr);
-    } else if(Env.client.isIE()){
+    } else if(Nehan.Env.client.isIE()){
       return this._evalRotateCharIE(line, chr);
     } else {
       return this._evalCharWithBr(line, chr);
@@ -10461,11 +10462,6 @@ var HoriEvaluator = (function(){
   return HoriEvaluator;
 })();
 
-
-// export global interfaces
-Nehan.version = "5.0.4";
-Nehan.Class = Class;
-Nehan.Env = Env;
 
 // set engine args
 Args.copy(Config, __engine_args.config || {});

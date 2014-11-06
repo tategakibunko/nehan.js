@@ -35,11 +35,12 @@ module.exports = function(grunt) {
 	files:{
 	  "build/<%= pkg.name %>.js":[
 	    "COPYING",
+	    "src/nehan-start.js",
+	    "src/client.js",
+	    "src/env.js",
 	    "src/nehan-setup-start.js",
 	    "src/config.js",
 	    "src/layout.js",
-	    "src/client.js",
-	    "src/env.js",
 	    "src/lexing-rule.js",
 	    "src/style.js",
 	    "src/class.js",

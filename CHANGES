@@ -9,6 +9,7 @@ Mark "!": change that can break compatibility with older version
 version 5.0.4 ????/??/??
 ========================
 o support display:none
+! extract Client and Env as global module.
 * fix line-break bug(double line-break).
 * switch from float-generator to original parent generator if rest space is exhausted.
 

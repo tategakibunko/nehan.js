@@ -1,4 +1,4 @@
-var Client = (function(){
+Nehan.Client = (function(){
   function Client(){
     this.userAgent = navigator.userAgent.toLowerCase();
     this.name = navigator.appName.toLowerCase();

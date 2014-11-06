@@ -829,7 +829,7 @@ var StyleContext = (function(){
       }
       if(this.isTextVertical()){
 	css["line-height"] = "1em";
-	if(Env.client.isAppleMobileFamily()){
+	if(Nehan.Env.client.isAppleMobileFamily()){
 	  css["letter-spacing"] = "-0.001em";
 	}
 	if(this.markup.getName() !== "ruby"){

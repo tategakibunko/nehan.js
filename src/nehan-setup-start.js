@@ -1,5 +1,3 @@
-;var Nehan = Nehan || {};
-
 // global style
 Nehan.style = {};
 
