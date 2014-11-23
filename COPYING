@@ -1,4 +1,4 @@
-/*
+/*!
  nehan.js
  Copyright (C) 2010-2014 Watanabe Masaki<lambda.watanabe[at]gmail.com>
  repository: https://github.com/tategakibunko/nehan.js
