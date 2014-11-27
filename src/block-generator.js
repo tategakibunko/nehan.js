@@ -1,6 +1,8 @@
 var BlockGenerator = (function(){
+  var __global_block_id = 0;
   function BlockGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
+    this.blockId = __global_block_id++;
   }
   Class.extend(BlockGenerator, LayoutGenerator);
 
@@ -123,6 +125,7 @@ var BlockGenerator = (function(){
       return null;
     }
     var block = this.style.createBlock({
+      blockId:this.blockId,
       extent:extent,
       elements:elements,
       breakAfter:context.hasBreakAfter(),

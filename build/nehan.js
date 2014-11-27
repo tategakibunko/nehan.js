@@ -7199,6 +7199,7 @@ var StyleContext = (function(){
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
+      box.blockId = opt.blockId;
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = this._createBlockContextEdge(this.edge || null, opt.cancelEdge || null); // for Box::getLayoutExtent, Box::getLayoutMeasure
       box.elements = elements;
@@ -8648,8 +8649,10 @@ var LayoutGenerator = (function(){
 
 
 var BlockGenerator = (function(){
+  var __global_block_id = 0;
   function BlockGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
+    this.blockId = __global_block_id++;
   }
   Class.extend(BlockGenerator, LayoutGenerator);
 
@@ -8772,6 +8775,7 @@ var BlockGenerator = (function(){
       return null;
     }
     var block = this.style.createBlock({
+      blockId:this.blockId,
       extent:extent,
       elements:elements,
       breakAfter:context.hasBreakAfter(),
@@ -9956,6 +9960,9 @@ var LayoutEvaluator = (function(){
       if(opt.content){
 	dom.innerHTML = opt.content;
       }
+      if(typeof opt.blockId !== "undefined"){
+	dataset["blockId"] = opt.blockId;
+      }
 
       // store css value to dom.style[<camelized-css-property>]
       Obj.iter(css, function(style_name, value){
@@ -10014,6 +10021,7 @@ var LayoutEvaluator = (function(){
 	attrs:tree.getAttrs(),
 	oncreate:tree.getOnCreate(),
 	content:(opt.content || tree.getContent()),
+	blockId:tree.blockId,
 	css:(opt.css || tree.getCssRoot()),
 	styleContext:tree.style
       });
