@@ -24,6 +24,9 @@ var Box = (function(){
 	return ret + (text? (text.data || "") : "");
       });
     },
+    getId : function(){
+      return this.id || null;
+    },
     getClassName : function(){
       return this.classes? this.classes.join(" ") : "";
     },

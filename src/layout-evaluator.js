@@ -89,6 +89,7 @@ var LayoutEvaluator = (function(){
     _evalTreeRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
+	id:tree.getId(),
 	className:tree.getClassName(),
 	attrs:tree.getAttrs(),
 	oncreate:tree.getOnCreate(),

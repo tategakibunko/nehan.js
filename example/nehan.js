@@ -3061,6 +3061,9 @@ var Tag = (function (){
     hasAttr : function(name){
       return this.attrs.hasAttr(name);
     },
+    isHeaderTag : function(){
+      return List.exists(["h1", "h2", "h3", "h4", "h5", "h6"], Closure.eq(this.name));
+    },
     isAnchorTag : function(){
       return this.name === "a" && this.getTagAttr("name") !== null;
     },
@@ -5223,6 +5226,9 @@ var Box = (function(){
 	return ret + (text? (text.data || "") : "");
       });
     },
+    getId : function(){
+      return this.id || null;
+    },
     getClassName : function(){
       return this.classes? this.classes.join(" ") : "";
     },
@@ -7199,6 +7205,9 @@ var StyleContext = (function(){
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
+      if(this.markup.isHeaderTag()){
+	classes.push("nehan-header");
+      }
       box.blockId = opt.blockId;
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = this._createBlockContextEdge(this.edge || null, opt.cancelEdge || null); // for Box::getLayoutExtent, Box::getLayoutMeasure
@@ -10017,6 +10026,7 @@ var LayoutEvaluator = (function(){
     _evalTreeRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
+	id:tree.getId(),
 	className:tree.getClassName(),
 	attrs:tree.getAttrs(),
 	oncreate:tree.getOnCreate(),

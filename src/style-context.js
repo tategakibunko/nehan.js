@@ -321,6 +321,9 @@ var StyleContext = (function(){
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
+      if(this.markup.isHeaderTag()){
+	classes.push("nehan-header");
+      }
       box.blockId = opt.blockId;
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = this._createBlockContextEdge(this.edge || null, opt.cancelEdge || null); // for Box::getLayoutExtent, Box::getLayoutMeasure

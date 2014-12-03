@@ -79,6 +79,9 @@ var Tag = (function (){
     hasAttr : function(name){
       return this.attrs.hasAttr(name);
     },
+    isHeaderTag : function(){
+      return List.exists(["h1", "h2", "h3", "h4", "h5", "h6"], Closure.eq(this.name));
+    },
     isAnchorTag : function(){
       return this.name === "a" && this.getTagAttr("name") !== null;
     },

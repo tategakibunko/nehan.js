@@ -9,7 +9,8 @@ Mark "!": change that can break compatibility with older version
 version 5.0.4 ????/??/??
 ========================
 o support display:none
-o set unique block id for every block elements.
+o set unique id as "data-block-id" for every block elements.
+o set unique id(nehan-header-xxx) and common class(nehan-header) for every header eleemnts.
 ! extract Client and Env as global module.
 * fix line-break bug(double line-break).
 * switch from float-generator to original parent generator if rest space is exhausted.
