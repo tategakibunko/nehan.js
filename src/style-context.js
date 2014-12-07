@@ -772,8 +772,8 @@ var StyleContext = (function(){
       return edge? edge.getExtent(flow || this.flow) : 0;
     },
     getBlockContextEdge : function(flow){
+      flow = flow || this.flow;
       var edge = this.edge || null;
-      var flow = flow || this.flow;
       return {
 	before:(edge? edge.getBefore(flow) : 0),
 	after:(edge? edge.getAfter(flow) : 0)
