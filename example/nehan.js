@@ -1335,10 +1335,10 @@ var Style = {
 
 var Class = {};
 Class.extend = function(childCtor, parentCtor) {
-  function tempCtor() {};
-  tempCtor.prototype = parentCtor.prototype;
+  function TempCtor() {}
+  TempCtor.prototype = parentCtor.prototype;
   childCtor.superClass_ = parentCtor.prototype;
-  childCtor.prototype = new tempCtor();
+  childCtor.prototype = new TempCtor();
   childCtor.prototype.constructor = childCtor;
 };
 
@@ -7235,7 +7235,7 @@ var StyleContext = (function(){
       if(edge === null){
 	return null;
       }
-      if(cancel_edge == null || (cancel_edge.before === 0 && cancel_edge.after === 0)){
+      if(cancel_edge === null || (cancel_edge.before === 0 && cancel_edge.after === 0)){
 	return edge; // nothing to do
       }
       var context_edge = edge.clone();
@@ -7662,8 +7662,8 @@ var StyleContext = (function(){
       return edge? edge.getExtent(flow || this.flow) : 0;
     },
     getBlockContextEdge : function(flow){
+      flow = flow || this.flow;
       var edge = this.edge || null;
-      var flow = flow || this.flow;
       return {
 	before:(edge? edge.getBefore(flow) : 0),
 	after:(edge? edge.getAfter(flow) : 0)
