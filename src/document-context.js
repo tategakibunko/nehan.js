@@ -61,7 +61,7 @@ var DocumentContext = (function(){
       return (typeof __anchors[name] === "undefined")? null : __anchors[name];
     },
     genHeaderId : function(){
-      return __header_id++;
+      return [Nehan.engineId, __header_id++].join("-");
     },
     // this is shortcut function for __create_outline_elements_by_name("body", callbacks).
     // if many outline elements exists(that is, multiple '<body>' exists), use first one only.

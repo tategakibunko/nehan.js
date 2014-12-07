@@ -11,6 +11,7 @@ version 5.0.4 ????/??/??
 o support display:none
 o set unique id as "data-block-id" for every block elements.
 o set unique id(nehan-header-xxx) and common class(nehan-header) for every header eleemnts.
+o add unique engine id to each header_id to handle the case multi-engines are running in single page.
 ! extract Client and Env as global module.
 * fix line-break bug(double line-break).
 * switch from float-generator to original parent generator if rest space is exhausted.

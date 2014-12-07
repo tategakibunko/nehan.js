@@ -1,3 +1,6 @@
+// current engine id
+Nehan.engineId = 0;
+
 // global style
 Nehan.style = {};
 
@@ -34,3 +37,6 @@ Nehan.addSingleTagByRex = function(rex){
 Nehan.setup = function(engine_args){
 "use strict";
 var __engine_args = engine_args || {};
+
+// each time setup is called, engine id is incremented.
+Nehan.engineId++;
