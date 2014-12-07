@@ -6,7 +6,7 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.0.4 ????/??/??
+version 5.0.4 2014/12/8
 ========================
 o support display:none
 o set unique id as "data-block-id" for every block elements.

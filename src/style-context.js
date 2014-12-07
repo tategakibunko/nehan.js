@@ -345,7 +345,7 @@ var StyleContext = (function(){
       if(edge === null){
 	return null;
       }
-      if(cancel_edge == null || (cancel_edge.before === 0 && cancel_edge.after === 0)){
+      if(cancel_edge === null || (cancel_edge.before === 0 && cancel_edge.after === 0)){
 	return edge; // nothing to do
       }
       var context_edge = edge.clone();
