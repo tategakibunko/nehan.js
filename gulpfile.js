@@ -170,7 +170,7 @@ gulp.task("nehan.js", function(){
 });
 
 gulp.task("nehan.min.js", function(){
-  gulp.src(["COPYING", "build/nehan.js"])
+  gulp.src("build/nehan.js")
     .pipe(uglify({preserveComments:"some"}))
     .pipe(rename("nehan.min.js"))
     .pipe(gulp.dest("build/"));
