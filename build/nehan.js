@@ -28,7 +28,7 @@
 */
 
 var Nehan = Nehan || {};
-Nehan.version = "5.0.4";
+Nehan.version = "5.0.5";
 
 Nehan.Client = (function(){
   function Client(){
@@ -7165,6 +7165,7 @@ var StyleContext = (function(){
       }
       var clone_style = new StyleContext(this.markup, this.parent, {forceCss:(css || {})});
       clone_style.parent.removeChild(clone_style);
+      clone_style.setClone(true);
       return clone_style;
     },
     // append child style context
@@ -7203,6 +7204,12 @@ var StyleContext = (function(){
       var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
       this.listMarkerSize = this.flow.getBoxSize(marker_measure, marker_extent);
     },
+    isClone : function(){
+      return this._isClone || false;
+    },
+    setClone : function(state){
+      this._isClone = state;
+    },
     createBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
@@ -7213,6 +7220,9 @@ var StyleContext = (function(){
       var box = new Box(box_size, this);
       if(this.markup.isHeaderTag()){
 	classes.push("nehan-header");
+      }
+      if(this.isClone()){
+	classes.push("nehan-clone");
       }
       box.blockId = opt.blockId;
       box.display = (this.display === "inline-block")? this.display : "block";
