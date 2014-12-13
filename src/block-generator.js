@@ -1,8 +1,7 @@
 var BlockGenerator = (function(){
-  var __global_block_id = 0;
   function BlockGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
-    this.blockId = __global_block_id++;
+    this.blockId = DocumentContext.genBlockId();
   }
   Class.extend(BlockGenerator, LayoutGenerator);
 

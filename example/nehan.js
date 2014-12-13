@@ -5975,6 +5975,7 @@ var DocumentContext = (function(){
   var __anchors = {};
   var __outline_contexts = [];
   var __header_id = 0; // unique header-id
+  var __block_id = 0; // unique block-id
 
   var __get_outline_contexts_by_name = function(section_root_name){
     return List.filter(__outline_contexts, function(context){
@@ -6031,6 +6032,9 @@ var DocumentContext = (function(){
     },
     genHeaderId : function(){
       return [Nehan.engineId, __header_id++].join("-");
+    },
+    genBlockId: function(){
+      return __block_id++;
     },
     // this is shortcut function for __create_outline_elements_by_name("body", callbacks).
     // if many outline elements exists(that is, multiple '<body>' exists), use first one only.
@@ -8674,10 +8678,9 @@ var LayoutGenerator = (function(){
 
 
 var BlockGenerator = (function(){
-  var __global_block_id = 0;
   function BlockGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
-    this.blockId = __global_block_id++;
+    this.blockId = DocumentContext.genBlockId();
   }
   Class.extend(BlockGenerator, LayoutGenerator);
 
