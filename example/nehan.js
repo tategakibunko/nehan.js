@@ -6034,7 +6034,7 @@ var DocumentContext = (function(){
     genHeaderId : function(){
       return [Nehan.engineId, __header_id++].join("-");
     },
-    getRootBlockId : function(){
+    genRootBlockId : function(){
       return __root_block_id++;
     },
     genBlockId : function(){
@@ -8691,7 +8691,7 @@ var BlockGenerator = (function(){
   function BlockGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
     if(this.style.getParentMarkupName() === "body"){
-      this.rootBlockId = DocumentContext.getRootBlockId();
+      this.rootBlockId = DocumentContext.genRootBlockId();
     }
     this.blockId = DocumentContext.genBlockId();
   }

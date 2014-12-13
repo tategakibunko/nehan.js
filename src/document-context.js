@@ -65,7 +65,7 @@ var DocumentContext = (function(){
     genHeaderId : function(){
       return [Nehan.engineId, __header_id++].join("-");
     },
-    getRootBlockId : function(){
+    genRootBlockId : function(){
       return __root_block_id++;
     },
     genBlockId : function(){
