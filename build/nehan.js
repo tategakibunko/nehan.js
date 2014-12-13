@@ -5976,6 +5976,7 @@ var DocumentContext = (function(){
   var __outline_contexts = [];
   var __header_id = 0; // unique header-id
   var __block_id = 0; // unique block-id
+  var __root_block_id = 0; // unique block-id for direct children of <body>.
 
   var __get_outline_contexts_by_name = function(section_root_name){
     return List.filter(__outline_contexts, function(context){
@@ -6033,7 +6034,10 @@ var DocumentContext = (function(){
     genHeaderId : function(){
       return [Nehan.engineId, __header_id++].join("-");
     },
-    genBlockId: function(){
+    getRootBlockId : function(){
+      return __root_block_id++;
+    },
+    genBlockId : function(){
       return __block_id++;
     },
     // this is shortcut function for __create_outline_elements_by_name("body", callbacks).
@@ -7228,6 +7232,9 @@ var StyleContext = (function(){
       if(this.isClone()){
 	classes.push("nehan-clone");
       }
+      if(typeof opt.rootBlockId !== "undefined"){
+	box.rootBlockId = opt.rootBlockId;
+      }
       box.blockId = opt.blockId;
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = this._createBlockContextEdge(this.edge || null, opt.cancelEdge || null); // for Box::getLayoutExtent, Box::getLayoutMeasure
@@ -7536,6 +7543,9 @@ var StyleContext = (function(){
 	return this._evalCssAttr(name, ret);
       }
       return (typeof def_value !== "undefined")? def_value : null;
+    },
+    getParentMarkupName : function(){
+      return this.parent? this.parent.getMarkupName() : null;
     },
     getMarkupName : function(){
       return this.markup.getName();
@@ -8680,6 +8690,9 @@ var LayoutGenerator = (function(){
 var BlockGenerator = (function(){
   function BlockGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
+    if(this.style.getParentMarkupName() === "body"){
+      this.rootBlockId = DocumentContext.getRootBlockId();
+    }
     this.blockId = DocumentContext.genBlockId();
   }
   Class.extend(BlockGenerator, LayoutGenerator);
@@ -8802,13 +8815,17 @@ var BlockGenerator = (function(){
     if(extent === 0 || elements.length === 0){
       return null;
     }
-    var block = this.style.createBlock({
+    var block_args = {
       blockId:this.blockId,
       extent:extent,
       elements:elements,
       breakAfter:context.hasBreakAfter(),
       cancelEdge:context.getBlockCancelEdge(is_last_block)
-    });
+    };
+    if(typeof this.rootBlockId !== "undefined"){
+      block_args.rootBlockId = this.rootBlockId;
+    }
+    var block = this.style.createBlock(block_args);
 
     // call _onCreate callback for 'each' output
     this._onCreate(context, block);
@@ -9988,6 +10005,9 @@ var LayoutEvaluator = (function(){
       if(opt.content){
 	dom.innerHTML = opt.content;
       }
+      if(typeof opt.rootBlockId !== "undefined"){
+	dataset["rootBlockId"] = opt.rootBlockId;
+      }
       if(typeof opt.blockId !== "undefined"){
 	dataset["blockId"] = opt.blockId;
       }
@@ -10050,6 +10070,7 @@ var LayoutEvaluator = (function(){
 	attrs:tree.getAttrs(),
 	oncreate:tree.getOnCreate(),
 	content:(opt.content || tree.getContent()),
+	rootBlockId:tree.rootBlockId,
 	blockId:tree.blockId,
 	css:(opt.css || tree.getCssRoot()),
 	styleContext:tree.style

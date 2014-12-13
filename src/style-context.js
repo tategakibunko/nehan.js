@@ -334,6 +334,9 @@ var StyleContext = (function(){
       if(this.isClone()){
 	classes.push("nehan-clone");
       }
+      if(typeof opt.rootBlockId !== "undefined"){
+	box.rootBlockId = opt.rootBlockId;
+      }
       box.blockId = opt.blockId;
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = this._createBlockContextEdge(this.edge || null, opt.cancelEdge || null); // for Box::getLayoutExtent, Box::getLayoutMeasure
@@ -642,6 +645,9 @@ var StyleContext = (function(){
 	return this._evalCssAttr(name, ret);
       }
       return (typeof def_value !== "undefined")? def_value : null;
+    },
+    getParentMarkupName : function(){
+      return this.parent? this.parent.getMarkupName() : null;
     },
     getMarkupName : function(){
       return this.markup.getName();

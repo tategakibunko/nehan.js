@@ -32,6 +32,9 @@ var LayoutEvaluator = (function(){
       if(opt.content){
 	dom.innerHTML = opt.content;
       }
+      if(typeof opt.rootBlockId !== "undefined"){
+	dataset["rootBlockId"] = opt.rootBlockId;
+      }
       if(typeof opt.blockId !== "undefined"){
 	dataset["blockId"] = opt.blockId;
       }
@@ -94,6 +97,7 @@ var LayoutEvaluator = (function(){
 	attrs:tree.getAttrs(),
 	oncreate:tree.getOnCreate(),
 	content:(opt.content || tree.getContent()),
+	rootBlockId:tree.rootBlockId,
 	blockId:tree.blockId,
 	css:(opt.css || tree.getCssRoot()),
 	styleContext:tree.style

@@ -1,6 +1,9 @@
 var BlockGenerator = (function(){
   function BlockGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
+    if(this.style.getParentMarkupName() === "body"){
+      this.rootBlockId = DocumentContext.getRootBlockId();
+    }
     this.blockId = DocumentContext.genBlockId();
   }
   Class.extend(BlockGenerator, LayoutGenerator);
@@ -123,13 +126,17 @@ var BlockGenerator = (function(){
     if(extent === 0 || elements.length === 0){
       return null;
     }
-    var block = this.style.createBlock({
+    var block_args = {
       blockId:this.blockId,
       extent:extent,
       elements:elements,
       breakAfter:context.hasBreakAfter(),
       cancelEdge:context.getBlockCancelEdge(is_last_block)
-    });
+    };
+    if(typeof this.rootBlockId !== "undefined"){
+      block_args.rootBlockId = this.rootBlockId;
+    }
+    var block = this.style.createBlock(block_args);
 
     // call _onCreate callback for 'each' output
     this._onCreate(context, block);
