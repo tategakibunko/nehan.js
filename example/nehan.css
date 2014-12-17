@@ -59,6 +59,7 @@
   writing-mode:tb-rl;
   float:left;
 }
+.nehan-block,
 .nehan-img-char{
   box-sizing:content-box;
 }
