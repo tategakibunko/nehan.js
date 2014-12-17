@@ -7,6 +7,9 @@ var NehanPagedElement = (function(){
   }
 
   NehanPagedElement.prototype = {
+    isLastPage : function(){
+      return this.getPageNo() + 1 >= this.getPageCount();
+    },
     getEngine : function(){
       return this.engine;
     },
