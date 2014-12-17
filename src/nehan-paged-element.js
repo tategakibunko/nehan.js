@@ -48,25 +48,13 @@ var NehanPagedElement = (function(){
       return this;
     },
     setContent : function(content, opt){
-      var self = this;
-      opt = opt || {};
       this._pageStream = this.engine.createPageStream(content);
-      this._pageStream.asyncGet({
-	onProgress : function(stream, tree){
-	  if(tree.pageNo === 0){
-	    self.setPage(tree.pageNo);
-	  }
-	  if(opt.onProgress){
-	    opt.onProgress(tree);
-	  }
-	},
-	onComplete : function(stream, time){
-	  if(opt.onComplete){
-	    opt.onComplete(time);
-	  }
-	}
-      });
+      this._asyncGet(opt || {});
       return this;
+    },
+    addContent : function(content, opt){
+      this._pageStream.addText(content);
+      this._asyncGet(opt || {});
     },
     setPage : function(page_no){
       var page = this.getPage(page_no);
@@ -76,6 +64,23 @@ var NehanPagedElement = (function(){
       this.pageNo = page_no;
       this.element.innerHTML = "";
       this.element.appendChild(page.element);
+    },
+    _asyncGet : function(opt){
+      this._pageStream.asyncGet({
+	onProgress : function(stream, tree){
+	  if(tree.pageNo === 0){
+	    this.setPage(tree.pageNo);
+	  }
+	  if(opt.onProgress){
+	    opt.onProgress(tree);
+	  }
+	}.bind(this),
+	onComplete : function(stream, time){
+	  if(opt.onComplete){
+	    opt.onComplete(time);
+	  }
+	}.bind(this)
+      });
     }
   };
   

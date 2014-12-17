@@ -14,6 +14,9 @@ var PageStream = (function(){
     hasNext : function(){
       return this.generator.hasNext();
     },
+    addText : function(text){
+      this.generator.addText(text);
+    },
     setTerminate : function(status){
       this.generator.setTerminate(status);
     },

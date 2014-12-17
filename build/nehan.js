@@ -5419,6 +5419,9 @@ var HtmlLexer = (function (){
     getSeekPercent : function(seek_pos){
       return Math.round(100 * seek_pos / this.src.length);
     },
+    addText : function(text){
+      this.buff = this.buff + this._normalize(text);
+    },
     _stepBuff : function(count){
       this.pos += count;
       this.buff = this.buff.slice(count);
@@ -6077,6 +6080,13 @@ var TokenStream = (function(){
     isHead : function(){
       return this.pos === 0;
     },
+    addText : function(text){
+      // check if already done, and text is not empty.
+      if(this.eof && text !== ""){
+	this.lexer.addText(text);
+	this.eof = false;
+      }
+    },
     prev : function(){
       this.pos = Math.max(0, this.pos - 1);
     },
@@ -6337,6 +6347,9 @@ var PageStream = (function(){
     },
     hasNext : function(){
       return this.generator.hasNext();
+    },
+    addText : function(text){
+      this.generator.addText(text);
     },
     setTerminate : function(status){
       this.generator.setTerminate(status);
@@ -8525,6 +8538,12 @@ var LayoutGenerator = (function(){
     this._cachedElements = [];
   };
 
+  LayoutGenerator.prototype.addText = function(text){
+    if(this.stream){
+      this.stream.addText(text);
+    }
+  };
+
   // called when each time generator yields element of output, and added it.
   LayoutGenerator.prototype._onAddElement = function(block){
   };
@@ -9886,6 +9905,9 @@ var HtmlGenerator = (function(){
     setTerminate : function(status){
       this.generator.setTerminate(status);
     },
+    addText : function(text){
+      this.generator.addText(text);
+    },
     _createGenerator : function(){
       while(this.stream.hasNext()){
 	var tag = this.stream.get();
@@ -9947,6 +9969,9 @@ var DocumentGenerator = (function(){
     },
     setTerminate : function(status){
       this.generator.setTerminate(status);
+    },
+    addText : function(text){
+      this.generator.addText(text);
     },
     _createGenerator : function(){
       while(this.stream.hasNext()){
@@ -10617,25 +10642,13 @@ var NehanPagedElement = (function(){
       return this;
     },
     setContent : function(content, opt){
-      var self = this;
-      opt = opt || {};
       this._pageStream = this.engine.createPageStream(content);
-      this._pageStream.asyncGet({
-	onProgress : function(stream, tree){
-	  if(tree.pageNo === 0){
-	    self.setPage(tree.pageNo);
-	  }
-	  if(opt.onProgress){
-	    opt.onProgress(tree);
-	  }
-	},
-	onComplete : function(stream, time){
-	  if(opt.onComplete){
-	    opt.onComplete(time);
-	  }
-	}
-      });
+      this._asyncGet(opt || {});
       return this;
+    },
+    addContent : function(content, opt){
+      this._pageStream.addText(content);
+      this._asyncGet(opt || {});
     },
     setPage : function(page_no){
       var page = this.getPage(page_no);
@@ -10645,6 +10658,23 @@ var NehanPagedElement = (function(){
       this.pageNo = page_no;
       this.element.innerHTML = "";
       this.element.appendChild(page.element);
+    },
+    _asyncGet : function(opt){
+      this._pageStream.asyncGet({
+	onProgress : function(stream, tree){
+	  if(tree.pageNo === 0){
+	    this.setPage(tree.pageNo);
+	  }
+	  if(opt.onProgress){
+	    opt.onProgress(tree);
+	  }
+	}.bind(this),
+	onComplete : function(stream, time){
+	  if(opt.onComplete){
+	    opt.onComplete(time);
+	  }
+	}.bind(this)
+      });
     }
   };
   

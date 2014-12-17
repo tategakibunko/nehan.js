@@ -72,6 +72,9 @@ var HtmlLexer = (function (){
     getSeekPercent : function(seek_pos){
       return Math.round(100 * seek_pos / this.src.length);
     },
+    addText : function(text){
+      this.buff = this.buff + this._normalize(text);
+    },
     _stepBuff : function(count){
       this.pos += count;
       this.buff = this.buff.slice(count);

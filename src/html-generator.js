@@ -14,6 +14,9 @@ var HtmlGenerator = (function(){
     setTerminate : function(status){
       this.generator.setTerminate(status);
     },
+    addText : function(text){
+      this.generator.addText(text);
+    },
     _createGenerator : function(){
       while(this.stream.hasNext()){
 	var tag = this.stream.get();

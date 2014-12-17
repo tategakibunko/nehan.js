@@ -83,6 +83,12 @@ var LayoutGenerator = (function(){
     this._cachedElements = [];
   };
 
+  LayoutGenerator.prototype.addText = function(text){
+    if(this.stream){
+      this.stream.addText(text);
+    }
+  };
+
   // called when each time generator yields element of output, and added it.
   LayoutGenerator.prototype._onAddElement = function(block){
   };

@@ -20,6 +20,13 @@ var TokenStream = (function(){
     isHead : function(){
       return this.pos === 0;
     },
+    addText : function(text){
+      // check if already done, and text is not empty.
+      if(this.eof && text !== ""){
+	this.lexer.addText(text);
+	this.eof = false;
+      }
+    },
     prev : function(){
       this.pos = Math.max(0, this.pos - 1);
     },
