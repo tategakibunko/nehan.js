@@ -10628,13 +10628,15 @@ var NehanPagedElement = (function(){
     },
     setNextPage : function(){
       if(this.pageNo + 1 < this.getPageCount()){
-	this.setPage(this.pageNo + 1);
+	return this.setPage(this.pageNo + 1);
       }
+      return null;
     },
     setPrevPage : function(){
       if(this.pageNo > 0){
-	this.setPage(this.pageNo - 1);
+	return this.setPage(this.pageNo - 1);
       }
+      return null;
     },
     setStyle : function(name, value){
       this.engine.setStyle(name, value);
@@ -10661,6 +10663,7 @@ var NehanPagedElement = (function(){
       this.pageNo = page_no;
       this.element.innerHTML = "";
       this.element.appendChild(page.element);
+      return page;
     },
     _asyncGet : function(opt){
       this._pageStream.asyncGet({
