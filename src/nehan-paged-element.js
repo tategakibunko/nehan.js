@@ -67,7 +67,9 @@ var NehanPagedElement = (function(){
 	throw "page_no(" + page_no + ") is not found";
       }
       this.pageNo = page_no;
-      this.element.innerHTML = "";
+      while(this.element.firstChild){
+	this.element.removeChild(this.element.firstChild);
+      }
       this.element.appendChild(page.element);
       return page;
     },
