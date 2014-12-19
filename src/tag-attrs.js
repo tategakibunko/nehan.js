@@ -78,11 +78,18 @@ var TagAttrs = (function(){
       });
       return attrs;
     },
+    _parseDatasetValue : function(value){
+      switch(value){
+      case "true": return true;
+      case "false": return false;
+      default: return value;
+      }
+    },
     _parseDataset : function(attrs_raw){
       var dataset = {};
       for(var name in attrs_raw){
 	if(name.indexOf("data-") === 0){
-	  dataset[__data_name_of(name)] = attrs_raw[name];
+	  dataset[__data_name_of(name)] = this._parseDatasetValue(attrs_raw[name]);
 	}
       }
       return dataset;
