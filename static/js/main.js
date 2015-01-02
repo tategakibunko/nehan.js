@@ -11,12 +11,13 @@ $(function(){
     $(".legacy-browser-alert").show();
   }
 
+  /*
   $("#global-menu").find(".dropdown").dropdown({
     onChange:function(value, text, $choice){
       var href = $choice.attr("href") || $choice.find("a").attr("href");
       location.href = href;
     }
-  });
+  });*/
 
   $(".nehan-reader").each(function(i, dom){
     var $dom = $(dom);
