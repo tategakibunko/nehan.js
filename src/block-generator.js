@@ -1,4 +1,13 @@
 var BlockGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class BlockGenerator
+     @classdesc generator of generic block element
+     @constructor
+     @extends Nehan.LayoutGenerator
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function BlockGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
     if(this.style.getParentMarkupName() === "body"){
@@ -39,6 +48,11 @@ var BlockGenerator = (function(){
     }
   };
 
+  /**
+     @memberof Nehan.BlockGenerator
+     @method popCache
+     @return temporary stored cached element for next time yielding.
+  */
   BlockGenerator.prototype.popCache = function(context){
     var cache = LayoutGenerator.prototype.popCache.call(this);
 

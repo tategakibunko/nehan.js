@@ -1,4 +1,11 @@
 var LayoutGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class LayoutGenerator
+     @constructor
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function LayoutGenerator(style, stream){
     this.style = style;
     this.stream = stream;

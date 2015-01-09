@@ -1,4 +1,12 @@
 var BodyGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class BodyGenerator
+     @classdesc generator of &lt;body&gt; element
+     @extends Nehan.SectionRootGenerator
+     @constructor
+     @param text {string} - content source of html
+  */
   function BodyGenerator(text){
     var tag = new Tag("<body>", text);
     SectionRootGenerator.call(this, new StyleContext(tag, null), new TokenStream(text));

@@ -4325,12 +4325,33 @@ var Flow = (function(){
 
 
 var BlockFlow = (function(){
+  /**
+     @memberof Nehan
+     @class BlockFlow
+     @classdesc flow direction of block
+     @constructor
+     @param dir {string} - "lr" or "rl" or "tb"
+     @extends Nehan.Flow
+     @example
+     var bf = new BlockFlow("tb");
+  */
   function BlockFlow(dir){
     Flow.call(this, dir);
   }
 
   Class.extend(BlockFlow, Flow);
 
+  /**
+     get flipped block direction. If direction is "tb", nothing happend.
+
+     @memberof Nehan.BlockFlow
+     @method flip
+     @return {string} fliped block direction
+     @example
+new BlockFlow("tb").flip(); // => "tb" (nothing happened)
+new BlockFlow("lr").flip(); // => "rl"
+new BlockFlow("rl").flip(); // => "lr"
+  */
   BlockFlow.prototype.flip = function(){
     switch(this.dir){
     case "lr": case "rl": return "tb";
@@ -4339,15 +4360,33 @@ var BlockFlow = (function(){
     }
   };
 
-  // notice that "float" property is converted into "cssFloat" in evaluation time.
+  /**
+     get css object
+
+     @memberof Nehan.BlockFlow
+     @method getCss
+     @return {Object}
+  */
   BlockFlow.prototype.getCss = function(){
     var css = {};
     if(this.isHorizontal()){
+      // notice that "float" property is converted into "cssFloat" in evaluation time.
       css["css-float"] = (this.dir === "lr")? "left" : "right";
     }
     return css;
   };
 
+  /**
+     get physical directional property of logical before.
+
+     @memberof Nehan.BlockFlow
+     @method getPropBefore
+     @return {string}
+     @example
+new BlockFlow("tb").getPropBefore(); // => "top"
+new BlockFlow("lr").getPropBefore(); // => "left"
+new BlockFlow("rl").getPropBefore(); // => "right"
+  */
   BlockFlow.prototype.getPropBefore = function(){
     switch(this.dir){
     case "lr": return "left";
@@ -4357,6 +4396,17 @@ var BlockFlow = (function(){
     }
   };
 
+  /**
+     get physical directional property of logical before.
+
+     @memberof Nehan.BlockFlow
+     @method getPropBefore
+     @return {string}
+     @example
+new BlockFlow("tb").getPropAfter(); // => "bottom"
+new BlockFlow("lr").getPropAfter(); // => "right"
+new BlockFlow("rl").getPropAfter(); // => "left"
+  */
   BlockFlow.prototype.getPropAfter = function(){
     switch(this.dir){
     case "lr": return "right";
@@ -4698,6 +4748,12 @@ var Radius2d = (function(){
 })();
 
 var BorderRadius = (function(){
+  /**
+     @memberof Nehan
+     @class BorderRadius
+     @classdesc border radius object
+     @constructor
+  */
   function BorderRadius(){
     this.topLeft = new Radius2d();
     this.topRight = new Radius2d();
@@ -4706,6 +4762,11 @@ var BorderRadius = (function(){
   }
 
   BorderRadius.prototype = {
+    /**
+       @memberof Nehan.BorderRadius
+       @method getArray
+       @return {Array.<Nehan.Radius2d>}
+    */
     getArray : function(){
       return [
 	this.topLeft,
@@ -4785,10 +4846,25 @@ var BorderRadius = (function(){
 })();
 
 var BorderColor = (function(){
+  /**
+     @memberof Nehan
+     @class BorderColor
+     @classdesc border color object
+  */
   function BorderColor(){
   }
 
   BorderColor.prototype = {
+    /**
+       @memberof Nehan.BorderColor
+       @method setColor
+       @param flow {Nehan.Flow}
+       @param value {Object} - color values, object or array or string available.
+       @param value.before {Nehan.Color}
+       @param value.end {Nehan.Color}
+       @param value.after {Nehan.Color}
+       @param value.start {Nehan.Color}
+    */
     setColor : function(flow, value){
       var self = this;
 
@@ -4800,6 +4876,12 @@ var BorderColor = (function(){
 	self[dir] = new Color(val);
       });
     },
+    /**
+       get css object of border color
+
+       @memberof Nehan.BorderColor
+       @method getCss
+    */
     getCss : function(){
       var css = {};
       BoxRect.iter(this, function(dir, color){
@@ -8625,6 +8707,13 @@ var InlineContext = (function(){
 
 
 var LayoutGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class LayoutGenerator
+     @constructor
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function LayoutGenerator(style, stream){
     this.style = style;
     this.stream = stream;
@@ -8878,6 +8967,15 @@ var LayoutGenerator = (function(){
 
 
 var BlockGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class BlockGenerator
+     @classdesc generator of generic block element
+     @constructor
+     @extends Nehan.LayoutGenerator
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function BlockGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
     if(this.style.getParentMarkupName() === "body"){
@@ -8918,6 +9016,11 @@ var BlockGenerator = (function(){
     }
   };
 
+  /**
+     @memberof Nehan.BlockGenerator
+     @method popCache
+     @return temporary stored cached element for next time yielding.
+  */
   BlockGenerator.prototype.popCache = function(context){
     var cache = LayoutGenerator.prototype.popCache.call(this);
 
@@ -9454,7 +9557,7 @@ var FlipGenerator = (function(){
      @classdesc generate fliped layout of [style]
      @constructor
      @param style {Nehan.StyleContext}
-     @param stream {Nehan.TagStream}
+     @param stream {Nehan.TokenStream}
   */
   function FlipGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
@@ -10043,6 +10146,14 @@ var HeaderGenerator = (function(){
 
 
 var BodyGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class BodyGenerator
+     @classdesc generator of &lt;body&gt; element
+     @extends Nehan.SectionRootGenerator
+     @constructor
+     @param text {string} - content source of html
+  */
   function BodyGenerator(text){
     var tag = new Tag("<body>", text);
     SectionRootGenerator.call(this, new StyleContext(tag, null), new TokenStream(text));
