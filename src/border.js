@@ -1,9 +1,22 @@
 var Border = (function(){
+  /**
+     @memberof Nehan
+     @class Border
+     @classdesc logical border object that contains border-width, border-radius, border-style, border-color for each logical directions.
+     @constructor
+     @extends {Nehan.Edge}
+  */
   function Border(){
     Edge.call(this, "border");
   }
   Class.extend(Border, Edge);
 
+  /**
+     return cloned border object
+     @memberof Nehan.Border
+     @method clone
+     @return {Nehan.Border}
+  */
   Border.prototype.clone = function(){
     var border = this.copyTo(new Border());
     if(this.radius){

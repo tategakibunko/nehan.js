@@ -4751,7 +4751,7 @@ var BorderRadius = (function(){
   /**
      @memberof Nehan
      @class BorderRadius
-     @classdesc border radius object
+     @classdesc logical border radius object
      @constructor
   */
   function BorderRadius(){
@@ -4775,19 +4775,43 @@ var BorderRadius = (function(){
 	this.bottomLeft
       ];
     },
+    /**
+       get css value of border-radius for horizontal direction
+       @memberof Nehan.BorderRadius
+       @method getCssValueHroi
+       @return {Object}
+    */
     getCssValueHori : function(){
       return List.map(this.getArray(), function(radius){
 	return radius.getCssValueHori();
       }).join(" ");
     },
+    /**
+       get css value of border-radius for vertical direction
+       @memberof Nehan.BorderRadius
+       @method getCssValueVert
+       @return {Object}
+    */
     getCssValueVert : function(){
       return List.map(this.getArray(), function(radius){
 	return radius.getCssValueVert();
       }).join(" ");
     },
+    /**
+       get css value of border-radius for both vert and horizontal direction
+       @memberof Nehan.BorderRadius
+       @method getCssValue
+       @return {Object}
+    */
     getCssValue : function(){
       return [this.getCssValueHori(), this.getCssValueVert()].join("/");
     },
+    /**
+       get css object of border-radius
+       @memberof Nehan.BorderRadius
+       @method getCss
+       @return {Object}
+    */
     getCss : function(){
       var css = {};
       var css_value = this.getCssValue();
@@ -4798,10 +4822,29 @@ var BorderRadius = (function(){
       });
       return css;
     },
+    /**
+       get corner value
+       @memberof Nehan.BorderRadius
+       @method getCorner
+       @param dir1 {string} - physical direction of logical start or end
+       @param dir2 {string} - physical direction of logical before or after
+       @return {Nehan.Radius2d}
+    */
     getCorner : function(dir1, dir2){
       var name = BoxCorner.getCornerName(dir1, dir2);
       return this[name];
     },
+    /**
+       set corner size
+       @memberof Nehan.BorderRadius
+       @method setSize
+       @param flow {Nehan.BoxFlow} - base layout flow
+       @param size {Object} - size values for each logical corner
+       @param size.start-before {int}
+       @param size.start-after {int}
+       @param size.end-before {int}
+       @param size.end-after {int}
+    */
     setSize : function(flow, size){
       if(typeof size["start-before"] != "undefined"){
 	this.setStartBefore(flow, size["start-before"]);
@@ -4816,26 +4859,68 @@ var BorderRadius = (function(){
 	this.setEndAfter(flow, size["end-after"]);
       }
     },
+    /**
+       set corner of logical "start-before"
+       @memberof Nehan.BorderRadius
+       @method setStartBefore
+       @param flow {Nehan.BoxFlow} - base layout flow
+       @param value {Array<int>} - 2d radius value
+       @example
+       new BorderRadius().setStartBefore(BoxFlows.getByName("lr-tb"), [5, 10]); // horizontal 5px, vertical 10px
+    */
     setStartBefore : function(flow, value){
       var radius = this.getCorner(flow.getPropStart(), flow.getPropBefore());
       radius.setSize(value);
     },
+    /**
+       set corner of logical "start-after"
+       @memberof Nehan.BorderRadius
+       @method setStartAfter
+       @param flow {Nehan.BoxFlow} - base layout flow
+       @param value {Array<int>} - 2d radius value
+    */
     setStartAfter : function(flow, value){
       var radius = this.getCorner(flow.getPropStart(), flow.getPropAfter());
       radius.setSize(value);
     },
+    /**
+       set corner of logical "end-before"
+       @memberof Nehan.BorderRadius
+       @method setEndBefore
+       @param flow {Nehan.BoxFlow} - base layout flow
+       @param value {Array<int>} - 2d radius value
+    */
     setEndBefore : function(flow, value){
       var radius = this.getCorner(flow.getPropEnd(), flow.getPropBefore());
       radius.setSize(value);
     },
+    /**
+       set corner of logical "end-after"
+       @memberof Nehan.BorderRadius
+       @method setEndAfter
+       @param flow {Nehan.BoxFlow} - base layout flow
+       @param value {Array<int>} - 2d radius value
+    */
     setEndAfter :  function(flow, value){
       var radius = this.getCorner(flow.getPropEnd(), flow.getPropAfter());
       radius.setSize(value);
     },
+    /**
+       clear corner values of logical before direction("start-before" and "end-before")
+       @memberof Nehan.BorderRadius
+       @method clearBefore
+       @param flow {Nehan.BoxFlow} - base layout flow
+    */
     clearBefore : function(flow){
       this.setStartBefore(flow, [0, 0]);
       this.setEndBefore(flow, [0, 0]);
     },
+    /**
+       clear corner values of logical before direction("start-after" and "end-after")
+       @memberof Nehan.BorderRadius
+       @method clearAfter
+       @param flow {Nehan.BoxFlow} - base layout flow
+    */
     clearAfter : function(flow){
       this.setStartAfter(flow, [0, 0]);
       this.setEndAfter(flow, [0, 0]);
@@ -4849,7 +4934,8 @@ var BorderColor = (function(){
   /**
      @memberof Nehan
      @class BorderColor
-     @classdesc border color object
+     @classdesc logical border color object
+     @constructor
   */
   function BorderColor(){
   }
@@ -4858,7 +4944,7 @@ var BorderColor = (function(){
     /**
        @memberof Nehan.BorderColor
        @method setColor
-       @param flow {Nehan.Flow}
+       @param flow {Nehan.BoxFlow}
        @param value {Object} - color values, object or array or string available.
        @param value.before {Nehan.Color}
        @param value.end {Nehan.Color}
@@ -4896,13 +4982,34 @@ var BorderColor = (function(){
 })();
 
 var BorderStyle = (function(){
+  /**
+     @memberof Nehan
+     @class BorderStyle
+     @classdesc logical border style object
+     @constructor
+  */
   function BorderStyle(){
   }
 
   BorderStyle.prototype = {
+    /**
+       @memberof Nehan.BorderStyle
+       @method setStyle
+       @param flow {Nehan.BoxFlow}
+       @param value {Object} - logical style values for each logical direction
+       @param value.before {string}
+       @param value.end {string}
+       @param value.after {string}
+       @param value.start {string}
+    */
     setStyle : function(flow, value){
       BoxRect.setValue(this, flow, value);
     },
+    /**
+       get css object of logical border style
+       @memberof Nehan.BorderStyle
+       @return {Object}
+    */
     getCss : function(){
       var css = {};
       BoxRect.iter(this, function(dir, style){
@@ -4945,11 +5052,24 @@ var Margin = (function(){
 
 
 var Border = (function(){
+  /**
+     @memberof Nehan
+     @class Border
+     @classdesc logical border object that contains border-width, border-radius, border-style, border-color for each logical directions.
+     @constructor
+     @extends {Nehan.Edge}
+  */
   function Border(){
     Edge.call(this, "border");
   }
   Class.extend(Border, Edge);
 
+  /**
+     return cloned border object
+     @memberof Nehan.Border
+     @method clone
+     @return {Nehan.Border}
+  */
   Border.prototype.clone = function(){
     var border = this.copyTo(new Border());
     if(this.radius){

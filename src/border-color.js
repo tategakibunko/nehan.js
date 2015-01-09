@@ -2,7 +2,8 @@ var BorderColor = (function(){
   /**
      @memberof Nehan
      @class BorderColor
-     @classdesc border color object
+     @classdesc logical border color object
+     @constructor
   */
   function BorderColor(){
   }
@@ -11,7 +12,7 @@ var BorderColor = (function(){
     /**
        @memberof Nehan.BorderColor
        @method setColor
-       @param flow {Nehan.Flow}
+       @param flow {Nehan.BoxFlow}
        @param value {Object} - color values, object or array or string available.
        @param value.before {Nehan.Color}
        @param value.end {Nehan.Color}
