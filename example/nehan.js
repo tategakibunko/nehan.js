@@ -27,6 +27,9 @@
  OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/**
+   @namespace Nehan
+*/
 var Nehan = Nehan || {};
 Nehan.version = "5.0.5";
 
@@ -1626,6 +1629,11 @@ var MathUtils = {
 };
 
 
+/**
+   requestAnimationFrame wrapper function
+   @namespace Nehan
+   @function reqAnimationFrame
+*/
 var reqAnimationFrame = (function(){
   var default_wait = 1000 / 60;
   return window.requestAnimationFrame  ||
@@ -1768,7 +1776,17 @@ var Closure = {
   }
 };
 
+/**
+   @namespace Nehan.Args
+*/
 var Args = {
+  /**
+     copy all value in [args] to [dst]
+     @memberof Nehan.Args
+     @param {Object} dst
+     @param {Object} args
+     @return {Object} - copied dst
+  */
   copy : function(dst, args){
     dst = dst || {};
     for(var prop in args){
@@ -1776,6 +1794,13 @@ var Args = {
     }
     return dst;
   },
+  /**
+     copy all value in [args] to [dst] recursively
+     @memberof Nehan.Args
+     @param {Object} dst
+     @param {Object} args
+     @return {Object} - copied dst
+  */
   copy2 : function(dst, args){
     dst = dst || {};
     for(var prop in args){
@@ -1787,6 +1812,14 @@ var Args = {
     }
     return dst;
   },
+  /**
+     merge all value in [args] to [dst] with default value by [defaults]
+     @memberof Nehan.Args
+     @param {Object} dst
+     @param {Object} defaults
+     @param {Object} args
+     @return {Object} merged dst
+  */
   merge : function(dst, defaults, args){
     dst = dst || {};
     for(var prop in defaults){
@@ -2100,6 +2133,16 @@ var CssParser = (function(){
 
 
 var AttrSelector = (function(){
+  /**
+     @namespace Nehan
+     @memberof Nehan
+     @class AttrSelector
+     @classdesc css attribute selector
+     @constructor
+     @param {string} expr - attribute selector string
+     @example
+     var as = new AttrSelector("[name='taro']");
+  */
   function AttrSelector(expr){
     this.expr = this._normalize(expr);
     this.left = this.op = this.right = null;
@@ -2177,6 +2220,12 @@ var AttrSelector = (function(){
       }
       throw "undefined operation:" + this.op;
     },
+    /**
+       @memberof Nehan.AttrSelector
+       @method test
+       @param style {Nehan.StyleContext}
+       @return {bool} true if style is matched to this attribute selector.
+    */
     test : function(style){
       if(this.op && this.left && this.right){
 	return this._testOp(style);
@@ -8280,6 +8329,18 @@ var LayoutContext = (function(){
 
 
 var BlockContext = (function(){
+  /** @namespace Nehan
+      @memberof Nehan
+      @class BlockContext
+      @classdesc context info while building block level
+      @constructor
+      @param {int} max_extent - maximus size of extent in px
+      @param opt {Object} - optional argument
+      @param opt.isFirstBlock {boolean} - is this first generated block by this context object?
+      @param opt.contextEdge {Object} - special edge size of this block context
+      @param opt.contextEdge.before {int} - before edge size in px
+      @param opt.contextEdge.after {int} - after edge size in px
+  */
   function BlockContext(max_extent, opt){
     opt = opt || {};
     this.curExtent = 0;
@@ -8293,14 +8354,35 @@ var BlockContext = (function(){
   }
 
   BlockContext.prototype = {
+    /**
+       check if this block context has enough size of [extent]
+       @memberof Nehan.BlockContext
+       @method hasSpaceFor
+       @param extent {int} - size of extent in px
+       @param is_last_block {boolean} - is this the last output of source block generation? default false
+       @return {boolean}
+    */
     hasSpaceFor : function(extent, is_last_block){
       is_last_block = is_last_block || false;
       var cancel_size = this.getCancelSize(is_last_block);
       return this.getRestExtent() >= (extent - cancel_size);
     },
+    /**
+       check if this block context has break after flag.
+       @memberof Nehan.BlockContext
+       @method hasBreakAfter
+       @return {boolean}
+    */
     hasBreakAfter : function(){
       return this.breakAfter;
     },
+    /**
+       add box element to this block context
+       @memberof Nehan.BlockContext
+       @method addElement
+       @param element {Nehan.Box} - Box object added to this context
+       @param extent {int} - extent size of this element
+    */
     addElement : function(element, extent){
       this.curExtent += extent;
       if(element.breakAfter){

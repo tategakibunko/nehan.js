@@ -1,4 +1,14 @@
 var AttrSelector = (function(){
+  /**
+     @namespace Nehan
+     @memberof Nehan
+     @class AttrSelector
+     @classdesc css attribute selector
+     @constructor
+     @param {string} expr - attribute selector string
+     @example
+     var as = new AttrSelector("[name='taro']");
+  */
   function AttrSelector(expr){
     this.expr = this._normalize(expr);
     this.left = this.op = this.right = null;
@@ -76,6 +86,12 @@ var AttrSelector = (function(){
       }
       throw "undefined operation:" + this.op;
     },
+    /**
+       @memberof Nehan.AttrSelector
+       @method test
+       @param style {Nehan.StyleContext}
+       @return {bool} true if style is matched to this attribute selector.
+    */
     test : function(style){
       if(this.op && this.left && this.right){
 	return this._testOp(style);

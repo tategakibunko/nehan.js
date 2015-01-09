@@ -1,3 +1,8 @@
+/**
+   requestAnimationFrame wrapper function
+   @namespace Nehan
+   @function reqAnimationFrame
+*/
 var reqAnimationFrame = (function(){
   var default_wait = 1000 / 60;
   return window.requestAnimationFrame  ||

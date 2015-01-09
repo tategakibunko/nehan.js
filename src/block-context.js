@@ -1,4 +1,16 @@
 var BlockContext = (function(){
+  /** @namespace Nehan
+      @memberof Nehan
+      @class BlockContext
+      @classdesc context info while building block level
+      @constructor
+      @param {int} max_extent - maximus size of extent in px
+      @param opt {Object} - optional argument
+      @param opt.isFirstBlock {boolean} - is this first generated block by this context object?
+      @param opt.contextEdge {Object} - special edge size of this block context
+      @param opt.contextEdge.before {int} - before edge size in px
+      @param opt.contextEdge.after {int} - after edge size in px
+  */
   function BlockContext(max_extent, opt){
     opt = opt || {};
     this.curExtent = 0;
@@ -12,14 +24,35 @@ var BlockContext = (function(){
   }
 
   BlockContext.prototype = {
+    /**
+       check if this block context has enough size of [extent]
+       @memberof Nehan.BlockContext
+       @method hasSpaceFor
+       @param extent {int} - size of extent in px
+       @param is_last_block {boolean} - is this the last output of source block generation? default false
+       @return {boolean}
+    */
     hasSpaceFor : function(extent, is_last_block){
       is_last_block = is_last_block || false;
       var cancel_size = this.getCancelSize(is_last_block);
       return this.getRestExtent() >= (extent - cancel_size);
     },
+    /**
+       check if this block context has break after flag.
+       @memberof Nehan.BlockContext
+       @method hasBreakAfter
+       @return {boolean}
+    */
     hasBreakAfter : function(){
       return this.breakAfter;
     },
+    /**
+       add box element to this block context
+       @memberof Nehan.BlockContext
+       @method addElement
+       @param element {Nehan.Box} - Box object added to this context
+       @param extent {int} - extent size of this element
+    */
     addElement : function(element, extent){
       this.curExtent += extent;
       if(element.breakAfter){
