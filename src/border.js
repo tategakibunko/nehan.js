@@ -37,6 +37,11 @@ var Border = (function(){
     return border;
   };
 
+  /**
+     @memberof Nehan.Border
+     @method clearBefore
+     @param flow {Nehan.BoxFlow}
+  */
   Border.prototype.clearBefore = function(flow){
     this.setBefore(flow, 0);
     if(this.radius){

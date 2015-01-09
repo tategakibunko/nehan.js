@@ -117,7 +117,7 @@ var BorderRadius = (function(){
        @param flow {Nehan.BoxFlow} - base layout flow
        @param value {Array<int>} - 2d radius value
        @example
-       new BorderRadius().setStartBefore(BoxFlows.getByName("lr-tb"), [5, 10]); // horizontal 5px, vertical 10px
+       * new BorderRadius().setStartBefore(BoxFlows.getByName("lr-tb"), [5, 10]); // horizontal 5px, vertical 10px
     */
     setStartBefore : function(flow, value){
       var radius = this.getCorner(flow.getPropStart(), flow.getPropBefore());

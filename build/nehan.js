@@ -2140,7 +2140,7 @@ var AttrSelector = (function(){
      @constructor
      @param {string} expr - attribute selector string
      @example
-     var as = new AttrSelector("[name='taro']");
+     * var as = new AttrSelector("[name='taro']");
   */
   function AttrSelector(expr){
     this.expr = this._normalize(expr);
@@ -4333,7 +4333,7 @@ var BlockFlow = (function(){
      @param dir {string} - "lr" or "rl" or "tb"
      @extends Nehan.Flow
      @example
-     var bf = new BlockFlow("tb");
+     * var bf = new BlockFlow("tb");
   */
   function BlockFlow(dir){
     Flow.call(this, dir);
@@ -4348,9 +4348,9 @@ var BlockFlow = (function(){
      @method flip
      @return {string} fliped block direction
      @example
-new BlockFlow("tb").flip(); // => "tb" (nothing happened)
-new BlockFlow("lr").flip(); // => "rl"
-new BlockFlow("rl").flip(); // => "lr"
+     * new BlockFlow("tb").flip(); // => "tb" (nothing happened)
+     * new BlockFlow("lr").flip(); // => "rl"
+     * new BlockFlow("rl").flip(); // => "lr"
   */
   BlockFlow.prototype.flip = function(){
     switch(this.dir){
@@ -4383,9 +4383,9 @@ new BlockFlow("rl").flip(); // => "lr"
      @method getPropBefore
      @return {string}
      @example
-new BlockFlow("tb").getPropBefore(); // => "top"
-new BlockFlow("lr").getPropBefore(); // => "left"
-new BlockFlow("rl").getPropBefore(); // => "right"
+     * new BlockFlow("tb").getPropBefore(); // => "top"
+     * new BlockFlow("lr").getPropBefore(); // => "left"
+     * new BlockFlow("rl").getPropBefore(); // => "right"
   */
   BlockFlow.prototype.getPropBefore = function(){
     switch(this.dir){
@@ -4403,9 +4403,9 @@ new BlockFlow("rl").getPropBefore(); // => "right"
      @method getPropBefore
      @return {string}
      @example
-new BlockFlow("tb").getPropAfter(); // => "bottom"
-new BlockFlow("lr").getPropAfter(); // => "right"
-new BlockFlow("rl").getPropAfter(); // => "left"
+     * new BlockFlow("tb").getPropAfter(); // => "bottom"
+     * new BlockFlow("lr").getPropAfter(); // => "right"
+     * new BlockFlow("rl").getPropAfter(); // => "left"
   */
   BlockFlow.prototype.getPropAfter = function(){
     switch(this.dir){
@@ -4866,7 +4866,7 @@ var BorderRadius = (function(){
        @param flow {Nehan.BoxFlow} - base layout flow
        @param value {Array<int>} - 2d radius value
        @example
-       new BorderRadius().setStartBefore(BoxFlows.getByName("lr-tb"), [5, 10]); // horizontal 5px, vertical 10px
+       * new BorderRadius().setStartBefore(BoxFlows.getByName("lr-tb"), [5, 10]); // horizontal 5px, vertical 10px
     */
     setStartBefore : function(flow, value){
       var radius = this.getCorner(flow.getPropStart(), flow.getPropBefore());
@@ -5090,6 +5090,11 @@ var Border = (function(){
     return border;
   };
 
+  /**
+     @memberof Nehan.Border
+     @method clearBefore
+     @param flow {Nehan.BoxFlow}
+  */
   Border.prototype.clearBefore = function(flow){
     this.setBefore(flow, 0);
     if(this.radius){

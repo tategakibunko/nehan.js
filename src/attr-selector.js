@@ -6,7 +6,7 @@ var AttrSelector = (function(){
      @constructor
      @param {string} expr - attribute selector string
      @example
-     var as = new AttrSelector("[name='taro']");
+     * var as = new AttrSelector("[name='taro']");
   */
   function AttrSelector(expr){
     this.expr = this._normalize(expr);

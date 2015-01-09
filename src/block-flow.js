@@ -7,7 +7,7 @@ var BlockFlow = (function(){
      @param dir {string} - "lr" or "rl" or "tb"
      @extends Nehan.Flow
      @example
-     var bf = new BlockFlow("tb");
+     * var bf = new BlockFlow("tb");
   */
   function BlockFlow(dir){
     Flow.call(this, dir);
@@ -22,9 +22,9 @@ var BlockFlow = (function(){
      @method flip
      @return {string} fliped block direction
      @example
-new BlockFlow("tb").flip(); // => "tb" (nothing happened)
-new BlockFlow("lr").flip(); // => "rl"
-new BlockFlow("rl").flip(); // => "lr"
+     * new BlockFlow("tb").flip(); // => "tb" (nothing happened)
+     * new BlockFlow("lr").flip(); // => "rl"
+     * new BlockFlow("rl").flip(); // => "lr"
   */
   BlockFlow.prototype.flip = function(){
     switch(this.dir){
@@ -57,9 +57,9 @@ new BlockFlow("rl").flip(); // => "lr"
      @method getPropBefore
      @return {string}
      @example
-new BlockFlow("tb").getPropBefore(); // => "top"
-new BlockFlow("lr").getPropBefore(); // => "left"
-new BlockFlow("rl").getPropBefore(); // => "right"
+     * new BlockFlow("tb").getPropBefore(); // => "top"
+     * new BlockFlow("lr").getPropBefore(); // => "left"
+     * new BlockFlow("rl").getPropBefore(); // => "right"
   */
   BlockFlow.prototype.getPropBefore = function(){
     switch(this.dir){
@@ -77,9 +77,9 @@ new BlockFlow("rl").getPropBefore(); // => "right"
      @method getPropBefore
      @return {string}
      @example
-new BlockFlow("tb").getPropAfter(); // => "bottom"
-new BlockFlow("lr").getPropAfter(); // => "right"
-new BlockFlow("rl").getPropAfter(); // => "left"
+     * new BlockFlow("tb").getPropAfter(); // => "bottom"
+     * new BlockFlow("lr").getPropAfter(); // => "right"
+     * new BlockFlow("rl").getPropAfter(); // => "left"
   */
   BlockFlow.prototype.getPropAfter = function(){
     switch(this.dir){
