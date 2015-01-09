@@ -1,6 +1,5 @@
 var BlockContext = (function(){
-  /** @namespace Nehan
-      @memberof Nehan
+  /** @memberof Nehan
       @class BlockContext
       @classdesc context info while building block level
       @constructor
@@ -66,6 +65,14 @@ var BlockContext = (function(){
 	this.elements.push(element);
       }
     },
+    /**
+       cancel edge is available if posotion of current block cursor is not at first or at last,
+       because first edge of block is already added to parent block in first time yielding,
+       and last edge of block is only added to last block.
+       @memberof Nehan.BlockContext
+       @param is_last_block {boolean}
+       @return {Object} {before:[int value], after:[int value]}
+    */
     getCancelEdge : function(is_last_block){
       return {
 	// if not first output, we can reduce before edge.
@@ -77,19 +84,41 @@ var BlockContext = (function(){
 	after:(is_last_block? 0 : this.contextEdge.after)
       };
     },
+    /**
+       get size amount that is abled to be eliminated align to block direction, obtained by {@link Nehan.BlockContext.getCancelEdge}.
+       @memberof Nehan.BlockContext
+       @param is_last_block {boolean}
+       @return {int} canceled size of extent
+    */
     getCancelSize : function(is_last_block){
       var cancel_edge = this.getCancelEdge(is_last_block);
       return cancel_edge.before + cancel_edge.after;
     },
+    /**
+       @memberof Nehan.BlockContext
+       @return {int} current extent
+    */
     getCurExtent : function(){
       return this.curExtent;
     },
+    /**
+       @memberof Nehan.BlockContext
+       @return {int} current rest size of extent
+    */
     getRestExtent : function(){
       return this.maxExtent - this.curExtent;
     },
+    /**
+       @memberof Nehan.BlockContext
+       @return {int} max available size of this block context
+    */
     getMaxExtent : function(){
       return this.maxExtent;
     },
+    /**
+       @memberof Nehan.BlockContext
+       @return {Array.<Nehan.Box>} current elements added to this block context
+    */
     getElements : function(){
       return this.pulledElements
 	.concat(this.elements)

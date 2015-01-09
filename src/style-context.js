@@ -76,12 +76,16 @@ var StyleContext = (function(){
     return ret;
   };
 
-  // parent : parent style context
-  // args :
-  //   1. forceCss
-  //     system css that must be applied.
-  //   2. layoutContext
-  //     layout-context at the point of this style-context created.
+  /**
+     @memberof Nehan
+     @class StyleContext
+     @constructor
+     @param markup {Nehan.Tag} - markup of style
+     @param paernt {Nehan.StyleContext} - parent style context
+     @param args {Object} - option arguments
+     @param args.forceCss {Object} - system css that must be applied.
+     @param args.layoutContext {Nehan.LayoutContext} - layout context at the point of this style context created.
+  */
   function StyleContext(markup, parent, args){
     this._initialize(markup, parent, args);
   }
@@ -215,22 +219,50 @@ var StyleContext = (function(){
       // disable some unmanaged css properties depending on loaded style values.
       this._disableUnmanagedCssProps(this.unmanagedCss);
     },
+    /**
+       @memberof Nehan.StyleContext
+       @return {Nehan.OutlinContext}
+    */
     getOutlineContext : function(){
       return this.outlineContext || this.parent.getOutlineContext();
     },
+    /**
+       called when section root(body, blockquote, fieldset, figure, td) starts.
+       @memberof Nehan.StyleContext
+     */
     startOutlineContext : function(){
       this.outlineContext = new OutlineContext(this.getMarkupName());
     },
+    /**
+       called when section root(body, blockquote, fieldset, figure, td) ends.
+       @memberof Nehan.StyleContext
+       @method endOutlineContext
+     */
     endOutlineContext : function(){
       DocumentContext.addOutlineContext(this.getOutlineContext());
     },
+    /**
+       called when section content(article, aside, nav, section) starts.
+       @memberof Nehan.StyleContext
+       @method startSectionContext
+     */
     startSectionContext : function(){
       this.getOutlineContext().startSection(this.getMarkupName());
     },
+    /**
+       called when section content(article, aside, nav, section) ends.
+       @memberof Nehan.StyleContext
+       @method startSectionContext
+    */
     endSectionContext : function(){
       this.getOutlineContext().endSection(this.getMarkupName());
     },
-    // return header id
+    /**
+       called when heading content(h1-h6) starts.
+       @memberof Nehan.StyleContext
+       @method startHeaderContext
+       @return {string} header id
+     */
     startHeaderContext : function(opt){
       return this.getOutlineContext().addHeader({
 	type:opt.type,
@@ -238,23 +270,38 @@ var StyleContext = (function(){
 	title:opt.title
       });
     },
-    // [context_size] = (outer_size, content_size)
-    //
-    // (a) outer_size
-    //   1. if direct size is given, use it as outer_size.
-    //   2. else if parent exists, current outer_size is the content_size of parent.
-    //   3. else if parent not exists(root), use template layout size defined in layout.js.
-    //
-    // (b) content_size
-    //   1. if edge(margin/padding/border) is defined, content_size = [outer_size] - [edge_size]
-    //   2. else(no edge),  content_size = [outer_size]
+    /*
+      [context_size] = (outer_size, content_size)
+
+      (a) outer_size
+        1. if direct size is given, use it as outer_size.
+        2. else if parent exists, use content_size of parent.
+        3. else if parent not exists(root), use layout size defined in layout.js.
+      
+      (b) content_size
+        1. if edge(margin/padding/border) is defined, content_size = [outer_size] - [edge_size]
+	2. else(no edge),  content_size = [outer_size]
+    */
+    /**
+       calculate contexual box size of this style.
+       @memberof Nehan.StyleContext
+       @method initContextSize
+       @param measure {int}
+       @param extent {int}
+    */
     initContextSize : function(measure, extent){
       this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : Layout.getMeasure(this.flow));
       this.outerExtent = extent || (this.parent? this.parent.contentExtent : Layout.getExtent(this.flow));
       this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
       this.contentExtent = this._computeContentExtent(this.outerExtent);
     },
-    // update context size, but static size is preferred, called from flip-generator.
+    /**
+     update context size, but static size is preferred, called from {@link Nehan.FlipGenerator}.
+     @memberof Nehan.StyleContext
+     @method updateContextSize
+     @param measure {int}
+     @param extent {int}
+    */
     updateContextSize : function(measure, extent){
       this.forceUpdateContextSize(this.staticMeasure || measure, this.staticExtent || extent);
     },

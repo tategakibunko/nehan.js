@@ -1,4 +1,11 @@
 var Box = (function(){
+  /**
+     @memberof Nehan
+     @class Box
+     @constrctor
+     @param {Nehan.BoxSize} box size
+     @param {Nehan.StyleContext} style context of this box
+  */
   function Box(size, style){
     this.size = size;
     this.style = style;

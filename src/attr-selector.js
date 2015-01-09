@@ -1,6 +1,5 @@
 var AttrSelector = (function(){
   /**
-     @namespace Nehan
      @memberof Nehan
      @class AttrSelector
      @classdesc css attribute selector
@@ -90,7 +89,7 @@ var AttrSelector = (function(){
        @memberof Nehan.AttrSelector
        @method test
        @param style {Nehan.StyleContext}
-       @return {bool} true if style is matched to this attribute selector.
+       @return {boolean} true if style is matched to this attribute selector.
     */
     test : function(style){
       if(this.op && this.left && this.right){
