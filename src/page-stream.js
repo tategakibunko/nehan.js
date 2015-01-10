@@ -15,18 +15,40 @@ var PageStream = (function(){
   }
 
   PageStream.prototype = {
+    /**
+       @memberof Nehan.PageStream
+       @param page_no {int} - page index
+       @return {boolean}
+    */
     hasPage : function(page_no){
       return (typeof this._trees[page_no] != "undefined");
     },
+    /**
+       @memberof Nehan.PageStream
+       @return {boolean}
+    */
     hasNext : function(){
       return this.generator.hasNext();
     },
+    /**
+       @memberof Nehan.PageStream
+       @param text {String}
+    */
     addText : function(text){
       this.generator.addText(text);
     },
+    /**
+       @memberof Nehan.PageStream
+       @param status {boolean}
+    */
     setTerminate : function(status){
       this.generator.setTerminate(status);
     },
+    /**
+       calculate all pages by blocking loop.
+
+       @memberof Nehan.PageStream
+    */
     syncGet : function(){
       var page_no = 0;
       this._setTimeStart();
@@ -41,6 +63,15 @@ var PageStream = (function(){
       }
       return this._getTimeElapsed();
     },
+    /**
+       calculate all pages by asyncronous way.
+
+       @memberof Nehan.PageStream
+       @param opt {Object}
+       @param opt.onProgress {Function} - fun {@link Nehan.PageStream} -> {@link Nehan.Box} -> ()
+       @param opt.onComplete {Function} - fun {@link Nehan.PageStream} -> ellapse_time:float -> ()
+       @param opt.onError {Function} - fun {@link Nehan.PageStream} -> ()
+    */
     asyncGet : function(opt){
       Args.merge(this, {
 	onComplete : function(self, time){},
@@ -50,14 +81,30 @@ var PageStream = (function(){
       this._setTimeStart();
       this._asyncGet(opt.wait || 0);
     },
+    /**
+       @memberof Nehan.PageStream
+       @return {int}
+    */
     getPageCount : function(){
       return this._trees.length;
     },
-    // same as getPage, defined to keep compatibility of older version of nehan.js
+    /**
+       same as getPage, defined to keep compatibility of older version of nehan.js
+
+       @memberof Nehan.PageStream
+       @param page_no {int} - page index starts from 0.
+       @deprecated
+    */
     get : function(page_no){
       return this.getPage(page_no);
     },
-    // int -> Page
+    /**
+       get evaluated page object.
+
+       @memberof Nehan.PageStream
+       @param page_no {int} - page index starts from 0.
+       @return {Nehan.Page}
+    */
     getPage : function(page_no){
       if(this._pages[page_no]){
 	return this._pages[page_no];
@@ -70,6 +117,13 @@ var PageStream = (function(){
       this._pages[page_no] = page;
       return page;
     },
+    /**
+       get pre evaluated page tree.
+
+       @memberof Nehan.PageStream
+       @param page_no {int} - page index starts from 0.
+       @return {Nehan.Box}
+    */
     getTree : function(page_no){
       return this._trees[page_no] || null;
     },

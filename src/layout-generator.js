@@ -16,10 +16,17 @@ var LayoutGenerator = (function(){
     this._terminate = false; // used to force terminate generator.
   }
 
-  // 1. create child layout context from parent layout context.
-  // 2. call _yield implemented in inherited class.
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method yield
+     @param parent_context {Nehan.CursorContext} - cursor context from parent generator
+     @return {Nehan.Box}
+  */
   LayoutGenerator.prototype.yield = function(parent_context){
+    // create child layout context from parent layout context.
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
+
+    // call _yield implemented in inherited class.
     return this._yield(context);
   };
 

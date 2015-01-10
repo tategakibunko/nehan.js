@@ -5108,6 +5108,11 @@ var Colors = (function(){
 })();
 
 
+/**
+   palette color utility module
+
+   @namespace Nehan.Palette
+*/
 var Palette = (function(){
   // 256(8 * 8 * 4) color palette scales.
   var __rg_palette = [0, 36, 73, 109, 146, 182, 219, 255];
@@ -5131,8 +5136,14 @@ var Palette = (function(){
   };
 
   return {
-    // search and return color value defined in nehan palette.
-    // we use this value for img characters.
+    /**
+     * search nearest color value defined in nehan palette.<br>
+     * we use this value for img characters.
+
+       @memberof Nehan.Palette
+       @param rgb {Nehan.Rbg}
+       @return {String}
+    */
     getColor : function(rgb){
       var palette_red = __find_palette(rgb.getRed(), __rg_palette);
       var palette_green = __find_palette(rgb.getGreen(), __rg_palette);
@@ -8683,6 +8694,19 @@ var RubyTokenStream = (function(){
 
 
 var Page = (function(){
+  /**
+     @memberof Nehan
+     @class Page
+     @classdesc abstract evaluated page object.
+     @constructor
+     @param opt {Object}
+     @param opt.element {DOMElement} - generated DOMElement.
+     @param opt.seekPos {int} - page seek position in literal string pos.
+     @param opt.pageNo {int} - page index starts from 0.
+     @param opt.charPos {int} - character position of this page from first page.
+     @param opt.charCount {int} - character count included in this page object.
+     @param opt.percent {int}
+  */
   function Page(opt){
     Args.merge(this, {
       element:null,
@@ -8699,6 +8723,12 @@ var Page = (function(){
 
 
 var PageEvaluator = (function(){
+  /**
+     @memberof Nehan
+     @class PageEvaluator
+     @classdesc evaluate {@link Nehan.Box} as {@link Nehan.Page}.
+     @constructor
+  */
   function PageEvaluator(){
     this.evaluator = this._getEvaluator();
   }
@@ -8707,6 +8737,13 @@ var PageEvaluator = (function(){
     _getEvaluator : function(){
       return (Display.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
     },
+    /**
+       evaluate {@link Nehan.Box}, output {@link Nehan.Page}.
+
+       @memberof Nehan.PageEvaluator
+       @param tree {Nehan.Box}
+       @return {Nehan.Page}
+    */
     evaluate : function(tree){
       return tree? new Page({
 	element:this.evaluator.evaluate(tree),
@@ -8740,18 +8777,40 @@ var PageStream = (function(){
   }
 
   PageStream.prototype = {
+    /**
+       @memberof Nehan.PageStream
+       @param page_no {int} - page index
+       @return {boolean}
+    */
     hasPage : function(page_no){
       return (typeof this._trees[page_no] != "undefined");
     },
+    /**
+       @memberof Nehan.PageStream
+       @return {boolean}
+    */
     hasNext : function(){
       return this.generator.hasNext();
     },
+    /**
+       @memberof Nehan.PageStream
+       @param text {String}
+    */
     addText : function(text){
       this.generator.addText(text);
     },
+    /**
+       @memberof Nehan.PageStream
+       @param status {boolean}
+    */
     setTerminate : function(status){
       this.generator.setTerminate(status);
     },
+    /**
+       calculate all pages by blocking loop.
+
+       @memberof Nehan.PageStream
+    */
     syncGet : function(){
       var page_no = 0;
       this._setTimeStart();
@@ -8766,6 +8825,15 @@ var PageStream = (function(){
       }
       return this._getTimeElapsed();
     },
+    /**
+       calculate all pages by asyncronous way.
+
+       @memberof Nehan.PageStream
+       @param opt {Object}
+       @param opt.onProgress {Function} - fun {@link Nehan.PageStream} -> {@link Nehan.Box} -> ()
+       @param opt.onComplete {Function} - fun {@link Nehan.PageStream} -> ellapse_time:float -> ()
+       @param opt.onError {Function} - fun {@link Nehan.PageStream} -> ()
+    */
     asyncGet : function(opt){
       Args.merge(this, {
 	onComplete : function(self, time){},
@@ -8775,14 +8843,30 @@ var PageStream = (function(){
       this._setTimeStart();
       this._asyncGet(opt.wait || 0);
     },
+    /**
+       @memberof Nehan.PageStream
+       @return {int}
+    */
     getPageCount : function(){
       return this._trees.length;
     },
-    // same as getPage, defined to keep compatibility of older version of nehan.js
+    /**
+       same as getPage, defined to keep compatibility of older version of nehan.js
+
+       @memberof Nehan.PageStream
+       @param page_no {int} - page index starts from 0.
+       @deprecated
+    */
     get : function(page_no){
       return this.getPage(page_no);
     },
-    // int -> Page
+    /**
+       get evaluated page object.
+
+       @memberof Nehan.PageStream
+       @param page_no {int} - page index starts from 0.
+       @return {Nehan.Page}
+    */
     getPage : function(page_no){
       if(this._pages[page_no]){
 	return this._pages[page_no];
@@ -8795,6 +8879,13 @@ var PageStream = (function(){
       this._pages[page_no] = page;
       return page;
     },
+    /**
+       get pre evaluated page tree.
+
+       @memberof Nehan.PageStream
+       @param page_no {int} - page index starts from 0.
+       @return {Nehan.Box}
+    */
     getTree : function(page_no){
       return this._trees[page_no] || null;
     },
@@ -9246,18 +9337,36 @@ var Partition = (function(){
 // key : partition count
 // value : Partition
 var PartitionHashSet = (function(){
+  /**
+     @memberof Nehan
+     @class PartitionHashSet
+     @classdesc hash set to manage partitioning of layout. key = partition_count, value = {@link Nehan.Partition}.
+     @extends {Nehan.HashSet}
+   */
   function PartitionHashSet(){
     HashSet.call(this);
   }
   Class.extend(PartitionHashSet, HashSet);
 
+  /**
+     @memberof Nehan.PartitionHashSet
+     @param old_part {Nehan.Partition}
+     @param new_part {Nehan.Partition}
+     @return {Nehan.Partition}
+  */
   PartitionHashSet.prototype.merge = function(old_part, new_part){
     return old_part.mergeTo(new_part);
   };
 
-  // [arugments]
-  // opt.partitionCount : int
-  // opt.measure : int
+  /**
+     get partition size(in px) array.
+
+     @memberof Nehan.PartitionHashSet
+     @param opt {Object}
+     @param opt.partitionCount {int}
+     @param opt.measure {int}
+     @return {Array.<int>}
+  */
   PartitionHashSet.prototype.getSizes = function(opt){
     var partition = this.get(opt.partitionCount);
     return partition.mapMeasure(opt.measure);
@@ -11271,10 +11380,17 @@ var LayoutGenerator = (function(){
     this._terminate = false; // used to force terminate generator.
   }
 
-  // 1. create child layout context from parent layout context.
-  // 2. call _yield implemented in inherited class.
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method yield
+     @param parent_context {Nehan.CursorContext} - cursor context from parent generator
+     @return {Nehan.Box}
+  */
   LayoutGenerator.prototype.yield = function(parent_context){
+    // create child layout context from parent layout context.
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
+
+    // call _yield implemented in inherited class.
     return this._yield(context);
   };
 
@@ -12615,6 +12731,15 @@ var FloatGenerator = (function(){
 
 
 var ParallelGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class ParallelGenerator
+     @classdesc wrapper generator to generate multicolumn layout like LI(list-mark,list-body) or TR(child TD).
+     @constructor
+     @extends {Nehan.LayoutGenerator}
+     @param style {Nehan.StyleContext}
+     @param generators {Array<Nehan.LayoutGenerator>}
+  */
   function ParallelGenerator(style, generators){
     LayoutGenerator.call(this, style, null);
     this.generators = generators;
@@ -12639,6 +12764,13 @@ var ParallelGenerator = (function(){
     return wrap_block;
   };
 
+  /**
+     @memberof Nehan.ParallelGenerator
+     @method hasNext
+     @override
+     @param context {Nehan.CurosrContext}
+     @return {boolean}
+  */
   ParallelGenerator.prototype.hasNext = function(context){
     if(this._terminate){
       return false;

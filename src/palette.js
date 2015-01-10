@@ -1,3 +1,8 @@
+/**
+   palette color utility module
+
+   @namespace Nehan.Palette
+*/
 var Palette = (function(){
   // 256(8 * 8 * 4) color palette scales.
   var __rg_palette = [0, 36, 73, 109, 146, 182, 219, 255];
@@ -21,8 +26,14 @@ var Palette = (function(){
   };
 
   return {
-    // search and return color value defined in nehan palette.
-    // we use this value for img characters.
+    /**
+     * search nearest color value defined in nehan palette.<br>
+     * we use this value for img characters.
+
+       @memberof Nehan.Palette
+       @param rgb {Nehan.Rbg}
+       @return {String}
+    */
     getColor : function(rgb){
       var palette_red = __find_palette(rgb.getRed(), __rg_palette);
       var palette_green = __find_palette(rgb.getGreen(), __rg_palette);
