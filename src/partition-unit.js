@@ -20,7 +20,7 @@ var PartitionUnit = (function(){
        @memberof Nehan.PartitionUnit
        @param measure {int}
        @param total_weight {int}
-       @return {int} - size in px
+       @return {int} size in px
     */
     getSize : function(measure, total_weight){
       return Math.floor(measure * this.weight / total_weight);

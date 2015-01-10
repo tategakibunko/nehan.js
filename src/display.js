@@ -216,7 +216,7 @@ var Display = {
   },
   /**
      @memberof Nehan.Display
-     @return {String} - "lr" or "rl"
+     @return {String} "lr" or "rl"
   */
   getPagingDirection : function(){
     return this.pagingDirection[this.direction];

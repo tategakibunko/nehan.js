@@ -58,7 +58,7 @@ var OutlineContextParser = (function(){
     /**
        @memberof Nehan.OutlineContextParser
        @param context {Nehan.OutlineContext}
-       @return {Nehan.Section} - section tree root
+       @return {Nehan.Section} section tree root
     */
     parse : function(context){
       var ptr = 0;

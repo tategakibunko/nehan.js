@@ -51,7 +51,7 @@ var BlockGenerator = (function(){
   /**
      @memberof Nehan.BlockGenerator
      @method popCache
-     @return temporary stored cached element for next time yielding.
+     @return {Nehan.Box} temporary stored cached element for next time yielding.
   */
   BlockGenerator.prototype.popCache = function(context){
     var cache = LayoutGenerator.prototype.popCache.call(this);

@@ -1,3 +1,8 @@
+/**
+   all selector values managed by layout engine.
+
+   @namespace Nehan.Selectors
+ */
 var Selectors = (function(){
   var __selectors = []; // selector list ordered by specificity desc.
   var __selectors_pe = []; // selector (with pseudo-element) list, ordered by specificity desc.
@@ -90,31 +95,51 @@ var Selectors = (function(){
   __init_selectors();
 
   return {
-    // selector_key: selector string
-    // [example] => 'p.some', 'li.foo'
-    //
-    // value: associated selector value object.
-    // [example] => {'color':'black', 'font-size':'16px'}
+    /**
+       @memberof Nehan.Selectors
+       @param selector_key {String}
+       @param value {css_value}
+       @example
+       * Selectors.setValue("li.foo", {"font-size":19});
+    */
     setValue : function(selector_key, value){
       __set_value(selector_key, value);
     },
+    /**
+       @memberof Nehan.Selectors
+       @param values {Object}
+       @example
+       * Selectors.setValues({
+       *   "body":{"color":"red", "background-color":"white"},
+       *   "h1":{"font-size":24}
+       * });
+    */
     setValues : function(values){
       for(var selector_key in values){
 	__set_value(selector_key, values[selector_key]);
       }
     },
-    // get selector css that matches to the style context.
-    //
-    // style: style context
+    /**
+       get selector css that matches to the style context.
+
+       @memberof Nehan.Selectors
+       @param style {Nehan.StyleContext}
+       @return {css_value}
+    */
     getValue : function(style){
       return __get_value(style);
     },
-    // get selector css that matches to the pseudo element of some style context.
-    // notice that if selector_key is "p::first-letter",
-    // pseudo-element is "first-letter" and style-context is "p".
-    //
-    // style: 'parent' style of pseudo-element
-    // pseudo_element_name: "first-letter", "first-line", "before", "after" are available
+    /**<pre>
+     * get selector css that matches to the pseudo element of some style context.
+     * notice that if selector_key is "p::first-letter",
+     * pseudo-element is "first-letter" and style-context is "p".
+     *</pre>
+
+       @memberof Nehan.Selectors
+       @param style {Nehan.StyleContext} - 'parent' style context of pseudo-element
+       @param pseudo_element_name {String} - "first-letter", "first-line", "before", "after"
+       @return {css_value}
+    */
     getValuePe : function(style, pseudo_element_name){
       return __get_value_pe(style, pseudo_element_name);
     }

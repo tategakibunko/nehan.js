@@ -1,5 +1,13 @@
 // Selector = [TypeSelector | TypeSelector + combinator + Selector]
 var Selector = (function(){
+  /**
+     @memberof Nehan
+     @class Selector
+     @classdesc abstraction of css selector.
+     @constructor
+     @param key {String}
+     @param value {css_value}
+  */
   function Selector(key, value){
     this.key = this._normalizeKey(key); // selector source like 'h1 > p'
     this.value = this._formatValue(value); // associated css value object like {font-size:16px}
@@ -8,13 +16,27 @@ var Selector = (function(){
   }
 
   Selector.prototype = {
+    /**
+       @memberof Nehan.Selector
+       @param style {Nehan.StyleContext}
+       @return {boolean}
+    */
     test : function(style){
       return SelectorStateMachine.accept(style, this.elements);
     },
-    // element_name: "before", "after", "first-line", "first-letter"
+    /**
+       @memberof Nehan.Selector
+       @param style {Nehan.StyleContext}
+       @param element_name {String} - "before", "after", "first-line", "first-letter"
+       @return {boolean}
+    */
     testPseudoElement : function(style, element_name){
       return this.hasPseudoElementName(element_name) && this.test(style);
     },
+    /**
+       @memberof Nehan.Selector
+       @param value {css_value}
+    */
     updateValue : function(value){
       for(var prop in value){
 	var fmt_value = CssParser.formatValue(prop, value[prop]);
@@ -27,18 +49,39 @@ var Selector = (function(){
 	}
       }
     },
+    /**
+       @memberof Nehan.Selector
+       @return {String}
+    */
     getKey : function(){
       return this.key;
     },
+    /**
+       @memberof Nehan.Selector
+       @return {css_value}
+    */
     getValue : function(){
       return this.value;
     },
+    /**
+       @memberof Nehan.Selector
+       @return {int} selector specificity
+    */
     getSpec : function(){
       return this.spec;
     },
+    /**
+       @memberof Nehan.Selector
+       @return {boolean}
+    */
     hasPseudoElement : function(){
       return this.key.indexOf("::") >= 0;
     },
+    /**
+       @memberof Nehan.Selector
+       @param element_name {String} - "first-letter", "first-line"
+       @return {boolean}
+    */
     hasPseudoElementName : function(element_name){
       return this.key.indexOf("::" + element_name) >= 0;
     },

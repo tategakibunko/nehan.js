@@ -223,7 +223,7 @@ var CssParser = (function(){
     /**
        @memberof Nehan.CssParser
        @param prop {String} - css property name
-       @return {String} - normalized property name
+       @return {String} normalized property name
        @example
        * CssParser.formatProp("margin-start"); // => "margin"
     */

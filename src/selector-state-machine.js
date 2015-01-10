@@ -1,3 +1,8 @@
+/**
+   state machine module to check if some selector is matched to destination style context.
+
+   @namespace Nehan.SelectorStateMachine
+*/
 var SelectorStateMachine = (function(){
   var __find_parent = function(style, parent_type){
     var ptr = style.parent;
@@ -38,7 +43,14 @@ var SelectorStateMachine = (function(){
   };
 
   return {
-    // return true if all the selector-tokens(TypeSelector or combinator) matches the style-context.
+    /**
+       return true if all the selector-tokens({@link Nehan.TypeSelector} or combinator) matches the style-context.
+
+       @memberof Nehan.SelectorStateMachine
+       @param style {Nehan.StyleContext}
+       @param tokens {Array.<Nehan.TypeSelector> | combinator_string}
+       @return {boolean}
+    */
     accept : function(style, tokens){
       if(tokens.length === 0){
 	throw "selector syntax error:" + src;

@@ -21,7 +21,7 @@ var OutlineContext = (function(){
     },
     /**
        @memberof Nehan.OutlineContext
-       @return {Object} - log object
+       @return {Object} log object
     */
     get : function(index){
       return this.logs[index] || null;
@@ -64,7 +64,7 @@ var OutlineContext = (function(){
        @param opt.type {String} - markup name
        @param opt.rank {int} - header rank(1 - 6)
        @param opt.title {String} - header title
-       @return {String} - header id
+       @return {String} header id
     */
     addHeader : function(opt){
       // header id is used to associate header box object with outline.

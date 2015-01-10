@@ -7,7 +7,7 @@ var Args = {
      @memberof Nehan.Args
      @param {Object} dst
      @param {Object} args
-     @return {Object} - copied dst
+     @return {Object} copied dst
   */
   copy : function(dst, args){
     dst = dst || {};
@@ -21,7 +21,7 @@ var Args = {
      @memberof Nehan.Args
      @param {Object} dst
      @param {Object} args
-     @return {Object} - copied dst
+     @return {Object} copied dst
   */
   copy2 : function(dst, args){
     dst = dst || {};

@@ -1,4 +1,10 @@
 var SelectorLexer = (function(){
+  /**
+     @memberof Nehan
+     @class SelectorLexer
+     @classdesc lexer of css selector
+     @constructor
+  */
   function SelectorLexer(src){
     this.buff = this._normalize(src);
   }
@@ -11,6 +17,10 @@ var SelectorLexer = (function(){
   var __rex_pseudo = /^:{1,2}[\w-_]+/;
 
   SelectorLexer.prototype = {
+    /**
+       @memberof Nehan.SelectorLexer
+       @return {Array.<Nehan.TypeSelector>}
+    */
     getTokens : function(){
       var tokens = [];
       while(this.buff !== ""){
