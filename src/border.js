@@ -38,6 +38,7 @@ var Border = (function(){
   };
 
   /**
+     clear border values of logical before
      @memberof Nehan.Border
      @method clearBefore
      @param flow {Nehan.BoxFlow}
@@ -49,6 +50,12 @@ var Border = (function(){
     }
   };
 
+  /**
+     clear border values of logical after
+     @memberof Nehan.Border
+     @method clearAfter
+     @param flow {Nehan.BoxFlow}
+  */
   Border.prototype.clearAfter = function(flow){
     this.setAfter(flow, 0);
     if(this.radius){
@@ -56,25 +63,59 @@ var Border = (function(){
     }
   };
 
+  /**
+     @memberof Nehan.Border
+     @method getDirProp
+     @param dir {string} - "top", "right", "bottom", "left"
+     @example
+     * new Border().getDirProp("top"); // => "border-top-width"
+  */
   Border.prototype.getDirProp = function(dir){
     return ["border", dir, "width"].join("-");
   };
 
+  /**
+     set border radius
+     @memberof Nehan.Border
+     @method setRadius
+     @param flow {Nehan.BoxFlow}
+     @param radius {Nehan.BorderRadius}
+  */
   Border.prototype.setRadius = function(flow, radius){
     this.radius = new BorderRadius();
     this.radius.setSize(flow, radius);
   };
 
+  /**
+     set border color
+     @memberof Nehan.Border
+     @method setColor
+     @param flow {Nehan.BoxFlow}
+     @param color {Nehan.Color}
+  */
   Border.prototype.setColor = function(flow, color){
     this.color = new BorderColor();
     this.color.setColor(flow, color);
   };
 
+  /**
+     set border style
+     @memberof Nehan.Border
+     @method setStyle
+     @param flow {Nehan.BoxFlow}
+     @param style {Nehan.BorderStyle}
+  */
   Border.prototype.setStyle = function(flow, style){
     this.style = new BorderStyle();
     this.style.setStyle(flow, style);
   };
 
+  /**
+     get css object
+     @memberof Nehan.Border
+     @method getCss
+     @return {Object}
+  */
   Border.prototype.getCss = function(){
     var css = Edge.prototype.getCss.call(this);
     if(this.radius){

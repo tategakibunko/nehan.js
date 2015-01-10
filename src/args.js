@@ -1,4 +1,5 @@
 /**
+   @memberof Nehan
    @namespace Nehan.Args
 */
 var Args = {

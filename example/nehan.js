@@ -1779,6 +1779,7 @@ var Closure = {
 };
 
 /**
+   @memberof Nehan
    @namespace Nehan.Args
 */
 var Args = {
@@ -4588,18 +4589,33 @@ var BoxRect = {
 };
 
 
-var BoxCorner = {
-  sortCornerDirection : function(dir1, dir2){
+/**
+   @memberof Nehan
+   @namespace Nehan.BoxCorner
+*/
+var BoxCorner = (function(){
+  var __sort = function(dir1, dir2){
     var order = {top:0, bottom:1, left:2, right:3};
     return [dir1, dir2].sort(function (c1, c2){
       return order[c1] - order[c2];
     });
-  },
-  getCornerName : function(dir1, dir2){
-    var dirs = this.sortCornerDirection(dir1, dir2);
-    return [dirs[0], Utils.capitalize(dirs[1])].join("");
-  }
-};
+  };
+  return {
+    /**
+       get normalized(and camel-cased) corner property name
+       @memberof Nehan.BoxCorner
+       @param dir1 {string}
+       @param dir2 {string}
+       @return {string}
+       @example
+       * BoxCorner.getCornerName("right", "top"); // => "topRight"
+    */
+    getCornerName : function(dir1, dir2){
+      var dirs = __sort(dir1, dir2);
+      return [dirs[0], Utils.capitalize(dirs[1])].join("");
+    }
+  };
+})();
 
 var Font = (function(){
   function Font(size){
@@ -5093,6 +5109,7 @@ var Border = (function(){
   };
 
   /**
+     clear border values of logical before
      @memberof Nehan.Border
      @method clearBefore
      @param flow {Nehan.BoxFlow}
@@ -5104,6 +5121,12 @@ var Border = (function(){
     }
   };
 
+  /**
+     clear border values of logical after
+     @memberof Nehan.Border
+     @method clearAfter
+     @param flow {Nehan.BoxFlow}
+  */
   Border.prototype.clearAfter = function(flow){
     this.setAfter(flow, 0);
     if(this.radius){
@@ -5111,25 +5134,59 @@ var Border = (function(){
     }
   };
 
+  /**
+     @memberof Nehan.Border
+     @method getDirProp
+     @param dir {string} - "top", "right", "bottom", "left"
+     @example
+     * new Border().getDirProp("top"); // => "border-top-width"
+  */
   Border.prototype.getDirProp = function(dir){
     return ["border", dir, "width"].join("-");
   };
 
+  /**
+     set border radius
+     @memberof Nehan.Border
+     @method setRadius
+     @param flow {Nehan.BoxFlow}
+     @param radius {Nehan.BorderRadius}
+  */
   Border.prototype.setRadius = function(flow, radius){
     this.radius = new BorderRadius();
     this.radius.setSize(flow, radius);
   };
 
+  /**
+     set border color
+     @memberof Nehan.Border
+     @method setColor
+     @param flow {Nehan.BoxFlow}
+     @param color {Nehan.Color}
+  */
   Border.prototype.setColor = function(flow, color){
     this.color = new BorderColor();
     this.color.setColor(flow, color);
   };
 
+  /**
+     set border style
+     @memberof Nehan.Border
+     @method setStyle
+     @param flow {Nehan.BoxFlow}
+     @param style {Nehan.BorderStyle}
+  */
   Border.prototype.setStyle = function(flow, style){
     this.style = new BorderStyle();
     this.style.setStyle(flow, style);
   };
 
+  /**
+     get css object
+     @memberof Nehan.Border
+     @method getCss
+     @return {Object}
+  */
   Border.prototype.getCss = function(){
     var css = Edge.prototype.getCss.call(this);
     if(this.radius){
