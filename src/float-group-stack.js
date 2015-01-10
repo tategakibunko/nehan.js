@@ -37,7 +37,7 @@ var FloatGroupStack = (function(){
   /**
      @memberof Nehan
      @class FloatGroupStack
-     @classdesc pop floated element both from start and end, but select one that has larger extent.
+     @classdesc pop {@link Nehan.FloatGroup} with larger extent from start or end.
      @constructor
      @param flow {Nehan.BoxFlow}
      @param start_blocks {Array.<Nehan.Box>}
@@ -72,6 +72,7 @@ var FloatGroupStack = (function(){
       return this.extent;
     },
     /**
+       pop {@link Nehan.FloatGroup} with larger extent from start or end.
        @memberof Nehan.FloatGroupStack
        @return {Nehan.FloatGroup}
     */

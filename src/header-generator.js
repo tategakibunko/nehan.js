@@ -1,4 +1,13 @@
 var HeaderGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class HeaderGenerator
+     @classdesc generator of header tag(h1 - h6) conetnt, and create header context when complete.
+     @constructor
+     @extends {Nehan.BlockGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function HeaderGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }

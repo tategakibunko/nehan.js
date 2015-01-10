@@ -1,12 +1,27 @@
 var Font = (function(){
+  /**
+     @memberof Nehan
+     @class Font
+     @classdesc css 'font' abstraction
+     @constructor
+     @param size {int} - font size in px
+  */
   function Font(size){
     this.size = size;
   }
 
   Font.prototype = {
+    /**
+       @memberof Nehan.Font
+       @return {boolean}
+    */
     isBold : function(){
       return this.weight && this.weight !== "normal" && this.weight !== "lighter";
     },
+    /**
+       @memberof Nehan.Font
+       @return {string}
+    */
     toString : function(){
       return [
 	this.weight || "normal",
@@ -15,6 +30,10 @@ var Font = (function(){
 	this.family || "monospace"
       ].join(" ");
     },
+    /**
+       @memberof Nehan.Font
+       @return {Object}
+    */
     getCss : function(){
       var css = {};
       if(this.size){

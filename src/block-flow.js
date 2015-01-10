@@ -2,7 +2,7 @@ var BlockFlow = (function(){
   /**
      @memberof Nehan
      @class BlockFlow
-     @classdesc flow direction of block
+     @classdesc flow direction at block level.
      @constructor
      @param dir {string} - "lr" or "rl" or "tb"
      @extends Nehan.Flow

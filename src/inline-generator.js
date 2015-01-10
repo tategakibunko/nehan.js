@@ -1,4 +1,14 @@
 var InlineGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class InlineGenerator
+     @classdesc inline level generator, output anonymous line block.
+     @constructor
+     @extends {Nehan.LayoutGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+     @param child_generator {Nehan.LayoutGenerator}
+  */
   function InlineGenerator(style, stream, child_generator){
     LayoutGenerator.call(this, style, stream);
     if(child_generator){
@@ -37,7 +47,10 @@ var InlineGenerator = (function(){
     return this._createOutput(context);
   };
 
-  LayoutGenerator.prototype.rollback = function(parent_cache){
+  /**
+     @memberof Nehan.InlineGenerator
+  */
+  InlineGenerator.prototype.rollback = function(parent_cache){
     if(this.stream === null){
       return;
     }
@@ -47,7 +60,7 @@ var InlineGenerator = (function(){
     var cache = this.popCache();
 
     // inline child is always inline, so repeat this rollback while cache exists.
-    if(this._childLayout && cache){
+    if(cache && this._childLayout && this._childLayout.rollback){
       this._childLayout.rollback(cache);
     }
   };

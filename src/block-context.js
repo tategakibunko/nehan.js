@@ -1,9 +1,9 @@
 var BlockContext = (function(){
   /** @memberof Nehan
       @class BlockContext
-      @classdesc context info while building block level
+      @classdesc context data of block level.
       @constructor
-      @param {int} max_extent - maximus size of extent in px
+      @param {int} max_extent - maximus position of block in px.
       @param opt {Object} - optional argument
       @param opt.isFirstBlock {boolean} - is this first generated block by this context object?
       @param opt.contextEdge {Object} - special edge size of this block context

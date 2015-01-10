@@ -2153,7 +2153,20 @@ var Css = {
   }
 };
 
+/**
+   html utility module
+
+   @namespace Nehan.Html
+*/
 var Html = {
+  /**
+     escape special text like &lt;, &gt;, etc.
+
+     @memberof Nehan.Html
+     @method escape
+     @param str {String}
+     @return {String}
+  */
   escape : function(str){
     return str
       .replace(/&/g, "&amp;")
@@ -2162,6 +2175,14 @@ var Html = {
       .replace(/'/g, "&#039;")
       .replace(/"/g, "&quot;");
   },
+  /**
+     unescape special text.
+
+     @memberof Nehan.Html
+     @method unescape
+     @param str {String}
+     @return {String}
+  */
   unescape : function(str) {
     var div = document.createElement("div");
     div.innerHTML = str.replace(/</g,"&lt;")
@@ -2171,6 +2192,16 @@ var Html = {
       .replace(/\n/g, "&#10;");
     return div.textContent || div.innerText;
   },
+  /*
+    generate html attribute string
+
+    @memberof Nehan.Html
+    @method attr
+    @param args {Object}
+    @return {String}
+    @example
+    * Html.attr({width:"100", height:"200"}); // width='100' height = '200'
+  */
   attr : function(args){
     var tmp = [];
     for(var prop in args){
@@ -2180,15 +2211,59 @@ var Html = {
     }
     return (tmp == [])? "" : tmp.join(" ");
   },
+  /**
+     generate html tag string
+
+     @memberof Nehan.Html
+     @method tagWrap
+     @param name {String} - tag name
+     @param content {String} - tag content text
+     @param args {Object} - tag attributes
+     @return {String}
+     @example
+     * Html.tagWrap("a", "homepage", {href:"#"}); // "<a href='#'>homepage</a>"
+  */
   tagWrap : function(name, content, args){
     return [this.tagStart(name, args || {}), content, this.tagEnd(name)].join("");
   },
+  /**
+     generate unwrapped single html tag string
+
+     @memberof Nehan.Html
+     @method tagSingle
+     @param name {String} - tag name
+     @param args {Object} - tag attributes
+     @return {String}
+     @example
+     * Html.tagSingle("img", {src:"/path/to/img"}); // "<img src='/path/to/img' />"
+  */
   tagSingle : function(name, args){
     return "<" + name + " " + this.attr(args) + "/>";
   },
+  /**
+     generate open tag string
+
+     @memberof Nehan.Html
+     @method tagStart
+     @return {String}
+     @param name {String} - tag name
+     @param args {Object} - tag attributes
+     @example
+     * Html.tagStart("div"); // "<div>"
+  */
   tagStart : function(name, args){
     return "<" + name + " " + this.attr(args) + ">";
   },
+  /**
+     generate enclose tag string
+
+     @memberof Nehan.Html
+     @method tagEnd
+     @return {String}
+     @param name {String} - tag name
+     @example
+     * Html.tagEnd("div"); // "</div>"
+  */
   tagEnd : function(name){
     return "</" + name + ">";
   }
@@ -2294,22 +2369,47 @@ var Args = {
 };
 
 var HashSet = (function(){
+  /**
+     @memberof Nehan
+     @class HashSet
+     @classdesc abstraction of (key, value) set.
+     @constructor
+   */
   function HashSet(){
     this._values = {};
   }
 
   HashSet.prototype = {
+    /**
+       @memberof Nehan.HashSet
+       @param fn {Function}
+    */
     iter : function(fn){
       Obj.iter(this._values, fn);
     },
+    /**
+       @memberof Nehan.HashSet
+       @param fn {Function}
+    */
     filter : function(fn){
       return Obj.filter(this._values, fn);
     },
-    // return merged value when conflict.
-    // simply overwrite by default.
+    /**
+       merge new value to old value with same key. simply overwrite by default.
+
+       @memberof Nehan.HashSet
+       @param old_value
+       @param new_value
+    */
     merge : function(old_value, new_value){
       return new_value;
     },
+    /**
+       return union set between this and [set].
+
+       @memberof Nehan.HashSet
+       @param set {Nehan.HashSet}
+     */
     union : function(set){
       var self = this;
       set.iter(function(key, value){
@@ -2317,21 +2417,46 @@ var HashSet = (function(){
       });
       return this;
     },
+    /**
+       get value by name(key).
+
+       @memberof Nehan.HashSet
+       @name {String}
+       @return {value}
+    */
     get : function(name){
       return this._values[name] || null;
     },
+    /**
+       add [value] by [name]. HashSet::merge is called if [name] is already registered.
+
+       @memberof Nehan.HashSet
+       @param name {String}
+       @param value
+    */
     add : function(name, value){
       var old_value = this._values[name] || null;
       this._values[name] = old_value? this.merge(old_value, value) : value;
     },
-    // this function is used when performance matters,
-    // instead of using this.union(new HashSet(values))
+    /**
+     * this function is used when performance matters,<br>
+     * instead of using this.union(new HashSet(values))
+
+       @memberof Nehan.HashSet
+       @param values {Array}
+    */
     addValues : function(values){
       values = values || {};
       for(var prop in values){
 	this.add(prop, values[prop]);
       }
     },
+    /**
+       remove value associated with [name].
+
+       @memberof Nehan.HashSet
+       @param name {String}
+    */
     remove : function(name){
       delete this._values[name];
     }
@@ -5053,23 +5178,58 @@ var ListStyle = (function(){
 })();
 
 var Flow = (function(){
+  /**
+     @memberof Nehan
+     @class Flow
+     @classdesc abstraction of flow, left to right as "lr", right to left as "rl", top to bottom as "tb".
+     @constructor
+     @param dir {String}
+     @example
+     * new Flow("lr").isHorizontal(); // true
+     * new Flow("rl").isHorizontal(); // true
+     * new Flow("lr").isLeftToRight(); // true
+     * new Flow("rl").isLeftToRight(); // false
+     * new Flow("rl").isRightToLeft(); // true
+     * new Flow("tb").isHorizontal(); // false
+     * new Flow("tb").isVertical(); // true
+  */
   function Flow(dir){
     this.dir = dir;
   }
 
   Flow.prototype = {
+    /**
+       @memberof Nehan.Flow
+       @param dir {String}
+    */
     init : function(dir){
       this.dir = dir;
     },
+    /**
+       @memberof Nehan.Flow
+       @return {boolean}
+    */
     isHorizontal : function(){
       return (this.dir === "lr" || this.dir === "rl");
     },
+    /**
+       @memberof Nehan.Flow
+       @return {boolean}
+    */
     isVertical : function(){
       return (this.dir === "tb");
     },
+    /**
+       @memberof Nehan.Flow
+       @return {boolean}
+    */
     isLeftToRight : function(){
       return this.dir === "lr";
     },
+    /**
+       @memberof Nehan.Flow
+       @return {boolean}
+    */
     isRightToLeft : function(){
       return this.dir === "rl";
     }
@@ -5083,7 +5243,7 @@ var BlockFlow = (function(){
   /**
      @memberof Nehan
      @class BlockFlow
-     @classdesc flow direction of block
+     @classdesc flow direction at block level.
      @constructor
      @param dir {string} - "lr" or "rl" or "tb"
      @extends Nehan.Flow
@@ -5176,11 +5336,27 @@ var BlockFlow = (function(){
 
 
 var InlineFlow = (function(){
+  /**
+     @memberof Nehan
+     @class InlineFlow
+     @classdesc flow abstraction at inline level.
+     @constructor
+     @extends {Nehan.Flow}
+     @param dir {String} - "lr" or "rl"(but not supported) or "tb"
+   */
   function InlineFlow(dir){
     Flow.call(this, dir);
   }
   Class.extend(InlineFlow, Flow);
 
+  /**
+     @memberof Nehan.InlineFlow
+     @return {String}
+     @example
+     * new InlineFlow("lr").getPropStart(); // "left"
+     * new InlineFlow("rl").getPropStart(); // "right"
+     * new InlineFlow("tb").getPropStart(); // "top"
+  */
   InlineFlow.prototype.getPropStart = function(){
     switch(this.dir){
     case "lr": return "left";
@@ -5190,6 +5366,14 @@ var InlineFlow = (function(){
     }
   };
 
+  /**
+     @memberof Nehan.InlineFlow
+     @return {String}
+     @example
+     * new InlineFlow("lr").getPropEnd(); // "right"
+     * new InlineFlow("rl").getPropEnd(); // "left"
+     * new InlineFlow("tb").getPropEnd(); // "bottom"
+  */
   InlineFlow.prototype.getPropEnd = function(){
     switch(this.dir){
     case "lr": return "right";
@@ -5536,14 +5720,29 @@ var BoxCorner = (function(){
 })();
 
 var Font = (function(){
+  /**
+     @memberof Nehan
+     @class Font
+     @classdesc css 'font' abstraction
+     @constructor
+     @param size {int} - font size in px
+  */
   function Font(size){
     this.size = size;
   }
 
   Font.prototype = {
+    /**
+       @memberof Nehan.Font
+       @return {boolean}
+    */
     isBold : function(){
       return this.weight && this.weight !== "normal" && this.weight !== "lighter";
     },
+    /**
+       @memberof Nehan.Font
+       @return {string}
+    */
     toString : function(){
       return [
 	this.weight || "normal",
@@ -5552,6 +5751,10 @@ var Font = (function(){
 	this.family || "monospace"
       ].join(" ");
     },
+    /**
+       @memberof Nehan.Font
+       @return {Object}
+    */
     getCss : function(){
       var css = {};
       if(this.size){
@@ -6971,6 +7174,13 @@ var HtmlLexer = (function (){
     return restart_pos2 + __find_close_pos(buff.substring(restart_pos2), tag_name, open_tag_rex, close_tag);
   };
 
+  /**
+     @memberof Nehan
+     @class HtmlLexer
+     @classdesc lexer of html text.
+     @constructor
+     @param src {String}
+  */
   function HtmlLexer(src){
     this.pos = 0;
     this.buff = this._normalize(src);
@@ -6987,9 +7197,19 @@ var HtmlLexer = (function (){
 	.replace(/\s+$/, "") // discard tail space
 	.replace(/\r/g, ""); // discard CR
     },
+    /**
+       @memberof Nehan.HtmlLexer
+       @return {boolean}
+    */
     isEmpty : function(){
       return this.src === "";
     },
+    /**
+       get token and step cusor to next position.
+
+       @memberof Nehan.HtmlLexer
+       @return {Nehan.Token}
+    */
     get : function(){
       var token = this._getToken();
       if(token){
@@ -6997,12 +7217,28 @@ var HtmlLexer = (function (){
       }
       return token;
     },
+    /**
+       get lexer source text
+
+       @memberof Nehan.HtmlLexer
+       @return {String}
+    */
     getSrc : function(){
       return this.src;
     },
+    /**
+       get current pos in percentage format.
+
+       @memberof Nehan.HtmlLexer
+       @return {int}
+    */
     getSeekPercent : function(seek_pos){
       return Math.round(100 * seek_pos / this.src.length);
     },
+    /**
+       @memberof Nehan.HtmlLexer
+       @param text {String}
+     */
     addText : function(text){
       this.buff = this.buff + this._normalize(text);
     },
@@ -7964,6 +8200,13 @@ var DocumentTokenStream = (function(){
 })();
 
 var HtmlTokenStream = (function(){
+  /**
+     @memberof Nehan
+     @class HtmlTokenStream
+     @classdesc token stream for &lt;html&gt; tag(head, body).
+     @extends {Nehan.FilteredTokenStream}
+     @param src {String} - content text of &lt;html&gt; tag.
+  */
   function HtmlTokenStream(src){
     FilteredTokenStream.call(this, src, function(tag){
       var name = tag.getName();
@@ -7977,6 +8220,13 @@ var HtmlTokenStream = (function(){
 
 
 var HeadTokenStream = (function(){
+  /**
+     @memberof Nehan
+     @class HeadTokenStream
+     @classdesc tokens of &lt;head&gt; tag content(title, meta, link, style, script).
+     @constructor
+     @extends {Nehan.FilteredTokenStream}
+  */
   function HeadTokenStream(src){
     FilteredTokenStream.call(this, src, function(tag){
       var name = tag.getName();
@@ -10264,9 +10514,9 @@ var CursorContext = (function(){
 var BlockContext = (function(){
   /** @memberof Nehan
       @class BlockContext
-      @classdesc context info while building block level
+      @classdesc context data of block level.
       @constructor
-      @param {int} max_extent - maximus size of extent in px
+      @param {int} max_extent - maximus position of block in px.
       @param opt {Object} - optional argument
       @param opt.isFirstBlock {boolean} - is this first generated block by this context object?
       @param opt.contextEdge {Object} - special edge size of this block context
@@ -10394,6 +10644,13 @@ var BlockContext = (function(){
 
 
 var InlineContext = (function(){
+  /**
+     @memberof Nehan
+     @class InlineContext
+     @classdesc context data of inline level.
+     @constructor
+     @param max_measure {int} - maximum posistion of inline in px.
+  */
   function InlineContext(max_measure){
     this.charCount = 0;
     this.curMeasure = 0;
@@ -10407,24 +10664,54 @@ var InlineContext = (function(){
   }
 
   InlineContext.prototype = {
+    /**
+       @memberof Nehan.InlineContext
+       @return {boolean}
+    */
     isEmpty : function(){
       return !this.lineBreak && !this.breakAfter && this.elements.length === 0;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @param measure {int}
+       @return {boolean}
+    */
     hasSpaceFor : function(measure){
       return this.getRestMeasure() >= measure;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @return {boolean}
+    */
     hasLineBreak : function(){
       return this.lineBreak;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @param status {boolean}
+    */
     setLineBreak : function(status){
       this.lineBreak = status;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @return {boolean}
+    */
     hasBreakAfter : function(){
       return this.breakAfter;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @param status {boolean}
+    */
     setBreakAfter : function(status){
       this.breakAfter = status;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @param element {Nehan.Box}
+       @param measure {int}
+    */
     addElement : function(element, measure){
       this.elements.push(element);
       if(Token.isText(element)){
@@ -10447,36 +10734,87 @@ var InlineContext = (function(){
       }
       this.curMeasure += measure;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
+    */
     getLastText : function(){
       return List.last(this.texts);
     },
+    /**
+       get text elements.
+
+       @memberof Nehan.InlineContext
+       @return {Array}
+    */
     getTexts : function(){
       return this.texts;
     },
+    /**
+       get all elements.
+
+       @memberof Nehan.InlineContext
+       @return {Array}
+    */
     getElements : function(){
       return this.elements;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @return {int}
+    */
     getCurMeasure : function(){
       return this.curMeasure;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @return {int}
+    */
     getRestMeasure : function(){
       return this.maxMeasure - this.curMeasure;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @return {int}
+    */
     getMaxMeasure : function(){
       return this.maxMeasure;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @return {int}
+    */
     getMaxExtent : function(){
       return this.maxExtent;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @return {int}
+    */
     getMaxFontSize : function(){
       return this.maxFontSize;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @return {int}
+    */
     getCharCount : function(){
       return this.charCount;
     },
+    /**
+       @memberof Nehan.InlineContext
+       @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
+    */
     getLastChar : function(){
       return List.last(this.texts);
     },
+    /**
+       justify inline element with next head character, return null if nothing happend, or return new tail char if justified.
+
+       @memberof Nehan.InlineContext
+       @param head {Nehan.Char} - head_char at next line.
+       @return {Nehan.Char | null}
+    */
     justify : function(head){
       var last = this.texts.length - 1, ptr = last, tail;
       while(ptr >= 0){
@@ -10824,8 +11162,7 @@ var BlockGenerator = (function(){
 
     // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
     // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
-    if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br){
-      //console.log("rollback inline![%s]", cache.toLineString());
+    if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br && this._childLayout && this._childLayout.rollback){
       this._childLayout.rollback(cache);
       return this.yieldChildLayout(context);
     }
@@ -10933,6 +11270,16 @@ var BlockGenerator = (function(){
 
 
 var InlineGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class InlineGenerator
+     @classdesc inline level generator, output anonymous line block.
+     @constructor
+     @extends {Nehan.LayoutGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+     @param child_generator {Nehan.LayoutGenerator}
+  */
   function InlineGenerator(style, stream, child_generator){
     LayoutGenerator.call(this, style, stream);
     if(child_generator){
@@ -10971,7 +11318,11 @@ var InlineGenerator = (function(){
     return this._createOutput(context);
   };
 
-  LayoutGenerator.prototype.rollback = function(parent_cache){
+  /**
+     @memberof Nehan.InlineGenerator
+  */
+  //LayoutGenerator.prototype.rollback = function(parent_cache){
+  InlineGenerator.prototype.rollback = function(parent_cache){
     if(this.stream === null){
       return;
     }
@@ -10981,7 +11332,7 @@ var InlineGenerator = (function(){
     var cache = this.popCache();
 
     // inline child is always inline, so repeat this rollback while cache exists.
-    if(this._childLayout && cache){
+    if(cache && this._childLayout && this._childLayout.rollback){
       this._childLayout.rollback(cache);
     }
   };
@@ -11236,6 +11587,14 @@ var InlineGenerator = (function(){
 
 
 var InlineBlockGenerator = (function (){
+  /**
+     @memberof Nehan
+     @class InlineBlockGenerator
+     @classdesc generator of element with display:'inline-block'.
+     @extends {Nehan.BlockGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function InlineBlockGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
@@ -11401,33 +11760,69 @@ var FlipGenerator = (function(){
 
 
 var FloatGroup = (function(){
+  /**
+     @memberof Nehan
+     @class FloatGroup
+     @classdesc element set with same floated direction.
+     @constructor
+     @param elements {Array.<Nehan.Box>}
+     @param float_direction {Nehan.FloatDirection}
+  */
   function FloatGroup(elements, float_direction){
     this.elements = elements || [];
     this.floatDirection = float_direction || FloatDirections.get("start");
   }
 
   FloatGroup.prototype = {
+    /**
+       element is popped from float-stack, but unshifted to elements in float-group to keep original stack order.
+     *<pre>
+     * float-stack  | float-group
+     *     [f1,f2]  |  []
+     *  => [f1]     |  [f2] (pop f2 from float-stack, unshift f2 to float-group)
+     *  => []       |  [f1, f2] (pop f1 from float-stack, unshift f1 to float-group)
+     *</pre>
+
+      @memberof Nehan.FloatGroup
+      @param element {Nehan.Box}
+    */
     add : function(element){
-      // float-stack | float-group
-      //    [f1,f2]  |  []
-      // => [f1]     |  [f2]
-      // => []       |  [f1, f2]
       this.elements.unshift(element); // keep original stack order
     },
+    /**
+       @memberof Nehan.FloatGroup
+       @return {boolean}
+    */
     isFloatStart : function(){
       return this.floatDirection.isStart();
     },
+    /**
+       @memberof Nehan.FloatGroup
+       @return {boolean}
+    */
     isFloatEnd : function(){
       return this.floatDirection.isEnd();
     },
+    /**
+       @memberof Nehan.FloatGroup
+       @return {Array.<Nehan.Box>}
+    */
     getElements : function(){
       return this.isFloatStart()? this.elements : List.reverse(this.elements);
     },
+    /**
+       @memberof Nehan.FloatGroup
+       @return {int}
+    */
     getMeasure : function(flow){
       return List.fold(this.elements, 0, function(measure, element){
 	return measure + element.getLayoutMeasure(flow);
       });
     },
+    /**
+       @memberof Nehan.FloatGroup
+       @return {int}
+    */
     getExtent : function(flow){
       return List.fold(this.elements, 0, function(extent, element){
 	return Math.max(extent, element.getLayoutExtent(flow));
@@ -11478,7 +11873,7 @@ var FloatGroupStack = (function(){
   /**
      @memberof Nehan
      @class FloatGroupStack
-     @classdesc pop floated element both from start and end, but select one that has larger extent.
+     @classdesc pop {@link Nehan.FloatGroup} with larger extent from start or end.
      @constructor
      @param flow {Nehan.BoxFlow}
      @param start_blocks {Array.<Nehan.Box>}
@@ -11513,6 +11908,7 @@ var FloatGroupStack = (function(){
       return this.extent;
     },
     /**
+       pop {@link Nehan.FloatGroup} with larger extent from start or end.
        @memberof Nehan.FloatGroupStack
        @return {Nehan.FloatGroup}
     */
@@ -11980,6 +12376,15 @@ var TableCellGenerator = (function(){
 
 
 var HeaderGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class HeaderGenerator
+     @classdesc generator of header tag(h1 - h6) conetnt, and create header context when complete.
+     @constructor
+     @extends {Nehan.BlockGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function HeaderGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
@@ -12040,21 +12445,44 @@ var BodyGenerator = (function(){
 })();
 
 var HtmlGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class HtmlGenerator
+     @classdesc generator of &lt;html&gt; tag content.
+     @constructor
+     @param text {String}
+  */
   function HtmlGenerator(text){
     this.stream = new HtmlTokenStream(text);
     this.generator = this._createGenerator();
   }
 
   HtmlGenerator.prototype = {
+    /**
+       @memberof Nehan.HtmlGenerator
+       @return {Nehan.Box}
+    */
     yield : function(){
       return this.generator.yield();
     },
+    /**
+       @memberof Nehan.HtmlGenerator
+       @return {boolean}
+    */
     hasNext : function(){
       return this.generator.hasNext();
     },
+    /**
+       @memberof Nehan.HtmlGenerator
+       @param status {boolean}
+    */
     setTerminate : function(status){
       this.generator.setTerminate(status);
     },
+    /**
+       @memberof Nehan.HtmlGenerator
+       @param text {String}
+    */
     addText : function(text){
       this.generator.addText(text);
     },
@@ -12595,6 +13023,13 @@ var VertEvaluator = (function(){
 
 
 var HoriEvaluator = (function(){
+  /**
+     @memberof Nehan
+     @class HoriEvaluator
+     @classdesc evaluate {@link Nehan.Box} as horizontal layout, and output DOMElement.
+     @constructor
+     @extends {Nehan.LayoutEvaluator}
+  */
   function HoriEvaluator(){
     LayoutEvaluator.call(this, "hori");
   }

@@ -1,4 +1,11 @@
 var HoriEvaluator = (function(){
+  /**
+     @memberof Nehan
+     @class HoriEvaluator
+     @classdesc evaluate {@link Nehan.Box} as horizontal layout, and output DOMElement.
+     @constructor
+     @extends {Nehan.LayoutEvaluator}
+  */
   function HoriEvaluator(){
     LayoutEvaluator.call(this, "hori");
   }

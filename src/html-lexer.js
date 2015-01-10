@@ -40,6 +40,13 @@ var HtmlLexer = (function (){
     return restart_pos2 + __find_close_pos(buff.substring(restart_pos2), tag_name, open_tag_rex, close_tag);
   };
 
+  /**
+     @memberof Nehan
+     @class HtmlLexer
+     @classdesc lexer of html text.
+     @constructor
+     @param src {String}
+  */
   function HtmlLexer(src){
     this.pos = 0;
     this.buff = this._normalize(src);
@@ -56,9 +63,19 @@ var HtmlLexer = (function (){
 	.replace(/\s+$/, "") // discard tail space
 	.replace(/\r/g, ""); // discard CR
     },
+    /**
+       @memberof Nehan.HtmlLexer
+       @return {boolean}
+    */
     isEmpty : function(){
       return this.src === "";
     },
+    /**
+       get token and step cusor to next position.
+
+       @memberof Nehan.HtmlLexer
+       @return {Nehan.Token}
+    */
     get : function(){
       var token = this._getToken();
       if(token){
@@ -66,12 +83,28 @@ var HtmlLexer = (function (){
       }
       return token;
     },
+    /**
+       get lexer source text
+
+       @memberof Nehan.HtmlLexer
+       @return {String}
+    */
     getSrc : function(){
       return this.src;
     },
+    /**
+       get current pos in percentage format.
+
+       @memberof Nehan.HtmlLexer
+       @return {int}
+    */
     getSeekPercent : function(seek_pos){
       return Math.round(100 * seek_pos / this.src.length);
     },
+    /**
+       @memberof Nehan.HtmlLexer
+       @param text {String}
+     */
     addText : function(text){
       this.buff = this.buff + this._normalize(text);
     },

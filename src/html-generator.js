@@ -1,19 +1,42 @@
 var HtmlGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class HtmlGenerator
+     @classdesc generator of &lt;html&gt; tag content.
+     @constructor
+     @param text {String}
+  */
   function HtmlGenerator(text){
     this.stream = new HtmlTokenStream(text);
     this.generator = this._createGenerator();
   }
 
   HtmlGenerator.prototype = {
+    /**
+       @memberof Nehan.HtmlGenerator
+       @return {Nehan.Box}
+    */
     yield : function(){
       return this.generator.yield();
     },
+    /**
+       @memberof Nehan.HtmlGenerator
+       @return {boolean}
+    */
     hasNext : function(){
       return this.generator.hasNext();
     },
+    /**
+       @memberof Nehan.HtmlGenerator
+       @param status {boolean}
+    */
     setTerminate : function(status){
       this.generator.setTerminate(status);
     },
+    /**
+       @memberof Nehan.HtmlGenerator
+       @param text {String}
+    */
     addText : function(text){
       this.generator.addText(text);
     },

@@ -1,4 +1,12 @@
 var InlineBlockGenerator = (function (){
+  /**
+     @memberof Nehan
+     @class InlineBlockGenerator
+     @classdesc generator of element with display:'inline-block'.
+     @extends {Nehan.BlockGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function InlineBlockGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
