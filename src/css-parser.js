@@ -1,4 +1,5 @@
-/*
+/**
+<pre>
   there are css properties that are required to calculate accurate paged-layout,
   and we call them 'managed css properties'.
 
@@ -37,7 +38,9 @@
   text-combine
   text-emphasis-style
   white-space
-  width
+  width</pre>
+
+  @namespace Nehan.CssParser
 */
 var CssParser = (function(){
   var __normalize = function(value){
@@ -217,9 +220,25 @@ var CssParser = (function(){
   };
 
   return {
+    /**
+       @memberof Nehan.CssParser
+       @param prop {String} - css property name
+       @return {String} - normalized property name
+       @example
+       * CssParser.formatProp("margin-start"); // => "margin"
+    */
     formatProp : function(prop){
       return __format_prop(prop);
     },
+    /**
+       @memberof Nehan.CssParser
+       @param prop {String} - css property name
+       @param value - css value
+       @return {Object|int|string|boolean|function}
+       @example
+       * CssParser.formatValue("margin-start", "1em"); // => {start:"1em"}
+       * CssParser.formatValue("margin", "1em 1em 0 0"); // => {before:"1em", end:"1em", after:0, start:0}
+    */
     formatValue : function(prop, value){
       return __format_value(prop, value);
     }

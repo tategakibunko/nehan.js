@@ -1,5 +1,4 @@
 /**
-   @memberof Nehan
    @namespace Nehan.BoxCorner
 */
 var BoxCorner = (function(){

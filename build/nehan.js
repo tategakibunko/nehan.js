@@ -34,6 +34,12 @@ var Nehan = Nehan || {};
 Nehan.version = "5.0.5";
 
 Nehan.Client = (function(){
+  /**
+     @memberof Nehan
+     @class Client
+     @classdesc wrapper class for user browser agent
+     @constructor
+  */
   function Client(){
     this.userAgent = navigator.userAgent.toLowerCase();
     this.name = navigator.appName.toLowerCase();
@@ -42,42 +48,94 @@ Nehan.Client = (function(){
   }
 
   Client.prototype = {
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isWindows : function(){
       return this.userAgent.indexOf("windows") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isMacintosh : function(){
       return this.userAgent.indexOf("macintosh") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isIphone : function(){
       return this.userAgent.indexOf("iphone") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isIpod : function(){
       return this.userAgent.indexOf("ipod") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isIpad : function(){
       return this.userAgent.indexOf("ipad") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isAppleMobileFamily : function(){
       return this.isIphone() || this.isIpod() || this.isIpad();
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isAndroid : function(){
       return this.userAgent.indexOf("android") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isSmartPhone : function(){
       return this.isAppleMobileFamily() || this.isAndroid();
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isWebkit : function(){
       return this.userAgent.indexOf("webkit") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isIE : function(){
       return this.name === "msie";
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isTrident : function(){
       return this.isIE() && this.version >= 11;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isChrome : function(){
       return this.name === "chrome";
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isSafari : function(){
       return this.name === "safari";
     },
@@ -183,16 +241,79 @@ Nehan.engineId++;
 
 // this function is closed by nehan-setup-end.js
 
+/**
+   system configuration
+   @namespace Nehan.Config
+*/
 var Config = {
+  /**
+     language setting default ["ja-JP"]
+     @memberof Nehan.Config
+     @type {string}
+  */
   lang:"ja-JP",
+
+  /**
+     is debug mode? default [false]
+     @memberof Nehan.Config
+     @type {boolean}
+  */
   debug:false,
+
+  /**
+     is kerning enabled? default [true]
+     @memberof Nehan.Config
+     @type {boolean}
+  */
   kerning:true,
+
+  /**
+     is justify enabled? default [true]
+     @memberof Nehan.Config
+     @type {boolean}
+  */
   justify:true,
+
+  /**
+     max rety count when something troubles. default [20]
+     @memberof Nehan.Config
+     @type {int}
+  */
   maxRollbackCount:20,
+
+  /**
+     max available page count for each engine. default [10000]
+     @memberof Nehan.Config
+     @type {int}
+  */
   maxPageCount:10000,
+
+  /**
+     use vertical glyph if browser support 'writing-mode'. default [true]
+     @memberof Nehan.Config
+     @type {boolean}
+  */
   useVerticalGlyphIfEnable:true,
+
+  /**
+     calculate strict alphabetical metrics using hidden canvas. default [true]
+     @memberof Nehan.Config
+     @type {boolean}
+   */
   useStrictWordMetrics:true,
+
+  /**
+     enable ommiting element by start tag. default [false]
+     @memberof Nehan.Config
+     @type {boolean}
+  */
   enableAutoCloseTag:false,
+
+  /**
+     default length of html-lexer buffer. default [2000]
+     @memberof Nehan.Config
+     @type {int}
+  */
   lexingBufferLen:2000
 };
 
@@ -1338,7 +1459,17 @@ var Style = {
   }
 };
 
+/**
+   @namespace Nehan.Class
+*/
 var Class = {};
+
+/**
+   @memberof Nehan.Class
+   @param childCtor {Object}
+   @param parentCtor {Object}
+   @return {Object}
+*/
 Class.extend = function(childCtor, parentCtor) {
   function TempCtor() {}
   TempCtor.prototype = parentCtor.prototype;
@@ -1649,58 +1780,113 @@ var reqAnimationFrame = (function(){
 })();
 
 
+/**
+   some set of usefull constant variables.
+   @namespace Nehan.Const
+*/
 var Const = {
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
   cssVenderPrefixes:[
     "-moz",
     "-webkit",
     "-o",
     "-ms"
   ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
   cssCorders:[
     "top-left",
     "top-right",
     "bottom-left",
     "bottom-right"
   ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
   cssBorderRadius:[
     "border-top-left-radius",
     "border-top-right-radius",
     "border-bottom-left-radius",
     "border-bottom-right-radius"
   ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
   cssBoxDirs:[
     "top",
     "right",
     "bottom",
     "left"
   ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
   cssBoxDirsLogical:[
     "before",
     "end",
     "after",
     "start"
   ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
   cssBoxCornersLogical:[
     "start-before",
     "end-before",
     "end-after",
     "start-after"
   ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<int>}
+  */
   css2dIndex:{
     1:[0, 0],
     2:[0, 1]
   },
+  /**
+     @memberof Nehan.Const
+     @type {Array.<int>}
+  */
   css4dIndex:{
     1:[0, 0, 0, 0],
     2:[0, 1, 0, 1],
     3:[0, 1, 2, 1],
     4:[0, 1, 2, 3]
   },
+  /**
+     @memberof Nehan.Const
+     @type {string}
+  */
   space:"&nbsp;",
+  /**
+     @memberof Nehan.Const
+     @type {string}
+  */
   clearFix:"<div style='clear:both'></div>"
 };
 
+/**
+   css utility module
+   @namespace Nehan.Css
+*/
 var Css = {
+  /**
+     @memberof Nehan.Css
+     @param args {Object}
+     @return {String}
+     @example
+     * Css.toString({"color":"red", "font-size":16}); // "color:'red'; 'font-size':16"
+  */
   toString : function(args){
     var tmp = [];
     for(var prop in args){
@@ -1708,12 +1894,33 @@ var Css = {
     }
     return tmp.join(";");
   },
+  /**
+     @memberof Nehan.Css
+     @param name {String}
+     @return {String}
+     @example
+     * Css.addNehanPrefix("foo"); // "nehan-foo"
+  */
   addNehanPrefix : function(name){
     return "nehan-" + name;
   },
+  /**
+     @memberof Nehan.Css
+     @param name {String}
+     @return {String}
+     @example
+     * Css.addNehanHeaderPrefix("foo"); // "nehan-header-foo"
+  */
   addNehanHeaderPrefix : function(name){
     return "nehan-header-" + name;
   },
+  /**
+     @memberof Nehan.Css
+     @param name {String}
+     @return {String}
+     @example
+     * Css.addNehanTocLinkPrefix("foo"); // "nehan-toc-link-foo"
+  */
   addNehanTocLinkPrefix : function(name){
     return "nehan-toc-link-" + name;
   }
@@ -1760,17 +1967,45 @@ var Html = {
   }
 };
 
+/**
+   closure factory
+   @namespace Nehan.Closure
+*/
 var Closure = {
+  /**
+     @memberof Nehan.Closure
+     @return {Function}
+     @example
+     * var echo = Closure.id();
+     * echo(1); // 1
+     * echo("yo"); // "yo"
+  */
   id : function(){
     return function(x){
       return x;
     };
   },
+  /**
+     @memberof Nehan.Closure
+     @return {Function}
+     @example
+     * var is_one = Closure.eq(1);
+     * is_one(1); // true
+     * is_one(2); // false
+  */
   eq : function(x){
     return function(y){
       return x == y;
     };
   },
+  /**
+     @memberof Nehan.Closure
+     @return {Function}
+     @example
+     * var is_not_one = Closure.neq(1);
+     * is_not_one(1); // false
+     * is_not_one(2); // true
+  */
   neq : function(x){
     return function(y){
       return x != y;
@@ -1779,7 +2014,6 @@ var Closure = {
 };
 
 /**
-   @memberof Nehan
    @namespace Nehan.Args
 */
 var Args = {
@@ -1883,14 +2117,27 @@ var HashSet = (function(){
 
 
 var CssHashSet = (function(){
+  /**
+     @memberof Nehan
+     @class CssHashSet
+     @classdesc hash set for css
+     @extends {Nehan.HashSet}
+  */
   function CssHashSet(){
     HashSet.call(this);
   }
   Class.extend(CssHashSet, HashSet);
 
-  // merge css value
-  // 1. if old_value is object, merge each properties.
-  // 2. other case, simplly overwrite new_value to old_value(even if new_value is function).
+  /**
+   * merge css value<br>
+   * 1. if old_value is object, merge each properties.<br>
+   * 2. other case, simplly overwrite new_value to old_value(even if new_value is function).<br>
+
+   @memberof Nehan.CssHashSet
+   @method merge
+   @param old_value
+   @param new_value
+  */
   CssHashSet.prototype.merge = function(old_value, new_value){
     if(typeof old_value === "object"){
       Args.copy(old_value, new_value);
@@ -1899,6 +2146,11 @@ var CssHashSet = (function(){
     return new_value;
   };
 
+  /**
+     @memberof Nehan.CssHashSet
+     @method copyValuesTo
+     @param dst {Object}
+  */
   CssHashSet.prototype.copyValuesTo = function(dst){
     return Args.copy(dst, this._values);
   };
@@ -1906,7 +2158,8 @@ var CssHashSet = (function(){
   return CssHashSet;
 })();
 
-/*
+/**
+<pre>
   there are css properties that are required to calculate accurate paged-layout,
   and we call them 'managed css properties'.
 
@@ -1945,7 +2198,9 @@ var CssHashSet = (function(){
   text-combine
   text-emphasis-style
   white-space
-  width
+  width</pre>
+
+  @namespace Nehan.CssParser
 */
 var CssParser = (function(){
   var __normalize = function(value){
@@ -2125,9 +2380,25 @@ var CssParser = (function(){
   };
 
   return {
+    /**
+       @memberof Nehan.CssParser
+       @param prop {String} - css property name
+       @return {String} - normalized property name
+       @example
+       * CssParser.formatProp("margin-start"); // => "margin"
+    */
     formatProp : function(prop){
       return __format_prop(prop);
     },
+    /**
+       @memberof Nehan.CssParser
+       @param prop {String} - css property name
+       @param value - css value
+       @return {Object|int|string|boolean|function}
+       @example
+       * CssParser.formatValue("margin-start", "1em"); // => {start:"1em"}
+       * CssParser.formatValue("margin", "1em 1em 0 0"); // => {before:"1em", end:"1em", after:0, start:0}
+    */
     formatValue : function(prop, value){
       return __format_value(prop, value);
     }
@@ -3201,6 +3472,13 @@ var Token = {
 
 
 var Char = (function(){
+  /**
+     @memberof Nehan
+     @class Char
+     @classdesc character object
+     @param c1 {String}
+     @param is_ref {boolean} - is character reference?
+  */
   function Char(c1, is_ref){
     this.data = c1;
     this._type = "char";
@@ -3220,9 +3498,17 @@ var Char = (function(){
   var __tail_ng = ["\uff08","\x5c","\x28","\u300c","\u3010","\uff3b","\u3014","\x5c","\x5b","\u300e","\uff1c","\u3008","\u300a","\u201c","\u301d"];
 
   Char.prototype = {
+    /**
+       @memberof Nehan.Char
+       @return {string}
+     */
     getData : function(){
       return this.cnv || this.data;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssPadding : function(line){
       var padding = new Padding();
       if(this.paddingStart){
@@ -3233,6 +3519,10 @@ var Char = (function(){
       }
       return padding.getCss();
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertGlyph : function(line){
       var css = {};
       var padding_enable = this.isPaddingEnable();
@@ -3254,6 +3544,10 @@ var Char = (function(){
       }
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertImgChar : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css.display = "block";
@@ -3266,6 +3560,10 @@ var Char = (function(){
       }
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertRotateCharIE : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css["css-float"] = "left";
@@ -3274,10 +3572,18 @@ var Char = (function(){
       css["line-height"] = font_size + "px";
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertEmphaTarget : function(line){
       var css = {};
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertEmphaText : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css.display = "inline-block";
@@ -3285,19 +3591,35 @@ var Char = (function(){
       css.height = font_size + "px";
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssHoriEmphaTarget : function(line){
       var css = {};
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssHoriEmphaText : function(line){
       var css = {};
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertLetterSpacing : function(line){
       var css = {};
       css["margin-bottom"] = line.letterSpacing + "px";
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertHalfSpaceChar : function(line){
       var css = {}, font_size = line.style.getFontSize();
       var half = Math.round(font_size / 2);
@@ -3305,6 +3627,10 @@ var Char = (function(){
       css["line-height"] = half + "px";
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertSmallKana : function(){
       var css = {};
       css.position = "relative";
@@ -3315,31 +3641,64 @@ var Char = (function(){
       css.clear = "both";
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Float | Int}
+     */
     getHoriScale : function(){
       return this.hscale? this.hscale : 1;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Float | Int}
+     */
     getVertScale : function(){
       return this.vscale? this.vscale : 1;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Float | Int}
+     */
     getVertHeight : function(font_size){
       var vscale = this.getVertScale();
       return (vscale === 1)? font_size : Math.round(font_size * vscale);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     hasMetrics : function(){
       return (typeof this.bodySize != "undefined");
     },
+    /**
+       @memberof Nehan.Char
+       @return {Int}
+     */
     getAdvance : function(flow, letter_spacing){
       return this.bodySize + this.getPaddingSize() + (letter_spacing || 0);
     },
+    /**
+       @memberof Nehan.Char
+       @return {Int}
+     */
     getPaddingSize : function(){
       return (this.paddingStart || 0) + (this.paddingEnd || 0);
     },
+    /**
+       @memberof Nehan.Char
+       @return {Int}
+     */
     getCharCount : function(){
       if(this.data === " " || this.data === "\t" || this.data === "\u3000"){
 	return 0;
       }
       return 1;
     },
+    /**
+       @memberof Nehan.Char
+       @param flow {Nehan.BoxFlow}
+       @param font {Nehan.Font}
+     */
     setMetrics : function(flow, font){
       var is_vert = flow.isTextVertical();
       var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
@@ -3515,75 +3874,171 @@ var Char = (function(){
 	this._setRotate(90); break;
       }
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isNewLineChar : function(){
       return this.data === "\n";
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isSpaceChar : function(){
       return (this.data === " " || this.data === "&nbsp;" || this.data === "\t");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isWhiteSpaceChar : function(){
       return this.isNewLineChar() || this.isSpaceChar();
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isImgChar : function(){
       return (typeof this.img != "undefined");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isCnvChar : function(){
       return (typeof this.cnv != "undefined");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isRotateChar : function(){
       return (typeof this.rotate != "undefined");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isCharRef : function(){
       return this.isRef;
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isHalfSpaceChar : function(){
       return (this.isCnvChar() && this.cnv === "&nbsp;");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isKerningChar : function(){
       return this.isKutenTouten() || this.isKakko();
     },
+    /**
+       @memberof Nehan.Char
+       @return {string}
+     */
     getImgSrc : function(color){
       return [Display.fontImgRoot, this.img, color + ".png"].join("/");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isPaddingEnable : function(){
       return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isVertGlyphEnable : function(){
       return Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isTenten : function(){
       return this.img && this.img === "tenten";
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isHeadNg : function(){
       return List.mem(__head_ng, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isTailNg : function(){
       return List.mem(__tail_ng, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isSmallKana : function(){
       return List.mem(__small_kana, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isKakkoStart : function(){
       return List.mem(__kakko_start, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isKakkoEnd : function(){
       return List.mem(__kakko_end, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isKakko : function(){
       return this.isKakkoStart() || this.isKakkoEnd();
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isKuten : function(){
       return List.mem(__kuten, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isTouten : function(){
       return List.mem(__touten, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isKutenTouten : function(){
       return this.isKuten() || this.isTouten();
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isZenkaku : function(){
       return escape(this.data).charAt(1) === "u";
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isHankaku : function(){
       return !this.isZenkaku(this.data);
     }
@@ -3837,23 +4292,53 @@ var Rgb = (function(){
 })();
 
 var Color = (function(){
+  /**
+     @memberof Nehan
+     @class Color
+     @classdesc abstraction for css 'color'.
+     @param value {String}
+  */
   function Color(value){
     this.setValue(value);
   }
 
   Color.prototype = {
+    /**
+       @memberof Nehan.Color
+       @param value {String}
+    */
     setValue : function(value){
       this.value = Colors.get(value);
     },
+    /**
+       @memberof Nehan.Color
+       @return {String}
+    */
     getValue : function(){
       return this.value;
     },
+    /**
+       @memberof Nehan.Color
+       @return {String}
+       @example
+       * new Color("transparent").getCssValue(); // "transparent"
+       * new Color("ff0022").getCssValue(); // "#ff0022"
+       * new Color("red").getCssValue(); // "#ff0000"
+    */
     getCssValue : function(){
       return (this.value === "transparent")? this.value : "#" + this.value;
     },
+    /**
+       @memberof Nehan.Color
+       @return {Nehan.Rgb}
+    */
     getRgb : function(){
       return new Rgb(this.value);
     },
+    /**
+       @memberof Nehan.Color
+       @return {Object}
+    */
     getCss : function(){
       var css = {};
       css.color = this.getCssValue();
@@ -3864,6 +4349,10 @@ var Color = (function(){
   return Color;
 })();
 
+/**
+   color collection manager
+   @namespace Nehan.Colors
+*/
 var Colors = (function(){
   var __color_names = {
     "aliceblue":"f0f8ff",
@@ -4011,6 +4500,15 @@ var Colors = (function(){
   var rex_hex_color = /^(?:[0-9a-f]{3}){1,2}$/;
 
   return {
+    /**
+       @memberof Nehan.Colors
+       @param value {String}
+       @return {String}
+       @example
+       * Colors.get("white"); // "ffffff" (pre defined color)
+       * Colors.get("f00"); // "ff0000" (always length 6)
+       * Colors.get("0000FF"); // "0000ff" (always lowercased)
+    */
     get : function(value){
       value = value.replace(/#/g, "").toLowerCase();
       if(!rex_hex_color.test(value)){
@@ -4065,6 +4563,9 @@ var Palette = (function(){
 })();
 
 
+/**
+   @namespace Nehan.Cardinal
+*/
 var Cardinal = (function(){
   var __table = {
     "lower-alpha":[
@@ -4108,13 +4609,37 @@ var Cardinal = (function(){
   };
 
   return {
+    /**
+       get cardinal string array
+
+       @memberof Nehan.Cardinal
+       @param name {string}
+       @return {Array.<string>}
+    */
     getTableByName : function(name){
       return __table[__aliases[name] || name];
     },
+    /**
+       get cardical basis
+
+       @memberof Nehan.Cardinal
+       @param name {string}
+       @return {int}
+    */
     getBaseByName : function(name){
       var table = this.getTableByName(name);
       return table.length;
     },
+    /**
+       @memberof Nehan.Cardinal
+       @param name {string}
+       @param decimal {int}
+       @return {string}
+       @example
+       * Cardinal.getStringByName("lower-alpha", 2); // "c"
+       * Cardinal.getStringByName("hiragana", 0); // "あ"
+       * Cardinal.getStringByName("hiragana-iroha", 0); // "い"
+    */
     getStringByName : function(name, decimal){
       var table = this.getTableByName(name);
       var base = table.length;
@@ -4452,41 +4977,93 @@ var InlineFlow = (function(){
 
 
 var BoxFlow = (function(){
-  function BoxFlow(indir, blockdir, multicol){
+  /**
+     @memberof Nehan
+     @class BoxFlow
+     @classdesc abstract inline and block direction
+     @constructor
+     @param indir {string} - "lr" or "tb"("rl" not supported yet)
+     @param blockdir {string} - "tb" or "lr" or "rl"
+  */
+  function BoxFlow(indir, blockdir){
     this.inflow = new InlineFlow(indir);
-    this.blockflow = new BlockFlow(blockdir, multicol);
+    this.blockflow = new BlockFlow(blockdir);
   }
 
   BoxFlow.prototype = {
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
     isTextLineFirst : function(){
       if(this.isTextVertical() && this.blockflow.isLeftToRight()){
 	return true;
       }
       return false;
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
     isBlockflowVertical : function(){
       return this.blockflow.isVertical();
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
     isTextVertical : function(){
       return this.inflow.isVertical();
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
     isTextHorizontal : function(){
       return this.inflow.isHorizontal();
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {Object}
+    */
     getCss : function(){
       var css = {};
       Args.copy(css, this.blockflow.getCss());
       return css;
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+       @example
+       * new BlockFlow("tb", "rl").getName(); // "tb-rl"
+       * new BlockFlow("lr", "tb").getName(); // "lr-tb"
+    */
     getName : function(){
       return [this.inflow.dir, this.blockflow.dir].join("-");
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {String}
+       @example
+       * new BlockFlow("tb", "rl").getTextHorizontalDir(); // "rl"
+       * new BlockFlow("tb", "lr").getTextHorizontalDir(); // "lr"
+       * new BlockFlow("lr", "tb").getTextHorizontalDir(); // "" (empty)
+    */
     getTextHorizontalDir : function(){
       if(this.isTextHorizontal()){
 	return this.inflow.dir;
       }
       return "";
     },
+    /**
+       get physical property name from logical property.
+       @memberof Nehan.BoxFlow
+       @param prop {string} - logical direction name
+       @return {string}
+       @example
+       * new BlockFlow("tb", "rl").getProp("start"); // "top"
+       * new BlockFlow("lr", "tb").getProp("end"); // "right"
+    */
     getProp : function(prop){
       switch(prop){
       case "start":
@@ -4499,33 +5076,88 @@ var BoxFlow = (function(){
 	return this.getPropAfter();
       }
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
     getPropStart : function(){
       return this.inflow.getPropStart();
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
     getPropEnd : function(){
       return this.inflow.getPropEnd();
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
     getPropBefore : function(){
       return this.blockflow.getPropBefore();
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
     getPropAfter : function(){
       return this.blockflow.getPropAfter();
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
     getPropExtent : function(){
       return this.isTextVertical()? "width" : "height";
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
     getPropMeasure : function(){
       return this.isTextVertical()? "height" : "width";
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
     getPropWidth : function(){
       return this.isTextVertical()? "extent" : "measure";
     },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
     getPropHeight : function(){
       return this.isTextVertical()? "measure" : "extent";
     },
+    /**
+       get flipped box flow, but result depends on setting of Display.boxFlow.
+
+       @memberof Nehan.BoxFlow
+       @return {Nehan.BoxFlow}
+       @example
+       * // if  Display.boxFlow.hori = "lr-tb"
+       * // and Display.boxFlow.vert = "tb-rl"
+       * new BlockFlow("tb", "rl").getFlipFlow(); // BoxFlow("lr", "tb")
+       * new BlockFlow("lr", "tb").getFlipFlow(); // BoxFlow("tb", "rl")
+    */
     getFlipFlow : function(){
       return this.isTextVertical()? Display.getStdHoriFlow() : Display.getStdVertFlow();
     },
+    /**
+       get physical box size interpreted by this box flow.
+
+       @memberof Nehan.BoxFlow
+       @param measure {int}
+       @param extent {int}
+       @return {Nehan.BoxSize}
+       @example
+       * new BoxFlow("lr", "tb").getBoxSize(100, 200); // BoxSize(100, 200)
+       * new BoxFlow("tb", "rl").getBoxSize(100, 200); // BoxSize(200, 100)
+       * new BoxFlow("tb", "lr").getBoxSize(100, 200); // BoxSize(200, 100)
+     */
     getBoxSize : function(measure, extent){
       var size = new BoxSize(0, 0);
       size[this.getPropMeasure()] = measure;
@@ -4538,20 +5170,50 @@ var BoxFlow = (function(){
 })();
 
 
+/**
+   pre defined box flow collection.
+   @namespace Nehan.BoxFlows
+*/
 var BoxFlows = {
   "tb-rl":(new BoxFlow("tb", "rl")),
   "tb-lr":(new BoxFlow("tb", "lr")),
   "lr-tb":(new BoxFlow("lr", "tb")),
   "rl-tb":(new BoxFlow("rl", "tb")),
+  /**
+     get box flow by inflow and blockflow.
+
+     @memberof Nehan.BoxFlows
+     @param inflow {string} - "tb" or "lr"
+     @param blockflow {string} - "tb" or "lr" or "rl"
+     @return {Nehan.BoxFlow}
+  */
   get: function(inflow, blockflow){
     return this.getByName([inflow, blockflow].join("-"));
   },
+  /**
+     get box flow by flow-name.
+
+     @memberof Nehan.BoxFlows
+     @param name {string} - "lr-tb" or "tb-rl" or "tb-lr"
+     @return {Nehan.BoxFlow}
+  */
   getByName : function(name){
     return this[name] || null;
   }
 };
 
+/**
+   utiliti module for box physical direction(top, right, bottom, left).
+
+   @namespace Nehan.BoxRect
+*/
 var BoxRect = {
+  /**
+     iterate all direction of [obj] by [fn]
+     @memberof Nehan.BoxRect
+     @param obj {Object}
+     @param fn {Function}
+   */
   iter : function(obj, fn){
     List.iter(Const.cssBoxDirs, function(dir){
       if(obj[dir]){
@@ -4559,6 +5221,12 @@ var BoxRect = {
       }
     });
   },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value {Object}
+   */
   setValue : function(dst, flow, value){
     if(typeof value.start != "undefined"){
       this.setStart(dst, flow, value.start);
@@ -4574,15 +5242,39 @@ var BoxRect = {
     }
     return dst;
   },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value
+   */
   setBefore : function(dst, flow, value){
     dst[flow.getPropBefore()] = value;
   },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value
+   */
   setAfter : function(dst, flow, value){
     dst[flow.getPropAfter()] = value;
   },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value
+   */
   setStart : function(dst, flow, value){
     dst[flow.getPropStart()] = value;
   },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value
+   */
   setEnd : function(dst, flow, value){
     dst[flow.getPropEnd()] = value;
   }
@@ -4590,7 +5282,6 @@ var BoxRect = {
 
 
 /**
-   @memberof Nehan
    @namespace Nehan.BoxCorner
 */
 var BoxCorner = (function(){
@@ -5343,6 +6034,16 @@ var Uri = (function(){
 
 
 var BoxEdge = (function (){
+  /**
+     @memberof Nehan
+     @class BoxEdge
+     @classdesc edges object set(padding, border, margin)
+     @constructor
+     @param opt {Object} - optional argument
+     @param opt.padding {Nehan.Padding} - initial padding
+     @param opt.border {Nehan.Border} - initial border
+     @param opt.margin {Nehan.Margin} - initial margin
+  */
   function BoxEdge(opt){
     opt = opt || {};
     this.padding = opt.padding || new Padding();
@@ -5351,6 +6052,10 @@ var BoxEdge = (function (){
   }
 
   BoxEdge.prototype = {
+    /**
+       @memberof Nehan.BoxEdge
+       @return {Nehan.BoxEdge}
+    */
     clone : function(){
       var edge = new BoxEdge();
       edge.padding = this.padding.clone();
@@ -5358,11 +6063,19 @@ var BoxEdge = (function (){
       edge.margin = this.margin.clone();
       return edge;
     },
+    /**
+       clear all edge values
+       @memberof Nehan.BoxEdge
+    */
     clear : function(){
       this.padding.clear();
       this.border.clear();
       this.margin.clear();
     },
+    /**
+       get css object
+       @memberof Nehan.BoxEdge
+    */
     getCss : function(){
       var css = {};
       Args.copy(css, this.padding.getCss());
@@ -5370,6 +6083,10 @@ var BoxEdge = (function (){
       Args.copy(css, this.margin.getCss());
       return css;
     },
+    /**
+       get size of physical width amount size in px.
+       @memberof Nehan.BoxEdge
+     */
     getWidth : function(){
       var ret = 0;
       ret += this.padding.getWidth();
@@ -5377,6 +6094,10 @@ var BoxEdge = (function (){
       ret += this.margin.getWidth();
       return ret;
     },
+    /**
+       get size of physical height amount size in px.
+       @memberof Nehan.BoxEdge
+     */
     getHeight : function(){
       var ret = 0;
       ret += this.padding.getHeight();
@@ -5384,6 +6105,11 @@ var BoxEdge = (function (){
       ret += this.margin.getHeight();
       return ret;
     },
+    /**
+       get size of measure in px.
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     getMeasure : function(flow){
       var ret = 0;
       ret += this.padding.getMeasure(flow);
@@ -5391,6 +6117,11 @@ var BoxEdge = (function (){
       ret += this.margin.getMeasure(flow);
       return ret;
     },
+    /**
+       get size of extent in px.
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     getExtent : function(flow){
       var ret = 0;
       ret += this.padding.getExtent(flow);
@@ -5398,18 +6129,33 @@ var BoxEdge = (function (){
       ret += this.border.getExtent(flow);
       return ret;
     },
+    /**
+       get size of measure size in px without margin.
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     getInnerMeasureSize : function(flow){
       var ret = 0;
       ret += this.padding.getMeasure(flow);
       ret += this.border.getMeasure(flow);
       return ret;
     },
+    /**
+       get size of extent size in px without margin.
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     getInnerExtentSize : function(flow){
       var ret = 0;
       ret += this.padding.getExtent(flow);
       ret += this.border.getExtent(flow);
       return ret;
     },
+    /**
+       get before size amount in px.
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     getBefore : function(flow){
       var ret = 0;
       ret += this.padding.getBefore(flow);
@@ -5417,6 +6163,11 @@ var BoxEdge = (function (){
       ret += this.margin.getBefore(flow);
       return ret;
     },
+    /**
+       get after size amount in px.
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     getAfter : function(flow){
       var ret = 0;
       ret += this.padding.getAfter(flow);
@@ -5424,34 +6175,63 @@ var BoxEdge = (function (){
       ret += this.margin.getAfter(flow);
       return ret;
     },
-    setAll : function(prop, flow, value){
-      this[prop].setAll(flow, value);
-    },
+    /**
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     setBorderRadius : function(flow, value){
       this.border.setRadius(flow, value);
     },
+    /**
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     setBorderColor : function(flow, value){
       this.border.setColor(flow, value);
     },
+    /**
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     setBorderStyle : function(flow, value){
       this.border.setStyle(flow, value);
     },
+    /**
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     clearBefore : function(flow){
       this.padding.clearBefore(flow);
       this.border.clearBefore(flow);
       this.margin.clearBefore(flow);
     },
+    /**
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     clearAfter : function(flow){
       this.padding.clearAfter(flow);
       this.border.clearAfter(flow);
       this.margin.clearAfter(flow);
     },
+    /**
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     clearBorderStart : function(flow){
       this.border.clearStart(flow);
     },
+    /**
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     clearBorderBefore : function(flow){
       this.border.clearBefore(flow);
     },
+    /**
+       @memberof Nehan.BoxEdge
+       @param flow {Nehan.BoxFlow}
+     */
     clearBorderAfter : function(flow){
       this.border.clearAfter(flow);
     }
@@ -5461,32 +6241,73 @@ var BoxEdge = (function (){
 })();
 
 var BoxSize = (function(){
+  /**
+     @memberof Nehan
+     @class BoxSize
+     @classdesc physical box size 'width' and 'height'.
+     @constructor
+     @param width {int} - content width
+     @param height {int} - content height
+  */
   function BoxSize(width, height){
     this.width = width; // content width
     this.height = height; // content height
   }
 
   BoxSize.prototype = {
+    /**
+       clone box size object with same values.
+
+       @memberof Nehan.BoxSize
+       @return {Nehan.BoxSize}
+    */
     clone : function(){
       return new BoxSize(this.width, this.height);
     },
+    /**
+       @memberof Nehan.BoxSize
+       @param flow {Nehan.BoxFlow}
+       @param extent {int}
+     */
     setExtent : function(flow, extent){
       this[flow.getPropExtent()] = extent;
     },
+    /**
+       @memberof Nehan.BoxSize
+       @param flow {Nehan.BoxFlow}
+       @param measure {int}
+     */
     setMeasure : function(flow, measure){
       this[flow.getPropMeasure()] = measure;
     },
+    /**
+       @memberof Nehan.BoxSize
+       @param flow {Nehan.BoxFlow}
+       @return {Object}
+     */
     getCss : function(flow){
       var css = {};
       css.width = this.width + "px";
       css.height = this.height + "px";
       return css;
     },
-    // get content size of measure
+    /**
+       get content size of measure
+
+       @memberof Nehan.BoxSize
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+     */
     getMeasure : function(flow){
       return this[flow.getPropMeasure()];
     },
-    // get content size of extent
+    /**
+       get content size of extent
+
+       @memberof Nehan.BoxSize
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getExtent : function(flow){
       return this[flow.getPropExtent()];
     }
@@ -5496,14 +6317,29 @@ var BoxSize = (function(){
 })();
 
 var BoxPosition = (function(){
+  /**
+     @memberof Nehan
+     @class BoxPosition
+     @classdesc logical css 'position' property
+     @constructor
+     @param position {string}
+  */
   function BoxPosition(position){
     this.position = position;
   }
 
   BoxPosition.prototype = {
+    /**
+       @memberof Nehan.BoxPosition
+       @return {boolean}
+    */
     isAbsolute : function(){
       return this.position === "absolute";
     },
+    /**
+       @memberof Nehan.BoxPosition
+       @return {Object}
+    */
     getCss : function(flow){
       var css = {};
       css.position = this.position;
@@ -5531,9 +6367,10 @@ var Box = (function(){
   /**
      @memberof Nehan
      @class Box
+     @classdesc box abstraction with size and style context
      @constrctor
      @param {Nehan.BoxSize} box size
-     @param {Nehan.StyleContext} style context of this box
+     @param {Nehan.StyleContext}
   */
   function Box(size, style){
     this.size = size;
@@ -5551,24 +6388,50 @@ var Box = (function(){
   };
 
   Box.prototype = {
+    /**
+       @memberof Nehan.Box
+       @return {boolean}
+    */
     isAnonymousLine : function(){
       return this.display === "inline" && this.style.isRootLine();
     },
+    /**
+       filter text object and concat it as string, mainly used for debugging.
+
+       @memberof Nehan.Box
+       @return {string}
+    */
     toLineString : function(){
       var texts = __filter_text(this.elements || []);
       return List.fold(texts, "", function(ret, text){
 	return ret + (text? (text.data || "") : "");
       });
     },
+    /**
+       @memberof Nehan.Box
+       @return {string}
+    */
     getId : function(){
       return this.id || null;
     },
+    /**
+       @memberof Nehan.Box
+       @return {Array.<string>}
+    */
     getClassName : function(){
       return this.classes? this.classes.join(" ") : "";
     },
+    /**
+       @memberof Nehan.Box
+       @return {string}
+    */
     getContent : function(){
       return this.content || null;
     },
+    /**
+       @memberof Nehan.Box
+       @return {Function}
+    */
     getOnCreate : function(){
       // on create of anonymous line is already captured by parent element.
       if(this.isAnonymousLine()){
@@ -5576,6 +6439,10 @@ var Box = (function(){
       }
       return this.style.getCssAttr("oncreate");
     },
+    /**
+       @memberof Nehan.Box
+       @return {Object}
+    */
     getAttrs : function(){
       // attributes of anonymous line is already captured by parent element.
       if(this.isAnonymousLine()){
@@ -5583,6 +6450,10 @@ var Box = (function(){
       }
       return this.style.markup.attrs;
     },
+    /**
+       @memberof Nehan.Box
+       @return {Object}
+    */
     getCssRoot : function(){
       switch(this.display){
       case "block": return this.getCssBlock();
@@ -5590,6 +6461,10 @@ var Box = (function(){
       case "inline-block": return this.getCssInlineBlock();
       }
     },
+    /**
+       @memberof Nehan.Box
+       @return {Object}
+    */
     getCssBlock : function(){
       var css = {};
       Args.copy(css, this.style.getCssBlock()); // base style
@@ -5600,6 +6475,10 @@ var Box = (function(){
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
+    /**
+       @memberof Nehan.Box
+       @return {Object}
+    */
     getCssInline : function(){
       var css = {};
       Args.copy(css, this.style.getCssInline()); // base style
@@ -5610,6 +6489,10 @@ var Box = (function(){
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
+    /**
+       @memberof Nehan.Box
+       @return {Object}
+    */
     getCssInlineBlock : function(){
       var css = this.getCssBlock();
       if(!this.style.isFloated()){
@@ -5618,28 +6501,61 @@ var Box = (function(){
       css.display = "inline-block";
       return css;
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getContentMeasure : function(flow){
       flow = flow || this.style.flow;
       return this.size.getMeasure(flow);
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getContentExtent : function(flow){
       flow = flow || this.style.flow;
       return this.size.getExtent(flow);
     },
+    /**
+       @memberof Nehan.Box
+       @return {int}
+    */
     getContentWidth : function(){
       return this.size.width;
     },
+    /**
+       @memberof Nehan.Box
+       @return {int}
+    */
     getContentHeight : function(){
       return this.size.height;
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getEdgeMeasure : function(flow){
       flow = flow || this.style.flow;
       return this.edge? this.edge.getMeasure(flow) : 0;
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getEdgeExtent : function(flow){
       flow = flow || this.style.flow;
       return this.edge? this.edge.getExtent(flow) : 0;
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getLayoutMeasure : function(flow){
       flow = flow || this.style.flow;
       if(this.style.isPositionAbsolute()){
@@ -5647,6 +6563,11 @@ var Box = (function(){
       }
       return this.getContentMeasure(flow) + this.getEdgeMeasure(flow);
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getLayoutExtent : function(flow){
       flow = flow || this.style.flow;
       if(this.style.isPositionAbsolute()){
@@ -5654,16 +6575,27 @@ var Box = (function(){
       }
       return this.getContentExtent(flow) + this.getEdgeExtent(flow);
     },
+    /**
+       @memberof Nehan.Box
+    */
     clearBorderBefore : function(){
       if(this.edge){
 	this.edge.clearBorderBefore(this.style.flow);
       }
     },
+    /**
+       @memberof Nehan.Box
+    */
     clearBorderAfter : function(){
       if(this.edge){
 	this.edge.clearBorderAfter(this.style.flow);
       }
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @param extent {int}
+    */
     resizeExtent : function(flow, extent){
       this.size.setExtent(flow, extent);
       return this;
@@ -6891,23 +7823,52 @@ var FloatDirections = {
 };
 
 var Break = (function(){
+  /**
+     @memberof Nehan
+     @class Break
+     @classdesc logical abstraction for css 'page-break-before' or 'page-break-after'
+     @constructor
+     @param value {string} - "always" or "avoid" or "left" or "right"
+   */
   function Break(value){
     this.value = value;
   }
 
   Break.prototype = {
+    /**
+       @memberof Nehan.Break
+       @return {boolean}
+     */
     isAlways : function(){
       return this.value === "always";
     },
+    /**
+       @memberof Nehan.Break
+       @return {boolean}
+     */
     isAvoid : function(){
       return this.value === "avoid";
     },
+    /**
+       @memberof Nehan.Break
+       @return {boolean}
+     */
     isFirst : function(){
       return (Display.getPagingDirection() === "lr")? (this.value === "left") : (this.value === "right");
     },
+    /**
+       @memberof Nehan.Break
+       @return {boolean}
+     */
     isSecond : function(){
       return (Display.getPagingDirection() === "lr")? (this.value === "right") : (this.value === "left");
     },
+    /**
+       (TODO)
+       @memberof Nehan.Break
+       @param order {int}
+       @return {boolean}
+     */
     isNth : function(order){
     }
   };
@@ -6916,6 +7877,10 @@ var Break = (function(){
 })();
 
 
+/**
+   pre defined break collection.
+   @namespace Nehan.Breaks
+*/
 var Breaks = {
   before:{
     always:(new Break("always")),
@@ -6933,9 +7898,17 @@ var Breaks = {
     first:(new Break("first")), // correspond to break-before:"left"
     second:(new Break("second")) // correspond to break-before:"right"
   },
+  /**
+     @memberof Nehan.Breaks
+     @param value {String} - "always", "avoid", "left", "right", "first", "second"
+  */
   getBefore : function(value){
     return this.before[value] || null;
   },
+  /**
+     @memberof Nehan.Breaks
+     @param value {String} - "always", "avoid", "left", "right", "first", "second"
+  */
   getAfter : function(value){
     return this.after[value] || null;
   }
@@ -8561,83 +9534,171 @@ var StyleContext = (function(){
 
 
 var CursorContext = (function(){
+  /**
+     @memberof Nehan
+     @class CursorContext
+     @classdesc generator cursor position set(inline and block).
+     @constructor
+     @param block {Nehan.BlockContext}
+     @param inline {Nehan.InlineContext}
+  */
   function CursorContext(block, inline){
     this.block = block;
     this.inline = inline;
   }
 
   CursorContext.prototype = {
-    // block-level
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
     hasBlockSpaceFor : function(extent, opt){
       return this.block.hasSpaceFor(extent, opt);
     },
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
     hasBreakAfter : function(){
       return this.block.hasBreakAfter() || this.inline.hasBreakAfter() || false;
     },
+    /**
+       @memberof Nehan.CursorContext
+       @param element {Nehan.Box}
+       @param extent {int}
+    */
     addBlockElement : function(element, extent){
       this.block.addElement(element, extent);
     },
+    /**
+       @memberof Nehan.CursorContext
+       @return {Array.<Nehan.Box>}
+    */
     getBlockElements : function(){
       return this.block.getElements();
     },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
     getBlockCurExtent : function(){
       return this.block.getCurExtent();
     },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
     getBlockMaxExtent : function(){
       return this.block.getMaxExtent();
     },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
     getBlockRestExtent : function(){
       return this.block.getRestExtent();
     },
+    /**
+       @memberof Nehan.CursorContext
+       @param is_last_block {boolean}
+       @return {Object} {before:[int value], after:[int value]}
+    */
     getBlockCancelEdge : function(is_last_block){
       return this.block.getCancelEdge(is_last_block);
     },
-    // inline-level
+    /**
+       @memberof Nehan.CursorContext
+    */
     isInlineEmpty : function(){
       return this.inline.isEmpty();
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     hasInlineSpaceFor : function(measure){
       return this.inline.hasSpaceFor(measure);
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     hasLineBreak : function(){
       return this.inline.hasLineBreak();
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     setLineBreak : function(status){
       this.inline.setLineBreak(status);
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     setBreakAfter : function(status){
       this.inline.setBreakAfter(status);
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     addInlineElement : function(element, measure){
       this.inline.addElement(element, measure);
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     getInlineLastText : function(){
       return this.inline.getLastText();
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     getInlineTexts : function(){
       return this.inline.getTexts();
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     getInlineElements : function(){
       return this.inline.getElements();
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     getInlineCurMeasure : function(){
       return this.inline.getCurMeasure();
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     getInlineRestMeasure : function(){
       return this.inline.getRestMeasure();
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     getInlineMaxMeasure : function(){
       return this.inline.getMaxMeasure();
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     getInlineMaxExtent : function(){
       return this.inline.getMaxExtent();
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     getInlineMaxFontSize : function(){
       return this.inline.getMaxFontSize();
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     getInlineCharCount : function(){
       return this.inline.getCharCount();
     },
+    /**
+       @memberof Nehan.CursorContext
+    */
     justify : function(head_char){
       return this.inline.justify(head_char);
     }
@@ -9715,11 +10776,23 @@ var LazyGenerator = (function(){
 })();
 
 var BreakAfterGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class BreakAfterGenerator
+     @classdesc generate layout that breaks page when finished.
+     @constructor
+     @extends {Nehan.InlineGenerator}
+     @param style {Nehan.StyleContext}
+  */
   function BreakAfterGenerator(style){
     InlineGenerator.call(this, style, null, null);
   }
   Class.extend(BreakAfterGenerator, InlineGenerator);
 
+  /**
+     @memberof Nehan.BreakAfterGenerator
+     @return {boolean}
+  */
   BreakAfterGenerator.prototype.hasNext = function(){
     return !this._terminate;
   };

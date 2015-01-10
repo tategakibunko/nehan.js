@@ -1,3 +1,7 @@
+/**
+   color collection manager
+   @namespace Nehan.Colors
+*/
 var Colors = (function(){
   var __color_names = {
     "aliceblue":"f0f8ff",
@@ -145,6 +149,15 @@ var Colors = (function(){
   var rex_hex_color = /^(?:[0-9a-f]{3}){1,2}$/;
 
   return {
+    /**
+       @memberof Nehan.Colors
+       @param value {String}
+       @return {String}
+       @example
+       * Colors.get("white"); // "ffffff" (pre defined color)
+       * Colors.get("f00"); // "ff0000" (always length 6)
+       * Colors.get("0000FF"); // "0000ff" (always lowercased)
+    */
     get : function(value){
       value = value.replace(/#/g, "").toLowerCase();
       if(!rex_hex_color.test(value)){

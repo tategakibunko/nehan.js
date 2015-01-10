@@ -1,3 +1,6 @@
+/**
+   @namespace Nehan.Cardinal
+*/
 var Cardinal = (function(){
   var __table = {
     "lower-alpha":[
@@ -41,13 +44,37 @@ var Cardinal = (function(){
   };
 
   return {
+    /**
+       get cardinal string array
+
+       @memberof Nehan.Cardinal
+       @param name {string}
+       @return {Array.<string>}
+    */
     getTableByName : function(name){
       return __table[__aliases[name] || name];
     },
+    /**
+       get cardical basis
+
+       @memberof Nehan.Cardinal
+       @param name {string}
+       @return {int}
+    */
     getBaseByName : function(name){
       var table = this.getTableByName(name);
       return table.length;
     },
+    /**
+       @memberof Nehan.Cardinal
+       @param name {string}
+       @param decimal {int}
+       @return {string}
+       @example
+       * Cardinal.getStringByName("lower-alpha", 2); // "c"
+       * Cardinal.getStringByName("hiragana", 0); // "あ"
+       * Cardinal.getStringByName("hiragana-iroha", 0); // "い"
+    */
     getStringByName : function(name, decimal){
       var table = this.getTableByName(name);
       var base = table.length;

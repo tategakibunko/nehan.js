@@ -1,4 +1,10 @@
 Nehan.Client = (function(){
+  /**
+     @memberof Nehan
+     @class Client
+     @classdesc wrapper class for user browser agent
+     @constructor
+  */
   function Client(){
     this.userAgent = navigator.userAgent.toLowerCase();
     this.name = navigator.appName.toLowerCase();
@@ -7,42 +13,94 @@ Nehan.Client = (function(){
   }
 
   Client.prototype = {
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isWindows : function(){
       return this.userAgent.indexOf("windows") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isMacintosh : function(){
       return this.userAgent.indexOf("macintosh") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isIphone : function(){
       return this.userAgent.indexOf("iphone") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isIpod : function(){
       return this.userAgent.indexOf("ipod") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isIpad : function(){
       return this.userAgent.indexOf("ipad") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isAppleMobileFamily : function(){
       return this.isIphone() || this.isIpod() || this.isIpad();
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isAndroid : function(){
       return this.userAgent.indexOf("android") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isSmartPhone : function(){
       return this.isAppleMobileFamily() || this.isAndroid();
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isWebkit : function(){
       return this.userAgent.indexOf("webkit") >= 0;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isIE : function(){
       return this.name === "msie";
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isTrident : function(){
       return this.isIE() && this.version >= 11;
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isChrome : function(){
       return this.name === "chrome";
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
     isSafari : function(){
       return this.name === "safari";
     },

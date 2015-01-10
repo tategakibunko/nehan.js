@@ -1,4 +1,14 @@
+/**
+   @namespace Nehan.Class
+*/
 var Class = {};
+
+/**
+   @memberof Nehan.Class
+   @param childCtor {Object}
+   @param parentCtor {Object}
+   @return {Object}
+*/
 Class.extend = function(childCtor, parentCtor) {
   function TempCtor() {}
   TempCtor.prototype = parentCtor.prototype;

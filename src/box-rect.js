@@ -1,4 +1,15 @@
+/**
+   utiliti module for box physical direction(top, right, bottom, left).
+
+   @namespace Nehan.BoxRect
+*/
 var BoxRect = {
+  /**
+     iterate all direction of [obj] by [fn]
+     @memberof Nehan.BoxRect
+     @param obj {Object}
+     @param fn {Function}
+   */
   iter : function(obj, fn){
     List.iter(Const.cssBoxDirs, function(dir){
       if(obj[dir]){
@@ -6,6 +17,12 @@ var BoxRect = {
       }
     });
   },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value {Object}
+   */
   setValue : function(dst, flow, value){
     if(typeof value.start != "undefined"){
       this.setStart(dst, flow, value.start);
@@ -21,15 +38,39 @@ var BoxRect = {
     }
     return dst;
   },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value
+   */
   setBefore : function(dst, flow, value){
     dst[flow.getPropBefore()] = value;
   },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value
+   */
   setAfter : function(dst, flow, value){
     dst[flow.getPropAfter()] = value;
   },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value
+   */
   setStart : function(dst, flow, value){
     dst[flow.getPropStart()] = value;
   },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value
+   */
   setEnd : function(dst, flow, value){
     dst[flow.getPropEnd()] = value;
   }

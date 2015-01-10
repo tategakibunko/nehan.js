@@ -1779,7 +1779,6 @@ var Closure = {
 };
 
 /**
-   @memberof Nehan
    @namespace Nehan.Args
 */
 var Args = {
@@ -4590,7 +4589,6 @@ var BoxRect = {
 
 
 /**
-   @memberof Nehan
    @namespace Nehan.BoxCorner
 */
 var BoxCorner = (function(){
@@ -5342,6 +5340,15 @@ var Uri = (function(){
 })();
 
 
+/**
+   @memberof Nehan
+   @class BoxEdge
+   @classdesc edges object set(padding, border, margin)
+   @param opt {Object} - optional argument
+   @param opt.padding {Nehan.Padding} - initial padding
+   @param opt.border {Nehan.Border} - initial border
+   @param opt.margin {Nehan.Margin} - initial margin
+*/
 var BoxEdge = (function (){
   function BoxEdge(opt){
     opt = opt || {};
@@ -5351,6 +5358,10 @@ var BoxEdge = (function (){
   }
 
   BoxEdge.prototype = {
+    /**
+       @memberof Nehan.BoxEdge
+       @return {Nehan.BoxEdge}
+    */
     clone : function(){
       var edge = new BoxEdge();
       edge.padding = this.padding.clone();
@@ -5358,11 +5369,19 @@ var BoxEdge = (function (){
       edge.margin = this.margin.clone();
       return edge;
     },
+    /**
+       clear all edge values
+       @memberof Nehan.BoxEdge
+    */
     clear : function(){
       this.padding.clear();
       this.border.clear();
       this.margin.clear();
     },
+    /**
+       get css object
+       @memberof Nehan.BoxEdge
+    */
     getCss : function(){
       var css = {};
       Args.copy(css, this.padding.getCss());

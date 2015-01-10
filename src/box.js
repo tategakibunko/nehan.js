@@ -2,9 +2,10 @@ var Box = (function(){
   /**
      @memberof Nehan
      @class Box
+     @classdesc box abstraction with size and style context
      @constrctor
      @param {Nehan.BoxSize} box size
-     @param {Nehan.StyleContext} style context of this box
+     @param {Nehan.StyleContext}
   */
   function Box(size, style){
     this.size = size;
@@ -22,24 +23,50 @@ var Box = (function(){
   };
 
   Box.prototype = {
+    /**
+       @memberof Nehan.Box
+       @return {boolean}
+    */
     isAnonymousLine : function(){
       return this.display === "inline" && this.style.isRootLine();
     },
+    /**
+       filter text object and concat it as string, mainly used for debugging.
+
+       @memberof Nehan.Box
+       @return {string}
+    */
     toLineString : function(){
       var texts = __filter_text(this.elements || []);
       return List.fold(texts, "", function(ret, text){
 	return ret + (text? (text.data || "") : "");
       });
     },
+    /**
+       @memberof Nehan.Box
+       @return {string}
+    */
     getId : function(){
       return this.id || null;
     },
+    /**
+       @memberof Nehan.Box
+       @return {Array.<string>}
+    */
     getClassName : function(){
       return this.classes? this.classes.join(" ") : "";
     },
+    /**
+       @memberof Nehan.Box
+       @return {string}
+    */
     getContent : function(){
       return this.content || null;
     },
+    /**
+       @memberof Nehan.Box
+       @return {Function}
+    */
     getOnCreate : function(){
       // on create of anonymous line is already captured by parent element.
       if(this.isAnonymousLine()){
@@ -47,6 +74,10 @@ var Box = (function(){
       }
       return this.style.getCssAttr("oncreate");
     },
+    /**
+       @memberof Nehan.Box
+       @return {Object}
+    */
     getAttrs : function(){
       // attributes of anonymous line is already captured by parent element.
       if(this.isAnonymousLine()){
@@ -54,6 +85,10 @@ var Box = (function(){
       }
       return this.style.markup.attrs;
     },
+    /**
+       @memberof Nehan.Box
+       @return {Object}
+    */
     getCssRoot : function(){
       switch(this.display){
       case "block": return this.getCssBlock();
@@ -61,6 +96,10 @@ var Box = (function(){
       case "inline-block": return this.getCssInlineBlock();
       }
     },
+    /**
+       @memberof Nehan.Box
+       @return {Object}
+    */
     getCssBlock : function(){
       var css = {};
       Args.copy(css, this.style.getCssBlock()); // base style
@@ -71,6 +110,10 @@ var Box = (function(){
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
+    /**
+       @memberof Nehan.Box
+       @return {Object}
+    */
     getCssInline : function(){
       var css = {};
       Args.copy(css, this.style.getCssInline()); // base style
@@ -81,6 +124,10 @@ var Box = (function(){
       Args.copy(css, this.css); // some dynamic values
       return css;
     },
+    /**
+       @memberof Nehan.Box
+       @return {Object}
+    */
     getCssInlineBlock : function(){
       var css = this.getCssBlock();
       if(!this.style.isFloated()){
@@ -89,28 +136,61 @@ var Box = (function(){
       css.display = "inline-block";
       return css;
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getContentMeasure : function(flow){
       flow = flow || this.style.flow;
       return this.size.getMeasure(flow);
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getContentExtent : function(flow){
       flow = flow || this.style.flow;
       return this.size.getExtent(flow);
     },
+    /**
+       @memberof Nehan.Box
+       @return {int}
+    */
     getContentWidth : function(){
       return this.size.width;
     },
+    /**
+       @memberof Nehan.Box
+       @return {int}
+    */
     getContentHeight : function(){
       return this.size.height;
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getEdgeMeasure : function(flow){
       flow = flow || this.style.flow;
       return this.edge? this.edge.getMeasure(flow) : 0;
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getEdgeExtent : function(flow){
       flow = flow || this.style.flow;
       return this.edge? this.edge.getExtent(flow) : 0;
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getLayoutMeasure : function(flow){
       flow = flow || this.style.flow;
       if(this.style.isPositionAbsolute()){
@@ -118,6 +198,11 @@ var Box = (function(){
       }
       return this.getContentMeasure(flow) + this.getEdgeMeasure(flow);
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
     getLayoutExtent : function(flow){
       flow = flow || this.style.flow;
       if(this.style.isPositionAbsolute()){
@@ -125,16 +210,27 @@ var Box = (function(){
       }
       return this.getContentExtent(flow) + this.getEdgeExtent(flow);
     },
+    /**
+       @memberof Nehan.Box
+    */
     clearBorderBefore : function(){
       if(this.edge){
 	this.edge.clearBorderBefore(this.style.flow);
       }
     },
+    /**
+       @memberof Nehan.Box
+    */
     clearBorderAfter : function(){
       if(this.edge){
 	this.edge.clearBorderAfter(this.style.flow);
       }
     },
+    /**
+       @memberof Nehan.Box
+       @param flow {Nehan.BoxFlow}
+       @param extent {int}
+    */
     resizeExtent : function(flow, extent){
       this.size.setExtent(flow, extent);
       return this;

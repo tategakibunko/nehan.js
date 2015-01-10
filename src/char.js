@@ -1,4 +1,11 @@
 var Char = (function(){
+  /**
+     @memberof Nehan
+     @class Char
+     @classdesc character object
+     @param c1 {String}
+     @param is_ref {boolean} - is character reference?
+  */
   function Char(c1, is_ref){
     this.data = c1;
     this._type = "char";
@@ -18,9 +25,17 @@ var Char = (function(){
   var __tail_ng = ["\uff08","\x5c","\x28","\u300c","\u3010","\uff3b","\u3014","\x5c","\x5b","\u300e","\uff1c","\u3008","\u300a","\u201c","\u301d"];
 
   Char.prototype = {
+    /**
+       @memberof Nehan.Char
+       @return {string}
+     */
     getData : function(){
       return this.cnv || this.data;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssPadding : function(line){
       var padding = new Padding();
       if(this.paddingStart){
@@ -31,6 +46,10 @@ var Char = (function(){
       }
       return padding.getCss();
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertGlyph : function(line){
       var css = {};
       var padding_enable = this.isPaddingEnable();
@@ -52,6 +71,10 @@ var Char = (function(){
       }
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertImgChar : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css.display = "block";
@@ -64,6 +87,10 @@ var Char = (function(){
       }
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertRotateCharIE : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css["css-float"] = "left";
@@ -72,10 +99,18 @@ var Char = (function(){
       css["line-height"] = font_size + "px";
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertEmphaTarget : function(line){
       var css = {};
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertEmphaText : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css.display = "inline-block";
@@ -83,19 +118,35 @@ var Char = (function(){
       css.height = font_size + "px";
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssHoriEmphaTarget : function(line){
       var css = {};
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssHoriEmphaText : function(line){
       var css = {};
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertLetterSpacing : function(line){
       var css = {};
       css["margin-bottom"] = line.letterSpacing + "px";
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertHalfSpaceChar : function(line){
       var css = {}, font_size = line.style.getFontSize();
       var half = Math.round(font_size / 2);
@@ -103,6 +154,10 @@ var Char = (function(){
       css["line-height"] = half + "px";
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
     getCssVertSmallKana : function(){
       var css = {};
       css.position = "relative";
@@ -113,31 +168,64 @@ var Char = (function(){
       css.clear = "both";
       return css;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Float | Int}
+     */
     getHoriScale : function(){
       return this.hscale? this.hscale : 1;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Float | Int}
+     */
     getVertScale : function(){
       return this.vscale? this.vscale : 1;
     },
+    /**
+       @memberof Nehan.Char
+       @return {Float | Int}
+     */
     getVertHeight : function(font_size){
       var vscale = this.getVertScale();
       return (vscale === 1)? font_size : Math.round(font_size * vscale);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     hasMetrics : function(){
       return (typeof this.bodySize != "undefined");
     },
+    /**
+       @memberof Nehan.Char
+       @return {Int}
+     */
     getAdvance : function(flow, letter_spacing){
       return this.bodySize + this.getPaddingSize() + (letter_spacing || 0);
     },
+    /**
+       @memberof Nehan.Char
+       @return {Int}
+     */
     getPaddingSize : function(){
       return (this.paddingStart || 0) + (this.paddingEnd || 0);
     },
+    /**
+       @memberof Nehan.Char
+       @return {Int}
+     */
     getCharCount : function(){
       if(this.data === " " || this.data === "\t" || this.data === "\u3000"){
 	return 0;
       }
       return 1;
     },
+    /**
+       @memberof Nehan.Char
+       @param flow {Nehan.BoxFlow}
+       @param font {Nehan.Font}
+     */
     setMetrics : function(flow, font){
       var is_vert = flow.isTextVertical();
       var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
@@ -313,75 +401,171 @@ var Char = (function(){
 	this._setRotate(90); break;
       }
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isNewLineChar : function(){
       return this.data === "\n";
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isSpaceChar : function(){
       return (this.data === " " || this.data === "&nbsp;" || this.data === "\t");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isWhiteSpaceChar : function(){
       return this.isNewLineChar() || this.isSpaceChar();
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isImgChar : function(){
       return (typeof this.img != "undefined");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isCnvChar : function(){
       return (typeof this.cnv != "undefined");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isRotateChar : function(){
       return (typeof this.rotate != "undefined");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isCharRef : function(){
       return this.isRef;
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isHalfSpaceChar : function(){
       return (this.isCnvChar() && this.cnv === "&nbsp;");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isKerningChar : function(){
       return this.isKutenTouten() || this.isKakko();
     },
+    /**
+       @memberof Nehan.Char
+       @return {string}
+     */
     getImgSrc : function(color){
       return [Display.fontImgRoot, this.img, color + ".png"].join("/");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isPaddingEnable : function(){
       return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isVertGlyphEnable : function(){
       return Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isTenten : function(){
       return this.img && this.img === "tenten";
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isHeadNg : function(){
       return List.mem(__head_ng, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isTailNg : function(){
       return List.mem(__tail_ng, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isSmallKana : function(){
       return List.mem(__small_kana, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isKakkoStart : function(){
       return List.mem(__kakko_start, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isKakkoEnd : function(){
       return List.mem(__kakko_end, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isKakko : function(){
       return this.isKakkoStart() || this.isKakkoEnd();
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isKuten : function(){
       return List.mem(__kuten, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isTouten : function(){
       return List.mem(__touten, this.data);
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isKutenTouten : function(){
       return this.isKuten() || this.isTouten();
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isZenkaku : function(){
       return escape(this.data).charAt(1) === "u";
     },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isHankaku : function(){
       return !this.isZenkaku(this.data);
     }
