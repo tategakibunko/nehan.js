@@ -22,9 +22,13 @@ $(function(){
   $(".nehan-reader").each(function(i, dom){
     var $dom = $(dom);
     var html = $dom.html();
+    var flow = $dom.data("flow");
     new Ndoc.Reader({
       el:dom,
-      data:{text:html}
+      data:{
+	text:html, 
+	flow:flow
+      }
     });
   });
 });
@@ -143,7 +147,7 @@ Ndoc.Reader = Vue.extend({
 Ndoc.Utils = {
   createPagedElement: function(){
     return Nehan.createPagedElement({
-      layout:{
+      display:{
 	fontImgRoot:"http://static.antiscroll.com/image/char-img"
       }
     });
