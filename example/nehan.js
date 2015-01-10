@@ -229,6 +229,13 @@ Nehan.globalStyle = {};
 Nehan.__single_tag_names__ = [];
 Nehan.__single_tag_rexes__ = [];
 
+/**
+   set global style. see example at setStyle of {@link Nehan.Engine}.
+
+   @memberof Nehan
+   @param selector_key {String}
+   @param value {selector_value}
+*/
 Nehan.setStyle = function(selector_key, value){
   var entry = Nehan.globalStyle[selector_key] || {};
   for(var prop in value){
@@ -237,16 +244,34 @@ Nehan.setStyle = function(selector_key, value){
   Nehan.globalStyle[selector_key] = entry;
 };
 
+/**
+   set global styles. see example at setStyles of {@link Nehan.Engine}.
+
+   @memberof Nehan
+   @param values {Object}
+ */
 Nehan.setStyles = function(values){
   for(var selector_key in values){
     Nehan.setStyle(selector_key, values[selector_key]);
   }
 };
 
+/**
+   set global single tag name. see example at addSingleTagByName of {@link Nehan.LexingRule}.
+
+   @memberof Nehan
+   @param tag_name {String}
+*/
 Nehan.addSingleTagByName = function(tag_name){
   Nehan.__single_tag_names__.push(tag_name);
 };
 
+/**
+   set global single tag name by regexp object. see example at addSingleTagByRex of {@link Nehan.LexingRule}.
+
+   @memberof Nehan
+   @param rex {RegExp}
+*/
 Nehan.addSingleTagByRex = function(rex){
   Nehan.__single_tag_rexes__.push(rex);
 };
@@ -261,7 +286,7 @@ Nehan.addSingleTagByRex = function(rex){
    @param engine_args.config {Nehan.Config} - system config
    @param engine_args.display {Nehan.Display} - standard page parameters
    @param engine_args.style {Nehan.Style} - engine local style
-   @return {Object}
+   @return {Nehan.Engine}
 */
 // this function return the engine module(ends at nehan-setup-end.js),
 // enclosing local environment(Style, Display, Config, DocumentContext etc).
@@ -633,6 +658,11 @@ var Display = {
 };
 
 
+/**
+   module of html lexing rule
+
+   @namespace Nehan.LexingRule
+*/
 var LexingRule = (function(){
   var __single_tag_names__ = [
     "br",
@@ -668,14 +698,37 @@ var LexingRule = (function(){
   };
 
   return {
+    /**
+       @memberof Nehan.LexingRule
+       @param tag_name {String}
+       @return {boolean}
+       @example
+       * LexingRule.isSingleTag("img"); // true
+       * LexingRule.isSingleTag("br"); // true
+       * LexingRule.isSingleTag("div"); // false
+    */
     isSingleTag : function(tag_name){
       return __is_single_tag(tag_name) || __is_single_tag_rex(tag_name) || false;
     },
+    /**
+       @memberof Nehan.LexingRule
+       @param tag_name {String}
+       @example
+       * LexingRule.addSingleTagByName("my-custom-single-tag");
+       * LexingRule.isSingleTag("my-custom-single-tag"); // true
+    */
     addSingleTagByName : function(tag_name){
       if(!__is_single_tag(tag_name)){
 	__single_tag_names__.push(tag_name);
       }
     },
+    /**
+       @memberof Nehan.LexingRule
+       @param rex {RegExp}
+       @example
+       * LexingRule.addSingleTagByName(new RegExp("my-single-\d"));
+       * LexingRule.isSingleTag("my-single-1"); // true
+    */
     addSingleTagByRex : function(rex){
       if(!__find_single_tag_rex_by_rex(rex)){
 	__single_tag_rexes__.push(rex);
@@ -1706,27 +1759,58 @@ Class.extend = function(childCtor, parentCtor) {
 };
 
 
+/**
+   list utility module
+
+   @namespace Nehan.List
+*/
 var List = {
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> ()
+  */
   iter : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       fn(lst[i]);
     }
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun index -> obj -> ()
+  */
   iteri : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       fn(i, lst[i]);
     }
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> ()
+  */
   reviter : function(lst, fn){
     for(var i = lst.length - 1; i >= 0; i--){
       fn(lst[i]);
     }
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun index -> obj -> ()
+  */
   reviteri : function(lst, fn){
     for(var i = lst.length - 1; i >= 0; i--){
       fn(i, lst[i]);
     }
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {boolean}
+  */
   forall : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       if(!fn(lst[i])){
@@ -1735,6 +1819,12 @@ var List = {
     }
     return true;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> obj
+     @return {Array}
+  */
   map : function(lst, fn){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
@@ -1742,6 +1832,12 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun index -> obj -> obj
+     @return {Array}
+  */
   mapi : function(lst, fn){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
@@ -1749,6 +1845,13 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param acm {foldable_value} - accumulator
+     @param fn {Function} - fun acm -> obj -> acm
+     @return {folded_value}
+  */
   fold : function(lst, acm, fn){
     var ret = acm;
     for(var i = 0, len = lst.length; i < len; i++){
@@ -1756,6 +1859,12 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {Array}
+  */
   filter : function(lst, fn){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
@@ -1765,6 +1874,12 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {first_founded_object}
+  */
   find : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       var obj = lst[i];
@@ -1774,6 +1889,12 @@ var List = {
     }
     return null;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {first_founded_object}
+  */
   revfind : function(lst, fn){
     for(var i = lst.length - 1; i >= 0; i--){
       var obj = lst[i];
@@ -1783,6 +1904,12 @@ var List = {
     }
     return null;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {int}
+  */
   indexOf : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       var obj = lst[i];
@@ -1792,6 +1919,12 @@ var List = {
     }
     return -1;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {boolean}
+  */
   exists : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       if(fn(lst[i])){
@@ -1800,6 +1933,12 @@ var List = {
     }
     return false;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {boolean}
+  */
   mem : function(lst, val){
     for(var i = 0, len = lst.length; i < len; i++){
       if(lst[i] == val){
@@ -1808,11 +1947,22 @@ var List = {
     }
     return false;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {Number}
+  */
   sum : function(lst){
     return this.fold(lst, 0, function(ret, obj){
       return ret + obj;
     });
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {Number}
+     @return {min_obj}
+  */
   minobj : function(lst, fn){
     var min_obj = null, min_val = null;
     this.iter(lst, function(obj){
@@ -1824,6 +1974,12 @@ var List = {
     });
     return min_obj;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {Number}
+     @return {max_obj}
+  */
   maxobj : function(lst, fn){
     var max_obj = null, max_val = null;
     this.iter(lst, function(obj){
@@ -1835,6 +1991,11 @@ var List = {
     });
     return max_obj;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {Array}
+  */
   refcopy : function(lst){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
@@ -1842,6 +2003,12 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {int}
+  */
   count : function(lst, fn){
     var ret = 0;
     for(var i = 0, len = lst.length; i < len; i++){
@@ -1851,6 +2018,12 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param count {int} - array length
+     @param init_val - initialized value filled in new array
+     @return {Array}
+  */
   create : function(count, init_val){
     var ret = new Array(count);
     if(typeof init_val != "undefined"){
@@ -1860,9 +2033,19 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {first_object | null}
+  */
   first : function(lst){
     return lst[0] || null;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {last_object | null}
+  */
   last : function(lst){
     var len = lst.length;
     if(len === 0){
@@ -1870,6 +2053,12 @@ var List = {
     }
     return lst[len - 1];
   },
+  /**
+     @memberof Nehan.List
+     @param lst1 {Array}
+     @param lst2 {Array}
+     @return {Array.<Array>}
+  */
   zip : function(lst1, lst2){
     var ret = [];
     for(var i = 0, len = Math.min(lst1.length, lst2.length); i < len; i++){
@@ -1877,9 +2066,14 @@ var List = {
     }
     return ret;
   },
-  // props: [a,b,c]
-  // values:[1,2,3]
-  // => {a:1, b:2, c:3}
+  /**
+     @memberof Nehan.List
+     @param props {Array}
+     @param values {Array}
+     @return {Object}
+     @example
+     * List.zipObj(["a", "b", "c"], [1, 2, 3]); // {a:1, b:2, c:3}
+  */
   zipObj : function(props, values){
     var ret = {};
     if(props.length !== values.length){
@@ -1890,7 +2084,13 @@ var List = {
     }
     return ret;
   },
-  // non destructive reverse
+  /**
+     non destructive reverse
+
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {Array}
+  */
   reverse : function(lst){
     var ret = [];
     this.reviter(lst, function(obj){
@@ -1901,14 +2101,28 @@ var List = {
 };
 
 
+/**
+   object utility module
+
+   @namespace Nehan.Obj
+*/
 var Obj = {
+  /**
+     @memberof Nehan.Obj
+     @param obj {Object}
+     @return {boolean}
+  */
   isEmpty: function(obj){
     for(var name in obj){
       return false;
     }
     return true;
   },
-  // fn : prop -> value -> obj
+  /**
+     @memberof Nehan.Obj
+     @param obj {Object}
+     @param fn {Function} - fun prop -> value -> obj
+  */
   map : function(obj, fn){
     var ret = {};
     this.iter(obj, function(prop, value){
@@ -1916,7 +2130,11 @@ var Obj = {
     });
     return ret;
   },
-  // fn : prop -> value -> bool
+  /**
+     @memberof Nehan.Obj
+     @param obj {Object}
+     @param fn {Function} - fun prop -> value -> {boolean}
+  */
   filter : function(obj, fn){
     var ret = {};
     this.iter(obj, function(prop, value){
@@ -1926,7 +2144,11 @@ var Obj = {
     });
     return ret;
   },
-  // fn : prop -> value -> unit
+  /**
+     @memberof Nehan.Obj
+     @param obj {Object}
+     @param fn {Function} - fun prop -> value -> ()
+  */
   iter : function(obj, fn){
     for(var prop in obj){
       fn(prop, obj[prop]);
@@ -1973,7 +2195,18 @@ var Utils = {
   }
 };
 
+/**
+   @namespace Nehan.MathUtils
+*/
 var MathUtils = {
+  /**
+     convert [decial] number by [base]
+
+     @memberof Nehan.MathUtils
+     @param deciaml {int}
+     @param base {int}
+     @return {int}
+  */
   convBase : function(decimal, base){
    if(decimal === 0){
       return [0];
@@ -5038,6 +5271,13 @@ var TextMetrics = (function(){
 
 
 var ListStyleType = (function(){
+  /**
+     @memberof Nehan
+     @class ListStyleType
+     @classdesc abstraction of list-style-type.
+     @constructor
+     @param pos {String} - "disc", "circle", "square", "lower-alpha" .. etc
+  */
   function ListStyleType(type){
     this.type = type;
   }
@@ -5049,25 +5289,49 @@ var ListStyleType = (function(){
   };
 
   ListStyleType.prototype = {
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
     isDecimalList : function(){
       return (this.type === "decimal" || this.type === "decimal-leading-zero");
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
     isNoneList : function(){
       return this.type === "none";
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
     isMarkList : function(){
       return (this.type === "disc" ||
 	      this.type === "circle" ||
 	      this.type === "square");
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
     isCountableList : function(){
       return (!this.isNoneList() && !this.isMarkList());
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
     isHankaku : function(){
       return (this.type === "lower-alpha" || this.type === "upper-alpha" ||
 	      this.type === "lower-roman" || this.type === "upper-roman" ||
 	      this.isDecimalList());
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
     isZenkaku : function(){
       return !this.isHankaku();
     },
@@ -5083,6 +5347,10 @@ var ListStyleType = (function(){
       }
       return Cardinal.getStringByName(this.type, decimal);
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {String}
+    */
     getMarkerHtml : function(count){
       var text = this.getMarkerText(count);
       if(this.isZenkaku()){
@@ -5092,6 +5360,10 @@ var ListStyleType = (function(){
       }
       return text;
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {String}
+    */
     getMarkerText : function(count){
       if(this.isNoneList()){
 	return Const.space;
@@ -5109,14 +5381,29 @@ var ListStyleType = (function(){
 
 
 var ListStylePos = (function(){
+  /**
+     @memberof Nehan
+     @class ListStylePos
+     @classdesc abstraction of list-style-pos.
+     @constructor
+     @param pos {String} - "outside" or "inside"
+  */
   function ListStylePos(pos){
     this.pos = pos;
   }
 
   ListStylePos.prototype = {
+    /**
+       @memberof Nehan.ListStylePos
+       @return {boolean}
+    */
     isOutside : function(){
       return this.pos === "outside";
     },
+    /**
+       @memberof Nehan.ListStylePos
+       @return {boolean}
+    */
     isInside : function(){
       return this.pos === "inside";
     }
@@ -5127,11 +5414,26 @@ var ListStylePos = (function(){
 
 
 var ListStyleImage = (function(){
+  /**
+     @memberof Nehan
+     @class ListStyleImage
+     @classdesc abstraction of list-style-image.
+     @constructor
+     @param image {Object}
+     @param image.width {Int} - if undefined, use {@link Nehan.Display}.fontSize
+     @param image.height {Int} - if undefined, use {@link Nehan.Display}.fontSize
+     @param image.url {String}
+  */
   function ListStyleImage(image){
     this.image = image;
   }
 
   ListStyleImage.prototype = {
+    /**
+       @memberof Nehan.ListStyleImage
+       @param count {int}
+       @return {string}
+    */
     getMarkerHtml : function(count){
       var url = this.image.url;
       var width = this.image.width || Display.fontSize;
@@ -5150,6 +5452,16 @@ var ListStyleImage = (function(){
 
 
 var ListStyle = (function(){
+  /**
+     @memberof Nehan
+     @class ListStyle
+     @classdesc abstraction of list-style.
+     @constructor
+     @param opt {Object}
+     @param opt.type {Nehan.ListStyleType}
+     @param opt.position {Nehan.ListStylePos}
+     @param opt.image {Nehan.ListStyleImage}
+  */
   function ListStyle(opt){
     this.type = new ListStyleType(opt.type || "none");
     this.position = new ListStylePos(opt.position || "outside");
@@ -5157,15 +5469,32 @@ var ListStyle = (function(){
   }
 
   ListStyle.prototype = {
+    /**
+       @memberof Nehan.ListStyle
+       @return {boolean}
+    */
     isMultiCol : function(){
       return this.position.isOutside();
     },
+    /**
+       @memberof Nehan.ListStyle
+       @return {boolean}
+    */
     isInside : function(){
       return this.position.isInside();
     },
+    /**
+       @memberof Nehan.ListStyle
+       @return {boolean}
+    */
     isImageList : function(){
       return (this.image !== null);
     },
+    /**
+       @memberof Nehan.ListStyle
+       @param count {int}
+       @return {String}
+    */
     getMarkerHtml : function(count){
       if(this.image !== null){
 	return this.image.getMarkerHtml(count);
@@ -6260,11 +6589,22 @@ var BorderStyle = (function(){
 })();
 
 var Padding = (function(){
+  /**
+     @memberof Nehan
+     @class Padding
+     @classdesc abstraction of padding.
+     @extends {Nehan.Edge}
+  */
   function Padding(){
     Edge.call(this, "padding");
   }
   Class.extend(Padding, Edge);
 
+  /**
+     @memberof Nehan.Padding
+     @override
+     @return {Nehan.Padding}
+  */
   Padding.prototype.clone = function(){
     return this.copyTo(new Padding());
   };
@@ -6274,11 +6614,24 @@ var Padding = (function(){
 
 
 var Margin = (function(){
+  /**
+     @memberof Nehan
+     @class Margin
+     @classdesc abstraction of physical margin
+     @constructor
+     @extends {Nehan.Edge}
+  */
   function Margin(){
     Edge.call(this, "margin");
   }
   Class.extend(Margin, Edge);
 
+  /**
+     @memberof Nehan.Margin
+     @method clone
+     @override
+     @return {Nehan.Margin}
+  */
   Margin.prototype.clone = function(){
     return this.copyTo(new Margin());
   };
@@ -7488,21 +7841,45 @@ var TocContext = (function(){
 })();
 
 var OutlineContext = (function(){
+  /**
+     @memberof Nehan
+     @class OutlineContext
+     @classdesc outline context object. outline is generated by section root element, sectionning element, heading element etc.
+     @constructor
+     @param markup_name {String} - section root name like "body", "fieldset", "blockquote" etc.
+  */
   function OutlineContext(markup_name){
     this.logs = [];
     this.markupName = markup_name;
   }
 
   OutlineContext.prototype = {
+    /**
+       @memberof Nehan.OutlineContext
+       @return {boolean}
+    */
     isEmpty : function(){
       return this.logs.length === 0;
     },
+    /**
+       @memberof Nehan.OutlineContext
+       @return {Object} - log object
+    */
     get : function(index){
       return this.logs[index] || null;
     },
+    /**
+       @memberof Nehan.OutlineContext
+       @return {String}
+    */
     getMarkupName : function(){
       return this.markupName;
     },
+    /**
+       @memberof Nehan.OutlineContext
+       @param type {String} - markup name
+       @return {Nehan.OutlineContext}
+    */
     startSection : function(type){
       this.logs.push({
 	name:"start-section",
@@ -7511,6 +7888,11 @@ var OutlineContext = (function(){
       });
       return this;
     },
+    /**
+       @memberof Nehan.OutlineContext
+       @param type {String} - markup name
+       @return {Nehan.OutlineContext}
+    */
     endSection : function(type){
       this.logs.push({
 	name:"end-section",
@@ -7518,6 +7900,14 @@ var OutlineContext = (function(){
       });
       return this;
     },
+    /**
+       @memberof Nehan.OutlineContext
+       @param opt {Object}
+       @param opt.type {String} - markup name
+       @param opt.rank {int} - header rank(1 - 6)
+       @param opt.title {String} - header title
+       @return {String} - header id
+    */
     addHeader : function(opt){
       // header id is used to associate header box object with outline.
       var header_id = DocumentContext.genHeaderId();
@@ -7536,7 +7926,11 @@ var OutlineContext = (function(){
   return OutlineContext;
 })();
 
-// parse : context -> section tree
+/**
+   parser module to convert from context to section tree object.
+
+   @namespace Nehan.OutlineContextParser
+*/
 var OutlineContextParser = (function(){
   var _parse = function(context, parent, ptr){
     var log = context.get(ptr++);
@@ -7589,6 +7983,11 @@ var OutlineContextParser = (function(){
   };
 
   return {
+    /**
+       @memberof Nehan.OutlineContextParser
+       @param context {Nehan.OutlineContext}
+       @return {Nehan.Section} - section tree root
+    */
     parse : function(context){
       var ptr = 0;
       var root = new Section("section", null, 0);
@@ -8329,6 +8728,7 @@ var PageStream = (function(){
      @memberof Nehan
      @class PageStream
      @classdesc async stream of paged-media.
+     @consturctor
      @param text {String} - html source text
   */
   function PageStream(text){
@@ -8457,9 +8857,20 @@ var PageStream = (function(){
 })();
 
 
-// notice charactors that can be shurinked is already shurinked in it's body size calculation in nehan.js.
-// so this module only 'add' the space to start/end direction, that are not requiered to be shurinked.
+/**
+ * kerning utility module<br>
+ * notice that in nehan.js, charactors that can be shurinked are already shurinked in it's body size calculation.<br>
+ * so this module only 'add' the space to start/end direction, not requiered to be shurinked.
+
+ @namespace Nehan.Kerning
+*/
 var Kerning = {
+  /**
+     @memberof Nehan.Kerning
+     @param cur_char {Nehan.Char}
+     @param prev_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
+     @param next_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
+  */
   set : function(cur_char, prev_text, next_text){
     if(cur_char.isKakkoStart()){
       this._setKerningStart(cur_char, prev_text);
@@ -10846,6 +11257,7 @@ var LayoutGenerator = (function(){
   /**
      @memberof Nehan
      @class LayoutGenerator
+     @classdesc root abstract class for all generator
      @constructor
      @param style {Nehan.StyleContext}
      @param stream {Nehan.TokenStream}
@@ -10870,15 +11282,30 @@ var LayoutGenerator = (function(){
     throw "LayoutGenerator::_yield must be implemented in child class";
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method setTerminate
+     @param status {boolean}
+  */
   LayoutGenerator.prototype.setTerminate = function(status){
     this._terminate = status;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method setChildLayout
+     @param generator {Nehan.LayoutGenerator}
+  */
   LayoutGenerator.prototype.setChildLayout = function(generator){
     this._childLayout = generator;
     generator._parentLayout = this;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method hasNext
+     @return {boolean}
+  */
   LayoutGenerator.prototype.hasNext = function(){
     if(this._terminate){
       return false;
@@ -10892,6 +11319,11 @@ var LayoutGenerator = (function(){
     return this.stream? this.stream.hasNext() : false;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method hasChildLayout
+     @return {boolean}
+  */
   LayoutGenerator.prototype.hasChildLayout = function(){
     if(this._childLayout && this._childLayout.hasNext()){
       return true;
@@ -10899,19 +11331,40 @@ var LayoutGenerator = (function(){
     return false;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method hasCache
+     @return {boolean}
+  */
   LayoutGenerator.prototype.hasCache = function(){
     return this._cachedElements.length > 0;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method yieldChildLayout
+     @param context {Nehan.CursorContext}
+     @return {Nehan.Box}
+  */
   LayoutGenerator.prototype.yieldChildLayout = function(context){
     var next = this._childLayout.yield(context);
     return next;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method peekLastCache
+     @return {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
+  */
   LayoutGenerator.prototype.peekLastCache = function(){
     return List.last(this._cachedElements);
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method pushCache
+     @param element {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
+  */
   LayoutGenerator.prototype.pushCache = function(element){
     var cache_count = element.cacheCount || 0;
     if(cache_count > 0){
@@ -10925,15 +11378,29 @@ var LayoutGenerator = (function(){
     this._cachedElements.push(element);
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method popCache
+     @return {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
+  */
   LayoutGenerator.prototype.popCache = function(){
     var cache = this._cachedElements.pop();
     return cache;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method clearCache
+  */
   LayoutGenerator.prototype.clearCache = function(){
     this._cachedElements = [];
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method addText
+     @param text {String}
+  */
   LayoutGenerator.prototype.addText = function(text){
     if(this.stream){
       this.stream.addText(text);
@@ -11273,7 +11740,7 @@ var InlineGenerator = (function(){
   /**
      @memberof Nehan
      @class InlineGenerator
-     @classdesc inline level generator, output anonymous line block.
+     @classdesc inline level generator, output inline level block.
      @constructor
      @extends {Nehan.LayoutGenerator}
      @param style {Nehan.StyleContext}
@@ -11319,9 +11786,11 @@ var InlineGenerator = (function(){
   };
 
   /**
+     rollback stream position by cached element of parent generator.
+
      @memberof Nehan.InlineGenerator
+     @param parent_cache {Nehan.Box}
   */
-  //LayoutGenerator.prototype.rollback = function(parent_cache){
   InlineGenerator.prototype.rollback = function(parent_cache){
     if(this.stream === null){
       return;
@@ -11628,6 +12097,15 @@ var LinkGenerator = (function(){
     }
   };
 
+  /**
+     @memberof Nehan
+     @class LinkGenerator
+     @classdesc generator of &lt;a&gt; tag, set anchor context to {@link Nehan.DocumentContext} if exists.
+     @constructor
+     @extends {Nehan.InlineGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function LinkGenerator(style, stream){
     InlineGenerator.call(this, style, stream);
     __add_anchor(style); // set anchor at this point
@@ -11673,18 +12151,38 @@ var FirstLineGenerator = (function(){
 })();
 
 
-// lazy generator holds pre-yielded output in construction, and yields it once.
 var LazyGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class LazyGenerator
+     @classdesc lazy generator holds pre-yielded output in construction, and yields it once.
+     @constructor
+     @extends {Nehan.LayoutGenerator}
+     @param style {Nehan.StyleContext}
+     @param output {Nehan.Box} - pre yielded output
+  */
   function LazyGenerator(style, output){
     LayoutGenerator.call(this, style, null);
     this.output = output; // only output this gen yields.
   }
   Class.extend(LazyGenerator, LayoutGenerator);
 
+  /**
+     @memberof Nehan.LazyGenerator
+     @method hasNext
+     @override
+     @return {boolean}
+  */
   LazyGenerator.prototype.hasNext = function(){
     return !this._terminate;
   };
 
+  /**
+     @memberof Nehan.LazyGenerator
+     @method yield
+     @override
+     @return {Nehan.Box}
+  */
   LazyGenerator.prototype.yield = function(context){
     if(this._terminate){ // already yielded
       return null;
@@ -12226,6 +12724,15 @@ var SectionContentGenerator = (function(){
 
 
 var ListGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class ListGenerator
+     @classdesc generator of &lt;ul&gt;, &lt;ol&gt; tag. need to count child item if list-style is set to numeral property like 'decimal'.
+     @constructor
+     @extends {Nehan.BlockGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function ListGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
 
@@ -12239,6 +12746,15 @@ var ListGenerator = (function(){
 
 
 var ListItemGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class ListItemGenerator
+     @classdesc generator of &lt;li&gt; tag, consists parallel generator of list-item and list-body.
+     @constructor
+     @extends {Nehan.ParallelGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function ListItemGenerator(style, stream){
     ParallelGenerator.call(this, style, [
       this._createListMarkGenerator(style),
@@ -12598,11 +13114,23 @@ var DocumentGenerator = (function(){
 
 
 var LayoutEvaluator = (function(){
+  /**
+     @memberof Nehan
+     @class LayoutEvaluator
+     @classdesc evaluate {@link Nehan.Box}, and output DOMElement.
+     @constructor
+     @param direction {String} - "hori" or "vert"
+  */
   function LayoutEvaluator(direction){
     this.direction = direction;
   }
 
   LayoutEvaluator.prototype = {
+    /**
+       @memberof Nehan.LayoutEvaluator
+       @param tree {Nehan.Box}
+       @return {DOMElement}
+    */
     evaluate : function(tree){
       return this._getEvaluator(tree)._evaluate(tree);
     },
@@ -13165,34 +13693,86 @@ Selectors.setValues(__engine_args.style || {}); // set local style
 List.iter(Nehan.__single_tag_names__, LexingRule.addSingleTagByName);
 List.iter(Nehan.__single_tag_rexes__, LexingRule.addSingleTagByRex);
 
-// export engine local interfaces
+/**
+ * engine iterfaces enclosed by local engine environment like<br>
+ * <ul>
+ * <li>{@link Nehan.DocumentContext}</li>
+ * <li>{@link Nehan.LexingRule}</li>
+ * <li>{@link Nehan.Style}</li>
+ * <li>{@link Nehan.Selectors}</li>
+ * <li>{@link Nehan.Display}</li>
+ * <li>{@link Nehan.Config}</li>
+ * </ul>
+   @namespace Nehan.Engine
+*/
 return {
+  /**
+     @memberof Nehan.Engine
+     @param text {String} - html text
+     @return {Nehan.PageStream}
+  */
   createPageStream : function(text){
     return new PageStream(text);
   },
-  // create outline element of "<body>",
-  // if multiple body exists, only first one is returned.
-  // about callback argument, see 'src/section-tree-converter.js'.
+  /**<pre>
+   * create outline element of "<body>",
+   * if multiple body exists, only first one is returned.
+   * about callback argument, see {@link Nehan.SectionTreeConverter}.
+   *</pre>
+     @memberof Nehan.Engine
+     @param callbacks {Object} - see {@link Nehan.SectionTreeConverter}
+   */
   createOutlineElement : function(callbacks){
     return DocumentContext.createBodyOutlineElement(callbacks);
   },
+  /*
+    get the page index where [anchor_name] is defined in from {@link Nehan.DocumentContext}.
+
+    @memberof Nehan.Engine
+    @param anchor_name {String}
+  */
   getAnchorPageNo : function(anchor_name){
     return DocumentContext.getAnchorPageNo(anchor_name);
   },
-  // register engine local single tag by name
+  /**
+     register engine local single tag by name.
+
+     @memberof Nehan.Engine
+     @param name {String}
+  */
   addSingleTagByName : function(name){
     LexingRule.addSingleTagByName(name);
   },
-  // register engine local single tag by rex
+  /**
+     register engine local single tag by regexp object.
+
+     @memberof Nehan.Engine
+     @param rex {RegExp}
+  */
   addSingleTagByRex : function(rex){
     LexingRule.addSingleTagRex(name);
   },
-  // set engine local style
+  /**
+     set engine local style
+
+     @memberof Nehan.Engine
+     @example
+     * engine.setStyle("p", {"font-size":"1.6em"});
+  */
   setStyle : function(selector_key, value){
     Selectors.setValue(selector_key, value);
     return this;
   },
-  // set engine local styles
+  /**
+     set engine local styles
+
+     @memberof Nehan.Engine
+     @example
+     * engine.setStyles({
+     *   "body":{"font-size":18},
+     *   "a[href^=#]":{"background-color":"gold"}
+     * });
+  */
   setStyles : function(values){
     Selectors.setValues(values);
     return this;
@@ -13220,60 +13800,162 @@ Nehan.PagedElement = (function(){
   }
 
   NehanPagedElement.prototype = {
+    /**
+       check if current page position is at last.
+
+       @memberof Nehan.PagedElement
+       @return {boolean}
+    */
     isLastPage : function(){
       return this.getPageNo() + 1 >= this.getPageCount();
     },
+    /**
+       get nner {@link Nehan.Engine} interfaces.
+
+       @memberof Nehan.PagedElement
+       @return {Nehan.Engine}
+    */
     getEngine : function(){
       return this.engine;
     },
+    /**
+       get inner DOMElement containning current page element.
+
+       @memberof Nehan.PagedElement
+    */
     getElement : function(){
       return this.element;
     },
+    /**
+       get content text
+
+       @memberof Nehan.PagedElement
+       @return {String}
+    */
     getContent : function(){
       return this._pageStream? this._pageStream.text : "";
     },
+    /**
+       @memberof Nehan.PagedElement
+       @return {int}
+    */
     getPageCount : function(){
       return this._pageStream? this._pageStream.getPageCount() : 0;
     },
+    /**
+       @memberof Nehan.PagedElement
+       @return {Nehan.Page}
+    */
     getPage : function(page_no){
       return this._pageStream? this._pageStream.getPage(page_no) : null;
     },
+    /**
+       @memberof Nehan.PagedElement
+       @param page_no {int} - page index starts from 0.
+       @return {DOMElement}
+    */
     getPagedElement : function(page_no){
       var page = this.getPage(page_no);
       return page? page.element : null;
     },
+    /**
+       get current page index
+
+       @memberof Nehan.PagedElement
+       @return {int}
+    */
     getPageNo : function(){
       return this.pageNo;
     },
+    /**
+       set inner page position to next page and return next page if exists, else null.
+
+       @memberof Nehan.PagedElement
+       @return {Nehan.Page | null}
+    */
     setNextPage : function(){
       if(this.pageNo + 1 < this.getPageCount()){
 	return this.setPage(this.pageNo + 1);
       }
       return null;
     },
+    /**
+       set inner page posision to previous page and return previous page if exists, else null.
+
+       @memberof Nehan.PagedElement
+       @return {Nehan.Page | null}
+    */
     setPrevPage : function(){
       if(this.pageNo > 0){
 	return this.setPage(this.pageNo - 1);
       }
       return null;
     },
+    /**
+     * set selector value. [name] is selector key, value is selector value.<br>
+     * see example at setStyle of {@link Nehan.Engine}.
+
+       @memberof Nehan.PagedElement
+       @param name {String} - selector string
+       @param value {selector_value}
+    */
     setStyle : function(name, value){
       this.engine.setStyle(name, value);
       return this;
     },
+    /**
+       set selector key and values. see example at setStyles of {@link Nehan.Engine}.
+
+       @memberof Nehan.PagedElement
+       @param value {Object}
+    */
     setStyles : function(values){
       this.engine.setStyles(values);
       return this;
     },
+    /**
+       set content string to paged element and start parsing.
+
+       @memberof Nehan.PagedElement
+       @param content {String} - html text.
+       @param opt {Object} - optinal argument
+       @param opt.onProgress {Function} - fun tree -> ()
+       @param opt.onComplete {Function} - fun time -> ()
+       @example
+       * paged_element.setContent("<h1>hello, nehan.js!!</h1>", {
+       *   onProgress:function(tree){
+       *     console.log("page no:%d", tree.pageNo);
+       *     console.log("progress:%d", tree.percent);
+       *   },
+       *   onComplete:function(time){
+       *     console.log("complete:%fmsec", time);
+       *   }
+       * });
+    */
     setContent : function(content, opt){
       this._pageStream = this.engine.createPageStream(content);
       this._asyncGet(opt || {});
       return this;
     },
+    /**
+       append additional text to paged element.
+
+       @memberof Nehan.PagedElement
+       @param content {String} - html text.
+       @param opt {Object} - optinal argument
+       @param opt.onProgress {Function} - fun tree -> ()
+       @param opt.onComplete {Function} - fun time -> ()
+    */
     addContent : function(content, opt){
       this._pageStream.addText(content);
       this._asyncGet(opt || {});
     },
+    /**
+       set current page index to [page_no]
+
+       @memberof Nehan.PagedElement
+       @param page_no {int}
+    */
     setPage : function(page_no){
       var page = this.getPage(page_no);
       if(page === null || page.element === null){
@@ -13308,6 +13990,16 @@ Nehan.PagedElement = (function(){
   return NehanPagedElement;
 })();
 
+/**
+   @namespace Nehan
+   @memberof Nehan
+   @method createPagedElement
+   @param engine_args {Object}
+   @param engine_args.config {Nehan.Config} - system config
+   @param engine_args.display {Nehan.Display} - standard page parameters
+   @param engine_args.style {Nehan.Style} - engine local style
+   @return {Nehan.PagedElement}
+*/
 Nehan.createPagedElement = function(engine_args){
   return new Nehan.PagedElement(engine_args || {});
 };
