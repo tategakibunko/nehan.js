@@ -107,7 +107,7 @@ var PageStream = (function(){
 	.replace(/<rt><\/rt>/gi, ""); // discard empty rt
     },
     _createGenerator : function(text){
-      switch(Layout.root){
+      switch(PageLayout.root){
       case "document":
 	return new DocumentGenerator(text);
       case "html":

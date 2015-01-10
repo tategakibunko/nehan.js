@@ -5,7 +5,7 @@ var LayoutTest = (function(){
 
   var create_engine = function(opt){
     var engine = Nehan.setup({
-      layout:{
+      pageLayout:{
 	direction:(opt.direction || "vert"),
 	fontSize:(opt.fontSize || 16),
 	width:(opt.width || 500),

@@ -6,8 +6,8 @@ var ListStyleImage = (function(){
   ListStyleImage.prototype = {
     getMarkerHtml : function(count){
       var url = this.image.url;
-      var width = this.image.width || Layout.fontSize;
-      var height = this.image.height || Layout.fontSize;
+      var width = this.image.width || PageLayout.fontSize;
+      var height = this.image.height || PageLayout.fontSize;
       return Html.tagSingle("img", {
 	"src":url,
 	"class":"nehan-list-image",

@@ -29,7 +29,7 @@ var BlockFlow = (function(){
   BlockFlow.prototype.flip = function(){
     switch(this.dir){
     case "lr": case "rl": return "tb";
-    case "tb": return Layout.getVertBlockdir();
+    case "tb": return PageLayout.getVertBlockdir();
     default: return "";
     }
   };

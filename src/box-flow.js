@@ -71,7 +71,7 @@ var BoxFlow = (function(){
       return this.isTextVertical()? "measure" : "extent";
     },
     getFlipFlow : function(){
-      return this.isTextVertical()? Layout.getStdHoriFlow() : Layout.getStdVertFlow();
+      return this.isTextVertical()? PageLayout.getStdHoriFlow() : PageLayout.getStdVertFlow();
     },
     getBoxSize : function(measure, extent){
       var size = new BoxSize(0, 0);

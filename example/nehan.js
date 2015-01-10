@@ -195,7 +195,7 @@ var Config = {
 };
 
 
-var Layout = {
+var PageLayout = {
   // define root where content text starts from.
   // 'body' or 'html' or 'document' are enabled.
   // 
@@ -349,7 +349,7 @@ var LexingRule = (function(){
   --------------------------------------------
 
     [examples]
-    Assume that Layout.direction is "hori" and Layout["hori"] is "lr-tb".
+    Assume that PageLayout.direction is "hori" and PageLayout["hori"] is "lr-tb".
 
     ex1. {margin:{before:"10px"}} // => {margin:{top:"10px"}}
     ex2. {float:"start"} // => {float:"left"}.
@@ -426,10 +426,10 @@ var LexingRule = (function(){
 
   'tb-rl' means inline flows 'top to bottom', block flows 'right to left', and so on.
 
-  'flip' means toggle Layout["hori"] and Layout["vert"].
-  for example, assume that Layout["hori"] is "lr-tb", and Layout["vert"] is "tb-rl",
-  and current document direction(Layout.direction) is "hori",
-  flow:"flip" means Layout["vert"], "tb-rl".
+  'flip' means toggle PageLayout["hori"] and PageLayout["vert"].
+  for example, assume that PageLayout["hori"] is "lr-tb", and PageLayout["vert"] is "tb-rl",
+  and current document direction(PageLayout.direction) is "hori",
+  flow:"flip" means PageLayout["vert"], "tb-rl".
 */
 var Style = {
   //-------------------------------------------------------
@@ -1074,31 +1074,31 @@ var Style = {
   // font-size classes
   //-------------------------------------------------------
   ".nehan-xx-large":{
-    "font-size": Layout.fontSizeNames["xx-large"]
+    "font-size": PageLayout.fontSizeNames["xx-large"]
   },
   ".nehan-x-large":{
-    "font-size": Layout.fontSizeNames["x-large"]
+    "font-size": PageLayout.fontSizeNames["x-large"]
   },
   ".nehan-large":{
-    "font-size": Layout.fontSizeNames.large
+    "font-size": PageLayout.fontSizeNames.large
   },
   ".nehan-medium":{
-    "font-size": Layout.fontSizeNames.medium
+    "font-size": PageLayout.fontSizeNames.medium
   },
   ".nehan-small":{
-    "font-size": Layout.fontSizeNames.small
+    "font-size": PageLayout.fontSizeNames.small
   },
   ".nehan-x-small":{
-    "font-size": Layout.fontSizeNames["x-small"]
+    "font-size": PageLayout.fontSizeNames["x-small"]
   },
   ".nehan-xx-small":{
-    "font-size": Layout.fontSizeNames["xx-small"]
+    "font-size": PageLayout.fontSizeNames["xx-small"]
   },
   ".nehan-larger":{
-    "font-size": Layout.fontSizeNames.larger
+    "font-size": PageLayout.fontSizeNames.larger
   },
   ".nehan-smaller":{
-    "font-size": Layout.fontSizeNames.smaller
+    "font-size": PageLayout.fontSizeNames.smaller
   },
   //-------------------------------------------------------
   // box-sizing classes
@@ -3540,7 +3540,7 @@ var Char = (function(){
       return this.isKutenTouten() || this.isKakko();
     },
     getImgSrc : function(color){
-      return [Layout.fontImgRoot, this.img, color + ".png"].join("/");
+      return [PageLayout.fontImgRoot, this.img, color + ".png"].join("/");
     },
     isPaddingEnable : function(){
       return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
@@ -3667,7 +3667,7 @@ var Word = (function(){
       }
       this.bodySize = Math.round(this.data.length * font.size * 0.5);
       if(font.isBold()){
-	this.bodySize += Math.round(Layout.boldRate * this.bodySize);
+	this.bodySize += Math.round(PageLayout.boldRate * this.bodySize);
       }
     },
     getLetterCount : function(){
@@ -3784,7 +3784,7 @@ var Ruby = (function(){
       return css;
     },
     setMetrics : function(flow, font, letter_spacing){
-      this.rtFontSize = Layout.getRtFontSize(font.size);
+      this.rtFontSize = PageLayout.getRtFontSize(font.size);
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font);
 	return ret + rb.getAdvance(flow, letter_spacing);
@@ -4131,8 +4131,8 @@ var Cardinal = (function(){
 // more strict metrics using canvas
 var TextMetrics = (function(){
   var __canvas = document.createElement("canvas");
-  __canvas.style.width = Math.max(Layout.width, Layout.height) + "px";
-  __canvas.style.height = Layout.maxFontSize + "px";
+  __canvas.style.width = Math.max(PageLayout.width, PageLayout.height) + "px";
+  __canvas.style.height = PageLayout.maxFontSize + "px";
 
   var __canvas_context;
   if(__canvas.getContext){
@@ -4150,7 +4150,7 @@ var TextMetrics = (function(){
     },
     getMeasure : function(font, text){
       var metrics = this.getMetrics(font, text);
-      var space = Math.floor(Layout.vertWordSpaceRate * font.size);
+      var space = Math.floor(PageLayout.vertWordSpaceRate * font.size);
       return metrics.width + space;
     }
   };
@@ -4254,8 +4254,8 @@ var ListStyleImage = (function(){
   ListStyleImage.prototype = {
     getMarkerHtml : function(count){
       var url = this.image.url;
-      var width = this.image.width || Layout.fontSize;
-      var height = this.image.height || Layout.fontSize;
+      var width = this.image.width || PageLayout.fontSize;
+      var height = this.image.height || PageLayout.fontSize;
       return Html.tagSingle("img", {
 	"src":url,
 	"class":"nehan-list-image",
@@ -4355,7 +4355,7 @@ var BlockFlow = (function(){
   BlockFlow.prototype.flip = function(){
     switch(this.dir){
     case "lr": case "rl": return "tb";
-    case "tb": return Layout.getVertBlockdir();
+    case "tb": return PageLayout.getVertBlockdir();
     default: return "";
     }
   };
@@ -4521,7 +4521,7 @@ var BoxFlow = (function(){
       return this.isTextVertical()? "measure" : "extent";
     },
     getFlipFlow : function(){
-      return this.isTextVertical()? Layout.getStdHoriFlow() : Layout.getStdVertFlow();
+      return this.isTextVertical()? PageLayout.getStdHoriFlow() : PageLayout.getStdVertFlow();
     },
     getBoxSize : function(measure, extent){
       var size = new BoxSize(0, 0);
@@ -5221,7 +5221,7 @@ var TextEmpha = (function(){
     opt = opt || {};
     this.style = opt.style || new TextEmphaStyle();
     this.pos = opt.pos || new TextEmphaPos();
-    this.color = opt.color || new Color(Layout.fontColor);
+    this.color = opt.color || new Color(PageLayout.fontColor);
   }
 
   TextEmpha.prototype = {
@@ -6583,7 +6583,7 @@ var PageEvaluator = (function(){
 
   PageEvaluator.prototype = {
     _getEvaluator : function(){
-      return (Layout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
+      return (PageLayout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
     },
     evaluate : function(tree){
       return tree? new Page({
@@ -6710,7 +6710,7 @@ var PageStream = (function(){
 	.replace(/<rt><\/rt>/gi, ""); // discard empty rt
     },
     _createGenerator : function(text){
-      switch(Layout.root){
+      switch(PageLayout.root){
       case "document":
 	return new DocumentGenerator(text);
       case "html":
@@ -6844,10 +6844,10 @@ var Break = (function(){
       return this.value === "avoid";
     },
     isFirst : function(){
-      return (Layout.getPagingDirection() === "lr")? (this.value === "left") : (this.value === "right");
+      return (PageLayout.getPagingDirection() === "lr")? (this.value === "left") : (this.value === "right");
     },
     isSecond : function(){
-      return (Layout.getPagingDirection() === "lr")? (this.value === "right") : (this.value === "left");
+      return (PageLayout.getPagingDirection() === "lr")? (this.value === "right") : (this.value === "left");
     },
     isNth : function(order){
     }
@@ -7007,7 +7007,7 @@ var Partition = (function(){
       var sizes =  List.map(this._punits, function(punit){
 	return punit.getSize(measure, total_weight);
       });
-      return __levelize(sizes, Layout.minTableCellSize);
+      return __levelize(sizes, PageLayout.minTableCellSize);
     }
   };
 
@@ -7119,7 +7119,7 @@ var SelectorPropContext = (function(){
     },
     getParentFlow : function(){
       var parent = this.getParentStyleContext();
-      return parent? parent.flow : Layout.getStdBoxFlow();
+      return parent? parent.flow : PageLayout.getStdBoxFlow();
     },
     getMarkup : function(){
       return this._style.markup;
@@ -7470,8 +7470,8 @@ var StyleContext = (function(){
        @param extent {int}
     */
     initContextSize : function(measure, extent){
-      this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : Layout.getMeasure(this.flow));
-      this.outerExtent = extent || (this.parent? this.parent.contentExtent : Layout.getExtent(this.flow));
+      this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : PageLayout.getMeasure(this.flow));
+      this.outerExtent = extent || (this.parent? this.parent.contentExtent : PageLayout.getExtent(this.flow));
       this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
       this.contentExtent = this._computeContentExtent(this.outerExtent);
     },
@@ -7924,7 +7924,7 @@ var StyleContext = (function(){
       return this.font.size;
     },
     getFontFamily : function(){
-      return this.font.family || Layout.fontFamily;
+      return this.font.family || PageLayout.fontFamily;
     },
     getTextAlign : function(){
       return this.textAlign || TextAligns.get("start");
@@ -7942,7 +7942,7 @@ var StyleContext = (function(){
       return this.listMarkerSize? this.listMarkerSize : (this.parent? this.parent.getListMarkerSize() : this.getFontSize());
     },
     getColor : function(){
-      return this.color || (this.parent? this.parent.getColor() : new Color(Layout.fontColor));
+      return this.color || (this.parent? this.parent.getColor() : new Color(PageLayout.fontColor));
     },
     getTablePartition : function(){
       return this.tablePartition || (this.parent? this.parent.getTablePartition() : null);
@@ -7980,19 +7980,19 @@ var StyleContext = (function(){
       return this.parent? this.parent.flow : this.flow;
     },
     getParentFontSize : function(){
-      return this.parent? this.parent.getFontSize() : Layout.fontSize;
+      return this.parent? this.parent.getFontSize() : PageLayout.fontSize;
     },
     getParentContentMeasure : function(){
-      return this.parent? this.parent.contentMeasure : Layout.getMeasure(this.flow);
+      return this.parent? this.parent.contentMeasure : PageLayout.getMeasure(this.flow);
     },
     getParentContentExtent : function(){
-      return this.parent? this.parent.contentExtent : Layout.getExtent(this.flow);
+      return this.parent? this.parent.contentExtent : PageLayout.getExtent(this.flow);
     },
     getNextSibling : function(){
       return this.next;
     },
     getLineRate : function(){
-      return this.lineRate || Layout.lineRate || 2;
+      return this.lineRate || PageLayout.lineRate || 2;
     },
     getEmphaLineExtent : function(){
       return this.getFontSize() * 3;
@@ -8000,7 +8000,7 @@ var StyleContext = (function(){
     getRubyLineExtent : function(){
       var base_font_size = this.getFontSize();
       var base_extent = Math.floor(base_font_size * this.getLineRate());
-      var rt_extent = Layout.getRtFontSize(base_font_size);
+      var rt_extent = PageLayout.getRtFontSize(base_font_size);
       return base_extent + rt_extent;
     },
     getAutoLineExtent : function(){
@@ -8113,16 +8113,16 @@ var StyleContext = (function(){
     },
     _computeFontSize : function(val, unit_size){
       var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
-      var size = Layout.fontSizeNames[str] || str;
+      var size = PageLayout.fontSizeNames[str] || str;
       var max_size = this.getParentFontSize();
       var font_size = this._computeUnitSize(size, unit_size, max_size);
-      return Math.min(font_size, Layout.maxFontSize);
+      return Math.min(font_size, PageLayout.maxFontSize);
     },
     _computeUnitSize : function(val, unit_size, max_size){
       var str = String(val);
       if(str.indexOf("rem") > 0){
 	var rem_scale = parseFloat(str.replace("rem",""));
-	return Math.round(Layout.fontSize * rem_scale); // use root font-size
+	return Math.round(PageLayout.fontSize * rem_scale); // use root font-size
       }
       if(str.indexOf("em") > 0){
 	var em_scale = parseFloat(str.replace("em",""));
@@ -8269,7 +8269,7 @@ var StyleContext = (function(){
     },
     _loadFlow : function(){
       var value = this.getCssAttr("flow", "inherit");
-      var parent_flow = this.parent? this.parent.flow : Layout.getStdBoxFlow();
+      var parent_flow = this.parent? this.parent.flow : PageLayout.getStdBoxFlow();
       if(value === "inherit"){
 	return parent_flow;
       }
@@ -8300,7 +8300,7 @@ var StyleContext = (function(){
       }
     },
     _loadFont : function(){
-      var parent_font_size = this.parent? this.parent.font.size : Layout.fontSize;
+      var parent_font_size = this.parent? this.parent.font.size : PageLayout.fontSize;
       var font = new Font(parent_font_size);
       var font_size = this.getCssAttr("font-size", "inherit");
       if(font_size !== "inherit"){
@@ -8310,7 +8310,7 @@ var StyleContext = (function(){
       if(font_family !== "inherit"){
 	font.family = font_family;
       } else if(this.parent === null){
-	font.family = Layout.fontFamily;
+	font.family = PageLayout.fontFamily;
       }
       var font_weight = this.getCssAttr("font-weight", "inherit");
       if(font_weight !== "inherit"){
@@ -8413,7 +8413,7 @@ var StyleContext = (function(){
       if(value === "inherit" && this.parent && this.parent.lineRate){
 	return this.parent.lineRate;
       }
-      return parseFloat(value || Layout.lineRate);
+      return parseFloat(value || PageLayout.lineRate);
     },
     _loadTextAlign : function(){
       var value = this.getCssAttr("text-align", "inherit");
@@ -10793,7 +10793,7 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalImgChar = function(line, chr){
-    var color = line.color || new Color(Layout.fontColor);
+    var color = line.color || new Color(PageLayout.fontColor);
     var font_rgb = color.getRgb();
     var palette_color = Palette.getColor(font_rgb).toUpperCase();
     return this._createElement("img", {
@@ -10963,7 +10963,7 @@ var HoriEvaluator = (function(){
 
 // set engine args
 Args.copy(Config, __engine_args.config || {});
-Args.copy2(Layout, __engine_args.layout || {});
+Args.copy2(PageLayout, __engine_args.pageLayout || {});
 
 Selectors.setValues(Nehan.globalStyle || {}); // set global style.
 Selectors.setValues(__engine_args.style || {}); // set local style

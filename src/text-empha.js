@@ -3,7 +3,7 @@ var TextEmpha = (function(){
     opt = opt || {};
     this.style = opt.style || new TextEmphaStyle();
     this.pos = opt.pos || new TextEmphaPos();
-    this.color = opt.color || new Color(Layout.fontColor);
+    this.color = opt.color || new Color(PageLayout.fontColor);
   }
 
   TextEmpha.prototype = {

@@ -61,7 +61,7 @@ var Partition = (function(){
       var sizes =  List.map(this._punits, function(punit){
 	return punit.getSize(measure, total_weight);
       });
-      return __levelize(sizes, Layout.minTableCellSize);
+      return __levelize(sizes, PageLayout.minTableCellSize);
     }
   };
 

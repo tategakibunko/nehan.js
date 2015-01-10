@@ -11,10 +11,10 @@ var Break = (function(){
       return this.value === "avoid";
     },
     isFirst : function(){
-      return (Layout.getPagingDirection() === "lr")? (this.value === "left") : (this.value === "right");
+      return (PageLayout.getPagingDirection() === "lr")? (this.value === "left") : (this.value === "right");
     },
     isSecond : function(){
-      return (Layout.getPagingDirection() === "lr")? (this.value === "right") : (this.value === "left");
+      return (PageLayout.getPagingDirection() === "lr")? (this.value === "right") : (this.value === "left");
     },
     isNth : function(order){
     }

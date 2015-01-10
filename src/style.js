@@ -12,7 +12,7 @@
   --------------------------------------------
 
     [examples]
-    Assume that Layout.direction is "hori" and Layout["hori"] is "lr-tb".
+    Assume that PageLayout.direction is "hori" and PageLayout["hori"] is "lr-tb".
 
     ex1. {margin:{before:"10px"}} // => {margin:{top:"10px"}}
     ex2. {float:"start"} // => {float:"left"}.
@@ -89,10 +89,10 @@
 
   'tb-rl' means inline flows 'top to bottom', block flows 'right to left', and so on.
 
-  'flip' means toggle Layout["hori"] and Layout["vert"].
-  for example, assume that Layout["hori"] is "lr-tb", and Layout["vert"] is "tb-rl",
-  and current document direction(Layout.direction) is "hori",
-  flow:"flip" means Layout["vert"], "tb-rl".
+  'flip' means toggle PageLayout["hori"] and PageLayout["vert"].
+  for example, assume that PageLayout["hori"] is "lr-tb", and PageLayout["vert"] is "tb-rl",
+  and current document direction(PageLayout.direction) is "hori",
+  flow:"flip" means PageLayout["vert"], "tb-rl".
 */
 var Style = {
   //-------------------------------------------------------
@@ -737,31 +737,31 @@ var Style = {
   // font-size classes
   //-------------------------------------------------------
   ".nehan-xx-large":{
-    "font-size": Layout.fontSizeNames["xx-large"]
+    "font-size": PageLayout.fontSizeNames["xx-large"]
   },
   ".nehan-x-large":{
-    "font-size": Layout.fontSizeNames["x-large"]
+    "font-size": PageLayout.fontSizeNames["x-large"]
   },
   ".nehan-large":{
-    "font-size": Layout.fontSizeNames.large
+    "font-size": PageLayout.fontSizeNames.large
   },
   ".nehan-medium":{
-    "font-size": Layout.fontSizeNames.medium
+    "font-size": PageLayout.fontSizeNames.medium
   },
   ".nehan-small":{
-    "font-size": Layout.fontSizeNames.small
+    "font-size": PageLayout.fontSizeNames.small
   },
   ".nehan-x-small":{
-    "font-size": Layout.fontSizeNames["x-small"]
+    "font-size": PageLayout.fontSizeNames["x-small"]
   },
   ".nehan-xx-small":{
-    "font-size": Layout.fontSizeNames["xx-small"]
+    "font-size": PageLayout.fontSizeNames["xx-small"]
   },
   ".nehan-larger":{
-    "font-size": Layout.fontSizeNames.larger
+    "font-size": PageLayout.fontSizeNames.larger
   },
   ".nehan-smaller":{
-    "font-size": Layout.fontSizeNames.smaller
+    "font-size": PageLayout.fontSizeNames.smaller
   },
   //-------------------------------------------------------
   // box-sizing classes

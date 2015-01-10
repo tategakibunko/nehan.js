@@ -76,7 +76,7 @@ var Word = (function(){
       }
       this.bodySize = Math.round(this.data.length * font.size * 0.5);
       if(font.isBold()){
-	this.bodySize += Math.round(Layout.boldRate * this.bodySize);
+	this.bodySize += Math.round(PageLayout.boldRate * this.bodySize);
       }
     },
     getLetterCount : function(){

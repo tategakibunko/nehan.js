@@ -27,7 +27,7 @@ var sources = [
   "src/env.js",
   "src/nehan-setup-start.js",
   "src/config.js",
-  "src/layout.js",
+  "src/page-layout.js",
   "src/lexing-rule.js",
   "src/style.js",
   "src/class.js",

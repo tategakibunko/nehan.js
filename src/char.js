@@ -341,7 +341,7 @@ var Char = (function(){
       return this.isKutenTouten() || this.isKakko();
     },
     getImgSrc : function(color){
-      return [Layout.fontImgRoot, this.img, color + ".png"].join("/");
+      return [PageLayout.fontImgRoot, this.img, color + ".png"].join("/");
     },
     isPaddingEnable : function(){
       return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");

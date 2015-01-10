@@ -1,4 +1,4 @@
-var Layout = {
+var PageLayout = {
   // define root where content text starts from.
   // 'body' or 'html' or 'document' are enabled.
   // 
