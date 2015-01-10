@@ -290,8 +290,8 @@ var StyleContext = (function(){
        @param extent {int}
     */
     initContextSize : function(measure, extent){
-      this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : PageLayout.getMeasure(this.flow));
-      this.outerExtent = extent || (this.parent? this.parent.contentExtent : PageLayout.getExtent(this.flow));
+      this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : Display.getMeasure(this.flow));
+      this.outerExtent = extent || (this.parent? this.parent.contentExtent : Display.getExtent(this.flow));
       this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
       this.contentExtent = this._computeContentExtent(this.outerExtent);
     },
@@ -744,7 +744,7 @@ var StyleContext = (function(){
       return this.font.size;
     },
     getFontFamily : function(){
-      return this.font.family || PageLayout.fontFamily;
+      return this.font.family || Display.fontFamily;
     },
     getTextAlign : function(){
       return this.textAlign || TextAligns.get("start");
@@ -762,7 +762,7 @@ var StyleContext = (function(){
       return this.listMarkerSize? this.listMarkerSize : (this.parent? this.parent.getListMarkerSize() : this.getFontSize());
     },
     getColor : function(){
-      return this.color || (this.parent? this.parent.getColor() : new Color(PageLayout.fontColor));
+      return this.color || (this.parent? this.parent.getColor() : new Color(Display.fontColor));
     },
     getTablePartition : function(){
       return this.tablePartition || (this.parent? this.parent.getTablePartition() : null);
@@ -800,19 +800,19 @@ var StyleContext = (function(){
       return this.parent? this.parent.flow : this.flow;
     },
     getParentFontSize : function(){
-      return this.parent? this.parent.getFontSize() : PageLayout.fontSize;
+      return this.parent? this.parent.getFontSize() : Display.fontSize;
     },
     getParentContentMeasure : function(){
-      return this.parent? this.parent.contentMeasure : PageLayout.getMeasure(this.flow);
+      return this.parent? this.parent.contentMeasure : Display.getMeasure(this.flow);
     },
     getParentContentExtent : function(){
-      return this.parent? this.parent.contentExtent : PageLayout.getExtent(this.flow);
+      return this.parent? this.parent.contentExtent : Display.getExtent(this.flow);
     },
     getNextSibling : function(){
       return this.next;
     },
     getLineRate : function(){
-      return this.lineRate || PageLayout.lineRate || 2;
+      return this.lineRate || Display.lineRate || 2;
     },
     getEmphaLineExtent : function(){
       return this.getFontSize() * 3;
@@ -820,7 +820,7 @@ var StyleContext = (function(){
     getRubyLineExtent : function(){
       var base_font_size = this.getFontSize();
       var base_extent = Math.floor(base_font_size * this.getLineRate());
-      var rt_extent = PageLayout.getRtFontSize(base_font_size);
+      var rt_extent = Display.getRtFontSize(base_font_size);
       return base_extent + rt_extent;
     },
     getAutoLineExtent : function(){
@@ -933,16 +933,16 @@ var StyleContext = (function(){
     },
     _computeFontSize : function(val, unit_size){
       var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
-      var size = PageLayout.fontSizeNames[str] || str;
+      var size = Display.fontSizeNames[str] || str;
       var max_size = this.getParentFontSize();
       var font_size = this._computeUnitSize(size, unit_size, max_size);
-      return Math.min(font_size, PageLayout.maxFontSize);
+      return Math.min(font_size, Display.maxFontSize);
     },
     _computeUnitSize : function(val, unit_size, max_size){
       var str = String(val);
       if(str.indexOf("rem") > 0){
 	var rem_scale = parseFloat(str.replace("rem",""));
-	return Math.round(PageLayout.fontSize * rem_scale); // use root font-size
+	return Math.round(Display.fontSize * rem_scale); // use root font-size
       }
       if(str.indexOf("em") > 0){
 	var em_scale = parseFloat(str.replace("em",""));
@@ -1089,7 +1089,7 @@ var StyleContext = (function(){
     },
     _loadFlow : function(){
       var value = this.getCssAttr("flow", "inherit");
-      var parent_flow = this.parent? this.parent.flow : PageLayout.getStdBoxFlow();
+      var parent_flow = this.parent? this.parent.flow : Display.getStdBoxFlow();
       if(value === "inherit"){
 	return parent_flow;
       }
@@ -1120,7 +1120,7 @@ var StyleContext = (function(){
       }
     },
     _loadFont : function(){
-      var parent_font_size = this.parent? this.parent.font.size : PageLayout.fontSize;
+      var parent_font_size = this.parent? this.parent.font.size : Display.fontSize;
       var font = new Font(parent_font_size);
       var font_size = this.getCssAttr("font-size", "inherit");
       if(font_size !== "inherit"){
@@ -1130,7 +1130,7 @@ var StyleContext = (function(){
       if(font_family !== "inherit"){
 	font.family = font_family;
       } else if(this.parent === null){
-	font.family = PageLayout.fontFamily;
+	font.family = Display.fontFamily;
       }
       var font_weight = this.getCssAttr("font-weight", "inherit");
       if(font_weight !== "inherit"){
@@ -1233,7 +1233,7 @@ var StyleContext = (function(){
       if(value === "inherit" && this.parent && this.parent.lineRate){
 	return this.parent.lineRate;
       }
-      return parseFloat(value || PageLayout.lineRate);
+      return parseFloat(value || Display.lineRate);
     },
     _loadTextAlign : function(){
       var value = this.getCssAttr("text-align", "inherit");

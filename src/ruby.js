@@ -58,7 +58,7 @@ var Ruby = (function(){
       return css;
     },
     setMetrics : function(flow, font, letter_spacing){
-      this.rtFontSize = PageLayout.getRtFontSize(font.size);
+      this.rtFontSize = Display.getRtFontSize(font.size);
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font);
 	return ret + rb.getAdvance(flow, letter_spacing);

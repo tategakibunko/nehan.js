@@ -1,6 +1,6 @@
 // set engine args
 Args.copy(Config, __engine_args.config || {});
-Args.copy2(PageLayout, __engine_args.pageLayout || {});
+Args.copy2(Display, __engine_args.display || {});
 
 Selectors.setValues(Nehan.globalStyle || {}); // set global style.
 Selectors.setValues(__engine_args.style || {}); // set local style

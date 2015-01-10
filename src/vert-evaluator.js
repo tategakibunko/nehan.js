@@ -200,7 +200,7 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalImgChar = function(line, chr){
-    var color = line.color || new Color(PageLayout.fontColor);
+    var color = line.color || new Color(Display.fontColor);
     var font_rgb = color.getRgb();
     var palette_color = Palette.getColor(font_rgb).toUpperCase();
     return this._createElement("img", {

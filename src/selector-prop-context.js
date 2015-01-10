@@ -10,7 +10,7 @@ var SelectorPropContext = (function(){
     },
     getParentFlow : function(){
       var parent = this.getParentStyleContext();
-      return parent? parent.flow : PageLayout.getStdBoxFlow();
+      return parent? parent.flow : Display.getStdBoxFlow();
     },
     getMarkup : function(){
       return this._style.markup;

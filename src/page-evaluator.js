@@ -5,7 +5,7 @@ var PageEvaluator = (function(){
 
   PageEvaluator.prototype = {
     _getEvaluator : function(){
-      return (PageLayout.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
+      return (Display.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
     },
     evaluate : function(tree){
       return tree? new Page({

@@ -1,8 +1,8 @@
 // more strict metrics using canvas
 var TextMetrics = (function(){
   var __canvas = document.createElement("canvas");
-  __canvas.style.width = Math.max(PageLayout.width, PageLayout.height) + "px";
-  __canvas.style.height = PageLayout.maxFontSize + "px";
+  __canvas.style.width = Math.max(Display.width, Display.height) + "px";
+  __canvas.style.height = Display.maxFontSize + "px";
 
   var __canvas_context;
   if(__canvas.getContext){
@@ -20,7 +20,7 @@ var TextMetrics = (function(){
     },
     getMeasure : function(font, text){
       var metrics = this.getMetrics(font, text);
-      var space = Math.floor(PageLayout.vertWordSpaceRate * font.size);
+      var space = Math.floor(Display.vertWordSpaceRate * font.size);
       return metrics.width + space;
     }
   };
