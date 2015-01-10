@@ -53,7 +53,7 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createChildContext = function(context){
-    return new LayoutContext(
+    return new CursorContext(
       context.block, // inline generator inherits block context as it is.
       new InlineContext(context.getInlineRestMeasure())
     );

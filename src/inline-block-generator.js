@@ -15,7 +15,7 @@ var InlineBlockGenerator = (function (){
   };
 
   InlineBlockGenerator.prototype._createChildContext = function(parent_context){
-    return new LayoutContext(
+    return new CursorContext(
       new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
       new InlineContext(parent_context.getInlineRestMeasure() - this.style.getEdgeMeasure())
     );

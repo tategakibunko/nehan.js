@@ -1,10 +1,10 @@
-var LayoutContext = (function(){
-  function LayoutContext(block, inline){
+var CursorContext = (function(){
+  function CursorContext(block, inline){
     this.block = block;
     this.inline = inline;
   }
 
-  LayoutContext.prototype = {
+  CursorContext.prototype = {
     // block-level
     hasBlockSpaceFor : function(extent, opt){
       return this.block.hasSpaceFor(extent, opt);
@@ -81,6 +81,6 @@ var LayoutContext = (function(){
     }
   };
 
-  return LayoutContext;
+  return CursorContext;
 })();
 

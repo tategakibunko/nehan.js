@@ -109,7 +109,7 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createStartContext = function(){
-    return new LayoutContext(
+    return new CursorContext(
       new BlockContext(this.style.contentExtent, {
 	isFirstBlock:true,
 	contextEdge:this.style.getBlockContextEdge()
@@ -122,7 +122,7 @@ var LayoutGenerator = (function(){
     var context_edge = this.style.getBlockContextEdge();
     var is_first_block = this.stream? this.stream.isHead() : true;
     var max_extent = parent_context.getBlockRestExtent() - context_edge.before - context_edge.after;
-    return new LayoutContext(
+    return new CursorContext(
       new BlockContext(max_extent, {
 	isFirstBlock:is_first_block,
 	contextEdge:context_edge

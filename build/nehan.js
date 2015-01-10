@@ -7264,7 +7264,7 @@ var StyleContext = (function(){
      @param paernt {Nehan.StyleContext} - parent style context
      @param args {Object} - option arguments
      @param args.forceCss {Object} - system css that must be applied.
-     @param args.layoutContext {Nehan.LayoutContext} - layout context at the point of this style context created.
+     @param args.layoutContext {Nehan.CursorContext} - layout context at the point of this style context created.
   */
   function StyleContext(markup, parent, args){
     this._initialize(markup, parent, args);
@@ -8501,13 +8501,13 @@ var StyleContext = (function(){
 })();
 
 
-var LayoutContext = (function(){
-  function LayoutContext(block, inline){
+var CursorContext = (function(){
+  function CursorContext(block, inline){
     this.block = block;
     this.inline = inline;
   }
 
-  LayoutContext.prototype = {
+  CursorContext.prototype = {
     // block-level
     hasBlockSpaceFor : function(extent, opt){
       return this.block.hasSpaceFor(extent, opt);
@@ -8584,7 +8584,7 @@ var LayoutContext = (function(){
     }
   };
 
-  return LayoutContext;
+  return CursorContext;
 })();
 
 
@@ -8942,7 +8942,7 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createStartContext = function(){
-    return new LayoutContext(
+    return new CursorContext(
       new BlockContext(this.style.contentExtent, {
 	isFirstBlock:true,
 	contextEdge:this.style.getBlockContextEdge()
@@ -8955,7 +8955,7 @@ var LayoutGenerator = (function(){
     var context_edge = this.style.getBlockContextEdge();
     var is_first_block = this.stream? this.stream.isHead() : true;
     var max_extent = parent_context.getBlockRestExtent() - context_edge.before - context_edge.after;
-    return new LayoutContext(
+    return new CursorContext(
       new BlockContext(max_extent, {
 	isFirstBlock:is_first_block,
 	contextEdge:context_edge
@@ -9314,7 +9314,7 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createChildContext = function(context){
-    return new LayoutContext(
+    return new CursorContext(
       context.block, // inline generator inherits block context as it is.
       new InlineContext(context.getInlineRestMeasure())
     );
@@ -9579,7 +9579,7 @@ var InlineBlockGenerator = (function (){
   };
 
   InlineBlockGenerator.prototype._createChildContext = function(parent_context){
-    return new LayoutContext(
+    return new CursorContext(
       new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
       new InlineContext(parent_context.getInlineRestMeasure() - this.style.getEdgeMeasure())
     );
