@@ -171,8 +171,8 @@ Nehan.addSingleTagByRex = function(rex){
 };
 
 // this function return the engine module(ends at nehan-setup-end.js),
-// enclosing local variable(style, layout, config, document-context etc).
-// so each module returned by this function has independent environment.
+// enclosing local environment(Style, Display, Config, DocumentContext etc).
+// so each engine module has it's own environment.
 // this is usefull to show multiple layout(vertical and horizontal) in a single page.
 Nehan.setup = function(engine_args){
 "use strict";
@@ -180,6 +180,8 @@ var __engine_args = engine_args || {};
 
 // each time setup is called, engine id is incremented.
 Nehan.engineId++;
+
+// this function is closed by nehan-setup-end.js
 
 var Config = {
   lang:"ja-JP",
