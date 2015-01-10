@@ -23,7 +23,7 @@ var LayoutGenerator = (function(){
      @return {Nehan.Box}
   */
   LayoutGenerator.prototype.yield = function(parent_context){
-    // create child layout context from parent layout context.
+    // create child cursor context from parent cursor context.
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
 
     // call _yield implemented in inherited class.
@@ -211,7 +211,7 @@ var LayoutGenerator = (function(){
       if(!Token.isTag(token)){
 	return false;
       }
-      var child_style = new StyleContext(token, parent_style, {layoutContext:context});
+      var child_style = new StyleContext(token, parent_style, {cursorContext:context});
       if(!child_style.isFloated()){
 	parent_style.removeChild(child_style);
 	return false;

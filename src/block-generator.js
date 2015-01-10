@@ -96,7 +96,7 @@ var BlockGenerator = (function(){
     }
 
     // if tag token, inherit style
-    var child_style = new StyleContext(token, this.style, {layoutContext:context});
+    var child_style = new StyleContext(token, this.style, {cursorContext:context});
 
     // if disabled style, just skip
     if(child_style.isDisabled()){

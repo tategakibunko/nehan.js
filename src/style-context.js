@@ -84,7 +84,7 @@ var StyleContext = (function(){
      @param paernt {Nehan.StyleContext} - parent style context
      @param args {Object} - option arguments
      @param args.forceCss {Object} - system css that must be applied.
-     @param args.layoutContext {Nehan.CursorContext} - layout context at the point of this style context created.
+     @param args.cursorContext {Nehan.CursorContext} - cursor context at the point of this style context created.
   */
   function StyleContext(markup, parent, args){
     this._initialize(markup, parent, args);
@@ -116,7 +116,7 @@ var StyleContext = (function(){
       }
 
       // create context for each functional css property.
-      this.selectorPropContext = new SelectorPropContext(this, args.layoutContext || null);
+      this.selectorPropContext = new SelectorPropContext(this, args.cursorContext || null);
 
       // create selector callback context,
       // this context is passed to "onload" callback.
@@ -124,7 +124,7 @@ var StyleContext = (function(){
       // because 'onload' callback is called after loading selector css.
       // notice that at this phase, css values are not converted into internal style object.
       // so by updating css value, you can update calculation of internal style object.
-      this.selectorContext = new SelectorContext(this, args.layoutContext || null);
+      this.selectorContext = new SelectorContext(this, args.cursorContext || null);
 
       this.managedCss = new CssHashSet();
       this.unmanagedCss = new CssHashSet();
