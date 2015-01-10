@@ -73,24 +73,28 @@ var CursorContext = (function(){
     },
     /**
        @memberof Nehan.CursorContext
+       @return {boolean}
     */
     isInlineEmpty : function(){
       return this.inline.isEmpty();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {boolean}
     */
     hasInlineSpaceFor : function(measure){
       return this.inline.hasSpaceFor(measure);
     },
     /**
        @memberof Nehan.CursorContext
+       @return {boolean}
     */
     hasLineBreak : function(){
       return this.inline.hasLineBreak();
     },
     /**
        @memberof Nehan.CursorContext
+       @param status {boolean}
     */
     setLineBreak : function(status){
       this.inline.setLineBreak(status);
@@ -103,66 +107,80 @@ var CursorContext = (function(){
     },
     /**
        @memberof Nehan.CursorContext
+       @param element {Nehan.Box}
+       @param measure {int}
     */
     addInlineElement : function(element, measure){
       this.inline.addElement(element, measure);
     },
     /**
        @memberof Nehan.CursorContext
+       @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
     */
     getInlineLastText : function(){
       return this.inline.getLastText();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
     */
     getInlineTexts : function(){
       return this.inline.getTexts();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {Array}
     */
     getInlineElements : function(){
       return this.inline.getElements();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
     */
     getInlineCurMeasure : function(){
       return this.inline.getCurMeasure();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
     */
     getInlineRestMeasure : function(){
       return this.inline.getRestMeasure();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
     */
     getInlineMaxMeasure : function(){
       return this.inline.getMaxMeasure();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
     */
     getInlineMaxExtent : function(){
       return this.inline.getMaxExtent();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
     */
     getInlineMaxFontSize : function(){
       return this.inline.getMaxFontSize();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
     */
     getInlineCharCount : function(){
       return this.inline.getCharCount();
     },
     /**
+       justify inline element with next head character, return null if nothing happend, or return new tail char if justified.
        @memberof Nehan.CursorContext
+       @param head_char {Nehan.Char}
+       @return {Nehan.Char | null}
     */
     justify : function(head_char){
       return this.inline.justify(head_char);

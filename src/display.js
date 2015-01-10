@@ -1,13 +1,25 @@
+/**
+   standard page settings.
+   @namespace Nehan.Display
+*/
 var Display = {
-  // define root where content text starts from.
-  // 'body' or 'html' or 'document' are enabled.
-  // 
-  // 1. 'document'
-  //    <!doctype xxx> tag is included in content text.
-  // 2. 'html'
-  //    <head> and <html> are included in content text.
-  // 3. 'body'
-  //    <body> or content of body itself is included in content text.
+  /**
+     @memberof Nehan.Display
+     @type {String}
+     @default "document"
+     @description
+     <pre>
+      define root where content text starts from.
+      'body' or 'html' or 'document' are enabled.
+      
+      1. 'document'
+         &lt;!doctype xxx&gt; tag is included in content text.
+      2. 'html'
+         &lt;head&gt; and &lt;html&gt; are included in content text.
+      3. 'body'
+         &lt;body&gt; or content of body itself is included in content text.
+     </pre>
+  */
   root:"document",
   direction:"vert", // or 'hori'
   boxFlow:{

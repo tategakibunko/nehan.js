@@ -247,87 +247,109 @@ Nehan.engineId++;
 */
 var Config = {
   /**
-     language setting default ["ja-JP"]
+     language setting
      @memberof Nehan.Config
      @type {string}
+     @default "ja-JP"
   */
   lang:"ja-JP",
 
   /**
-     is debug mode? default [false]
+     is debug mode?
      @memberof Nehan.Config
      @type {boolean}
+     @default false
   */
   debug:false,
 
   /**
-     is kerning enabled? default [true]
+     is kerning enabled?
      @memberof Nehan.Config
      @type {boolean}
+     @default true
   */
   kerning:true,
 
   /**
-     is justify enabled? default [true]
+     is justify enabled?
      @memberof Nehan.Config
      @type {boolean}
+     @default true
   */
   justify:true,
 
   /**
-     max rety count when something troubles. default [20]
+     max rety count when something troubles.
      @memberof Nehan.Config
      @type {int}
+     @default 20
   */
   maxRollbackCount:20,
 
   /**
-     max available page count for each engine. default [10000]
+     max available page count for each engine.
      @memberof Nehan.Config
      @type {int}
+     @default 10000
   */
   maxPageCount:10000,
 
   /**
-     use vertical glyph if browser support 'writing-mode'. default [true]
+     use vertical glyph if browser support 'writing-mode'.
      @memberof Nehan.Config
      @type {boolean}
+     @default true
   */
   useVerticalGlyphIfEnable:true,
 
   /**
-     calculate strict alphabetical metrics using hidden canvas. default [true]
+     calculate strict alphabetical metrics using hidden canvas.
      @memberof Nehan.Config
      @type {boolean}
+     @default true
    */
   useStrictWordMetrics:true,
 
   /**
-     enable ommiting element by start tag. default [false]
+     enable ommiting element by start tag.
      @memberof Nehan.Config
      @type {boolean}
+     @default false
   */
   enableAutoCloseTag:false,
 
   /**
-     default length of html-lexer buffer. default [2000]
+     default length of html-lexer buffer.
      @memberof Nehan.Config
      @type {int}
+     @default 2000
   */
   lexingBufferLen:2000
 };
 
 
+/**
+   standard page settings.
+   @namespace Nehan.Display
+*/
 var Display = {
-  // define root where content text starts from.
-  // 'body' or 'html' or 'document' are enabled.
-  // 
-  // 1. 'document'
-  //    <!doctype xxx> tag is included in content text.
-  // 2. 'html'
-  //    <head> and <html> are included in content text.
-  // 3. 'body'
-  //    <body> or content of body itself is included in content text.
+  /**
+     @memberof Nehan.Display
+     @type {String}
+     @default "document"
+     @description
+     <pre>
+      define root where content text starts from.
+      'body' or 'html' or 'document' are enabled.
+      
+      1. 'document'
+         &lt;!doctype xxx&gt; tag is included in content text.
+      2. 'html'
+         &lt;head&gt; and &lt;html&gt; are included in content text.
+      3. 'body'
+         &lt;body&gt; or content of body itself is included in content text.
+     </pre>
+  */
   root:"document",
   direction:"vert", // or 'hori'
   boxFlow:{
@@ -9608,24 +9630,28 @@ var CursorContext = (function(){
     },
     /**
        @memberof Nehan.CursorContext
+       @return {boolean}
     */
     isInlineEmpty : function(){
       return this.inline.isEmpty();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {boolean}
     */
     hasInlineSpaceFor : function(measure){
       return this.inline.hasSpaceFor(measure);
     },
     /**
        @memberof Nehan.CursorContext
+       @return {boolean}
     */
     hasLineBreak : function(){
       return this.inline.hasLineBreak();
     },
     /**
        @memberof Nehan.CursorContext
+       @param status {boolean}
     */
     setLineBreak : function(status){
       this.inline.setLineBreak(status);
@@ -9638,66 +9664,80 @@ var CursorContext = (function(){
     },
     /**
        @memberof Nehan.CursorContext
+       @param element {Nehan.Box}
+       @param measure {int}
     */
     addInlineElement : function(element, measure){
       this.inline.addElement(element, measure);
     },
     /**
        @memberof Nehan.CursorContext
+       @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
     */
     getInlineLastText : function(){
       return this.inline.getLastText();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
     */
     getInlineTexts : function(){
       return this.inline.getTexts();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {Array}
     */
     getInlineElements : function(){
       return this.inline.getElements();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
     */
     getInlineCurMeasure : function(){
       return this.inline.getCurMeasure();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
     */
     getInlineRestMeasure : function(){
       return this.inline.getRestMeasure();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
     */
     getInlineMaxMeasure : function(){
       return this.inline.getMaxMeasure();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
     */
     getInlineMaxExtent : function(){
       return this.inline.getMaxExtent();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
     */
     getInlineMaxFontSize : function(){
       return this.inline.getMaxFontSize();
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
     */
     getInlineCharCount : function(){
       return this.inline.getCharCount();
     },
     /**
+       justify inline element with next head character, return null if nothing happend, or return new tail char if justified.
        @memberof Nehan.CursorContext
+       @param head_char {Nehan.Char}
+       @return {Nehan.Char | null}
     */
     justify : function(head_char){
       return this.inline.justify(head_char);
