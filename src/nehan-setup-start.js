@@ -2,18 +2,18 @@
 Nehan.engineId = 0;
 
 // global style
-Nehan.style = {};
+Nehan.globalStyle = {};
 
 // global single tags
 Nehan.__single_tag_names__ = [];
 Nehan.__single_tag_rexes__ = [];
 
 Nehan.setStyle = function(selector_key, value){
-  var entry = Nehan.style[selector_key] || {};
+  var entry = Nehan.globalStyle[selector_key] || {};
   for(var prop in value){
     entry[prop] = value[prop];
   }
-  Nehan.style[selector_key] = entry;
+  Nehan.globalStyle[selector_key] = entry;
 };
 
 Nehan.setStyles = function(values){

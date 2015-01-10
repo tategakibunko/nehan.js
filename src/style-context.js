@@ -1030,7 +1030,7 @@ var StyleContext = (function(){
 	return Selectors.getValue(this);
       }
     },
-    // nehan.js can change style dynamically by layout-context.
+    // nehan.js can change style dynamically by cursor-context.
     //
     // [example]
     // engine.setStyle("p", {

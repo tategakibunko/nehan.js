@@ -1,8 +1,9 @@
 // set engine args
 Args.copy(Config, __engine_args.config || {});
 Args.copy2(Layout, __engine_args.layout || {});
-Selectors.setValues(Nehan.style || {}); // copy global style
-Selectors.setValues(__engine_args.style || {}); // copy engine local style
+
+Selectors.setValues(Nehan.globalStyle || {}); // set global style.
+Selectors.setValues(__engine_args.style || {}); // set local style
 
 // register global single tags
 List.iter(Nehan.__single_tag_names__, LexingRule.addSingleTagByName);
