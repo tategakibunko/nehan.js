@@ -1,4 +1,11 @@
 var ListStyleType = (function(){
+  /**
+     @memberof Nehan
+     @class ListStyleType
+     @classdesc abstraction of list-style-type.
+     @constructor
+     @param pos {String} - "disc", "circle", "square", "lower-alpha" .. etc
+  */
   function ListStyleType(type){
     this.type = type;
   }
@@ -10,25 +17,49 @@ var ListStyleType = (function(){
   };
 
   ListStyleType.prototype = {
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
     isDecimalList : function(){
       return (this.type === "decimal" || this.type === "decimal-leading-zero");
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
     isNoneList : function(){
       return this.type === "none";
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
     isMarkList : function(){
       return (this.type === "disc" ||
 	      this.type === "circle" ||
 	      this.type === "square");
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
     isCountableList : function(){
       return (!this.isNoneList() && !this.isMarkList());
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
     isHankaku : function(){
       return (this.type === "lower-alpha" || this.type === "upper-alpha" ||
 	      this.type === "lower-roman" || this.type === "upper-roman" ||
 	      this.isDecimalList());
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
     isZenkaku : function(){
       return !this.isHankaku();
     },
@@ -44,6 +75,10 @@ var ListStyleType = (function(){
       }
       return Cardinal.getStringByName(this.type, decimal);
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {String}
+    */
     getMarkerHtml : function(count){
       var text = this.getMarkerText(count);
       if(this.isZenkaku()){
@@ -53,6 +88,10 @@ var ListStyleType = (function(){
       }
       return text;
     },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {String}
+    */
     getMarkerText : function(count){
       if(this.isNoneList()){
 	return Const.space;

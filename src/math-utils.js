@@ -1,4 +1,15 @@
+/**
+   @namespace Nehan.MathUtils
+*/
 var MathUtils = {
+  /**
+     convert [decial] number by [base]
+
+     @memberof Nehan.MathUtils
+     @param deciaml {int}
+     @param base {int}
+     @return {int}
+  */
   convBase : function(decimal, base){
    if(decimal === 0){
       return [0];

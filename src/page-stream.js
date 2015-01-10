@@ -3,6 +3,7 @@ var PageStream = (function(){
      @memberof Nehan
      @class PageStream
      @classdesc async stream of paged-media.
+     @consturctor
      @param text {String} - html source text
   */
   function PageStream(text){

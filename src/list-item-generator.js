@@ -1,4 +1,13 @@
 var ListItemGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class ListItemGenerator
+     @classdesc generator of &lt;li&gt; tag, consists parallel generator of list-item and list-body.
+     @constructor
+     @extends {Nehan.ParallelGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function ListItemGenerator(style, stream){
     ParallelGenerator.call(this, style, [
       this._createListMarkGenerator(style),

@@ -2,6 +2,7 @@ var LayoutGenerator = (function(){
   /**
      @memberof Nehan
      @class LayoutGenerator
+     @classdesc root abstract class for all generator
      @constructor
      @param style {Nehan.StyleContext}
      @param stream {Nehan.TokenStream}
@@ -26,15 +27,30 @@ var LayoutGenerator = (function(){
     throw "LayoutGenerator::_yield must be implemented in child class";
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method setTerminate
+     @param status {boolean}
+  */
   LayoutGenerator.prototype.setTerminate = function(status){
     this._terminate = status;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method setChildLayout
+     @param generator {Nehan.LayoutGenerator}
+  */
   LayoutGenerator.prototype.setChildLayout = function(generator){
     this._childLayout = generator;
     generator._parentLayout = this;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method hasNext
+     @return {boolean}
+  */
   LayoutGenerator.prototype.hasNext = function(){
     if(this._terminate){
       return false;
@@ -48,6 +64,11 @@ var LayoutGenerator = (function(){
     return this.stream? this.stream.hasNext() : false;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method hasChildLayout
+     @return {boolean}
+  */
   LayoutGenerator.prototype.hasChildLayout = function(){
     if(this._childLayout && this._childLayout.hasNext()){
       return true;
@@ -55,19 +76,40 @@ var LayoutGenerator = (function(){
     return false;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method hasCache
+     @return {boolean}
+  */
   LayoutGenerator.prototype.hasCache = function(){
     return this._cachedElements.length > 0;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method yieldChildLayout
+     @param context {Nehan.CursorContext}
+     @return {Nehan.Box}
+  */
   LayoutGenerator.prototype.yieldChildLayout = function(context){
     var next = this._childLayout.yield(context);
     return next;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method peekLastCache
+     @return {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
+  */
   LayoutGenerator.prototype.peekLastCache = function(){
     return List.last(this._cachedElements);
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method pushCache
+     @param element {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
+  */
   LayoutGenerator.prototype.pushCache = function(element){
     var cache_count = element.cacheCount || 0;
     if(cache_count > 0){
@@ -81,15 +123,29 @@ var LayoutGenerator = (function(){
     this._cachedElements.push(element);
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method popCache
+     @return {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
+  */
   LayoutGenerator.prototype.popCache = function(){
     var cache = this._cachedElements.pop();
     return cache;
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method clearCache
+  */
   LayoutGenerator.prototype.clearCache = function(){
     this._cachedElements = [];
   };
 
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method addText
+     @param text {String}
+  */
   LayoutGenerator.prototype.addText = function(text){
     if(this.stream){
       this.stream.addText(text);

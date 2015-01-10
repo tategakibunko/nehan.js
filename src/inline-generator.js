@@ -2,7 +2,7 @@ var InlineGenerator = (function(){
   /**
      @memberof Nehan
      @class InlineGenerator
-     @classdesc inline level generator, output anonymous line block.
+     @classdesc inline level generator, output inline level block.
      @constructor
      @extends {Nehan.LayoutGenerator}
      @param style {Nehan.StyleContext}
@@ -48,7 +48,10 @@ var InlineGenerator = (function(){
   };
 
   /**
+     rollback stream position by cached element of parent generator.
+
      @memberof Nehan.InlineGenerator
+     @param parent_cache {Nehan.Box}
   */
   InlineGenerator.prototype.rollback = function(parent_cache){
     if(this.stream === null){

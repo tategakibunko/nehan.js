@@ -1,9 +1,21 @@
 var LayoutEvaluator = (function(){
+  /**
+     @memberof Nehan
+     @class LayoutEvaluator
+     @classdesc evaluate {@link Nehan.Box}, and output DOMElement.
+     @constructor
+     @param direction {String} - "hori" or "vert"
+  */
   function LayoutEvaluator(direction){
     this.direction = direction;
   }
 
   LayoutEvaluator.prototype = {
+    /**
+       @memberof Nehan.LayoutEvaluator
+       @param tree {Nehan.Box}
+       @return {DOMElement}
+    */
     evaluate : function(tree){
       return this._getEvaluator(tree)._evaluate(tree);
     },

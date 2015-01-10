@@ -8,6 +8,13 @@ Nehan.globalStyle = {};
 Nehan.__single_tag_names__ = [];
 Nehan.__single_tag_rexes__ = [];
 
+/**
+   set global style. see example at setStyle of {@link Nehan.Engine}.
+
+   @memberof Nehan
+   @param selector_key {String}
+   @param value {selector_value}
+*/
 Nehan.setStyle = function(selector_key, value){
   var entry = Nehan.globalStyle[selector_key] || {};
   for(var prop in value){
@@ -16,16 +23,34 @@ Nehan.setStyle = function(selector_key, value){
   Nehan.globalStyle[selector_key] = entry;
 };
 
+/**
+   set global styles. see example at setStyles of {@link Nehan.Engine}.
+
+   @memberof Nehan
+   @param values {Object}
+ */
 Nehan.setStyles = function(values){
   for(var selector_key in values){
     Nehan.setStyle(selector_key, values[selector_key]);
   }
 };
 
+/**
+   set global single tag name. see example at addSingleTagByName of {@link Nehan.LexingRule}.
+
+   @memberof Nehan
+   @param tag_name {String}
+*/
 Nehan.addSingleTagByName = function(tag_name){
   Nehan.__single_tag_names__.push(tag_name);
 };
 
+/**
+   set global single tag name by regexp object. see example at addSingleTagByRex of {@link Nehan.LexingRule}.
+
+   @memberof Nehan
+   @param rex {RegExp}
+*/
 Nehan.addSingleTagByRex = function(rex){
   Nehan.__single_tag_rexes__.push(rex);
 };
@@ -40,7 +65,7 @@ Nehan.addSingleTagByRex = function(rex){
    @param engine_args.config {Nehan.Config} - system config
    @param engine_args.display {Nehan.Display} - standard page parameters
    @param engine_args.style {Nehan.Style} - engine local style
-   @return {Object}
+   @return {Nehan.Engine}
 */
 // this function return the engine module(ends at nehan-setup-end.js),
 // enclosing local environment(Style, Display, Config, DocumentContext etc).

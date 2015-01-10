@@ -6,6 +6,15 @@ var LinkGenerator = (function(){
     }
   };
 
+  /**
+     @memberof Nehan
+     @class LinkGenerator
+     @classdesc generator of &lt;a&gt; tag, set anchor context to {@link Nehan.DocumentContext} if exists.
+     @constructor
+     @extends {Nehan.InlineGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function LinkGenerator(style, stream){
     InlineGenerator.call(this, style, stream);
     __add_anchor(style); // set anchor at this point

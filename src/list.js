@@ -1,24 +1,55 @@
+/**
+   list utility module
+
+   @namespace Nehan.List
+*/
 var List = {
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> ()
+  */
   iter : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       fn(lst[i]);
     }
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun index -> obj -> ()
+  */
   iteri : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       fn(i, lst[i]);
     }
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> ()
+  */
   reviter : function(lst, fn){
     for(var i = lst.length - 1; i >= 0; i--){
       fn(lst[i]);
     }
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun index -> obj -> ()
+  */
   reviteri : function(lst, fn){
     for(var i = lst.length - 1; i >= 0; i--){
       fn(i, lst[i]);
     }
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {boolean}
+  */
   forall : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       if(!fn(lst[i])){
@@ -27,6 +58,12 @@ var List = {
     }
     return true;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> obj
+     @return {Array}
+  */
   map : function(lst, fn){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
@@ -34,6 +71,12 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun index -> obj -> obj
+     @return {Array}
+  */
   mapi : function(lst, fn){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
@@ -41,6 +84,13 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param acm {foldable_value} - accumulator
+     @param fn {Function} - fun acm -> obj -> acm
+     @return {folded_value}
+  */
   fold : function(lst, acm, fn){
     var ret = acm;
     for(var i = 0, len = lst.length; i < len; i++){
@@ -48,6 +98,12 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {Array}
+  */
   filter : function(lst, fn){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
@@ -57,6 +113,12 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {first_founded_object}
+  */
   find : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       var obj = lst[i];
@@ -66,6 +128,12 @@ var List = {
     }
     return null;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {first_founded_object}
+  */
   revfind : function(lst, fn){
     for(var i = lst.length - 1; i >= 0; i--){
       var obj = lst[i];
@@ -75,6 +143,12 @@ var List = {
     }
     return null;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {int}
+  */
   indexOf : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       var obj = lst[i];
@@ -84,6 +158,12 @@ var List = {
     }
     return -1;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {boolean}
+  */
   exists : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       if(fn(lst[i])){
@@ -92,6 +172,12 @@ var List = {
     }
     return false;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {boolean}
+  */
   mem : function(lst, val){
     for(var i = 0, len = lst.length; i < len; i++){
       if(lst[i] == val){
@@ -100,11 +186,22 @@ var List = {
     }
     return false;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {Number}
+  */
   sum : function(lst){
     return this.fold(lst, 0, function(ret, obj){
       return ret + obj;
     });
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {Number}
+     @return {min_obj}
+  */
   minobj : function(lst, fn){
     var min_obj = null, min_val = null;
     this.iter(lst, function(obj){
@@ -116,6 +213,12 @@ var List = {
     });
     return min_obj;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {Number}
+     @return {max_obj}
+  */
   maxobj : function(lst, fn){
     var max_obj = null, max_val = null;
     this.iter(lst, function(obj){
@@ -127,6 +230,11 @@ var List = {
     });
     return max_obj;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {Array}
+  */
   refcopy : function(lst){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
@@ -134,6 +242,12 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {int}
+  */
   count : function(lst, fn){
     var ret = 0;
     for(var i = 0, len = lst.length; i < len; i++){
@@ -143,6 +257,12 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param count {int} - array length
+     @param init_val - initialized value filled in new array
+     @return {Array}
+  */
   create : function(count, init_val){
     var ret = new Array(count);
     if(typeof init_val != "undefined"){
@@ -152,9 +272,19 @@ var List = {
     }
     return ret;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {first_object | null}
+  */
   first : function(lst){
     return lst[0] || null;
   },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {last_object | null}
+  */
   last : function(lst){
     var len = lst.length;
     if(len === 0){
@@ -162,6 +292,12 @@ var List = {
     }
     return lst[len - 1];
   },
+  /**
+     @memberof Nehan.List
+     @param lst1 {Array}
+     @param lst2 {Array}
+     @return {Array.<Array>}
+  */
   zip : function(lst1, lst2){
     var ret = [];
     for(var i = 0, len = Math.min(lst1.length, lst2.length); i < len; i++){
@@ -169,9 +305,14 @@ var List = {
     }
     return ret;
   },
-  // props: [a,b,c]
-  // values:[1,2,3]
-  // => {a:1, b:2, c:3}
+  /**
+     @memberof Nehan.List
+     @param props {Array}
+     @param values {Array}
+     @return {Object}
+     @example
+     * List.zipObj(["a", "b", "c"], [1, 2, 3]); // {a:1, b:2, c:3}
+  */
   zipObj : function(props, values){
     var ret = {};
     if(props.length !== values.length){
@@ -182,7 +323,13 @@ var List = {
     }
     return ret;
   },
-  // non destructive reverse
+  /**
+     non destructive reverse
+
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {Array}
+  */
   reverse : function(lst){
     var ret = [];
     this.reviter(lst, function(obj){
