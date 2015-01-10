@@ -3100,17 +3100,35 @@ var AttrSelector = (function(){
 
 
 var PseudoSelector = (function(){
+  /**
+     @memberof Nehan
+     @class PseudoSelector
+     @classdesc abstraction of css pseudo element or pseudo class selector
+     @constructor
+     @param expr {String}
+     @example
+     * var ps = new PseudoSelector("::first-letter").hasPseudoElement(); // true
+  */
   function PseudoSelector(expr){
     this.name = this._normalize(expr);
   }
 
   PseudoSelector.prototype = {
+    /**
+       @memberof Nehan.PseudoSelector
+       @return {boolean}
+    */
     hasPseudoElement : function(){
       return (this.name === "before" ||
 	      this.name === "after" ||
 	      this.name === "first-letter" ||
 	      this.name === "first-line");
     },
+    /**
+       @memberof Nehan.PseudoSelector
+       @param style {Nehan.StyleContext}
+       @return {boolean}
+    */
     test : function(style){
       switch(this.name){
       // pseudo-element
@@ -4768,6 +4786,14 @@ var Tcy = (function(){
 
 
 var Ruby = (function(){
+  /**
+     @memberof Nehan
+     @class Ruby
+     @classdesc abstraction of ruby text.
+     @constructor
+     @param rbs {Array<Nehan.Char>} - characters of &lt;rb&gt; tag.
+     @param rt {Nehan.Tag}
+  */
   function Ruby(rbs, rt){
     this._type = "ruby";
     this.rbs = rbs;
@@ -4775,34 +4801,73 @@ var Ruby = (function(){
   }
 
   Ruby.prototype = {
+    /**
+       @memberof Nehan.Ruby
+       @return {boolean}
+    */
     hasMetrics : function(){
       return (typeof this.advanceSize !== "undefined");
     },
+    /**
+       @memberof Nehan.Ruby
+       @return {int}
+    */
     getCharCount : function(){
       return this.rbs? this.rbs.length : 0;
     },
+    /**
+       @memberof Nehan.Ruby
+       @return {int}
+    */
     getAdvance : function(flow){
       return this.advanceSize;
     },
+    /**
+       @memberof Nehan.Ruby
+       @return {Array<Nehan.Char>}
+    */
     getRbs : function(){
       return this.rbs;
     },
+    /**
+       @memberof Nehan.Ruby
+       @return {String}
+    */
     getRtString : function(){
       return this.rt? this.rt.getContent() : "";
     },
+    /**
+       @memberof Nehan.Ruby
+       @return {int}
+    */
     getRtFontSize : function(){
       return this.rtFontSize;
     },
+    /**
+       @memberof Nehan.Ruby
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssHoriRuby : function(line){
       var css = {};
       css.display = "inline-block";
       return css;
     },
+    /**
+       @memberof Nehan.Ruby
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertRt : function(line){
       var css = {};
       css["css-float"] = "left";
       return css;
     },
+    /**
+       @memberof Nehan.Ruby
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssHoriRt : function(line){
       var css = {};
       var offset = Math.floor((line.style.getFontSize() - this.getRtFontSize()) / 3);
@@ -4810,6 +4875,11 @@ var Ruby = (function(){
       css["line-height"] = "1em";
       return css;
     },
+    /**
+       @memberof Nehan.Ruby
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertRb : function(line){
       var css = {};
       css["css-float"] = "left";
@@ -4818,6 +4888,11 @@ var Ruby = (function(){
       }
       return css;
     },
+    /**
+       @memberof Nehan.Ruby
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssHoriRb : function(line){
       var css = {};
       if(this.padding){
@@ -4826,6 +4901,12 @@ var Ruby = (function(){
       css["text-align"] = "center";
       return css;
     },
+    /**
+       @memberof Nehan.Ruby
+       @param flow {Nehan.BoxFlow}
+       @param font {Nehan.Font}
+       @param letter_spacing {int}
+    */
     setMetrics : function(flow, font, letter_spacing){
       this.rtFontSize = Display.getRtFontSize(font.size);
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
@@ -4851,6 +4932,13 @@ var Ruby = (function(){
 
 
 var Rgb = (function(){
+  /**
+     @memberof Nehan
+     @class Rgb
+     @classdesc abstraction of RGB color value.
+     @constructor
+     @param value {String}
+  */
   function Rgb(value){
     this.value = String(value);
     this.red = parseInt(this.value.substring(0,2), 16);
@@ -4859,15 +4947,31 @@ var Rgb = (function(){
   }
   
   Rgb.prototype = {
+    /**
+       @memberof Nehan.Rgb
+       @return {String}
+    */
     getRed : function(){
       return this.red;
     },
+    /**
+       @memberof Nehan.Rgb
+       @return {String}
+    */
     getGreen : function(){
       return this.green;
     },
+    /**
+       @memberof Nehan.Rgb
+       @return {String}
+    */
     getBlue : function(){
       return this.blue;
     },
+    /**
+       @memberof Nehan.Rgb
+       @return {String}
+    */
     getColorValue : function(){
       return this.value;
     }
@@ -6302,19 +6406,39 @@ var Edge = (function(){
 })();
 
 var Radius2d = (function(){
+  /**
+     @memberof Nehan
+     @class Radius2d
+     @classdesc abstraction of radius with 2 direction vert and hori.
+     @constructor
+  */
   function Radius2d(){
     this.hori = 0;
     this.vert = 0;
   }
 
   Radius2d.prototype = {
+    /**
+       @memberof Nehan.Radius2d
+       @param value {Array<int>} - 2 length array, value[0] as horizontal radius, value[1] as vertical radius.
+       @param value.0 {int} - horizontal radius
+       @param value.1 {int} - vertical radius
+    */
     setSize : function(value){
       this.hori = value[0];
       this.vert = value[1];
     },
+    /**
+       @memberof Nehan.Radius2d
+       @return {String}
+    */
     getCssValueHori : function(){
       return this.hori + "px";
     },
+    /**
+       @memberof Nehan.Radius2d
+       @return {String}
+    */
     getCssValueVert : function(){
       return this.vert + "px";
     }
@@ -8654,6 +8778,16 @@ var HeadTokenStream = (function(){
 
 
 var RubyTokenStream = (function(){
+  /**
+     token stream of &lt;ruby&gt; tag content.
+
+     @memberof Nehan
+     @class RubyTokenStream
+     @classdesc 
+     @constructor
+     @extends {Nehan.TokenStream}
+     @param markup {Nehan.Tag}
+  */
   function RubyTokenStream(markup_ruby){
     TokenStream.call(this, markup_ruby.getContent());
     this.getAll();
@@ -9239,15 +9373,37 @@ var TextAligns = {
 };
 
 var PartitionUnit = (function(){
+  /**
+     @memberof Nehan
+     @class PartitionUnit
+     @classdesc abstraction for unit size of partition.
+     @constructor
+     @param opt {Object}
+     @param opt.weight {int} - partition weight, larger one gets more measure.
+     @param opt.isStatic {boolean} - if true, size is fixed.
+  */
   function PartitionUnit(opt){
     this.weight = opt.weight || 0;
     this.isStatic = opt.isStatic || false;
   }
 
   PartitionUnit.prototype = {
+    /**
+       get unit size in px.
+
+       @memberof Nehan.PartitionUnit
+       @param measure {int}
+       @param total_weight {int}
+       @return {int} - size in px
+    */
     getSize : function(measure, total_weight){
       return Math.floor(measure * this.weight / total_weight);
     },
+    /**
+       @memberof Nehan.PartitionUnit
+       @param punit {Nehan.ParitionUnit}
+       @return {Nehan.PartitionUnit}
+    */
     mergeTo : function(punit){
       if(this.isStatic && !punit.isStatic){
 	return this;
@@ -9264,6 +9420,13 @@ var PartitionUnit = (function(){
 
 
 var Partition = (function(){
+  /**
+     @memberof Nehan
+     @class Partition
+     @classdesc abstraction for partition of measure size.
+     @constructor
+     @param punits {Array.<PartitionUnit>}
+  */
   function Partition(punits){
     this._punits = punits || []; // partition units
   }
@@ -9297,30 +9460,53 @@ var Partition = (function(){
   };
 
   Partition.prototype = {
+    /**
+       @memberof Nehan.Partition
+       @param index {int}
+       @return {Nehan.PartitionUnit}
+    */
     get : function(index){
       return this._punits[index] || null;
     },
+    /**
+       @memberof Nehan.Partition
+       @return {int}
+    */
     getLength : function(){
       return this._punits.length;
     },
+    /**
+       @memberof Nehan.Partition
+       @return {int}
+    */
     getTotalWeight : function(){
       return List.fold(this._punits, 0, function(ret, punit){
 	return ret + punit.weight;
       });
     },
-    // merge(this._punits[0], partition._punits[0]),
-    // merge(this._punits[1], partition._punits[1]),
-    // ...
-    // merge(this._punits[n-1], partition._punits[n-1])
+    /**
+       @memberof Nehan.Partition
+       @param partition {Nehan.Partition}
+       @return {Nehan.Partition}
+    */
     mergeTo : function(partition){
       if(this.getLength() !== partition.getLength()){
 	throw "Partition::mergeTo, invalid merge target(length not same)";
       }
+      // merge(this._punits[0], partition._punits[0]),
+      // merge(this._punits[1], partition._punits[1]),
+      // ...
+      // merge(this._punits[n-1], partition._punits[n-1])
       var merged_punits =  List.mapi(this._punits, function(i, punit){
 	return punit.mergeTo(partition.get(i));
       });
       return new Partition(merged_punits);
     },
+    /**
+       @memberof Nehan.Partition
+       @param measure {int} - max measure size in px
+       @return {Array<int>} - divided size array
+    */
     mapMeasure : function(measure){
       var total_weight = this.getTotalWeight();
       var sizes =  List.map(this._punits, function(punit){
@@ -11862,6 +12048,19 @@ var InlineGenerator = (function(){
      @param style {Nehan.StyleContext}
      @param stream {Nehan.TokenStream}
      @param child_generator {Nehan.LayoutGenerator}
+     @description <pre>
+     * constructor argument child_generator is available when block generator yield
+     * child inline level, but firt token is not text element but child inline markup.
+     * for example see below.
+     *
+     * &lt;p&gt;&lt;a href="#"&gt;foo&lt;/a&gt;text,text&lt;/p&gt;
+     *
+     * &lt;p&gt; is block level, and &lt;a&gt; is inline level, then inline generator is
+     * spawned sharing same token stream of &lt;p&gt; and with inline generator of &lt;a&gt; as 'first' inline child generator.
+     * this mechanism is mainly performance issue, because inline level markup(&lt;a&gt; in this case) is
+     * already parsed and selector style is calculated, so to avoid double parse,
+     * we pass the first child generator to the consctuctor of inline generator.
+     *</pre>
   */
   function InlineGenerator(style, stream, child_generator){
     LayoutGenerator.call(this, style, stream);

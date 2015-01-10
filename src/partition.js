@@ -1,4 +1,11 @@
 var Partition = (function(){
+  /**
+     @memberof Nehan
+     @class Partition
+     @classdesc abstraction for partition of measure size.
+     @constructor
+     @param punits {Array.<PartitionUnit>}
+  */
   function Partition(punits){
     this._punits = punits || []; // partition units
   }
@@ -32,30 +39,53 @@ var Partition = (function(){
   };
 
   Partition.prototype = {
+    /**
+       @memberof Nehan.Partition
+       @param index {int}
+       @return {Nehan.PartitionUnit}
+    */
     get : function(index){
       return this._punits[index] || null;
     },
+    /**
+       @memberof Nehan.Partition
+       @return {int}
+    */
     getLength : function(){
       return this._punits.length;
     },
+    /**
+       @memberof Nehan.Partition
+       @return {int}
+    */
     getTotalWeight : function(){
       return List.fold(this._punits, 0, function(ret, punit){
 	return ret + punit.weight;
       });
     },
-    // merge(this._punits[0], partition._punits[0]),
-    // merge(this._punits[1], partition._punits[1]),
-    // ...
-    // merge(this._punits[n-1], partition._punits[n-1])
+    /**
+       @memberof Nehan.Partition
+       @param partition {Nehan.Partition}
+       @return {Nehan.Partition}
+    */
     mergeTo : function(partition){
       if(this.getLength() !== partition.getLength()){
 	throw "Partition::mergeTo, invalid merge target(length not same)";
       }
+      // merge(this._punits[0], partition._punits[0]),
+      // merge(this._punits[1], partition._punits[1]),
+      // ...
+      // merge(this._punits[n-1], partition._punits[n-1])
       var merged_punits =  List.mapi(this._punits, function(i, punit){
 	return punit.mergeTo(partition.get(i));
       });
       return new Partition(merged_punits);
     },
+    /**
+       @memberof Nehan.Partition
+       @param measure {int} - max measure size in px
+       @return {Array<int>} - divided size array
+    */
     mapMeasure : function(measure){
       var total_weight = this.getTotalWeight();
       var sizes =  List.map(this._punits, function(punit){

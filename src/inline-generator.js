@@ -8,6 +8,19 @@ var InlineGenerator = (function(){
      @param style {Nehan.StyleContext}
      @param stream {Nehan.TokenStream}
      @param child_generator {Nehan.LayoutGenerator}
+     @description <pre>
+     * constructor argument child_generator is available when block generator yield
+     * child inline level, but firt token is not text element but child inline markup.
+     * for example see below.
+     *
+     * &lt;p&gt;&lt;a href="#"&gt;foo&lt;/a&gt;text,text&lt;/p&gt;
+     *
+     * &lt;p&gt; is block level, and &lt;a&gt; is inline level, then inline generator is
+     * spawned sharing same token stream of &lt;p&gt; and with inline generator of &lt;a&gt; as 'first' inline child generator.
+     * this mechanism is mainly performance issue, because inline level markup(&lt;a&gt; in this case) is
+     * already parsed and selector style is calculated, so to avoid double parse,
+     * we pass the first child generator to the consctuctor of inline generator.
+     *</pre>
   */
   function InlineGenerator(style, stream, child_generator){
     LayoutGenerator.call(this, style, stream);

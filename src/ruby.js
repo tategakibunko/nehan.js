@@ -1,4 +1,12 @@
 var Ruby = (function(){
+  /**
+     @memberof Nehan
+     @class Ruby
+     @classdesc abstraction of ruby text.
+     @constructor
+     @param rbs {Array<Nehan.Char>} - characters of &lt;rb&gt; tag.
+     @param rt {Nehan.Tag}
+  */
   function Ruby(rbs, rt){
     this._type = "ruby";
     this.rbs = rbs;
@@ -6,34 +14,73 @@ var Ruby = (function(){
   }
 
   Ruby.prototype = {
+    /**
+       @memberof Nehan.Ruby
+       @return {boolean}
+    */
     hasMetrics : function(){
       return (typeof this.advanceSize !== "undefined");
     },
+    /**
+       @memberof Nehan.Ruby
+       @return {int}
+    */
     getCharCount : function(){
       return this.rbs? this.rbs.length : 0;
     },
+    /**
+       @memberof Nehan.Ruby
+       @return {int}
+    */
     getAdvance : function(flow){
       return this.advanceSize;
     },
+    /**
+       @memberof Nehan.Ruby
+       @return {Array<Nehan.Char>}
+    */
     getRbs : function(){
       return this.rbs;
     },
+    /**
+       @memberof Nehan.Ruby
+       @return {String}
+    */
     getRtString : function(){
       return this.rt? this.rt.getContent() : "";
     },
+    /**
+       @memberof Nehan.Ruby
+       @return {int}
+    */
     getRtFontSize : function(){
       return this.rtFontSize;
     },
+    /**
+       @memberof Nehan.Ruby
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssHoriRuby : function(line){
       var css = {};
       css.display = "inline-block";
       return css;
     },
+    /**
+       @memberof Nehan.Ruby
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertRt : function(line){
       var css = {};
       css["css-float"] = "left";
       return css;
     },
+    /**
+       @memberof Nehan.Ruby
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssHoriRt : function(line){
       var css = {};
       var offset = Math.floor((line.style.getFontSize() - this.getRtFontSize()) / 3);
@@ -41,6 +88,11 @@ var Ruby = (function(){
       css["line-height"] = "1em";
       return css;
     },
+    /**
+       @memberof Nehan.Ruby
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertRb : function(line){
       var css = {};
       css["css-float"] = "left";
@@ -49,6 +101,11 @@ var Ruby = (function(){
       }
       return css;
     },
+    /**
+       @memberof Nehan.Ruby
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssHoriRb : function(line){
       var css = {};
       if(this.padding){
@@ -57,6 +114,12 @@ var Ruby = (function(){
       css["text-align"] = "center";
       return css;
     },
+    /**
+       @memberof Nehan.Ruby
+       @param flow {Nehan.BoxFlow}
+       @param font {Nehan.Font}
+       @param letter_spacing {int}
+    */
     setMetrics : function(flow, font, letter_spacing){
       this.rtFontSize = Display.getRtFontSize(font.size);
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){

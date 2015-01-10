@@ -1,15 +1,33 @@
 var PseudoSelector = (function(){
+  /**
+     @memberof Nehan
+     @class PseudoSelector
+     @classdesc abstraction of css pseudo element or pseudo class selector
+     @constructor
+     @param expr {String}
+     @example
+     * var ps = new PseudoSelector("::first-letter").hasPseudoElement(); // true
+  */
   function PseudoSelector(expr){
     this.name = this._normalize(expr);
   }
 
   PseudoSelector.prototype = {
+    /**
+       @memberof Nehan.PseudoSelector
+       @return {boolean}
+    */
     hasPseudoElement : function(){
       return (this.name === "before" ||
 	      this.name === "after" ||
 	      this.name === "first-letter" ||
 	      this.name === "first-line");
     },
+    /**
+       @memberof Nehan.PseudoSelector
+       @param style {Nehan.StyleContext}
+       @return {boolean}
+    */
     test : function(style){
       switch(this.name){
       // pseudo-element

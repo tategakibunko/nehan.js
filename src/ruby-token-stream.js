@@ -1,4 +1,14 @@
 var RubyTokenStream = (function(){
+  /**
+     token stream of &lt;ruby&gt; tag content.
+
+     @memberof Nehan
+     @class RubyTokenStream
+     @classdesc 
+     @constructor
+     @extends {Nehan.TokenStream}
+     @param markup {Nehan.Tag}
+  */
   function RubyTokenStream(markup_ruby){
     TokenStream.call(this, markup_ruby.getContent());
     this.getAll();
