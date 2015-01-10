@@ -1,19 +1,42 @@
 var DocumentGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class DocumentGenerator
+     @classdesc generator of formal html content including &lt;!doctype&gt; tag.
+     @constructor
+     @param text {String} - html source text
+  */
   function DocumentGenerator(text){
     this.stream = new DocumentTokenStream(text);
     this.generator = this._createGenerator();
   }
 
   DocumentGenerator.prototype = {
+    /**
+       @memberof Nehan.DocumentGenerator
+       @return {Nehan.Box}
+    */
     yield : function(){
       return this.generator.yield();
     },
+    /**
+       @memberof Nehan.DocumentGenerator
+       @return {boolean}
+    */
     hasNext : function(){
       return this.generator.hasNext();
     },
+    /**
+       @memberof Nehan.DocumentGenerator
+       @param status {boolean}
+    */
     setTerminate : function(status){
       this.generator.setTerminate(status);
     },
+    /**
+       @memberof Nehan.DocumentGenerator
+       @param text {String}
+    */
     addText : function(text){
       this.generator.addText(text);
     },

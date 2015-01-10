@@ -1,4 +1,10 @@
 var PageStream = (function(){
+  /**
+     @memberof Nehan
+     @class PageStream
+     @classdesc async stream of paged-media.
+     @param text {String} - html source text
+  */
   function PageStream(text){
     this.text = this._createSource(text);
     this._trees = [];

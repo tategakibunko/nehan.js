@@ -1,6 +1,15 @@
-// style of first line generator is enabled until first line is yielded.
-// after yielding first line, parent style is inherited.
 var FirstLineGenerator = (function(){
+  /**
+   * style of first line generator is enabled until first line is yielded.<br>
+   * after yielding first line, parent style is inherited.
+   @memberof Nehan
+   @class FirstLineGenerator
+   @classdesc generator to yield first line block.
+   @constructor
+   @param style {Nehan.StyleContext}
+   @param stream {Nehan.TokenStream}
+   @extends {Nehan.BlockGenerator}
+  */
   function FirstLineGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }

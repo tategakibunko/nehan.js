@@ -30,6 +30,18 @@ Nehan.addSingleTagByRex = function(rex){
   Nehan.__single_tag_rexes__.push(rex);
 };
 
+/**
+   return engine module object.
+
+   @namespace Nehan
+   @memberof Nehan
+   @method setup
+   @param engine_args {Object}
+   @param engine_args.config {Nehan.Config} - system config
+   @param engine_args.display {Nehan.Display} - standard page parameters
+   @param engine_args.style {Nehan.Style} - engine local style
+   @return {Object}
+*/
 // this function return the engine module(ends at nehan-setup-end.js),
 // enclosing local environment(Style, Display, Config, DocumentContext etc).
 // so each engine module has it's own environment.

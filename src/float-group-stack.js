@@ -1,4 +1,3 @@
-// pop floated element both from start and end, but select larger one.
 var FloatGroupStack = (function(){
 
   // [float block] -> FloatGroup
@@ -35,6 +34,15 @@ var FloatGroupStack = (function(){
     return ret;
   };
 
+  /**
+     @memberof Nehan
+     @class FloatGroupStack
+     @classdesc pop floated element both from start and end, but select one that has larger extent.
+     @constructor
+     @param flow {Nehan.BoxFlow}
+     @param start_blocks {Array.<Nehan.Box>}
+     @param end_blocks {Array.<Nehan.Box>}
+  */
   function FloatGroupStack(flow, start_blocks, end_blocks){
     var start_groups = __make_float_groups(flow, FloatDirections.get("start"), start_blocks);
     var end_groups = __make_float_groups(flow, FloatDirections.get("end"), end_blocks);
@@ -49,12 +57,24 @@ var FloatGroupStack = (function(){
   }
 
   FloatGroupStack.prototype = {
+    /**
+       @memberof Nehan.FloatGroupStack
+       @return {boolean}
+    */
     isEmpty : function(){
       return this.stack.length === 0;
     },
+    /**
+       @memberof Nehan.FloatGroupStack
+       @return {int}
+    */
     getExtent : function(){
       return this.extent;
     },
+    /**
+       @memberof Nehan.FloatGroupStack
+       @return {Nehan.FloatGroup}
+    */
     pop : function(){
       return this.stack.pop() || null;
     }

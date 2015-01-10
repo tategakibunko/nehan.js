@@ -12,6 +12,12 @@ var FlipGenerator = (function(){
   }
   Class.extend(FlipGenerator, BlockGenerator);
 
+  /**
+     @memberof Nehan.FlipGenerator
+     @method yield
+     @param context {Nehan.CursorContext}
+     @return {Nehan.Box}
+  */
   FlipGenerator.prototype.yield = function(context){
     // [measure of this.style] -> [extent of this.style.parent]
     // [extent of this.style]  -> [measure of this.style.parent]

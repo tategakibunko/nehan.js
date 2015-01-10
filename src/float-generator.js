@@ -1,7 +1,18 @@
 var FloatGenerator = (function(){
-  // caution: constructor argument 'style' is the style of parent.
-  // so if <body><float1>..</float1><float2>...</float2></body>,
-  // style of this contructor is 'body.style'
+  /**
+   * [caution]<br>
+   * constructor argument 'style' is the style of <b>parent</b>.<br>
+   * so if &lt;body&gt;&lt;float1&gt;..&lt;/float1&gt;&lt;float2&gt;...&lt;/float2&gt;&lt;/body&gt;,<br>
+   * style of this contructor is 'body.style'
+
+     @memberof Nehan
+     @class FloatGenerator
+     @classdesc generator of float layout
+     @constructor
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+     @param floated_generators {Array.<Nehan.LayoutGenerator>} - continuous floated generator collection
+  */
   function FloatGenerator(style, stream, floated_generators){
     BlockGenerator.call(this, style, stream);
     this.generators = floated_generators;
@@ -14,6 +25,10 @@ var FloatGenerator = (function(){
   }
   Class.extend(FloatGenerator, LayoutGenerator);
 
+  /**
+     @memberof Nehan.FloatGenerator
+     @return {boolean}
+  */
   FloatGenerator.prototype.hasNext = function(){
     if(this._hasNextFloat()){
       return true;

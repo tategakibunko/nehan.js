@@ -1,4 +1,14 @@
-var NehanPagedElement = (function(){
+Nehan.PagedElement = (function(){
+  /**
+     @memberof Nehan
+     @class PagedElement
+     @classdesc DOM element with {@link Nehan.PageStream}
+     @constructor
+     @param engine_args {Object}
+     @param engine_args.config {Nehan.Config} - system config
+     @param engine_args.display {Nehan.Display} - standard page parameters
+     @param engine_args.style {Nehan.Style} - engine local style
+  */
   function NehanPagedElement(engine_args){
     this.pageNo = 0;
     this.element = document.createElement("div");
@@ -96,5 +106,5 @@ var NehanPagedElement = (function(){
 })();
 
 Nehan.createPagedElement = function(engine_args){
-  return new NehanPagedElement(engine_args || {});
+  return new Nehan.PagedElement(engine_args || {});
 };
