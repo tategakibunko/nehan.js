@@ -1,4 +1,11 @@
 var TagAttrParser = (function(){
+  /**
+     @memberof Nehan
+     @class TagAttrParser
+     @classdesc tag attribute parser
+     @constructor
+     @param src {String}
+  */
   function TagAttrParser(src){
     this._lexer = new TagAttrLexer(src);
     this._attrs = {};
@@ -6,6 +13,10 @@ var TagAttrParser = (function(){
   }
 
   TagAttrParser.prototype = {
+    /**
+       @memberof Nehan.TagAttrParser
+       @return {Object}
+    */
     parse : function(){
       while(!this._isEnd()){
 	this._parseAttr();

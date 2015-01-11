@@ -1,4 +1,11 @@
 var TagAttrs = (function(){
+  /**
+     @memberof Nehan
+     @class TagAttrs
+     @classdesc tag attribute set wrapper
+     @constructor
+     @param src {String}
+  */
   function TagAttrs(src){
     var attrs_raw = src? (new TagAttrParser(src)).parse() : {};
     this.classes = this._parseClasses(attrs_raw);
@@ -11,12 +18,31 @@ var TagAttrs = (function(){
   };
 
   TagAttrs.prototype = {
+    /**
+       @memberof Nehan.TagAttrs
+       @param name {String} - attribute name
+       @return {boolean}
+    */
     hasAttr : function(name){
       return (typeof this.attrs.name !== "undefined");
     },
+    /**
+       @memberof Nehan.TagAttrs
+       @param klass {String} - css class name
+       @return {boolean}
+    */
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
     },
+    /**
+     * add class name, but note that all css classes is force added prefix 'nehan-'.<br>
+     * that is, if you add class "foo", it's registered as "nehan-foo"<br>
+     * to avoid external css classes defined in client browser window.
+
+       @memberof Nehan.TagAttrs
+       @param klass {String} - css class name
+       @return {Array.<String>} current css classes
+    */
     addClass : function(klass){
       klass = (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
       if(!this.hasClass(klass)){
@@ -25,6 +51,10 @@ var TagAttrs = (function(){
       }
       return this.classes;
     },
+    /**
+       @memberof Nehan.TagAttrs
+       @param klass {String} - css class name(prefiex by "nehan-")
+    */
     removeClass : function(klass){
       this.classes = List.filter(this.classes, function(cls){
 	return cls != klass;
@@ -32,19 +62,44 @@ var TagAttrs = (function(){
       this.setAttr("class", this.classes.join(" "));
       return this.classes;
     },
+    /**
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param def_value {default_value}
+       @return {attribute_value}
+    */
     getAttr : function(name, def_value){
       def_value = (typeof def_value === "undefined")? null : def_value;
       return (typeof this.attrs[name] === "undefined")? def_value : this.attrs[name];
     },
+    /**
+       get dataset value
+
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param def_value {default_value}
+       @return {dataset_value}
+    */
     getData : function(name, def_value){
       def_value = (typeof def_value === "undefined")? null : def_value;
       return (typeof this.dataset[name] === "undefined")? def_value : this.dataset[name];
     },
+    /**
+       get classes NOT prefixed by "nehan-".
+
+       @memberof Nehan.TagAttrs
+       @return {Array.<String>}
+    */
     getClassesRaw : function(){
       return List.map(this.classes, function(klass){
 	return klass.replace("nehan-", "");
       });
     },
+    /**
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param value {attribute_value}
+    */
     setAttr : function(name, value){
       if(name.indexOf("data-") === 0){
 	this.setData(__data_name_of(name), value);
@@ -52,6 +107,13 @@ var TagAttrs = (function(){
 	this.attrs[name] = value;
       }
     },
+    /**
+       set dataset value
+
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param value {dataset_value}
+    */
     setData : function(name, value){
       this.dataset[name] = value;
     },

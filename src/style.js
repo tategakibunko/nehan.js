@@ -1,4 +1,7 @@
-/*
+/**
+   @namespace Nehan.Style
+   @description <pre>
+
   Important notices about style.js
   ================================
 
@@ -93,6 +96,7 @@
   for example, assume that Display["hori"] is "lr-tb", and Display["vert"] is "tb-rl",
   and current document direction(Display.direction) is "hori",
   flow:"flip" means Display["vert"], "tb-rl".
+</pre>
 */
 var Style = {
   //-------------------------------------------------------

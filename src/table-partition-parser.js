@@ -1,4 +1,15 @@
+/**
+   table partition parser module
+
+   @namespace Nehan.TablePartitionParser
+*/
 var TablePartitionParser = {
+  /**
+    @memberof Nehan.TablePartitionParser
+    @param style {Nehan.StyleContext}
+    @param stream {Nehan.TokenStream}
+    @return {Nehan.PartitionHashSet}
+  */
   parse : function(style, stream){
     var pset = new PartitionHashSet();
     while(stream.hasNext()){

@@ -1,18 +1,35 @@
 var TagAttrLexer = (function(){
   var __rex_symbol = /[^=\s]+/;
 
-  // lexer src is attribute parts of original tag source.
-  // so if tag source is "<div class='nehan-float-start'>",
-  // then lexer src is "class='nehan-float-start'".
+  /**
+     @memberof Nehan
+     @class TagAttrLexer
+     @classdesc tag attribute string lexer
+     @constructor
+     @param src {String}
+     @description <pre>
+     * lexer src is attribute parts of original tag source.
+     * so if tag source is "<div class='nehan-float-start'>",
+     * then lexer src is "class='nehan-float-start'".
+     </pre>
+  */
   function TagAttrLexer(src){
     this.buff = src;
     this._error = false;
   }
 
   TagAttrLexer.prototype = {
+    /**
+       @memberof Nehan.TagAttrLexer
+       @return {boolean}
+    */
     isEnd : function(){
       return this._error || (this.buff === "");
     },
+    /**
+       @memberof Nehan.TagAttrLexer
+       @return {symbol}
+    */
     get : function(){
       var c1 = this._peek();
       if(c1 === null){

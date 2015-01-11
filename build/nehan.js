@@ -738,7 +738,10 @@ var LexingRule = (function(){
 })();
 
 
-/*
+/**
+   @namespace Nehan.Style
+   @description <pre>
+
   Important notices about style.js
   ================================
 
@@ -833,6 +836,7 @@ var LexingRule = (function(){
   for example, assume that Display["hori"] is "lr-tb", and Display["vert"] is "tb-rl",
   and current document direction(Display.direction) is "hori",
   flow:"flip" means Display["vert"], "tb-rl".
+</pre>
 */
 var Style = {
   //-------------------------------------------------------
@@ -3803,18 +3807,35 @@ var Selectors = (function(){
 var TagAttrLexer = (function(){
   var __rex_symbol = /[^=\s]+/;
 
-  // lexer src is attribute parts of original tag source.
-  // so if tag source is "<div class='nehan-float-start'>",
-  // then lexer src is "class='nehan-float-start'".
+  /**
+     @memberof Nehan
+     @class TagAttrLexer
+     @classdesc tag attribute string lexer
+     @constructor
+     @param src {String}
+     @description <pre>
+     * lexer src is attribute parts of original tag source.
+     * so if tag source is "<div class='nehan-float-start'>",
+     * then lexer src is "class='nehan-float-start'".
+     </pre>
+  */
   function TagAttrLexer(src){
     this.buff = src;
     this._error = false;
   }
 
   TagAttrLexer.prototype = {
+    /**
+       @memberof Nehan.TagAttrLexer
+       @return {boolean}
+    */
     isEnd : function(){
       return this._error || (this.buff === "");
     },
+    /**
+       @memberof Nehan.TagAttrLexer
+       @return {symbol}
+    */
     get : function(){
       var c1 = this._peek();
       if(c1 === null){
@@ -3864,6 +3885,13 @@ var TagAttrLexer = (function(){
 
 
 var TagAttrParser = (function(){
+  /**
+     @memberof Nehan
+     @class TagAttrParser
+     @classdesc tag attribute parser
+     @constructor
+     @param src {String}
+  */
   function TagAttrParser(src){
     this._lexer = new TagAttrLexer(src);
     this._attrs = {};
@@ -3871,6 +3899,10 @@ var TagAttrParser = (function(){
   }
 
   TagAttrParser.prototype = {
+    /**
+       @memberof Nehan.TagAttrParser
+       @return {Object}
+    */
     parse : function(){
       while(!this._isEnd()){
 	this._parseAttr();
@@ -3907,6 +3939,13 @@ var TagAttrParser = (function(){
 })();
 
 var TagAttrs = (function(){
+  /**
+     @memberof Nehan
+     @class TagAttrs
+     @classdesc tag attribute set wrapper
+     @constructor
+     @param src {String}
+  */
   function TagAttrs(src){
     var attrs_raw = src? (new TagAttrParser(src)).parse() : {};
     this.classes = this._parseClasses(attrs_raw);
@@ -3919,12 +3958,31 @@ var TagAttrs = (function(){
   };
 
   TagAttrs.prototype = {
+    /**
+       @memberof Nehan.TagAttrs
+       @param name {String} - attribute name
+       @return {boolean}
+    */
     hasAttr : function(name){
       return (typeof this.attrs.name !== "undefined");
     },
+    /**
+       @memberof Nehan.TagAttrs
+       @param klass {String} - css class name
+       @return {boolean}
+    */
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
     },
+    /**
+     * add class name, but note that all css classes is force added prefix 'nehan-'.<br>
+     * that is, if you add class "foo", it's registered as "nehan-foo"<br>
+     * to avoid external css classes defined in client browser window.
+
+       @memberof Nehan.TagAttrs
+       @param klass {String} - css class name
+       @return {Array.<String>} current css classes
+    */
     addClass : function(klass){
       klass = (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
       if(!this.hasClass(klass)){
@@ -3933,6 +3991,10 @@ var TagAttrs = (function(){
       }
       return this.classes;
     },
+    /**
+       @memberof Nehan.TagAttrs
+       @param klass {String} - css class name(prefiex by "nehan-")
+    */
     removeClass : function(klass){
       this.classes = List.filter(this.classes, function(cls){
 	return cls != klass;
@@ -3940,19 +4002,44 @@ var TagAttrs = (function(){
       this.setAttr("class", this.classes.join(" "));
       return this.classes;
     },
+    /**
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param def_value {default_value}
+       @return {attribute_value}
+    */
     getAttr : function(name, def_value){
       def_value = (typeof def_value === "undefined")? null : def_value;
       return (typeof this.attrs[name] === "undefined")? def_value : this.attrs[name];
     },
+    /**
+       get dataset value
+
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param def_value {default_value}
+       @return {dataset_value}
+    */
     getData : function(name, def_value){
       def_value = (typeof def_value === "undefined")? null : def_value;
       return (typeof this.dataset[name] === "undefined")? def_value : this.dataset[name];
     },
+    /**
+       get classes NOT prefixed by "nehan-".
+
+       @memberof Nehan.TagAttrs
+       @return {Array.<String>}
+    */
     getClassesRaw : function(){
       return List.map(this.classes, function(klass){
 	return klass.replace("nehan-", "");
       });
     },
+    /**
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param value {attribute_value}
+    */
     setAttr : function(name, value){
       if(name.indexOf("data-") === 0){
 	this.setData(__data_name_of(name), value);
@@ -3960,6 +4047,13 @@ var TagAttrs = (function(){
 	this.attrs[name] = value;
       }
     },
+    /**
+       set dataset value
+
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param value {dataset_value}
+    */
     setData : function(name, value){
       this.dataset[name] = value;
     },
@@ -4012,6 +4106,14 @@ var TagAttrs = (function(){
 // to avoid name-conflicts about existing name space of stylesheet,
 // all class names and id in nehan.js are forced to be prefixed by "nehan-".
 var Tag = (function (){
+  /**
+     @memberof Nehan
+     @class Tag
+     @classdesc abstraction of html tag markup.
+     @constructor
+     @param src {String} - string of markup part like "&lt;div class='foo'&gt;"
+     @param content {String} - content text of markup
+  */
   function Tag(src, content){
     this._type = "tag";
     this.src = src;
@@ -4021,93 +4123,207 @@ var Tag = (function (){
   }
 
   Tag.prototype = {
+    /**
+       @memberof Nehan.Tag
+       @return {Nehan.Tag}
+    */
     clone : function(){
       return new Tag(this.src, this.content);
     },
+    /**
+       @memberof Nehan.Tag
+       @param content {String}
+    */
     setContent : function(content){
       if(this._fixed){
 	return;
       }
       this.content = content;
     },
+    /**
+       @memberof Nehan.Tag
+       @param status {boolean}
+    */
     setContentImmutable : function(status){
       this._fixed = status;
     },
+    /**
+       @memberof Nehan.Tag
+       @param name {String} - alias markup name
+    */
     setAlias : function(name){
       this.alias = name;
     },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @param value {attribute_value}
+    */
     setAttr : function(name, value){
       this.attrs.setAttr(name, value);
     },
+    /**
+       @memberof Nehan.Tag
+       @param attrs {Object}
+    */
     setAttrs : function(attrs){
       for(var name in attrs){
 	this.setAttr(name, attrs[name]);
       }
     },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @param value {dataset_value}
+    */
     setData : function(name, value){
       this.attrs.setData(name, value);
     },
+    /**
+       @memberof Nehan.Tag
+       @param klass {String}
+    */
     addClass : function(klass){
       this.attrs.addClass(klass);
     },
+    /**
+       @memberof Nehan.Tag
+       @param klass {String}
+    */
     removeClass : function(klass){
       this.attrs.removeClass(klass);
     },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
     getId : function(){
       return this.attrs.id;
     },
+    /**
+       @memberof Nehan.Tag
+       @return {Array.<String>}
+    */
     getClasses : function(){
       return this.attrs.classes;
     },
+    /**
+       @memberof Nehan.Tag
+       @return {Array.<String>}
+    */
     getClassesRaw : function(){
       return this.attrs.getClassesRaw();
     },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
     getName : function(){
       return this.alias || this.name;
     },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @param def_value {default_value}
+       @return {attribute_value}
+    */
     getAttr : function(name, def_value){
       return this.attrs.getAttr(name, def_value);
     },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @param def_value {default_value}
+       @return {dataset_value}
+    */
     getData : function(name, def_value){
       return this.attrs.getData(name, def_value);
     },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
     getContent : function(){
       return this.content;
     },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
     getSrc : function(){
       return this.src;
     },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
     getWrapSrc : function(){
       if(this.content === ""){
 	return this.src;
       }
       return this.src + this.content + "</" + this.name + ">";
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     hasClass : function(klass){
       return this.attrs.hasClass(klass);
     },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @return {boolean}
+    */
     hasAttr : function(name){
       return this.attrs.hasAttr(name);
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isHeaderTag : function(){
       return List.exists(["h1", "h2", "h3", "h4", "h5", "h6"], Closure.eq(this.name));
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isAnchorTag : function(){
       return this.name === "a" && this.getTagAttr("name") !== null;
     },
+    /**
+       @memberof Nehan.Tag
+    */
     isAnchorLinkTag : function(){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isPageBreakTag : function(){
       return this.name === "page-break" || this.name === "end-page" || this.name === "pbr";
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isCloseTag : function(){
       return this.name.charAt(0) === "/";
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isSingleTag : function(){
       return this._single || false;
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isEmpty : function(){
       return this.content === "";
     },
@@ -4851,21 +5067,45 @@ var Word = (function(){
 
 
 var Tcy = (function(){
+  /**
+     @memberof Nehan
+     @class Tcy
+     @classdesc abstraction of tcy(tate-chu-yoko) character.
+     @constructor
+     @param tcy {String}
+  */
   function Tcy(tcy){
     this.data = tcy;
     this._type = "tcy";
   }
 
   Tcy.prototype = {
+    /**
+       @memberof Nehan.Tcy
+       @return {int}
+    */
     getCharCount : function(){
       return 1;
     },
+    /**
+       @memberof Nehan.Tcy
+       @return {int}
+    */
     getAdvance : function(flow, letter_spacing){
       return this.bodySize + letter_spacing;
     },
+    /**
+       @memberof Nehan.Tcy
+       @return {boolean}
+    */
     hasMetrics : function(){
       return (typeof this.bodySize != "undefined");
     },
+    /**
+       @memberof Nehan.Tcy
+       @param flow {Nehan.BoxFlow}
+       @param font {Nehan.Font}
+    */
     setMetrics : function(flow, font){
       this.bodySize = font.size;
     }
@@ -9506,20 +9746,43 @@ var Breaks = {
 
 
 var TextAlign = (function(){
+  /**
+     @memberof Nehan
+     @class TextAlign
+     @classdesc abstraction of logical text align(start, end, center)
+     @constructor
+     @param value {String} - logical align direction, "start" or "end" or "center"
+  */
   function TextAlign(value){
     this.value = value || "start";
   }
 
   TextAlign.prototype = {
+    /**
+       @memberof Nehan.TextAlign
+       @return {boolean}
+    */
     isStart : function(){
       return this.value === "start";
     },
+    /**
+       @memberof Nehan.TextAlign
+       @return {boolean}
+    */
     isEnd : function(){
       return this.value === "end";
     },
+    /**
+       @memberof Nehan.TextAlign
+       @return {boolean}
+    */
     isCenter : function(){
       return this.value === "center";
     },
+    /**
+       @memberof Nehan.TextAlign
+       @return {Object}
+    */
     getCss : function(line){
       var css = {};
       if(this.value === "center"){
@@ -9532,10 +9795,20 @@ var TextAlign = (function(){
 })();
 
 
+/**
+   pre defined text align set
+
+   @namespace Nehan.TextAligns
+*/
 var TextAligns = {
   start:(new TextAlign("start")),
   end:(new TextAlign("end")),
   center:(new TextAlign("center")),
+  /**
+     @memberof Nehan.TextAligns
+     @param value - logical text align direction, "start" or "end" or "center".
+     @return {Nehan.TextAlign}
+  */
   get : function(value){
     return this[value] || null;
   }
@@ -9731,7 +10004,18 @@ var PartitionHashSet = (function(){
 })();
 
 
+/**
+   table partition parser module
+
+   @namespace Nehan.TablePartitionParser
+*/
 var TablePartitionParser = {
+  /**
+    @memberof Nehan.TablePartitionParser
+    @param style {Nehan.StyleContext}
+    @param stream {Nehan.TokenStream}
+    @return {Nehan.PartitionHashSet}
+  */
   parse : function(style, stream){
     var pset = new PartitionHashSet();
     while(stream.hasNext()){
@@ -10039,6 +10323,7 @@ var StyleContext = (function(){
   /**
      @memberof Nehan
      @class StyleContext
+     @classdesc abstraction of document tree hierarchy with selector values, associated markup, cursor_context.
      @constructor
      @param markup {Nehan.Tag} - markup of style
      @param paernt {Nehan.StyleContext} - parent style context
@@ -10188,29 +10473,33 @@ var StyleContext = (function(){
     },
     /**
        called when section root(body, blockquote, fieldset, figure, td) starts.
+
        @memberof Nehan.StyleContext
-     */
+    */
     startOutlineContext : function(){
       this.outlineContext = new OutlineContext(this.getMarkupName());
     },
     /**
        called when section root(body, blockquote, fieldset, figure, td) ends.
+
        @memberof Nehan.StyleContext
        @method endOutlineContext
-     */
+    */
     endOutlineContext : function(){
       DocumentContext.addOutlineContext(this.getOutlineContext());
     },
     /**
        called when section content(article, aside, nav, section) starts.
+
        @memberof Nehan.StyleContext
        @method startSectionContext
-     */
+    */
     startSectionContext : function(){
       this.getOutlineContext().startSection(this.getMarkupName());
     },
     /**
        called when section content(article, aside, nav, section) ends.
+
        @memberof Nehan.StyleContext
        @method startSectionContext
     */
@@ -10219,10 +10508,11 @@ var StyleContext = (function(){
     },
     /**
        called when heading content(h1-h6) starts.
+
        @memberof Nehan.StyleContext
        @method startHeaderContext
        @return {string} header id
-     */
+    */
     startHeaderContext : function(opt){
       return this.getOutlineContext().addHeader({
 	type:opt.type,
@@ -10258,6 +10548,7 @@ var StyleContext = (function(){
     },
     /**
      update context size, but static size is preferred, called from {@link Nehan.FlipGenerator}.
+
      @memberof Nehan.StyleContext
      @method updateContextSize
      @param measure {int}
@@ -10270,6 +10561,8 @@ var StyleContext = (function(){
        force update context size, called from generator of floating-rest-generator.
 
        @memberof Nehan.StyleContext
+       @param measure {int}
+       @param extent {int}
     */
     forceUpdateContextSize : function(measure, extent){
       this.initContextSize(measure, extent);
@@ -10281,7 +10574,10 @@ var StyleContext = (function(){
     },
     /**
        clone style-context with temporary css
+
        @memberof Nehan.StyleContext
+       @param css {Object}
+       @return {Nehan.StyleContext}
     */
     clone : function(css){
       // no one can clone root style.
@@ -10295,7 +10591,9 @@ var StyleContext = (function(){
     },
     /**
        append child style context
+
        @memberof Nehan.StyleContext
+       @param child_style {Nehan.StyleContext}
     */
     appendChild : function(child_style){
       if(this.childs.length > 0){
@@ -10307,6 +10605,8 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @param child_style {Nehan.StyleContext}
+       @return {Nehan.StyleContext | null} removed child or null if nothing removed.
     */
     removeChild : function(child_style){
       var index = List.indexOf(this.childs, function(child){
@@ -10322,6 +10622,10 @@ var StyleContext = (function(){
        inherit style with tag_name and css(optional).
 
        @memberof Nehan.StyleContext
+       @param tag_name {String}
+       @param css {Object}
+       @param tag_attr {Object}
+       @return {Nehan.StyleContext}
     */
     createChild : function(tag_name, css, tag_attr){
       var tag = new Tag("<" + tag_name + ">");
@@ -10332,6 +10636,7 @@ var StyleContext = (function(){
        calclate max marker size by total child_count(item_count).
 
        @memberof Nehan.StyleContext
+       @param item_count {int}
     */
     setListItemCount : function(item_count){
       var max_marker_html = this.getListMarkerHtml(item_count);
@@ -10345,18 +10650,31 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isClone : function(){
       return this._isClone || false;
     },
     /**
        @memberof Nehan.StyleContext
+       @param state {boolean}
     */
     setClone : function(state){
       this._isClone = state;
     },
     /**
        @memberof Nehan.StyleContext
+       @param opt {Object}
+       @param opt.extent {int}
+       @param opt.elements {Array.<Nehan.Box>}
+       @param opt.breakAfter {boolean}
+       @param opt.blockId {int}
+       @param opt.rootBlockId {int}
+       @param opt.content {String}
+       @param opt.cancelEdge {Object}
+       @param opt.cancelEdge.before {int}
+       @param opt.cancelEdge.after {int}
+       @return {Nehan.Box}
     */
     createBlock : function(opt){
       opt = opt || {};
@@ -10410,6 +10728,9 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @param opt
+       @param opt.breakAfter {boolean}
+       @return {Nehan.Box}
     */
     createImage : function(opt){
       opt = opt || {};
@@ -10433,6 +10754,17 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @param opt
+       @param opt.measure {int}
+       @param opt.content {String}
+       @param opt.charCount {int}
+       @param opt.elements {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
+       @param opt.texts {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
+       @param opt.maxFontSize {int}
+       @param opt.maxExtent {int}
+       @param opt.lineBreak {boolean}
+       @param opt.breakAfter {boolean}
+       @return {Nehan.Box}
     */
     createLine : function(opt){
       opt = opt || {};
@@ -10486,6 +10818,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Nehan.Box}
     */
     createBreakLine : function(){
       var line = new Box(this.flow.getBoxSize(this.contentMeasure, 0), this);
@@ -10495,6 +10828,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isDisabled : function(){
       if(this.display === "none"){
@@ -10516,6 +10850,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isBlock : function(){
       switch(this.display){
@@ -10534,30 +10869,35 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isRoot : function(){
       return this.parent === null;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isChildBlock : function(){
       return this.isBlock() && !this.isRoot();
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isInlineBlock : function(){
       return this.display === "inline-block";
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isInline : function(){
       return this.display === "inline";
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isRootLine : function(){
       // check if current inline is anonymous line block.
@@ -10570,72 +10910,84 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isFloatStart : function(){
       return this.floatDirection && this.floatDirection.isStart();
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isFloatEnd : function(){
       return this.floatDirection && this.floatDirection.isEnd();
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isFloated : function(){
       return this.isFloatStart() || this.isFloatEnd();
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isParallel : function(){
       return this.display === "list-item";
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isPushed : function(){
       return this.getMarkupAttr("pushed") !== null;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isPulled : function(){
       return this.getMarkupAttr("pulled") !== null;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isPasted : function(){
       return this.getMarkupAttr("pasted") !== null;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isTextEmphaEnable : function(){
       return (this.textEmpha && this.textEmpha.isEnable())? true : false;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isTextVertical : function(){
       return this.flow.isTextVertical();
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isTextHorizontal : function(){
       return this.flow.isTextHorizontal();
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isPositionAbsolute : function(){
       return this.position.isAbsolute();
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isPre : function(){
       var white_space = this.getCssAttr("white-space", "normal");
@@ -10643,6 +10995,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isPageBreak : function(){
       switch(this.getMarkupName()){
@@ -10654,18 +11007,21 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isBreakBefore : function(){
       return this.breakBefore? !this.breakBefore.isAvoid() : false;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isBreakAfter : function(){
       return this.breakAfter? !this.breakAfter.isAvoid() : false;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isFirstChild : function(){
       var childs = this.getParentChilds();
@@ -10673,6 +11029,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isFirstOfType : function(){
       var childs = this.getParentChildsOfType(this.getMarkupName());
@@ -10680,6 +11037,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isLastChild : function(){
       // for descent parsing, last child can't be gained,
@@ -10690,6 +11048,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isLastOfType : function(){
       //return List.last(this.getParentChildsOfType(this.getMarkupName())) === this;
@@ -10697,6 +11056,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isOnlyChild : function(){
       var childs = this.getParentChilds();
@@ -10704,6 +11064,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isOnlyOfType : function(){
       var childs = this.getParentChildsOfType(this.getMarkupName());
@@ -10711,18 +11072,21 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isMarkupEmpty : function(){
       return this.markup.isEmpty();
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     isWordBreakAll : function(){
       return this.wordBreak && this.wordBreak === "break-all";
     },
     /**
        @memberof Nehan.StyleContext
+       @return {boolean}
     */
     hasFlipFlow : function(){
       return this.parent? (this.flow !== this.parent.flow) : false;
@@ -10740,12 +11104,14 @@ var StyleContext = (function(){
       this.breakAfter = null;
     },
     /**
-       search property from markup attributes
+       search property from markup attributes first, and css values second.
 
        @memberof Nehan.StyleContext
+       @param name {String}
+       @param def_value {default_value}
+       @return {value}
     */
     getAttr : function(name, def_value){
-      // search property from markup attribute -> css
       var ret = this.getMarkupAttr(name);
       if(typeof ret !== "undefined" && ret !== null){
 	return ret;
@@ -10758,6 +11124,9 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @param name {String}
+       @param def_value {default_value}
+       @return {value}
     */
     getMarkupAttr : function(name, def_value){
       // if markup is "<img src='aaa.jpg'>"
@@ -10781,6 +11150,8 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @param name {String}
+       @param value {css_value}
     */
     setCssAttr : function(name, value){
       if(__is_managed_css_prop(name)){
@@ -10791,7 +11162,11 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
-       @description notice that subdivided properties like 'margin-before' as [name] are always not found,<br>
+       @param name {String}
+       @def_value {default_value}
+       @return {css_value}
+       @description <pre>
+       * notice that subdivided properties like 'margin-before' as [name] are always not found,
        * even if you defined them in setStyle(s).
        * because all subdivided properties are already converted into unified name in loading process.
     */
@@ -10809,18 +11184,21 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {String}
     */
     getParentMarkupName : function(){
       return this.parent? this.parent.getMarkupName() : null;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {String}
     */
     getMarkupName : function(){
       return this.markup.getName();
     },
     /**
        @memberof Nehan.StyleContext
+       @return {String}
     */
     getMarkupId : function(){
       // if markup is <p id="foo">, markup.id is "nehan-foo".
@@ -10828,30 +11206,35 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Array.<String>}
     */
     getMarkupClasses : function(){
       return this.markup.getClasses();
     },
     /**
        @memberof Nehan.StyleContext
+       @return {String}
     */
     getMarkupContent : function(){
       return this.markup.getContent();
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getMarkupPos : function(){
       return this.markup.pos;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {String}
     */
     getMarkupData : function(name){
       return this.markup.getData(name);
     },
     /**
        @memberof Nehan.StyleContext
+       @return {String}
     */
     getContent : function(){
       var content = this.markup.getContent();
@@ -10877,72 +11260,85 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getHeaderRank : function(){
       return this.markup.getHeaderRank();
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getFontSize : function(){
       return this.font.size;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {String}
     */
     getFontFamily : function(){
       return this.font.family || Display.fontFamily;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Nehan.TextAlign}
     */
     getTextAlign : function(){
       return this.textAlign || TextAligns.get("start");
     },
     /**
        @memberof Nehan.StyleContext
+       @return {String}
     */
     getTextCombine : function(){
       return this.textCombine || null;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getLetterSpacing : function(){
       return this.letterSpacing || 0;
     },
     /**
        @memberof Nehan.StyleContext
+       @param order {int}
+       @return {String}
     */
     getListMarkerHtml : function(order){
       return this.listStyle? this.listStyle.getMarkerHtml(order) : (this.parent? this.parent.getListMarkerHtml(order) : "");
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getListMarkerSize : function(){
       return this.listMarkerSize? this.listMarkerSize : (this.parent? this.parent.getListMarkerSize() : this.getFontSize());
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Nehan.Color}
     */
     getColor : function(){
       return this.color || (this.parent? this.parent.getColor() : new Color(Display.fontColor));
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Nehan.Partition}
     */
     getTablePartition : function(){
       return this.tablePartition || (this.parent? this.parent.getTablePartition() : null);
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getChildCount : function(){
       return this.childs.length;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getChildIndex : function(){
       var self = this;
@@ -10952,6 +11348,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getChildIndexOfType : function(){
       var self = this;
@@ -10961,24 +11358,30 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Nehan.StyleContext}
     */
     getNthChild : function(nth){
       return this.childs[nth] || null;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Array.<Nehan.StyleContext>}
     */
     getParentChilds : function(){
       return this.parent? this.parent.childs : [];
     },
     /**
        @memberof Nehan.StyleContext
+       @param nth {int}
+       @return {Nehan.StyleContext}
     */
     getParentNthChild : function(nth){
       return this.parent? this.parent.getNthChild(nth) : null;
     },
     /**
        @memberof Nehan.StyleContext
+       @param markup_name {String}
+       @return {Nehan.StyleContext}
     */
     getParentChildsOfType : function(markup_name){
       return List.filter(this.getParentChilds(), function(child){
@@ -10987,48 +11390,56 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Nehan.BoxFlow}
     */
     getParentFlow : function(){
       return this.parent? this.parent.flow : this.flow;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getParentFontSize : function(){
       return this.parent? this.parent.getFontSize() : Display.fontSize;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getParentContentMeasure : function(){
       return this.parent? this.parent.contentMeasure : Display.getMeasure(this.flow);
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getParentContentExtent : function(){
       return this.parent? this.parent.contentExtent : Display.getExtent(this.flow);
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Nehan.StyleContext}
     */
     getNextSibling : function(){
       return this.next;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {float | int}
     */
     getLineRate : function(){
       return this.lineRate || Display.lineRate || 2;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getEmphaLineExtent : function(){
       return this.getFontSize() * 3;
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getRubyLineExtent : function(){
       var base_font_size = this.getFontSize();
@@ -11038,12 +11449,14 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getAutoLineExtent : function(){
       return Math.floor(this.getFontSize() * this.getLineRate());
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getEdgeMeasure : function(flow){
       var edge = this.edge || null;
@@ -11051,6 +11464,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getEdgeExtent : function(flow){
       var edge = this.edge || null;
@@ -11058,6 +11472,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Object} {before:xxx, after:yyy}
     */
     getBlockContextEdge : function(flow){
       flow = flow || this.flow;
@@ -11069,6 +11484,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getInnerEdgeMeasure : function(flow){
       var edge = this.edge || null;
@@ -11076,6 +11492,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
     */
     getInnerEdgeExtent : function(flow){
       var edge = this.edge || null;
@@ -11083,6 +11500,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Object}
     */
     getCssBlock : function(){
       // notice that box-size, box-edge is box local variable,<br>
@@ -11116,6 +11534,7 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Object}
     */
     getCssInline : function(){
       // notice that line-size, line-edge is box local variable,
@@ -13689,6 +14108,15 @@ var ListItemGenerator = (function(){
 // stream : [thead | tbody | tfoot]
 // yield : [thead | tbody | tfoot]
 var TableGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class TableGenerator
+     @classdesc generator of table tag content.
+     @constructor
+     @extends {Nehan.BlockGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TagStream}
+  */
   function TableGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
@@ -13703,6 +14131,15 @@ var TableGenerator = (function(){
 // stream : [tr]
 // yield : [tr]
 var TableRowGroupGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class TabeRowGroupGenerator
+     @classdesc generator of table group(tbody, thead, tfoo) content.
+     @constructor
+     @extends {Nehan.BlockGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TagStream}
+  */
   function TableRowGroupGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
@@ -13717,6 +14154,15 @@ var TableRowGroupGenerator = (function(){
 // stream : [td | th]
 // yield : parallel([td | th])
 var TableRowGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class TableRowGenerator
+     @classdesc generator of table row(TR) content.
+     @constructor
+     @extends {Nehan.ParallelGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TagStream}
+  */
   function TableRowGenerator(style, stream){
     var generators = this._getGenerators(style, stream);
     ParallelGenerator.call(this, style, generators);
@@ -13764,6 +14210,15 @@ var TableRowGenerator = (function(){
 })();
 
 var TableCellGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class TableCellGenerator
+     @classdesc generator of table-cell(td, th) content.
+     @constructor
+     @extends {Nehan.SectionRootGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function TableCellGenerator(style, stream){
     SectionRootGenerator.call(this, style, stream);
   }
