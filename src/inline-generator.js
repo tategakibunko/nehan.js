@@ -285,7 +285,7 @@ var InlineGenerator = (function(){
     
     // if there is enough space for this word, just return.
     if(advance <= rest_measure){
-      token.setDevided(false);
+      token.setDivided(false);
       return token;
     }
     // at this point, this word is larger than rest space.

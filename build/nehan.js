@@ -2160,37 +2160,78 @@ var Obj = {
   }
 };
 
+/**
+   misc utility module.
+
+   @namespace Nehan.Utils
+*/
 var Utils = {
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
   trimHeadCRLF : function(str){
     return str.replace(/^\n+/, "");
   },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
   trimFootCRLF : function(str){
     return str.replace(/\n+$/, "");
   },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
   trimCRLF : function(str){
     return this.trimFootCRLF(this.trimHeadCRLF(str));
   },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
   trim : function(str){
     return str.replace(/^\s+/, "").replace(/\s+$/, "");
   },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
   cutQuote : function(str){
     return str.replace(/['\"]/g, "");
   },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+     @example
+     * Nehan.Utils.capitalize("japan"); // "Japan"
+  */
   capitalize : function(str){
     if(str === ""){
       return "";
     }
     return str.charAt(0).toUpperCase() + str.slice(1);
   },
-  log : function(true_num, rad){
-    var radix = rad || 10;
-    return Math.log(true_num) / Math.log(radix);
-  },
+  /**
+     @memberof Nehan.Utils
+     @param p1 {String}
+     @param p2 {String}
+     @example
+     * Nehan.Utils.filenameConcat("/path/to", "foo"); // "/path/to/foo"
+     * Nehan.Utils.filenameConcat("/path/to/", "foo"); // "/path/to/foo"
+  */
   filenameConcat : function(p1, p2){
     p1 = (p1==="")? "" : (p1.slice(-1) === "/")? p1 : p1 + "/";
     p2 = (p2==="")? "" : (p2[0] === "/")? p2.substring(1, p2.length) : p2;
     return p1 + p2;
   },
+  /**
+     @memberof Nehan.Utils
+     @param name {String}
+     @example
+     * Nehan.Utils.camelize("font-size"); // "fontSize"
+  */
   camelize : function(name){
     var self = this;
     return (name.indexOf("-") < 0)? name : List.mapi(name.split("-"), function(i, part){
@@ -2758,7 +2799,7 @@ var CssHashSet = (function(){
   before(nehan.js local property, same as 'top' if lr-tb)
   border
   border-width
-  border-radius(rounded corner after/before is cleared if page is devided into multiple pages)
+  border-radius(rounded corner after/before is cleared if page is divided into multiple pages)
   box-sizing
   break-after
   break-before
@@ -5033,13 +5074,26 @@ var Char = (function(){
 })();
 
 var Word = (function(){
-  function Word(word, devided){
+  /**
+     @memberof Nehan
+     @class Word
+     @classdesc abstraction of alphabetical phrase.
+     @constructor
+     @param word {String}
+     @param divided {boolean} - true if word is divided by too long phrase and overflow inline.
+  */
+  function Word(word, divided){
     this.data = word;
     this._type = "word";
-    this._devided = devided || false;
+    this._divided = divided || false;
   }
 
   Word.prototype = {
+    /**
+       @memberof Nehan.Word
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertTrans : function(line){
       var css = {};
       if(line.style.letterSpacing){
@@ -5052,12 +5106,22 @@ var Word = (function(){
       css["font-family"] = "monospace";
       return css;
     },
+    /**
+       @memberof Nehan.Word
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertTransBody : function(line){
       var css = {};
       //css["font-family"] = line.style.getFontFamily();
       css["font-family"] = "monospace";
       return css;
     },
+    /**
+       @memberof Nehan.Word
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertTransBodyTrident : function(line){
       var css = {};
       css["font-family"] = "monospace";
@@ -5075,6 +5139,11 @@ var Word = (function(){
       }
       return css;
     },
+    /**
+       @memberof Nehan.Word
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertTransIE : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css["font-family"] = "monospace";
@@ -5085,15 +5154,33 @@ var Word = (function(){
       css["line-height"] = font_size + "px";
       return css;
     },
+    /**
+       @memberof Nehan.Word
+       @return {int}
+    */
     getCharCount : function(){
       return 1; // word is count by 1 character.
     },
+    /**
+       @memberof Nehan.Word
+       @param flow {Nehan.BoxFlow}
+       @param letter_spacing {int}
+       @return {int}
+    */
     getAdvance : function(flow, letter_spacing){
       return this.bodySize + (letter_spacing || 0) * this.getLetterCount();
     },
+    /**
+       @memberof Nehan.Word
+       @return {boolean}
+    */
     hasMetrics : function(){
       return (typeof this.bodySize !== "undefined");
     },
+    /**
+       @memberof Nehan.Word
+       @return {int}
+    */
     countUpper : function(){
       var count = 0;
       for(var i = 0; i < this.data.length; i++){
@@ -5103,6 +5190,11 @@ var Word = (function(){
       }
       return count;
     },
+    /**
+       @memberof Nehan.Word
+       @param flow {Nehan.BoxFlow}
+       @param font {Nehan.Font}
+    */
     setMetrics : function(flow, font){
       if(Config.useStrictWordMetrics && TextMetrics.isEnable()){
 	this.bodySize = TextMetrics.getMeasure(font, this.data);
@@ -5113,16 +5205,35 @@ var Word = (function(){
 	this.bodySize += Math.round(Display.boldRate * this.bodySize);
       }
     },
+    /**
+       @memberof Nehan.Word
+       @return {int}
+    */
     getLetterCount : function(){
       return this.data.length;
     },
-    setDevided : function(enable){
-      this._devided = enable;
+    /**
+       @memberof Nehan.Word
+       @param enable {boolean}
+    */
+    setDivided : function(enable){
+      this._divided = enable;
     },
-    isDevided : function(){
-      return this._devided;
+    /**
+       @memberof Nehan.Word
+       @param enable {boolean}
+    */
+    isDivided : function(){
+      return this._divided;
     },
-    // devide word by measure size and return first half of word.
+    /**
+       devide word by [measure] size and return first half of word.
+
+       @memberof Nehan.Word
+       @param font_size {int}
+       @param measure {int}
+       @return {Nehan.Word}
+    */
     cutMeasure : function(font_size, measure){
       var half_size = Math.round(font_size / 2);
       var this_half_count = Math.round(this.bodySize / half_size);
@@ -5133,7 +5244,7 @@ var Word = (function(){
       var str_part = this.data.substring(0, measure_half_count);
       var word_part = new Word(str_part, true);
       this.data = this.data.slice(measure_half_count);
-      this.setDevided(true);
+      this.setDivided(true);
       return word_part;
     }
   };
@@ -7527,6 +7638,13 @@ var TextEmpha = (function(){
 
 
 var Uri = (function(){
+  /**
+     @memberof Nehan
+     @class Uri
+     @classdesc abstraction of URI. 
+     @constructor
+     @param address {String}
+  */
   function Uri(address){
     this.address = this._normalize(address || "");
   }
@@ -7535,9 +7653,19 @@ var Uri = (function(){
     _normalize : function(address){
       return address.replace(/\s/g, "");
     },
+    /**
+       @memberof Nehan.Uri
+       @return {String}
+    */
     getAddress : function(){
       return this.address;
     },
+    /**
+       @memberof Nehan.Uri
+       @return {String}
+       @example
+       * new Uri("http://example.com/top#foo").getAnchorName(); // "foo"
+    */
     getAnchorName : function(){
       var sharp_pos = this.address.indexOf("#");
       if(sharp_pos < 0){
@@ -13611,7 +13739,7 @@ var InlineGenerator = (function(){
     
     // if there is enough space for this word, just return.
     if(advance <= rest_measure){
-      token.setDevided(false);
+      token.setDivided(false);
       return token;
     }
     // at this point, this word is larger than rest space.
@@ -14977,6 +15105,13 @@ var LayoutEvaluator = (function(){
 
 
 var VertEvaluator = (function(){
+  /**
+     @memberof Nehan
+     @class VertEvaluator
+     @classdesc evaluate {@link Nehan.Box} as vertical layout, and output DOMElement.
+     @constructor
+     @extends {Nehan.LayoutEvaluator}
+  */
   function VertEvaluator(){
     LayoutEvaluator.call(this, "vert");
   }

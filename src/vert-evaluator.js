@@ -1,4 +1,11 @@
 var VertEvaluator = (function(){
+  /**
+     @memberof Nehan
+     @class VertEvaluator
+     @classdesc evaluate {@link Nehan.Box} as vertical layout, and output DOMElement.
+     @constructor
+     @extends {Nehan.LayoutEvaluator}
+  */
   function VertEvaluator(){
     LayoutEvaluator.call(this, "vert");
   }

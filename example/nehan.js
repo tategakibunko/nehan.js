@@ -2160,37 +2160,78 @@ var Obj = {
   }
 };
 
+/**
+   misc utility module.
+
+   @namespace Nehan.Utils
+*/
 var Utils = {
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
   trimHeadCRLF : function(str){
     return str.replace(/^\n+/, "");
   },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
   trimFootCRLF : function(str){
     return str.replace(/\n+$/, "");
   },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
   trimCRLF : function(str){
     return this.trimFootCRLF(this.trimHeadCRLF(str));
   },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
   trim : function(str){
     return str.replace(/^\s+/, "").replace(/\s+$/, "");
   },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
   cutQuote : function(str){
     return str.replace(/['\"]/g, "");
   },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+     @example
+     * Nehan.Utils.capitalize("japan"); // "Japan"
+  */
   capitalize : function(str){
     if(str === ""){
       return "";
     }
     return str.charAt(0).toUpperCase() + str.slice(1);
   },
-  log : function(true_num, rad){
-    var radix = rad || 10;
-    return Math.log(true_num) / Math.log(radix);
-  },
+  /**
+     @memberof Nehan.Utils
+     @param p1 {String}
+     @param p2 {String}
+     @example
+     * Nehan.Utils.filenameConcat("/path/to", "foo"); // "/path/to/foo"
+     * Nehan.Utils.filenameConcat("/path/to/", "foo"); // "/path/to/foo"
+  */
   filenameConcat : function(p1, p2){
     p1 = (p1==="")? "" : (p1.slice(-1) === "/")? p1 : p1 + "/";
     p2 = (p2==="")? "" : (p2[0] === "/")? p2.substring(1, p2.length) : p2;
     return p1 + p2;
   },
+  /**
+     @memberof Nehan.Utils
+     @param name {String}
+     @example
+     * Nehan.Utils.camelize("font-size"); // "fontSize"
+  */
   camelize : function(name){
     var self = this;
     return (name.indexOf("-") < 0)? name : List.mapi(name.split("-"), function(i, part){
@@ -2758,7 +2799,7 @@ var CssHashSet = (function(){
   before(nehan.js local property, same as 'top' if lr-tb)
   border
   border-width
-  border-radius(rounded corner after/before is cleared if page is devided into multiple pages)
+  border-radius(rounded corner after/before is cleared if page is divided into multiple pages)
   box-sizing
   break-after
   break-before
@@ -3189,6 +3230,42 @@ var PseudoSelector = (function(){
      div::first-line{font-size:xxx}
 */
 var TypeSelector = (function(){
+  /**
+     @memberof Nehan
+     @class TypeSelector
+     @classdesc selector abstraction(name, class, id, attribute, pseudo).
+     @constructor
+     @param opt {Object}
+     @param opt.name {String}
+     @param opt.nameRex {RegExp}
+     @param opt.id {String}
+     @param opt.classes {Array<String>}
+     @param opt.attrs {Array<Nehan.AttrSelector>}
+     @param opt.pseudo {Nehan.PseudoSelector}
+     @description <pre>
+
+     1. name selector
+       div {font-size:xxx}
+       /h[1-6]/ {font-weight:xxx}
+
+     2. class selector
+       div.class{font-size:xxx}
+       div.class1.class2{color:yyy}
+
+     3. id selector
+       div#id{font-size:xxx}
+
+     4. attribute selector
+       div[name=value]{font-size:xxx}
+       div[name1=value1][name1^=xxx]{color:yyy}
+
+     5. pseudo-class selector
+       li:first-child{font-weight:bold}
+
+     6. pseudo-element selector
+       div::first-line{font-size:xxx}
+     </pre>
+  */
   function TypeSelector(opt){
     this.name = opt.name || null;
     this.nameRex = opt.nameRex || null;
@@ -4355,25 +4432,65 @@ var Tag = (function (){
 })();
 
 
+/**
+   utility module to check token type.
+
+   @namespace Nehan.Token
+*/
 var Token = {
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isTag : function(token){
     return token._type === "tag";
   },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isText : function(token){
     return token._type === "char" || token._type === "word" || token._type === "tcy" || token._type === "ruby";
   },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isChar : function(token){
     return token._type === "char";
   },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isWord : function(token){
     return token._type === "word";
   },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isTcy : function(token){
     return token._type === "tcy";
   },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isNewLine : function(token){
     return token instanceof Char && token.isNewLineChar();
   },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isWhiteSpace : function(token){
     return token instanceof Char && token.isWhiteSpaceChar();
   }
@@ -4957,13 +5074,26 @@ var Char = (function(){
 })();
 
 var Word = (function(){
-  function Word(word, devided){
+  /**
+     @memberof Nehan
+     @class Word
+     @classdesc abstraction of alphabetical phrase.
+     @constructor
+     @param word {String}
+     @param divided {boolean} - true if word is divided by too long phrase and overflow inline.
+  */
+  function Word(word, divided){
     this.data = word;
     this._type = "word";
-    this._devided = devided || false;
+    this._divided = divided || false;
   }
 
   Word.prototype = {
+    /**
+       @memberof Nehan.Word
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertTrans : function(line){
       var css = {};
       if(line.style.letterSpacing){
@@ -4976,12 +5106,22 @@ var Word = (function(){
       css["font-family"] = "monospace";
       return css;
     },
+    /**
+       @memberof Nehan.Word
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertTransBody : function(line){
       var css = {};
       //css["font-family"] = line.style.getFontFamily();
       css["font-family"] = "monospace";
       return css;
     },
+    /**
+       @memberof Nehan.Word
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertTransBodyTrident : function(line){
       var css = {};
       css["font-family"] = "monospace";
@@ -4999,6 +5139,11 @@ var Word = (function(){
       }
       return css;
     },
+    /**
+       @memberof Nehan.Word
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertTransIE : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css["font-family"] = "monospace";
@@ -5009,15 +5154,33 @@ var Word = (function(){
       css["line-height"] = font_size + "px";
       return css;
     },
+    /**
+       @memberof Nehan.Word
+       @return {int}
+    */
     getCharCount : function(){
       return 1; // word is count by 1 character.
     },
+    /**
+       @memberof Nehan.Word
+       @param flow {Nehan.BoxFlow}
+       @param letter_spacing {int}
+       @return {int}
+    */
     getAdvance : function(flow, letter_spacing){
       return this.bodySize + (letter_spacing || 0) * this.getLetterCount();
     },
+    /**
+       @memberof Nehan.Word
+       @return {boolean}
+    */
     hasMetrics : function(){
       return (typeof this.bodySize !== "undefined");
     },
+    /**
+       @memberof Nehan.Word
+       @return {int}
+    */
     countUpper : function(){
       var count = 0;
       for(var i = 0; i < this.data.length; i++){
@@ -5027,6 +5190,11 @@ var Word = (function(){
       }
       return count;
     },
+    /**
+       @memberof Nehan.Word
+       @param flow {Nehan.BoxFlow}
+       @param font {Nehan.Font}
+    */
     setMetrics : function(flow, font){
       if(Config.useStrictWordMetrics && TextMetrics.isEnable()){
 	this.bodySize = TextMetrics.getMeasure(font, this.data);
@@ -5037,16 +5205,35 @@ var Word = (function(){
 	this.bodySize += Math.round(Display.boldRate * this.bodySize);
       }
     },
+    /**
+       @memberof Nehan.Word
+       @return {int}
+    */
     getLetterCount : function(){
       return this.data.length;
     },
-    setDevided : function(enable){
-      this._devided = enable;
+    /**
+       @memberof Nehan.Word
+       @param enable {boolean}
+    */
+    setDivided : function(enable){
+      this._divided = enable;
     },
-    isDevided : function(){
-      return this._devided;
+    /**
+       @memberof Nehan.Word
+       @param enable {boolean}
+    */
+    isDivided : function(){
+      return this._divided;
     },
-    // devide word by measure size and return first half of word.
+    /**
+       devide word by [measure] size and return first half of word.
+
+       @memberof Nehan.Word
+       @param font_size {int}
+       @param measure {int}
+       @return {Nehan.Word}
+    */
     cutMeasure : function(font_size, measure){
       var half_size = Math.round(font_size / 2);
       var this_half_count = Math.round(this.bodySize / half_size);
@@ -5057,7 +5244,7 @@ var Word = (function(){
       var str_part = this.data.substring(0, measure_half_count);
       var word_part = new Word(str_part, true);
       this.data = this.data.slice(measure_half_count);
-      this.setDevided(true);
+      this.setDivided(true);
       return word_part;
     }
   };
@@ -7451,6 +7638,13 @@ var TextEmpha = (function(){
 
 
 var Uri = (function(){
+  /**
+     @memberof Nehan
+     @class Uri
+     @classdesc abstraction of URI. 
+     @constructor
+     @param address {String}
+  */
   function Uri(address){
     this.address = this._normalize(address || "");
   }
@@ -7459,9 +7653,19 @@ var Uri = (function(){
     _normalize : function(address){
       return address.replace(/\s/g, "");
     },
+    /**
+       @memberof Nehan.Uri
+       @return {String}
+    */
     getAddress : function(){
       return this.address;
     },
+    /**
+       @memberof Nehan.Uri
+       @return {String}
+       @example
+       * new Uri("http://example.com/top#foo").getAnchorName(); // "foo"
+    */
     getAnchorName : function(){
       var sharp_pos = this.address.indexOf("#");
       if(sharp_pos < 0){
@@ -9115,7 +9319,7 @@ var TokenStream = (function(){
   /**
      @memberof Nehan
      @class TokenStream
-     @classdesc abstract of lexer token stream with background buffering.
+     @classdesc abstraction of token stream with background buffering.
      @constructor
      @param src {String}
   */
@@ -9151,12 +9355,14 @@ var TokenStream = (function(){
     },
     /**
        @memberof Nehan.TokenStream
+       @return {boolean}
     */
     isHead : function(){
       return this.pos === 0;
     },
     /**
        @memberof Nehan.TokenStream
+       @param text {String}
     */
     addText : function(text){
       // check if already done, and text is not empty.
@@ -9166,25 +9372,35 @@ var TokenStream = (function(){
       }
     },
     /**
+       step backward current stream position.
+
        @memberof Nehan.TokenStream
     */
     prev : function(){
       this.pos = Math.max(0, this.pos - 1);
     },
     /**
+       set stream position directly.
+
        @memberof Nehan.TokenStream
+       @param pos {int}
     */
     setPos : function(pos){
       this.pos = pos;
     },
     /**
+       set current stream position to the beginning of stream.
+
        @memberof Nehan.TokenStream
     */
     rewind : function(){
       this.pos = 0;
     },
     /**
+       look current token but not step forward current position.
+
        @memberof Nehan.TokenStream
+       @return {token}
     */
     peek : function(off){
       var offset = off || 0;
@@ -9203,7 +9419,10 @@ var TokenStream = (function(){
       return null;
     },
     /**
+       get current stream token and step forward current position.
+
        @memberof Nehan.TokenStream
+       @return {token}
     */
     get : function(){
       var token = this.peek();
@@ -9211,39 +9430,57 @@ var TokenStream = (function(){
       return token;
     },
     /**
+       get stream soruce as text.
+
        @memberof Nehan.TokenStream
+       @return {String}
     */
     getSrc : function(){
       return this.lexer.getSrc();
     },
     /**
+       get current stream position.
+
        @memberof Nehan.TokenStream
+       @return {int}
     */
     getPos : function(){
       return this.pos;
     },
     /**
+       get current token count.
+
        @memberof Nehan.TokenStream
+       @return {int}
     */
     getTokenCount : function(){
       return this.tokens.length;
     },
     /**
+       get current token position of source text(not stream position).
+
        @memberof Nehan.TokenStream
+       @return {int}
     */
     getSeekPos : function(){
       var token = this.tokens[this.pos];
       return token? token.spos : 0;
     },
     /**
+       get current seek pos as percent.
+
        @memberof Nehan.TokenStream
+       @return {int}
     */
     getSeekPercent : function(){
       var seek_pos = this.getSeekPos();
       return this.lexer.getSeekPercent(seek_pos);
     },
     /**
+       read whole stream source, and return all tokens immediately.
+
        @memberof Nehan.TokenStream
+       @return {Array.<token>}
     */
     getAll : function(){
       while(!this.eof){
@@ -9252,7 +9489,11 @@ var TokenStream = (function(){
       return this.tokens;
     },
     /**
+       read whole stream source, and return all tokens immediately, but filter by [fn].
+
        @memberof Nehan.TokenStream
+       @param fn {Function}
+       @return {Array.<token>}
     */
     getAllIf : function(fn){
       return List.filter(this.getAll(), function(token){
@@ -9260,7 +9501,10 @@ var TokenStream = (function(){
       });
     },
     /**
+       iterate tokens by [fn].
+
        @memberof Nehan.TokenStream
+       @param fn {Function}
     */
     iterWhile : function(fn){
       var token;
@@ -9273,7 +9517,10 @@ var TokenStream = (function(){
       }
     },
     /**
+       step stream position while [fn(token)] is true.
+
        @memberof Nehan.TokenStream
+       @param fn {Function}
     */
     skipUntil : function(fn){
       while(this.hasNext()){
@@ -13492,7 +13739,7 @@ var InlineGenerator = (function(){
     
     // if there is enough space for this word, just return.
     if(advance <= rest_measure){
-      token.setDevided(false);
+      token.setDivided(false);
       return token;
     }
     // at this point, this word is larger than rest space.
@@ -14858,6 +15105,13 @@ var LayoutEvaluator = (function(){
 
 
 var VertEvaluator = (function(){
+  /**
+     @memberof Nehan
+     @class VertEvaluator
+     @classdesc evaluate {@link Nehan.Box} as vertical layout, and output DOMElement.
+     @constructor
+     @extends {Nehan.LayoutEvaluator}
+  */
   function VertEvaluator(){
     LayoutEvaluator.call(this, "vert");
   }

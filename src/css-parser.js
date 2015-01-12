@@ -9,7 +9,7 @@
   before(nehan.js local property, same as 'top' if lr-tb)
   border
   border-width
-  border-radius(rounded corner after/before is cleared if page is devided into multiple pages)
+  border-radius(rounded corner after/before is cleared if page is divided into multiple pages)
   box-sizing
   break-after
   break-before
