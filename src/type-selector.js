@@ -25,6 +25,42 @@
      div::first-line{font-size:xxx}
 */
 var TypeSelector = (function(){
+  /**
+     @memberof Nehan
+     @class TypeSelector
+     @classdesc selector abstraction(name, class, id, attribute, pseudo).
+     @constructor
+     @param opt {Object}
+     @param opt.name {String}
+     @param opt.nameRex {RegExp}
+     @param opt.id {String}
+     @param opt.classes {Array<String>}
+     @param opt.attrs {Array<Nehan.AttrSelector>}
+     @param opt.pseudo {Nehan.PseudoSelector}
+     @description <pre>
+
+     1. name selector
+       div {font-size:xxx}
+       /h[1-6]/ {font-weight:xxx}
+
+     2. class selector
+       div.class{font-size:xxx}
+       div.class1.class2{color:yyy}
+
+     3. id selector
+       div#id{font-size:xxx}
+
+     4. attribute selector
+       div[name=value]{font-size:xxx}
+       div[name1=value1][name1^=xxx]{color:yyy}
+
+     5. pseudo-class selector
+       li:first-child{font-weight:bold}
+
+     6. pseudo-element selector
+       div::first-line{font-size:xxx}
+     </pre>
+  */
   function TypeSelector(opt){
     this.name = opt.name || null;
     this.nameRex = opt.nameRex || null;

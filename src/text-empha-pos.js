@@ -1,15 +1,27 @@
 var TextEmphaPos = (function(){
-  function TextEmphaPos(value){
+  /**
+     @memberof Nehan
+     @class TextEmphaPos
+     @classdesc abstraction of text-empha-position, but not impremented yet.
+     @constructor
+     @param opt {Object}
+     @param opt.hori {String} - horizontal empha pos, default "over"
+     @param opt.vert {String} - vertical empha pos, default "right"
+  */
+  function TextEmphaPos(opt){
     Args.merge(this, {
       hori:"over",
       vert:"right"
-    }, value || {});
+    }, opt || {});
   }
 
   TextEmphaPos.prototype = {
-    isEmphaFirst : function(){
-      return this.hori === "over" || this.vert === "left";
-    },
+    /**
+       not implemented yet.
+
+       @memberof Nehan.TextEmphaPos
+       @return {Object}
+    */
     getCss : function(line){
       var css = {};
       return css;

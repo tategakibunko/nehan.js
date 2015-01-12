@@ -1,4 +1,11 @@
 var Uri = (function(){
+  /**
+     @memberof Nehan
+     @class Uri
+     @classdesc abstraction of URI. 
+     @constructor
+     @param address {String}
+  */
   function Uri(address){
     this.address = this._normalize(address || "");
   }

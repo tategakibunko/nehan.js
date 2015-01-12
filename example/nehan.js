@@ -738,7 +738,10 @@ var LexingRule = (function(){
 })();
 
 
-/*
+/**
+   @namespace Nehan.Style
+   @description <pre>
+
   Important notices about style.js
   ================================
 
@@ -833,6 +836,7 @@ var LexingRule = (function(){
   for example, assume that Display["hori"] is "lr-tb", and Display["vert"] is "tb-rl",
   and current document direction(Display.direction) is "hori",
   flow:"flip" means Display["vert"], "tb-rl".
+</pre>
 */
 var Style = {
   //-------------------------------------------------------
@@ -3803,18 +3807,35 @@ var Selectors = (function(){
 var TagAttrLexer = (function(){
   var __rex_symbol = /[^=\s]+/;
 
-  // lexer src is attribute parts of original tag source.
-  // so if tag source is "<div class='nehan-float-start'>",
-  // then lexer src is "class='nehan-float-start'".
+  /**
+     @memberof Nehan
+     @class TagAttrLexer
+     @classdesc tag attribute string lexer
+     @constructor
+     @param src {String}
+     @description <pre>
+     * lexer src is attribute parts of original tag source.
+     * so if tag source is "<div class='nehan-float-start'>",
+     * then lexer src is "class='nehan-float-start'".
+     </pre>
+  */
   function TagAttrLexer(src){
     this.buff = src;
     this._error = false;
   }
 
   TagAttrLexer.prototype = {
+    /**
+       @memberof Nehan.TagAttrLexer
+       @return {boolean}
+    */
     isEnd : function(){
       return this._error || (this.buff === "");
     },
+    /**
+       @memberof Nehan.TagAttrLexer
+       @return {symbol}
+    */
     get : function(){
       var c1 = this._peek();
       if(c1 === null){
@@ -3864,6 +3885,13 @@ var TagAttrLexer = (function(){
 
 
 var TagAttrParser = (function(){
+  /**
+     @memberof Nehan
+     @class TagAttrParser
+     @classdesc tag attribute parser
+     @constructor
+     @param src {String}
+  */
   function TagAttrParser(src){
     this._lexer = new TagAttrLexer(src);
     this._attrs = {};
@@ -3871,6 +3899,10 @@ var TagAttrParser = (function(){
   }
 
   TagAttrParser.prototype = {
+    /**
+       @memberof Nehan.TagAttrParser
+       @return {Object}
+    */
     parse : function(){
       while(!this._isEnd()){
 	this._parseAttr();
@@ -3907,6 +3939,13 @@ var TagAttrParser = (function(){
 })();
 
 var TagAttrs = (function(){
+  /**
+     @memberof Nehan
+     @class TagAttrs
+     @classdesc tag attribute set wrapper
+     @constructor
+     @param src {String}
+  */
   function TagAttrs(src){
     var attrs_raw = src? (new TagAttrParser(src)).parse() : {};
     this.classes = this._parseClasses(attrs_raw);
@@ -3919,12 +3958,31 @@ var TagAttrs = (function(){
   };
 
   TagAttrs.prototype = {
+    /**
+       @memberof Nehan.TagAttrs
+       @param name {String} - attribute name
+       @return {boolean}
+    */
     hasAttr : function(name){
       return (typeof this.attrs.name !== "undefined");
     },
+    /**
+       @memberof Nehan.TagAttrs
+       @param klass {String} - css class name
+       @return {boolean}
+    */
     hasClass : function(klass){
       return List.exists(this.classes, Closure.eq(klass));
     },
+    /**
+     * add class name, but note that all css classes is force added prefix 'nehan-'.<br>
+     * that is, if you add class "foo", it's registered as "nehan-foo"<br>
+     * to avoid external css classes defined in client browser window.
+
+       @memberof Nehan.TagAttrs
+       @param klass {String} - css class name
+       @return {Array.<String>} current css classes
+    */
     addClass : function(klass){
       klass = (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
       if(!this.hasClass(klass)){
@@ -3933,6 +3991,10 @@ var TagAttrs = (function(){
       }
       return this.classes;
     },
+    /**
+       @memberof Nehan.TagAttrs
+       @param klass {String} - css class name(prefiex by "nehan-")
+    */
     removeClass : function(klass){
       this.classes = List.filter(this.classes, function(cls){
 	return cls != klass;
@@ -3940,19 +4002,44 @@ var TagAttrs = (function(){
       this.setAttr("class", this.classes.join(" "));
       return this.classes;
     },
+    /**
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param def_value {default_value}
+       @return {attribute_value}
+    */
     getAttr : function(name, def_value){
       def_value = (typeof def_value === "undefined")? null : def_value;
       return (typeof this.attrs[name] === "undefined")? def_value : this.attrs[name];
     },
+    /**
+       get dataset value
+
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param def_value {default_value}
+       @return {dataset_value}
+    */
     getData : function(name, def_value){
       def_value = (typeof def_value === "undefined")? null : def_value;
       return (typeof this.dataset[name] === "undefined")? def_value : this.dataset[name];
     },
+    /**
+       get classes NOT prefixed by "nehan-".
+
+       @memberof Nehan.TagAttrs
+       @return {Array.<String>}
+    */
     getClassesRaw : function(){
       return List.map(this.classes, function(klass){
 	return klass.replace("nehan-", "");
       });
     },
+    /**
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param value {attribute_value}
+    */
     setAttr : function(name, value){
       if(name.indexOf("data-") === 0){
 	this.setData(__data_name_of(name), value);
@@ -3960,6 +4047,13 @@ var TagAttrs = (function(){
 	this.attrs[name] = value;
       }
     },
+    /**
+       set dataset value
+
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param value {dataset_value}
+    */
     setData : function(name, value){
       this.dataset[name] = value;
     },
@@ -4012,6 +4106,14 @@ var TagAttrs = (function(){
 // to avoid name-conflicts about existing name space of stylesheet,
 // all class names and id in nehan.js are forced to be prefixed by "nehan-".
 var Tag = (function (){
+  /**
+     @memberof Nehan
+     @class Tag
+     @classdesc abstraction of html tag markup.
+     @constructor
+     @param src {String} - string of markup part like "&lt;div class='foo'&gt;"
+     @param content {String} - content text of markup
+  */
   function Tag(src, content){
     this._type = "tag";
     this.src = src;
@@ -4021,93 +4123,207 @@ var Tag = (function (){
   }
 
   Tag.prototype = {
+    /**
+       @memberof Nehan.Tag
+       @return {Nehan.Tag}
+    */
     clone : function(){
       return new Tag(this.src, this.content);
     },
+    /**
+       @memberof Nehan.Tag
+       @param content {String}
+    */
     setContent : function(content){
       if(this._fixed){
 	return;
       }
       this.content = content;
     },
+    /**
+       @memberof Nehan.Tag
+       @param status {boolean}
+    */
     setContentImmutable : function(status){
       this._fixed = status;
     },
+    /**
+       @memberof Nehan.Tag
+       @param name {String} - alias markup name
+    */
     setAlias : function(name){
       this.alias = name;
     },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @param value {attribute_value}
+    */
     setAttr : function(name, value){
       this.attrs.setAttr(name, value);
     },
+    /**
+       @memberof Nehan.Tag
+       @param attrs {Object}
+    */
     setAttrs : function(attrs){
       for(var name in attrs){
 	this.setAttr(name, attrs[name]);
       }
     },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @param value {dataset_value}
+    */
     setData : function(name, value){
       this.attrs.setData(name, value);
     },
+    /**
+       @memberof Nehan.Tag
+       @param klass {String}
+    */
     addClass : function(klass){
       this.attrs.addClass(klass);
     },
+    /**
+       @memberof Nehan.Tag
+       @param klass {String}
+    */
     removeClass : function(klass){
       this.attrs.removeClass(klass);
     },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
     getId : function(){
       return this.attrs.id;
     },
+    /**
+       @memberof Nehan.Tag
+       @return {Array.<String>}
+    */
     getClasses : function(){
       return this.attrs.classes;
     },
+    /**
+       @memberof Nehan.Tag
+       @return {Array.<String>}
+    */
     getClassesRaw : function(){
       return this.attrs.getClassesRaw();
     },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
     getName : function(){
       return this.alias || this.name;
     },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @param def_value {default_value}
+       @return {attribute_value}
+    */
     getAttr : function(name, def_value){
       return this.attrs.getAttr(name, def_value);
     },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @param def_value {default_value}
+       @return {dataset_value}
+    */
     getData : function(name, def_value){
       return this.attrs.getData(name, def_value);
     },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
     getContent : function(){
       return this.content;
     },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
     getSrc : function(){
       return this.src;
     },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
     getWrapSrc : function(){
       if(this.content === ""){
 	return this.src;
       }
       return this.src + this.content + "</" + this.name + ">";
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     hasClass : function(klass){
       return this.attrs.hasClass(klass);
     },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @return {boolean}
+    */
     hasAttr : function(name){
       return this.attrs.hasAttr(name);
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isHeaderTag : function(){
       return List.exists(["h1", "h2", "h3", "h4", "h5", "h6"], Closure.eq(this.name));
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isAnchorTag : function(){
       return this.name === "a" && this.getTagAttr("name") !== null;
     },
+    /**
+       @memberof Nehan.Tag
+    */
     isAnchorLinkTag : function(){
       var href = this.getTagAttr("href");
       return this.name === "a" && href && href.indexOf("#") >= 0;
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isPageBreakTag : function(){
       return this.name === "page-break" || this.name === "end-page" || this.name === "pbr";
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isCloseTag : function(){
       return this.name.charAt(0) === "/";
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isSingleTag : function(){
       return this._single || false;
     },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isEmpty : function(){
       return this.content === "";
     },
@@ -4851,21 +5067,45 @@ var Word = (function(){
 
 
 var Tcy = (function(){
+  /**
+     @memberof Nehan
+     @class Tcy
+     @classdesc abstraction of tcy(tate-chu-yoko) character.
+     @constructor
+     @param tcy {String}
+  */
   function Tcy(tcy){
     this.data = tcy;
     this._type = "tcy";
   }
 
   Tcy.prototype = {
+    /**
+       @memberof Nehan.Tcy
+       @return {int}
+    */
     getCharCount : function(){
       return 1;
     },
+    /**
+       @memberof Nehan.Tcy
+       @return {int}
+    */
     getAdvance : function(flow, letter_spacing){
       return this.bodySize + letter_spacing;
     },
+    /**
+       @memberof Nehan.Tcy
+       @return {boolean}
+    */
     hasMetrics : function(){
       return (typeof this.bodySize != "undefined");
     },
+    /**
+       @memberof Nehan.Tcy
+       @param flow {Nehan.BoxFlow}
+       @param font {Nehan.Font}
+    */
     setMetrics : function(flow, font){
       this.bodySize = font.size;
     }
@@ -5446,7 +5686,11 @@ var Cardinal = (function(){
 })();
 
 
-// more strict metrics using canvas
+/**
+   utility module to get more strict metrics using canvas.
+
+   @namespace Nehan.TextMetrics
+*/
 var TextMetrics = (function(){
   var __canvas = document.createElement("canvas");
   __canvas.style.width = Math.max(Display.width, Display.height) + "px";
@@ -5459,13 +5703,31 @@ var TextMetrics = (function(){
   }
 
   return {
+    /**
+       check if client browser is supported.
+
+       @memberof Nehan.TextMetrics
+       @return {boolean}
+    */
     isEnable : function(){
       return __canvas_context && (typeof __canvas_context.measureText !== "undefined");
     },
+    /**
+       @memberof Nehan.TextMetrics
+       @param font {Nehan.Font}
+       @param text {String}
+       @return {Object} - {width:xxx, height:yyy}
+    */
     getMetrics : function(font, text){
       __canvas_context.font = font.toString(); // to get accurate metrics, font info is required.
       return __canvas_context.measureText(text);
     },
+    /**
+       @memberof Nehan.TextMetrics
+       @param font {Nehan.Font}
+       @param text {String}
+       @return {int}
+    */
     getMeasure : function(font, text){
       var metrics = this.getMetrics(font, text);
       var space = Math.floor(Display.vertWordSpaceRate * font.size);
@@ -7024,20 +7286,51 @@ var TextEmphaStyle = (function(){
     "open sesame":"&#xfe46;"
   };
 
+  /**
+     @memberof Nehan
+     @class TextEmphaStyle
+     @classdesc abstraction of text-empha-position.
+     @constructor
+     @param value {String} - style name. default "none".
+     @example
+     * new TextEmphaStyle().getText(); // ""
+     * new TextEmphaStyle().getText("none"); // ""
+     * new TextEmphaStyle("filled dot").getText(); // "&#x2022";
+     * new TextEmphaStyle("foo").getText(); // "foo";
+  */
   function TextEmphaStyle(value){
     this.value = value || "none";
   }
 
   TextEmphaStyle.prototype = {
+    /**
+       @memberof Nehan.TextEmphaStyle
+       @return {bool}
+    */
     isEnable : function(){
       return this.value != "none";
     },
+    /**
+       @memberof Nehan.TextEmphaStyle
+       @param value {String} - empha style name
+    */
     setValue : function(value){
       this.value = value;
     },
+    /**
+       @memberof Nehan.TextEmphaStyle
+       @return {String}
+    */
     getText : function(){
+      if(!this.isEnable()){
+	return "";
+      }
       return __empha_marks[this.value] || this.value || __empha_marks[__default_empha_style];
     },
+    /**
+       @memberof Nehan.TextEmphaStyle
+       @return {Object}
+    */
     getCss : function(){
       var css = {};
       //return css["text-emphasis-style"] = this.value;
@@ -7050,17 +7343,29 @@ var TextEmphaStyle = (function(){
 
 
 var TextEmphaPos = (function(){
-  function TextEmphaPos(value){
+  /**
+     @memberof Nehan
+     @class TextEmphaPos
+     @classdesc abstraction of text-empha-position, but not impremented yet.
+     @constructor
+     @param opt {Object}
+     @param opt.hori {String} - horizontal empha pos, default "over"
+     @param opt.vert {String} - vertical empha pos, default "right"
+  */
+  function TextEmphaPos(opt){
     Args.merge(this, {
       hori:"over",
       vert:"right"
-    }, value || {});
+    }, opt || {});
   }
 
   TextEmphaPos.prototype = {
-    isEmphaFirst : function(){
-      return this.hori === "over" || this.vert === "left";
-    },
+    /**
+       not implemented yet.
+
+       @memberof Nehan.TextEmphaPos
+       @return {Object}
+    */
     getCss : function(line){
       var css = {};
       return css;
@@ -7072,6 +7377,16 @@ var TextEmphaPos = (function(){
 
 
 var TextEmpha = (function(){
+  /**
+     @memberof Nehan
+     @class TextEmpha
+     @classdesc abstraction of text emphasis.
+     @constructor
+     @param opt {Object}
+     @param opt.style {Nehan.TextEmphaStyle}
+     @param opt.pos {Nehan.TextEmphaPos}
+     @param opt.color {Nehan.Color}
+  */
   function TextEmpha(opt){
     opt = opt || {};
     this.style = opt.style || new TextEmphaStyle();
@@ -7080,18 +7395,35 @@ var TextEmpha = (function(){
   }
 
   TextEmpha.prototype = {
+    /**
+       @memberof Nehan.TextEmpha
+       @return {boolean}
+    */
     isEnable : function(){
       return this.style && this.style.isEnable();
     },
-    isEmphaStart : function(){
-      return this.pos? this.pos.isEmphaStart() : true;
-    },
+    /**
+       get text of empha style, see {@link Nehan.TextEmphaStyle}.
+
+       @memberof Nehan.TextEmpha
+       @return {String}
+    */
     getText : function(){
       return this.style? this.style.getText() : "";
     },
+    /**
+       @memberof Nehan.TextEmpha
+       @return {int}
+    */
     getExtent : function(font_size){
       return font_size * 3;
     },
+    /**
+       @memberof Nehan.TextEmpha
+       @param line {Nehan.Box}
+       @param chr {Nehan.Char}
+       @return {Object}
+    */
     getCssVertEmphaWrap : function(line, chr){
       var css = {}, font_size = line.style.getFontSize();
       css["text-align"] = "left";
@@ -7099,6 +7431,12 @@ var TextEmpha = (function(){
       css.height = chr.getAdvance(line.style.flow, line.style.letterSpacing || 0) + "px";
       return css;
     },
+    /**
+       @memberof Nehan.TextEmpha
+       @param line {Nehan.Box}
+       @param chr {Nehan.Char}
+       @return {Object}
+    */
     getCssHoriEmphaWrap : function(line, chr){
       var css = {}, font_size = line.style.getFontSize();
       css.display = "inline-block";
@@ -8133,24 +8471,73 @@ var Section = (function(){
 
 
 var TocContext = (function(){
+  /**
+     @memberof Nehan
+     @class TocContext
+     @classdesc context data of toc parsing.
+     @constructor
+  */
   function TocContext(){
     this.stack = [1];
   }
 
   TocContext.prototype = {
+    /**
+       @memberof Nehan.TocContext
+       @return {String}
+       @example
+       * // assume that current toc stack is [1,2,1].
+       * ctx.toString(); // "1.2.1"
+    */
     toString : function(){
       return this.stack.join(".");
     },
+    /**
+       countup toc count of current depth.
+
+       @memberof Nehan.TocContext
+       @return {Nehan.TocContext}
+       @example
+       * // assume that current toc stack is [1,2], and
+       * // current toc depth is at 1(0 is first).
+       * ctx.toString(); // "1.2"
+       * ctx.stepNext();
+       * ctx.toString(); // "1.3"
+    */
     stepNext : function(){
       if(this.stack.length > 0){
 	this.stack[this.stack.length - 1]++;
       }
       return this;
     },
+    /**
+       append toc root
+
+       @memberof Nehan.TocContext
+       @return {Nehan.TocContext}
+       @example
+       * // assume that current toc stack is [1,2].
+       * ctx.toString(); // "1.2"
+       * ctx.startRoot();
+       * ctx.toString(); // "1.2.1"
+    */
     startRoot : function(){
       this.stack.push(1);
       return this;
     },
+    /**
+       finish toc root
+
+       @memberof Nehan.TocContext
+       @return {Nehan.TocContext}
+       @example
+       * // assume that current toc stack is [1,2].
+       * ctx.toString(); // "1.2"
+       * ctx.startRoot();
+       * ctx.toString(); // "1.2.1"
+       * ctx.endRoot();
+       * ctx.toString(); // "1.2"
+    */
     endRoot : function(){
       this.stack.pop();
       return this;
@@ -8725,6 +9112,13 @@ var DocumentContext = (function(){
 
 
 var TokenStream = (function(){
+  /**
+     @memberof Nehan
+     @class TokenStream
+     @classdesc abstract of lexer token stream with background buffering.
+     @constructor
+     @param src {String}
+  */
   function TokenStream(src){
     this.lexer = this._createLexer(src);
     this.tokens = [];
@@ -8734,18 +9128,36 @@ var TokenStream = (function(){
   }
 
   TokenStream.prototype = {
+    /**
+       @memberof Nehan.TokenStream
+       @return {boolean}
+    */
     hasNext : function(){
       return (!this.eof || this.pos < this.tokens.length);
     },
-    isEmpty : function(){
+    /**
+       @memberof Nehan.TokenStream
+       @return {boolean}
+    */
+    isEmptyLexer : function(){
       return this.lexer.isEmpty();
     },
+    /**
+       @memberof Nehan.TokenStream
+       @return {boolean}
+    */
     isEmptyTokens : function(){
       return this.tokens.length === 0;
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     isHead : function(){
       return this.pos === 0;
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     addText : function(text){
       // check if already done, and text is not empty.
       if(this.eof && text !== ""){
@@ -8753,15 +9165,27 @@ var TokenStream = (function(){
 	this.eof = false;
       }
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     prev : function(){
       this.pos = Math.max(0, this.pos - 1);
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     setPos : function(pos){
       this.pos = pos;
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     rewind : function(){
       this.pos = 0;
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     peek : function(off){
       var offset = off || 0;
       var index = Math.max(0, this.pos + offset);
@@ -8778,39 +9202,66 @@ var TokenStream = (function(){
       }
       return null;
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     get : function(){
       var token = this.peek();
       this.pos++;
       return token;
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     getSrc : function(){
       return this.lexer.getSrc();
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     getPos : function(){
       return this.pos;
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     getTokenCount : function(){
       return this.tokens.length;
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     getSeekPos : function(){
       var token = this.tokens[this.pos];
       return token? token.spos : 0;
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     getSeekPercent : function(){
       var seek_pos = this.getSeekPos();
       return this.lexer.getSeekPercent(seek_pos);
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     getAll : function(){
       while(!this.eof){
 	this._doBuffer();
       }
       return this.tokens;
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     getAllIf : function(fn){
       return List.filter(this.getAll(), function(token){
 	return fn(token);
       });
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     iterWhile : function(fn){
       var token;
       while(this.hasNext()){
@@ -8821,6 +9272,9 @@ var TokenStream = (function(){
 	}
       }
     },
+    /**
+       @memberof Nehan.TokenStream
+    */
     skipUntil : function(fn){
       while(this.hasNext()){
 	var token = this.get();
@@ -9506,20 +9960,43 @@ var Breaks = {
 
 
 var TextAlign = (function(){
+  /**
+     @memberof Nehan
+     @class TextAlign
+     @classdesc abstraction of logical text align(start, end, center)
+     @constructor
+     @param value {String} - logical align direction, "start" or "end" or "center"
+  */
   function TextAlign(value){
     this.value = value || "start";
   }
 
   TextAlign.prototype = {
+    /**
+       @memberof Nehan.TextAlign
+       @return {boolean}
+    */
     isStart : function(){
       return this.value === "start";
     },
+    /**
+       @memberof Nehan.TextAlign
+       @return {boolean}
+    */
     isEnd : function(){
       return this.value === "end";
     },
+    /**
+       @memberof Nehan.TextAlign
+       @return {boolean}
+    */
     isCenter : function(){
       return this.value === "center";
     },
+    /**
+       @memberof Nehan.TextAlign
+       @return {Object}
+    */
     getCss : function(line){
       var css = {};
       if(this.value === "center"){
@@ -9532,10 +10009,20 @@ var TextAlign = (function(){
 })();
 
 
+/**
+   pre defined text align set
+
+   @namespace Nehan.TextAligns
+*/
 var TextAligns = {
   start:(new TextAlign("start")),
   end:(new TextAlign("end")),
   center:(new TextAlign("center")),
+  /**
+     @memberof Nehan.TextAligns
+     @param value - logical text align direction, "start" or "end" or "center".
+     @return {Nehan.TextAlign}
+  */
   get : function(value){
     return this[value] || null;
   }
@@ -9731,7 +10218,18 @@ var PartitionHashSet = (function(){
 })();
 
 
+/**
+   table partition parser module
+
+   @namespace Nehan.TablePartitionParser
+*/
 var TablePartitionParser = {
+  /**
+    @memberof Nehan.TablePartitionParser
+    @param style {Nehan.StyleContext}
+    @param stream {Nehan.TokenStream}
+    @return {Nehan.PartitionHashSet}
+  */
   parse : function(style, stream){
     var pset = new PartitionHashSet();
     while(stream.hasNext()){
@@ -10039,6 +10537,7 @@ var StyleContext = (function(){
   /**
      @memberof Nehan
      @class StyleContext
+     @classdesc abstraction of document tree hierarchy with selector values, associated markup, cursor_context.
      @constructor
      @param markup {Nehan.Tag} - markup of style
      @param paernt {Nehan.StyleContext} - parent style context
@@ -13823,6 +14322,15 @@ var ListItemGenerator = (function(){
 // stream : [thead | tbody | tfoot]
 // yield : [thead | tbody | tfoot]
 var TableGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class TableGenerator
+     @classdesc generator of table tag content.
+     @constructor
+     @extends {Nehan.BlockGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TagStream}
+  */
   function TableGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
@@ -13837,6 +14345,15 @@ var TableGenerator = (function(){
 // stream : [tr]
 // yield : [tr]
 var TableRowGroupGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class TabeRowGroupGenerator
+     @classdesc generator of table group(tbody, thead, tfoo) content.
+     @constructor
+     @extends {Nehan.BlockGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TagStream}
+  */
   function TableRowGroupGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
@@ -13851,6 +14368,15 @@ var TableRowGroupGenerator = (function(){
 // stream : [td | th]
 // yield : parallel([td | th])
 var TableRowGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class TableRowGenerator
+     @classdesc generator of table row(TR) content.
+     @constructor
+     @extends {Nehan.ParallelGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TagStream}
+  */
   function TableRowGenerator(style, stream){
     var generators = this._getGenerators(style, stream);
     ParallelGenerator.call(this, style, generators);
@@ -13898,6 +14424,15 @@ var TableRowGenerator = (function(){
 })();
 
 var TableCellGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class TableCellGenerator
+     @classdesc generator of table-cell(td, th) content.
+     @constructor
+     @extends {Nehan.SectionRootGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+  */
   function TableCellGenerator(style, stream){
     SectionRootGenerator.call(this, style, stream);
   }

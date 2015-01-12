@@ -3189,6 +3189,42 @@ var PseudoSelector = (function(){
      div::first-line{font-size:xxx}
 */
 var TypeSelector = (function(){
+  /**
+     @memberof Nehan
+     @class TypeSelector
+     @classdesc selector abstraction(name, class, id, attribute, pseudo).
+     @constructor
+     @param opt {Object}
+     @param opt.name {String}
+     @param opt.nameRex {RegExp}
+     @param opt.id {String}
+     @param opt.classes {Array<String>}
+     @param opt.attrs {Array<Nehan.AttrSelector>}
+     @param opt.pseudo {Nehan.PseudoSelector}
+     @description <pre>
+
+     1. name selector
+       div {font-size:xxx}
+       /h[1-6]/ {font-weight:xxx}
+
+     2. class selector
+       div.class{font-size:xxx}
+       div.class1.class2{color:yyy}
+
+     3. id selector
+       div#id{font-size:xxx}
+
+     4. attribute selector
+       div[name=value]{font-size:xxx}
+       div[name1=value1][name1^=xxx]{color:yyy}
+
+     5. pseudo-class selector
+       li:first-child{font-weight:bold}
+
+     6. pseudo-element selector
+       div::first-line{font-size:xxx}
+     </pre>
+  */
   function TypeSelector(opt){
     this.name = opt.name || null;
     this.nameRex = opt.nameRex || null;
@@ -4355,25 +4391,65 @@ var Tag = (function (){
 })();
 
 
+/**
+   utility module to check token type.
+
+   @namespace Nehan.Token
+*/
 var Token = {
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isTag : function(token){
     return token._type === "tag";
   },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isText : function(token){
     return token._type === "char" || token._type === "word" || token._type === "tcy" || token._type === "ruby";
   },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isChar : function(token){
     return token._type === "char";
   },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isWord : function(token){
     return token._type === "word";
   },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isTcy : function(token){
     return token._type === "tcy";
   },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isNewLine : function(token){
     return token instanceof Char && token.isNewLineChar();
   },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isWhiteSpace : function(token){
     return token instanceof Char && token.isWhiteSpaceChar();
   }
@@ -5686,7 +5762,11 @@ var Cardinal = (function(){
 })();
 
 
-// more strict metrics using canvas
+/**
+   utility module to get more strict metrics using canvas.
+
+   @namespace Nehan.TextMetrics
+*/
 var TextMetrics = (function(){
   var __canvas = document.createElement("canvas");
   __canvas.style.width = Math.max(Display.width, Display.height) + "px";
@@ -5699,13 +5779,31 @@ var TextMetrics = (function(){
   }
 
   return {
+    /**
+       check if client browser is supported.
+
+       @memberof Nehan.TextMetrics
+       @return {boolean}
+    */
     isEnable : function(){
       return __canvas_context && (typeof __canvas_context.measureText !== "undefined");
     },
+    /**
+       @memberof Nehan.TextMetrics
+       @param font {Nehan.Font}
+       @param text {String}
+       @return {Object} - {width:xxx, height:yyy}
+    */
     getMetrics : function(font, text){
       __canvas_context.font = font.toString(); // to get accurate metrics, font info is required.
       return __canvas_context.measureText(text);
     },
+    /**
+       @memberof Nehan.TextMetrics
+       @param font {Nehan.Font}
+       @param text {String}
+       @return {int}
+    */
     getMeasure : function(font, text){
       var metrics = this.getMetrics(font, text);
       var space = Math.floor(Display.vertWordSpaceRate * font.size);
@@ -7264,20 +7362,51 @@ var TextEmphaStyle = (function(){
     "open sesame":"&#xfe46;"
   };
 
+  /**
+     @memberof Nehan
+     @class TextEmphaStyle
+     @classdesc abstraction of text-empha-position.
+     @constructor
+     @param value {String} - style name. default "none".
+     @example
+     * new TextEmphaStyle().getText(); // ""
+     * new TextEmphaStyle().getText("none"); // ""
+     * new TextEmphaStyle("filled dot").getText(); // "&#x2022";
+     * new TextEmphaStyle("foo").getText(); // "foo";
+  */
   function TextEmphaStyle(value){
     this.value = value || "none";
   }
 
   TextEmphaStyle.prototype = {
+    /**
+       @memberof Nehan.TextEmphaStyle
+       @return {bool}
+    */
     isEnable : function(){
       return this.value != "none";
     },
+    /**
+       @memberof Nehan.TextEmphaStyle
+       @param value {String} - empha style name
+    */
     setValue : function(value){
       this.value = value;
     },
+    /**
+       @memberof Nehan.TextEmphaStyle
+       @return {String}
+    */
     getText : function(){
+      if(!this.isEnable()){
+	return "";
+      }
       return __empha_marks[this.value] || this.value || __empha_marks[__default_empha_style];
     },
+    /**
+       @memberof Nehan.TextEmphaStyle
+       @return {Object}
+    */
     getCss : function(){
       var css = {};
       //return css["text-emphasis-style"] = this.value;
@@ -7290,17 +7419,29 @@ var TextEmphaStyle = (function(){
 
 
 var TextEmphaPos = (function(){
-  function TextEmphaPos(value){
+  /**
+     @memberof Nehan
+     @class TextEmphaPos
+     @classdesc abstraction of text-empha-position, but not impremented yet.
+     @constructor
+     @param opt {Object}
+     @param opt.hori {String} - horizontal empha pos, default "over"
+     @param opt.vert {String} - vertical empha pos, default "right"
+  */
+  function TextEmphaPos(opt){
     Args.merge(this, {
       hori:"over",
       vert:"right"
-    }, value || {});
+    }, opt || {});
   }
 
   TextEmphaPos.prototype = {
-    isEmphaFirst : function(){
-      return this.hori === "over" || this.vert === "left";
-    },
+    /**
+       not implemented yet.
+
+       @memberof Nehan.TextEmphaPos
+       @return {Object}
+    */
     getCss : function(line){
       var css = {};
       return css;
@@ -7312,6 +7453,16 @@ var TextEmphaPos = (function(){
 
 
 var TextEmpha = (function(){
+  /**
+     @memberof Nehan
+     @class TextEmpha
+     @classdesc abstraction of text emphasis.
+     @constructor
+     @param opt {Object}
+     @param opt.style {Nehan.TextEmphaStyle}
+     @param opt.pos {Nehan.TextEmphaPos}
+     @param opt.color {Nehan.Color}
+  */
   function TextEmpha(opt){
     opt = opt || {};
     this.style = opt.style || new TextEmphaStyle();
@@ -7320,18 +7471,35 @@ var TextEmpha = (function(){
   }
 
   TextEmpha.prototype = {
+    /**
+       @memberof Nehan.TextEmpha
+       @return {boolean}
+    */
     isEnable : function(){
       return this.style && this.style.isEnable();
     },
-    isEmphaStart : function(){
-      return this.pos? this.pos.isEmphaStart() : true;
-    },
+    /**
+       get text of empha style, see {@link Nehan.TextEmphaStyle}.
+
+       @memberof Nehan.TextEmpha
+       @return {String}
+    */
     getText : function(){
       return this.style? this.style.getText() : "";
     },
+    /**
+       @memberof Nehan.TextEmpha
+       @return {int}
+    */
     getExtent : function(font_size){
       return font_size * 3;
     },
+    /**
+       @memberof Nehan.TextEmpha
+       @param line {Nehan.Box}
+       @param chr {Nehan.Char}
+       @return {Object}
+    */
     getCssVertEmphaWrap : function(line, chr){
       var css = {}, font_size = line.style.getFontSize();
       css["text-align"] = "left";
@@ -7339,6 +7507,12 @@ var TextEmpha = (function(){
       css.height = chr.getAdvance(line.style.flow, line.style.letterSpacing || 0) + "px";
       return css;
     },
+    /**
+       @memberof Nehan.TextEmpha
+       @param line {Nehan.Box}
+       @param chr {Nehan.Char}
+       @return {Object}
+    */
     getCssHoriEmphaWrap : function(line, chr){
       var css = {}, font_size = line.style.getFontSize();
       css.display = "inline-block";
@@ -8373,24 +8547,73 @@ var Section = (function(){
 
 
 var TocContext = (function(){
+  /**
+     @memberof Nehan
+     @class TocContext
+     @classdesc context data of toc parsing.
+     @constructor
+  */
   function TocContext(){
     this.stack = [1];
   }
 
   TocContext.prototype = {
+    /**
+       @memberof Nehan.TocContext
+       @return {String}
+       @example
+       * // assume that current toc stack is [1,2,1].
+       * ctx.toString(); // "1.2.1"
+    */
     toString : function(){
       return this.stack.join(".");
     },
+    /**
+       countup toc count of current depth.
+
+       @memberof Nehan.TocContext
+       @return {Nehan.TocContext}
+       @example
+       * // assume that current toc stack is [1,2], and
+       * // current toc depth is at 1(0 is first).
+       * ctx.toString(); // "1.2"
+       * ctx.stepNext();
+       * ctx.toString(); // "1.3"
+    */
     stepNext : function(){
       if(this.stack.length > 0){
 	this.stack[this.stack.length - 1]++;
       }
       return this;
     },
+    /**
+       append toc root
+
+       @memberof Nehan.TocContext
+       @return {Nehan.TocContext}
+       @example
+       * // assume that current toc stack is [1,2].
+       * ctx.toString(); // "1.2"
+       * ctx.startRoot();
+       * ctx.toString(); // "1.2.1"
+    */
     startRoot : function(){
       this.stack.push(1);
       return this;
     },
+    /**
+       finish toc root
+
+       @memberof Nehan.TocContext
+       @return {Nehan.TocContext}
+       @example
+       * // assume that current toc stack is [1,2].
+       * ctx.toString(); // "1.2"
+       * ctx.startRoot();
+       * ctx.toString(); // "1.2.1"
+       * ctx.endRoot();
+       * ctx.toString(); // "1.2"
+    */
     endRoot : function(){
       this.stack.pop();
       return this;
@@ -8965,6 +9188,13 @@ var DocumentContext = (function(){
 
 
 var TokenStream = (function(){
+  /**
+     @memberof Nehan
+     @class TokenStream
+     @classdesc abstraction of token stream with background buffering.
+     @constructor
+     @param src {String}
+  */
   function TokenStream(src){
     this.lexer = this._createLexer(src);
     this.tokens = [];
@@ -8974,18 +9204,38 @@ var TokenStream = (function(){
   }
 
   TokenStream.prototype = {
+    /**
+       @memberof Nehan.TokenStream
+       @return {boolean}
+    */
     hasNext : function(){
       return (!this.eof || this.pos < this.tokens.length);
     },
-    isEmpty : function(){
+    /**
+       @memberof Nehan.TokenStream
+       @return {boolean}
+    */
+    isEmptyLexer : function(){
       return this.lexer.isEmpty();
     },
+    /**
+       @memberof Nehan.TokenStream
+       @return {boolean}
+    */
     isEmptyTokens : function(){
       return this.tokens.length === 0;
     },
+    /**
+       @memberof Nehan.TokenStream
+       @return {boolean}
+    */
     isHead : function(){
       return this.pos === 0;
     },
+    /**
+       @memberof Nehan.TokenStream
+       @param text {String}
+    */
     addText : function(text){
       // check if already done, and text is not empty.
       if(this.eof && text !== ""){
@@ -8993,15 +9243,37 @@ var TokenStream = (function(){
 	this.eof = false;
       }
     },
+    /**
+       step backward current stream position.
+
+       @memberof Nehan.TokenStream
+    */
     prev : function(){
       this.pos = Math.max(0, this.pos - 1);
     },
+    /**
+       set stream position directly.
+
+       @memberof Nehan.TokenStream
+       @param pos {int}
+    */
     setPos : function(pos){
       this.pos = pos;
     },
+    /**
+       set current stream position to the beginning of stream.
+
+       @memberof Nehan.TokenStream
+    */
     rewind : function(){
       this.pos = 0;
     },
+    /**
+       look current token but not step forward current position.
+
+       @memberof Nehan.TokenStream
+       @return {token}
+    */
     peek : function(off){
       var offset = off || 0;
       var index = Math.max(0, this.pos + offset);
@@ -9018,39 +9290,94 @@ var TokenStream = (function(){
       }
       return null;
     },
+    /**
+       get current stream token and step forward current position.
+
+       @memberof Nehan.TokenStream
+       @return {token}
+    */
     get : function(){
       var token = this.peek();
       this.pos++;
       return token;
     },
+    /**
+       get stream soruce as text.
+
+       @memberof Nehan.TokenStream
+       @return {String}
+    */
     getSrc : function(){
       return this.lexer.getSrc();
     },
+    /**
+       get current stream position.
+
+       @memberof Nehan.TokenStream
+       @return {int}
+    */
     getPos : function(){
       return this.pos;
     },
+    /**
+       get current token count.
+
+       @memberof Nehan.TokenStream
+       @return {int}
+    */
     getTokenCount : function(){
       return this.tokens.length;
     },
+    /**
+       get current token position of source text(not stream position).
+
+       @memberof Nehan.TokenStream
+       @return {int}
+    */
     getSeekPos : function(){
       var token = this.tokens[this.pos];
       return token? token.spos : 0;
     },
+    /**
+       get current seek pos as percent.
+
+       @memberof Nehan.TokenStream
+       @return {int}
+    */
     getSeekPercent : function(){
       var seek_pos = this.getSeekPos();
       return this.lexer.getSeekPercent(seek_pos);
     },
+    /**
+       read whole stream source, and return all tokens immediately.
+
+       @memberof Nehan.TokenStream
+       @return {Array.<token>}
+    */
     getAll : function(){
       while(!this.eof){
 	this._doBuffer();
       }
       return this.tokens;
     },
+    /**
+       read whole stream source, and return all tokens immediately, but filter by [fn].
+
+       @memberof Nehan.TokenStream
+       @param fn {Function}
+       @return {Array.<token>}
+    */
     getAllIf : function(fn){
       return List.filter(this.getAll(), function(token){
 	return fn(token);
       });
     },
+    /**
+       iterate tokens by [fn].
+
+       @memberof Nehan.TokenStream
+       @param fn {Function}
+    */
     iterWhile : function(fn){
       var token;
       while(this.hasNext()){
@@ -9061,6 +9388,12 @@ var TokenStream = (function(){
 	}
       }
     },
+    /**
+       step stream position while [fn(token)] is true.
+
+       @memberof Nehan.TokenStream
+       @param fn {Function}
+    */
     skipUntil : function(fn){
       while(this.hasNext()){
 	var token = this.get();
