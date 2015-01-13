@@ -4161,7 +4161,7 @@ var TagAttrs = (function(){
       switch(value){
       case "true": return true;
       case "false": return false;
-      default: return value;
+      default: isNaN(value)? value : Number(value);
       }
     },
     _parseDataset : function(attrs_raw){
