@@ -379,6 +379,14 @@ var Config = {
   enableAutoCloseTag:false,
 
   /**
+     enable inline style.
+     @memberof Nehan.Config
+     @type {boolean}
+     @default true
+  */
+  enableInlineStyle:true,
+
+  /**
      default length of html-lexer buffer.
      @memberof Nehan.Config
      @type {int}
@@ -520,8 +528,6 @@ var Display = {
      @default 0.25
   */
   vertWordSpaceRate: 0.25,
-
-  // 
   /**
      standard font color. this is required for browsers not supporting writing-mode to display vertical font-images.
 
@@ -557,9 +563,8 @@ var Display = {
   fontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
   //fontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 
-  // font sizes defined by name
   /**
-     pre defined font-name values.
+     font sizes defined by name
 
      @memberof Nehan.Display
      @type {Object}
@@ -12174,7 +12179,7 @@ var StyleContext = (function(){
     },
     _loadInlineCss : function(markup){
       var style = markup.getAttr("style");
-      if(style === null){
+      if(style === null || Config.enableInlineStyle === false){
 	return {};
       }
       var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];

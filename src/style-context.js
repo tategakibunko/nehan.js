@@ -1469,7 +1469,7 @@ var StyleContext = (function(){
     },
     _loadInlineCss : function(markup){
       var style = markup.getAttr("style");
-      if(style === null){
+      if(style === null || Config.enableInlineStyle === false){
 	return {};
       }
       var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];

@@ -76,6 +76,14 @@ var Config = {
   enableAutoCloseTag:false,
 
   /**
+     enable inline style.
+     @memberof Nehan.Config
+     @type {boolean}
+     @default true
+  */
+  enableInlineStyle:true,
+
+  /**
      default length of html-lexer buffer.
      @memberof Nehan.Config
      @type {int}
