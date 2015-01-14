@@ -1469,7 +1469,7 @@ var StyleContext = (function(){
     },
     _loadInlineCss : function(markup){
       var style = markup.getAttr("style");
-      if(style === null || Config.enableInlineStyle === false){
+      if(style === null || Config.disableInlineStyle){
 	return {};
       }
       var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];
@@ -1563,6 +1563,11 @@ var StyleContext = (function(){
       var border = this._loadBorder(flow, font_size);
       if(padding === null && margin === null && border === null){
 	return null;
+      }
+      // disable margin of before and after for inline.
+      if(this.isInline()){
+	margin.clearBefore(flow);
+	margin.clearAfter(flow);
       }
       return new BoxEdge({
 	padding:padding,

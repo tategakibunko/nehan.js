@@ -379,12 +379,12 @@ var Config = {
   enableAutoCloseTag:false,
 
   /**
-     enable inline style.
+     disable inline style or not.
      @memberof Nehan.Config
      @type {boolean}
-     @default true
+     @default false
   */
-  enableInlineStyle:true,
+  disableInlineStyle:false,
 
   /**
      default length of html-lexer buffer.
@@ -12179,7 +12179,7 @@ var StyleContext = (function(){
     },
     _loadInlineCss : function(markup){
       var style = markup.getAttr("style");
-      if(style === null || Config.enableInlineStyle === false){
+      if(style === null || Config.disableInlineStyle){
 	return {};
       }
       var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];
@@ -12273,6 +12273,11 @@ var StyleContext = (function(){
       var border = this._loadBorder(flow, font_size);
       if(padding === null && margin === null && border === null){
 	return null;
+      }
+      // disable margin of before and after for inline.
+      if(this.isInline()){
+	margin.clearBefore(flow);
+	margin.clearAfter(flow);
       }
       return new BoxEdge({
 	padding:padding,
