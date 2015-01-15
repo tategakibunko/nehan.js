@@ -1564,11 +1564,6 @@ var StyleContext = (function(){
       if(padding === null && margin === null && border === null){
 	return null;
       }
-      // disable margin of before and after for inline.
-      if(this.isInline()){
-	margin.clearBefore(flow);
-	margin.clearAfter(flow);
-      }
       return new BoxEdge({
 	padding:padding,
 	margin:margin,
@@ -1611,6 +1606,11 @@ var StyleContext = (function(){
 	 (this.prev.edge.margin.getAfter(this.flow) > 0) &&
 	 (margin.getBefore(this.flow) > 0)){
 	this._cancelMargin(this.flow, margin, this.prev.edge.margin);
+      }
+      // if inline, disable margin-before and margin-after.
+      if(this.isInline()){
+	margin.clearBefore(flow);
+	margin.clearAfter(flow);
       }
       return margin;
     },
