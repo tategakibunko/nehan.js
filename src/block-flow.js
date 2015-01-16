@@ -74,7 +74,7 @@ var BlockFlow = (function(){
      get physical directional property of logical before.
 
      @memberof Nehan.BlockFlow
-     @method getPropBefore
+     @method getPropAfter
      @return {string}
      @example
      * new BlockFlow("tb").getPropAfter(); // => "bottom"
