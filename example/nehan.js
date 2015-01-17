@@ -277,23 +277,22 @@ Nehan.addSingleTagByRex = function(rex){
 };
 
 /**
-   create engine module.
-
+ * This function ends at nehan-setup-end.js(tail part of all source code),<br>
+ * to enclose local environment(Style, Display, Config, DocumentContext etc).<br>
+ * So each engine has it's own environment.<br>
+ * This is usefull to show multiple layout(vertical and horizontal) in a single page.<br>
+ * Note that Nehan.setup is alias name of Nehan.createEngine.
+ 
    @namespace Nehan
    @memberof Nehan
    @method createEngine
-   @alias setup
    @param engine_args {Object}
    @param engine_args.config {Nehan.Config} - system config
    @param engine_args.display {Nehan.Display} - standard page parameters
    @param engine_args.style {Nehan.Style} - engine local style
    @return {Nehan.Engine}
 */
-// this function return the engine module(ends at nehan-setup-end.js),
-// enclosing local environment(Style, Display, Config, DocumentContext etc).
-// so each engine module has it's own environment.
-// this is usefull to show multiple layout(vertical and horizontal) in a single page.
-Nehan.setup = Nehan.createEngine = function(engine_args){
+Nehan.createEngine = Nehan.setup = function(engine_args){
 "use strict";
 var __engine_args = engine_args || {};
 
@@ -15511,18 +15510,30 @@ List.iter(Nehan.__single_tag_names__, LexingRule.addSingleTagByName);
 List.iter(Nehan.__single_tag_rexes__, LexingRule.addSingleTagByRex);
 
 /**
- * engine iterfaces enclosed by local engine environment like<br>
- * <ul>
- * <li>{@link Nehan.DocumentContext}</li>
- * <li>{@link Nehan.LexingRule}</li>
- * <li>{@link Nehan.Style}</li>
- * <li>{@link Nehan.Selectors}</li>
- * <li>{@link Nehan.Display}</li>
- * <li>{@link Nehan.Config}</li>
- * </ul>
-   @namespace Nehan.Engine
+   @memberof Nehan
+   @class
+   @constructor
+   @classdesc this is logical layout engine module, enclosing followings<br>
+   * <ul>
+   * <li>{@link Nehan.DocumentContext}</li>
+   * <li>{@link Nehan.LexingRule}</li>
+   * <li>{@link Nehan.Style}</li>
+   * <li>{@link Nehan.Selectors}</li>
+   * <li>{@link Nehan.Display}</li>
+   * <li>{@link Nehan.Config}</li>
+   * </ul>
+   @param opt {Object}
+   @param opt.documentContext {Nehan.DocumentContext}
+   @param opt.lexingRule {Nehan.LexingRule}
+   @param opt.selectors {Nehan.Selectors}
 */
-return {
+function Engine(opt){
+  this.documentContext = opt.documentContext;
+  this.lexingRule = opt.lexingRule;
+  this.selectors = opt.selectors;
+}
+
+Engine.prototype = {
   /**
      @memberof Nehan.Engine
      @param text {String} - html text
@@ -15540,7 +15551,7 @@ return {
      @param callbacks {Object} - see {@link Nehan.SectionTreeConverter}
    */
   createOutlineElement : function(callbacks){
-    return DocumentContext.createBodyOutlineElement(callbacks);
+    return this.documentContext.createBodyOutlineElement(callbacks);
   },
   /*
     get the page index where [anchor_name] is defined in from {@link Nehan.DocumentContext}.
@@ -15549,7 +15560,7 @@ return {
     @param anchor_name {String}
   */
   getAnchorPageNo : function(anchor_name){
-    return DocumentContext.getAnchorPageNo(anchor_name);
+    return this.documentContext.getAnchorPageNo(anchor_name);
   },
   /**
      register engine local single tag by name.
@@ -15558,7 +15569,7 @@ return {
      @param name {String}
   */
   addSingleTagByName : function(name){
-    LexingRule.addSingleTagByName(name);
+    this.lexingRule.addSingleTagByName(name);
   },
   /**
      register engine local single tag by regexp object.
@@ -15567,7 +15578,7 @@ return {
      @param rex {RegExp}
   */
   addSingleTagByRex : function(rex){
-    LexingRule.addSingleTagRex(name);
+    this.lexingRule.addSingleTagRex(name);
   },
   /**
      set engine local style
@@ -15577,7 +15588,7 @@ return {
      * engine.setStyle("p", {"font-size":"1.6em"});
   */
   setStyle : function(selector_key, value){
-    Selectors.setValue(selector_key, value);
+    this.selectors.setValue(selector_key, value);
     return this;
   },
   /**
@@ -15591,12 +15602,18 @@ return {
      * });
   */
   setStyles : function(values){
-    Selectors.setValues(values);
+    this.selectors.setValues(values);
     return this;
   }
 };
 
-}; // Nehan.setup
+return new Engine({
+  documentContext:DocumentContext,
+  lexingRule:LexingRule,
+  selectors:Selectors
+});
+
+}; // Nehan.createEngine
 
 Nehan.PagedElement = (function(){
   /**
@@ -15612,7 +15629,7 @@ Nehan.PagedElement = (function(){
   function NehanPagedElement(engine_args){
     this.pageNo = 0;
     this.element = document.createElement("div");
-    this.engine = Nehan.setup(engine_args);
+    this.engine = Nehan.createEngine(engine_args);
     this._pageStream = null;
   }
 

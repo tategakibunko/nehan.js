@@ -12,7 +12,7 @@ Nehan.PagedElement = (function(){
   function NehanPagedElement(engine_args){
     this.pageNo = 0;
     this.element = document.createElement("div");
-    this.engine = Nehan.setup(engine_args);
+    this.engine = Nehan.createEngine(engine_args);
     this._pageStream = null;
   }
 

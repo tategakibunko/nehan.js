@@ -56,23 +56,22 @@ Nehan.addSingleTagByRex = function(rex){
 };
 
 /**
-   create engine module.
-
+ * This function ends at nehan-setup-end.js(tail part of all source code),<br>
+ * to enclose local environment(Style, Display, Config, DocumentContext etc).<br>
+ * So each engine has it's own environment.<br>
+ * This is usefull to show multiple layout(vertical and horizontal) in a single page.<br>
+ * Note that Nehan.setup is alias name of Nehan.createEngine.
+ 
    @namespace Nehan
    @memberof Nehan
    @method createEngine
-   @alias setup
    @param engine_args {Object}
    @param engine_args.config {Nehan.Config} - system config
    @param engine_args.display {Nehan.Display} - standard page parameters
    @param engine_args.style {Nehan.Style} - engine local style
    @return {Nehan.Engine}
 */
-// this function return the engine module(ends at nehan-setup-end.js),
-// enclosing local environment(Style, Display, Config, DocumentContext etc).
-// so each engine module has it's own environment.
-// this is usefull to show multiple layout(vertical and horizontal) in a single page.
-Nehan.setup = Nehan.createEngine = function(engine_args){
+Nehan.createEngine = Nehan.setup = function(engine_args){
 "use strict";
 var __engine_args = engine_args || {};
 
