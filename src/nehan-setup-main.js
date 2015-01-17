@@ -12,8 +12,8 @@ List.iter(Nehan.__single_tag_rexes__, LexingRule.addSingleTagByRex);
 /**
    @memberof Nehan
    @class
-   @constructor
    @classdesc this is logical layout engine module, enclosing followings<br>
+   @constructor
    * <ul>
    * <li>{@link Nehan.DocumentContext}</li>
    * <li>{@link Nehan.LexingRule}</li>
@@ -22,15 +22,11 @@ List.iter(Nehan.__single_tag_rexes__, LexingRule.addSingleTagByRex);
    * <li>{@link Nehan.Display}</li>
    * <li>{@link Nehan.Config}</li>
    * </ul>
-   @param opt {Object}
-   @param opt.documentContext {Nehan.DocumentContext}
-   @param opt.lexingRule {Nehan.LexingRule}
-   @param opt.selectors {Nehan.Selectors}
 */
-function Engine(opt){
-  this.documentContext = opt.documentContext;
-  this.lexingRule = opt.lexingRule;
-  this.selectors = opt.selectors;
+function Engine(){
+  this.documentContext = DocumentContext;
+  this.lexingRule = LexingRule;
+  this.selectors = Selectors;
 }
 
 Engine.prototype = {
@@ -107,8 +103,4 @@ Engine.prototype = {
   }
 };
 
-return new Engine({
-  documentContext:DocumentContext,
-  lexingRule:LexingRule,
-  selectors:Selectors
-});
+return new Engine();
