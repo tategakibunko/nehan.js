@@ -11,9 +11,9 @@ List.iter(Nehan.__single_tag_rexes__, LexingRule.addSingleTagByRex);
 
 /**
    @memberof Nehan
-   @class
-   @classdesc this is logical layout engine module, enclosing followings<br>
+   @class Engine
    @constructor
+   @classdesc this is logical layout engine module, enclosing following environments.<br>
    * <ul>
    * <li>{@link Nehan.DocumentContext}</li>
    * <li>{@link Nehan.LexingRule}</li>
