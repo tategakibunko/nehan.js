@@ -65,7 +65,7 @@ document.getElementById("prev").onclick = function(){ pe.setPrevPage() };
 
 ```javascript
 // create layout engine.
-var engine = Nehan.setup();
+var engine = Nehan.createEnginep();
 
 // set body size(= page size)
 engine.setStyle("body", {
@@ -101,7 +101,7 @@ Engine local style is only available for the single engine.
 
 ```javascript
 // create layout engine.
-var engine = Nehan.setup();
+var engine = Nehan.createEngine();
 
 // set engine local style.
 engine.setStyles({
