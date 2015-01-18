@@ -65,7 +65,7 @@ document.getElementById("prev").onclick = function(){ pe.setPrevPage() };
 
 ```javascript
 // create layout engine.
-var engine = Nehan.createEnginep();
+var engine = Nehan.createEngine();
 
 // set body size(= page size)
 engine.setStyle("body", {
