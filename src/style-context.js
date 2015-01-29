@@ -527,6 +527,8 @@ var StyleContext = (function(){
       var elements = opt.elements || [];
       var max_font_size = opt.maxFontSize || this.getFontSize();
       var max_extent = opt.maxExtent || 0;
+      var char_count = opt.charCount || 0;
+      var content = opt.content || null;
       if(this.isTextEmphaEnable()){
 	max_extent = Math.max(max_extent, this.getEmphaLineExtent());
       } else if(this.markup.name === "ruby"){
@@ -542,12 +544,12 @@ var StyleContext = (function(){
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.getClasses());
       var line = new Box(line_size, this);
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
-      line.elements = opt.elements || [];
+      line.elements = elements;
       line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.getMarkupName());
-      line.charCount = opt.charCount || 0;
+      line.charCount = char_count;
       line.maxFontSize = max_font_size;
       line.maxExtent = max_extent;
-      line.content = opt.content || null;
+      line.content = content;
 
       // edge of top level line is disabled.
       // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
@@ -1200,8 +1202,9 @@ var StyleContext = (function(){
     getRubyLineExtent : function(){
       var base_font_size = this.getFontSize();
       var base_extent = Math.floor(base_font_size * this.getLineRate());
-      var rt_extent = Display.getRtFontSize(base_font_size);
-      return base_extent + rt_extent;
+      //var rt_extent = Display.getRtFontSize(base_font_size);
+      //return base_extent + rt_extent;
+      return base_extent;
     },
     /**
        @memberof Nehan.StyleContext
