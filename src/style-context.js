@@ -564,9 +564,15 @@ var StyleContext = (function(){
 	line.inlineMeasure = opt.measure || this.contentMeasure;
 	line.texts = opt.texts || [];
 
+	// pickup decorated elements that has different baseline(ruby or empha)
+	var decorated_elements = __filter_decorated_inline_elements(elements);
+
 	// if vertical line, needs some position fix for decorated element(ruby, empha) to align baseline.
 	if(this.isTextVertical()){
-	  this._setVertBaseline(elements, max_font_size, max_extent);
+	  this._setVertBaseline(elements, decorated_elements, max_font_size, max_extent);
+	} else if(decorated_elements.length === 0){
+	  // if horizontal line and no decorated elements exists, set line-height = exent.
+	  this.setCssAttr("line-height", max_extent + "px");
 	}
 	if(this.textAlign && !this.textAlign.isStart()){
 	  this._setTextAlign(line, this.textAlign);
@@ -1317,7 +1323,7 @@ var StyleContext = (function(){
 	  css["text-align"] = "center";
 	}
       } else {
-	// if line-height is defined, enable only when horizontal mode.
+	// enable line-height only when horizontal mode.
 	// this logic is required for drop-caps of horizontal mode.
 	// TODO: more simple solution.
 	var line_height = this.getCssAttr("line-height");
@@ -1404,7 +1410,7 @@ var StyleContext = (function(){
 	Args.copy(line.css, padding.getCss());
       }
     },
-    _setVertBaseline : function(elements, max_font_size, max_extent){
+    _setVertBaseline : function(elements, decorated_elements, max_font_size, max_extent){
       var flow = this.flow;
       var base_font_size = this.getFontSize();
       var text_center = Math.floor(max_extent / 2); // center line offset
@@ -1416,8 +1422,6 @@ var StyleContext = (function(){
 	}
       });
 
-      // pickup decorated elements that has different baseline(ruby or empha)
-      var decorated_elements = __filter_decorated_inline_elements(elements);
       List.iter(decorated_elements, function(element){
 	var font_size = element.style.getFontSize();
 	var text_center_offset = text_center - Math.floor(font_size / 2); // text displayed at half font-size minus from center line.

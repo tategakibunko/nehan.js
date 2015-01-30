@@ -69,11 +69,13 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype._evalEmpha = function(line, chr){
     var char_part = this._createElement("div", {
       content:chr.data,
+      className:"nehan-empha-src",
       css:chr.getCssHoriEmphaTarget(line),
       styleContext:line.style
     });
     var empha_part = this._createElement("div", {
       content:line.style.textEmpha.getText(),
+      className:"nehan-empha-text",
       css:chr.getCssHoriEmphaText(line),
       styleContext:line.style
     });
