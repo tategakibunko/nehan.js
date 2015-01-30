@@ -1200,10 +1200,9 @@ var StyleContext = (function(){
        @return {int}
     */
     getRubyLineExtent : function(){
+      var line_rate = this.getLineRate();
       var base_font_size = this.getFontSize();
-      var base_extent = Math.floor(base_font_size * this.getLineRate());
-      var rt_extent = Display.getRtFontSize(base_font_size);
-      return base_extent + ((base_font_size > Display.fontSize)? rt_extent : 0);
+      return Math.floor(base_font_size * line_rate);
     },
     /**
        @memberof Nehan.StyleContext

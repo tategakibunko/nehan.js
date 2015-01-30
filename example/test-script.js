@@ -1,4 +1,9 @@
 var Script = {
+  "baseline2":[
+    "<h3><ruby>日本<rt>にほん</rt></ruby>と<ruby>漢字<rt>かんじ</rt></ruby></h3>",
+    Snipet["ruby"]
+  ].join("\n"),
+
   "selector":[
     // adjacent sibling selector(A+B) test
     "<h2>adj sibling</h2>",

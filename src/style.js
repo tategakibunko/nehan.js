@@ -286,7 +286,6 @@ var Style = {
     "display":"block",
     // in html4, page-break-before is 'always' by default.
     //"break-before":"always",
-    "line-rate":1.4,
     "font-size":"2.4em",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
@@ -295,7 +294,6 @@ var Style = {
   },
   "h2":{
     "display":"block",
-    "line-rate":1.4,
     "font-size":"2.0em",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
@@ -304,7 +302,6 @@ var Style = {
   },
   "h3":{
     "display":"block",
-    "line-rate":1.4,
     "font-size":"1.6em",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
@@ -313,7 +310,6 @@ var Style = {
   },
   "h4":{
     "display":"block",
-    "line-rate":1.4,
     "font-size":"1.4em",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
@@ -322,7 +318,6 @@ var Style = {
   },
   "h5":{
     "display":"block",
-    "line-rate":1.4,
     "font-size":"1.0em",
     "font-weight":"bold",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
@@ -332,7 +327,6 @@ var Style = {
   },
   "h6":{
     "display":"block",
-    "line-rate":1.4,
     "font-weight":"bold",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "font-size":"1.0em"

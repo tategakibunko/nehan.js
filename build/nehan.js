@@ -1031,7 +1031,6 @@ var Style = {
     "display":"block",
     // in html4, page-break-before is 'always' by default.
     //"break-before":"always",
-    "line-rate":1.4,
     "font-size":"2.4em",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
@@ -1040,7 +1039,6 @@ var Style = {
   },
   "h2":{
     "display":"block",
-    "line-rate":1.4,
     "font-size":"2.0em",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
@@ -1049,7 +1047,6 @@ var Style = {
   },
   "h3":{
     "display":"block",
-    "line-rate":1.4,
     "font-size":"1.6em",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
@@ -1058,7 +1055,6 @@ var Style = {
   },
   "h4":{
     "display":"block",
-    "line-rate":1.4,
     "font-size":"1.4em",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "margin":{
@@ -1067,7 +1063,6 @@ var Style = {
   },
   "h5":{
     "display":"block",
-    "line-rate":1.4,
     "font-size":"1.0em",
     "font-weight":"bold",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
@@ -1077,7 +1072,6 @@ var Style = {
   },
   "h6":{
     "display":"block",
-    "line-rate":1.4,
     "font-weight":"bold",
     "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
     "font-size":"1.0em"
@@ -11910,10 +11904,9 @@ var StyleContext = (function(){
        @return {int}
     */
     getRubyLineExtent : function(){
+      var line_rate = this.getLineRate();
       var base_font_size = this.getFontSize();
-      var base_extent = Math.floor(base_font_size * this.getLineRate());
-      var rt_extent = Display.getRtFontSize(base_font_size);
-      return base_extent + ((base_font_size > Display.fontSize)? rt_extent : 0);
+      return Math.floor(base_font_size * line_rate);
     },
     /**
        @memberof Nehan.StyleContext
