@@ -1208,7 +1208,8 @@ var StyleContext = (function(){
     getRubyLineExtent : function(){
       var line_rate = this.getLineRate();
       var base_font_size = this.getFontSize();
-      return Math.floor(base_font_size * line_rate);
+      var extent = Math.floor(base_font_size * line_rate);
+      return (base_font_size % 2 === 0)? extent : extent + 1;
     },
     /**
        @memberof Nehan.StyleContext
