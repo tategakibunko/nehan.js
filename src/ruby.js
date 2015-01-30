@@ -112,6 +112,7 @@ var Ruby = (function(){
 	Args.copy(css, this.padding.getCss());
       }
       css["text-align"] = "center";
+      css["line-height"] = "1em";
       return css;
     },
     /**

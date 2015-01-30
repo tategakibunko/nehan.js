@@ -132,6 +132,7 @@ var Char = (function(){
      */
     getCssHoriEmphaText : function(line){
       var css = {};
+      css["line-height"] = "1em";
       return css;
     },
     /**

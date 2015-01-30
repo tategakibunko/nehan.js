@@ -28,12 +28,6 @@
 .nehan-inline.nehan-inline-lr-tb .nehan-inline{
   float:none;
 }
-.nehan-inline.nehan-inline-lr-tb.nehan-rb{
-  line-height:1em;
-}
-.nehan-inline.nehan-inline-lr-tb .nehan-empha-text{
-  line-height:1em;
-}
 .nehan-inline-tb-rl a,
 .nehan-inline-tb-lr a {
   overflow:visible;

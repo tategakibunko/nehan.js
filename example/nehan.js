@@ -4630,6 +4630,7 @@ var Char = (function(){
      */
     getCssHoriEmphaText : function(line){
       var css = {};
+      css["line-height"] = "1em";
       return css;
     },
     /**
@@ -5415,6 +5416,7 @@ var Ruby = (function(){
 	Args.copy(css, this.padding.getCss());
       }
       css["text-align"] = "center";
+      css["line-height"] = "1em";
       return css;
     },
     /**
