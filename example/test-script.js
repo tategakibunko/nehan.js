@@ -59,6 +59,7 @@ var Script = {
   ].join(""),
 
   "baseline":[
+    "<h3><ruby>日本<rt>にほん</rt></ruby>と<ruby>漢字<rt>かんじ</rt></ruby></h3>",
     Snipet["ruby"],
     "これは<span class='nehan-x-large'>大きい</span>文字",
     "<p><a href='#'><ruby>漢字<rt>かんじ</rt></ruby></a>と<a href='#'><span class='nehan-xx-large'><ruby>日本<rt>にほん</rt></ruby></span></a>と<a href='#3'><span class='nehan-empha-dot-open'>圏点</span></a>です。</p>",

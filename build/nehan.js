@@ -11912,9 +11912,8 @@ var StyleContext = (function(){
     getRubyLineExtent : function(){
       var base_font_size = this.getFontSize();
       var base_extent = Math.floor(base_font_size * this.getLineRate());
-      //var rt_extent = Display.getRtFontSize(base_font_size);
-      //return base_extent + rt_extent;
-      return base_extent;
+      var rt_extent = Display.getRtFontSize(base_font_size);
+      return base_extent + ((base_font_size > Display.fontSize)? rt_extent : 0);
     },
     /**
        @memberof Nehan.StyleContext
