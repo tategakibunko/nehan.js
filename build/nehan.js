@@ -11403,13 +11403,6 @@ var StyleContext = (function(){
        @memberof Nehan.StyleContext
        @return {boolean}
     */
-    isParallel : function(){
-      return this.display === "list-item";
-    },
-    /**
-       @memberof Nehan.StyleContext
-       @return {boolean}
-    */
     isPushed : function(){
       return this.getMarkupAttr("pushed") !== null;
     },
