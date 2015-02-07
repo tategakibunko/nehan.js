@@ -36,6 +36,7 @@ var Snipet = {
     "<ul>",
     "<li>" + Text["short"] + "</li>",
     "<li>" + [
+      "hoge",
       "<ul class='nehan-lst-circle'>",
       "<li>" + Text["middle"] + "</li>",
       "<li>" + Text["long"] + "</li>",
@@ -51,6 +52,7 @@ var Snipet = {
     "<ol>",
     "<li>" + Text["short"] + "</li>",
     "<li>" + [
+      "hoge",
       "<ol class='nehan-lst-lower-alpha'>",
       "<li>" + Text["middle"] + "</li>",
       "<li>" + Text["long"] + "</li>",
