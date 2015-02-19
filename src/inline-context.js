@@ -185,9 +185,9 @@ var InlineContext = (function(){
       if(0 <= ptr && ptr < last){
 	// disable text after new tail pos.
 	this.elements = List.filter(this.elements, function(element){
-	  return element.pos? (element.pos <= tail.pos) : true;
+	  return element.pos? (element.pos < head.pos) : true;
 	});
-	return tail; // return new tail
+	return head; // return new head
       }
       return null; // justify failed or not required.
     }

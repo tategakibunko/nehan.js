@@ -16,6 +16,7 @@ o Nehan.createEngine is added, now Nehan.setup is alias name of this function(re
 * fix too wide extent of ruby line.
 * treat "true" or "false" value in dataset as 'boolean'.
 * disable margin-after, margin-before of inline element.
+* fix justify bug in some rare case.
 ! rename LayoutContext(layout-context.js) to CursorContext(cursor-context.js).
 ! rename Layout(layout.js) to Display(display.js).
 ! rename 'layout' in optinal argument for Nehan.setup to 'display'.

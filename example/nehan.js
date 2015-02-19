@@ -12955,9 +12955,9 @@ var InlineContext = (function(){
       if(0 <= ptr && ptr < last){
 	// disable text after new tail pos.
 	this.elements = List.filter(this.elements, function(element){
-	  return element.pos? (element.pos <= tail.pos) : true;
+	  return element.pos? (element.pos < head.pos) : true;
 	});
-	return tail; // return new tail
+	return head; // return new head
       }
       return null; // justify failed or not required.
     }
@@ -13567,6 +13567,11 @@ var InlineGenerator = (function(){
       maxFontSize:context.getInlineMaxFontSize()
     });
 
+    // set position in parent stream.
+    if(this._parentLayout && this._parentLayout.stream){
+      line.pos = Math.max(0, this._parentLayout.stream.getPos() - 1);
+    }
+
     // call _onCreate callback for 'each' output
     this._onCreate(context, line);
 
@@ -13585,9 +13590,9 @@ var InlineGenerator = (function(){
     }
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var next_head = this.peekLastCache() || this.stream.peek();
-    var new_tail = context.justify(next_head); // if justify is occured, new_tail token is gained.
-    if(new_tail){
-      this.stream.setPos(new_tail.pos + 1); // new stream pos is next pos of new tail.
+    var new_head = context.justify(next_head); // if justify is occured, new_tail token is gained.
+    if(new_head){
+      this.stream.setPos(new_head.pos);
       this.clearCache(); // stream position changed, so disable cache.
     }
   };
