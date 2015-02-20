@@ -49,6 +49,14 @@ var Token = {
      @param {token}
      @return {boolean}
   */
+  isEmphaTargetable : function(token){
+    return token._type === "char" || token._type === "tcy";
+  },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isNewLine : function(token){
     return token instanceof Char && token.isNewLineChar();
   },

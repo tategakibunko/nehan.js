@@ -4482,6 +4482,14 @@ var Token = {
      @param {token}
      @return {boolean}
   */
+  isEmphaTargetable : function(token){
+    return token._type === "char" || token._type === "tcy";
+  },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
   isNewLine : function(token){
     return token instanceof Char && token.isNewLineChar();
   },
@@ -5091,6 +5099,13 @@ var Word = (function(){
   Word.prototype = {
     /**
        @memberof Nehan.Word
+       @return {string}
+     */
+    getData : function(){
+      return this.data;
+    },
+    /**
+       @memberof Nehan.Word
        @param line {Nehan.Box}
        @return {Object}
     */
@@ -5267,6 +5282,13 @@ var Tcy = (function(){
   }
 
   Tcy.prototype = {
+    /**
+       @memberof Nehan.Tcy
+       @return {string}
+     */
+    getData : function(){
+      return this.data;
+    },
     /**
        @memberof Nehan.Tcy
        @return {int}
@@ -15071,7 +15093,7 @@ var LayoutEvaluator = (function(){
       }
     },
     _evalInlineChildText : function(parent, element){
-      if(parent.style.isTextEmphaEnable()){
+      if(parent.style.isTextEmphaEnable() && Token.isEmphaTargetable(element)){
 	return this._evalEmpha(parent, element);
       }
       return this._evalTextElement(parent, element);

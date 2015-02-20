@@ -16,6 +16,13 @@ var Word = (function(){
   Word.prototype = {
     /**
        @memberof Nehan.Word
+       @return {string}
+     */
+    getData : function(){
+      return this.data;
+    },
+    /**
+       @memberof Nehan.Word
        @param line {Nehan.Box}
        @return {Object}
     */

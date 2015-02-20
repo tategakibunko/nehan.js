@@ -14,6 +14,13 @@ var Tcy = (function(){
   Tcy.prototype = {
     /**
        @memberof Nehan.Tcy
+       @return {string}
+     */
+    getData : function(){
+      return this.data;
+    },
+    /**
+       @memberof Nehan.Tcy
        @return {int}
     */
     getCharCount : function(){

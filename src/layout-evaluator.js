@@ -147,7 +147,7 @@ var LayoutEvaluator = (function(){
       }
     },
     _evalInlineChildText : function(parent, element){
-      if(parent.style.isTextEmphaEnable()){
+      if(parent.style.isTextEmphaEnable() && Token.isEmphaTargetable(element)){
 	return this._evalEmpha(parent, element);
       }
       return this._evalTextElement(parent, element);
