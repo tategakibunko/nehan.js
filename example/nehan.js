@@ -12967,6 +12967,12 @@ var InlineContext = (function(){
       while(ptr >= 0){
 	tail = this.texts[ptr];
 	if(head && head.isHeadNg && head.isHeadNg() || tail.isTailNg && tail.isTailNg()){
+	  // if tail and head is not continuous elmenet, for example
+	  // [tail(pos=29)][inline element(pos=30)][head(pos=31)]
+	  // then justification is already done at inline element, so skip it.
+	  if(head && tail && head.pos - tail.pos > 1){
+	    break;
+	  }
 	  head = tail;
 	  ptr--;
 	} else {
