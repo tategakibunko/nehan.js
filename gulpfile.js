@@ -10,7 +10,7 @@
   2. to make nehan.min.js
      gulp nehan.min.js
 
-  these files are generated in build directory.
+  these files are generated in dist directory.
 */
 var gulp = require("gulp");
 var concat = require("gulp-concat");
@@ -166,14 +166,14 @@ var sources = [
 gulp.task("nehan.js", function(){
   gulp.src(sources)
     .pipe(concat("nehan.js"))
-    .pipe(gulp.dest("build/"));
+    .pipe(gulp.dest("dist/"));
 });
 
 gulp.task("nehan.min.js", function(){
-  gulp.src("build/nehan.js")
+  gulp.src("dist/nehan.js")
     .pipe(uglify({preserveComments:"some"}))
     .pipe(rename("nehan.min.js"))
-    .pipe(gulp.dest("build/"));
+    .pipe(gulp.dest("dist/"));
 });
 
 gulp.task("jshint", function(){
