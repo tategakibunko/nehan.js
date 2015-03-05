@@ -160,7 +160,7 @@ var sources = [
   "src/hori-evaluator.js",
   "src/nehan-setup-main.js",
   "src/nehan-setup-end.js",
-  "src/nehan-paged-element.js"
+  "src/paged-element.js"
 ];
 
 gulp.task("nehan.js", function(){
