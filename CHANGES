@@ -8,6 +8,7 @@ Mark "!": change that can break compatibility with older version
 
 version 5.0.6 ????/??/??
 ========================
+! Not throw exception if page_no not found at PagedElement::setPage(page_no).
 
 
 version 5.0.5 2015/03/06

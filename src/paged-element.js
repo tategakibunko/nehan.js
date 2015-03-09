@@ -172,11 +172,13 @@ Nehan.PagedElement = (function(){
 
        @memberof Nehan.PagedElement
        @param page_no {int}
+       @return {Nehan.Page | null}
     */
     setPage : function(page_no){
       var page = this.getPage(page_no);
       if(page === null || page.element === null){
-	throw "page_no(" + page_no + ") is not found";
+	//console.error("page_no(%d) is not found", page_no);
+	return null;
       }
       this.pageNo = page_no;
       while(this.element.firstChild){
