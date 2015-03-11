@@ -582,16 +582,6 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
-       @return {Nehan.Box}
-    */
-    createBreakLine : function(){
-      var line = new Box(this.flow.getBoxSize(this.contentMeasure, 0), this);
-      line.breakAfter = true;
-      line.elements = [];
-      return line;
-    },
-    /**
-       @memberof Nehan.StyleContext
        @return {boolean}
     */
     isDisabled : function(){

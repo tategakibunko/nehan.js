@@ -11310,16 +11310,6 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
-       @return {Nehan.Box}
-    */
-    createBreakLine : function(){
-      var line = new Box(this.flow.getBoxSize(this.contentMeasure, 0), this);
-      line.breakAfter = true;
-      line.elements = [];
-      return line;
-    },
-    /**
-       @memberof Nehan.StyleContext
        @return {boolean}
     */
     isDisabled : function(){
@@ -13420,6 +13410,12 @@ var BlockGenerator = (function(){
     if(child_style.isDisabled()){
       this.style.removeChild(child_style);
       return this._getNext(context);
+    }
+
+    // if page-break, end page
+    if(child_style.isPageBreak()){
+      context.setBreakAfter(true);
+      return null;
     }
 
     var child_stream = this._createStream(child_style);

@@ -104,6 +104,12 @@ var BlockGenerator = (function(){
       return this._getNext(context);
     }
 
+    // if page-break, end page
+    if(child_style.isPageBreak()){
+      context.setBreakAfter(true);
+      return null;
+    }
+
     var child_stream = this._createStream(child_style);
 
     if(child_style.isFloated()){
