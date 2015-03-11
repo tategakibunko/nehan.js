@@ -208,6 +208,10 @@ var InlineGenerator = (function(){
       context.setLineBreak(true);
       return null;
 
+    case "page-break": case "pbr": case "end-page":
+      context.setBreakAfter(true);
+      return null;
+
     default:
       var child_generator = this._createChildInlineGenerator(child_style, child_stream, context);
       this.setChildLayout(child_generator);
