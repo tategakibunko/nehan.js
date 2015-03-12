@@ -2429,7 +2429,7 @@ var Css = {
     return "nehan-toc-link-" + name;
   },
   /**
-     add vender-prefixed css value like(-webkit-opacity, -moz-opacity etc).
+     set vender-prefixed css value like(-webkit-opacity, -moz-opacity etc).
 
      @memberof Nehan.Css
      @param 
@@ -2438,9 +2438,9 @@ var Css = {
      @param value {String}
      @return {Object}
      @example
-     * Css.addCssValueWithVender({}, "writing-mode", "vertical-rl");
+     * Css.setCssValueWithVender({}, "writing-mode", "vertical-rl");
   */
-  addCssValueWithVender: function(dst, name, value){
+  setCssValueWithVender: function(dst, name, value){
     List.iter(Const.cssVenderPrefixes, function(prefix){
       dst[prefix + "-" + name] = value;
     });
@@ -4579,7 +4579,6 @@ var Char = (function(){
       var padding_enable = this.isPaddingEnable();
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
-      Css.addCssValueWithVender(css, "writing-mode", "vertical-rl");
       if(this.isKakkoStart()){
 	if(this.data === "\x28"){ // left parenthis
 	  css["height"] = "0.5em"; // it's temporary fix, so maybe need to be refactored.
@@ -15352,7 +15351,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalVerticalGlyph = function(line, chr){
     return this._createElement("div", {
       content:chr.getData(),
-      //className:"nehan-vert-glyph",
+      className:"nehan-vert-glyph",
       css:chr.getCssVertGlyph(line),
       styleContext:line.style
     });

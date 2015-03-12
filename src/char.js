@@ -55,7 +55,6 @@ var Char = (function(){
       var padding_enable = this.isPaddingEnable();
       css["margin-left"] = "auto";
       css["margin-right"] = "auto";
-      Css.addCssValueWithVender(css, "writing-mode", "vertical-rl");
       if(this.isKakkoStart()){
 	if(this.data === "\x28"){ // left parenthis
 	  css["height"] = "0.5em"; // it's temporary fix, so maybe need to be refactored.

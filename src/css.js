@@ -48,7 +48,7 @@ var Css = {
     return "nehan-toc-link-" + name;
   },
   /**
-     add vender-prefixed css value like(-webkit-opacity, -moz-opacity etc).
+     set vender-prefixed css value like(-webkit-opacity, -moz-opacity etc).
 
      @memberof Nehan.Css
      @param 
@@ -57,9 +57,9 @@ var Css = {
      @param value {String}
      @return {Object}
      @example
-     * Css.addCssValueWithVender({}, "writing-mode", "vertical-rl");
+     * Css.setCssValueWithVender({}, "writing-mode", "vertical-rl");
   */
-  addCssValueWithVender: function(dst, name, value){
+  setCssValueWithVender: function(dst, name, value){
     List.iter(Const.cssVenderPrefixes, function(prefix){
       dst[prefix + "-" + name] = value;
     });
