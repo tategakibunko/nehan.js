@@ -223,7 +223,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalVerticalGlyph = function(line, chr){
     return this._createElement("div", {
       content:chr.getData(),
-      className:"nehan-vert-glyph",
+      //className:"nehan-vert-glyph",
       css:chr.getCssVertGlyph(line),
       styleContext:line.style
     });

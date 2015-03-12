@@ -36,10 +36,11 @@
 .nehan-body a{
   word-wrap:normal !important;
 }
+/*
 .nehan-vert-glyph{
   -webkit-writing-mode:vertical-rl;
   writing-mode:vertical-rl;
-}
+}*/
 .nehan-rotate-90{
   word-break:normal;
   word-wrap:normal;
