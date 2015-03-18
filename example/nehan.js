@@ -549,9 +549,9 @@ var Display = {
 
      @memberof Nehan.Display
      @type {String}
-     @default "http://nehan.googlecode.com/hg/char-img"
+     @default "https://raw.githubusercontent.com/tategakibunko/nehan.js/master/char-img"
   */
-  fontImgRoot:"http://nehan.googlecode.com/hg/char-img",
+  fontImgRoot:"https://raw.githubusercontent.com/tategakibunko/nehan.js/master/char-img",
 
   /**
      standard font family. this is required to calculate proper text-metrics of alphabetical word.
