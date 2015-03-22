@@ -1,7 +1,7 @@
 var HtmlLexer = (function (){
   var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
   var __rex_word = /^[\w!\.\?\/\_:#;"',]+/;
-  var __rex_tag = /^<[^>]+>/;
+  var __rex_tag = /^<[a-zA-Z][^>]*>/;
   var __rex_char_ref = /^&[^;\s]+;/;
 
   /*
@@ -116,23 +116,23 @@ var HtmlLexer = (function (){
       if(this.buff === ""){
 	return null;
       }
-      var rex_str;
-      rex_str = this._getByRex(__rex_tag);
-      if(rex_str){
-	return this._parseTag(rex_str);
+      var str;
+      str = this._getByRex(__rex_tag);
+      if(str){
+	return this._parseTag(str);
       }
-      rex_str = this._getByRex(__rex_word);
-      if(rex_str){
-	if(rex_str.length === 1){
-	  return this._parseChar(rex_str);
-	} else if(rex_str.length === 2 && rex_str.match(__rex_tcy)){
-	  return this._parseTcy(rex_str);
+      str = this._getByRex(__rex_word);
+      if(str){
+	if(str.length === 1){
+	  return this._parseChar(str);
+	} else if(str.length === 2 && str.match(__rex_tcy)){
+	  return this._parseTcy(str);
 	}
-	return this._parseWord(rex_str);
+	return this._parseWord(str);
       }
-      rex_str = this._getByRex(__rex_char_ref);
-      if(rex_str){
-	return this._parseCharRef(rex_str);
+      str = this._getByRex(__rex_char_ref);
+      if(str){
+	return this._parseCharRef(str);
       }
       return this._parseChar(this._getChar());
     },

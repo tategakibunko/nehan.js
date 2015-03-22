@@ -8297,7 +8297,7 @@ var Box = (function(){
 var HtmlLexer = (function (){
   var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
   var __rex_word = /^[\w!\.\?\/\_:#;"',]+/;
-  var __rex_tag = /^<[^>]+>/;
+  var __rex_tag = /^<[a-zA-Z][^>]*>/;
   var __rex_char_ref = /^&[^;\s]+;/;
 
   /*
