@@ -4470,6 +4470,9 @@ var Token = {
      @return {boolean}
   */
   isText : function(token){
+    if(token instanceof Text){
+      return true;
+    }
     return token._type === "char" || token._type === "word" || token._type === "tcy" || token._type === "ruby";
   },
   /**
@@ -4522,6 +4525,25 @@ var Token = {
   }
 };
 
+
+var Text = (function(){
+  /**
+     @memberof Nehan
+     @class Text
+     @param content {String}
+  */
+  function Text(content){
+    this.content = content;
+  }
+
+  Text.prototype = {
+    getContent: function(){
+      return this.content;
+    }
+  };
+
+  return Text;
+})();
 
 var Char = (function(){
   /**
@@ -8295,10 +8317,7 @@ var Box = (function(){
 })();
 
 var HtmlLexer = (function (){
-  var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
-  var __rex_word = /^[\w!\.\?\/\_:#;"',]+/;
-  var __rex_tag = /^<[a-zA-Z][^>]*>/;
-  var __rex_char_ref = /^&[^;\s]+;/;
+  var __rex_tag = /<[a-zA-Z][^>]*>/;
 
   /*
   var __close_abbr_tags = [
@@ -8339,7 +8358,7 @@ var HtmlLexer = (function (){
   /**
      @memberof Nehan
      @class HtmlLexer
-     @classdesc lexer of html text.
+     @classdesc lexer of html tag elements.
      @constructor
      @param src {String}
   */
@@ -8348,6 +8367,7 @@ var HtmlLexer = (function (){
     this.buff = this._normalize(src);
     this.src = this.buff;
   }
+
   HtmlLexer.prototype = {
     _normalize : function(src){
       return src
@@ -8405,49 +8425,29 @@ var HtmlLexer = (function (){
       this.buff = this.buff + this._normalize(text);
     },
     _stepBuff : function(count){
+      var part = this.buff.substring(0, count);
       this.pos += count;
       this.buff = this.buff.slice(count);
+      return part;
     },
     _getToken : function(){
       if(this.buff === ""){
 	return null;
       }
-      var rex_str;
-      rex_str = this._getByRex(__rex_tag);
-      if(rex_str){
-	return this._parseTag(rex_str);
+      var match;
+      match = this.buff.match(__rex_tag);
+      if(match === null){
+	return new Text(this._stepBuff(this.buff.length));
       }
-      rex_str = this._getByRex(__rex_word);
-      if(rex_str){
-	if(rex_str.length === 1){
-	  return this._parseChar(rex_str);
-	} else if(rex_str.length === 2 && rex_str.match(__rex_tcy)){
-	  return this._parseTcy(rex_str);
-	}
-	return this._parseWord(rex_str);
+      if(match.index === 0){
+	return this._parseTag(match[0]);
       }
-      rex_str = this._getByRex(__rex_char_ref);
-      if(rex_str){
-	return this._parseCharRef(rex_str);
-      }
-      return this._parseChar(this._getChar());
-    },
-    _getByRex : function(rex){
-      var rex_result = this.buff.match(rex);
-      return rex_result? rex_result[0] : null;
-    },
-    _getRb : function(){
-      var rb = this.buffRb.substring(0, 1);
-      this.buffRb = this.buffRb.slice(1);
-      return rb;
-    },
-    _getChar : function(){
-      return this.buff.substring(0,1);
+      return new Text(this._stepBuff(match.index));
     },
     _getTagContent : function(tag_name){
       // why we added [\\s|>] for open_tag_rex?
-      // because if we choose pattern only "<" + tag_name,
-      // "<p" matches both "<p" and "<pre".
+      // if tag_name is "p", 
+      // both "<p>" and "<p class='foo'" also must be matched.
       var open_tag_rex = new RegExp("<" + tag_name + "[\\s|>]");
       var close_tag = "</" + tag_name + ">"; // tag name is already lower-cased by preprocessor.
       var close_pos = __find_close_pos(this.buff, tag_name, open_tag_rex, close_tag);
@@ -8480,11 +8480,6 @@ var HtmlLexer = (function (){
       }
       return this._parseChildContentTag(tag);
     },
-    _parseTcyTag : function(tag){
-      var content = this._getTagContent(tag.name);
-      this._stepBuff(content.length + tag.name.length + 3); // 3 = "</>".length
-      return new Tcy(content);
-    },
     _parseChildContentTag : function(tag){
       var result = this._getTagContent(tag.name);
       tag.setContent(Utils.trimCRLF(result.content));
@@ -8494,25 +8489,57 @@ var HtmlLexer = (function (){
 	this._stepBuff(result.content.length);
       }
       return tag;
-    },
-    _parseWord : function(str){
-      this._stepBuff(str.length);
-      return new Word(str);
-    },
-    _parseTcy : function(str){
-      this._stepBuff(str.length);
-      return new Tcy(str);
-    },
-    _parseChar : function(str){
-      this._stepBuff(str.length);
-      return new Char(str, false);
-    },
-    _parseCharRef : function(str){
-      this._stepBuff(str.length);
-      return new Char(str, true);
     }
   };
   return HtmlLexer;
+})();
+
+
+var TextLexer = (function (){
+  var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
+  var __rex_word = /^[\w!\.\?\/\_:#;"',]+/;
+  var __rex_char_ref = /^&[^;\s]+;/;
+
+  /**
+     @memberof Nehan
+     @class TextLexer
+     @classdesc lexer of html text elements.
+     @constructor
+     @param src {String}
+  */
+  function TextLexer(src){
+    HtmlLexer.call(this, src);
+  }
+
+  Class.extend(TextLexer, HtmlLexer);
+
+  TextLexer.prototype._getToken = function(){
+    if(this.buff === ""){
+      return null;
+    }
+    var str = this._getByRex(__rex_word);
+    if(str){
+      if(str.length === 1){
+	return new Char(this._stepBuff(1), false);
+      } else if(str.length === 2 && str.match(__rex_tcy)){
+	return new Tcy(this._stepBuff(str.length));
+      }
+      return new Word(this._stepBuff(str.length));
+    }
+    str = this._getByRex(__rex_char_ref);
+    if(str){
+      return new Char(this._stepBuff(str.length), true);
+    }
+    str = this.buff.substring(0, 1);
+    return new Char(this._stepBuff(1), false);
+  };
+
+  TextLexer.prototype._getByRex = function(rex){
+    var rex_result = this.buff.match(rex);
+    return rex_result? rex_result[0] : null;
+  };
+
+  return TextLexer;
 })();
 
 
@@ -9365,8 +9392,8 @@ var TokenStream = (function(){
      @constructor
      @param src {String}
   */
-  function TokenStream(src){
-    this.lexer = this._createLexer(src);
+  function TokenStream(src, lexer){
+    this.lexer = lexer || this._createLexer(src);
     this.tokens = [];
     this.pos = 0;
     this.eof = false;
@@ -13303,6 +13330,13 @@ var LayoutGenerator = (function(){
     }
   };
 
+  LayoutGenerator.prototype._createTextGenerator = function(style, text){
+    var content = text.getContent();
+    var lexer = new TextLexer(content);
+    var stream = new TokenStream(content, lexer);
+    return new TextGenerator(this.style, stream);
+  };
+
   LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, context){
     if(style.isInlineBlock()){
       return new InlineBlockGenerator(style, stream);
@@ -13409,17 +13443,15 @@ var BlockGenerator = (function(){
       return null;
     }
 
+    if(token instanceof Text){
+      this.setChildLayout(this._createTextGenerator(this.style, token));
+      return this.yieldChildLayout(context);
+    }
+
     // skip while-space in block-level.
     if(Token.isWhiteSpace(token)){
       this.stream.skipUntil(Token.isWhiteSpace);
       return this._getNext(context);
-    }
-
-    // if text, push back stream and restart current style and stream as child inline generator.
-    if(Token.isText(token)){
-      this.stream.prev();
-      this.setChildLayout(new InlineGenerator(this.style, this.stream));
-      return this.yieldChildLayout(context);
     }
 
     // if tag token, inherit style
@@ -13446,10 +13478,9 @@ var BlockGenerator = (function(){
     }
 
     // if child inline or child inline-block,
-    // delegate current style and stream to child inline-generator with first child inline generator.
     if(child_style.isInlineBlock() || child_style.isInline()){
-      var first_inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, first_inline_gen));
+      var inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
+      this.setChildLayout(inline_gen);
       return this.yieldChildLayout(context);
     }
 
@@ -13654,17 +13685,9 @@ var InlineGenerator = (function(){
       return null;
     }
 
-    // inline text
-    if(Token.isText(token)){
-      // if tcy, wrap all content and return Tcy object and force generator terminate.
-      if(this.style.getTextCombine() === "horizontal"){
-	return this._getTcy(context, token);
-      }
-      // if white-space
-      if(Token.isWhiteSpace(token)){
-	return this._getWhiteSpace(context, token);
-      }
-      return this._getText(context, token);
+    if(token instanceof Text){
+      this.setChildLayout(this._createTextGenerator(this.style, token));
+      return this.yieldChildLayout(context);
     }
 
     // if tag token, inherit style
@@ -13872,6 +13895,259 @@ var InlineBlockGenerator = (function (){
 
   return InlineBlockGenerator;
 })();
+
+var TextGenerator = (function(){
+  /**
+     @memberof Nehan
+     @class TextGenerator
+     @classdesc inline level generator, output inline level block.
+     @constructor
+     @extends {Nehan.LayoutGenerator}
+     @param style {Nehan.StyleContext}
+     @param stream {Nehan.TokenStream}
+     @param child_generator {Nehan.LayoutGenerator}
+  */
+  function TextGenerator(style, stream){
+    LayoutGenerator.call(this, style, stream);
+  }
+  Class.extend(TextGenerator, LayoutGenerator);
+
+  var __get_line_start_pos = function(line){
+    var head = line.elements[0];
+    return head.pos;
+  };
+
+  TextGenerator.prototype._yield = function(context){
+    if(!context.hasInlineSpaceFor(1)){
+      return null;
+    }
+    while(this.hasNext()){
+      var element = this._getNext(context);
+      if(element === null){
+	break;
+      }
+      var measure = this._getMeasure(element);
+      if(measure === 0){
+	break;
+      }
+      if(!context.hasInlineSpaceFor(measure)){
+	this.pushCache(element);
+	break;
+      }
+      this._addElement(context, element, measure);
+      if(!context.hasInlineSpaceFor(1)){
+	break;
+      }
+    }
+    return this._createOutput(context);
+  };
+
+  /**
+     rollback stream position by cached element of parent generator.
+
+     @memberof Nehan.TextGenerator
+     @param parent_cache {Nehan.Box}
+  */
+  TextGenerator.prototype.rollback = function(parent_cache){
+    if(this.stream === null){
+      return;
+    }
+    var start_pos = parent_cache.pos;
+    this.stream.setPos(start_pos); // rewind stream to the head of line.
+
+    var cache = this.popCache();
+  };
+
+  TextGenerator.prototype._createChildContext = function(context){
+    return new CursorContext(
+      context.block, // inline generator inherits block context as it is.
+      new InlineContext(context.getInlineRestMeasure())
+    );
+  };
+
+  TextGenerator.prototype._createOutput = function(context){
+    // no like-break, no page-break, no element
+    if(context.isInlineEmpty()){
+      return null;
+    }
+    // justify if this line is generated by overflow(not line-break).
+    if(!context.hasLineBreak() && Config.justify){
+      this._justifyLine(context);
+    }
+    var line = this.style.createLine({
+      lineBreak:context.hasLineBreak(), // is line break included in?
+      breakAfter:context.hasBreakAfter(), // is break after included in?
+      measure:context.getInlineCurMeasure(), // actual measure
+      elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
+      texts:context.getInlineTexts(), // elements but text element only.
+      charCount:context.getInlineCharCount(),
+      maxExtent:context.getInlineMaxExtent(),
+      maxFontSize:context.getInlineMaxFontSize()
+    });
+
+    // set position in parent stream.
+    if(this._parentLayout && this._parentLayout.stream){
+      line.pos = Math.max(0, this._parentLayout.stream.getPos() - 1);
+    }
+
+    // call _onCreate callback for 'each' output
+    this._onCreate(context, line);
+
+    // call _onComplete callback for 'final' output
+    if(!this.hasNext()){
+      this._onComplete(context, line);
+    }
+    return line;
+  };
+
+  TextGenerator.prototype._justifyLine = function(context){
+    // before justify, skip single <br> to avoid double line-break.
+    var stream_next = this.stream? this.stream.peek() : null;
+    if(stream_next && Token.isTag(stream_next) && stream_next.getName() === "br"){
+      this.stream.get(); // skip <br>
+    }
+    // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
+    var next_head = this.peekLastCache() || this.stream.peek();
+    var new_head = context.justify(next_head); // if justify is occured, new_tail token is gained.
+    if(new_head){
+      this.stream.setPos(new_head.pos);
+      this.clearCache(); // stream position changed, so disable cache.
+    }
+  };
+
+  TextGenerator.prototype._getNext = function(context){
+    if(this.hasCache()){
+      var cache = this.popCache(context);
+      return cache;
+    }
+
+    // read next token
+    var token = this.stream.get();
+    if(token === null){
+      return null;
+    }
+
+    // if tcy, wrap all content and return Tcy object and force generator terminate.
+    if(this.style.getTextCombine() === "horizontal"){
+      return this._getTcy(context, token);
+    }
+    // if white-space
+    if(Token.isWhiteSpace(token)){
+      return this._getWhiteSpace(context, token);
+    }
+    return this._getText(context, token);
+  };
+
+  TextGenerator.prototype._breakInline = function(block_gen){
+    this.setTerminate(true);
+    if(this._parentLayout === null){
+      return;
+    }
+    if(this._parentLayout instanceof TextGenerator){
+      this._parentLayout._breakInline(block_gen);
+    } else {
+      this._parentLayout.setChildLayout(block_gen);
+    }
+  };
+
+  TextGenerator.prototype._getTcy = function(context, token){
+    this.setTerminate(true);
+    var tcy = new Tcy(this.style.getMarkupContent());
+    return this._getText(context, tcy);
+  };
+
+  TextGenerator.prototype._getWhiteSpace = function(context, token){
+    if(this.style.isPre()){
+      if(Token.isNewLine(token)){
+	return null; // break line at new-line char.
+      }
+      return this._getText(context, token); // read as normal text
+    }
+
+    // if not pre, skip continuous white-spaces.
+    this.stream.skipUntil(Token.isNewLine);
+
+    // if white-space is new-line, ignore it.
+    if(Token.isNewLine(token)){
+      return this._getNext(context);
+    }
+    // if white-space is not new-line, use first one.
+    return this._getText(context, token);
+  };
+
+  TextGenerator.prototype._getText = function(context, token){
+    if(!token.hasMetrics()){
+      this._setTextMetrics(context, token);
+    }
+    switch(token._type){
+    case "char":
+    case "tcy":
+      return token;
+    case "word":
+      return this._getWord(context, token);
+    }
+  };
+
+  TextGenerator.prototype._setTextMetrics = function(context, token){
+    // if charactor token, set kerning before setting metrics.
+    // because some additional space is added if kerning is enabled or not.
+    if(token instanceof Char && Config.kerning){
+      this._setCharKerning(context, token);
+    }
+    token.setMetrics(this.style.flow, this.style.font);
+  };
+
+  TextGenerator.prototype._setCharKerning = function(context, char_token){
+    var next_token = this.stream.peek();
+    var prev_text = context.getInlineLastText();
+    var next_text = next_token && Token.isText(next_token)? next_token : null;
+    Kerning.set(char_token, prev_text, next_text);
+  };
+
+  TextGenerator.prototype._getWord = function(context, token){
+    var rest_measure = context.getInlineRestMeasure();
+    var advance = token.getAdvance(this.style.flow, this.style.letterSpacing || 0);
+    
+    // if there is enough space for this word, just return.
+    if(advance <= rest_measure){
+      token.setDivided(false);
+      return token;
+    }
+    // at this point, this word is larger than rest space.
+    // but if this word size is less than max_measure and 'word-berak' is not 'break-all',
+    // just break line and show it at the head of next line.
+    if(advance <= context.getInlineMaxMeasure() && !this.style.isWordBreakAll()){
+      this.stream.prev();
+      return null;
+    }
+    // at this point, situations are
+    // 1. advance is larger than rest_measure and 'word-break' is set to 'break-all'.
+    // 2. or word itself is larger than max_measure.
+    // in these case, we must cut this word into some parts.
+    var part = token.cutMeasure(this.style.getFontSize(), rest_measure); // get sliced word
+    part.setMetrics(this.style.flow, this.style.font); // metrics for first half
+    token.setMetrics(this.style.flow, this.style.font); // metrics for second half
+    if(token.data !== "" && token.bodySize > 0){
+      this.stream.prev(); // re-parse this token because rest part is still exists.
+    }
+    part.bodySize = Math.min(rest_measure, part.bodySize); // sometimes overflows. more accurate logic is required in the future.
+    return part;
+  };
+
+  TextGenerator.prototype._getMeasure = function(element){
+    return element.getAdvance(this.style.flow, this.style.letterSpacing || 0);
+  };
+
+  TextGenerator.prototype._addElement = function(context, element, measure){
+    context.addInlineElement(element, measure);
+
+    // call _onAddElement callback for each 'element' of output.
+    this._onAddElement(element);
+  };
+
+  return TextGenerator;
+})();
+
 
 var LinkGenerator = (function(){
   var __add_anchor = function(style){

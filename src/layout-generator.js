@@ -297,6 +297,13 @@ var LayoutGenerator = (function(){
     }
   };
 
+  LayoutGenerator.prototype._createTextGenerator = function(style, text){
+    var content = text.getContent();
+    var lexer = new TextLexer(content);
+    var stream = new TokenStream(content, lexer);
+    return new TextGenerator(this.style, stream);
+  };
+
   LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, context){
     if(style.isInlineBlock()){
       return new InlineBlockGenerator(style, stream);

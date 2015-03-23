@@ -1,8 +1,5 @@
 var HtmlLexer = (function (){
-  var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
-  var __rex_word = /^[\w!\.\?\/\_:#;"',]+/;
-  var __rex_tag = /^<[a-zA-Z][^>]*>/;
-  var __rex_char_ref = /^&[^;\s]+;/;
+  var __rex_tag = /<[a-zA-Z][^>]*>/;
 
   /*
   var __close_abbr_tags = [
@@ -43,7 +40,7 @@ var HtmlLexer = (function (){
   /**
      @memberof Nehan
      @class HtmlLexer
-     @classdesc lexer of html text.
+     @classdesc lexer of html tag elements.
      @constructor
      @param src {String}
   */
@@ -52,6 +49,7 @@ var HtmlLexer = (function (){
     this.buff = this._normalize(src);
     this.src = this.buff;
   }
+
   HtmlLexer.prototype = {
     _normalize : function(src){
       return src
@@ -109,49 +107,29 @@ var HtmlLexer = (function (){
       this.buff = this.buff + this._normalize(text);
     },
     _stepBuff : function(count){
+      var part = this.buff.substring(0, count);
       this.pos += count;
       this.buff = this.buff.slice(count);
+      return part;
     },
     _getToken : function(){
       if(this.buff === ""){
 	return null;
       }
-      var str;
-      str = this._getByRex(__rex_tag);
-      if(str){
-	return this._parseTag(str);
+      var match;
+      match = this.buff.match(__rex_tag);
+      if(match === null){
+	return new Text(this._stepBuff(this.buff.length));
       }
-      str = this._getByRex(__rex_word);
-      if(str){
-	if(str.length === 1){
-	  return this._parseChar(str);
-	} else if(str.length === 2 && str.match(__rex_tcy)){
-	  return this._parseTcy(str);
-	}
-	return this._parseWord(str);
+      if(match.index === 0){
+	return this._parseTag(match[0]);
       }
-      str = this._getByRex(__rex_char_ref);
-      if(str){
-	return this._parseCharRef(str);
-      }
-      return this._parseChar(this._getChar());
-    },
-    _getByRex : function(rex){
-      var rex_result = this.buff.match(rex);
-      return rex_result? rex_result[0] : null;
-    },
-    _getRb : function(){
-      var rb = this.buffRb.substring(0, 1);
-      this.buffRb = this.buffRb.slice(1);
-      return rb;
-    },
-    _getChar : function(){
-      return this.buff.substring(0,1);
+      return new Text(this._stepBuff(match.index));
     },
     _getTagContent : function(tag_name){
       // why we added [\\s|>] for open_tag_rex?
-      // because if we choose pattern only "<" + tag_name,
-      // "<p" matches both "<p" and "<pre".
+      // if tag_name is "p", 
+      // both "<p>" and "<p class='foo'" also must be matched.
       var open_tag_rex = new RegExp("<" + tag_name + "[\\s|>]");
       var close_tag = "</" + tag_name + ">"; // tag name is already lower-cased by preprocessor.
       var close_pos = __find_close_pos(this.buff, tag_name, open_tag_rex, close_tag);
@@ -184,11 +162,6 @@ var HtmlLexer = (function (){
       }
       return this._parseChildContentTag(tag);
     },
-    _parseTcyTag : function(tag){
-      var content = this._getTagContent(tag.name);
-      this._stepBuff(content.length + tag.name.length + 3); // 3 = "</>".length
-      return new Tcy(content);
-    },
     _parseChildContentTag : function(tag){
       var result = this._getTagContent(tag.name);
       tag.setContent(Utils.trimCRLF(result.content));
@@ -198,22 +171,6 @@ var HtmlLexer = (function (){
 	this._stepBuff(result.content.length);
       }
       return tag;
-    },
-    _parseWord : function(str){
-      this._stepBuff(str.length);
-      return new Word(str);
-    },
-    _parseTcy : function(str){
-      this._stepBuff(str.length);
-      return new Tcy(str);
-    },
-    _parseChar : function(str){
-      this._stepBuff(str.length);
-      return new Char(str, false);
-    },
-    _parseCharRef : function(str){
-      this._stepBuff(str.length);
-      return new Char(str, true);
     }
   };
   return HtmlLexer;

@@ -82,17 +82,15 @@ var BlockGenerator = (function(){
       return null;
     }
 
+    if(token instanceof Text){
+      this.setChildLayout(this._createTextGenerator(this.style, token));
+      return this.yieldChildLayout(context);
+    }
+
     // skip while-space in block-level.
     if(Token.isWhiteSpace(token)){
       this.stream.skipUntil(Token.isWhiteSpace);
       return this._getNext(context);
-    }
-
-    // if text, push back stream and restart current style and stream as child inline generator.
-    if(Token.isText(token)){
-      this.stream.prev();
-      this.setChildLayout(new InlineGenerator(this.style, this.stream));
-      return this.yieldChildLayout(context);
     }
 
     // if tag token, inherit style
@@ -119,10 +117,9 @@ var BlockGenerator = (function(){
     }
 
     // if child inline or child inline-block,
-    // delegate current style and stream to child inline-generator with first child inline generator.
     if(child_style.isInlineBlock() || child_style.isInline()){
-      var first_inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, first_inline_gen));
+      var inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
+      this.setChildLayout(inline_gen);
       return this.yieldChildLayout(context);
     }
 

@@ -154,17 +154,9 @@ var InlineGenerator = (function(){
       return null;
     }
 
-    // inline text
-    if(Token.isText(token)){
-      // if tcy, wrap all content and return Tcy object and force generator terminate.
-      if(this.style.getTextCombine() === "horizontal"){
-	return this._getTcy(context, token);
-      }
-      // if white-space
-      if(Token.isWhiteSpace(token)){
-	return this._getWhiteSpace(context, token);
-      }
-      return this._getText(context, token);
+    if(token instanceof Text){
+      this.setChildLayout(this._createTextGenerator(this.style, token));
+      return this.yieldChildLayout(context);
     }
 
     // if tag token, inherit style

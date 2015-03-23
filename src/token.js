@@ -18,6 +18,9 @@ var Token = {
      @return {boolean}
   */
   isText : function(token){
+    if(token instanceof Text){
+      return true;
+    }
     return token._type === "char" || token._type === "word" || token._type === "tcy" || token._type === "ruby";
   },
   /**

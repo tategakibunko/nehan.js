@@ -6,8 +6,8 @@ var TokenStream = (function(){
      @constructor
      @param src {String}
   */
-  function TokenStream(src){
-    this.lexer = this._createLexer(src);
+  function TokenStream(src, lexer){
+    this.lexer = lexer || this._createLexer(src);
     this.tokens = [];
     this.pos = 0;
     this.eof = false;
