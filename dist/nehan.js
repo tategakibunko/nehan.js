@@ -4539,6 +4539,9 @@ var Text = (function(){
   }
 
   Text.prototype = {
+    isWhiteSpaceOnly: function(){
+      return this.content.replace(/[\s\n]/g, "") === "";
+    },
     getContent: function(){
       return this.content;
     }
@@ -4602,8 +4605,6 @@ var Char = (function(){
     getCssVertGlyph : function(line){
       var css = {};
       var padding_enable = this.isPaddingEnable();
-      css["margin-left"] = "auto";
-      css["margin-right"] = "auto";
       if(this.isKakkoStart()){
 	if(this.data === "\x28"){ // left parenthis
 	  css["height"] = "0.5em"; // it's temporary fix, so maybe need to be refactored.
@@ -4629,8 +4630,8 @@ var Char = (function(){
       css.display = "block";
       css.width = font_size + "px";
       css.height = this.getVertHeight(font_size) + "px";
-      css["margin-left"] = "auto";
-      css["margin-right"] = "auto";
+      //css["margin-left"] = "auto";
+      //css["margin-right"] = "auto";
       if(this.isPaddingEnable()){
 	Args.copy(css, this.getCssPadding(line));
       }
@@ -4657,6 +4658,15 @@ var Char = (function(){
       css.display = "inline-block";
       css.width = font_size + "px";
       css.height = font_size + "px";
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
+    getCssHoriEmphaSrc : function(line){
+      var css = {};
+      css["line-height"] = "1em";
       return css;
     },
     /**
@@ -5394,6 +5404,15 @@ var Ruby = (function(){
     */
     getRbs : function(){
       return this.rbs;
+    },
+    /**
+       @memberof Nehan.Ruby
+       @return {String}
+    */
+    getRbString : function(){
+      return List.map(this.rbs, function(rb){
+	return rb.data || "";
+      }).join("");
     },
     /**
        @memberof Nehan.Ruby
@@ -8174,6 +8193,9 @@ var Box = (function(){
 	Args.copy(css, this.edge.getCss());
       }
       Args.copy(css, this.css); // some dynamic values
+      if(this.texts && this.style.isTextVertical()){
+	delete css["css-float"];
+      }
       return css;
     },
     /**
@@ -11282,12 +11304,13 @@ var StyleContext = (function(){
     */
     createLine : function(opt){
       opt = opt || {};
+      var is_root_line = this.isRootLine();
       var elements = opt.elements || [];
       var max_font_size = opt.maxFontSize || this.getFontSize();
       var max_extent = opt.maxExtent || 0;
       var char_count = opt.charCount || 0;
       var content = opt.content || null;
-      var measure = (this.parent && opt.measure && this.staticMeasure === null && !this.isRootLine())? opt.measure : this.contentMeasure;
+      var measure = (this.parent && opt.measure && this.staticMeasure === null && !is_root_line)? opt.measure : this.contentMeasure;
       if(this.display === "inline-block"){
 	measure = this.staticMeasure || opt.measure;
       }
@@ -11296,74 +11319,81 @@ var StyleContext = (function(){
       var line = new Box(line_size, this);
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = elements;
-      line.classes = this.isRootLine()? classes : classes.concat("nehan-" + this.getMarkupName());
+      line.classes = is_root_line? classes : classes.concat("nehan-" + this.getMarkupName());
       line.charCount = char_count;
       line.maxFontSize = max_font_size;
       line.maxExtent = max_extent;
       line.content = content;
+      line.isRootLine = is_root_line;
 
+      /*
       // edge of top level line is disabled.
       // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
       // anonymous line block('aaa' and 'ccc') is already edged by <p> in block level.
       // so if line is anonymous, edge must be ignored.
-      line.edge = (this.edge && !this.isRootLine())? this.edge : null;
+      line.edge = (this.edge && !is_root_line)? this.edge : null;
+      */
 
       // backup other line data. mainly required to restore inline-context.
-      if(this.isRootLine()){
-	console.log("[root line fix]:%o", this);
+      if(is_root_line){
 	line.lineBreak = opt.lineBreak || false;
 	line.breakAfter = opt.breakAfter || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;
-	//line.texts = opt.texts || [];
-
-	// pickup decorated elements that has different baseline(ruby or empha)
-	var decorated_elements = __filter_decorated_inline_elements(elements);
-	console.log("decorated elements", decorated_elements);
 
 	// if vertical line, needs some position fix for decorated element(ruby, empha) to align baseline.
 	if(this.isTextVertical()){
-	  this._setVertBaseline(elements, decorated_elements, max_font_size, max_extent);
-	} else if(decorated_elements.length === 0){
+	  this._setVertBaseline(line);
+	} else /*if(decorated_elements.length === 0)*/{
 	  // if horizontal line and no decorated elements exists, set line-height = exent.
 	  this.setCssAttr("line-height", max_extent + "px");
 	}
 	if(this.textAlign && !this.textAlign.isStart()){
 	  this._setTextAlign(line, this.textAlign);
 	}
+	var edge_after = Math.floor(line.maxFontSize * this.getLineRate()) - line.maxExtent;
+	if(edge_after > 0){
+	  line.edge = new BoxEdge();
+	  line.edge.padding.setBefore(this.flow, edge_after);
+	}
       }
-      console.log("line: %s:(%d,%d)", line.classes.join(", "), line.size.width, line.size.height);
+      //console.log("line: %s:(%d,%d)", line.classes.join(", "), line.size.width, line.size.height);
       return line;
     },
     createTextBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
-      var max_font_size = opt.maxFontSize || this.getFontSize();
-      var max_extent = opt.maxExtent || 0;
+      var font_size = this.getFontSize();
+      var extent = opt.maxExtent || font_size;
+      var measure = opt.measure;
+      /*
+      if(this.display === "inline-block"){
+	measure = this.staticMeasure || opt.measure;
+      }*/
       var char_count = opt.charCount || 0;
       var content = opt.content || null;
 
       if(this.isTextEmphaEnable()){
-	max_extent = Math.max(max_extent, this.getEmphaTextBlockExtent());
+	extent = this.getEmphaTextBlockExtent();
       } else if(this.markup.name === "ruby"){
-	max_extent = Math.max(max_extent, this.getRubyTextBlockExtent());
-      } else {
-	max_extent = Math.max(max_extent, this.getAutoLineExtent());
+	extent = this.getRubyTextBlockExtent();
       }
-      var measure = opt.measure;
-      if(this.display === "inline-block"){
-	measure = this.staticMeasure || opt.measure;
-      }
-      var line_size = this.flow.getBoxSize(measure, max_extent);
+      var line_size = this.flow.getBoxSize(measure, extent);
       var classes = ["nehan-text-block", "nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.getClasses());
       var line = new Box(line_size, this);
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = elements;
       line.classes = classes;
       line.charCount = char_count;
-      line.maxFontSize = max_font_size;
-      line.maxExtent = max_extent;
+      line.maxFontSize = font_size;
+      line.maxExtent = extent;
       line.content = content;
-      console.log("text: %s:(%d,%d) - %s", line.classes.join(", "), line.size.width, line.size.height, this.markup.getContent());
+      line.texts = opt.texts || [];
+      /*
+      var text = List.map(line.texts, function(txt){
+	return (txt instanceof Ruby)? txt.getRbString() : (txt.data || "");
+      }).join("");
+      console.log("text: %s:(%d,%d) - %s", line.classes.join(", "), line.size.width, line.size.height, text);
+      */
       return line;
     },
     /**
@@ -11968,7 +11998,6 @@ var StyleContext = (function(){
        @return {int}
     */
     getEmphaTextBlockExtent : function(){
-      //return this.getFontSize() * 3;
       return this.getFontSize() * 2;
     },
     /**
@@ -11977,8 +12006,6 @@ var StyleContext = (function(){
     */
     getRubyTextBlockExtent : function(){
       var base_font_size = this.getFontSize();
-      //var line_rate = this.getLineRate();
-      //var extent = Math.floor(base_font_size * line_rate);
       var extent = Math.floor(base_font_size * (1 + Display.rubyRate));
       return (base_font_size % 2 === 0)? extent : extent + 1;
     },
@@ -12076,23 +12103,19 @@ var StyleContext = (function(){
       // so style of line-size(content-size) and edge-size are generated at Box::getCssInline
       var css = {};
       var markup_name = this.markup.getName();
+      if(this.isRootLine()){
+	Args.copy(css, this.flow.getCss());
+      }
       if(this.font){
 	Args.copy(css, this.font.getCss());
       }
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
-      if(markup_name !== "ruby"){
-	Args.copy(css, this.flow.getCss());
-      }
       if(this.isTextVertical()){
 	css["line-height"] = "1em";
 	if(Nehan.Env.client.isAppleMobileFamily()){
 	  css["letter-spacing"] = "-0.001em";
-	}
-	if(markup_name !== "ruby"){
-	  css["margin-left"] = css["margin-right"] = "auto";
-	  css["text-align"] = "center";
 	}
       } else {
 	// enable line-height only when horizontal mode.
@@ -12185,15 +12208,17 @@ var StyleContext = (function(){
 	Args.copy(line.css, padding.getCss());
       }
     },
-    _setVertBaseline : function(elements, decorated_elements, max_font_size, max_extent){
+    /*
+    _setVertBaseline : function(root_line){
       var flow = this.flow;
       var base_font_size = this.getFontSize();
-      var text_center = Math.floor(max_extent / 2); // center line offset
+      var text_center = Math.floor(root_line.maxExtent / 2); // center line offset
+      var decorated_elements = __filter_decorated_inline_elements(root_line.elements); // ruby, empha
 
       // before align baseline, align all extents of children to max_extent.
-      List.iter(elements, function(element){
+      List.iter(root_line.elements, function(element){
 	if(element instanceof Box && element.style.getMarkupName() !== "img" && element.style.display !== "inline-block"){
-	  element.size.setExtent(flow, max_extent);
+	  element.size.setExtent(flow, root_line.maxExtent);
 	}
       });
 
@@ -12204,6 +12229,29 @@ var StyleContext = (function(){
 	  var edge = element.style.edge? element.style.edge.clone() : new BoxEdge();
 	  edge.padding.setAfter(flow, text_center_offset); // set offset to padding
 
+	  // set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
+	  Args.copy(element.css, edge.getCss(flow));
+	}
+      });
+    },
+    */
+    _setVertBaseline : function(root_line){
+      var flow = this.flow;
+      var base_font_size = this.getFontSize();
+      var max_font_size = root_line.maxFontSize;
+      //console.log("vert base line:maxExtent = %d, maxFontSize = %d",  root_line.maxExtent, root_line.maxFontSize);
+
+      var overflow = 0;
+
+      List.iter(root_line.elements, function(element){
+	var font_size = element.style.getFontSize();
+	var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
+	if (from_after > 0){
+	  //console.log("%o edge after = %d", element, from_after);
+	  var edge = element.style.edge? element.style.edge.clone() : new BoxEdge();
+	  edge.padding.setAfter(flow, from_after); // set offset to padding
+	  element.size.width = (root_line.maxExtent - from_after);
+	  
 	  // set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
 	  Args.copy(element.css, edge.getCss(flow));
 	}
@@ -13476,8 +13524,13 @@ var BlockGenerator = (function(){
       return null;
     }
 
+    //console.log("block token:%o", token);
+
     // text block
     if(token instanceof Text){
+      if(token.isWhiteSpaceOnly()){
+	return this._getNext(context);
+      }
       var text_gen = this._createTextGenerator(this.style, token);
       this.setChildLayout(new InlineGenerator(this.style, this.stream, text_gen));
       return this.yieldChildLayout(context);
@@ -13694,6 +13747,8 @@ var InlineGenerator = (function(){
     if(token === null){
       return null;
     }
+
+    //console.log("inline token:%o", token);
 
     // text block
     if(token instanceof Text){
@@ -13942,13 +13997,17 @@ var TextGenerator = (function(){
       return null;
     }
 
+    //console.log("text token:%o", token);
+
+    // if white-space
+    if(Token.isWhiteSpace(token)){
+      console.log("white space!");
+      return this._getWhiteSpace(context, token);
+    }
+
     // if tcy, wrap all content and return Tcy object and force generator terminate.
     if(this.style.getTextCombine() === "horizontal"){
       return this._getTcy(context, token);
-    }
-    // if white-space
-    if(Token.isWhiteSpace(token)){
-      return this._getWhiteSpace(context, token);
     }
     return this._getText(context, token);
   };
@@ -15663,6 +15722,7 @@ var HoriEvaluator = (function(){
     return this._createElement("div", {
       content:chr.data,
       className:"nehan-empha-src",
+      css:chr.getCssHoriEmphaSrc(line),
       styleContext:line.style
     });
   };

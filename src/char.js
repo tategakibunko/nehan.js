@@ -53,8 +53,6 @@ var Char = (function(){
     getCssVertGlyph : function(line){
       var css = {};
       var padding_enable = this.isPaddingEnable();
-      css["margin-left"] = "auto";
-      css["margin-right"] = "auto";
       if(this.isKakkoStart()){
 	if(this.data === "\x28"){ // left parenthis
 	  css["height"] = "0.5em"; // it's temporary fix, so maybe need to be refactored.
@@ -80,8 +78,8 @@ var Char = (function(){
       css.display = "block";
       css.width = font_size + "px";
       css.height = this.getVertHeight(font_size) + "px";
-      css["margin-left"] = "auto";
-      css["margin-right"] = "auto";
+      //css["margin-left"] = "auto";
+      //css["margin-right"] = "auto";
       if(this.isPaddingEnable()){
 	Args.copy(css, this.getCssPadding(line));
       }
@@ -108,6 +106,15 @@ var Char = (function(){
       css.display = "inline-block";
       css.width = font_size + "px";
       css.height = font_size + "px";
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+     */
+    getCssHoriEmphaSrc : function(line){
+      var css = {};
+      css["line-height"] = "1em";
       return css;
     },
     /**

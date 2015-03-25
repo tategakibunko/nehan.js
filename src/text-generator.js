@@ -129,13 +129,17 @@ var TextGenerator = (function(){
       return null;
     }
 
+    //console.log("text token:%o", token);
+
+    // if white-space
+    if(Token.isWhiteSpace(token)){
+      console.log("white space!");
+      return this._getWhiteSpace(context, token);
+    }
+
     // if tcy, wrap all content and return Tcy object and force generator terminate.
     if(this.style.getTextCombine() === "horizontal"){
       return this._getTcy(context, token);
-    }
-    // if white-space
-    if(Token.isWhiteSpace(token)){
-      return this._getWhiteSpace(context, token);
     }
     return this._getText(context, token);
   };

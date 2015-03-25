@@ -78,6 +78,7 @@ var HoriEvaluator = (function(){
     return this._createElement("div", {
       content:chr.data,
       className:"nehan-empha-src",
+      css:chr.getCssHoriEmphaSrc(line),
       styleContext:line.style
     });
   };

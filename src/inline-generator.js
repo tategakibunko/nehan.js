@@ -135,6 +135,8 @@ var InlineGenerator = (function(){
       return null;
     }
 
+    //console.log("inline token:%o", token);
+
     // text block
     if(token instanceof Text){
       this.setChildLayout(this._createTextGenerator(this.style, token));

@@ -122,6 +122,9 @@ var Box = (function(){
 	Args.copy(css, this.edge.getCss());
       }
       Args.copy(css, this.css); // some dynamic values
+      if(this.texts && this.style.isTextVertical()){
+	delete css["css-float"];
+      }
       return css;
     },
     /**

@@ -82,8 +82,13 @@ var BlockGenerator = (function(){
       return null;
     }
 
+    //console.log("block token:%o", token);
+
     // text block
     if(token instanceof Text){
+      if(token.isWhiteSpaceOnly()){
+	return this._getNext(context);
+      }
       var text_gen = this._createTextGenerator(this.style, token);
       this.setChildLayout(new InlineGenerator(this.style, this.stream, text_gen));
       return this.yieldChildLayout(context);

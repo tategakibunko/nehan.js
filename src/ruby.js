@@ -46,6 +46,15 @@ var Ruby = (function(){
        @memberof Nehan.Ruby
        @return {String}
     */
+    getRbString : function(){
+      return List.map(this.rbs, function(rb){
+	return rb.data || "";
+      }).join("");
+    },
+    /**
+       @memberof Nehan.Ruby
+       @return {String}
+    */
     getRtString : function(){
       return this.rt? this.rt.getContent() : "";
     },

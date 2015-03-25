@@ -9,6 +9,9 @@ var Text = (function(){
   }
 
   Text.prototype = {
+    isWhiteSpaceOnly: function(){
+      return this.content.replace(/[\s\n]/g, "") === "";
+    },
     getContent: function(){
       return this.content;
     }
