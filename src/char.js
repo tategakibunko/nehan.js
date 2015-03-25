@@ -103,27 +103,11 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {Object}
      */
-    getCssVertEmphaTarget : function(line){
-      var css = {};
-      return css;
-    },
-    /**
-       @memberof Nehan.Char
-       @return {Object}
-     */
     getCssVertEmphaText : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css.display = "inline-block";
       css.width = font_size + "px";
       css.height = font_size + "px";
-      return css;
-    },
-    /**
-       @memberof Nehan.Char
-       @return {Object}
-     */
-    getCssHoriEmphaTarget : function(line){
-      var css = {};
       return css;
     },
     /**

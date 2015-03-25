@@ -76,7 +76,7 @@ var TextGenerator = (function(){
     if(!context.hasLineBreak() && Config.justify){
       this._justifyLine(context);
     }
-    var line = this.style.createLine({
+    var line = this.style.createTextBlock({
       lineBreak:context.hasLineBreak(), // is line break included in?
       breakAfter:context.hasBreakAfter(), // is break after included in?
       measure:context.getInlineCurMeasure(), // actual measure
@@ -184,6 +184,7 @@ var TextGenerator = (function(){
     switch(token._type){
     case "char":
     case "tcy":
+    case "ruby":
       return token;
     case "word":
       return this._getWord(context, token);
@@ -241,7 +242,7 @@ var TextGenerator = (function(){
   };
 
   TextGenerator.prototype._addElement = function(context, element, measure){
-    context.addInlineElement(element, measure);
+    context.addInlineTextElement(element, measure);
 
     // call _onAddElement callback for each 'element' of output.
     this._onAddElement(element);

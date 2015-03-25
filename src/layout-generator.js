@@ -312,6 +312,8 @@ var LayoutGenerator = (function(){
       return new LazyGenerator(style, style.createLine({content:style.getContent()}));
     }
     switch(style.getMarkupName()){
+    case "ruby":
+      return new TextGenerator(style, stream);
     case "img":
       // if inline img, no content text is included in img tag, so we yield it by lazy generator.
       return new LazyGenerator(style, style.createImage());

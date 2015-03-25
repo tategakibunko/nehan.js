@@ -67,27 +67,33 @@ var InlineContext = (function(){
        @param element {Nehan.Box}
        @param measure {int}
     */
-    addElement : function(element, measure){
+    addTextElement : function(element, measure){
       this.elements.push(element);
-      if(Token.isText(element)){
-	this.texts.push(element);
-	if(element.getCharCount){
-	  this.charCount += element.getCharCount();
-	}
-      } else if(element instanceof Box){
-	if(element.maxExtent){
-	  this.maxExtent = Math.max(this.maxExtent, element.maxExtent);
-	} else {
-	  this.maxExtent = Math.max(this.maxExtent, element.getLayoutExtent());
-	}
-	if(element.maxFontSize){
-	  this.maxFontSize = Math.max(this.maxFontSize, element.maxFontSize);
-	}
-	if(element.breakAfter){
-	  this.breakAfter = true;
-	}
-      }
+      this.texts.push(element);
       this.curMeasure += measure;
+      if(element.getCharCount){
+	this.charCount += element.getCharCount();
+      }
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param element {Nehan.Box}
+       @param measure {int}
+    */
+    addBoxElement : function(element, measure){
+      this.elements.push(element);
+      this.curMeasure += measure;
+      if(element.maxExtent){
+	this.maxExtent = Math.max(this.maxExtent, element.maxExtent);
+      } else {
+	this.maxExtent = Math.max(this.maxExtent, element.getLayoutExtent());
+      }
+      if(element.maxFontSize){
+	this.maxFontSize = Math.max(this.maxFontSize, element.maxFontSize);
+      }
+      if(element.breakAfter){
+	this.breakAfter = true;
+      }
     },
     /**
        @memberof Nehan.InlineContext

@@ -61,16 +61,6 @@ var Ruby = (function(){
        @param line {Nehan.Box}
        @return {Object}
     */
-    getCssHoriRuby : function(line){
-      var css = {};
-      css.display = "inline-block";
-      return css;
-    },
-    /**
-       @memberof Nehan.Ruby
-       @param line {Nehan.Box}
-       @return {Object}
-    */
     getCssVertRt : function(line){
       var css = {};
       css["css-float"] = "left";

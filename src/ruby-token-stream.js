@@ -37,11 +37,19 @@ var RubyTokenStream = (function(){
 	rt = token;
 	break;
       }
-      if(Token.isText(token)){
-	rbs.push(token);
+      if(Token.isTag(token) && token.getName() === "rb"){
+	rbs = this._parseRb(token.getContent())
+      }
+      if(token instanceof Text){
+	rbs = this._parseRb(token.getContent());
       }
     }
     return new Ruby(rbs, rt);
+  };
+
+  RubyTokenStream.prototype._parseRb = function(content){
+    var lexer = new TextLexer(content);
+    return (new TokenStream(content, lexer)).getAll();
   };
 
   return RubyTokenStream;

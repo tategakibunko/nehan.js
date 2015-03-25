@@ -529,13 +529,6 @@ var StyleContext = (function(){
       var max_extent = opt.maxExtent || 0;
       var char_count = opt.charCount || 0;
       var content = opt.content || null;
-      if(this.isTextEmphaEnable()){
-	max_extent = Math.max(max_extent, this.getEmphaLineExtent());
-      } else if(this.markup.name === "ruby"){
-	max_extent = Math.max(max_extent, this.getRubyLineExtent());
-      } else {
-	max_extent = Math.max(max_extent, this.getAutoLineExtent());
-      }
       var measure = (this.parent && opt.measure && this.staticMeasure === null && !this.isRootLine())? opt.measure : this.contentMeasure;
       if(this.display === "inline-block"){
 	measure = this.staticMeasure || opt.measure;
@@ -559,13 +552,15 @@ var StyleContext = (function(){
 
       // backup other line data. mainly required to restore inline-context.
       if(this.isRootLine()){
+	console.log("[root line fix]:%o", this);
 	line.lineBreak = opt.lineBreak || false;
 	line.breakAfter = opt.breakAfter || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;
-	line.texts = opt.texts || [];
+	//line.texts = opt.texts || [];
 
 	// pickup decorated elements that has different baseline(ruby or empha)
 	var decorated_elements = __filter_decorated_inline_elements(elements);
+	console.log("decorated elements", decorated_elements);
 
 	// if vertical line, needs some position fix for decorated element(ruby, empha) to align baseline.
 	if(this.isTextVertical()){
@@ -578,6 +573,39 @@ var StyleContext = (function(){
 	  this._setTextAlign(line, this.textAlign);
 	}
       }
+      console.log("line: %s:(%d,%d)", line.classes.join(", "), line.size.width, line.size.height);
+      return line;
+    },
+    createTextBlock : function(opt){
+      opt = opt || {};
+      var elements = opt.elements || [];
+      var max_font_size = opt.maxFontSize || this.getFontSize();
+      var max_extent = opt.maxExtent || 0;
+      var char_count = opt.charCount || 0;
+      var content = opt.content || null;
+
+      if(this.isTextEmphaEnable()){
+	max_extent = Math.max(max_extent, this.getEmphaTextBlockExtent());
+      } else if(this.markup.name === "ruby"){
+	max_extent = Math.max(max_extent, this.getRubyTextBlockExtent());
+      } else {
+	max_extent = Math.max(max_extent, this.getAutoLineExtent());
+      }
+      var measure = opt.measure;
+      if(this.display === "inline-block"){
+	measure = this.staticMeasure || opt.measure;
+      }
+      var line_size = this.flow.getBoxSize(measure, max_extent);
+      var classes = ["nehan-text-block", "nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.getClasses());
+      var line = new Box(line_size, this);
+      line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
+      line.elements = elements;
+      line.classes = classes;
+      line.charCount = char_count;
+      line.maxFontSize = max_font_size;
+      line.maxExtent = max_extent;
+      line.content = content;
+      console.log("text: %s:(%d,%d) - %s", line.classes.join(", "), line.size.width, line.size.height, this.markup.getContent());
       return line;
     },
     /**
@@ -1181,17 +1209,16 @@ var StyleContext = (function(){
        @memberof Nehan.StyleContext
        @return {int}
     */
-    getEmphaLineExtent : function(){
-      return this.getFontSize() * 3;
+    getEmphaTextBlockExtent : function(){
+      return this.getFontSize() * 2;
     },
     /**
        @memberof Nehan.StyleContext
        @return {int}
     */
-    getRubyLineExtent : function(){
-      var line_rate = this.getLineRate();
+    getRubyTextBlockExtent : function(){
       var base_font_size = this.getFontSize();
-      var extent = Math.floor(base_font_size * line_rate);
+      var extent = Math.floor(base_font_size * (1 + Display.rubyRate));
       return (base_font_size % 2 === 0)? extent : extent + 1;
     },
     /**
@@ -1287,14 +1314,14 @@ var StyleContext = (function(){
       // notice that line-size, line-edge is box local variable,
       // so style of line-size(content-size) and edge-size are generated at Box::getCssInline
       var css = {};
+      var markup_name = this.markup.getName();
       if(this.font){
 	Args.copy(css, this.font.getCss());
       }
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
-      // anonymous line block need to follow parent blockflow.
-      if(this.isRootLine()){
+      if(markup_name !== "ruby"){
 	Args.copy(css, this.flow.getCss());
       }
       if(this.isTextVertical()){
@@ -1302,7 +1329,7 @@ var StyleContext = (function(){
 	if(Nehan.Env.client.isAppleMobileFamily()){
 	  css["letter-spacing"] = "-0.001em";
 	}
-	if(this.markup.getName() !== "ruby"){
+	if(markup_name !== "ruby"){
 	  css["margin-left"] = css["margin-right"] = "auto";
 	  css["text-align"] = "center";
 	}
@@ -1313,6 +1340,9 @@ var StyleContext = (function(){
 	var line_height = this.getCssAttr("line-height");
 	if(line_height){
 	  css["line-height"] = this._computeUnitSize(line_height, this.font.size) + "px";
+	}
+	if(markup_name === "ruby" || this.isTextEmphaEnable()){
+	  css["display"] = "inline-block";
 	}
       }
       this.unmanagedCss.copyValuesTo(css);

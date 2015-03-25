@@ -82,15 +82,11 @@ var BlockGenerator = (function(){
       return null;
     }
 
+    // text block
     if(token instanceof Text){
-      this.setChildLayout(this._createTextGenerator(this.style, token));
+      var text_gen = this._createTextGenerator(this.style, token);
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, text_gen));
       return this.yieldChildLayout(context);
-    }
-
-    // skip while-space in block-level.
-    if(Token.isWhiteSpace(token)){
-      this.stream.skipUntil(Token.isWhiteSpace);
-      return this._getNext(context);
     }
 
     // if tag token, inherit style
@@ -119,7 +115,7 @@ var BlockGenerator = (function(){
     // if child inline or child inline-block,
     if(child_style.isInlineBlock() || child_style.isInline()){
       var inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
-      this.setChildLayout(inline_gen);
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, inline_gen));
       return this.yieldChildLayout(context);
     }
 

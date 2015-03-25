@@ -24,13 +24,10 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalRuby = function(line, ruby){
-    var div = this._createElement("div", {
-      className:"nehan-ruby-body",
-      styleContext:line.style
-    });
-    div.appendChild(this._evalRb(line, ruby));
-    div.appendChild(this._evalRt(line, ruby));
-    return div;
+    return [
+      this._evalRb(line, ruby),
+      this._evalRt(line, ruby)
+    ];
   };
 
   VertEvaluator.prototype._evalRb = function(line, ruby){
@@ -176,26 +173,33 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalEmpha = function(line, chr){
-    var char_body = this._createElement("span", {
-      content:chr.getData(),
-      className:"nehan-empha-src",
-      css:chr.getCssVertEmphaTarget(line),
-      styleContext:line.style
-    });
-    var empha_body = this._createElement("span", {
-      content:line.style.textEmpha.getText(),
-      className:"nehan-empha-text",
-      css:chr.getCssVertEmphaText(line),
-      styleContext:line.style
-    });
+    var char_part = this._evalEmphaSrc(line, chr);
+    var empha_part = this._evalEmphaText(line, chr);
     var wrap = this._createElement("div", {
       className:"nehan-empha-wrap",
       css:line.style.textEmpha.getCssVertEmphaWrap(line, chr),
       styleContext:line.style
     });
-    wrap.appendChild(char_body);
-    wrap.appendChild(empha_body);
+    wrap.appendChild(char_part);
+    wrap.appendChild(empha_part);
     return wrap;
+  };
+
+  VertEvaluator.prototype._evalEmphaSrc = function(line, chr){
+    return this._createElement("span", {
+      content:chr.getData(),
+      className:"nehan-empha-src",
+      styleContext:line.style
+    });
+  };
+
+  VertEvaluator.prototype._evalEmphaText = function(line, chr){
+    return this._createElement("span", {
+      content:line.style.textEmpha.getText(),
+      className:"nehan-empha-text",
+      css:chr.getCssVertEmphaText(line),
+      styleContext:line.style
+    });
   };
 
   VertEvaluator.prototype._evalPaddingChar = function(line, chr){

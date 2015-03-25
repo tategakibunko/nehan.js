@@ -85,21 +85,29 @@ var LayoutEvaluator = (function(){
       div.style.clear = clear || "both";
       return div;
     },
+    _appendChild : function(root, child){
+      if(child instanceof Array){
+	List.iter(child, function(child){
+	  this._appendChild(root, child);
+	}.bind(this));
+      } else {
+	root.appendChild(child);
+      }
+    },
     _evaluate : function(tree, opt){
       opt = opt || {};
-      var self = this;
       var elements = List.filter(tree.elements, function(element){ return element !== null; });
       var root = this._evalTreeRoot(tree, opt);
       return root.innerHTML? root : List.fold(elements, root, function(ret, child){
-	root.appendChild(self._evalTreeChild(tree, child));
+	this._appendChild(root, this._evalTreeChild(tree, child));
 	if(child.withBr){ // annotated to add extra br element
-	  root.appendChild(document.createElement("br"));
+	  this._appendChild(root, document.createElement("br"));
 	}
 	if(child.withClearFix){ // annotated to add extra clear fix element
-	  root.appendChild(self._createClearFix());
+	  this._appendChild(root, this._createClearFix());
 	}
 	return root;
-      });
+      }.bind(this));
     },
     _evalTreeRoot : function(tree, opt){
       opt = opt || {};

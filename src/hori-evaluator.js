@@ -16,14 +16,10 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalRuby = function(line, ruby){
-    var span = this._createElement("span", {
-      className:"nehan-ruby-body",
-      css:ruby.getCssHoriRuby(line),
-      styleContext:line.style
-    });
-    span.appendChild(this._evalRt(line, ruby));
-    span.appendChild(this._evalRb(line, ruby));
-    return span;
+    return [
+      this._evalRt(line, ruby),
+      this._evalRb(line, ruby)
+    ];
   };
 
   HoriEvaluator.prototype._evalRb = function(line, ruby){
@@ -67,18 +63,8 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalEmpha = function(line, chr){
-    var char_part = this._createElement("div", {
-      content:chr.data,
-      className:"nehan-empha-src",
-      css:chr.getCssHoriEmphaTarget(line),
-      styleContext:line.style
-    });
-    var empha_part = this._createElement("div", {
-      content:line.style.textEmpha.getText(),
-      className:"nehan-empha-text",
-      css:chr.getCssHoriEmphaText(line),
-      styleContext:line.style
-    });
+    var char_part = this._evalEmphaSrc(line, chr);
+    var empha_part = this._evalEmphaText(line, chr);
     var wrap = this._createElement("span", {
       css:line.style.textEmpha.getCssHoriEmphaWrap(line, chr),
       styleContext:line.style
@@ -86,6 +72,23 @@ var HoriEvaluator = (function(){
     wrap.appendChild(empha_part);
     wrap.appendChild(char_part);
     return wrap;
+  };
+
+  HoriEvaluator.prototype._evalEmphaSrc = function(line, chr){
+    return this._createElement("div", {
+      content:chr.data,
+      className:"nehan-empha-src",
+      styleContext:line.style
+    });
+  };
+
+  HoriEvaluator.prototype._evalEmphaText = function(line, chr){
+    return this._createElement("div", {
+      content:line.style.textEmpha.getText(),
+      className:"nehan-empha-text",
+      css:chr.getCssHoriEmphaText(line),
+      styleContext:line.style
+    });
   };
 
   HoriEvaluator.prototype._evalKerningChar = function(line, chr){

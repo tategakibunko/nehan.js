@@ -110,8 +110,16 @@ var CursorContext = (function(){
        @param element {Nehan.Box}
        @param measure {int}
     */
-    addInlineElement : function(element, measure){
-      this.inline.addElement(element, measure);
+    addInlineBoxElement : function(element, measure){
+      this.inline.addBoxElement(element, measure);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @param element {Nehan.Box}
+       @param measure {int}
+    */
+    addInlineTextElement : function(element, measure){
+      this.inline.addTextElement(element, measure);
     },
     /**
        @memberof Nehan.CursorContext
