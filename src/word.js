@@ -33,8 +33,6 @@ var Word = (function(){
       }
       css.width = line.style.getFontSize() + "px";
       css.height = this.bodySize + "px";
-      css["margin-left"] = "auto";
-      css["margin-right"] = "auto";
       css["font-family"] = "monospace";
       return css;
     },

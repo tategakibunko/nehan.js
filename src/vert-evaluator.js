@@ -153,11 +153,12 @@ var VertEvaluator = (function(){
       return this._evalPaddingChar(line, chr);
     } else if(line.letterSpacing){
       return this._evalCharLetterSpacing(line, chr);
+    } else if(chr.isSingleDigit()){
+      return this._evalCharSingleDigit(line, chr);
     }
     return this._evalCharWithBr(line, chr);
   };
 
-  // to inherit style of parent, we use <br> to keep elements in 'inline-level'.
   // for example, if we use <div> instead, parent bg-color is not inherited.
   VertEvaluator.prototype._evalCharWithBr = function(line, chr){
     chr.withBr = true;
@@ -168,6 +169,14 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:chr.getData(),
       css:chr.getCssVertLetterSpacing(line),
+      styleContext:line.style
+    });
+  };
+
+  VertEvaluator.prototype._evalCharSingleDigit = function(line, chr){
+    return this._createElement("div", {
+      content:chr.getData(),
+      css:chr.getCssVertSingleDigit(line),
       styleContext:line.style
     });
   };

@@ -585,10 +585,6 @@ var StyleContext = (function(){
       var font_size = this.getFontSize();
       var extent = opt.maxExtent || font_size;
       var measure = opt.measure;
-      /*
-      if(this.display === "inline-block"){
-	measure = this.staticMeasure || opt.measure;
-      }*/
       var char_count = opt.charCount || 0;
       var content = opt.content || null;
 
@@ -1428,54 +1424,19 @@ var StyleContext = (function(){
 	Args.copy(line.css, padding.getCss());
       }
     },
-    /*
     _setVertBaseline : function(root_line){
-      var flow = this.flow;
-      var base_font_size = this.getFontSize();
-      var text_center = Math.floor(root_line.maxExtent / 2); // center line offset
-      var decorated_elements = __filter_decorated_inline_elements(root_line.elements); // ruby, empha
-
-      // before align baseline, align all extents of children to max_extent.
-      List.iter(root_line.elements, function(element){
-	if(element instanceof Box && element.style.getMarkupName() !== "img" && element.style.display !== "inline-block"){
-	  element.size.setExtent(flow, root_line.maxExtent);
-	}
-      });
-
-      List.iter(decorated_elements, function(element){
-	var font_size = element.style.getFontSize();
-	var text_center_offset = text_center - Math.floor(font_size / 2); // text displayed at half font-size minus from center line.
-	if(text_center_offset > 0){
-	  var edge = element.style.edge? element.style.edge.clone() : new BoxEdge();
-	  edge.padding.setAfter(flow, text_center_offset); // set offset to padding
-
-	  // set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
-	  Args.copy(element.css, edge.getCss(flow));
-	}
-      });
-    },
-    */
-    _setVertBaseline : function(root_line){
-      var flow = this.flow;
-      var base_font_size = this.getFontSize();
-      var max_font_size = root_line.maxFontSize;
-      //console.log("vert base line:maxExtent = %d, maxFontSize = %d",  root_line.maxExtent, root_line.maxFontSize);
-
-      var overflow = 0;
-
       List.iter(root_line.elements, function(element){
 	var font_size = element.style.getFontSize();
 	var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
 	if (from_after > 0){
-	  //console.log("%o edge after = %d", element, from_after);
 	  var edge = element.style.edge? element.style.edge.clone() : new BoxEdge();
-	  edge.padding.setAfter(flow, from_after); // set offset to padding
+	  edge.padding.setAfter(this.flow, from_after); // set offset to padding
 	  element.size.width = (root_line.maxExtent - from_after);
 	  
 	  // set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
-	  Args.copy(element.css, edge.getCss(flow));
+	  Args.copy(element.css, edge.getCss(this.flow));
 	}
-      });
+      }.bind(this));
     },
     _loadSelectorCss : function(markup, parent){
       switch(markup.getName()){

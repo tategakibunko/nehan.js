@@ -133,7 +133,6 @@ var TextGenerator = (function(){
 
     // if white-space
     if(Token.isWhiteSpace(token)){
-      console.log("white space!");
       return this._getWhiteSpace(context, token);
     }
 

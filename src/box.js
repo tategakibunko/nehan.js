@@ -31,6 +31,13 @@ var Box = (function(){
       return this.display === "inline" && this.style.isRootLine();
     },
     /**
+       @memberof Nehan.Box
+       @return {boolean}
+    */
+    isTextBlock : function(){
+      return (typeof this.texts !== "undefined");
+    },
+    /**
        filter text object and concat it as string, mainly used for debugging.
 
        @memberof Nehan.Box
@@ -123,6 +130,8 @@ var Box = (function(){
       }
       Args.copy(css, this.css); // some dynamic values
       if(this.texts && this.style.isTextVertical()){
+	delete css["margin-left"];
+	delete css["margin-right"];
 	delete css["css-float"];
       }
       return css;

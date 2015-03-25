@@ -23,19 +23,20 @@ var Char = (function(){
   var __small_kana = ["\u3041","\u3043","\u3045","\u3047","\u3049","\u3063","\u3083","\u3085","\u3087","\u308e","\u30a1","\u30a3","\u30a5","\u30a7","\u30a9","\u30f5","\u30f6","\u30c3","\u30e3","\u30e5","\u30e7","\u30ee"];
   var __head_ng = ["\uff09","\x5c","\x29","\u300d","\u3011","\u3015","\uff3d","\x5c","\x5d","\u3002","\u300f","\uff1e","\u3009","\u300b","\u3001","\uff0e","\x5c","\x2e","\x2c","\u201d","\u301f"];
   var __tail_ng = ["\uff08","\x5c","\x28","\u300c","\u3010","\uff3b","\u3014","\x5c","\x5b","\u300e","\uff1c","\u3008","\u300a","\u201c","\u301d"];
+  var __rex_digit = /[0-9]/;
 
   Char.prototype = {
     /**
        @memberof Nehan.Char
        @return {string}
-     */
+    */
     getData : function(){
       return this.cnv || this.data;
     },
     /**
        @memberof Nehan.Char
        @return {Object}
-     */
+    */
     getCssPadding : function(line){
       var padding = new Padding();
       if(this.paddingStart){
@@ -49,7 +50,7 @@ var Char = (function(){
     /**
        @memberof Nehan.Char
        @return {Object}
-     */
+    */
     getCssVertGlyph : function(line){
       var css = {};
       var padding_enable = this.isPaddingEnable();
@@ -72,14 +73,12 @@ var Char = (function(){
     /**
        @memberof Nehan.Char
        @return {Object}
-     */
+    */
     getCssVertImgChar : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css.display = "block";
       css.width = font_size + "px";
       css.height = this.getVertHeight(font_size) + "px";
-      //css["margin-left"] = "auto";
-      //css["margin-right"] = "auto";
       if(this.isPaddingEnable()){
 	Args.copy(css, this.getCssPadding(line));
       }
@@ -88,7 +87,16 @@ var Char = (function(){
     /**
        @memberof Nehan.Char
        @return {Object}
-     */
+    */
+    getCssVertSingleDigit : function(line){
+      var css = {};
+      css["padding-left"] = "0.25em";
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
     getCssVertRotateCharIE : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css["css-float"] = "left";
@@ -100,7 +108,7 @@ var Char = (function(){
     /**
        @memberof Nehan.Char
        @return {Object}
-     */
+    */
     getCssVertEmphaText : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css.display = "inline-block";
@@ -111,7 +119,7 @@ var Char = (function(){
     /**
        @memberof Nehan.Char
        @return {Object}
-     */
+    */
     getCssHoriEmphaSrc : function(line){
       var css = {};
       css["line-height"] = "1em";
@@ -120,7 +128,7 @@ var Char = (function(){
     /**
        @memberof Nehan.Char
        @return {Object}
-     */
+    */
     getCssHoriEmphaText : function(line){
       var css = {};
       css["line-height"] = "1em";
@@ -129,7 +137,7 @@ var Char = (function(){
     /**
        @memberof Nehan.Char
        @return {Object}
-     */
+    */
     getCssVertLetterSpacing : function(line){
       var css = {};
       css["margin-bottom"] = line.letterSpacing + "px";
@@ -138,7 +146,7 @@ var Char = (function(){
     /**
        @memberof Nehan.Char
        @return {Object}
-     */
+    */
     getCssVertHalfSpaceChar : function(line){
       var css = {}, font_size = line.style.getFontSize();
       var half = Math.round(font_size / 2);
@@ -149,7 +157,7 @@ var Char = (function(){
     /**
        @memberof Nehan.Char
        @return {Object}
-     */
+    */
     getCssVertSmallKana : function(){
       var css = {};
       css.position = "relative";
@@ -163,21 +171,21 @@ var Char = (function(){
     /**
        @memberof Nehan.Char
        @return {Float | Int}
-     */
+    */
     getHoriScale : function(){
       return this.hscale? this.hscale : 1;
     },
     /**
        @memberof Nehan.Char
        @return {Float | Int}
-     */
+    */
     getVertScale : function(){
       return this.vscale? this.vscale : 1;
     },
     /**
        @memberof Nehan.Char
        @return {Float | Int}
-     */
+    */
     getVertHeight : function(font_size){
       var vscale = this.getVertScale();
       return (vscale === 1)? font_size : Math.round(font_size * vscale);
@@ -185,28 +193,28 @@ var Char = (function(){
     /**
        @memberof Nehan.Char
        @return {boolean}
-     */
+    */
     hasMetrics : function(){
       return (typeof this.bodySize != "undefined");
     },
     /**
        @memberof Nehan.Char
        @return {Int}
-     */
+    */
     getAdvance : function(flow, letter_spacing){
       return this.bodySize + this.getPaddingSize() + (letter_spacing || 0);
     },
     /**
        @memberof Nehan.Char
        @return {Int}
-     */
+    */
     getPaddingSize : function(){
       return (this.paddingStart || 0) + (this.paddingEnd || 0);
     },
     /**
        @memberof Nehan.Char
        @return {Int}
-     */
+    */
     getCharCount : function(){
       if(this.data === " " || this.data === "\t" || this.data === "\u3000"){
 	return 0;
@@ -217,7 +225,7 @@ var Char = (function(){
        @memberof Nehan.Char
        @param flow {Nehan.BoxFlow}
        @param font {Nehan.Font}
-     */
+    */
     setMetrics : function(flow, font){
       var is_vert = flow.isTextVertical();
       var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
@@ -504,6 +512,13 @@ var Char = (function(){
      */
     isSmallKana : function(){
       return List.mem(__small_kana, this.data);
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
+    isSingleDigit : function(){
+      return this.data.length === 1 && __rex_digit.test(this.data);
     },
     /**
        @memberof Nehan.Char
