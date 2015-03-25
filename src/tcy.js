@@ -34,6 +34,15 @@ var Tcy = (function(){
       return this.bodySize + letter_spacing;
     },
     /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
+    getCssVert : function(line){
+      var css = {};
+      css["text-align"] = "center";
+      return css;
+    },
+    /**
        @memberof Nehan.Tcy
        @return {boolean}
     */

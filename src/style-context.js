@@ -563,17 +563,19 @@ var StyleContext = (function(){
 	// if vertical line, needs some position fix for decorated element(ruby, empha) to align baseline.
 	if(this.isTextVertical()){
 	  this._setVertBaseline(line);
-	} else /*if(decorated_elements.length === 0)*/{
+	} else {
 	  // if horizontal line and no decorated elements exists, set line-height = exent.
 	  this.setCssAttr("line-height", max_extent + "px");
 	}
 	if(this.textAlign && !this.textAlign.isStart()){
 	  this._setTextAlign(line, this.textAlign);
 	}
-	var edge_after = Math.floor(line.maxFontSize * this.getLineRate()) - line.maxExtent;
-	if(edge_after > 0){
+	var edge_size = Math.floor(line.maxFontSize * this.getLineRate()) - line.maxExtent;
+	if(edge_size > 0){
+	  var edge_size_half = Math.floor(edge_size / 2);
 	  line.edge = new BoxEdge();
-	  line.edge.padding.setBefore(this.flow, edge_after);
+	  line.edge.padding.setBefore(this.flow, edge_size_half);
+	  line.edge.padding.setAfter(this.flow, edge_size_half);
 	}
       }
       //console.log("line: %s:(%d,%d)", line.classes.join(", "), line.size.width, line.size.height);
@@ -605,10 +607,7 @@ var StyleContext = (function(){
       line.content = content;
       line.texts = opt.texts || [];
       /*
-      var text = List.map(line.texts, function(txt){
-	return (txt instanceof Ruby)? txt.getRbString() : (txt.data || "");
-      }).join("");
-      console.log("text: %s:(%d,%d) - %s", line.classes.join(", "), line.size.width, line.size.height, text);
+      console.log("text: %s:(%d,%d) - %s", line.classes.join(", "), line.size.width, line.size.height, line.toLineString());
       */
       return line;
     },

@@ -89,10 +89,6 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createOutput = function(context){
-    // no like-break, no page-break, no element
-    if(context.isInlineEmpty()){
-      return null;
-    }
     var line = this.style.createLine({
       lineBreak:context.hasLineBreak(), // is line break included in?
       breakAfter:context.hasBreakAfter(), // is break after included in?
@@ -135,10 +131,14 @@ var InlineGenerator = (function(){
       return null;
     }
 
-    //console.log("inline token:%o", token);
+    console.log("inline token:%o", token);
 
     // text block
     if(token instanceof Text){
+      if(token.isWhiteSpaceOnly()){
+	console.log("[inline] white space only, skip it");
+	return this._getNext(context);
+      }
       this.setChildLayout(this._createTextGenerator(this.style, token));
       return this.yieldChildLayout(context);
     }

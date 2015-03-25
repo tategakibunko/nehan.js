@@ -46,7 +46,8 @@ var Box = (function(){
     toLineString : function(){
       var texts = __filter_text(this.elements || []);
       return List.fold(texts, "", function(ret, text){
-	return ret + (text? (text.data || "") : "");
+	var str = (text instanceof Ruby)? text.getRbString() : (text.data || "");
+	return ret + str;
       });
     },
     /**

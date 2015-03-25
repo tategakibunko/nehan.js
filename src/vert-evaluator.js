@@ -133,6 +133,7 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:tcy.data,
       className:"nehan-tcy",
+      css:tcy.getCssVert(line),
       styleContext:line.style
     });
   };
