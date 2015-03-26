@@ -13776,7 +13776,8 @@ var InlineGenerator = (function(){
     }
 
     if(this.hasChildLayout()){
-      // inline context is always re-constructed(see LayoutGenerator::_createChildContext)
+      // block context is delegated, but inline context is always re-constructed.
+      // see LayoutGenerator::_createChildContext
       return this.yieldChildLayout(context);
     }
 
