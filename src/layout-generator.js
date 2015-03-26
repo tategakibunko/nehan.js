@@ -159,15 +159,15 @@ var LayoutGenerator = (function(){
     }
   };
 
-  // called when each time generator yields element of output, and added it.
+  // called 'after' generated each element of target output is added to each context.
   LayoutGenerator.prototype._onAddElement = function(context, block){
   };
 
-  // called when each time generator yields output.
+  // called 'after' output element is generated.
   LayoutGenerator.prototype._onCreate = function(context, output){
   };
 
-  // called when generator yields final output.
+  // called 'after' final output element is generated.
   LayoutGenerator.prototype._onComplete = function(context, output){
   };
 
