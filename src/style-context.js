@@ -1505,10 +1505,12 @@ var StyleContext = (function(){
       }
     },
     _loadDisplay : function(){
-      if(this.getMarkupName() === "first-line"){
+      switch(this.getMarkupName()){
+      case "first-line":
 	return "block";
+      default:
+	return this.getCssAttr("display", "inline");
       }
-      return this.getCssAttr("display", "inline");
     },
     _loadFlow : function(){
       var value = this.getCssAttr("flow", "inherit");

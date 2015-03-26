@@ -703,10 +703,6 @@ var Style = {
   },
   "!doctype":{
   },
-  "first-line":{
-    //"display":"block !important" // TODO
-    "display":"block"
-  },
   // <page-break>, <pbr>, <end-page> are all same and nehan.js original tag,
   // defined to keep compatibility of older nehan.js document,
   // and must be defined as logical-break-before, logical-break-after props in the future.

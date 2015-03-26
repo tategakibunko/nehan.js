@@ -1448,10 +1448,6 @@ var Style = {
   },
   "!doctype":{
   },
-  "first-line":{
-    //"display":"block !important" // TODO
-    "display":"block"
-  },
   // <page-break>, <pbr>, <end-page> are all same and nehan.js original tag,
   // defined to keep compatibility of older nehan.js document,
   // and must be defined as logical-break-before, logical-break-after props in the future.
@@ -12325,10 +12321,12 @@ var StyleContext = (function(){
       }
     },
     _loadDisplay : function(){
-      if(this.getMarkupName() === "first-line"){
+      switch(this.getMarkupName()){
+      case "first-line":
 	return "block";
+      default:
+	return this.getCssAttr("display", "inline");
       }
-      return this.getCssAttr("display", "inline");
     },
     _loadFlow : function(){
       var value = this.getCssAttr("flow", "inherit");
