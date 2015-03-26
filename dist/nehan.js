@@ -8401,7 +8401,7 @@ var HtmlLexer = (function (){
   HtmlLexer.prototype = {
     _normalize : function(src){
       return src
-	.replace(/(<\/[^>]+>)/g, function(p1){
+	.replace(/(<\/.+?>)(?:[\s\n]*)/gm, function(str, p1){
 	  return p1.toLowerCase();
 	}) // convert close tag to lower case(for innerHTML of IE)
 	//.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
@@ -8523,6 +8523,7 @@ var HtmlLexer = (function (){
   };
   return HtmlLexer;
 })();
+
 
 
 var TextLexer = (function (){
@@ -11418,9 +11419,7 @@ var StyleContext = (function(){
       line.maxExtent = extent;
       line.content = content;
       line.texts = opt.texts || [];
-      /*
-      console.log("text: %s:(%d,%d) - %s", line.classes.join(", "), line.size.width, line.size.height, line.toLineString());
-      */
+      //console.log("text: %s:(%d,%d) - %s", line.classes.join(", "), line.size.width, line.size.height, line.toLineString());
       return line;
     },
     /**
@@ -12140,6 +12139,7 @@ var StyleContext = (function(){
 	Args.copy(css, this.color.getCss());
       }
       if(this.isTextVertical()){
+	css["display"] = "block";
 	css["line-height"] = "1em";
 	if(Nehan.Env.client.isAppleMobileFamily()){
 	  css["letter-spacing"] = "-0.001em";
@@ -12237,7 +12237,7 @@ var StyleContext = (function(){
     },
     _setVertBaseline : function(root_line){
       List.iter(root_line.elements, function(element){
-	var font_size = element.style.getFontSize();
+	var font_size = element.maxFontSize;
 	var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
 	if (from_after > 0){
 	  var edge = element.style.edge? element.style.edge.clone() : new BoxEdge();
@@ -13516,12 +13516,12 @@ var BlockGenerator = (function(){
       return null;
     }
 
-    console.log("block token:%o", token);
+    //console.log("block token:%o", token);
 
     // text block
     if(token instanceof Text){
       if(token.isWhiteSpaceOnly()){
-	console.log("[block] white space only, skip it");
+	//console.log("[block] white space only, skip it");
 	return this._getNext(context);
       }
       var text_gen = this._createTextGenerator(this.style, token);
@@ -13637,7 +13637,11 @@ var InlineGenerator = (function(){
   Class.extend(InlineGenerator, LayoutGenerator);
 
   var __get_line_start_pos = function(line){
-    var head = line.elements[0];
+    var head = line.elements[0] || null;
+    console.log("__get_line_start_pos(%o): head = %o", line, head);
+    if(head === null){
+      return line.style.getMarkupPos();
+    }
     return (head instanceof Box)? head.style.getMarkupPos() : head.pos;
   };
 
@@ -13727,8 +13731,8 @@ var InlineGenerator = (function(){
     }
 
     if(this.hasChildLayout()){
+      // inline context is always re-constructed(see LayoutGenerator::_createChildContext)
       return this.yieldChildLayout();
-      //return this.yieldChildLayout(context);
     }
 
     // read next token
@@ -13737,12 +13741,12 @@ var InlineGenerator = (function(){
       return null;
     }
 
-    console.log("inline token:%o", token);
+    //console.log("inline token:%o", token);
 
     // text block
     if(token instanceof Text){
       if(token.isWhiteSpaceOnly()){
-	console.log("[inline] white space only, skip it");
+	//console.log("[inline] white space only, skip it");
 	return this._getNext(context);
       }
       this.setChildLayout(this._createTextGenerator(this.style, token));
@@ -13990,7 +13994,7 @@ var TextGenerator = (function(){
       return null;
     }
 
-    console.log("text token:%o", token);
+    //console.log("text token:%o", token);
 
     // if white-space
     if(Token.isWhiteSpace(token)){

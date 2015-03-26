@@ -129,7 +129,7 @@ var TextGenerator = (function(){
       return null;
     }
 
-    console.log("text token:%o", token);
+    //console.log("text token:%o", token);
 
     // if white-space
     if(Token.isWhiteSpace(token)){

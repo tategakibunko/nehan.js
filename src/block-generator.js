@@ -82,12 +82,12 @@ var BlockGenerator = (function(){
       return null;
     }
 
-    console.log("block token:%o", token);
+    //console.log("block token:%o", token);
 
     // text block
     if(token instanceof Text){
       if(token.isWhiteSpaceOnly()){
-	console.log("[block] white space only, skip it");
+	//console.log("[block] white space only, skip it");
 	return this._getNext(context);
       }
       var text_gen = this._createTextGenerator(this.style, token);

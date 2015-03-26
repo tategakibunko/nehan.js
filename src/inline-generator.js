@@ -31,7 +31,11 @@ var InlineGenerator = (function(){
   Class.extend(InlineGenerator, LayoutGenerator);
 
   var __get_line_start_pos = function(line){
-    var head = line.elements[0];
+    var head = line.elements[0] || null;
+    console.log("__get_line_start_pos(%o): head = %o", line, head);
+    if(head === null){
+      return line.style.getMarkupPos();
+    }
     return (head instanceof Box)? head.style.getMarkupPos() : head.pos;
   };
 
@@ -121,8 +125,8 @@ var InlineGenerator = (function(){
     }
 
     if(this.hasChildLayout()){
+      // inline context is always re-constructed(see LayoutGenerator::_createChildContext)
       return this.yieldChildLayout();
-      //return this.yieldChildLayout(context);
     }
 
     // read next token
@@ -131,12 +135,12 @@ var InlineGenerator = (function(){
       return null;
     }
 
-    console.log("inline token:%o", token);
+    //console.log("inline token:%o", token);
 
     // text block
     if(token instanceof Text){
       if(token.isWhiteSpaceOnly()){
-	console.log("[inline] white space only, skip it");
+	//console.log("[inline] white space only, skip it");
 	return this._getNext(context);
       }
       this.setChildLayout(this._createTextGenerator(this.style, token));

@@ -606,9 +606,7 @@ var StyleContext = (function(){
       line.maxExtent = extent;
       line.content = content;
       line.texts = opt.texts || [];
-      /*
-      console.log("text: %s:(%d,%d) - %s", line.classes.join(", "), line.size.width, line.size.height, line.toLineString());
-      */
+      //console.log("text: %s:(%d,%d) - %s", line.classes.join(", "), line.size.width, line.size.height, line.toLineString());
       return line;
     },
     /**
@@ -1328,6 +1326,7 @@ var StyleContext = (function(){
 	Args.copy(css, this.color.getCss());
       }
       if(this.isTextVertical()){
+	css["display"] = "block";
 	css["line-height"] = "1em";
 	if(Nehan.Env.client.isAppleMobileFamily()){
 	  css["letter-spacing"] = "-0.001em";
@@ -1425,7 +1424,7 @@ var StyleContext = (function(){
     },
     _setVertBaseline : function(root_line){
       List.iter(root_line.elements, function(element){
-	var font_size = element.style.getFontSize();
+	var font_size = element.maxFontSize;
 	var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
 	if (from_after > 0){
 	  var edge = element.style.edge? element.style.edge.clone() : new BoxEdge();

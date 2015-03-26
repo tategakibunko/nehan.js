@@ -53,7 +53,7 @@ var HtmlLexer = (function (){
   HtmlLexer.prototype = {
     _normalize : function(src){
       return src
-	.replace(/(<\/[^>]+>)/g, function(p1){
+	.replace(/(<\/.+?>)(?:[\s\n]*)/gm, function(str, p1){
 	  return p1.toLowerCase();
 	}) // convert close tag to lower case(for innerHTML of IE)
 	//.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
@@ -175,4 +175,5 @@ var HtmlLexer = (function (){
   };
   return HtmlLexer;
 })();
+
 
