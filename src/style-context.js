@@ -556,6 +556,7 @@ var StyleContext = (function(){
 
       // backup other line data. mainly required to restore inline-context.
       if(is_root_line){
+	line.lineNo = opt.lineNo;
 	line.lineBreak = opt.lineBreak || false;
 	line.breakAfter = opt.breakAfter || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;
@@ -577,6 +578,7 @@ var StyleContext = (function(){
 	  line.edge.padding.setBefore(this.flow, edge_size_half);
 	  line.edge.padding.setAfter(this.flow, edge_size_half);
 	}
+	console.log("root line:", line);
       }
       //console.log("line: %s:(%d,%d)", line.classes.join(", "), line.size.width, line.size.height);
       return line;
@@ -1504,6 +1506,9 @@ var StyleContext = (function(){
       }
     },
     _loadDisplay : function(){
+      if(this.getMarkupName() === "first-line"){
+	return "block";
+      }
       return this.getCssAttr("display", "inline");
     },
     _loadFlow : function(){

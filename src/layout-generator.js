@@ -10,8 +10,8 @@ var LayoutGenerator = (function(){
   function LayoutGenerator(style, stream){
     this.style = style;
     this.stream = stream;
-    this._parentLayout = null;
-    this._childLayout = null;
+    this._parent = null;
+    this._child = null;
     this._cachedElements = [];
     this._terminate = false; // used to force terminate generator.
   }
@@ -49,8 +49,8 @@ var LayoutGenerator = (function(){
      @param generator {Nehan.LayoutGenerator}
   */
   LayoutGenerator.prototype.setChildLayout = function(generator){
-    this._childLayout = generator;
-    generator._parentLayout = this;
+    this._child = generator;
+    generator._parent = this;
   };
 
   /**
@@ -77,7 +77,7 @@ var LayoutGenerator = (function(){
      @return {boolean}
   */
   LayoutGenerator.prototype.hasChildLayout = function(){
-    if(this._childLayout && this._childLayout.hasNext()){
+    if(this._child && this._child.hasNext()){
       return true;
     }
     return false;
@@ -99,7 +99,7 @@ var LayoutGenerator = (function(){
      @return {Nehan.Box}
   */
   LayoutGenerator.prototype.yieldChildLayout = function(context){
-    var next = this._childLayout.yield(context);
+    var next = this._child.yield(context);
     return next;
   };
 
@@ -160,7 +160,7 @@ var LayoutGenerator = (function(){
   };
 
   // called when each time generator yields element of output, and added it.
-  LayoutGenerator.prototype._onAddElement = function(block){
+  LayoutGenerator.prototype._onAddElement = function(context, block){
   };
 
   // called when each time generator yields output.
@@ -188,6 +188,7 @@ var LayoutGenerator = (function(){
     return new CursorContext(
       new BlockContext(max_extent, {
 	isFirstBlock:is_first_block,
+	lineNo:parent_context.lineNo,
 	contextEdge:context_edge
       }),
       new InlineContext(this.style.contentMeasure)

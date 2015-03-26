@@ -87,10 +87,11 @@ var TextGenerator = (function(){
       maxFontSize:context.getInlineMaxFontSize()
     });
 
+    /*
     // set position in parent stream.
-    if(this._parentLayout && this._parentLayout.stream){
-      line.pos = Math.max(0, this._parentLayout.stream.getPos() - 1);
-    }
+    if(this._parent && this._parent.stream){
+      line.pos = Math.max(0, this._parent.stream.getPos() - 1);
+    }*/
 
     // call _onCreate callback for 'each' output
     this._onCreate(context, line);
@@ -145,13 +146,13 @@ var TextGenerator = (function(){
 
   TextGenerator.prototype._breakInline = function(block_gen){
     this.setTerminate(true);
-    if(this._parentLayout === null){
+    if(this._parent === null){
       return;
     }
-    if(this._parentLayout instanceof TextGenerator){
-      this._parentLayout._breakInline(block_gen);
+    if(this._parent instanceof TextGenerator){
+      this._parent._breakInline(block_gen);
     } else {
-      this._parentLayout.setChildLayout(block_gen);
+      this._parent.setChildLayout(block_gen);
     }
   };
 
@@ -248,7 +249,7 @@ var TextGenerator = (function(){
     context.addInlineTextElement(element, measure);
 
     // call _onAddElement callback for each 'element' of output.
-    this._onAddElement(element);
+    this._onAddElement(context, element);
   };
 
   return TextGenerator;

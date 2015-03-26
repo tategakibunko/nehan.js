@@ -104,11 +104,11 @@ var FloatGenerator = (function(){
       this._termFloat = true;
 
       // delegate cache and child to original parent.
-      this._parentLayout._cachedElements = this._childLayout._cachedElements;
-      this._parentLayout._childLayout = this._childLayout._childLayout || null;
-      if(this._parentLayout._childLayout){
-	this._parentLayout._childLayout.style.forceUpdateContextSize(start_measure, rest_extent_space);
-	this._parentLayout._childLayout._parentLayout = this._parentLayout;
+      this._parent._cachedElements = this._child._cachedElements;
+      this._parent._child = this._child._child || null;
+      if(this._parent._child){
+	this._parent._child.style.forceUpdateContextSize(start_measure, rest_extent_space);
+	this._parent._child._parent = this._parent;
       }
       return group_set;
     }
@@ -170,7 +170,7 @@ var FloatGenerator = (function(){
   };
   
   FloatGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
-    this._childLayout.style.forceUpdateContextSize(measure, extent);
+    this._child.style.forceUpdateContextSize(measure, extent);
     return this.yieldChildLayout();
   };
   

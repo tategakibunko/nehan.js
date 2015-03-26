@@ -58,8 +58,9 @@ var BlockGenerator = (function(){
 
     // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
     // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
-    if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br && this._childLayout && this._childLayout.rollback){
-      this._childLayout.rollback(cache);
+    //if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br && this._child && this._child.rollback){
+    if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child && this._child.rollback){
+      this._child.rollback(cache);
       return this.yieldChildLayout(context);
     }
     return cache;
@@ -120,8 +121,9 @@ var BlockGenerator = (function(){
 
     // if child inline or child inline-block,
     if(child_style.isInlineBlock() || child_style.isInline()){
-      var inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, inline_gen));
+      var first_inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
+      console.log("style:%o, first inline gen:%o", child_style, first_inline_gen);
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, first_inline_gen));
       return this.yieldChildLayout(context);
     }
 
@@ -135,7 +137,7 @@ var BlockGenerator = (function(){
       return;
     }
     context.addBlockElement(element, extent);
-    this._onAddElement(element);
+    this._onAddElement(context, element);
   };
 
   BlockGenerator.prototype._createOutput = function(context, is_last_block){

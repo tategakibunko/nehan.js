@@ -65,6 +65,20 @@ var CursorContext = (function(){
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
+    */
+    getBlockLineNo : function(){
+      return this.block.getLineNo();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    incBlockLineNo : function(){
+      return this.block.incLineNo();
+    },
+    /**
+       @memberof Nehan.CursorContext
        @param is_last_block {boolean}
        @return {Object} {before:[int value], after:[int value]}
     */

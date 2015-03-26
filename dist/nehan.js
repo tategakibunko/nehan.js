@@ -8131,6 +8131,13 @@ var Box = (function(){
       return (typeof this.texts !== "undefined");
     },
     /**
+       @memberof Nehan.Box
+       @return {boolean}
+    */
+    isRootBlock : function(){
+      return this.isRootLine || false;
+    },
+    /**
        filter text object and concat it as string, mainly used for debugging.
 
        @memberof Nehan.Box
@@ -11369,6 +11376,7 @@ var StyleContext = (function(){
 
       // backup other line data. mainly required to restore inline-context.
       if(is_root_line){
+	line.lineNo = opt.lineNo;
 	line.lineBreak = opt.lineBreak || false;
 	line.breakAfter = opt.breakAfter || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;
@@ -11390,6 +11398,7 @@ var StyleContext = (function(){
 	  line.edge.padding.setBefore(this.flow, edge_size_half);
 	  line.edge.padding.setAfter(this.flow, edge_size_half);
 	}
+	console.log("root line:", line);
       }
       //console.log("line: %s:(%d,%d)", line.classes.join(", "), line.size.width, line.size.height);
       return line;
@@ -12317,6 +12326,9 @@ var StyleContext = (function(){
       }
     },
     _loadDisplay : function(){
+      if(this.getMarkupName() === "first-line"){
+	return "block";
+      }
       return this.getCssAttr("display", "inline");
     },
     _loadFlow : function(){
@@ -12625,6 +12637,20 @@ var CursorContext = (function(){
     },
     /**
        @memberof Nehan.CursorContext
+       @return {int}
+    */
+    getBlockLineNo : function(){
+      return this.block.getLineNo();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    incBlockLineNo : function(){
+      return this.block.incLineNo();
+    },
+    /**
+       @memberof Nehan.CursorContext
        @param is_last_block {boolean}
        @return {Object} {before:[int value], after:[int value]}
     */
@@ -12781,6 +12807,7 @@ var BlockContext = (function(){
     this.breakAfter = false;
     this.contextEdge = opt.contextEdge || {before:0, after:0};
     this.isFirstBlock = (typeof opt.isFirstBlock === "undefined")? true : opt.isFirstBlock;
+    this.lineNo = opt.lineNo || 0;
   }
 
   BlockContext.prototype = {
@@ -12875,6 +12902,20 @@ var BlockContext = (function(){
     */
     getMaxExtent : function(){
       return this.maxExtent;
+    },
+    /**
+       @memberof Nehan.BlockContext
+       @return {int} max available size of this block context
+    */
+    getLineNo : function(){
+      return this.lineNo;
+    },
+    /**
+       @memberof Nehan.BlockContext
+       @return {int} max available size of this block context
+    */
+    incLineNo : function(){
+      return this.lineNo++;
     },
     /**
        @memberof Nehan.BlockContext
@@ -13114,8 +13155,8 @@ var LayoutGenerator = (function(){
   function LayoutGenerator(style, stream){
     this.style = style;
     this.stream = stream;
-    this._parentLayout = null;
-    this._childLayout = null;
+    this._parent = null;
+    this._child = null;
     this._cachedElements = [];
     this._terminate = false; // used to force terminate generator.
   }
@@ -13153,8 +13194,8 @@ var LayoutGenerator = (function(){
      @param generator {Nehan.LayoutGenerator}
   */
   LayoutGenerator.prototype.setChildLayout = function(generator){
-    this._childLayout = generator;
-    generator._parentLayout = this;
+    this._child = generator;
+    generator._parent = this;
   };
 
   /**
@@ -13181,7 +13222,7 @@ var LayoutGenerator = (function(){
      @return {boolean}
   */
   LayoutGenerator.prototype.hasChildLayout = function(){
-    if(this._childLayout && this._childLayout.hasNext()){
+    if(this._child && this._child.hasNext()){
       return true;
     }
     return false;
@@ -13203,7 +13244,7 @@ var LayoutGenerator = (function(){
      @return {Nehan.Box}
   */
   LayoutGenerator.prototype.yieldChildLayout = function(context){
-    var next = this._childLayout.yield(context);
+    var next = this._child.yield(context);
     return next;
   };
 
@@ -13264,7 +13305,7 @@ var LayoutGenerator = (function(){
   };
 
   // called when each time generator yields element of output, and added it.
-  LayoutGenerator.prototype._onAddElement = function(block){
+  LayoutGenerator.prototype._onAddElement = function(context, block){
   };
 
   // called when each time generator yields output.
@@ -13292,6 +13333,7 @@ var LayoutGenerator = (function(){
     return new CursorContext(
       new BlockContext(max_extent, {
 	isFirstBlock:is_first_block,
+	lineNo:parent_context.lineNo,
 	contextEdge:context_edge
       }),
       new InlineContext(this.style.contentMeasure)
@@ -13492,8 +13534,9 @@ var BlockGenerator = (function(){
 
     // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
     // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
-    if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br && this._childLayout && this._childLayout.rollback){
-      this._childLayout.rollback(cache);
+    //if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br && this._child && this._child.rollback){
+    if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child && this._child.rollback){
+      this._child.rollback(cache);
       return this.yieldChildLayout(context);
     }
     return cache;
@@ -13554,8 +13597,9 @@ var BlockGenerator = (function(){
 
     // if child inline or child inline-block,
     if(child_style.isInlineBlock() || child_style.isInline()){
-      var inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, inline_gen));
+      var first_inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
+      console.log("style:%o, first inline gen:%o", child_style, first_inline_gen);
+      this.setChildLayout(new InlineGenerator(this.style, this.stream, first_inline_gen));
       return this.yieldChildLayout(context);
     }
 
@@ -13569,7 +13613,7 @@ var BlockGenerator = (function(){
       return;
     }
     context.addBlockElement(element, extent);
-    this._onAddElement(element);
+    this._onAddElement(context, element);
   };
 
   BlockGenerator.prototype._createOutput = function(context, is_last_block){
@@ -13638,7 +13682,7 @@ var InlineGenerator = (function(){
 
   var __get_line_start_pos = function(line){
     var head = line.elements[0] || null;
-    console.log("__get_line_start_pos(%o): head = %o", line, head);
+    //console.log("rollback -> line_start_pos: %o, head = %o", line, head);
     if(head === null){
       return line.style.getMarkupPos();
     }
@@ -13686,8 +13730,8 @@ var InlineGenerator = (function(){
     var cache = this.popCache();
 
     // inline child is always inline, so repeat this rollback while cache exists.
-    if(cache && this._childLayout && this._childLayout.rollback){
-      this._childLayout.rollback(cache);
+    if(cache && this._child && this._child.rollback){
+      this._child.rollback(cache);
     }
   };
 
@@ -13700,6 +13744,7 @@ var InlineGenerator = (function(){
 
   InlineGenerator.prototype._createOutput = function(context){
     var line = this.style.createLine({
+      lineNo:context.getBlockLineNo(),
       lineBreak:context.hasLineBreak(), // is line break included in?
       breakAfter:context.hasBreakAfter(), // is break after included in?
       measure:context.getInlineCurMeasure(), // actual measure
@@ -13710,8 +13755,12 @@ var InlineGenerator = (function(){
     });
 
     // set position in parent stream.
-    if(this._parentLayout && this._parentLayout.stream){
-      line.pos = Math.max(0, this._parentLayout.stream.getPos() - 1);
+    if(this._parent && this._parent.stream){
+      line.pos = Math.max(0, this._parent.stream.getPos() - 1);
+    }
+
+    if(this.style.isRootLine()){
+      context.incBlockLineNo();
     }
 
     // call _onCreate callback for 'each' output
@@ -13732,7 +13781,7 @@ var InlineGenerator = (function(){
 
     if(this.hasChildLayout()){
       // inline context is always re-constructed(see LayoutGenerator::_createChildContext)
-      return this.yieldChildLayout();
+      return this.yieldChildLayout(context);
     }
 
     // read next token
@@ -13804,13 +13853,13 @@ var InlineGenerator = (function(){
 
   InlineGenerator.prototype._breakInline = function(block_gen){
     this.setTerminate(true);
-    if(this._parentLayout === null){
+    if(this._parent === null){
       return;
     }
-    if(this._parentLayout instanceof InlineGenerator){
-      this._parentLayout._breakInline(block_gen);
+    if(this._parent instanceof InlineGenerator){
+      this._parent._breakInline(block_gen);
     } else {
-      this._parentLayout.setChildLayout(block_gen);
+      this._parent.setChildLayout(block_gen);
     }
   };
 
@@ -13822,7 +13871,7 @@ var InlineGenerator = (function(){
     context.addInlineBoxElement(element, measure);
 
     // call _onAddElement callback for each 'element' of output.
-    this._onAddElement(element);
+    this._onAddElement(context, element);
   };
 
   return InlineGenerator;
@@ -13952,10 +14001,11 @@ var TextGenerator = (function(){
       maxFontSize:context.getInlineMaxFontSize()
     });
 
+    /*
     // set position in parent stream.
-    if(this._parentLayout && this._parentLayout.stream){
-      line.pos = Math.max(0, this._parentLayout.stream.getPos() - 1);
-    }
+    if(this._parent && this._parent.stream){
+      line.pos = Math.max(0, this._parent.stream.getPos() - 1);
+    }*/
 
     // call _onCreate callback for 'each' output
     this._onCreate(context, line);
@@ -14010,13 +14060,13 @@ var TextGenerator = (function(){
 
   TextGenerator.prototype._breakInline = function(block_gen){
     this.setTerminate(true);
-    if(this._parentLayout === null){
+    if(this._parent === null){
       return;
     }
-    if(this._parentLayout instanceof TextGenerator){
-      this._parentLayout._breakInline(block_gen);
+    if(this._parent instanceof TextGenerator){
+      this._parent._breakInline(block_gen);
     } else {
-      this._parentLayout.setChildLayout(block_gen);
+      this._parent.setChildLayout(block_gen);
     }
   };
 
@@ -14113,7 +14163,7 @@ var TextGenerator = (function(){
     context.addInlineTextElement(element, measure);
 
     // call _onAddElement callback for each 'element' of output.
-    this._onAddElement(element);
+    this._onAddElement(context, element);
   };
 
   return TextGenerator;
@@ -14168,12 +14218,15 @@ var FirstLineGenerator = (function(){
   }
   Class.extend(FirstLineGenerator, BlockGenerator);
 
-  FirstLineGenerator.prototype._onAddElement = function(element){
-    if(element.display === "inline" && typeof this._first === "undefined"){
-      this._first = true; // flag that first line is already generated.
-      this.style = this.style.parent; // first-line yieled, so switch style to parent one.
-      if(this._childLayout){
-	this._childLayout.style = this.style;
+  FirstLineGenerator.prototype._onAddElement = function(context, element){
+    // first-line yieled, so switch style to parent one.
+    if(context.getBlockLineNo() === 1){
+      this.style = this.style.parent;
+      var child = this._child, parent = this;
+      while(child){
+	child.style = parent.style;
+	parent = child;
+	child = child._child;
       }
     }
   };
@@ -14524,11 +14577,11 @@ var FloatGenerator = (function(){
       this._termFloat = true;
 
       // delegate cache and child to original parent.
-      this._parentLayout._cachedElements = this._childLayout._cachedElements;
-      this._parentLayout._childLayout = this._childLayout._childLayout || null;
-      if(this._parentLayout._childLayout){
-	this._parentLayout._childLayout.style.forceUpdateContextSize(start_measure, rest_extent_space);
-	this._parentLayout._childLayout._parentLayout = this._parentLayout;
+      this._parent._cachedElements = this._child._cachedElements;
+      this._parent._child = this._child._child || null;
+      if(this._parent._child){
+	this._parent._child.style.forceUpdateContextSize(start_measure, rest_extent_space);
+	this._parent._child._parent = this._parent;
       }
       return group_set;
     }
@@ -14590,7 +14643,7 @@ var FloatGenerator = (function(){
   };
   
   FloatGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
-    this._childLayout.style.forceUpdateContextSize(measure, extent);
+    this._child.style.forceUpdateContextSize(measure, extent);
     return this.yieldChildLayout();
   };
   

@@ -38,6 +38,13 @@ var Box = (function(){
       return (typeof this.texts !== "undefined");
     },
     /**
+       @memberof Nehan.Box
+       @return {boolean}
+    */
+    isRootBlock : function(){
+      return this.isRootLine || false;
+    },
+    /**
        filter text object and concat it as string, mainly used for debugging.
 
        @memberof Nehan.Box

@@ -32,7 +32,7 @@ var InlineGenerator = (function(){
 
   var __get_line_start_pos = function(line){
     var head = line.elements[0] || null;
-    console.log("__get_line_start_pos(%o): head = %o", line, head);
+    //console.log("rollback -> line_start_pos: %o, head = %o", line, head);
     if(head === null){
       return line.style.getMarkupPos();
     }
@@ -80,8 +80,8 @@ var InlineGenerator = (function(){
     var cache = this.popCache();
 
     // inline child is always inline, so repeat this rollback while cache exists.
-    if(cache && this._childLayout && this._childLayout.rollback){
-      this._childLayout.rollback(cache);
+    if(cache && this._child && this._child.rollback){
+      this._child.rollback(cache);
     }
   };
 
@@ -94,6 +94,7 @@ var InlineGenerator = (function(){
 
   InlineGenerator.prototype._createOutput = function(context){
     var line = this.style.createLine({
+      lineNo:context.getBlockLineNo(),
       lineBreak:context.hasLineBreak(), // is line break included in?
       breakAfter:context.hasBreakAfter(), // is break after included in?
       measure:context.getInlineCurMeasure(), // actual measure
@@ -104,8 +105,12 @@ var InlineGenerator = (function(){
     });
 
     // set position in parent stream.
-    if(this._parentLayout && this._parentLayout.stream){
-      line.pos = Math.max(0, this._parentLayout.stream.getPos() - 1);
+    if(this._parent && this._parent.stream){
+      line.pos = Math.max(0, this._parent.stream.getPos() - 1);
+    }
+
+    if(this.style.isRootLine()){
+      context.incBlockLineNo();
     }
 
     // call _onCreate callback for 'each' output
@@ -126,7 +131,7 @@ var InlineGenerator = (function(){
 
     if(this.hasChildLayout()){
       // inline context is always re-constructed(see LayoutGenerator::_createChildContext)
-      return this.yieldChildLayout();
+      return this.yieldChildLayout(context);
     }
 
     // read next token
@@ -198,13 +203,13 @@ var InlineGenerator = (function(){
 
   InlineGenerator.prototype._breakInline = function(block_gen){
     this.setTerminate(true);
-    if(this._parentLayout === null){
+    if(this._parent === null){
       return;
     }
-    if(this._parentLayout instanceof InlineGenerator){
-      this._parentLayout._breakInline(block_gen);
+    if(this._parent instanceof InlineGenerator){
+      this._parent._breakInline(block_gen);
     } else {
-      this._parentLayout.setChildLayout(block_gen);
+      this._parent.setChildLayout(block_gen);
     }
   };
 
@@ -216,7 +221,7 @@ var InlineGenerator = (function(){
     context.addInlineBoxElement(element, measure);
 
     // call _onAddElement callback for each 'element' of output.
-    this._onAddElement(element);
+    this._onAddElement(context, element);
   };
 
   return InlineGenerator;

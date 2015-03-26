@@ -20,6 +20,7 @@ var BlockContext = (function(){
     this.breakAfter = false;
     this.contextEdge = opt.contextEdge || {before:0, after:0};
     this.isFirstBlock = (typeof opt.isFirstBlock === "undefined")? true : opt.isFirstBlock;
+    this.lineNo = opt.lineNo || 0;
   }
 
   BlockContext.prototype = {
@@ -114,6 +115,20 @@ var BlockContext = (function(){
     */
     getMaxExtent : function(){
       return this.maxExtent;
+    },
+    /**
+       @memberof Nehan.BlockContext
+       @return {int} max available size of this block context
+    */
+    getLineNo : function(){
+      return this.lineNo;
+    },
+    /**
+       @memberof Nehan.BlockContext
+       @return {int} max available size of this block context
+    */
+    incLineNo : function(){
+      return this.lineNo++;
     },
     /**
        @memberof Nehan.BlockContext
