@@ -11398,7 +11398,6 @@ var StyleContext = (function(){
 	  line.edge.padding.setBefore(this.flow, edge_size_half);
 	  line.edge.padding.setAfter(this.flow, edge_size_half);
 	}
-	console.log("root line:", line);
       }
       //console.log("line: %s:(%d,%d)", line.classes.join(", "), line.size.width, line.size.height);
       return line;
@@ -13598,7 +13597,6 @@ var BlockGenerator = (function(){
     // if child inline or child inline-block,
     if(child_style.isInlineBlock() || child_style.isInline()){
       var first_inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
-      console.log("style:%o, first inline gen:%o", child_style, first_inline_gen);
       this.setChildLayout(new InlineGenerator(this.style, this.stream, first_inline_gen));
       return this.yieldChildLayout(context);
     }

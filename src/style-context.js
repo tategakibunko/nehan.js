@@ -578,7 +578,6 @@ var StyleContext = (function(){
 	  line.edge.padding.setBefore(this.flow, edge_size_half);
 	  line.edge.padding.setAfter(this.flow, edge_size_half);
 	}
-	console.log("root line:", line);
       }
       //console.log("line: %s:(%d,%d)", line.classes.join(", "), line.size.width, line.size.height);
       return line;

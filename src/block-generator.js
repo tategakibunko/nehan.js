@@ -122,7 +122,6 @@ var BlockGenerator = (function(){
     // if child inline or child inline-block,
     if(child_style.isInlineBlock() || child_style.isInline()){
       var first_inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
-      console.log("style:%o, first inline gen:%o", child_style, first_inline_gen);
       this.setChildLayout(new InlineGenerator(this.style, this.stream, first_inline_gen));
       return this.yieldChildLayout(context);
     }
