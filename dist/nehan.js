@@ -13529,7 +13529,10 @@ var BlockGenerator = (function(){
 	context2.inline.maxFontSize = cache.maxFontSize || this.style.getFontSize();
 	context2.inline.maxExtent = cache.maxExtent || 0;
 	context2.inline.charCount = cache.charCount || 0;
-	return this._child._yield(context2);
+	var line = this._child._yield(context2);
+	//console.log("line:%o(line no = %d)", line, line.lineNo);
+	context.incBlockLineNo(); // cached line is first line, so increment line no.
+	return line;
       }
     }
     return cache;
