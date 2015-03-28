@@ -14116,21 +14116,6 @@ var TextGenerator = (function(){
 })();
 
 
-var WordGenerator = (function(){
-  function WordGenerator(style, word){
-    this.style = style;
-    this.word = word;
-  }
-  Class.extend(WordGenerator, LayoutGenerator);
-
-  WordGenerator.prototype._yield = function(context){
-  };
-
-  return WordGenerator;
-})();
-
-
-
 var LinkGenerator = (function(){
   var __add_anchor = function(style){
     var anchor_name = style.getMarkupAttr("name");
