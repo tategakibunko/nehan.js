@@ -139,15 +139,8 @@ var CursorContext = (function(){
        @memberof Nehan.CursorContext
        @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
     */
-    getInlineLastText : function(){
-      return this.inline.getLastText();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
-    */
-    getInlineTexts : function(){
-      return this.inline.getTexts();
+    getInlineLastElement : function(){
+      return this.inline.getLastElement();
     },
     /**
        @memberof Nehan.CursorContext

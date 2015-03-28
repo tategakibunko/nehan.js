@@ -61,21 +61,6 @@ var StyleContext = (function(){
     return List.exists(__managed_css_props, Closure.eq(prop));
   };
 
-  var __filter_decorated_inline_elements = function(elements){
-    var ret = [];
-    List.iter(elements, function(element){
-      if(element instanceof Box === false){
-	return;
-      }
-      if(element.style.isTextEmphaEnable() || element.style.getMarkupName() === "ruby"){
-	ret.push(element);
-      } else if(element.elements){
-	ret = ret.concat(__filter_decorated_inline_elements(element.elements));
-      }
-    });
-    return ret;
-  };
-
   /**
      @memberof Nehan
      @class StyleContext
@@ -337,11 +322,10 @@ var StyleContext = (function(){
     */
     clone : function(css){
       // no one can clone root style.
-      if(this.parent === null){
-	return this.createChild("div", css);
+      var clone_style = this.parent? new StyleContext(this.markup, this.parent, {forceCss:(css || {})}) : this.createChild("div", css);
+      if(clone_style.parent){
+	clone_style.parent.removeChild(clone_style);
       }
-      var clone_style = new StyleContext(this.markup, this.parent, {forceCss:(css || {})});
-      clone_style.parent.removeChild(clone_style);
       clone_style.setClone(true);
       return clone_style;
     },
@@ -455,7 +439,7 @@ var StyleContext = (function(){
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
-	return total + (element? (element.charCount || 0) : 0);
+	return total + (element.charCount || 0);
       });
       box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
       box.content = opt.content || null;
@@ -514,8 +498,7 @@ var StyleContext = (function(){
        @param opt.measure {int}
        @param opt.content {String}
        @param opt.charCount {int}
-       @param opt.elements {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
-       @param opt.texts {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
+       @param opt.elements {Array.<Nehan.Box>}
        @param opt.maxFontSize {int}
        @param opt.maxExtent {int}
        @param opt.lineBreak {boolean}
@@ -536,7 +519,7 @@ var StyleContext = (function(){
       }
       var line_size = this.flow.getBoxSize(measure, max_extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.getClasses());
-      var line = new Box(line_size, this);
+      var line = new Box(line_size, this, "line-block");
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = elements;
       line.classes = is_root_line? classes : classes.concat("nehan-" + this.getMarkupName());
@@ -572,16 +555,27 @@ var StyleContext = (function(){
 	  this._setTextAlign(line, this.textAlign);
 	}
 	var edge_size = Math.floor(line.maxFontSize * this.getLineRate()) - line.maxExtent;
-	if(edge_size > 0){
-	  var edge_size_half = Math.floor(edge_size / 2);
+	if(edge_size > 0 && line.lineNo > 0){
 	  line.edge = new BoxEdge();
-	  line.edge.padding.setBefore(this.flow, edge_size_half);
-	  line.edge.padding.setAfter(this.flow, edge_size_half);
+	  line.edge.padding.setBefore(this.flow, edge_size);
 	}
       }
       //console.log("line: %s:(%d,%d)", line.classes.join(", "), line.size.width, line.size.height);
       return line;
     },
+    /**
+       @memberof Nehan.StyleContext
+       @param opt
+       @param opt.measure {int}
+       @param opt.content {String}
+       @param opt.charCount {int}
+       @param opt.elements {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
+       @param opt.maxFontSize {int}
+       @param opt.maxExtent {int}
+       @param opt.lineBreak {boolean}
+       @param opt.breakAfter {boolean}
+       @return {Nehan.Box}
+    */
     createTextBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
@@ -591,14 +585,16 @@ var StyleContext = (function(){
       var char_count = opt.charCount || 0;
       var content = opt.content || null;
 
-      if(this.isTextEmphaEnable()){
+      if(opt.isEmpty){
+	extent = 0;
+      } else if(this.isTextEmphaEnable()){
 	extent = this.getEmphaTextBlockExtent();
       } else if(this.markup.name === "ruby"){
 	extent = this.getRubyTextBlockExtent();
       }
       var line_size = this.flow.getBoxSize(measure, extent);
-      var classes = ["nehan-text-block", "nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.getClasses());
-      var line = new Box(line_size, this);
+      var classes = ["nehan-text-block"].concat(this.markup.getClasses());
+      var line = new Box(line_size, this, "text-block");
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = elements;
       line.classes = classes;
@@ -606,8 +602,6 @@ var StyleContext = (function(){
       line.maxFontSize = font_size;
       line.maxExtent = extent;
       line.content = content;
-      line.texts = opt.texts || [];
-      //console.log("text: %s:(%d,%d) - %s", line.classes.join(", "), line.size.width, line.size.height, line.toLineString());
       return line;
     },
     /**

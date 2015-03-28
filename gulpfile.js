@@ -136,6 +136,7 @@ var sources = [
   "src/inline-generator.js",
   "src/inline-block-generator.js",
   "src/text-generator.js",
+  "src/word-generator.js",
   "src/link-generator.js",
   "src/first-line-generator.js",
   "src/lazy-generator.js",

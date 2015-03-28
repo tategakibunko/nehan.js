@@ -13,7 +13,6 @@ var InlineContext = (function(){
     this.maxExtent = 0;
     this.maxFontSize = 0;
     this.elements = [];
-    this.texts = [];
     this.lineBreak = false; // is line-break included in line?
     this.breakAfter = false; // is break-after incuded in line?
   }
@@ -69,7 +68,6 @@ var InlineContext = (function(){
     */
     addTextElement : function(element, measure){
       this.elements.push(element);
-      this.texts.push(element);
       this.curMeasure += measure;
       if(element.getCharCount){
 	this.charCount += element.getCharCount();
@@ -99,17 +97,8 @@ var InlineContext = (function(){
        @memberof Nehan.InlineContext
        @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
     */
-    getLastText : function(){
-      return List.last(this.texts);
-    },
-    /**
-       get text elements.
-
-       @memberof Nehan.InlineContext
-       @return {Array}
-    */
-    getTexts : function(){
-      return this.texts;
+    getLastElement : function(){
+      return List.last(this.elements);
     },
     /**
        get all elements.
@@ -146,7 +135,7 @@ var InlineContext = (function(){
        @return {int}
     */
     getMaxExtent : function(){
-      return this.maxExtent;
+      return this.isEmpty()? 0 : this.maxExtent;
     },
     /**
        @memberof Nehan.InlineContext
@@ -163,13 +152,6 @@ var InlineContext = (function(){
       return this.charCount;
     },
     /**
-       @memberof Nehan.InlineContext
-       @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
-    */
-    getLastChar : function(){
-      return List.last(this.texts);
-    },
-    /**
        justify inline element with next head character, return null if nothing happend, or return new tail char if justified.
 
        @memberof Nehan.InlineContext
@@ -177,9 +159,9 @@ var InlineContext = (function(){
        @return {Nehan.Char | null}
     */
     justify : function(head){
-      var last = this.texts.length - 1, ptr = last, tail;
+      var last = this.elements.length - 1, ptr = last, tail;
       while(ptr >= 0){
-	tail = this.texts[ptr];
+	tail = this.elements[ptr];
 	if(head && head.isHeadNg && head.isHeadNg() || tail.isTailNg && tail.isTailNg()){
 	  // if tail and head is not continuous elmenet, for example
 	  // [tail(pos=29)][inline element(pos=30)][head(pos=31)]

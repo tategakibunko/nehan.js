@@ -56,12 +56,28 @@ var BlockGenerator = (function(){
   BlockGenerator.prototype.popCache = function(context){
     var cache = LayoutGenerator.prototype.popCache.call(this);
 
-    // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
-    // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
-    //if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br && this._child && this._child.rollback){
-    if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child && this._child.rollback){
-      this._child.rollback(cache);
-      return this.yieldChildLayout(context);
+    // restore cached line with correct line no
+    if(cache && cache.display === "inline"){
+      //console.info("block gen pop cached line = %o(%s), gen = %o, is parent style is clone = %o", cache, cache.toString(), this, (this.style.parent? this.style.parent.isClone() : "false"));
+      if(cache.edge && cache.edge.padding && context.getBlockLineNo() === 0){
+	cache.lineNo = 0;
+	cache.edge.padding.clearBefore(this.style.flow);
+	context.incBlockLineNo();
+      }
+      // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
+      // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
+      if(cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child){
+	//console.info("inline float fix, line = %o(%s), context = %o, child_gen = %o", cache, cache.toString(), context, this._child);
+
+	// resume inline context
+	var context2 = this._createChildContext(context);
+	context2.inline.elements = cache.elements;
+	context2.inline.curMeasure = cache.getLayoutMeasure(this.style.flow);
+	context2.inline.maxFontSize = cache.maxFontSize || this.style.getFontSize();
+	context2.inline.maxExtent = cache.maxExtent || 0;
+	context2.inline.charCount = cache.charCount || 0;
+	return this._child._yield(context2);
+      }
     }
     return cache;
   };
@@ -88,7 +104,6 @@ var BlockGenerator = (function(){
     // text block
     if(token instanceof Text){
       if(token.isWhiteSpaceOnly()){
-	//console.log("[block] white space only, skip it");
 	return this._getNext(context);
       }
       var text_gen = this._createTextGenerator(this.style, token);
@@ -132,9 +147,6 @@ var BlockGenerator = (function(){
   };
 
   BlockGenerator.prototype._addElement = function(context, element, extent){
-    if(element === null){
-      return;
-    }
     context.addBlockElement(element, extent);
     this._onAddElement(context, element);
   };
@@ -164,6 +176,7 @@ var BlockGenerator = (function(){
     if(!this.hasNext()){
       this._onComplete(context, block);
     }
+    //console.log(">> block output:%o:(m=%d, e=%d):(%s)", block, block.size.height, block.size.width, block.toString());
     return block;
   };
 

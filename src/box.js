@@ -7,9 +7,10 @@ var Box = (function(){
      @param {Nehan.BoxSize} box size
      @param {Nehan.StyleContext}
   */
-  function Box(size, style){
+  function Box(size, style, type){
     this.size = size;
     this.style = style;
+    this.type = type || "block";
     this.css = {};
   }
 
@@ -18,7 +19,7 @@ var Box = (function(){
       if(element instanceof Box){
 	return ret.concat(__filter_text(element.elements || []));
       }
-      return ret.concat(element);
+      return element? ret.concat(element) : ret;
     });
   };
 
@@ -34,8 +35,15 @@ var Box = (function(){
        @memberof Nehan.Box
        @return {boolean}
     */
+    isLine : function(){
+      return this.type === "line-block";
+    },
+    /**
+       @memberof Nehan.Box
+       @return {boolean}
+    */
     isTextBlock : function(){
-      return (typeof this.texts !== "undefined");
+      return this.type === "text-block";
     },
     /**
        @memberof Nehan.Box
@@ -50,7 +58,7 @@ var Box = (function(){
        @memberof Nehan.Box
        @return {string}
     */
-    toLineString : function(){
+    toString : function(){
       var texts = __filter_text(this.elements || []);
       return List.fold(texts, "", function(ret, text){
 	var str = (text instanceof Ruby)? text.getRbString() : (text.data || "");
@@ -137,7 +145,7 @@ var Box = (function(){
 	Args.copy(css, this.edge.getCss());
       }
       Args.copy(css, this.css); // some dynamic values
-      if(this.texts && this.style.isTextVertical()){
+      if(this.isTextBlock() && this.style.isTextVertical()){
 	delete css["margin-left"];
 	delete css["margin-right"];
 	delete css["css-float"];

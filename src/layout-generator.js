@@ -172,13 +172,14 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createStartContext = function(){
-    return new CursorContext(
+    var context = new CursorContext(
       new BlockContext(this.style.contentExtent, {
 	isFirstBlock:true,
 	contextEdge:this.style.getBlockContextEdge()
       }),
       new InlineContext(this.style.contentMeasure)
     );
+    return context;
   };
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){

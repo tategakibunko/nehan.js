@@ -30,15 +30,6 @@ var InlineGenerator = (function(){
   }
   Class.extend(InlineGenerator, LayoutGenerator);
 
-  var __get_line_start_pos = function(line){
-    var head = line.elements[0] || null;
-    //console.log("rollback -> line_start_pos: %o, head = %o", line, head);
-    if(head === null){
-      return line.style.getMarkupPos();
-    }
-    return (head instanceof Box)? head.style.getMarkupPos() : head.pos;
-  };
-
   InlineGenerator.prototype._yield = function(context){
     if(!context.hasInlineSpaceFor(1)){
       return null;
@@ -64,27 +55,6 @@ var InlineGenerator = (function(){
     return this._createOutput(context);
   };
 
-  /**
-     rollback stream position by cached element of parent generator.
-
-     @memberof Nehan.InlineGenerator
-     @param parent_cache {Nehan.Box}
-  */
-  InlineGenerator.prototype.rollback = function(parent_cache){
-    if(this.stream === null){
-      return;
-    }
-    var start_pos = __get_line_start_pos(parent_cache);
-    this.stream.setPos(start_pos); // rewind stream to the head of line.
-
-    var cache = this.popCache();
-
-    // inline child is always inline, so repeat this rollback while cache exists.
-    if(cache && this._child && this._child.rollback){
-      this._child.rollback(cache);
-    }
-  };
-
   InlineGenerator.prototype._createChildContext = function(context){
     return new CursorContext(
       context.block, // inline generator inherits block context as it is.
@@ -93,6 +63,9 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createOutput = function(context){
+    if(context.isInlineEmpty()){
+      return null;
+    }
     var line = this.style.createLine({
       lineNo:context.getBlockLineNo(),
       lineBreak:context.hasLineBreak(), // is line break included in?
@@ -120,6 +93,7 @@ var InlineGenerator = (function(){
     if(!this.hasNext()){
       this._onComplete(context, line);
     }
+    //console.log(">> line:%o, context = %o", line, context);
     return line;
   };
 
@@ -146,7 +120,6 @@ var InlineGenerator = (function(){
     // text block
     if(token instanceof Text){
       if(token.isWhiteSpaceOnly()){
-	//console.log("[inline] white space only, skip it");
 	return this._getNext(context);
       }
       this.setChildLayout(this._createTextGenerator(this.style, token));

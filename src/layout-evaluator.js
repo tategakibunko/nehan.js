@@ -95,10 +95,8 @@ var LayoutEvaluator = (function(){
       }
     },
     _evaluate : function(tree, opt){
-      opt = opt || {};
-      var elements = List.filter(tree.elements, function(element){ return element !== null; });
-      var root = this._evalTreeRoot(tree, opt);
-      return root.innerHTML? root : List.fold(elements, root, function(ret, child){
+      var root = this._evalTreeRoot(tree, opt || {});
+      return root.innerHTML? root : List.fold(tree.elements, root, function(ret, child){
 	this._appendChild(root, this._evalTreeChild(tree, child));
 	if(child.withBr){ // annotated to add extra br element
 	  this._appendChild(root, document.createElement("br"));

@@ -189,11 +189,13 @@ var List = {
   /**
      @memberof Nehan.List
      @param lst {Array}
+     @param start {Number}
+     @param fn {Function}
      @return {Number}
   */
-  sum : function(lst){
-    return this.fold(lst, 0, function(ret, obj){
-      return ret + obj;
+  sum : function(lst, start, fn){
+    return this.fold(lst, start, function(ret, obj){
+      return ret + fn(obj);
     });
   },
   /**

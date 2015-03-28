@@ -1949,11 +1949,13 @@ var List = {
   /**
      @memberof Nehan.List
      @param lst {Array}
+     @param start {Number}
+     @param fn {Function}
      @return {Number}
   */
-  sum : function(lst){
-    return this.fold(lst, 0, function(ret, obj){
-      return ret + obj;
+  sum : function(lst, start, fn){
+    return this.fold(lst, start, function(ret, obj){
+      return ret + fn(obj);
     });
   },
   /**
@@ -8096,9 +8098,10 @@ var Box = (function(){
      @param {Nehan.BoxSize} box size
      @param {Nehan.StyleContext}
   */
-  function Box(size, style){
+  function Box(size, style, type){
     this.size = size;
     this.style = style;
+    this.type = type || "block";
     this.css = {};
   }
 
@@ -8107,7 +8110,7 @@ var Box = (function(){
       if(element instanceof Box){
 	return ret.concat(__filter_text(element.elements || []));
       }
-      return ret.concat(element);
+      return element? ret.concat(element) : ret;
     });
   };
 
@@ -8123,8 +8126,15 @@ var Box = (function(){
        @memberof Nehan.Box
        @return {boolean}
     */
+    isLine : function(){
+      return this.type === "line-block";
+    },
+    /**
+       @memberof Nehan.Box
+       @return {boolean}
+    */
     isTextBlock : function(){
-      return (typeof this.texts !== "undefined");
+      return this.type === "text-block";
     },
     /**
        @memberof Nehan.Box
@@ -8139,7 +8149,7 @@ var Box = (function(){
        @memberof Nehan.Box
        @return {string}
     */
-    toLineString : function(){
+    toString : function(){
       var texts = __filter_text(this.elements || []);
       return List.fold(texts, "", function(ret, text){
 	var str = (text instanceof Ruby)? text.getRbString() : (text.data || "");
@@ -8226,7 +8236,7 @@ var Box = (function(){
 	Args.copy(css, this.edge.getCss());
       }
       Args.copy(css, this.css); // some dynamic values
-      if(this.texts && this.style.isTextVertical()){
+      if(this.isTextBlock() && this.style.isTextVertical()){
 	delete css["margin-left"];
 	delete css["margin-right"];
 	delete css["css-float"];
@@ -10877,21 +10887,6 @@ var StyleContext = (function(){
     return List.exists(__managed_css_props, Closure.eq(prop));
   };
 
-  var __filter_decorated_inline_elements = function(elements){
-    var ret = [];
-    List.iter(elements, function(element){
-      if(element instanceof Box === false){
-	return;
-      }
-      if(element.style.isTextEmphaEnable() || element.style.getMarkupName() === "ruby"){
-	ret.push(element);
-      } else if(element.elements){
-	ret = ret.concat(__filter_decorated_inline_elements(element.elements));
-      }
-    });
-    return ret;
-  };
-
   /**
      @memberof Nehan
      @class StyleContext
@@ -11153,11 +11148,10 @@ var StyleContext = (function(){
     */
     clone : function(css){
       // no one can clone root style.
-      if(this.parent === null){
-	return this.createChild("div", css);
+      var clone_style = this.parent? new StyleContext(this.markup, this.parent, {forceCss:(css || {})}) : this.createChild("div", css);
+      if(clone_style.parent){
+	clone_style.parent.removeChild(clone_style);
       }
-      var clone_style = new StyleContext(this.markup, this.parent, {forceCss:(css || {})});
-      clone_style.parent.removeChild(clone_style);
       clone_style.setClone(true);
       return clone_style;
     },
@@ -11271,7 +11265,7 @@ var StyleContext = (function(){
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
-	return total + (element? (element.charCount || 0) : 0);
+	return total + (element.charCount || 0);
       });
       box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
       box.content = opt.content || null;
@@ -11330,8 +11324,7 @@ var StyleContext = (function(){
        @param opt.measure {int}
        @param opt.content {String}
        @param opt.charCount {int}
-       @param opt.elements {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
-       @param opt.texts {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
+       @param opt.elements {Array.<Nehan.Box>}
        @param opt.maxFontSize {int}
        @param opt.maxExtent {int}
        @param opt.lineBreak {boolean}
@@ -11352,7 +11345,7 @@ var StyleContext = (function(){
       }
       var line_size = this.flow.getBoxSize(measure, max_extent);
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.getClasses());
-      var line = new Box(line_size, this);
+      var line = new Box(line_size, this, "line-block");
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = elements;
       line.classes = is_root_line? classes : classes.concat("nehan-" + this.getMarkupName());
@@ -11388,16 +11381,27 @@ var StyleContext = (function(){
 	  this._setTextAlign(line, this.textAlign);
 	}
 	var edge_size = Math.floor(line.maxFontSize * this.getLineRate()) - line.maxExtent;
-	if(edge_size > 0){
-	  var edge_size_half = Math.floor(edge_size / 2);
+	if(edge_size > 0 && line.lineNo > 0){
 	  line.edge = new BoxEdge();
-	  line.edge.padding.setBefore(this.flow, edge_size_half);
-	  line.edge.padding.setAfter(this.flow, edge_size_half);
+	  line.edge.padding.setBefore(this.flow, edge_size);
 	}
       }
       //console.log("line: %s:(%d,%d)", line.classes.join(", "), line.size.width, line.size.height);
       return line;
     },
+    /**
+       @memberof Nehan.StyleContext
+       @param opt
+       @param opt.measure {int}
+       @param opt.content {String}
+       @param opt.charCount {int}
+       @param opt.elements {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
+       @param opt.maxFontSize {int}
+       @param opt.maxExtent {int}
+       @param opt.lineBreak {boolean}
+       @param opt.breakAfter {boolean}
+       @return {Nehan.Box}
+    */
     createTextBlock : function(opt){
       opt = opt || {};
       var elements = opt.elements || [];
@@ -11407,14 +11411,16 @@ var StyleContext = (function(){
       var char_count = opt.charCount || 0;
       var content = opt.content || null;
 
-      if(this.isTextEmphaEnable()){
+      if(opt.isEmpty){
+	extent = 0;
+      } else if(this.isTextEmphaEnable()){
 	extent = this.getEmphaTextBlockExtent();
       } else if(this.markup.name === "ruby"){
 	extent = this.getRubyTextBlockExtent();
       }
       var line_size = this.flow.getBoxSize(measure, extent);
-      var classes = ["nehan-text-block", "nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.getClasses());
-      var line = new Box(line_size, this);
+      var classes = ["nehan-text-block"].concat(this.markup.getClasses());
+      var line = new Box(line_size, this, "text-block");
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
       line.elements = elements;
       line.classes = classes;
@@ -11422,8 +11428,6 @@ var StyleContext = (function(){
       line.maxFontSize = font_size;
       line.maxExtent = extent;
       line.content = content;
-      line.texts = opt.texts || [];
-      //console.log("text: %s:(%d,%d) - %s", line.classes.join(", "), line.size.width, line.size.height, line.toLineString());
       return line;
     },
     /**
@@ -12708,15 +12712,8 @@ var CursorContext = (function(){
        @memberof Nehan.CursorContext
        @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
     */
-    getInlineLastText : function(){
-      return this.inline.getLastText();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
-    */
-    getInlineTexts : function(){
-      return this.inline.getTexts();
+    getInlineLastElement : function(){
+      return this.inline.getLastElement();
     },
     /**
        @memberof Nehan.CursorContext
@@ -12944,7 +12941,6 @@ var InlineContext = (function(){
     this.maxExtent = 0;
     this.maxFontSize = 0;
     this.elements = [];
-    this.texts = [];
     this.lineBreak = false; // is line-break included in line?
     this.breakAfter = false; // is break-after incuded in line?
   }
@@ -13000,7 +12996,6 @@ var InlineContext = (function(){
     */
     addTextElement : function(element, measure){
       this.elements.push(element);
-      this.texts.push(element);
       this.curMeasure += measure;
       if(element.getCharCount){
 	this.charCount += element.getCharCount();
@@ -13030,17 +13025,8 @@ var InlineContext = (function(){
        @memberof Nehan.InlineContext
        @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
     */
-    getLastText : function(){
-      return List.last(this.texts);
-    },
-    /**
-       get text elements.
-
-       @memberof Nehan.InlineContext
-       @return {Array}
-    */
-    getTexts : function(){
-      return this.texts;
+    getLastElement : function(){
+      return List.last(this.elements);
     },
     /**
        get all elements.
@@ -13077,7 +13063,7 @@ var InlineContext = (function(){
        @return {int}
     */
     getMaxExtent : function(){
-      return this.maxExtent;
+      return this.isEmpty()? 0 : this.maxExtent;
     },
     /**
        @memberof Nehan.InlineContext
@@ -13094,13 +13080,6 @@ var InlineContext = (function(){
       return this.charCount;
     },
     /**
-       @memberof Nehan.InlineContext
-       @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
-    */
-    getLastChar : function(){
-      return List.last(this.texts);
-    },
-    /**
        justify inline element with next head character, return null if nothing happend, or return new tail char if justified.
 
        @memberof Nehan.InlineContext
@@ -13108,9 +13087,9 @@ var InlineContext = (function(){
        @return {Nehan.Char | null}
     */
     justify : function(head){
-      var last = this.texts.length - 1, ptr = last, tail;
+      var last = this.elements.length - 1, ptr = last, tail;
       while(ptr >= 0){
-	tail = this.texts[ptr];
+	tail = this.elements[ptr];
 	if(head && head.isHeadNg && head.isHeadNg() || tail.isTailNg && tail.isTailNg()){
 	  // if tail and head is not continuous elmenet, for example
 	  // [tail(pos=29)][inline element(pos=30)][head(pos=31)]
@@ -13314,13 +13293,14 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createStartContext = function(){
-    return new CursorContext(
+    var context = new CursorContext(
       new BlockContext(this.style.contentExtent, {
 	isFirstBlock:true,
 	contextEdge:this.style.getBlockContextEdge()
       }),
       new InlineContext(this.style.contentMeasure)
     );
+    return context;
   };
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){
@@ -13529,12 +13509,28 @@ var BlockGenerator = (function(){
   BlockGenerator.prototype.popCache = function(context){
     var cache = LayoutGenerator.prototype.popCache.call(this);
 
-    // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
-    // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
-    //if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && !cache.br && this._child && this._child.rollback){
-    if(cache && cache.display === "inline" && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child && this._child.rollback){
-      this._child.rollback(cache);
-      return this.yieldChildLayout(context);
+    // restore cached line with correct line no
+    if(cache && cache.display === "inline"){
+      //console.info("block gen pop cached line = %o(%s), gen = %o, is parent style is clone = %o", cache, cache.toString(), this, (this.style.parent? this.style.parent.isClone() : "false"));
+      if(cache.edge && cache.edge.padding && context.getBlockLineNo() === 0){
+	cache.lineNo = 0;
+	cache.edge.padding.clearBefore(this.style.flow);
+	context.incBlockLineNo();
+      }
+      // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
+      // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
+      if(cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child){
+	//console.info("inline float fix, line = %o(%s), context = %o, child_gen = %o", cache, cache.toString(), context, this._child);
+
+	// resume inline context
+	var context2 = this._createChildContext(context);
+	context2.inline.elements = cache.elements;
+	context2.inline.curMeasure = cache.getLayoutMeasure(this.style.flow);
+	context2.inline.maxFontSize = cache.maxFontSize || this.style.getFontSize();
+	context2.inline.maxExtent = cache.maxExtent || 0;
+	context2.inline.charCount = cache.charCount || 0;
+	return this._child._yield(context2);
+      }
     }
     return cache;
   };
@@ -13561,7 +13557,6 @@ var BlockGenerator = (function(){
     // text block
     if(token instanceof Text){
       if(token.isWhiteSpaceOnly()){
-	//console.log("[block] white space only, skip it");
 	return this._getNext(context);
       }
       var text_gen = this._createTextGenerator(this.style, token);
@@ -13605,9 +13600,6 @@ var BlockGenerator = (function(){
   };
 
   BlockGenerator.prototype._addElement = function(context, element, extent){
-    if(element === null){
-      return;
-    }
     context.addBlockElement(element, extent);
     this._onAddElement(context, element);
   };
@@ -13637,6 +13629,7 @@ var BlockGenerator = (function(){
     if(!this.hasNext()){
       this._onComplete(context, block);
     }
+    //console.log(">> block output:%o:(m=%d, e=%d):(%s)", block, block.size.height, block.size.width, block.toString());
     return block;
   };
 
@@ -13676,15 +13669,6 @@ var InlineGenerator = (function(){
   }
   Class.extend(InlineGenerator, LayoutGenerator);
 
-  var __get_line_start_pos = function(line){
-    var head = line.elements[0] || null;
-    //console.log("rollback -> line_start_pos: %o, head = %o", line, head);
-    if(head === null){
-      return line.style.getMarkupPos();
-    }
-    return (head instanceof Box)? head.style.getMarkupPos() : head.pos;
-  };
-
   InlineGenerator.prototype._yield = function(context){
     if(!context.hasInlineSpaceFor(1)){
       return null;
@@ -13710,27 +13694,6 @@ var InlineGenerator = (function(){
     return this._createOutput(context);
   };
 
-  /**
-     rollback stream position by cached element of parent generator.
-
-     @memberof Nehan.InlineGenerator
-     @param parent_cache {Nehan.Box}
-  */
-  InlineGenerator.prototype.rollback = function(parent_cache){
-    if(this.stream === null){
-      return;
-    }
-    var start_pos = __get_line_start_pos(parent_cache);
-    this.stream.setPos(start_pos); // rewind stream to the head of line.
-
-    var cache = this.popCache();
-
-    // inline child is always inline, so repeat this rollback while cache exists.
-    if(cache && this._child && this._child.rollback){
-      this._child.rollback(cache);
-    }
-  };
-
   InlineGenerator.prototype._createChildContext = function(context){
     return new CursorContext(
       context.block, // inline generator inherits block context as it is.
@@ -13739,6 +13702,9 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createOutput = function(context){
+    if(context.isInlineEmpty()){
+      return null;
+    }
     var line = this.style.createLine({
       lineNo:context.getBlockLineNo(),
       lineBreak:context.hasLineBreak(), // is line break included in?
@@ -13766,6 +13732,7 @@ var InlineGenerator = (function(){
     if(!this.hasNext()){
       this._onComplete(context, line);
     }
+    //console.log(">> line:%o, context = %o", line, context);
     return line;
   };
 
@@ -13792,7 +13759,6 @@ var InlineGenerator = (function(){
     // text block
     if(token instanceof Text){
       if(token.isWhiteSpaceOnly()){
-	//console.log("[inline] white space only, skip it");
 	return this._getNext(context);
       }
       this.setChildLayout(this._createTextGenerator(this.style, token));
@@ -13925,9 +13891,8 @@ var TextGenerator = (function(){
   }
   Class.extend(TextGenerator, LayoutGenerator);
 
-  var __get_line_start_pos = function(line){
-    var head = line.elements[0];
-    return head.pos;
+  var __find_head_text = function(element){
+    return (element instanceof Box)? __find_head_text(element.elements[0]) : element;
   };
 
   TextGenerator.prototype._yield = function(context){
@@ -13944,6 +13909,7 @@ var TextGenerator = (function(){
 	break;
       }
       if(!context.hasInlineSpaceFor(measure)){
+	//console.log("!> text overflow:%o(m=%d)", element, measure);
 	this.pushCache(element);
 	break;
       }
@@ -13955,22 +13921,6 @@ var TextGenerator = (function(){
     return this._createOutput(context);
   };
 
-  /**
-     rollback stream position by cached element of parent generator.
-
-     @memberof Nehan.TextGenerator
-     @param parent_cache {Nehan.Box}
-  */
-  TextGenerator.prototype.rollback = function(parent_cache){
-    if(this.stream === null){
-      return;
-    }
-    var start_pos = parent_cache.pos;
-    this.stream.setPos(start_pos); // rewind stream to the head of line.
-
-    var cache = this.popCache();
-  };
-
   TextGenerator.prototype._createChildContext = function(context){
     return new CursorContext(
       context.block, // inline generator inherits block context as it is.
@@ -13979,12 +13929,11 @@ var TextGenerator = (function(){
   };
 
   TextGenerator.prototype._createOutput = function(context){
-    // no like-break, no page-break, no element
     if(context.isInlineEmpty()){
       return null;
     }
     // justify if this line is generated by overflow(not line-break).
-    if(!context.hasLineBreak() && Config.justify){
+    if(Config.justify && !context.isInlineEmpty() && !context.hasLineBreak()){
       this._justifyLine(context);
     }
     var line = this.style.createTextBlock({
@@ -13992,17 +13941,16 @@ var TextGenerator = (function(){
       breakAfter:context.hasBreakAfter(), // is break after included in?
       measure:context.getInlineCurMeasure(), // actual measure
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
-      texts:context.getInlineTexts(), // elements but text element only.
       charCount:context.getInlineCharCount(),
       maxExtent:context.getInlineMaxExtent(),
-      maxFontSize:context.getInlineMaxFontSize()
+      maxFontSize:context.getInlineMaxFontSize(),
+      isEmpty:context.isInlineEmpty()
     });
 
-    /*
     // set position in parent stream.
     if(this._parent && this._parent.stream){
       line.pos = Math.max(0, this._parent.stream.getPos() - 1);
-    }*/
+    }
 
     // call _onCreate callback for 'each' output
     this._onCreate(context, line);
@@ -14011,6 +13959,7 @@ var TextGenerator = (function(){
     if(!this.hasNext()){
       this._onComplete(context, line);
     }
+    //console.log(">> texts:[%s], context = %o, cache list:%o, stream pos:%d, stream:%o", line.toString(), context, this._cachedElements, this.stream.getPos(), this.stream);
     return line;
   };
 
@@ -14117,7 +14066,7 @@ var TextGenerator = (function(){
 
   TextGenerator.prototype._setCharKerning = function(context, char_token){
     var next_token = this.stream.peek();
-    var prev_text = context.getInlineLastText();
+    var prev_text = context.getInlineLastElement();
     var next_text = next_token && Token.isText(next_token)? next_token : null;
     Kerning.set(char_token, prev_text, next_text);
   };
@@ -14165,6 +14114,21 @@ var TextGenerator = (function(){
 
   return TextGenerator;
 })();
+
+
+var WordGenerator = (function(){
+  function WordGenerator(style, word){
+    this.style = style;
+    this.word = word;
+  }
+  Class.extend(WordGenerator, LayoutGenerator);
+
+  WordGenerator.prototype._yield = function(context){
+  };
+
+  return WordGenerator;
+})();
+
 
 
 var LinkGenerator = (function(){
@@ -14500,13 +14464,10 @@ var FloatGenerator = (function(){
      @return {boolean}
   */
   FloatGenerator.prototype.hasNext = function(){
-    if(this._hasNextFloat()){
-      return true;
-    }
-    if(this._termFloat && !this.hasCache()){
+    if(this._terminate){
       return false;
     }
-    return LayoutGenerator.prototype.hasNext.call(this);
+    return this._hasNextFloat() || this.hasCache();
   };
 
   FloatGenerator.prototype._hasNextFloat = function(){
@@ -14517,23 +14478,21 @@ var FloatGenerator = (function(){
 
   FloatGenerator.prototype._yield = function(context){
     var stack = this._yieldFloatStack(context);
-
-    // if float generators are still available but output nothing bacause of too short rest-extent,
-    // break current page and output continuous block in next page.
-    if(this._hasNextFloat() && stack.isEmpty()){
-      return null;
-    }
     var rest_measure = context.getInlineRestMeasure();
     var rest_extent = stack.getExtent();
     var start_measure = rest_measure;
+    if(rest_measure <= 0 || rest_extent <= 0){
+      return null;
+    }
     return this._yieldFloat(context, stack, start_measure, rest_measure, rest_extent);
   };
 
   FloatGenerator.prototype._yieldFloat = function(context, stack, start_measure, rest_measure, rest_extent){
+    //console.log("_yieldFloat(start_rest_m:%d, rest_m:%d, rest_e:%d)", start_measure, rest_measure, rest_extent);
+
     if(rest_measure <= 0){
       return null;
     }
-    var flow = this.style.flow;
 
     // no more floated layout, just yield rest area.
     if(stack.isEmpty()){
@@ -14547,6 +14506,7 @@ var FloatGenerator = (function(){
       |       |                |
       --------------------------
     */
+    var flow = this.style.flow;
     var group = stack.pop(); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
     var rest_rest_measure = rest_measure - group.getMeasure(flow); // rest of 'rest measure'
     var rest = this._yieldFloat(context, stack, start_measure, rest_rest_measure, group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
@@ -14570,8 +14530,9 @@ var FloatGenerator = (function(){
     // float generator is terminated when
     // 1. rest space is all sweeped, and cursor is now at original inline start position.
     // 2. simply stream data is exhausted.
-    if(!this._hasNextFloat() && (start_measure === rest_measure || !this.stream.hasNext())){
-      this._termFloat = true;
+    if(!this._hasNextFloat() && !this.hasNext() && (start_measure === rest_measure || !this.stream.hasNext())){
+      //console.log("float finish!!, gen:%o, context:%o, rest_m:%d, rest_e:%d, rest_extent_space:%d", this, context, rest_measure, rest_extent, rest_extent_space);
+      this._terminate = true;
 
       // delegate cache and child to original parent.
       this._parent._cachedElements = this._child._cachedElements;
@@ -14600,22 +14561,21 @@ var FloatGenerator = (function(){
     */
     // if there is space in block-flow direction, yield rest space and wrap tfloated-set and rest-space as one.
     var space = this._yieldFloatSpace(context, rest_measure, rest_extent_space);
-    return this._wrapBlock(group_set, space);
+    return this._wrapBlocks([group_set, space]);
   };
   
   FloatGenerator.prototype._sortFloatRest = function(floated, rest){
     var floated_elements = floated.getElements();
-    return floated.isFloatStart()? floated_elements.concat(rest) : [rest].concat(floated_elements);
+    var elements = floated.isFloatStart()? floated_elements.concat(rest) : [rest].concat(floated_elements);
+    return List.filter(elements, function(element){ return element !== null; });
   };
 
-  FloatGenerator.prototype._wrapBlock = function(block1, block2){
+  FloatGenerator.prototype._wrapBlocks = function(blocks){
     var flow = this.style.flow;
-    var measure = block1.getLayoutMeasure(flow); // block2 has same measure
-    var extent = block1.getLayoutExtent(flow) + (block2? block2.getLayoutExtent(flow) : 0);
-    var elements = block2? [block1, block2] : [block1];
-    var break_after = List.exists(elements, function(element){
-      return (element && element.breakAfter)? true : false;
-    });
+    var elements = List.filter(blocks, function(block){ return block !== null; });
+    var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
+    var extent = List.sum(elements, 0, function(element){ element.getLayoutExtent(flow); });
+    var break_after = List.exists(elements, function(element){ return element.breakAfter; });
 
     // wrapping block always float to start direction
     return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
@@ -14628,10 +14588,8 @@ var FloatGenerator = (function(){
   FloatGenerator.prototype._wrapFloat = function(floated, rest, measure){
     var flow = this.style.flow;
     var extent = floated.getExtent(flow);
-    var elements = this._sortFloatRest(floated, rest);
-    var break_after = List.exists(elements, function(element){
-      return (element && element.breakAfter)? true : false;
-    });
+    var elements = this._sortFloatRest(floated, rest || null);
+    var break_after = List.exists(elements, function(element){ return element.breakAfter; });
     return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
       elements:elements,
       breakAfter:break_after,
@@ -14640,6 +14598,7 @@ var FloatGenerator = (function(){
   };
   
   FloatGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
+    //console.log("yieldFloatSpace(c = %o, m = %d, e = %d)", context, measure, extent);
     this._child.style.forceUpdateContextSize(measure, extent);
     return this.yieldChildLayout();
   };
@@ -15329,10 +15288,8 @@ var LayoutEvaluator = (function(){
       }
     },
     _evaluate : function(tree, opt){
-      opt = opt || {};
-      var elements = List.filter(tree.elements, function(element){ return element !== null; });
-      var root = this._evalTreeRoot(tree, opt);
-      return root.innerHTML? root : List.fold(elements, root, function(ret, child){
+      var root = this._evalTreeRoot(tree, opt || {});
+      return root.innerHTML? root : List.fold(tree.elements, root, function(ret, child){
 	this._appendChild(root, this._evalTreeChild(tree, child));
 	if(child.withBr){ // annotated to add extra br element
 	  this._appendChild(root, document.createElement("br"));
