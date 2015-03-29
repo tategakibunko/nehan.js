@@ -124,30 +124,17 @@ var Box = (function(){
        @return {Object}
     */
     getCssBlock : function(){
-      var css = {};
-      Args.copy(css, this.style.getCssBlock()); // base style
-      Args.copy(css, this.size.getCss(this.style.flow)); // content size
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
-      Args.copy(css, this.css); // some dynamic values
-      return css;
+      return this.style.getCssBlock(this);
     },
     /**
        @memberof Nehan.Box
        @return {Object}
     */
     getCssInline : function(){
-      var css = this.isTextBlock()? this.style.getCssTextBlock() : this.style.getCssLineBlock();
-      Args.copy(css, this.size.getCss(this.style.flow)); // layout size
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
+      if(this.isTextBlock()){
+	return this.style.getCssTextBlock(this);
       }
-      Args.copy(css, this.css); // some dynamic values
-      if(this.style.isRootLine() && this.style.isTextHorizontal()){
-	css["line-height"] = this.maxExtent + "px";
-      }
-      return css;
+      return this.style.getCssLineBlock(this);
     },
     /**
        @memberof Nehan.Box
@@ -160,6 +147,14 @@ var Box = (function(){
       }
       css.display = "inline-block";
       return css;
+    },
+    /**
+       @memberof Nehan.Box
+       @param line {Nehan.Box}
+       @return {Object}
+    */
+    getCssHoriInlineImage : function(line){
+      return this.style.getCssHoriInlineImage(line, this);
     },
     /**
        @memberof Nehan.Box

@@ -383,7 +383,7 @@ var Style = {
   "legend":{
     "display":"block",
     "font-weight":"bold",
-    "line-height":1.5
+    "line-height":"1.5em"
   },
   "li":{
     "display":"list-item",
@@ -484,7 +484,7 @@ var Style = {
   },
   "rt":{
     "font-size":"0.5em",
-    "line-height":1.0,
+    "line-height":"1.0em",
     "display":"inline"
   },
   //-------------------------------------------------------
@@ -589,7 +589,7 @@ var Style = {
   },
   "th":{
     "display":"table-cell",
-    "line-height":1.4,
+    "line-height":"1.4em",
     "border-width":{
       "end":"1px"
     },
@@ -927,7 +927,7 @@ var Style = {
     "measure":"1em",
     "extent":"1em",
     "float":"start",
-    "line-height":1.0,
+    "line-height":"1.0em",
     "font-size":"4em",
     // set 'line-height:1em' to inline css if horizotal mode.
     "onload":function(context){

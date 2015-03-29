@@ -15,12 +15,6 @@ var VertEvaluator = (function(){
     return this._evaluate(tree);
   };
 
-  VertEvaluator.prototype._evalInlineImage = function(line, image){
-    return this._evalTreeRoot(image, {
-      name:"img"
-    });
-  };
-
   VertEvaluator.prototype._evalRuby = function(line, ruby){
     return [
       this._evalRb(line, ruby),

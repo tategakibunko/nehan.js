@@ -15,6 +15,13 @@ var HoriEvaluator = (function(){
     return this._evaluate(tree, {name:"span"});
   };
 
+  HoriEvaluator.prototype._evalInlineImage = function(line, image){
+    return this._evalTreeRoot(image, {
+      name:"img",
+      css:image.getCssHoriInlineImage(line)
+    });
+  };
+
   HoriEvaluator.prototype._evalRuby = function(line, ruby){
     return [
       this._evalRt(line, ruby),

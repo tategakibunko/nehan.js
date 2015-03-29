@@ -1267,9 +1267,10 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @param block {Nehan.Box}
        @return {Object}
     */
-    getCssBlock : function(){
+    getCssBlock : function(block){
       // notice that box-size, box-edge is box local variable,<br>
       // so style of box-size(content-size) and edge-size are generated at Box::getCssBlock
       var css = {};
@@ -1296,17 +1297,26 @@ var StyleContext = (function(){
 	css["z-index"] = this.zIndex;
       }
       this.unmanagedCss.copyValuesTo(css);
-      //css.overflow = "hidden"; // to avoid margin collapsing
+      Args.copy(css, block.size.getCss(this.flow)); // content size
+      if(block.edge){
+	Args.copy(css, block.edge.getCss());
+      }
+      Args.copy(css, block.css); // some dynamic values
       return css;
     },
     /**
        @memberof Nehan.StyleContext
+       @param line {Nehan.Box}
        @return {Object}
     */
-    getCssLineBlock : function(){
+    getCssLineBlock : function(line){
       // notice that line-size, line-edge is box local variable,
       // so style of line-size(content-size) and edge-size are generated at Box::getBoxCss
       var css = {};
+      Args.copy(css, line.size.getCss(this.flow));
+      if(line.edge){
+	Args.copy(css, line.edge.getCss());
+      }
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
       }
@@ -1318,18 +1328,26 @@ var StyleContext = (function(){
       }
       if(this.isTextVertical()){
 	css["display"] = "block";
+      } else if(this.isRootLine()){
+	css["line-height"] = line.maxExtent + "px";
       }
       this.unmanagedCss.copyValuesTo(css);
+      Args.copy(css, line.css);
       return css;
     },
     /**
        @memberof Nehan.StyleContext
+       @param line {Nehan.Box}
        @return {Object}
     */
-    getCssTextBlock : function(){
+    getCssTextBlock : function(line){
       // notice that line-size, line-edge is box local variable,
       // so style of line-size(content-size) and edge-size are generated at Box::getCssInline
       var css = {};
+      Args.copy(css, line.size.getCss(this.flow));
+      if(line.edge){
+	Args.copy(css, line.edge.getCss());
+      }
       if(this.isTextVertical()){
 	css["display"] = "block";
 	css["line-height"] = "1em";
@@ -1338,11 +1356,12 @@ var StyleContext = (function(){
 	}
       } else {
 	Args.copy(css, this.flow.getCss());
+	css["line-height"] = line.maxFontSize + "px";
 
 	// enable line-height only when horizontal mode.
 	// this logic is required for drop-caps of horizontal mode.
 	// TODO: more simple solution.
-	var line_height = this.getCssAttr("line-height");
+	var line_height = this.getCssAttr("line-height")
 	if(line_height){
 	  css["line-height"] = this._computeUnitSize(line_height, this.font.size) + "px";
 	}
@@ -1351,7 +1370,17 @@ var StyleContext = (function(){
 	}
       }
       this.unmanagedCss.copyValuesTo(css);
+      Args.copy(css, line.css);
       return css;
+    },
+    /**
+       @memberof Nehan.StyleContext
+       @param line {Nehan.Box}
+       @param image {Nehan.Box}
+       @return {Object}
+    */
+    getCssHoriInlineImage : function(line, image){
+      return this.flow.getCss();
     },
     _computeContentMeasure : function(outer_measure){
       switch(this.boxSizing){

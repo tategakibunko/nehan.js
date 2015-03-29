@@ -1128,7 +1128,7 @@ var Style = {
   "legend":{
     "display":"block",
     "font-weight":"bold",
-    "line-height":1.5
+    "line-height":"1.5em"
   },
   "li":{
     "display":"list-item",
@@ -1229,7 +1229,7 @@ var Style = {
   },
   "rt":{
     "font-size":"0.5em",
-    "line-height":1.0,
+    "line-height":"1.0em",
     "display":"inline"
   },
   //-------------------------------------------------------
@@ -1334,7 +1334,7 @@ var Style = {
   },
   "th":{
     "display":"table-cell",
-    "line-height":1.4,
+    "line-height":"1.4em",
     "border-width":{
       "end":"1px"
     },
@@ -1672,7 +1672,7 @@ var Style = {
     "measure":"1em",
     "extent":"1em",
     "float":"start",
-    "line-height":1.0,
+    "line-height":"1.0em",
     "font-size":"4em",
     // set 'line-height:1em' to inline css if horizotal mode.
     "onload":function(context){
@@ -8196,30 +8196,17 @@ var Box = (function(){
        @return {Object}
     */
     getCssBlock : function(){
-      var css = {};
-      Args.copy(css, this.style.getCssBlock()); // base style
-      Args.copy(css, this.size.getCss(this.style.flow)); // content size
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
-      }
-      Args.copy(css, this.css); // some dynamic values
-      return css;
+      return this.style.getCssBlock(this);
     },
     /**
        @memberof Nehan.Box
        @return {Object}
     */
     getCssInline : function(){
-      var css = this.isTextBlock()? this.style.getCssTextBlock() : this.style.getCssLineBlock();
-      Args.copy(css, this.size.getCss(this.style.flow)); // layout size
-      if(this.edge){
-	Args.copy(css, this.edge.getCss());
+      if(this.isTextBlock()){
+	return this.style.getCssTextBlock(this);
       }
-      Args.copy(css, this.css); // some dynamic values
-      if(this.style.isRootLine() && this.style.isTextHorizontal()){
-	css["line-height"] = this.maxExtent + "px";
-      }
-      return css;
+      return this.style.getCssLineBlock(this);
     },
     /**
        @memberof Nehan.Box
@@ -8232,6 +8219,14 @@ var Box = (function(){
       }
       css.display = "inline-block";
       return css;
+    },
+    /**
+       @memberof Nehan.Box
+       @param line {Nehan.Box}
+       @return {Object}
+    */
+    getCssHoriInlineImage : function(line){
+      return this.style.getCssHoriInlineImage(line, this);
     },
     /**
        @memberof Nehan.Box
@@ -12071,9 +12066,10 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @param block {Nehan.Box}
        @return {Object}
     */
-    getCssBlock : function(){
+    getCssBlock : function(block){
       // notice that box-size, box-edge is box local variable,<br>
       // so style of box-size(content-size) and edge-size are generated at Box::getCssBlock
       var css = {};
@@ -12100,17 +12096,26 @@ var StyleContext = (function(){
 	css["z-index"] = this.zIndex;
       }
       this.unmanagedCss.copyValuesTo(css);
-      //css.overflow = "hidden"; // to avoid margin collapsing
+      Args.copy(css, block.size.getCss(this.flow)); // content size
+      if(block.edge){
+	Args.copy(css, block.edge.getCss());
+      }
+      Args.copy(css, block.css); // some dynamic values
       return css;
     },
     /**
        @memberof Nehan.StyleContext
+       @param line {Nehan.Box}
        @return {Object}
     */
-    getCssLineBlock : function(){
+    getCssLineBlock : function(line){
       // notice that line-size, line-edge is box local variable,
       // so style of line-size(content-size) and edge-size are generated at Box::getBoxCss
       var css = {};
+      Args.copy(css, line.size.getCss(this.flow));
+      if(line.edge){
+	Args.copy(css, line.edge.getCss());
+      }
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
       }
@@ -12122,18 +12127,26 @@ var StyleContext = (function(){
       }
       if(this.isTextVertical()){
 	css["display"] = "block";
+      } else if(this.isRootLine()){
+	css["line-height"] = line.maxExtent + "px";
       }
       this.unmanagedCss.copyValuesTo(css);
+      Args.copy(css, line.css);
       return css;
     },
     /**
        @memberof Nehan.StyleContext
+       @param line {Nehan.Box}
        @return {Object}
     */
-    getCssTextBlock : function(){
+    getCssTextBlock : function(line){
       // notice that line-size, line-edge is box local variable,
       // so style of line-size(content-size) and edge-size are generated at Box::getCssInline
       var css = {};
+      Args.copy(css, line.size.getCss(this.flow));
+      if(line.edge){
+	Args.copy(css, line.edge.getCss());
+      }
       if(this.isTextVertical()){
 	css["display"] = "block";
 	css["line-height"] = "1em";
@@ -12141,13 +12154,13 @@ var StyleContext = (function(){
 	  css["letter-spacing"] = "-0.001em";
 	}
       } else {
-	//css["css-float"] = this.flow.isTextLeftToRight()? "left" : "right";
 	Args.copy(css, this.flow.getCss());
+	css["line-height"] = line.maxFontSize + "px";
 
 	// enable line-height only when horizontal mode.
 	// this logic is required for drop-caps of horizontal mode.
 	// TODO: more simple solution.
-	var line_height = this.getCssAttr("line-height");
+	var line_height = this.getCssAttr("line-height")
 	if(line_height){
 	  css["line-height"] = this._computeUnitSize(line_height, this.font.size) + "px";
 	}
@@ -12156,7 +12169,17 @@ var StyleContext = (function(){
 	}
       }
       this.unmanagedCss.copyValuesTo(css);
+      Args.copy(css, line.css);
       return css;
+    },
+    /**
+       @memberof Nehan.StyleContext
+       @param line {Nehan.Box}
+       @param image {Nehan.Box}
+       @return {Object}
+    */
+    getCssHoriInlineImage : function(line, image){
+      return this.flow.getCss();
     },
     _computeContentMeasure : function(outer_measure){
       switch(this.boxSizing){
@@ -15405,12 +15428,6 @@ var VertEvaluator = (function(){
     return this._evaluate(tree);
   };
 
-  VertEvaluator.prototype._evalInlineImage = function(line, image){
-    return this._evalTreeRoot(image, {
-      name:"img"
-    });
-  };
-
   VertEvaluator.prototype._evalRuby = function(line, ruby){
     return [
       this._evalRb(line, ruby),
@@ -15667,6 +15684,13 @@ var HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._evalInlineChildTree = function(tree){
     return this._evaluate(tree, {name:"span"});
+  };
+
+  HoriEvaluator.prototype._evalInlineImage = function(line, image){
+    return this._evalTreeRoot(image, {
+      name:"img",
+      css:image.getCssHoriInlineImage(line)
+    });
   };
 
   HoriEvaluator.prototype._evalRuby = function(line, ruby){
