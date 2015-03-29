@@ -28,13 +28,6 @@ var Box = (function(){
        @memberof Nehan.Box
        @return {boolean}
     */
-    isAnonymousLine : function(){
-      return this.display === "inline" && this.style.isRootLine();
-    },
-    /**
-       @memberof Nehan.Box
-       @return {boolean}
-    */
     isLine : function(){
       return this.type === "line-block";
     },
@@ -49,7 +42,7 @@ var Box = (function(){
        @memberof Nehan.Box
        @return {boolean}
     */
-    isRootBlock : function(){
+    isRootLine : function(){
       return this.isRootLine || false;
     },
     /**
@@ -91,8 +84,8 @@ var Box = (function(){
        @return {Function}
     */
     getOnCreate : function(){
-      // on create of anonymous line is already captured by parent element.
-      if(this.isAnonymousLine()){
+      // on create of text-block is already captured by parent line
+      if(this.isTextBlock()){
 	return null;
       }
       return this.style.getCssAttr("oncreate");
@@ -102,8 +95,8 @@ var Box = (function(){
        @return {Object}
     */
     getAttrs : function(){
-      // attributes of anonymous line is already captured by parent element.
-      if(this.isAnonymousLine()){
+      // attributes of text-block is already captured by parent line
+      if(this.isTextBlock()){
 	return null;
       }
       return this.style.markup.attrs;
