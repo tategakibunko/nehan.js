@@ -112,7 +112,7 @@ var Box = (function(){
        @memberof Nehan.Box
        @return {Object}
     */
-    getCssRoot : function(){
+    getBoxCss : function(){
       switch(this.display){
       case "block": return this.getCssBlock();
       case "inline": return this.getCssInline();
@@ -138,18 +138,12 @@ var Box = (function(){
        @return {Object}
     */
     getCssInline : function(){
-      var css = {};
-      Args.copy(css, this.style.getCssInline()); // base style
+      var css = this.isTextBlock()? this.style.getCssTextBlock() : this.style.getCssLineBlock();
       Args.copy(css, this.size.getCss(this.style.flow)); // layout size
       if(this.edge){
 	Args.copy(css, this.edge.getCss());
       }
       Args.copy(css, this.css); // some dynamic values
-      if(this.isTextBlock() && this.style.isTextVertical()){
-	delete css["margin-left"];
-	delete css["margin-right"];
-	delete css["css-float"];
-      }
       return css;
     },
     /**

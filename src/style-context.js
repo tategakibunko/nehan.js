@@ -35,7 +35,7 @@ var StyleContext = (function(){
     "height",
     "interactive", // flag
     "letter-spacing",
-    "line-rate",
+    "line-height",
     "list-style-type",
     "list-style-position",
     "list-style-image",
@@ -150,9 +150,9 @@ var StyleContext = (function(){
       if(edge){
 	this.edge = edge;
       }
-      var line_rate = this._loadLineRate();
-      if(line_rate){
-	this.lineRate = line_rate;
+      var line_height = this._loadLineHeight();
+      if(line_height){
+	this.lineHeight = line_height;
       }
       var text_align = this._loadTextAlign();
       if(text_align){
@@ -529,13 +529,11 @@ var StyleContext = (function(){
       line.content = content;
       line.isRootLine = is_root_line;
 
-      /*
       // edge of top level line is disabled.
       // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
       // anonymous line block('aaa' and 'ccc') is already edged by <p> in block level.
       // so if line is anonymous, edge must be ignored.
       line.edge = (this.edge && !is_root_line)? this.edge : null;
-      */
 
       // backup other line data. mainly required to restore inline-context.
       if(is_root_line){
@@ -554,7 +552,7 @@ var StyleContext = (function(){
 	if(this.textAlign && !this.textAlign.isStart()){
 	  this._setTextAlign(line, this.textAlign);
 	}
-	var edge_size = Math.floor(line.maxFontSize * this.getLineRate()) - line.maxExtent;
+	var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
 	if(edge_size > 0 && line.lineNo > 0){
 	  line.edge = new BoxEdge();
 	  line.edge.padding.setBefore(this.flow, edge_size);
@@ -1198,8 +1196,8 @@ var StyleContext = (function(){
        @memberof Nehan.StyleContext
        @return {float | int}
     */
-    getLineRate : function(){
-      return this.lineRate || Display.lineRate || 2;
+    getLineHeight : function(){
+      return this.lineHeight || Display.lineHeight || 2;
     },
     /**
        @memberof Nehan.StyleContext
@@ -1222,7 +1220,7 @@ var StyleContext = (function(){
        @return {int}
     */
     getAutoLineExtent : function(){
-      return Math.floor(this.getFontSize() * this.getLineRate());
+      return Math.floor(this.getFontSize() * this.getLineHeight());
     },
     /**
        @memberof Nehan.StyleContext
@@ -1306,11 +1304,10 @@ var StyleContext = (function(){
        @memberof Nehan.StyleContext
        @return {Object}
     */
-    getCssInline : function(){
+    getCssLineBlock : function(){
       // notice that line-size, line-edge is box local variable,
-      // so style of line-size(content-size) and edge-size are generated at Box::getCssInline
+      // so style of line-size(content-size) and edge-size are generated at Box::getBoxCss
       var css = {};
-      var markup_name = this.markup.getName();
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
       }
@@ -1320,6 +1317,20 @@ var StyleContext = (function(){
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
+      if(this.isTextVertical()){
+	css["display"] = "block";
+      }
+      this.unmanagedCss.copyValuesTo(css);
+      return css;
+    },
+    /**
+       @memberof Nehan.StyleContext
+       @return {Object}
+    */
+    getCssTextBlock : function(){
+      // notice that line-size, line-edge is box local variable,
+      // so style of line-size(content-size) and edge-size are generated at Box::getCssInline
+      var css = {};
       if(this.isTextVertical()){
 	css["display"] = "block";
 	css["line-height"] = "1em";
@@ -1334,7 +1345,7 @@ var StyleContext = (function(){
 	if(line_height){
 	  css["line-height"] = this._computeUnitSize(line_height, this.font.size) + "px";
 	}
-	if(markup_name === "ruby" || this.isTextEmphaEnable()){
+	if(this.getMarkupName() === "ruby" || this.isTextEmphaEnable()){
 	  css["display"] = "inline-block";
 	}
       }
@@ -1417,12 +1428,18 @@ var StyleContext = (function(){
 	Args.copy(line.css, padding.getCss());
       }
     },
-    _setVertBaseline : function(root_line){
+    // argument 'baseline' is not used yet.
+    // baseline: central | alphabetic
+    // ----------------------------------------------------------------
+    // In nehan.js, 'central' is used when vertical writing mode.
+    // see http://dev.w3.org/csswg/css-writing-modes-3/#text-baselines
+    _setVertBaseline : function(root_line, baseline){
       List.iter(root_line.elements, function(element){
 	var font_size = element.maxFontSize;
 	var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
 	if (from_after > 0){
-	  var edge = element.style.edge? element.style.edge.clone() : new BoxEdge();
+	  var edge = element.edge || null;
+	  edge = edge? edge.clone() : new BoxEdge();
 	  edge.padding.setAfter(this.flow, from_after); // set offset to padding
 	  element.size.width = (root_line.maxExtent - from_after);
 	  
@@ -1501,6 +1518,8 @@ var StyleContext = (function(){
     _loadDisplay : function(){
       switch(this.getMarkupName()){
       case "first-line":
+      case "li-marker":
+      case "li-body":
 	return "block";
       default:
 	return this.getCssAttr("display", "inline");
@@ -1652,12 +1671,12 @@ var StyleContext = (function(){
       }
       return border;
     },
-    _loadLineRate : function(){
-      var value = this.getCssAttr("line-rate", "inherit");
-      if(value === "inherit" && this.parent && this.parent.lineRate){
-	return this.parent.lineRate;
+    _loadLineHeight : function(){
+      var value = this.getCssAttr("line-height", "inherit");
+      if(value === "inherit" && this.parent && this.parent.lineHeight){
+	return this.parent.lineHeight;
       }
-      return parseFloat(value || Display.lineRate);
+      return parseFloat(value || Display.lineHeight);
     },
     _loadTextAlign : function(){
       var value = this.getCssAttr("text-align", "inherit");

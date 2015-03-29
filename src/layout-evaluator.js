@@ -117,7 +117,7 @@ var LayoutEvaluator = (function(){
 	content:(opt.content || tree.getContent()),
 	rootBlockId:tree.rootBlockId,
 	blockId:tree.blockId,
-	css:(opt.css || tree.getCssRoot()),
+	css:(opt.css || tree.getBoxCss()),
 	styleContext:tree.style
       });
     },

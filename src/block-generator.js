@@ -56,13 +56,11 @@ var BlockGenerator = (function(){
   BlockGenerator.prototype.popCache = function(context){
     var cache = LayoutGenerator.prototype.popCache.call(this);
 
-    // restore cached line with correct line no
     if(cache && cache.display === "inline"){
-      //console.info("block gen pop cached line = %o(%s), gen = %o, is parent style is clone = %o", cache, cache.toString(), this, (this.style.parent? this.style.parent.isClone() : "false"));
-      if(cache.edge && cache.edge.padding && context.getBlockLineNo() === 0){
+      // restore cached line with correct line no
+      if(context.getBlockLineNo() === 0){
 	cache.lineNo = 0;
-	cache.edge.padding.clearBefore(this.style.flow);
-	context.incBlockLineNo();
+	context.incBlockLineNo(); // cached line is next first line, so increment line no in block level context.
       }
       // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
       // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
@@ -78,7 +76,6 @@ var BlockGenerator = (function(){
 	context2.inline.charCount = cache.charCount || 0;
 	var line = this._child._yield(context2);
 	//console.log("line:%o(line no = %d)", line, line.lineNo);
-	context.incBlockLineNo(); // cached line is first line, so increment line no.
 	return line;
       }
     }

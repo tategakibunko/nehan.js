@@ -16,10 +16,8 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalInlineImage = function(line, image){
-    image.withBr = true;
     return this._evalTreeRoot(image, {
-      name:"img",
-      css:image.getCssInline()
+      name:"img"
     });
   };
 

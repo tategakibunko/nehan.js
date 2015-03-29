@@ -63,18 +63,7 @@
  5. special properties in nehan.js
   ----------------------------------
 
-  (5.1) line-rate:(float)
-
-  In normal html, size of 'line-height:1.0em' is determined by
-  font size of 'parent' block.
-
-  In contrast, property line-rate is determined by max font size of
-  'current line'.
-
-  Assume that font-size of parent block is 16px, and max font size of
-  current line is 32px, line-height:1.0em is 16px, but line-rate:1.0em is 32px.
-
-  (5.2) box-sizing:[content-box | border-box | margin-box(default)]
+  (5.1) box-sizing:[content-box | border-box | margin-box(default)]
 
   In box-sizing, 'margin-box' is special value in nehan.js, and is box-sizing default value.
   In margin-box, even if margin is included in box-size.
@@ -84,7 +73,7 @@
   So if you represent margin/border/padding(called in edge in nehan.js),
   the only way is 'eliminating content space'.
 
-  (5.3) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
+  (5.2) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
 
   This property represent document-mode in nehan.js.
 
@@ -230,7 +219,7 @@ var Style = {
     "display":"block",
     "font-weight":"bold",
     "margin":{
-      "after":"0.2em"
+      "after":"1em"
     }
   },
   //-------------------------------------------------------
@@ -394,19 +383,13 @@ var Style = {
   "legend":{
     "display":"block",
     "font-weight":"bold",
-    "line-rate":1.5
+    "line-height":1.5
   },
   "li":{
     "display":"list-item",
     "margin":{
       "after":"0.6em"
     }
-  },
-  "li-marker":{
-    "display":"block"
-  },
-  "li-body":{
-    "display":"block"
   },
   "link":{
     "meta":true
@@ -457,16 +440,6 @@ var Style = {
       "before":"1em"
     }
   },
-  "ol ol":{
-    "margin":{
-      "before":"0em"
-    }
-  },
-  "ol ul":{
-    "margin":{
-      "before":"0em"
-    }
-  },
   "optgroup":{
   },
   "option":{
@@ -511,7 +484,7 @@ var Style = {
   },
   "rt":{
     "font-size":"0.5em",
-    "line-rate":1.0,
+    "line-height":1.0,
     "display":"inline"
   },
   //-------------------------------------------------------
@@ -616,7 +589,7 @@ var Style = {
   },
   "th":{
     "display":"table-cell",
-    "line-rate":1.4,
+    "line-height":1.4,
     "border-width":{
       "end":"1px"
     },
@@ -668,16 +641,6 @@ var Style = {
     "list-style-position":"outside",
     "margin":{
       "before":"1em"
-    }
-  },
-  "ul ul":{
-    "margin":{
-      "before":"0em"
-    }
-  },
-  "ul ol":{
-    "margin":{
-      "before":"0em"
     }
   },
   //-------------------------------------------------------
@@ -964,7 +927,7 @@ var Style = {
     "measure":"1em",
     "extent":"1em",
     "float":"start",
-    "line-rate":1.0,
+    "line-height":1.0,
     "font-size":"4em",
     // set 'line-height:1em' to inline css if horizotal mode.
     "onload":function(context){
