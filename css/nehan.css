@@ -62,7 +62,11 @@
 }
 .nehan-block,
 .nehan-inline,
+.nehan-text-block,
 .nehan-img-char{
-  -webkit-box-siging:content-box !important;
+  -o-box-sizing:content-box !important;
+  -ms-box-sizing:content-box !important;
+  -moz-box-sizing:content-box !important;
+  -webkit-box-sizing:content-box !important;
   box-sizing:content-box !important;
 }
