@@ -13997,7 +13997,7 @@ var TextGenerator = (function(){
     if(!this.hasNext()){
       this._onComplete(context, line);
     }
-    console.log(">> texts:[%s], context = %o, stream pos:%d, stream:%o", line.toString(), context, this.stream.getPos(), this.stream);
+    //console.log(">> texts:[%s], context = %o, stream pos:%d, stream:%o", line.toString(), context, this.stream.getPos(), this.stream);
     return line;
   };
 
@@ -14119,8 +14119,6 @@ var TextGenerator = (function(){
     // but if this word size is less than max_measure and 'word-berak' is not 'break-all',
     // just break line and show it at the head of next line.
     if(advance <= context.getInlineMaxMeasure() && !this.style.isWordBreakAll()){
-      //this.stream.prev();
-      //return null;
       return token; // overflow and cached
     }
     // at this point, situations are

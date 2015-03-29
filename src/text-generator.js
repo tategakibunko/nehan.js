@@ -84,7 +84,7 @@ var TextGenerator = (function(){
     if(!this.hasNext()){
       this._onComplete(context, line);
     }
-    console.log(">> texts:[%s], context = %o, stream pos:%d, stream:%o", line.toString(), context, this.stream.getPos(), this.stream);
+    //console.log(">> texts:[%s], context = %o, stream pos:%d, stream:%o", line.toString(), context, this.stream.getPos(), this.stream);
     return line;
   };
 
