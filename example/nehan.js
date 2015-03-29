@@ -10822,7 +10822,7 @@ var StyleContext = (function(){
     "height",
     "interactive", // flag
     "letter-spacing",
-    "line-height",
+    //"line-height",
     "list-style-type",
     "list-style-position",
     "list-style-image",

@@ -61,6 +61,8 @@
   float:left;
 }
 .nehan-block,
+.nehan-inline,
 .nehan-img-char{
-  box-sizing:content-box;
+  -webkit-box-siging:content-box !important;
+  box-sizing:content-box !important;
 }
