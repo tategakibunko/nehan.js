@@ -23,7 +23,7 @@ var Char = (function(){
   var __small_kana = ["\u3041","\u3043","\u3045","\u3047","\u3049","\u3063","\u3083","\u3085","\u3087","\u308e","\u30a1","\u30a3","\u30a5","\u30a7","\u30a9","\u30f5","\u30f6","\u30c3","\u30e3","\u30e5","\u30e7","\u30ee"];
   var __head_ng = ["\uff09","\x5c","\x29","\u300d","\u3011","\u3015","\uff3d","\x5c","\x5d","\u3002","\u300f","\uff1e","\u3009","\u300b","\u3001","\uff0e","\x5c","\x2e","\x2c","\u201d","\u301f"];
   var __tail_ng = ["\uff08","\x5c","\x28","\u300c","\u3010","\uff3b","\u3014","\x5c","\x5b","\u300e","\uff1c","\u3008","\u300a","\u201c","\u301d"];
-  var __rex_digit = /[0-9]/;
+  var __rex_half_char = /[\w!\.\?\/:#;"',]/;
 
   Char.prototype = {
     /**
@@ -88,7 +88,7 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {Object}
     */
-    getCssVertSingleDigit : function(line){
+    getCssVertSingleHalfChar : function(line){
       var css = {};
       css["padding-left"] = "0.25em";
       return css;
@@ -517,8 +517,8 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {boolean}
      */
-    isSingleDigit : function(){
-      return this.data.length === 1 && __rex_digit.test(this.data);
+    isSingleHalfChar : function(){
+      return this.data.length === 1 && __rex_half_char.test(this.data);
     },
     /**
        @memberof Nehan.Char

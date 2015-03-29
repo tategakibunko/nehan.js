@@ -43,6 +43,15 @@ var Tcy = (function(){
       return css;
     },
     /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
+    getCssHoriSingleHalfChar : function(line){
+      var css = {};
+      css["text-align"] = "center";
+      return css;
+    },
+    /**
        @memberof Nehan.Tcy
        @return {boolean}
     */

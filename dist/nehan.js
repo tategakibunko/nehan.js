@@ -4531,7 +4531,7 @@ var Char = (function(){
   var __small_kana = ["\u3041","\u3043","\u3045","\u3047","\u3049","\u3063","\u3083","\u3085","\u3087","\u308e","\u30a1","\u30a3","\u30a5","\u30a7","\u30a9","\u30f5","\u30f6","\u30c3","\u30e3","\u30e5","\u30e7","\u30ee"];
   var __head_ng = ["\uff09","\x5c","\x29","\u300d","\u3011","\u3015","\uff3d","\x5c","\x5d","\u3002","\u300f","\uff1e","\u3009","\u300b","\u3001","\uff0e","\x5c","\x2e","\x2c","\u201d","\u301f"];
   var __tail_ng = ["\uff08","\x5c","\x28","\u300c","\u3010","\uff3b","\u3014","\x5c","\x5b","\u300e","\uff1c","\u3008","\u300a","\u201c","\u301d"];
-  var __rex_digit = /[0-9]/;
+  var __rex_half_char = /[\w!\.\?\/:#;"',]/;
 
   Char.prototype = {
     /**
@@ -4596,7 +4596,7 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {Object}
     */
-    getCssVertSingleDigit : function(line){
+    getCssVertSingleHalfChar : function(line){
       var css = {};
       css["padding-left"] = "0.25em";
       return css;
@@ -5025,8 +5025,8 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {boolean}
      */
-    isSingleDigit : function(){
-      return this.data.length === 1 && __rex_digit.test(this.data);
+    isSingleHalfChar : function(){
+      return this.data.length === 1 && __rex_half_char.test(this.data);
     },
     /**
        @memberof Nehan.Char
@@ -5314,6 +5314,15 @@ var Tcy = (function(){
        @return {Object}
     */
     getCssVert : function(line){
+      var css = {};
+      css["text-align"] = "center";
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
+    getCssHoriSingleHalfChar : function(line){
       var css = {};
       css["text-align"] = "center";
       return css;
@@ -8509,7 +8518,7 @@ var HtmlLexer = (function (){
 
 var TextLexer = (function (){
   var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
-  var __rex_word = /^[\w!\.\?\/\_:#;"',]+/;
+  var __rex_word = /^[\w!\.\?\/\:#;"',]+/;
   var __rex_char_ref = /^&[^;\s]+;/;
 
   /**
@@ -15563,8 +15572,8 @@ var VertEvaluator = (function(){
       return this._evalPaddingChar(line, chr);
     } else if(line.letterSpacing){
       return this._evalCharLetterSpacing(line, chr);
-    } else if(chr.isSingleDigit()){
-      return this._evalCharSingleDigit(line, chr);
+    } else if(chr.isSingleHalfChar()){
+      return this._evalCharSingleHalfChar(line, chr);
     }
     return this._evalCharWithBr(line, chr);
   };
@@ -15583,10 +15592,10 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype._evalCharSingleDigit = function(line, chr){
+  VertEvaluator.prototype._evalCharSingleHalfChar = function(line, chr){
     return this._createElement("div", {
       content:chr.getData(),
-      css:chr.getCssVertSingleDigit(line),
+      css:chr.getCssVertSingleHalfChar(line),
       styleContext:line.style
     });
   };
@@ -15736,7 +15745,17 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalTcy = function(line, tcy){
+    if(tcy.data.length === 1){
+      return this._evalTcySingleHalfChar(line, tcy);
+    } 
     return document.createTextNode(Html.unescape(tcy.data));
+  };
+
+  HoriEvaluator.prototype._evalTcySingleHalfChar = function(line, tcy){
+    return this._createElement("span", {
+      css:tcy.getCssHoriSingleHalfChar(line),
+      content:tcy.data
+    });
   };
 
   HoriEvaluator.prototype._evalChar = function(line, chr){

@@ -148,8 +148,8 @@ var VertEvaluator = (function(){
       return this._evalPaddingChar(line, chr);
     } else if(line.letterSpacing){
       return this._evalCharLetterSpacing(line, chr);
-    } else if(chr.isSingleDigit()){
-      return this._evalCharSingleDigit(line, chr);
+    } else if(chr.isSingleHalfChar()){
+      return this._evalCharSingleHalfChar(line, chr);
     }
     return this._evalCharWithBr(line, chr);
   };
@@ -168,10 +168,10 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype._evalCharSingleDigit = function(line, chr){
+  VertEvaluator.prototype._evalCharSingleHalfChar = function(line, chr){
     return this._createElement("div", {
       content:chr.getData(),
-      css:chr.getCssVertSingleDigit(line),
+      css:chr.getCssVertSingleHalfChar(line),
       styleContext:line.style
     });
   };
