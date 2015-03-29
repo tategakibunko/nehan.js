@@ -50,9 +50,16 @@ var HtmlLexer = (function (){
     this.src = this.buff;
   }
 
+  // discard close tags defined as single tag in LexingRule.
+  var __replace_single_close_tags = function(str){
+    return List.fold(LexingRule.getSingleTagNames(), str, function(ret, name){
+      return ret.replace(new RegExp("</" + name + ">", "g"), "");
+    });
+  };
+
   HtmlLexer.prototype = {
     _normalize : function(src){
-      return src
+      return __replace_single_close_tags(src)
 	.replace(/(<\/.+?>)(?:[\s]*)/gm, function(str, p1){
 	  return p1.toLowerCase();
 	}) // convert close tag to lower case(for innerHTML of IE)

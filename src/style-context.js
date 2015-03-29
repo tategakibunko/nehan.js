@@ -620,9 +620,6 @@ var StyleContext = (function(){
       if(this.contentMeasure <= 0 || this.contentExtent <= 0){
 	return true;
       }
-      if(this.markup.isCloseTag()){
-	return true;
-      }
       if(!this.markup.isSingleTag() && this.isBlock() && this.isMarkupEmpty() && this.getContent() === ""){
 	return true;
       }

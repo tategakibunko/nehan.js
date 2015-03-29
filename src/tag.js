@@ -206,13 +206,6 @@ var Tag = (function (){
        @memberof Nehan.Tag
        @return {boolean}
     */
-    isCloseTag : function(){
-      return this.name.charAt(0) === "/";
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
     isSingleTag : function(){
       return this._single || false;
     },

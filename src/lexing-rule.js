@@ -40,6 +40,13 @@ var LexingRule = (function(){
   return {
     /**
        @memberof Nehan.LexingRule
+       @return {Array.<String>}
+    */
+    getSingleTagNames : function(){
+      return __single_tag_names__;
+    },
+    /**
+       @memberof Nehan.LexingRule
        @param tag_name {String}
        @return {boolean}
        @example
