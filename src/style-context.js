@@ -420,7 +420,12 @@ var StyleContext = (function(){
       opt = opt || {};
       var elements = opt.elements || [];
       var measure = this.contentMeasure;
-      var extent = (this.parent && opt.extent && this.staticExtent === null)? opt.extent : this.contentExtent;
+      var extent = this.contentExtent;
+
+      // if elements under <body>, staticExtent or context extent(opt.extent) is available.
+      if(this.parent && opt.extent){
+	extent = this.staticExtent || opt.extent;
+      }
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
