@@ -11339,9 +11339,9 @@ var StyleContext = (function(){
 	  this._setTextAlign(line, this.textAlign);
 	}
 	var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
-	if(edge_size > 0 && line.lineNo > 0){
+	if(edge_size > 0){
 	  line.edge = new BoxEdge();
-	  line.edge.padding.setBefore(this.flow, edge_size);
+	  line.edge.padding.setBefore(this.flow, (line.lineNo > 0)? edge_size : Math.floor(edge_size / 2));
 	}
       }
       //console.log("line: %s:(%d,%d)", line.classes.join(", "), line.size.width, line.size.height);
