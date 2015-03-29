@@ -127,7 +127,7 @@ var Word = (function(){
     */
     setMetrics : function(flow, font){
       if(Config.useStrictWordMetrics && TextMetrics.isEnable()){
-	this.bodySize = TextMetrics.getMeasure(font, this.data);
+	this.bodySize = Math.round(TextMetrics.getMeasure(font, this.data));
 	return;
       }
       this.bodySize = Math.round(this.data.length * font.size * 0.5);

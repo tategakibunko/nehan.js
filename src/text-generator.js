@@ -24,6 +24,7 @@ var TextGenerator = (function(){
     }
     while(this.hasNext()){
       var element = this._getNext(context);
+      //console.log("element:%o", (element? (element.data || "?") : "null"));
       if(element === null){
 	break;
       }
@@ -37,6 +38,7 @@ var TextGenerator = (function(){
 	break;
       }
       this._addElement(context, element, measure);
+      //console.log("cur measure:%d", context.inline.curMeasure);
       if(!context.hasInlineSpaceFor(1)){
 	break;
       }
@@ -82,7 +84,7 @@ var TextGenerator = (function(){
     if(!this.hasNext()){
       this._onComplete(context, line);
     }
-    //console.log(">> texts:[%s], context = %o, cache list:%o, stream pos:%d, stream:%o", line.toString(), context, this._cachedElements, this.stream.getPos(), this.stream);
+    console.log(">> texts:[%s], context = %o, stream pos:%d, stream:%o", line.toString(), context, this.stream.getPos(), this.stream);
     return line;
   };
 
@@ -149,12 +151,12 @@ var TextGenerator = (function(){
     if(this.style.isPre()){
       return this._getText(context, token); // read as normal text
     }
-
     // if not pre, skip continuous white-spaces.
-    this.stream.skipUntil(Token.isNewLine);
+    //this.stream.skipUntil(Token.isNewLine);
 
-    // if white-space is new-line, ignore it.
     if(Token.isNewLine(token)){
+      // skip continuous white-spaces.
+      this.stream.skipUntil(Token.isNewLine);
       return this._getNext(context);
     }
     // if white-space is not new-line, use first one.
@@ -204,8 +206,7 @@ var TextGenerator = (function(){
     // but if this word size is less than max_measure and 'word-berak' is not 'break-all',
     // just break line and show it at the head of next line.
     if(advance <= context.getInlineMaxMeasure() && !this.style.isWordBreakAll()){
-      this.stream.prev();
-      return null;
+      return token; // overflow and cached
     }
     // at this point, situations are
     // 1. advance is larger than rest_measure and 'word-break' is set to 'break-all'.
