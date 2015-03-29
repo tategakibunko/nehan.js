@@ -1197,7 +1197,7 @@ var Style = {
   "p":{
     "display":"block",
     "margin":{
-      "after":"1.5em"
+      "after":"1em"
     }
   },
   "param":{
@@ -1673,11 +1673,7 @@ var Style = {
     "extent":"1em",
     "float":"start",
     "line-height":"1.0em",
-    "font-size":"4em",
-    // set 'line-height:1em' to inline css if horizotal mode.
-    "onload":function(context){
-      return context.isTextHorizontal()? {"line-height":"1em"} : {};
-    }
+    "font-size":"4em"
   },
   ".nehan-gap-start":{
     "margin":{
