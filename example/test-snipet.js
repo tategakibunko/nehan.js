@@ -13,20 +13,20 @@ var Snipet = {
   ].join(""),
 
   "float":[
-    "<p class='nehan-float-start' style='measure:100px'>",
+    "<p class='nehan-float-start' style='measure:100px; background:gray'>",
     "短い長さの前方コンテンツ",
     "</p>",
     
-    "<p class='nehan-float-start' style='measure:80px'>",
+    "<p class='nehan-float-start' style='measure:80px; background:red'>",
     "先頭に回り込まれる先頭に回り込まれる先頭に回り込まれる先頭に回り込まれる",
     "先頭に回り込まれる先頭に回り込まれる先頭に回り込まれる先頭に回り込まれる",
     "</p>",
 
-    "<p class='nehan-float-end' style='measure:60px'>",
+    "<p class='nehan-float-end' style='measure:60px; background:green'>",
     "一つ目の後方に回り込まれるコンテンツ",
     "</p>",
 
-    "<p class='nehan-float-end' style='measure:50px'>",
+    "<p class='nehan-float-end' style='measure:50px; background:yellow'>",
     "二つ目の後方コンテンツ",
     "</p>"
 
