@@ -5194,7 +5194,7 @@ var Word = (function(){
        @return {int}
     */
     getAdvance : function(flow, letter_spacing){
-      return this.bodySize + (letter_spacing || 0) * this.getLetterCount();
+      return Math.floor(this.bodySize + (letter_spacing || 0) * this.getLetterCount());
     },
     /**
        @memberof Nehan.Word
@@ -6301,22 +6301,6 @@ var BlockFlow = (function(){
   };
 
   /**
-     get css object
-
-     @memberof Nehan.BlockFlow
-     @method getCss
-     @return {Object}
-  */
-  BlockFlow.prototype.getCss = function(){
-    var css = {};
-    if(this.isHorizontal()){
-      // notice that "float" property is converted into "cssFloat" in evaluation time.
-      css["css-float"] = (this.dir === "lr")? "left" : "right";
-    }
-    return css;
-  };
-
-  /**
      get physical directional property of logical before.
 
      @memberof Nehan.BlockFlow
@@ -6460,11 +6444,45 @@ var BoxFlow = (function(){
     },
     /**
        @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isTextLeftToRight : function(){
+      return this.inflow.isLeftToRight();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isTextRightToLeft : function(){
+      return this.inflow.isRightToLeft();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isBlockLeftToRight : function(){
+      return this.blockflow.isLeftToRight();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isBlockRightToLeft : function(){
+      return this.blockflow.isRightToLeft();
+    },
+    /**
+       @memberof Nehan.BoxFlow
        @return {Object}
     */
     getCss : function(){
       var css = {};
-      Args.copy(css, this.blockflow.getCss());
+
+      // notice that "float" property is converted into "cssFloat" in evaluation time.
+      if(this.isTextVertical()){
+	css["css-float"] = this.isBlockLeftToRight()? "left" : "right";
+      } else {
+	css["css-float"] = this.isTextLeftToRight()? "left" : "right";
+      }
       return css;
     },
     /**
@@ -8198,6 +8216,9 @@ var Box = (function(){
 	Args.copy(css, this.edge.getCss());
       }
       Args.copy(css, this.css); // some dynamic values
+      if(this.style.isRootLine() && this.style.isTextHorizontal()){
+	css["line-height"] = this.maxExtent + "px";
+      }
       return css;
     },
     /**
@@ -11329,8 +11350,7 @@ var StyleContext = (function(){
 	if(this.isTextVertical()){
 	  this._setVertBaseline(line);
 	} else {
-	  // if horizontal line and no decorated elements exists, set line-height = exent.
-	  this.setCssAttr("line-height", max_extent + "px");
+	  this._setHoriBaseline(line);
 	}
 	if(this.textAlign && !this.textAlign.isStart()){
 	  this._setTextAlign(line, this.textAlign);
@@ -12121,6 +12141,9 @@ var StyleContext = (function(){
 	  css["letter-spacing"] = "-0.001em";
 	}
       } else {
+	//css["css-float"] = this.flow.isTextLeftToRight()? "left" : "right";
+	Args.copy(css, this.flow.getCss());
+
 	// enable line-height only when horizontal mode.
 	// this logic is required for drop-caps of horizontal mode.
 	// TODO: more simple solution.
@@ -12225,6 +12248,21 @@ var StyleContext = (function(){
 	  edge = edge? edge.clone() : new BoxEdge();
 	  edge.padding.setAfter(this.flow, from_after); // set offset to padding
 	  element.size.width = (root_line.maxExtent - from_after);
+	  
+	  // set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
+	  Args.copy(element.css, edge.getCss(this.flow));
+	}
+      }.bind(this));
+    },
+    _setHoriBaseline : function(root_line, baseline){
+      List.iter(root_line.elements, function(element){
+	var font_size = element.maxFontSize;
+	var from_after = root_line.maxExtent - element.maxExtent;
+	if (from_after > 0){
+	  var edge = element.edge || null;
+	  edge = edge? edge.clone() : new BoxEdge();
+	  edge.padding.setBefore(this.flow, from_after); // set offset to padding
+	  //element.size.width = (root_line.maxExtent - from_after);
 	  
 	  // set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
 	  Args.copy(element.css, edge.getCss(this.flow));

@@ -144,6 +144,9 @@ var Box = (function(){
 	Args.copy(css, this.edge.getCss());
       }
       Args.copy(css, this.css); // some dynamic values
+      if(this.style.isRootLine() && this.style.isTextHorizontal()){
+	css["line-height"] = this.maxExtent + "px";
+      }
       return css;
     },
     /**

@@ -46,11 +46,45 @@ var BoxFlow = (function(){
     },
     /**
        @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isTextLeftToRight : function(){
+      return this.inflow.isLeftToRight();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isTextRightToLeft : function(){
+      return this.inflow.isRightToLeft();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isBlockLeftToRight : function(){
+      return this.blockflow.isLeftToRight();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isBlockRightToLeft : function(){
+      return this.blockflow.isRightToLeft();
+    },
+    /**
+       @memberof Nehan.BoxFlow
        @return {Object}
     */
     getCss : function(){
       var css = {};
-      Args.copy(css, this.blockflow.getCss());
+
+      // notice that "float" property is converted into "cssFloat" in evaluation time.
+      if(this.isTextVertical()){
+	css["css-float"] = this.isBlockLeftToRight()? "left" : "right";
+      } else {
+	css["css-float"] = this.isTextLeftToRight()? "left" : "right";
+      }
       return css;
     },
     /**

@@ -35,22 +35,6 @@ var BlockFlow = (function(){
   };
 
   /**
-     get css object
-
-     @memberof Nehan.BlockFlow
-     @method getCss
-     @return {Object}
-  */
-  BlockFlow.prototype.getCss = function(){
-    var css = {};
-    if(this.isHorizontal()){
-      // notice that "float" property is converted into "cssFloat" in evaluation time.
-      css["css-float"] = (this.dir === "lr")? "left" : "right";
-    }
-    return css;
-  };
-
-  /**
      get physical directional property of logical before.
 
      @memberof Nehan.BlockFlow

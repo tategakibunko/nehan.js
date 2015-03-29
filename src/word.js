@@ -98,7 +98,7 @@ var Word = (function(){
        @return {int}
     */
     getAdvance : function(flow, letter_spacing){
-      return this.bodySize + (letter_spacing || 0) * this.getLetterCount();
+      return Math.floor(this.bodySize + (letter_spacing || 0) * this.getLetterCount());
     },
     /**
        @memberof Nehan.Word
