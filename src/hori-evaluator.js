@@ -11,8 +11,16 @@ var HoriEvaluator = (function(){
   }
   Class.extend(HoriEvaluator, LayoutEvaluator);
 
-  HoriEvaluator.prototype._evalInlineChildTree = function(tree){
-    return this._evaluate(tree, {name:"span"});
+  HoriEvaluator.prototype._evalInlineChildTree = function(line, tree){
+    return this._evaluate(tree, {
+      name:"span"
+    });
+  };
+
+  HoriEvaluator.prototype._evalLinkElement = function(line, link){
+    return this._evaluate(link, {
+      name:(link.isTextBlock()? "span" : "a")
+    });
   };
 
   HoriEvaluator.prototype._evalInlineImage = function(line, image){

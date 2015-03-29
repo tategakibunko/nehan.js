@@ -147,10 +147,13 @@ var LayoutEvaluator = (function(){
       case "img":
 	return this._evalInlineImage(parent, element);
       case "a":
-	return this._evalLink(element);
+	return this._evalLink(parent, element);
       default:
-	return this._evalInlineChildTree(element);
+	return this._evalInlineChildTree(parent, element);
       }
+    },
+    _evalInlineChildTree : function(parent, element){
+      return this._evaluate(element);
     },
     _evalInlineChildText : function(parent, element){
       if(parent.style.isTextEmphaEnable() && Token.isEmphaTargetable(element)){
@@ -165,7 +168,7 @@ var LayoutEvaluator = (function(){
       return this._evalImage(image);
     },
     // if link uri has anchor address, add page-no to dataset where the anchor is defined.
-    _evalLink : function(link){
+    _evalLink : function(line, link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
       var anchor_name = uri.getAnchorName();
       if(anchor_name){
@@ -173,7 +176,7 @@ var LayoutEvaluator = (function(){
 	link.classes.push("nehan-anchor-link");
 	link.style.markup.setAttr("data-page", page_no);
       }
-      return this._evaluate(link, {name:"a"});
+      return this._evalLinkElement(line, link)
     },
     _evalTextElement : function(line, text){
       switch(text._type){

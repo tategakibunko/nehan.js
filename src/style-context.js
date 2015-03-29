@@ -510,7 +510,7 @@ var StyleContext = (function(){
       var is_root_line = this.isRootLine();
       var elements = opt.elements || [];
       var max_font_size = opt.maxFontSize || this.getFontSize();
-      var max_extent = opt.maxExtent || 0;
+      var max_extent = opt.maxExtent || this.staticExtent || 0;
       var char_count = opt.charCount || 0;
       var content = opt.content || null;
       var measure = (this.parent && opt.measure && this.staticMeasure === null && !is_root_line)? opt.measure : this.contentMeasure;
@@ -1006,6 +1006,9 @@ var StyleContext = (function(){
     */
     getContent : function(){
       var content = this.markup.getContent();
+      if(this.isPre()){
+	content = content.replace(/\n/g, "<br>");
+      }
       var before = Selectors.getValuePe(this, "before");
       if(!Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;
@@ -1326,10 +1329,11 @@ var StyleContext = (function(){
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
+      if(this.isRootLine()){
+	css["line-height"] = this.getFontSize() + "px";
+      }
       if(this.isTextVertical()){
 	css["display"] = "block";
-      } else if(this.isRootLine()){
-	css["line-height"] = line.maxExtent + "px";
       }
       this.unmanagedCss.copyValuesTo(css);
       Args.copy(css, line.css);

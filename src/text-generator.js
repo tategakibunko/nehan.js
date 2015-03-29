@@ -147,9 +147,6 @@ var TextGenerator = (function(){
 
   TextGenerator.prototype._getWhiteSpace = function(context, token){
     if(this.style.isPre()){
-      if(Token.isNewLine(token)){
-	return null; // break line at new-line char.
-      }
       return this._getText(context, token); // read as normal text
     }
 

@@ -512,14 +512,13 @@ var Display = {
   */
   boldRate:0.5,
   /**
-    * standard line rate. note that extent size of line is specified by<br>
-    * [lineRate] * [max-font-size of current-line] in nehan.js.
+     standard line-height.
 
      @memberof Nehan.Display
      @type {Float}
      @default 2.0
   */
-  lineRate: 2.0,
+  lineHeight: 2.0,
   /**
      extra space rate for vertical word in vertical mode.
 
@@ -8383,12 +8382,12 @@ var HtmlLexer = (function (){
   HtmlLexer.prototype = {
     _normalize : function(src){
       return src
-	.replace(/(<\/.+?>)(?:[\s\n]*)/gm, function(str, p1){
+	.replace(/(<\/.+?>)(?:[\s]*)/gm, function(str, p1){
 	  return p1.toLowerCase();
 	}) // convert close tag to lower case(for innerHTML of IE)
 	//.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
-	.replace(/^[ \n]+/, "") // shorten head space
-	.replace(/\s+$/, "") // discard tail space
+	.replace(/^[\s]+/, "") // shorten head space
+	.replace(/[\s]+$/, "") // discard tail space
 	.replace(/\r/g, ""); // discard CR
     },
     /**
@@ -11305,7 +11304,7 @@ var StyleContext = (function(){
       var is_root_line = this.isRootLine();
       var elements = opt.elements || [];
       var max_font_size = opt.maxFontSize || this.getFontSize();
-      var max_extent = opt.maxExtent || 0;
+      var max_extent = opt.maxExtent || this.staticExtent || 0;
       var char_count = opt.charCount || 0;
       var content = opt.content || null;
       var measure = (this.parent && opt.measure && this.staticMeasure === null && !is_root_line)? opt.measure : this.contentMeasure;
@@ -11801,6 +11800,9 @@ var StyleContext = (function(){
     */
     getContent : function(){
       var content = this.markup.getContent();
+      if(this.isPre()){
+	content = content.replace(/\n/g, "<br>");
+      }
       var before = Selectors.getValuePe(this, "before");
       if(!Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;
@@ -12121,10 +12123,11 @@ var StyleContext = (function(){
       if(this.color){
 	Args.copy(css, this.color.getCss());
       }
+      if(this.isRootLine()){
+	css["line-height"] = this.getFontSize() + "px";
+      }
       if(this.isTextVertical()){
 	css["display"] = "block";
-      } else if(this.isRootLine()){
-	css["line-height"] = line.maxExtent + "px";
       }
       this.unmanagedCss.copyValuesTo(css);
       Args.copy(css, line.css);
@@ -14057,9 +14060,6 @@ var TextGenerator = (function(){
 
   TextGenerator.prototype._getWhiteSpace = function(context, token){
     if(this.style.isPre()){
-      if(Token.isNewLine(token)){
-	return null; // break line at new-line char.
-      }
       return this._getText(context, token); // read as normal text
     }
 
@@ -15358,10 +15358,13 @@ var LayoutEvaluator = (function(){
       case "img":
 	return this._evalInlineImage(parent, element);
       case "a":
-	return this._evalLink(element);
+	return this._evalLink(parent, element);
       default:
-	return this._evalInlineChildTree(element);
+	return this._evalInlineChildTree(parent, element);
       }
+    },
+    _evalInlineChildTree : function(parent, element){
+      return this._evaluate(element);
     },
     _evalInlineChildText : function(parent, element){
       if(parent.style.isTextEmphaEnable() && Token.isEmphaTargetable(element)){
@@ -15376,7 +15379,7 @@ var LayoutEvaluator = (function(){
       return this._evalImage(image);
     },
     // if link uri has anchor address, add page-no to dataset where the anchor is defined.
-    _evalLink : function(link){
+    _evalLink : function(line, link){
       var uri = new Uri(link.style.getMarkupAttr("href"));
       var anchor_name = uri.getAnchorName();
       if(anchor_name){
@@ -15384,7 +15387,7 @@ var LayoutEvaluator = (function(){
 	link.classes.push("nehan-anchor-link");
 	link.style.markup.setAttr("data-page", page_no);
       }
-      return this._evaluate(link, {name:"a"});
+      return this._evalLinkElement(line, link)
     },
     _evalTextElement : function(line, text){
       switch(text._type){
@@ -15420,8 +15423,10 @@ var VertEvaluator = (function(){
   }
   Class.extend(VertEvaluator, LayoutEvaluator);
 
-  VertEvaluator.prototype._evalInlineChildTree = function(tree){
-    return this._evaluate(tree);
+  VertEvaluator.prototype._evalLinkElement = function(line, link){
+    return this._evaluate(link, {
+      name:(link.isTextBlock()? "div" : "a")
+    });
   };
 
   VertEvaluator.prototype._evalRuby = function(line, ruby){
@@ -15678,8 +15683,16 @@ var HoriEvaluator = (function(){
   }
   Class.extend(HoriEvaluator, LayoutEvaluator);
 
-  HoriEvaluator.prototype._evalInlineChildTree = function(tree){
-    return this._evaluate(tree, {name:"span"});
+  HoriEvaluator.prototype._evalInlineChildTree = function(line, tree){
+    return this._evaluate(tree, {
+      name:"span"
+    });
+  };
+
+  HoriEvaluator.prototype._evalLinkElement = function(line, link){
+    return this._evaluate(link, {
+      name:(link.isTextBlock()? "span" : "a")
+    });
   };
 
   HoriEvaluator.prototype._evalInlineImage = function(line, image){

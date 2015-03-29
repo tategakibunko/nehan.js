@@ -114,14 +114,13 @@ var Display = {
   */
   boldRate:0.5,
   /**
-    * standard line rate. note that extent size of line is specified by<br>
-    * [lineRate] * [max-font-size of current-line] in nehan.js.
+     standard line-height.
 
      @memberof Nehan.Display
      @type {Float}
      @default 2.0
   */
-  lineRate: 2.0,
+  lineHeight: 2.0,
   /**
      extra space rate for vertical word in vertical mode.
 

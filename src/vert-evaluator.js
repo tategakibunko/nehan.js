@@ -11,8 +11,10 @@ var VertEvaluator = (function(){
   }
   Class.extend(VertEvaluator, LayoutEvaluator);
 
-  VertEvaluator.prototype._evalInlineChildTree = function(tree){
-    return this._evaluate(tree);
+  VertEvaluator.prototype._evalLinkElement = function(line, link){
+    return this._evaluate(link, {
+      name:(link.isTextBlock()? "div" : "a")
+    });
   };
 
   VertEvaluator.prototype._evalRuby = function(line, ruby){
