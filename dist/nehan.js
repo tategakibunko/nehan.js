@@ -14042,10 +14042,10 @@ var TextGenerator = (function(){
   TextGenerator.prototype._peekParentNextToken = function(){
     var root_line = this._parent;
     while(root_line && root_line instanceof InlineGenerator){
-      root_line = root_line._parent;
+      root_line = root_line._parent || null;
     }
     root_line = root_line || this._parent;
-    return root_line? (root_line.stream? root_line.stream.peek() : null) : null;
+    return (root_line && root_line.stream)? root_line.stream.peek() : null;
   };
 
   TextGenerator.prototype._justifyLine = function(context){
