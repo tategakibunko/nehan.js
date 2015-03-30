@@ -59,11 +59,12 @@ var HtmlLexer = (function (){
 
   HtmlLexer.prototype = {
     _normalize : function(src){
-      return __replace_single_close_tags(src)
-	.replace(/(<\/.+?>)(?:[\s]*)/gm, function(str, p1){
+      var src = src.replace(/(<\/.+?>)(?:[\s]*)/gm, function(str, p1){
 	  return p1.toLowerCase();
-	}) // convert close tag to lower case(for innerHTML of IE)
-	//.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
+      }); // convert close tag to lower case(for innerHTML of IE)
+      src = __replace_single_close_tags(src);
+      //src = src.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
+      return src
 	.replace(/^[\s]+/, "") // shorten head space
 	.replace(/[\s]+$/, "") // discard tail space
 	.replace(/\r/g, ""); // discard CR

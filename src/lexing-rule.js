@@ -51,6 +51,7 @@ var LexingRule = (function(){
        * LexingRule.isSingleTag("my-custom-single-tag"); // true
     */
     addSingleTagByName : function(tag_name){
+      tag_name = tag_name.toLowerCase();
       if(!__is_single_tag(tag_name)){
 	__single_tag_names__.push(tag_name);
       }

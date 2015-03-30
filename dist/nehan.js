@@ -715,6 +715,7 @@ var LexingRule = (function(){
        * LexingRule.isSingleTag("my-custom-single-tag"); // true
     */
     addSingleTagByName : function(tag_name){
+      tag_name = tag_name.toLowerCase();
       if(!__is_single_tag(tag_name)){
 	__single_tag_names__.push(tag_name);
       }
@@ -8371,11 +8372,12 @@ var HtmlLexer = (function (){
 
   HtmlLexer.prototype = {
     _normalize : function(src){
-      return __replace_single_close_tags(src)
-	.replace(/(<\/.+?>)(?:[\s]*)/gm, function(str, p1){
+      var src = src.replace(/(<\/.+?>)(?:[\s]*)/gm, function(str, p1){
 	  return p1.toLowerCase();
-	}) // convert close tag to lower case(for innerHTML of IE)
-	//.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
+      }); // convert close tag to lower case(for innerHTML of IE)
+      src = __replace_single_close_tags(src);
+      //src = src.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
+      return src
 	.replace(/^[\s]+/, "") // shorten head space
 	.replace(/[\s]+$/, "") // discard tail space
 	.replace(/\r/g, ""); // discard CR
@@ -11302,8 +11304,8 @@ var StyleContext = (function(){
       var max_extent = opt.maxExtent || this.staticExtent || 0;
       var char_count = opt.charCount || 0;
       var content = opt.content || null;
-      var measure = (this.parent && opt.measure && this.staticMeasure === null && !is_root_line)? opt.measure : this.contentMeasure;
-      if(this.display === "inline-block"){
+      var measure = this.contentMeasure;
+      if((this.parent && opt.measure && !is_root_line) || (this.display === "inline-block")){
 	measure = this.staticMeasure || opt.measure;
       }
       var line_size = this.flow.getBoxSize(measure, max_extent);
@@ -11341,7 +11343,7 @@ var StyleContext = (function(){
 	  this._setTextAlign(line, this.textAlign);
 	}
 	var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
-	if(edge_size > 0){
+	if(line.elements.length > 0 && edge_size > 0){
 	  line.edge = new BoxEdge();
 	  line.edge.padding.setBefore(this.flow, (line.lineNo > 0)? edge_size : Math.floor(edge_size / 2));
 	}
@@ -13743,7 +13745,7 @@ var InlineGenerator = (function(){
       measure:context.getInlineCurMeasure(), // actual measure
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       charCount:context.getInlineCharCount(),
-      maxExtent:context.getInlineMaxExtent(),
+      maxExtent:(context.getInlineMaxExtent() || this.style.getFontSize()),
       maxFontSize:context.getInlineMaxFontSize()
     });
 

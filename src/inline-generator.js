@@ -73,7 +73,7 @@ var InlineGenerator = (function(){
       measure:context.getInlineCurMeasure(), // actual measure
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       charCount:context.getInlineCharCount(),
-      maxExtent:context.getInlineMaxExtent(),
+      maxExtent:(context.getInlineMaxExtent() || this.style.getFontSize()),
       maxFontSize:context.getInlineMaxFontSize()
     });
 

@@ -518,8 +518,8 @@ var StyleContext = (function(){
       var max_extent = opt.maxExtent || this.staticExtent || 0;
       var char_count = opt.charCount || 0;
       var content = opt.content || null;
-      var measure = (this.parent && opt.measure && this.staticMeasure === null && !is_root_line)? opt.measure : this.contentMeasure;
-      if(this.display === "inline-block"){
+      var measure = this.contentMeasure;
+      if((this.parent && opt.measure && !is_root_line) || (this.display === "inline-block")){
 	measure = this.staticMeasure || opt.measure;
       }
       var line_size = this.flow.getBoxSize(measure, max_extent);
@@ -557,7 +557,7 @@ var StyleContext = (function(){
 	  this._setTextAlign(line, this.textAlign);
 	}
 	var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
-	if(edge_size > 0){
+	if(line.elements.length > 0 && edge_size > 0){
 	  line.edge = new BoxEdge();
 	  line.edge.padding.setBefore(this.flow, (line.lineNo > 0)? edge_size : Math.floor(edge_size / 2));
 	}
