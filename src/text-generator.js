@@ -22,6 +22,7 @@ var TextGenerator = (function(){
     if(!context.hasInlineSpaceFor(1)){
       return null;
     }
+    var font_size = this.style.getFontSize();
     while(this.hasNext()){
       var element = this._getNext(context);
       //console.log("element:%o", (element? (element.data || "?") : "null"));
@@ -29,7 +30,25 @@ var TextGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
+      //console.log("[%s]element:%s, m = %d (%d/%d)", this.style.markupName, (element.data || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
       if(measure === 0){
+	break;
+      }
+      // break if
+      // 1. token is last token of stream.
+      // 2. and token is tail ng
+      // 3. and enough space of same font_size is not left.
+      // why? this is because next head-text can't be obtained from this generator. for example,
+      //
+      //   text(c1, c2, c3, <c4:tail-ng-char>) <line-break> strong(<b1:next-line-head-char>, b2, b3...)
+      //
+      // current generator is text(c1, c2,...), and strong(b1, b2, ...) is the next child-generator of parent-generator.
+      // so we can not get <b1:next-line-head-char> from this current generator,
+      // but if we leave this situation alone, tail ng char is layouted at the tail of this line.
+      // so we have to estimate this token 'maybe tail NG'.
+      if(!this.stream.hasNext() && !context.hasInlineSpaceFor(measure + font_size) && element instanceof Char && element.isTailNg()){
+	//console.log("!> maybe tail character and tai ng:(%s)", element.data);
+	this.pushCache(element);
 	break;
       }
       if(!context.hasInlineSpaceFor(measure)){

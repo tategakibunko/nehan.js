@@ -179,6 +179,7 @@ var LayoutGenerator = (function(){
       }),
       new InlineContext(this.style.contentMeasure)
     );
+    //console.info("[%s]start context:%o", this.style.markupName, context);
     return context;
   };
 
@@ -186,7 +187,7 @@ var LayoutGenerator = (function(){
     var context_edge = this.style.getBlockContextEdge();
     var is_first_block = this.stream? this.stream.isHead() : true;
     var max_extent = parent_context.getBlockRestExtent() - context_edge.before - context_edge.after;
-    return new CursorContext(
+    var child_context = new CursorContext(
       new BlockContext(max_extent, {
 	isFirstBlock:is_first_block,
 	lineNo:parent_context.lineNo,
@@ -194,6 +195,8 @@ var LayoutGenerator = (function(){
       }),
       new InlineContext(this.style.contentMeasure)
     );
+    //console.info("[%s]child context:%o", this.style.markupName, child_context);
+    return child_context;
   };
 
   LayoutGenerator.prototype._createStream = function(style){
