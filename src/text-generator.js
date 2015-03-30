@@ -34,7 +34,7 @@ var TextGenerator = (function(){
       if(measure === 0){
 	break;
       }
-      // if token is at the last of stream(maybe), check tail/head NG between two inline generators.
+      // if token is last one and maybe tail text, check tail/head NG between two inline generators.
       if(!this.stream.hasNext() && !context.hasInlineSpaceFor(measure + font_size)){
 	// avoid tail NG between two generators
 	if(element instanceof Char && element.isTailNg()){
