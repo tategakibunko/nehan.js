@@ -9531,8 +9531,8 @@ var TokenStream = (function(){
        @return {int}
     */
     getSeekPos : function(){
-      var token = this.tokens[this.pos];
-      return token? token.spos : 0;
+      var token = this.tokens[Math.max(0, this.pos)];
+      return token? token.spos : this.tokens[this.tokens.length - 1].spos;
     },
     /**
        get current seek pos as percent.
