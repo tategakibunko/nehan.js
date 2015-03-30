@@ -11348,7 +11348,7 @@ var StyleContext = (function(){
 	  line.edge.padding.setBefore(this.flow, (line.lineNo > 0)? edge_size : Math.floor(edge_size / 2));
 	}
       }
-      //console.log("line: %s:(%d,%d)", line.classes.join(", "), line.size.width, line.size.height);
+      //console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_root_line);
       return line;
     },
     /**
@@ -11390,6 +11390,7 @@ var StyleContext = (function(){
       line.maxFontSize = font_size;
       line.maxExtent = extent;
       line.content = content;
+      //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
       return line;
     },
     /**
@@ -13550,7 +13551,7 @@ var BlockGenerator = (function(){
       }
       // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
       // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
-      if(cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child){
+      if(!cache.lineBreak && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child){
 	//console.info("inline float fix, line = %o(%s), context = %o, child_gen = %o", cache, cache.toString(), context, this._child);
 
 	// resume inline context
@@ -13728,10 +13729,12 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createChildContext = function(context){
-    return new CursorContext(
+    var child_context = new CursorContext(
       context.block, // inline generator inherits block context as it is.
       new InlineContext(context.getInlineRestMeasure())
     );
+    //console.log("create child context:%o", child_context);
+    return child_context;
   };
 
   InlineGenerator.prototype._createOutput = function(context){
@@ -13748,6 +13751,8 @@ var InlineGenerator = (function(){
       maxExtent:(context.getInlineMaxExtent() || this.style.getFontSize()),
       maxFontSize:context.getInlineMaxFontSize()
     });
+
+    //console.log("%o create output(%s): conetxt max measure = %d, context:%o", this, line.toString(), context.inline.maxMeasure, context);
 
     // set position in parent stream.
     if(this._parent && this._parent.stream){
@@ -14496,15 +14501,15 @@ var FloatGenerator = (function(){
     var stack = this._yieldFloatStack(context);
     var rest_measure = context.getInlineRestMeasure();
     var rest_extent = stack.getExtent();
-    var start_measure = rest_measure;
+    var root_measure = rest_measure;
     if(rest_measure <= 0 || rest_extent <= 0){
       return null;
     }
-    return this._yieldFloat(context, stack, start_measure, rest_measure, rest_extent);
+    return this._yieldFloat(context, stack, root_measure, rest_measure, rest_extent);
   };
 
-  FloatGenerator.prototype._yieldFloat = function(context, stack, start_measure, rest_measure, rest_extent){
-    //console.log("_yieldFloat(start_rest_m:%d, rest_m:%d, rest_e:%d)", start_measure, rest_measure, rest_extent);
+  FloatGenerator.prototype._yieldFloat = function(context, stack, root_measure, rest_measure, rest_extent){
+    //console.log("_yieldFloat(root_m:%d, rest_m:%d, rest_e:%d)", root_measure, rest_measure, rest_extent);
 
     if(rest_measure <= 0){
       return null;
@@ -14525,7 +14530,7 @@ var FloatGenerator = (function(){
     var flow = this.style.flow;
     var group = stack.pop(); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
     var rest_rest_measure = rest_measure - group.getMeasure(flow); // rest of 'rest measure'
-    var rest = this._yieldFloat(context, stack, start_measure, rest_rest_measure, group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
+    var rest = this._yieldFloat(context, stack, root_measure, rest_rest_measure, group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
     var group_set = this._wrapFloat(group, rest, rest_measure); // wrap these 2 floated layout as one block.
 
     /*
@@ -14543,25 +14548,12 @@ var FloatGenerator = (function(){
     */
     var rest_extent_space = rest_extent - group.getExtent(flow);
 
-    // float generator is terminated when
-    // 1. rest space is all sweeped, and cursor is now at original inline start position.
-    // 2. simply stream data is exhausted.
-    if(!this._hasNextFloat() && !this.hasNext() && (start_measure === rest_measure || !this.stream.hasNext())){
-      //console.log("float finish!!, gen:%o, context:%o, rest_m:%d, rest_e:%d, rest_extent_space:%d", this, context, rest_measure, rest_extent, rest_extent_space);
-      this._terminate = true;
-
-      // delegate cache and child to original parent.
-      this._parent._cachedElements = this._child._cachedElements;
-      this._parent._child = this._child._child || null;
-      if(this._parent._child){
-	this._parent._child.style.forceUpdateContextSize(start_measure, rest_extent_space);
-	this._parent._child._parent = this._parent;
-      }
-      return group_set;
-    }
-
-    // if no more rest extent is left, continuous layout is displayed in next page.
+    // if no more rest extent is left, continuous layout is displayed in context of parent generator.
     if(rest_extent_space <= 0){
+      if(!this.hasNext()){
+	this._child.style.forceUpdateContextSize(root_measure, this._parent.style.contentExtent);
+	this._parent._child = this._child;
+      }
       return group_set;
     }
 

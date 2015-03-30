@@ -56,10 +56,12 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createChildContext = function(context){
-    return new CursorContext(
+    var child_context = new CursorContext(
       context.block, // inline generator inherits block context as it is.
       new InlineContext(context.getInlineRestMeasure())
     );
+    //console.log("create child context:%o", child_context);
+    return child_context;
   };
 
   InlineGenerator.prototype._createOutput = function(context){
@@ -76,6 +78,8 @@ var InlineGenerator = (function(){
       maxExtent:(context.getInlineMaxExtent() || this.style.getFontSize()),
       maxFontSize:context.getInlineMaxFontSize()
     });
+
+    //console.log("%o create output(%s): conetxt max measure = %d, context:%o", this, line.toString(), context.inline.maxMeasure, context);
 
     // set position in parent stream.
     if(this._parent && this._parent.stream){
