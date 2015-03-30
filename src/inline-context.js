@@ -81,6 +81,7 @@ var InlineContext = (function(){
     addBoxElement : function(element, measure){
       this.elements.push(element);
       this.curMeasure += measure;
+      this.charCount += (element.charCount || 0);
       if(element.maxExtent){
 	this.maxExtent = Math.max(this.maxExtent, element.maxExtent);
       } else {
