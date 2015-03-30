@@ -4344,6 +4344,13 @@ var Tag = (function (){
        @memberof Nehan.Tag
        @return {boolean}
     */
+    isCloseTag : function(){
+      return this.name.charAt(0) === "/";
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isSingleTag : function(){
       return this._single || false;
     },
@@ -11395,6 +11402,9 @@ var StyleContext = (function(){
 	return true;
       }
       if(this.contentMeasure <= 0 || this.contentExtent <= 0){
+	return true;
+      }
+      if(this.markup.isCloseTag()){
 	return true;
       }
       if(!this.markup.isSingleTag() && this.isBlock() && this.isMarkupEmpty() && this.getContent() === ""){
