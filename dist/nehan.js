@@ -13965,22 +13965,23 @@ var TextGenerator = (function(){
       if(measure === 0){
 	break;
       }
-      // break if
-      // 1. token is last token of stream.
-      // 2. and token is tail ng
-      // 3. and enough space of same font_size is not left.
-      // why? this is because next head-text can't be obtained from this generator. for example,
-      //
-      //   text(c1, c2, c3, <c4:tail-ng-char>) <line-break> strong(<b1:next-line-head-char>, b2, b3...)
-      //
-      // current generator is text(c1, c2,...), and strong(b1, b2, ...) is the next child-generator of parent-generator.
-      // so we can not get <b1:next-line-head-char> from this current generator,
-      // but if we leave this situation alone, tail ng char is layouted at the tail of this line.
-      // so we have to estimate this token 'maybe tail NG'.
-      if(!this.stream.hasNext() && !context.hasInlineSpaceFor(measure + font_size) && element instanceof Char && element.isTailNg()){
-	//console.log("!> maybe tail character and tai ng:(%s)", element.data);
-	this.pushCache(element);
-	break;
+      // if token is at the last of stream(maybe), check tail/head NG between two inline generators.
+      if(!this.stream.hasNext() && !context.hasInlineSpaceFor(measure + font_size)){
+	// avoid tail NG between two generators
+	if(element instanceof Char && element.isTailNg()){
+	  this.pushCache(element);
+	  break;
+	}
+	// avoid head NG between two generators
+	var head = this._peekParentNextToken();
+	if(head && (head instanceof Text || head instanceof Tag)){
+	  var head_c1 = head.getContent().substring(0,1); // both Text and Tag have same method 'getContent'
+	  var head_char = new Char(head_c1);
+	  if(head_char.isHeadNg()){
+	    this.pushCache(element);
+	    break;
+	  }
+	}
       }
       if(!context.hasInlineSpaceFor(measure)){
 	//console.log("!> text overflow:%o(m=%d)", element, measure);
@@ -14036,6 +14037,15 @@ var TextGenerator = (function(){
     }
     //console.log(">> texts:[%s], context = %o, stream pos:%d, stream:%o", line.toString(), context, this.stream.getPos(), this.stream);
     return line;
+  };
+
+  TextGenerator.prototype._peekParentNextToken = function(){
+    var root_line = this._parent;
+    while(root_line && root_line instanceof InlineGenerator){
+      root_line = root_line._parent;
+    }
+    root_line = root_line || this._parent;
+    return root_line? (root_line.stream? root_line.stream.peek() : null) : null;
   };
 
   TextGenerator.prototype._justifyLine = function(context){
