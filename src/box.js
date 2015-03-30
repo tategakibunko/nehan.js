@@ -134,12 +134,7 @@ var Box = (function(){
        @return {Object}
     */
     getCssInlineBlock : function(){
-      var css = this.getCssBlock();
-      if(!this.style.isFloated()){
-	delete css["css-float"];
-      }
-      css.display = "inline-block";
-      return css;
+      return this.style.getCssInlineBlock(this);
     },
     /**
        @memberof Nehan.Box

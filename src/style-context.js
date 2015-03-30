@@ -1386,6 +1386,23 @@ var StyleContext = (function(){
     /**
        @memberof Nehan.StyleContext
        @param line {Nehan.Box}
+       @return {Object}
+    */
+    getCssInlineBlock : function(line){
+      var css = this.getCssBlock(line);
+      if(this.isTextVertical()){
+	if(!this.isFloated()){
+	  delete css["css-float"];
+	}
+      } else {
+	Args.copy(css, this.flow.getCss());
+      }
+      css.display = "inline-block";
+      return css;
+    },
+    /**
+       @memberof Nehan.StyleContext
+       @param line {Nehan.Box}
        @param image {Nehan.Box}
        @return {Object}
     */

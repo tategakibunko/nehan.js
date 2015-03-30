@@ -8192,12 +8192,7 @@ var Box = (function(){
        @return {Object}
     */
     getCssInlineBlock : function(){
-      var css = this.getCssBlock();
-      if(!this.style.isFloated()){
-	delete css["css-float"];
-      }
-      css.display = "inline-block";
-      return css;
+      return this.style.getCssInlineBlock(this);
     },
     /**
        @memberof Nehan.Box
@@ -12167,6 +12162,23 @@ var StyleContext = (function(){
       }
       this.unmanagedCss.copyValuesTo(css);
       Args.copy(css, line.css);
+      return css;
+    },
+    /**
+       @memberof Nehan.StyleContext
+       @param line {Nehan.Box}
+       @return {Object}
+    */
+    getCssInlineBlock : function(line){
+      var css = this.getCssBlock(line);
+      if(this.isTextVertical()){
+	if(!this.isFloated()){
+	  delete css["css-float"];
+	}
+      } else {
+	Args.copy(css, this.flow.getCss());
+      }
+      css.display = "inline-block";
       return css;
     },
     /**
