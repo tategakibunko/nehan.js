@@ -4580,7 +4580,11 @@ var Char = (function(){
     */
     getCssVertSingleHalfChar : function(line){
       var css = {};
-      css["padding-left"] = "0.25em";
+      if(line.edge){
+	css["padding-left"] = "0.25em"; // base aligned line
+      } else {
+	css["text-align"] = "center"; // normal text line(all text with same font-size)
+      }
       return css;
     },
     /**
