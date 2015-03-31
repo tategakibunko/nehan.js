@@ -50,19 +50,17 @@
 	<h2 class="ui header">Tutorial</h2>
 
 <h3 class="ui dividing header">
-<i class="right caret icon"></i><div class="content">Getting started</div>
+<i class="idea icon"></i><div class="content">Getting started</div>
 </h3>
 
-<h4 class="ui dividing header">
-<i class="idea icon"></i> Install</h4>
+<h4 class="ui dividing header">Install</h4>
 
 <p>Just include nehan.js, nehan.css in the <code>head</code>.</p>
 
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-markup">&lt;link rel="stylesheet" href="/path/to/nehan.css"&gt;
 &lt;script type="text/javascript" src="/path/to/nehan.js"&gt;&lt;/script&gt;</code></pre></div></div></div>
 
-<h4 class="ui dividing header">
-<i class="idea icon"></i> Create paged-element</h4>
+<h4 class="ui dividing header">Create paged-element</h4>
 
 <p>First of all, create paged-element that contains all generated pages by <code>Nehan.createPagedElement</code>.</p>
 
@@ -90,15 +88,13 @@
 <i class="warning icon"></i><p class="content">Note that camel cased property(like <code>fontSize</code>) is not allowed in <code>setStyle</code>.</p>
 </div>
 
-<h4 class="ui dividing header">
-<i class="idea icon"></i> Set paged media to some target.</h4>
+<h4 class="ui dividing header">Set paged media to some target.</h4>
 
 <p>You can obtain the DOM node that wraps paged media by <code>getElement</code>.</p>
 
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript"><span class="predefined">$</span>(<span class="string"><span class="delimiter">"</span><span class="content">#target-element</span><span class="delimiter">"</span></span>).append(pages.getElement());</code></pre></div></div></div>
 
-<h4 class="ui dividing header">
-<i class="idea icon"></i> Bind events</h4>
+<h4 class="ui dividing header">Bind events</h4>
 
 <p>Paged-element contains all pages and <strong>state</strong> of current page, so <code>setNextPage</code> and <code>setPrevPage</code> is the method that updates the inner state of current page no of paged-element.</p>
 
@@ -110,11 +106,10 @@
 <span class="predefined">$</span>(<span class="string"><span class="delimiter">"</span><span class="content">.last</span><span class="delimiter">"</span></span>).click(<span class="keyword">function</span>(){ pages.setPage(pages.getPageCount() - <span class="integer">1</span>) });</code></pre></div></div></div>
 
 <h3 class="ui dividing header">
-<i class="right caret icon"></i><div class="content">Setting style</div>
+<i class="idea icon"></i><div class="content">Setting style</div>
 </h3>
 
-<h4 class="ui dividing header">
-<i class="idea icon"></i> Preface</h4>
+<h4 class="ui dividing header">Preface</h4>
 
 <h5>logical property</h5>
 
@@ -134,8 +129,7 @@
 
 <p>To avoid confliction of css defined in outer world of nehan.js, both css className and idName must be prefixed by <code>nehan-</code>.</p>
 
-<h4 class="ui dividing header">
-<i class="idea icon"></i> Example1</h4>
+<h4 class="ui dividing header">Example1</h4>
 
 <p>Set some class size 100px at inline level, 200px at block level, and set margin 20px at block level.</p>
 
@@ -158,8 +152,7 @@ But if flow is <code>tb-rl</code>, it means <code>margin-left:20px</code> becaus
 </p>
 </div>
 
-<h4 class="ui dividing header">
-<i class="idea icon"></i> Example2</h4>
+<h4 class="ui dividing header">Example2</h4>
 
 <p>Set <code>backgrond-color</code> to <code>blue</code> if nth-child is even, otherwise <code>red</code>.</p>
 
@@ -175,8 +168,7 @@ But if flow is <code>tb-rl</code>, it means <code>margin-left:20px</code> becaus
 
 <p>For functional value is supported in nehan.js, you don't need to remember css property <code>nth-child</code>, you can set them by javascript <code>if/else</code> clause by looking selector context object.</p>
 
-<h4 class="ui dividing header">
-<i class="idea icon"></i> Example3</h4>
+<h4 class="ui dividing header">Example3</h4>
 
 <p>You can set global style by <code>Nehan.setStyle</code>.</p>
 
@@ -197,8 +189,7 @@ Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class=
   }
 });</code></pre></div></div></div>
 
-<h4 class="ui dividing header">
-<i class="idea icon"></i> Example4</h4>
+<h4 class="ui dividing header">Example4</h4>
 
 <p>Using <code>onload</code> property, you can change markup dynamically before parsing.</p>
 
@@ -215,8 +206,7 @@ Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class=
   }
 });</code></pre></div></div></div>
 
-<h4 class="ui dividing header">
-<i class="idea icon"></i> Example5</h4>
+<h4 class="ui dividing header">Example5</h4>
 
 <p>Using <code>oncreate</code> property, you can hook the evaluation phase just after converting from layout tree to DOM node.</p>
 
