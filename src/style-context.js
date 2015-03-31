@@ -604,6 +604,7 @@ var StyleContext = (function(){
       line.maxFontSize = font_size;
       line.maxExtent = extent;
       line.content = content;
+      line.lineBreak = opt.lineBreak || false;
       //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
       return line;
     },

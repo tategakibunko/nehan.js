@@ -48,7 +48,8 @@ var InlineGenerator = (function(){
 	break;
       }
       this._addElement(context, element, measure);
-      if(!context.hasInlineSpaceFor(1)){
+      if(!context.hasInlineSpaceFor(1) || element.lineBreak){
+	context.setLineBreak(element.lineBreak || false);
 	break;
       }
     }

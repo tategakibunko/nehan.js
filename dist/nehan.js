@@ -11385,6 +11385,7 @@ var StyleContext = (function(){
       line.maxFontSize = font_size;
       line.maxExtent = extent;
       line.content = content;
+      line.lineBreak = opt.lineBreak || false;
       //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
       return line;
     },
@@ -13737,7 +13738,8 @@ var InlineGenerator = (function(){
 	break;
       }
       this._addElement(context, element, measure);
-      if(!context.hasInlineSpaceFor(1)){
+      if(!context.hasInlineSpaceFor(1) || element.lineBreak){
+	context.setLineBreak(element.lineBreak || false);
 	break;
       }
     }
@@ -13953,7 +13955,13 @@ var TextGenerator = (function(){
     if(!context.hasInlineSpaceFor(1)){
       return null;
     }
-    var font_size = this.style.getFontSize();
+    var next_head = Config.justify? this._peekParentNextToken() : null;
+    var next_head_char = next_head? this._peekParentNextHeadChar(next_head) : null;
+    var next_head_measure = next_head? this._estimateParentNextHeadMeasure(next_head) : this.style.getFontSize();
+    var is_next_head_ng = next_head_char? next_head_char.isHeadNg() : false;
+
+    //console.log("[%s]next head:%o, next_head_char:%s, next size:%d", this.style.markupName, next_head, (next_head_char? next_head_char.data : "null"), next_head_measure);
+
     while(this.hasNext()){
       var element = this._getNext(context);
       //console.log("element:%o", (element? (element.data || "?") : "null"));
@@ -13966,25 +13974,18 @@ var TextGenerator = (function(){
 	break;
       }
       // if token is last one and maybe tail text, check tail/head NG between two inline generators.
-      if(!this.stream.hasNext() && !context.hasInlineSpaceFor(measure + font_size)){
-	// avoid tail NG between two generators
-	if(element instanceof Char && element.isTailNg()){
+      if(Config.justify && !this.stream.hasNext() && !context.hasInlineSpaceFor(measure + next_head_measure)){
+	// avoid tail/head NG between two generators
+	if(element instanceof Char && element.isTailNg() || is_next_head_ng){
+	  context.setLineBreak(true);
+	  //console.log("justified at %o:type:%s", (element.data || ""), (is_next_head_ng? "head" : "tail"));
+	  //console.log("next head:%s", (next_head_char? next_head_char.data : ""));
 	  this.pushCache(element);
 	  break;
 	}
-	// avoid head NG between two generators
-	var head = this._peekParentNextToken();
-	if(head && (head instanceof Text || head instanceof Tag)){
-	  var head_c1 = head.getContent().substring(0,1); // both Text and Tag have same method 'getContent'
-	  var head_char = new Char(head_c1);
-	  if(head_char.isHeadNg()){
-	    this.pushCache(element);
-	    break;
-	  }
-	}
       }
       if(!context.hasInlineSpaceFor(measure)){
-	//console.log("!> text overflow:%o(m=%d)", element, measure);
+	//console.info("!> text overflow:%o(m=%d)", element, measure);
 	this.pushCache(element);
 	break;
       }
@@ -14040,6 +14041,9 @@ var TextGenerator = (function(){
   };
 
   TextGenerator.prototype._peekParentNextToken = function(){
+    if(this.style.markupName === "rt"){
+      return null;
+    }
     var root_line = this._parent;
     while(root_line && root_line instanceof InlineGenerator){
       root_line = root_line._parent || null;
@@ -14048,17 +14052,42 @@ var TextGenerator = (function(){
     return (root_line && root_line.stream)? root_line.stream.peek() : null;
   };
 
+  TextGenerator.prototype._peekParentNextHeadChar = function(token){
+    if(token instanceof Text){
+      var head_c1 = token.getContent().substring(0,1);
+      return new Char(head_c1);
+    } else if(token instanceof Tag){
+      if(token.name === "ruby"){
+	return null; // generally, ruby is not both tail-NG and head-NG.
+      }
+      var head_c1 = token.getContent().replace(/^[\s]*<.+?>/, "").substring(0,1);
+      return new Char(head_c1);
+    }
+    return null;
+  };
+
+  // estimate 'maybe' size, not strict!!
+  TextGenerator.prototype._estimateParentNextHeadMeasure = function(token){
+    var font_size = this.style.getFontSize();
+    if(token instanceof Tag && token.name === "ruby"){
+      var ruby = new RubyTokenStream(token).get();
+      var char_count = ruby.getCharCount();
+      var rt_char_count = ruby.getRtString().length;
+      return Math.max(Math.floor(rt_char_count * font_size / 2), char_count * font_size);
+    }
+    return font_size;
+  };
+
   TextGenerator.prototype._justifyLine = function(context){
     // before justify, skip single <br> to avoid double line-break.
     var stream_next = this.stream? this.stream.peek() : null;
-    if(stream_next && Token.isTag(stream_next) && stream_next.getName() === "br"){
-      this.stream.get(); // skip <br>
-    }
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var next_head = this.peekLastCache() || this.stream.peek();
-    var new_head = context.justify(next_head); // if justify is occured, new_tail token is gained.
+    var new_head = context.justify(next_head); // if justified, new_head token is returned.
     if(new_head){
+      //console.log("justify and new head:%o", new_head);
       this.stream.setPos(new_head.pos);
+      context.setLineBreak(true);
       this.clearCache(); // stream position changed, so disable cache.
     }
   };
