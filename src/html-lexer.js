@@ -65,7 +65,7 @@ var HtmlLexer = (function (){
       src = __replace_single_close_tags(src);
       //src = src.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
       return src
-	.replace(/^[\s]+/, "") // shorten head space
+	//.replace(/^[\s]+/, "") // shorten head space
 	.replace(/[\s]+$/, "") // discard tail space
 	.replace(/\r/g, ""); // discard CR
     },

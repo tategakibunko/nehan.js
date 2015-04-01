@@ -8443,7 +8443,7 @@ var HtmlLexer = (function (){
       src = __replace_single_close_tags(src);
       //src = src.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
       return src
-	.replace(/^[\s]+/, "") // shorten head space
+	//.replace(/^[\s]+/, "") // shorten head space
 	.replace(/[\s]+$/, "") // discard tail space
 	.replace(/\r/g, ""); // discard CR
     },
@@ -13900,7 +13900,7 @@ var TextGenerator = (function(){
 
     while(this.hasNext()){
       var element = this._getNext(context);
-      //console.log("element:%o", (element? (element.data || "?") : "null"));
+      //console.log("element:[%o]", (element? (element.data || "?") : "null"));
       if(element === null){
 	break;
       }
