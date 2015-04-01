@@ -5,10 +5,6 @@ var BlockContext = (function(){
       @constructor
       @param {int} max_extent - maximus position of block in px.
       @param opt {Object} - optional argument
-      @param opt.isFirstBlock {boolean} - is this first generated block by this context object?
-      @param opt.contextEdge {Object} - special edge size of this block context
-      @param opt.contextEdge.before {int} - before edge size in px
-      @param opt.contextEdge.after {int} - after edge size in px
   */
   function BlockContext(max_extent, opt){
     opt = opt || {};
@@ -18,8 +14,6 @@ var BlockContext = (function(){
     this.elements = [];
     this.pulledElements = [];
     this.breakAfter = false;
-    this.contextEdge = opt.contextEdge || {before:0, after:0};
-    this.isFirstBlock = (typeof opt.isFirstBlock === "undefined")? true : opt.isFirstBlock;
     this.lineNo = opt.lineNo || 0;
   }
 
@@ -29,13 +23,10 @@ var BlockContext = (function(){
        @memberof Nehan.BlockContext
        @method hasSpaceFor
        @param extent {int} - size of extent in px
-       @param is_last_block {boolean} - is this the last output of source block generation? default false
        @return {boolean}
     */
-    hasSpaceFor : function(extent, is_last_block){
-      is_last_block = is_last_block || false;
-      var cancel_size = this.getCancelSize(is_last_block);
-      return this.getRestExtent() >= (extent - cancel_size);
+    hasSpaceFor : function(extent){
+      return this.getRestExtent() >= extent;
     },
     /**
        check if this block context has break after flag.
@@ -65,35 +56,6 @@ var BlockContext = (function(){
       } else {
 	this.elements.push(element);
       }
-    },
-    /**
-       cancel edge is available if posotion of current block cursor is not at first or at last,
-       because first edge of block is already added to parent block in first time yielding,
-       and last edge of block is only added to last block.
-       @memberof Nehan.BlockContext
-       @param is_last_block {boolean}
-       @return {Object} {before:[int value], after:[int value]}
-    */
-    getCancelEdge : function(is_last_block){
-      return {
-	// if not first output, we can reduce before edge.
-	// bacause first edge is only available to 'first' block.
-	before:(this.isFirstBlock? 0 : this.contextEdge.before),
-	
-	// if not last output, we can reduce after edge,
-	// because after edge is only available to 'last' block.
-	after:(is_last_block? 0 : this.contextEdge.after)
-      };
-    },
-    /**
-       get size amount that is abled to be eliminated align to block direction, obtained by {@link Nehan.BlockContext.getCancelEdge}.
-       @memberof Nehan.BlockContext
-       @param is_last_block {boolean}
-       @return {int} canceled size of extent
-    */
-    getCancelSize : function(is_last_block){
-      var cancel_edge = this.getCancelEdge(is_last_block);
-      return cancel_edge.before + cancel_edge.after;
     },
     /**
        @memberof Nehan.BlockContext

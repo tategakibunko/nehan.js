@@ -11196,9 +11196,6 @@ var StyleContext = (function(){
        @param opt.blockId {int}
        @param opt.rootBlockId {int}
        @param opt.content {String}
-       @param opt.cancelEdge {Object}
-       @param opt.cancelEdge.before {int}
-       @param opt.cancelEdge.after {int}
        @return {Nehan.Box}
     */
     createBlock : function(opt){
@@ -11225,7 +11222,7 @@ var StyleContext = (function(){
       }
       box.blockId = opt.blockId;
       box.display = (this.display === "inline-block")? this.display : "block";
-      box.edge = this._createBlockContextEdge(this.edge || null, opt.cancelEdge || null); // for Box::getLayoutExtent, Box::getLayoutMeasure
+      box.edge = this.edge || null;
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
@@ -11240,22 +11237,20 @@ var StyleContext = (function(){
       }
       return box;
     },
-    _createBlockContextEdge : function(edge, cancel_edge){
-      if(edge === null){
-	return null;
-      }
-      if(cancel_edge === null || (cancel_edge.before === 0 && cancel_edge.after === 0)){
-	return edge; // nothing to do
+    /* TODO
+    _createBlockContextEdge : function(edge, is_first, is_last){
+      if(!is_first && !is_last){
+	return edge;
       }
       var context_edge = edge.clone();
-      if(cancel_edge.before){
-	context_edge.clearBefore(this.flow);
-      }
-      if(cancel_edge.after){
+      if(is_first){
 	context_edge.clearAfter(this.flow);
       }
+      if(is_last){
+	context_edge.clearBefore(this.flow);
+      }
       return context_edge;
-    },
+    },*/
     /**
        @memberof Nehan.StyleContext
        @param opt
@@ -12703,14 +12698,6 @@ var CursorContext = (function(){
     },
     /**
        @memberof Nehan.CursorContext
-       @param is_last_block {boolean}
-       @return {Object} {before:[int value], after:[int value]}
-    */
-    getBlockCancelEdge : function(is_last_block){
-      return this.block.getCancelEdge(is_last_block);
-    },
-    /**
-       @memberof Nehan.CursorContext
        @return {boolean}
     */
     isInlineEmpty : function(){
@@ -12837,10 +12824,6 @@ var BlockContext = (function(){
       @constructor
       @param {int} max_extent - maximus position of block in px.
       @param opt {Object} - optional argument
-      @param opt.isFirstBlock {boolean} - is this first generated block by this context object?
-      @param opt.contextEdge {Object} - special edge size of this block context
-      @param opt.contextEdge.before {int} - before edge size in px
-      @param opt.contextEdge.after {int} - after edge size in px
   */
   function BlockContext(max_extent, opt){
     opt = opt || {};
@@ -12850,8 +12833,6 @@ var BlockContext = (function(){
     this.elements = [];
     this.pulledElements = [];
     this.breakAfter = false;
-    this.contextEdge = opt.contextEdge || {before:0, after:0};
-    this.isFirstBlock = (typeof opt.isFirstBlock === "undefined")? true : opt.isFirstBlock;
     this.lineNo = opt.lineNo || 0;
   }
 
@@ -12861,13 +12842,10 @@ var BlockContext = (function(){
        @memberof Nehan.BlockContext
        @method hasSpaceFor
        @param extent {int} - size of extent in px
-       @param is_last_block {boolean} - is this the last output of source block generation? default false
        @return {boolean}
     */
-    hasSpaceFor : function(extent, is_last_block){
-      is_last_block = is_last_block || false;
-      var cancel_size = this.getCancelSize(is_last_block);
-      return this.getRestExtent() >= (extent - cancel_size);
+    hasSpaceFor : function(extent){
+      return this.getRestExtent() >= extent;
     },
     /**
        check if this block context has break after flag.
@@ -12897,35 +12875,6 @@ var BlockContext = (function(){
       } else {
 	this.elements.push(element);
       }
-    },
-    /**
-       cancel edge is available if posotion of current block cursor is not at first or at last,
-       because first edge of block is already added to parent block in first time yielding,
-       and last edge of block is only added to last block.
-       @memberof Nehan.BlockContext
-       @param is_last_block {boolean}
-       @return {Object} {before:[int value], after:[int value]}
-    */
-    getCancelEdge : function(is_last_block){
-      return {
-	// if not first output, we can reduce before edge.
-	// bacause first edge is only available to 'first' block.
-	before:(this.isFirstBlock? 0 : this.contextEdge.before),
-	
-	// if not last output, we can reduce after edge,
-	// because after edge is only available to 'last' block.
-	after:(is_last_block? 0 : this.contextEdge.after)
-      };
-    },
-    /**
-       get size amount that is abled to be eliminated align to block direction, obtained by {@link Nehan.BlockContext.getCancelEdge}.
-       @memberof Nehan.BlockContext
-       @param is_last_block {boolean}
-       @return {int} canceled size of extent
-    */
-    getCancelSize : function(is_last_block){
-      var cancel_edge = this.getCancelEdge(is_last_block);
-      return cancel_edge.before + cancel_edge.after;
     },
     /**
        @memberof Nehan.BlockContext
@@ -13537,21 +13486,20 @@ var BlockGenerator = (function(){
     }
     while(true){
       if(!this.hasNext()){
-	return this._createOutput(context, true); // output last block
+	return this._createOutput(context); // output last block
       }
       var element = this._getNext(context);
-      var is_last_block = !this.hasNext();
       if(element === null){
-	return this._createOutput(context, is_last_block);
+	return this._createOutput(context);
       }
       var extent = element.getLayoutExtent(this.style.flow);
-      if(!context.hasBlockSpaceFor(extent, is_last_block)){
+      if(!context.hasBlockSpaceFor(extent)){
 	this.pushCache(element);
-	return this._createOutput(context, false);
+	return this._createOutput(context);
       }
       this._addElement(context, element, extent);
-      if(!context.hasBlockSpaceFor(1, is_last_block) || context.hasBreakAfter()){
-	return this._createOutput(context, is_last_block);
+      if(!context.hasBlockSpaceFor(1) || context.hasBreakAfter()){
+	return this._createOutput(context);
       }
     }
   };
@@ -13659,7 +13607,7 @@ var BlockGenerator = (function(){
     this._onAddElement(context, element);
   };
 
-  BlockGenerator.prototype._createOutput = function(context, is_last_block){
+  BlockGenerator.prototype._createOutput = function(context){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
@@ -13669,8 +13617,7 @@ var BlockGenerator = (function(){
       blockId:this.blockId,
       extent:extent,
       elements:elements,
-      breakAfter:context.hasBreakAfter(),
-      cancelEdge:context.getBlockCancelEdge(is_last_block)
+      breakAfter:context.hasBreakAfter()
     };
     if(typeof this.rootBlockId !== "undefined"){
       block_args.rootBlockId = this.rootBlockId;
@@ -13684,7 +13631,7 @@ var BlockGenerator = (function(){
     if(!this.hasNext()){
       this._onComplete(context, block);
     }
-    //console.log(">> block output:%o:(m=%d, e=%d):(%s)", block, block.size.height, block.size.width, block.toString());
+     //console.log(">> block output:%o:(m=%d, e=%d):(%s)", block, block.size.height, block.size.width, block.toString());
     return block;
   };
 

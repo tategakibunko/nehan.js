@@ -79,14 +79,6 @@ var CursorContext = (function(){
     },
     /**
        @memberof Nehan.CursorContext
-       @param is_last_block {boolean}
-       @return {Object} {before:[int value], after:[int value]}
-    */
-    getBlockCancelEdge : function(is_last_block){
-      return this.block.getCancelEdge(is_last_block);
-    },
-    /**
-       @memberof Nehan.CursorContext
        @return {boolean}
     */
     isInlineEmpty : function(){

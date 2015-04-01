@@ -29,21 +29,20 @@ var BlockGenerator = (function(){
     }
     while(true){
       if(!this.hasNext()){
-	return this._createOutput(context, true); // output last block
+	return this._createOutput(context); // output last block
       }
       var element = this._getNext(context);
-      var is_last_block = !this.hasNext();
       if(element === null){
-	return this._createOutput(context, is_last_block);
+	return this._createOutput(context);
       }
       var extent = element.getLayoutExtent(this.style.flow);
-      if(!context.hasBlockSpaceFor(extent, is_last_block)){
+      if(!context.hasBlockSpaceFor(extent)){
 	this.pushCache(element);
-	return this._createOutput(context, false);
+	return this._createOutput(context);
       }
       this._addElement(context, element, extent);
-      if(!context.hasBlockSpaceFor(1, is_last_block) || context.hasBreakAfter()){
-	return this._createOutput(context, is_last_block);
+      if(!context.hasBlockSpaceFor(1) || context.hasBreakAfter()){
+	return this._createOutput(context);
       }
     }
   };
@@ -151,7 +150,7 @@ var BlockGenerator = (function(){
     this._onAddElement(context, element);
   };
 
-  BlockGenerator.prototype._createOutput = function(context, is_last_block){
+  BlockGenerator.prototype._createOutput = function(context){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
@@ -161,8 +160,7 @@ var BlockGenerator = (function(){
       blockId:this.blockId,
       extent:extent,
       elements:elements,
-      breakAfter:context.hasBreakAfter(),
-      cancelEdge:context.getBlockCancelEdge(is_last_block)
+      breakAfter:context.hasBreakAfter()
     };
     if(typeof this.rootBlockId !== "undefined"){
       block_args.rootBlockId = this.rootBlockId;
@@ -176,7 +174,7 @@ var BlockGenerator = (function(){
     if(!this.hasNext()){
       this._onComplete(context, block);
     }
-    //console.log(">> block output:%o:(m=%d, e=%d):(%s)", block, block.size.height, block.size.width, block.toString());
+     //console.log(">> block output:%o:(m=%d, e=%d):(%s)", block, block.size.height, block.size.width, block.toString());
     return block;
   };
 

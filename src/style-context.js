@@ -411,9 +411,6 @@ var StyleContext = (function(){
        @param opt.blockId {int}
        @param opt.rootBlockId {int}
        @param opt.content {String}
-       @param opt.cancelEdge {Object}
-       @param opt.cancelEdge.before {int}
-       @param opt.cancelEdge.after {int}
        @return {Nehan.Box}
     */
     createBlock : function(opt){
@@ -440,7 +437,7 @@ var StyleContext = (function(){
       }
       box.blockId = opt.blockId;
       box.display = (this.display === "inline-block")? this.display : "block";
-      box.edge = this._createBlockContextEdge(this.edge || null, opt.cancelEdge || null); // for Box::getLayoutExtent, Box::getLayoutMeasure
+      box.edge = this.edge || null;
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
@@ -455,22 +452,20 @@ var StyleContext = (function(){
       }
       return box;
     },
-    _createBlockContextEdge : function(edge, cancel_edge){
-      if(edge === null){
-	return null;
-      }
-      if(cancel_edge === null || (cancel_edge.before === 0 && cancel_edge.after === 0)){
-	return edge; // nothing to do
+    /* TODO
+    _createBlockContextEdge : function(edge, is_first, is_last){
+      if(!is_first && !is_last){
+	return edge;
       }
       var context_edge = edge.clone();
-      if(cancel_edge.before){
-	context_edge.clearBefore(this.flow);
-      }
-      if(cancel_edge.after){
+      if(is_first){
 	context_edge.clearAfter(this.flow);
       }
+      if(is_last){
+	context_edge.clearBefore(this.flow);
+      }
       return context_edge;
-    },
+    },*/
     /**
        @memberof Nehan.StyleContext
        @param opt
