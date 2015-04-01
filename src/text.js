@@ -10,7 +10,14 @@ var Text = (function(){
 
   Text.prototype = {
     isWhiteSpaceOnly: function(){
-      return this.content.replace(/[\s\n]/g, "") === "";
+      // \s contain multi character space,
+      // but we want to replace half one only.
+      var replaced = this.content
+	.replace(/ /g, "") // half space
+	.replace(/&nbsp;/g, "")
+	.replace(/\n/g, "")
+	.replace(/\t/g, "");
+      return replaced === "";
     },
     getContent: function(){
       return this.content;
