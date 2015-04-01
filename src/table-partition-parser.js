@@ -27,7 +27,7 @@ var TablePartitionParser = {
 	break;
 
       case "tr":
-	var cell_tags = this._getCellStream(token).getAll();
+	var cell_tags = this._getCellStream(token).getTokens();
 	var cell_count = cell_tags.length;
 	var partition = this._getPartition(style, cell_tags);
 	pset.add(cell_count, partition);
@@ -65,13 +65,13 @@ var TablePartitionParser = {
     return new PartitionUnit({weight:weight, isStatic:false});
   },
   _getCellStream : function(tag){
-    return new FilteredTokenStream(tag.getContent(), function(token){
-      return Token.isTag(token) && (token.getName() === "td" || token.getName() === "th");
+    return new TokenStream(tag.getContent(), {
+      filter:Closure.isTagName(["td", "th"])
     });
   },
   _getRowStream : function(tag){
-    return new FilteredTokenStream(tag.getContent(), function(token){
-      return Token.isTag(token) && token.getName() === "tr";
+    return new TokenStream(tag.getContent(), {
+      filter:Closure.isTagName(["tr"])
     });
   }
 };

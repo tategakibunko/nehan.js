@@ -81,14 +81,6 @@ var Config = {
      @type {boolean}
      @default false
   */
-  disableInlineStyle:false,
-
-  /**
-     default length of html-lexer buffer.
-     @memberof Nehan.Config
-     @type {int}
-     @default 2000
-  */
-  lexingBufferLen:2000
+  disableInlineStyle:false
 };
 

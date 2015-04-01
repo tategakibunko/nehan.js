@@ -2,16 +2,20 @@ var TokenStream = (function(){
   /**
      @memberof Nehan
      @class TokenStream
-     @classdesc abstraction of token stream with background buffering.
+     @classdesc abstraction of token stream
      @constructor
      @param src {String}
+     @param opt {Object}
+     @param opt.lexer {Lexer} - lexer class(optional)
+     @param opt.filter {Function} - token filter function(optional)
   */
-  function TokenStream(src, lexer){
-    this.lexer = lexer || this._createLexer(src);
+  function TokenStream(src, opt){
+    opt = opt || {};
+    this.lexer = opt.lexer || this._createLexer(src);
     this.tokens = [];
     this.pos = 0;
-    this.eof = false;
-    this._doBuffer();
+    this._filter = opt.filter || null;
+    this._loadTokens(this._filter);
   }
 
   TokenStream.prototype = {
@@ -20,7 +24,7 @@ var TokenStream = (function(){
        @return {boolean}
     */
     hasNext : function(){
-      return (!this.eof || this.pos < this.tokens.length);
+      return (this.pos < this.tokens.length);
     },
     /**
        @memberof Nehan.TokenStream
@@ -48,10 +52,9 @@ var TokenStream = (function(){
        @param text {String}
     */
     addText : function(text){
-      // check if already done, and text is not empty.
-      if(this.eof && text !== ""){
+      if(text !== ""){
 	this.lexer.addText(text);
-	this.eof = false;
+	this._loadTokens(this._filter);
       }
     },
     /**
@@ -88,12 +91,6 @@ var TokenStream = (function(){
     peek : function(off){
       var offset = off || 0;
       var index = Math.max(0, this.pos + offset);
-      if(index >= this.tokens.length){
-	if(this.eof){
-	  return null;
-	}
-	this._doBuffer();
-      }
       var token = this.tokens[index];
       if(token){
 	token.pos = index;
@@ -140,6 +137,15 @@ var TokenStream = (function(){
       return this.tokens.length;
     },
     /**
+       get all tokens.
+
+       @memberof Nehan.TokenStream
+       @return {Array}
+    */
+    getTokens : function(){
+      return this.tokens;
+    },
+    /**
        get current token position of source text(not stream position).
 
        @memberof Nehan.TokenStream
@@ -158,30 +164,6 @@ var TokenStream = (function(){
     getSeekPercent : function(){
       var seek_pos = this.getSeekPos();
       return this.lexer.getSeekPercent(seek_pos);
-    },
-    /**
-       read whole stream source, and return all tokens immediately.
-
-       @memberof Nehan.TokenStream
-       @return {Array.<token>}
-    */
-    getAll : function(){
-      while(!this.eof){
-	this._doBuffer();
-      }
-      return this.tokens;
-    },
-    /**
-       read whole stream source, and return all tokens immediately, but filter by [fn].
-
-       @memberof Nehan.TokenStream
-       @param fn {Function}
-       @return {Array.<token>}
-    */
-    getAllIf : function(fn){
-      return List.filter(this.getAll(), function(token){
-	return fn(token);
-      });
     },
     /**
        iterate tokens by [fn].
@@ -217,19 +199,54 @@ var TokenStream = (function(){
 	}
       }
     },
-    _createLexer : function(src){
-      return new HtmlLexer(src);
-    },
-    _doBuffer : function(){
-      var buff_len = Config.lexingBufferLen;
-      for(var i = 0; i < buff_len; i++){
+    /**
+       read whole stream source.
+
+       @memberof Nehan.TokenStream
+       @param filter {Function} - filter function
+       @return {Array.<token>}
+    */
+    _loadTokens : function(filter){
+      var filter_order = 0;
+      while(true){
 	var token = this.lexer.get();
 	if(token === null){
-	  this.eof = true;
 	  break;
 	}
-	this.tokens.push(token);
+	if(filter === null){
+	  this.tokens.push(token);
+	} else if(filter && filter(token)){
+	  token.order = filter_order++;
+	  this.tokens.push(token);
+	}
       }
+      this._setPseudoAttribute(this.tokens);
+    },
+    _setPseudoAttribute : function(tokens){
+      var tags = List.filter(tokens, function(token){
+	return (token instanceof Tag);
+      });
+      if(tags.length === 0){
+	return;
+      }
+      var type_of_tags = {};
+      List.iter(tags, function(tag){
+	var tag_name = tag.getName();
+	if(type_of_tags[tag_name]){
+	  type_of_tags[tag_name].push(tag);
+	} else {
+	  type_of_tags[tag_name] = [tag];
+	  tag.setFirstOfType(true);
+	}
+      });
+      tags[0].setFirstChild(true);
+      tags[tags.length - 1].setLastChild(true);
+      for(var tag_name in type_of_tags){
+	List.last(type_of_tags[tag_name]).setLastOfType(true);
+      }
+    },
+    _createLexer : function(src){
+      return new HtmlLexer(src);
     }
   };
 

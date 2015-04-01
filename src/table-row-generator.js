@@ -50,7 +50,7 @@ var TableRowGenerator = (function(){
   };
 
   TableRowGenerator.prototype._getChildTags = function(stream){
-    return stream.getAllIf(function(token){
+    return List.filter(stream.getTokens(), function(token){
       return (token instanceof Tag && (token.getName() === "td" || token.getName() === "th"));
     });
   };

@@ -7,29 +7,27 @@ var RubyTokenStream = (function(){
      @classdesc 
      @constructor
      @extends {Nehan.TokenStream}
-     @param markup {Nehan.Tag}
+     @param str {String}
   */
-  function RubyTokenStream(markup_ruby){
-    TokenStream.call(this, markup_ruby.getContent());
-    this.getAll();
-    this.tokens = this._parse(markup_ruby);
-    this.rewind();
+  function RubyTokenStream(str){
+    this.tokens = this._parse(new TokenStream(str));
+    this.pos = 0;
   }
   Class.extend(RubyTokenStream, TokenStream);
 
-  RubyTokenStream.prototype._parse = function(markup_ruby){
-    var ret = [];
-    while(this.hasNext()){
-      ret.push(this._parseRuby(markup_ruby));
+  RubyTokenStream.prototype._parse = function(stream){
+    var tokens = [];
+    while(stream.hasNext()){
+      tokens.push(this._parseRuby(stream));
     }
-    return ret;
+    return tokens;
   };
 
-  RubyTokenStream.prototype._parseRuby = function(markup_ruby){
+  RubyTokenStream.prototype._parseRuby = function(stream){
     var rbs = [];
     var rt = null;
     while(true){
-      var token = this.get();
+      var token = stream.get();
       if(token === null){
 	break;
       }
@@ -48,8 +46,9 @@ var RubyTokenStream = (function(){
   };
 
   RubyTokenStream.prototype._parseRb = function(content){
-    var lexer = new TextLexer(content);
-    return (new TokenStream(content, lexer)).getAll();
+    return new TokenStream(content, {
+      lexer:new TextLexer(content)
+    }).getTokens();
   };
 
   return RubyTokenStream;

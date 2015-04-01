@@ -7,7 +7,12 @@ var HtmlGenerator = (function(){
      @param text {String}
   */
   function HtmlGenerator(text){
-    this.stream = new HtmlTokenStream(text);
+    this.stream = new TokenStream(text, {
+      filter:Closure.isTagName(["head", "body"])
+    });
+    if(this.stream.isEmptyTokens()){
+      this.stream.tags = [new Tag("body", text)];
+    }
     this.generator = this._createGenerator();
   }
 
@@ -45,7 +50,9 @@ var HtmlGenerator = (function(){
 	var tag = this.stream.get();
 	switch(tag.getName()){
 	case "head":
-	  this._parseDocumentHeader(new HeadTokenStream(tag.getContent()));
+	  this._parseDocumentHeader(new TokenStream(tag.getContent(), {
+	    filter:Closure.isTagName(["title", "meta", "link", "style", "script"])
+	  }));
 	  break;
 	case "body":
 	  return this._createBodyGenerator(tag.getContent());

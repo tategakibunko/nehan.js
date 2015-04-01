@@ -137,7 +137,7 @@ var TextGenerator = (function(){
   TextGenerator.prototype._estimateParentNextHeadMeasure = function(token){
     var font_size = this.style.getFontSize();
     if(token instanceof Tag && token.name === "ruby"){
-      var ruby = new RubyTokenStream(token).get();
+      var ruby = new RubyTokenStream(token.getContent()).get();
       var char_count = ruby.getCharCount();
       var rt_char_count = ruby.getRtString().length;
       return Math.max(Math.floor(rt_char_count * font_size / 2), char_count * font_size);
@@ -207,9 +207,6 @@ var TextGenerator = (function(){
     if(this.style.isPre()){
       return this._getText(context, token); // read as normal text
     }
-    // if not pre, skip continuous white-spaces.
-    //this.stream.skipUntil(Token.isNewLine);
-
     if(Token.isNewLine(token)){
       // skip continuous white-spaces.
       this.stream.skipUntil(Token.isNewLine);

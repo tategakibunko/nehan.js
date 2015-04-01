@@ -41,5 +41,16 @@ var Closure = {
     return function(y){
       return x != y;
     };
+  },
+  isTagName : function(names){
+    return function(token){
+      if(token instanceof Tag === false){
+	return false;
+      }
+      var tag_name = token.getName();
+      return List.exists(names, function(name){
+	return name === tag_name;
+      });
+    };
   }
 };

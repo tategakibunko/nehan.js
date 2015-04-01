@@ -201,7 +201,7 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createStream = function(style){
     switch(style.getMarkupName()){
-    case "ruby": return new RubyTokenStream(style.markup);
+    case "ruby": return new RubyTokenStream(style.getMarkupContent());
     default: return new TokenStream(style.getContent());
     } 
   };
@@ -304,8 +304,9 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createTextGenerator = function(style, text){
     var content = text.getContent();
-    var lexer = new TextLexer(content);
-    var stream = new TokenStream(content, lexer);
+    var stream = new TokenStream(content, {
+      lexer:new TextLexer(content)
+    });
     return new TextGenerator(this.style, stream);
   };
 

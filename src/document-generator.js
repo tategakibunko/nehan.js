@@ -7,7 +7,12 @@ var DocumentGenerator = (function(){
      @param text {String} - html source text
   */
   function DocumentGenerator(text){
-    this.stream = new DocumentTokenStream(text);
+    this.stream = new TokenStream(text, {
+      filter:Closure.isTagName(["!doctype", "html"])
+    });
+    if(this.stream.isEmptyTokens()){
+      this.stream.tokens = [new Tag("html", text)];
+    }
     this.generator = this._createGenerator();
   }
 

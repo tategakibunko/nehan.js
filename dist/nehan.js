@@ -384,15 +384,7 @@ var Config = {
      @type {boolean}
      @default false
   */
-  disableInlineStyle:false,
-
-  /**
-     default length of html-lexer buffer.
-     @memberof Nehan.Config
-     @type {int}
-     @default 2000
-  */
-  lexingBufferLen:2000
+  disableInlineStyle:false
 };
 
 
@@ -2546,6 +2538,17 @@ var Closure = {
     return function(y){
       return x != y;
     };
+  },
+  isTagName : function(names){
+    return function(token){
+      if(token instanceof Tag === false){
+	return false;
+      }
+      var tag_name = token.getName();
+      return List.exists(names, function(name){
+	return name === tag_name;
+      });
+    };
   }
 };
 
@@ -4155,6 +4158,10 @@ var Tag = (function (){
     this.content = content || "";
     this.name = this._parseName(this.src);
     this.attrs = this._parseTagAttrs(this.name, this.src);
+    this._firstChild = false;
+    this._firstOfType = false;
+    this._lastChild = false;
+    this._lastOfType = false;
   }
 
   Tag.prototype = {
@@ -4213,6 +4220,34 @@ var Tag = (function (){
     */
     setData : function(name, value){
       this.attrs.setData(name, value);
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setFirstChild : function(status){
+      this._firstChild = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setFirstOfType : function(status){
+      this._firstOfType = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setLastChild : function(status){
+      this._lastChild = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setLastOfType : function(status){
+      this._lastOfType = status;
     },
     /**
        @memberof Nehan.Tag
@@ -4361,6 +4396,34 @@ var Tag = (function (){
     */
     isEmpty : function(){
       return this.content === "";
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isFirstChild : function(){
+      return this._firstChild;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isFirstOfType : function(){
+      return this._firstOfType;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isLastChild : function(){
+      return this._lastChild;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isLastOfType : function(){
+      return this._lastOfType;
     },
     _getTagAttrSrc : function(src){
       return src
@@ -5458,6 +5521,9 @@ var Ruby = (function(){
     */
     setMetrics : function(flow, font, letter_spacing){
       this.rtFontSize = Display.getRtFontSize(font.size);
+      if(typeof this.rbs === "undefined"){
+	debugger;
+      }
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font);
 	return ret + rb.getAdvance(flow, letter_spacing);
@@ -9391,16 +9457,20 @@ var TokenStream = (function(){
   /**
      @memberof Nehan
      @class TokenStream
-     @classdesc abstraction of token stream with background buffering.
+     @classdesc abstraction of token stream
      @constructor
      @param src {String}
+     @param opt {Object}
+     @param opt.lexer {Lexer} - lexer class(optional)
+     @param opt.filter {Function} - token filter function(optional)
   */
-  function TokenStream(src, lexer){
-    this.lexer = lexer || this._createLexer(src);
+  function TokenStream(src, opt){
+    opt = opt || {};
+    this.lexer = opt.lexer || this._createLexer(src);
     this.tokens = [];
     this.pos = 0;
-    this.eof = false;
-    this._doBuffer();
+    this._filter = opt.filter || null;
+    this._loadTokens(this._filter);
   }
 
   TokenStream.prototype = {
@@ -9409,7 +9479,7 @@ var TokenStream = (function(){
        @return {boolean}
     */
     hasNext : function(){
-      return (!this.eof || this.pos < this.tokens.length);
+      return (this.pos < this.tokens.length);
     },
     /**
        @memberof Nehan.TokenStream
@@ -9437,10 +9507,9 @@ var TokenStream = (function(){
        @param text {String}
     */
     addText : function(text){
-      // check if already done, and text is not empty.
-      if(this.eof && text !== ""){
+      if(text !== ""){
 	this.lexer.addText(text);
-	this.eof = false;
+	this._loadTokens(this._filter);
       }
     },
     /**
@@ -9477,12 +9546,6 @@ var TokenStream = (function(){
     peek : function(off){
       var offset = off || 0;
       var index = Math.max(0, this.pos + offset);
-      if(index >= this.tokens.length){
-	if(this.eof){
-	  return null;
-	}
-	this._doBuffer();
-      }
       var token = this.tokens[index];
       if(token){
 	token.pos = index;
@@ -9529,6 +9592,15 @@ var TokenStream = (function(){
       return this.tokens.length;
     },
     /**
+       get all tokens.
+
+       @memberof Nehan.TokenStream
+       @return {Array}
+    */
+    getTokens : function(){
+      return this.tokens;
+    },
+    /**
        get current token position of source text(not stream position).
 
        @memberof Nehan.TokenStream
@@ -9547,30 +9619,6 @@ var TokenStream = (function(){
     getSeekPercent : function(){
       var seek_pos = this.getSeekPos();
       return this.lexer.getSeekPercent(seek_pos);
-    },
-    /**
-       read whole stream source, and return all tokens immediately.
-
-       @memberof Nehan.TokenStream
-       @return {Array.<token>}
-    */
-    getAll : function(){
-      while(!this.eof){
-	this._doBuffer();
-      }
-      return this.tokens;
-    },
-    /**
-       read whole stream source, and return all tokens immediately, but filter by [fn].
-
-       @memberof Nehan.TokenStream
-       @param fn {Function}
-       @return {Array.<token>}
-    */
-    getAllIf : function(fn){
-      return List.filter(this.getAll(), function(token){
-	return fn(token);
-      });
     },
     /**
        iterate tokens by [fn].
@@ -9606,116 +9654,58 @@ var TokenStream = (function(){
 	}
       }
     },
-    _createLexer : function(src){
-      return new HtmlLexer(src);
-    },
-    _doBuffer : function(){
-      var buff_len = Config.lexingBufferLen;
-      for(var i = 0; i < buff_len; i++){
+    /**
+       read whole stream source.
+
+       @memberof Nehan.TokenStream
+       @param filter {Function} - filter function
+       @return {Array.<token>}
+    */
+    _loadTokens : function(filter){
+      var filter_order = 0;
+      while(true){
 	var token = this.lexer.get();
 	if(token === null){
-	  this.eof = true;
 	  break;
 	}
-	this.tokens.push(token);
+	if(filter === null){
+	  this.tokens.push(token);
+	} else if(filter && filter(token)){
+	  token.order = filter_order++;
+	  this.tokens.push(token);
+	}
       }
+      this._setPseudoAttribute(this.tokens);
+    },
+    _setPseudoAttribute : function(tokens){
+      var tags = List.filter(tokens, function(token){
+	return (token instanceof Tag);
+      });
+      if(tags.length === 0){
+	return;
+      }
+      var type_of_tags = {};
+      List.iter(tags, function(tag){
+	var tag_name = tag.getName();
+	if(type_of_tags[tag_name]){
+	  type_of_tags[tag_name].push(tag);
+	} else {
+	  type_of_tags[tag_name] = [tag];
+	  tag.setFirstOfType(true);
+	}
+      });
+      tags[0].setFirstChild(true);
+      tags[tags.length - 1].setLastChild(true);
+      for(var tag_name in type_of_tags){
+	List.last(type_of_tags[tag_name]).setLastOfType(true);
+      }
+    },
+    _createLexer : function(src){
+      return new HtmlLexer(src);
     }
   };
 
   return TokenStream;
-})();
-
-
-var FilteredTokenStream = (function(){
-  /**
-     @memberof Nehan
-     @class FilteredTokenStream
-     @classdesc token stream that is filtered by [fn](token -> bool).
-     @constructor
-     @extends {Nehan.TokenStream}
-     @param src {String} - html text
-     @param fn {Function} - {@link Nehan.Token} -> bool
-   */
-  function FilteredTokenStream(src, fn){
-    TokenStream.call(this, src);
-    var order = 0;
-    this.tokens = this.getAllIf(function(token){
-      if(Token.isText(token)){
-	return false;
-      }
-      if(fn(token)){
-	token.order = order++;
-	return true;
-      }
-    });
-  }
-  Class.extend(FilteredTokenStream, TokenStream);
-
-  return FilteredTokenStream;
-})();
-
-var DocumentTokenStream = (function(){
-  /**
-     @memberof Nehan
-     @class DocumentTokenStream
-     @classdesc token stream for &lt;document&gt; tag.
-     @extends {Nehan.FilteredTokenStream}
-  */
-  function DocumentTokenStream(src){
-    FilteredTokenStream.call(this, src, function(tag){
-      var name = tag.getName();
-      return (name === "!doctype" || name === "html");
-    });
-    if(this.isEmptyTokens()){
-      this.tokens = [new Tag("html", src)];
-    }
-  }
-  Class.extend(DocumentTokenStream, FilteredTokenStream);
-
-  return DocumentTokenStream;
-})();
-
-var HtmlTokenStream = (function(){
-  /**
-     @memberof Nehan
-     @class HtmlTokenStream
-     @classdesc token stream for &lt;html&gt; tag(head, body).
-     @extends {Nehan.FilteredTokenStream}
-     @param src {String} - content text of &lt;html&gt; tag.
-  */
-  function HtmlTokenStream(src){
-    FilteredTokenStream.call(this, src, function(tag){
-      var name = tag.getName();
-      return (name === "head" || name === "body");
-    });
-  }
-  Class.extend(HtmlTokenStream, FilteredTokenStream);
-
-  return HtmlTokenStream;
-})();
-
-
-var HeadTokenStream = (function(){
-  /**
-     @memberof Nehan
-     @class HeadTokenStream
-     @classdesc tokens of &lt;head&gt; tag content(title, meta, link, style, script).
-     @constructor
-     @extends {Nehan.FilteredTokenStream}
-  */
-  function HeadTokenStream(src){
-    FilteredTokenStream.call(this, src, function(tag){
-      var name = tag.getName();
-      return (name === "title" ||
-	      name === "meta" ||
-	      name === "link" ||
-	      name === "style" ||
-	      name === "script");
-    });
-  }
-  Class.extend(HeadTokenStream, FilteredTokenStream);
-
-  return HeadTokenStream;
 })();
 
 
@@ -9728,29 +9718,27 @@ var RubyTokenStream = (function(){
      @classdesc 
      @constructor
      @extends {Nehan.TokenStream}
-     @param markup {Nehan.Tag}
+     @param str {String}
   */
-  function RubyTokenStream(markup_ruby){
-    TokenStream.call(this, markup_ruby.getContent());
-    this.getAll();
-    this.tokens = this._parse(markup_ruby);
-    this.rewind();
+  function RubyTokenStream(str){
+    this.tokens = this._parse(new TokenStream(str));
+    this.pos = 0;
   }
   Class.extend(RubyTokenStream, TokenStream);
 
-  RubyTokenStream.prototype._parse = function(markup_ruby){
-    var ret = [];
-    while(this.hasNext()){
-      ret.push(this._parseRuby(markup_ruby));
+  RubyTokenStream.prototype._parse = function(stream){
+    var tokens = [];
+    while(stream.hasNext()){
+      tokens.push(this._parseRuby(stream));
     }
-    return ret;
+    return tokens;
   };
 
-  RubyTokenStream.prototype._parseRuby = function(markup_ruby){
+  RubyTokenStream.prototype._parseRuby = function(stream){
     var rbs = [];
     var rt = null;
     while(true){
-      var token = this.get();
+      var token = stream.get();
       if(token === null){
 	break;
       }
@@ -9769,8 +9757,9 @@ var RubyTokenStream = (function(){
   };
 
   RubyTokenStream.prototype._parseRb = function(content){
-    var lexer = new TextLexer(content);
-    return (new TokenStream(content, lexer)).getAll();
+    return new TokenStream(content, {
+      lexer:new TextLexer(content)
+    }).getTokens();
   };
 
   return RubyTokenStream;
@@ -10574,7 +10563,7 @@ var TablePartitionParser = {
 	break;
 
       case "tr":
-	var cell_tags = this._getCellStream(token).getAll();
+	var cell_tags = this._getCellStream(token).getTokens();
 	var cell_count = cell_tags.length;
 	var partition = this._getPartition(style, cell_tags);
 	pset.add(cell_count, partition);
@@ -10612,13 +10601,13 @@ var TablePartitionParser = {
     return new PartitionUnit({weight:weight, isStatic:false});
   },
   _getCellStream : function(tag){
-    return new FilteredTokenStream(tag.getContent(), function(token){
-      return Token.isTag(token) && (token.getName() === "td" || token.getName() === "th");
+    return new TokenStream(tag.getContent(), {
+      filter:Closure.isTagName(["td", "th"])
     });
   },
   _getRowStream : function(tag){
-    return new FilteredTokenStream(tag.getContent(), function(token){
-      return Token.isTag(token) && token.getName() === "tr";
+    return new TokenStream(tag.getContent(), {
+      filter:Closure.isTagName(["tr"])
     });
   }
 };
@@ -13323,7 +13312,7 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createStream = function(style){
     switch(style.getMarkupName()){
-    case "ruby": return new RubyTokenStream(style.markup);
+    case "ruby": return new RubyTokenStream(style.getMarkupContent());
     default: return new TokenStream(style.getContent());
     } 
   };
@@ -13426,8 +13415,9 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createTextGenerator = function(style, text){
     var content = text.getContent();
-    var lexer = new TextLexer(content);
-    var stream = new TokenStream(content, lexer);
+    var stream = new TokenStream(content, {
+      lexer:new TextLexer(content)
+    });
     return new TextGenerator(this.style, stream);
   };
 
@@ -14016,7 +14006,7 @@ var TextGenerator = (function(){
   TextGenerator.prototype._estimateParentNextHeadMeasure = function(token){
     var font_size = this.style.getFontSize();
     if(token instanceof Tag && token.name === "ruby"){
-      var ruby = new RubyTokenStream(token).get();
+      var ruby = new RubyTokenStream(token.getContent()).get();
       var char_count = ruby.getCharCount();
       var rt_char_count = ruby.getRtString().length;
       return Math.max(Math.floor(rt_char_count * font_size / 2), char_count * font_size);
@@ -14086,9 +14076,6 @@ var TextGenerator = (function(){
     if(this.style.isPre()){
       return this._getText(context, token); // read as normal text
     }
-    // if not pre, skip continuous white-spaces.
-    //this.stream.skipUntil(Token.isNewLine);
-
     if(Token.isNewLine(token)){
       // skip continuous white-spaces.
       this.stream.skipUntil(Token.isNewLine);
@@ -14969,7 +14956,7 @@ var TableRowGenerator = (function(){
   };
 
   TableRowGenerator.prototype._getChildTags = function(stream){
-    return stream.getAllIf(function(token){
+    return List.filter(stream.getTokens(), function(token){
       return (token instanceof Tag && (token.getName() === "td" || token.getName() === "th"));
     });
   };
@@ -15075,7 +15062,12 @@ var HtmlGenerator = (function(){
      @param text {String}
   */
   function HtmlGenerator(text){
-    this.stream = new HtmlTokenStream(text);
+    this.stream = new TokenStream(text, {
+      filter:Closure.isTagName(["head", "body"])
+    });
+    if(this.stream.isEmptyTokens()){
+      this.stream.tags = [new Tag("body", text)];
+    }
     this.generator = this._createGenerator();
   }
 
@@ -15113,7 +15105,9 @@ var HtmlGenerator = (function(){
 	var tag = this.stream.get();
 	switch(tag.getName()){
 	case "head":
-	  this._parseDocumentHeader(new HeadTokenStream(tag.getContent()));
+	  this._parseDocumentHeader(new TokenStream(tag.getContent(), {
+	    filter:Closure.isTagName(["title", "meta", "link", "style", "script"])
+	  }));
 	  break;
 	case "body":
 	  return this._createBodyGenerator(tag.getContent());
@@ -15163,7 +15157,12 @@ var DocumentGenerator = (function(){
      @param text {String} - html source text
   */
   function DocumentGenerator(text){
-    this.stream = new DocumentTokenStream(text);
+    this.stream = new TokenStream(text, {
+      filter:Closure.isTagName(["!doctype", "html"])
+    });
+    if(this.stream.isEmptyTokens()){
+      this.stream.tokens = [new Tag("html", text)];
+    }
     this.generator = this._createGenerator();
   }
 

@@ -16,6 +16,10 @@ var Tag = (function (){
     this.content = content || "";
     this.name = this._parseName(this.src);
     this.attrs = this._parseTagAttrs(this.name, this.src);
+    this._firstChild = false;
+    this._firstOfType = false;
+    this._lastChild = false;
+    this._lastOfType = false;
   }
 
   Tag.prototype = {
@@ -74,6 +78,34 @@ var Tag = (function (){
     */
     setData : function(name, value){
       this.attrs.setData(name, value);
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setFirstChild : function(status){
+      this._firstChild = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setFirstOfType : function(status){
+      this._firstOfType = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setLastChild : function(status){
+      this._lastChild = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setLastOfType : function(status){
+      this._lastOfType = status;
     },
     /**
        @memberof Nehan.Tag
@@ -222,6 +254,34 @@ var Tag = (function (){
     */
     isEmpty : function(){
       return this.content === "";
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isFirstChild : function(){
+      return this._firstChild;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isFirstOfType : function(){
+      return this._firstOfType;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isLastChild : function(){
+      return this._lastChild;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isLastOfType : function(){
+      return this._lastOfType;
     },
     _getTagAttrSrc : function(src){
       return src
