@@ -14,6 +14,7 @@ o Add new lexer and generator(TextLexer, TextGenerator), so now inline element a
 ! Remove LexingRule::addSingleTagByRex.
 ! Not throw exception if page_no not found at PagedElement::setPage(page_no).
 ! Fix page-break bug, and delete BreakAfterGenerator.
+! Remove FilteredTokenStream.
 
 version 5.0.5 2015/03/06
 ========================
