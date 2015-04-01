@@ -4162,6 +4162,8 @@ var Tag = (function (){
     this._firstOfType = false;
     this._lastChild = false;
     this._lastOfType = false;
+    this._onlyChild = false;
+    this._onlyOfType = false;
   }
 
   Tag.prototype = {
@@ -4227,6 +4229,20 @@ var Tag = (function (){
     */
     setFirstChild : function(status){
       this._firstChild = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setOnlyChild : function(status){
+      this._onlyChild = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setOnlyOfType : function(status){
+      this._onlyOfType = status;
     },
     /**
        @memberof Nehan.Tag
@@ -4408,6 +4424,20 @@ var Tag = (function (){
        @memberof Nehan.Tag
        @return {boolean}
     */
+    isOnlyChild : function(){
+      return this._onlyChild;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isOnlyOfType : function(){
+      return this._onlyOfType;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
     isFirstOfType : function(){
       return this._firstOfType;
     },
@@ -4545,7 +4575,6 @@ var Text = (function(){
       // but we want to replace half one only.
       var replaced = this.content
 	.replace(/ /g, "") // half space
-	.replace(/&nbsp;/g, "")
 	.replace(/\n/g, "")
 	.replace(/\t/g, "");
       return replaced === "";
@@ -9480,6 +9509,18 @@ var TokenStream = (function(){
     this._loadTokens(this._filter);
   }
 
+  var __set_pseudo = function(tags){
+    tags[0].setFirstChild(true);
+    tags[0].setOnlyChild(tags.length === 1);
+    tags[tags.length - 1].setLastChild(true);
+  };
+
+  var __set_pseudo_of_type = function(tags){
+    tags[0].setFirstOfType(true);
+    tags[0].setOnlyOfType(tags.length === 1);
+    tags[tags.length - 1].setLastOfType(true);
+  };
+
   TokenStream.prototype = {
     /**
        @memberof Nehan.TokenStream
@@ -9698,13 +9739,11 @@ var TokenStream = (function(){
 	  type_of_tags[tag_name].push(tag);
 	} else {
 	  type_of_tags[tag_name] = [tag];
-	  tag.setFirstOfType(true);
 	}
       });
-      tags[0].setFirstChild(true);
-      tags[tags.length - 1].setLastChild(true);
+      __set_pseudo(tags);
       for(var tag_name in type_of_tags){
-	List.last(type_of_tags[tag_name]).setLastOfType(true);
+	__set_pseudo_of_type(type_of_tags[tag_name]);
       }
     },
     _createLexer : function(src){
@@ -11575,51 +11614,42 @@ var StyleContext = (function(){
        @return {boolean}
     */
     isFirstChild : function(){
-      var childs = this.getParentChilds();
-      return (childs.length > 0 && childs[0] === this);
+      return this.markup.isFirstChild();
     },
     /**
        @memberof Nehan.StyleContext
        @return {boolean}
     */
     isFirstOfType : function(){
-      var childs = this.getParentChildsOfType(this.getMarkupName());
-      return (childs.length > 0 && childs[0] === this);
+      return this.markup.isFirstOfType();
     },
     /**
        @memberof Nehan.StyleContext
        @return {boolean}
     */
     isLastChild : function(){
-      // for descent parsing, last child can't be gained,
-      // this pseudo-class is maybe enabled in future release.
-
-      //return List.last(this.getParentChilds()) === this;
-      return false; // TODO
+      return this.markup.isLastChild();
     },
     /**
        @memberof Nehan.StyleContext
        @return {boolean}
     */
     isLastOfType : function(){
-      //return List.last(this.getParentChildsOfType(this.getMarkupName())) === this;
-      return false; // TODO
+      return this.markup.isLastOfType();
     },
     /**
        @memberof Nehan.StyleContext
        @return {boolean}
     */
     isOnlyChild : function(){
-      var childs = this.getParentChilds();
-      return (childs.length === 1 && childs[0] === this);
+      return this.markup.isOnlyChild();
     },
     /**
        @memberof Nehan.StyleContext
        @return {boolean}
     */
     isOnlyOfType : function(){
-      var childs = this.getParentChildsOfType(this.getMarkupName());
-      return (childs.length === 1 && childs[0] === this);
+      return this.markup.isOnlyOfType();
     },
     /**
        @memberof Nehan.StyleContext

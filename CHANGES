@@ -9,6 +9,7 @@ Mark "!": change that can break compatibility with older version
 version 5.1.0 2015/??/??
 ========================
 o Add new lexer and generator(TextLexer, TextGenerator), so now inline element and text node are devided into different tree.
+o Support last-child, last-of-type detection.
 * Fix float bug in horizontal mode(see "float" at example/catalog5.html).
 * Fix baseline problem in many case.
 ! Remove LexingRule::addSingleTagByRex.

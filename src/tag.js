@@ -20,6 +20,8 @@ var Tag = (function (){
     this._firstOfType = false;
     this._lastChild = false;
     this._lastOfType = false;
+    this._onlyChild = false;
+    this._onlyOfType = false;
   }
 
   Tag.prototype = {
@@ -85,6 +87,20 @@ var Tag = (function (){
     */
     setFirstChild : function(status){
       this._firstChild = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setOnlyChild : function(status){
+      this._onlyChild = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setOnlyOfType : function(status){
+      this._onlyOfType = status;
     },
     /**
        @memberof Nehan.Tag
@@ -261,6 +277,20 @@ var Tag = (function (){
     */
     isFirstChild : function(){
       return this._firstChild;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isOnlyChild : function(){
+      return this._onlyChild;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isOnlyOfType : function(){
+      return this._onlyOfType;
     },
     /**
        @memberof Nehan.Tag

@@ -794,51 +794,42 @@ var StyleContext = (function(){
        @return {boolean}
     */
     isFirstChild : function(){
-      var childs = this.getParentChilds();
-      return (childs.length > 0 && childs[0] === this);
+      return this.markup.isFirstChild();
     },
     /**
        @memberof Nehan.StyleContext
        @return {boolean}
     */
     isFirstOfType : function(){
-      var childs = this.getParentChildsOfType(this.getMarkupName());
-      return (childs.length > 0 && childs[0] === this);
+      return this.markup.isFirstOfType();
     },
     /**
        @memberof Nehan.StyleContext
        @return {boolean}
     */
     isLastChild : function(){
-      // for descent parsing, last child can't be gained,
-      // this pseudo-class is maybe enabled in future release.
-
-      //return List.last(this.getParentChilds()) === this;
-      return false; // TODO
+      return this.markup.isLastChild();
     },
     /**
        @memberof Nehan.StyleContext
        @return {boolean}
     */
     isLastOfType : function(){
-      //return List.last(this.getParentChildsOfType(this.getMarkupName())) === this;
-      return false; // TODO
+      return this.markup.isLastOfType();
     },
     /**
        @memberof Nehan.StyleContext
        @return {boolean}
     */
     isOnlyChild : function(){
-      var childs = this.getParentChilds();
-      return (childs.length === 1 && childs[0] === this);
+      return this.markup.isOnlyChild();
     },
     /**
        @memberof Nehan.StyleContext
        @return {boolean}
     */
     isOnlyOfType : function(){
-      var childs = this.getParentChildsOfType(this.getMarkupName());
-      return (childs.length === 1 && childs[0] === this);
+      return this.markup.isOnlyOfType();
     },
     /**
        @memberof Nehan.StyleContext

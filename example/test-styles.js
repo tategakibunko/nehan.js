@@ -2,13 +2,23 @@ var TestStyles = {
   ".nehan-test-pseudo li:first-child":{
     "color":"green"
   },
+  ".nehan-test-pseudo li:last-child":{
+    "background-color":"skyblue"
+  },
   ".nehan-test-pseudo p:first-of-type":{
-    "font-weight":"bold",
     "color":"red"
   },
-  ".nehan-test-pseudo blockquote:only-of-type":{
+  ".nehan-test-pseudo p:last-of-type":{
+    "color":"blue"
+  },
+  ".nehan-test-pseudo-only div:only-of-type":{
+    "background-color":"#ccc",
     "color":"white",
-    "background-color":"gray"
+    "margin":{"after":"1em"}
+  },
+  ".nehan-test-pseudo-only p:only-child":{
+    "background-color":"black",
+    "color":"white"
   },
   ".nehan-gen-adj-test a~b":{
     "color":"green"

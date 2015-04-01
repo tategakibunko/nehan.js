@@ -18,6 +18,18 @@ var TokenStream = (function(){
     this._loadTokens(this._filter);
   }
 
+  var __set_pseudo = function(tags){
+    tags[0].setFirstChild(true);
+    tags[0].setOnlyChild(tags.length === 1);
+    tags[tags.length - 1].setLastChild(true);
+  };
+
+  var __set_pseudo_of_type = function(tags){
+    tags[0].setFirstOfType(true);
+    tags[0].setOnlyOfType(tags.length === 1);
+    tags[tags.length - 1].setLastOfType(true);
+  };
+
   TokenStream.prototype = {
     /**
        @memberof Nehan.TokenStream
@@ -236,13 +248,11 @@ var TokenStream = (function(){
 	  type_of_tags[tag_name].push(tag);
 	} else {
 	  type_of_tags[tag_name] = [tag];
-	  tag.setFirstOfType(true);
 	}
       });
-      tags[0].setFirstChild(true);
-      tags[tags.length - 1].setLastChild(true);
+      __set_pseudo(tags);
       for(var tag_name in type_of_tags){
-	List.last(type_of_tags[tag_name]).setLastOfType(true);
+	__set_pseudo_of_type(type_of_tags[tag_name]);
       }
     },
     _createLexer : function(src){

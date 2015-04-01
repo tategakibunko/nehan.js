@@ -344,16 +344,26 @@ var Script = {
   ].join(""),
 
   "pseudo-class":[
-    "<h2>pseudo root</h2>",
-    "this is root sentence",
-    "<h2>pseudo first</h2>",
+    "<h2>first/last</h2>",
     "<div class='nehan-test-pseudo'>",
     "<ul>",
     "<li>first</li>",
     "<li>second</li>",
+    "<li>last</li>",
     "</ul>",
     "<p>first of type</p>",
-    "<blockquote>only of type</blockquote>",
+    "<p>last of type</p>",
+    "</div>",
+
+    "<h2>only child</h2>",
+    "<div class='nehan-test-pseudo-only'>",
+    "<p>only child</p>",
+    "</div>",
+
+    "<h2>only of type</h2>",
+    "<div class='nehan-test-pseudo-only'>",
+    "<div>only of type</div>",
+    "<p>child</p>",
     "</div>"
   ].join("\n"),
 
