@@ -155,11 +155,6 @@ var InlineGenerator = (function(){
       return null;
     }
 
-    // if inline-block, yield immediately, and return as child inline element.
-    if(child_style.isInlineBlock()){
-      return (new InlineBlockGenerator(child_style, child_stream)).yield(context);
-    }
-
     // inline child
     switch(child_style.getMarkupName()){
     case "img":
