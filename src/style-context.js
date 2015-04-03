@@ -150,7 +150,7 @@ var StyleContext = (function(){
       if(edge){
 	this.edge = edge;
 	if(this.edge.margin){
-	  this._cancelMargin();
+	  this._collapseMargin();
 	}
       }
       var line_height = this._loadLineHeight();
@@ -426,6 +426,20 @@ var StyleContext = (function(){
       if(this.parent && opt.extent){
 	extent = this.staticExtent || opt.extent;
       }
+      var edge = this.edge || null;
+
+      /*
+      if(edge && (!opt.isFirts || !opt.isLast)){
+	edge = edge.clone();
+	if(!opt.isFirst){
+	  //console.log("[%s]clear before", this.markupName);
+	  edge.clearBefore(this.flow);
+	}
+	if(!opt.isLast){
+	  //console.log("[%s]clear after", this.markupName);
+	  edge.clearAfter(this.flow);
+	}
+      }*/
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
@@ -440,7 +454,7 @@ var StyleContext = (function(){
       }
       box.blockId = opt.blockId;
       box.display = (this.display === "inline-block")? this.display : "block";
-      box.edge = this.edge || null;
+      box.edge = edge;
       box.elements = elements;
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
@@ -448,6 +462,8 @@ var StyleContext = (function(){
       });
       box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
       box.content = opt.content || null;
+      box.isFirst = opt.isFirst || false;
+      box.isLast = opt.isLast || false;
       if(this.isPushed()){
 	box.pushed = true;
       } else if(this.isPulled()){
@@ -455,20 +471,6 @@ var StyleContext = (function(){
       }
       return box;
     },
-    /* TODO
-    _createBlockContextEdge : function(edge, is_first, is_last){
-      if(!is_first && !is_last){
-	return edge;
-      }
-      var context_edge = edge.clone();
-      if(is_first){
-	context_edge.clearAfter(this.flow);
-      }
-      if(is_last){
-	context_edge.clearBefore(this.flow);
-      }
-      return context_edge;
-    },*/
     /**
        @memberof Nehan.StyleContext
        @param opt
@@ -1238,6 +1240,22 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {int}
+    */
+    getEdgeBefore : function(flow){
+      var edge = this.edge || null;
+      return edge? edge.getBefore(flow || this.flow) : 0;
+    },
+    /**
+       @memberof Nehan.StyleContext
+       @return {int}
+    */
+    getEdgeAfter : function(flow){
+      var edge = this.edge || null;
+      return edge? edge.getAfter(flow || this.flow) : 0;
+    },
+    /**
+       @memberof Nehan.StyleContext
        @return {Object} {before:xxx, after:yyy}
     */
     getBlockContextEdge : function(flow){
@@ -1690,103 +1708,108 @@ var StyleContext = (function(){
       return margin;
     },
     // precondition: this.edge.margin is available
-    _cancelMargin : function(){
+    _collapseMargin : function(){
       if(this.parent && this.parent.edge && this.parent.edge.margin){
-	this._cancelMarginParent();
+	this._collapseMarginParent();
       }
       if(this.prev && this.prev.isBlock() && this.prev.edge){
 	// cancel margin between previous sibling and cur element.
 	if(this.prev.edge.margin && this.edge.margin){
-	  this._cancelMarginSibling();
+	  this._collapseMarginSibling();
 	}
       }
     },
     // cancel margin between parent and current element
-    _cancelMarginParent : function(){
+    _collapseMarginParent : function(){
       if(this.isFirstChild()){
-	this._cancelMarginFirstChild();
+	this._collapseMarginFirstChild();
       }
       if(this.isLastChild()){
-	this._cancelMarginLastChild();
+	this._collapseMarginLastChild();
       }
     },
     // cancel margin between parent and first-child(current element)
-    _cancelMarginFirstChild : function(){
+    _collapseMarginFirstChild : function(){
       if(this.flow === this.parent.flow){
-	this._setCancelMarginBetween(
+	this._collapseMarginBetween(
 	  {flow:this.flow, edge:this.parent.edge, target:"before"},
 	  {flow:this.flow, edge:this.edge, target:"before"}
 	);
       }
     },
     // cancel margin between parent and first-child(current element)
-    _cancelMarginLastChild : function(){
+    _collapseMarginLastChild : function(){
       if(this.flow === this.parent.flow){
-	this._setCancelMarginBetween(
+	this._collapseMarginBetween(
 	  {flow:this.flow, edge:this.parent.edge, target:"after"},
 	  {flow:this.flow, edge:this.edge, target:"after"}
 	);
       }
     },
     // cancel margin prev sibling and current element
-    _cancelMarginSibling : function(){
+    _collapseMarginSibling : function(){
       if(this.flow === this.prev.flow){
 	// both prev and cur are floated to same direction
 	if(this.isFloated() && this.prev.isFloated()){
 	  if(this.isFloatStart() && this.prev.isFloatStart()){
 	    // [start] x [start]
-	    this._setCancelMarginBetween(
+	    this._collapseMarginBetween(
 	      {flow:this.prev.flow, edge:this.prev.edge, target:"end"},
 	      {flow:this.flow, edge:this.edge, target:"start"}
 	    );
 	  } else if(this.isFloatEnd() && this.prev.isFloatEnd()){
 	    // [end] x [end]
-	    this._setCancelMarginBetween(
+	    this._collapseMarginBetween(
 	      {flow:this.prev.flow, edge:this.prev.edge, target:"start"},
 	      {flow:this.flow, edge:this.edge, target:"end"}
 	    );
 	  }
 	} else if(!this.isFloated() && !this.prev.isFloated()){
 	  // [block] x [block]
-	  this._setCancelMarginBetween(
+	  this._collapseMarginBetween(
 	    {flow:this.prev.flow, edge:this.prev.edge, target:"after"},
 	    {flow:this.flow, edge:this.edge, target:"before"}
 	  );
 	}
       } else if(this.prev.isTextHorizontal() && this.isTextVertical()){
 	// [hori] x [vert]
-	this._setCancelMarginBetween(
+	this._collapseMarginBetween(
 	  {flow:this.prev.flow, edge:this.prev.edge, target:"after"},
 	  {flow:this.flow, edge:this.edge, target:"before"}
 	);
       } else if(this.prev.isTextVertical() && this.isTextHorizontal()){
 	if(this.prev.flow.isBlockRightToLeft()){
 	  // [vert:tb-rl] x [hori]
-	  this._setCancelMarginBetween(
+	  this._collapseMarginBetween(
 	    {flow:this.prev.flow, edge:this.prev.edge, target:"after"},
 	    {flow:this.flow, edge:this.edge, target:"end"}
 	  );
 	} else {
 	  // [vert:tb-lr] x [hori]
-	  this._setCancelMarginBetween(
+	  this._collapseMarginBetween(
 	    {flow:this.prev.flow, edge:this.prev.edge, target:"after"},
 	    {flow:this.flow, edge:this.edge, target:"start"}
 	  );
 	}
       }
     },
-    // 1. if prev_margin > cur_margin, just clear cur_margin.
-    // 2. if prev_margin < cur_margin, clear cur_margin and add extra 'padding' to cur_block instead.
-    //    because two margin is canceled by native browser,
-    //    but edge of prev is unnabled to cancel as it is displayed already.
-    _setCancelMarginBetween : function(prev, cur){
+    // if prev_margin > cur_margin, just clear cur_margin.
+    _collapseMarginBetween : function(prev, cur){
+      // before collapsing, check if border between to edge exsits.
+      // if border exists between two edge, margin collapsing is ignored.
+      if(prev.edge.border && prev.edge.border.getByName(prev.flow, prev.target) ||
+	 cur.edge.border && cur.edge.border.getByName(cur.flow, cur.target)){
+	return;
+      }
       var prev_size = prev.edge.margin.getByName(prev.flow, prev.target);
       var cur_size = cur.edge.margin.getByName(cur.flow, cur.target);
-      cur.edge.margin.setByName(cur.flow, cur.target, 0);
-      if(prev_size < cur_size){
-	cur.edge.padding = cur.edge.padding || new Padding();
-	cur.edge.padding.setByName(cur.flow, cur.target, cur.edge.padding.getByName(cur.flow, cur.target) + cur_size - prev_size);
-      }
+
+      // we use float for layouting each block element in evaluation phase,
+      // so standard margin collapsing doesn't work.
+      // that is because we use 'differene' of margin for collapsed size.
+      var new_size = (prev_size > cur_size)? 0 : cur_size - prev_size;
+
+      cur.edge.margin.setByName(cur.flow, cur.target, new_size);
     },
     _loadBorder : function(flow, font_size){
       var edge_size = this._loadEdgeSize(font_size, "border-width");

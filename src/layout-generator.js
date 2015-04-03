@@ -14,6 +14,7 @@ var LayoutGenerator = (function(){
     this._child = null;
     this._cachedElements = [];
     this._terminate = false; // used to force terminate generator.
+    this._yieldCount = 0;
   }
 
   /**
@@ -27,7 +28,14 @@ var LayoutGenerator = (function(){
     var context = parent_context? this._createChildContext(parent_context) : this._createStartContext();
 
     // call _yield implemented in inherited class.
-    return this._yield(context);
+    var result = this._yield(context);
+
+    // increment inner yield count
+    if(result !== null){
+      this._yieldCount++;
+    }
+
+    return result;
   };
 
   LayoutGenerator.prototype._yield = function(context){
@@ -90,6 +98,15 @@ var LayoutGenerator = (function(){
   */
   LayoutGenerator.prototype.hasCache = function(){
     return this._cachedElements.length > 0;
+  };
+
+  /**
+     @memberof Nehan.LayoutGenerator
+     @method isFirstOutput
+     @return {boolean}
+  */
+  LayoutGenerator.prototype.isFirstOutput = function(){
+    return this._yieldCount === 0;
   };
 
   /**

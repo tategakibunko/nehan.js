@@ -21,8 +21,7 @@ var Border = (function(){
     var border = this.copyTo(new Border());
     if(this.radius){
       // TODO
-      // border.radius = this.radius.clone();
-      border.radius = this.radius;
+      border.radius = this.radius.clone();
     }
     if(this.style){
       // TODO

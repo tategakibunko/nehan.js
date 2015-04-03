@@ -11,6 +11,12 @@ var Radius2d = (function(){
   }
 
   Radius2d.prototype = {
+    clone : function(){
+      var radius2d = new Radius2d();
+      radius2d.hori = this.hori;
+      radius2d.vert = this.vert;
+      return radius2d;
+    },
     /**
        @memberof Nehan.Radius2d
        @param value {Array<int>} - 2 length array, value[0] as horizontal radius, value[1] as vertical radius.

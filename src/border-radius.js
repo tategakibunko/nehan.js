@@ -13,6 +13,14 @@ var BorderRadius = (function(){
   }
 
   BorderRadius.prototype = {
+    clone : function(){
+      var radius = new BorderRadius();
+      radius.topLeft = this.topLeft.clone();
+      radius.topRight = this.topRight.clone();
+      radius.bottomRight = this.bottomRight.clone();
+      radius.bottomLeft = this.bottomLeft.clone();
+      return radius;
+    },
     /**
        @memberof Nehan.BorderRadius
        @method getArray

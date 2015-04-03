@@ -160,7 +160,10 @@ var BlockGenerator = (function(){
       blockId:this.blockId,
       extent:extent,
       elements:elements,
-      breakAfter:context.hasBreakAfter()
+      breakAfter:context.hasBreakAfter(),
+      localPageNo:this._yieldCount,
+      isFirst:this.isFirstOutput(),
+      isLast:!this.hasNext()
     };
     if(typeof this.rootBlockId !== "undefined"){
       block_args.rootBlockId = this.rootBlockId;
@@ -174,7 +177,10 @@ var BlockGenerator = (function(){
     if(!this.hasNext()){
       this._onComplete(context, block);
     }
-     //console.log(">> block output:%o:(m=%d, e=%d):(%s)", block, block.size.height, block.size.width, block.toString());
+    /*
+    console.log("[%s] block output:%o:(m=%d, e=%d, maxe=%d):(%s), first:%o, last:%o",
+		this.style.markupName, block, block.size.height, block.size.width, context.block.maxExtent, block.toString().substring(0,10), this.isFirstOutput(), !this.hasNext());
+    */
     return block;
   };
 
