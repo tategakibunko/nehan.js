@@ -176,6 +176,50 @@ var Edge = (function(){
     */
     getAfter : function(flow){
       return this[flow.getPropAfter()];
+    },
+    /**
+       @memberof Nehan.Edge
+       @param flow {Nehan.BoxFlow}
+       @param name {String} - before, end, after, start
+    */
+    setByName : function(flow, name, value){
+      switch(name){
+      case "before":
+	this.setBefore(flow, value);
+	break;
+      case "end":
+	this.setEnd(flow, value);
+	break;
+      case "after":
+	this.setAfter(flow, value);
+	break;
+      case "start":
+	this.setStart(flow, value);
+	break;
+      default:
+	console.error("Edge::setByName, undefined direction:", name);
+      }
+    },
+    /**
+       @memberof Nehan.Edge
+       @param flow {Nehan.BoxFlow}
+       @param name {String} - before, end, after, start
+       @return {int}
+    */
+    getByName : function(flow, name){
+      switch(name){
+      case "before":
+	return this.getBefore(flow);
+      case "end":
+	return this.getEnd(flow);
+      case "after":
+	return this.getAfter(flow);
+      case "start":
+	return this.getStart(flow);
+      default:
+	consolo.error("Edge::getByName, undefined direction:", name);
+	return 0;
+      }
     }
   };
 

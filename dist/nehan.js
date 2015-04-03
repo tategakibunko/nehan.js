@@ -7090,6 +7090,50 @@ var Edge = (function(){
     */
     getAfter : function(flow){
       return this[flow.getPropAfter()];
+    },
+    /**
+       @memberof Nehan.Edge
+       @param flow {Nehan.BoxFlow}
+       @param name {String} - before, end, after, start
+    */
+    setByName : function(flow, name, value){
+      switch(name){
+      case "before":
+	this.setBefore(flow, value);
+	break;
+      case "end":
+	this.setEnd(flow, value);
+	break;
+      case "after":
+	this.setAfter(flow, value);
+	break;
+      case "start":
+	this.setStart(flow, value);
+	break;
+      default:
+	console.error("Edge::setByName, undefined direction:", name);
+      }
+    },
+    /**
+       @memberof Nehan.Edge
+       @param flow {Nehan.BoxFlow}
+       @param name {String} - before, end, after, start
+       @return {int}
+    */
+    getByName : function(flow, name){
+      switch(name){
+      case "before":
+	return this.getBefore(flow);
+      case "end":
+	return this.getEnd(flow);
+      case "after":
+	return this.getAfter(flow);
+      case "start":
+	return this.getStart(flow);
+      default:
+	consolo.error("Edge::getByName, undefined direction:", name);
+	return 0;
+      }
     }
   };
 
@@ -10969,6 +11013,13 @@ var StyleContext = (function(){
       var edge = this._loadEdge(this.flow, this.getFontSize());
       if(edge){
 	this.edge = edge;
+
+	if(this.prev && this.prev.isBlock() && this.prev.edge){
+	  // cancel margin between previous sibling and cur element.
+	  if(this.prev.edge.margin && this.edge.margin){
+	    this._cancelMarginBetween(this.prev);
+	  }
+	}
       }
       var line_height = this._loadLineHeight();
       if(line_height){
@@ -12499,19 +12550,6 @@ var StyleContext = (function(){
       var margin = new Margin();
       margin.setSize(flow, edge_size);
 
-      // cancel margin between previous sibling and cur element if
-      // 1. prev sibling element with edge exists.
-      // 2. both prev and cur have display "block".
-      // 3. both prev and cur have same box flow.
-      // 4. both prev and cur is not floated element.
-      // 5. prev has margin-after and cur has margin-before.
-      if(this.prev && this.prev.display === "block" && !this.prev.isFloated() && this.prev.edge &&
-	 this.flow === this.prev.flow &&
-	 this.display === "block" && !this.isFloated() &&
-	 (this.prev.edge.margin.getAfter(this.flow) > 0) &&
-	 (margin.getBefore(this.flow) > 0)){
-	this._cancelMargin(this.flow, margin, this.prev.edge.margin);
-      }
       // if inline, disable margin-before and margin-after.
       if(this.isInline()){
 	margin.clearBefore(flow);
@@ -12519,13 +12557,63 @@ var StyleContext = (function(){
       }
       return margin;
     },
-    _cancelMargin : function(flow, cur_margin, prev_margin){
-      var after = prev_margin.getAfter(flow);
-      var before = cur_margin.getBefore(flow);
-      if(after >= before){
-	cur_margin.setBefore(flow, 0);
-      } else {
-	cur_margin.setBefore(flow, before - after);
+    _cancelMarginBetween : function(prev){
+      if(this.flow === prev.flow){
+	// both prev and cur are floated to same direction
+	if(this.isFloated() && prev.isFloated()){
+	  if(this.isFloatStart() && prev.isFloatStart()){
+	    // [start] x [start]
+	    this._setCancelMarginBetween(
+	      {flow:prev.flow, edge:prev.edge, target:"end"},
+	      {flow:this.flow, edge:this.edge, target:"start"}
+	    );
+	  } else if(this.isFloatEnd() && prev.isFloatEnd()){
+	    // [end] x [end]
+	    this._setCancelMarginBetween(
+	      {flow:prev.flow, edge:prev.edge, target:"start"},
+	      {flow:this.flow, edge:this.edge, target:"end"}
+	    );
+	  }
+	} else if(!this.isFloated() && !prev.isFloated()){
+	  // [block] x [block]
+	  this._setCancelMarginBetween(
+	    {flow:prev.flow, edge:prev.edge, target:"after"},
+	    {flow:this.flow, edge:this.edge, target:"before"}
+	  );
+	}
+      } else if(prev.isTextHorizontal() && this.isTextVertical()){
+	// [hori] x [vert]
+	this._setCancelMarginBetween(
+	  {flow:prev.flow, edge:prev.edge, target:"after"},
+	  {flow:this.flow, edge:this.edge, target:"before"}
+	);
+      } else if(prev.isTextVertical() && this.isTextHorizontal()){
+	if(prev.isBlockRightToLeft()){
+	  // [vert:tb-rl] x [hori]
+	  this._setCancelMarginBetween(
+	    {flow:prev.flow, edge:prev.edge, target:"after"},
+	    {flow:this.flow, edge:this.edge, target:"end"}
+	  );
+	} else {
+	  // [vert:tb-lr] x [hori]
+	  this._setCancelMarginBetween(
+	    {flow:prev.flow, edge:prev.edge, target:"after"},
+	    {flow:this.flow, edge:this.edge, target:"start"}
+	  );
+	}
+      }
+    },
+    // 1. if prev_margin > cur_margin, just clear cur_margin.
+    // 2. if prev_margin < cur_margin, clear cur_margin and add extra 'padding' to cur_block instead.
+    //    because two margin is canceled by native browser,
+    //    but edge of prev is unnabled to cancel as it is displayed already.
+    _setCancelMarginBetween : function(prev, cur){
+      var prev_size = prev.edge.margin.getByName(prev.flow, prev.target);
+      var cur_size = cur.edge.margin.getByName(cur.flow, cur.target);
+      cur.edge.margin.setByName(cur.flow, cur.target, 0);
+      if(prev_size < cur_size){
+	cur.edge.padding = cur.edge.padding || new Padding();
+	cur.edge.padding.setByName(cur.flow, cur.target, cur.edge.padding.getByName(cur.flow, cur.target) + cur_size - prev_size);
       }
     },
     _loadBorder : function(flow, font_size){
