@@ -149,12 +149,8 @@ var StyleContext = (function(){
       var edge = this._loadEdge(this.flow, this.getFontSize());
       if(edge){
 	this.edge = edge;
-
-	if(this.prev && this.prev.isBlock() && this.prev.edge){
-	  // cancel margin between previous sibling and cur element.
-	  if(this.prev.edge.margin && this.edge.margin){
-	    this._cancelMarginBetween(this.prev);
-	  }
+	if(this.edge.margin){
+	  this._cancelMargin();
 	}
       }
       var line_height = this._loadLineHeight();
@@ -1693,47 +1689,87 @@ var StyleContext = (function(){
       }
       return margin;
     },
-    _cancelMarginBetween : function(prev){
-      if(this.flow === prev.flow){
+    // precondition: this.edge.margin is available
+    _cancelMargin : function(){
+      if(this.parent && this.parent.edge && this.parent.edge.margin){
+	this._cancelMarginParent();
+      }
+      if(this.prev && this.prev.isBlock() && this.prev.edge){
+	// cancel margin between previous sibling and cur element.
+	if(this.prev.edge.margin && this.edge.margin){
+	  this._cancelMarginSibling();
+	}
+      }
+    },
+    // cancel margin between parent and current element
+    _cancelMarginParent : function(){
+      if(this.isFirstChild()){
+	this._cancelMarginFirstChild();
+      }
+      if(this.isLastChild()){
+	this._cancelMarginLastChild();
+      }
+    },
+    // cancel margin between parent and first-child(current element)
+    _cancelMarginFirstChild : function(){
+      if(this.flow === this.parent.flow){
+	this._setCancelMarginBetween(
+	  {flow:this.flow, edge:this.parent.edge, target:"before"},
+	  {flow:this.flow, edge:this.edge, target:"before"}
+	);
+      }
+    },
+    // cancel margin between parent and first-child(current element)
+    _cancelMarginLastChild : function(){
+      if(this.flow === this.parent.flow){
+	this._setCancelMarginBetween(
+	  {flow:this.flow, edge:this.parent.edge, target:"after"},
+	  {flow:this.flow, edge:this.edge, target:"after"}
+	);
+      }
+    },
+    // cancel margin prev sibling and current element
+    _cancelMarginSibling : function(){
+      if(this.flow === this.prev.flow){
 	// both prev and cur are floated to same direction
-	if(this.isFloated() && prev.isFloated()){
-	  if(this.isFloatStart() && prev.isFloatStart()){
+	if(this.isFloated() && this.prev.isFloated()){
+	  if(this.isFloatStart() && this.prev.isFloatStart()){
 	    // [start] x [start]
 	    this._setCancelMarginBetween(
-	      {flow:prev.flow, edge:prev.edge, target:"end"},
+	      {flow:this.prev.flow, edge:this.prev.edge, target:"end"},
 	      {flow:this.flow, edge:this.edge, target:"start"}
 	    );
-	  } else if(this.isFloatEnd() && prev.isFloatEnd()){
+	  } else if(this.isFloatEnd() && this.prev.isFloatEnd()){
 	    // [end] x [end]
 	    this._setCancelMarginBetween(
-	      {flow:prev.flow, edge:prev.edge, target:"start"},
+	      {flow:this.prev.flow, edge:this.prev.edge, target:"start"},
 	      {flow:this.flow, edge:this.edge, target:"end"}
 	    );
 	  }
-	} else if(!this.isFloated() && !prev.isFloated()){
+	} else if(!this.isFloated() && !this.prev.isFloated()){
 	  // [block] x [block]
 	  this._setCancelMarginBetween(
-	    {flow:prev.flow, edge:prev.edge, target:"after"},
+	    {flow:this.prev.flow, edge:this.prev.edge, target:"after"},
 	    {flow:this.flow, edge:this.edge, target:"before"}
 	  );
 	}
-      } else if(prev.isTextHorizontal() && this.isTextVertical()){
+      } else if(this.prev.isTextHorizontal() && this.isTextVertical()){
 	// [hori] x [vert]
 	this._setCancelMarginBetween(
-	  {flow:prev.flow, edge:prev.edge, target:"after"},
+	  {flow:this.prev.flow, edge:this.prev.edge, target:"after"},
 	  {flow:this.flow, edge:this.edge, target:"before"}
 	);
-      } else if(prev.isTextVertical() && this.isTextHorizontal()){
-	if(prev.isBlockRightToLeft()){
+      } else if(this.prev.isTextVertical() && this.isTextHorizontal()){
+	if(this.prev.flow.isBlockRightToLeft()){
 	  // [vert:tb-rl] x [hori]
 	  this._setCancelMarginBetween(
-	    {flow:prev.flow, edge:prev.edge, target:"after"},
+	    {flow:this.prev.flow, edge:this.prev.edge, target:"after"},
 	    {flow:this.flow, edge:this.edge, target:"end"}
 	  );
 	} else {
 	  // [vert:tb-lr] x [hori]
 	  this._setCancelMarginBetween(
-	    {flow:prev.flow, edge:prev.edge, target:"after"},
+	    {flow:this.prev.flow, edge:this.prev.edge, target:"after"},
 	    {flow:this.flow, edge:this.edge, target:"start"}
 	  );
 	}
