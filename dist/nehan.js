@@ -10712,6 +10712,55 @@ var SelectorPropContext = (function(){
     */
     getChildIndexOfType : function(){
       return this._style.getChildIndexOfType;
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isFirstChild : function(){
+      return this._style.isFirstChild();
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isFirstOfType : function(){
+      return this._style.isFirstOfType();
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isLastChild : function(){
+      return this._style.isLastChild();
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isLastOfType : function(){
+      return this._style.isLastOfType();
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isOnlyChild : function(){
+      return this._style.isOnlyChild();
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isOnlyOfType : function(){
+      return this._style.isOnlyOfType();
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isMarkupEmpty : function(){
+      return this._style.isMarkupEmpty();
     }
   };
 
@@ -10890,15 +10939,7 @@ var StyleContext = (function(){
       // initialize tree
       if(parent){
 	parent.appendChild(this);
-	/*
-	console.log("%s(%s) > %s(%s)",
-		    parent.markup.name,
-		    parent.markup.content.replace(/[\s\n]/g, "").replace(/</g, "[").replace(/>/g, "]").substring(0,10),
-		    this.markup.name,
-		    this.markup.content.replace(/[\s\n]/g, "").replace(/</g, "[").replace(/>/g, "]").substring(0,10));
-		    */
       }
-
 
       // create context for each functional css property.
       this.selectorPropContext = new SelectorPropContext(this, args.cursorContext || null);

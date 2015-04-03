@@ -80,6 +80,55 @@ var SelectorPropContext = (function(){
     */
     getChildIndexOfType : function(){
       return this._style.getChildIndexOfType;
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isFirstChild : function(){
+      return this._style.isFirstChild();
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isFirstOfType : function(){
+      return this._style.isFirstOfType();
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isLastChild : function(){
+      return this._style.isLastChild();
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isLastOfType : function(){
+      return this._style.isLastOfType();
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isOnlyChild : function(){
+      return this._style.isOnlyChild();
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isOnlyOfType : function(){
+      return this._style.isOnlyOfType();
+    },
+    /**
+       @memberof Nehan.SelectorPropContext
+       @return {bool}
+    */
+    isMarkupEmpty : function(){
+      return this._style.isMarkupEmpty();
     }
   };
 

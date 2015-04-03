@@ -99,15 +99,7 @@ var StyleContext = (function(){
       // initialize tree
       if(parent){
 	parent.appendChild(this);
-	/*
-	console.log("%s(%s) > %s(%s)",
-		    parent.markup.name,
-		    parent.markup.content.replace(/[\s\n]/g, "").replace(/</g, "[").replace(/>/g, "]").substring(0,10),
-		    this.markup.name,
-		    this.markup.content.replace(/[\s\n]/g, "").replace(/</g, "[").replace(/>/g, "]").substring(0,10));
-		    */
       }
-
 
       // create context for each functional css property.
       this.selectorPropContext = new SelectorPropContext(this, args.cursorContext || null);
