@@ -545,10 +545,7 @@ var Style = {
     "border-color":"#a8a8a8",
     "border-style":"solid",
     //"border-spacing":"5px", // TODO: support batch style like "5px 10px".
-    "border-width":{
-      "start":"1px",
-      "before":"1px"
-    },
+    "border-width":"1px",
     "margin":{
       "start":"0.5em",
       "end":"0.5em",
@@ -562,9 +559,7 @@ var Style = {
   "td":{
     "display":"table-cell",
     "section-root":true,
-    "border-width":{
-      "end":"1px"
-    },
+    "border-width":"1px",
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
     "border-style":"solid",
@@ -590,9 +585,7 @@ var Style = {
   "th":{
     "display":"table-cell",
     "line-height":"1.4em",
-    "border-width":{
-      "end":"1px"
-    },
+    "border-width":"1px",
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
     "border-style":"solid",
@@ -621,10 +614,8 @@ var Style = {
     "display":"table-row",
     "border-collapse":"inherit",
     "border-color":"#a8a8a8",
-    "border-style":"solid",
-    "border-width":{
-      "after":"1px"
-    }
+    "border-width":"1px",
+    "border-style":"solid"
   },
   "track":{
   },

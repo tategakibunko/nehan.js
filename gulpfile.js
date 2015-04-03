@@ -120,7 +120,6 @@ var sources = [
   "src/partition-unit.js",
   "src/partition.js",
   "src/partition-hash-set.js",
-  "src/table-partition-parser.js",
   "src/selector-prop-context.js",
   "src/selector-context.js",
   "src/style-context.js",

@@ -99,7 +99,15 @@ var StyleContext = (function(){
       // initialize tree
       if(parent){
 	parent.appendChild(this);
+	/*
+	console.log("%s(%s) > %s(%s)",
+		    parent.markup.name,
+		    parent.markup.content.replace(/[\s\n]/g, "").replace(/</g, "[").replace(/>/g, "]").substring(0,10),
+		    this.markup.name,
+		    this.markup.content.replace(/[\s\n]/g, "").replace(/</g, "[").replace(/>/g, "]").substring(0,10));
+		    */
       }
+
 
       // create context for each functional css property.
       this.selectorPropContext = new SelectorPropContext(this, args.cursorContext || null);
@@ -145,6 +153,10 @@ var StyleContext = (function(){
       var position = this._loadPosition();
       if(position){
 	this.position = position;
+      }
+      var border_collapse = this._loadBorderCollapse();
+      if(border_collapse){
+	this.borderCollapse = border_collapse;
       }
       var edge = this._loadEdge(this.flow, this.getFontSize());
       if(edge){
@@ -199,11 +211,6 @@ var StyleContext = (function(){
       // 2. parent size
       // 3. current edge size.
       this.initContextSize(this.staticMeasure, this.staticExtent);
-
-      // load partition set after context size is calculated.
-      if(this.display === "table" && this.getCssAttr("table-layout") === "auto"){
-	this.tablePartition = TablePartitionParser.parse(this, new TokenStream(this.getContent()));
-      }
 
       // disable some unmanaged css properties depending on loaded style values.
       this._disableUnmanagedCssProps(this.unmanagedCss);
@@ -277,17 +284,37 @@ var StyleContext = (function(){
        * (a) outer_size
        * 1. if direct size is given, use it as outer_size.
        * 2. else if parent exists, use content_size of parent.
-       * 3. else if parent not exists(root), use layout size defined in layout.js.
+       * 3. else if parent not exists(root), use layout size defined in display.js.
       
        * (b) content_size
-       * 1. if edge(margin/padding/border) is defined, content_size = [outer_size] - [edge_size]
-       * 2. else(no edge),  content_size = [outer_size]
+       * 1. if edge(margin/padding/border) is defined, content_size = outer_size - edge_size
+       * 2. else(no edge),  content_size = outer_size
        *</pre>
     */
     initContextSize : function(measure, extent){
+      this.initContextMeasure(measure);
+      this.initContextExtent(extent);
+    },
+    /**
+       calculate contexual box measure
+
+       @memberof Nehan.StyleContext
+       @method initContextMeasure
+       @param measure {int}
+    */
+    initContextMeasure : function(measure){
       this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : Display.getMeasure(this.flow));
-      this.outerExtent = extent || (this.parent? this.parent.contentExtent : Display.getExtent(this.flow));
       this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
+    },
+    /**
+       calculate contexual box extent
+
+       @memberof Nehan.StyleContext
+       @method initContextExtent
+       @param extent {int}
+    */
+    initContextExtent : function(extent){
+      this.outerExtent = extent || (this.parent? this.parent.contentExtent : Display.getExtent(this.flow));
       this.contentExtent = this._computeContentExtent(this.outerExtent);
     },
     /**
@@ -1100,6 +1127,16 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {String}
+    */
+    getBorderCollapse : function(){
+      if(this.borderCollapse){
+	return (this.borderCollapse === "inherit")? this.parent.getBorderCollapse() : this.borderCollapse;
+      }
+      return null;
+    },
+    /**
+       @memberof Nehan.StyleContext
        @return {int}
     */
     getChildCount : function(){
@@ -1631,6 +1668,9 @@ var StyleContext = (function(){
       });
       return position;
     },
+    _loadBorderCollapse : function(){
+      return this.getCssAttr("border-collapse");
+    },
     _loadColor : function(){
       var value = this.getCssAttr("color", "inherit");
       if(value !== "inherit"){
@@ -1707,6 +1747,99 @@ var StyleContext = (function(){
       }
       return margin;
     },
+    _findParentEnableBorder : function(style, target){
+      if(style.edge && style.edge.border && style.edge.border.getByName(this.flow, target) > 0){
+	return style.edge.border;
+      }
+      return style.parent? this._findParentEnableBorder(style.parent, target) : null;
+    },
+    _collapseBorder : function(border){
+      switch(this.display){
+      case "table-row-group":
+	this._collapseBorderTableRow(border); // same as table-row
+	break;
+      case "table-row":
+	this._collapseBorderTableRow(border);
+	break;
+      case "table-cell":
+	this._collapseBorderTableCell(border);
+	break;
+      }
+    },
+    _collapseBorderTableRow : function(border){
+      // TODO : if parent is table-row-group?
+      // var parent = search_parent(function(parent){ parent.display === "table"; });
+      var parent_start_border = this._findParentEnableBorder(this.parent, "start");
+      if(parent_start_border){
+	this._collapseBorderBetween(
+	  {border:parent_start_border, target:"start"},
+	  {border:border, target:"start"}
+	);
+      }
+      var parent_end_border = this._findParentEnableBorder(this.parent, "end");
+      if(parent_end_border){
+	this._collapseBorderBetween(
+	  {border:parent_end_border, target:"end"},
+	  {border:border, target:"end"}
+	);
+      }
+      if(this.prev && this.prev.edge && this.prev.edge.border){
+	this._collapseBorderBetween(
+	  {border:this.prev.edge.border, target:"after"},
+	  {border:border, target:"before"}
+	);
+      }
+      if(this.isFirstChild()){
+	var parent_before_border = this._findParentEnableBorder(this.parent, "before");
+	if(parent_before_border){
+	  this._collapseBorderBetween(
+	    {border:parent_before_border, target:"before"},
+	    {border:border, target:"before"}
+	  );
+	}
+      }
+      if(this.isLastChild()){
+	var parent_after_border = this._findParentEnableBorder(this.parent, "after");
+	if(parent_after_border){
+	  this._collapseBorderBetween(
+	    {border:parent_after_border, target:"after"},
+	    {border:border, target:"after"}
+	  );
+	}
+      }
+    },
+    _collapseBorderTableCell : function(border){
+      if(this.prev && this.prev.edge && this.prev.edge.border){
+	this._collapseBorderBetween(
+	  {border:this.prev.edge.border, target:"end"},
+	  {border:border, target:"start"}
+	);
+      }
+      if(this.isFirstChild()){
+	var parent_start_border = this._findParentEnableBorder(this.parent, "start");
+	if(parent_start_border){
+	  this._collapseBorderBetween(
+	    {border:parent_start_border, target:"start"},
+	    {border:border, target:"start"}
+	  );
+	}
+      }
+      if(this.isLastChild()){
+	var parent_end_border = this._findParentEnableBorder(this.parent, "end");
+	if(parent_end_border){
+	  this._collapseBorderBetween(
+	    {border:parent_end_border, target:"end"},
+	    {border:border, target:"end"}
+	  );
+	}
+      }
+    },
+    _collapseBorderBetween : function(prev, cur){
+      var prev_size = prev.border.getByName(this.flow, prev.target);
+      var cur_size = cur.border.getByName(this.flow, cur.target);
+      var new_size = Math.max(0, cur_size - prev_size);
+      cur.border.setByName(this.flow, cur.target, new_size);
+    },
     // precondition: this.edge.margin is available
     _collapseMargin : function(){
       if(this.parent && this.parent.edge && this.parent.edge.margin){
@@ -1732,8 +1865,8 @@ var StyleContext = (function(){
     _collapseMarginFirstChild : function(){
       if(this.flow === this.parent.flow){
 	this._collapseMarginBetween(
-	  {flow:this.flow, edge:this.parent.edge, target:"before"},
-	  {flow:this.flow, edge:this.edge, target:"before"}
+	  {edge:this.parent.edge, target:"before"},
+	  {edge:this.edge, target:"before"}
 	);
       }
     },
@@ -1741,8 +1874,8 @@ var StyleContext = (function(){
     _collapseMarginLastChild : function(){
       if(this.flow === this.parent.flow){
 	this._collapseMarginBetween(
-	  {flow:this.flow, edge:this.parent.edge, target:"after"},
-	  {flow:this.flow, edge:this.edge, target:"after"}
+	  {edge:this.parent.edge, target:"after"},
+	  {edge:this.edge, target:"after"}
 	);
       }
     },
@@ -1754,41 +1887,41 @@ var StyleContext = (function(){
 	  if(this.isFloatStart() && this.prev.isFloatStart()){
 	    // [start] x [start]
 	    this._collapseMarginBetween(
-	      {flow:this.prev.flow, edge:this.prev.edge, target:"end"},
-	      {flow:this.flow, edge:this.edge, target:"start"}
+	      {edge:this.prev.edge, target:"end"},
+	      {edge:this.edge, target:"start"}
 	    );
 	  } else if(this.isFloatEnd() && this.prev.isFloatEnd()){
 	    // [end] x [end]
 	    this._collapseMarginBetween(
-	      {flow:this.prev.flow, edge:this.prev.edge, target:"start"},
-	      {flow:this.flow, edge:this.edge, target:"end"}
+	      {edge:this.prev.edge, target:"start"},
+	      {edge:this.edge, target:"end"}
 	    );
 	  }
 	} else if(!this.isFloated() && !this.prev.isFloated()){
 	  // [block] x [block]
 	  this._collapseMarginBetween(
-	    {flow:this.prev.flow, edge:this.prev.edge, target:"after"},
-	    {flow:this.flow, edge:this.edge, target:"before"}
+	    {edge:this.prev.edge, target:"after"},
+	    {edge:this.edge, target:"before"}
 	  );
 	}
       } else if(this.prev.isTextHorizontal() && this.isTextVertical()){
 	// [hori] x [vert]
 	this._collapseMarginBetween(
-	  {flow:this.prev.flow, edge:this.prev.edge, target:"after"},
-	  {flow:this.flow, edge:this.edge, target:"before"}
+	  {edge:this.prev.edge, target:"after"},
+	  {edge:this.edge, target:"before"}
 	);
       } else if(this.prev.isTextVertical() && this.isTextHorizontal()){
 	if(this.prev.flow.isBlockRightToLeft()){
 	  // [vert:tb-rl] x [hori]
 	  this._collapseMarginBetween(
-	    {flow:this.prev.flow, edge:this.prev.edge, target:"after"},
-	    {flow:this.flow, edge:this.edge, target:"end"}
+	    {edge:this.prev.edge, target:"after"},
+	    {edge:this.edge, target:"end"}
 	  );
 	} else {
 	  // [vert:tb-lr] x [hori]
 	  this._collapseMarginBetween(
-	    {flow:this.prev.flow, edge:this.prev.edge, target:"after"},
-	    {flow:this.flow, edge:this.edge, target:"start"}
+	    {edge:this.prev.edge, target:"after"},
+	    {edge:this.edge, target:"start"}
 	  );
 	}
       }
@@ -1797,19 +1930,19 @@ var StyleContext = (function(){
     _collapseMarginBetween : function(prev, cur){
       // before collapsing, check if border between to edge exsits.
       // if border exists between two edge, margin collapsing is ignored.
-      if(prev.edge.border && prev.edge.border.getByName(prev.flow, prev.target) ||
-	 cur.edge.border && cur.edge.border.getByName(cur.flow, cur.target)){
+      if(prev.edge.border && prev.edge.border.getByName(this.flow, prev.target) ||
+	 cur.edge.border && cur.edge.border.getByName(this.flow, cur.target)){
 	return;
       }
-      var prev_size = prev.edge.margin.getByName(prev.flow, prev.target);
-      var cur_size = cur.edge.margin.getByName(cur.flow, cur.target);
+      var prev_size = prev.edge.margin.getByName(this.flow, prev.target);
+      var cur_size = cur.edge.margin.getByName(this.flow, cur.target);
 
       // we use float for layouting each block element in evaluation phase,
       // so standard margin collapsing doesn't work.
       // that is because we use 'differene' of margin for collapsed size.
       var new_size = (prev_size > cur_size)? 0 : cur_size - prev_size;
 
-      cur.edge.margin.setByName(cur.flow, cur.target, new_size);
+      cur.edge.margin.setByName(this.flow, cur.target, new_size);
     },
     _loadBorder : function(flow, font_size){
       var edge_size = this._loadEdgeSize(font_size, "border-width");
@@ -1819,6 +1952,12 @@ var StyleContext = (function(){
       var border = new Border();
       border.setSize(flow, edge_size);
 
+      if(this.getBorderCollapse() === "collapse" && this.display !== "table"){
+	var before = border.clone();
+	//console.log("[%s]collapse before:%o", this.markupName, before);
+	this._collapseBorder(border);
+	//console.log("[%s]collapse after:%o", this.markupName, border);
+      }
       var border_radius = this.getCssAttr("border-radius");
       if(border_radius){
 	border.setRadius(flow, this._computeCornerSize(border_radius, font_size));

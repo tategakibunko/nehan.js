@@ -19,15 +19,15 @@ var TableRowGenerator = (function(){
   Class.extend(TableRowGenerator, ParallelGenerator);
 
   TableRowGenerator.prototype._getGenerators = function(style_tr, stream){
-    var child_tags = this._getChildTags(stream);
-    var child_styles = this._getChildStyles(style_tr, child_tags);
+    var child_styles = this._getChildStyles(style_tr, stream);
     return List.map(child_styles, function(child_style){
-      return new TableCellGenerator(child_style, new TokenStream(child_style.getMarkupContent()));
-    });
+      return new TableCellGenerator(child_style, this._createStream(child_style));
+    }.bind(this));
   };
 
-  TableRowGenerator.prototype._getChildStyles = function(style_tr, child_tags){
+  TableRowGenerator.prototype._getChildStyles = function(style_tr, stream){
     var self = this;
+    var child_tags = stream.getTokens();
     var rest_measure = style_tr.contentMeasure;
     var partition = style_tr.getTablePartition();
     var part_sizes = partition? partition.getSizes({
@@ -42,10 +42,9 @@ var TableRowGenerator = (function(){
 	measure = part_sizes[i];
       }
       rest_measure -= measure;
-      return default_style.clone({
-	"float":"start",
-	"measure":measure
-      });
+      default_style.floatDirection = FloatDirections.get("start");
+      default_style.initContextMeasure(measure);
+      return default_style;
     });
   };
 
