@@ -212,6 +212,11 @@ var StyleContext = (function(){
       // 3. current edge size.
       this.initContextSize(this.staticMeasure, this.staticExtent);
 
+      // border collapse after context size is calculated.
+      if(this.getBorderCollapse() === "collapse" && this.display !== "table" && this.edge && this.edge.border){
+	this._collapseBorder(this.edge.border);
+      }
+
       // disable some unmanaged css properties depending on loaded style values.
       this._disableUnmanagedCssProps(this.unmanagedCss);
     },
@@ -1851,6 +1856,15 @@ var StyleContext = (function(){
       var prev_size = prev.border.getByName(this.flow, prev.target);
       var cur_size = cur.border.getByName(this.flow, cur.target);
       var new_size = Math.max(0, cur_size - prev_size);
+      var rm_size = cur_size - new_size;
+      switch(cur.target){
+      case "before": case "after":
+	this.contentExtent += rm_size;
+	break;
+      case "start": case "end":
+	this.contentMeasure += rm_size;
+	break;
+      }
       cur.border.setByName(this.flow, cur.target, new_size);
     },
     // precondition: this.edge.margin is available
@@ -1965,12 +1979,6 @@ var StyleContext = (function(){
       var border = new Border();
       border.setSize(flow, edge_size);
 
-      if(this.getBorderCollapse() === "collapse" && this.display !== "table"){
-	var before = border.clone();
-	//console.log("[%s]collapse before:%o", this.markupName, before);
-	this._collapseBorder(border);
-	//console.log("[%s]collapse after:%o", this.markupName, border);
-      }
       var border_radius = this.getCssAttr("border-radius");
       if(border_radius){
 	border.setRadius(flow, this._computeCornerSize(border_radius, font_size));
