@@ -577,6 +577,7 @@ var Style = {
   },
   "tfoot":{
     "display":"table-footer-group",
+    "border-width":"1px",
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
     "border-style":"solid",
@@ -600,6 +601,7 @@ var Style = {
     "display":"table-header-group",
     "font-weight":"bold",
     "background-color":"#c3d9ff",
+    "border-width":"1px",
     "border-color":"#a8a8a8",
     "border-collapse":"inherit",
     "border-style":"solid"

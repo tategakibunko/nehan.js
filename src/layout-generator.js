@@ -275,11 +275,6 @@ var LayoutGenerator = (function(){
     case "table":
       return new TableGenerator(style, stream);
 
-    case "table-header-group":
-    case "table-row-group":
-    case "table-footer-group":
-      return new TableRowGroupGenerator(style, stream);
-
     case "table-row":
       return new TableRowGenerator(style, stream);
 

@@ -145,7 +145,6 @@ var sources = [
   "src/list-generator.js",
   "src/list-item-generator.js",
   "src/table-generator.js",
-  "src/table-row-group-generator.js",
   "src/table-row-generator.js",
   "src/table-cell-generator.js",
   "src/header-generator.js",

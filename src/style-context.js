@@ -455,8 +455,8 @@ var StyleContext = (function(){
       }
       var edge = this.edge || null;
 
-      /*
-      if(edge && (!opt.isFirts || !opt.isLast)){
+      /* TODO
+      if(edge && (!opt.isFirts || !opt.isLast) && this.display !== "list-item"){
 	edge = edge.clone();
 	if(!opt.isFirst){
 	  //console.log("[%s]clear before", this.markupName);
@@ -467,6 +467,7 @@ var StyleContext = (function(){
 	  edge.clearAfter(this.flow);
 	}
       }*/
+
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);
       var box = new Box(box_size, this);
@@ -1755,9 +1756,9 @@ var StyleContext = (function(){
     },
     _collapseBorder : function(border){
       switch(this.display){
+      case "table-header-group":
       case "table-row-group":
-	this._collapseBorderTableRow(border); // same as table-row
-	break;
+      case "table-footer-group":
       case "table-row":
 	this._collapseBorderTableRow(border);
 	break;
@@ -1767,8 +1768,6 @@ var StyleContext = (function(){
       }
     },
     _collapseBorderTableRow : function(border){
-      // TODO : if parent is table-row-group?
-      // var parent = search_parent(function(parent){ parent.display === "table"; });
       var parent_start_border = this._findParentEnableBorder(this.parent, "start");
       if(parent_start_border){
 	this._collapseBorderBetween(
@@ -1813,6 +1812,20 @@ var StyleContext = (function(){
 	this._collapseBorderBetween(
 	  {border:this.prev.edge.border, target:"end"},
 	  {border:border, target:"start"}
+	);
+      }
+      var parent_before_border = this._findParentEnableBorder(this.parent, "before");
+      if(parent_before_border){
+	this._collapseBorderBetween(
+	  {border:parent_before_border, target:"before"},
+	  {border:border, target:"before"}
+	);
+      }
+      var parent_after_border = this._findParentEnableBorder(this.parent, "after");
+      if(parent_after_border){
+	this._collapseBorderBetween(
+	  {border:parent_after_border, target:"after"},
+	  {border:border, target:"after"}
 	);
       }
       if(this.isFirstChild()){
