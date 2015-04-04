@@ -20,6 +20,26 @@ var TestStyles = {
     "background-color":"black",
     "color":"white"
   },
+  ".nehan-test-pseudo-only2 p":{
+    onload:function(ctx){
+      var markup = ctx.getMarkup();
+      if(ctx.isOnlyOfType()){
+	markup.setContent("this is only of type!");
+
+	// you can return multiple values
+	return {
+	  "color":"white",
+	  "background":"red"
+	};
+      } else {
+	markup.setContent("this is not only of type..");
+
+	// or set (name,value) directly.
+	ctx.setCssAttr("color", "yellow");
+	ctx.setCssAttr("background", "blue");
+      }
+    }
+  },
   ".nehan-gen-adj-test a~b":{
     "color":"green"
   },

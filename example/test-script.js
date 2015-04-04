@@ -364,6 +364,17 @@ var Script = {
     "<div class='nehan-test-pseudo-only'>",
     "<div>only of type</div>",
     "<p>child</p>",
+    "</div>",
+
+    "<h2>only of type func</h2>",
+    "<div class='nehan-test-pseudo-only2'>",
+    "<p></p>", // only of type
+    "</div>",
+
+    "<h2>only of type func2</h2>",
+    "<div class='nehan-test-pseudo-only2'>",
+    "<p></p>", // not only of type
+    "<p></p>", // not only of type
     "</div>"
   ].join("\n"),
 
