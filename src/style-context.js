@@ -153,9 +153,6 @@ var StyleContext = (function(){
       var edge = this._loadEdge(this.flow, this.getFontSize());
       if(edge){
 	this.edge = edge;
-	if(this.edge.margin){
-	  this._collapseMargin();
-	}
       }
       var line_height = this._loadLineHeight();
       if(line_height){
@@ -204,9 +201,15 @@ var StyleContext = (function(){
       // 3. current edge size.
       this.initContextSize(this.staticMeasure, this.staticExtent);
 
-      // border collapse after context size is calculated.
-      if(this.getBorderCollapse() === "collapse" && this.display !== "table" && this.edge && this.edge.border){
-	this._collapseBorder(this.edge.border);
+      // margin or edge collapse after context size is calculated.
+      if(this.edge){
+	if(this.edge.margin){
+	  this._collapseMargin();
+	}
+	// border collapse after context size is calculated.
+	if(this.edge.border && this.getBorderCollapse() === "collapse" && this.display !== "table"){
+	  this._collapseBorder(this.edge.border);
+	}
       }
 
       // disable some unmanaged css properties depending on loaded style values.
@@ -1947,8 +1950,7 @@ var StyleContext = (function(){
     },
     // if prev_margin > cur_margin, just clear cur_margin.
     _collapseMarginBetween : function(prev, cur){
-      // before collapsing, check if border between to edge exsits.
-      // if border exists between two edge, margin collapsing is ignored.
+      // margin collapsing is ignored if there is a border between two edge.
       if(prev.edge.border && prev.edge.border.getByName(this.flow, prev.target) ||
 	 cur.edge.border && cur.edge.border.getByName(this.flow, cur.target)){
 	return;
@@ -1962,6 +1964,11 @@ var StyleContext = (function(){
       var new_size = (prev_size > cur_size)? 0 : cur_size - prev_size;
 
       cur.edge.margin.setByName(this.flow, cur.target, new_size);
+
+      var rm_size = cur_size - new_size;
+
+      // update content size
+      this.contentExtent += rm_size;
     },
     _loadBorder : function(flow, font_size){
       var edge_size = this._loadEdgeSize(font_size, "border-width");
