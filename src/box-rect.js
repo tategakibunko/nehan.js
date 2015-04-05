@@ -1,5 +1,5 @@
 /**
-   utiliti module for box physical direction(top, right, bottom, left).
+   utility module for box physical direction(top, right, bottom, left).
 
    @namespace Nehan.BoxRect
 */
