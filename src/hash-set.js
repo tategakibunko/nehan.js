@@ -18,13 +18,6 @@ var HashSet = (function(){
       Obj.iter(this._values, fn);
     },
     /**
-       @memberof Nehan.HashSet
-       @param fn {Function}
-    */
-    filter : function(fn){
-      return Obj.filter(this._values, fn);
-    },
-    /**
        merge new value to old value with same key. simply overwrite by default.
 
        @memberof Nehan.HashSet
@@ -57,6 +50,9 @@ var HashSet = (function(){
     get : function(name){
       return this._values[name] || null;
     },
+    getValues : function(){
+      return this._values;
+    },
     /**
        add [value] by [name]. HashSet::merge is called if [name] is already registered.
 
@@ -76,7 +72,6 @@ var HashSet = (function(){
        @param values {Array}
     */
     addValues : function(values){
-      values = values || {};
       for(var prop in values){
 	this.add(prop, values[prop]);
       }

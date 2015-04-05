@@ -2618,13 +2618,6 @@ var HashSet = (function(){
       Obj.iter(this._values, fn);
     },
     /**
-       @memberof Nehan.HashSet
-       @param fn {Function}
-    */
-    filter : function(fn){
-      return Obj.filter(this._values, fn);
-    },
-    /**
        merge new value to old value with same key. simply overwrite by default.
 
        @memberof Nehan.HashSet
@@ -2657,6 +2650,9 @@ var HashSet = (function(){
     get : function(name){
       return this._values[name] || null;
     },
+    getValues : function(){
+      return this._values;
+    },
     /**
        add [value] by [name]. HashSet::merge is called if [name] is already registered.
 
@@ -2676,7 +2672,6 @@ var HashSet = (function(){
        @param values {Array}
     */
     addValues : function(values){
-      values = values || {};
       for(var prop in values){
 	this.add(prop, values[prop]);
       }
@@ -10882,8 +10877,6 @@ var StyleContext = (function(){
     "margin",
     "measure",
     "meta", // flag
-    "onload",
-    "oncreate",
     "padding",
     "position",
     "section", // flag
@@ -10897,8 +10890,18 @@ var StyleContext = (function(){
     "word-break"
   ];
 
+  // these property are special functional properties
+  var __callback_css_props = [
+    "onload",
+    "oncreae"
+  ];
+
   var __is_managed_css_prop = function(prop){
     return List.exists(__managed_css_props, Closure.eq(prop));
+  };
+
+  var __is_callback_css_prop = function(prop){
+    return prop === "onload" || prop === "ocreate";
   };
 
   /**
@@ -10954,19 +10957,20 @@ var StyleContext = (function(){
 
       this.managedCss = new CssHashSet();
       this.unmanagedCss = new CssHashSet();
+      this.callbackCss = new CssHashSet();
 
       // load managed css from
       // 1. load selector css.
       // 2. load inline css from 'style' property of markup.
-      // 3. load dynamic callback css(onload) from selector css.
+      // 3. load callback css 'onload'.
       // 4. load system required css(args.forceCss).
-      this.managedCss.addValues(this._loadSelectorCss(markup, parent));
-      this.managedCss.addValues(this._loadInlineCss(markup));
-      this.managedCss.addValues(this._loadCallbackCss(this.managedCss, "onload"));
-      this.managedCss.addValues(args.forceCss, {});
-
-      // load unmanaged css from managed css
-      this.unmanagedCss.addValues(this._loadUnmanagedCss(this.managedCss));
+      this._registerCssValues(this._loadSelectorCss(markup, parent));
+      this._registerCssValues(this._loadInlineCss(markup));
+      var onload = this.callbackCss.get("onload");
+      if(onload){
+	this._registerCssValues(onload(this.selectorContext));
+      }
+      this._registerCssValues(args.forceCss || {});
 
       // always required properties
       this.display = this._loadDisplay(); // required
@@ -11814,6 +11818,10 @@ var StyleContext = (function(){
       if(ret !== null){
 	return this._evalCssAttr(name, ret);
       }
+      ret = this.callbackCss.get(name);
+      if(ret !== null){
+	return this._evalCssAttr(name, ret);
+      }
       return (typeof def_value !== "undefined")? def_value : null;
     },
     /**
@@ -12412,37 +12420,17 @@ var StyleContext = (function(){
       case "after":
       case "first-letter":
       case "first-line":
-	// notice that parent style is the style base of pseudo-element.
-	return Selectors.getValuePe(parent, markup.getName());
+	// notice that style of pseudo-element is defined with parent context.
+	var pe_values = Selectors.getValuePe(parent, markup.getName());
+	// console.log("[%s::%s] pseudo values:%o", parent.markupName, this.markup.name, pe_values);
+	return pe_values;
 
       default:
-	return Selectors.getValue(this);
+	//return Selectors.getValue(this);
+	var values = Selectors.getValue(this);
+	//console.log("[%s] selector values:%o", this.markup.name, values);
+	return values;
       }
-    },
-    // nehan.js can change style dynamically by cursor-context.
-    //
-    // [example]
-    // engine.setStyle("p", {
-    //   "onload" : function(context){
-    //      var min_extent = parseInt(context.getMarkup().getData("minExtent"), 10);
-    //	    if(context.getRestExtent() < min_extent){
-    //        return {"page-break-before":"always"};
-    //      }
-    //   }
-    // });
-    //
-    // then markup "<p data-min-extent='100'>text</p>" will be broken before
-    // if rest extent is less than 100.
-    _loadCallbackCss : function(managed_css, name){
-      var callback = managed_css.get(name);
-      if(callback === null || typeof callback !== "function"){
-	return {};
-      }
-      var ret = callback(this.selectorContext) || {};
-      for(var prop in ret){
-	ret[prop] = this._evalCssAttr(prop, ret[prop]);
-      }
-      return ret;
     },
     _loadInlineCss : function(markup){
       var style = markup.getAttr("style");
@@ -12450,7 +12438,7 @@ var StyleContext = (function(){
 	return {};
       }
       var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];
-      return List.fold(stmts, {}, function(ret, stmt){
+      var values = List.fold(stmts, {}, function(ret, stmt){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]).toLowerCase();
@@ -12461,17 +12449,25 @@ var StyleContext = (function(){
 	}
 	return ret;
       });
-    },
-    _loadUnmanagedCss : function(managed_css){
-      return managed_css.filter(function(prop, value){
-	return !__is_managed_css_prop(prop);
-      });
+      //console.log("[%s] load inline css:%o", this.markup.name, values);
+      return values;
     },
     _disableUnmanagedCssProps : function(unmanaged_css){
       if(this.isTextVertical()){
 	// unmanaged 'line-height' is not welcome for vertical-mode.
 	unmanaged_css.remove("line-height");
       }
+    },
+    _registerCssValues : function(values){
+      Obj.iter(values, function(prop, value){
+	if(__is_callback_css_prop(prop)){
+	  this.callbackCss.add(prop, value);
+	} else if(__is_managed_css_prop(prop)){
+	  this.managedCss.add(prop, this._evalCssAttr(prop, value));
+	} else {
+	  this.unmanagedCss.add(prop, this._evalCssAttr(prop, value));
+	}
+      }.bind(this));
     },
     _loadDisplay : function(){
       switch(this.getMarkupName()){
