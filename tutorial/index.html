@@ -211,8 +211,9 @@ Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class=
 <p>Using <code>oncreate</code> property, you can hook the evaluation phase just after converting from layout tree to DOM node.</p>
 
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">pages.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">p</span><span class="delimiter">"</span></span>, {
-  <span class="function">oncreate</span>:<span class="keyword">function</span>(dom, context){
-    <span class="predefined">$</span>(dom).click(<span class="keyword">function</span>(){
+<span class="function">oncreate</span>:<span class="keyword">function</span>(context){
+    <span class="comment">// console.log("abstract logical tree:%o", context.box);</span>
+    <span class="predefined">$</span>(context.dom).click(<span class="keyword">function</span>(){
        alert(<span class="string"><span class="delimiter">"</span><span class="content">click p!</span><span class="delimiter">"</span></span>);
     });
   }
