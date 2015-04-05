@@ -90,9 +90,9 @@ var LayoutEvaluator = (function(){
       }
     },
     _evaluate : function(tree, opt){
-      var root = this._evalTreeRoot(tree, opt || {});
+      var root = this._evalElementRoot(tree, opt || {});
       var result = root.innerHTML? root : List.fold(tree.elements, root, function(ret, child){
-	this._appendChild(root, this._evalTreeChild(tree, child));
+	this._appendChild(root, this._evalElementChild(tree, child));
 	if(child.withBr){ // annotated to add extra br element
 	  this._appendChild(root, document.createElement("br"));
 	}
@@ -103,11 +103,14 @@ var LayoutEvaluator = (function(){
       }.bind(this));
       var oncreate = tree.getOnCreate();
       if(oncreate){
-	oncreate(result, tree);
+	oncreate({
+	  dom:result,
+	  box:tree
+	});
       }
       return result;
     },
-    _evalTreeRoot : function(tree, opt){
+    _evalElementRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
 	id:tree.getId(),
@@ -119,7 +122,7 @@ var LayoutEvaluator = (function(){
 	css:(opt.css || tree.getBoxCss())
       });
     },
-    _evalTreeChild : function(parent, child){
+    _evalElementChild : function(parent, child){
       switch(parent.display){
       case "inline":
 	if(child instanceof Box){
@@ -150,6 +153,7 @@ var LayoutEvaluator = (function(){
 	return this._evalInlineChildTree(parent, element);
       }
     },
+    // override by HoriEvaluator
     _evalInlineChildTree : function(parent, element){
       return this._evaluate(element);
     },
@@ -160,7 +164,7 @@ var LayoutEvaluator = (function(){
       return this._evalTextElement(parent, element);
     },
     _evalImage : function(image){
-      return this._evalTreeRoot(image, {name:"img"});
+      return this._evaluate(image, {name:"img"});
     },
     _evalInlineImage : function(line, image){
       return this._evalImage(image);

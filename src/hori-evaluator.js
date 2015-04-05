@@ -24,7 +24,7 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalInlineImage = function(line, image){
-    return this._evalTreeRoot(image, {
+    return this._evaluate(image, {
       name:"img",
       css:image.getCssHoriInlineImage(line)
     });

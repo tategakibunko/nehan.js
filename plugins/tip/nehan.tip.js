@@ -31,9 +31,9 @@ Nehan.setStyle("tip", {
     markup.setData("content", tip_content);
     markup.setContent(tip_title);
   },
-  "oncreate":function(dom, style_context){
-    var tip_content = style_context.getMarkupData("content");
-    dom.onclick = function(){
+  "oncreate":function(context){
+    var tip_content = context.box.style.getMarkupData("content");
+    context.dom.onclick = function(){
       alert(tip_content);
       return false;
     };

@@ -11,6 +11,7 @@ var Box = (function(){
     this.size = size;
     this.style = style;
     this.type = type || "block";
+    this.elements = [];
     this.css = {};
   }
 

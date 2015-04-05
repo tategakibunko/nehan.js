@@ -21,18 +21,20 @@ Nehan.setStyle("fa", {
   "display":"inline",
   "width":"1em",
   "height":"1em",
-  "onload":function(ctx){
-    var markup = ctx.getMarkup();
-    var icon_names = markup.getAttr("name").replace(/\s+/g, " ").split(" ");
-    var fa_icon_names = ["fa"];
-    var get_fa_icon_name = function(icon_name){
-      return (icon_name.indexOf("fa-") < 0)? "fa-" + icon_name : icon_name;
-    };
-    for(var i = 0; i < fa_icon_names.length; i++){
-      fa_icon_names.push(get_fa_icon_name(fa_icon_names[i]));
+  oncreate:function(ctx){
+    var $i = document.createElement("i");
+    var names = ctx.box.style.markup.getAttr("name").replace(/\s+/g, " ").split(" ");
+    var icon_names = ["fa"];
+    for(var i = 0; i < names.length; i++){
+      icon_names.push("fa-" + names[i]);
     }
-    markup.setContent("<i class='" + fa_icon_names.join(" ") + "'></i>");
-    markup.setAttr("pasted", true);
+    $i.className = icon_names.join(" ");
+    ctx.dom.appendChild($i);
+    if(ctx.box.style.isTextVertical()){
+      ctx.dom.style.textAlign = "center";
+    }
+  },
+  onload:function(ctx){
+    ctx.getMarkup().setAttr("pasted", true);
   }
 });
-
