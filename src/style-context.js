@@ -985,7 +985,7 @@ var StyleContext = (function(){
       }
       ret = this.callbackCss.get(name);
       if(ret !== null){
-	return this._evalCssAttr(name, ret);
+	return ret;
       }
       return (typeof def_value !== "undefined")? def_value : null;
     },

@@ -73,14 +73,6 @@ var LayoutEvaluator = (function(){
 
       // dataset attributes(defined in TagAttrs::dataset)
       Args.copy(dom.dataset, dataset);
-
-      // call oncreate callback if exists.
-      if(opt.oncreate){
-	opt.oncreate(dom, {
-	  box:opt.box || null,
-	  style:opt.styleContext || null
-	});
-      }
       return dom;
     },
     _createClearFix : function(clear){
@@ -99,7 +91,7 @@ var LayoutEvaluator = (function(){
     },
     _evaluate : function(tree, opt){
       var root = this._evalTreeRoot(tree, opt || {});
-      return root.innerHTML? root : List.fold(tree.elements, root, function(ret, child){
+      var result = root.innerHTML? root : List.fold(tree.elements, root, function(ret, child){
 	this._appendChild(root, this._evalTreeChild(tree, child));
 	if(child.withBr){ // annotated to add extra br element
 	  this._appendChild(root, document.createElement("br"));
@@ -109,20 +101,22 @@ var LayoutEvaluator = (function(){
 	}
 	return root;
       }.bind(this));
+      var oncreate = tree.getOnCreate();
+      if(oncreate){
+	oncreate(result, tree);
+      }
+      return result;
     },
     _evalTreeRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
-	box:tree,
 	id:tree.getId(),
 	className:tree.getClassName(),
 	attrs:tree.getAttrs(),
-	oncreate:tree.getOnCreate(),
 	content:(opt.content || tree.getContent()),
 	rootBlockId:tree.rootBlockId,
 	blockId:tree.blockId,
-	css:(opt.css || tree.getBoxCss()),
-	styleContext:tree.style
+	css:(opt.css || tree.getBoxCss())
       });
     },
     _evalTreeChild : function(parent, child){
