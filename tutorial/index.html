@@ -90,7 +90,7 @@
 
 <h4 class="ui dividing header">Set paged media to some target.</h4>
 
-<p>You can obtain the DOM node that wraps paged media by <code>getElement</code>.</p>
+<p>All paged media are stored in paged-element internally, so if you want to display them, you need to obtain the DOM node that wraps paged media by <code>getElement</code>.</p>
 
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript"><span class="predefined">$</span>(<span class="string"><span class="delimiter">"</span><span class="content">#target-element</span><span class="delimiter">"</span></span>).append(pages.getElement());</code></pre></div></div></div>
 
