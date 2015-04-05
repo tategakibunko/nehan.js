@@ -46,7 +46,31 @@ pe.setStyle("body", {
   //"flow":"tb-rl", // for Japanese vertical
   "font-size":16, // use 'font-size' instead of 'fontSize'!
   "width":640,
-  "height":480
+  "height":480,
+  // you can use functional css property!
+  "background-color":function(prop_context){
+    // you can get many pseudo-class in javascript.
+    // console.log("nth-child:%d", prop_context.getChildIndex());
+    // console.log("nth-of-type:%d", prop_context.getChildIndexOfType());
+    // console.log("is-last-child:%o", prop_context.isLastChild());
+    // console.log("is-only-child:%o", prop_context.isOnlyChild());
+    return "white";
+  },
+  // called after after all props in "body" selector are loaded.
+  "onload":function(selector_context){
+    // console.log("nth-child:%d", selector_context.getChildIndex());
+    // console.log("markup:%o", selector_context.getMarkup());
+  },
+  // called after "body" is converted into DOM Element.
+  "oncreate":function(context){
+    context.dom.onclick = function(){
+      alert("body is clicked!");
+    };
+    // many various context data...
+    // console.log("abstract logical box:%o", context.box);
+    // console.log("abstract style info:%o", context.box.style);
+    // console.log("markup info:%o", context.box.markup);
+  }
 });
 
 // by setContent, paged-media is asynchronously generated.
