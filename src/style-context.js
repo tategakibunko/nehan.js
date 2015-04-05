@@ -58,7 +58,7 @@ var StyleContext = (function(){
   // these property are special functional properties
   var __callback_css_props = [
     "onload",
-    "oncreae"
+    "oncreate"
   ];
 
   var __is_managed_css_prop = function(prop){
@@ -66,7 +66,7 @@ var StyleContext = (function(){
   };
 
   var __is_callback_css_prop = function(prop){
-    return prop === "onload" || prop === "ocreate";
+    return List.exists(__callback_css_props, Closure.eq(prop));
   };
 
   /**

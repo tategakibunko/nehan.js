@@ -10893,7 +10893,7 @@ var StyleContext = (function(){
   // these property are special functional properties
   var __callback_css_props = [
     "onload",
-    "oncreae"
+    "oncreate"
   ];
 
   var __is_managed_css_prop = function(prop){
@@ -10901,7 +10901,7 @@ var StyleContext = (function(){
   };
 
   var __is_callback_css_prop = function(prop){
-    return prop === "onload" || prop === "ocreate";
+    return List.exists(__callback_css_props, Closure.eq(prop));
   };
 
   /**
@@ -15680,7 +15680,10 @@ var LayoutEvaluator = (function(){
 
       // call oncreate callback if exists.
       if(opt.oncreate){
-	opt.oncreate(dom, opt.styleContext || null);
+	opt.oncreate(dom, {
+	  box:opt.box || null,
+	  style:opt.styleContext || null
+	});
       }
       return dom;
     },
@@ -15714,6 +15717,7 @@ var LayoutEvaluator = (function(){
     _evalTreeRoot : function(tree, opt){
       opt = opt || {};
       return this._createElement(opt.name || "div", {
+	box:tree,
 	id:tree.getId(),
 	className:tree.getClassName(),
 	attrs:tree.getAttrs(),
