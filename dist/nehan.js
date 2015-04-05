@@ -13961,10 +13961,6 @@ var BlockGenerator = (function(){
     if(!this.hasNext()){
       this._onComplete(context, block);
     }
-    /*
-    console.log("[%s] block output:%o:(m=%d, e=%d, maxe=%d):(%s), first:%o, last:%o",
-		this.style.markupName, block, block.size.height, block.size.width, context.block.maxExtent, block.toString().substring(0,10), this.isFirstOutput(), !this.hasNext());
-    */
     return block;
   };
 
