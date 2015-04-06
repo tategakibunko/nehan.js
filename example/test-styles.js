@@ -109,27 +109,26 @@ var TestStyles = {
   },
   ".nehan-circular":{
     "list-style-type":"none",
-    "font-size":"10px",
-    "measure":"180px"
+    "font-size":"14px",
+    "measure":"300px",
+    "extent":"320px"
   },
   ".nehan-circular li":{
+    "line-height":"1em",
     oncreate:function(ctx){
       var mode = ctx.box.style.parent.markup.getAttr("mode", "normal");
       if(ctx.box.display === "block"){
 	var index = ctx.box.style.getChildIndex();
 	var is_vert = ctx.box.style.isTextVertical();
 	var child_count = ctx.box.style.parent.getChildCount();
-	var center_x = 50;
-	var center_y = 100;
+	var center_pos = ctx.box.parent.getContentExtent() / 2;
 	var unit_degree = Math.floor(360 / child_count);
 	var start_degree = is_vert? 0 : 90;
 	var rotate_degree = start_degree + unit_degree * (index + 1);
-	var transform = [
-	  "translate(" + center_x + "px, " + center_y + "px)",
-	  "rotate(" + rotate_degree + "deg)"
-	].join(" ");
+	var translate = is_vert? "translateX(" + center_pos + "px)" : "translateY(" + center_pos + "px)";
+	var rotate = "rotate(" + rotate_degree + "deg)";
+	var transform = [translate, rotate].join(" ");
 
-	ctx.dom.style["width"] = center_x;
 	ctx.dom.style["position"] = "absolute";
 	ctx.dom.style["-webkit-transform"] = transform;
 	ctx.dom.style["-moz-transform"] = transform;
