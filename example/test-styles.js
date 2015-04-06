@@ -122,8 +122,8 @@ var TestStyles = {
 	var center_x = 50;
 	var center_y = 100;
 	var unit_degree = Math.floor(360 / child_count);
-	var start_degree = is_vert? 30 : 120;
-	var rotate_degree = start_degree + index * unit_degree;
+	var start_degree = is_vert? 0 : 90;
+	var rotate_degree = start_degree + unit_degree * (index + 1);
 	var transform = [
 	  "translate(" + center_x + "px, " + center_y + "px)",
 	  "rotate(" + rotate_degree + "deg)"
