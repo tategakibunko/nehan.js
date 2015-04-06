@@ -27,6 +27,23 @@ var Box = (function(){
   Box.prototype = {
     /**
        @memberof Nehan.Box
+       @param element {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
+    */
+    addElement : function(element){
+      element.parent = this;
+      this.elements.push(element);
+    },
+    /**
+       @memberof Nehan.Box
+       @param element {Array.<Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy>}
+    */
+    addElements : function(elements){
+      List.iter(elements, function(element){
+	this.addElement(element);
+      }.bind(this));
+    },
+    /**
+       @memberof Nehan.Box
        @return {boolean}
     */
     isLine : function(){

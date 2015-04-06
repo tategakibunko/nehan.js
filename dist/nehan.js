@@ -8236,6 +8236,23 @@ var Box = (function(){
   Box.prototype = {
     /**
        @memberof Nehan.Box
+       @param element {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
+    */
+    addElement : function(element){
+      element.parent = this;
+      this.elements.push(element);
+    },
+    /**
+       @memberof Nehan.Box
+       @param element {Array.<Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy>}
+    */
+    addElements : function(elements){
+      List.iter(elements, function(element){
+	this.addElement(element);
+      }.bind(this));
+    },
+    /**
+       @memberof Nehan.Box
        @return {boolean}
     */
     isLine : function(){
@@ -11328,7 +11345,7 @@ var StyleContext = (function(){
       box.blockId = opt.blockId;
       box.display = (this.display === "inline-block")? this.display : "block";
       box.edge = edge;
-      box.elements = elements;
+      box.addElements(elements);
       box.classes = classes;
       box.charCount = List.fold(elements, 0, function(total, element){
 	return total + (element.charCount || 0);
@@ -11399,7 +11416,7 @@ var StyleContext = (function(){
       var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.getClasses());
       var line = new Box(line_size, this, "line-block");
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
-      line.elements = elements;
+      line.addElements(elements);
       line.classes = is_root_line? classes : classes.concat("nehan-" + this.getMarkupName());
       line.charCount = char_count;
       line.maxFontSize = max_font_size;
@@ -11471,7 +11488,7 @@ var StyleContext = (function(){
       var classes = ["nehan-text-block"].concat(this.markup.getClasses());
       var line = new Box(line_size, this, "text-block");
       line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
-      line.elements = elements;
+      line.addElements(elements);
       line.classes = classes;
       line.charCount = char_count;
       line.maxFontSize = font_size;
