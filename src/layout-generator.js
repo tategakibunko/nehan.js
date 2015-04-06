@@ -138,8 +138,14 @@ var LayoutGenerator = (function(){
     var cache_count = element.cacheCount || 0;
     if(cache_count > 0){
       if(cache_count >= Config.maxRollbackCount){
-	console.error("[%s] too many retry:%o", this.style.getMarkupName(), this.style);
-	this.setTerminate(true); // this error sometimes causes infinite loop, so force terminate generator.
+	var element_str = (element instanceof Box)? element.toString() : (element.data || "??");
+	console.warn("[%s] too many retry:%o, element:%o(%s)", this.style.getMarkupName(), this.style, element, element_str);
+	// to avoid infinite loop, force child or this generator terminate!
+	if(this._child && this._child.hasNext()){
+	  this._child.setTerminate(true);
+	} else {
+	  this.setTerminate(true);
+	}
 	return;
       }
     }
