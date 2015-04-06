@@ -1951,11 +1951,9 @@ var List = {
      @return {Array}
   */
   create : function(count, init_val){
-    var ret = new Array(count);
-    if(typeof init_val != "undefined"){
-      for(var i = 0; i < count; i++){
-	ret[i] = init_val;
-      }
+    var ret = [];
+    for(var i = 0; i < count; i++){
+      ret.push((typeof init_val !== "undefined")? init_val : i);
     }
     return ret;
   },
