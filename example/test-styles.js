@@ -124,13 +124,18 @@ var TestStyles = {
 	var unit_degree = Math.floor(360 / child_count);
 	var start_degree = is_vert? 30 : 120;
 	var rotate_degree = start_degree + index * unit_degree;
-
-	ctx.dom.style["width"] = center_x;
-	ctx.dom.style["position"] = "absolute";
-	ctx.dom.style["-webkit-transform"] = [
+	var transform = [
 	  "translate(" + center_x + "px, " + center_y + "px)",
 	  "rotate(" + rotate_degree + "deg)"
 	].join(" ");
+
+	ctx.dom.style["width"] = center_x;
+	ctx.dom.style["position"] = "absolute";
+	ctx.dom.style["-webkit-transform"] = transform;
+	ctx.dom.style["-moz-transform"] = transform;
+	ctx.dom.style["-o-transform"] = transform;
+	ctx.dom.style["-ms-transform"] = transform;
+	ctx.dom.style["transform"] = transform;
 
 	if(mode === "clock"){
 	  var first_text = ctx.dom.getElementsByClassName("nehan-text-block")[0] ||
