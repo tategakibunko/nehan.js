@@ -11,6 +11,10 @@ version 5.1.0 2015/??/??
 o Add new lexer and generator(TextLexer, TextGenerator), so now inline element and text node are devided into different tree.
 o Support last-child, last-of-type detection.
 o Support margin cancellation of elements floated or conctructed with different block flow.
+o Add new callback 'onblock', 'online', 'ontext' when called document is converted into dom for each layout level.
+  'onblock' is called after block element is converted,
+  'online' is called after anonymous line in block element is converted,
+  'ontext' is called after text-element in anonymous line is converted.
 * Fix float bug in horizontal mode(see "float" at example/catalog5.html).
 * Fix baseline problem in many case.
 ! Remove LexingRule::addSingleTagByRex.

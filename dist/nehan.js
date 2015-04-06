@@ -8309,11 +8309,16 @@ var Box = (function(){
        @return {Function}
     */
     getOnCreate : function(){
+      var oncreate = this.style.getCssAttr("oncreate") || null;
+
       // on create of text-block is already captured by parent line
       if(this.isTextBlock()){
-	return null;
+	return this.style.getCssAttr("ontext") || null;
       }
-      return this.style.getCssAttr("oncreate");
+      if(this.isLine()){
+	return this.style.getCssAttr("online") || oncreate;
+      }
+      return this.style.getCssAttr("onblock") || oncreate;
     },
     /**
        @memberof Nehan.Box
@@ -10902,7 +10907,10 @@ var StyleContext = (function(){
   // these property are special functional properties
   var __callback_css_props = [
     "onload",
-    "oncreate"
+    "oncreate",
+    "onblock",
+    "online",
+    "ontext"
   ];
 
   var __is_managed_css_prop = function(prop){
@@ -11786,9 +11794,10 @@ var StyleContext = (function(){
       return this.markup.getAttr(name, def_value);
     },
     _evalCssAttr : function(name, value){
-      // "oncreate" not return style, it's a hook called after this style is converted into dom element.
+      // "oncreate", "onblock", "online", "ontext" not return style,
+      // it's a hook called after this style is converted into dom element on each layout level(block, line, text).
       // so leave it as it is.
-      if(name === "oncreate"){
+      if(name === "oncreate" || name === "onblock" || name == "online" || name === "ontext"){
 	return value;
       }
       // if value is function, call with selector context, and format the returned value.

@@ -113,15 +113,11 @@ var TestStyles = {
   },
   ".nehan-circular li":{
     "line-height":"1em",
-    oncreate:function(ctx){
-      // if anonymous line block in <li>, ignore.
-      if(ctx.box.display !== "block"){
-	return;
-      }
-      var index = ctx.box.style.getChildIndex();
-      var is_vert = ctx.box.style.isTextVertical();
-      var child_count = ctx.box.style.parent.getChildCount();
-      var center_pos = ctx.box.parent.getContentExtent() / 2;
+    onblock:function(ctx){
+      var index = ctx.getChildIndex();
+      var is_vert = ctx.isTextVertical();
+      var child_count = ctx.getParentChildCount();
+      var center_pos = ctx.getParentBox().getContentExtent() / 2;
       var unit_degree = Math.floor(360 / child_count);
       var start_degree = is_vert? 30 : 120;
       var rotate_degree = start_degree + unit_degree * index;

@@ -102,11 +102,16 @@ var Box = (function(){
        @return {Function}
     */
     getOnCreate : function(){
+      var oncreate = this.style.getCssAttr("oncreate") || null;
+
       // on create of text-block is already captured by parent line
       if(this.isTextBlock()){
-	return null;
+	return this.style.getCssAttr("ontext") || null;
       }
-      return this.style.getCssAttr("oncreate");
+      if(this.isLine()){
+	return this.style.getCssAttr("online") || oncreate;
+      }
+      return this.style.getCssAttr("onblock") || oncreate;
     },
     /**
        @memberof Nehan.Box
