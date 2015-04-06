@@ -109,9 +109,8 @@ var TestStyles = {
   },
   ".nehan-circular":{
     "list-style-type":"none",
-    "font-size":"14px",
     "measure":"300px",
-    "extent":"320px"
+    "extent":"300px"
   },
   ".nehan-circular li":{
     "line-height":"1em",
