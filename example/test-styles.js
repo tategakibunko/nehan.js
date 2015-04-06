@@ -106,5 +106,41 @@ var TestStyles = {
 	"<p>this is added by onload(rest extent = " + rest_extent + " at this point)</p>"
       ].join(""));
     }
+  },
+  ".nehan-circular":{
+    "list-style-type":"none",
+    "font-size":"10px",
+    "measure":"180px"
+  },
+  ".nehan-circular li":{
+    oncreate:function(ctx){
+      var mode = ctx.box.style.parent.markup.getAttr("mode", "normal");
+      if(ctx.box.display === "block"){
+	var index = ctx.box.style.getChildIndex();
+	var is_vert = ctx.box.style.isTextVertical();
+	var child_count = ctx.box.style.parent.getChildCount();
+	var center_x = 50;
+	var center_y = 100;
+	var unit_degree = Math.floor(360 / child_count);
+	var start_degree = is_vert? 30 : 120;
+	var rotate_degree = start_degree + index * unit_degree;
+
+	ctx.dom.style["width"] = center_x;
+	ctx.dom.style["position"] = "absolute";
+	ctx.dom.style["-webkit-transform"] = [
+	  "translate(" + center_x + "px, " + center_y + "px)",
+	  "rotate(" + rotate_degree + "deg)"
+	].join(" ");
+
+	if(mode === "clock"){
+	  var first_text = ctx.dom.getElementsByClassName("nehan-text-block")[0] ||
+	    ctx.dom.getElementsByClassName("nehan-inline")[0];
+	  if(first_text){
+	    var rotate_degree = is_vert? (-unit_degree * (index + 1)) : (240 - unit_degree * index);
+	    first_text.style["-webkit-transform"] = "rotate(" + rotate_degree + "deg)";
+	  }
+	}
+      }
+    }
   }
 };
