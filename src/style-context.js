@@ -1044,7 +1044,7 @@ var StyleContext = (function(){
        @return {String}
     */
     getContent : function(){
-      var content = this.markup.getContent();
+      var content = this.getCssAttr("content") || this.markup.getContent();
       if(this.isPre()){
 	content = content.replace(/\n/g, "<br>");
       }
