@@ -11851,6 +11851,13 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Nehan.Tag}
+    */
+    getMarkup : function(){
+      return this.markup;
+    },
+    /**
+       @memberof Nehan.StyleContext
        @return {String}
     */
     getMarkupName : function(){
