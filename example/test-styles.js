@@ -109,41 +109,32 @@ var TestStyles = {
   },
   ".nehan-circular":{
     "list-style-type":"none",
-    "measure":"300px",
-    "extent":"300px"
+    "measure":"300px"
   },
   ".nehan-circular li":{
     "line-height":"1em",
     oncreate:function(ctx){
-      var mode = ctx.box.style.parent.markup.getAttr("mode", "normal");
-      if(ctx.box.display === "block"){
-	var index = ctx.box.style.getChildIndex();
-	var is_vert = ctx.box.style.isTextVertical();
-	var child_count = ctx.box.style.parent.getChildCount();
-	var center_pos = ctx.box.parent.getContentExtent() / 2;
-	var unit_degree = Math.floor(360 / child_count);
-	var start_degree = is_vert? 0 : 90;
-	var rotate_degree = start_degree + unit_degree * (index + 1);
-	var translate = is_vert? "translateX(" + center_pos + "px)" : "translateY(" + center_pos + "px)";
-	var rotate = "rotate(" + rotate_degree + "deg)";
-	var transform = [translate, rotate].join(" ");
-
-	ctx.dom.style["position"] = "absolute";
-	ctx.dom.style["-webkit-transform"] = transform;
-	ctx.dom.style["-moz-transform"] = transform;
-	ctx.dom.style["-o-transform"] = transform;
-	ctx.dom.style["-ms-transform"] = transform;
-	ctx.dom.style["transform"] = transform;
-
-	if(mode === "clock"){
-	  var first_text = ctx.dom.getElementsByClassName("nehan-text-block")[0] ||
-	    ctx.dom.getElementsByClassName("nehan-inline")[0];
-	  if(first_text){
-	    var rotate_degree = is_vert? (-unit_degree * (index + 1)) : (240 - unit_degree * index);
-	    first_text.style["-webkit-transform"] = "rotate(" + rotate_degree + "deg)";
-	  }
-	}
+      // if anonymous line block in <li>, ignore.
+      if(ctx.box.display !== "block"){
+	return;
       }
+      var index = ctx.box.style.getChildIndex();
+      var is_vert = ctx.box.style.isTextVertical();
+      var child_count = ctx.box.style.parent.getChildCount();
+      var center_pos = ctx.box.parent.getContentExtent() / 2;
+      var unit_degree = Math.floor(360 / child_count);
+      var start_degree = is_vert? 30 : 120;
+      var rotate_degree = start_degree + unit_degree * index;
+      var translate = is_vert? "translateX(" + center_pos + "px)" : "translateY(" + center_pos + "px)";
+      var rotate = "rotate(" + rotate_degree + "deg)";
+      var transform = [translate, rotate].join(" ");
+
+      ctx.dom.style["position"] = "absolute";
+      ctx.dom.style["-webkit-transform"] = transform;
+      ctx.dom.style["-moz-transform"] = transform;
+      ctx.dom.style["-o-transform"] = transform;
+      ctx.dom.style["-ms-transform"] = transform;
+      ctx.dom.style["transform"] = transform;
     }
   }
 };

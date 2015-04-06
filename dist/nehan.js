@@ -16227,6 +16227,9 @@ Selectors.setValues(__engine_args.style || {}); // set local style
 List.iter(Nehan.__single_tag_names__, LexingRule.addSingleTagByName);
 List.iter(Nehan.__single_tag_rexes__, LexingRule.addSingleTagByRex);
 
+// export utilities
+Nehan.List = List;
+
 /**
    @memberof Nehan
    @class Engine

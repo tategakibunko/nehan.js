@@ -449,15 +449,8 @@ var Script = {
   ].join("\n"),
 
   "circular":[
-    "<h2>normal</h2>",
     "<ul class='nehan-circular'>",
     Snipet.list_item_12_phrase,
-    "</ul>",
-    "<page-break>",
-
-    "<h2>clock</h2>",
-    "<ul class='nehan-circular' mode='clock'>",
-    Snipet.list_item_12,
     "</ul>"
   ].join("")
 };
