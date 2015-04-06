@@ -501,6 +501,8 @@ var StyleContext = (function(){
       box.content = opt.content || null;
       box.isFirst = opt.isFirst || false;
       box.isLast = opt.isLast || false;
+      box.restExtent = opt.restExtent || 0;
+      box.restMeasure = opt.restMeasure || 0;
       if(this.isPushed()){
 	box.pushed = true;
       } else if(this.isPulled()){

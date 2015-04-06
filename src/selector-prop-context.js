@@ -44,13 +44,6 @@ var SelectorPropContext = (function(){
     },
     /**
        @memberof Nehan.SelectorPropContext
-       @return {Nehan.DocumentContext}
-    */
-    getDocumentContext : function(){
-      return DocumentContext;
-    },
-    /**
-       @memberof Nehan.SelectorPropContext
        @return {int}
     */
     getRestMeasure : function(){

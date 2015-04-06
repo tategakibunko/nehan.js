@@ -163,7 +163,9 @@ var BlockGenerator = (function(){
       breakAfter:context.hasBreakAfter(),
       localPageNo:this._yieldCount,
       isFirst:this.isFirstOutput(),
-      isLast:!this.hasNext()
+      isLast:!this.hasNext(),
+      restMeasure:context.getInlineRestMeasure(),
+      restExtent:context.getBlockRestExtent()
     };
     if(typeof this.rootBlockId !== "undefined"){
       block_args.rootBlockId = this.rootBlockId;

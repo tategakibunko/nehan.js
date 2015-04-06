@@ -91,7 +91,7 @@ var LayoutEvaluator = (function(){
     },
     _evaluate : function(tree, opt){
       var root = this._evalElementRoot(tree, opt || {});
-      var result = root.innerHTML? root : List.fold(tree.elements, root, function(ret, child){
+      var dom = root.innerHTML? root : List.fold(tree.elements, root, function(ret, child){
 	this._appendChild(root, this._evalElementChild(tree, child));
 	if(child.withBr){ // annotated to add extra br element
 	  this._appendChild(root, document.createElement("br"));
@@ -103,12 +103,9 @@ var LayoutEvaluator = (function(){
       }.bind(this));
       var oncreate = tree.getOnCreate();
       if(oncreate){
-	oncreate({
-	  dom:result,
-	  box:tree
-	});
+	oncreate(new EvalContext(dom, tree));
       }
-      return result;
+      return dom;
     },
     _evalElementRoot : function(tree, opt){
       opt = opt || {};
