@@ -1317,18 +1317,6 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
-       @return {Object} {before:xxx, after:yyy}
-    */
-    getBlockContextEdge : function(flow){
-      flow = flow || this.flow;
-      var edge = this.edge || null;
-      return {
-	before:(edge? edge.getBefore(flow) : 0),
-	after:(edge? edge.getAfter(flow) : 0)
-      };
-    },
-    /**
-       @memberof Nehan.StyleContext
        @return {int}
     */
     getInnerEdgeMeasure : function(flow){
