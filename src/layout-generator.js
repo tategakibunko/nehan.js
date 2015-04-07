@@ -195,8 +195,9 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createStartContext = function(){
+    var edge_size = this._getContextEdgeSize();
     var context = new CursorContext(
-      new BlockContext(this.style.contentExtent),
+      new BlockContext(this.style.outerExtent - edge_size),
       new InlineContext(this.style.contentMeasure)
     );
     //console.info("[%s]start context:%o", this.style.markupName, context);
@@ -204,9 +205,8 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createChildContext = function(parent_context){
-    var context_edge = this.style.getBlockContextEdge();
-    var is_first_block = this.stream? this.stream.isHead() : true;
-    var max_extent = parent_context.getBlockRestExtent() - context_edge.before - context_edge.after;
+    var edge_size = this._getContextEdgeSize();
+    var max_extent = parent_context.getBlockRestExtent() - edge_size;
     var child_context = new CursorContext(
       new BlockContext(max_extent, {
 	lineNo:parent_context.lineNo
@@ -215,6 +215,10 @@ var LayoutGenerator = (function(){
     );
     //console.info("[%s]child context:%o", this.style.markupName, child_context);
     return child_context;
+  };
+
+  LayoutGenerator.prototype._getContextEdgeSize = function(style){
+    return this.isFirstOutput()? this.style.getEdgeBefore() : 0;
   };
 
   LayoutGenerator.prototype._createStream = function(style){

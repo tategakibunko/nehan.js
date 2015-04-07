@@ -465,20 +465,17 @@ var StyleContext = (function(){
       if(this.parent && opt.extent){
 	extent = this.staticExtent || opt.extent;
       }
-      var edge = this.edge || null;
 
-      /* TODO
-      if(edge && (!opt.isFirts || !opt.isLast) && this.display !== "list-item"){
+      var edge = this.edge || null;
+      if(edge && (!opt.useBeforeEdge || !opt.useAfterEdge)){
 	edge = edge.clone();
-	if(!opt.isFirst){
-	  //console.log("[%s]clear before", this.markupName);
+	if(!opt.useBeforeEdge){
 	  edge.clearBefore(this.flow);
 	}
-	if(!opt.isLast){
-	  //console.log("[%s]clear after", this.markupName);
+	if(!opt.useAfterEdge){
 	  edge.clearAfter(this.flow);
 	}
-      }*/
+      }
 
       var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
       var box_size = this.flow.getBoxSize(measure, extent);

@@ -156,14 +156,15 @@ var BlockGenerator = (function(){
     if(extent === 0 || elements.length === 0){
       return null;
     }
+    var after_edge_size = this.style.getEdgeAfter();
     var block_args = {
       blockId:this.blockId,
       extent:extent,
       elements:elements,
       breakAfter:context.hasBreakAfter(),
       localPageNo:this._yieldCount,
-      isFirst:this.isFirstOutput(),
-      isLast:!this.hasNext(),
+      useBeforeEdge:this.isFirstOutput(),
+      useAfterEdge:(!this.hasNext() && after_edge_size <= context.getBlockRestExtent()),
       restMeasure:context.getInlineRestMeasure(),
       restExtent:context.getBlockRestExtent()
     };
