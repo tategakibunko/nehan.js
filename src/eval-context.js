@@ -16,6 +16,13 @@ var EvalContext = (function(){
   EvalContext.prototype = {
     /**
        @memberof Nehan.EvalContext
+       @return {HTMLElement}
+    */
+    getElement : function(){
+      return this.dom;
+    },
+    /**
+       @memberof Nehan.EvalContext
        @return {int}
     */
     getRestMeasure : function(){

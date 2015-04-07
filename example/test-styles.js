@@ -107,30 +107,49 @@ var TestStyles = {
       ].join(""));
     }
   },
-  ".nehan-circular":{
-    "list-style-type":"none",
-    "measure":"300px"
+  "circular":{
+    "display":"block",
+    "background":"orange",
+    "measure":"300px",
+    "extent":"300px",
+    "margin":{after:"1em"},
+    "content":function(ctx){
+      if(!ctx.getMarkup().isEmpty()){
+	return null;
+      }
+      return Nehan.List.fold(Nehan.List.create(12), "", function(ret, index){
+	return ret + "<div>" + (index + 1) + "番目の子</div>";
+      });
+    }
   },
-  ".nehan-circular li":{
+  "circular div":{
     "line-height":"1em",
+    "color":function(ctx){
+      var child_index = ctx.getChildIndex();
+      var parent_style = ctx.getParentStyleContext();
+      var active = parseInt(parent_style.markup.getAttr("active", 1), 10);
+      return (child_index + 1 === active)? "red" : "black";
+    },
     onblock:function(ctx){
       var index = ctx.getChildIndex();
       var is_vert = ctx.isTextVertical();
       var child_count = ctx.getParentChildCount();
-      var center_pos = ctx.getParentBox().getContentExtent() / 2;
+      var font_size = ctx.getStyleContext().getFontSize();
+      var center_pos = Math.floor((ctx.getParentBox().getContentExtent() - font_size) / 2);
       var unit_degree = Math.floor(360 / child_count);
       var start_degree = is_vert? 30 : 120;
       var rotate_degree = start_degree + unit_degree * index;
       var translate = is_vert? "translateX(" + center_pos + "px)" : "translateY(" + center_pos + "px)";
       var rotate = "rotate(" + rotate_degree + "deg)";
       var transform = [translate, rotate].join(" ");
+      var style = ctx.dom.style;
 
-      ctx.dom.style["position"] = "absolute";
-      ctx.dom.style["-webkit-transform"] = transform;
-      ctx.dom.style["-moz-transform"] = transform;
-      ctx.dom.style["-o-transform"] = transform;
-      ctx.dom.style["-ms-transform"] = transform;
-      ctx.dom.style["transform"] = transform;
+      style["position"] = "absolute";
+      style["-webkit-transform"] = transform;
+      style["-moz-transform"] = transform;
+      style["-o-transform"] = transform;
+      style["-ms-transform"] = transform;
+      style["transform"] = transform;
     }
   }
 };

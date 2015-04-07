@@ -449,9 +449,8 @@ var Script = {
   ].join("\n"),
 
   "circular":[
-    "<ul class='nehan-circular'>",
-    Snipet.list_item_12_phrase,
-    "</ul>"
+    "<circular active='3'></circular>",
+    "after text"
   ].join("")
 };
 
