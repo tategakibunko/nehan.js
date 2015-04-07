@@ -162,7 +162,6 @@ var BlockGenerator = (function(){
       extent:extent,
       elements:elements,
       breakAfter:context.hasBreakAfter(),
-      localPageNo:this._yieldCount,
       useBeforeEdge:this.isFirstOutput(),
       useAfterEdge:(!this.hasNext() && after_edge_size <= context.getBlockRestExtent()),
       restMeasure:context.getInlineRestMeasure(),
