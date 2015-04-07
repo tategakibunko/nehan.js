@@ -15200,7 +15200,7 @@ var ParallelGenerator = (function(){
     if(blocks === null){
       return null;
     }
-    var wrap_block = this._wrapBlocks(blocks);
+    var wrap_block = this._wrapBlocks(context, blocks);
     var wrap_extent = wrap_block.getLayoutExtent(this.style.flow);
     if(!context.hasBlockSpaceFor(wrap_extent)){
       this.pushCache(wrap_block);
@@ -15257,13 +15257,18 @@ var ParallelGenerator = (function(){
     });
   };
 
-  ParallelGenerator.prototype._wrapBlocks = function(blocks){
+  ParallelGenerator.prototype._wrapBlocks = function(context, blocks){
     var flow = this.style.flow;
     var max_block = this._findMaxBlock(blocks);
-    var uniformed_blocks = this._alignContentExtent(blocks, max_block.getContentExtent(flow));
+    var wrap_extent = max_block.getContentExtent(flow);
+    var rest_extent = context.getBlockRestExtent() - wrap_extent;
+    var after_edge_size = this.style.getEdgeAfter();
+    var uniformed_blocks = this._alignContentExtent(blocks, wrap_extent);
     return this.style.createBlock({
       elements:uniformed_blocks,
-      extent:max_block.getLayoutExtent(flow)
+      extent:max_block.getLayoutExtent(flow),
+      useBeforeEdge:this.isFirstOutput(),
+      useAfterEdge:(!this.hasNext() && after_edge_size <= rest_extent)
     });
   };
 
