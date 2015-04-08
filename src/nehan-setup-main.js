@@ -6,8 +6,7 @@ Selectors.setValues(Nehan.globalStyle || {}); // set global style.
 Selectors.setValues(__engine_args.style || {}); // set local style
 
 // register global single tags
-List.iter(Nehan.__single_tag_names__, LexingRule.addSingleTagByName);
-List.iter(Nehan.__single_tag_rexes__, LexingRule.addSingleTagByRex);
+List.iter(Nehan.singleTagNames, LexingRule.addSingleTagByName);
 
 // export utilities
 Nehan.List = List;

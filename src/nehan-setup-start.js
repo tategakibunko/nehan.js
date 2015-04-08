@@ -1,12 +1,11 @@
 // current engine id
-Nehan.engineId = 0;
+Nehan.engineId = Nehan.engineId || 0;
 
 // global style
-Nehan.globalStyle = {};
+Nehan.globalStyle = Nehan.globalStyle || {};
 
 // global single tags
-Nehan.__single_tag_names__ = [];
-Nehan.__single_tag_rexes__ = [];
+Nehan.singleTagNames = Nehan.singleTagNames || [];
 
 /**
    set global style. see example at setStyle of {@link Nehan.Engine}.
@@ -42,17 +41,7 @@ Nehan.setStyles = function(values){
    @param tag_name {String}
 */
 Nehan.addSingleTagByName = function(tag_name){
-  Nehan.__single_tag_names__.push(tag_name);
-};
-
-/**
-   set global single tag name by regexp object. see example at addSingleTagByRex of {@link Nehan.LexingRule}.
-
-   @memberof Nehan
-   @param rex {RegExp}
-*/
-Nehan.addSingleTagByRex = function(rex){
-  Nehan.__single_tag_rexes__.push(rex);
+  Nehan.singleTagNames.push(tag_name);
 };
 
 /**
