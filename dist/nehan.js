@@ -7189,6 +7189,11 @@ var BorderRadius = (function(){
   }
 
   BorderRadius.prototype = {
+    /**
+       @memberof Nehan.BorderRadius
+       @method clone
+       @return {Nehan.BorderRadius}
+    */
     clone : function(){
       var radius = new BorderRadius();
       radius.topLeft = this.topLeft.clone();
@@ -7378,6 +7383,20 @@ var BorderColor = (function(){
   BorderColor.prototype = {
     /**
        @memberof Nehan.BorderColor
+       @method clone
+       @return {Nehan.BorderColor}
+    */
+    clone : function(){
+      var border_color = new BorderColor();
+      List.iter(Const.cssBoxDirs, function(dir){
+	if(this[dir]){
+	  border_color[dir] = this[dir];
+	}
+      }.bind(this));
+      return border_color;
+    },
+    /**
+       @memberof Nehan.BorderColor
        @method setColor
        @param flow {Nehan.BoxFlow}
        @param value {Object} - color values, object or array or string available.
@@ -7427,6 +7446,20 @@ var BorderStyle = (function(){
   }
 
   BorderStyle.prototype = {
+    /**
+       @memberof Nehan.BorderStyle
+       @method clone
+       @return {Nehan.BorderStyle}
+    */
+    clone : function(){
+      var style = new BorderStyle();
+      List.iter(Const.cssBoxDirs, function(dir){
+	if(this[dir]){
+	  style[dir] = this[dir];
+	}
+      }.bind(this));
+      return style;
+    },
     /**
        @memberof Nehan.BorderStyle
        @method setStyle
@@ -7532,18 +7565,13 @@ var Border = (function(){
   Border.prototype.clone = function(){
     var border = this.copyTo(new Border());
     if(this.radius){
-      // TODO
       border.radius = this.radius.clone();
     }
     if(this.style){
-      // TODO
-      // border.style = this.style.clone();
-      border.style = this.style;
+      border.style = this.style.clone();
     }
     if(this.color){
-      // TODO
-      // border.color = this.color.clone();
-      border.color = this.color;
+      border.color = this.color.clone();
     }
     return border;
   };
@@ -12820,13 +12848,14 @@ var StyleContext = (function(){
     },
     _loadBorder : function(flow, font_size){
       var edge_size = this._loadEdgeSize(font_size, "border-width");
-      if(edge_size === null){
+      var border_radius = this.getCssAttr("border-radius");
+      if(edge_size === null && border_radius === null){
 	return null;
       }
       var border = new Border();
-      border.setSize(flow, edge_size);
-
-      var border_radius = this.getCssAttr("border-radius");
+      if(edge_size){
+	border.setSize(flow, edge_size);
+      }
       if(border_radius){
 	border.setRadius(flow, this._computeCornerSize(border_radius, font_size));
       }

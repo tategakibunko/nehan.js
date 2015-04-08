@@ -20,18 +20,13 @@ var Border = (function(){
   Border.prototype.clone = function(){
     var border = this.copyTo(new Border());
     if(this.radius){
-      // TODO
       border.radius = this.radius.clone();
     }
     if(this.style){
-      // TODO
-      // border.style = this.style.clone();
-      border.style = this.style;
+      border.style = this.style.clone();
     }
     if(this.color){
-      // TODO
-      // border.color = this.color.clone();
-      border.color = this.color;
+      border.color = this.color.clone();
     }
     return border;
   };

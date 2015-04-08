@@ -11,6 +11,20 @@ var BorderStyle = (function(){
   BorderStyle.prototype = {
     /**
        @memberof Nehan.BorderStyle
+       @method clone
+       @return {Nehan.BorderStyle}
+    */
+    clone : function(){
+      var style = new BorderStyle();
+      List.iter(Const.cssBoxDirs, function(dir){
+	if(this[dir]){
+	  style[dir] = this[dir];
+	}
+      }.bind(this));
+      return style;
+    },
+    /**
+       @memberof Nehan.BorderStyle
        @method setStyle
        @param flow {Nehan.BoxFlow}
        @param value {Object} - logical style values for each logical direction

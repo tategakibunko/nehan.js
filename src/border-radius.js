@@ -13,6 +13,11 @@ var BorderRadius = (function(){
   }
 
   BorderRadius.prototype = {
+    /**
+       @memberof Nehan.BorderRadius
+       @method clone
+       @return {Nehan.BorderRadius}
+    */
     clone : function(){
       var radius = new BorderRadius();
       radius.topLeft = this.topLeft.clone();

@@ -1971,13 +1971,14 @@ var StyleContext = (function(){
     },
     _loadBorder : function(flow, font_size){
       var edge_size = this._loadEdgeSize(font_size, "border-width");
-      if(edge_size === null){
+      var border_radius = this.getCssAttr("border-radius");
+      if(edge_size === null && border_radius === null){
 	return null;
       }
       var border = new Border();
-      border.setSize(flow, edge_size);
-
-      var border_radius = this.getCssAttr("border-radius");
+      if(edge_size){
+	border.setSize(flow, edge_size);
+      }
       if(border_radius){
 	border.setRadius(flow, this._computeCornerSize(border_radius, font_size));
       }

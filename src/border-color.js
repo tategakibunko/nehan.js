@@ -11,6 +11,20 @@ var BorderColor = (function(){
   BorderColor.prototype = {
     /**
        @memberof Nehan.BorderColor
+       @method clone
+       @return {Nehan.BorderColor}
+    */
+    clone : function(){
+      var border_color = new BorderColor();
+      List.iter(Const.cssBoxDirs, function(dir){
+	if(this[dir]){
+	  border_color[dir] = this[dir];
+	}
+      }.bind(this));
+      return border_color;
+    },
+    /**
+       @memberof Nehan.BorderColor
        @method setColor
        @param flow {Nehan.BoxFlow}
        @param value {Object} - color values, object or array or string available.
