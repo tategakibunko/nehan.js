@@ -127,7 +127,7 @@ var FloatGenerator = (function(){
     var flow = this.style.flow;
     var elements = List.filter(blocks, function(block){ return block !== null; });
     var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
-    var extent = List.sum(elements, 0, function(element){ element.getLayoutExtent(flow); });
+    var extent = List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
     var break_after = List.exists(elements, function(element){ return element.breakAfter; });
 
     // wrapping block always float to start direction
