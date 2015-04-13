@@ -15129,8 +15129,8 @@ var FloatGenerator = (function(){
 	var root_child = root_clone._child || null;
 	if(root_child){
 	  root_child._parent = root;
+	  root_child.style.forceUpdateContextSize(root_measure, root.style.contentExtent);
 	}
-	root_child.style.forceUpdateContextSize(root_measure, root.style.contentExtent);
 	root._child = root_child;
 	root._cachedElements = root_clone._cachedElements || [];
       }
