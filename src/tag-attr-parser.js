@@ -33,10 +33,7 @@ var TagAttrParser = (function(){
 	  this._attrs[this._left] = "true";
 	  this._left = null;
 	}
-      } else if(token === "="){
-	if(this._left === null){
-	  throw "TagAttrParser::syntax error(=)";
-	}
+      } else if(token === "=" && this._left){
 	this._attrs[this._left] = this._lexer.get() || "true";
 	this._left = null;
 	return;
