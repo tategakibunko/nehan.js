@@ -59,7 +59,7 @@ var HtmlLexer = (function (){
 
   HtmlLexer.prototype = {
     _normalize : function(src){
-      var src = src.replace(/(<\/.+?>)(?:[\s]*)/gm, function(str, p1){
+      var src = src.replace(/(<\/.+?>)/gm, function(str, p1){
 	  return p1.toLowerCase();
       }); // convert close tag to lower case(for innerHTML of IE)
       src = __replace_single_close_tags(src);
