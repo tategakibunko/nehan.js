@@ -96,8 +96,17 @@ var FloatGenerator = (function(){
     // if no more rest extent is left, continuous layout is displayed in context of parent generator.
     if(rest_extent_space <= 0){
       if(!this.hasNext()){
-	this._child.style.forceUpdateContextSize(root_measure, this._parent.style.contentExtent);
-	this._parent._child = this._child;
+	// before: [root] -> [float(this)] -> [root(clone)] -> [child]
+	//  after: [root] -> [child]
+	var root = this._parent;
+	var root_clone = this._child;
+	var root_child = root_clone._child || null;
+	if(root_child){
+	  root_child._parent = root;
+	}
+	root_child.style.forceUpdateContextSize(root_measure, root.style.contentExtent);
+	root._child = root_child;
+	root._cachedElements = root_clone._cachedElements || [];
       }
       return group_set;
     }
