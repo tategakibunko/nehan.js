@@ -4615,6 +4615,7 @@ var Char = (function(){
     getCssVertGlyph : function(line){
       var css = {};
       var padding_enable = this.isPaddingEnable();
+      css["height"] = "1em";
       if(this.isKakkoStart()){
 	if(this.data === "\x28"){ // left parenthis
 	  css["height"] = "0.5em"; // it's temporary fix, so maybe need to be refactored.
@@ -13613,6 +13614,9 @@ var InlineContext = (function(){
     */
     justify : function(head){
       var last = this.elements.length - 1, ptr = last, tail;
+      if(head && head instanceof Char && head.isHeadNg() && this.elements.length === 1){
+	return this.elements.pop();
+      }
       while(ptr >= 0){
 	tail = this.elements[ptr];
 	if(head && head.isHeadNg && head.isHeadNg() || tail.isTailNg && tail.isTailNg()){
@@ -13627,9 +13631,6 @@ var InlineContext = (function(){
 	} else {
 	  break;
 	}
-      }
-      if(ptr < 0){
-	return this.elements.pop();
       }
       // if ptr moved, justification is executed.
       if(0 <= ptr && ptr < last){
@@ -14582,8 +14583,6 @@ var TextGenerator = (function(){
   };
 
   TextGenerator.prototype._justifyLine = function(context){
-    // before justify, skip single <br> to avoid double line-break.
-    var stream_next = this.stream? this.stream.peek() : null;
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var next_head = this.peekLastCache() || this.stream.peek();
     var new_head = context.justify(next_head); // if justified, new_head token is returned.

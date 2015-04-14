@@ -145,8 +145,6 @@ var TextGenerator = (function(){
   };
 
   TextGenerator.prototype._justifyLine = function(context){
-    // before justify, skip single <br> to avoid double line-break.
-    var stream_next = this.stream? this.stream.peek() : null;
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var next_head = this.peekLastCache() || this.stream.peek();
     var new_head = context.justify(next_head); // if justified, new_head token is returned.

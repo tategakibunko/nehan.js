@@ -161,6 +161,9 @@ var InlineContext = (function(){
     */
     justify : function(head){
       var last = this.elements.length - 1, ptr = last, tail;
+      if(head && head instanceof Char && head.isHeadNg() && this.elements.length === 1){
+	return this.elements.pop();
+      }
       while(ptr >= 0){
 	tail = this.elements[ptr];
 	if(head && head.isHeadNg && head.isHeadNg() || tail.isTailNg && tail.isTailNg()){
@@ -175,9 +178,6 @@ var InlineContext = (function(){
 	} else {
 	  break;
 	}
-      }
-      if(ptr < 0){
-	return this.elements.pop();
       }
       // if ptr moved, justification is executed.
       if(0 <= ptr && ptr < last){

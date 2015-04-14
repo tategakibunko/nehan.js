@@ -54,6 +54,7 @@ var Char = (function(){
     getCssVertGlyph : function(line){
       var css = {};
       var padding_enable = this.isPaddingEnable();
+      css["height"] = "1em";
       if(this.isKakkoStart()){
 	if(this.data === "\x28"){ // left parenthis
 	  css["height"] = "0.5em"; // it's temporary fix, so maybe need to be refactored.
