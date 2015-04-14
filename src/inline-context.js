@@ -176,6 +176,9 @@ var InlineContext = (function(){
 	  break;
 	}
       }
+      if(ptr < 0){
+	return this.elements.pop();
+      }
       // if ptr moved, justification is executed.
       if(0 <= ptr && ptr < last){
 	// disable text after new tail pos.
