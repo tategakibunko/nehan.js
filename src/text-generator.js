@@ -31,7 +31,6 @@ var TextGenerator = (function(){
 
     while(this.hasNext()){
       var element = this._getNext(context);
-      //console.log("element:%o(%s)", element, (element? (element.data || "?") : "null"));
       if(element === null){
 	break;
       }
