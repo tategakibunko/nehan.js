@@ -4823,6 +4823,7 @@ var Char = (function(){
       this.rotate = angle;
     },
     _setRotateOrImg : function(angle, img, vscale){
+      this.vscale = vscale || 1;
       if(Nehan.Env.isTransformEnable){
 	this._setRotate(angle);
 	return;
@@ -8232,7 +8233,7 @@ var Box = (function(){
   function Box(size, style, type){
     this.size = size;
     this.style = style;
-    this.type = type || "block";
+    this._type = type || "block";
     this.elements = [];
     this.css = {};
   }
@@ -8269,14 +8270,14 @@ var Box = (function(){
        @return {boolean}
     */
     isLine : function(){
-      return this.type === "line-block";
+      return this._type === "line-block";
     },
     /**
        @memberof Nehan.Box
        @return {boolean}
     */
     isTextBlock : function(){
-      return this.type === "text-block";
+      return this._type === "text-block";
     },
     /**
        @memberof Nehan.Box
@@ -16175,6 +16176,9 @@ var VertEvaluator = (function(){
     } else if(chr.isHalfSpaceChar(chr)){
       return this._evalHalfSpaceChar(line, chr);
     } else if(chr.isRotateChar()){
+      if(chr.isVertGlyphEnable()){
+	return this._evalVerticalGlyph(line, chr);
+      }
       return this._evalRotateChar(line, chr);
     } else if(chr.isSmallKana()){
       return this._evalSmallKana(line, chr);

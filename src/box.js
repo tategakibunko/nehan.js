@@ -10,7 +10,7 @@ var Box = (function(){
   function Box(size, style, type){
     this.size = size;
     this.style = style;
-    this.type = type || "block";
+    this._type = type || "block";
     this.elements = [];
     this.css = {};
   }
@@ -47,14 +47,14 @@ var Box = (function(){
        @return {boolean}
     */
     isLine : function(){
-      return this.type === "line-block";
+      return this._type === "line-block";
     },
     /**
        @memberof Nehan.Box
        @return {boolean}
     */
     isTextBlock : function(){
-      return this.type === "text-block";
+      return this._type === "text-block";
     },
     /**
        @memberof Nehan.Box

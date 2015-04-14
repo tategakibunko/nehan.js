@@ -133,6 +133,9 @@ var VertEvaluator = (function(){
     } else if(chr.isHalfSpaceChar(chr)){
       return this._evalHalfSpaceChar(line, chr);
     } else if(chr.isRotateChar()){
+      if(chr.isVertGlyphEnable()){
+	return this._evalVerticalGlyph(line, chr);
+      }
       return this._evalRotateChar(line, chr);
     } else if(chr.isSmallKana()){
       return this._evalSmallKana(line, chr);

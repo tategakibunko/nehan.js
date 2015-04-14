@@ -262,6 +262,7 @@ var Char = (function(){
       this.rotate = angle;
     },
     _setRotateOrImg : function(angle, img, vscale){
+      this.vscale = vscale || 1;
       if(Nehan.Env.isTransformEnable){
 	this._setRotate(angle);
 	return;
