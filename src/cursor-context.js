@@ -88,6 +88,13 @@ var CursorContext = (function(){
        @memberof Nehan.CursorContext
        @return {boolean}
     */
+    isJustified : function(){
+      return this.inline.isJustified();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
     hasInlineSpaceFor : function(measure){
       return this.inline.hasSpaceFor(measure);
     },
@@ -110,6 +117,13 @@ var CursorContext = (function(){
     */
     setBreakAfter : function(status){
       this.inline.setBreakAfter(status);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @param status {boolean}
+    */
+    setJustified : function(status){
+      this.inline.setJustified(status);
     },
     /**
        @memberof Nehan.CursorContext

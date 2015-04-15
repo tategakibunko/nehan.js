@@ -8,9 +8,12 @@ var StyleContext = (function(){
     "script",
     "noscript",
     "style",
-    "input",
     "iframe",
-    "form"
+    "form",
+    "input",
+    "select",
+    "button",
+    "textarea"
   ];
 
   // these properties must be under control of layout engine.

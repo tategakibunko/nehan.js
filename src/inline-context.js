@@ -15,6 +15,7 @@ var InlineContext = (function(){
     this.elements = [];
     this.lineBreak = false; // is line-break included in line?
     this.breakAfter = false; // is break-after incuded in line?
+    this.justified = false; // is line justified?
   }
 
   InlineContext.prototype = {
@@ -24,6 +25,13 @@ var InlineContext = (function(){
     */
     isEmpty : function(){
       return !this.lineBreak && !this.breakAfter && this.elements.length === 0;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {boolean}
+    */
+    isJustified : function(){
+      return this.justified;
     },
     /**
        @memberof Nehan.InlineContext
@@ -46,6 +54,13 @@ var InlineContext = (function(){
     */
     setLineBreak : function(status){
       this.lineBreak = status;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param status {boolean}
+    */
+    setJustified : function(status){
+      this.justified = status;
     },
     /**
        @memberof Nehan.InlineContext
