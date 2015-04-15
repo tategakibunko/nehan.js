@@ -60,15 +60,8 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalTcy = function(line, tcy){
-    if(tcy.data.length === 1){
-      return this._evalTcySingleHalfChar(line, tcy);
-    } 
-    return document.createTextNode(Html.unescape(tcy.data));
-  };
-
-  HoriEvaluator.prototype._evalTcySingleHalfChar = function(line, tcy){
     return this._createElement("span", {
-      css:tcy.getCssHoriSingleHalfChar(line),
+      css:tcy.getCssHori(line),
       content:tcy.data
     });
   };

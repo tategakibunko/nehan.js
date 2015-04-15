@@ -49,9 +49,11 @@ var Tcy = (function(){
        @memberof Nehan.Char
        @return {Object}
     */
-    getCssHoriSingleHalfChar : function(line){
+    getCssHori : function(line){
       var css = {};
-      css["text-align"] = "center";
+      if(this.data.length === 1){
+	css["margin-left"] = "0.25em";
+      }
       return css;
     },
     /**
@@ -67,7 +69,11 @@ var Tcy = (function(){
        @param font {Nehan.Font}
     */
     setMetrics : function(flow, font){
-      this.bodySize = font.size;
+      if(flow.isTextVertical()){
+	this.bodySize = font.size;
+      } else {
+	this.bodySize = (this.data.length <= 1)? font.size : Math.floor(1.2 * font.size);
+      }
     }
   };
 

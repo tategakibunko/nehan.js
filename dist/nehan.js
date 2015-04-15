@@ -5384,9 +5384,11 @@ var Tcy = (function(){
        @memberof Nehan.Char
        @return {Object}
     */
-    getCssHoriSingleHalfChar : function(line){
+    getCssHori : function(line){
       var css = {};
-      css["text-align"] = "center";
+      if(this.data.length === 1){
+	css["margin-left"] = "0.25em";
+      }
       return css;
     },
     /**
@@ -5402,7 +5404,11 @@ var Tcy = (function(){
        @param font {Nehan.Font}
     */
     setMetrics : function(flow, font){
-      this.bodySize = font.size;
+      if(flow.isTextVertical()){
+	this.bodySize = font.size;
+      } else {
+	this.bodySize = (this.data.length <= 1)? font.size : Math.floor(1.2 * font.size);
+      }
     }
   };
 
@@ -16351,15 +16357,8 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalTcy = function(line, tcy){
-    if(tcy.data.length === 1){
-      return this._evalTcySingleHalfChar(line, tcy);
-    } 
-    return document.createTextNode(Html.unescape(tcy.data));
-  };
-
-  HoriEvaluator.prototype._evalTcySingleHalfChar = function(line, tcy){
     return this._createElement("span", {
-      css:tcy.getCssHoriSingleHalfChar(line),
+      css:tcy.getCssHori(line),
       content:tcy.data
     });
   };
