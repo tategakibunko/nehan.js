@@ -53,21 +53,18 @@ var Char = (function(){
     */
     getCssVertGlyph : function(line){
       var css = {};
+      var is_kakko_start = this.isKakkoStart();
+      var is_kakko_end = this.isKakkoEnd();
       var padding_enable = this.isPaddingEnable();
-      css["height"] = "1em";
-      if(this.isKakkoStart()){
-	if(this.data === "\x28"){ // left parenthis
-	  css["height"] = "0.5em"; // it's temporary fix, so maybe need to be refactored.
-	} else if(!padding_enable){
-	  css["margin-top"] = "-0.5em";
-	}
-      } else {
-	if(this.getVertScale() < 1){
-	  css.height = "0.5em";
-	}
-	if(padding_enable){
-	  css["margin-bottom"] = "0.5em";
-	}
+      css.height = "1em";
+      // kerning for left-parenthesis is done by {height:1em; margin-top:-0.5em}
+      // kerning for right-parenthesis is done by {height:1em; margin-bottom:-0.5em}
+      if(is_kakko_start && !padding_enable){
+	css["margin-top"] = "-0.5em";
+      } else if(is_kakko_end && !padding_enable){
+	css["margin-bottom"] = "-0.5em";
+      } else if(!is_kakko_start && !is_kakko_end && this.vscale < 1){
+	css.height = "0.5em";
       }
       return css;
     },
