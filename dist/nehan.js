@@ -5368,9 +5368,7 @@ var Tcy = (function(){
     getCssVert : function(line){
       var css = {};
       css["text-align"] = "center";
-      if(this.data.length >= 2){
-	css["width"] = "1.2em"; // a little wider
-      }
+      css["font-family"] = "monospace";
       return css;
     },
     /**
