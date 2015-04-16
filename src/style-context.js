@@ -591,6 +591,7 @@ var StyleContext = (function(){
 	line.lineNo = opt.lineNo;
 	line.lineBreak = opt.lineBreak || false;
 	line.breakAfter = opt.breakAfter || false;
+	line.justified = opt.justified || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;
 
 	// if vertical line, needs some position fix for decorated element(ruby, empha) to align baseline.

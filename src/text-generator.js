@@ -44,6 +44,7 @@ var TextGenerator = (function(){
 	// avoid tail/head NG between two generators
 	if(element instanceof Char && element.isTailNg() || is_next_head_ng){
 	  context.setLineBreak(true);
+	  context.setJustified(true);
 	  //console.log("justified at %o:type:%s", (element.data || ""), (is_next_head_ng? "head" : "tail"));
 	  //console.log("next head:%s", (next_head_char? next_head_char.data : ""));
 	  this.pushCache(element);
@@ -82,6 +83,7 @@ var TextGenerator = (function(){
     var line = this.style.createTextBlock({
       lineBreak:context.hasLineBreak(), // is line break included in?
       breakAfter:context.hasBreakAfter(), // is break after included in?
+      justified:context.isJustified(), // is line justified?
       measure:context.getInlineCurMeasure(), // actual measure
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       charCount:context.getInlineCharCount(),
@@ -152,6 +154,7 @@ var TextGenerator = (function(){
       //console.log("justify and new head:%o", new_head);
       this.stream.setPos(new_head.pos);
       context.setLineBreak(true);
+      context.setJustified(true);
       this.clearCache(); // stream position changed, so disable cache.
     }
   };

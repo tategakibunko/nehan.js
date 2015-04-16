@@ -11468,6 +11468,7 @@ var StyleContext = (function(){
 	line.lineNo = opt.lineNo;
 	line.lineBreak = opt.lineBreak || false;
 	line.breakAfter = opt.breakAfter || false;
+	line.justified = opt.justified || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;
 
 	// if vertical line, needs some position fix for decorated element(ruby, empha) to align baseline.
@@ -13248,6 +13249,13 @@ var CursorContext = (function(){
        @memberof Nehan.CursorContext
        @return {boolean}
     */
+    isJustified : function(){
+      return this.inline.isJustified();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
     hasInlineSpaceFor : function(measure){
       return this.inline.hasSpaceFor(measure);
     },
@@ -13270,6 +13278,13 @@ var CursorContext = (function(){
     */
     setBreakAfter : function(status){
       this.inline.setBreakAfter(status);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @param status {boolean}
+    */
+    setJustified : function(status){
+      this.inline.setJustified(status);
     },
     /**
        @memberof Nehan.CursorContext
@@ -13484,6 +13499,7 @@ var InlineContext = (function(){
     this.elements = [];
     this.lineBreak = false; // is line-break included in line?
     this.breakAfter = false; // is break-after incuded in line?
+    this.justified = false; // is line justified?
   }
 
   InlineContext.prototype = {
@@ -13493,6 +13509,13 @@ var InlineContext = (function(){
     */
     isEmpty : function(){
       return !this.lineBreak && !this.breakAfter && this.elements.length === 0;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {boolean}
+    */
+    isJustified : function(){
+      return this.justified;
     },
     /**
        @memberof Nehan.InlineContext
@@ -13515,6 +13538,13 @@ var InlineContext = (function(){
     */
     setLineBreak : function(status){
       this.lineBreak = status;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param status {boolean}
+    */
+    setJustified : function(status){
+      this.justified = status;
     },
     /**
        @memberof Nehan.InlineContext
@@ -14498,6 +14528,7 @@ var TextGenerator = (function(){
 	// avoid tail/head NG between two generators
 	if(element instanceof Char && element.isTailNg() || is_next_head_ng){
 	  context.setLineBreak(true);
+	  context.setJustified(true);
 	  //console.log("justified at %o:type:%s", (element.data || ""), (is_next_head_ng? "head" : "tail"));
 	  //console.log("next head:%s", (next_head_char? next_head_char.data : ""));
 	  this.pushCache(element);
@@ -14536,6 +14567,7 @@ var TextGenerator = (function(){
     var line = this.style.createTextBlock({
       lineBreak:context.hasLineBreak(), // is line break included in?
       breakAfter:context.hasBreakAfter(), // is break after included in?
+      justified:context.isJustified(), // is line justified?
       measure:context.getInlineCurMeasure(), // actual measure
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       charCount:context.getInlineCharCount(),
@@ -14606,6 +14638,7 @@ var TextGenerator = (function(){
       //console.log("justify and new head:%o", new_head);
       this.stream.setPos(new_head.pos);
       context.setLineBreak(true);
+      context.setJustified(true);
       this.clearCache(); // stream position changed, so disable cache.
     }
   };
