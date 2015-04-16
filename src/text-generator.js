@@ -148,9 +148,12 @@ var TextGenerator = (function(){
 
   TextGenerator.prototype._justifyLine = function(context){
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
-    var next_head = this.peekLastCache() || this.stream.peek();
-    var new_head = context.justify(next_head); // if justified, new_head token is returned.
+    var old_head = this.peekLastCache() || this.stream.peek();
+    var new_head = context.justify(old_head); // if justified, new_head token is returned.
     if(new_head){
+      //console.log("old_head:%o, new_head:%o", old_head, new_head);
+      var justified_measure = (new_head.pos - old_head.pos) * this.style.getFontSize();
+      context.addInlineMeasure(justified_measure);
       //console.log("justify and new head:%o", new_head);
       this.stream.setPos(new_head.pos);
       context.setLineBreak(true);

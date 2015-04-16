@@ -63,7 +63,7 @@ var BlockGenerator = (function(){
       }
       // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
       // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
-      if(!cache.lineBreak && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child){
+      if((!cache.lineBreak || (cache.lineBreak && cache.justified)) && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child){
 	//console.info("inline float fix, line = %o(%s), context = %o, child_gen = %o", cache, cache.toString(), context, this._child);
 
 	// resume inline context
@@ -154,6 +154,8 @@ var BlockGenerator = (function(){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
+      //console.log("create void element!:(extent=%d, elements=%o)", extent, elements);
+      //return new Box(new BoxSize(0,0), this.style, "void");
       return null;
     }
     var after_edge_size = this.style.getEdgeAfter();

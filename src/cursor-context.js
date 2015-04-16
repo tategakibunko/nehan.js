@@ -127,6 +127,13 @@ var CursorContext = (function(){
     },
     /**
        @memberof Nehan.CursorContext
+       @param measure {int}
+    */
+    addInlineMeasure : function(measure){
+      this.inline.addMeasure(measure);
+    },
+    /**
+       @memberof Nehan.CursorContext
        @param element {Nehan.Box}
        @param measure {int}
     */

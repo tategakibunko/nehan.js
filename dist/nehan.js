@@ -11529,6 +11529,7 @@ var StyleContext = (function(){
       line.maxExtent = extent;
       line.content = content;
       line.lineBreak = opt.lineBreak || false;
+      line.justified = opt.justified || false;
       //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
       return line;
     },
@@ -13288,6 +13289,13 @@ var CursorContext = (function(){
     },
     /**
        @memberof Nehan.CursorContext
+       @param measure {int}
+    */
+    addInlineMeasure : function(measure){
+      this.inline.addMeasure(measure);
+    },
+    /**
+       @memberof Nehan.CursorContext
        @param element {Nehan.Box}
        @param measure {int}
     */
@@ -13562,6 +13570,13 @@ var InlineContext = (function(){
     },
     /**
        @memberof Nehan.InlineContext
+       @param measure {int}
+    */
+    addMeasure : function(measure){
+      this.curMeasure += measure;
+    },
+    /**
+       @memberof Nehan.InlineContext
        @param element {Nehan.Box}
        @param measure {int}
     */
@@ -13591,6 +13606,9 @@ var InlineContext = (function(){
       }
       if(element.breakAfter){
 	this.breakAfter = true;
+      }
+      if(element.justified){
+	this.justified = true;
       }
     },
     /**
@@ -14121,7 +14139,7 @@ var BlockGenerator = (function(){
       }
       // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
       // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
-      if(!cache.lineBreak && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child){
+      if((!cache.lineBreak || (cache.lineBreak && cache.justified)) && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child){
 	//console.info("inline float fix, line = %o(%s), context = %o, child_gen = %o", cache, cache.toString(), context, this._child);
 
 	// resume inline context
@@ -14212,6 +14230,8 @@ var BlockGenerator = (function(){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
+      //console.log("create void element!:(extent=%d, elements=%o)", extent, elements);
+      //return new Box(new BoxSize(0,0), this.style, "void");
       return null;
     }
     var after_edge_size = this.style.getEdgeAfter();
@@ -14319,6 +14339,7 @@ var InlineGenerator = (function(){
       lineNo:context.getBlockLineNo(),
       lineBreak:context.hasLineBreak(), // is line break included in?
       breakAfter:context.hasBreakAfter(), // is break after included in?
+      justified:context.isJustified(), // is line justified?
       measure:context.getInlineCurMeasure(), // actual measure
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       charCount:context.getInlineCharCount(),
@@ -14632,9 +14653,12 @@ var TextGenerator = (function(){
 
   TextGenerator.prototype._justifyLine = function(context){
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
-    var next_head = this.peekLastCache() || this.stream.peek();
-    var new_head = context.justify(next_head); // if justified, new_head token is returned.
+    var old_head = this.peekLastCache() || this.stream.peek();
+    var new_head = context.justify(old_head); // if justified, new_head token is returned.
     if(new_head){
+      //console.log("old_head:%o, new_head:%o", old_head, new_head);
+      var justified_measure = (new_head.pos - old_head.pos) * this.style.getFontSize();
+      context.addInlineMeasure(justified_measure);
       //console.log("justify and new head:%o", new_head);
       this.stream.setPos(new_head.pos);
       context.setLineBreak(true);
@@ -15983,6 +16007,10 @@ var LayoutEvaluator = (function(){
     _evaluate : function(tree, opt){
       var root = this._evalElementRoot(tree, opt || {});
       var dom = root.innerHTML? root : List.fold(tree.elements, root, function(ret, child){
+	/*
+	if(child._type === "void"){
+	  return ret;
+	}*/
 	this._appendChild(root, this._evalElementChild(tree, child));
 	if(child.withBr){ // annotated to add extra br element
 	  this._appendChild(root, document.createElement("br"));

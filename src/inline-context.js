@@ -78,6 +78,13 @@ var InlineContext = (function(){
     },
     /**
        @memberof Nehan.InlineContext
+       @param measure {int}
+    */
+    addMeasure : function(measure){
+      this.curMeasure += measure;
+    },
+    /**
+       @memberof Nehan.InlineContext
        @param element {Nehan.Box}
        @param measure {int}
     */
@@ -107,6 +114,9 @@ var InlineContext = (function(){
       }
       if(element.breakAfter){
 	this.breakAfter = true;
+      }
+      if(element.justified){
+	this.justified = true;
       }
     },
     /**
