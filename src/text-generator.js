@@ -149,6 +149,9 @@ var TextGenerator = (function(){
   TextGenerator.prototype._justifyLine = function(context){
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var old_head = this.peekLastCache() || this.stream.peek();
+    if(old_head === null){
+      return;
+    }
     var new_head = context.justify(old_head); // if justified, new_head token is returned.
     if(new_head){
       //console.log("old_head:%o, new_head:%o", old_head, new_head);

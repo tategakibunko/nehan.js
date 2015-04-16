@@ -33,7 +33,6 @@ var Word = (function(){
       }
       css.width = line.style.getFontSize() + "px";
       css.height = this.bodySize + "px";
-      css["font-family"] = "monospace";
       return css;
     },
     /**
@@ -43,8 +42,6 @@ var Word = (function(){
     */
     getCssVertTransBody : function(line){
       var css = {};
-      //css["font-family"] = line.style.getFontFamily();
-      css["font-family"] = "monospace";
       return css;
     },
     /**
@@ -54,8 +51,6 @@ var Word = (function(){
     */
     getCssVertTransBodyTrident : function(line){
       var css = {};
-      css["font-family"] = "monospace";
-      //css["font-family"] = line.style.getFontFamily();
       css.width = line.style.getFontSize() + "px";
       css.height = this.bodySize + "px";
       css["transform-origin"] = "50% 50%";
@@ -76,7 +71,6 @@ var Word = (function(){
     */
     getCssVertTransIE : function(line){
       var css = {}, font_size = line.style.getFontSize();
-      css["font-family"] = "monospace";
       css["css-float"] = "left";
       css["writing-mode"] = "tb-rl";
       css["letter-spacing"] = (line.style.letterSpacing || 0) + "px";
