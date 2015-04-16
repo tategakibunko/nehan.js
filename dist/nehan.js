@@ -4617,12 +4617,11 @@ var Char = (function(){
       var is_kakko_start = this.isKakkoStart();
       var is_kakko_end = this.isKakkoEnd();
       var padding_enable = this.isPaddingEnable();
-      css.height = "1em";
-      // kerning for left-parenthesis is done by {height:1em; margin-top:-0.5em}
-      // kerning for right-parenthesis is done by {height:1em; margin-bottom:-0.5em}
       if(is_kakko_start && !padding_enable){
+	css.height = "1em";
 	css["margin-top"] = "-0.5em";
       } else if(is_kakko_end && !padding_enable){
+	css.height = "1em";
 	css["margin-bottom"] = "-0.5em";
       } else if(!is_kakko_start && !is_kakko_end && this.vscale < 1){
 	css.height = "0.5em";
