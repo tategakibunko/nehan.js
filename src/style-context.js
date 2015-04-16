@@ -1142,7 +1142,14 @@ var StyleContext = (function(){
        @return {int}
     */
     getListMarkerSize : function(){
-      return this.listMarkerSize? this.listMarkerSize : (this.parent? this.parent.getListMarkerSize() : this.getFontSize());
+      if(this.listMarkerSize){
+	return this.listMarkerSize;
+      }
+      if(this.parent){
+	return this.parent.getListMarkerSize();
+      }
+      var font_size = this.getFontSize();
+      return new BoxSize(font_size, font_size);
     },
     /**
        @memberof Nehan.StyleContext
