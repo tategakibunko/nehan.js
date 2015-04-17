@@ -19,9 +19,9 @@ Include css, js in the ``<head>``
 <script src="/path/to/nehan.js" type="text/javascript"></script>
 ```
 
-## Demo & Document
+## Application sample
 
-See [demo and document](http://tategakibunko.github.io/nehan.js).
+[Nehan Reader/Paged-media reader for google chrome](https://chrome.google.com/webstore/detail/nehan-reader/bebbekgiffjpgjlgkkhmlgheckolmdcf).
 
 ## Screenshot
 
