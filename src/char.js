@@ -405,6 +405,7 @@ var Char = (function(){
 	this.vscale = 0.5;
 	this._setRotate(90);
 	break;
+      case 34: // quotation mark
       case 8786: // approximately equal to
 	this._setRotate(90); break;
       }
