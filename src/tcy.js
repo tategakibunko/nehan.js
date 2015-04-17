@@ -41,6 +41,7 @@ var Tcy = (function(){
       var css = {};
       css["text-align"] = "center";
       css["font-family"] = "monospace";
+      css["font-weight"] = "normal";
       return css;
     },
     /**
