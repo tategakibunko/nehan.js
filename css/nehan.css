@@ -40,6 +40,11 @@
 .nehan-vert-glyph{
   -webkit-writing-mode:vertical-rl;
   writing-mode:vertical-rl;
+  -o-box-sizing:content-box !important;
+  -ms-box-sizing:content-box !important;
+  -moz-box-sizing:content-box !important;
+  -webkit-box-sizing:content-box !important;
+  box-sizing:content-box !important;
 }
 .nehan-rotate-90{
   word-break:normal;
