@@ -142,7 +142,7 @@ var Tag = (function (){
        @return {String}
     */
     getId : function(){
-      return this.attrs.id;
+      return this.attrs.getAttr("id");
     },
     /**
        @memberof Nehan.Tag

@@ -3721,7 +3721,10 @@ var Selectors = (function(){
   // offcource, higher specificity overwrite lower one.
   var __get_value = function(style){
     return List.fold(__selectors, {}, function(ret, selector){
-      return selector.test(style)? Args.copy(ret, selector.getValue()) : ret;
+      if(!selector.test(style)){
+	return ret;
+      }
+      return Args.copy(ret, selector.getValue());
     });
   };
 
@@ -4256,7 +4259,7 @@ var Tag = (function (){
        @return {String}
     */
     getId : function(){
-      return this.attrs.id;
+      return this.attrs.getAttr("id");
     },
     /**
        @memberof Nehan.Tag
