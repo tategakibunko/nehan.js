@@ -6033,8 +6033,10 @@ var TextMetrics = (function(){
     */
     getMeasure : function(font, text){
       var metrics = this.getMetrics(font, text);
-      var space = Math.floor(Display.vertWordSpaceRate * font.size);
-      return metrics.width + space;
+      //var space = Math.floor(Display.vertWordSpaceRate * font.size);
+      //var measure = metrics.width + space;
+      //return measure;
+      return metrics.width;
     }
   };
 })();

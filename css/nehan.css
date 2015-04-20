@@ -25,10 +25,6 @@
   -webkit-text-overflow:clip;
   -o-text-overflow:clip;
 }
-/*
-.nehan-inline.nehan-inline-lr-tb .nehan-inline{
-  float:none;
-}*/
 .nehan-inline-tb-rl a,
 .nehan-inline-tb-lr a {
   overflow:visible;
