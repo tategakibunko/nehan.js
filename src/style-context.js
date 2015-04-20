@@ -515,6 +515,7 @@ var StyleContext = (function(){
       } else if(this.isPulled()){
 	box.pulled = true;
       }
+      //console.log("[%s]block(%o):%s:(%d,%d)", this.markupName, box, box.toString(), box.size.width, box.size.height);
       return box;
     },
     /**
