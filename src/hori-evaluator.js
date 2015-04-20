@@ -68,7 +68,7 @@ var HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._evalChar = function(line, chr){
     if(chr.isHalfSpaceChar()){
-      return document.createTextNode(chr.data);
+      return this._evalHalfSpaceChar(line, chr);
     }
     if(chr.isCharRef()){
       return document.createTextNode(Html.unescape(chr.data));
@@ -139,6 +139,13 @@ var HoriEvaluator = (function(){
     return this._createElement("span", {
       content:chr.data,
       css:chr.getCssPadding(line)
+    });
+  };
+
+  HoriEvaluator.prototype._evalHalfSpaceChar = function(line, chr){
+    return this._createElement("span", {
+      content:"&nbsp;",
+      css:chr.getCssHoriHalfSpaceChar(line)
     });
   };
 

@@ -149,11 +149,20 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {Object}
     */
+    getCssHoriHalfSpaceChar : function(line){
+      var css = {};
+      css.display = "inline-block";
+      css.width = this.bodySize + "px";
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
     getCssVertHalfSpaceChar : function(line){
-      var css = {}, font_size = line.style.getFontSize();
-      var half = Math.round(font_size / 2);
-      css.height = half + "px";
-      css["line-height"] = half + "px";
+      var css = {};
+      css.height = this.bodySize + "px";
+      css["line-height"] = this.bodySize + "px";
       return css;
     },
     /**
