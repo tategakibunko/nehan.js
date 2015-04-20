@@ -501,14 +501,6 @@ var Display = {
   */
   lineHeight: 2.0,
   /**
-     extra space rate for vertical word in vertical mode.
-
-     @memberof Nehan.Display
-     @type {Float}
-     @default 0.25
-  */
-  vertWordSpaceRate: 0.25,
-  /**
      size rate of half size space.
 
      @memberof Nehan.Display
@@ -6054,9 +6046,6 @@ var TextMetrics = (function(){
     */
     getMeasure : function(font, text){
       var metrics = this.getMetrics(font, text);
-      //var space = Math.floor(Display.vertWordSpaceRate * font.size);
-      //var measure = metrics.width + space;
-      //return measure;
       return metrics.width;
     }
   };

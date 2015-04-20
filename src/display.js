@@ -122,14 +122,6 @@ var Display = {
   */
   lineHeight: 2.0,
   /**
-     extra space rate for vertical word in vertical mode.
-
-     @memberof Nehan.Display
-     @type {Float}
-     @default 0.25
-  */
-  vertWordSpaceRate: 0.25,
-  /**
      size rate of half size space.
 
      @memberof Nehan.Display
