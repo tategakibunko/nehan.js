@@ -11414,7 +11414,7 @@ var StyleContext = (function(){
       } else if(this.isPulled()){
 	box.pulled = true;
       }
-      console.log("[%s]block(%o):%s:(%d,%d)", this.markupName, box, box.toString(), box.size.width, box.size.height);
+      //console.log("[%s]block(%o):%s:(%d,%d)", this.markupName, box, box.toString(), box.size.width, box.size.height);
       return box;
     },
     /**
@@ -11509,7 +11509,7 @@ var StyleContext = (function(){
 	  line.edge.padding.setBefore(this.flow, (line.lineNo > 0)? edge_size : Math.floor(edge_size / 2));
 	}
       }
-      console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_root_line);
+      //console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_root_line);
       return line;
     },
     /**
