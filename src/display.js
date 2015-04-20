@@ -130,6 +130,14 @@ var Display = {
   */
   vertWordSpaceRate: 0.25,
   /**
+     size rate of half size space.
+
+     @memberof Nehan.Display
+     @type {Float}
+     @default 0.25
+  */
+  halfSpaceSizeRate: 0.38,
+  /**
      standard font color. this is required for browsers not supporting writing-mode to display vertical font-images.
 
      @memberof Nehan.Display

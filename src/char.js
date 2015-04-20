@@ -238,6 +238,10 @@ var Char = (function(){
        @param font {Nehan.Font}
     */
     setMetrics : function(flow, font){
+      if(this.isHalfSpaceChar()){
+	this.bodySize = Math.floor(font.size * Display.halfSpaceSizeRate);
+	return;
+      }
       var is_vert = flow.isTextVertical();
       var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
       this.bodySize = (step_scale != 1)? Math.round(font.size * step_scale) : font.size;

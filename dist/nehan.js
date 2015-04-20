@@ -509,6 +509,14 @@ var Display = {
   */
   vertWordSpaceRate: 0.25,
   /**
+     size rate of half size space.
+
+     @memberof Nehan.Display
+     @type {Float}
+     @default 0.25
+  */
+  halfSpaceSizeRate: 0.38,
+  /**
      standard font color. this is required for browsers not supporting writing-mode to display vertical font-images.
 
      @memberof Nehan.Display
@@ -4802,6 +4810,10 @@ var Char = (function(){
        @param font {Nehan.Font}
     */
     setMetrics : function(flow, font){
+      if(this.isHalfSpaceChar()){
+	this.bodySize = Math.floor(font.size * Display.halfSpaceSizeRate);
+	return;
+      }
       var is_vert = flow.isTextVertical();
       var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
       this.bodySize = (step_scale != 1)? Math.round(font.size * step_scale) : font.size;
