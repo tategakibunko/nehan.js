@@ -35,8 +35,7 @@ var TextGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
-      console.log("[%s]%o(%s), m = %d (%d/%d, rest=%d)", this.style.markupName, element, (element.data || ""), measure,
-		  context.inline.curMeasure, context.inline.maxMeasure, context.getInlineRestMeasure());
+      //console.log("[%s]%o(%s), m = %d (%d/%d, rest=%d)", this.style.markupName, element, (element.data || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
       if(measure === 0){
 	break;
       }

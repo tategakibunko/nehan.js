@@ -4724,13 +4724,6 @@ var Char = (function(){
        @return {Object}
     */
     getCssVertHalfSpaceChar : function(line){
-      /*
-      var css = {}, font_size = line.style.getFontSize();
-      var half = Math.round(font_size / 2);
-      css.height = half + "px";
-      css["line-height"] = half + "px";
-      return css;
-      */
       var css = {};
       css.height = this.bodySize + "px";
       css["line-height"] = this.bodySize + "px";
@@ -11503,7 +11496,7 @@ var StyleContext = (function(){
 	  line.edge.padding.setBefore(this.flow, (line.lineNo > 0)? edge_size : Math.floor(edge_size / 2));
 	}
       }
-      console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_root_line);
+      //console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_root_line);
       return line;
     },
     /**
@@ -11547,7 +11540,7 @@ var StyleContext = (function(){
       line.content = content;
       line.lineBreak = opt.lineBreak || false;
       line.justified = opt.justified || false;
-      console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
+      //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
       return line;
     },
     /**
@@ -14569,8 +14562,7 @@ var TextGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
-      console.log("[%s]%o(%s), m = %d (%d/%d, rest=%d)", this.style.markupName, element, (element.data || ""), measure,
-		  context.inline.curMeasure, context.inline.maxMeasure, context.getInlineRestMeasure());
+      //console.log("[%s]%o(%s), m = %d (%d/%d, rest=%d)", this.style.markupName, element, (element.data || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
       if(measure === 0){
 	break;
       }

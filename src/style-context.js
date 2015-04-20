@@ -609,7 +609,7 @@ var StyleContext = (function(){
 	  line.edge.padding.setBefore(this.flow, (line.lineNo > 0)? edge_size : Math.floor(edge_size / 2));
 	}
       }
-      console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_root_line);
+      //console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_root_line);
       return line;
     },
     /**
@@ -653,7 +653,7 @@ var StyleContext = (function(){
       line.content = content;
       line.lineBreak = opt.lineBreak || false;
       line.justified = opt.justified || false;
-      console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
+      //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
       return line;
     },
     /**
