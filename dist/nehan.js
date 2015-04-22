@@ -11967,10 +11967,6 @@ var StyleContext = (function(){
     */
     getContent : function(){
       var content = this.getCssAttr("content") || this.markup.getContent();
-      /*
-      if(this.isPre()){
-	content = content.replace(/\n/g, "<br>");
-      }*/
       var before = Selectors.getValuePe(this, "before");
       if(!Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;
