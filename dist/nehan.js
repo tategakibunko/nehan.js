@@ -14224,12 +14224,9 @@ var BlockGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
-    // empty line at block level
+    // skip block level br
     if(token.getName() === "br"){
-      return this.style.createLine({
-	//maxExtent:Math.floor(this.style.getAutoLineExtent())
-	maxExtent:this.style.getFontSize() // maybe this size is better
-      });
+      return this._getNext();
     }
 
     // if tag token, inherit style
