@@ -14466,6 +14466,11 @@ var InlineGenerator = (function(){
 
     case "br":
       context.setLineBreak(true);
+      if(!this.style.isPre()){
+	this.stream.skipUntil(function(token){
+	  return (token instanceof Text && token.isWhiteSpaceOnly());
+	});
+      }
       return null;
 
     case "page-break": case "pbr": case "end-page":
