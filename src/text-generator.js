@@ -211,7 +211,7 @@ var TextGenerator = (function(){
 
   TextGenerator.prototype._getWhiteSpace = function(context, token){
     if(this.style.isPre()){
-      return this._getText(context, token); // read as normal text
+      return this._getWhiteSpacePre(context, token);
     }
     if(Token.isNewLine(token)){
       // skip continuous white-spaces.
@@ -220,6 +220,14 @@ var TextGenerator = (function(){
     }
     // if white-space is not new-line, use first one.
     return this._getText(context, token);
+  };
+
+  TextGenerator.prototype._getWhiteSpacePre = function(context, token){
+    if(Token.isNewLine(token)){
+      context.setLineBreak(true);
+      return null;
+    }
+    return this._getText(context, token); // read as normal text
   };
 
   TextGenerator.prototype._getText = function(context, token){

@@ -127,15 +127,17 @@ var HtmlLexer = (function (){
       if(this.buff === ""){
 	return null;
       }
-      var match;
+      var match, content;
       match = this.buff.match(__rex_tag);
       if(match === null){
-	return new Text(this._stepBuff(this.buff.length));
+	content = this._stepBuff(this.buff.length);
+	return new Text(content);
       }
       if(match.index === 0){
 	return this._parseTag(match[0]);
       }
-      return new Text(this._stepBuff(match.index));
+      content = this._stepBuff(match.index);
+      return new Text(content);
     },
     _getTagContent : function(tag_name){
       // why we added [\\s|>] for open_tag_rex?
@@ -175,7 +177,7 @@ var HtmlLexer = (function (){
     },
     _parseChildContentTag : function(tag){
       var result = this._getTagContent(tag.name);
-      tag.setContent(Utils.trimCRLF(result.content));
+      tag.setContent(result.content);
       if(result.closed){
 	this._stepBuff(result.content.length + tag.name.length + 3); // 3 = "</>".length
       } else {

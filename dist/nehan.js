@@ -8643,15 +8643,17 @@ var HtmlLexer = (function (){
       if(this.buff === ""){
 	return null;
       }
-      var match;
+      var match, content;
       match = this.buff.match(__rex_tag);
       if(match === null){
-	return new Text(this._stepBuff(this.buff.length));
+	content = this._stepBuff(this.buff.length);
+	return new Text(content);
       }
       if(match.index === 0){
 	return this._parseTag(match[0]);
       }
-      return new Text(this._stepBuff(match.index));
+      content = this._stepBuff(match.index);
+      return new Text(content);
     },
     _getTagContent : function(tag_name){
       // why we added [\\s|>] for open_tag_rex?
@@ -8691,7 +8693,7 @@ var HtmlLexer = (function (){
     },
     _parseChildContentTag : function(tag){
       var result = this._getTagContent(tag.name);
-      tag.setContent(Utils.trimCRLF(result.content));
+      tag.setContent(result.content);
       if(result.closed){
 	this._stepBuff(result.content.length + tag.name.length + 3); // 3 = "</>".length
       } else {
@@ -11965,9 +11967,10 @@ var StyleContext = (function(){
     */
     getContent : function(){
       var content = this.getCssAttr("content") || this.markup.getContent();
+      /*
       if(this.isPre()){
 	content = content.replace(/\n/g, "<br>");
-      }
+      }*/
       var before = Selectors.getValuePe(this, "before");
       if(!Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;
@@ -14754,7 +14757,7 @@ var TextGenerator = (function(){
 
   TextGenerator.prototype._getWhiteSpace = function(context, token){
     if(this.style.isPre()){
-      return this._getText(context, token); // read as normal text
+      return this._getWhiteSpacePre(context, token);
     }
     if(Token.isNewLine(token)){
       // skip continuous white-spaces.
@@ -14763,6 +14766,14 @@ var TextGenerator = (function(){
     }
     // if white-space is not new-line, use first one.
     return this._getText(context, token);
+  };
+
+  TextGenerator.prototype._getWhiteSpacePre = function(context, token){
+    if(Token.isNewLine(token)){
+      context.setLineBreak(true);
+      return null;
+    }
+    return this._getText(context, token); // read as normal text
   };
 
   TextGenerator.prototype._getText = function(context, token){
