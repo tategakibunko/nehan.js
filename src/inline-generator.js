@@ -40,6 +40,7 @@ var InlineGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
+      //console.log("[%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.toString() || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
       if(measure === 0){
 	break;
       }
@@ -125,9 +126,6 @@ var InlineGenerator = (function(){
 
     // text block
     if(token instanceof Text){
-      if(token.isWhiteSpaceOnly()){
-	return this._getNext(context);
-      }
       this.setChildLayout(this._createTextGenerator(this.style, token));
       return this.yieldChildLayout(context);
     }

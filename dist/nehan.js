@@ -9774,6 +9774,15 @@ var TokenStream = (function(){
       return this.lexer.getSeekPercent(seek_pos);
     },
     /**
+       get stream src text
+
+       @memberof Nehan.TokenStream
+       @return {string}
+    */
+    getSrc : function(){
+      return this.lexer.getSrc();
+    },
+    /**
        iterate tokens by [fn].
 
        @memberof Nehan.TokenStream
@@ -11094,6 +11103,10 @@ var StyleContext = (function(){
       if(word_break){
 	this.wordBreak = word_break;
       }
+      var white_space = this._loadWhiteSpace();
+      if(white_space){
+	this.whiteSpace = white_space;
+      }
       // static size is defined in selector or tag attr, hightest priority
       this.staticMeasure = this._loadStaticMeasure();
       this.staticExtent = this._loadStaticExtent();
@@ -11702,8 +11715,7 @@ var StyleContext = (function(){
        @return {boolean}
     */
     isPre : function(){
-      var white_space = this.getCssAttr("white-space", "normal");
-      return white_space === "pre";
+      return this.whiteSpace === "pre";
     },
     /**
        @memberof Nehan.StyleContext
@@ -12954,6 +12966,10 @@ var StyleContext = (function(){
     },
     _loadWordBreak : function(){
       return this.getCssAttr("word-break");
+    },
+    _loadWhiteSpace : function(){
+      var inherit = this.parent? this.parent.whiteSpace : "normal";
+      return this.getCssAttr("white-space", inherit);
     },
     _loadListStyle : function(){
       var list_style_type = this.getCssAttr("list-style-type", "none");
@@ -14330,6 +14346,7 @@ var InlineGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
+      //console.log("[%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.toString() || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
       if(measure === 0){
 	break;
       }
@@ -14415,9 +14432,6 @@ var InlineGenerator = (function(){
 
     // text block
     if(token instanceof Text){
-      if(token.isWhiteSpaceOnly()){
-	return this._getNext(context);
-      }
       this.setChildLayout(this._createTextGenerator(this.style, token));
       return this.yieldChildLayout(context);
     }
@@ -14564,7 +14578,7 @@ var TextGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
-      //console.log("[%s]%o(%s), m = %d (%d/%d, rest=%d)", this.style.markupName, element, (element.data || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
+      //console.log("[%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.data || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
       if(measure === 0){
 	break;
       }
