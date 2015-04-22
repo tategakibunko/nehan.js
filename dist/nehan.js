@@ -11462,6 +11462,7 @@ var StyleContext = (function(){
     createLine : function(opt){
       opt = opt || {};
       var is_root_line = this.isRootLine();
+      var is_line_break = opt.isLineBreak || false;
       var elements = opt.elements || [];
       var max_font_size = opt.maxFontSize || this.getFontSize();
       var max_extent = opt.maxExtent || this.staticExtent || 0;
@@ -11488,6 +11489,10 @@ var StyleContext = (function(){
       // anonymous line block('aaa' and 'ccc') is already edged by <p> in block level.
       // so if line is anonymous, edge must be ignored.
       line.edge = (this.edge && !is_root_line)? this.edge : null;
+
+      if(is_line_break){
+	line.css["background-color"] = "transparent";
+      }
 
       // backup other line data. mainly required to restore inline-context.
       if(is_root_line){
@@ -11682,6 +11687,13 @@ var StyleContext = (function(){
     */
     isPasted : function(){
       return this.getMarkupAttr("pasted") !== null;
+    },
+    /**
+       @memberof Nehan.StyleContext
+       @return {boolean}
+    */
+    isLineBreak : function(){
+      return this.markupName === "br";
     },
     /**
        @memberof Nehan.StyleContext
@@ -14224,11 +14236,6 @@ var BlockGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
-    // skip block level br
-    if(token.getName() === "br"){
-      return this._getNext();
-    }
-
     // if tag token, inherit style
     var child_style = new StyleContext(token, this.style, {cursorContext:context});
 
@@ -14242,6 +14249,14 @@ var BlockGenerator = (function(){
     if(child_style.isPageBreak()){
       context.setBreakAfter(true);
       return null;
+    }
+
+    // if line-break, output empty line(extent = font-size).
+    if(child_style.isLineBreak()){
+      return this.style.createLine({
+	isLineBreak:true,
+	maxExtent:this.style.getFontSize()
+      });
     }
 
     var child_stream = this._createStream(child_style);
@@ -14273,8 +14288,7 @@ var BlockGenerator = (function(){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
-      //console.log("create void element!:(extent=%d, elements=%o)", extent, elements);
-      //return new Box(new BoxSize(0,0), this.style, "void");
+      console.log("void layout found:cache=%o, has_next:%o, child:%o", this._cachedElements, this.hasNext(), this._child);
       return null;
     }
     var after_edge_size = this.style.getEdgeAfter();

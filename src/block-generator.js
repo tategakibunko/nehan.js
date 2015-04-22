@@ -110,11 +110,6 @@ var BlockGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
-    // skip block level br
-    if(token.getName() === "br"){
-      return this._getNext();
-    }
-
     // if tag token, inherit style
     var child_style = new StyleContext(token, this.style, {cursorContext:context});
 
@@ -128,6 +123,14 @@ var BlockGenerator = (function(){
     if(child_style.isPageBreak()){
       context.setBreakAfter(true);
       return null;
+    }
+
+    // if line-break, output empty line(extent = font-size).
+    if(child_style.isLineBreak()){
+      return this.style.createLine({
+	isLineBreak:true,
+	maxExtent:this.style.getFontSize()
+      });
     }
 
     var child_stream = this._createStream(child_style);
@@ -159,8 +162,7 @@ var BlockGenerator = (function(){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
-      //console.log("create void element!:(extent=%d, elements=%o)", extent, elements);
-      //return new Box(new BoxSize(0,0), this.style, "void");
+      console.log("void layout found:cache=%o, has_next:%o, child:%o", this._cachedElements, this.hasNext(), this._child);
       return null;
     }
     var after_edge_size = this.style.getEdgeAfter();
