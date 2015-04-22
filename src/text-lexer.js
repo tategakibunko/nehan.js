@@ -1,6 +1,6 @@
 var TextLexer = (function (){
   var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
-  var __rex_word = /^[\w!\.\?\/\:#;"',]+/;
+  var __rex_word = /^[a-zA-Z0-9.?\/:#;"',_]+/;
   var __rex_char_ref = /^&[^;\s]+;/;
 
   /**

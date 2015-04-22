@@ -4748,14 +4748,14 @@ var Char = (function(){
        @return {Float | Int}
     */
     getHoriScale : function(){
-      return this.hscale? this.hscale : 1;
+      return this.hscale || 1;
     },
     /**
        @memberof Nehan.Char
        @return {Float | Int}
     */
     getVertScale : function(){
-      return this.vscale? this.vscale : 1;
+      return this.vscale || 1;
     },
     /**
        @memberof Nehan.Char
@@ -4802,10 +4802,6 @@ var Char = (function(){
        @param font {Nehan.Font}
     */
     setMetrics : function(flow, font){
-      if(this.isHalfSpaceChar()){
-	this.bodySize = Math.floor(font.size * Display.halfSpaceSizeRate);
-	return;
-      }
       var is_vert = flow.isTextVertical();
       var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
       this.bodySize = (step_scale != 1)? Math.round(font.size * step_scale) : font.size;
@@ -4829,6 +4825,7 @@ var Char = (function(){
     },
     _setCnv : function(cnv, vscale, hscale){
       this.cnv = cnv;
+      this.isRef = true;
       this.vscale = vscale || 1;
       this.hscale = hscale || this.vscale;
     },
@@ -4847,16 +4844,18 @@ var Char = (function(){
       switch(c1){
       case "&lt;":
 	this._setRotateOrImg(90, "kakko7", 0.5);
+	this.hscale = 0.5;
 	break;
       case "&gt;":
 	this._setRotateOrImg(90, "kakko8", 0.5);
+	this.hscale = 0.5;
 	break;
       }
     },
     _setupNormal : function(code){
       switch(code){
       case 32: // half scape char
-	this._setCnv("&nbsp;", 0.5, 0.5); break;
+	this._setCnv("&nbsp;", Display.halfSpaceSizeRate, Display.halfSpaceSizeRate); break;
       case 12300:
 	this._setImg("kakko1", 0.5); break;
       case 65378:
@@ -8709,7 +8708,7 @@ var HtmlLexer = (function (){
 
 var TextLexer = (function (){
   var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
-  var __rex_word = /^[\w!\.\?\/\:#;"',]+/;
+  var __rex_word = /^[a-zA-Z0-9.?\/:#;"',_]+/;
   var __rex_char_ref = /^&[^;\s]+;/;
 
   /**
