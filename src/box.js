@@ -46,6 +46,13 @@ var Box = (function(){
        @memberof Nehan.Box
        @return {boolean}
     */
+    isVoid : function(){
+      return this._type === "void";
+    },
+    /**
+       @memberof Nehan.Box
+       @return {boolean}
+    */
     isLine : function(){
       return this._type === "line-block";
     },

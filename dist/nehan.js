@@ -8288,6 +8288,13 @@ var Box = (function(){
        @memberof Nehan.Box
        @return {boolean}
     */
+    isVoid : function(){
+      return this._type === "void";
+    },
+    /**
+       @memberof Nehan.Box
+       @return {boolean}
+    */
     isLine : function(){
       return this._type === "line-block";
     },
@@ -14163,6 +14170,9 @@ var BlockGenerator = (function(){
       if(element === null){
 	return this._createOutput(context);
       }
+      if(element.isVoid()){
+	continue;
+      }
       var extent = element.getLayoutExtent(this.style.flow);
       if(!context.hasBlockSpaceFor(extent)){
 	this.pushCache(element);
@@ -14292,9 +14302,12 @@ var BlockGenerator = (function(){
       /*
       var cache = (this._cachedElements.length > 0)? this._cachedElements[0] : null;
       var cache_str = cache? cache.toString() : "null";
-      var flow_str = this.style.isTextVertical()? "v" : "h";
-      //console.log("void(flow=%s), gen:%o, context:%o, cache:%o(%s), stream at:%d(has next:%o)", flow_str, this, context, cache, cache_str, this.stream.getPos(), this.stream.hasNext());
+      //console.log("void, gen:%o(yielded=%d), context:%o, cache:%o(%s), stream at:%d(has next:%o)", this, this._yieldCount, context, cache, cache_str, this.stream.getPos(), this.stream.hasNext());
       */
+      if(!this.hasCache() && this.isFirstOutput()){
+	// size 'zero' has special meaning... so we use 1.
+	return new Box(new BoxSize(1,1), this.style, "void"); // empty void element
+      }
       return null;
     }
     var after_edge_size = this.style.getEdgeAfter();
@@ -16083,11 +16096,10 @@ var LayoutEvaluator = (function(){
     },
     _evaluate : function(tree, opt){
       var root = this._evalElementRoot(tree, opt || {});
-      var dom = root.innerHTML? root : List.fold(tree.elements, root, function(ret, child){
-	/*
+      var dom = root.innerHTML? root : List.fold(tree.elements, root, function(root, child){
 	if(child._type === "void"){
-	  return ret;
-	}*/
+	  return root; // do nothing
+	}
 	this._appendChild(root, this._evalElementChild(tree, child));
 	if(child.withBr){ // annotated to add extra br element
 	  this._appendChild(root, document.createElement("br"));
