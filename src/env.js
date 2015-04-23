@@ -9,6 +9,7 @@ Nehan.Env = (function(){
   var __is_chrome_vert_glyph_enable = __client.isChrome() && __client.version >= 24;
   var __is_safari_vert_glyph_enable = __client.isSafari() && __client.version >= 5;
   var __is_vertical_glyph_enable = __is_chrome_vert_glyph_enable || __is_safari_vert_glyph_enable;
+  var __is_bold_metrics_correct = __client.isSafari() && __client.version >= 5;
 
   return {
     /**
@@ -31,6 +32,15 @@ Nehan.Env = (function(){
        @memberof Nehan.Env
        @type {boolean}
     */
-    isVerticalGlyphEnable : __is_vertical_glyph_enable
+    isVerticalGlyphEnable : __is_vertical_glyph_enable,
+
+    /**
+       true if canvas text-metrics is accurate even if text is bold.
+       for now, it is correct only safari >= 5.
+
+       @memberof Nehan.Env
+       @type {boolean}
+    */
+    isBoldMetricsCorrect : __is_bold_metrics_correct
   };
 })();

@@ -126,7 +126,7 @@ var Word = (function(){
       } else {
 	this.bodySize = Math.round(this.data.length * font.size * 0.5);
       }
-      if(font.isBold()){
+      if(!Nehan.Env.isBoldMetricsCorrect && font.isBold()){
 	this.bodySize += Math.round(Display.boldRate * this.bodySize);
       }
     },
