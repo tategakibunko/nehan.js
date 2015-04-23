@@ -180,15 +180,6 @@ var TokenStream = (function(){
       return this.lexer.getSeekPercent(seek_pos);
     },
     /**
-       get stream src text
-
-       @memberof Nehan.TokenStream
-       @return {string}
-    */
-    getSrc : function(){
-      return this.lexer.getSrc();
-    },
-    /**
        iterate tokens by [fn].
 
        @memberof Nehan.TokenStream
