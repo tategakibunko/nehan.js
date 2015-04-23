@@ -42,6 +42,7 @@ var TextMetrics = (function(){
     */
     getMeasure : function(font, text){
       var metrics = this.getMetrics(font, text);
+      //console.log("[%s] - %f", text, metrics.width);
       return metrics.width;
     }
   };
