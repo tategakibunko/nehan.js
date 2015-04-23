@@ -187,7 +187,7 @@ var InlineContext = (function(){
     justify : function(head){
       var last = this.elements.length - 1, ptr = last, tail = null;
       // if element is only Tcy('a.'), then stream last is '.'(head NG) but element last(Tcy) is not head NG.
-      if(head && head instanceof Char && head.isHeadNg() && this.elements.length === 1 && !(this.elements[0] instanceof Tcy)){
+      if(head && head.isHeadNg && head.isHeadNg() && this.elements.length === 1 && !(this.elements[0] instanceof Tcy)){
 	return this.elements.pop();
       }
       while(ptr >= 0){
@@ -206,7 +206,7 @@ var InlineContext = (function(){
 	}
       }
       // even if first element is tail ng, sweep it out to the head of next line.
-      if(ptr < 0 && tail && tail.isTailNg()){
+      if(ptr < 0 && tail && tail.isTailNg && tail.isTailNg()){
 	return tail;
       }
       // if ptr moved, justification is executed.

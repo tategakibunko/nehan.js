@@ -115,7 +115,6 @@ var BlockGenerator = (function(){
 
     // if disabled style, just skip
     if(child_style.isDisabled()){
-      this.style.removeChild(child_style);
       return this._getNext(context);
     }
 
@@ -162,7 +161,6 @@ var BlockGenerator = (function(){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
-      console.log("void layout found:cache=%o, has_next:%o, child:%o", this._cachedElements, this.hasNext(), this._child);
       return null;
     }
     var after_edge_size = this.style.getEdgeAfter();
