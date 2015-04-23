@@ -121,12 +121,11 @@ var Word = (function(){
     */
     setMetrics : function(flow, font){
       if(Config.useStrictWordMetrics && TextMetrics.isEnable()){
-	// caution: sometimes bold style is not correctly calculated.
 	this.bodySize = Math.round(TextMetrics.getMeasure(font, this.data));
-      } else {
-	this.bodySize = Math.round(this.data.length * font.size * 0.5);
+	return;
       }
-      if(!Nehan.Env.isBoldMetricsCorrect && font.isBold()){
+      this.bodySize = Math.round(this.data.length * font.size * 0.5);
+      if(font.isBold()){
 	this.bodySize += Math.round(Display.boldRate * this.bodySize);
       }
     },

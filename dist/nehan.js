@@ -193,7 +193,6 @@ Nehan.Env = (function(){
   var __is_chrome_vert_glyph_enable = __client.isChrome() && __client.version >= 24;
   var __is_safari_vert_glyph_enable = __client.isSafari() && __client.version >= 5;
   var __is_vertical_glyph_enable = __is_chrome_vert_glyph_enable || __is_safari_vert_glyph_enable;
-  var __is_bold_metrics_correct = __client.isSafari() && __client.version >= 5;
 
   return {
     /**
@@ -216,16 +215,7 @@ Nehan.Env = (function(){
        @memberof Nehan.Env
        @type {boolean}
     */
-    isVerticalGlyphEnable : __is_vertical_glyph_enable,
-
-    /**
-       true if canvas text-metrics is accurate even if text is bold.
-       for now, it is correct only safari >= 5.
-
-       @memberof Nehan.Env
-       @type {boolean}
-    */
-    isBoldMetricsCorrect : __is_bold_metrics_correct
+    isVerticalGlyphEnable : __is_vertical_glyph_enable
   };
 })();
 
@@ -5299,12 +5289,11 @@ var Word = (function(){
     */
     setMetrics : function(flow, font){
       if(Config.useStrictWordMetrics && TextMetrics.isEnable()){
-	// caution: sometimes bold style is not correctly calculated.
 	this.bodySize = Math.round(TextMetrics.getMeasure(font, this.data));
-      } else {
-	this.bodySize = Math.round(this.data.length * font.size * 0.5);
+	return;
       }
-      if(!Nehan.Env.isBoldMetricsCorrect && font.isBold()){
+      this.bodySize = Math.round(this.data.length * font.size * 0.5);
+      if(font.isBold()){
 	this.bodySize += Math.round(Display.boldRate * this.bodySize);
       }
     },
