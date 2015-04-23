@@ -247,7 +247,7 @@ var TextGenerator = (function(){
   TextGenerator.prototype._setTextMetrics = function(context, token){
     // if charactor token, set kerning before setting metrics.
     // because some additional space is added if kerning is enabled or not.
-    if(token instanceof Char && Config.kerning){
+    if(token instanceof Char && token.isKerningChar() && Config.kerning){
       this._setCharKerning(context, token);
     }
     token.setMetrics(this.style.flow, this.style.font);

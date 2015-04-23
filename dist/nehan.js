@@ -5047,7 +5047,7 @@ var Char = (function(){
        @return {boolean}
      */
     isKerningChar : function(){
-      return this.isKutenTouten() || this.isKakko();
+      return this.isZenkaku() && (this.isKutenTouten() || this.isKakko());
     },
     /**
        @memberof Nehan.Char
@@ -10201,7 +10201,7 @@ var PageStream = (function(){
 var Kerning = {
   /**
      @memberof Nehan.Kerning
-     @param cur_char {Nehan.Char}
+     @param cur_char(zenkaku) {Nehan.Char}
      @param prev_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
      @param next_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
   */
@@ -14831,7 +14831,7 @@ var TextGenerator = (function(){
   TextGenerator.prototype._setTextMetrics = function(context, token){
     // if charactor token, set kerning before setting metrics.
     // because some additional space is added if kerning is enabled or not.
-    if(token instanceof Char && Config.kerning){
+    if(token instanceof Char && token.isKerningChar() && Config.kerning){
       this._setCharKerning(context, token);
     }
     token.setMetrics(this.style.flow, this.style.font);

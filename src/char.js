@@ -483,7 +483,7 @@ var Char = (function(){
        @return {boolean}
      */
     isKerningChar : function(){
-      return this.isKutenTouten() || this.isKakko();
+      return this.isZenkaku() && (this.isKutenTouten() || this.isKakko());
     },
     /**
        @memberof Nehan.Char

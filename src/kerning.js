@@ -8,7 +8,7 @@
 var Kerning = {
   /**
      @memberof Nehan.Kerning
-     @param cur_char {Nehan.Char}
+     @param cur_char(zenkaku) {Nehan.Char}
      @param prev_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
      @param next_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
   */
