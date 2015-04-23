@@ -118,7 +118,9 @@ var TokenStream = (function(){
     */
     get : function(){
       var token = this.peek();
-      this.pos++;
+      if(token){
+	this.pos++;
+      }
       return token;
     },
     /**

@@ -161,6 +161,12 @@ var BlockGenerator = (function(){
     var extent = context.getBlockCurExtent();
     var elements = context.getBlockElements();
     if(extent === 0 || elements.length === 0){
+      /*
+      var cache = (this._cachedElements.length > 0)? this._cachedElements[0] : null;
+      var cache_str = cache? cache.toString() : "null";
+      var flow_str = this.style.isTextVertical()? "v" : "h";
+      //console.log("void(flow=%s), gen:%o, context:%o, cache:%o(%s), stream at:%d(has next:%o)", flow_str, this, context, cache, cache_str, this.stream.getPos(), this.stream.hasNext());
+      */
       return null;
     }
     var after_edge_size = this.style.getEdgeAfter();
