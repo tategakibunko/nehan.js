@@ -1424,7 +1424,7 @@ var StyleContext = (function(){
       }
       this.unmanagedCss.copyValuesTo(css);
       Args.copy(css, line.css);
-      css["background-color"] = "transparent";
+      css["background-color"] = this.getCssAttr("background-color", "transparent");
       return css;
     },
     /**
@@ -1463,7 +1463,7 @@ var StyleContext = (function(){
       }
       this.unmanagedCss.copyValuesTo(css);
       Args.copy(css, line.css);
-      css["background-color"] = "transparent";
+      css["background-color"] = this.getCssAttr("background-color", "transparent");
       return css;
     },
     /**
