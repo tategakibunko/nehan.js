@@ -130,7 +130,6 @@ var BlockGenerator = (function(){
     // if line-break, output empty line(extent = font-size).
     if(child_style.isLineBreak()){
       return this.style.createLine({
-	isLineBreak:true,
 	maxExtent:this.style.getFontSize()
       });
     }

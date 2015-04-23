@@ -112,7 +112,7 @@ var Display = {
 
      @memberof Nehan.Display
   */
-  boldRate:0.5,
+  boldRate:0.12,
   /**
      standard line-height.
 

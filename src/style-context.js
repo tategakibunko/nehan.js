@@ -564,7 +564,6 @@ var StyleContext = (function(){
     createLine : function(opt){
       opt = opt || {};
       var is_root_line = this.isRootLine();
-      var is_line_break = opt.isLineBreak || false;
       var elements = opt.elements || [];
       var max_font_size = opt.maxFontSize || this.getFontSize();
       var max_extent = opt.maxExtent || this.staticExtent || 0;
@@ -591,10 +590,6 @@ var StyleContext = (function(){
       // anonymous line block('aaa' and 'ccc') is already edged by <p> in block level.
       // so if line is anonymous, edge must be ignored.
       line.edge = (this.edge && !is_root_line)? this.edge : null;
-
-      if(is_line_break){
-	line.css["background-color"] = "transparent";
-      }
 
       // backup other line data. mainly required to restore inline-context.
       if(is_root_line){
@@ -1429,6 +1424,7 @@ var StyleContext = (function(){
       }
       this.unmanagedCss.copyValuesTo(css);
       Args.copy(css, line.css);
+      css["background-color"] = "transparent";
       return css;
     },
     /**
@@ -1467,6 +1463,7 @@ var StyleContext = (function(){
       }
       this.unmanagedCss.copyValuesTo(css);
       Args.copy(css, line.css);
+      css["background-color"] = "transparent";
       return css;
     },
     /**
