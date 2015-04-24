@@ -368,12 +368,14 @@ var Config = {
   enableAutoCloseTag:false,
 
   /**
-     disable inline style or not.
+     allowed inline style properties.
+     allow all properties if not defined or list is empty.
+
      @memberof Nehan.Config
-     @type {boolean}
-     @default false
+     @type {Array.<string>}
+     @default []
   */
-  disableInlineStyle:false
+  allowedInlineStyleProps:[]
 };
 
 
@@ -12526,10 +12528,11 @@ var StyleContext = (function(){
     },
     _loadInlineCss : function(markup){
       var style = markup.getAttr("style");
-      if(style === null || Config.disableInlineStyle){
+      if(style === null){
 	return {};
       }
       var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];
+      var allowed_props = Config.allowedInlineStyleProps || [];
       var values = List.fold(stmts, {}, function(ret, stmt){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
@@ -12537,7 +12540,9 @@ var StyleContext = (function(){
 	  var value = Utils.trim(nv[1]);
 	  var fmt_prop = CssParser.formatProp(prop);
 	  var fmt_value = CssParser.formatValue(prop, value);
-	  ret[fmt_prop] = fmt_value;
+	  if(allowed_props.length === 0 || List.exists(allowed_props, Closure.eq(fmt_prop))){
+	    ret[fmt_prop] = fmt_value;
+	  }
 	}
 	return ret;
       });

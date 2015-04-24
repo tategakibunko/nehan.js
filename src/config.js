@@ -76,11 +76,13 @@ var Config = {
   enableAutoCloseTag:false,
 
   /**
-     disable inline style or not.
+     allowed inline style properties.
+     allow all properties if not defined or list is empty.
+
      @memberof Nehan.Config
-     @type {boolean}
-     @default false
+     @type {Array.<string>}
+     @default []
   */
-  disableInlineStyle:false
+  allowedInlineStyleProps:[]
 };
 
