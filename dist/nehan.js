@@ -14399,9 +14399,7 @@ var InlineGenerator = (function(){
   InlineGenerator.prototype._createChildContext = function(context){
     var child_context = new CursorContext(
       context.block, // inline generator inherits block context as it is.
-      new InlineContext(context.getInlineRestMeasure(), {
-	firstText:(this.style.isRootLine() && this.isFirstOutput())
-      })
+      new InlineContext(context.getInlineRestMeasure())
     );
     //console.log("create child context:%o", child_context);
     return child_context;
