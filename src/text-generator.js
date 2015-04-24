@@ -26,7 +26,7 @@ var TextGenerator = (function(){
     var next_head_char = next_head? this._peekParentNextHeadChar(next_head) : null;
     var next_head_measure = next_head? this._estimateParentNextHeadMeasure(next_head) : this.style.getFontSize();
     var is_next_head_ng = next_head_char? next_head_char.isHeadNg() : false;
-
+    var is_head_output = this.style.contentMeasure === context.getInlineMaxMeasure();
     //console.log("[%s]next head:%o, next_head_char:%s, next size:%d", this.style.markupName, next_head, (next_head_char? next_head_char.data : "null"), next_head_measure);
 
     while(this.hasNext()){
@@ -38,6 +38,13 @@ var TextGenerator = (function(){
       //console.log("[%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.data || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
       if(measure === 0){
 	break;
+      }
+      // skip head space for first word element if not 'white-space:pre'
+      if(is_head_output && context.getInlineCurMeasure() === 0 && element instanceof Char && element.isWhiteSpaceChar() && !this.style.isPre()){
+	var next = this.stream.peek();
+	if(next && next instanceof Word){
+	  continue; // skip head space
+	}
       }
       // if token is last one and maybe tail text, check tail/head NG between two inline generators.
       if(Config.justify && !this.stream.hasNext() && !context.hasInlineSpaceFor(measure + next_head_measure)){
