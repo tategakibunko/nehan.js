@@ -290,9 +290,9 @@ var Char = (function(){
       }
     },
     _setupNormal : function(code){
-      // for half-size char, rotate 90 and half-scale by default.
+      // for half-size char, rotate 90 and half-scale in horizontal by default.
       if(this.isHankaku()){
-	this.vscale = this.hscale = 0.5;
+	this.hscale = 0.5;
 	this._setRotate(90);
       }
       switch(code){
