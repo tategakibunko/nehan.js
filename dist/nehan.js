@@ -13811,6 +13811,7 @@ var LayoutGenerator = (function(){
     }
     if(this._yieldCount > Config.maxYieldCount){
       console.error("too many yield! gen:%o, stream:%o", this, this.stream);
+      this.setTerminate(true);
       return null;
     }
     return result;
