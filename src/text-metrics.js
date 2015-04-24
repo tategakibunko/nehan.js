@@ -32,7 +32,9 @@ var TextMetrics = (function(){
     */
     getMetrics : function(font, text){
       __canvas_context.font = font.toString(); // to get accurate metrics, font info is required.
-      return __canvas_context.measureText(text);
+      // caution: this metrics is not always correct(especially webkit), but firefox is well done.
+      var metrics = __canvas_context.measureText(text);
+      return metrics;
     },
     /**
        @memberof Nehan.TextMetrics

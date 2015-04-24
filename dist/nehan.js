@@ -4960,7 +4960,9 @@ var Char = (function(){
       case 12540:
 	this._setImg("onbiki", 1); break;
       case 45: // Hyphen-minus(Basic Latin)
-	this._setCnv("&#65372;"); break;
+	this.vscale = this.hscale = 0.5;
+	this._setRotate(90);
+	break;
       case 8213: // Horizontal bar(General Punctuation)
       case 65293: // Halfwidth and Fullwidth Forms
       case 9472: // Box drawings light horizontal(Box Drawing)
@@ -4981,7 +4983,7 @@ var Char = (function(){
       case 8221: // right double quotateion mark
       case 171: // LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
       case 187: // RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
-	this.vscale = 0.5;
+	this.vscale = this.hscale = 0.5;
 	this._setRotate(90);
 	break;
       case 34: // quotation mark
@@ -6041,7 +6043,9 @@ var TextMetrics = (function(){
     */
     getMetrics : function(font, text){
       __canvas_context.font = font.toString(); // to get accurate metrics, font info is required.
-      return __canvas_context.measureText(text);
+      // caution: this metrics is not always correct(especially webkit), but firefox is well done.
+      var metrics = __canvas_context.measureText(text);
+      return metrics;
     },
     /**
        @memberof Nehan.TextMetrics
