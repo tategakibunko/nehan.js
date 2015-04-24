@@ -336,6 +336,14 @@ var Config = {
   maxRollbackCount:20,
 
   /**
+     max yield count to block infinite loop.
+     @memberof Nehan.Config
+     @type {int}
+     @default 2000
+  */
+  maxYieldCount:2000,
+
+  /**
      max available page count for each engine.
      @memberof Nehan.Config
      @type {int}
@@ -13801,7 +13809,10 @@ var LayoutGenerator = (function(){
     if(result !== null){
       this._yieldCount++;
     }
-
+    if(this._yieldCount > Config.maxYieldCount){
+      console.error("too many yield! gen:%o, stream:%o", this, this.stream);
+      return null;
+    }
     return result;
   };
 

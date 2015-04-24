@@ -44,6 +44,14 @@ var Config = {
   maxRollbackCount:20,
 
   /**
+     max yield count to block infinite loop.
+     @memberof Nehan.Config
+     @type {int}
+     @default 2000
+  */
+  maxYieldCount:2000,
+
+  /**
      max available page count for each engine.
      @memberof Nehan.Config
      @type {int}
