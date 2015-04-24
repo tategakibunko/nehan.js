@@ -459,8 +459,7 @@ var Script = {
     "var hoo = function(){",
     "  alert('hoo');",
     "};",
-    "</pre>",
-    "<div>vertical prettify not works well yet.</div>"
+    "</pre>"
   ].join("\n")
 };
 

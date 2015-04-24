@@ -393,7 +393,10 @@ var Char = (function(){
 	this._setRotate(90); break;
       case 12540:
 	this._setImg("onbiki", 1); break;
+      case 33: // EXCLAMATION MARK
+      case 39: // APOSTROPHE
       case 45: // Hyphen-minus(Basic Latin)
+      case 59: // SEMICOLON
 	this.vscale = this.hscale = 0.5;
 	this._setRotate(90);
 	break;
