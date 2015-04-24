@@ -395,6 +395,7 @@ var Char = (function(){
       case 61:
 	this._setImg("equal", 1); break;
       case 8212: // Em dash
+      case 8221: // Right Double Quotation Mark
 	this._setRotate(90); break;
       case 12540:
 	this._setImg("onbiki", 1); break;
