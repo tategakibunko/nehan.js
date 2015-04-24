@@ -5289,11 +5289,14 @@ var Word = (function(){
        @param font {Nehan.Font}
     */
     setMetrics : function(flow, font){
+      var rough_measure = Math.ceil(this.data.length * font.size * 0.5);
       if(Config.useStrictWordMetrics && TextMetrics.isEnable()){
-	this.bodySize = Math.ceil(TextMetrics.getMeasure(font, this.data));
+	var text_measure = Math.ceil(TextMetrics.getMeasure(font, this.data));
+	//console.log("[%s]:%d(rough = %d)", this.data, text_measure, rough_measure);
+	this.bodySize = Math.max(text_measure, rough_measure); // use longer one
 	return;
       }
-      this.bodySize = Math.ceil(this.data.length * font.size * 0.5);
+      this.bodySize = rough_measure;
       if(font.isBold()){
 	this.bodySize += Math.floor(Display.boldRate * this.bodySize);
       }
