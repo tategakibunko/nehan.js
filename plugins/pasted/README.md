@@ -24,7 +24,14 @@ instead of writing like this.
 </div>
 ```
 
-# example
+## Install
+
+```html
+<script type="text/javascript" src="/path/to/nehan.js"></script>
+<script type="text/javascript" src="/path/to/nehan.pasted.js"></script>
+```
+
+## Example
 
 ```html
 <!-- using shortcut attribute {width}x{height} -->

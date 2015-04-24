@@ -451,6 +451,16 @@ var Script = {
   "circular":[
     "<circular active='3'></circular>",
     "after text"
-  ].join("")
+  ].join(""),
+
+  "prettify":[
+    "<pre class='nehan-prettify'>",
+    "var foo = 'hello, prettify!';",
+    "var hoo = function(){",
+    "  alert('hoo');",
+    "};",
+    "</pre>",
+    "<div>vertical prettify not works well yet.</div>"
+  ].join("\n")
 };
 

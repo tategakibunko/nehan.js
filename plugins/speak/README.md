@@ -2,7 +2,14 @@
 
 Show scenario script like layout.
 
-# example
+## Install
+
+```html
+<script type="text/javascript" src="/path/to/nehan.js"></script>
+<script type="text/javascript" src="/path/to/nehan.speak.js"></script>
+```
+
+## Example
 
 ```html
 <speak name='Taro'>Hello, I'm Taro.</speak>

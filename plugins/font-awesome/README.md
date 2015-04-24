@@ -4,11 +4,15 @@ This plugin provides shortcut tag for [font-awesome](http://fortawesome.github.i
 
 Font awesome itself can be enabled like this(see tutorial for more detail).
 
+## Install
+
 ```html
 <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+<script type="text/javascript" src="/path/to/nehan.js"></script>
+<script type="text/javascript" src="/path/to/nehan.font-awesome.js"></script>
 ```
 
-# example
+## Example
 
 Notice that close tag is not required.
 
