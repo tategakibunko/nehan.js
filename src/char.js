@@ -290,6 +290,11 @@ var Char = (function(){
       }
     },
     _setupNormal : function(code){
+      // for half-size char, rotate 90 and half-scale by default.
+      if(this.isHankaku()){
+	this.vscale = this.hscale = 0.5;
+	this._setRotate(90);
+      }
       switch(code){
       case 32: // half scape char
 	this._setCnv("&nbsp;", Display.halfSpaceSizeRate, Display.halfSpaceSizeRate); break;
@@ -389,17 +394,10 @@ var Char = (function(){
 	this._setImg("equal", 1); break;
       case 61:
 	this._setImg("equal", 1); break;
-      case 8212: // Em dash(Generao Punctuation)
+      case 8212: // Em dash
 	this._setRotate(90); break;
       case 12540:
 	this._setImg("onbiki", 1); break;
-      case 33: // EXCLAMATION MARK
-      case 39: // APOSTROPHE
-      case 45: // Hyphen-minus(Basic Latin)
-      case 59: // SEMICOLON
-	this.vscale = this.hscale = 0.5;
-	this._setRotate(90);
-	break;
       case 8213: // Horizontal bar(General Punctuation)
       case 65293: // Halfwidth and Fullwidth Forms
       case 9472: // Box drawings light horizontal(Box Drawing)
@@ -416,16 +414,6 @@ var Char = (function(){
 	this._setCnv("&#8592;"); break;
       case 8592: // left
 	this._setCnv("&#8593;"); break;
-      case 8220: // left double quotation mark
-      case 8221: // right double quotateion mark
-      case 171: // LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
-      case 187: // RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
-	this.vscale = this.hscale = 0.5;
-	this._setRotate(90);
-	break;
-      case 34: // quotation mark
-      case 8786: // approximately equal to
-	this._setRotate(90); break;
       }
     },
     /**
