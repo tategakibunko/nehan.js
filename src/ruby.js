@@ -122,9 +122,6 @@ var Ruby = (function(){
     */
     setMetrics : function(flow, font, letter_spacing){
       this.rtFontSize = Display.getRtFontSize(font.size);
-      if(typeof this.rbs === "undefined"){
-	debugger;
-      }
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font);
 	return ret + rb.getAdvance(flow, letter_spacing);

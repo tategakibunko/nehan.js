@@ -185,20 +185,33 @@ var InlineContext = (function(){
        @return {Nehan.Char | null}
     */
     justify : function(head){
-      var last = this.elements.length - 1, ptr = last, tail = null;
-      // if element is only Tcy('a.'), then stream last is '.'(head NG) but element last(Tcy) is not head NG.
-      if(head && head.isHeadNg && head.isHeadNg() && this.elements.length === 1 && !(this.elements[0] instanceof Tcy)){
-	return this.elements.pop();
+      var last = this.elements.length - 1;
+      var ptr = last;
+      var tail = this.elements[ptr] || null;
+      var is_tail_ng = function(tail){
+	return (tail && tail.isTailNg && tail.isTailNg())? true : false;
+      };
+      var is_head_ng = function(head){
+	return (head && head.isHeadNg && head.isHeadNg())? true : false;
+      };
+
+      if(!is_tail_ng(tail) && !is_head_ng(head)){
+	return null;
       }
+
+      //console.log("start justify:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng, head, is_head_ng);
+
+      // if [word] is divided into [word1], [word2], then
+      //    [char][word]<br>[char(head_ng)]
+      // => [char][word1]<br>[word2][char(head_ng)]
+      // so nothing to justify.
+      if(tail && tail instanceof Word && tail.isDivided()){
+	return null;
+      }
+
       while(ptr >= 0){
 	tail = this.elements[ptr];
-	if(head && head.isHeadNg && head.isHeadNg() || tail.isTailNg && tail.isTailNg()){
-	  // if tail and head is not continuous elmenet, for example
-	  // [tail(pos=29)][inline element(pos=30)][head(pos=31)]
-	  // then justification is already done at inline element, so skip it.
-	  if(head && tail && head.pos - tail.pos > 1){
-	    break;
-	  }
+	if(is_head_ng(head) || is_tail_ng(tail)){
 	  head = tail;
 	  ptr--;
 	} else {
@@ -206,7 +219,7 @@ var InlineContext = (function(){
 	}
       }
       // even if first element is tail ng, sweep it out to the head of next line.
-      if(ptr < 0 && tail && tail.isTailNg && tail.isTailNg()){
+      if(ptr < 0 && is_tail_ng(tail)){
 	return tail;
       }
       // if ptr moved, justification is executed.

@@ -5189,6 +5189,20 @@ var Word = (function(){
   Word.prototype = {
     /**
        @memberof Nehan.Word
+       @return {bool}
+    */
+    isHeadNg: function(){
+      return false; // TODO
+    },
+    /**
+       @memberof Nehan.Word
+       @return {bool}
+    */
+    isTailNg: function(){
+      return false; // TODO
+    },
+    /**
+       @memberof Nehan.Word
        @return {string}
      */
     getData : function(){
@@ -5342,6 +5356,9 @@ var Word = (function(){
 	return this;
       }
       var str_part = this.data.substring(0, measure_half_count);
+      if(str_part.length === this.data.length){
+	return this;
+      }
       var word_part = new Word(str_part, true);
       this.data = this.data.slice(measure_half_count);
       this.setDivided(true);
@@ -5367,6 +5384,20 @@ var Tcy = (function(){
   }
 
   Tcy.prototype = {
+    /**
+       @memberof Nehan.Tcy
+       @return {bool}
+    */
+    isHeadNg: function(){
+      return false; // TODO
+    },
+    /**
+       @memberof Nehan.Tcy
+       @return {bool}
+    */
+    isTailNg: function(){
+      return false; // TODO
+    },
     /**
        @memberof Nehan.Tcy
        @return {string}
@@ -5559,9 +5590,6 @@ var Ruby = (function(){
     */
     setMetrics : function(flow, font, letter_spacing){
       this.rtFontSize = Display.getRtFontSize(font.size);
-      if(typeof this.rbs === "undefined"){
-	debugger;
-      }
       var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font);
 	return ret + rb.getAdvance(flow, letter_spacing);
@@ -9627,10 +9655,12 @@ var TokenStream = (function(){
   function TokenStream(src, opt){
     opt = opt || {};
     this.lexer = opt.lexer || this._createLexer(src);
-    this.tokens = [];
+    this.tokens = opt.tokens || [];
     this.pos = 0;
     this._filter = opt.filter || null;
-    this._loadTokens(this._filter);
+    if(this.tokens.length === 0){
+      this._loadTokens(this._filter);
+    }
   }
 
   var __set_pseudo = function(tags){
@@ -13733,20 +13763,33 @@ var InlineContext = (function(){
        @return {Nehan.Char | null}
     */
     justify : function(head){
-      var last = this.elements.length - 1, ptr = last, tail = null;
-      // if element is only Tcy('a.'), then stream last is '.'(head NG) but element last(Tcy) is not head NG.
-      if(head && head.isHeadNg && head.isHeadNg() && this.elements.length === 1 && !(this.elements[0] instanceof Tcy)){
-	return this.elements.pop();
+      var last = this.elements.length - 1;
+      var ptr = last;
+      var tail = this.elements[ptr] || null;
+      var is_tail_ng = function(tail){
+	return (tail && tail.isTailNg && tail.isTailNg())? true : false;
+      };
+      var is_head_ng = function(head){
+	return (head && head.isHeadNg && head.isHeadNg())? true : false;
+      };
+
+      if(!is_tail_ng(tail) && !is_head_ng(head)){
+	return null;
       }
+
+      //console.log("start justify:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng, head, is_head_ng);
+
+      // if [word] is divided into [word1], [word2], then
+      //    [char][word]<br>[char(head_ng)]
+      // => [char][word1]<br>[word2][char(head_ng)]
+      // so nothing to justify.
+      if(tail && tail instanceof Word && tail.isDivided()){
+	return null;
+      }
+
       while(ptr >= 0){
 	tail = this.elements[ptr];
-	if(head && head.isHeadNg && head.isHeadNg() || tail.isTailNg && tail.isTailNg()){
-	  // if tail and head is not continuous elmenet, for example
-	  // [tail(pos=29)][inline element(pos=30)][head(pos=31)]
-	  // then justification is already done at inline element, so skip it.
-	  if(head && tail && head.pos - tail.pos > 1){
-	    break;
-	  }
+	if(is_head_ng(head) || is_tail_ng(tail)){
 	  head = tail;
 	  ptr--;
 	} else {
@@ -13754,7 +13797,7 @@ var InlineContext = (function(){
 	}
       }
       // even if first element is tail ng, sweep it out to the head of next line.
-      if(ptr < 0 && tail && tail.isTailNg && tail.isTailNg()){
+      if(ptr < 0 && is_tail_ng(tail)){
 	return tail;
       }
       // if ptr moved, justification is executed.
@@ -14000,6 +14043,12 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createStream = function(style){
+    if(style.getTextCombine() === "horizontal"){
+      var content = style.getMarkupContent();
+      return new TokenStream(content, {
+	tokens:[new Tcy(content)]
+      });
+    }
     switch(style.getMarkupName()){
     case "ruby":
       return new RubyTokenStream(style.getMarkupContent());
@@ -14107,11 +14156,15 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createTextGenerator = function(style, text){
+    if(text instanceof Tcy){
+      return new TextGenerator(this.style, new TokenStream(text.getData(), {
+	tokens:[text]
+      }));
+    }
     var content = text.getContent();
-    var stream = new TokenStream(content, {
+    return new TextGenerator(this.style, new TokenStream(content, {
       lexer:new TextLexer(content)
-    });
-    return new TextGenerator(this.style, stream);
+    }));
   };
 
   LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, context){
@@ -14471,7 +14524,7 @@ var InlineGenerator = (function(){
     //console.log("inline token:%o", token);
 
     // text block
-    if(token instanceof Text){
+    if(token instanceof Text || token instanceof Tcy){
       this.setChildLayout(this._createTextGenerator(this.style, token));
       return this.yieldChildLayout(context);
     }
@@ -14779,10 +14832,6 @@ var TextGenerator = (function(){
       return this._getWhiteSpace(context, token);
     }
 
-    // if tcy, wrap all content and return Tcy object and force generator terminate.
-    if(this.style.getTextCombine() === "horizontal"){
-      return this._getTcy(context, token);
-    }
     return this._getText(context, token);
   };
 
@@ -14796,12 +14845,6 @@ var TextGenerator = (function(){
     } else {
       this._parent.setChildLayout(block_gen);
     }
-  };
-
-  TextGenerator.prototype._getTcy = function(context, token){
-    this.setTerminate(true);
-    var tcy = new Tcy(this.style.getMarkupContent());
-    return this._getText(context, tcy);
   };
 
   TextGenerator.prototype._getWhiteSpace = function(context, token){
@@ -14875,6 +14918,9 @@ var TextGenerator = (function(){
     // 2. or word itself is larger than max_measure.
     // in these case, we must cut this word into some parts.
     var part = token.cutMeasure(this.style.getFontSize(), rest_measure); // get sliced word
+    if(!token.isDivided()){
+      return token;
+    }
     part.setMetrics(this.style.flow, this.style.font); // metrics for first half
     token.setMetrics(this.style.flow, this.style.font); // metrics for second half
     if(token.data !== "" && token.bodySize > 0){

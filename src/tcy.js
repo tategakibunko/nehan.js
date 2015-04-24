@@ -14,6 +14,20 @@ var Tcy = (function(){
   Tcy.prototype = {
     /**
        @memberof Nehan.Tcy
+       @return {bool}
+    */
+    isHeadNg: function(){
+      return false; // TODO
+    },
+    /**
+       @memberof Nehan.Tcy
+       @return {bool}
+    */
+    isTailNg: function(){
+      return false; // TODO
+    },
+    /**
+       @memberof Nehan.Tcy
        @return {string}
      */
     getData : function(){

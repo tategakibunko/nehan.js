@@ -191,10 +191,6 @@ var TextGenerator = (function(){
       return this._getWhiteSpace(context, token);
     }
 
-    // if tcy, wrap all content and return Tcy object and force generator terminate.
-    if(this.style.getTextCombine() === "horizontal"){
-      return this._getTcy(context, token);
-    }
     return this._getText(context, token);
   };
 
@@ -208,12 +204,6 @@ var TextGenerator = (function(){
     } else {
       this._parent.setChildLayout(block_gen);
     }
-  };
-
-  TextGenerator.prototype._getTcy = function(context, token){
-    this.setTerminate(true);
-    var tcy = new Tcy(this.style.getMarkupContent());
-    return this._getText(context, tcy);
   };
 
   TextGenerator.prototype._getWhiteSpace = function(context, token){
@@ -287,6 +277,9 @@ var TextGenerator = (function(){
     // 2. or word itself is larger than max_measure.
     // in these case, we must cut this word into some parts.
     var part = token.cutMeasure(this.style.getFontSize(), rest_measure); // get sliced word
+    if(!token.isDivided()){
+      return token;
+    }
     part.setMetrics(this.style.flow, this.style.font); // metrics for first half
     token.setMetrics(this.style.flow, this.style.font); // metrics for second half
     if(token.data !== "" && token.bodySize > 0){

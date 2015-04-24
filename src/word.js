@@ -16,6 +16,20 @@ var Word = (function(){
   Word.prototype = {
     /**
        @memberof Nehan.Word
+       @return {bool}
+    */
+    isHeadNg: function(){
+      return false; // TODO
+    },
+    /**
+       @memberof Nehan.Word
+       @return {bool}
+    */
+    isTailNg: function(){
+      return false; // TODO
+    },
+    /**
+       @memberof Nehan.Word
        @return {string}
      */
     getData : function(){
@@ -169,6 +183,9 @@ var Word = (function(){
 	return this;
       }
       var str_part = this.data.substring(0, measure_half_count);
+      if(str_part.length === this.data.length){
+	return this;
+      }
       var word_part = new Word(str_part, true);
       this.data = this.data.slice(measure_half_count);
       this.setDivided(true);

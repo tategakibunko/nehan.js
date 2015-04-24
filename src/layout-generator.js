@@ -225,6 +225,12 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createStream = function(style){
+    if(style.getTextCombine() === "horizontal"){
+      var content = style.getMarkupContent();
+      return new TokenStream(content, {
+	tokens:[new Tcy(content)]
+      });
+    }
     switch(style.getMarkupName()){
     case "ruby":
       return new RubyTokenStream(style.getMarkupContent());
@@ -332,11 +338,15 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createTextGenerator = function(style, text){
+    if(text instanceof Tcy){
+      return new TextGenerator(this.style, new TokenStream(text.getData(), {
+	tokens:[text]
+      }));
+    }
     var content = text.getContent();
-    var stream = new TokenStream(content, {
+    return new TextGenerator(this.style, new TokenStream(content, {
       lexer:new TextLexer(content)
-    });
-    return new TextGenerator(this.style, stream);
+    }));
   };
 
   LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, context){

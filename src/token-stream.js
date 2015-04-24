@@ -12,10 +12,12 @@ var TokenStream = (function(){
   function TokenStream(src, opt){
     opt = opt || {};
     this.lexer = opt.lexer || this._createLexer(src);
-    this.tokens = [];
+    this.tokens = opt.tokens || [];
     this.pos = 0;
     this._filter = opt.filter || null;
-    this._loadTokens(this._filter);
+    if(this.tokens.length === 0){
+      this._loadTokens(this._filter);
+    }
   }
 
   var __set_pseudo = function(tags){
