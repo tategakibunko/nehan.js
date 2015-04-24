@@ -15,6 +15,7 @@ o Add new callback 'onblock', 'online', 'ontext' when called document is convert
   'onblock' is called after block element is converted,
   'online' is called after anonymous line in block element is converted,
   'ontext' is called after text-element in anonymous line is converted.
+o New config Config.allowedInlineStyleProps is added.
 * Fix float bug in horizontal mode(see "float" at example/catalog5.html).
 * Fix baseline problem in many case.
 ! Remove LexingRule::addSingleTagByRex.
