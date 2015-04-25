@@ -1054,7 +1054,7 @@ var Style = {
     },
     "extent":"1px",
     "border-width":{
-      "before":"1px"
+      "after":"1px"
     }
   },
   "hr.nehan-space":{
@@ -11458,7 +11458,7 @@ var StyleContext = (function(){
       }
 
       var edge = this.edge || null;
-      if(edge && (!opt.useBeforeEdge || !opt.useAfterEdge)){
+      if(edge && (!opt.useBeforeEdge || !opt.useAfterEdge) && this.markupName !== "hr"){
 	edge = edge.clone();
 	if(!opt.useBeforeEdge){
 	  edge.clearBefore(this.flow);
@@ -11511,8 +11511,8 @@ var StyleContext = (function(){
     createImage : function(opt){
       opt = opt || {};
       // image size always considered as horizontal mode.
-      var width = this.getMarkupAttr("width")? parseInt(this.getMarkupAttr("width"), 10) : (this.staticMeasure || this.font.size);
-      var height = this.getMarkupAttr("height")? parseInt(this.getMarkupAttr("height"), 10) : (this.staticExtent || this.font.size);
+      var width = this.getMarkupAttr("width")? parseInt(this.getMarkupAttr("width"), 10) : (this.staticMeasure || this.getFontSize());
+      var height = this.getMarkupAttr("height")? parseInt(this.getMarkupAttr("height"), 10) : (this.staticExtent || this.getFontSize());
       var classes = ["nehan-block", "nehan-image"].concat(this.markup.getClasses());
       var image_size = new BoxSize(width, height);
       var image = new Box(image_size, this);
@@ -12098,7 +12098,7 @@ var StyleContext = (function(){
       }
       var std_value = __std_values[name] || null;
       if(std_value === null){
-	throw "undefined style object(" + name + ")";
+	throw "error(getStyleObject):undefined style object(" + name + ")";
       }
       return std_value;
     },
@@ -12715,24 +12715,24 @@ var StyleContext = (function(){
     },
     _loadFont : function(){
       var parent_font = this.getFont();
-      var font_size = this.getCssAttr("font-size");
-      var font_family = this.getCssAttr("font-family");
-      var font_weight = this.getCssAttr("font-weight");
-      var font_style = this.getCssAttr("font-style");
-      if(font_size === null && font_family === null && font_weight === null && font_style === null){
+      var font_size = this.getCssAttr("font-size", "inherit");
+      var font_family = this.getCssAttr("font-family", "inherit");
+      var font_weight = this.getCssAttr("font-weight", "inherit");
+      var font_style = this.getCssAttr("font-style", "inherit");
+      if(font_size === "inherit" && font_family === "inherit" && font_weight === "inherit" && font_style === "inherit"){
 	return parent_font;
       }
       var font = new Font(parent_font.size);
-      if(font_size !== null){
+      if(font_size !== "inherit"){
 	font.size = this._computeFontSize(font_size, parent_font.size);
       }
-      if(font_family !== null){
+      if(font_family !== "inherit"){
 	font.family = font_family;
       }
-      if(font_weight !== null){
+      if(font_weight !== "inherit"){
 	font.weight = font_weight;
       }
-      if(font_style !== null){
+      if(font_style !== "inherit"){
 	font.style = font_style;
       }
       return font;

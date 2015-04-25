@@ -337,7 +337,7 @@ var Style = {
     },
     "extent":"1px",
     "border-width":{
-      "before":"1px"
+      "after":"1px"
     }
   },
   "hr.nehan-space":{
