@@ -8781,7 +8781,7 @@ var TextLexer = (function (){
   var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
   var __rex_word = /^[a-zA-Z0-9.!?\/:$#;"',_%]+/;
   var __rex_char_ref = /^&[^;\s]+;/;
-  var __rex_half_single_tcy = /[a-zA-Z0-9]/;
+  var __rex_half_single_tcy = /[a-zA-Z0-9!?]/;
 
   /**
      @memberof Nehan
