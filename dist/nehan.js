@@ -12715,17 +12715,24 @@ var StyleContext = (function(){
     },
     _loadFont : function(){
       var parent_font = this.getFont();
-      if(this.parent === null){ // body
-	return parent_font;
-      }
       var font_size = this.getCssAttr("font-size", "inherit");
       var font_family = this.getCssAttr("font-family", "inherit");
       var font_weight = this.getCssAttr("font-weight", "inherit");
       var font_style = this.getCssAttr("font-style", "inherit");
-      if(font_size === "inherit" && font_family === "inherit" && font_weight === "inherit" && font_style === "inherit"){
+
+      // child-font and no special settings.
+      if(this.parent !== null && font_size === "inherit" && font_family === "inherit" && font_weight === "inherit" && font_style === "inherit"){
 	return null;
       }
       var font = new Font(parent_font.size);
+
+      // if root font, initialize font by default styles.
+      if(this.parent === null){
+	font.family = parent_font.family;
+	font.style = parent_font.style;
+	font.weight = parent_font.weight;
+      }
+
       if(font_size !== "inherit"){
 	font.size = this._computeFontSize(font_size, parent_font.size);
       }
