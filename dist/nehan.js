@@ -12396,7 +12396,7 @@ var StyleContext = (function(){
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
       }
-      if(this.font){
+      if(this.font && !this.isRootLine()){
 	Args.copy(css, this.font.getCss());
       }
       if(this.color){
