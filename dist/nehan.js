@@ -12715,12 +12715,15 @@ var StyleContext = (function(){
     },
     _loadFont : function(){
       var parent_font = this.getFont();
+      if(this.parent === null){ // body
+	return parent_font;
+      }
       var font_size = this.getCssAttr("font-size", "inherit");
       var font_family = this.getCssAttr("font-family", "inherit");
       var font_weight = this.getCssAttr("font-weight", "inherit");
       var font_style = this.getCssAttr("font-style", "inherit");
       if(font_size === "inherit" && font_family === "inherit" && font_weight === "inherit" && font_style === "inherit"){
-	return parent_font;
+	return null;
       }
       var font = new Font(parent_font.size);
       if(font_size !== "inherit"){
