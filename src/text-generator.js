@@ -280,8 +280,6 @@ var TextGenerator = (function(){
     if(!token.isDivided()){
       return token;
     }
-    part.setMetrics(this.style.flow, this.style.font); // metrics for first half
-    token.setMetrics(this.style.flow, this.style.font); // metrics for second half
     if(token.data !== "" && token.bodySize > 0){
       this.stream.prev(); // re-parse this token because rest part is still exists.
     }

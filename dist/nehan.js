@@ -5179,9 +5179,9 @@ var Word = (function(){
       var part_measure = Math.ceil(TextMetrics.getMeasure(font, head_part));
       //console.log("head_part:%s(%d) for %d", head_part, part_measure, measure);
       if(part_measure <= measure){
-	var head = new Word(head_part, true);
-	head.bodySize = part_measure;
-	return head;
+	var head_word = new Word(head_part, true);
+	head_word.bodySize = measure;
+	return head_word;
       }
     }
     return word;
@@ -5190,9 +5190,9 @@ var Word = (function(){
   var __cut_word_rough = function(word, font, measure){
     var half_size = Math.round(font.size / 2);
     var head_count = Math.round(measure / half_size);
-    var head = new Word(word.data.substring(0, head_count), true);
-    head.bodySize = half_size;
-    return head;
+    var head_word = new Word(word.data.substring(0, head_count), true);
+    head_word.bodySize = measure;
+    return head_word
   };
 
   var __cut_word = function(word, font, measure){
@@ -5386,7 +5386,7 @@ var Word = (function(){
       }
       this.data = rest_str;
       this.setDivided(true);
-      this.setMetrics(flow, font);
+      this.setMetrics(flow, font); // update bodySize
       return head_word;
     }
   };
@@ -14953,8 +14953,6 @@ var TextGenerator = (function(){
     if(!token.isDivided()){
       return token;
     }
-    part.setMetrics(this.style.flow, this.style.font); // metrics for first half
-    token.setMetrics(this.style.flow, this.style.font); // metrics for second half
     if(token.data !== "" && token.bodySize > 0){
       this.stream.prev(); // re-parse this token because rest part is still exists.
     }
