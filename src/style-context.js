@@ -83,6 +83,10 @@ var StyleContext = (function(){
     return font;
   })();
 
+  var __std_values = {
+    font:__std_font
+  };
+
   /**
      @memberof Nehan
      @class StyleContext
@@ -1111,11 +1115,31 @@ var StyleContext = (function(){
       return this.markup.getHeaderRank();
     },
     /**
+       get managed style object by name
+
+       @memberof Nehan.StyleContext
+       @param name {String}
+       @return {Object}
+    */
+    getStyleObject : function(name){
+      if(this[name]){
+	return this[name];
+      }
+      if(this.parent){
+	return this.parent.getStyleObject(name);
+      }
+      var std_value = __std_values[name] || null;
+      if(std_value === null){
+	throw "undefined style object(" + name + ")";
+      }
+      return std_value;
+    },
+    /**
        @memberof Nehan.StyleContext
        @return {Nehan.Font}
     */
     getFont : function(){
-      return this.font || this.parent.getFont() || __std_font;
+      return this.getStyleObject("font");
     },
     /**
        @memberof Nehan.StyleContext
@@ -1722,24 +1746,25 @@ var StyleContext = (function(){
       }
     },
     _loadFont : function(){
-      var parent_font_size = this.parent? this.parent.font.size : Display.fontSize;
-      var font = new Font(parent_font_size);
-      var font_size = this.getCssAttr("font-size", "inherit");
-      if(font_size !== "inherit"){
-	font.size = this._computeFontSize(font_size, parent_font_size);
+      var parent_font = this.getFont();
+      var font_size = this.getCssAttr("font-size");
+      var font_family = this.getCssAttr("font-family");
+      var font_weight = this.getCssAttr("font-weight");
+      var font_style = this.getCssAttr("font-style");
+      if(font_size === null && font_family === null && font_weight === null && font_style === null){
+	return parent_font;
       }
-      var font_family = this.getCssAttr("font-family", "inherit");
-      if(font_family !== "inherit"){
+      var font = new Font(parent_font.size);
+      if(font_size !== null){
+	font.size = this._computeFontSize(font_size, parent_font.size);
+      }
+      if(font_family !== null){
 	font.family = font_family;
-      } else if(this.parent === null){
-	font.family = Display.fontFamily;
       }
-      var font_weight = this.getCssAttr("font-weight", "inherit");
-      if(font_weight !== "inherit"){
+      if(font_weight !== null){
 	font.weight = font_weight;
       }
-      var font_style = this.getCssAttr("font-style", "inherit");
-      if(font_style !== "inherit"){
+      if(font_style !== null){
 	font.style = font_style;
       }
       return font;

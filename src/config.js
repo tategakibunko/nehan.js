@@ -47,17 +47,17 @@ var Config = {
      max yield count to block infinite loop.
      @memberof Nehan.Config
      @type {int}
-     @default 2000
+     @default 20000
   */
-  maxYieldCount:2000,
+  maxYieldCount:20000,
 
   /**
      max available page count for each engine.
      @memberof Nehan.Config
      @type {int}
-     @default 10000
+     @default 5000
   */
-  maxPageCount:10000,
+  maxPageCount:5000,
 
   /**
      use vertical glyph if browser support 'writing-mode'.
