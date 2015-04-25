@@ -8781,6 +8781,7 @@ var TextLexer = (function (){
   var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
   var __rex_word = /^[a-zA-Z0-9.!?\/:$#;"',_%]+/;
   var __rex_char_ref = /^&[^;\s]+;/;
+  var __rex_half_single_tcy = /[a-zA-Z0-9]/;
 
   /**
      @memberof Nehan
@@ -8802,6 +8803,9 @@ var TextLexer = (function (){
     var str = this._getByRex(__rex_word);
     if(str){
       if(str.length === 1){
+	if(__rex_half_single_tcy.test(str)){
+	  return new Tcy(this._stepBuff(1));
+	}
 	return new Char(this._stepBuff(1), false);
       } else if(str.length === 2 && str.match(__rex_tcy)){
 	return new Tcy(this._stepBuff(str.length));
