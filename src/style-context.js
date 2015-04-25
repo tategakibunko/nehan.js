@@ -75,18 +75,6 @@ var StyleContext = (function(){
     return List.exists(__callback_css_props, Closure.eq(prop));
   };
 
-  var __std_font = (function(){
-    var font = new Font(Display.fontSize);
-    font.family = Display.fontFamily;
-    font.weight = "normal";
-    font.style = "normal";
-    return font;
-  })();
-
-  var __std_values = {
-    font:__std_font
-  };
-
   /**
      @memberof Nehan
      @class StyleContext
@@ -1115,31 +1103,11 @@ var StyleContext = (function(){
       return this.markup.getHeaderRank();
     },
     /**
-       get managed style object by name
-
-       @memberof Nehan.StyleContext
-       @param name {String}
-       @return {Object}
-    */
-    getStyleObject : function(name){
-      if(this[name]){
-	return this[name];
-      }
-      if(this.parent){
-	return this.parent.getStyleObject(name);
-      }
-      var std_value = __std_values[name] || null;
-      if(std_value === null){
-	throw "error(getStyleObject):undefined style object(" + name + ")";
-      }
-      return std_value;
-    },
-    /**
        @memberof Nehan.StyleContext
        @return {Nehan.Font}
     */
     getFont : function(){
-      return this.getStyleObject("font");
+      return this.font || (this.parent? this.parent.getFont() : Display.getStdFont());
     },
     /**
        @memberof Nehan.StyleContext

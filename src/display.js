@@ -221,6 +221,17 @@ var Display = {
      @memberof Nehan.Display
      @return {Nehan.BoxFlow}
   */
+  getStdFont : function(){
+    var font = new Font(Display.fontSize);
+    font.family = Display.fontFamily;
+    font.weight = "normal";
+    font.style = "normal";
+    return font;
+  },
+  /**
+     @memberof Nehan.Display
+     @return {Nehan.BoxFlow}
+  */
   getStdBoxFlow : function(){
     var flow_name = this.boxFlow[this.direction];
     return BoxFlows.getByName(flow_name);
