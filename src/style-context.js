@@ -1104,6 +1104,13 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Nehan.Font}
+    */
+    getFont : function(){
+      return this.font || this.parent.getFont();
+    },
+    /**
+       @memberof Nehan.StyleContext
        @return {int}
     */
     getFontSize : function(){

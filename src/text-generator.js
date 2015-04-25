@@ -276,7 +276,7 @@ var TextGenerator = (function(){
     // 1. advance is larger than rest_measure and 'word-break' is set to 'break-all'.
     // 2. or word itself is larger than max_measure.
     // in these case, we must cut this word into some parts.
-    var part = token.cutMeasure(this.style.getFontSize(), rest_measure); // get sliced word
+    var part = token.cutMeasure(this.style.flow, this.style.getFont(), rest_measure); // get sliced word
     if(!token.isDivided()){
       return token;
     }

@@ -5172,6 +5172,36 @@ var Char = (function(){
 })();
 
 var Word = (function(){
+
+  var __cut_word_by_metrics = function(word, font, measure){
+    for(var i = word.data.length - 1; i >= 1; i--){
+      var head_part = word.data.substring(0, i);
+      var part_measure = Math.ceil(TextMetrics.getMeasure(font, head_part));
+      //console.log("head_part:%s(%d) for %d", head_part, part_measure, measure);
+      if(part_measure <= measure){
+	var head = new Word(head_part, true);
+	head.bodySize = part_measure;
+	return head;
+      }
+    }
+    return word;
+  };
+
+  var __cut_word_rough = function(word, font, measure){
+    var half_size = Math.round(font.size / 2);
+    var head_count = Math.round(measure / half_size);
+    var head = new Word(word.data.substring(0, head_count), true);
+    head.bodySize = half_size;
+    return head;
+  };
+
+  var __cut_word = function(word, font, measure){
+    if(TextMetrics.isEnable()){
+      return __cut_word_by_metrics(word, font, measure);
+    }
+    return __cut_word_rough(word, font, measure);
+  };
+
   /**
      @memberof Nehan
      @class Word
@@ -5348,21 +5378,16 @@ var Word = (function(){
        @param measure {int}
        @return {Nehan.Word}
     */
-    cutMeasure : function(font_size, measure){
-      var half_size = Math.round(font_size / 2);
-      var this_half_count = Math.round(this.bodySize / half_size);
-      var measure_half_count = Math.round(measure / half_size);
-      if(this_half_count < measure_half_count){
+    cutMeasure : function(flow, font, measure){
+      var head_word = __cut_word(this, font, measure);
+      var rest_str = this.data.slice(head_word.data.length);
+      if(rest_str === ""){
 	return this;
       }
-      var str_part = this.data.substring(0, measure_half_count);
-      if(str_part.length === this.data.length){
-	return this;
-      }
-      var word_part = new Word(str_part, true);
-      this.data = this.data.slice(measure_half_count);
+      this.data = rest_str;
       this.setDivided(true);
-      return word_part;
+      this.setMetrics(flow, font);
+      return head_word;
     }
   };
   
@@ -12043,6 +12068,13 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {Nehan.Font}
+    */
+    getFont : function(){
+      return this.font || this.parent.getFont();
+    },
+    /**
+       @memberof Nehan.StyleContext
        @return {int}
     */
     getFontSize : function(){
@@ -14917,7 +14949,7 @@ var TextGenerator = (function(){
     // 1. advance is larger than rest_measure and 'word-break' is set to 'break-all'.
     // 2. or word itself is larger than max_measure.
     // in these case, we must cut this word into some parts.
-    var part = token.cutMeasure(this.style.getFontSize(), rest_measure); // get sliced word
+    var part = token.cutMeasure(this.style.flow, this.style.getFont(), rest_measure); // get sliced word
     if(!token.isDivided()){
       return token;
     }
