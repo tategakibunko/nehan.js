@@ -11043,6 +11043,14 @@ var StyleContext = (function(){
     return List.exists(__callback_css_props, Closure.eq(prop));
   };
 
+  var __std_font = (function(){
+    var font = new Font(Display.fontSize);
+    font.family = Display.fontFamily;
+    font.weight = "normal";
+    font.style = "normal";
+    return font;
+  })();
+
   /**
      @memberof Nehan
      @class StyleContext
@@ -12075,21 +12083,21 @@ var StyleContext = (function(){
        @return {Nehan.Font}
     */
     getFont : function(){
-      return this.font || this.parent.getFont();
+      return this.font || this.parent.getFont() || __std_font;
     },
     /**
        @memberof Nehan.StyleContext
        @return {int}
     */
     getFontSize : function(){
-      return this.font.size;
+      return this.getFont().size;
     },
     /**
        @memberof Nehan.StyleContext
        @return {String}
     */
     getFontFamily : function(){
-      return this.font.family || Display.fontFamily;
+      return this.getFont().family;
     },
     /**
        @memberof Nehan.StyleContext
@@ -14924,7 +14932,7 @@ var TextGenerator = (function(){
     if(token instanceof Char && token.isKerningChar() && Config.kerning){
       this._setCharKerning(context, token);
     }
-    token.setMetrics(this.style.flow, this.style.font);
+    token.setMetrics(this.style.flow, this.style.getFont());
   };
 
   TextGenerator.prototype._setCharKerning = function(context, char_token){

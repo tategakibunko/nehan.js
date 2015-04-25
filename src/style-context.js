@@ -75,6 +75,14 @@ var StyleContext = (function(){
     return List.exists(__callback_css_props, Closure.eq(prop));
   };
 
+  var __std_font = (function(){
+    var font = new Font(Display.fontSize);
+    font.family = Display.fontFamily;
+    font.weight = "normal";
+    font.style = "normal";
+    return font;
+  })();
+
   /**
      @memberof Nehan
      @class StyleContext
@@ -1107,21 +1115,21 @@ var StyleContext = (function(){
        @return {Nehan.Font}
     */
     getFont : function(){
-      return this.font || this.parent.getFont();
+      return this.font || this.parent.getFont() || __std_font;
     },
     /**
        @memberof Nehan.StyleContext
        @return {int}
     */
     getFontSize : function(){
-      return this.font.size;
+      return this.getFont().size;
     },
     /**
        @memberof Nehan.StyleContext
        @return {String}
     */
     getFontFamily : function(){
-      return this.font.family || Display.fontFamily;
+      return this.getFont().family;
     },
     /**
        @memberof Nehan.StyleContext
@@ -1462,7 +1470,7 @@ var StyleContext = (function(){
 	// TODO: more simple solution.
 	var line_height = this.getCssAttr("line-height")
 	if(line_height){
-	  css["line-height"] = this._computeUnitSize(line_height, this.font.size) + "px";
+	  css["line-height"] = this._computeUnitSize(line_height, this.getFontSize()) + "px";
 	}
 	if(this.getMarkupName() === "ruby" || this.isTextEmphaEnable()){
 	  css["display"] = "inline-block";
@@ -2111,13 +2119,13 @@ var StyleContext = (function(){
       var prop = this.flow.getPropMeasure();
       var max_size = this.getParentContentMeasure();
       var static_size = this.getAttr(prop) || this.getAttr("measure") || this.getCssAttr(prop) || this.getCssAttr("measure");
-      return static_size? this._computeUnitSize(static_size, this.font.size, max_size) : null;
+      return static_size? this._computeUnitSize(static_size, this.getFontSize(), max_size) : null;
     },
     _loadStaticExtent : function(){
       var prop = this.flow.getPropExtent();
       var max_size = this.getParentContentExtent();
       var static_size = this.getAttr(prop) || this.getAttr("extent") || this.getCssAttr(prop) || this.getCssAttr("extent");
-      return static_size? this._computeUnitSize(static_size, this.font.size, max_size) : null;
+      return static_size? this._computeUnitSize(static_size, this.getFontSize(), max_size) : null;
     }
   };
 

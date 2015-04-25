@@ -247,7 +247,7 @@ var TextGenerator = (function(){
     if(token instanceof Char && token.isKerningChar() && Config.kerning){
       this._setCharKerning(context, token);
     }
-    token.setMetrics(this.style.flow, this.style.font);
+    token.setMetrics(this.style.flow, this.style.getFont());
   };
 
   TextGenerator.prototype._setCharKerning = function(context, char_token){
