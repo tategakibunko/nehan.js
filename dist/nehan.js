@@ -5020,6 +5020,13 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {boolean}
      */
+    isTabChar : function(){
+      return this.data === "\t";
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isWhiteSpaceChar : function(){
       return this.isNewLineChar() || this.isSpaceChar();
     },
