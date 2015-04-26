@@ -160,7 +160,27 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {Object}
     */
+    getCssHoriTabChar : function(line){
+      var css = {};
+      css.display = "inline-block";
+      css.width = this.bodySize + "px";
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
     getCssVertHalfSpaceChar : function(line){
+      var css = {};
+      css.height = this.bodySize + "px";
+      css["line-height"] = this.bodySize + "px";
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
+    getCssVertTabChar : function(line){
       var css = {};
       css.height = this.bodySize + "px";
       css["line-height"] = this.bodySize + "px";
@@ -296,6 +316,9 @@ var Char = (function(){
 	this._setRotate(90);
       }
       switch(code){
+      case 9: // tab space char
+	this.hscale = this.vscale = Display.halfSpaceSizeRate * Display.tabCount;
+	break;
       case 32: // half scape char
 	this._setCnv("&nbsp;", Display.halfSpaceSizeRate, Display.halfSpaceSizeRate); break;
       case 12300:

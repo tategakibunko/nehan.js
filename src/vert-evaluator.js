@@ -130,8 +130,10 @@ var VertEvaluator = (function(){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalImgChar(line, chr);
-    } else if(chr.isHalfSpaceChar(chr)){
+    } else if(chr.isHalfSpaceChar()){
       return this._evalHalfSpaceChar(line, chr);
+    } else if(chr.isTabChar()){
+      return this._evalTabChar(line, chr);
     } else if(chr.isRotateChar()){
       if(chr.isVertGlyphEnable()){
 	return this._evalVerticalGlyph(line, chr);
@@ -236,6 +238,13 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:"&nbsp;",
       css:chr.getCssVertHalfSpaceChar(line)
+    });
+  };
+
+  VertEvaluator.prototype._evalTabChar = function(line, chr){
+    return this._createElement("div", {
+      content:"&nbsp;",
+      css:chr.getCssVertTabChar(line)
     });
   };
 

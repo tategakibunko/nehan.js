@@ -210,9 +210,11 @@ var TextGenerator = (function(){
     if(this.style.isPre()){
       return this._getWhiteSpacePre(context, token);
     }
+    // skip continuous white-spaces.
+    this.stream.skipUntil(Token.isNewLine);
+
+    // ignore new-line
     if(Token.isNewLine(token)){
-      // skip continuous white-spaces.
-      this.stream.skipUntil(Token.isNewLine);
       return this._getNext(context);
     }
     // if white-space is not new-line, use first one.

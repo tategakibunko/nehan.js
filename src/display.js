@@ -130,6 +130,14 @@ var Display = {
   */
   halfSpaceSizeRate: 0.38,
   /**
+     count of tab space
+
+     @memberof Nehan.Display
+     @type {int}
+     @default 4
+  */
+  tabCount: 4,
+  /**
      standard font color. this is required for browsers not supporting writing-mode to display vertical font-images.
 
      @memberof Nehan.Display

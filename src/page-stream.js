@@ -160,7 +160,7 @@ var PageStream = (function(){
     },
     _createSource : function(text){
       return text
-	.replace(/\t/g, "") // discard TAB
+	//.replace(/\t/g, "") // discard TAB
 	.replace(/<!--[\s\S]*?-->/g, "") // discard comment
 	.replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
 	.replace(/<rb>/gi, "") // discard rb

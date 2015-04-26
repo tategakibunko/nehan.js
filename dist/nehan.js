@@ -519,6 +519,14 @@ var Display = {
   */
   halfSpaceSizeRate: 0.38,
   /**
+     count of tab space
+
+     @memberof Nehan.Display
+     @type {int}
+     @default 4
+  */
+  tabCount: 4,
+  /**
      standard font color. this is required for browsers not supporting writing-mode to display vertical font-images.
 
      @memberof Nehan.Display
@@ -4745,7 +4753,27 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {Object}
     */
+    getCssHoriTabChar : function(line){
+      var css = {};
+      css.display = "inline-block";
+      css.width = this.bodySize + "px";
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
     getCssVertHalfSpaceChar : function(line){
+      var css = {};
+      css.height = this.bodySize + "px";
+      css["line-height"] = this.bodySize + "px";
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
+    getCssVertTabChar : function(line){
       var css = {};
       css.height = this.bodySize + "px";
       css["line-height"] = this.bodySize + "px";
@@ -4881,6 +4909,9 @@ var Char = (function(){
 	this._setRotate(90);
       }
       switch(code){
+      case 9: // tab space char
+	this.hscale = this.vscale = Display.halfSpaceSizeRate * Display.tabCount;
+	break;
       case 32: // half scape char
 	this._setCnv("&nbsp;", Display.halfSpaceSizeRate, Display.halfSpaceSizeRate); break;
       case 12300:
@@ -10244,7 +10275,7 @@ var PageStream = (function(){
     },
     _createSource : function(text){
       return text
-	.replace(/\t/g, "") // discard TAB
+	//.replace(/\t/g, "") // discard TAB
 	.replace(/<!--[\s\S]*?-->/g, "") // discard comment
 	.replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
 	.replace(/<rb>/gi, "") // discard rb
@@ -14916,9 +14947,11 @@ var TextGenerator = (function(){
     if(this.style.isPre()){
       return this._getWhiteSpacePre(context, token);
     }
+    // skip continuous white-spaces.
+    this.stream.skipUntil(Token.isNewLine);
+
+    // ignore new-line
     if(Token.isNewLine(token)){
-      // skip continuous white-spaces.
-      this.stream.skipUntil(Token.isNewLine);
       return this._getNext(context);
     }
     // if white-space is not new-line, use first one.
@@ -16458,8 +16491,10 @@ var VertEvaluator = (function(){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalImgChar(line, chr);
-    } else if(chr.isHalfSpaceChar(chr)){
+    } else if(chr.isHalfSpaceChar()){
       return this._evalHalfSpaceChar(line, chr);
+    } else if(chr.isTabChar()){
+      return this._evalTabChar(line, chr);
     } else if(chr.isRotateChar()){
       if(chr.isVertGlyphEnable()){
 	return this._evalVerticalGlyph(line, chr);
@@ -16567,6 +16602,13 @@ var VertEvaluator = (function(){
     });
   };
 
+  VertEvaluator.prototype._evalTabChar = function(line, chr){
+    return this._createElement("div", {
+      content:"&nbsp;",
+      css:chr.getCssVertTabChar(line)
+    });
+  };
+
   return VertEvaluator;
 })();
 
@@ -16642,6 +16684,9 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype._evalChar = function(line, chr){
     if(chr.isHalfSpaceChar()){
       return this._evalHalfSpaceChar(line, chr);
+    }
+    if(chr.isTabChar()){
+      return this._evalTabChar(line, chr);
     }
     if(chr.isCharRef()){
       return document.createTextNode(Html.unescape(chr.data));
@@ -16719,6 +16764,13 @@ var HoriEvaluator = (function(){
     return this._createElement("span", {
       content:"&nbsp;",
       css:chr.getCssHoriHalfSpaceChar(line)
+    });
+  };
+
+  HoriEvaluator.prototype._evalTabChar = function(line, chr){
+    return this._createElement("span", {
+      content:"&nbsp;",
+      css:chr.getCssHoriTabChar(line)
     });
   };
 

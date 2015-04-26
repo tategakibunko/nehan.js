@@ -70,6 +70,9 @@ var HoriEvaluator = (function(){
     if(chr.isHalfSpaceChar()){
       return this._evalHalfSpaceChar(line, chr);
     }
+    if(chr.isTabChar()){
+      return this._evalTabChar(line, chr);
+    }
     if(chr.isCharRef()){
       return document.createTextNode(Html.unescape(chr.data));
     }
@@ -146,6 +149,13 @@ var HoriEvaluator = (function(){
     return this._createElement("span", {
       content:"&nbsp;",
       css:chr.getCssHoriHalfSpaceChar(line)
+    });
+  };
+
+  HoriEvaluator.prototype._evalTabChar = function(line, chr){
+    return this._createElement("span", {
+      content:"&nbsp;",
+      css:chr.getCssHoriTabChar(line)
     });
   };
 
