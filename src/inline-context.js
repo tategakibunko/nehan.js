@@ -199,7 +199,7 @@ var InlineContext = (function(){
 	return null;
       }
 
-      //console.log("start justify:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng, head, is_head_ng);
+      //console.log("start justify:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng(tail), head, is_head_ng(head));
 
       // if [word] is divided into [word1], [word2], then
       //    [char][word]<br>[char(head_ng)]

@@ -11647,6 +11647,7 @@ var StyleContext = (function(){
       line.maxExtent = max_extent;
       line.content = content;
       line.isRootLine = is_root_line;
+      line.lineBreak = opt.lineBreak || false;
 
       // edge of top level line is disabled.
       // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
@@ -11657,7 +11658,6 @@ var StyleContext = (function(){
       // backup other line data. mainly required to restore inline-context.
       if(is_root_line){
 	line.lineNo = opt.lineNo;
-	line.lineBreak = opt.lineBreak || false;
 	line.breakAfter = opt.breakAfter || false;
 	line.justified = opt.justified || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;
@@ -13919,7 +13919,7 @@ var InlineContext = (function(){
 	return null;
       }
 
-      //console.log("start justify:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng, head, is_head_ng);
+      //console.log("start justify:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng(tail), head, is_head_ng(head));
 
       // if [word] is divided into [word1], [word2], then
       //    [char][word]<br>[char(head_ng)]
@@ -14842,7 +14842,7 @@ var TextGenerator = (function(){
 	}
       }
       if(!context.hasInlineSpaceFor(measure)){
-	//console.info("!> text overflow:%o(m=%d)", element, measure);
+	//console.info("!> text overflow:%o(%s, m=%d)", element, element.data, measure);
 	this.pushCache(element);
 	break;
       }

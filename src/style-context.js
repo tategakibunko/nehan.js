@@ -584,6 +584,7 @@ var StyleContext = (function(){
       line.maxExtent = max_extent;
       line.content = content;
       line.isRootLine = is_root_line;
+      line.lineBreak = opt.lineBreak || false;
 
       // edge of top level line is disabled.
       // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
@@ -594,7 +595,6 @@ var StyleContext = (function(){
       // backup other line data. mainly required to restore inline-context.
       if(is_root_line){
 	line.lineNo = opt.lineNo;
-	line.lineBreak = opt.lineBreak || false;
 	line.breakAfter = opt.breakAfter || false;
 	line.justified = opt.justified || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;

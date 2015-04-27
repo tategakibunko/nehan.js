@@ -59,7 +59,7 @@ var TextGenerator = (function(){
 	}
       }
       if(!context.hasInlineSpaceFor(measure)){
-	//console.info("!> text overflow:%o(m=%d)", element, measure);
+	//console.info("!> text overflow:%o(%s, m=%d)", element, element.data, measure);
 	this.pushCache(element);
 	break;
       }
