@@ -67,7 +67,7 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalChar = function(line, chr){
-    if(chr.isHalfSpaceChar()){
+    if(chr.isHalfSpace()){
       return this._evalHalfSpaceChar(line, chr);
     }
     if(chr.isTabSpace()){

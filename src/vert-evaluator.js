@@ -130,7 +130,7 @@ var VertEvaluator = (function(){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalImgChar(line, chr);
-    } else if(chr.isHalfSpaceChar()){
+    } else if(chr.isHalfSpace()){
       return this._evalHalfSpaceChar(line, chr);
     } else if(chr.isTabSpace()){
       return this._evalTabChar(line, chr);

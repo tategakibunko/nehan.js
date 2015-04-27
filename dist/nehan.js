@@ -5058,14 +5058,14 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {boolean}
      */
-    isSpaceChar : function(){
+    isSpace : function(){
       return (this.data === " " || this.cnv === "&nbsp;" || this.isTabSpace());
     },
     /**
        @memberof Nehan.Char
        @return {boolean}
      */
-    isHalfSpaceChar : function(){
+    isHalfSpace : function(){
       return (this.data === " " || this.cnv === "&nbsp;");
     },
     /**
@@ -5080,7 +5080,7 @@ var Char = (function(){
        @return {boolean}
      */
     isWhiteSpaceChar : function(){
-      return this.isNewLineChar() || this.isSpaceChar();
+      return this.isNewLineChar() || this.isSpace();
     },
     /**
        @memberof Nehan.Char
@@ -16505,7 +16505,7 @@ var VertEvaluator = (function(){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalImgChar(line, chr);
-    } else if(chr.isHalfSpaceChar()){
+    } else if(chr.isHalfSpace()){
       return this._evalHalfSpaceChar(line, chr);
     } else if(chr.isTabSpace()){
       return this._evalTabChar(line, chr);
@@ -16698,7 +16698,7 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalChar = function(line, chr){
-    if(chr.isHalfSpaceChar()){
+    if(chr.isHalfSpace()){
       return this._evalHalfSpaceChar(line, chr);
     }
     if(chr.isTabSpace()){

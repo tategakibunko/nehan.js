@@ -465,14 +465,14 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {boolean}
      */
-    isSpaceChar : function(){
+    isSpace : function(){
       return (this.data === " " || this.cnv === "&nbsp;" || this.isTabSpace());
     },
     /**
        @memberof Nehan.Char
        @return {boolean}
      */
-    isHalfSpaceChar : function(){
+    isHalfSpace : function(){
       return (this.data === " " || this.cnv === "&nbsp;");
     },
     /**
@@ -487,7 +487,7 @@ var Char = (function(){
        @return {boolean}
      */
     isWhiteSpaceChar : function(){
-      return this.isNewLineChar() || this.isSpaceChar();
+      return this.isNewLineChar() || this.isSpace();
     },
     /**
        @memberof Nehan.Char
