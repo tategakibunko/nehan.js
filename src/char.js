@@ -302,7 +302,16 @@ var Char = (function(){
       this.cnv = c1;
       switch(c1){
       case "&nbsp;":
-	this._setupHalfSpace();
+	this._setupNbsp();
+	break;
+      case "&thinsp;":
+	this.vscale = this.hscale = Display.spaceSizeRate.thinsp;
+	break;
+      case "&ensp;":
+	this.vscale = this.hscale = Display.spaceSizeRate.ensp;
+	break;
+      case "&emsp;":
+	this.vscale = this.hscale = Display.spaceSizeRate.emsp;
 	break;
       case "&#09;":
 	this._setupTabSpace();
@@ -315,7 +324,7 @@ var Char = (function(){
 	break;
       }
     },
-    _setupHalfSpace : function(){
+    _setupNbsp : function(){
       this.vscale = this.hscale = Display.spaceSizeRate.nbsp;
     },
     _setupTabSpace : function(){
@@ -332,7 +341,7 @@ var Char = (function(){
 	this._setupTabSpace(); break;
 	break;
       case 32: // half scape char
-	this._setupHalfSpace(); break;
+	this._setupNbsp(); break;
       case 12300:
 	this._setImg("kakko1", 0.5, 0.5); break;
       case 65378:
@@ -462,9 +471,30 @@ var Char = (function(){
     /**
        @memberof Nehan.Char
        @return {boolean}
-     */
-    isHalfSpace : function(){
+    */
+    isNbsp : function(){
       return (this.data === " " || this.cnv === "&nbsp;");
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+    */
+    isThinsp : function(){
+      return this.cnv === "&thinsp;";
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+    */
+    isEnsp : function(){
+      return this.cnv === "&ensp;";
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+    */
+    isEmsp : function(){
+      return this.cnv === "&emsp;";
     },
     /**
        @memberof Nehan.Char
@@ -478,7 +508,7 @@ var Char = (function(){
        @return {boolean}
      */
     isSpace : function(){
-      return this.isHalfSpace() || this.isTabSpace();
+      return this.isNbsp() || this.isTabSpace() || this.isThinsp() || this.isEnsp() || this.isEmsp();
     },
     /**
        @memberof Nehan.Char
