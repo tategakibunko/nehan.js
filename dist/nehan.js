@@ -8749,6 +8749,7 @@ var HtmlLexer = (function (){
 	.replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
 	.replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
 	.replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
+	.replace(/｡/g, "。") // half size ideographic full stop -> full size
 	//.replace(/^[\s]+/, "") // shorten head space
 	//.replace(/[\s]+$/, "") // discard tail space
 	.replace(/\r/g, ""); // discard CR
