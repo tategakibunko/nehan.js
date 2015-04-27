@@ -211,11 +211,11 @@ var TextGenerator = (function(){
       return this._getWhiteSpacePre(context, token);
     }
     // skip continuous white-spaces.
-    this.stream.skipUntil(Token.isNewLine);
+    this.stream.skipUntil(Token.isWhiteSpace);
 
-    // ignore new-line
-    if(Token.isNewLine(token)){
-      return this._getNext(context);
+    // first new-line and tab are treated as single half space.
+    if(token.isNewLine() || token.isTabSpace()){
+      Char.call(token, " "); // update by half-space
     }
     // if white-space is not new-line, use first one.
     return this._getText(context, token);
