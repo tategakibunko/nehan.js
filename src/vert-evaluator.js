@@ -130,8 +130,8 @@ var VertEvaluator = (function(){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalImgChar(line, chr);
-    } else if(chr.isNbsp()){
-      return this._evalNbsp(line, chr);
+    } else if(chr.isSpace()){
+      return this._evalSpace(line, chr);
     } else if(chr.isTabSpace()){
       return this._evalTabChar(line, chr);
     } else if(chr.isRotateChar()){
@@ -234,11 +234,11 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype._evalNbsp = function(line, chr){
+  VertEvaluator.prototype._evalSpace = function(line, chr){
     return this._createElement("div", {
       content:"&nbsp;",
-      className:"nehan-half-space",
-      css:chr.getCssVertHalfSpaceChar(line)
+      className:"nehan-space",
+      css:chr.getCssVertSpaceChar(line)
     });
   };
 

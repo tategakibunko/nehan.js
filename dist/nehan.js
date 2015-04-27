@@ -4747,7 +4747,7 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {Object}
     */
-    getCssHoriHalfSpaceChar : function(line){
+    getCssHoriSpaceChar : function(line){
       var css = {};
       css.display = "inline-block";
       css.width = this.bodySize + "px";
@@ -4767,7 +4767,7 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {Object}
     */
-    getCssVertHalfSpaceChar : function(line){
+    getCssVertSpaceChar : function(line){
       var css = {};
       css.height = this.bodySize + "px";
       css["line-height"] = this.bodySize + "px";
@@ -16537,8 +16537,8 @@ var VertEvaluator = (function(){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalImgChar(line, chr);
-    } else if(chr.isNbsp()){
-      return this._evalNbsp(line, chr);
+    } else if(chr.isSpace()){
+      return this._evalSpace(line, chr);
     } else if(chr.isTabSpace()){
       return this._evalTabChar(line, chr);
     } else if(chr.isRotateChar()){
@@ -16641,11 +16641,11 @@ var VertEvaluator = (function(){
     });
   };
 
-  VertEvaluator.prototype._evalNbsp = function(line, chr){
+  VertEvaluator.prototype._evalSpace = function(line, chr){
     return this._createElement("div", {
       content:"&nbsp;",
-      className:"nehan-half-space",
-      css:chr.getCssVertHalfSpaceChar(line)
+      className:"nehan-space",
+      css:chr.getCssVertSpaceChar(line)
     });
   };
 
@@ -16730,8 +16730,8 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalChar = function(line, chr){
-    if(chr.isNbsp()){
-      return this._evalNbsp(line, chr);
+    if(chr.isSpace()){
+      return this._evalSpace(line, chr);
     }
     if(chr.isTabSpace()){
       return this._evalTabChar(line, chr);
@@ -16808,11 +16808,11 @@ var HoriEvaluator = (function(){
     });
   };
 
-  HoriEvaluator.prototype._evalNbsp = function(line, chr){
+  HoriEvaluator.prototype._evalSpace = function(line, chr){
     return this._createElement("span", {
       content:"&nbsp;",
-      className:"nehan-half-space",
-      css:chr.getCssHoriHalfSpaceChar(line)
+      className:"nehan-space",
+      css:chr.getCssHoriSpaceChar(line)
     });
   };
 

@@ -150,7 +150,7 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {Object}
     */
-    getCssHoriHalfSpaceChar : function(line){
+    getCssHoriSpaceChar : function(line){
       var css = {};
       css.display = "inline-block";
       css.width = this.bodySize + "px";
@@ -170,7 +170,7 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {Object}
     */
-    getCssVertHalfSpaceChar : function(line){
+    getCssVertSpaceChar : function(line){
       var css = {};
       css.height = this.bodySize + "px";
       css["line-height"] = this.bodySize + "px";

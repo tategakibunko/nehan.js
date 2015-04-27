@@ -463,9 +463,26 @@ var Script = {
   ].join("\n"),
 
   "white-space":[
-    "<h3>double half space</h3>",
+    "<h3>double space</h3>",
     "<pre>a  b</pre>",
     "<div>a  b</div>",
+
+    "<h3>double thinsp</h3>",
+    "<pre>a&thinsp;&thinsp;b</pre>",
+    "<div>a&thinsp;&thinsp;b</div>",
+
+    "<h3>double nbsp</h3>",
+    "<pre>a&nbsp;&nbsp;b</pre>",
+    "<div>a&nbsp;&nbsp;b</div>",
+
+    "<h3>double ensp</h3>",
+    "<pre>a&ensp;&ensp;b</pre>",
+    "<div>a&ensp;&ensp;b</div>",
+
+    "<h3>double emsp</h3>",
+    "<pre>a&emsp;&emsp;b</pre>",
+    "<div>a&emsp;&emsp;b</div>",
+
     "<h3>tab space</h3>",
     "<pre>a&#09;b</pre>",
     "<div>a&#09;b</div>"
