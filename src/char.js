@@ -316,7 +316,7 @@ var Char = (function(){
       }
     },
     _setupHalfSpace : function(){
-      this.vscale = this.hscale = Display.halfSpaceSizeRate;
+      this.vscale = this.hscale = Display.spaceSizeRate.nbsp;
     },
     _setupTabSpace : function(){
       this.vscale = this.hscale = Math.floor(Display.tabCount / 2);

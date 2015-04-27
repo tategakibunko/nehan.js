@@ -511,13 +511,17 @@ var Display = {
   */
   lineHeight: 2.0,
   /**
-     size rate of half size space.
+     various kind of spacing rate
 
      @memberof Nehan.Display
-     @type {Float}
-     @default 0.25
+     @type {Array.<Float>}
   */
-  halfSpaceSizeRate: 0.38,
+  spaceSizeRate:{
+    thinsp:0.2, // &thinsp;
+    nbsp:0.38,  // &nbsp;
+    ensp:0.5,   // &ensp;
+    emsp:1.0    // &emsp;
+  },
   /**
      count of tab space
 
@@ -4909,7 +4913,7 @@ var Char = (function(){
       }
     },
     _setupHalfSpace : function(){
-      this.vscale = this.hscale = Display.halfSpaceSizeRate;
+      this.vscale = this.hscale = Display.spaceSizeRate.nbsp;
     },
     _setupTabSpace : function(){
       this.vscale = this.hscale = Math.floor(Display.tabCount / 2);
