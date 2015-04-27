@@ -61,7 +61,7 @@ var Token = {
      @return {boolean}
   */
   isNewLine : function(token){
-    return token instanceof Char && token.isNewLineChar();
+    return token instanceof Char && token.isNewLine();
   },
   /**
      @memberof Nehan.Token
@@ -69,7 +69,7 @@ var Token = {
      @return {boolean}
   */
   isWhiteSpace : function(token){
-    return token instanceof Char && token.isWhiteSpaceChar();
+    return token instanceof Char && token.isWhiteSpace();
   }
 };
 

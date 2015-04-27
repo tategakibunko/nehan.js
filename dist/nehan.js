@@ -4550,7 +4550,7 @@ var Token = {
      @return {boolean}
   */
   isNewLine : function(token){
-    return token instanceof Char && token.isNewLineChar();
+    return token instanceof Char && token.isNewLine();
   },
   /**
      @memberof Nehan.Token
@@ -4558,7 +4558,7 @@ var Token = {
      @return {boolean}
   */
   isWhiteSpace : function(token){
-    return token instanceof Char && token.isWhiteSpaceChar();
+    return token instanceof Char && token.isWhiteSpace();
   }
 };
 
@@ -5051,7 +5051,7 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {boolean}
      */
-    isNewLineChar : function(){
+    isNewLine : function(){
       return this.data === "\n";
     },
     /**
@@ -5059,7 +5059,7 @@ var Char = (function(){
        @return {boolean}
      */
     isSpace : function(){
-      return (this.data === " " || this.cnv === "&nbsp;" || this.isTabSpace());
+      return (this.isHalfSpace() || this.isTabSpace());
     },
     /**
        @memberof Nehan.Char
@@ -5079,8 +5079,8 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {boolean}
      */
-    isWhiteSpaceChar : function(){
-      return this.isNewLineChar() || this.isSpace();
+    isWhiteSpace : function(){
+      return this.isNewLine() || this.isSpace();
     },
     /**
        @memberof Nehan.Char
@@ -14791,7 +14791,7 @@ var TextGenerator = (function(){
 	break;
       }
       // skip head space for first word element if not 'white-space:pre'
-      if(is_head_output && context.getInlineCurMeasure() === 0 && element instanceof Char && element.isWhiteSpaceChar() && !this.style.isPre()){
+      if(is_head_output && context.getInlineCurMeasure() === 0 && element instanceof Char && element.isWhiteSpace() && !this.style.isPre()){
 	var next = this.stream.peek();
 	if(next && next instanceof Word){
 	  continue; // skip head space

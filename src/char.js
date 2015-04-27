@@ -458,7 +458,7 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {boolean}
      */
-    isNewLineChar : function(){
+    isNewLine : function(){
       return this.data === "\n";
     },
     /**
@@ -466,7 +466,7 @@ var Char = (function(){
        @return {boolean}
      */
     isSpace : function(){
-      return (this.data === " " || this.cnv === "&nbsp;" || this.isTabSpace());
+      return (this.isHalfSpace() || this.isTabSpace());
     },
     /**
        @memberof Nehan.Char
@@ -486,8 +486,8 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {boolean}
      */
-    isWhiteSpaceChar : function(){
-      return this.isNewLineChar() || this.isSpace();
+    isWhiteSpace : function(){
+      return this.isNewLine() || this.isSpace();
     },
     /**
        @memberof Nehan.Char
