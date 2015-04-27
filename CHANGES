@@ -17,6 +17,7 @@ o Add new callback 'onblock', 'online', 'ontext' when called document is convert
   'ontext' is called after text-element in anonymous line is converted.
 o Config.allowedInlineStyleProps is added.
 o Config.maxYieldCount is added.
+o Add Display.spaceSizeRate, to support various kind of space strictly.
 * Fix float bug in horizontal mode(see "float" at example/catalog5.html).
 * Fix baseline problem in many case.
 ! Remove LexingRule::addSingleTagByRex.
