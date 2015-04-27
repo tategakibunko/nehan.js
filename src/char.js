@@ -277,25 +277,26 @@ var Char = (function(){
     },
     _setImg : function(img, vscale, hscale){
       this.img = img;
-      this.vscale = vscale || 1;
-      this.hscale = hscale || this.vscale;
+      this.vscale = vscale;
+      this.hscale = hscale;
     },
     _setCnv : function(cnv, vscale, hscale){
       this.cnv = cnv;
       this.isRef = true;
-      this.vscale = vscale || 1;
-      this.hscale = hscale || this.vscale;
+      this.vscale = vscale;
+      this.hscale = hscale;
     },
     _setRotate : function(angle){
       this.rotate = angle;
     },
-    _setRotateOrImg : function(angle, img, vscale){
-      this.vscale = vscale || 1;
+    _setRotateOrImg : function(angle, img, vscale, hscale){
       if(Nehan.Env.isTransformEnable){
 	this._setRotate(angle);
+	this.vscale = vscale;
+	this.hscale = hscale;
 	return;
       }
-      this._setImg(img, vscale);
+      this._setImg(img, vscale, hscale);
     },
     _setupRef : function(c1){
       this.cnv = c1;
@@ -307,12 +308,10 @@ var Char = (function(){
 	this._setupTabSpace();
 	break;
       case "&lt;":
-	this._setRotateOrImg(90, "kakko7", 0.5);
-	this.hscale = 0.5;
+	this._setRotateOrImg(90, "kakko7", 0.5, 0.5);
 	break;
       case "&gt;":
-	this._setRotateOrImg(90, "kakko8", 0.5);
-	this.hscale = 0.5;
+	this._setRotateOrImg(90, "kakko8", 0.5, 0.5);
 	break;
       }
     },
@@ -335,122 +334,122 @@ var Char = (function(){
       case 32: // half scape char
 	this._setupHalfSpace(); break;
       case 12300:
-	this._setImg("kakko1", 0.5); break;
+	this._setImg("kakko1", 0.5, 0.5); break;
       case 65378:
-	this._setImg("kakko1", 0.5); break;
+	this._setImg("kakko1", 0.5, 0.5); break;
       case 12301:
-	this._setImg("kakko2", 0.5); break;
+	this._setImg("kakko2", 0.5, 0.5); break;
       case 65379:
-	this._setImg("kakko2", 0.5); break;
+	this._setImg("kakko2", 0.5, 0.5); break;
       case 12302:
-	this._setImg("kakko3", 0.5); break;
+	this._setImg("kakko3", 0.5, 0.5); break;
       case 12303:
-	this._setImg("kakko4", 0.5); break;
+	this._setImg("kakko4", 0.5, 0.5); break;
       case 65288:
-	this._setImg("kakko5", 0.5); break;
+	this._setImg("kakko5", 0.5, 0.5); break;
       case 40:
-	this._setImg("kakko5", 0.5); break;
+	this._setImg("kakko5", 0.5, 0.5); break;
       case 65371:
-	this._setImg("kakko5", 0.5); break;
+	this._setImg("kakko5", 0.5, 0.5); break;
       case 123:
-	this._setImg("kakko5", 0.5); break;
+	this._setImg("kakko5", 0.5, 0.5); break;
       case 65289:
-	this._setImg("kakko6", 0.5); break;
+	this._setImg("kakko6", 0.5, 0.5); break;
       case 41:
-	this._setImg("kakko6", 0.5); break;
+	this._setImg("kakko6", 0.5, 0.5); break;
       case 65373:
-	this._setImg("kakko6", 0.5); break;
+	this._setImg("kakko6", 0.5, 0.5); break;
       case 125:
-	this._setImg("kakko6", 0.5); break;
+	this._setImg("kakko6", 0.5, 0.5); break;
       case 65308:
-	this._setImg("kakko7", 0.5); break;
+	this._setImg("kakko7", 0.5, 0.5); break;
       case 12296:
-	this._setImg("kakko7", 0.5); break;
+	this._setImg("kakko7", 0.5, 0.5); break;
       case 65310:
-	this._setImg("kakko8", 0.5); break;
+	this._setImg("kakko8", 0.5, 0.5); break;
       case 12297:
-	this._setImg("kakko8", 0.5); break;
+	this._setImg("kakko8", 0.5, 0.5); break;
       case 12298:
-	this._setImg("kakko9", 0.5); break;
+	this._setImg("kakko9", 0.5, 0.5); break;
       case 8810:
-	this._setImg("kakko9", 0.5); break;
+	this._setImg("kakko9", 0.5, 0.5); break;
       case 12299:
-	this._setImg("kakko10", 0.5); break;
+	this._setImg("kakko10", 0.5, 0.5); break;
       case 8811:
-	this._setImg("kakko10", 0.5); break;
+	this._setImg("kakko10", 0.5, 0.5); break;
       case 65339:
-	this._setImg("kakko11", 0.5); break;
+	this._setImg("kakko11", 0.5, 0.5); break;
       case 12308:
-	this._setImg("kakko11", 0.5); break;
+	this._setImg("kakko11", 0.5, 0.5); break;
       case 91:
-	this._setImg("kakko11", 0.5); break;
+	this._setImg("kakko11", 0.5, 0.5); break;
       case 65341:
-	this._setImg("kakko12", 0.5); break;
+	this._setImg("kakko12", 0.5, 0.5); break;
       case 12309:
-	this._setImg("kakko12", 0.5); break;
+	this._setImg("kakko12", 0.5, 0.5); break;
       case 93:
-	this._setImg("kakko12", 0.5); break;
+	this._setImg("kakko12", 0.5, 0.5); break;
       case 12304:
-	this._setImg("kakko17", 0.5); break;
+	this._setImg("kakko17", 0.5, 0.5); break;
       case 12305:
-	this._setImg("kakko18", 0.5); break;
+	this._setImg("kakko18", 0.5, 0.5); break;
       case 65306:
 	this._setImg("tenten", 1, 1); break;
       case 58:
 	this._setImg("tenten", 1, 1); break;
       case 12290:
-	this._setImg("kuten", 0.5); break;
+	this._setImg("kuten", 0.5, 0.5); break;
       case 65377:
-	this._setImg("kuten", 0.5); break;
+	this._setImg("kuten", 0.5, 0.5); break;
       case 65294:
-	this._setImg("period", 1); break;
+	this._setImg("period", 1, 1); break;
       case 46:
-	this._setImg("period", 1); break;
+	this._setImg("period", 1, 1); break;
       case 12289:
-	this._setImg("touten", 0.5); break;
+	this._setImg("touten", 0.5, 0.5); break;
       case 65380:
-	this._setImg("touten", 0.5); break;
+	this._setImg("touten", 0.5, 0.5); break;
       case 44:
-	this._setImg("touten", 0.5); break;
+	this._setImg("touten", 0.5, 0.5); break;
       case 65292:
-	this._setImg("touten", 0.5); break;
+	this._setImg("touten", 0.5, 0.5); break;
       case 65374:
-	this._setImg("kara", 1); break;
+	this._setImg("kara", 1, 1); break;
       case 12316:
-	this._setImg("kara", 1); break;
+	this._setImg("kara", 1, 1); break;
       case 8230:
-	this._setImg("mmm", 1); break;
+	this._setImg("mmm", 1, 1); break;
       case 8229:
-	this._setImg("mm", 1); break;
+	this._setImg("mm", 1, 1); break;
       case 12317:
-	this._setImg("dmn1", 1); break;
+	this._setImg("dmn1", 1, 1); break;
       case 12319:
-	this._setImg("dmn2", 1); break;
+	this._setImg("dmn2", 1, 1); break;
       case 65309:
-	this._setImg("equal", 1); break;
+	this._setImg("equal", 1, 1); break;
       case 61:
-	this._setImg("equal", 1); break;
+	this._setImg("equal", 1, 1); break;
       case 8212: // Em dash
       case 8221: // Right Double Quotation Mark
 	this._setRotate(90); break;
       case 12540:
-	this._setImg("onbiki", 1); break;
+	this._setImg("onbiki", 1, 1); break;
       case 8213: // Horizontal bar(General Punctuation)
       case 65293: // Halfwidth and Fullwidth Forms
       case 9472: // Box drawings light horizontal(Box Drawing)
-	this._setCnv("&#8212;");
+	this._setCnv("&#8212;", 1, 1);
 	this._setRotate(90);
 	break;
       case 8593: // up
-	this._setCnv("&#8594;"); break;
+	this._setCnv("&#8594;", 1, 1); break;
       case 8594: // right
-	this._setCnv("&#8595;"); break;
+	this._setCnv("&#8595;", 1, 1); break;
       case 8658: // right2
-	this._setCnv("&#8595;"); break;
+	this._setCnv("&#8595;", 1, 1); break;
       case 8595: // down
-	this._setCnv("&#8592;"); break;
+	this._setCnv("&#8592;", 1, 1); break;
       case 8592: // left
-	this._setCnv("&#8593;"); break;
+	this._setCnv("&#8593;", 1, 1); break;
       }
     },
     /**
