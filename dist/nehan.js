@@ -4909,10 +4909,10 @@ var Char = (function(){
       }
     },
     _setupHalfSpace : function(){
-      this._setCnv("&nbsp;", Display.halfSpaceSizeRate, Display.halfSpaceSizeRate);
+      this.vscale = this.hscale = Display.halfSpaceSizeRate;
     },
     _setupTabSpace : function(){
-      this.hscale = this.vscale = Math.floor(Display.tabCount / 2);
+      this.vscale = this.hscale = Math.floor(Display.tabCount / 2);
     },
     _setupNormal : function(code){
       // for half-size char, rotate 90 and half-scale in horizontal by default.
