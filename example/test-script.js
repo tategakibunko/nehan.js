@@ -460,6 +460,15 @@ var Script = {
     "  alert('hoo');",
     "};",
     "</pre>"
+  ].join("\n"),
+
+  "white-space":[
+    "<h3>double half space</h3>",
+    "<pre>a  b</pre>",
+    "<div>a  b</div>",
+    "<h3>tab space</h3>",
+    "<pre>a&#09;b</pre>",
+    "<div>a&#09;b</div>"
   ].join("\n")
 };
 

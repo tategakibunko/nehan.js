@@ -320,7 +320,6 @@ var Char = (function(){
       this._setCnv("&nbsp;", Display.halfSpaceSizeRate, Display.halfSpaceSizeRate);
     },
     _setupTabSpace : function(){
-      //this.hscale = this.vscale = Display.halfSpaceSizeRate * Display.tabCount;
       this.hscale = this.vscale = Math.floor(Display.tabCount / 2);
     },
     _setupNormal : function(code){
