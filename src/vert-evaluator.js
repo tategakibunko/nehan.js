@@ -132,7 +132,7 @@ var VertEvaluator = (function(){
       return this._evalImgChar(line, chr);
     } else if(chr.isHalfSpaceChar()){
       return this._evalHalfSpaceChar(line, chr);
-    } else if(chr.isTabChar()){
+    } else if(chr.isTabSpace()){
       return this._evalTabChar(line, chr);
     } else if(chr.isRotateChar()){
       if(chr.isVertGlyphEnable()){
@@ -237,6 +237,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalHalfSpaceChar = function(line, chr){
     return this._createElement("div", {
       content:"&nbsp;",
+      className:"nehan-half-space",
       css:chr.getCssVertHalfSpaceChar(line)
     });
   };
@@ -244,6 +245,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalTabChar = function(line, chr){
     return this._createElement("div", {
       content:"&nbsp;",
+      className:"nehan-tab",
       css:chr.getCssVertTabChar(line)
     });
   };

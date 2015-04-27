@@ -298,7 +298,14 @@ var Char = (function(){
       this._setImg(img, vscale);
     },
     _setupRef : function(c1){
+      this.cnv = c1;
       switch(c1){
+      case "&nbsp;":
+	this._setupHalfSpace();
+	break;
+      case "&#09;":
+	this._setupTabSpace();
+	break;
       case "&lt;":
 	this._setRotateOrImg(90, "kakko7", 0.5);
 	this.hscale = 0.5;
@@ -309,6 +316,13 @@ var Char = (function(){
 	break;
       }
     },
+    _setupHalfSpace : function(){
+      this._setCnv("&nbsp;", Display.halfSpaceSizeRate, Display.halfSpaceSizeRate);
+    },
+    _setupTabSpace : function(){
+      //this.hscale = this.vscale = Display.halfSpaceSizeRate * Display.tabCount;
+      this.hscale = this.vscale = Math.floor(Display.tabCount / 2);
+    },
     _setupNormal : function(code){
       // for half-size char, rotate 90 and half-scale in horizontal by default.
       if(this.isHankaku()){
@@ -317,10 +331,10 @@ var Char = (function(){
       }
       switch(code){
       case 9: // tab space char
-	this.hscale = this.vscale = Display.halfSpaceSizeRate * Display.tabCount;
+	this._setupTabSpace(); break;
 	break;
       case 32: // half scape char
-	this._setCnv("&nbsp;", Display.halfSpaceSizeRate, Display.halfSpaceSizeRate); break;
+	this._setupHalfSpace(); break;
       case 12300:
 	this._setImg("kakko1", 0.5); break;
       case 65378:
@@ -452,14 +466,21 @@ var Char = (function(){
        @return {boolean}
      */
     isSpaceChar : function(){
-      return (this.data === " " || this.data === "&nbsp;" || this.data === "\t");
+      return (this.data === " " || this.cnv === "&nbsp;" || this.isTabSpace());
     },
     /**
        @memberof Nehan.Char
        @return {boolean}
      */
-    isTabChar : function(){
-      return this.data === "\t";
+    isHalfSpaceChar : function(){
+      return (this.data === " " || this.cnv === "&nbsp;");
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
+    isTabSpace : function(){
+      return (this.data === "\t" || this.cnv === "&#09;");
     },
     /**
        @memberof Nehan.Char
@@ -495,13 +516,6 @@ var Char = (function(){
      */
     isCharRef : function(){
       return this.isRef;
-    },
-    /**
-       @memberof Nehan.Char
-       @return {boolean}
-     */
-    isHalfSpaceChar : function(){
-      return (this.isCnvChar() && this.cnv === "&nbsp;");
     },
     /**
        @memberof Nehan.Char

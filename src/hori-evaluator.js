@@ -70,7 +70,7 @@ var HoriEvaluator = (function(){
     if(chr.isHalfSpaceChar()){
       return this._evalHalfSpaceChar(line, chr);
     }
-    if(chr.isTabChar()){
+    if(chr.isTabSpace()){
       return this._evalTabChar(line, chr);
     }
     if(chr.isCharRef()){
@@ -148,6 +148,7 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype._evalHalfSpaceChar = function(line, chr){
     return this._createElement("span", {
       content:"&nbsp;",
+      className:"nehan-half-space",
       css:chr.getCssHoriHalfSpaceChar(line)
     });
   };
@@ -155,6 +156,7 @@ var HoriEvaluator = (function(){
   HoriEvaluator.prototype._evalTabChar = function(line, chr){
     return this._createElement("span", {
       content:"&nbsp;",
+      className:"nehan-tab",
       css:chr.getCssHoriTabChar(line)
     });
   };
