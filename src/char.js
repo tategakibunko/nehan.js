@@ -465,13 +465,6 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {boolean}
      */
-    isSpace : function(){
-      return (this.isHalfSpace() || this.isTabSpace());
-    },
-    /**
-       @memberof Nehan.Char
-       @return {boolean}
-     */
     isHalfSpace : function(){
       return (this.data === " " || this.cnv === "&nbsp;");
     },
@@ -481,6 +474,13 @@ var Char = (function(){
      */
     isTabSpace : function(){
       return (this.data === "\t" || this.cnv === "&#09;");
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
+    isSpace : function(){
+      return this.isHalfSpace() || this.isTabSpace();
     },
     /**
        @memberof Nehan.Char
