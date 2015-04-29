@@ -218,8 +218,7 @@ var InlineContext = (function(){
 	  break;
 	}
       }
-      // even if first element is tail ng, sweep it out to the head of next line.
-      if(ptr < 0 && is_tail_ng(tail)){
+      if(ptr < 0){
 	return tail;
       }
       // if ptr moved, justification is executed.
