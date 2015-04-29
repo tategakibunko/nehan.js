@@ -1714,14 +1714,20 @@ var StyleContext = (function(){
       }
     },
     _loadFont : function(){
+      if(this.markupName == "p"){
+	debugger;
+      }
       var parent_font = this.getFont();
       var font_size = this.getCssAttr("font-size", "inherit");
       var font_family = this.getCssAttr("font-family", "inherit");
       var font_weight = this.getCssAttr("font-weight", "inherit");
       var font_style = this.getCssAttr("font-style", "inherit");
 
-      // child-font and no special settings.
-      if(this.parent !== null && font_size === "inherit" && font_family === "inherit" && font_weight === "inherit" && font_style === "inherit"){
+      // if no special settings, font-style is already defined in parent block.
+      // but if parent is inline like <span style='font-size:small'><p>foo</p></span>,
+      // then <span>(linline) is terminated when it meets <p>(block), and any box is created by span,
+      // so in this case, parent style(span) must be defined by <p>.
+      if(this.parent && this.parent.isBlock() && font_size === "inherit" && font_family === "inherit" && font_weight === "inherit" && font_style === "inherit"){
 	return null;
       }
       var font = new Font(parent_font.size);
