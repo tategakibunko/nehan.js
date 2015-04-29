@@ -12787,7 +12787,10 @@ var StyleContext = (function(){
       var font_weight = this.getCssAttr("font-weight", "inherit");
       var font_style = this.getCssAttr("font-style", "inherit");
 
-      // child-font and no special settings.
+      // if no special settings, font-style is already defined in parent block.
+      // but if parent is inline like <span style='font-size:small'><p>foo</p></span>,
+      // then <span>(linline) is terminated when it meets <p>(block), and any box is created by span,
+      // so in this case, parent style(span) must be defined by <p>.
       if(this.parent && this.parent.isBlock() && font_size === "inherit" && font_family === "inherit" && font_weight === "inherit" && font_style === "inherit"){
 	return null;
       }
