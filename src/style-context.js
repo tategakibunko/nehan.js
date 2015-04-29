@@ -678,7 +678,7 @@ var StyleContext = (function(){
       if(this.markup.isCloseTag()){
 	return true;
       }
-      if(!this.markup.isSingleTag() && this.isBlock() && this.isMarkupEmpty() && this.getContent() === ""){
+      if(!this.markup.isSingleTag() && this.isMarkupEmpty() && this.getContent() === ""){
 	return true;
       }
       return false;
