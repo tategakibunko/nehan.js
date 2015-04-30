@@ -14584,7 +14584,7 @@ var InlineGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
-      //console.log("[%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.toString() || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
+      //console.log("[i:%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.toString() || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
       if(measure === 0){
 	break;
       }
@@ -14813,7 +14813,7 @@ var TextGenerator = (function(){
     var next_head_measure = next_head? this._estimateParentNextHeadMeasure(next_head) : this.style.getFontSize();
     var is_next_head_ng = next_head_char? next_head_char.isHeadNg() : false;
     var is_head_output = this.style.contentMeasure === context.getInlineMaxMeasure();
-    //console.log("[%s]next head:%o, next_head_char:%s, next size:%d", this.style.markupName, next_head, (next_head_char? next_head_char.data : "null"), next_head_measure);
+    //console.log("[t:%s]next head:%o, next_head_char:%s, next size:%d", this.style.markupName, next_head, (next_head_char? next_head_char.data : "null"), next_head_measure);
 
     while(this.hasNext()){
       var element = this._getNext(context);
@@ -14821,7 +14821,7 @@ var TextGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
-      //console.log("[%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.data || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
+      //console.log("[t:%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.data || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
       if(measure === 0){
 	break;
       }
@@ -14906,7 +14906,7 @@ var TextGenerator = (function(){
       return null;
     }
     var root_line = this._parent;
-    while(root_line && root_line instanceof InlineGenerator){
+    while(root_line && root_line.style === this.style){
       root_line = root_line._parent || null;
     }
     root_line = root_line || this._parent;
