@@ -12778,9 +12778,6 @@ var StyleContext = (function(){
       }
     },
     _loadFont : function(){
-      if(this.markupName == "p"){
-	debugger;
-      }
       var parent_font = this.getFont();
       var font_size = this.getCssAttr("font-size", "inherit");
       var font_family = this.getCssAttr("font-family", "inherit");
