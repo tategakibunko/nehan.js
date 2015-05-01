@@ -18,7 +18,6 @@ var TagAttrParser = (function(){
        @return {Object}
     */
     parse : function(){
-      debugger;
       while(!this._isEnd()){
 	this._parseAttr();
       }
