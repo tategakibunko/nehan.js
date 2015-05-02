@@ -187,6 +187,17 @@ Nehan.PagedElement = (function(){
       this.element.appendChild(page.element);
       return page;
     },
+    /**<pre>
+     * create outline element of "<body>",
+     * if multiple body exists, only first one is returned.
+     * about callback argument, see {@link Nehan.SectionTreeConverter}.
+     *</pre>
+     @memberof Nehan.PagedElement
+     @param callbacks {Object} - see {@link Nehan.SectionTreeConverter}
+    */
+    createOutlineElement : function(callbacks){
+      return this.engine.createOutlineElement(callbacks);
+    },
     _asyncGet : function(opt){
       this._pageStream.asyncGet({
 	onProgress : function(stream, tree){
