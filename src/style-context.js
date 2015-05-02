@@ -857,6 +857,13 @@ var StyleContext = (function(){
        @memberof Nehan.StyleContext
        @return {boolean}
     */
+    isFirstLine : function(){
+      return this.markupName === "first-line";
+    },
+    /**
+       @memberof Nehan.StyleContext
+       @return {boolean}
+    */
     isFirstChild : function(){
       return this.markup.isFirstChild();
     },
@@ -1417,7 +1424,7 @@ var StyleContext = (function(){
       if(this.isRootLine()){
 	Args.copy(css, this.flow.getCss());
       }
-      if(this.font && !this.isRootLine()){
+      if(this.font && (!this.isRootLine() || this.isFirstLine())){
 	Args.copy(css, this.font.getCss());
       }
       if(this.color){
