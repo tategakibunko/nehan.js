@@ -60,7 +60,8 @@
 
       pe.setContent(content, {
         onComplete : function(time){
-          outline.appendChild(pe.engine.createOutlineElement());
+          // console.log("finish:%fmsec", time);
+          outline.appendChild(pe.createOutlineElement());
         }
       });
 
