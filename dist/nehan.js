@@ -16267,7 +16267,11 @@ var LayoutEvaluator = (function(){
 
       // store css value to dom.style[<camelized-css-property>]
       Obj.iter(css, function(style_name, value){
-	dom.style[Utils.camelize(style_name)] = value;
+	try {
+	  dom.style[Utils.camelize(style_name)] = value;
+	} catch(error){
+	  //console.warn(error);
+	}
       });
 
       // notice that class(className in style object) is given by variable "Box::classes".
