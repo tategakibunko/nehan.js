@@ -160,8 +160,8 @@ Nehan.PagedElement = (function(){
        @memberof Nehan.PagedElement
        @param content {String} - html text.
        @param opt {Object} - optinal argument
-       @param opt.onProgress {Function} - fun tree -> ()
-       @param opt.onComplete {Function} - fun time -> ()
+       @param opt.onProgress {Function} - fun tree ctx -> ()
+       @param opt.onComplete {Function} - fun time ctx -> ()
     */
     addContent : function(content, opt){
       this._pageStream.addText(content);
@@ -205,12 +205,16 @@ Nehan.PagedElement = (function(){
 	    this.setPage(tree.pageNo);
 	  }
 	  if(opt.onProgress){
-	    opt.onProgress(tree);
+	    opt.onProgress(tree, {
+	      stream:stream
+	    });
 	  }
 	}.bind(this),
 	onComplete : function(stream, time){
 	  if(opt.onComplete){
-	    opt.onComplete(time);
+	    opt.onComplete(time, {
+	      stream:stream
+	    });
 	  }
 	}.bind(this)
       });
