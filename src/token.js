@@ -10,7 +10,7 @@ var Token = {
      @return {boolean}
   */
   isTag : function(token){
-    return token._type === "tag";
+    return token instanceof Tag;
   },
   /**
      @memberof Nehan.Token
@@ -18,10 +18,13 @@ var Token = {
      @return {boolean}
   */
   isText : function(token){
-    if(token instanceof Text){
-      return true;
-    }
-    return token._type === "char" || token._type === "word" || token._type === "tcy" || token._type === "ruby";
+    return (
+      token instanceof Text ||
+      token instanceof Char ||
+      token instanceof Word ||
+      token instanceof Tcy ||
+      token instanceof Ruby
+    );
   },
   /**
      @memberof Nehan.Token
@@ -29,7 +32,7 @@ var Token = {
      @return {boolean}
   */
   isChar : function(token){
-    return token._type === "char";
+    return token instanceof Char;
   },
   /**
      @memberof Nehan.Token
@@ -37,7 +40,7 @@ var Token = {
      @return {boolean}
   */
   isWord : function(token){
-    return token._type === "word";
+    return token instanceof Word;
   },
   /**
      @memberof Nehan.Token
@@ -45,7 +48,7 @@ var Token = {
      @return {boolean}
   */
   isTcy : function(token){
-    return token._type === "tcy";
+    return token instanceof Tcy;
   },
   /**
      @memberof Nehan.Token
@@ -53,7 +56,7 @@ var Token = {
      @return {boolean}
   */
   isEmphaTargetable : function(token){
-    return token._type === "char" || token._type === "tcy";
+    return token instanceof Char || token instanceof Tcy;
   },
   /**
      @memberof Nehan.Token
