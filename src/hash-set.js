@@ -5,8 +5,8 @@ var HashSet = (function(){
      @classdesc abstraction of (key, value) set.
      @constructor
    */
-  function HashSet(){
-    this._values = {};
+  function HashSet(values){
+    this._values = values || {};
   }
 
   HashSet.prototype = {

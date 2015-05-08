@@ -29,10 +29,10 @@ var Selectors = (function(){
   };
 
   var __update_value = function(selector_key, value){
-    var style_value = Style[selector_key]; // old style value, must be found
-    Args.copy(style_value, value); // overwrite new value to old
+    var style_value = new CssHashSet(Style[selector_key]); // old style value, must be found
+    style_value = style_value.union(new CssHashSet(value)); // merge new value to old
     var selector = __find_selector(selector_key); // selector object for selector_key, must be found
-    selector.updateValue(style_value);
+    selector.updateValue(style_value.getValues());
   };
 
   var __insert_value = function(selector_key, value){
@@ -51,20 +51,23 @@ var Selectors = (function(){
   // if matches, copy selector value to result object.
   // offcource, higher specificity overwrite lower one.
   var __get_value = function(style){
-    return List.fold(__selectors, {}, function(ret, selector){
+    return List.fold(__selectors, new CssHashSet(), function(ret, selector){
       if(!selector.test(style)){
 	return ret;
       }
-      return Args.copy(ret, selector.getValue());
-    });
+      return ret.union(new CssHashSet(selector.getValue()));
+    }).getValues();
   };
 
   // 'p::first-letter'
   // => style = 'p', pseudo_element_name = 'first-letter'
   var __get_value_pe = function(style, pseudo_element_name){
-    return List.fold(__selectors_pe, {}, function(ret, selector){
-      return selector.testPseudoElement(style, pseudo_element_name)? Args.copy(ret, selector.getValue()) : ret;
-    });
+    return List.fold(__selectors_pe, new CssHashSet(), function(ret, selector){
+      if(!selector.testPseudoElement(style, pseudo_element_name)){
+	return ret;
+      }
+      return ret.union(new CssHashSet(selector.getValue()));
+    }).getValues();
   };
 
   var __set_value = function(selector_key, value){

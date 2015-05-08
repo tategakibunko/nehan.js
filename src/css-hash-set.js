@@ -5,8 +5,8 @@ var CssHashSet = (function(){
      @classdesc hash set for css
      @extends {Nehan.HashSet}
   */
-  function CssHashSet(){
-    HashSet.call(this);
+  function CssHashSet(values){
+    HashSet.call(this, values);
   }
   Class.extend(CssHashSet, HashSet);
 
