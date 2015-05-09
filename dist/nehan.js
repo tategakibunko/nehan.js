@@ -10296,6 +10296,26 @@ var PageStream = (function(){
     getTree : function(page_no){
       return this._trees[page_no] || null;
     },
+    /**
+       find tree object by fn(Nehan.Box -> bool).
+
+       @memberof Nehan.PageStream
+       @param fn {Function} - Nehan.Box -> bool
+       @return {Nehan.Box}
+    */
+    findTree : function(fn){
+      return List.find(this._trees, fn);
+    },
+    /**
+       find page object by fn(Nehan.Page -> bool).
+
+       @memberof Nehan.PageStream
+       @param fn {Function} - Nehan.Page -> bool
+       @return {Nehan.Page}
+    */
+    findPage : function(fn){
+      return List.find(this._pages, fn);
+    },
     // () -> tree
     _yield : function(){
       return this.generator.yield();
@@ -17045,6 +17065,26 @@ Nehan.PagedElement = (function(){
     */
     getPageNo : function(){
       return this.pageNo;
+    },
+    /**
+       find tree object by fn(Nehan.Box -> bool).
+
+       @memberof Nehan.PagedElement
+       @param fn {Function} - Nehan.Box -> bool
+       @return {Nehan.Box}
+    */
+    findTree : function(fn){
+      return this._pageStream? this._pageStream.findTree(fn) : null;
+    },
+    /**
+       find page object by fn(Nehan.Page -> bool).
+
+       @memberof Nehan.PagedElement
+       @param fn {Function} - Nehan.Page -> bool
+       @return {Nehan.Page}
+    */
+    findPage : function(fn){
+      return this._pageStream? this._pageStream.findPage(fn) : null;
     },
     /**
        set inner page position to next page and return next page if exists, else null.

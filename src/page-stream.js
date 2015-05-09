@@ -127,6 +127,26 @@ var PageStream = (function(){
     getTree : function(page_no){
       return this._trees[page_no] || null;
     },
+    /**
+       find tree object by fn(Nehan.Box -> bool).
+
+       @memberof Nehan.PageStream
+       @param fn {Function} - Nehan.Box -> bool
+       @return {Nehan.Box}
+    */
+    findTree : function(fn){
+      return List.find(this._trees, fn);
+    },
+    /**
+       find page object by fn(Nehan.Page -> bool).
+
+       @memberof Nehan.PageStream
+       @param fn {Function} - Nehan.Page -> bool
+       @return {Nehan.Page}
+    */
+    findPage : function(fn){
+      return List.find(this._pages, fn);
+    },
     // () -> tree
     _yield : function(){
       return this.generator.yield();
