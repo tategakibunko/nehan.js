@@ -17201,7 +17201,7 @@ Nehan.PagedElement = (function(){
     },
     _asyncGet : function(opt){
       this._pageStream.asyncGet({
-	onProgress : function(stream, tree){
+	onProgress : function(sender, tree){
 	  if(tree.pageNo === 0){
 	    this.setPage(tree.pageNo);
 	  }
@@ -17211,7 +17211,7 @@ Nehan.PagedElement = (function(){
 	    });
 	  }
 	}.bind(this),
-	onComplete : function(stream, time){
+	onComplete : function(sender, time){
 	  if(opt.onComplete){
 	    opt.onComplete(time, {
 	      sender:this
