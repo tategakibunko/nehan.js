@@ -226,14 +226,14 @@ Nehan.PagedElement = (function(){
 	  }
 	  if(opt.onProgress){
 	    opt.onProgress(tree, {
-	      stream:stream
+	      sender:this
 	    });
 	  }
 	}.bind(this),
 	onComplete : function(stream, time){
 	  if(opt.onComplete){
 	    opt.onComplete(time, {
-	      stream:stream
+	      sender:this
 	    });
 	  }
 	}.bind(this)

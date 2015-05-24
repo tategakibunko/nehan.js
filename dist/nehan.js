@@ -10243,9 +10243,9 @@ var PageStream = (function(){
     */
     asyncGet : function(opt){
       Args.merge(this, {
-	onComplete : function(self, time){},
-	onProgress : function(self, tree){},
-	onError : function(self){}
+	onComplete : function(sender, time){},
+	onProgress : function(sender, tree){},
+	onError : function(sender){}
       }, opt || {});
       this._setTimeStart();
       this._asyncGet(opt.wait || 0);
@@ -10339,10 +10339,9 @@ var PageStream = (function(){
 	this._addTree(tree);
 	this.onProgress(this, tree);
       }
-      var self = this;
       reqAnimationFrame(function(){
-	self._asyncGet(wait);
-      });
+	this._asyncGet(wait);
+      }.bind(this));
     },
     _addTree : function(tree){
       this._trees.push(tree);
@@ -17208,14 +17207,14 @@ Nehan.PagedElement = (function(){
 	  }
 	  if(opt.onProgress){
 	    opt.onProgress(tree, {
-	      stream:stream
+	      sender:this
 	    });
 	  }
 	}.bind(this),
 	onComplete : function(stream, time){
 	  if(opt.onComplete){
 	    opt.onComplete(time, {
-	      stream:stream
+	      sender:this
 	    });
 	  }
 	}.bind(this)
