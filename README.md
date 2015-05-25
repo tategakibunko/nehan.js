@@ -24,7 +24,7 @@ Include css, js in the ``<head>``
 ## Application sample
 
 - [Nehan Reader/Paged-media reader for google chrome](https://chrome.google.com/webstore/detail/nehan-reader/bebbekgiffjpgjlgkkhmlgheckolmdcf)
-- [nehan.js playground!!](http://tb.antiscroll.com/static/editor)
+- [nehan.js playground!!](http://tb.antiscroll.com/static/editor/)
 
 ## Screenshot
 
