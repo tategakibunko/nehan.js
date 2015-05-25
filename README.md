@@ -23,7 +23,8 @@ Include css, js in the ``<head>``
 
 ## Application sample
 
-[Nehan Reader/Paged-media reader for google chrome](https://chrome.google.com/webstore/detail/nehan-reader/bebbekgiffjpgjlgkkhmlgheckolmdcf).
+- [Nehan Reader/Paged-media reader for google chrome](https://chrome.google.com/webstore/detail/nehan-reader/bebbekgiffjpgjlgkkhmlgheckolmdcf)
+- [nehan.js playground!!](http://tb.antiscroll.com/static/editor)
 
 ## Screenshot
 
@@ -36,6 +37,8 @@ These screenshots are layout result of [jekyll-nehan](https://github.com/tategak
 <img src="https://raw.github.com/tategakibunko/jekyll-nehan/master/assets/sshot-vert.png" width="300" height="160" />
 
 ## Quick Start 1 (for simple single page layout)
+
+Note that we can use functional value for styles!!
 
 ```javascript
 // NehanPagedElement is available for Nehan.version >= 5.0.3
