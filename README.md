@@ -45,7 +45,7 @@ Note that we can use functional value for styles!!
 var pe = Nehan.createPagedElement();
 
 // before calling setContent, set 'body' style of this paged-element.
-// notice that you can't use camel-cased css property.
+// note that you can't use camel-cased css property.
 pe.setStyle("body", {
   "flow":"lr-tb",
   //"flow":"tb-rl", // for Japanese vertical
@@ -136,14 +136,14 @@ var engine = Nehan.createEngine();
 
 // set engine local style.
 engine.setStyles({
-  // notice that 'body size' = 'page size'.
+  // note that 'body size' = 'page size'.
   "body":{
     "flow":"lr-tb", // document mode horizontal
     //"flow":"tb-rl", // document mode vertical(Japanese)
     "width":"80%", // percent size from parent, 'screen.width' at this case.
     // "width":900, // direct size
     "height":"60%", // percent size from parent, 'screen.height' at this case.
-    "font-size":16, // notice that camel-case(fontSize) is not allowed.
+    "font-size":16, // note that camel-case(fontSize) is not allowed.
     "font-family":"Meiryo",
     // functional property is supported.
     // about prop_context, see src/selector-prop-context.js
@@ -186,7 +186,7 @@ engine.setStyles({
   // you can use regexp as element name like this.
   "header /h[1-6]/":{
     "font-weight":"bold",
-    // notice that directions in nehan.js are defined as 'logical' like this.
+    // note that directions in nehan.js are defined as 'logical' like this.
     "margin":{
       "after":"1.5em" // 'after' is 'bottom' if body.flow = 'lr-tb'('left' if 'tb-rl').
     }
@@ -195,7 +195,7 @@ engine.setStyles({
 ```
 
 ### important notice about css properties in nehan.js
-Notice that camel case is not allowed for css properties.
+Note that camel case is not allowed for css properties.
 
 - "font-size":16 => OK
 - "fontSize":16 => NG
