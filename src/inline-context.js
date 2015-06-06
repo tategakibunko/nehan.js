@@ -14,6 +14,7 @@ var InlineContext = (function(){
     this.maxFontSize = 0;
     this.elements = [];
     this.lineBreak = false; // is line-break included in line?
+    this.lineOver = false; // is line full-filled?
     this.breakAfter = false; // is break-after incuded in line?
     this.justified = false; // is line justified?
   }
@@ -32,6 +33,13 @@ var InlineContext = (function(){
     */
     isJustified : function(){
       return this.justified;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {boolean}
+    */
+    isLineOver: function(){
+      return this.lineOver;
     },
     /**
        @memberof Nehan.InlineContext
@@ -54,6 +62,13 @@ var InlineContext = (function(){
     */
     setLineBreak : function(status){
       this.lineBreak = status;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param status {boolean}
+    */
+    setLineOver : function(status){
+      this.lineOver = status;
     },
     /**
        @memberof Nehan.InlineContext
@@ -178,13 +193,13 @@ var InlineContext = (function(){
       return this.charCount;
     },
     /**
-       justify inline element with next head character, return null if nothing happend, or return new tail char if justified.
+       justify(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if justified.
 
        @memberof Nehan.InlineContext
        @param head {Nehan.Char} - head_char at next line.
        @return {Nehan.Char | null}
     */
-    justify : function(head){
+    justifySweep : function(head){
       var last = this.elements.length - 1;
       var ptr = last;
       var tail = this.elements[ptr] || null;
@@ -230,6 +245,23 @@ var InlineContext = (function(){
 	return head; // return new head
       }
       return null; // justify failed or not required.
+    },
+    /**
+       justify(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
+
+       @memberof Nehan.InlineContext
+       @param head {Nehan.Char}
+       @param head_next {Nehan.Char}
+       @return {bool}
+    */
+    justifyDangling : function(head, head_next){
+      if(!(head instanceof Char) || !head.isHeadNg()){
+	return false;
+      }
+      if(head_next instanceof Char && head_next.isHeadNg()){
+	return false;
+      }
+      return true;
     }
   };
 

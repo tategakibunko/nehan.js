@@ -329,6 +329,15 @@ var Config = {
   justify:true,
 
   /**
+     is dangling justify enable?
+     Note that this property is enabled only when Config.justify is enabled.
+     @memberof Nehan.Config
+     @type {boolean}
+     @default true
+  */
+  danglingJustify:true,
+
+  /**
      max rety count when something troubles.
      @memberof Nehan.Config
      @type {int}
@@ -9992,6 +10001,16 @@ var TokenStream = (function(){
       }
     },
     /**
+       step stream position once if [fn(token)] is true.
+
+       @memberof Nehan.TokenStream
+       @param fn {Function}
+    */
+    skipIf: function(fn){
+      var token = this.peek();
+      return (token && fn(token))? this.get() : null;
+    },
+    /**
        read whole stream source.
 
        @memberof Nehan.TokenStream
@@ -11749,6 +11768,7 @@ var StyleContext = (function(){
       line.content = content;
       line.lineBreak = opt.lineBreak || false;
       line.justified = opt.justified || false;
+      line.lineOver = opt.lineOver || false;
       //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
       return line;
     },
@@ -13523,6 +13543,13 @@ var CursorContext = (function(){
        @memberof Nehan.CursorContext
        @return {boolean}
     */
+    isLineOver : function(){
+      return this.inline.isLineOver();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
     hasInlineSpaceFor : function(measure){
       return this.inline.hasSpaceFor(measure);
     },
@@ -13539,6 +13566,13 @@ var CursorContext = (function(){
     */
     setLineBreak : function(status){
       this.inline.setLineBreak(status);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @param status {boolean}
+    */
+    setLineOver: function(status){
+      this.inline.setLineOver(status);
     },
     /**
        @memberof Nehan.CursorContext
@@ -13633,13 +13667,23 @@ var CursorContext = (function(){
       return this.inline.getCharCount();
     },
     /**
-       justify inline element with next head character, return null if nothing happend, or return new tail char if justified.
+       justify(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if justified.
        @memberof Nehan.CursorContext
        @param head_char {Nehan.Char}
        @return {Nehan.Char | null}
     */
-    justify : function(head_char){
-      return this.inline.justify(head_char);
+    justifySweep : function(head_char){
+      return this.inline.justifySweep(head_char);
+    },
+    /**
+       justify(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
+       @memberof Nehan.CursorContext
+       @param head_char {Nehan.Char}
+       @param head_next {Nehan.Char}
+       @return {Nehan.Char | null}
+    */
+    justifyDangling : function(head_char, head_next){
+      return this.inline.justifyDangling(head_char, head_next);
     }
   };
 
@@ -13772,6 +13816,7 @@ var InlineContext = (function(){
     this.maxFontSize = 0;
     this.elements = [];
     this.lineBreak = false; // is line-break included in line?
+    this.lineOver = false; // is line full-filled?
     this.breakAfter = false; // is break-after incuded in line?
     this.justified = false; // is line justified?
   }
@@ -13790,6 +13835,13 @@ var InlineContext = (function(){
     */
     isJustified : function(){
       return this.justified;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {boolean}
+    */
+    isLineOver: function(){
+      return this.lineOver;
     },
     /**
        @memberof Nehan.InlineContext
@@ -13812,6 +13864,13 @@ var InlineContext = (function(){
     */
     setLineBreak : function(status){
       this.lineBreak = status;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param status {boolean}
+    */
+    setLineOver : function(status){
+      this.lineOver = status;
     },
     /**
        @memberof Nehan.InlineContext
@@ -13936,13 +13995,13 @@ var InlineContext = (function(){
       return this.charCount;
     },
     /**
-       justify inline element with next head character, return null if nothing happend, or return new tail char if justified.
+       justify(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if justified.
 
        @memberof Nehan.InlineContext
        @param head {Nehan.Char} - head_char at next line.
        @return {Nehan.Char | null}
     */
-    justify : function(head){
+    justifySweep : function(head){
       var last = this.elements.length - 1;
       var ptr = last;
       var tail = this.elements[ptr] || null;
@@ -13988,6 +14047,23 @@ var InlineContext = (function(){
 	return head; // return new head
       }
       return null; // justify failed or not required.
+    },
+    /**
+       justify(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
+
+       @memberof Nehan.InlineContext
+       @param head {Nehan.Char}
+       @param head_next {Nehan.Char}
+       @return {bool}
+    */
+    justifyDangling : function(head, head_next){
+      if(!(head instanceof Char) || !head.isHeadNg()){
+	return false;
+      }
+      if(head_next instanceof Char && head_next.isHeadNg()){
+	return false;
+      }
+      return true;
     }
   };
 
@@ -14430,7 +14506,7 @@ var BlockGenerator = (function(){
   BlockGenerator.prototype.popCache = function(context){
     var cache = LayoutGenerator.prototype.popCache.call(this);
 
-    if(cache && cache.display === "inline"){
+    if(cache && cache.isLine()){
       // restore cached line with correct line no
       if(context.getBlockLineNo() === 0){
 	cache.lineNo = 0;
@@ -14627,10 +14703,20 @@ var InlineGenerator = (function(){
 	break;
       }
       this._addElement(context, element, measure);
-      if(!context.hasInlineSpaceFor(1) || element.lineBreak){
-	context.setLineBreak(element.lineBreak || false);
+      /*
+      if(!context.hasInlineSpaceFor(1)){
+	context.setLineOver(true);
+      }*/
+      if(element.lineBreak){
+	context.setLineBreak(true);
 	break;
       }
+    }
+    // if element is the last full-filled line, skip continuous <br>.
+    if(element && element.lineOver && this._child && !this._child.hasNext()){
+      this.stream.skipIf(function(token){
+	return (token instanceof Tag && token.getName() === "br");
+      });
     }
     return this._createOutput(context);
   };
@@ -14881,11 +14967,13 @@ var TextGenerator = (function(){
       if(!context.hasInlineSpaceFor(measure)){
 	//console.info("!> text overflow:%o(%s, m=%d)", element, element.data, measure);
 	this.pushCache(element);
+	context.setLineOver(true);
 	break;
       }
       this._addElement(context, element, measure);
       //console.log("cur measure:%d", context.inline.curMeasure);
       if(!context.hasInlineSpaceFor(1)){
+	context.setLineOver(true);
 	break;
       }
     }
@@ -14909,6 +14997,7 @@ var TextGenerator = (function(){
     }
     var line = this.style.createTextBlock({
       lineBreak:context.hasLineBreak(), // is line break included in?
+      lineOver:context.isLineOver(), // is line full-filled?
       breakAfter:context.hasBreakAfter(), // is break after included in?
       justified:context.isJustified(), // is line justified?
       measure:context.getInlineCurMeasure(), // actual measure
@@ -14979,10 +15068,26 @@ var TextGenerator = (function(){
     if(old_head === null){
       return;
     }
-    var new_head = context.justify(old_head); // if justified, new_head token is returned.
+    // justify by dangling.
+    var head_next = this.stream.peek();
+    head_next = (head_next && old_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
+    if(Config.danglingJustify && context.justifyDangling(old_head, head_next) === true){
+      this._addElement(context, old_head, 0); // push tail as zero element
+      if(head_next){
+	this.stream.setPos(head_next.pos);
+      } else {
+	this.stream.get();
+      }
+      context.setLineBreak(true);
+      context.setJustified(true);
+      this.clearCache();
+      return;
+    }
+    // justify by sweep.
+    var new_head = context.justifySweep(old_head, head_next); // if justified, new_head token is returned.
     if(new_head){
       //console.log("old_head:%o, new_head:%o", old_head, new_head);
-      var justified_measure = (new_head.pos - old_head.pos) * this.style.getFontSize();
+      var justified_measure = (new_head.pos - old_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
       context.addInlineMeasure(justified_measure);
       //console.log("justify and new head:%o", new_head);
       this.stream.setPos(new_head.pos);

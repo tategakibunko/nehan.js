@@ -36,6 +36,15 @@ var Config = {
   justify:true,
 
   /**
+     is dangling justify enable?
+     Note that this property is enabled only when Config.justify is enabled.
+     @memberof Nehan.Config
+     @type {boolean}
+     @default true
+  */
+  danglingJustify:true,
+
+  /**
      max rety count when something troubles.
      @memberof Nehan.Config
      @type {int}

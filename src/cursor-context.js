@@ -95,6 +95,13 @@ var CursorContext = (function(){
        @memberof Nehan.CursorContext
        @return {boolean}
     */
+    isLineOver : function(){
+      return this.inline.isLineOver();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
     hasInlineSpaceFor : function(measure){
       return this.inline.hasSpaceFor(measure);
     },
@@ -111,6 +118,13 @@ var CursorContext = (function(){
     */
     setLineBreak : function(status){
       this.inline.setLineBreak(status);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @param status {boolean}
+    */
+    setLineOver: function(status){
+      this.inline.setLineOver(status);
     },
     /**
        @memberof Nehan.CursorContext
@@ -205,13 +219,23 @@ var CursorContext = (function(){
       return this.inline.getCharCount();
     },
     /**
-       justify inline element with next head character, return null if nothing happend, or return new tail char if justified.
+       justify(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if justified.
        @memberof Nehan.CursorContext
        @param head_char {Nehan.Char}
        @return {Nehan.Char | null}
     */
-    justify : function(head_char){
-      return this.inline.justify(head_char);
+    justifySweep : function(head_char){
+      return this.inline.justifySweep(head_char);
+    },
+    /**
+       justify(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
+       @memberof Nehan.CursorContext
+       @param head_char {Nehan.Char}
+       @param head_next {Nehan.Char}
+       @return {Nehan.Char | null}
+    */
+    justifyDangling : function(head_char, head_next){
+      return this.inline.justifyDangling(head_char, head_next);
     }
   };
 

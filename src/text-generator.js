@@ -61,11 +61,13 @@ var TextGenerator = (function(){
       if(!context.hasInlineSpaceFor(measure)){
 	//console.info("!> text overflow:%o(%s, m=%d)", element, element.data, measure);
 	this.pushCache(element);
+	context.setLineOver(true);
 	break;
       }
       this._addElement(context, element, measure);
       //console.log("cur measure:%d", context.inline.curMeasure);
       if(!context.hasInlineSpaceFor(1)){
+	context.setLineOver(true);
 	break;
       }
     }
@@ -89,6 +91,7 @@ var TextGenerator = (function(){
     }
     var line = this.style.createTextBlock({
       lineBreak:context.hasLineBreak(), // is line break included in?
+      lineOver:context.isLineOver(), // is line full-filled?
       breakAfter:context.hasBreakAfter(), // is break after included in?
       justified:context.isJustified(), // is line justified?
       measure:context.getInlineCurMeasure(), // actual measure
@@ -159,10 +162,26 @@ var TextGenerator = (function(){
     if(old_head === null){
       return;
     }
-    var new_head = context.justify(old_head); // if justified, new_head token is returned.
+    // justify by dangling.
+    var head_next = this.stream.peek();
+    head_next = (head_next && old_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
+    if(Config.danglingJustify && context.justifyDangling(old_head, head_next) === true){
+      this._addElement(context, old_head, 0); // push tail as zero element
+      if(head_next){
+	this.stream.setPos(head_next.pos);
+      } else {
+	this.stream.get();
+      }
+      context.setLineBreak(true);
+      context.setJustified(true);
+      this.clearCache();
+      return;
+    }
+    // justify by sweep.
+    var new_head = context.justifySweep(old_head, head_next); // if justified, new_head token is returned.
     if(new_head){
       //console.log("old_head:%o, new_head:%o", old_head, new_head);
-      var justified_measure = (new_head.pos - old_head.pos) * this.style.getFontSize();
+      var justified_measure = (new_head.pos - old_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
       context.addInlineMeasure(justified_measure);
       //console.log("justify and new head:%o", new_head);
       this.stream.setPos(new_head.pos);

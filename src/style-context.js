@@ -658,6 +658,7 @@ var StyleContext = (function(){
       line.content = content;
       line.lineBreak = opt.lineBreak || false;
       line.justified = opt.justified || false;
+      line.lineOver = opt.lineOver || false;
       //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
       return line;
     },

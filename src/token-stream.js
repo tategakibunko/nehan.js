@@ -216,6 +216,16 @@ var TokenStream = (function(){
       }
     },
     /**
+       step stream position once if [fn(token)] is true.
+
+       @memberof Nehan.TokenStream
+       @param fn {Function}
+    */
+    skipIf: function(fn){
+      var token = this.peek();
+      return (token && fn(token))? this.get() : null;
+    },
+    /**
        read whole stream source.
 
        @memberof Nehan.TokenStream

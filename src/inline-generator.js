@@ -49,10 +49,20 @@ var InlineGenerator = (function(){
 	break;
       }
       this._addElement(context, element, measure);
-      if(!context.hasInlineSpaceFor(1) || element.lineBreak){
-	context.setLineBreak(element.lineBreak || false);
+      /*
+      if(!context.hasInlineSpaceFor(1)){
+	context.setLineOver(true);
+      }*/
+      if(element.lineBreak){
+	context.setLineBreak(true);
 	break;
       }
+    }
+    // if element is the last full-filled line, skip continuous <br>.
+    if(element && element.lineOver && this._child && !this._child.hasNext()){
+      this.stream.skipIf(function(token){
+	return (token instanceof Tag && token.getName() === "br");
+      });
     }
     return this._createOutput(context);
   };

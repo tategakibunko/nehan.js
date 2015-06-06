@@ -58,7 +58,7 @@ var BlockGenerator = (function(){
   BlockGenerator.prototype.popCache = function(context){
     var cache = LayoutGenerator.prototype.popCache.call(this);
 
-    if(cache && cache.display === "inline"){
+    if(cache && cache.isLine()){
       // restore cached line with correct line no
       if(context.getBlockLineNo() === 0){
 	cache.lineNo = 0;
