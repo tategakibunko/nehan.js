@@ -4727,7 +4727,7 @@ var Char = (function(){
     */
     getCssVertDashIE : function(line){
       var css = {};
-      css["height"] = "0.9em"; // eliminate space between dash for IE.
+      css["height"] = "0.84em"; // eliminate space between dash for IE.
       return css;
     },
     /**
