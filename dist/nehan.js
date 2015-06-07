@@ -10412,8 +10412,8 @@ var PageStream = (function(){
 
 /**
  * kerning utility module<br>
- * notice that in nehan.js, charactors that can be shurinked are already shurinked in it's body size calculation.<br>
- * so this module only 'add' the space to start/end direction, not requiered to be shurinked.
+ * Note that charactors that can be kerned are already kerned in nehan.js.<br>
+ * So this module only 'add' the space to start/end direction.
 
  @namespace Nehan.Kerning
 */
