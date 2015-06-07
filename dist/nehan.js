@@ -10457,7 +10457,7 @@ var Kerning = {
     if(prev_text === null){
       return 0.5;
     }
-    if(Token.isChar(prev_text) && prev_text.isKakkoStart()){
+    if(prev_text instanceof Char && prev_text.isKakkoStart()){
       return 0;
     }
     return 0.5;
@@ -10472,11 +10472,15 @@ var Kerning = {
   // [example:do nothing]
   //   )) => ))
   //   )} => )}
+  //   ,( => ,(
   _getTextSpaceEnd : function(cur_char, next_text){
     if(next_text === null){
       return 0.5;
     }
-    if(Token.isChar(next_text) && (next_text.isKakkoEnd() || next_text.isKutenTouten())){
+    if(next_text instanceof Char && (cur_char.isKutenTouten() && next_text.isKakkoStart())){
+      return 0;
+    }
+    if(next_text instanceof Char && (next_text.isKakkoEnd() || next_text.isKutenTouten())){
       return 0;
     }
     return 0.5;
