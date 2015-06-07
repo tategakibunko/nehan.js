@@ -112,6 +112,15 @@ var Char = (function(){
        @memberof Nehan.Char
        @return {Object}
     */
+    getCssVertDashIE : function(line){
+      var css = {};
+      css["height"] = "0.9em"; // eliminate space between dash for IE.
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
     getCssVertEmphaText : function(line){
       var css = {}, font_size = line.style.getFontSize();
       css.display = "inline-block";
@@ -551,6 +560,13 @@ var Char = (function(){
      */
     isKerningChar : function(){
       return this.isZenkaku() && (this.isKutenTouten() || this.isKakko());
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+    */
+    isDash : function(){
+      return this.cnv === "&#8212;";
     },
     /**
        @memberof Nehan.Char

@@ -21,6 +21,7 @@ o Config.danglingJustify is added.
 o Add Display.spaceSizeRate, to support various kind of space strictly.
 * Fix float bug in horizontal mode(see "float" at example/catalog5.html).
 * Fix baseline problem in many case.
+* Fix spacing between full-size dash for IE.
 ! Remove LexingRule::addSingleTagByRex.
 ! Not throw exception if page_no not found at PagedElement::setPage(page_no).
 ! Fix page-break bug, and delete BreakAfterGenerator.

@@ -102,9 +102,11 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalRotateCharTransform = function(line, chr){
+    var css = (Nehan.Env.client.isIE() && chr.isDash())? chr.getCssVertDashIE() : {};
     return this._createElement("div", {
       content:chr.getData(),
-      className:"nehan-rotate-90"
+      className:"nehan-rotate-90",
+      css:css
     });
   };
 
