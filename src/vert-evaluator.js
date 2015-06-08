@@ -149,6 +149,8 @@ var VertEvaluator = (function(){
       return this._evalCharLetterSpacing(line, chr);
     } else if(chr.isSingleHalfChar()){
       return this._evalCharSingleHalfChar(line, chr);
+    } else if(chr.isHalfKana()){
+      return this._evalCharHalfKana(line, chr);
     }
     return this._evalCharWithBr(line, chr);
   };
@@ -170,6 +172,13 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:chr.getData(),
       css:chr.getCssVertSingleHalfChar(line)
+    });
+  };
+
+  VertEvaluator.prototype._evalCharHalfKana = function(line, chr){
+    return this._createElement("div", {
+      content:chr.getData(),
+      css:chr.getCssVertHalfKana(line)
     });
   };
 

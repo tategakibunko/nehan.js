@@ -239,6 +239,13 @@ var TokenStream = (function(){
 	if(token === null){
 	  break;
 	}
+	if(token instanceof Char && token.isLigature()){
+	  var last = List.last(this.tokens);
+	  if(last instanceof Char){
+	    last.setLigature(token.data);
+	    continue;
+	  }
+	}
 	if(filter === null){
 	  this.tokens.push(token);
 	} else if(filter && filter(token)){

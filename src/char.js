@@ -23,7 +23,10 @@ var Char = (function(){
   var __small_kana = ["\u3041","\u3043","\u3045","\u3047","\u3049","\u3063","\u3083","\u3085","\u3087","\u308e","\u30a1","\u30a3","\u30a5","\u30a7","\u30a9","\u30f5","\u30f6","\u30c3","\u30e3","\u30e5","\u30e7","\u30ee"];
   var __head_ng = ["\uff09","\x5c","\x29","\u300d","\u3011","\u3015","\uff3d","\x5c","\x5d","\u3002","\u300f","\uff1e","\u3009","\u300b","\u3001","\uff0e","\x5c","\x2e","\x2c","\u201d","\u301f"];
   var __tail_ng = ["\uff08","\x5c","\x28","\u300c","\u3010","\uff3b","\u3014","\x5c","\x5b","\u300e","\uff1c","\u3008","\u300a","\u201c","\u301d"];
+  var __voiced_mark = ["\u3099", "\u309b", "\u309a", "\u309c", "\uff9e", "\uff9f"];
   var __rex_half_char = /[\w!\.\?\/:#;"',]/;
+  var __rex_half_kana = /[\uff65-\uff9f]/;
+  var __rex_half_kana_small = /[\uff67-\uff6f]/;
 
   Char.prototype = {
     /**
@@ -31,7 +34,8 @@ var Char = (function(){
        @return {string}
     */
     getData : function(){
-      return this.cnv || this.data;
+      var data = this.cnv || this.data;
+      return data + (this.ligature || "");
     },
     /**
        @memberof Nehan.Char
@@ -93,6 +97,21 @@ var Char = (function(){
 	css["padding-left"] = "0.25em"; // base aligned line
       } else {
 	css["text-align"] = "center"; // normal text line(all text with same font-size)
+      }
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
+    getCssVertHalfKana : function(line){
+      var css = {};
+      css["text-align"] = "center";
+      if(this.hasLigature()){
+	css["padding-left"] = "0.25em";
+      } else if(this.isHalfKanaSmall()){
+	css["padding-left"] = "0.25em";
+	css["margin-top"] = "-0.25em";
       }
       return css;
     },
@@ -472,6 +491,13 @@ var Char = (function(){
     },
     /**
        @memberof Nehan.Char
+       @param ligature {String}
+    */
+    setLigature : function(ligature){
+      this.ligature = ligature;
+    },
+    /**
+       @memberof Nehan.Char
        @return {boolean}
      */
     isNewLine : function(){
@@ -679,6 +705,34 @@ var Char = (function(){
      */
     isHankaku : function(){
       return !this.isZenkaku(this.data);
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
+    isHalfKana : function(){
+      return __rex_half_kana.test(this.data);
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
+    isHalfKanaSmall : function(){
+      return __rex_half_kana_small.test(this.data);
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
+    isLigature : function(){
+      return List.mem(__voiced_mark, this.data);
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
+    hasLigature : function(){
+      return (typeof this.ligature !== "undefined");
     }
   };
 

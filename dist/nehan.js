@@ -32,7 +32,7 @@
    @namespace Nehan
 */
 var Nehan = Nehan || {};
-Nehan.version = "5.1.0";
+Nehan.version = "5.1.1";
 
 Nehan.Client = (function(){
   /**
@@ -4636,7 +4636,10 @@ var Char = (function(){
   var __small_kana = ["\u3041","\u3043","\u3045","\u3047","\u3049","\u3063","\u3083","\u3085","\u3087","\u308e","\u30a1","\u30a3","\u30a5","\u30a7","\u30a9","\u30f5","\u30f6","\u30c3","\u30e3","\u30e5","\u30e7","\u30ee"];
   var __head_ng = ["\uff09","\x5c","\x29","\u300d","\u3011","\u3015","\uff3d","\x5c","\x5d","\u3002","\u300f","\uff1e","\u3009","\u300b","\u3001","\uff0e","\x5c","\x2e","\x2c","\u201d","\u301f"];
   var __tail_ng = ["\uff08","\x5c","\x28","\u300c","\u3010","\uff3b","\u3014","\x5c","\x5b","\u300e","\uff1c","\u3008","\u300a","\u201c","\u301d"];
+  var __voiced_mark = ["\u3099", "\u309b", "\u309a", "\u309c", "\uff9e", "\uff9f"];
   var __rex_half_char = /[\w!\.\?\/:#;"',]/;
+  var __rex_half_kana = /[\uff65-\uff9f]/;
+  var __rex_half_kana_small = /[\uff67-\uff6f]/;
 
   Char.prototype = {
     /**
@@ -4644,7 +4647,8 @@ var Char = (function(){
        @return {string}
     */
     getData : function(){
-      return this.cnv || this.data;
+      var data = this.cnv || this.data;
+      return data + (this.ligature || "");
     },
     /**
        @memberof Nehan.Char
@@ -4706,6 +4710,21 @@ var Char = (function(){
 	css["padding-left"] = "0.25em"; // base aligned line
       } else {
 	css["text-align"] = "center"; // normal text line(all text with same font-size)
+      }
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
+    getCssVertHalfKana : function(line){
+      var css = {};
+      css["text-align"] = "center";
+      if(this.hasLigature()){
+	css["padding-left"] = "0.25em";
+      } else if(this.isHalfKanaSmall()){
+	css["padding-left"] = "0.25em";
+	css["margin-top"] = "-0.25em";
       }
       return css;
     },
@@ -5085,6 +5104,13 @@ var Char = (function(){
     },
     /**
        @memberof Nehan.Char
+       @param ligature {String}
+    */
+    setLigature : function(ligature){
+      this.ligature = ligature;
+    },
+    /**
+       @memberof Nehan.Char
        @return {boolean}
      */
     isNewLine : function(){
@@ -5292,6 +5318,34 @@ var Char = (function(){
      */
     isHankaku : function(){
       return !this.isZenkaku(this.data);
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
+    isHalfKana : function(){
+      return __rex_half_kana.test(this.data);
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
+    isHalfKanaSmall : function(){
+      return __rex_half_kana_small.test(this.data);
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
+    isLigature : function(){
+      return List.mem(__voiced_mark, this.data);
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
+    hasLigature : function(){
+      return (typeof this.ligature !== "undefined");
     }
   };
 
@@ -10039,6 +10093,13 @@ var TokenStream = (function(){
 	var token = this.lexer.get();
 	if(token === null){
 	  break;
+	}
+	if(token instanceof Char && token.isLigature()){
+	  var last = List.last(this.tokens);
+	  if(last instanceof Char){
+	    last.setLigature(token.data);
+	    continue;
+	  }
 	}
 	if(filter === null){
 	  this.tokens.push(token);
@@ -16722,6 +16783,8 @@ var VertEvaluator = (function(){
       return this._evalCharLetterSpacing(line, chr);
     } else if(chr.isSingleHalfChar()){
       return this._evalCharSingleHalfChar(line, chr);
+    } else if(chr.isHalfKana()){
+      return this._evalCharHalfKana(line, chr);
     }
     return this._evalCharWithBr(line, chr);
   };
@@ -16743,6 +16806,13 @@ var VertEvaluator = (function(){
     return this._createElement("div", {
       content:chr.getData(),
       css:chr.getCssVertSingleHalfChar(line)
+    });
+  };
+
+  VertEvaluator.prototype._evalCharHalfKana = function(line, chr){
+    return this._createElement("div", {
+      content:chr.getData(),
+      css:chr.getCssVertHalfKana(line)
     });
   };
 
@@ -16905,12 +16975,12 @@ var HoriEvaluator = (function(){
       return this._evalTabChar(line, chr);
     }
     if(chr.isCharRef()){
-      return document.createTextNode(Html.unescape(chr.data));
+      return document.createTextNode(Html.unescape(chr.getData()));
     }
     if(chr.isKerningChar()){
       return this._evalKerningChar(line, chr);
     }
-    return document.createTextNode(chr.data);
+    return document.createTextNode(chr.getData());
   };
 
   HoriEvaluator.prototype._evalEmpha = function(line, chr){
@@ -16926,7 +16996,7 @@ var HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._evalEmphaSrc = function(line, chr){
     return this._createElement("div", {
-      content:chr.data,
+      content:chr.getData(),
       className:"nehan-empha-src",
       css:chr.getCssHoriEmphaSrc(line)
     });
@@ -16945,7 +17015,7 @@ var HoriEvaluator = (function(){
     if(chr.isKakkoStart()){
       css["margin-left"] = "-0.5em";
       return this._createElement("span", {
-	content:chr.data,
+	content:chr.getData(),
 	className:"nehan-char-kakko-start",
 	css:css
       });
@@ -16953,7 +17023,7 @@ var HoriEvaluator = (function(){
     if(chr.isKakkoEnd()){
       css["margin-right"] = "-0.5em";
       return this._createElement("span", {
-	content:chr.data,
+	content:chr.getData(),
 	className:"nehan-char-kakko-end",
 	css:css
       });
@@ -16961,17 +17031,17 @@ var HoriEvaluator = (function(){
     if(chr.isKutenTouten()){
       css["margin-right"] = "-0.5em";
       return this._createElement("span", {
-	content:chr.data,
+	content:chr.getData(),
 	className:"nehan-char-kuto",
 	css:css
       });
     }
-    return document.createTextNode(chr.data);
+    return document.createTextNode(chr.getData());
   };
 
   HoriEvaluator.prototype._evalPaddingChar = function(line, chr){
     return this._createElement("span", {
-      content:chr.data,
+      content:chr.getData(),
       css:chr.getCssPadding(line)
     });
   };

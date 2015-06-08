@@ -6,7 +6,11 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.1.0 2015/??/??
+version 5.1.1 2015/??/??
+========================
+* Fix half size kana position.
+
+version 5.1.0 2015/06/08
 ========================
 o Add new lexer and generator(TextLexer, TextGenerator), so now inline element and text node are devided into different tree.
 o Support last-child, last-of-type detection.

@@ -74,12 +74,12 @@ var HoriEvaluator = (function(){
       return this._evalTabChar(line, chr);
     }
     if(chr.isCharRef()){
-      return document.createTextNode(Html.unescape(chr.data));
+      return document.createTextNode(Html.unescape(chr.getData()));
     }
     if(chr.isKerningChar()){
       return this._evalKerningChar(line, chr);
     }
-    return document.createTextNode(chr.data);
+    return document.createTextNode(chr.getData());
   };
 
   HoriEvaluator.prototype._evalEmpha = function(line, chr){
@@ -95,7 +95,7 @@ var HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._evalEmphaSrc = function(line, chr){
     return this._createElement("div", {
-      content:chr.data,
+      content:chr.getData(),
       className:"nehan-empha-src",
       css:chr.getCssHoriEmphaSrc(line)
     });
@@ -114,7 +114,7 @@ var HoriEvaluator = (function(){
     if(chr.isKakkoStart()){
       css["margin-left"] = "-0.5em";
       return this._createElement("span", {
-	content:chr.data,
+	content:chr.getData(),
 	className:"nehan-char-kakko-start",
 	css:css
       });
@@ -122,7 +122,7 @@ var HoriEvaluator = (function(){
     if(chr.isKakkoEnd()){
       css["margin-right"] = "-0.5em";
       return this._createElement("span", {
-	content:chr.data,
+	content:chr.getData(),
 	className:"nehan-char-kakko-end",
 	css:css
       });
@@ -130,17 +130,17 @@ var HoriEvaluator = (function(){
     if(chr.isKutenTouten()){
       css["margin-right"] = "-0.5em";
       return this._createElement("span", {
-	content:chr.data,
+	content:chr.getData(),
 	className:"nehan-char-kuto",
 	css:css
       });
     }
-    return document.createTextNode(chr.data);
+    return document.createTextNode(chr.getData());
   };
 
   HoriEvaluator.prototype._evalPaddingChar = function(line, chr){
     return this._createElement("span", {
-      content:chr.data,
+      content:chr.getData(),
       css:chr.getCssPadding(line)
     });
   };
