@@ -18,52 +18,18 @@
       <button id="prev">prev</button>
     </div>
     <div id="result"></div>
-    <div id="outline"></div>
 
     <!-- scripts -->
     <script type="text/javascript" src="../dist/nehan.js"></script>
     <script type="text/javascript">
-      var result = document.getElementById("result");
-      var outline = document.getElementById("outline");
-      var pe = Nehan.createPagedElement();
-      var content = [
-        "<h1>hello, nehan.js</h1>",
-        "<p>this is sample entry</p>",
-        "<ol>",
-	"<li>list child</li>",
-	"<li>list child</li>",
-	"<li>list child</li>",
-	"<li>list child</li>",
-	"<li>list child</li>",
-	"<li>list child</li>",
-	"<li>list child</li>",
-	"<li>list child</li>",
-	"<li>list child</li>",
-	"<li>list child</li>",
-	"<li>list child</li>",
-	"<li>list child</li>",
-	"</ol>"
-      ].join("\n");
-
-      pe.setStyle("body", {
+      var pe = Nehan.createPagedElement().setStyle("body", {
         "flow":"tb-rl",
         "color":"#505050",
         "background-color":"#f0f0f0",
         "width":640,
         "height":480,
         "font-size":20
-      });
-
-      pe.setStyle("h1", {
-        "color":"darkred"
-      });
-
-      pe.setContent(content, {
-        onComplete : function(time){
-          // console.log("finish:%fmsec", time);
-          outline.appendChild(pe.createOutlineElement());
-        }
-      });
+      }).setContent("<h1>hello, nehan.js</h1>");
 
       document.getElementById("next").onclick = function(){
         pe.setNextPage();
@@ -73,7 +39,7 @@
         pe.setPrevPage();
       };
 
-      result.appendChild(pe.getElement());
+      document.getElementById("result").appendChild(pe.getElement());
     </script>
   </body>
 </html>
