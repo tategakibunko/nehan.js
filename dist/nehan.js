@@ -10311,14 +10311,20 @@ var PageStream = (function(){
       this.generator.setTerminate(status);
     },
     /**
-       calculate all pages by blocking loop.
+       calculate pages by blocking loop until max_page_count if defined.
 
        @memberof Nehan.PageStream
+       @param max_page_count {int}
+       return {float} ellapsed time
     */
-    syncGet : function(){
+    syncGet : function(max_page_count){
       var page_no = 0;
+      max_page_count = max_page_count || -1;
       this._setTimeStart();
       while(this.hasNext()){
+	if(max_page_count >= 0 && page_no >= max_page_count){
+	  break;
+	}
 	if(!this.hasPage(page_no)){
 	  var tree = this._yield();
 	  if(tree){
@@ -10337,15 +10343,18 @@ var PageStream = (function(){
        @param opt.onProgress {Function} - fun {@link Nehan.PageStream} -> {@link Nehan.Box} -> ()
        @param opt.onComplete {Function} - fun {@link Nehan.PageStream} -> ellapse_time:float -> ()
        @param opt.onError {Function} - fun {@link Nehan.PageStream} -> ()
+       @param opt.maxPageCount {int} upper bound of page count
     */
     asyncGet : function(opt){
+      var wait = opt.wait || 0;
+      var max_page_count = opt.maxPageCount || -1;
       Args.merge(this, {
 	onComplete : function(sender, time){},
 	onProgress : function(sender, tree){},
 	onError : function(sender){}
       }, opt || {});
       this._setTimeStart();
-      this._asyncGet(opt.wait || 0);
+      this._asyncGet(wait, max_page_count);
     },
     /**
        @memberof Nehan.PageStream
@@ -10424,8 +10433,8 @@ var PageStream = (function(){
     _getTimeElapsed : function(){
       return (new Date()).getTime() - this._timeStart;
     },
-    _asyncGet : function(wait){
-      if(!this.generator.hasNext()){
+    _asyncGet : function(wait, max_page_count){
+      if(!this.generator.hasNext() || (max_page_count >= 0 && this._trees.length >= max_page_count)){
 	this.onComplete(this, this._getTimeElapsed());
 	return;
       }
@@ -10437,7 +10446,7 @@ var PageStream = (function(){
 	this.onProgress(this, tree);
       }
       reqAnimationFrame(function(){
-	this._asyncGet(wait);
+	this._asyncGet(wait, max_page_count);
       }.bind(this));
     },
     _addTree : function(tree){
@@ -17337,6 +17346,7 @@ Nehan.PagedElement = (function(){
        @param opt {Object} - optinal argument
        @param opt.onProgress {Function} - fun tree -> ()
        @param opt.onComplete {Function} - fun time -> ()
+       @param opt.maxPageCount {int} - upper bound of page count
        @example
        * paged_element.setContent("<h1>hello, nehan.js!!</h1>", {
        *   onProgress:function(tree){
@@ -17361,6 +17371,7 @@ Nehan.PagedElement = (function(){
        @param opt {Object} - optinal argument
        @param opt.onProgress {Function} - fun tree ctx -> ()
        @param opt.onComplete {Function} - fun time ctx -> ()
+       @param opt.maxPageCount {int} - upper bound of page count
     */
     addContent : function(content, opt){
       this._pageStream.addText(content);
@@ -17399,6 +17410,7 @@ Nehan.PagedElement = (function(){
     },
     _asyncGet : function(opt){
       this._pageStream.asyncGet({
+	maxPageCount:(opt.maxPageCount || -1),
 	onProgress : function(sender, tree){
 	  if(tree.pageNo === 0){
 	    this.setPage(tree.pageNo);
