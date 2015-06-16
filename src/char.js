@@ -142,9 +142,11 @@ var Char = (function(){
     */
     getCssVertEmphaText : function(line){
       var css = {}, font_size = line.style.getFontSize();
+      css["font-size"] = "0.5em";
       css.display = "inline-block";
       css.width = font_size + "px";
       css.height = font_size + "px";
+      css["position"] = "absolute";
       return css;
     },
     /**
@@ -162,7 +164,12 @@ var Char = (function(){
     */
     getCssHoriEmphaText : function(line){
       var css = {};
+      css.display = "inline-block";
+      css.width = "1em";
+      css.height = "1em";
+      css["padding-left"] = "0.5em";
       css["line-height"] = "1em";
+      css["font-size"] = "0.5em";
       return css;
     },
     /**

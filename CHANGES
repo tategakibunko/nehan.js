@@ -9,6 +9,7 @@ Mark "!": change that can break compatibility with older version
 version 5.1.1 2015/??/??
 ========================
 o Add new parameter maxPageCount to PageStream::syncGet, PageStream.asyncGet, PagedElement::asyncGet.
+* Fix emphasis size and position.
 * Fix half size kana position.
 
 version 5.1.0 2015/06/08
