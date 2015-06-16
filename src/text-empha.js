@@ -51,6 +51,7 @@ var TextEmpha = (function(){
       css["text-align"] = "left";
       css.width = this.getExtent(font_size) + "px";
       css.height = chr.getAdvance(line.style.flow, line.style.letterSpacing || 0) + "px";
+      css.position = "relative";
       return css;
     },
     /**
