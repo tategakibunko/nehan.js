@@ -133,7 +133,9 @@ span.token.lf::before {
   .nehan-reader .pager .right {
     margin-right: 1em; }
 .nehan-reader .screen {
-  padding: 10px;
-  background: #efefef; }
+  width: 420px;
+  height: 330px;
+  background: #efefef;
+  padding: 10px 10px 15px; }
 
 /*# sourceMappingURL=main.css.map */

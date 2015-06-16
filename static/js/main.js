@@ -41,13 +41,14 @@ Ndoc.Settings = {
 
 
 
-Nehan.setStyle("body", {
-  width:"90%",
-  height:function(){
-    return Math.floor(screen.height * 55 / 100);
+Nehan.setStyles({
+  body:{
+    width:"90%",
+    height:function(){
+      return Math.floor(screen.height * 55 / 100);
+    }
   }
 });
-
 
 Ndoc.Reader = Vue.extend({
   template: "#tmpl-reader",
@@ -113,7 +114,7 @@ Ndoc.Reader = Vue.extend({
       });
       $(this.$$.screen).empty().css({
 	width:(this.width + 20),
-	height:(this.height + 20)
+	height:(this.height + 25)
       }).append(this.pages.getElement());
     },
     isVert: function(){
