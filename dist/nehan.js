@@ -771,18 +771,12 @@ var LexingRule = (function(){
     ex2. {float:"start"} // => {float:"left"}.
     ex3. {measure:"100px", extent:"50px"} // => {width:"100px", height:"50px"}
 
-  3. all class names must start with "nehan-" prefix
-  --------------------------------------------------
-
-     to avoid css collision that is not layouted by nehan.js,
-     our css names must be prefixed by "nehan-".
-
-  4. about functional css value
+  3. about functional css value
   ------------------------------
 
   you can use functional css value in each css property.
 
-  (4.1) callback argument 'context' in functional css value is 'SelectorPropContext'
+  (3.1) callback argument 'context' in functional css value is 'SelectorPropContext'
 
   // [example]
   // change backgroiund-color by child index.
@@ -792,14 +786,14 @@ var LexingRule = (function(){
     }
   }
 
-  (4.2) callback argument 'context' in 'onload' is 'SelectorContext'
+  (3.2) callback argument 'context' in 'onload' is 'SelectorContext'
 
   this context is 'extended class' of 'SelectorPropContext', with some extra interfaces
   that can touch css object, because 'onload' is called after all css of matched elements are loaded.
 
   // [example]
   // force image metrics to square sizing if width and height is not same.
-  ".nehan-must-be-squares img":{
+  ".must-be-squares img":{
     "onload":function(context){
       var width = context.getCssAttr("width", 100);
       var height = context.getCssAttr("height", 100);
@@ -810,10 +804,10 @@ var LexingRule = (function(){
     }
   }
 
- 5. special properties in nehan.js
+ 4. special properties in nehan.js
   ----------------------------------
 
-  (5.1) box-sizing:[content-box | border-box | margin-box(default)]
+  (4.1) box-sizing:[content-box | border-box | margin-box(default)]
 
   In box-sizing, 'margin-box' is special value in nehan.js, and is box-sizing default value.
   In margin-box, even if margin is included in box-size.
@@ -823,7 +817,7 @@ var LexingRule = (function(){
   So if you represent margin/border/padding(called in edge in nehan.js),
   the only way is 'eliminating content space'.
 
-  (5.2) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
+  (4.2) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
 
   This property represent document-mode in nehan.js.
 
@@ -2359,7 +2353,7 @@ var Css = {
      * Css.addNehanPrefix("foo"); // "nehan-foo"
   */
   addNehanPrefix : function(name){
-    return "nehan-" + name;
+    return (name.indexOf("nehan-") === 0)? name : "nehan-" + name;
   },
   /**
      @memberof Nehan.Css
@@ -3874,9 +3868,9 @@ var TagAttrLexer = (function(){
      @constructor
      @param src {String}
      @description <pre>
-     * lexer src is attribute parts of original tag source.
+     * [src] is attribute string of original tag source.
      * so if tag source is "<div class='nehan-float-start'>",
-     * then lexer src is "class='nehan-float-start'".
+     * then [src] is "class='nehan-float-start'".
      </pre>
   */
   function TagAttrLexer(src){
@@ -4034,16 +4028,11 @@ var TagAttrs = (function(){
       return List.exists(this.classes, Closure.eq(klass));
     },
     /**
-     * add class name, but note that all css classes is force added prefix 'nehan-'.<br>
-     * that is, if you add class "foo", it's registered as "nehan-foo"<br>
-     * to avoid external css classes defined in client browser window.
-
        @memberof Nehan.TagAttrs
        @param klass {String} - css class name
        @return {Array.<String>} current css classes
     */
     addClass : function(klass){
-      klass = (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
       if(!this.hasClass(klass)){
 	this.classes.push(klass);
 	this.setAttr("class", [this.getAttr("class"), klass].join(" "));
@@ -4084,17 +4073,6 @@ var TagAttrs = (function(){
       return (typeof this.dataset[name] === "undefined")? def_value : this.dataset[name];
     },
     /**
-       get classes NOT prefixed by "nehan-".
-
-       @memberof Nehan.TagAttrs
-       @return {Array.<String>}
-    */
-    getClassesRaw : function(){
-      return List.map(this.classes, function(klass){
-	return klass.replace("nehan-", "");
-      });
-    },
-    /**
        @memberof Nehan.TagAttrs
        @param name {String}
        @param value {attribute_value}
@@ -4121,19 +4099,12 @@ var TagAttrs = (function(){
     _parseClasses : function(attrs_raw){
       var class_name = attrs_raw["class"] || "";
       class_name = Utils.trim(class_name.replace(/\s+/g, " "));
-      var classes = (class_name === "")? [] : class_name.split(/\s+/);
-      return List.map(classes, function(klass){
-	return (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
-      });
+      return (class_name === "")? [] : class_name.split(/\s+/);
     },
     _parseAttrs : function(attrs_raw, classes){
       var attrs = {};
       Obj.iter(attrs_raw, function(name, value){
-	if(name === "id"){ // force add prefix "nehan-".
-	  attrs[name] = (value.indexOf("nehan-") === 0)? value : "nehan-" + value;
-	} else if(name === "class"){
-	  attrs[name] = classes.join(" ");
-	} else if(name.indexOf("data-") < 0){
+	if(name.indexOf("data-") < 0){
 	  attrs[name] = value;
 	}
       });
@@ -4313,13 +4284,6 @@ var Tag = (function (){
     */
     getClasses : function(){
       return this.attrs.classes;
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {Array.<String>}
-    */
-    getClassesRaw : function(){
-      return this.attrs.getClassesRaw();
     },
     /**
        @memberof Nehan.Tag
@@ -8590,7 +8554,7 @@ var Box = (function(){
        @return {Array.<string>}
     */
     getClassName : function(){
-      return this.classes? this.classes.join(" ") : "";
+      return this.classes? List.map(this.classes, Css.addNehanPrefix).join(" ") : "";
     },
     /**
        @memberof Nehan.Box
@@ -12254,7 +12218,6 @@ var StyleContext = (function(){
        @return {String}
     */
     getMarkupId : function(){
-      // if markup is <p id="foo">, markup.id is "nehan-foo".
       return this.markup.getId();
     },
     /**

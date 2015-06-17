@@ -8,9 +8,9 @@ var TagAttrLexer = (function(){
      @constructor
      @param src {String}
      @description <pre>
-     * lexer src is attribute parts of original tag source.
+     * [src] is attribute string of original tag source.
      * so if tag source is "<div class='nehan-float-start'>",
-     * then lexer src is "class='nehan-float-start'".
+     * then [src] is "class='nehan-float-start'".
      </pre>
   */
   function TagAttrLexer(src){

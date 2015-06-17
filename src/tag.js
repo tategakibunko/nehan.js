@@ -153,13 +153,6 @@ var Tag = (function (){
     },
     /**
        @memberof Nehan.Tag
-       @return {Array.<String>}
-    */
-    getClassesRaw : function(){
-      return this.attrs.getClassesRaw();
-    },
-    /**
-       @memberof Nehan.Tag
        @return {String}
     */
     getName : function(){

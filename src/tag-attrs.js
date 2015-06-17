@@ -35,16 +35,11 @@ var TagAttrs = (function(){
       return List.exists(this.classes, Closure.eq(klass));
     },
     /**
-     * add class name, but note that all css classes is force added prefix 'nehan-'.<br>
-     * that is, if you add class "foo", it's registered as "nehan-foo"<br>
-     * to avoid external css classes defined in client browser window.
-
        @memberof Nehan.TagAttrs
        @param klass {String} - css class name
        @return {Array.<String>} current css classes
     */
     addClass : function(klass){
-      klass = (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
       if(!this.hasClass(klass)){
 	this.classes.push(klass);
 	this.setAttr("class", [this.getAttr("class"), klass].join(" "));
@@ -85,17 +80,6 @@ var TagAttrs = (function(){
       return (typeof this.dataset[name] === "undefined")? def_value : this.dataset[name];
     },
     /**
-       get classes NOT prefixed by "nehan-".
-
-       @memberof Nehan.TagAttrs
-       @return {Array.<String>}
-    */
-    getClassesRaw : function(){
-      return List.map(this.classes, function(klass){
-	return klass.replace("nehan-", "");
-      });
-    },
-    /**
        @memberof Nehan.TagAttrs
        @param name {String}
        @param value {attribute_value}
@@ -122,19 +106,12 @@ var TagAttrs = (function(){
     _parseClasses : function(attrs_raw){
       var class_name = attrs_raw["class"] || "";
       class_name = Utils.trim(class_name.replace(/\s+/g, " "));
-      var classes = (class_name === "")? [] : class_name.split(/\s+/);
-      return List.map(classes, function(klass){
-	return (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
-      });
+      return (class_name === "")? [] : class_name.split(/\s+/);
     },
     _parseAttrs : function(attrs_raw, classes){
       var attrs = {};
       Obj.iter(attrs_raw, function(name, value){
-	if(name === "id"){ // force add prefix "nehan-".
-	  attrs[name] = (value.indexOf("nehan-") === 0)? value : "nehan-" + value;
-	} else if(name === "class"){
-	  attrs[name] = classes.join(" ");
-	} else if(name.indexOf("data-") < 0){
+	if(name.indexOf("data-") < 0){
 	  attrs[name] = value;
 	}
       });
