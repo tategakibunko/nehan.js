@@ -60,7 +60,7 @@ var Selectors = (function(){
   };
 
   // 'p::first-letter'
-  // => style = 'p', pseudo_element_name = 'first-letter'
+  // => [style] = 'p', [pseudo_element_name] = 'first-letter'
   var __get_value_pe = function(style, pseudo_element_name){
     return List.fold(__selectors_pe, new CssHashSet(), function(ret, selector){
       if(!selector.testPseudoElement(style, pseudo_element_name)){
