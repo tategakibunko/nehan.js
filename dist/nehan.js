@@ -1084,7 +1084,7 @@ var Style = {
       "after":"1px"
     }
   },
-  "hr.nehan-space":{
+  "hr.space":{
     "border-width":"0px"
   },
   "html":{
@@ -1418,7 +1418,7 @@ var Style = {
   //-------------------------------------------------------
   // rounded corner
   //-------------------------------------------------------
-  ".nehan-rounded":{
+  ".rounded":{
     "padding":{
       before:"1.6em",
       end:"1.0em",
@@ -1430,235 +1430,235 @@ var Style = {
   //-------------------------------------------------------
   // font-size classes
   //-------------------------------------------------------
-  ".nehan-xx-large":{
+  ".xx-large":{
     "font-size": Display.fontSizeNames["xx-large"]
   },
-  ".nehan-x-large":{
+  ".x-large":{
     "font-size": Display.fontSizeNames["x-large"]
   },
-  ".nehan-large":{
+  ".large":{
     "font-size": Display.fontSizeNames.large
   },
-  ".nehan-medium":{
+  ".medium":{
     "font-size": Display.fontSizeNames.medium
   },
-  ".nehan-small":{
+  ".small":{
     "font-size": Display.fontSizeNames.small
   },
-  ".nehan-x-small":{
+  ".x-small":{
     "font-size": Display.fontSizeNames["x-small"]
   },
-  ".nehan-xx-small":{
+  ".xx-small":{
     "font-size": Display.fontSizeNames["xx-small"]
   },
-  ".nehan-larger":{
+  ".larger":{
     "font-size": Display.fontSizeNames.larger
   },
-  ".nehan-smaller":{
+  ".smaller":{
     "font-size": Display.fontSizeNames.smaller
   },
   //-------------------------------------------------------
   // box-sizing classes
   //-------------------------------------------------------
-  ".nehan-content-box":{
+  ".content-box":{
     "box-sizing":"content-box"
   },
-  ".nehan-border-box":{
+  ".border-box":{
     "box-sizing":"border-box"
   },
-  ".nehan-margin-box":{
+  ".margin-box":{
     "box-sizing":"margin-box"
   },
   //-------------------------------------------------------
   // display classes
   //-------------------------------------------------------
-  ".nehan-disp-none":{
+  ".disp-none":{
     "display":"none"
   },
-  ".nehan-disp-block":{
+  ".disp-block":{
     "display":"block"
   },
-  ".nehan-disp-inline":{
+  ".disp-inline":{
     "display":"inline"
   },
-  ".nehan-disp-iblock":{
+  ".disp-iblock":{
     "display":"inline-block"
   },
   //-------------------------------------------------------
   // text-align classes
   //-------------------------------------------------------
-  ".nehan-ta-start":{
+  ".ta-start":{
     "text-align":"start"
   },
-  ".nehan-ta-center":{
+  ".ta-center":{
     "text-align":"center"
   },
-  ".nehan-ta-end":{
+  ".ta-end":{
     "text-align":"end"
   },
   //-------------------------------------------------------
   // float classes
   //-------------------------------------------------------
-  ".nehan-float-start":{
+  ".float-start":{
     "float":"start"
   },
-  ".nehan-float-end":{
+  ".float-end":{
     "float":"end"
   },
   //-------------------------------------------------------
   // flow classes
   //-------------------------------------------------------
-  ".nehan-flow-lr-tb":{
+  ".flow-lr-tb":{
     "flow":"lr-tb"
   },
-  ".nehan-flow-tb-rl":{
+  ".flow-tb-rl":{
     "flow":"tb-rl"
   },
-  ".nehan-flow-tb-lr":{
+  ".flow-tb-lr":{
     "flow":"tb-lr"
   },
-  ".nehan-flow-rl-tb":{
+  ".flow-rl-tb":{
     "flow":"rl-tb"
   },
-  ".nehan-flow-flip":{
+  ".flow-flip":{
     "flow":"flip"
   },
   //-------------------------------------------------------
   // list-style-position classes
   //-------------------------------------------------------
-  ".nehan-lsp-inside":{
+  ".lsp-inside":{
     "list-style-position":"inside"
   },
-  ".nehan-lsp-outside":{
+  ".lsp-outside":{
     "list-style-position":"outside"
   },
   //-------------------------------------------------------
   // list-style-type classes
   //-------------------------------------------------------
-  ".nehan-lst-none":{
+  ".lst-none":{
     "list-style-type":"none"
   },
-  ".nehan-lst-decimal":{
+  ".lst-decimal":{
     "list-style-type":"decimal"
   },
-  ".nehan-lst-disc":{
+  ".lst-disc":{
     "list-style-type":"disc"
   },
-  ".nehan-lst-circle":{
+  ".lst-circle":{
     "list-style-type":"circle"
   },
-  ".nehan-lst-square":{
+  ".lst-square":{
     "list-style-type":"square"
   },
-  ".nehan-lst-decimal-leading-zero":{
+  ".lst-decimal-leading-zero":{
     "list-style-type":"decimal-leading-zero"
   },
-  ".nehan-lst-lower-alpha":{
+  ".lst-lower-alpha":{
     "list-style-type":"lower-alpha"
   },
-  ".nehan-lst-upper-alpha":{
+  ".lst-upper-alpha":{
     "list-style-type":"upper-alpha"
   },
-  ".nehan-lst-lower-latin":{
+  ".lst-lower-latin":{
     "list-style-type":"lower-latin"
   },
-  ".nehan-lst-upper-latin":{
+  ".lst-upper-latin":{
     "list-style-type":"upper-latin"
   },
-  ".nehan-lst-lower-roman":{
+  ".lst-lower-roman":{
     "list-style-type":"lower-roman"
   },
-  ".nehan-lst-upper-roman":{
+  ".lst-upper-roman":{
     "list-style-type":"upper-roman"
   },
-  ".nehan-lst-lower-greek":{
+  ".lst-lower-greek":{
     "list-style-type":"lower-greek"
   },
-  ".nehan-lst-upper-greek":{
+  ".lst-upper-greek":{
     "list-style-type":"upper-greek"
   },
-  ".nehan-lst-cjk-ideographic":{
+  ".lst-cjk-ideographic":{
     "list-style-type":"cjk-ideographic"
   },
-  ".nehan-lst-hiragana":{
+  ".lst-hiragana":{
     "list-style-type":"hiragana"
   },
-  ".nehan-lst-hiragana-iroha":{
+  ".lst-hiragana-iroha":{
     "list-style-type":"hiragana-iroha"
   },
-  ".nehan-lst-katakana":{
+  ".lst-katakana":{
     "list-style-type":"katakana"
   },
-  ".nehan-lst-katakana-iroha":{
+  ".lst-katakana-iroha":{
     "list-style-type":"katakana-iroha"
   },
   //-------------------------------------------------------
   // text-combine
   //-------------------------------------------------------
-  ".nehan-tcy":{
+  ".tcy":{
     "text-combine":"horizontal"
   },
-  ".nehan-text-combine":{
+  ".text-combine":{
     "text-combine":"horizontal"
   },
   //-------------------------------------------------------
   // text emphasis
   //-------------------------------------------------------
-  ".nehan-empha-dot-filled":{
+  ".empha-dot-filled":{
     "text-emphasis-style":"filled dot"
   },
-  ".nehan-empha-dot-open":{
+  ".empha-dot-open":{
     "text-emphasis-style":"open dot"
   },
-  ".nehan-empha-circle-filled":{
+  ".empha-circle-filled":{
     "text-emphasis-style":"filled circle"
   },
-  ".nehan-empha-circle-open":{
+  ".empha-circle-open":{
     "text-emphasis-style":"open circle"
   },
-  ".nehan-empha-double-circle-filled":{
+  ".empha-double-circle-filled":{
     "text-emphasis-style":"filled double-circle"
   },
-  ".nehan-empha-double-circle-open":{
+  ".empha-double-circle-open":{
     "text-emphasis-style":"open double-circle"
   },
-  ".nehan-empha-triangle-filled":{
+  ".empha-triangle-filled":{
     "text-emphasis-style":"filled triangle"
   },
-  ".nehan-empha-triangle-open":{
+  ".empha-triangle-open":{
     "text-emphasis-style":"open triangle"
   },
-  ".nehan-empha-sesame-filled":{
+  ".empha-sesame-filled":{
     "text-emphasis-style":"filled sesame"
   },
-  ".nehan-empha-sesame-open":{
+  ".empha-sesame-open":{
     "text-emphasis-style":"open sesame"
   },
   //-------------------------------------------------------
   // break
   //-------------------------------------------------------
-  ".nehan-break-before":{
+  ".break-before":{
     "break-before":"always"
   },
-  ".nehan-break-after":{
+  ".break-after":{
     "break-after":"always"
   },
   //-------------------------------------------------------
   // word-break
   //-------------------------------------------------------
-  ".nehan-wb-all":{
+  ".wb-all":{
     "word-break":"break-all"
   },
-  ".nehan-wb-normal":{
+  ".wb-normal":{
     "word-break":"normal"
   },
-  ".nehan-wb-keep":{
+  ".wb-keep":{
     "word-break":"keep-all"
   },
   //-------------------------------------------------------
   // other utility classes
   //-------------------------------------------------------
-  ".nehan-drop-caps::first-letter":{
+  ".drop-caps::first-letter":{
     "display":"inline-block",
     "box-sizing":"content-box",
     "measure":"1em",
@@ -1667,22 +1667,22 @@ var Style = {
     "line-height":"1.0em",
     "font-size":"4em"
   },
-  ".nehan-gap-start":{
+  ".gap-start":{
     "margin":{
       "start":"1em"
     }
   },
-  ".nehan-gap-end":{
+  ".gap-end":{
     "margin":{
       "end":"1em"
     }
   },
-  ".nehan-gap-after":{
+  ".gap-after":{
     "margin":{
       "after":"1em"
     }
   },
-  ".nehan-gap-before":{
+  ".gap-before":{
     "margin":{
       "before":"1em"
     }

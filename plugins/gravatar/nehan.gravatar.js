@@ -3,7 +3,7 @@
 // license: MIT
 
 /**
-   plugin name: nehan-gravatar
+   plugin name: gravatar
    description: shortcut tag for gravatar(http://www.gravatar.com/) icon.
    tag_name: gravatar
    close_tag: not required

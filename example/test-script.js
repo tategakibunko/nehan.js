@@ -2,7 +2,7 @@ var Script = {
   "selector":[
     // adjacent sibling selector(A+B) test
     "<h2>adj sibling</h2>",
-    "<div class='nehan-adj-test'>", [
+    "<div class='adj-test'>", [
       "<a href='#'>one</a>",
       "<b>two</b>",
       "<b>three</b>"
@@ -11,7 +11,7 @@ var Script = {
 
     // generic sibling selector(A~B) test
     "<h2>gen sibling</h2>",
-    "<div class='nehan-gen-adj-test'>", [
+    "<div class='gen-adj-test'>", [
       "<a href='#'>one</a>",
       "<b>two</b>",
       "<b>three</b>"
@@ -43,7 +43,7 @@ var Script = {
   ].join("\n"),
 
   "functional":[
-    "<ul class='nehan-test-stripe'>",
+    "<ul class='test-stripe'>",
     "<li>even</li>",
     "<li>odd</li>",
     "<li>even</li>",
@@ -61,11 +61,11 @@ var Script = {
   "baseline":[
     "<h3><ruby>日本<rt>にほん</rt></ruby>と<ruby>漢字<rt>かんじ</rt></ruby></h3>",
     Snipet["ruby"],
-    "これは<span class='nehan-x-large'>大きい</span>文字",
-    "<p><a href='#'><ruby>漢字<rt>かんじ</rt></ruby></a>と<a href='#'><span class='nehan-xx-large'><ruby>日本<rt>にほん</rt></ruby></span></a>と<a href='#3'><span class='nehan-empha-dot-open'>圏点</span></a>です。</p>",
-    "<a href='#'><ruby>漢字<rt>かんじ</rt></ruby></a>と<a href='#'><span class='nehan-xx-large'><ruby>日本<rt>にほん</rt></ruby></span></a>と<a href='#3'><span class='nehan-empha-dot-open'>圏点</span></a>です。",
-    "<ruby>漢字<rt>かんじ</rt></ruby>と<span class='nehan-xx-large'><ruby>日本<rt>にほん</rt></ruby></span>と<span class='nehan-empha-dot-open'>圏点</span>です。",
-    "<ruby>漢字<rt>かんじ</rt></ruby>と<ruby>日本<rt>にほん</rt></ruby>と<span class='nehan-empha-dot-open'>圏点</span>です。"
+    "これは<span class='x-large'>大きい</span>文字",
+    "<p><a href='#'><ruby>漢字<rt>かんじ</rt></ruby></a>と<a href='#'><span class='xx-large'><ruby>日本<rt>にほん</rt></ruby></span></a>と<a href='#3'><span class='empha-dot-open'>圏点</span></a>です。</p>",
+    "<a href='#'><ruby>漢字<rt>かんじ</rt></ruby></a>と<a href='#'><span class='xx-large'><ruby>日本<rt>にほん</rt></ruby></span></a>と<a href='#3'><span class='empha-dot-open'>圏点</span></a>です。",
+    "<ruby>漢字<rt>かんじ</rt></ruby>と<span class='xx-large'><ruby>日本<rt>にほん</rt></ruby></span>と<span class='empha-dot-open'>圏点</span>です。",
+    "<ruby>漢字<rt>かんじ</rt></ruby>と<ruby>日本<rt>にほん</rt></ruby>と<span class='empha-dot-open'>圏点</span>です。"
   ].join("<br />\n"),
 
   "float":[
@@ -80,11 +80,11 @@ var Script = {
     Text["long"],
     Text["middle"],
     Text["long"],
-    "<img class='nehan-disp-block nehan-float-start' src='128x128.gif' width='128' height='128' />",
+    "<img class='disp-block float-start' src='128x128.gif' width='128' height='128' />",
     Text["long"],
-    "<img class='nehan-disp-block nehan-float-end' src='128x128.gif' width='128' height='128' />",
+    "<img class='disp-block float-end' src='128x128.gif' width='128' height='128' />",
     Text["long"],
-    "<img class='nehan-disp-block nehan-float-start nehan-gap-end' width='128' height='128' src='128x128.gif' />",
+    "<img class='disp-block float-start gap-end' width='128' height='128' src='128x128.gif' />",
     "<p>あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをんあいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをんあいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん</p>",
     "<p>あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをんあいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをんあいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん</p>"
   ].join(""),
@@ -201,29 +201,29 @@ var Script = {
 
   "flip-flow":[
     "<p>" + Text["long"] + "</p>",
-    "<div class='nehan-flow-flip'>" + Text["long"] + Text["long"] + Text["long"] + "</div>",
+    "<div class='flow-flip'>" + Text["long"] + Text["long"] + Text["long"] + "</div>",
     "<p>" + Text["middle"] + "</p>",
-    "<div class='nehan-flow-flip'>" + Text["long"] + "</div>",
+    "<div class='flow-flip'>" + Text["long"] + "</div>",
     "<p>" + Text["long"] + "</p>",
-    "<p class='nehan-flow-flip' width='100' height='100'>" + Text["short"] + "</p>",
+    "<p class='flow-flip' width='100' height='100'>" + Text["short"] + "</p>",
     Text["long"]
   ].join(""),
 
   "callback":[
     "<p>" + Text["middle"] + "</p>",
-    "<div class='nehan-my-callback'>" + Text["short"] + "</div>"
+    "<div class='my-callback'>" + Text["short"] + "</div>"
   ].join(""),
 
   "text-align":[
-    "<p class='nehan-ta-start'>先頭寄せ</p>",
-    "<p class='nehan-ta-center'>中央寄せ</p>",
-    "<p class='nehan-ta-end'>後方寄せ</p>"
+    "<p class='ta-start'>先頭寄せ</p>",
+    "<p class='ta-center'>中央寄せ</p>",
+    "<p class='ta-end'>後方寄せ</p>"
   ].join(""),
 
   "iblock":[
-    "<div style='background-color:red' class='nehan-disp-iblock' width='100' height='100'>hello<br/>iblock</div>",
+    "<div style='background-color:red' class='disp-iblock' width='100' height='100'>hello<br/>iblock</div>",
     Text["middle"],
-    "<div style='background-color:gold' class='nehan-disp-iblock' width='100' height='100'>iblock2</div>",
+    "<div style='background-color:gold' class='disp-iblock' width='100' height='100'>iblock2</div>",
     Text["middle"]
   ].join(""),
 
@@ -242,11 +242,11 @@ var Script = {
     "page three",
     "<pbr>",
     "page four",
-    "<hr class='nehan-break-after'/>",
+    "<hr class='break-after'/>",
     "page five",
     "<div style='break-before:always'>page six</div>",
-    "<div class='nehan-break-before'>page seven</div>",
-    "<div class='nehan-break-after'>page seven2</div>",
+    "<div class='break-before'>page seven</div>",
+    "<div class='break-after'>page seven2</div>",
     "page eight"
   ].join("\n"),
 
@@ -254,7 +254,7 @@ var Script = {
     Text["short"],
     "<hr />",
     Text["short"],
-    "<hr class='nehan-space'>",
+    "<hr class='space'>",
     Text["short"]
   ].join(""),
 
@@ -264,7 +264,7 @@ var Script = {
   ].join(""),
 
   "tcy":[
-    "平成<span class='nehan-tcy'>25</span>年<span class='nehan-tcy'>1</span>月<span class='nehan-tcy'>10</span>日<span class='nehan-tcy'>!!</span>"
+    "平成<span class='tcy'>25</span>年<span class='tcy'>1</span>月<span class='tcy'>10</span>日<span class='tcy'>!!</span>"
   ].join(""),
 
   "link":[
@@ -297,16 +297,16 @@ var Script = {
   ].join(""),
 
   "empha":[
-    "これは<span class='nehan-empha-dot-open'>圏点</span>です。",
-    "これは<span class='nehan-empha-dot-filled'>圏点</span>です。",
-    "これは<span class='nehan-empha-circle-open'>圏点</span>です。",
-    "これは<span class='nehan-empha-circle-filled'>圏点</span>です。",
-    "これは<span class='nehan-empha-double-circle-open'>圏点</span>です。",
-    "これは<span class='nehan-empha-double-circle-filled'>圏点</span>です。",
-    "これは<span class='nehan-empha-triangle-open'>圏点</span>です。",
-    "これは<span class='nehan-empha-triangle-filled'>圏点</span>です。",
-    "これは<span class='nehan-empha-sesame-open'>圏点</span>です。",
-    "これは<span class='nehan-empha-sesame-filled'>圏点</span>です。"
+    "これは<span class='empha-dot-open'>圏点</span>です。",
+    "これは<span class='empha-dot-filled'>圏点</span>です。",
+    "これは<span class='empha-circle-open'>圏点</span>です。",
+    "これは<span class='empha-circle-filled'>圏点</span>です。",
+    "これは<span class='empha-double-circle-open'>圏点</span>です。",
+    "これは<span class='empha-double-circle-filled'>圏点</span>です。",
+    "これは<span class='empha-triangle-open'>圏点</span>です。",
+    "これは<span class='empha-triangle-filled'>圏点</span>です。",
+    "これは<span class='empha-sesame-open'>圏点</span>です。",
+    "これは<span class='empha-sesame-filled'>圏点</span>です。"
   ].join("<br>"),
 
   "header":[
@@ -336,16 +336,16 @@ var Script = {
   ].join(""),
 
   "push-pull":[
-    "<img class='nehan-disp-block' src='256x256.gif' width='256' height='256' pushed />",
+    "<img class='disp-block' src='256x256.gif' width='256' height='256' pushed />",
     Text["long"],
     "<page-break>",
     Text["long"],
-    "<img class='nehan-disp-block' src='256x256.gif' width='256' height='256' pulled />"
+    "<img class='disp-block' src='256x256.gif' width='256' height='256' pulled />"
   ].join(""),
 
   "pseudo-class":[
     "<h2>first/last</h2>",
-    "<div class='nehan-test-pseudo'>",
+    "<div class='test-pseudo'>",
     "<ul>",
     "<li>first</li>",
     "<li>second</li>",
@@ -356,23 +356,23 @@ var Script = {
     "</div>",
 
     "<h2>only child</h2>",
-    "<div class='nehan-test-pseudo-only'>",
+    "<div class='test-pseudo-only'>",
     "<p>only child</p>",
     "</div>",
 
     "<h2>only of type</h2>",
-    "<div class='nehan-test-pseudo-only'>",
+    "<div class='test-pseudo-only'>",
     "<div>only of type</div>",
     "<p>child</p>",
     "</div>",
 
     "<h2>only of type func</h2>",
-    "<div class='nehan-test-pseudo-only2'>",
+    "<div class='test-pseudo-only2'>",
     "<p></p>", // only of type
     "</div>",
 
     "<h2>only of type func2</h2>",
-    "<div class='nehan-test-pseudo-only2'>",
+    "<div class='test-pseudo-only2'>",
     "<p></p>", // not only of type
     "<p></p>", // not only of type
     "</div>"
@@ -380,34 +380,34 @@ var Script = {
 
   "pseudo-element":[
     "<h2>first letter</h2>",
-    "<div class='nehan-drop-caps'>",
+    "<div class='drop-caps'>",
     Text["long"],
     "</div>",
     "<page-break />",
     "<h2>first letter2</h2>",
-    "<div class='nehan-drop-caps'>",
+    "<div class='drop-caps'>",
     Text["lorem"],
     "</div>",
     "<page-break />",
     "<h2>first line</h2>",
-    "<div class='nehan-first-line-larger'>",
+    "<div class='first-line-larger'>",
     Text["long"],
     "</div>",
     "<page-break />",
     "<h2>before, after</h2>",
-    "<div class='nehan-test-before'>test for before</div>",
-    "<div class='nehan-test-after'>test for after</div>"
+    "<div class='test-before'>test for before</div>",
+    "<div class='test-after'>test for after</div>"
   ].join(""),
 
   "pasted-attribute":[
     "<p>this is normal1</p>",
-    "<div class='nehan-content-box nehan-gap-after' style='width:200px; height:200px; background-color:gold' pasted>",
+    "<div class='content-box gap-after' style='width:200px; height:200px; background-color:gold' pasted>",
     "this is pasted content",
     "</div>",
     "<p>this is normal2</p>"
   ].join("\n"),
 
-  "nehan-tip-test":[
+  "tip-test":[
     "<p><tip title='click here'>tip content</tip></p>",
     "<p><tip title='タイトル'>チップの内容</tip></p>"
   ].join("\n"),
@@ -428,21 +428,21 @@ var Script = {
     "<p>" + Text["lorem"] + "</p>"
   ].join("\n"),
 
-  "nehan-speak-test":[
+  "speak-test":[
     "<speak name='太郎'>" + Text["middle"] + "</speak>",
     "<speak src='128x128.gif'>" + Text["long"] + "</speak>"
   ].join("\n"),
 
-  "nehan-gravator-test":[
+  "gravator-test":[
     "<h2>my gravator</h2>",
     "<gravator size='64' email='someone@example.com'>",
     "<div>" + Text["middle"] + "</div>",
     "<h2>my gravator floated</h2>",
-    "<gravator class='nehan-float-start nehan-disp-block' size='64' email='someone@example.com'>",
+    "<gravator class='float-start disp-block' size='64' email='someone@example.com'>",
     "<div>" + Text["middle"] + "</div>"
   ].join("\n"),
 
-  "nehan-pasted-test":[
+  "pasted-test":[
     "<pasted size='150x200'>",
     "<p>this is pasted content!!!</p>",
     "</pasted>"
@@ -454,7 +454,7 @@ var Script = {
   ].join(""),
 
   "prettify":[
-    "<pre class='nehan-prettify'>",
+    "<pre class='prettify'>",
     "var foo = 'hello, prettify!';",
     "var hoo = function(){",
     "  alert('hoo');",
