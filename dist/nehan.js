@@ -3850,7 +3850,7 @@ var Selectors = (function(){
     /**<pre>
      * get selector css that matches to the pseudo element of some style context.
      * notice that if selector_key is "p::first-letter",
-     * pseudo-element is "first-letter" and style-context is "p".
+     * pseudo-element is "first-letter" and style is "p".
      *</pre>
 
        @memberof Nehan.Selectors
