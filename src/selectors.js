@@ -42,7 +42,7 @@ var Selectors = (function(){
     var matched_selectors = List.filter(__selectors_pe, function(selector){
       return selector.testPseudoElement(style, pseudo_element_name);
     });
-    return List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
+    return (matched_selectors.length === 0)? {} : List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
       return ret.union(new CssHashSet(selector.getValue()));
     }).getValues();
   };
@@ -51,7 +51,7 @@ var Selectors = (function(){
     var matched_selectors = List.filter(__selectors, function(selector){
       return selector.test(style);
     });
-    return List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
+    return (matched_selectors.length === 0)? {} : List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
       return ret.union(new CssHashSet(selector.getValue()));
     }).getValues();
   };
