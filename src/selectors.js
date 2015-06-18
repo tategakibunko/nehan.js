@@ -34,10 +34,14 @@ var Selectors = (function(){
   // apply Selector::test(or testPseudoElement) to style.
   var __get_value = function(style, pseudo_element_name){
     var matched_selectors = List.filter(__selectors, function(selector){
-      if(selector.hasPseudoElement()){
-	if(!pseudo_element_name){
-	  return false;
-	}
+      var is_pseudo_selector = selector.hasPseudoElement();
+      if(!pseudo_element_name && is_pseudo_selector){
+	return false;
+      }
+      if(pseudo_element_name && !is_pseudo_selector){
+	return false;
+      }
+      if(is_pseudo_selector){
 	return selector.testPseudoElement(style, pseudo_element_name);
       }
       return selector.test(style);
@@ -45,11 +49,11 @@ var Selectors = (function(){
     if(matched_selectors.length === 0){
       return {};
     }
-    console.log("[%s]%o matched selectors:%o", style.markup.getName(), style.markup, matched_selectors);
+    //console.log("[%s(pe=%o)]%o matched selectors:%o", style.getMarkupName(), pseudo_element_name, style.markup, matched_selectors);
     var values = List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
       return ret.union(new CssHashSet(selector.getValue()));
     }).getValues();
-    console.log("[%s]:%o", style.getMarkupName(), values);
+    //console.log("[%s]:%o", style.getMarkupName(), values);
     return values;
   };
 
@@ -102,8 +106,8 @@ var Selectors = (function(){
        @param style {Nehan.StyleContext}
        @return {css_value}
     */
-    getValue : function(style){
-      return __get_value(style);
+    getValue : function(style, pseudo_element_name){
+      return __get_value(style, pseudo_element_name || null);
     }
   };
 })();
