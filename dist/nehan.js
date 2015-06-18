@@ -3788,8 +3788,6 @@ var Selectors = (function(){
       __update_value(selector_key, value);
       return;
     }
-    __insert_value(selector_key, value);
-
     var selector = __insert_value(selector_key, value);
 
     // notice that '__sort_selectors'(or '__sort_selectors_pe') is not called in '__insert_value'.
