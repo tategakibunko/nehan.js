@@ -1082,21 +1082,21 @@ var StyleContext = (function(){
     */
     getContent : function(){
       var content = this.getCssAttr("content") || this.markup.getContent();
-      var before = Selectors.getValue(this, "before");
+      var before = Selectors.getValuePe(this, "before");
       if(!Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;
       }
-      var after = Selectors.getValue(this, "after");
+      var after = Selectors.getValuePe(this, "after");
       if(!Obj.isEmpty(after)){
 	content = content + Html.tagWrap("after", after.content || "");
       }
-      var first_letter = Selectors.getValue(this, "first-letter");
+      var first_letter = Selectors.getValuePe(this, "first-letter");
       if(!Obj.isEmpty(first_letter)){
 	content = content.replace(__rex_first_letter, function(match, p1, p2, p3){
 	  return p1 + Html.tagWrap("first-letter", p3);
 	});
       }
-      var first_line = Selectors.getValue(this, "first-line");
+      var first_line = Selectors.getValuePe(this, "first-line");
       if(!Obj.isEmpty(first_line)){
 	content = Html.tagWrap("first-line", content);
       }
@@ -1624,7 +1624,7 @@ var StyleContext = (function(){
       case "first-letter":
       case "first-line":
 	// notice that style of pseudo-element is defined with parent context.
-	var pe_values = Selectors.getValue(parent, markup.getName());
+	var pe_values = Selectors.getValuePe(parent, markup.getName());
 	// console.log("[%s::%s] pseudo values:%o", parent.markupName, this.markup.name, pe_values);
 	return pe_values;
 
