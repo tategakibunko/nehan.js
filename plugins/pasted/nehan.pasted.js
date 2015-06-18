@@ -3,7 +3,7 @@
 // license: MIT
 
 /**
-   plugin name: nehan-pasted
+   plugin name: pasted
    description: shortcut tag for pasted content
    tag_name: pasted
    close_tag: required

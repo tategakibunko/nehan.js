@@ -68,6 +68,7 @@ var TypeSelector = (function(){
     this.classes = opt.classes || [];
     this.attrs = opt.attrs || [];
     this.pseudo = opt.pseudo || null;
+    this.classes.sort();
   }
   
   TypeSelector.prototype = {

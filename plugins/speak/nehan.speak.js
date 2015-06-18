@@ -3,7 +3,7 @@
 // license: MIT
 
 /**
-   plugin name: nehan-speak
+   plugin name: speak
    description: display charactor and speech set like scenario script.
    tag_name: speak
    close_tag: required
@@ -35,7 +35,7 @@ Nehan.setStyles({
 	  selector_context.setCssAttr("break-before", "always");
 	}
 	var size2 = Math.max(32, size - 2); // subtract max border size(=2)
-	var icon = "<img class='nehan-disp-block' src='{{src}}' width='{{size2}}' height='{{size2}}'>".replace(/{{src}}/, src).replace(/{{size2}}/g, size2);
+	var icon = "<img class='disp-block' src='{{src}}' width='{{size2}}' height='{{size2}}'>".replace(/{{src}}/, src).replace(/{{size2}}/g, size2);
 	markup.setContent([
 	  "<tr>",
 	  "<td style='measure:{{size}}'>{{icon}}</td>",

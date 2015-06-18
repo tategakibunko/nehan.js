@@ -3,19 +3,19 @@
 // license: MIT
 
 /**
-   plugin name: nehan-prettify
+   plugin name: prettify
    description: prettify code using google code prettify(https://github.com/google/google-code-prettify).
-   tag: pre.nehan-prettify
+   tag: pre.prettify
    close_tag: not required
    dependencies: google code prettify
 
    attributes: none
 
    example:
-     <pre class="nehan-prettify">alert("hello, prettify!");</pre>
+     <pre class="prettify">alert("hello, prettify!");</pre>
 */
 Nehan.setStyles({
-  "pre.nehan-prettify":{
+  "pre.prettify":{
     "margin":"10px",
     "padding":"8px",
     "background-color":"white",
@@ -33,67 +33,67 @@ Nehan.setStyles({
       markup.setContent(pretty_content);
     }
   },
-  ".nehan-pln":{
+  ".pln":{
     color:"#111111"
   },
   /* string content */
-  ".nehan-str":{
+  ".str":{
     color:"#739200"
   },
   /* a keyword */
-  ".nehan-kwd":{
+  ".kwd":{
     //"font-weight":"bold",
     color:"#739200"
   },
   /* a comment */
-  ".nehan-com":{
+  ".com":{
     "font-style":"italic",
     color:"#999999"
   },
   /* a type name */
-  ".nehan-typ":{
+  ".typ":{
     //"font-weight":"bold",
     color:"#ff0055"
   },
   /* a literal value */
-  ".nehan-lit":{
+  ".lit":{
     color:"#538192"
   },
   /* punctuation */
-  ".nehan-pun":{
+  ".pun":{
     color:"#111111"
   },
   /* lisp open bracket */
-  ".nehan-opn":{
+  ".opn":{
     color:"#111111"
   },
   /* lisp close bracket */
-  ".nehan-clo":{
+  ".clo":{
     color:"#111111"
   },
   /* a markup tag name */
-  ".nehan-tag":{
+  ".tag":{
     //"font-weight":"bold",
     color:"#111111"
   },
   /* a markup attribute name */
-  ".nehan-atn":{
+  ".atn":{
     color:"#739200"
   },
   /* a markup attribute value */
-  ".nehan-atv":{
+  ".atv":{
     color:"#ff0055"
   },
   /* a declaration */
-  ".nehan-dec":{
+  ".dec":{
     color:"#111111"
   },
   /* a variable name */
-  ".nehan-var":{
+  ".var":{
     color:"#111111"
   },
   /* a function name */
-  ".nehan-fun":{
+  ".fun":{
     color:"#538192"
   }
 });

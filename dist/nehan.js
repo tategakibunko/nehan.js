@@ -771,18 +771,12 @@ var LexingRule = (function(){
     ex2. {float:"start"} // => {float:"left"}.
     ex3. {measure:"100px", extent:"50px"} // => {width:"100px", height:"50px"}
 
-  3. all class names must start with "nehan-" prefix
-  --------------------------------------------------
-
-     to avoid css collision that is not layouted by nehan.js,
-     our css names must be prefixed by "nehan-".
-
-  4. about functional css value
+  3. about functional css value
   ------------------------------
 
   you can use functional css value in each css property.
 
-  (4.1) callback argument 'context' in functional css value is 'SelectorPropContext'
+  (3.1) callback argument 'context' in functional css value is 'SelectorPropContext'
 
   // [example]
   // change backgroiund-color by child index.
@@ -792,14 +786,14 @@ var LexingRule = (function(){
     }
   }
 
-  (4.2) callback argument 'context' in 'onload' is 'SelectorContext'
+  (3.2) callback argument 'context' in 'onload' is 'SelectorContext'
 
   this context is 'extended class' of 'SelectorPropContext', with some extra interfaces
   that can touch css object, because 'onload' is called after all css of matched elements are loaded.
 
   // [example]
   // force image metrics to square sizing if width and height is not same.
-  ".nehan-must-be-squares img":{
+  ".must-be-squares img":{
     "onload":function(context){
       var width = context.getCssAttr("width", 100);
       var height = context.getCssAttr("height", 100);
@@ -810,10 +804,10 @@ var LexingRule = (function(){
     }
   }
 
- 5. special properties in nehan.js
+ 4. special properties in nehan.js
   ----------------------------------
 
-  (5.1) box-sizing:[content-box | border-box | margin-box(default)]
+  (4.1) box-sizing:[content-box | border-box | margin-box(default)]
 
   In box-sizing, 'margin-box' is special value in nehan.js, and is box-sizing default value.
   In margin-box, even if margin is included in box-size.
@@ -823,7 +817,7 @@ var LexingRule = (function(){
   So if you represent margin/border/padding(called in edge in nehan.js),
   the only way is 'eliminating content space'.
 
-  (5.2) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
+  (4.2) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
 
   This property represent document-mode in nehan.js.
 
@@ -1090,7 +1084,7 @@ var Style = {
       "after":"1px"
     }
   },
-  "hr.nehan-space":{
+  "hr.space":{
     "border-width":"0px"
   },
   "html":{
@@ -1424,7 +1418,7 @@ var Style = {
   //-------------------------------------------------------
   // rounded corner
   //-------------------------------------------------------
-  ".nehan-rounded":{
+  ".rounded":{
     "padding":{
       before:"1.6em",
       end:"1.0em",
@@ -1436,235 +1430,235 @@ var Style = {
   //-------------------------------------------------------
   // font-size classes
   //-------------------------------------------------------
-  ".nehan-xx-large":{
+  ".xx-large":{
     "font-size": Display.fontSizeNames["xx-large"]
   },
-  ".nehan-x-large":{
+  ".x-large":{
     "font-size": Display.fontSizeNames["x-large"]
   },
-  ".nehan-large":{
+  ".large":{
     "font-size": Display.fontSizeNames.large
   },
-  ".nehan-medium":{
+  ".medium":{
     "font-size": Display.fontSizeNames.medium
   },
-  ".nehan-small":{
+  ".small":{
     "font-size": Display.fontSizeNames.small
   },
-  ".nehan-x-small":{
+  ".x-small":{
     "font-size": Display.fontSizeNames["x-small"]
   },
-  ".nehan-xx-small":{
+  ".xx-small":{
     "font-size": Display.fontSizeNames["xx-small"]
   },
-  ".nehan-larger":{
+  ".larger":{
     "font-size": Display.fontSizeNames.larger
   },
-  ".nehan-smaller":{
+  ".smaller":{
     "font-size": Display.fontSizeNames.smaller
   },
   //-------------------------------------------------------
   // box-sizing classes
   //-------------------------------------------------------
-  ".nehan-content-box":{
+  ".content-box":{
     "box-sizing":"content-box"
   },
-  ".nehan-border-box":{
+  ".border-box":{
     "box-sizing":"border-box"
   },
-  ".nehan-margin-box":{
+  ".margin-box":{
     "box-sizing":"margin-box"
   },
   //-------------------------------------------------------
   // display classes
   //-------------------------------------------------------
-  ".nehan-disp-none":{
+  ".disp-none":{
     "display":"none"
   },
-  ".nehan-disp-block":{
+  ".disp-block":{
     "display":"block"
   },
-  ".nehan-disp-inline":{
+  ".disp-inline":{
     "display":"inline"
   },
-  ".nehan-disp-iblock":{
+  ".disp-iblock":{
     "display":"inline-block"
   },
   //-------------------------------------------------------
   // text-align classes
   //-------------------------------------------------------
-  ".nehan-ta-start":{
+  ".ta-start":{
     "text-align":"start"
   },
-  ".nehan-ta-center":{
+  ".ta-center":{
     "text-align":"center"
   },
-  ".nehan-ta-end":{
+  ".ta-end":{
     "text-align":"end"
   },
   //-------------------------------------------------------
   // float classes
   //-------------------------------------------------------
-  ".nehan-float-start":{
+  ".float-start":{
     "float":"start"
   },
-  ".nehan-float-end":{
+  ".float-end":{
     "float":"end"
   },
   //-------------------------------------------------------
   // flow classes
   //-------------------------------------------------------
-  ".nehan-flow-lr-tb":{
+  ".flow-lr-tb":{
     "flow":"lr-tb"
   },
-  ".nehan-flow-tb-rl":{
+  ".flow-tb-rl":{
     "flow":"tb-rl"
   },
-  ".nehan-flow-tb-lr":{
+  ".flow-tb-lr":{
     "flow":"tb-lr"
   },
-  ".nehan-flow-rl-tb":{
+  ".flow-rl-tb":{
     "flow":"rl-tb"
   },
-  ".nehan-flow-flip":{
+  ".flow-flip":{
     "flow":"flip"
   },
   //-------------------------------------------------------
   // list-style-position classes
   //-------------------------------------------------------
-  ".nehan-lsp-inside":{
+  ".lsp-inside":{
     "list-style-position":"inside"
   },
-  ".nehan-lsp-outside":{
+  ".lsp-outside":{
     "list-style-position":"outside"
   },
   //-------------------------------------------------------
   // list-style-type classes
   //-------------------------------------------------------
-  ".nehan-lst-none":{
+  ".lst-none":{
     "list-style-type":"none"
   },
-  ".nehan-lst-decimal":{
+  ".lst-decimal":{
     "list-style-type":"decimal"
   },
-  ".nehan-lst-disc":{
+  ".lst-disc":{
     "list-style-type":"disc"
   },
-  ".nehan-lst-circle":{
+  ".lst-circle":{
     "list-style-type":"circle"
   },
-  ".nehan-lst-square":{
+  ".lst-square":{
     "list-style-type":"square"
   },
-  ".nehan-lst-decimal-leading-zero":{
+  ".lst-decimal-leading-zero":{
     "list-style-type":"decimal-leading-zero"
   },
-  ".nehan-lst-lower-alpha":{
+  ".lst-lower-alpha":{
     "list-style-type":"lower-alpha"
   },
-  ".nehan-lst-upper-alpha":{
+  ".lst-upper-alpha":{
     "list-style-type":"upper-alpha"
   },
-  ".nehan-lst-lower-latin":{
+  ".lst-lower-latin":{
     "list-style-type":"lower-latin"
   },
-  ".nehan-lst-upper-latin":{
+  ".lst-upper-latin":{
     "list-style-type":"upper-latin"
   },
-  ".nehan-lst-lower-roman":{
+  ".lst-lower-roman":{
     "list-style-type":"lower-roman"
   },
-  ".nehan-lst-upper-roman":{
+  ".lst-upper-roman":{
     "list-style-type":"upper-roman"
   },
-  ".nehan-lst-lower-greek":{
+  ".lst-lower-greek":{
     "list-style-type":"lower-greek"
   },
-  ".nehan-lst-upper-greek":{
+  ".lst-upper-greek":{
     "list-style-type":"upper-greek"
   },
-  ".nehan-lst-cjk-ideographic":{
+  ".lst-cjk-ideographic":{
     "list-style-type":"cjk-ideographic"
   },
-  ".nehan-lst-hiragana":{
+  ".lst-hiragana":{
     "list-style-type":"hiragana"
   },
-  ".nehan-lst-hiragana-iroha":{
+  ".lst-hiragana-iroha":{
     "list-style-type":"hiragana-iroha"
   },
-  ".nehan-lst-katakana":{
+  ".lst-katakana":{
     "list-style-type":"katakana"
   },
-  ".nehan-lst-katakana-iroha":{
+  ".lst-katakana-iroha":{
     "list-style-type":"katakana-iroha"
   },
   //-------------------------------------------------------
   // text-combine
   //-------------------------------------------------------
-  ".nehan-tcy":{
+  ".tcy":{
     "text-combine":"horizontal"
   },
-  ".nehan-text-combine":{
+  ".text-combine":{
     "text-combine":"horizontal"
   },
   //-------------------------------------------------------
   // text emphasis
   //-------------------------------------------------------
-  ".nehan-empha-dot-filled":{
+  ".empha-dot-filled":{
     "text-emphasis-style":"filled dot"
   },
-  ".nehan-empha-dot-open":{
+  ".empha-dot-open":{
     "text-emphasis-style":"open dot"
   },
-  ".nehan-empha-circle-filled":{
+  ".empha-circle-filled":{
     "text-emphasis-style":"filled circle"
   },
-  ".nehan-empha-circle-open":{
+  ".empha-circle-open":{
     "text-emphasis-style":"open circle"
   },
-  ".nehan-empha-double-circle-filled":{
+  ".empha-double-circle-filled":{
     "text-emphasis-style":"filled double-circle"
   },
-  ".nehan-empha-double-circle-open":{
+  ".empha-double-circle-open":{
     "text-emphasis-style":"open double-circle"
   },
-  ".nehan-empha-triangle-filled":{
+  ".empha-triangle-filled":{
     "text-emphasis-style":"filled triangle"
   },
-  ".nehan-empha-triangle-open":{
+  ".empha-triangle-open":{
     "text-emphasis-style":"open triangle"
   },
-  ".nehan-empha-sesame-filled":{
+  ".empha-sesame-filled":{
     "text-emphasis-style":"filled sesame"
   },
-  ".nehan-empha-sesame-open":{
+  ".empha-sesame-open":{
     "text-emphasis-style":"open sesame"
   },
   //-------------------------------------------------------
   // break
   //-------------------------------------------------------
-  ".nehan-break-before":{
+  ".break-before":{
     "break-before":"always"
   },
-  ".nehan-break-after":{
+  ".break-after":{
     "break-after":"always"
   },
   //-------------------------------------------------------
   // word-break
   //-------------------------------------------------------
-  ".nehan-wb-all":{
+  ".wb-all":{
     "word-break":"break-all"
   },
-  ".nehan-wb-normal":{
+  ".wb-normal":{
     "word-break":"normal"
   },
-  ".nehan-wb-keep":{
+  ".wb-keep":{
     "word-break":"keep-all"
   },
   //-------------------------------------------------------
   // other utility classes
   //-------------------------------------------------------
-  ".nehan-drop-caps::first-letter":{
+  ".drop-caps::first-letter":{
     "display":"inline-block",
     "box-sizing":"content-box",
     "measure":"1em",
@@ -1673,22 +1667,22 @@ var Style = {
     "line-height":"1.0em",
     "font-size":"4em"
   },
-  ".nehan-gap-start":{
+  ".gap-start":{
     "margin":{
       "start":"1em"
     }
   },
-  ".nehan-gap-end":{
+  ".gap-end":{
     "margin":{
       "end":"1em"
     }
   },
-  ".nehan-gap-after":{
+  ".gap-after":{
     "margin":{
       "after":"1em"
     }
   },
-  ".nehan-gap-before":{
+  ".gap-before":{
     "margin":{
       "before":"1em"
     }
@@ -2062,55 +2056,88 @@ var List = {
 
    @namespace Nehan.Obj
 */
-var Obj = {
-  /**
-     @memberof Nehan.Obj
-     @param obj {Object}
-     @return {boolean}
-  */
-  isEmpty: function(obj){
-    for(var name in obj){
-      return false;
+var Obj = (function(){
+  var __clone = function(obj){
+    var copy;
+    if(obj === null || typeof obj !== "object"){
+      return obj;
     }
-    return true;
-  },
-  /**
-     @memberof Nehan.Obj
-     @param obj {Object}
-     @param fn {Function} - fun prop -> value -> obj
-  */
-  map : function(obj, fn){
-    var ret = {};
-    this.iter(obj, function(prop, value){
-      ret[prop] = fn(prop, value);
-    });
-    return ret;
-  },
-  /**
-     @memberof Nehan.Obj
-     @param obj {Object}
-     @param fn {Function} - fun prop -> value -> {boolean}
-  */
-  filter : function(obj, fn){
-    var ret = {};
-    this.iter(obj, function(prop, value){
-      if(fn(prop, value)){
-	ret[prop] = value;
+    if(obj instanceof Array) {
+      copy = [];
+      for(var i = 0; i < obj.len; i++){
+        copy[i] = __clone(obj[i]);
       }
-    });
-    return ret;
-  },
-  /**
-     @memberof Nehan.Obj
-     @param obj {Object}
-     @param fn {Function} - fun prop -> value -> ()
-  */
-  iter : function(obj, fn){
-    for(var prop in obj){
-      fn(prop, obj[prop]);
+      return copy;
     }
-  }
-};
+    if (obj instanceof Object) {
+      copy = {};
+      for(var prop in obj){
+        if(obj.hasOwnProperty(prop)){
+	  copy[prop] = __clone(obj[prop]);
+	}
+      }
+      return copy;
+    }
+    throw "Obj::clone(unsupported type)";
+  };
+  return {
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @return {boolean}
+    */
+    isEmpty: function(obj){
+      for(var name in obj){
+	return false;
+      }
+      return true;
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @return {Object}
+    */
+    clone: function(obj){
+      return __clone(obj);
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @param fn {Function} - fun prop -> value -> obj
+    */
+    map : function(obj, fn){
+      var ret = {};
+      this.iter(obj, function(prop, value){
+	ret[prop] = fn(prop, value);
+      });
+      return ret;
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @param fn {Function} - fun prop -> value -> {boolean}
+    */
+    filter : function(obj, fn){
+      var ret = {};
+      this.iter(obj, function(prop, value){
+	if(fn(prop, value)){
+	  ret[prop] = value;
+	}
+      });
+      return ret;
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @param fn {Function} - fun prop -> value -> ()
+    */
+    iter : function(obj, fn){
+      for(var prop in obj){
+	fn(prop, obj[prop]);
+      }
+    }
+  };
+})();
 
 /**
    misc utility module.
@@ -2359,7 +2386,7 @@ var Css = {
      * Css.addNehanPrefix("foo"); // "nehan-foo"
   */
   addNehanPrefix : function(name){
-    return "nehan-" + name;
+    return (name.indexOf("nehan-") === 0)? name : "nehan-" + name;
   },
   /**
      @memberof Nehan.Css
@@ -2636,7 +2663,7 @@ var HashSet = (function(){
      @constructor
    */
   function HashSet(values){
-    this._values = values || {};
+    this._values = Obj.clone(values || {});
   }
 
   HashSet.prototype = {
@@ -2664,10 +2691,9 @@ var HashSet = (function(){
        @param set {Nehan.HashSet}
      */
     union : function(set){
-      var self = this;
       set.iter(function(key, value){
-	self.add(key, value);
-      });
+	this.add(key, value);
+      }.bind(this));
       return this;
     },
     /**
@@ -2692,7 +2718,8 @@ var HashSet = (function(){
     */
     add : function(name, value){
       var old_value = this._values[name] || null;
-      this._values[name] = old_value? this.merge(old_value, value) : value;
+      var new_value = old_value? this.merge(old_value, value) : value;
+      this._values[name] = new_value;
     },
     /**
      * this function is used when performance matters,<br>
@@ -3250,6 +3277,7 @@ var TypeSelector = (function(){
     this.classes = opt.classes || [];
     this.attrs = opt.attrs || [];
     this.pseudo = opt.pseudo || null;
+    this.classes.sort();
   }
   
   TypeSelector.prototype = {
@@ -3716,26 +3744,21 @@ var Selector = (function(){
    @namespace Nehan.Selectors
  */
 var Selectors = (function(){
-  var __selectors = []; // selector list ordered by specificity desc.
-  var __selectors_pe = []; // selector (with pseudo-element) list, ordered by specificity desc.
+  var __selectors = []; // selector (without pseudo-element) list.
+  var __selectors_pe = []; // selector (with pseudo-element) list.
 
   // sort __selectors by specificity asc.
-  // so higher specificity overwrites lower one.
-  var __sort_selectors = function(){
-    __selectors.sort(function(s1,s2){ return s1.spec - s2.spec; });
-  };
-
-  var __sort_selectors_pe = function(){
-    __selectors_pe.sort(function(s1,s2){ return s1.spec - s2.spec; });
+  var __sort_selectors = function(selectors){
+    selectors.sort(function(s1,s2){ return s1.spec - s2.spec; });
+    return selectors;
   };
 
   var __is_pe_key = function(selector_key){
     return selector_key.indexOf("::") >= 0;
   };
 
-  var __find_selector = function(selector_key){
-    var dst_selectors = __is_pe_key(selector_key)? __selectors_pe : __selectors;
-    return List.find(dst_selectors, function(selector){
+  var __find_selector = function(selectors, selector_key){
+    return List.find(selectors, function(selector){
       return selector.getKey() === selector_key;
     });
   };
@@ -3743,74 +3766,62 @@ var Selectors = (function(){
   var __update_value = function(selector_key, value){
     var style_value = new CssHashSet(Style[selector_key]); // old style value, must be found
     style_value = style_value.union(new CssHashSet(value)); // merge new value to old
-    var selector = __find_selector(selector_key); // selector object for selector_key, must be found
+    var target_selectors = __is_pe_key(selector_key)? __selectors_pe : __selectors;
+    var selector = __find_selector(target_selectors, selector_key); // selector object for selector_key, must be found
     selector.updateValue(style_value.getValues());
   };
 
   var __insert_value = function(selector_key, value){
     var selector = new Selector(selector_key, value);
-    if(selector.hasPseudoElement()){
-      __selectors_pe.push(selector);
-    } else {
-      __selectors.push(selector);
-    }
-    // to speed up 'init_selectors' function, we did not sort immediatelly after inserting value.
-    // we sort entries after all selector_key and value are registered.
+    var target_selectors = __is_pe_key(selector_key)? __selectors_pe : __selectors;
+    target_selectors.push(selector);
     return selector;
   };
 
-  // apply Selector::test to style.
-  // if matches, copy selector value to result object.
-  // offcource, higher specificity overwrite lower one.
-  var __get_value = function(style){
-    return List.fold(__selectors, new CssHashSet(), function(ret, selector){
-      if(!selector.test(style)){
-	return ret;
-      }
+  var __get_value_pe = function(style, pseudo_element_name){
+    var matched_selectors = List.filter(__selectors_pe, function(selector){
+      return selector.testPseudoElement(style, pseudo_element_name);
+    });
+    return (matched_selectors.length === 0)? {} : List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
       return ret.union(new CssHashSet(selector.getValue()));
     }).getValues();
   };
 
-  // 'p::first-letter'
-  // => style = 'p', pseudo_element_name = 'first-letter'
-  var __get_value_pe = function(style, pseudo_element_name){
-    return List.fold(__selectors_pe, new CssHashSet(), function(ret, selector){
-      if(!selector.testPseudoElement(style, pseudo_element_name)){
-	return ret;
-      }
+  var __get_value = function(style){
+    var matched_selectors = List.filter(__selectors, function(selector){
+      return selector.test(style);
+    });
+    return (matched_selectors.length === 0)? {} : List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
       return ret.union(new CssHashSet(selector.getValue()));
     }).getValues();
   };
 
   var __set_value = function(selector_key, value){
-    // if selector_key already defined, just overwrite it.
     if(Style[selector_key]){
       __update_value(selector_key, value);
       return;
     }
     var selector = __insert_value(selector_key, value);
-
-    // notice that '__sort_selectors'(or '__sort_selectors_pe') is not called in '__insert_value'.
     Style[selector_key] = selector.getValue();
-    if(selector.hasPseudoElement()){
-      __sort_selectors_pe();
-    } else {
-      __sort_selectors();
-    }
   };
 
   var __init_selectors = function(){
-    // initialize selector list
     Obj.iter(Style, function(key, value){
       __insert_value(key, value);
     });
-    __sort_selectors();
-    __sort_selectors_pe();
   };
 
   __init_selectors();
 
   return {
+    /**
+       @memberof Nehan.Selectors
+       @param selector_key {String}
+       @return {Nehan.Selector}
+    */
+    get : function(selector_key){
+      return __find_selector(__selectors, selector_key);
+    },
     /**
        @memberof Nehan.Selectors
        @param selector_key {String}
@@ -3847,10 +3858,9 @@ var Selectors = (function(){
     },
     /**<pre>
      * get selector css that matches to the pseudo element of some style context.
-     * notice that if selector_key is "p::first-letter",
-     * pseudo-element is "first-letter" and style-context is "p".
+     * if selector_key is "p::first-letter",
+     * [pseudo_element_name] is "first-letter" and [style] is style-context of "p".
      *</pre>
-
        @memberof Nehan.Selectors
        @param style {Nehan.StyleContext} - 'parent' style context of pseudo-element
        @param pseudo_element_name {String} - "first-letter", "first-line", "before", "after"
@@ -3872,9 +3882,9 @@ var TagAttrLexer = (function(){
      @constructor
      @param src {String}
      @description <pre>
-     * lexer src is attribute parts of original tag source.
+     * [src] is attribute string of original tag source.
      * so if tag source is "<div class='nehan-float-start'>",
-     * then lexer src is "class='nehan-float-start'".
+     * then [src] is "class='nehan-float-start'".
      </pre>
   */
   function TagAttrLexer(src){
@@ -4032,16 +4042,11 @@ var TagAttrs = (function(){
       return List.exists(this.classes, Closure.eq(klass));
     },
     /**
-     * add class name, but note that all css classes is force added prefix 'nehan-'.<br>
-     * that is, if you add class "foo", it's registered as "nehan-foo"<br>
-     * to avoid external css classes defined in client browser window.
-
        @memberof Nehan.TagAttrs
        @param klass {String} - css class name
        @return {Array.<String>} current css classes
     */
     addClass : function(klass){
-      klass = (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
       if(!this.hasClass(klass)){
 	this.classes.push(klass);
 	this.setAttr("class", [this.getAttr("class"), klass].join(" "));
@@ -4082,17 +4087,6 @@ var TagAttrs = (function(){
       return (typeof this.dataset[name] === "undefined")? def_value : this.dataset[name];
     },
     /**
-       get classes NOT prefixed by "nehan-".
-
-       @memberof Nehan.TagAttrs
-       @return {Array.<String>}
-    */
-    getClassesRaw : function(){
-      return List.map(this.classes, function(klass){
-	return klass.replace("nehan-", "");
-      });
-    },
-    /**
        @memberof Nehan.TagAttrs
        @param name {String}
        @param value {attribute_value}
@@ -4120,18 +4114,16 @@ var TagAttrs = (function(){
       var class_name = attrs_raw["class"] || "";
       class_name = Utils.trim(class_name.replace(/\s+/g, " "));
       var classes = (class_name === "")? [] : class_name.split(/\s+/);
+
+      // replace 'nehan-' prefix for backword compatibility(version <= 5.1.0).
       return List.map(classes, function(klass){
-	return (klass.indexOf("nehan-") < 0)? "nehan-" + klass : klass;
-      });
+	return (klass.indexOf("nehan-") === 0)? klass.replace("nehan-", "") : klass;
+      }); 
     },
     _parseAttrs : function(attrs_raw, classes){
       var attrs = {};
       Obj.iter(attrs_raw, function(name, value){
-	if(name === "id"){ // force add prefix "nehan-".
-	  attrs[name] = (value.indexOf("nehan-") === 0)? value : "nehan-" + value;
-	} else if(name === "class"){
-	  attrs[name] = classes.join(" ");
-	} else if(name.indexOf("data-") < 0){
+	if(name.indexOf("data-") < 0){
 	  attrs[name] = value;
 	}
       });
@@ -4311,13 +4303,6 @@ var Tag = (function (){
     */
     getClasses : function(){
       return this.attrs.classes;
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {Array.<String>}
-    */
-    getClassesRaw : function(){
-      return this.attrs.getClassesRaw();
     },
     /**
        @memberof Nehan.Tag
@@ -8588,7 +8573,7 @@ var Box = (function(){
        @return {Array.<string>}
     */
     getClassName : function(){
-      return this.classes? this.classes.join(" ") : "";
+      return this.classes? List.map(this.classes, Css.addNehanPrefix).join(" ") : "";
     },
     /**
        @memberof Nehan.Box
@@ -12252,7 +12237,6 @@ var StyleContext = (function(){
        @return {String}
     */
     getMarkupId : function(){
-      // if markup is <p id="foo">, markup.id is "nehan-foo".
       return this.markup.getId();
     },
     /**

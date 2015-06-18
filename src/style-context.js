@@ -1046,7 +1046,6 @@ var StyleContext = (function(){
        @return {String}
     */
     getMarkupId : function(){
-      // if markup is <p id="foo">, markup.id is "nehan-foo".
       return this.markup.getId();
     },
     /**

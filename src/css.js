@@ -25,7 +25,7 @@ var Css = {
      * Css.addNehanPrefix("foo"); // "nehan-foo"
   */
   addNehanPrefix : function(name){
-    return "nehan-" + name;
+    return (name.indexOf("nehan-") === 0)? name : "nehan-" + name;
   },
   /**
      @memberof Nehan.Css

@@ -6,7 +6,7 @@ var HashSet = (function(){
      @constructor
    */
   function HashSet(values){
-    this._values = values || {};
+    this._values = Obj.clone(values || {});
   }
 
   HashSet.prototype = {
@@ -34,10 +34,9 @@ var HashSet = (function(){
        @param set {Nehan.HashSet}
      */
     union : function(set){
-      var self = this;
       set.iter(function(key, value){
-	self.add(key, value);
-      });
+	this.add(key, value);
+      }.bind(this));
       return this;
     },
     /**
@@ -62,7 +61,8 @@ var HashSet = (function(){
     */
     add : function(name, value){
       var old_value = this._values[name] || null;
-      this._values[name] = old_value? this.merge(old_value, value) : value;
+      var new_value = old_value? this.merge(old_value, value) : value;
+      this._values[name] = new_value;
     },
     /**
      * this function is used when performance matters,<br>
