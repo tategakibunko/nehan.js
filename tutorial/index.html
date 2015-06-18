@@ -127,38 +127,30 @@
 <i class="info icon"></i><p class="content">For more details for logical property, see <a href="http://www.w3.org/TR/2012/WD-css3-writing-modes-20121115/#abstract-box">CSS Writing Modes Module Level3 - Abstract box dimemsions.</a>.</p>
 </div>
 
-<h5>special prefix</h5>
+<h5>logical direction</h5>
 
-<p>To avoid confliction of css defined in outer world of nehan.js, both css className and idName must be prefixed by <code>nehan-</code>.</p>
-
-<h4 class="ui dividing header">Example1</h4>
-
-<p>Set some class size 100px at inline level, 200px at block level, and set margin 20px at block level.</p>
+<p>For example, lets define some simple style like bellow.</p>
 
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript"><span class="comment">// all class name of nehan is required "nehan-" prefix.</span>
-pages.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">.nehan-example1</span><span class="delimiter">"</span></span>, {
+pages.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">.example1</span><span class="delimiter">"</span></span>, {
   <span class="key">measure</span>:<span class="string"><span class="delimiter">"</span><span class="content">100px</span><span class="delimiter">"</span></span>,
   <span class="key">extent</span>:<span class="string"><span class="delimiter">"</span><span class="content">200px</span><span class="delimiter">"</span></span>,
   <span class="key">margin</span>:{<span class="key">start</span>:<span class="integer">0</span>, <span class="key">end</span>:<span class="integer">0</span>, <span class="key">before</span>:<span class="integer">0</span>, <span class="key">after</span>:<span class="string"><span class="delimiter">"</span><span class="content">20px</span><span class="delimiter">"</span></span>}
 });</code></pre></div></div></div>
 
-<div class="ui warning icon message">
-<i class="warning icon"></i><p class="content">
-You might wonder what is <code>{start:0, end:0, before:0, after:"20px"}</code>?<br>
-<br>
-This is <b>logical direction</b> of abstract box, <code>start</code> and <code>end</code> are along inline direction, and <code>before</code> and <code>after</code> are along block level direction.<br>
-<br>
-So if flow is <code>lr-tb</code>, <code>margin:{after:"20px"}</code> means <code>margin-bottom:"20px"</code>.<br>
-<br>
-But if flow is <code>tb-rl</code>, it means <code>margin-left:20px</code> because in tb-rl, block level flows from right to left.
-</p>
-</div>
+<p>You might wonder what is <code>{start:0, end:0, before:0, after:"20px"}</code>?<br></p>
+
+<p>This is <b>logical direction</b> of abstract box, <code>start</code> and <code>end</code> are along inline direction, and <code>before</code> and <code>after</code> are along block level direction.<br></p>
+
+<p>So if flow is <code>lr-tb</code>, <code>margin:{after:"20px"}</code> means <code>margin-bottom:"20px"</code>.<br></p>
+
+<p>But if flow is <code>tb-rl</code>, it means <code>margin-left:20px</code> because in tb-rl, block level flows from right to left.</p>
 
 <h4 class="ui dividing header">Example2</h4>
 
 <p>Set <code>backgrond-color</code> to <code>blue</code> if nth-child is even, otherwise <code>red</code>.</p>
 
-<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">pages.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">.nehan-example2</span><span class="delimiter">"</span></span>, {
+<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">pages.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">.example2</span><span class="delimiter">"</span></span>, {
   <span class="key"><span class="delimiter">"</span><span class="content">background-color</span><span class="delimiter">"</span></span>:<span class="keyword">function</span>(ctx){
      <span class="keyword">if</span>(ctx.getChildIndex() % <span class="integer">2</span> === <span class="integer">0</span>){
        <span class="keyword">return</span> <span class="string"><span class="delimiter">"</span><span class="content">blue</span><span class="delimiter">"</span></span>;
@@ -195,7 +187,7 @@ Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class=
 
 <p>Using <code>onload</code> property, you can change markup dynamically before parsing.</p>
 
-<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">pages.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">.nehan-time</span><span class="delimiter">"</span></span>, {
+<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">pages.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">.time</span><span class="delimiter">"</span></span>, {
   <span class="function">onload</span>:<span class="keyword">function</span>(context){
      <span class="keyword">var</span> markup = context.getMarkup();
      <span class="keyword">var</span> now = <span class="keyword">new</span> Date().toDateString();
