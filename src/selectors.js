@@ -77,6 +77,14 @@ var Selectors = (function(){
     /**
        @memberof Nehan.Selectors
        @param selector_key {String}
+       @return {Nehan.Selector}
+    */
+    get : function(selector_key){
+      return __find_selector(__selectors, selector_key);
+    },
+    /**
+       @memberof Nehan.Selectors
+       @param selector_key {String}
        @param value {css_value}
        @example
        * Selectors.setValue("li.foo", {"font-size":19});

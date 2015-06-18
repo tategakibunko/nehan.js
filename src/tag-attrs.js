@@ -106,7 +106,12 @@ var TagAttrs = (function(){
     _parseClasses : function(attrs_raw){
       var class_name = attrs_raw["class"] || "";
       class_name = Utils.trim(class_name.replace(/\s+/g, " "));
-      return (class_name === "")? [] : class_name.split(/\s+/);
+      var classes = (class_name === "")? [] : class_name.split(/\s+/);
+
+      // replace 'nehan-' prefix for backword compatibility(version <= 5.1.0).
+      return List.map(classes, function(klass){
+	return (klass.indexOf("nehan-") === 0)? klass.replace("nehan-", "") : klass;
+      }); 
     },
     _parseAttrs : function(attrs_raw, classes){
       var attrs = {};

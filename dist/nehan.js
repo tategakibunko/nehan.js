@@ -2056,55 +2056,88 @@ var List = {
 
    @namespace Nehan.Obj
 */
-var Obj = {
-  /**
-     @memberof Nehan.Obj
-     @param obj {Object}
-     @return {boolean}
-  */
-  isEmpty: function(obj){
-    for(var name in obj){
-      return false;
+var Obj = (function(){
+  var __clone = function(obj){
+    var copy;
+    if(obj === null || typeof obj !== "object"){
+      return obj;
     }
-    return true;
-  },
-  /**
-     @memberof Nehan.Obj
-     @param obj {Object}
-     @param fn {Function} - fun prop -> value -> obj
-  */
-  map : function(obj, fn){
-    var ret = {};
-    this.iter(obj, function(prop, value){
-      ret[prop] = fn(prop, value);
-    });
-    return ret;
-  },
-  /**
-     @memberof Nehan.Obj
-     @param obj {Object}
-     @param fn {Function} - fun prop -> value -> {boolean}
-  */
-  filter : function(obj, fn){
-    var ret = {};
-    this.iter(obj, function(prop, value){
-      if(fn(prop, value)){
-	ret[prop] = value;
+    if(obj instanceof Array) {
+      copy = [];
+      for(var i = 0; i < obj.len; i++){
+        copy[i] = __clone(obj[i]);
       }
-    });
-    return ret;
-  },
-  /**
-     @memberof Nehan.Obj
-     @param obj {Object}
-     @param fn {Function} - fun prop -> value -> ()
-  */
-  iter : function(obj, fn){
-    for(var prop in obj){
-      fn(prop, obj[prop]);
+      return copy;
     }
-  }
-};
+    if (obj instanceof Object) {
+      copy = {};
+      for(var prop in obj){
+        if(obj.hasOwnProperty(prop)){
+	  copy[prop] = __clone(obj[prop]);
+	}
+      }
+      return copy;
+    }
+    throw "Obj::clone(unsupported type)";
+  };
+  return {
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @return {boolean}
+    */
+    isEmpty: function(obj){
+      for(var name in obj){
+	return false;
+      }
+      return true;
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @return {Object}
+    */
+    clone: function(obj){
+      return __clone(obj);
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @param fn {Function} - fun prop -> value -> obj
+    */
+    map : function(obj, fn){
+      var ret = {};
+      this.iter(obj, function(prop, value){
+	ret[prop] = fn(prop, value);
+      });
+      return ret;
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @param fn {Function} - fun prop -> value -> {boolean}
+    */
+    filter : function(obj, fn){
+      var ret = {};
+      this.iter(obj, function(prop, value){
+	if(fn(prop, value)){
+	  ret[prop] = value;
+	}
+      });
+      return ret;
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @param fn {Function} - fun prop -> value -> ()
+    */
+    iter : function(obj, fn){
+      for(var prop in obj){
+	fn(prop, obj[prop]);
+      }
+    }
+  };
+})();
 
 /**
    misc utility module.
@@ -2630,7 +2663,7 @@ var HashSet = (function(){
      @constructor
    */
   function HashSet(values){
-    this._values = values || {};
+    this._values = Obj.clone(values || {});
   }
 
   HashSet.prototype = {
@@ -2658,10 +2691,9 @@ var HashSet = (function(){
        @param set {Nehan.HashSet}
      */
     union : function(set){
-      var self = this;
       set.iter(function(key, value){
-	self.add(key, value);
-      });
+	this.add(key, value);
+      }.bind(this));
       return this;
     },
     /**
@@ -2686,7 +2718,8 @@ var HashSet = (function(){
     */
     add : function(name, value){
       var old_value = this._values[name] || null;
-      this._values[name] = old_value? this.merge(old_value, value) : value;
+      var new_value = old_value? this.merge(old_value, value) : value;
+      this._values[name] = new_value;
     },
     /**
      * this function is used when performance matters,<br>
@@ -3784,6 +3817,14 @@ var Selectors = (function(){
     /**
        @memberof Nehan.Selectors
        @param selector_key {String}
+       @return {Nehan.Selector}
+    */
+    get : function(selector_key){
+      return __find_selector(__selectors, selector_key);
+    },
+    /**
+       @memberof Nehan.Selectors
+       @param selector_key {String}
        @param value {css_value}
        @example
        * Selectors.setValue("li.foo", {"font-size":19});
@@ -4072,7 +4113,12 @@ var TagAttrs = (function(){
     _parseClasses : function(attrs_raw){
       var class_name = attrs_raw["class"] || "";
       class_name = Utils.trim(class_name.replace(/\s+/g, " "));
-      return (class_name === "")? [] : class_name.split(/\s+/);
+      var classes = (class_name === "")? [] : class_name.split(/\s+/);
+
+      // replace 'nehan-' prefix for backword compatibility(version <= 5.1.0).
+      return List.map(classes, function(klass){
+	return (klass.indexOf("nehan-") === 0)? klass.replace("nehan-", "") : klass;
+      }); 
     },
     _parseAttrs : function(attrs_raw, classes){
       var attrs = {};
