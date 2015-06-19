@@ -562,6 +562,94 @@ Nehan.List = {
 };
 
 
+/**
+   object utility module
+
+   @namespace Nehan.Obj
+*/
+Nehan.Obj = (function(){
+  var __clone = function(obj){
+    var copy;
+    if(obj === null || typeof obj !== "object"){
+      return obj;
+    }
+    if(obj instanceof Array) {
+      copy = [];
+      for(var i = 0; i < obj.len; i++){
+        copy[i] = __clone(obj[i]);
+      }
+      return copy;
+    }
+    if (obj instanceof Object) {
+      copy = {};
+      for(var prop in obj){
+        if(obj.hasOwnProperty(prop)){
+	  copy[prop] = __clone(obj[prop]);
+	}
+      }
+      return copy;
+    }
+    throw "Obj::clone(unsupported type)";
+  };
+  return {
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @return {boolean}
+    */
+    isEmpty: function(obj){
+      for(var name in obj){
+	return false;
+      }
+      return true;
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @return {Object}
+    */
+    clone: function(obj){
+      return __clone(obj);
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @param fn {Function} - fun prop -> value -> obj
+    */
+    map : function(obj, fn){
+      var ret = {};
+      this.iter(obj, function(prop, value){
+	ret[prop] = fn(prop, value);
+      });
+      return ret;
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @param fn {Function} - fun prop -> value -> {boolean}
+    */
+    filter : function(obj, fn){
+      var ret = {};
+      this.iter(obj, function(prop, value){
+	if(fn(prop, value)){
+	  ret[prop] = value;
+	}
+      });
+      return ret;
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @param fn {Function} - fun prop -> value -> ()
+    */
+    iter : function(obj, fn){
+      for(var prop in obj){
+	fn(prop, obj[prop]);
+      }
+    }
+  };
+})();
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -2052,94 +2140,6 @@ Class.extend = function(childCtor, parentCtor) {
 
 
 /**
-   object utility module
-
-   @namespace Nehan.Obj
-*/
-var Obj = (function(){
-  var __clone = function(obj){
-    var copy;
-    if(obj === null || typeof obj !== "object"){
-      return obj;
-    }
-    if(obj instanceof Array) {
-      copy = [];
-      for(var i = 0; i < obj.len; i++){
-        copy[i] = __clone(obj[i]);
-      }
-      return copy;
-    }
-    if (obj instanceof Object) {
-      copy = {};
-      for(var prop in obj){
-        if(obj.hasOwnProperty(prop)){
-	  copy[prop] = __clone(obj[prop]);
-	}
-      }
-      return copy;
-    }
-    throw "Obj::clone(unsupported type)";
-  };
-  return {
-    /**
-       @memberof Nehan.Obj
-       @param obj {Object}
-       @return {boolean}
-    */
-    isEmpty: function(obj){
-      for(var name in obj){
-	return false;
-      }
-      return true;
-    },
-    /**
-       @memberof Nehan.Obj
-       @param obj {Object}
-       @return {Object}
-    */
-    clone: function(obj){
-      return __clone(obj);
-    },
-    /**
-       @memberof Nehan.Obj
-       @param obj {Object}
-       @param fn {Function} - fun prop -> value -> obj
-    */
-    map : function(obj, fn){
-      var ret = {};
-      this.iter(obj, function(prop, value){
-	ret[prop] = fn(prop, value);
-      });
-      return ret;
-    },
-    /**
-       @memberof Nehan.Obj
-       @param obj {Object}
-       @param fn {Function} - fun prop -> value -> {boolean}
-    */
-    filter : function(obj, fn){
-      var ret = {};
-      this.iter(obj, function(prop, value){
-	if(fn(prop, value)){
-	  ret[prop] = value;
-	}
-      });
-      return ret;
-    },
-    /**
-       @memberof Nehan.Obj
-       @param obj {Object}
-       @param fn {Function} - fun prop -> value -> ()
-    */
-    iter : function(obj, fn){
-      for(var prop in obj){
-	fn(prop, obj[prop]);
-      }
-    }
-  };
-})();
-
-/**
    misc utility module.
 
    @namespace Nehan.Utils
@@ -2663,7 +2663,7 @@ var HashSet = (function(){
      @constructor
    */
   function HashSet(values){
-    this._values = Obj.clone(values || {});
+    this._values = Nehan.Obj.clone(values || {});
   }
 
   HashSet.prototype = {
@@ -2672,7 +2672,7 @@ var HashSet = (function(){
        @param fn {Function}
     */
     iter : function(fn){
-      Obj.iter(this._values, fn);
+      Nehan.Obj.iter(this._values, fn);
     },
     /**
        merge new value to old value with same key. simply overwrite by default.
@@ -3806,7 +3806,7 @@ var Selectors = (function(){
   };
 
   var __init_selectors = function(){
-    Obj.iter(Style, function(key, value){
+    Nehan.Obj.iter(Style, function(key, value){
       __insert_value(key, value);
     });
   };
@@ -4122,7 +4122,7 @@ var TagAttrs = (function(){
     },
     _parseAttrs : function(attrs_raw, classes){
       var attrs = {};
-      Obj.iter(attrs_raw, function(name, value){
+      Nehan.Obj.iter(attrs_raw, function(name, value){
 	if(name.indexOf("data-") < 0){
 	  attrs[name] = value;
 	}
@@ -12274,21 +12274,21 @@ var StyleContext = (function(){
     getContent : function(){
       var content = this.getCssAttr("content") || this.markup.getContent();
       var before = Selectors.getValuePe(this, "before");
-      if(!Obj.isEmpty(before)){
+      if(!Nehan.Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;
       }
       var after = Selectors.getValuePe(this, "after");
-      if(!Obj.isEmpty(after)){
+      if(!Nehan.Obj.isEmpty(after)){
 	content = content + Html.tagWrap("after", after.content || "");
       }
       var first_letter = Selectors.getValuePe(this, "first-letter");
-      if(!Obj.isEmpty(first_letter)){
+      if(!Nehan.Obj.isEmpty(first_letter)){
 	content = content.replace(__rex_first_letter, function(match, p1, p2, p3){
 	  return p1 + Html.tagWrap("first-letter", p3);
 	});
       }
       var first_line = Selectors.getValuePe(this, "first-line");
-      if(!Obj.isEmpty(first_line)){
+      if(!Nehan.Obj.isEmpty(first_line)){
 	content = Html.tagWrap("first-line", content);
       }
       return content;
@@ -12856,7 +12856,7 @@ var StyleContext = (function(){
       }
     },
     _registerCssValues : function(values){
-      Obj.iter(values, function(prop, value){
+      Nehan.Obj.iter(values, function(prop, value){
 	if(__is_callback_css_prop(prop)){
 	  this.callbackCss.add(prop, value);
 	} else if(__is_managed_css_prop(prop)){
@@ -16478,7 +16478,7 @@ var LayoutEvaluator = (function(){
       }
 
       // store css value to dom.style[<camelized-css-property>]
-      Obj.iter(css, function(style_name, value){
+      Nehan.Obj.iter(css, function(style_name, value){
 	try {
 	  dom.style[Utils.camelize(style_name)] = value;
 	} catch(error){
@@ -16490,7 +16490,7 @@ var LayoutEvaluator = (function(){
       // why? because
       // 1. markup of anonymous line is shared by parent block, but both are given different class names.
       // 2. sometimes we add some special class name like "nehan-div", "nehan-body", "nehan-p"... etc.
-      Obj.iter(attrs, function(attr_name, value){ // pure attributes(without dataset defined in TagAttrs::attrs)
+      Nehan.Obj.iter(attrs, function(attr_name, value){ // pure attributes(without dataset defined in TagAttrs::attrs)
 	// "style" is readonly and "class" is already set by opt.className.
 	if(attr_name !== "style" && attr_name !== "class"){
 	  try {

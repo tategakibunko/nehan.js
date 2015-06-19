@@ -3,7 +3,7 @@
 
    @namespace Nehan.Obj
 */
-var Obj = (function(){
+Nehan.Obj = (function(){
   var __clone = function(obj){
     var copy;
     if(obj === null || typeof obj !== "object"){

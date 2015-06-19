@@ -115,7 +115,7 @@ var TagAttrs = (function(){
     },
     _parseAttrs : function(attrs_raw, classes){
       var attrs = {};
-      Obj.iter(attrs_raw, function(name, value){
+      Nehan.Obj.iter(attrs_raw, function(name, value){
 	if(name.indexOf("data-") < 0){
 	  attrs[name] = value;
 	}

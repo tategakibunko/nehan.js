@@ -6,7 +6,7 @@ var HashSet = (function(){
      @constructor
    */
   function HashSet(values){
-    this._values = Obj.clone(values || {});
+    this._values = Nehan.Obj.clone(values || {});
   }
 
   HashSet.prototype = {
@@ -15,7 +15,7 @@ var HashSet = (function(){
        @param fn {Function}
     */
     iter : function(fn){
-      Obj.iter(this._values, fn);
+      Nehan.Obj.iter(this._values, fn);
     },
     /**
        merge new value to old value with same key. simply overwrite by default.

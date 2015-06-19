@@ -66,7 +66,7 @@ var Selectors = (function(){
   };
 
   var __init_selectors = function(){
-    Obj.iter(Style, function(key, value){
+    Nehan.Obj.iter(Style, function(key, value){
       __insert_value(key, value);
     });
   };

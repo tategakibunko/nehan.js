@@ -1083,21 +1083,21 @@ var StyleContext = (function(){
     getContent : function(){
       var content = this.getCssAttr("content") || this.markup.getContent();
       var before = Selectors.getValuePe(this, "before");
-      if(!Obj.isEmpty(before)){
+      if(!Nehan.Obj.isEmpty(before)){
 	content = Html.tagWrap("before", before.content || "") + content;
       }
       var after = Selectors.getValuePe(this, "after");
-      if(!Obj.isEmpty(after)){
+      if(!Nehan.Obj.isEmpty(after)){
 	content = content + Html.tagWrap("after", after.content || "");
       }
       var first_letter = Selectors.getValuePe(this, "first-letter");
-      if(!Obj.isEmpty(first_letter)){
+      if(!Nehan.Obj.isEmpty(first_letter)){
 	content = content.replace(__rex_first_letter, function(match, p1, p2, p3){
 	  return p1 + Html.tagWrap("first-letter", p3);
 	});
       }
       var first_line = Selectors.getValuePe(this, "first-line");
-      if(!Obj.isEmpty(first_line)){
+      if(!Nehan.Obj.isEmpty(first_line)){
 	content = Html.tagWrap("first-line", content);
       }
       return content;
@@ -1665,7 +1665,7 @@ var StyleContext = (function(){
       }
     },
     _registerCssValues : function(values){
-      Obj.iter(values, function(prop, value){
+      Nehan.Obj.iter(values, function(prop, value){
 	if(__is_callback_css_prop(prop)){
 	  this.callbackCss.add(prop, value);
 	} else if(__is_managed_css_prop(prop)){

@@ -52,7 +52,7 @@ var LayoutEvaluator = (function(){
       }
 
       // store css value to dom.style[<camelized-css-property>]
-      Obj.iter(css, function(style_name, value){
+      Nehan.Obj.iter(css, function(style_name, value){
 	try {
 	  dom.style[Utils.camelize(style_name)] = value;
 	} catch(error){
@@ -64,7 +64,7 @@ var LayoutEvaluator = (function(){
       // why? because
       // 1. markup of anonymous line is shared by parent block, but both are given different class names.
       // 2. sometimes we add some special class name like "nehan-div", "nehan-body", "nehan-p"... etc.
-      Obj.iter(attrs, function(attr_name, value){ // pure attributes(without dataset defined in TagAttrs::attrs)
+      Nehan.Obj.iter(attrs, function(attr_name, value){ // pure attributes(without dataset defined in TagAttrs::attrs)
 	// "style" is readonly and "class" is already set by opt.className.
 	if(attr_name !== "style" && attr_name !== "class"){
 	  try {
