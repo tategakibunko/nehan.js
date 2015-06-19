@@ -3803,7 +3803,7 @@ var Display = {
      @return {Nehan.BoxFlow}
   */
   getStdFont : function(){
-    var font = new Font(Display.fontSize);
+    var font = new Nehan.Font(Display.fontSize);
     font.family = Display.fontFamily;
     font.weight = "normal";
     font.style = "normal";
@@ -7075,7 +7075,7 @@ var BoxFlows = {
   }
 };
 
-var Font = (function(){
+Nehan.Font = (function(){
   /**
      @memberof Nehan
      @class Font
@@ -12918,7 +12918,7 @@ var StyleContext = (function(){
       if(this.parent && this.parent.isBlock() && font_size === "inherit" && font_family === "inherit" && font_weight === "inherit" && font_style === "inherit"){
 	return null;
       }
-      var font = new Font(parent_font.size);
+      var font = new Nehan.Font(parent_font.size);
 
       // if root font, initialize font by default styles.
       if(this.parent === null){

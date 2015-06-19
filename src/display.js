@@ -234,7 +234,7 @@ var Display = {
      @return {Nehan.BoxFlow}
   */
   getStdFont : function(){
-    var font = new Font(Display.fontSize);
+    var font = new Nehan.Font(Display.fontSize);
     font.family = Display.fontFamily;
     font.weight = "normal";
     font.style = "normal";

@@ -1734,7 +1734,7 @@ var StyleContext = (function(){
       if(this.parent && this.parent.isBlock() && font_size === "inherit" && font_family === "inherit" && font_weight === "inherit" && font_style === "inherit"){
 	return null;
       }
-      var font = new Font(parent_font.size);
+      var font = new Nehan.Font(parent_font.size);
 
       // if root font, initialize font by default styles.
       if(this.parent === null){

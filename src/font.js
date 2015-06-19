@@ -1,4 +1,4 @@
-var Font = (function(){
+Nehan.Font = (function(){
   /**
      @memberof Nehan
      @class Font
