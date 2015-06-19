@@ -1,4 +1,4 @@
-var SectionHeader = (function(){
+Nehan.SectionHeader = (function(){
   /**
      @memberof Nehan
      @class SectionHeader

@@ -21,7 +21,7 @@ var DocumentContext = (function(){
   };
 
   var __convert_outline_context_to_element = function(context, callbacks){
-    var tree = OutlineContextParser.parse(context);
+    var tree = Nehan.OutlineContextParser.parse(context);
     return tree? SectionTreeConverter.convert(tree, callbacks) : null;
   };
 

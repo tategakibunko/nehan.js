@@ -4595,6 +4595,441 @@ Nehan.BoxPosition = (function(){
 })();
 
 
+Nehan.SectionHeader = (function(){
+  /**
+     @memberof Nehan
+     @class SectionHeader
+     @classdesc abstraction of section header with header rank, header title, and system unique id(optional).
+     @constructor
+  */
+  function SectionHeader(rank, title, id){
+    this.rank = rank;
+    this.title = title;
+    this._id = id || 0;
+  }
+
+  SectionHeader.prototype = {
+    /**
+       @memberof Nehan.SectionHeader
+       @return {int}
+    */
+    getId : function(){
+      return this._id;
+    }
+  };
+
+  return SectionHeader;
+})();
+
+Nehan.Section = (function(){
+  /**
+     @memberof Nehan
+     @class Section
+     @classdesc section tree node with parent, next, child pointer.
+     @constructor
+  */
+  function Section(type, parent, page_no){
+    this._type = type;
+    this._header = null;
+    this._auto = false;
+    this._next = null;
+    this._child = null;
+    this._parent = parent || null;
+    this._pageNo = page_no || 0;
+  }
+
+  Section.prototype = {
+    /**
+       @memberof Nehan.Section
+       @return {boolean}
+    */
+    isRoot : function(){
+      return this._parent === null;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {boolean}
+    */
+    isAuto : function(){
+      return this._auto;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {boolean}
+    */
+    hasHeader : function(){
+      return this._header !== null;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {boolean}
+    */
+    hasHeaderId : function(){
+      return this.getHeaderId() > 0;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {boolean}
+    */
+    hasChild : function(){
+      return this._child !== null;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {boolean}
+    */
+    hasNext : function(){
+      return this._next !== null;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {Nehan.Section}
+    */
+    getNext : function(){
+      return this._next;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {Nehan.Section}
+    */
+    getChild : function(){
+      return this._child;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {Nehan.Section}
+    */
+    getParent : function(){
+      return this._parent;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {Nehan.SectionHeader}
+    */
+    getHeader : function(){
+      return this._header;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {int}
+    */
+    getHeaderId : function(){
+      if(this._header){
+	return this._header.getId();
+      }
+      return null;
+    },
+    /**
+       @memberof Nehan.Section
+       @param header {Nehan.SectionHeader}
+    */
+    setHeader : function(header){
+      this._header = header;
+    },
+    /**
+       @memberof Nehan.Section
+    */
+    setAuto : function(){
+      this._auto = true;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {int}
+    */
+    getRank : function(){
+      return this._header? this._header.rank : 0;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {String}
+    */
+    getTitle : function(){
+      return this._header? this._header.title : ["untitled", this._type].join(" ");
+    },
+    /**
+       @memberof Nehan.Section
+       @return {String}
+    */
+    getType : function(){
+      return this._type;
+    },
+    /**
+       @memberof Nehan.Section
+       @return {int}
+    */
+    getPageNo : function(){
+      return this._pageNo;
+    },
+    /**
+       @memberof Nehan.Section
+       @param page_no {int}
+    */
+    updatePageNo : function(page_no){
+      this._pageNo = page_no;
+    },
+    /**
+       @memberof Nehan.Section
+       @param section {Nehan.Section}
+    */
+    addChild : function(section){
+      if(this._child === null){
+	this._child = section;
+      } else {
+	this._child.addNext(section);
+      }
+    },
+    /**
+       @memberof Nehan.Section
+       @param section {Nehan.Section}
+    */
+    addNext : function(section){
+      if(this._next === null){
+	this._next = section;
+      } else {
+	this._next.addNext(section);
+      }
+    }
+  };
+
+  return Section;
+})();
+
+
+Nehan.TocContext = (function(){
+  /**
+     @memberof Nehan
+     @class TocContext
+     @classdesc context data of toc parsing.
+     @constructor
+  */
+  function TocContext(){
+    this.stack = [1];
+  }
+
+  TocContext.prototype = {
+    /**
+       @memberof Nehan.TocContext
+       @return {String}
+       @example
+       * // assume that current toc stack is [1,2,1].
+       * ctx.toString(); // "1.2.1"
+    */
+    toString : function(){
+      return this.stack.join(".");
+    },
+    /**
+       countup toc count of current depth.
+
+       @memberof Nehan.TocContext
+       @return {Nehan.TocContext}
+       @example
+       * // assume that current toc stack is [1,2], and
+       * // current toc depth is at 1(0 is first).
+       * ctx.toString(); // "1.2"
+       * ctx.stepNext();
+       * ctx.toString(); // "1.3"
+    */
+    stepNext : function(){
+      if(this.stack.length > 0){
+	this.stack[this.stack.length - 1]++;
+      }
+      return this;
+    },
+    /**
+       append toc root
+
+       @memberof Nehan.TocContext
+       @return {Nehan.TocContext}
+       @example
+       * // assume that current toc stack is [1,2].
+       * ctx.toString(); // "1.2"
+       * ctx.startRoot();
+       * ctx.toString(); // "1.2.1"
+    */
+    startRoot : function(){
+      this.stack.push(1);
+      return this;
+    },
+    /**
+       finish toc root
+
+       @memberof Nehan.TocContext
+       @return {Nehan.TocContext}
+       @example
+       * // assume that current toc stack is [1,2].
+       * ctx.toString(); // "1.2"
+       * ctx.startRoot();
+       * ctx.toString(); // "1.2.1"
+       * ctx.endRoot();
+       * ctx.toString(); // "1.2"
+    */
+    endRoot : function(){
+      this.stack.pop();
+      return this;
+    }
+  };
+
+  return TocContext;
+})();
+
+Nehan.OutlineContext = (function(){
+  /**
+     @memberof Nehan
+     @class OutlineContext
+     @classdesc outline context object. outline is generated by section root element, sectionning element, heading element etc.
+     @constructor
+     @param markup_name {String} - section root name like "body", "fieldset", "blockquote" etc.
+  */
+  function OutlineContext(markup_name){
+    this.logs = [];
+    this.markupName = markup_name;
+  }
+
+  OutlineContext.prototype = {
+    /**
+       @memberof Nehan.OutlineContext
+       @return {boolean}
+    */
+    isEmpty : function(){
+      return this.logs.length === 0;
+    },
+    /**
+       @memberof Nehan.OutlineContext
+       @return {Object} log object
+    */
+    get : function(index){
+      return this.logs[index] || null;
+    },
+    /**
+       @memberof Nehan.OutlineContext
+       @return {String}
+    */
+    getMarkupName : function(){
+      return this.markupName;
+    },
+    /**
+       @memberof Nehan.OutlineContext
+       @param opt {Object}
+       @param opt.type {String} - markup name
+       @param opt.pageNo {int} - page no of section
+       @return {Nehan.OutlineContext}
+    */
+    startSection : function(opt){
+      this.logs.push({
+	name:"start-section",
+	type:opt.type,
+	pageNo:opt.pageNo
+      });
+      return this;
+    },
+    /**
+       @memberof Nehan.OutlineContext
+       @param type {String} - markup name
+       @return {Nehan.OutlineContext}
+    */
+    endSection : function(type){
+      this.logs.push({
+	name:"end-section",
+	type:type
+      });
+      return this;
+    },
+    /**
+       @memberof Nehan.OutlineContext
+       @param opt {Object}
+       @param opt.type {String} - markup name
+       @param opt.headerId {String} - unique header id(associate header box object with outline)
+       @pramm opt.pageNo {int} - page no of this header
+       @param opt.rank {int} - header rank(1 - 6)
+       @param opt.title {String} - header title
+       @return {String} header id
+    */
+    addHeader : function(opt){
+      this.logs.push({
+	name:"set-header",
+	headerId:opt.headerId,
+	pageNo:opt.pageNo,
+	type:opt.type,
+	rank:opt.rank,
+	title:opt.title
+      });
+      return opt.headerId;
+    }
+  };
+
+  return OutlineContext;
+})();
+
+/**
+   parser module to convert from context to section tree object.
+
+   @namespace Nehan.OutlineContextParser
+*/
+Nehan.OutlineContextParser = (function(){
+  var _parse = function(context, parent, ptr){
+    var log = context.get(ptr++);
+    if(log === null){
+      return;
+    }
+    switch(log.name){
+    case "start-section":
+      var section = new Nehan.Section(log.type, parent, log.pageNo);
+      if(parent){
+	parent.addChild(section);
+      }
+      _parse(context, section, ptr);
+      break;
+
+    case "end-section":
+      _parse(context, parent.getParent(), ptr);
+      break;
+
+    case "set-header":
+      var header = new Nehan.SectionHeader(log.rank, log.title, log.headerId);
+      if(parent === null){
+	var auto_section = new Nehan.Section("section", null, log.pageNo);
+	auto_section.setHeader(header);
+	_parse(context, auto_section, ptr);
+      } else if(!parent.hasHeader()){
+	parent.setHeader(header);
+	_parse(context, parent, ptr);
+      } else {
+	var rank = log.rank;
+	var parent_rank = parent.getRank();
+	if(rank < parent_rank){ // higher rank
+	  ptr = Math.max(0, ptr - 1);
+	  _parse(context, parent.getParent(), ptr);
+	} else if(log.rank == parent_rank){ // same rank
+	  var next_section = new Nehan.Section("section", parent, log.pageNo);
+	  next_section.setHeader(header);
+	  parent.addNext(next_section);
+	  _parse(context, next_section, ptr);
+	} else { // lower rank
+	  var child_section = new Nehan.Section("section", parent, log.pageNo);
+	  child_section.setHeader(header);
+	  parent.addChild(child_section);
+	  _parse(context, child_section, ptr);
+	}
+      }
+      break;
+    }
+    return parent;
+  };
+
+  return {
+    /**
+       @memberof Nehan.OutlineContextParser
+       @param context {Nehan.OutlineContext}
+       @return {Nehan.Section} section tree root
+    */
+    parse : function(context){
+      var ptr = 0;
+      var root = new Nehan.Section("section", null, 0);
+      return _parse(context, root, ptr);
+    }
+  };
+})();
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -8996,439 +9431,6 @@ var TextLexer = (function (){
 })();
 
 
-var SectionHeader = (function(){
-  /**
-     @memberof Nehan
-     @class SectionHeader
-     @classdesc abstraction of section header with header rank, header title, and system unique id(optional).
-     @constructor
-  */
-  function SectionHeader(rank, title, id){
-    this.rank = rank;
-    this.title = title;
-    this._id = id || 0;
-  }
-
-  SectionHeader.prototype = {
-    /**
-       @memberof Nehan.SectionHeader
-       @return {int}
-    */
-    getId : function(){
-      return this._id;
-    }
-  };
-
-  return SectionHeader;
-})();
-
-var Section = (function(){
-  /**
-     @memberof Nehan
-     @class Section
-     @classdesc section tree node with parent, next, child pointer.
-     @constructor
-  */
-  function Section(type, parent, page_no){
-    this._type = type;
-    this._header = null;
-    this._auto = false;
-    this._next = null;
-    this._child = null;
-    this._parent = parent || null;
-    this._pageNo = page_no || 0;
-  }
-
-  Section.prototype = {
-    /**
-       @memberof Nehan.Section
-       @return {boolean}
-    */
-    isRoot : function(){
-      return this._parent === null;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {boolean}
-    */
-    isAuto : function(){
-      return this._auto;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {boolean}
-    */
-    hasHeader : function(){
-      return this._header !== null;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {boolean}
-    */
-    hasHeaderId : function(){
-      return this.getHeaderId() > 0;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {boolean}
-    */
-    hasChild : function(){
-      return this._child !== null;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {boolean}
-    */
-    hasNext : function(){
-      return this._next !== null;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {Nehan.Section}
-    */
-    getNext : function(){
-      return this._next;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {Nehan.Section}
-    */
-    getChild : function(){
-      return this._child;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {Nehan.Section}
-    */
-    getParent : function(){
-      return this._parent;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {Nehan.SectionHeader}
-    */
-    getHeader : function(){
-      return this._header;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {int}
-    */
-    getHeaderId : function(){
-      if(this._header){
-	return this._header.getId();
-      }
-      return null;
-    },
-    /**
-       @memberof Nehan.Section
-       @param header {Nehan.SectionHeader}
-    */
-    setHeader : function(header){
-      this._header = header;
-    },
-    /**
-       @memberof Nehan.Section
-    */
-    setAuto : function(){
-      this._auto = true;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {int}
-    */
-    getRank : function(){
-      return this._header? this._header.rank : 0;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {String}
-    */
-    getTitle : function(){
-      return this._header? this._header.title : ["untitled", this._type].join(" ");
-    },
-    /**
-       @memberof Nehan.Section
-       @return {String}
-    */
-    getType : function(){
-      return this._type;
-    },
-    /**
-       @memberof Nehan.Section
-       @return {int}
-    */
-    getPageNo : function(){
-      return this._pageNo;
-    },
-    /**
-       @memberof Nehan.Section
-       @param page_no {int}
-    */
-    updatePageNo : function(page_no){
-      this._pageNo = page_no;
-    },
-    /**
-       @memberof Nehan.Section
-       @param section {Nehan.Section}
-    */
-    addChild : function(section){
-      if(this._child === null){
-	this._child = section;
-      } else {
-	this._child.addNext(section);
-      }
-    },
-    /**
-       @memberof Nehan.Section
-       @param section {Nehan.Section}
-    */
-    addNext : function(section){
-      if(this._next === null){
-	this._next = section;
-      } else {
-	this._next.addNext(section);
-      }
-    }
-  };
-
-  return Section;
-})();
-
-
-var TocContext = (function(){
-  /**
-     @memberof Nehan
-     @class TocContext
-     @classdesc context data of toc parsing.
-     @constructor
-  */
-  function TocContext(){
-    this.stack = [1];
-  }
-
-  TocContext.prototype = {
-    /**
-       @memberof Nehan.TocContext
-       @return {String}
-       @example
-       * // assume that current toc stack is [1,2,1].
-       * ctx.toString(); // "1.2.1"
-    */
-    toString : function(){
-      return this.stack.join(".");
-    },
-    /**
-       countup toc count of current depth.
-
-       @memberof Nehan.TocContext
-       @return {Nehan.TocContext}
-       @example
-       * // assume that current toc stack is [1,2], and
-       * // current toc depth is at 1(0 is first).
-       * ctx.toString(); // "1.2"
-       * ctx.stepNext();
-       * ctx.toString(); // "1.3"
-    */
-    stepNext : function(){
-      if(this.stack.length > 0){
-	this.stack[this.stack.length - 1]++;
-      }
-      return this;
-    },
-    /**
-       append toc root
-
-       @memberof Nehan.TocContext
-       @return {Nehan.TocContext}
-       @example
-       * // assume that current toc stack is [1,2].
-       * ctx.toString(); // "1.2"
-       * ctx.startRoot();
-       * ctx.toString(); // "1.2.1"
-    */
-    startRoot : function(){
-      this.stack.push(1);
-      return this;
-    },
-    /**
-       finish toc root
-
-       @memberof Nehan.TocContext
-       @return {Nehan.TocContext}
-       @example
-       * // assume that current toc stack is [1,2].
-       * ctx.toString(); // "1.2"
-       * ctx.startRoot();
-       * ctx.toString(); // "1.2.1"
-       * ctx.endRoot();
-       * ctx.toString(); // "1.2"
-    */
-    endRoot : function(){
-      this.stack.pop();
-      return this;
-    }
-  };
-
-  return TocContext;
-})();
-
-var OutlineContext = (function(){
-  /**
-     @memberof Nehan
-     @class OutlineContext
-     @classdesc outline context object. outline is generated by section root element, sectionning element, heading element etc.
-     @constructor
-     @param markup_name {String} - section root name like "body", "fieldset", "blockquote" etc.
-  */
-  function OutlineContext(markup_name){
-    this.logs = [];
-    this.markupName = markup_name;
-  }
-
-  OutlineContext.prototype = {
-    /**
-       @memberof Nehan.OutlineContext
-       @return {boolean}
-    */
-    isEmpty : function(){
-      return this.logs.length === 0;
-    },
-    /**
-       @memberof Nehan.OutlineContext
-       @return {Object} log object
-    */
-    get : function(index){
-      return this.logs[index] || null;
-    },
-    /**
-       @memberof Nehan.OutlineContext
-       @return {String}
-    */
-    getMarkupName : function(){
-      return this.markupName;
-    },
-    /**
-       @memberof Nehan.OutlineContext
-       @param type {String} - markup name
-       @return {Nehan.OutlineContext}
-    */
-    startSection : function(type){
-      this.logs.push({
-	name:"start-section",
-	type:type,
-	pageNo:DocumentContext.getPageNo()
-      });
-      return this;
-    },
-    /**
-       @memberof Nehan.OutlineContext
-       @param type {String} - markup name
-       @return {Nehan.OutlineContext}
-    */
-    endSection : function(type){
-      this.logs.push({
-	name:"end-section",
-	type:type
-      });
-      return this;
-    },
-    /**
-       @memberof Nehan.OutlineContext
-       @param opt {Object}
-       @param opt.type {String} - markup name
-       @param opt.rank {int} - header rank(1 - 6)
-       @param opt.title {String} - header title
-       @return {String} header id
-    */
-    addHeader : function(opt){
-      // header id is used to associate header box object with outline.
-      var header_id = DocumentContext.genHeaderId();
-      this.logs.push({
-	name:"set-header",
-	type:opt.type,
-	rank:opt.rank,
-	title:opt.title,
-	pageNo:DocumentContext.getPageNo(),
-	headerId:header_id
-      });
-      return header_id;
-    }
-  };
-
-  return OutlineContext;
-})();
-
-/**
-   parser module to convert from context to section tree object.
-
-   @namespace Nehan.OutlineContextParser
-*/
-var OutlineContextParser = (function(){
-  var _parse = function(context, parent, ptr){
-    var log = context.get(ptr++);
-    if(log === null){
-      return;
-    }
-    switch(log.name){
-    case "start-section":
-      var section = new Section(log.type, parent, log.pageNo);
-      if(parent){
-	parent.addChild(section);
-      }
-      _parse(context, section, ptr);
-      break;
-
-    case "end-section":
-      _parse(context, parent.getParent(), ptr);
-      break;
-
-    case "set-header":
-      var header = new SectionHeader(log.rank, log.title, log.headerId);
-      if(parent === null){
-	var auto_section = new Section("section", null, log.pageNo);
-	auto_section.setHeader(header);
-	_parse(context, auto_section, ptr);
-      } else if(!parent.hasHeader()){
-	parent.setHeader(header);
-	_parse(context, parent, ptr);
-      } else {
-	var rank = log.rank;
-	var parent_rank = parent.getRank();
-	if(rank < parent_rank){ // higher rank
-	  ptr = Math.max(0, ptr - 1);
-	  _parse(context, parent.getParent(), ptr);
-	} else if(log.rank == parent_rank){ // same rank
-	  var next_section = new Section("section", parent, log.pageNo);
-	  next_section.setHeader(header);
-	  parent.addNext(next_section);
-	  _parse(context, next_section, ptr);
-	} else { // lower rank
-	  var child_section = new Section("section", parent, log.pageNo);
-	  child_section.setHeader(header);
-	  parent.addChild(child_section);
-	  _parse(context, child_section, ptr);
-	}
-      }
-      break;
-    }
-    return parent;
-  };
-
-  return {
-    /**
-       @memberof Nehan.OutlineContextParser
-       @param context {Nehan.OutlineContext}
-       @return {Nehan.Section} section tree root
-    */
-    parse : function(context){
-      var ptr = 0;
-      var root = new Section("section", null, 0);
-      return _parse(context, root, ptr);
-    }
-  };
-})();
-
 /*
   outline mapping
   ===============
@@ -9544,7 +9546,7 @@ var SectionTreeConverter = (function(){
     */
     convert : function(outline_tree, callbacks){
       callbacks = Nehan.Args.merge({}, default_callbacks, callbacks || {});
-      var toc_context = new TocContext();
+      var toc_context = new Nehan.TocContext();
       var root_node = callbacks.createRoot();
       return parse(toc_context, root_node, outline_tree, callbacks); // section tree -> dom node
     }
@@ -9685,7 +9687,7 @@ var DocumentContext = (function(){
   };
 
   var __convert_outline_context_to_element = function(context, callbacks){
-    var tree = OutlineContextParser.parse(context);
+    var tree = Nehan.OutlineContextParser.parse(context);
     return tree? SectionTreeConverter.convert(tree, callbacks) : null;
   };
 
@@ -11431,7 +11433,7 @@ var StyleContext = (function(){
        @memberof Nehan.StyleContext
     */
     startOutlineContext : function(){
-      this.outlineContext = new OutlineContext(this.getMarkupName());
+      this.outlineContext = new Nehan.OutlineContext(this.getMarkupName());
     },
     /**
        called when section root(body, blockquote, fieldset, figure, td) ends.
@@ -11449,7 +11451,10 @@ var StyleContext = (function(){
        @method startSectionContext
     */
     startSectionContext : function(){
-      this.getOutlineContext().startSection(this.getMarkupName());
+      this.getOutlineContext().startSection({
+	type:this.getMarkupName(),
+	pageNo:DocumentContext.getPageNo()
+      });
     },
     /**
        called when section content(article, aside, nav, section) ends.
@@ -11469,6 +11474,8 @@ var StyleContext = (function(){
     */
     startHeaderContext : function(opt){
       return this.getOutlineContext().addHeader({
+	headerId:DocumentContext.genHeaderId(),
+	pageNo:DocumentContext.getPageNo(),
 	type:opt.type,
 	rank:opt.rank,
 	title:opt.title

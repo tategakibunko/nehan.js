@@ -247,7 +247,7 @@ var StyleContext = (function(){
        @memberof Nehan.StyleContext
     */
     startOutlineContext : function(){
-      this.outlineContext = new OutlineContext(this.getMarkupName());
+      this.outlineContext = new Nehan.OutlineContext(this.getMarkupName());
     },
     /**
        called when section root(body, blockquote, fieldset, figure, td) ends.
@@ -265,7 +265,10 @@ var StyleContext = (function(){
        @method startSectionContext
     */
     startSectionContext : function(){
-      this.getOutlineContext().startSection(this.getMarkupName());
+      this.getOutlineContext().startSection({
+	type:this.getMarkupName(),
+	pageNo:DocumentContext.getPageNo()
+      });
     },
     /**
        called when section content(article, aside, nav, section) ends.
@@ -285,6 +288,8 @@ var StyleContext = (function(){
     */
     startHeaderContext : function(opt){
       return this.getOutlineContext().addHeader({
+	headerId:DocumentContext.genHeaderId(),
+	pageNo:DocumentContext.getPageNo(),
 	type:opt.type,
 	rank:opt.rank,
 	title:opt.title

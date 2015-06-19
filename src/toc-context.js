@@ -1,4 +1,4 @@
-var TocContext = (function(){
+Nehan.TocContext = (function(){
   /**
      @memberof Nehan
      @class TocContext

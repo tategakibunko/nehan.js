@@ -68,6 +68,11 @@ var sources = [
   "src/box-edge.js",
   "src/box-size.js",
   "src/box-position.js",
+  "src/section-header.js",
+  "src/section.js",
+  "src/toc-context.js",
+  "src/outline-context.js",
+  "src/outline-context-parser.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
@@ -98,15 +103,10 @@ var sources = [
   "src/text-empha-style.js",
   "src/text-empha-pos.js",
   "src/text-empha.js",
-
   "src/box.js",
   "src/html-lexer.js",
   "src/text-lexer.js",
-  "src/section-header.js",
-  "src/section.js",
-  "src/toc-context.js",
-  "src/outline-context.js",
-  "src/outline-context-parser.js",
+
   "src/section-tree-converter.js",
   "src/document-header.js",
   "src/document-context.js",

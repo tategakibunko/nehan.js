@@ -3,7 +3,7 @@
 
    @namespace Nehan.OutlineContextParser
 */
-var OutlineContextParser = (function(){
+Nehan.OutlineContextParser = (function(){
   var _parse = function(context, parent, ptr){
     var log = context.get(ptr++);
     if(log === null){
@@ -11,7 +11,7 @@ var OutlineContextParser = (function(){
     }
     switch(log.name){
     case "start-section":
-      var section = new Section(log.type, parent, log.pageNo);
+      var section = new Nehan.Section(log.type, parent, log.pageNo);
       if(parent){
 	parent.addChild(section);
       }
@@ -23,9 +23,9 @@ var OutlineContextParser = (function(){
       break;
 
     case "set-header":
-      var header = new SectionHeader(log.rank, log.title, log.headerId);
+      var header = new Nehan.SectionHeader(log.rank, log.title, log.headerId);
       if(parent === null){
-	var auto_section = new Section("section", null, log.pageNo);
+	var auto_section = new Nehan.Section("section", null, log.pageNo);
 	auto_section.setHeader(header);
 	_parse(context, auto_section, ptr);
       } else if(!parent.hasHeader()){
@@ -38,12 +38,12 @@ var OutlineContextParser = (function(){
 	  ptr = Math.max(0, ptr - 1);
 	  _parse(context, parent.getParent(), ptr);
 	} else if(log.rank == parent_rank){ // same rank
-	  var next_section = new Section("section", parent, log.pageNo);
+	  var next_section = new Nehan.Section("section", parent, log.pageNo);
 	  next_section.setHeader(header);
 	  parent.addNext(next_section);
 	  _parse(context, next_section, ptr);
 	} else { // lower rank
-	  var child_section = new Section("section", parent, log.pageNo);
+	  var child_section = new Nehan.Section("section", parent, log.pageNo);
 	  child_section.setHeader(header);
 	  parent.addChild(child_section);
 	  _parse(context, child_section, ptr);
@@ -62,7 +62,7 @@ var OutlineContextParser = (function(){
     */
     parse : function(context){
       var ptr = 0;
-      var root = new Section("section", null, 0);
+      var root = new Nehan.Section("section", null, 0);
       return _parse(context, root, ptr);
     }
   };

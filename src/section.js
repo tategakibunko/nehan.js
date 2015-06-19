@@ -1,4 +1,4 @@
-var Section = (function(){
+Nehan.Section = (function(){
   /**
      @memberof Nehan
      @class Section

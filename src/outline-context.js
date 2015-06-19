@@ -1,4 +1,4 @@
-var OutlineContext = (function(){
+Nehan.OutlineContext = (function(){
   /**
      @memberof Nehan
      @class OutlineContext
@@ -35,14 +35,16 @@ var OutlineContext = (function(){
     },
     /**
        @memberof Nehan.OutlineContext
-       @param type {String} - markup name
+       @param opt {Object}
+       @param opt.type {String} - markup name
+       @param opt.pageNo {int} - page no of section
        @return {Nehan.OutlineContext}
     */
-    startSection : function(type){
+    startSection : function(opt){
       this.logs.push({
 	name:"start-section",
-	type:type,
-	pageNo:DocumentContext.getPageNo()
+	type:opt.type,
+	pageNo:opt.pageNo
       });
       return this;
     },
@@ -62,22 +64,22 @@ var OutlineContext = (function(){
        @memberof Nehan.OutlineContext
        @param opt {Object}
        @param opt.type {String} - markup name
+       @param opt.headerId {String} - unique header id(associate header box object with outline)
+       @pramm opt.pageNo {int} - page no of this header
        @param opt.rank {int} - header rank(1 - 6)
        @param opt.title {String} - header title
        @return {String} header id
     */
     addHeader : function(opt){
-      // header id is used to associate header box object with outline.
-      var header_id = DocumentContext.genHeaderId();
       this.logs.push({
 	name:"set-header",
+	headerId:opt.headerId,
+	pageNo:opt.pageNo,
 	type:opt.type,
 	rank:opt.rank,
-	title:opt.title,
-	pageNo:DocumentContext.getPageNo(),
-	headerId:header_id
+	title:opt.title
       });
-      return header_id;
+      return opt.headerId;
     }
   };
 
