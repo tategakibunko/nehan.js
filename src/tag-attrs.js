@@ -1,4 +1,4 @@
-var TagAttrs = (function(){
+Nehan.TagAttrs = (function(){
   /**
      @memberof Nehan
      @class TagAttrs
@@ -7,7 +7,7 @@ var TagAttrs = (function(){
      @param src {String}
   */
   function TagAttrs(src){
-    var attrs_raw = src? (new TagAttrParser(src)).parse() : {};
+    var attrs_raw = src? (new Nehan.TagAttrParser(src)).parse() : {};
     this.classes = this._parseClasses(attrs_raw);
     this.attrs = this._parseAttrs(attrs_raw, this.classes);
     this.dataset = this._parseDataset(attrs_raw);
@@ -32,7 +32,7 @@ var TagAttrs = (function(){
        @return {boolean}
     */
     hasClass : function(klass){
-      return Nehan.List.exists(this.classes, Closure.eq(klass));
+      return Nehan.List.exists(this.classes, Nehan.Closure.eq(klass));
     },
     /**
        @memberof Nehan.TagAttrs

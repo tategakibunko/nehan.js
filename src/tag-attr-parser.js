@@ -1,4 +1,4 @@
-var TagAttrParser = (function(){
+Nehan.TagAttrParser = (function(){
   /**
      @memberof Nehan
      @class TagAttrParser
@@ -7,7 +7,7 @@ var TagAttrParser = (function(){
      @param src {String}
   */
   function TagAttrParser(src){
-    this._lexer = new TagAttrLexer(src);
+    this._lexer = new Nehan.TagAttrLexer(src);
     this._attrs = {};
     this._left = null;
   }

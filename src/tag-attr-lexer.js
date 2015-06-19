@@ -1,4 +1,4 @@
-var TagAttrLexer = (function(){
+Nehan.TagAttrLexer = (function(){
   var __rex_symbol = /[^=\s]+/;
 
   /**

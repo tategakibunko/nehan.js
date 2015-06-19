@@ -257,7 +257,7 @@ var TokenStream = (function(){
     },
     _setPseudoAttribute : function(tokens){
       var tags = Nehan.List.filter(tokens, function(token){
-	return (token instanceof Tag);
+	return (token instanceof Nehan.Tag);
       });
       if(tags.length === 0){
 	return;

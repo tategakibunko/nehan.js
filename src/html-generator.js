@@ -8,10 +8,10 @@ var HtmlGenerator = (function(){
   */
   function HtmlGenerator(text){
     this.stream = new TokenStream(text, {
-      filter:Closure.isTagName(["head", "body"])
+      filter:Nehan.Closure.isTagName(["head", "body"])
     });
     if(this.stream.isEmptyTokens()){
-      this.stream.tags = [new Tag("body", text)];
+      this.stream.tags = [new Nehan.Tag("body", text)];
     }
     this.generator = this._createGenerator();
   }
@@ -51,7 +51,7 @@ var HtmlGenerator = (function(){
 	switch(tag.getName()){
 	case "head":
 	  this._parseDocumentHeader(new TokenStream(tag.getContent(), {
-	    filter:Closure.isTagName(["title", "meta", "link", "style", "script"])
+	    filter:Nehan.Closure.isTagName(["title", "meta", "link", "style", "script"])
 	  }));
 	  break;
 	case "body":

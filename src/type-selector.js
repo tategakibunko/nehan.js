@@ -119,7 +119,7 @@ var TypeSelector = (function(){
     },
     testClassNames : function(markup_classes){
       return Nehan.List.forall(this.classes, function(klass){
-	return Nehan.List.exists(markup_classes, Closure.eq(klass));
+	return Nehan.List.exists(markup_classes, Nehan.Closure.eq(klass));
       });
     },
     getNameSpec : function(){

@@ -8,7 +8,7 @@ var BodyGenerator = (function(){
      @param text {string} - content source of html
   */
   function BodyGenerator(text){
-    var tag = new Tag("<body>", text);
+    var tag = new Nehan.Tag("<body>", text);
     SectionRootGenerator.call(this, new StyleContext(tag, null), new TokenStream(text));
   }
   Class.extend(BodyGenerator, SectionRootGenerator);

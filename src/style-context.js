@@ -68,11 +68,11 @@ var StyleContext = (function(){
   ];
 
   var __is_managed_css_prop = function(prop){
-    return Nehan.List.exists(__managed_css_props, Closure.eq(prop));
+    return Nehan.List.exists(__managed_css_props, Nehan.Closure.eq(prop));
   };
 
   var __is_callback_css_prop = function(prop){
-    return Nehan.List.exists(__callback_css_props, Closure.eq(prop));
+    return Nehan.List.exists(__callback_css_props, Nehan.Closure.eq(prop));
   };
 
   /**
@@ -421,7 +421,7 @@ var StyleContext = (function(){
        @return {Nehan.StyleContext}
     */
     createChild : function(tag_name, css, tag_attr){
-      var tag = new Tag("<" + tag_name + ">");
+      var tag = new Nehan.Tag("<" + tag_name + ">");
       tag.setAttrs(tag_attr || {});
       return new StyleContext(tag, this, {forceCss:(css || {})});
     },
@@ -670,7 +670,7 @@ var StyleContext = (function(){
       if(this.display === "none"){
 	return true;
       }
-      if(Nehan.List.exists(__disabled_markups, Closure.eq(this.getMarkupName()))){
+      if(Nehan.List.exists(__disabled_markups, Nehan.Closure.eq(this.getMarkupName()))){
 	return true;
       }
       if(this.contentMeasure <= 0 || this.contentExtent <= 0){
@@ -1649,7 +1649,7 @@ var StyleContext = (function(){
 	  var value = Nehan.Utils.trim(nv[1]);
 	  var fmt_prop = CssParser.formatProp(prop);
 	  var fmt_value = CssParser.formatValue(prop, value);
-	  if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Closure.eq(fmt_prop))){
+	  if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Nehan.Closure.eq(fmt_prop))){
 	    ret[fmt_prop] = fmt_value;
 	  }
 	}

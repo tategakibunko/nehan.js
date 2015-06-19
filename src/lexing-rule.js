@@ -20,7 +20,7 @@ var LexingRule = (function(){
   ];
 
   var __is_single_tag = function(tag_name){
-    return Nehan.List.exists(__single_tag_names__, Closure.eq(tag_name));
+    return Nehan.List.exists(__single_tag_names__, Nehan.Closure.eq(tag_name));
   };
 
   return {

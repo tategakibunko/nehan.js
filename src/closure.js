@@ -2,12 +2,12 @@
    closure factory
    @namespace Nehan.Closure
 */
-var Closure = {
+Nehan.Closure = {
   /**
      @memberof Nehan.Closure
      @return {Function}
      @example
-     * var echo = Closure.id();
+     * var echo = Nehan.Closure.id();
      * echo(1); // 1
      * echo("yo"); // "yo"
   */
@@ -20,7 +20,7 @@ var Closure = {
      @memberof Nehan.Closure
      @return {Function}
      @example
-     * var is_one = Closure.eq(1);
+     * var is_one = Nehan.Closure.eq(1);
      * is_one(1); // true
      * is_one(2); // false
   */
@@ -33,7 +33,7 @@ var Closure = {
      @memberof Nehan.Closure
      @return {Function}
      @example
-     * var is_not_one = Closure.neq(1);
+     * var is_not_one = Nehan.Closure.neq(1);
      * is_not_one(1); // false
      * is_not_one(2); // true
   */
@@ -44,7 +44,7 @@ var Closure = {
   },
   isTagName : function(names){
     return function(token){
-      if(token instanceof Tag === false){
+      if(token instanceof Nehan.Tag === false){
 	return false;
       }
       var tag_name = token.getName();

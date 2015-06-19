@@ -1031,6 +1031,678 @@ Nehan.Html = {
   }
 };
 
+Nehan.TagAttrLexer = (function(){
+  var __rex_symbol = /[^=\s]+/;
+
+  /**
+     @memberof Nehan
+     @class TagAttrLexer
+     @classdesc tag attribute string lexer
+     @constructor
+     @param src {String}
+     @description <pre>
+     * [src] is attribute string of original tag source.
+     * so if tag source is "<div class='nehan-float-start'>",
+     * then [src] is "class='nehan-float-start'".
+     </pre>
+  */
+  function TagAttrLexer(src){
+    this.buff = src;
+    this._error = false;
+  }
+
+  TagAttrLexer.prototype = {
+    /**
+       @memberof Nehan.TagAttrLexer
+       @return {boolean}
+    */
+    isEnd : function(){
+      return this._error || (this.buff === "");
+    },
+    /**
+       @memberof Nehan.TagAttrLexer
+       @return {symbol}
+    */
+    get : function(){
+      var c1 = this._peek();
+      if(c1 === null){
+	return null;
+      }
+      switch(c1){
+      case "=":
+	this._step(1);
+	return c1;
+      case "'": case "\"":
+	return this._getLiteral(c1);
+      case " ":
+	this._step(1);
+	return this.get(); // skip space
+      default:
+	return this._getSymbol();
+      }
+    },
+    _peek : function(){
+      return this.buff? this.buff.charAt(0) : null;
+    },
+    _step : function(length){
+      this.buff = this.buff.substring(length);
+    },
+    _getSymbol : function(){
+      //var symbol = HtmlLexer.prototype._getByRex.call(this, __rex_symbol);
+      var match = this.buff.match(__rex_symbol);
+      var symbol = match? match[0] : null;
+      if(symbol){
+	this._step(symbol.length);
+      }
+      return symbol;
+    },
+    _getLiteral : function(quote_char){
+      var quote_end_pos = this.buff.indexOf(quote_char, 1);
+      if(quote_end_pos < 0){
+	console.error("TagAttrLexer::syntax error:literal not closed(%s)", this.buff);
+	this._error = true;
+	return null;
+      }
+      var literal = this.buff.substring(1, quote_end_pos);
+      this._step(quote_end_pos + 1);
+      return literal;
+    }
+  };
+
+  return TagAttrLexer;
+})();
+
+
+Nehan.TagAttrParser = (function(){
+  /**
+     @memberof Nehan
+     @class TagAttrParser
+     @classdesc tag attribute parser
+     @constructor
+     @param src {String}
+  */
+  function TagAttrParser(src){
+    this._lexer = new Nehan.TagAttrLexer(src);
+    this._attrs = {};
+    this._left = null;
+  }
+
+  TagAttrParser.prototype = {
+    /**
+       @memberof Nehan.TagAttrParser
+       @return {Object}
+    */
+    parse : function(){
+      while(!this._isEnd()){
+	this._parseAttr();
+      }
+      return this._attrs;
+    },
+    _isEnd : function(){
+      return this._left === null && this._lexer.isEnd();
+    },
+    _parseAttr : function(){
+      var token = this._lexer.get();
+      if(token === null){
+	if(this._left){
+	  this._attrs[this._left] = "true";
+	  this._left = null;
+	}
+      } else if(token === "=" && this._left){
+	this._attrs[this._left] = this._lexer.get() || "true";
+	this._left = null;
+	return;
+      } else if(this._left){
+	this._attrs[this._left] = "true";
+	this._left = token;
+      } else if(token && token !== "="){ // block invalid left identifier
+	this._left = token;
+      }
+    }
+  };
+
+  return TagAttrParser;
+})();
+
+Nehan.TagAttrs = (function(){
+  /**
+     @memberof Nehan
+     @class TagAttrs
+     @classdesc tag attribute set wrapper
+     @constructor
+     @param src {String}
+  */
+  function TagAttrs(src){
+    var attrs_raw = src? (new Nehan.TagAttrParser(src)).parse() : {};
+    this.classes = this._parseClasses(attrs_raw);
+    this.attrs = this._parseAttrs(attrs_raw, this.classes);
+    this.dataset = this._parseDataset(attrs_raw);
+  }
+
+  var __data_name_of = function(name){
+    return Nehan.Utils.camelize(name.slice(5));
+  };
+
+  TagAttrs.prototype = {
+    /**
+       @memberof Nehan.TagAttrs
+       @param name {String} - attribute name
+       @return {boolean}
+    */
+    hasAttr : function(name){
+      return (typeof this.attrs.name !== "undefined");
+    },
+    /**
+       @memberof Nehan.TagAttrs
+       @param klass {String} - css class name
+       @return {boolean}
+    */
+    hasClass : function(klass){
+      return Nehan.List.exists(this.classes, Nehan.Closure.eq(klass));
+    },
+    /**
+       @memberof Nehan.TagAttrs
+       @param klass {String} - css class name
+       @return {Array.<String>} current css classes
+    */
+    addClass : function(klass){
+      if(!this.hasClass(klass)){
+	this.classes.push(klass);
+	this.setAttr("class", [this.getAttr("class"), klass].join(" "));
+      }
+      return this.classes;
+    },
+    /**
+       @memberof Nehan.TagAttrs
+       @param klass {String} - css class name(prefiex by "nehan-")
+    */
+    removeClass : function(klass){
+      this.classes = Nehan.List.filter(this.classes, function(cls){
+	return cls != klass;
+      });
+      this.setAttr("class", this.classes.join(" "));
+      return this.classes;
+    },
+    /**
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param def_value {default_value}
+       @return {attribute_value}
+    */
+    getAttr : function(name, def_value){
+      def_value = (typeof def_value === "undefined")? null : def_value;
+      return (typeof this.attrs[name] === "undefined")? def_value : this.attrs[name];
+    },
+    /**
+       get dataset value
+
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param def_value {default_value}
+       @return {dataset_value}
+    */
+    getData : function(name, def_value){
+      def_value = (typeof def_value === "undefined")? null : def_value;
+      return (typeof this.dataset[name] === "undefined")? def_value : this.dataset[name];
+    },
+    /**
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param value {attribute_value}
+    */
+    setAttr : function(name, value){
+      if(name.indexOf("data-") === 0){
+	this.setData(__data_name_of(name), value);
+      } else {
+	this.attrs[name] = value;
+      }
+    },
+    /**
+       set dataset value
+
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @param value {dataset_value}
+    */
+    setData : function(name, value){
+      this.dataset[name] = value;
+    },
+    // <p class='hi hey'>
+    // => ["nehan-hi", "nehan-hey"]
+    _parseClasses : function(attrs_raw){
+      var class_name = attrs_raw["class"] || "";
+      class_name = Nehan.Utils.trim(class_name.replace(/\s+/g, " "));
+      var classes = (class_name === "")? [] : class_name.split(/\s+/);
+
+      // replace 'nehan-' prefix for backword compatibility(version <= 5.1.0).
+      return Nehan.List.map(classes, function(klass){
+	return (klass.indexOf("nehan-") === 0)? klass.replace("nehan-", "") : klass;
+      }); 
+    },
+    _parseAttrs : function(attrs_raw, classes){
+      var attrs = {};
+      Nehan.Obj.iter(attrs_raw, function(name, value){
+	if(name.indexOf("data-") < 0){
+	  attrs[name] = value;
+	}
+      });
+      return attrs;
+    },
+    _parseDatasetValue : function(value){
+      switch(value){
+      case "true": return true;
+      case "false": return false;
+      default: return isNaN(value)? value : Number(value);
+      }
+    },
+    _parseDataset : function(attrs_raw){
+      var dataset = {};
+      for(var name in attrs_raw){
+	if(name.indexOf("data-") === 0){
+	  dataset[__data_name_of(name)] = this._parseDatasetValue(attrs_raw[name]);
+	}
+      }
+      return dataset;
+    }
+  };
+
+  return TagAttrs;
+})();
+
+
+// Important Notice:
+// to avoid name-conflicts about existing name space of stylesheet,
+// all class names and id in nehan.js are forced to be prefixed by "nehan-".
+Nehan.Tag = (function (){
+  /**
+     @memberof Nehan
+     @class Tag
+     @classdesc abstraction of html tag markup.
+     @constructor
+     @param src {String} - string of markup part like "&lt;div class='foo'&gt;"
+     @param content {String} - content text of markup
+  */
+  function Tag(src, content){
+    this._type = "tag";
+    this.src = src;
+    this.content = content || "";
+    this.name = this._parseName(this.src);
+    this.attrs = this._parseTagAttrs(this.name, this.src);
+    this._firstChild = false;
+    this._firstOfType = false;
+    this._lastChild = false;
+    this._lastOfType = false;
+    this._onlyChild = false;
+    this._onlyOfType = false;
+  }
+
+  Tag.prototype = {
+    /**
+       @memberof Nehan.Tag
+       @return {Nehan.Tag}
+    */
+    clone : function(){
+      return new Tag(this.src, this.content);
+    },
+    /**
+       @memberof Nehan.Tag
+       @param content {String}
+    */
+    setContent : function(content){
+      if(this._fixed){
+	return;
+      }
+      this.content = content;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {boolean}
+    */
+    setContentImmutable : function(status){
+      this._fixed = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param name {String} - alias markup name
+    */
+    setAlias : function(name){
+      this.alias = name;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @param value {attribute_value}
+    */
+    setAttr : function(name, value){
+      this.attrs.setAttr(name, value);
+    },
+    /**
+       @memberof Nehan.Tag
+       @param attrs {Object}
+    */
+    setAttrs : function(attrs){
+      for(var name in attrs){
+	this.setAttr(name, attrs[name]);
+      }
+    },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @param value {dataset_value}
+    */
+    setData : function(name, value){
+      this.attrs.setData(name, value);
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setFirstChild : function(status){
+      this._firstChild = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setOnlyChild : function(status){
+      this._onlyChild = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setOnlyOfType : function(status){
+      this._onlyOfType = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setFirstOfType : function(status){
+      this._firstOfType = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setLastChild : function(status){
+      this._lastChild = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param status {Bool}
+    */
+    setLastOfType : function(status){
+      this._lastOfType = status;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param klass {String}
+    */
+    addClass : function(klass){
+      this.attrs.addClass(klass);
+    },
+    /**
+       @memberof Nehan.Tag
+       @param klass {String}
+    */
+    removeClass : function(klass){
+      this.attrs.removeClass(klass);
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
+    getId : function(){
+      return this.attrs.getAttr("id");
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {Array.<String>}
+    */
+    getClasses : function(){
+      return this.attrs.classes;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
+    getName : function(){
+      return this.alias || this.name;
+    },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @param def_value {default_value}
+       @return {attribute_value}
+    */
+    getAttr : function(name, def_value){
+      return this.attrs.getAttr(name, def_value);
+    },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @param def_value {default_value}
+       @return {dataset_value}
+    */
+    getData : function(name, def_value){
+      return this.attrs.getData(name, def_value);
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
+    getContent : function(){
+      return this.content;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
+    getSrc : function(){
+      return this.src;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {String}
+    */
+    getWrapSrc : function(){
+      if(this.content === ""){
+	return this.src;
+      }
+      return this.src + this.content + "</" + this.name + ">";
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    hasClass : function(klass){
+      return this.attrs.hasClass(klass);
+    },
+    /**
+       @memberof Nehan.Tag
+       @param name {String}
+       @return {boolean}
+    */
+    hasAttr : function(name){
+      return this.attrs.hasAttr(name);
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isHeaderTag : function(){
+      return Nehan.List.exists(["h1", "h2", "h3", "h4", "h5", "h6"], Nehan.Closure.eq(this.name));
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isAnchorTag : function(){
+      return this.name === "a" && this.getTagAttr("name") !== null;
+    },
+    /**
+       @memberof Nehan.Tag
+    */
+    isAnchorLinkTag : function(){
+      var href = this.getTagAttr("href");
+      return this.name === "a" && href && href.indexOf("#") >= 0;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isPageBreakTag : function(){
+      return this.name === "page-break" || this.name === "end-page" || this.name === "pbr";
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isCloseTag : function(){
+      return this.name.charAt(0) === "/";
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isSingleTag : function(){
+      return this._single || false;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isEmpty : function(){
+      return this.content === "";
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isFirstChild : function(){
+      return this._firstChild;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isOnlyChild : function(){
+      return this._onlyChild;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isOnlyOfType : function(){
+      return this._onlyOfType;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isFirstOfType : function(){
+      return this._firstOfType;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isLastChild : function(){
+      return this._lastChild;
+    },
+    /**
+       @memberof Nehan.Tag
+       @return {boolean}
+    */
+    isLastOfType : function(){
+      return this._lastOfType;
+    },
+    _getTagAttrSrc : function(src){
+      return src
+	.replace(/<[\S]+/, "") // cut tag start
+	.replace(/^\s+/, "") // cut head space
+	.replace("/>", "") // cut tag tail(single tag)
+	.replace(">", "") // cut tag tail(normal tag)
+	.replace(/\s+$/, "") // cut tail space
+	.replace(/\n/g, " ") // conv from multi line to single space
+	.replace(/[　|\s]+/g, " ") // conv from multi space to single space
+	.replace(/\s+=/g, "=") // cut multi space before '='
+	.replace(/=\s+/g, "="); // cut multi space after '='
+    },
+    _parseName : function(src){
+      return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
+    },
+    _parseTagAttrs : function(tag_name, tag_src){
+      var attr_src = this._getTagAttrSrc(tag_src);
+      if(tag_name.length === attr_src.length){
+	return new Nehan.TagAttrs("");
+      }
+      return new Nehan.TagAttrs(attr_src);
+    }
+  };
+
+  return Tag;
+})();
+
+
+/**
+   closure factory
+   @namespace Nehan.Closure
+*/
+Nehan.Closure = {
+  /**
+     @memberof Nehan.Closure
+     @return {Function}
+     @example
+     * var echo = Nehan.Closure.id();
+     * echo(1); // 1
+     * echo("yo"); // "yo"
+  */
+  id : function(){
+    return function(x){
+      return x;
+    };
+  },
+  /**
+     @memberof Nehan.Closure
+     @return {Function}
+     @example
+     * var is_one = Nehan.Closure.eq(1);
+     * is_one(1); // true
+     * is_one(2); // false
+  */
+  eq : function(x){
+    return function(y){
+      return x == y;
+    };
+  },
+  /**
+     @memberof Nehan.Closure
+     @return {Function}
+     @example
+     * var is_not_one = Nehan.Closure.neq(1);
+     * is_not_one(1); // false
+     * is_not_one(2); // true
+  */
+  neq : function(x){
+    return function(y){
+      return x != y;
+    };
+  },
+  isTagName : function(names){
+    return function(token){
+      if(token instanceof Nehan.Tag === false){
+	return false;
+      }
+      var tag_name = token.getName();
+      return Nehan.List.exists(names, function(name){
+	return name === tag_name;
+      });
+    };
+  }
+};
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -1519,7 +2191,7 @@ var LexingRule = (function(){
   ];
 
   var __is_single_tag = function(tag_name){
-    return Nehan.List.exists(__single_tag_names__, Closure.eq(tag_name));
+    return Nehan.List.exists(__single_tag_names__, Nehan.Closure.eq(tag_name));
   };
 
   return {
@@ -2539,63 +3211,6 @@ var reqAnimationFrame = (function(){
 
 
 /**
-   closure factory
-   @namespace Nehan.Closure
-*/
-var Closure = {
-  /**
-     @memberof Nehan.Closure
-     @return {Function}
-     @example
-     * var echo = Closure.id();
-     * echo(1); // 1
-     * echo("yo"); // "yo"
-  */
-  id : function(){
-    return function(x){
-      return x;
-    };
-  },
-  /**
-     @memberof Nehan.Closure
-     @return {Function}
-     @example
-     * var is_one = Closure.eq(1);
-     * is_one(1); // true
-     * is_one(2); // false
-  */
-  eq : function(x){
-    return function(y){
-      return x == y;
-    };
-  },
-  /**
-     @memberof Nehan.Closure
-     @return {Function}
-     @example
-     * var is_not_one = Closure.neq(1);
-     * is_not_one(1); // false
-     * is_not_one(2); // true
-  */
-  neq : function(x){
-    return function(y){
-      return x != y;
-    };
-  },
-  isTagName : function(names){
-    return function(token){
-      if(token instanceof Tag === false){
-	return false;
-      }
-      var tag_name = token.getName();
-      return Nehan.List.exists(names, function(name){
-	return name === tag_name;
-      });
-    };
-  }
-};
-
-/**
    @namespace Nehan.Args
 */
 var Args = {
@@ -3099,7 +3714,7 @@ var AttrSelector = (function(){
     _testTildeEqual : function(style){
       var value = style.getMarkupAttr(this.left);
       var values = value? value.split(/\s+/) : [];
-      return Nehan.List.exists(values, Closure.eq(this.right));
+      return Nehan.List.exists(values, Nehan.Closure.eq(this.right));
     },
     _testPipeEqual : function(style){
       var value = style.getMarkupAttr(this.left);
@@ -3321,7 +3936,7 @@ var TypeSelector = (function(){
     },
     testClassNames : function(markup_classes){
       return Nehan.List.forall(this.classes, function(klass){
-	return Nehan.List.exists(markup_classes, Closure.eq(klass));
+	return Nehan.List.exists(markup_classes, Nehan.Closure.eq(klass));
       });
     },
     getNameSpec : function(){
@@ -3865,621 +4480,6 @@ var Selectors = (function(){
   };
 })();
 
-var TagAttrLexer = (function(){
-  var __rex_symbol = /[^=\s]+/;
-
-  /**
-     @memberof Nehan
-     @class TagAttrLexer
-     @classdesc tag attribute string lexer
-     @constructor
-     @param src {String}
-     @description <pre>
-     * [src] is attribute string of original tag source.
-     * so if tag source is "<div class='nehan-float-start'>",
-     * then [src] is "class='nehan-float-start'".
-     </pre>
-  */
-  function TagAttrLexer(src){
-    this.buff = src;
-    this._error = false;
-  }
-
-  TagAttrLexer.prototype = {
-    /**
-       @memberof Nehan.TagAttrLexer
-       @return {boolean}
-    */
-    isEnd : function(){
-      return this._error || (this.buff === "");
-    },
-    /**
-       @memberof Nehan.TagAttrLexer
-       @return {symbol}
-    */
-    get : function(){
-      var c1 = this._peek();
-      if(c1 === null){
-	return null;
-      }
-      switch(c1){
-      case "=":
-	this._step(1);
-	return c1;
-      case "'": case "\"":
-	return this._getLiteral(c1);
-      case " ":
-	this._step(1);
-	return this.get(); // skip space
-      default:
-	return this._getSymbol();
-      }
-    },
-    _peek : function(){
-      return this.buff? this.buff.charAt(0) : null;
-    },
-    _step : function(length){
-      this.buff = this.buff.substring(length);
-    },
-    _getSymbol : function(){
-      //var symbol = HtmlLexer.prototype._getByRex.call(this, __rex_symbol);
-      var match = this.buff.match(__rex_symbol);
-      var symbol = match? match[0] : null;
-      if(symbol){
-	this._step(symbol.length);
-      }
-      return symbol;
-    },
-    _getLiteral : function(quote_char){
-      var quote_end_pos = this.buff.indexOf(quote_char, 1);
-      if(quote_end_pos < 0){
-	console.error("TagAttrLexer::syntax error:literal not closed(%s)", this.buff);
-	this._error = true;
-	return null;
-      }
-      var literal = this.buff.substring(1, quote_end_pos);
-      this._step(quote_end_pos + 1);
-      return literal;
-    }
-  };
-
-  return TagAttrLexer;
-})();
-
-
-var TagAttrParser = (function(){
-  /**
-     @memberof Nehan
-     @class TagAttrParser
-     @classdesc tag attribute parser
-     @constructor
-     @param src {String}
-  */
-  function TagAttrParser(src){
-    this._lexer = new TagAttrLexer(src);
-    this._attrs = {};
-    this._left = null;
-  }
-
-  TagAttrParser.prototype = {
-    /**
-       @memberof Nehan.TagAttrParser
-       @return {Object}
-    */
-    parse : function(){
-      while(!this._isEnd()){
-	this._parseAttr();
-      }
-      return this._attrs;
-    },
-    _isEnd : function(){
-      return this._left === null && this._lexer.isEnd();
-    },
-    _parseAttr : function(){
-      var token = this._lexer.get();
-      if(token === null){
-	if(this._left){
-	  this._attrs[this._left] = "true";
-	  this._left = null;
-	}
-      } else if(token === "=" && this._left){
-	this._attrs[this._left] = this._lexer.get() || "true";
-	this._left = null;
-	return;
-      } else if(this._left){
-	this._attrs[this._left] = "true";
-	this._left = token;
-      } else if(token && token !== "="){ // block invalid left identifier
-	this._left = token;
-      }
-    }
-  };
-
-  return TagAttrParser;
-})();
-
-var TagAttrs = (function(){
-  /**
-     @memberof Nehan
-     @class TagAttrs
-     @classdesc tag attribute set wrapper
-     @constructor
-     @param src {String}
-  */
-  function TagAttrs(src){
-    var attrs_raw = src? (new TagAttrParser(src)).parse() : {};
-    this.classes = this._parseClasses(attrs_raw);
-    this.attrs = this._parseAttrs(attrs_raw, this.classes);
-    this.dataset = this._parseDataset(attrs_raw);
-  }
-
-  var __data_name_of = function(name){
-    return Nehan.Utils.camelize(name.slice(5));
-  };
-
-  TagAttrs.prototype = {
-    /**
-       @memberof Nehan.TagAttrs
-       @param name {String} - attribute name
-       @return {boolean}
-    */
-    hasAttr : function(name){
-      return (typeof this.attrs.name !== "undefined");
-    },
-    /**
-       @memberof Nehan.TagAttrs
-       @param klass {String} - css class name
-       @return {boolean}
-    */
-    hasClass : function(klass){
-      return Nehan.List.exists(this.classes, Closure.eq(klass));
-    },
-    /**
-       @memberof Nehan.TagAttrs
-       @param klass {String} - css class name
-       @return {Array.<String>} current css classes
-    */
-    addClass : function(klass){
-      if(!this.hasClass(klass)){
-	this.classes.push(klass);
-	this.setAttr("class", [this.getAttr("class"), klass].join(" "));
-      }
-      return this.classes;
-    },
-    /**
-       @memberof Nehan.TagAttrs
-       @param klass {String} - css class name(prefiex by "nehan-")
-    */
-    removeClass : function(klass){
-      this.classes = Nehan.List.filter(this.classes, function(cls){
-	return cls != klass;
-      });
-      this.setAttr("class", this.classes.join(" "));
-      return this.classes;
-    },
-    /**
-       @memberof Nehan.TagAttrs
-       @param name {String}
-       @param def_value {default_value}
-       @return {attribute_value}
-    */
-    getAttr : function(name, def_value){
-      def_value = (typeof def_value === "undefined")? null : def_value;
-      return (typeof this.attrs[name] === "undefined")? def_value : this.attrs[name];
-    },
-    /**
-       get dataset value
-
-       @memberof Nehan.TagAttrs
-       @param name {String}
-       @param def_value {default_value}
-       @return {dataset_value}
-    */
-    getData : function(name, def_value){
-      def_value = (typeof def_value === "undefined")? null : def_value;
-      return (typeof this.dataset[name] === "undefined")? def_value : this.dataset[name];
-    },
-    /**
-       @memberof Nehan.TagAttrs
-       @param name {String}
-       @param value {attribute_value}
-    */
-    setAttr : function(name, value){
-      if(name.indexOf("data-") === 0){
-	this.setData(__data_name_of(name), value);
-      } else {
-	this.attrs[name] = value;
-      }
-    },
-    /**
-       set dataset value
-
-       @memberof Nehan.TagAttrs
-       @param name {String}
-       @param value {dataset_value}
-    */
-    setData : function(name, value){
-      this.dataset[name] = value;
-    },
-    // <p class='hi hey'>
-    // => ["nehan-hi", "nehan-hey"]
-    _parseClasses : function(attrs_raw){
-      var class_name = attrs_raw["class"] || "";
-      class_name = Nehan.Utils.trim(class_name.replace(/\s+/g, " "));
-      var classes = (class_name === "")? [] : class_name.split(/\s+/);
-
-      // replace 'nehan-' prefix for backword compatibility(version <= 5.1.0).
-      return Nehan.List.map(classes, function(klass){
-	return (klass.indexOf("nehan-") === 0)? klass.replace("nehan-", "") : klass;
-      }); 
-    },
-    _parseAttrs : function(attrs_raw, classes){
-      var attrs = {};
-      Nehan.Obj.iter(attrs_raw, function(name, value){
-	if(name.indexOf("data-") < 0){
-	  attrs[name] = value;
-	}
-      });
-      return attrs;
-    },
-    _parseDatasetValue : function(value){
-      switch(value){
-      case "true": return true;
-      case "false": return false;
-      default: return isNaN(value)? value : Number(value);
-      }
-    },
-    _parseDataset : function(attrs_raw){
-      var dataset = {};
-      for(var name in attrs_raw){
-	if(name.indexOf("data-") === 0){
-	  dataset[__data_name_of(name)] = this._parseDatasetValue(attrs_raw[name]);
-	}
-      }
-      return dataset;
-    }
-  };
-
-  return TagAttrs;
-})();
-
-
-// Important Notice:
-// to avoid name-conflicts about existing name space of stylesheet,
-// all class names and id in nehan.js are forced to be prefixed by "nehan-".
-var Tag = (function (){
-  /**
-     @memberof Nehan
-     @class Tag
-     @classdesc abstraction of html tag markup.
-     @constructor
-     @param src {String} - string of markup part like "&lt;div class='foo'&gt;"
-     @param content {String} - content text of markup
-  */
-  function Tag(src, content){
-    this._type = "tag";
-    this.src = src;
-    this.content = content || "";
-    this.name = this._parseName(this.src);
-    this.attrs = this._parseTagAttrs(this.name, this.src);
-    this._firstChild = false;
-    this._firstOfType = false;
-    this._lastChild = false;
-    this._lastOfType = false;
-    this._onlyChild = false;
-    this._onlyOfType = false;
-  }
-
-  Tag.prototype = {
-    /**
-       @memberof Nehan.Tag
-       @return {Nehan.Tag}
-    */
-    clone : function(){
-      return new Tag(this.src, this.content);
-    },
-    /**
-       @memberof Nehan.Tag
-       @param content {String}
-    */
-    setContent : function(content){
-      if(this._fixed){
-	return;
-      }
-      this.content = content;
-    },
-    /**
-       @memberof Nehan.Tag
-       @param status {boolean}
-    */
-    setContentImmutable : function(status){
-      this._fixed = status;
-    },
-    /**
-       @memberof Nehan.Tag
-       @param name {String} - alias markup name
-    */
-    setAlias : function(name){
-      this.alias = name;
-    },
-    /**
-       @memberof Nehan.Tag
-       @param name {String}
-       @param value {attribute_value}
-    */
-    setAttr : function(name, value){
-      this.attrs.setAttr(name, value);
-    },
-    /**
-       @memberof Nehan.Tag
-       @param attrs {Object}
-    */
-    setAttrs : function(attrs){
-      for(var name in attrs){
-	this.setAttr(name, attrs[name]);
-      }
-    },
-    /**
-       @memberof Nehan.Tag
-       @param name {String}
-       @param value {dataset_value}
-    */
-    setData : function(name, value){
-      this.attrs.setData(name, value);
-    },
-    /**
-       @memberof Nehan.Tag
-       @param status {Bool}
-    */
-    setFirstChild : function(status){
-      this._firstChild = status;
-    },
-    /**
-       @memberof Nehan.Tag
-       @param status {Bool}
-    */
-    setOnlyChild : function(status){
-      this._onlyChild = status;
-    },
-    /**
-       @memberof Nehan.Tag
-       @param status {Bool}
-    */
-    setOnlyOfType : function(status){
-      this._onlyOfType = status;
-    },
-    /**
-       @memberof Nehan.Tag
-       @param status {Bool}
-    */
-    setFirstOfType : function(status){
-      this._firstOfType = status;
-    },
-    /**
-       @memberof Nehan.Tag
-       @param status {Bool}
-    */
-    setLastChild : function(status){
-      this._lastChild = status;
-    },
-    /**
-       @memberof Nehan.Tag
-       @param status {Bool}
-    */
-    setLastOfType : function(status){
-      this._lastOfType = status;
-    },
-    /**
-       @memberof Nehan.Tag
-       @param klass {String}
-    */
-    addClass : function(klass){
-      this.attrs.addClass(klass);
-    },
-    /**
-       @memberof Nehan.Tag
-       @param klass {String}
-    */
-    removeClass : function(klass){
-      this.attrs.removeClass(klass);
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {String}
-    */
-    getId : function(){
-      return this.attrs.getAttr("id");
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {Array.<String>}
-    */
-    getClasses : function(){
-      return this.attrs.classes;
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {String}
-    */
-    getName : function(){
-      return this.alias || this.name;
-    },
-    /**
-       @memberof Nehan.Tag
-       @param name {String}
-       @param def_value {default_value}
-       @return {attribute_value}
-    */
-    getAttr : function(name, def_value){
-      return this.attrs.getAttr(name, def_value);
-    },
-    /**
-       @memberof Nehan.Tag
-       @param name {String}
-       @param def_value {default_value}
-       @return {dataset_value}
-    */
-    getData : function(name, def_value){
-      return this.attrs.getData(name, def_value);
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {String}
-    */
-    getContent : function(){
-      return this.content;
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {String}
-    */
-    getSrc : function(){
-      return this.src;
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {String}
-    */
-    getWrapSrc : function(){
-      if(this.content === ""){
-	return this.src;
-      }
-      return this.src + this.content + "</" + this.name + ">";
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    hasClass : function(klass){
-      return this.attrs.hasClass(klass);
-    },
-    /**
-       @memberof Nehan.Tag
-       @param name {String}
-       @return {boolean}
-    */
-    hasAttr : function(name){
-      return this.attrs.hasAttr(name);
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    isHeaderTag : function(){
-      return Nehan.List.exists(["h1", "h2", "h3", "h4", "h5", "h6"], Closure.eq(this.name));
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    isAnchorTag : function(){
-      return this.name === "a" && this.getTagAttr("name") !== null;
-    },
-    /**
-       @memberof Nehan.Tag
-    */
-    isAnchorLinkTag : function(){
-      var href = this.getTagAttr("href");
-      return this.name === "a" && href && href.indexOf("#") >= 0;
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    isPageBreakTag : function(){
-      return this.name === "page-break" || this.name === "end-page" || this.name === "pbr";
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    isCloseTag : function(){
-      return this.name.charAt(0) === "/";
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    isSingleTag : function(){
-      return this._single || false;
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    isEmpty : function(){
-      return this.content === "";
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    isFirstChild : function(){
-      return this._firstChild;
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    isOnlyChild : function(){
-      return this._onlyChild;
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    isOnlyOfType : function(){
-      return this._onlyOfType;
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    isFirstOfType : function(){
-      return this._firstOfType;
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    isLastChild : function(){
-      return this._lastChild;
-    },
-    /**
-       @memberof Nehan.Tag
-       @return {boolean}
-    */
-    isLastOfType : function(){
-      return this._lastOfType;
-    },
-    _getTagAttrSrc : function(src){
-      return src
-	.replace(/<[\S]+/, "") // cut tag start
-	.replace(/^\s+/, "") // cut head space
-	.replace("/>", "") // cut tag tail(single tag)
-	.replace(">", "") // cut tag tail(normal tag)
-	.replace(/\s+$/, "") // cut tail space
-	.replace(/\n/g, " ") // conv from multi line to single space
-	.replace(/[　|\s]+/g, " ") // conv from multi space to single space
-	.replace(/\s+=/g, "=") // cut multi space before '='
-	.replace(/=\s+/g, "="); // cut multi space after '='
-    },
-    _parseName : function(src){
-      return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
-    },
-    _parseTagAttrs : function(tag_name, tag_src){
-      var attr_src = this._getTagAttrSrc(tag_src);
-      if(tag_name.length === attr_src.length){
-	return new TagAttrs("");
-      }
-      return new TagAttrs(attr_src);
-    }
-  };
-
-  return Tag;
-})();
-
-
 /**
    utility module to check token type.
 
@@ -4492,7 +4492,7 @@ var Token = {
      @return {boolean}
   */
   isTag : function(token){
-    return token instanceof Tag;
+    return token instanceof Nehan.Tag;
   },
   /**
      @memberof Nehan.Token
@@ -6101,7 +6101,7 @@ var Palette = (function(){
   };
 
   var __find_palette = function(ival, palette){
-    if(Nehan.List.exists(palette, Closure.eq(ival))){
+    if(Nehan.List.exists(palette, Nehan.Closure.eq(ival))){
       return ival;
     }
     return Nehan.List.minobj(palette, function(pval){
@@ -8919,7 +8919,7 @@ var HtmlLexer = (function (){
       return {closed:false, content:this.buff};
     },
     _parseTag : function(tagstr){
-      var tag = new Tag(tagstr);
+      var tag = new Nehan.Tag(tagstr);
       this._stepBuff(tagstr.length);
       var tag_name = tag.getName();
       if(LexingRule.isSingleTag(tag_name)){
@@ -10096,7 +10096,7 @@ var TokenStream = (function(){
     },
     _setPseudoAttribute : function(tokens){
       var tags = Nehan.List.filter(tokens, function(token){
-	return (token instanceof Tag);
+	return (token instanceof Nehan.Tag);
       });
       if(tags.length === 0){
 	return;
@@ -11252,11 +11252,11 @@ var StyleContext = (function(){
   ];
 
   var __is_managed_css_prop = function(prop){
-    return Nehan.List.exists(__managed_css_props, Closure.eq(prop));
+    return Nehan.List.exists(__managed_css_props, Nehan.Closure.eq(prop));
   };
 
   var __is_callback_css_prop = function(prop){
-    return Nehan.List.exists(__callback_css_props, Closure.eq(prop));
+    return Nehan.List.exists(__callback_css_props, Nehan.Closure.eq(prop));
   };
 
   /**
@@ -11605,7 +11605,7 @@ var StyleContext = (function(){
        @return {Nehan.StyleContext}
     */
     createChild : function(tag_name, css, tag_attr){
-      var tag = new Tag("<" + tag_name + ">");
+      var tag = new Nehan.Tag("<" + tag_name + ">");
       tag.setAttrs(tag_attr || {});
       return new StyleContext(tag, this, {forceCss:(css || {})});
     },
@@ -11854,7 +11854,7 @@ var StyleContext = (function(){
       if(this.display === "none"){
 	return true;
       }
-      if(Nehan.List.exists(__disabled_markups, Closure.eq(this.getMarkupName()))){
+      if(Nehan.List.exists(__disabled_markups, Nehan.Closure.eq(this.getMarkupName()))){
 	return true;
       }
       if(this.contentMeasure <= 0 || this.contentExtent <= 0){
@@ -12833,7 +12833,7 @@ var StyleContext = (function(){
 	  var value = Nehan.Utils.trim(nv[1]);
 	  var fmt_prop = CssParser.formatProp(prop);
 	  var fmt_value = CssParser.formatValue(prop, value);
-	  if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Closure.eq(fmt_prop))){
+	  if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Nehan.Closure.eq(fmt_prop))){
 	    ret[fmt_prop] = fmt_value;
 	  }
 	}
@@ -14382,11 +14382,11 @@ var LayoutGenerator = (function(){
       return new RubyTokenStream(style.getMarkupContent());
     case "tbody": case "thead": case "tfoot":
       return new TokenStream(style.getContent(), {
-	filter:Closure.isTagName(["tr"])
+	filter:Nehan.Closure.isTagName(["tr"])
       });
     case "tr":
       return new TokenStream(style.getContent(), {
-	filter:Closure.isTagName(["td", "th"])
+	filter:Nehan.Closure.isTagName(["td", "th"])
       });
     default: return new TokenStream(style.getContent());
     } 
@@ -15113,7 +15113,7 @@ var TextGenerator = (function(){
     if(token instanceof Text){
       var head_c1 = token.getContent().substring(0,1);
       return new Char(head_c1);
-    } else if(token instanceof Tag){
+    } else if(token instanceof Nehan.Tag){
       if(token.name === "ruby"){
 	return null; // generally, ruby is not both tail-NG and head-NG.
       }
@@ -15126,7 +15126,7 @@ var TextGenerator = (function(){
   // estimate 'maybe' size, not strict!!
   TextGenerator.prototype._estimateParentNextHeadMeasure = function(token){
     var font_size = this.style.getFontSize();
-    if(token instanceof Tag && token.name === "ruby"){
+    if(token instanceof Nehan.Tag && token.name === "ruby"){
       var ruby = new RubyTokenStream(token.getContent()).get();
       var char_count = ruby.getCharCount();
       var rt_char_count = ruby.getRtString().length;
@@ -16053,14 +16053,14 @@ var TableGenerator = (function(){
       switch(token.getName()){
       case "tbody": case "thead": case "tfoot":
 	var pset2 = this._createAutoPartition(new TokenStream(token.getContent(), {
-	  filter:Closure.isTagName(["tr"])
+	  filter:Nehan.Closure.isTagName(["tr"])
 	}));
 	pset = pset.union(pset2);
 	break;
 
       case "tr":
 	var cell_tags = new TokenStream(token.getContent(), {
-	  filter:Closure.isTagName(["td", "th"])
+	  filter:Nehan.Closure.isTagName(["td", "th"])
 	}).getTokens();
 	var cell_count = cell_tags.length;
 	var partition = this._getPartition(cell_tags);
@@ -16156,7 +16156,7 @@ var TableRowGenerator = (function(){
 
   TableRowGenerator.prototype._getChildTags = function(stream){
     return Nehan.List.filter(stream.getTokens(), function(token){
-      return (token instanceof Tag && (token.getName() === "td" || token.getName() === "th"));
+      return (token instanceof Nehan.Tag && (token.getName() === "td" || token.getName() === "th"));
     });
   };
 
@@ -16228,7 +16228,7 @@ var BodyGenerator = (function(){
      @param text {string} - content source of html
   */
   function BodyGenerator(text){
-    var tag = new Tag("<body>", text);
+    var tag = new Nehan.Tag("<body>", text);
     SectionRootGenerator.call(this, new StyleContext(tag, null), new TokenStream(text));
   }
   Class.extend(BodyGenerator, SectionRootGenerator);
@@ -16262,10 +16262,10 @@ var HtmlGenerator = (function(){
   */
   function HtmlGenerator(text){
     this.stream = new TokenStream(text, {
-      filter:Closure.isTagName(["head", "body"])
+      filter:Nehan.Closure.isTagName(["head", "body"])
     });
     if(this.stream.isEmptyTokens()){
-      this.stream.tags = [new Tag("body", text)];
+      this.stream.tags = [new Nehan.Tag("body", text)];
     }
     this.generator = this._createGenerator();
   }
@@ -16305,7 +16305,7 @@ var HtmlGenerator = (function(){
 	switch(tag.getName()){
 	case "head":
 	  this._parseDocumentHeader(new TokenStream(tag.getContent(), {
-	    filter:Closure.isTagName(["title", "meta", "link", "style", "script"])
+	    filter:Nehan.Closure.isTagName(["title", "meta", "link", "style", "script"])
 	  }));
 	  break;
 	case "body":
@@ -16357,10 +16357,10 @@ var DocumentGenerator = (function(){
   */
   function DocumentGenerator(text){
     this.stream = new TokenStream(text, {
-      filter:Closure.isTagName(["!doctype", "html"])
+      filter:Nehan.Closure.isTagName(["!doctype", "html"])
     });
     if(this.stream.isEmptyTokens()){
-      this.stream.tokens = [new Tag("html", text)];
+      this.stream.tokens = [new Nehan.Tag("html", text)];
     }
     this.generator = this._createGenerator();
   }
@@ -16405,7 +16405,7 @@ var DocumentGenerator = (function(){
 	  return this._createHtmlGenerator(tag);
 	}
       }
-      var html_tag = new Tag("<html>", this.stream.getSrc());
+      var html_tag = new Nehan.Tag("<html>", this.stream.getSrc());
       return this._createHtmlGenerator(html_tag);
     },
     _createHtmlGenerator : function(html_tag){
@@ -16451,7 +16451,7 @@ var LayoutEvaluator = (function(){
     _createElement : function(name, opt){
       opt = opt || {};
       var css = opt.css || {};
-      var attrs = opt.attrs? ((opt.attrs instanceof TagAttrs)? opt.attrs.attrs : opt.attrs) : {};
+      var attrs = opt.attrs? ((opt.attrs instanceof Nehan.TagAttrs)? opt.attrs.attrs : opt.attrs) : {};
       var dataset = opt.attrs? opt.attrs.dataset : {};
       var dom = document.createElement(name);
       if(opt.id){
@@ -16651,7 +16651,7 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalRb = function(line, ruby){
-    var rb_style = new StyleContext(new Tag("<rb>"), line.style);
+    var rb_style = new StyleContext(new Nehan.Tag("<rb>"), line.style);
     var rb_line = rb_style.createLine({
       elements:ruby.getRbs()
     });
@@ -16931,7 +16931,7 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalRb = function(line, ruby){
-    var rb_style = new StyleContext(new Tag("<rb>"), line.style);
+    var rb_style = new StyleContext(new Nehan.Tag("<rb>"), line.style);
     var rb_line = rb_style.createLine({
       elements:ruby.getRbs()
     });

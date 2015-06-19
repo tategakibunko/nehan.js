@@ -64,7 +64,7 @@ var AttrSelector = (function(){
     _testTildeEqual : function(style){
       var value = style.getMarkupAttr(this.left);
       var values = value? value.split(/\s+/) : [];
-      return Nehan.List.exists(values, Closure.eq(this.right));
+      return Nehan.List.exists(values, Nehan.Closure.eq(this.right));
     },
     _testPipeEqual : function(style){
       var value = style.getMarkupAttr(this.left);

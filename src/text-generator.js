@@ -134,7 +134,7 @@ var TextGenerator = (function(){
     if(token instanceof Text){
       var head_c1 = token.getContent().substring(0,1);
       return new Char(head_c1);
-    } else if(token instanceof Tag){
+    } else if(token instanceof Nehan.Tag){
       if(token.name === "ruby"){
 	return null; // generally, ruby is not both tail-NG and head-NG.
       }
@@ -147,7 +147,7 @@ var TextGenerator = (function(){
   // estimate 'maybe' size, not strict!!
   TextGenerator.prototype._estimateParentNextHeadMeasure = function(token){
     var font_size = this.style.getFontSize();
-    if(token instanceof Tag && token.name === "ruby"){
+    if(token instanceof Nehan.Tag && token.name === "ruby"){
       var ruby = new RubyTokenStream(token.getContent()).get();
       var char_count = ruby.getCharCount();
       var rt_char_count = ruby.getRtString().length;

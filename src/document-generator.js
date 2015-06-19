@@ -8,10 +8,10 @@ var DocumentGenerator = (function(){
   */
   function DocumentGenerator(text){
     this.stream = new TokenStream(text, {
-      filter:Closure.isTagName(["!doctype", "html"])
+      filter:Nehan.Closure.isTagName(["!doctype", "html"])
     });
     if(this.stream.isEmptyTokens()){
-      this.stream.tokens = [new Tag("html", text)];
+      this.stream.tokens = [new Nehan.Tag("html", text)];
     }
     this.generator = this._createGenerator();
   }
@@ -56,7 +56,7 @@ var DocumentGenerator = (function(){
 	  return this._createHtmlGenerator(tag);
 	}
       }
-      var html_tag = new Tag("<html>", this.stream.getSrc());
+      var html_tag = new Nehan.Tag("<html>", this.stream.getSrc());
       return this._createHtmlGenerator(html_tag);
     },
     _createHtmlGenerator : function(html_tag){

@@ -50,7 +50,7 @@ var TableRowGenerator = (function(){
 
   TableRowGenerator.prototype._getChildTags = function(stream){
     return Nehan.List.filter(stream.getTokens(), function(token){
-      return (token instanceof Tag && (token.getName() === "td" || token.getName() === "th"));
+      return (token instanceof Nehan.Tag && (token.getName() === "td" || token.getName() === "th"));
     });
   };
 

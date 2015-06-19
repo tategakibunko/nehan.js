@@ -236,11 +236,11 @@ var LayoutGenerator = (function(){
       return new RubyTokenStream(style.getMarkupContent());
     case "tbody": case "thead": case "tfoot":
       return new TokenStream(style.getContent(), {
-	filter:Closure.isTagName(["tr"])
+	filter:Nehan.Closure.isTagName(["tr"])
       });
     case "tr":
       return new TokenStream(style.getContent(), {
-	filter:Closure.isTagName(["td", "th"])
+	filter:Nehan.Closure.isTagName(["td", "th"])
       });
     default: return new TokenStream(style.getContent());
     } 

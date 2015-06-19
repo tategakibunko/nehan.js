@@ -9,7 +9,7 @@ var HtmlTokenStream = (function(){
   function HtmlTokenStream(src){
     TokenStream.call(this, src, {
       filter:function(tag){
-	if(token instanceof Tag === false){
+	if(token instanceof Nehan.Tag === false){
 	  return false;
 	}
 	var name = tag.getName();

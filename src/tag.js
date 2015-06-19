@@ -1,7 +1,7 @@
 // Important Notice:
 // to avoid name-conflicts about existing name space of stylesheet,
 // all class names and id in nehan.js are forced to be prefixed by "nehan-".
-var Tag = (function (){
+Nehan.Tag = (function (){
   /**
      @memberof Nehan
      @class Tag
@@ -220,7 +220,7 @@ var Tag = (function (){
        @return {boolean}
     */
     isHeaderTag : function(){
-      return Nehan.List.exists(["h1", "h2", "h3", "h4", "h5", "h6"], Closure.eq(this.name));
+      return Nehan.List.exists(["h1", "h2", "h3", "h4", "h5", "h6"], Nehan.Closure.eq(this.name));
     },
     /**
        @memberof Nehan.Tag
@@ -324,9 +324,9 @@ var Tag = (function (){
     _parseTagAttrs : function(tag_name, tag_src){
       var attr_src = this._getTagAttrSrc(tag_src);
       if(tag_name.length === attr_src.length){
-	return new TagAttrs("");
+	return new Nehan.TagAttrs("");
       }
-      return new TagAttrs(attr_src);
+      return new Nehan.TagAttrs(attr_src);
     }
   };
 

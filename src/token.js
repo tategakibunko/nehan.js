@@ -10,7 +10,7 @@ var Token = {
      @return {boolean}
   */
   isTag : function(token){
-    return token instanceof Tag;
+    return token instanceof Nehan.Tag;
   },
   /**
      @memberof Nehan.Token

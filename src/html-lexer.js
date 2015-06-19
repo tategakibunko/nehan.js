@@ -168,7 +168,7 @@ var HtmlLexer = (function (){
       return {closed:false, content:this.buff};
     },
     _parseTag : function(tagstr){
-      var tag = new Tag(tagstr);
+      var tag = new Nehan.Tag(tagstr);
       this._stepBuff(tagstr.length);
       var tag_name = tag.getName();
       if(LexingRule.isSingleTag(tag_name)){
