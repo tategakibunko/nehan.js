@@ -3,7 +3,7 @@
 
    @namespace Nehan.Palette
 */
-var Palette = (function(){
+Nehan.Palette = (function(){
   // 256(8 * 8 * 4) color palette scales.
   var __rg_palette = [0, 36, 73, 109, 146, 182, 219, 255];
   var __b_palette = [0, 85, 170, 255];

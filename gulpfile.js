@@ -51,6 +51,7 @@ var sources = [
   "src/rgb.js",
   "src/colors.js",
   "src/color.js",
+  "src/palette.js",
 
   // closed modules
   "src/nehan-setup-start.js",
@@ -67,7 +68,6 @@ var sources = [
   "src/tcy.js",
   "src/ruby.js",
 
-  "src/palette.js",
   "src/cardinal.js",
   "src/text-metrics.js",
   "src/list-style-type.js",

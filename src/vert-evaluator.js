@@ -219,7 +219,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalImgChar = function(line, chr){
     var color = line.color || new Nehan.Color(Display.fontColor);
     var font_rgb = color.getRgb();
-    var palette_color = Palette.getColor(font_rgb).toUpperCase();
+    var palette_color = Nehan.Palette.getColor(font_rgb).toUpperCase();
     return this._createElement("img", {
       className:"nehan-img-char",
       attrs:{
