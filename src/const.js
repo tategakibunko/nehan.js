@@ -2,7 +2,7 @@
    some set of usefull constant variables.
    @namespace Nehan.Const
 */
-var Const = {
+Nehan.Const = {
   /**
      @memberof Nehan.Const
      @type {Array.<string>}

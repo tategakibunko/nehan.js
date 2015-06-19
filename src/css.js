@@ -61,7 +61,7 @@ var Css = {
   */
   setCssValueWithVender: function(dst, name, value){
     dst[name] = value; // no prefixed version
-    Nehan.List.iter(Const.cssVenderPrefixes, function(prefix){
+    Nehan.List.iter(Nehan.Const.cssVenderPrefixes, function(prefix){
       dst[prefix + "-" + name] = value;
     });
     return dst;

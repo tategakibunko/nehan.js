@@ -70,11 +70,11 @@ var CssParser = (function(){
   };
 
   var __get_map_2d = function(len){
-    return Const.css2dIndex[Math.min(len, 2)] || [];
+    return Nehan.Const.css2dIndex[Math.min(len, 2)] || [];
   };
 
   var __get_map_4d = function(len){
-    return Const.css4dIndex[Math.min(len, 4)] || [];
+    return Nehan.Const.css4dIndex[Math.min(len, 4)] || [];
   };
 
   // values:[a,b]
@@ -102,13 +102,13 @@ var CssParser = (function(){
   };
 
   var __make_edge_4d = function(values){
-    var props = Const.cssBoxDirsLogical; // len = 4
+    var props = Nehan.Const.cssBoxDirsLogical; // len = 4
     var values_4d = __make_values_4d(values); // len = 4
     return Nehan.List.zipObj(props, values_4d);
   };
 
   var __make_corner_4d = function(values){
-    var props = Const.cssBoxCornersLogical; // len = 4
+    var props = Nehan.Const.cssBoxCornersLogical; // len = 4
     var values_4d = __make_values_4d(values); // len = 4
     return __zip_obj(props, values_4d);
   };

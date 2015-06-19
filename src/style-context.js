@@ -1703,7 +1703,7 @@ var StyleContext = (function(){
       }
       var position = new BoxPosition(value);
       var self = this;
-      Nehan.List.iter(Const.cssBoxDirsLogical, function(dir){
+      Nehan.List.iter(Nehan.Const.cssBoxDirsLogical, function(dir){
 	var value = self.getCssAttr(dir, "auto");
 	if(value !== "auto"){
 	  position[value] = self._computeUnitSize(start, self.font.size);

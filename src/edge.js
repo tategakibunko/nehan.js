@@ -43,7 +43,7 @@ var Edge = (function(){
     */
     copyTo : function(dst){
       var self = this;
-      Nehan.List.iter(Const.cssBoxDirs, function(dir){
+      Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
 	dst[dir] = self[dir];
       });
       return dst;

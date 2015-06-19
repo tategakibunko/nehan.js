@@ -750,6 +750,101 @@ Nehan.Utils = {
   }
 };
 
+/**
+   some set of usefull constant variables.
+   @namespace Nehan.Const
+*/
+Nehan.Const = {
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
+  cssVenderPrefixes:[
+    "-moz",
+    "-webkit",
+    "-o",
+    "-ms"
+  ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
+  cssCorders:[
+    "top-left",
+    "top-right",
+    "bottom-left",
+    "bottom-right"
+  ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
+  cssBorderRadius:[
+    "border-top-left-radius",
+    "border-top-right-radius",
+    "border-bottom-left-radius",
+    "border-bottom-right-radius"
+  ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
+  cssBoxDirs:[
+    "top",
+    "right",
+    "bottom",
+    "left"
+  ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
+  cssBoxDirsLogical:[
+    "before",
+    "end",
+    "after",
+    "start"
+  ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
+  cssBoxCornersLogical:[
+    "start-before",
+    "end-before",
+    "end-after",
+    "start-after"
+  ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<int>}
+  */
+  css2dIndex:{
+    1:[0, 0],
+    2:[0, 1]
+  },
+  /**
+     @memberof Nehan.Const
+     @type {Array.<int>}
+  */
+  css4dIndex:{
+    1:[0, 0, 0, 0],
+    2:[0, 1, 0, 1],
+    3:[0, 1, 2, 1],
+    4:[0, 1, 2, 3]
+  },
+  /**
+     @memberof Nehan.Const
+     @type {string}
+  */
+  space:"&nbsp;",
+  /**
+     @memberof Nehan.Const
+     @type {string}
+  */
+  clearFix:"<div style='clear:both'></div>"
+};
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -2258,101 +2353,6 @@ var reqAnimationFrame = (function(){
 
 
 /**
-   some set of usefull constant variables.
-   @namespace Nehan.Const
-*/
-var Const = {
-  /**
-     @memberof Nehan.Const
-     @type {Array.<string>}
-  */
-  cssVenderPrefixes:[
-    "-moz",
-    "-webkit",
-    "-o",
-    "-ms"
-  ],
-  /**
-     @memberof Nehan.Const
-     @type {Array.<string>}
-  */
-  cssCorders:[
-    "top-left",
-    "top-right",
-    "bottom-left",
-    "bottom-right"
-  ],
-  /**
-     @memberof Nehan.Const
-     @type {Array.<string>}
-  */
-  cssBorderRadius:[
-    "border-top-left-radius",
-    "border-top-right-radius",
-    "border-bottom-left-radius",
-    "border-bottom-right-radius"
-  ],
-  /**
-     @memberof Nehan.Const
-     @type {Array.<string>}
-  */
-  cssBoxDirs:[
-    "top",
-    "right",
-    "bottom",
-    "left"
-  ],
-  /**
-     @memberof Nehan.Const
-     @type {Array.<string>}
-  */
-  cssBoxDirsLogical:[
-    "before",
-    "end",
-    "after",
-    "start"
-  ],
-  /**
-     @memberof Nehan.Const
-     @type {Array.<string>}
-  */
-  cssBoxCornersLogical:[
-    "start-before",
-    "end-before",
-    "end-after",
-    "start-after"
-  ],
-  /**
-     @memberof Nehan.Const
-     @type {Array.<int>}
-  */
-  css2dIndex:{
-    1:[0, 0],
-    2:[0, 1]
-  },
-  /**
-     @memberof Nehan.Const
-     @type {Array.<int>}
-  */
-  css4dIndex:{
-    1:[0, 0, 0, 0],
-    2:[0, 1, 0, 1],
-    3:[0, 1, 2, 1],
-    4:[0, 1, 2, 3]
-  },
-  /**
-     @memberof Nehan.Const
-     @type {string}
-  */
-  space:"&nbsp;",
-  /**
-     @memberof Nehan.Const
-     @type {string}
-  */
-  clearFix:"<div style='clear:both'></div>"
-};
-
-/**
    css utility module
    @namespace Nehan.Css
 */
@@ -2415,7 +2415,7 @@ var Css = {
   */
   setCssValueWithVender: function(dst, name, value){
     dst[name] = value; // no prefixed version
-    Nehan.List.iter(Const.cssVenderPrefixes, function(prefix){
+    Nehan.List.iter(Nehan.Const.cssVenderPrefixes, function(prefix){
       dst[prefix + "-" + name] = value;
     });
     return dst;
@@ -2857,11 +2857,11 @@ var CssParser = (function(){
   };
 
   var __get_map_2d = function(len){
-    return Const.css2dIndex[Math.min(len, 2)] || [];
+    return Nehan.Const.css2dIndex[Math.min(len, 2)] || [];
   };
 
   var __get_map_4d = function(len){
-    return Const.css4dIndex[Math.min(len, 4)] || [];
+    return Nehan.Const.css4dIndex[Math.min(len, 4)] || [];
   };
 
   // values:[a,b]
@@ -2889,13 +2889,13 @@ var CssParser = (function(){
   };
 
   var __make_edge_4d = function(values){
-    var props = Const.cssBoxDirsLogical; // len = 4
+    var props = Nehan.Const.cssBoxDirsLogical; // len = 4
     var values_4d = __make_values_4d(values); // len = 4
     return Nehan.List.zipObj(props, values_4d);
   };
 
   var __make_corner_4d = function(values){
-    var props = Const.cssBoxCornersLogical; // len = 4
+    var props = Nehan.Const.cssBoxCornersLogical; // len = 4
     var values_4d = __make_values_4d(values); // len = 4
     return __zip_obj(props, values_4d);
   };
@@ -6375,7 +6375,7 @@ var ListStyleType = (function(){
     */
     getMarkerText : function(count){
       if(this.isNoneList()){
-	return Const.space;
+	return Nehan.Const.space;
       }
       if(this.isMarkList()){
 	return __marker_text[this.type] || "";
@@ -6982,7 +6982,7 @@ var BoxRect = {
      @param fn {Function}
    */
   iter : function(obj, fn){
-    Nehan.List.iter(Const.cssBoxDirs, function(dir){
+    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
       if(obj[dir]){
 	fn(dir, obj[dir]);
       }
@@ -7178,7 +7178,7 @@ var Edge = (function(){
     */
     copyTo : function(dst){
       var self = this;
-      Nehan.List.iter(Const.cssBoxDirs, function(dir){
+      Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
 	dst[dir] = self[dir];
       });
       return dst;
@@ -7491,7 +7491,7 @@ var BorderRadius = (function(){
       var css = {};
       var css_value = this.getCssValue();
       css["border-radius"] = css_value; // without vender prefix
-      Nehan.List.iter(Const.cssVenderPrefixes, function(prefix){
+      Nehan.List.iter(Nehan.Const.cssVenderPrefixes, function(prefix){
 	var prop = [prefix, "border-radius"].join("-"); // with vender prefix
 	css[prop] = css_value;
       });
@@ -7623,7 +7623,7 @@ var BorderColor = (function(){
     */
     clone : function(){
       var border_color = new BorderColor();
-      Nehan.List.iter(Const.cssBoxDirs, function(dir){
+      Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
 	if(this[dir]){
 	  border_color[dir] = this[dir];
 	}
@@ -7688,7 +7688,7 @@ var BorderStyle = (function(){
     */
     clone : function(){
       var style = new BorderStyle();
-      Nehan.List.iter(Const.cssBoxDirs, function(dir){
+      Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
 	if(this[dir]){
 	  style[dir] = this[dir];
 	}
@@ -12887,7 +12887,7 @@ var StyleContext = (function(){
       }
       var position = new BoxPosition(value);
       var self = this;
-      Nehan.List.iter(Const.cssBoxDirsLogical, function(dir){
+      Nehan.List.iter(Nehan.Const.cssBoxDirsLogical, function(dir){
 	var value = self.getCssAttr(dir, "auto");
 	if(value !== "auto"){
 	  position[value] = self._computeUnitSize(start, self.font.size);

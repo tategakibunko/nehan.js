@@ -94,7 +94,7 @@ var ListStyleType = (function(){
     */
     getMarkerText : function(count){
       if(this.isNoneList()){
-	return Const.space;
+	return Nehan.Const.space;
       }
       if(this.isMarkList()){
 	return __marker_text[this.type] || "";
