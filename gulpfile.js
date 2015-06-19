@@ -83,6 +83,7 @@ var sources = [
   "src/break.js",
   "src/breaks.js",
   "src/page.js",
+  "src/flow.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
@@ -105,7 +106,6 @@ var sources = [
   "src/list-style-pos.js",
   "src/list-style-image.js",
   "src/list-style.js",
-  "src/flow.js",
   "src/block-flow.js",
   "src/inline-flow.js",
   "src/box-flow.js",

@@ -8,9 +8,9 @@ var InlineFlow = (function(){
      @param dir {String} - "lr" or "rl"(but not supported) or "tb"
    */
   function InlineFlow(dir){
-    Flow.call(this, dir);
+    Nehan.Flow.call(this, dir);
   }
-  Nehan.Class.extend(InlineFlow, Flow);
+  Nehan.Class.extend(InlineFlow, Nehan.Flow);
 
   /**
      @memberof Nehan.InlineFlow

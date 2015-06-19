@@ -5532,6 +5532,68 @@ Nehan.Page = (function(){
 })();
 
 
+Nehan.Flow = (function(){
+  /**
+     @memberof Nehan
+     @class Flow
+     @classdesc abstraction of flow, left to right as "lr", right to left as "rl", top to bottom as "tb".
+     @constructor
+     @param dir {String}
+     @example
+     * new Flow("lr").isHorizontal(); // true
+     * new Flow("rl").isHorizontal(); // true
+     * new Flow("lr").isLeftToRight(); // true
+     * new Flow("rl").isLeftToRight(); // false
+     * new Flow("rl").isRightToLeft(); // true
+     * new Flow("tb").isHorizontal(); // false
+     * new Flow("tb").isVertical(); // true
+  */
+  function Flow(dir){
+    this.dir = dir;
+  }
+
+  Flow.prototype = {
+    /**
+       @memberof Nehan.Flow
+       @param dir {String}
+    */
+    init : function(dir){
+      this.dir = dir;
+    },
+    /**
+       @memberof Nehan.Flow
+       @return {boolean}
+    */
+    isHorizontal : function(){
+      return (this.dir === "lr" || this.dir === "rl");
+    },
+    /**
+       @memberof Nehan.Flow
+       @return {boolean}
+    */
+    isVertical : function(){
+      return (this.dir === "tb");
+    },
+    /**
+       @memberof Nehan.Flow
+       @return {boolean}
+    */
+    isLeftToRight : function(){
+      return this.dir === "lr";
+    },
+    /**
+       @memberof Nehan.Flow
+       @return {boolean}
+    */
+    isRightToLeft : function(){
+      return this.dir === "rl";
+    }
+  };
+
+  return Flow;
+})();
+
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -8770,68 +8832,6 @@ var ListStyle = (function(){
   return ListStyle;
 })();
 
-var Flow = (function(){
-  /**
-     @memberof Nehan
-     @class Flow
-     @classdesc abstraction of flow, left to right as "lr", right to left as "rl", top to bottom as "tb".
-     @constructor
-     @param dir {String}
-     @example
-     * new Flow("lr").isHorizontal(); // true
-     * new Flow("rl").isHorizontal(); // true
-     * new Flow("lr").isLeftToRight(); // true
-     * new Flow("rl").isLeftToRight(); // false
-     * new Flow("rl").isRightToLeft(); // true
-     * new Flow("tb").isHorizontal(); // false
-     * new Flow("tb").isVertical(); // true
-  */
-  function Flow(dir){
-    this.dir = dir;
-  }
-
-  Flow.prototype = {
-    /**
-       @memberof Nehan.Flow
-       @param dir {String}
-    */
-    init : function(dir){
-      this.dir = dir;
-    },
-    /**
-       @memberof Nehan.Flow
-       @return {boolean}
-    */
-    isHorizontal : function(){
-      return (this.dir === "lr" || this.dir === "rl");
-    },
-    /**
-       @memberof Nehan.Flow
-       @return {boolean}
-    */
-    isVertical : function(){
-      return (this.dir === "tb");
-    },
-    /**
-       @memberof Nehan.Flow
-       @return {boolean}
-    */
-    isLeftToRight : function(){
-      return this.dir === "lr";
-    },
-    /**
-       @memberof Nehan.Flow
-       @return {boolean}
-    */
-    isRightToLeft : function(){
-      return this.dir === "rl";
-    }
-  };
-
-  return Flow;
-})();
-
-
 var BlockFlow = (function(){
   /**
      @memberof Nehan
@@ -8844,10 +8844,10 @@ var BlockFlow = (function(){
      * var bf = new BlockFlow("tb");
   */
   function BlockFlow(dir){
-    Flow.call(this, dir);
+    Nehan.Flow.call(this, dir);
   }
 
-  Nehan.Class.extend(BlockFlow, Flow);
+  Nehan.Class.extend(BlockFlow, Nehan.Flow);
 
   /**
      get flipped block direction. If direction is "tb", nothing happend.
@@ -8922,9 +8922,9 @@ var InlineFlow = (function(){
      @param dir {String} - "lr" or "rl"(but not supported) or "tb"
    */
   function InlineFlow(dir){
-    Flow.call(this, dir);
+    Nehan.Flow.call(this, dir);
   }
-  Nehan.Class.extend(InlineFlow, Flow);
+  Nehan.Class.extend(InlineFlow, Nehan.Flow);
 
   /**
      @memberof Nehan.InlineFlow

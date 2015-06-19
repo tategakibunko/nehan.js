@@ -1,4 +1,4 @@
-var Flow = (function(){
+Nehan.Flow = (function(){
   /**
      @memberof Nehan
      @class Flow

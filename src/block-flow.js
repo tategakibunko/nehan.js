@@ -10,10 +10,10 @@ var BlockFlow = (function(){
      * var bf = new BlockFlow("tb");
   */
   function BlockFlow(dir){
-    Flow.call(this, dir);
+    Nehan.Flow.call(this, dir);
   }
 
-  Nehan.Class.extend(BlockFlow, Flow);
+  Nehan.Class.extend(BlockFlow, Nehan.Flow);
 
   /**
      get flipped block direction. If direction is "tb", nothing happend.
