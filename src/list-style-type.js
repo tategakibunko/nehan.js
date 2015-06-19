@@ -73,7 +73,7 @@ var ListStyleType = (function(){
 	}
 	return decimal.toString(10);
       }
-      return Cardinal.getStringByName(this.type, decimal);
+      return Nehan.Cardinal.getStringByName(this.type, decimal);
     },
     /**
        @memberof Nehan.ListStyleType
