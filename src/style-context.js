@@ -610,7 +610,7 @@ var StyleContext = (function(){
 	}
 	var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
 	if(line.elements.length > 0 && edge_size > 0){
-	  line.edge = new BoxEdge();
+	  line.edge = new Nehan.BoxEdge();
 	  line.edge.padding.setBefore(this.flow, (line.lineNo > 0)? edge_size : Math.floor(edge_size / 2));
 	}
       }
@@ -1593,7 +1593,7 @@ var StyleContext = (function(){
 	var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
 	if (from_after > 0){
 	  var edge = element.edge || null;
-	  edge = edge? edge.clone() : new BoxEdge();
+	  edge = edge? edge.clone() : new Nehan.BoxEdge();
 	  edge.padding.setAfter(this.flow, from_after); // set offset to padding
 	  element.size.width = (root_line.maxExtent - from_after);
 	  
@@ -1608,7 +1608,7 @@ var StyleContext = (function(){
 	var from_after = root_line.maxExtent - element.maxExtent;
 	if (from_after > 0){
 	  var edge = element.edge || null;
-	  edge = edge? edge.clone() : new BoxEdge();
+	  edge = edge? edge.clone() : new Nehan.BoxEdge();
 	  edge.padding.setBefore(this.flow, from_after); // set offset to padding
 	  //element.size.width = (root_line.maxExtent - from_after);
 	  
@@ -1767,7 +1767,7 @@ var StyleContext = (function(){
       if(padding === null && margin === null && border === null){
 	return null;
       }
-      return new BoxEdge({
+      return new Nehan.BoxEdge({
 	padding:padding,
 	margin:margin,
 	border:border

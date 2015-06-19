@@ -1,4 +1,4 @@
-var BoxEdge = (function (){
+Nehan.BoxEdge = (function (){
   /**
      @memberof Nehan
      @class BoxEdge

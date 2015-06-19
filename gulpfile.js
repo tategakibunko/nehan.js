@@ -65,8 +65,11 @@ var sources = [
   "src/padding.js",
   "src/margin.js",
   "src/border.js",
+  "src/box-edge.js",
 
   // closed modules
+  // these modules/classes are referenced by Display/Config/style module.
+  // so can't be shared with other engines.
   "src/nehan-setup-start.js",
   "src/config.js",
   "src/display.js",
@@ -94,7 +97,6 @@ var sources = [
   "src/text-empha-pos.js",
   "src/text-empha.js",
 
-  "src/box-edge.js",
   "src/box-size.js",
   "src/box-position.js",
   "src/box.js",
