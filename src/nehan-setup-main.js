@@ -102,4 +102,5 @@ Engine.prototype = {
   }
 };
 
+// this is the returned value of Nehan.setup(defined in nehan-setup-start.js).
 return new Engine();
