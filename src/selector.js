@@ -1,5 +1,5 @@
 // Selector = [TypeSelector | TypeSelector + combinator + Selector]
-var Selector = (function(){
+Nehan.Selector = (function(){
   /**
      @memberof Nehan
      @class Selector

@@ -32,7 +32,7 @@ var Selectors = (function(){
   };
 
   var __insert_value = function(selector_key, value){
-    var selector = new Selector(selector_key, value);
+    var selector = new Nehan.Selector(selector_key, value);
     var target_selectors = __is_pe_key(selector_key)? __selectors_pe : __selectors;
     target_selectors.push(selector);
     return selector;
