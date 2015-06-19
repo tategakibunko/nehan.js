@@ -6,10 +6,10 @@ var BorderRadius = (function(){
      @constructor
   */
   function BorderRadius(){
-    this.topLeft = new Radius2d();
-    this.topRight = new Radius2d();
-    this.bottomRight = new Radius2d();
-    this.bottomLeft = new Radius2d();
+    this.topLeft = new Nehan.Radius2d();
+    this.topRight = new Nehan.Radius2d();
+    this.bottomRight = new Nehan.Radius2d();
+    this.bottomLeft = new Nehan.Radius2d();
   }
 
   BorderRadius.prototype = {

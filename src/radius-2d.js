@@ -1,4 +1,4 @@
-var Radius2d = (function(){
+Nehan.Radius2d = (function(){
   /**
      @memberof Nehan
      @class Radius2d
@@ -12,7 +12,7 @@ var Radius2d = (function(){
 
   Radius2d.prototype = {
     clone : function(){
-      var radius2d = new Radius2d();
+      var radius2d = new Nehan.Radius2d();
       radius2d.hori = this.hori;
       radius2d.vert = this.vert;
       return radius2d;
