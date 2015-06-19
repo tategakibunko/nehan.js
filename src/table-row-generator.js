@@ -42,7 +42,7 @@ var TableRowGenerator = (function(){
 	measure = part_sizes[i];
       }
       rest_measure -= measure;
-      default_style.floatDirection = FloatDirections.get("start");
+      default_style.floatDirection = Nehan.FloatDirections.get("start");
       default_style.initContextMeasure(measure);
       return default_style;
     });

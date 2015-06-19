@@ -9,7 +9,7 @@ var FloatGroup = (function(){
   */
   function FloatGroup(elements, float_direction){
     this.elements = elements || [];
-    this.floatDirection = float_direction || FloatDirections.get("start");
+    this.floatDirection = float_direction || Nehan.FloatDirections.get("start");
   }
 
   FloatGroup.prototype = {

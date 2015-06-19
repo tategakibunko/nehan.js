@@ -2100,7 +2100,7 @@ var StyleContext = (function(){
       if(name === "none"){
 	return null;
       }
-      return FloatDirections.get(name);
+      return Nehan.FloatDirections.get(name);
     },
     _loadBreakBefore : function(){
       var value = this.getCssAttr("break-before");

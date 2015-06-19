@@ -1,4 +1,4 @@
-var FloatDirection = (function(){
+Nehan.FloatDirection = (function(){
   /**
      @memberof Nehan
      @class FloatDirection

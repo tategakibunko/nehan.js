@@ -44,8 +44,8 @@ var FloatGroupStack = (function(){
      @param end_blocks {Array.<Nehan.Box>}
   */
   function FloatGroupStack(flow, start_blocks, end_blocks){
-    var start_groups = __make_float_groups(flow, FloatDirections.get("start"), start_blocks);
-    var end_groups = __make_float_groups(flow, FloatDirections.get("end"), end_blocks);
+    var start_groups = __make_float_groups(flow, Nehan.FloatDirections.get("start"), start_blocks);
+    var end_groups = __make_float_groups(flow, Nehan.FloatDirections.get("end"), end_blocks);
     this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
       return g1.getExtent(flow) - g2.getExtent(flow);
     });

@@ -5263,6 +5263,94 @@ Nehan.DocumentHeader = (function(){
 })();
 
 
+Nehan.FloatDirection = (function(){
+  /**
+     @memberof Nehan
+     @class FloatDirection
+     @classdesc abstraction of logical float direction.
+     @constructor
+     @param value {String} - "start" or "end" or "none"
+   */
+  function FloatDirection(value){
+    this.value = value || "none";
+  }
+
+  FloatDirection.prototype = {
+    /**
+       @memberof Nehan.FloatDirection
+       @param is_vert {bool}
+       @return {Object}
+    */
+    getCss : function(is_vert){
+      var css = {};
+      if(!is_vert){
+	if(this.isStart()){
+	  css["css-float"] = "left";
+	} else if(this.isEnd()){
+	  css["css-float"] = "right";
+	}
+      }
+      return css;
+    },
+    /**
+       @memberof Nehan.FloatDirection
+       @return {boolean}
+    */
+    isStart : function(){
+      return this.value === "start";
+    },
+    /**
+       @memberof Nehan.FloatDirection
+       @return {boolean}
+    */
+    isEnd : function(){
+      return this.value === "end";
+    },
+    /**
+       @memberof Nehan.FloatDirection
+       @return {boolean}
+    */
+    isNone : function(){
+      return this.value === "none";
+    }
+  };
+
+  return FloatDirection;
+})();
+
+
+/**
+   pre defined logical float direction collection.
+   @namespace Nehan.FloatDirections
+ */
+Nehan.FloatDirections = {
+  /**
+     @memberof Nehan.FloatDirections
+     @type {Nehan.FloatDirection}
+  */
+  start:(new Nehan.FloatDirection("start")),
+  /**
+     @memberof Nehan.FloatDirections
+     @type {Nehan.FloatDirection}
+  */
+  end:(new Nehan.FloatDirection("end")),
+  /**
+     @memberof Nehan.FloatDirections
+     @type {Nehan.FloatDirection}
+  */
+  none:(new Nehan.FloatDirection("none")),
+  /**
+     get {@link Nehan.FloatDirection} by float name.
+     
+     @memberof Nehan.FloatDirections
+     @param name {String} - "start" or "end" or "none"
+     @return {Nehan.FloatDirection}
+  */
+  get : function(name){
+    return this[name] || null;
+  }
+};
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -10550,94 +10638,6 @@ var Kerning = {
   }
 };
 
-var FloatDirection = (function(){
-  /**
-     @memberof Nehan
-     @class FloatDirection
-     @classdesc abstraction of logical float direction.
-     @constructor
-     @param value {String} - "start" or "end" or "none"
-   */
-  function FloatDirection(value){
-    this.value = value || "none";
-  }
-
-  FloatDirection.prototype = {
-    /**
-       @memberof Nehan.FloatDirection
-       @param is_vert {bool}
-       @return {Object}
-    */
-    getCss : function(is_vert){
-      var css = {};
-      if(!is_vert){
-	if(this.isStart()){
-	  css["css-float"] = "left";
-	} else if(this.isEnd()){
-	  css["css-float"] = "right";
-	}
-      }
-      return css;
-    },
-    /**
-       @memberof Nehan.FloatDirection
-       @return {boolean}
-    */
-    isStart : function(){
-      return this.value === "start";
-    },
-    /**
-       @memberof Nehan.FloatDirection
-       @return {boolean}
-    */
-    isEnd : function(){
-      return this.value === "end";
-    },
-    /**
-       @memberof Nehan.FloatDirection
-       @return {boolean}
-    */
-    isNone : function(){
-      return this.value === "none";
-    }
-  };
-
-  return FloatDirection;
-})();
-
-
-/**
-   pre defined logical float direction collection.
-   @namespace Nehan.FloatDirections
- */
-var FloatDirections = {
-  /**
-     @memberof Nehan.FloatDirections
-     @type {Nehan.FloatDirection}
-  */
-  start:(new FloatDirection("start")),
-  /**
-     @memberof Nehan.FloatDirections
-     @type {Nehan.FloatDirection}
-  */
-  end:(new FloatDirection("end")),
-  /**
-     @memberof Nehan.FloatDirections
-     @type {Nehan.FloatDirection}
-  */
-  none:(new FloatDirection("none")),
-  /**
-     get {@link Nehan.FloatDirection} by float name.
-     
-     @memberof Nehan.FloatDirections
-     @param name {String} - "start" or "end" or "none"
-     @return {Nehan.FloatDirection}
-  */
-  get : function(name){
-    return this[name] || null;
-  }
-};
-
 var Break = (function(){
   /**
      @memberof Nehan
@@ -13293,7 +13293,7 @@ var StyleContext = (function(){
       if(name === "none"){
 	return null;
       }
-      return FloatDirections.get(name);
+      return Nehan.FloatDirections.get(name);
     },
     _loadBreakBefore : function(){
       var value = this.getCssAttr("break-before");
@@ -15467,7 +15467,7 @@ var FloatGroup = (function(){
   */
   function FloatGroup(elements, float_direction){
     this.elements = elements || [];
-    this.floatDirection = float_direction || FloatDirections.get("start");
+    this.floatDirection = float_direction || Nehan.FloatDirections.get("start");
   }
 
   FloatGroup.prototype = {
@@ -15577,8 +15577,8 @@ var FloatGroupStack = (function(){
      @param end_blocks {Array.<Nehan.Box>}
   */
   function FloatGroupStack(flow, start_blocks, end_blocks){
-    var start_groups = __make_float_groups(flow, FloatDirections.get("start"), start_blocks);
-    var end_groups = __make_float_groups(flow, FloatDirections.get("end"), end_blocks);
+    var start_groups = __make_float_groups(flow, Nehan.FloatDirections.get("start"), start_blocks);
+    var end_groups = __make_float_groups(flow, Nehan.FloatDirections.get("end"), end_blocks);
     this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
       return g1.getExtent(flow) - g2.getExtent(flow);
     });
@@ -16163,7 +16163,7 @@ var TableRowGenerator = (function(){
 	measure = part_sizes[i];
       }
       rest_measure -= measure;
-      default_style.floatDirection = FloatDirections.get("start");
+      default_style.floatDirection = Nehan.FloatDirections.get("start");
       default_style.initContextMeasure(measure);
       return default_style;
     });

@@ -2,22 +2,22 @@
    pre defined logical float direction collection.
    @namespace Nehan.FloatDirections
  */
-var FloatDirections = {
+Nehan.FloatDirections = {
   /**
      @memberof Nehan.FloatDirections
      @type {Nehan.FloatDirection}
   */
-  start:(new FloatDirection("start")),
+  start:(new Nehan.FloatDirection("start")),
   /**
      @memberof Nehan.FloatDirections
      @type {Nehan.FloatDirection}
   */
-  end:(new FloatDirection("end")),
+  end:(new Nehan.FloatDirection("end")),
   /**
      @memberof Nehan.FloatDirections
      @type {Nehan.FloatDirection}
   */
-  none:(new FloatDirection("none")),
+  none:(new Nehan.FloatDirection("none")),
   /**
      get {@link Nehan.FloatDirection} by float name.
      

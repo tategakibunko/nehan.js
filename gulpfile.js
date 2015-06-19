@@ -76,6 +76,8 @@ var sources = [
   "src/outline-context-parser.js",
   "src/section-tree-converter.js",
   "src/document-header.js",
+  "src/float-direction.js",
+  "src/float-directions.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
@@ -116,8 +118,6 @@ var sources = [
   "src/page-evaluator.js",
   "src/page-stream.js",
   "src/kerning.js",
-  "src/float-direction.js",
-  "src/float-directions.js",
   "src/break.js",
   "src/breaks.js",
   "src/text-align.js",
