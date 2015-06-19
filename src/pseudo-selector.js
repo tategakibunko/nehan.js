@@ -1,4 +1,4 @@
-var PseudoSelector = (function(){
+Nehan.PseudoSelector = (function(){
   /**
      @memberof Nehan
      @class PseudoSelector

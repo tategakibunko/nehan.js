@@ -129,7 +129,7 @@ var SelectorLexer = (function(){
     },
     _getPseudo : function(){
       var pseudo = this._getByRex(__rex_pseudo);
-      return pseudo? new PseudoSelector(pseudo) : null;
+      return pseudo? new Nehan.PseudoSelector(pseudo) : null;
     }
   };
 
