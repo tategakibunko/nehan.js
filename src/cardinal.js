@@ -78,7 +78,7 @@ var Cardinal = (function(){
     getStringByName : function(name, decimal){
       var table = this.getTableByName(name);
       var base = table.length;
-      var digits = MathUtils.convBase(decimal, base);
+      var digits = Nehan.Utils.convBase(decimal, base);
       var ret = "";
       for(var i = 0; i < digits.length; i++){
 	var digit = digits[i];

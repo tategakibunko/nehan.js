@@ -34,7 +34,6 @@ var sources = [
   "src/lexing-rule.js",
   "src/style.js",
   "src/class.js",
-  "src/math-utils.js",
   "src/anim.js",
   "src/const.js",
   "src/css.js",

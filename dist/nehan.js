@@ -657,6 +657,26 @@ Nehan.Obj = (function(){
 */
 Nehan.Utils = {
   /**
+     convert [decial] number by [base]
+
+     @memberof Nehan.Utils
+     @param deciaml {int}
+     @param base {int}
+     @return {int}
+  */
+  convBase : function(decimal, base){
+   if(decimal === 0){
+      return [0];
+    }
+    var ret = [];
+    var work = decimal;
+    while(work > 0){
+      ret.unshift(work % base);
+      work = Math.floor(work / base);
+    }
+    return ret;
+  },
+  /**
      @memberof Nehan.Utils
      @param str {String}
   */
@@ -2216,33 +2236,6 @@ Class.extend = function(childCtor, parentCtor) {
   childCtor.superClass_ = parentCtor.prototype;
   childCtor.prototype = new TempCtor();
   childCtor.prototype.constructor = childCtor;
-};
-
-
-/**
-   @namespace Nehan.MathUtils
-*/
-var MathUtils = {
-  /**
-     convert [decial] number by [base]
-
-     @memberof Nehan.MathUtils
-     @param deciaml {int}
-     @param base {int}
-     @return {int}
-  */
-  convBase : function(decimal, base){
-   if(decimal === 0){
-      return [0];
-    }
-    var ret = [];
-    var work = decimal;
-    while(work > 0){
-      ret.unshift(work % base);
-      work = Math.floor(work / base);
-    }
-    return ret;
-  }
 };
 
 
@@ -6220,7 +6213,7 @@ var Cardinal = (function(){
     getStringByName : function(name, decimal){
       var table = this.getTableByName(name);
       var base = table.length;
-      var digits = MathUtils.convBase(decimal, base);
+      var digits = Nehan.Utils.convBase(decimal, base);
       var ret = "";
       for(var i = 0; i < digits.length; i++){
 	var digit = digits[i];
