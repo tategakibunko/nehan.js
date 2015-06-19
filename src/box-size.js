@@ -1,4 +1,4 @@
-var BoxSize = (function(){
+Nehan.BoxSize = (function(){
   /**
      @memberof Nehan
      @class BoxSize

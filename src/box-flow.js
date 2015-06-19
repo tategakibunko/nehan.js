@@ -215,7 +215,7 @@ var BoxFlow = (function(){
        * new BoxFlow("tb", "lr").getBoxSize(100, 200); // BoxSize(200, 100)
      */
     getBoxSize : function(measure, extent){
-      var size = new BoxSize(0, 0);
+      var size = new Nehan.BoxSize(0, 0);
       size[this.getPropMeasure()] = measure;
       size[this.getPropExtent()] = extent;
       return size;

@@ -170,7 +170,7 @@ var BlockGenerator = (function(){
       */
       if(!this.hasCache() && this.isFirstOutput()){
 	// size 'zero' has special meaning... so we use 1.
-	return new Box(new BoxSize(1,1), this.style, "void"); // empty void element
+	return new Box(new Nehan.BoxSize(1,1), this.style, "void"); // empty void element
       }
       return null;
     }

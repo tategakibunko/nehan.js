@@ -4472,6 +4472,82 @@ Nehan.BoxEdge = (function (){
   return BoxEdge;
 })();
 
+Nehan.BoxSize = (function(){
+  /**
+     @memberof Nehan
+     @class BoxSize
+     @classdesc physical box size 'width' and 'height'.
+     @constructor
+     @param width {int} - content width
+     @param height {int} - content height
+  */
+  function BoxSize(width, height){
+    this.width = width; // content width
+    this.height = height; // content height
+  }
+
+  BoxSize.prototype = {
+    /**
+       clone box size object with same values.
+
+       @memberof Nehan.BoxSize
+       @return {Nehan.BoxSize}
+    */
+    clone : function(){
+      return new BoxSize(this.width, this.height);
+    },
+    /**
+       @memberof Nehan.BoxSize
+       @param flow {Nehan.BoxFlow}
+       @param extent {int}
+     */
+    setExtent : function(flow, extent){
+      this[flow.getPropExtent()] = extent;
+    },
+    /**
+       @memberof Nehan.BoxSize
+       @param flow {Nehan.BoxFlow}
+       @param measure {int}
+     */
+    setMeasure : function(flow, measure){
+      this[flow.getPropMeasure()] = measure;
+    },
+    /**
+       @memberof Nehan.BoxSize
+       @param flow {Nehan.BoxFlow}
+       @return {Object}
+     */
+    getCss : function(flow){
+      var css = {};
+      css.width = this.width + "px";
+      css.height = this.height + "px";
+      return css;
+    },
+    /**
+       get content size of measure
+
+       @memberof Nehan.BoxSize
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+     */
+    getMeasure : function(flow){
+      return this[flow.getPropMeasure()];
+    },
+    /**
+       get content size of extent
+
+       @memberof Nehan.BoxSize
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
+    getExtent : function(flow){
+      return this[flow.getPropExtent()];
+    }
+  };
+
+  return BoxSize;
+})();
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -8114,7 +8190,7 @@ var BoxFlow = (function(){
        * new BoxFlow("tb", "lr").getBoxSize(100, 200); // BoxSize(200, 100)
      */
     getBoxSize : function(measure, extent){
-      var size = new BoxSize(0, 0);
+      var size = new Nehan.BoxSize(0, 0);
       size[this.getPropMeasure()] = measure;
       size[this.getPropExtent()] = extent;
       return size;
@@ -8345,82 +8421,6 @@ var TextEmpha = (function(){
   return TextEmpha;
 })();
 
-
-var BoxSize = (function(){
-  /**
-     @memberof Nehan
-     @class BoxSize
-     @classdesc physical box size 'width' and 'height'.
-     @constructor
-     @param width {int} - content width
-     @param height {int} - content height
-  */
-  function BoxSize(width, height){
-    this.width = width; // content width
-    this.height = height; // content height
-  }
-
-  BoxSize.prototype = {
-    /**
-       clone box size object with same values.
-
-       @memberof Nehan.BoxSize
-       @return {Nehan.BoxSize}
-    */
-    clone : function(){
-      return new BoxSize(this.width, this.height);
-    },
-    /**
-       @memberof Nehan.BoxSize
-       @param flow {Nehan.BoxFlow}
-       @param extent {int}
-     */
-    setExtent : function(flow, extent){
-      this[flow.getPropExtent()] = extent;
-    },
-    /**
-       @memberof Nehan.BoxSize
-       @param flow {Nehan.BoxFlow}
-       @param measure {int}
-     */
-    setMeasure : function(flow, measure){
-      this[flow.getPropMeasure()] = measure;
-    },
-    /**
-       @memberof Nehan.BoxSize
-       @param flow {Nehan.BoxFlow}
-       @return {Object}
-     */
-    getCss : function(flow){
-      var css = {};
-      css.width = this.width + "px";
-      css.height = this.height + "px";
-      return css;
-    },
-    /**
-       get content size of measure
-
-       @memberof Nehan.BoxSize
-       @param flow {Nehan.BoxFlow}
-       @return {int}
-     */
-    getMeasure : function(flow){
-      return this[flow.getPropMeasure()];
-    },
-    /**
-       get content size of extent
-
-       @memberof Nehan.BoxSize
-       @param flow {Nehan.BoxFlow}
-       @return {int}
-    */
-    getExtent : function(flow){
-      return this[flow.getPropExtent()];
-    }
-  };
-
-  return BoxSize;
-})();
 
 var BoxPosition = (function(){
   /**
@@ -11718,7 +11718,7 @@ var StyleContext = (function(){
       var width = this.getMarkupAttr("width")? parseInt(this.getMarkupAttr("width"), 10) : (this.staticMeasure || this.getFontSize());
       var height = this.getMarkupAttr("height")? parseInt(this.getMarkupAttr("height"), 10) : (this.staticExtent || this.getFontSize());
       var classes = ["nehan-block", "nehan-image"].concat(this.markup.getClasses());
-      var image_size = new BoxSize(width, height);
+      var image_size = new Nehan.BoxSize(width, height);
       var image = new Box(image_size, this);
       image.display = this.display; // inline, block, inline-block
       image.edge = this.edge || null;
@@ -12355,7 +12355,7 @@ var StyleContext = (function(){
 	return this.parent.getListMarkerSize();
       }
       var font_size = this.getFontSize();
-      return new BoxSize(font_size, font_size);
+      return new Nehan.BoxSize(font_size, font_size);
     },
     /**
        @memberof Nehan.StyleContext
@@ -14691,7 +14691,7 @@ var BlockGenerator = (function(){
       */
       if(!this.hasCache() && this.isFirstOutput()){
 	// size 'zero' has special meaning... so we use 1.
-	return new Box(new BoxSize(1,1), this.style, "void"); // empty void element
+	return new Box(new Nehan.BoxSize(1,1), this.style, "void"); // empty void element
       }
       return null;
     }

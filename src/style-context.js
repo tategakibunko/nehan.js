@@ -534,7 +534,7 @@ var StyleContext = (function(){
       var width = this.getMarkupAttr("width")? parseInt(this.getMarkupAttr("width"), 10) : (this.staticMeasure || this.getFontSize());
       var height = this.getMarkupAttr("height")? parseInt(this.getMarkupAttr("height"), 10) : (this.staticExtent || this.getFontSize());
       var classes = ["nehan-block", "nehan-image"].concat(this.markup.getClasses());
-      var image_size = new BoxSize(width, height);
+      var image_size = new Nehan.BoxSize(width, height);
       var image = new Box(image_size, this);
       image.display = this.display; // inline, block, inline-block
       image.edge = this.edge || null;
@@ -1171,7 +1171,7 @@ var StyleContext = (function(){
 	return this.parent.getListMarkerSize();
       }
       var font_size = this.getFontSize();
-      return new BoxSize(font_size, font_size);
+      return new Nehan.BoxSize(font_size, font_size);
     },
     /**
        @memberof Nehan.StyleContext
