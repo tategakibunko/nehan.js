@@ -26,7 +26,7 @@ var HeaderGenerator = (function(){
       rank:this._getHeaderRank(),
       title:this.style.getMarkupContent()
     });
-    block.id = Css.addNehanHeaderPrefix(header_id);
+    block.id = Nehan.Css.addNehanHeaderPrefix(header_id);
   };
   
   return HeaderGenerator;

@@ -2,13 +2,13 @@
    css utility module
    @namespace Nehan.Css
 */
-var Css = {
+Nehan.Css = {
   /**
      @memberof Nehan.Css
      @param args {Object}
      @return {String}
      @example
-     * Css.toString({"color":"red", "font-size":16}); // "color:'red'; 'font-size':16"
+     * Nehan.Css.toString({"color":"red", "font-size":16}); // "color:'red'; 'font-size':16"
   */
   toString : function(args){
     var tmp = [];
@@ -22,7 +22,7 @@ var Css = {
      @param name {String}
      @return {String}
      @example
-     * Css.addNehanPrefix("foo"); // "nehan-foo"
+     * Nehan.Css.addNehanPrefix("foo"); // "nehan-foo"
   */
   addNehanPrefix : function(name){
     return (name.indexOf("nehan-") === 0)? name : "nehan-" + name;
@@ -32,7 +32,7 @@ var Css = {
      @param name {String}
      @return {String}
      @example
-     * Css.addNehanHeaderPrefix("foo"); // "nehan-header-foo"
+     * Nehan.Css.addNehanHeaderPrefix("foo"); // "nehan-header-foo"
   */
   addNehanHeaderPrefix : function(name){
     return "nehan-header-" + name;
@@ -42,7 +42,7 @@ var Css = {
      @param name {String}
      @return {String}
      @example
-     * Css.addNehanTocLinkPrefix("foo"); // "nehan-toc-link-foo"
+     * Nehan.Css.addNehanTocLinkPrefix("foo"); // "nehan-toc-link-foo"
   */
   addNehanTocLinkPrefix : function(name){
     return "nehan-toc-link-" + name;
@@ -57,7 +57,7 @@ var Css = {
      @param value {String}
      @return {Object}
      @example
-     * Css.setCssValueWithVender({}, "writing-mode", "vertical-rl");
+     * Nehan.Css.setCssValueWithVender({}, "writing-mode", "vertical-rl");
   */
   setCssValueWithVender: function(dst, name, value){
     dst[name] = value; // no prefixed version

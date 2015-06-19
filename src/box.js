@@ -95,7 +95,7 @@ var Box = (function(){
        @return {Array.<string>}
     */
     getClassName : function(){
-      return this.classes? Nehan.List.map(this.classes, Css.addNehanPrefix).join(" ") : "";
+      return this.classes? Nehan.List.map(this.classes, Nehan.Css.addNehanPrefix).join(" ") : "";
     },
     /**
        @memberof Nehan.Box
