@@ -5351,6 +5351,65 @@ Nehan.FloatDirections = {
   }
 };
 
+Nehan.TextAlign = (function(){
+  /**
+     @memberof Nehan
+     @class TextAlign
+     @classdesc abstraction of logical text align(start, end, center)
+     @constructor
+     @param value {String} - logical align direction, "start" or "end" or "center"
+  */
+  function TextAlign(value){
+    this.value = value || "start";
+  }
+
+  TextAlign.prototype = {
+    /**
+       @memberof Nehan.TextAlign
+       @return {boolean}
+    */
+    isStart : function(){
+      return this.value === "start";
+    },
+    /**
+       @memberof Nehan.TextAlign
+       @return {boolean}
+    */
+    isEnd : function(){
+      return this.value === "end";
+    },
+    /**
+       @memberof Nehan.TextAlign
+       @return {boolean}
+    */
+    isCenter : function(){
+      return this.value === "center";
+    }
+  };
+
+  return TextAlign;
+})();
+
+
+/**
+   pre defined text align set
+
+   @namespace Nehan.TextAligns
+*/
+Nehan.TextAligns = {
+  start:(new Nehan.TextAlign("start")),
+  end:(new Nehan.TextAlign("end")),
+  center:(new Nehan.TextAlign("center")),
+  /**
+     @memberof Nehan.TextAligns
+     @param value - logical text align direction, "start" or "end" or "center".
+     @return {Nehan.TextAlign}
+  */
+  get : function(value){
+    return this[value] || null;
+  }
+};
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -10731,75 +10790,6 @@ var Breaks = {
 };
 
 
-var TextAlign = (function(){
-  /**
-     @memberof Nehan
-     @class TextAlign
-     @classdesc abstraction of logical text align(start, end, center)
-     @constructor
-     @param value {String} - logical align direction, "start" or "end" or "center"
-  */
-  function TextAlign(value){
-    this.value = value || "start";
-  }
-
-  TextAlign.prototype = {
-    /**
-       @memberof Nehan.TextAlign
-       @return {boolean}
-    */
-    isStart : function(){
-      return this.value === "start";
-    },
-    /**
-       @memberof Nehan.TextAlign
-       @return {boolean}
-    */
-    isEnd : function(){
-      return this.value === "end";
-    },
-    /**
-       @memberof Nehan.TextAlign
-       @return {boolean}
-    */
-    isCenter : function(){
-      return this.value === "center";
-    },
-    /**
-       @memberof Nehan.TextAlign
-       @return {Object}
-    */
-    getCss : function(line){
-      var css = {};
-      if(this.value === "center"){
-      }
-      return css;
-    }
-  };
-
-  return TextAlign;
-})();
-
-
-/**
-   pre defined text align set
-
-   @namespace Nehan.TextAligns
-*/
-var TextAligns = {
-  start:(new TextAlign("start")),
-  end:(new TextAlign("end")),
-  center:(new TextAlign("center")),
-  /**
-     @memberof Nehan.TextAligns
-     @param value - logical text align direction, "start" or "end" or "center".
-     @return {Nehan.TextAlign}
-  */
-  get : function(value){
-    return this[value] || null;
-  }
-};
-
 var PartitionUnit = (function(){
   /**
      @memberof Nehan
@@ -12333,7 +12323,7 @@ var StyleContext = (function(){
        @return {Nehan.TextAlign}
     */
     getTextAlign : function(){
-      return this.textAlign || TextAligns.get("start");
+      return this.textAlign || Nehan.TextAligns.get("start");
     },
     /**
        @memberof Nehan.StyleContext
@@ -13260,7 +13250,7 @@ var StyleContext = (function(){
       if(value === "inherit" && this.parent && this.parent.textAlign){
 	return this.parent.textAlign;
       }
-      return TextAligns.get(value || "start");
+      return Nehan.TextAligns.get(value || "start");
     },
     _loadTextEmpha : function(){
       var empha_style = this.getCssAttr("text-emphasis-style", "none");

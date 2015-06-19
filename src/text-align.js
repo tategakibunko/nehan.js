@@ -1,4 +1,4 @@
-var TextAlign = (function(){
+Nehan.TextAlign = (function(){
   /**
      @memberof Nehan
      @class TextAlign
@@ -31,16 +31,6 @@ var TextAlign = (function(){
     */
     isCenter : function(){
       return this.value === "center";
-    },
-    /**
-       @memberof Nehan.TextAlign
-       @return {Object}
-    */
-    getCss : function(line){
-      var css = {};
-      if(this.value === "center"){
-      }
-      return css;
     }
   };
 

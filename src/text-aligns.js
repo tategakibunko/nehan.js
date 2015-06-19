@@ -3,10 +3,10 @@
 
    @namespace Nehan.TextAligns
 */
-var TextAligns = {
-  start:(new TextAlign("start")),
-  end:(new TextAlign("end")),
-  center:(new TextAlign("center")),
+Nehan.TextAligns = {
+  start:(new Nehan.TextAlign("start")),
+  end:(new Nehan.TextAlign("end")),
+  center:(new Nehan.TextAlign("center")),
   /**
      @memberof Nehan.TextAligns
      @param value - logical text align direction, "start" or "end" or "center".

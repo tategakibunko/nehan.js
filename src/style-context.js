@@ -1140,7 +1140,7 @@ var StyleContext = (function(){
        @return {Nehan.TextAlign}
     */
     getTextAlign : function(){
-      return this.textAlign || TextAligns.get("start");
+      return this.textAlign || Nehan.TextAligns.get("start");
     },
     /**
        @memberof Nehan.StyleContext
@@ -2067,7 +2067,7 @@ var StyleContext = (function(){
       if(value === "inherit" && this.parent && this.parent.textAlign){
 	return this.parent.textAlign;
       }
-      return TextAligns.get(value || "start");
+      return Nehan.TextAligns.get(value || "start");
     },
     _loadTextEmpha : function(){
       var empha_style = this.getCssAttr("text-emphasis-style", "none");

@@ -78,6 +78,8 @@ var sources = [
   "src/document-header.js",
   "src/float-direction.js",
   "src/float-directions.js",
+  "src/text-align.js",
+  "src/text-aligns.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
@@ -120,8 +122,6 @@ var sources = [
   "src/kerning.js",
   "src/break.js",
   "src/breaks.js",
-  "src/text-align.js",
-  "src/text-aligns.js",
   "src/partition-unit.js",
   "src/partition.js",
   "src/partition-hash-set.js",
