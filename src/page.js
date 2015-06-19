@@ -1,4 +1,4 @@
-var Page = (function(){
+Nehan.Page = (function(){
   /**
      @memberof Nehan
      @class Page

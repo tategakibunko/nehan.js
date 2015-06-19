@@ -82,6 +82,7 @@ var sources = [
   "src/text-aligns.js",
   "src/break.js",
   "src/breaks.js",
+  "src/page.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
@@ -118,7 +119,6 @@ var sources = [
   "src/document-context.js",
   "src/token-stream.js",
   "src/ruby-token-stream.js",
-  "src/page.js",
   "src/page-evaluator.js",
   "src/page-stream.js",
   "src/kerning.js",
