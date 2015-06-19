@@ -221,6 +221,26 @@ Nehan.Env = (function(){
 })();
 
 /**
+   @namespace Nehan.Class
+*/
+Nehan.Class = {};
+
+/**
+   @memberof Nehan.Class
+   @param childCtor {Object}
+   @param parentCtor {Object}
+   @return {Object}
+*/
+Nehan.Class.extend = function(childCtor, parentCtor) {
+  function TempCtor() {}
+  TempCtor.prototype = parentCtor.prototype;
+  childCtor.superClass_ = parentCtor.prototype;
+  childCtor.prototype = new TempCtor();
+  childCtor.prototype.constructor = childCtor;
+};
+
+
+/**
    list utility module
 
    @namespace Nehan.List
@@ -1756,6 +1776,143 @@ Nehan.Closure = {
   }
 };
 
+Nehan.HashSet = (function(){
+  /**
+     @memberof Nehan
+     @class HashSet
+     @classdesc abstraction of (key, value) set.
+     @constructor
+   */
+  function HashSet(values){
+    this._values = Nehan.Obj.clone(values || {});
+  }
+
+  HashSet.prototype = {
+    /**
+       @memberof Nehan.HashSet
+       @param fn {Function}
+    */
+    iter : function(fn){
+      Nehan.Obj.iter(this._values, fn);
+    },
+    /**
+       merge new value to old value with same key. simply overwrite by default.
+
+       @memberof Nehan.HashSet
+       @param old_value
+       @param new_value
+    */
+    merge : function(old_value, new_value){
+      return new_value;
+    },
+    /**
+       return union set between this and [set].
+
+       @memberof Nehan.HashSet
+       @param set {Nehan.HashSet}
+     */
+    union : function(set){
+      set.iter(function(key, value){
+	this.add(key, value);
+      }.bind(this));
+      return this;
+    },
+    /**
+       get value by name(key).
+
+       @memberof Nehan.HashSet
+       @name {String}
+       @return {value}
+    */
+    get : function(name){
+      return this._values[name] || null;
+    },
+    getValues : function(){
+      return this._values;
+    },
+    /**
+       add [value] by [name]. HashSet::merge is called if [name] is already registered.
+
+       @memberof Nehan.HashSet
+       @param name {String}
+       @param value
+    */
+    add : function(name, value){
+      var old_value = this._values[name] || null;
+      var new_value = old_value? this.merge(old_value, value) : value;
+      this._values[name] = new_value;
+    },
+    /**
+     * this function is used when performance matters,<br>
+     * instead of using this.union(new HashSet(values))
+
+       @memberof Nehan.HashSet
+       @param values {Array}
+    */
+    addValues : function(values){
+      for(var prop in values){
+	this.add(prop, values[prop]);
+      }
+    },
+    /**
+       remove value associated with [name].
+
+       @memberof Nehan.HashSet
+       @param name {String}
+    */
+    remove : function(name){
+      delete this._values[name];
+    }
+  };
+
+  return HashSet;
+})();
+
+
+
+
+Nehan.CssHashSet = (function(){
+  /**
+     @memberof Nehan
+     @class CssHashSet
+     @classdesc hash set for css
+     @extends {Nehan.HashSet}
+  */
+  function CssHashSet(values){
+    Nehan.HashSet.call(this, values);
+  }
+  Nehan.Class.extend(CssHashSet, Nehan.HashSet);
+
+  /**
+   * merge css value<br>
+   * 1. if old_value is object, merge each properties.<br>
+   * 2. other case, simplly overwrite new_value to old_value(even if new_value is function).<br>
+
+   @memberof Nehan.CssHashSet
+   @method merge
+   @param old_value
+   @param new_value
+  */
+  CssHashSet.prototype.merge = function(old_value, new_value){
+    if(typeof old_value === "object"){
+      Nehan.Args.copy(old_value, new_value);
+      return old_value;
+    }
+    return new_value;
+  };
+
+  /**
+     @memberof Nehan.CssHashSet
+     @method copyValuesTo
+     @param dst {Object}
+  */
+  CssHashSet.prototype.copyValuesTo = function(dst){
+    return Nehan.Args.copy(dst, this._values);
+  };
+
+  return CssHashSet;
+})();
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -3226,26 +3383,6 @@ var Style = {
 };
 
 /**
-   @namespace Nehan.Class
-*/
-var Class = {};
-
-/**
-   @memberof Nehan.Class
-   @param childCtor {Object}
-   @param parentCtor {Object}
-   @return {Object}
-*/
-Class.extend = function(childCtor, parentCtor) {
-  function TempCtor() {}
-  TempCtor.prototype = parentCtor.prototype;
-  childCtor.superClass_ = parentCtor.prototype;
-  childCtor.prototype = new TempCtor();
-  childCtor.prototype.constructor = childCtor;
-};
-
-
-/**
    requestAnimationFrame wrapper function
    @namespace Nehan
    @function reqAnimationFrame
@@ -3262,143 +3399,6 @@ var reqAnimationFrame = (function(){
     };
 })();
 
-
-var HashSet = (function(){
-  /**
-     @memberof Nehan
-     @class HashSet
-     @classdesc abstraction of (key, value) set.
-     @constructor
-   */
-  function HashSet(values){
-    this._values = Nehan.Obj.clone(values || {});
-  }
-
-  HashSet.prototype = {
-    /**
-       @memberof Nehan.HashSet
-       @param fn {Function}
-    */
-    iter : function(fn){
-      Nehan.Obj.iter(this._values, fn);
-    },
-    /**
-       merge new value to old value with same key. simply overwrite by default.
-
-       @memberof Nehan.HashSet
-       @param old_value
-       @param new_value
-    */
-    merge : function(old_value, new_value){
-      return new_value;
-    },
-    /**
-       return union set between this and [set].
-
-       @memberof Nehan.HashSet
-       @param set {Nehan.HashSet}
-     */
-    union : function(set){
-      set.iter(function(key, value){
-	this.add(key, value);
-      }.bind(this));
-      return this;
-    },
-    /**
-       get value by name(key).
-
-       @memberof Nehan.HashSet
-       @name {String}
-       @return {value}
-    */
-    get : function(name){
-      return this._values[name] || null;
-    },
-    getValues : function(){
-      return this._values;
-    },
-    /**
-       add [value] by [name]. HashSet::merge is called if [name] is already registered.
-
-       @memberof Nehan.HashSet
-       @param name {String}
-       @param value
-    */
-    add : function(name, value){
-      var old_value = this._values[name] || null;
-      var new_value = old_value? this.merge(old_value, value) : value;
-      this._values[name] = new_value;
-    },
-    /**
-     * this function is used when performance matters,<br>
-     * instead of using this.union(new HashSet(values))
-
-       @memberof Nehan.HashSet
-       @param values {Array}
-    */
-    addValues : function(values){
-      for(var prop in values){
-	this.add(prop, values[prop]);
-      }
-    },
-    /**
-       remove value associated with [name].
-
-       @memberof Nehan.HashSet
-       @param name {String}
-    */
-    remove : function(name){
-      delete this._values[name];
-    }
-  };
-
-  return HashSet;
-})();
-
-
-
-
-var CssHashSet = (function(){
-  /**
-     @memberof Nehan
-     @class CssHashSet
-     @classdesc hash set for css
-     @extends {Nehan.HashSet}
-  */
-  function CssHashSet(values){
-    HashSet.call(this, values);
-  }
-  Class.extend(CssHashSet, HashSet);
-
-  /**
-   * merge css value<br>
-   * 1. if old_value is object, merge each properties.<br>
-   * 2. other case, simplly overwrite new_value to old_value(even if new_value is function).<br>
-
-   @memberof Nehan.CssHashSet
-   @method merge
-   @param old_value
-   @param new_value
-  */
-  CssHashSet.prototype.merge = function(old_value, new_value){
-    if(typeof old_value === "object"){
-      Nehan.Args.copy(old_value, new_value);
-      return old_value;
-    }
-    return new_value;
-  };
-
-  /**
-     @memberof Nehan.CssHashSet
-     @method copyValuesTo
-     @param dst {Object}
-  */
-  CssHashSet.prototype.copyValuesTo = function(dst){
-    return Nehan.Args.copy(dst, this._values);
-  };
-
-  return CssHashSet;
-})();
 
 /**
 <pre>
@@ -4372,8 +4372,8 @@ var Selectors = (function(){
   };
 
   var __update_value = function(selector_key, value){
-    var style_value = new CssHashSet(Style[selector_key]); // old style value, must be found
-    style_value = style_value.union(new CssHashSet(value)); // merge new value to old
+    var style_value = new Nehan.CssHashSet(Style[selector_key]); // old style value, must be found
+    style_value = style_value.union(new Nehan.CssHashSet(value)); // merge new value to old
     var target_selectors = __is_pe_key(selector_key)? __selectors_pe : __selectors;
     var selector = __find_selector(target_selectors, selector_key); // selector object for selector_key, must be found
     selector.updateValue(style_value.getValues());
@@ -4390,8 +4390,8 @@ var Selectors = (function(){
     var matched_selectors = Nehan.List.filter(__selectors_pe, function(selector){
       return selector.testPseudoElement(style, pseudo_element_name);
     });
-    return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
-      return ret.union(new CssHashSet(selector.getValue()));
+    return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new Nehan.CssHashSet(), function(ret, selector){
+      return ret.union(new Nehan.CssHashSet(selector.getValue()));
     }).getValues();
   };
 
@@ -4399,8 +4399,8 @@ var Selectors = (function(){
     var matched_selectors = Nehan.List.filter(__selectors, function(selector){
       return selector.test(style);
     });
-    return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
-      return ret.union(new CssHashSet(selector.getValue()));
+    return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new Nehan.CssHashSet(), function(ret, selector){
+      return ret.union(new Nehan.CssHashSet(selector.getValue()));
     }).getValues();
   };
 
@@ -6592,7 +6592,7 @@ var BlockFlow = (function(){
     Flow.call(this, dir);
   }
 
-  Class.extend(BlockFlow, Flow);
+  Nehan.Class.extend(BlockFlow, Flow);
 
   /**
      get flipped block direction. If direction is "tb", nothing happend.
@@ -6669,7 +6669,7 @@ var InlineFlow = (function(){
   function InlineFlow(dir){
     Flow.call(this, dir);
   }
-  Class.extend(InlineFlow, Flow);
+  Nehan.Class.extend(InlineFlow, Flow);
 
   /**
      @memberof Nehan.InlineFlow
@@ -7736,7 +7736,7 @@ var Padding = (function(){
   function Padding(){
     Edge.call(this, "padding");
   }
-  Class.extend(Padding, Edge);
+  Nehan.Class.extend(Padding, Edge);
 
   /**
      @memberof Nehan.Padding
@@ -7762,7 +7762,7 @@ var Margin = (function(){
   function Margin(){
     Edge.call(this, "margin");
   }
-  Class.extend(Margin, Edge);
+  Nehan.Class.extend(Margin, Edge);
 
   /**
      @memberof Nehan.Margin
@@ -7789,7 +7789,7 @@ var Border = (function(){
   function Border(){
     Edge.call(this, "border");
   }
-  Class.extend(Border, Edge);
+  Nehan.Class.extend(Border, Edge);
 
   /**
      return cloned border object
@@ -8961,7 +8961,7 @@ var TextLexer = (function (){
     HtmlLexer.call(this, src);
   }
 
-  Class.extend(TextLexer, HtmlLexer);
+  Nehan.Class.extend(TextLexer, HtmlLexer);
 
   TextLexer.prototype._getToken = function(){
     if(this.buff === ""){
@@ -10139,7 +10139,7 @@ var RubyTokenStream = (function(){
     this.tokens = this._parse(new TokenStream(str));
     this.pos = 0;
   }
-  Class.extend(RubyTokenStream, TokenStream);
+  Nehan.Class.extend(RubyTokenStream, TokenStream);
 
   RubyTokenStream.prototype._parse = function(stream){
     var tokens = [];
@@ -10949,9 +10949,9 @@ var PartitionHashSet = (function(){
      @extends {Nehan.HashSet}
    */
   function PartitionHashSet(){
-    HashSet.call(this);
+    Nehan.HashSet.call(this);
   }
-  Class.extend(PartitionHashSet, HashSet);
+  Nehan.Class.extend(PartitionHashSet, Nehan.HashSet);
 
   /**
      @memberof Nehan.PartitionHashSet
@@ -11133,7 +11133,7 @@ var SelectorContext = (function(){
   function SelectorContext(style, cursor_context){
     SelectorPropContext.call(this, style, cursor_context);
   }
-  Class.extend(SelectorContext, SelectorPropContext);
+  Nehan.Class.extend(SelectorContext, SelectorPropContext);
 
   /**
      @memberof Nehan.SelectorContext
@@ -11310,9 +11310,9 @@ var StyleContext = (function(){
       // so by updating css value, you can update calculation of internal style object.
       this.selectorContext = new SelectorContext(this, args.cursorContext || null);
 
-      this.managedCss = new CssHashSet();
-      this.unmanagedCss = new CssHashSet();
-      this.callbackCss = new CssHashSet();
+      this.managedCss = new Nehan.CssHashSet();
+      this.unmanagedCss = new Nehan.CssHashSet();
+      this.callbackCss = new Nehan.CssHashSet();
 
       // load managed css from
       // 1. load selector css.
@@ -14536,7 +14536,7 @@ var BlockGenerator = (function(){
     }
     this.blockId = DocumentContext.genBlockId();
   }
-  Class.extend(BlockGenerator, LayoutGenerator);
+  Nehan.Class.extend(BlockGenerator, LayoutGenerator);
 
   BlockGenerator.prototype._yield = function(context){
     if(!context.hasBlockSpaceFor(1, !this.hasNext())){
@@ -14755,7 +14755,7 @@ var InlineGenerator = (function(){
       this.setChildLayout(child_generator);
     }
   }
-  Class.extend(InlineGenerator, LayoutGenerator);
+  Nehan.Class.extend(InlineGenerator, LayoutGenerator);
 
   InlineGenerator.prototype._yield = function(context){
     if(!context.hasInlineSpaceFor(1)){
@@ -14955,7 +14955,7 @@ var InlineBlockGenerator = (function (){
   function InlineBlockGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
-  Class.extend(InlineBlockGenerator, BlockGenerator);
+  Nehan.Class.extend(InlineBlockGenerator, BlockGenerator);
 
   InlineBlockGenerator.prototype._onCreate = function(context, block){
     var max_inline = Nehan.List.maxobj(block.elements, function(element){
@@ -14991,7 +14991,7 @@ var TextGenerator = (function(){
   function TextGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
   }
-  Class.extend(TextGenerator, LayoutGenerator);
+  Nehan.Class.extend(TextGenerator, LayoutGenerator);
 
   var __find_head_text = function(element){
     return (element instanceof Box)? __find_head_text(element.elements[0]) : element;
@@ -15323,7 +15323,7 @@ var LinkGenerator = (function(){
     InlineGenerator.call(this, style, stream);
     __add_anchor(style); // set anchor at this point
   }
-  Class.extend(LinkGenerator, InlineGenerator);
+  Nehan.Class.extend(LinkGenerator, InlineGenerator);
 
   LinkGenerator.prototype._onComplete = function(context, output){
     __add_anchor(this.style); // overwrite anchor on complete
@@ -15348,7 +15348,7 @@ var FirstLineGenerator = (function(){
   function FirstLineGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
-  Class.extend(FirstLineGenerator, BlockGenerator);
+  Nehan.Class.extend(FirstLineGenerator, BlockGenerator);
 
   FirstLineGenerator.prototype._onAddElement = function(context, element){
     // first-line yieled, so switch style to parent one.
@@ -15381,7 +15381,7 @@ var LazyGenerator = (function(){
     LayoutGenerator.call(this, style, null);
     this.output = output; // only output this gen yields.
   }
-  Class.extend(LazyGenerator, LayoutGenerator);
+  Nehan.Class.extend(LazyGenerator, LayoutGenerator);
 
   /**
      @memberof Nehan.LazyGenerator
@@ -15422,7 +15422,7 @@ var FlipGenerator = (function(){
   function FlipGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
-  Class.extend(FlipGenerator, BlockGenerator);
+  Nehan.Class.extend(FlipGenerator, BlockGenerator);
 
   /**
      @memberof Nehan.FlipGenerator
@@ -15628,7 +15628,7 @@ var FloatGenerator = (function(){
     // so we must keep original style immutable.
     this.setChildLayout(new BlockGenerator(style.clone({"float":"start"}), stream));
   }
-  Class.extend(FloatGenerator, LayoutGenerator);
+  Nehan.Class.extend(FloatGenerator, LayoutGenerator);
 
   /**
      @memberof Nehan.FloatGenerator
@@ -15803,7 +15803,7 @@ var ParallelGenerator = (function(){
     LayoutGenerator.call(this, style, null);
     this.generators = generators;
   }
-  Class.extend(ParallelGenerator, LayoutGenerator);
+  Nehan.Class.extend(ParallelGenerator, LayoutGenerator);
 
   ParallelGenerator.prototype._yield = function(context){
     if(this.hasCache()){
@@ -15904,7 +15904,7 @@ var SectionRootGenerator = (function(){
     BlockGenerator.call(this, style, stream);
     this.style.startOutlineContext(); // create new section root
   }
-  Class.extend(SectionRootGenerator, BlockGenerator);
+  Nehan.Class.extend(SectionRootGenerator, BlockGenerator);
 
   SectionRootGenerator.prototype._onComplete = function(context, block){
     this.style.endOutlineContext();
@@ -15927,7 +15927,7 @@ var SectionContentGenerator = (function(){
     BlockGenerator.call(this, style, stream);
     this.style.startSectionContext();
   }
-  Class.extend(SectionContentGenerator, BlockGenerator);
+  Nehan.Class.extend(SectionContentGenerator, BlockGenerator);
 
   SectionContentGenerator.prototype._onComplete = function(context, block){
     this.style.endSectionContext();
@@ -15953,7 +15953,7 @@ var ListGenerator = (function(){
     // by setting max item count, 'this.style.listMarkerSize' is created.
     this.style.setListItemCount(this.stream.getTokenCount());
   }
-  Class.extend(ListGenerator, BlockGenerator);
+  Nehan.Class.extend(ListGenerator, BlockGenerator);
 
   return ListGenerator;
 })();
@@ -15975,7 +15975,7 @@ var ListItemGenerator = (function(){
       this._createListBodyGenerator(style, stream)
     ]);
   }
-  Class.extend(ListItemGenerator, ParallelGenerator);
+  Nehan.Class.extend(ListItemGenerator, ParallelGenerator);
 
   ListItemGenerator.prototype._createListMarkGenerator = function(style){
     var marker_size = style.getListMarkerSize();
@@ -16038,7 +16038,7 @@ var TableGenerator = (function(){
       stream.rewind();
     }
   }
-  Class.extend(TableGenerator, BlockGenerator);
+  Nehan.Class.extend(TableGenerator, BlockGenerator);
 
   TableGenerator.prototype._createAutoPartition = function(stream){
     var pset = new PartitionHashSet();
@@ -16122,7 +16122,7 @@ var TableRowGenerator = (function(){
     var generators = this._getGenerators(style, stream);
     ParallelGenerator.call(this, style, generators);
   }
-  Class.extend(TableRowGenerator, ParallelGenerator);
+  Nehan.Class.extend(TableRowGenerator, ParallelGenerator);
 
   TableRowGenerator.prototype._getGenerators = function(style_tr, stream){
     var child_styles = this._getChildStyles(style_tr, stream);
@@ -16177,7 +16177,7 @@ var TableCellGenerator = (function(){
     SectionRootGenerator.call(this, style, stream);
   }
   // notice that table-cell is sectioning root, so extends SectionRootGenerator.
-  Class.extend(TableCellGenerator, SectionRootGenerator);
+  Nehan.Class.extend(TableCellGenerator, SectionRootGenerator);
 
   return TableCellGenerator;
 })();
@@ -16196,7 +16196,7 @@ var HeaderGenerator = (function(){
   function HeaderGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
-  Class.extend(HeaderGenerator, BlockGenerator);
+  Nehan.Class.extend(HeaderGenerator, BlockGenerator);
 
   HeaderGenerator.prototype._getHeaderRank = function(block){
     if(this.style.getMarkupName().match(/h([1-6])/)){
@@ -16231,7 +16231,7 @@ var BodyGenerator = (function(){
     var tag = new Nehan.Tag("<body>", text);
     SectionRootGenerator.call(this, new StyleContext(tag, null), new TokenStream(text));
   }
-  Class.extend(BodyGenerator, SectionRootGenerator);
+  Nehan.Class.extend(BodyGenerator, SectionRootGenerator);
 
   BodyGenerator.prototype._onCreate = function(context, block){
     block.seekPos = this.stream.getSeekPos();
@@ -16635,7 +16635,7 @@ var VertEvaluator = (function(){
   function VertEvaluator(){
     LayoutEvaluator.call(this, "vert");
   }
-  Class.extend(VertEvaluator, LayoutEvaluator);
+  Nehan.Class.extend(VertEvaluator, LayoutEvaluator);
 
   VertEvaluator.prototype._evalLinkElement = function(line, link){
     return this._evaluate(link, {
@@ -16902,7 +16902,7 @@ var HoriEvaluator = (function(){
   function HoriEvaluator(){
     LayoutEvaluator.call(this, "hori");
   }
-  Class.extend(HoriEvaluator, LayoutEvaluator);
+  Nehan.Class.extend(HoriEvaluator, LayoutEvaluator);
 
   HoriEvaluator.prototype._evalInlineChildTree = function(line, tree){
     return this._evaluate(tree, {

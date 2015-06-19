@@ -10,7 +10,7 @@ var InlineFlow = (function(){
   function InlineFlow(dir){
     Flow.call(this, dir);
   }
-  Class.extend(InlineFlow, Flow);
+  Nehan.Class.extend(InlineFlow, Flow);
 
   /**
      @memberof Nehan.InlineFlow

@@ -9,7 +9,7 @@ var VertEvaluator = (function(){
   function VertEvaluator(){
     LayoutEvaluator.call(this, "vert");
   }
-  Class.extend(VertEvaluator, LayoutEvaluator);
+  Nehan.Class.extend(VertEvaluator, LayoutEvaluator);
 
   VertEvaluator.prototype._evalLinkElement = function(line, link){
     return this._evaluate(link, {

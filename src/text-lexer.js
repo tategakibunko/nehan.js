@@ -15,7 +15,7 @@ var TextLexer = (function (){
     HtmlLexer.call(this, src);
   }
 
-  Class.extend(TextLexer, HtmlLexer);
+  Nehan.Class.extend(TextLexer, HtmlLexer);
 
   TextLexer.prototype._getToken = function(){
     if(this.buff === ""){

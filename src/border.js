@@ -9,7 +9,7 @@ var Border = (function(){
   function Border(){
     Edge.call(this, "border");
   }
-  Class.extend(Border, Edge);
+  Nehan.Class.extend(Border, Edge);
 
   /**
      return cloned border object

@@ -9,7 +9,7 @@ var HoriEvaluator = (function(){
   function HoriEvaluator(){
     LayoutEvaluator.call(this, "hori");
   }
-  Class.extend(HoriEvaluator, LayoutEvaluator);
+  Nehan.Class.extend(HoriEvaluator, LayoutEvaluator);
 
   HoriEvaluator.prototype._evalInlineChildTree = function(line, tree){
     return this._evaluate(tree, {

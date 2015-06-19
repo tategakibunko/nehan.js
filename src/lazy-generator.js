@@ -12,7 +12,7 @@ var LazyGenerator = (function(){
     LayoutGenerator.call(this, style, null);
     this.output = output; // only output this gen yields.
   }
-  Class.extend(LazyGenerator, LayoutGenerator);
+  Nehan.Class.extend(LazyGenerator, LayoutGenerator);
 
   /**
      @memberof Nehan.LazyGenerator

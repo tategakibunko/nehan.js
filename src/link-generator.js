@@ -19,7 +19,7 @@ var LinkGenerator = (function(){
     InlineGenerator.call(this, style, stream);
     __add_anchor(style); // set anchor at this point
   }
-  Class.extend(LinkGenerator, InlineGenerator);
+  Nehan.Class.extend(LinkGenerator, InlineGenerator);
 
   LinkGenerator.prototype._onComplete = function(context, output){
     __add_anchor(this.style); // overwrite anchor on complete

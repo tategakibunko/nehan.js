@@ -14,7 +14,7 @@ var ListItemGenerator = (function(){
       this._createListBodyGenerator(style, stream)
     ]);
   }
-  Class.extend(ListItemGenerator, ParallelGenerator);
+  Nehan.Class.extend(ListItemGenerator, ParallelGenerator);
 
   ListItemGenerator.prototype._createListMarkGenerator = function(style){
     var marker_size = style.getListMarkerSize();

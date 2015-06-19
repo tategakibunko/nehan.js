@@ -13,7 +13,7 @@ var RubyTokenStream = (function(){
     this.tokens = this._parse(new TokenStream(str));
     this.pos = 0;
   }
-  Class.extend(RubyTokenStream, TokenStream);
+  Nehan.Class.extend(RubyTokenStream, TokenStream);
 
   RubyTokenStream.prototype._parse = function(stream){
     var tokens = [];

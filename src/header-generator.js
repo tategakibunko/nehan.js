@@ -11,7 +11,7 @@ var HeaderGenerator = (function(){
   function HeaderGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
-  Class.extend(HeaderGenerator, BlockGenerator);
+  Nehan.Class.extend(HeaderGenerator, BlockGenerator);
 
   HeaderGenerator.prototype._getHeaderRank = function(block){
     if(this.style.getMarkupName().match(/h([1-6])/)){

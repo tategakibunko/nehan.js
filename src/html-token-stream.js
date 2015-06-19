@@ -17,7 +17,7 @@ var HtmlTokenStream = (function(){
       }
     });
   }
-  Class.extend(HtmlTokenStream, TokenStream);
+  Nehan.Class.extend(HtmlTokenStream, TokenStream);
 
   return HtmlTokenStream;
 })();

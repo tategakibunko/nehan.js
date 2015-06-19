@@ -10,7 +10,7 @@ var InlineBlockGenerator = (function (){
   function InlineBlockGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
-  Class.extend(InlineBlockGenerator, BlockGenerator);
+  Nehan.Class.extend(InlineBlockGenerator, BlockGenerator);
 
   InlineBlockGenerator.prototype._onCreate = function(context, block){
     var max_inline = Nehan.List.maxobj(block.elements, function(element){

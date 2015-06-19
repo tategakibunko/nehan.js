@@ -126,9 +126,9 @@ var StyleContext = (function(){
       // so by updating css value, you can update calculation of internal style object.
       this.selectorContext = new SelectorContext(this, args.cursorContext || null);
 
-      this.managedCss = new CssHashSet();
-      this.unmanagedCss = new CssHashSet();
-      this.callbackCss = new CssHashSet();
+      this.managedCss = new Nehan.CssHashSet();
+      this.unmanagedCss = new Nehan.CssHashSet();
+      this.callbackCss = new Nehan.CssHashSet();
 
       // load managed css from
       // 1. load selector css.

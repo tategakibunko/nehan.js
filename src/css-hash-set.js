@@ -1,4 +1,4 @@
-var CssHashSet = (function(){
+Nehan.CssHashSet = (function(){
   /**
      @memberof Nehan
      @class CssHashSet
@@ -6,9 +6,9 @@ var CssHashSet = (function(){
      @extends {Nehan.HashSet}
   */
   function CssHashSet(values){
-    HashSet.call(this, values);
+    Nehan.HashSet.call(this, values);
   }
-  Class.extend(CssHashSet, HashSet);
+  Nehan.Class.extend(CssHashSet, Nehan.HashSet);
 
   /**
    * merge css value<br>

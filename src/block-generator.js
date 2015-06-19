@@ -15,7 +15,7 @@ var BlockGenerator = (function(){
     }
     this.blockId = DocumentContext.genBlockId();
   }
-  Class.extend(BlockGenerator, LayoutGenerator);
+  Nehan.Class.extend(BlockGenerator, LayoutGenerator);
 
   BlockGenerator.prototype._yield = function(context){
     if(!context.hasBlockSpaceFor(1, !this.hasNext())){

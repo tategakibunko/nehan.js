@@ -29,7 +29,7 @@ var TableGenerator = (function(){
       stream.rewind();
     }
   }
-  Class.extend(TableGenerator, BlockGenerator);
+  Nehan.Class.extend(TableGenerator, BlockGenerator);
 
   TableGenerator.prototype._createAutoPartition = function(stream){
     var pset = new PartitionHashSet();

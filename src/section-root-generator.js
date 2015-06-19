@@ -12,7 +12,7 @@ var SectionRootGenerator = (function(){
     BlockGenerator.call(this, style, stream);
     this.style.startOutlineContext(); // create new section root
   }
-  Class.extend(SectionRootGenerator, BlockGenerator);
+  Nehan.Class.extend(SectionRootGenerator, BlockGenerator);
 
   SectionRootGenerator.prototype._onComplete = function(context, block){
     this.style.endOutlineContext();

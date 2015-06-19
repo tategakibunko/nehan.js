@@ -12,7 +12,7 @@ var ParallelGenerator = (function(){
     LayoutGenerator.call(this, style, null);
     this.generators = generators;
   }
-  Class.extend(ParallelGenerator, LayoutGenerator);
+  Nehan.Class.extend(ParallelGenerator, LayoutGenerator);
 
   ParallelGenerator.prototype._yield = function(context){
     if(this.hasCache()){

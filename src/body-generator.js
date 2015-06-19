@@ -11,7 +11,7 @@ var BodyGenerator = (function(){
     var tag = new Nehan.Tag("<body>", text);
     SectionRootGenerator.call(this, new StyleContext(tag, null), new TokenStream(text));
   }
-  Class.extend(BodyGenerator, SectionRootGenerator);
+  Nehan.Class.extend(BodyGenerator, SectionRootGenerator);
 
   BodyGenerator.prototype._onCreate = function(context, block){
     block.seekPos = this.stream.getSeekPos();

@@ -1,7 +1,7 @@
 /**
    @namespace Nehan.Class
 */
-var Class = {};
+Nehan.Class = {};
 
 /**
    @memberof Nehan.Class
@@ -9,7 +9,7 @@ var Class = {};
    @param parentCtor {Object}
    @return {Object}
 */
-Class.extend = function(childCtor, parentCtor) {
+Nehan.Class.extend = function(childCtor, parentCtor) {
   function TempCtor() {}
   TempCtor.prototype = parentCtor.prototype;
   childCtor.superClass_ = parentCtor.prototype;

@@ -13,7 +13,7 @@ var FirstLineGenerator = (function(){
   function FirstLineGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
-  Class.extend(FirstLineGenerator, BlockGenerator);
+  Nehan.Class.extend(FirstLineGenerator, BlockGenerator);
 
   FirstLineGenerator.prototype._onAddElement = function(context, element){
     // first-line yieled, so switch style to parent one.

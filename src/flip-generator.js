@@ -10,7 +10,7 @@ var FlipGenerator = (function(){
   function FlipGenerator(style, stream){
     BlockGenerator.call(this, style, stream);
   }
-  Class.extend(FlipGenerator, BlockGenerator);
+  Nehan.Class.extend(FlipGenerator, BlockGenerator);
 
   /**
      @memberof Nehan.FlipGenerator

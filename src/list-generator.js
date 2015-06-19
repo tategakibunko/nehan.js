@@ -14,7 +14,7 @@ var ListGenerator = (function(){
     // by setting max item count, 'this.style.listMarkerSize' is created.
     this.style.setListItemCount(this.stream.getTokenCount());
   }
-  Class.extend(ListGenerator, BlockGenerator);
+  Nehan.Class.extend(ListGenerator, BlockGenerator);
 
   return ListGenerator;
 })();

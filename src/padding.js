@@ -8,7 +8,7 @@ var Padding = (function(){
   function Padding(){
     Edge.call(this, "padding");
   }
-  Class.extend(Padding, Edge);
+  Nehan.Class.extend(Padding, Edge);
 
   /**
      @memberof Nehan.Padding

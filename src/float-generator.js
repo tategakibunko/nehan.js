@@ -23,7 +23,7 @@ var FloatGenerator = (function(){
     // so we must keep original style immutable.
     this.setChildLayout(new BlockGenerator(style.clone({"float":"start"}), stream));
   }
-  Class.extend(FloatGenerator, LayoutGenerator);
+  Nehan.Class.extend(FloatGenerator, LayoutGenerator);
 
   /**
      @memberof Nehan.FloatGenerator

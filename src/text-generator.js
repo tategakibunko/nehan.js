@@ -12,7 +12,7 @@ var TextGenerator = (function(){
   function TextGenerator(style, stream){
     LayoutGenerator.call(this, style, stream);
   }
-  Class.extend(TextGenerator, LayoutGenerator);
+  Nehan.Class.extend(TextGenerator, LayoutGenerator);
 
   var __find_head_text = function(element){
     return (element instanceof Box)? __find_head_text(element.elements[0]) : element;

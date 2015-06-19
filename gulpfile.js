@@ -26,6 +26,7 @@ var sources = [
   "src/nehan-start.js",
   "src/client.js",
   "src/env.js",
+  "src/class.js",
   "src/list.js",
   "src/args.js",
   "src/obj.js",
@@ -38,6 +39,8 @@ var sources = [
   "src/tag-attrs.js",
   "src/tag.js",
   "src/closure.js",
+  "src/hash-set.js",
+  "src/css-hash-set.js",
 
   // closed modules
   "src/nehan-setup-start.js",
@@ -45,10 +48,7 @@ var sources = [
   "src/display.js",
   "src/lexing-rule.js",
   "src/style.js",
-  "src/class.js",
   "src/anim.js",
-  "src/hash-set.js",
-  "src/css-hash-set.js",
   "src/css-parser.js",
   "src/attr-selector.js",
   "src/pseudo-selector.js",

@@ -8,9 +8,9 @@ var PartitionHashSet = (function(){
      @extends {Nehan.HashSet}
    */
   function PartitionHashSet(){
-    HashSet.call(this);
+    Nehan.HashSet.call(this);
   }
-  Class.extend(PartitionHashSet, HashSet);
+  Nehan.Class.extend(PartitionHashSet, Nehan.HashSet);
 
   /**
      @memberof Nehan.PartitionHashSet

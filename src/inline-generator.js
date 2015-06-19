@@ -28,7 +28,7 @@ var InlineGenerator = (function(){
       this.setChildLayout(child_generator);
     }
   }
-  Class.extend(InlineGenerator, LayoutGenerator);
+  Nehan.Class.extend(InlineGenerator, LayoutGenerator);
 
   InlineGenerator.prototype._yield = function(context){
     if(!context.hasInlineSpaceFor(1)){

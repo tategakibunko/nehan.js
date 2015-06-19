@@ -12,7 +12,7 @@ var SectionContentGenerator = (function(){
     BlockGenerator.call(this, style, stream);
     this.style.startSectionContext();
   }
-  Class.extend(SectionContentGenerator, BlockGenerator);
+  Nehan.Class.extend(SectionContentGenerator, BlockGenerator);
 
   SectionContentGenerator.prototype._onComplete = function(context, block){
     this.style.endSectionContext();

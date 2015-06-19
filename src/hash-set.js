@@ -1,4 +1,4 @@
-var HashSet = (function(){
+Nehan.HashSet = (function(){
   /**
      @memberof Nehan
      @class HashSet

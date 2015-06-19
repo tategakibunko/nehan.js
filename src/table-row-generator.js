@@ -16,7 +16,7 @@ var TableRowGenerator = (function(){
     var generators = this._getGenerators(style, stream);
     ParallelGenerator.call(this, style, generators);
   }
-  Class.extend(TableRowGenerator, ParallelGenerator);
+  Nehan.Class.extend(TableRowGenerator, ParallelGenerator);
 
   TableRowGenerator.prototype._getGenerators = function(style_tr, stream){
     var child_styles = this._getChildStyles(style_tr, stream);
