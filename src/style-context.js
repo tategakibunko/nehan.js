@@ -1701,7 +1701,7 @@ var StyleContext = (function(){
       if(value === "start"){
 	return null;
       }
-      var position = new BoxPosition(value);
+      var position = new Nehan.BoxPosition(value);
       var self = this;
       Nehan.List.iter(Nehan.Const.cssBoxDirsLogical, function(dir){
 	var value = self.getCssAttr(dir, "auto");

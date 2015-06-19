@@ -1,4 +1,4 @@
-var BoxPosition = (function(){
+Nehan.BoxPosition = (function(){
   /**
      @memberof Nehan
      @class BoxPosition

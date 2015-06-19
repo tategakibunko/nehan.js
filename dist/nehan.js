@@ -4548,6 +4548,53 @@ Nehan.BoxSize = (function(){
   return BoxSize;
 })();
 
+Nehan.BoxPosition = (function(){
+  /**
+     @memberof Nehan
+     @class BoxPosition
+     @classdesc logical css 'position' property
+     @constructor
+     @param position {string}
+  */
+  function BoxPosition(position){
+    this.position = position;
+  }
+
+  BoxPosition.prototype = {
+    /**
+       @memberof Nehan.BoxPosition
+       @return {boolean}
+    */
+    isAbsolute : function(){
+      return this.position === "absolute";
+    },
+    /**
+       @memberof Nehan.BoxPosition
+       @return {Object}
+    */
+    getCss : function(flow){
+      var css = {};
+      css.position = this.position;
+      if(this.start){
+	css[flow.getPropStart()] = this.start + "px";
+      }
+      if(this.end){
+	css[flow.getPropEnd()] = this.end + "px";
+      }
+      if(this.before){
+	css[flow.getPropBefore()] = this.before + "px";
+      }
+      if(this.after){
+	css[flow.getPropAfter()] = this.after + "px";
+      }
+      return css;
+    }
+  };
+
+  return BoxPosition;
+})();
+
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -8419,53 +8466,6 @@ var TextEmpha = (function(){
   };
 
   return TextEmpha;
-})();
-
-
-var BoxPosition = (function(){
-  /**
-     @memberof Nehan
-     @class BoxPosition
-     @classdesc logical css 'position' property
-     @constructor
-     @param position {string}
-  */
-  function BoxPosition(position){
-    this.position = position;
-  }
-
-  BoxPosition.prototype = {
-    /**
-       @memberof Nehan.BoxPosition
-       @return {boolean}
-    */
-    isAbsolute : function(){
-      return this.position === "absolute";
-    },
-    /**
-       @memberof Nehan.BoxPosition
-       @return {Object}
-    */
-    getCss : function(flow){
-      var css = {};
-      css.position = this.position;
-      if(this.start){
-	css[flow.getPropStart()] = this.start + "px";
-      }
-      if(this.end){
-	css[flow.getPropEnd()] = this.end + "px";
-      }
-      if(this.before){
-	css[flow.getPropBefore()] = this.before + "px";
-      }
-      if(this.after){
-	css[flow.getPropAfter()] = this.after + "px";
-      }
-      return css;
-    }
-  };
-
-  return BoxPosition;
 })();
 
 
@@ -12885,7 +12885,7 @@ var StyleContext = (function(){
       if(value === "start"){
 	return null;
       }
-      var position = new BoxPosition(value);
+      var position = new Nehan.BoxPosition(value);
       var self = this;
       Nehan.List.iter(Nehan.Const.cssBoxDirsLogical, function(dir){
 	var value = self.getCssAttr(dir, "auto");

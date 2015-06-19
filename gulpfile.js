@@ -67,6 +67,7 @@ var sources = [
   "src/border.js",
   "src/box-edge.js",
   "src/box-size.js",
+  "src/box-position.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
@@ -98,7 +99,6 @@ var sources = [
   "src/text-empha-pos.js",
   "src/text-empha.js",
 
-  "src/box-position.js",
   "src/box.js",
   "src/html-lexer.js",
   "src/text-lexer.js",
