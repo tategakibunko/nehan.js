@@ -1,4 +1,4 @@
-var Break = (function(){
+Nehan.Break = (function(){
   /**
      @memberof Nehan
      @class Break

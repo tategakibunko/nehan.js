@@ -2,22 +2,22 @@
    pre defined break collection.
    @namespace Nehan.Breaks
 */
-var Breaks = {
+Nehan.Breaks = {
   before:{
-    always:(new Break("always")),
-    avoid:(new Break("avoid")),
-    left:(new Break("left")),
-    right:(new Break("right")),
-    first:(new Break("first")), // correspond to break-before:"left"
-    second:(new Break("second")) // correspond to break-before:"right"
+    always:(new Nehan.Break("always")),
+    avoid:(new Nehan.Break("avoid")),
+    left:(new Nehan.Break("left")),
+    right:(new Nehan.Break("right")),
+    first:(new Nehan.Break("first")), // correspond to break-before:"left"
+    second:(new Nehan.Break("second")) // correspond to break-before:"right"
   },
   after:{
-    always:(new Break("always")),
-    avoid:(new Break("avoid")),
-    left:(new Break("left")),
-    right:(new Break("right")),
-    first:(new Break("first")), // correspond to break-before:"left"
-    second:(new Break("second")) // correspond to break-before:"right"
+    always:(new Nehan.Break("always")),
+    avoid:(new Nehan.Break("avoid")),
+    left:(new Nehan.Break("left")),
+    right:(new Nehan.Break("right")),
+    first:(new Nehan.Break("first")), // correspond to break-before:"left"
+    second:(new Nehan.Break("second")) // correspond to break-before:"right"
   },
   /**
      @memberof Nehan.Breaks

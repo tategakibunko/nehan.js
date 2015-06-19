@@ -2104,11 +2104,11 @@ var StyleContext = (function(){
     },
     _loadBreakBefore : function(){
       var value = this.getCssAttr("break-before");
-      return value? Breaks.getBefore(value) : null;
+      return value? Nehan.Breaks.getBefore(value) : null;
     },
     _loadBreakAfter : function(){
       var value = this.getCssAttr("break-after");
-      return value? Breaks.getAfter(value) : null;
+      return value? Nehan.Breaks.getAfter(value) : null;
     },
     _loadWordBreak : function(){
       return this.getCssAttr("word-break");

@@ -5410,6 +5410,99 @@ Nehan.TextAligns = {
   }
 };
 
+Nehan.Break = (function(){
+  /**
+     @memberof Nehan
+     @class Break
+     @classdesc logical abstraction for css 'page-break-before' or 'page-break-after'
+     @constructor
+     @param value {string} - "always" or "avoid" or "left" or "right"
+   */
+  function Break(value){
+    this.value = value;
+  }
+
+  Break.prototype = {
+    /**
+       @memberof Nehan.Break
+       @return {boolean}
+     */
+    isAlways : function(){
+      return this.value === "always";
+    },
+    /**
+       @memberof Nehan.Break
+       @return {boolean}
+     */
+    isAvoid : function(){
+      return this.value === "avoid";
+    },
+    /**
+       @memberof Nehan.Break
+       @return {boolean}
+     */
+    isFirst : function(){
+      return (Display.getPagingDirection() === "lr")? (this.value === "left") : (this.value === "right");
+    },
+    /**
+       @memberof Nehan.Break
+       @return {boolean}
+     */
+    isSecond : function(){
+      return (Display.getPagingDirection() === "lr")? (this.value === "right") : (this.value === "left");
+    },
+    /**
+       (TODO)
+       @memberof Nehan.Break
+       @param order {int}
+       @return {boolean}
+     */
+    isNth : function(order){
+    }
+  };
+
+  return Break;
+})();
+
+
+/**
+   pre defined break collection.
+   @namespace Nehan.Breaks
+*/
+Nehan.Breaks = {
+  before:{
+    always:(new Nehan.Break("always")),
+    avoid:(new Nehan.Break("avoid")),
+    left:(new Nehan.Break("left")),
+    right:(new Nehan.Break("right")),
+    first:(new Nehan.Break("first")), // correspond to break-before:"left"
+    second:(new Nehan.Break("second")) // correspond to break-before:"right"
+  },
+  after:{
+    always:(new Nehan.Break("always")),
+    avoid:(new Nehan.Break("avoid")),
+    left:(new Nehan.Break("left")),
+    right:(new Nehan.Break("right")),
+    first:(new Nehan.Break("first")), // correspond to break-before:"left"
+    second:(new Nehan.Break("second")) // correspond to break-before:"right"
+  },
+  /**
+     @memberof Nehan.Breaks
+     @param value {String} - "always", "avoid", "left", "right", "first", "second"
+  */
+  getBefore : function(value){
+    return this.before[value] || null;
+  },
+  /**
+     @memberof Nehan.Breaks
+     @param value {String} - "always", "avoid", "left", "right", "first", "second"
+  */
+  getAfter : function(value){
+    return this.after[value] || null;
+  }
+};
+
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -10697,99 +10790,6 @@ var Kerning = {
   }
 };
 
-var Break = (function(){
-  /**
-     @memberof Nehan
-     @class Break
-     @classdesc logical abstraction for css 'page-break-before' or 'page-break-after'
-     @constructor
-     @param value {string} - "always" or "avoid" or "left" or "right"
-   */
-  function Break(value){
-    this.value = value;
-  }
-
-  Break.prototype = {
-    /**
-       @memberof Nehan.Break
-       @return {boolean}
-     */
-    isAlways : function(){
-      return this.value === "always";
-    },
-    /**
-       @memberof Nehan.Break
-       @return {boolean}
-     */
-    isAvoid : function(){
-      return this.value === "avoid";
-    },
-    /**
-       @memberof Nehan.Break
-       @return {boolean}
-     */
-    isFirst : function(){
-      return (Display.getPagingDirection() === "lr")? (this.value === "left") : (this.value === "right");
-    },
-    /**
-       @memberof Nehan.Break
-       @return {boolean}
-     */
-    isSecond : function(){
-      return (Display.getPagingDirection() === "lr")? (this.value === "right") : (this.value === "left");
-    },
-    /**
-       (TODO)
-       @memberof Nehan.Break
-       @param order {int}
-       @return {boolean}
-     */
-    isNth : function(order){
-    }
-  };
-
-  return Break;
-})();
-
-
-/**
-   pre defined break collection.
-   @namespace Nehan.Breaks
-*/
-var Breaks = {
-  before:{
-    always:(new Break("always")),
-    avoid:(new Break("avoid")),
-    left:(new Break("left")),
-    right:(new Break("right")),
-    first:(new Break("first")), // correspond to break-before:"left"
-    second:(new Break("second")) // correspond to break-before:"right"
-  },
-  after:{
-    always:(new Break("always")),
-    avoid:(new Break("avoid")),
-    left:(new Break("left")),
-    right:(new Break("right")),
-    first:(new Break("first")), // correspond to break-before:"left"
-    second:(new Break("second")) // correspond to break-before:"right"
-  },
-  /**
-     @memberof Nehan.Breaks
-     @param value {String} - "always", "avoid", "left", "right", "first", "second"
-  */
-  getBefore : function(value){
-    return this.before[value] || null;
-  },
-  /**
-     @memberof Nehan.Breaks
-     @param value {String} - "always", "avoid", "left", "right", "first", "second"
-  */
-  getAfter : function(value){
-    return this.after[value] || null;
-  }
-};
-
-
 var PartitionUnit = (function(){
   /**
      @memberof Nehan
@@ -13287,11 +13287,11 @@ var StyleContext = (function(){
     },
     _loadBreakBefore : function(){
       var value = this.getCssAttr("break-before");
-      return value? Breaks.getBefore(value) : null;
+      return value? Nehan.Breaks.getBefore(value) : null;
     },
     _loadBreakAfter : function(){
       var value = this.getCssAttr("break-after");
-      return value? Breaks.getAfter(value) : null;
+      return value? Nehan.Breaks.getAfter(value) : null;
     },
     _loadWordBreak : function(){
       return this.getCssAttr("word-break");
