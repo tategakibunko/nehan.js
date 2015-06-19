@@ -1,4 +1,4 @@
-var AttrSelector = (function(){
+Nehan.AttrSelector = (function(){
   /**
      @memberof Nehan
      @class AttrSelector

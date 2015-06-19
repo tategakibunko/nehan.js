@@ -123,7 +123,7 @@ var SelectorLexer = (function(){
 	if(attr === null){
 	  break;
 	}
-	attrs.push(new AttrSelector(attr));
+	attrs.push(new Nehan.AttrSelector(attr));
       }
       return attrs;
     },
