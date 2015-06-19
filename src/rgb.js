@@ -1,4 +1,4 @@
-var Rgb = (function(){
+Nehan.Rgb = (function(){
   /**
      @memberof Nehan
      @class Rgb

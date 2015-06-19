@@ -48,6 +48,7 @@ var sources = [
   "src/selector-lexer.js",
   "src/selector-state-machine.js",
   "src/selector.js",
+  "src/rgb.js",
 
   // closed modules
   "src/nehan-setup-start.js",
@@ -63,7 +64,7 @@ var sources = [
   "src/word.js",
   "src/tcy.js",
   "src/ruby.js",
-  "src/rgb.js",
+
   "src/color.js",
   "src/colors.js",
   "src/palette.js",

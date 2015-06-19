@@ -40,7 +40,7 @@ var Color = (function(){
        @return {Nehan.Rgb}
     */
     getRgb : function(){
-      return new Rgb(this.value);
+      return new Nehan.Rgb(this.value);
     },
     /**
        @memberof Nehan.Color

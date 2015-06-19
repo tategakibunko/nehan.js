@@ -10,6 +10,7 @@ version 5.1.1 2015/??/??
 ========================
 ! Now class selectors and id selectors are not required to be "nehan-" prefixed in setStyle method.
 o Add new parameter maxPageCount to PageStream::syncGet, PageStream.asyncGet, PagedElement::asyncGet.
+o Export shared modules to outside of engine closure.
 * Fix emphasis size and position.
 * Fix half size kana position.
 
