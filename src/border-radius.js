@@ -1,4 +1,4 @@
-var BorderRadius = (function(){
+Nehan.BorderRadius = (function(){
   /**
      @memberof Nehan
      @class BorderRadius

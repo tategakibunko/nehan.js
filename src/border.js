@@ -76,7 +76,7 @@ var Border = (function(){
      @param radius {Nehan.BorderRadius}
   */
   Border.prototype.setRadius = function(flow, radius){
-    this.radius = new BorderRadius();
+    this.radius = new Nehan.BorderRadius();
     this.radius.setSize(flow, radius);
   };
 
