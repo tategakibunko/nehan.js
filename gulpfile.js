@@ -22,6 +22,7 @@ var ignore = require("gulp-ignore");
 // note that orders of these sources matter!
 var sources = [
   "COPYING",
+
   // shared modules
   "src/nehan-start.js",
   "src/client.js",

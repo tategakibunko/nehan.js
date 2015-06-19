@@ -1383,6 +1383,7 @@ var StyleContext = (function(){
       // notice that box-size, box-edge is box local variable,<br>
       // so style of box-size(content-size) and edge-size are generated at Box::getCssBlock
       var css = {};
+      var is_vert = this.isTextVertical();
       css.display = "block";
       if(this.font){
 	Nehan.Args.copy(css, this.font.getCss());
@@ -1393,11 +1394,11 @@ var StyleContext = (function(){
       if(this.color){
 	Nehan.Args.copy(css, this.color.getCss());
       }
-      if(this.letterSpacing && !this.isTextVertical()){
+      if(this.letterSpacing && !is_vert){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
       if(this.floatDirection){
-	Nehan.Args.copy(css, this.floatDirection.getCss(this.flow));
+	Nehan.Args.copy(css, this.floatDirection.getCss(is_vert));
       }
       if(this.position){
 	Nehan.Args.copy(css, this.position.getCss());

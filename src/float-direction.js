@@ -13,12 +13,12 @@ var FloatDirection = (function(){
   FloatDirection.prototype = {
     /**
        @memberof Nehan.FloatDirection
-       @param flow {Nehan.BoxFlow}
+       @param is_vert {bool}
        @return {Object}
     */
-    getCss : function(flow){
+    getCss : function(is_vert){
       var css = {};
-      if(flow.isTextHorizontal()){
+      if(!is_vert){
 	if(this.isStart()){
 	  css["css-float"] = "left";
 	} else if(this.isEnd()){
