@@ -75,7 +75,7 @@ var SelectorLexer = (function(){
       if(this.buff.length === buff_len_before){
 	throw "invalid selector:[" + this.buff + "]";
       }
-      return new TypeSelector({
+      return new Nehan.TypeSelector({
 	name:name,
 	nameRex:name_rex,
 	id:id,

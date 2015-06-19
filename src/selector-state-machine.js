@@ -65,7 +65,7 @@ var SelectorStateMachine = (function(){
       var f2, tmp, f1, combinator;
       while(pos >= 0){
 	f2 = pop();
-	if(f2 instanceof TypeSelector === false){
+	if(f2 instanceof Nehan.TypeSelector === false){
 	  throw "selector syntax error:" + src;
 	}
 	if(!f2.test(style)){
@@ -75,13 +75,13 @@ var SelectorStateMachine = (function(){
 	if(tmp === null){
 	  return true;
 	}
-	if(tmp instanceof TypeSelector){
+	if(tmp instanceof Nehan.TypeSelector){
 	  f1 = tmp;
 	  combinator = " "; // descendant combinator
 	} else if(typeof tmp === "string"){
 	  combinator = tmp;
 	  f1 = pop();
-	  if(f1 === null || f1 instanceof TypeSelector === false){
+	  if(f1 === null || f1 instanceof Nehan.TypeSelector === false){
 	    throw "selector syntax error:" + src;
 	  }
 	}

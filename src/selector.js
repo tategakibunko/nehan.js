@@ -90,7 +90,7 @@ var Selector = (function(){
     _countSpec : function(elements){
       var a = 0, b = 0, c = 0;
       Nehan.List.iter(elements, function(token){
-	if(token instanceof TypeSelector){
+	if(token instanceof Nehan.TypeSelector){
 	  a += token.getIdSpec();
 	  b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();
 	  c += token.getNameSpec();

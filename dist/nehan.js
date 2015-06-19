@@ -2328,6 +2328,165 @@ Nehan.PseudoSelector = (function(){
 })();
 
 
+/* 
+   single element type selector
+
+   example:
+
+   1. name selector
+     div {font-size:xxx}
+     /h[1-6]/ {font-weight:xxx}
+
+   2. class selector
+     div.class{font-size:xxx}
+     div.class1.class2{color:yyy}
+
+   3. id selector
+     div#id{font-size:xxx}
+
+   4. attribute selector
+     div[name=value]{font-size:xxx}
+     div[name1=value1][name1^=xxx]{color:yyy}
+
+   5. pseudo-class selector
+     li:first-child{font-weight:bold}
+
+   6. pseudo-element selector
+     div::first-line{font-size:xxx}
+*/
+Nehan.TypeSelector = (function(){
+  /**
+     @memberof Nehan
+     @class TypeSelector
+     @classdesc selector abstraction(name, class, id, attribute, pseudo).
+     @constructor
+     @param opt {Object}
+     @param opt.name {String}
+     @param opt.nameRex {RegExp}
+     @param opt.id {String}
+     @param opt.classes {Array<String>}
+     @param opt.attrs {Array<Nehan.AttrSelector>}
+     @param opt.pseudo {Nehan.PseudoSelector}
+     @description <pre>
+
+     1. name selector
+       div {font-size:xxx}
+       /h[1-6]/ {font-weight:xxx}
+
+     2. class selector
+       div.class{font-size:xxx}
+       div.class1.class2{color:yyy}
+
+     3. id selector
+       div#id{font-size:xxx}
+
+     4. attribute selector
+       div[name=value]{font-size:xxx}
+       div[name1=value1][name1^=xxx]{color:yyy}
+
+     5. pseudo-class selector
+       li:first-child{font-weight:bold}
+
+     6. pseudo-element selector
+       div::first-line{font-size:xxx}
+     </pre>
+  */
+  function TypeSelector(opt){
+    this.name = opt.name || null;
+    this.nameRex = opt.nameRex || null;
+    this.id = opt.id || null;
+    this.classes = opt.classes || [];
+    this.attrs = opt.attrs || [];
+    this.pseudo = opt.pseudo || null;
+    this.classes.sort();
+  }
+  
+  TypeSelector.prototype = {
+    test : function(style){
+      if(style === null){
+	return false;
+      }
+      // name selector
+      if(this.name && !this.testName(style.getMarkupName())){
+	return false;
+      }
+      // name selector(by rex)
+      if(this.nameRex && !this.testNameRex(style.getMarkupName())){
+	return false;
+      }
+      // class selector
+      if(this.classes.length > 0 && !this.testClassNames(style.getMarkupClasses())){
+	return false;
+      }
+      // id selector
+      if(this.id && style.getMarkupId() != this.id){
+	return false;
+      }
+      // attribute selectgor
+      if(this.attrs.length > 0 && !this._testAttrs(style)){
+	return false;
+      }
+      // pseudo-element, pseudo-class selector
+      if(this.pseudo && !this.pseudo.test(style)){
+	return false;
+      }
+      return true;
+    },
+    testName : function(markup_name){
+      if(this.name === null){
+	return false;
+      }
+      if(this.name === "*"){
+	return true;
+      }
+      return markup_name === this.name;
+    },
+    testNameRex : function(markup_name){
+      if(this.nameRex === null){
+	return false;
+      }
+      return this.nameRex.test(markup_name);
+    },
+    testClassNames : function(markup_classes){
+      return Nehan.List.forall(this.classes, function(klass){
+	return Nehan.List.exists(markup_classes, Nehan.Closure.eq(klass));
+      });
+    },
+    getNameSpec : function(){
+      if(this.nameRex){
+	return 1;
+      }
+      if(this.name === null || this.name === "*"){
+	return 0;
+      }
+      return 1;
+    },
+    getIdSpec : function(){
+      return this.id? 1 : 0;
+    },
+    getClassSpec : function(){
+      return this.classes.length;
+    },
+    getAttrSpec : function(){
+      return this.attrs.length;
+    },
+    getPseudoClassSpec : function(){
+      if(this.pseudo){
+	return this.pseudo.hasPseudoElement()? 0 : 1;
+      }
+      return 0;
+    },
+    _testAttrs : function(style){
+      return Nehan.List.forall(this.attrs, function(attr){
+	return attr.test(style);
+      });
+    }
+  };
+
+  return TypeSelector;
+})();
+
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -3815,165 +3974,6 @@ var reqAnimationFrame = (function(){
 })();
 
 
-/* 
-   single element type selector
-
-   example:
-
-   1. name selector
-     div {font-size:xxx}
-     /h[1-6]/ {font-weight:xxx}
-
-   2. class selector
-     div.class{font-size:xxx}
-     div.class1.class2{color:yyy}
-
-   3. id selector
-     div#id{font-size:xxx}
-
-   4. attribute selector
-     div[name=value]{font-size:xxx}
-     div[name1=value1][name1^=xxx]{color:yyy}
-
-   5. pseudo-class selector
-     li:first-child{font-weight:bold}
-
-   6. pseudo-element selector
-     div::first-line{font-size:xxx}
-*/
-var TypeSelector = (function(){
-  /**
-     @memberof Nehan
-     @class TypeSelector
-     @classdesc selector abstraction(name, class, id, attribute, pseudo).
-     @constructor
-     @param opt {Object}
-     @param opt.name {String}
-     @param opt.nameRex {RegExp}
-     @param opt.id {String}
-     @param opt.classes {Array<String>}
-     @param opt.attrs {Array<Nehan.AttrSelector>}
-     @param opt.pseudo {Nehan.PseudoSelector}
-     @description <pre>
-
-     1. name selector
-       div {font-size:xxx}
-       /h[1-6]/ {font-weight:xxx}
-
-     2. class selector
-       div.class{font-size:xxx}
-       div.class1.class2{color:yyy}
-
-     3. id selector
-       div#id{font-size:xxx}
-
-     4. attribute selector
-       div[name=value]{font-size:xxx}
-       div[name1=value1][name1^=xxx]{color:yyy}
-
-     5. pseudo-class selector
-       li:first-child{font-weight:bold}
-
-     6. pseudo-element selector
-       div::first-line{font-size:xxx}
-     </pre>
-  */
-  function TypeSelector(opt){
-    this.name = opt.name || null;
-    this.nameRex = opt.nameRex || null;
-    this.id = opt.id || null;
-    this.classes = opt.classes || [];
-    this.attrs = opt.attrs || [];
-    this.pseudo = opt.pseudo || null;
-    this.classes.sort();
-  }
-  
-  TypeSelector.prototype = {
-    test : function(style){
-      if(style === null){
-	return false;
-      }
-      // name selector
-      if(this.name && !this.testName(style.getMarkupName())){
-	return false;
-      }
-      // name selector(by rex)
-      if(this.nameRex && !this.testNameRex(style.getMarkupName())){
-	return false;
-      }
-      // class selector
-      if(this.classes.length > 0 && !this.testClassNames(style.getMarkupClasses())){
-	return false;
-      }
-      // id selector
-      if(this.id && style.getMarkupId() != this.id){
-	return false;
-      }
-      // attribute selectgor
-      if(this.attrs.length > 0 && !this._testAttrs(style)){
-	return false;
-      }
-      // pseudo-element, pseudo-class selector
-      if(this.pseudo && !this.pseudo.test(style)){
-	return false;
-      }
-      return true;
-    },
-    testName : function(markup_name){
-      if(this.name === null){
-	return false;
-      }
-      if(this.name === "*"){
-	return true;
-      }
-      return markup_name === this.name;
-    },
-    testNameRex : function(markup_name){
-      if(this.nameRex === null){
-	return false;
-      }
-      return this.nameRex.test(markup_name);
-    },
-    testClassNames : function(markup_classes){
-      return Nehan.List.forall(this.classes, function(klass){
-	return Nehan.List.exists(markup_classes, Nehan.Closure.eq(klass));
-      });
-    },
-    getNameSpec : function(){
-      if(this.nameRex){
-	return 1;
-      }
-      if(this.name === null || this.name === "*"){
-	return 0;
-      }
-      return 1;
-    },
-    getIdSpec : function(){
-      return this.id? 1 : 0;
-    },
-    getClassSpec : function(){
-      return this.classes.length;
-    },
-    getAttrSpec : function(){
-      return this.attrs.length;
-    },
-    getPseudoClassSpec : function(){
-      if(this.pseudo){
-	return this.pseudo.hasPseudoElement()? 0 : 1;
-      }
-      return 0;
-    },
-    _testAttrs : function(style){
-      return Nehan.List.forall(this.attrs, function(attr){
-	return attr.test(style);
-      });
-    }
-  };
-
-  return TypeSelector;
-})();
-
-
 var SelectorLexer = (function(){
   /**
      @memberof Nehan
@@ -4051,7 +4051,7 @@ var SelectorLexer = (function(){
       if(this.buff.length === buff_len_before){
 	throw "invalid selector:[" + this.buff + "]";
       }
-      return new TypeSelector({
+      return new Nehan.TypeSelector({
 	name:name,
 	nameRex:name_rex,
 	id:id,
@@ -4180,7 +4180,7 @@ var SelectorStateMachine = (function(){
       var f2, tmp, f1, combinator;
       while(pos >= 0){
 	f2 = pop();
-	if(f2 instanceof TypeSelector === false){
+	if(f2 instanceof Nehan.TypeSelector === false){
 	  throw "selector syntax error:" + src;
 	}
 	if(!f2.test(style)){
@@ -4190,13 +4190,13 @@ var SelectorStateMachine = (function(){
 	if(tmp === null){
 	  return true;
 	}
-	if(tmp instanceof TypeSelector){
+	if(tmp instanceof Nehan.TypeSelector){
 	  f1 = tmp;
 	  combinator = " "; // descendant combinator
 	} else if(typeof tmp === "string"){
 	  combinator = tmp;
 	  f1 = pop();
-	  if(f1 === null || f1 instanceof TypeSelector === false){
+	  if(f1 === null || f1 instanceof Nehan.TypeSelector === false){
 	    throw "selector syntax error:" + src;
 	  }
 	}
@@ -4315,7 +4315,7 @@ var Selector = (function(){
     _countSpec : function(elements){
       var a = 0, b = 0, c = 0;
       Nehan.List.iter(elements, function(token){
-	if(token instanceof TypeSelector){
+	if(token instanceof Nehan.TypeSelector){
 	  a += token.getIdSpec();
 	  b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();
 	  c += token.getNameSpec();

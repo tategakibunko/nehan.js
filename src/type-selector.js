@@ -24,7 +24,7 @@
    6. pseudo-element selector
      div::first-line{font-size:xxx}
 */
-var TypeSelector = (function(){
+Nehan.TypeSelector = (function(){
   /**
      @memberof Nehan
      @class TypeSelector
