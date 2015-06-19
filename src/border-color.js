@@ -41,7 +41,7 @@ var BorderColor = (function(){
 
       // second, map as color class.
       BoxRect.iter(this, function(dir, val){
-	self[dir] = new Color(val);
+	self[dir] = new Nehan.Color(val);
       });
     },
     /**

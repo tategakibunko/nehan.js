@@ -1178,7 +1178,7 @@ var StyleContext = (function(){
        @return {Nehan.Color}
     */
     getColor : function(){
-      return this.color || (this.parent? this.parent.getColor() : new Color(Display.fontColor));
+      return this.color || (this.parent? this.parent.getColor() : new Nehan.Color(Display.fontColor));
     },
     /**
        @memberof Nehan.StyleContext
@@ -1717,7 +1717,7 @@ var StyleContext = (function(){
     _loadColor : function(){
       var value = this.getCssAttr("color", "inherit");
       if(value !== "inherit"){
-	return new Color(value);
+	return new Nehan.Color(value);
       }
     },
     _loadFont : function(){
@@ -2073,7 +2073,7 @@ var StyleContext = (function(){
       return new TextEmpha({
 	style:new TextEmphaStyle(empha_style),
 	pos:new TextEmphaPos(empha_pos),
-	color:(empha_color? new Color(empha_color) : this.getColor())
+	color:(empha_color? new Nehan.Color(empha_color) : this.getColor())
       });
     },
     _loadTextEmphaStyle : function(){

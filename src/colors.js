@@ -2,7 +2,7 @@
    color collection manager
    @namespace Nehan.Colors
 */
-var Colors = (function(){
+Nehan.Colors = (function(){
   var __color_names = {
     "aliceblue":"f0f8ff",
     "antiquewhite":"faebd7",

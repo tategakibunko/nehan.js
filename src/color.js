@@ -1,4 +1,4 @@
-var Color = (function(){
+Nehan.Color = (function(){
   /**
      @memberof Nehan
      @class Color
@@ -15,7 +15,7 @@ var Color = (function(){
        @param value {String}
     */
     setValue : function(value){
-      this.value = Colors.get(value);
+      this.value = Nehan.Colors.get(value);
     },
     /**
        @memberof Nehan.Color
