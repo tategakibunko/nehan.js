@@ -88,7 +88,7 @@ var Border = (function(){
      @param color {Nehan.Color}
   */
   Border.prototype.setColor = function(flow, color){
-    this.color = new BorderColor();
+    this.color = new Nehan.BorderColor();
     this.color.setColor(flow, color);
   };
 
