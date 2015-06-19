@@ -61,7 +61,7 @@ var InlineGenerator = (function(){
     // if element is the last full-filled line, skip continuous <br>.
     if(element && element.lineOver && this._child && !this._child.hasNext()){
       this.stream.skipIf(function(token){
-	return (token instanceof Tag && token.getName() === "br");
+	return (token instanceof Nehan.Tag && token.getName() === "br");
       });
     }
     return this._createOutput(context);

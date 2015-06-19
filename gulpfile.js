@@ -41,6 +41,7 @@ var sources = [
   "src/closure.js",
   "src/hash-set.js",
   "src/css-hash-set.js",
+  "src/css-parser.js",
 
   // closed modules
   "src/nehan-setup-start.js",
@@ -49,7 +50,6 @@ var sources = [
   "src/lexing-rule.js",
   "src/style.js",
   "src/anim.js",
-  "src/css-parser.js",
   "src/attr-selector.js",
   "src/pseudo-selector.js",
   "src/type-selector.js",

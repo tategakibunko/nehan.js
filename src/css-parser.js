@@ -42,7 +42,7 @@
 
   @namespace Nehan.CssParser
 */
-var CssParser = (function(){
+Nehan.CssParser = (function(){
   var __normalize = function(value){
     return Nehan.Utils.trim(String(value))
       .replace(/;/g, "")

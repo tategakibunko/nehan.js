@@ -978,7 +978,7 @@ var StyleContext = (function(){
       }
       // if value is function, call with selector context, and format the returned value.
       if(typeof value === "function"){
-	return CssParser.formatValue(name, value(this.selectorPropContext));
+	return Nehan.CssParser.formatValue(name, value(this.selectorPropContext));
       }
       return value; // already formatted
     },
@@ -1647,8 +1647,8 @@ var StyleContext = (function(){
 	if(nv.length >= 2){
 	  var prop = Nehan.Utils.trim(nv[0]).toLowerCase();
 	  var value = Nehan.Utils.trim(nv[1]);
-	  var fmt_prop = CssParser.formatProp(prop);
-	  var fmt_value = CssParser.formatValue(prop, value);
+	  var fmt_prop = Nehan.CssParser.formatProp(prop);
+	  var fmt_value = Nehan.CssParser.formatValue(prop, value);
 	  if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Nehan.Closure.eq(fmt_prop))){
 	    ret[fmt_prop] = fmt_value;
 	  }

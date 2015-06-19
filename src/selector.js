@@ -39,8 +39,8 @@ var Selector = (function(){
     */
     updateValue : function(value){
       for(var prop in value){
-	var fmt_value = CssParser.formatValue(prop, value[prop]);
-	var fmt_prop = CssParser.formatProp(prop);
+	var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
+	var fmt_prop = Nehan.CssParser.formatProp(prop);
 	var old_value = this.value[fmt_prop] || null;
 	if(old_value !== null && typeof old_value === "object" && typeof fmt_value === "object"){
 	  Nehan.Args.copy(old_value, fmt_value);
@@ -109,8 +109,8 @@ var Selector = (function(){
     _formatValue : function(value){
       var ret = {};
       for(var prop in value){
-	var fmt_prop = CssParser.formatProp(prop);
-	var fmt_value = CssParser.formatValue(prop, value[prop]);
+	var fmt_prop = Nehan.CssParser.formatProp(prop);
+	var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
 	ret[fmt_prop] = fmt_value;
       }
       return ret;
