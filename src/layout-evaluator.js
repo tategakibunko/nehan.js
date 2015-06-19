@@ -76,7 +76,7 @@ var LayoutEvaluator = (function(){
       });
 
       // dataset attributes(defined in TagAttrs::dataset)
-      Args.copy(dom.dataset, dataset);
+      Nehan.Args.copy(dom.dataset, dataset);
       return dom;
     },
     _createClearFix : function(clear){

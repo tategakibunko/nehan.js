@@ -43,7 +43,7 @@ var Selector = (function(){
 	var fmt_prop = CssParser.formatProp(prop);
 	var old_value = this.value[fmt_prop] || null;
 	if(old_value !== null && typeof old_value === "object" && typeof fmt_value === "object"){
-	  Args.copy(old_value, fmt_value);
+	  Nehan.Args.copy(old_value, fmt_value);
 	} else {
 	  this.value[fmt_prop] = fmt_value; // direct value or function
 	}

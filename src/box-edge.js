@@ -43,9 +43,9 @@ var BoxEdge = (function (){
     */
     getCss : function(){
       var css = {};
-      Args.copy(css, this.padding.getCss());
-      Args.copy(css, this.border.getCss());
-      Args.copy(css, this.margin.getCss());
+      Nehan.Args.copy(css, this.padding.getCss());
+      Nehan.Args.copy(css, this.border.getCss());
+      Nehan.Args.copy(css, this.margin.getCss());
       return css;
     },
     /**

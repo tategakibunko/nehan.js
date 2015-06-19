@@ -82,7 +82,7 @@ var PageStream = (function(){
     asyncGet : function(opt){
       var wait = opt.wait || 0;
       var max_page_count = opt.maxPageCount || -1;
-      Args.merge(this, {
+      Nehan.Args.merge(this, {
 	onComplete : function(sender, time){},
 	onProgress : function(sender, tree){},
 	onError : function(sender){}

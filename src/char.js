@@ -69,7 +69,7 @@ var Char = (function(){
 	css["margin-bottom"] = "-0.5em";
       } else if(!is_kakko_start && !is_kakko_end && this.vscale < 1){
 	css.height = "0.5em";
-	Args.copy(css, this.getCssPadding(line));
+	Nehan.Args.copy(css, this.getCssPadding(line));
       }
       return css;
     },
@@ -83,7 +83,7 @@ var Char = (function(){
       css.width = font_size + "px";
       css.height = this.getVertHeight(font_size) + "px";
       if(this.isPaddingEnable()){
-	Args.copy(css, this.getCssPadding(line));
+	Nehan.Args.copy(css, this.getCssPadding(line));
       }
       return css;
     },

@@ -40,7 +40,7 @@ var VertEvaluator = (function(){
       new TokenStream(ruby.getRtString()),
       null // outline context
     )).yield();
-    Args.copy(rt.css, ruby.getCssVertRt(line));
+    Nehan.Args.copy(rt.css, ruby.getCssVertRt(line));
     return this._evaluate(rt);
   };
 

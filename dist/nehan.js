@@ -563,6 +563,59 @@ Nehan.List = {
 
 
 /**
+   @namespace Nehan.Args
+*/
+Nehan.Args = {
+  /**
+     copy all value in [args] to [dst]
+     @memberof Nehan.Args
+     @param {Object} dst
+     @param {Object} args
+     @return {Object} copied dst
+  */
+  copy : function(dst, args){
+    dst = dst || {};
+    for(var prop in args){
+      dst[prop] = args[prop];
+    }
+    return dst;
+  },
+  /**
+     copy all value in [args] to [dst] recursively
+     @memberof Nehan.Args
+     @param {Object} dst
+     @param {Object} args
+     @return {Object} copied dst
+  */
+  copy2 : function(dst, args){
+    dst = dst || {};
+    for(var prop in args){
+      if(typeof dst[prop] === "object"){
+	this.copy2(dst[prop], args[prop]);
+      } else {
+	dst[prop] = args[prop];
+      }
+    }
+    return dst;
+  },
+  /**
+     merge all value in [args] to [dst] with default value by [defaults]
+     @memberof Nehan.Args
+     @param {Object} dst
+     @param {Object} defaults
+     @param {Object} args
+     @return {Object} merged dst
+  */
+  merge : function(dst, defaults, args){
+    dst = dst || {};
+    for(var prop in defaults){
+      dst[prop] = (typeof args[prop] === "undefined")? defaults[prop] : args[prop];
+    }
+    return dst;
+  }
+};
+
+/**
    object utility module
 
    @namespace Nehan.Obj
@@ -3210,59 +3263,6 @@ var reqAnimationFrame = (function(){
 })();
 
 
-/**
-   @namespace Nehan.Args
-*/
-var Args = {
-  /**
-     copy all value in [args] to [dst]
-     @memberof Nehan.Args
-     @param {Object} dst
-     @param {Object} args
-     @return {Object} copied dst
-  */
-  copy : function(dst, args){
-    dst = dst || {};
-    for(var prop in args){
-      dst[prop] = args[prop];
-    }
-    return dst;
-  },
-  /**
-     copy all value in [args] to [dst] recursively
-     @memberof Nehan.Args
-     @param {Object} dst
-     @param {Object} args
-     @return {Object} copied dst
-  */
-  copy2 : function(dst, args){
-    dst = dst || {};
-    for(var prop in args){
-      if(typeof dst[prop] === "object"){
-	this.copy2(dst[prop], args[prop]);
-      } else {
-	dst[prop] = args[prop];
-      }
-    }
-    return dst;
-  },
-  /**
-     merge all value in [args] to [dst] with default value by [defaults]
-     @memberof Nehan.Args
-     @param {Object} dst
-     @param {Object} defaults
-     @param {Object} args
-     @return {Object} merged dst
-  */
-  merge : function(dst, defaults, args){
-    dst = dst || {};
-    for(var prop in defaults){
-      dst[prop] = (typeof args[prop] === "undefined")? defaults[prop] : args[prop];
-    }
-    return dst;
-  }
-};
-
 var HashSet = (function(){
   /**
      @memberof Nehan
@@ -3382,7 +3382,7 @@ var CssHashSet = (function(){
   */
   CssHashSet.prototype.merge = function(old_value, new_value){
     if(typeof old_value === "object"){
-      Args.copy(old_value, new_value);
+      Nehan.Args.copy(old_value, new_value);
       return old_value;
     }
     return new_value;
@@ -3394,7 +3394,7 @@ var CssHashSet = (function(){
      @param dst {Object}
   */
   CssHashSet.prototype.copyValuesTo = function(dst){
-    return Args.copy(dst, this._values);
+    return Nehan.Args.copy(dst, this._values);
   };
 
   return CssHashSet;
@@ -4268,7 +4268,7 @@ var Selector = (function(){
 	var fmt_prop = CssParser.formatProp(prop);
 	var old_value = this.value[fmt_prop] || null;
 	if(old_value !== null && typeof old_value === "object" && typeof fmt_value === "object"){
-	  Args.copy(old_value, fmt_value);
+	  Nehan.Args.copy(old_value, fmt_value);
 	} else {
 	  this.value[fmt_prop] = fmt_value; // direct value or function
 	}
@@ -4658,7 +4658,7 @@ var Char = (function(){
 	css["margin-bottom"] = "-0.5em";
       } else if(!is_kakko_start && !is_kakko_end && this.vscale < 1){
 	css.height = "0.5em";
-	Args.copy(css, this.getCssPadding(line));
+	Nehan.Args.copy(css, this.getCssPadding(line));
       }
       return css;
     },
@@ -4672,7 +4672,7 @@ var Char = (function(){
       css.width = font_size + "px";
       css.height = this.getVertHeight(font_size) + "px";
       if(this.isPaddingEnable()){
-	Args.copy(css, this.getCssPadding(line));
+	Nehan.Args.copy(css, this.getCssPadding(line));
       }
       return css;
     },
@@ -5753,7 +5753,7 @@ var Ruby = (function(){
       var css = {};
       css["css-float"] = "left";
       if(this.padding){
-	Args.copy(css, this.padding.getCss());
+	Nehan.Args.copy(css, this.padding.getCss());
       }
       return css;
     },
@@ -5765,7 +5765,7 @@ var Ruby = (function(){
     getCssHoriRb : function(line){
       var css = {};
       if(this.padding){
-	Args.copy(css, this.padding.getCss());
+	Nehan.Args.copy(css, this.padding.getCss());
       }
       css["text-align"] = "center";
       css["line-height"] = "1em";
@@ -7893,13 +7893,13 @@ var Border = (function(){
   Border.prototype.getCss = function(){
     var css = Edge.prototype.getCss.call(this);
     if(this.radius){
-      Args.copy(css, this.radius.getCss());
+      Nehan.Args.copy(css, this.radius.getCss());
     }
     if(this.color){
-      Args.copy(css, this.color.getCss());
+      Nehan.Args.copy(css, this.color.getCss());
     }
     if(this.style){
-      Args.copy(css, this.style.getCss());
+      Nehan.Args.copy(css, this.style.getCss());
     }
     return css;
   };
@@ -7998,7 +7998,7 @@ var TextEmphaPos = (function(){
      @param opt.vert {String} - vertical empha pos, default "right"
   */
   function TextEmphaPos(opt){
-    Args.merge(this, {
+    Nehan.Args.merge(this, {
       hori:"over",
       vert:"right"
     }, opt || {});
@@ -8184,9 +8184,9 @@ var BoxEdge = (function (){
     */
     getCss : function(){
       var css = {};
-      Args.copy(css, this.padding.getCss());
-      Args.copy(css, this.border.getCss());
-      Args.copy(css, this.margin.getCss());
+      Nehan.Args.copy(css, this.padding.getCss());
+      Nehan.Args.copy(css, this.border.getCss());
+      Nehan.Args.copy(css, this.margin.getCss());
       return css;
     },
     /**
@@ -9543,7 +9543,7 @@ var SectionTreeConverter = (function(){
        @param callbacks.createPageNoItem {Function} - called when create page no item node in link object, create nothing by default.
     */
     convert : function(outline_tree, callbacks){
-      callbacks = Args.merge({}, default_callbacks, callbacks || {});
+      callbacks = Nehan.Args.merge({}, default_callbacks, callbacks || {});
       var toc_context = new TocContext();
       var root_node = callbacks.createRoot();
       return parse(toc_context, root_node, outline_tree, callbacks); // section tree -> dom node
@@ -10196,7 +10196,7 @@ var Page = (function(){
      @param opt.percent {int}
   */
   function Page(opt){
-    Args.merge(this, {
+    Nehan.Args.merge(this, {
       element:null,
       seekPos:0,
       pageNo:0,
@@ -10332,7 +10332,7 @@ var PageStream = (function(){
     asyncGet : function(opt){
       var wait = opt.wait || 0;
       var max_page_count = opt.maxPageCount || -1;
-      Args.merge(this, {
+      Nehan.Args.merge(this, {
 	onComplete : function(sender, time){},
 	onProgress : function(sender, tree){},
 	onError : function(sender){}
@@ -12564,32 +12564,32 @@ var StyleContext = (function(){
       var css = {};
       css.display = "block";
       if(this.font){
-	Args.copy(css, this.font.getCss());
+	Nehan.Args.copy(css, this.font.getCss());
       }
       if(this.parent){
-	Args.copy(css, this.parent.flow.getCss());
+	Nehan.Args.copy(css, this.parent.flow.getCss());
       }
       if(this.color){
-	Args.copy(css, this.color.getCss());
+	Nehan.Args.copy(css, this.color.getCss());
       }
       if(this.letterSpacing && !this.isTextVertical()){
 	css["letter-spacing"] = this.letterSpacing + "px";
       }
       if(this.floatDirection){
-	Args.copy(css, this.floatDirection.getCss(this.flow));
+	Nehan.Args.copy(css, this.floatDirection.getCss(this.flow));
       }
       if(this.position){
-	Args.copy(css, this.position.getCss());
+	Nehan.Args.copy(css, this.position.getCss());
       }
       if(this.zIndex){
 	css["z-index"] = this.zIndex;
       }
       this.unmanagedCss.copyValuesTo(css);
-      Args.copy(css, block.size.getCss(this.flow)); // content size
+      Nehan.Args.copy(css, block.size.getCss(this.flow)); // content size
       if(block.edge){
-	Args.copy(css, block.edge.getCss());
+	Nehan.Args.copy(css, block.edge.getCss());
       }
-      Args.copy(css, block.css); // some dynamic values
+      Nehan.Args.copy(css, block.css); // some dynamic values
       return css;
     },
     /**
@@ -12601,18 +12601,18 @@ var StyleContext = (function(){
       // notice that line-size, line-edge is box local variable,
       // so style of line-size(content-size) and edge-size are generated at Box::getBoxCss
       var css = {};
-      Args.copy(css, line.size.getCss(this.flow));
+      Nehan.Args.copy(css, line.size.getCss(this.flow));
       if(line.edge){
-	Args.copy(css, line.edge.getCss());
+	Nehan.Args.copy(css, line.edge.getCss());
       }
       if(this.isRootLine()){
-	Args.copy(css, this.flow.getCss());
+	Nehan.Args.copy(css, this.flow.getCss());
       }
       if(this.font && (!this.isRootLine() || this.isFirstLine())){
-	Args.copy(css, this.font.getCss());
+	Nehan.Args.copy(css, this.font.getCss());
       }
       if(this.color){
-	Args.copy(css, this.color.getCss());
+	Nehan.Args.copy(css, this.color.getCss());
       }
       if(this.isRootLine()){
 	css["line-height"] = this.getFontSize() + "px";
@@ -12621,7 +12621,7 @@ var StyleContext = (function(){
 	css["display"] = "block";
       }
       this.unmanagedCss.copyValuesTo(css);
-      Args.copy(css, line.css);
+      Nehan.Args.copy(css, line.css);
       css["background-color"] = this.getCssAttr("background-color", "transparent");
       return css;
     },
@@ -12634,9 +12634,9 @@ var StyleContext = (function(){
       // notice that line-size, line-edge is box local variable,
       // so style of line-size(content-size) and edge-size are generated at Box::getCssInline
       var css = {};
-      Args.copy(css, line.size.getCss(this.flow));
+      Nehan.Args.copy(css, line.size.getCss(this.flow));
       if(line.edge){
-	Args.copy(css, line.edge.getCss());
+	Nehan.Args.copy(css, line.edge.getCss());
       }
       if(this.isTextVertical()){
 	css["display"] = "block";
@@ -12645,7 +12645,7 @@ var StyleContext = (function(){
 	  css["letter-spacing"] = "-0.001em";
 	}
       } else {
-	Args.copy(css, this.flow.getCss());
+	Nehan.Args.copy(css, this.flow.getCss());
 	css["line-height"] = line.maxFontSize + "px";
 
 	// enable line-height only when horizontal mode.
@@ -12660,7 +12660,7 @@ var StyleContext = (function(){
 	}
       }
       this.unmanagedCss.copyValuesTo(css);
-      Args.copy(css, line.css);
+      Nehan.Args.copy(css, line.css);
       css["background-color"] = this.getCssAttr("background-color", "transparent");
       return css;
     },
@@ -12676,7 +12676,7 @@ var StyleContext = (function(){
 	  delete css["css-float"];
 	}
       } else {
-	Args.copy(css, this.flow.getCss());
+	Nehan.Args.copy(css, this.flow.getCss());
       }
       css.display = "inline-block";
       return css;
@@ -12759,11 +12759,11 @@ var StyleContext = (function(){
 	var start_offset = Math.floor(space_measure / 2);
 	line.size.setMeasure(this.flow, content_measure - start_offset);
 	padding.setStart(this.flow, start_offset);
-	Args.copy(line.css, padding.getCss());
+	Nehan.Args.copy(line.css, padding.getCss());
       } else if(text_align.isEnd()){
 	line.size.setMeasure(this.flow, line.inlineMeasure);
 	padding.setStart(this.flow, space_measure);
-	Args.copy(line.css, padding.getCss());
+	Nehan.Args.copy(line.css, padding.getCss());
       }
     },
     // argument 'baseline' is not used yet.
@@ -12782,7 +12782,7 @@ var StyleContext = (function(){
 	  element.size.width = (root_line.maxExtent - from_after);
 	  
 	  // set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
-	  Args.copy(element.css, edge.getCss(this.flow));
+	  Nehan.Args.copy(element.css, edge.getCss(this.flow));
 	}
       }.bind(this));
     },
@@ -12797,7 +12797,7 @@ var StyleContext = (function(){
 	  //element.size.width = (root_line.maxExtent - from_after);
 	  
 	  // set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
-	  Args.copy(element.css, edge.getCss(this.flow));
+	  Nehan.Args.copy(element.css, edge.getCss(this.flow));
 	}
       }.bind(this));
     },
@@ -16495,7 +16495,7 @@ var LayoutEvaluator = (function(){
       });
 
       // dataset attributes(defined in TagAttrs::dataset)
-      Args.copy(dom.dataset, dataset);
+      Nehan.Args.copy(dom.dataset, dataset);
       return dom;
     },
     _createClearFix : function(clear){
@@ -16666,7 +16666,7 @@ var VertEvaluator = (function(){
       new TokenStream(ruby.getRtString()),
       null // outline context
     )).yield();
-    Args.copy(rt.css, ruby.getCssVertRt(line));
+    Nehan.Args.copy(rt.css, ruby.getCssVertRt(line));
     return this._evaluate(rt);
   };
 
@@ -17059,8 +17059,8 @@ var HoriEvaluator = (function(){
 
 
 // set engine args
-Args.copy(Config, __engine_args.config || {});
-Args.copy2(Display, __engine_args.display || {});
+Nehan.Args.copy(Config, __engine_args.config || {});
+Nehan.Args.copy2(Display, __engine_args.display || {});
 
 Selectors.setValues(Nehan.globalStyle || {}); // set global style.
 Selectors.setValues(__engine_args.style || {}); // set local style

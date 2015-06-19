@@ -13,7 +13,7 @@ var Page = (function(){
      @param opt.percent {int}
   */
   function Page(opt){
-    Args.merge(this, {
+    Nehan.Args.merge(this, {
       element:null,
       seekPos:0,
       pageNo:0,

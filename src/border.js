@@ -113,13 +113,13 @@ var Border = (function(){
   Border.prototype.getCss = function(){
     var css = Edge.prototype.getCss.call(this);
     if(this.radius){
-      Args.copy(css, this.radius.getCss());
+      Nehan.Args.copy(css, this.radius.getCss());
     }
     if(this.color){
-      Args.copy(css, this.color.getCss());
+      Nehan.Args.copy(css, this.color.getCss());
     }
     if(this.style){
-      Args.copy(css, this.style.getCss());
+      Nehan.Args.copy(css, this.style.getCss());
     }
     return css;
   };

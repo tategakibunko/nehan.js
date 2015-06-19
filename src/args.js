@@ -1,7 +1,7 @@
 /**
    @namespace Nehan.Args
 */
-var Args = {
+Nehan.Args = {
   /**
      copy all value in [args] to [dst]
      @memberof Nehan.Args
