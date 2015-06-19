@@ -95,7 +95,7 @@ var BorderRadius = (function(){
        @return {Nehan.Radius2d}
     */
     getCorner : function(dir1, dir2){
-      var name = BoxCorner.getCornerName(dir1, dir2);
+      var name = Nehan.BoxCorner.getCornerName(dir1, dir2);
       return this[name];
     },
     /**

@@ -53,6 +53,8 @@ var sources = [
   "src/color.js",
   "src/palette.js",
   "src/cardinal.js",
+  "src/box-rect.js",
+  "src/box-corner.js",
 
   // closed modules
   "src/nehan-setup-start.js",
@@ -68,7 +70,6 @@ var sources = [
   "src/word.js",
   "src/tcy.js",
   "src/ruby.js",
-
   "src/text-metrics.js",
   "src/list-style-type.js",
   "src/list-style-pos.js",
@@ -79,8 +80,7 @@ var sources = [
   "src/inline-flow.js",
   "src/box-flow.js",
   "src/box-flows.js",
-  "src/box-rect.js",
-  "src/box-corner.js",
+
   "src/font.js",
   "src/edge.js",
   "src/radius-2d.js",

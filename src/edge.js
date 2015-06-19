@@ -111,7 +111,7 @@ var Edge = (function(){
        @param size.left {int}
     */
     setSize : function(flow, size){
-      BoxRect.setValue(this, flow, size);
+      Nehan.BoxRect.setValue(this, flow, size);
     },
     /**
        @memberof Nehan.Edge

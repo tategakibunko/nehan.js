@@ -37,10 +37,10 @@ var BorderColor = (function(){
       var self = this;
 
       // first, set as it is(obj, array, string).
-      BoxRect.setValue(this, flow, value);
+      Nehan.BoxRect.setValue(this, flow, value);
 
       // second, map as color class.
-      BoxRect.iter(this, function(dir, val){
+      Nehan.BoxRect.iter(this, function(dir, val){
 	self[dir] = new Nehan.Color(val);
       });
     },
@@ -52,7 +52,7 @@ var BorderColor = (function(){
     */
     getCss : function(){
       var css = {};
-      BoxRect.iter(this, function(dir, color){
+      Nehan.BoxRect.iter(this, function(dir, color){
 	var prop = ["border", dir, "color"].join("-");
 	css[prop] = color.getCssValue();
       });

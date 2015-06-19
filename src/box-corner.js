@@ -1,7 +1,7 @@
 /**
    @namespace Nehan.BoxCorner
 */
-var BoxCorner = (function(){
+Nehan.BoxCorner = (function(){
   var __sort = function(dir1, dir2){
     var order = {top:0, bottom:1, left:2, right:3};
     return [dir1, dir2].sort(function (c1, c2){

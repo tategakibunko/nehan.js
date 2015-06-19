@@ -3284,6 +3284,112 @@ Nehan.Cardinal = (function(){
 })();
 
 
+/**
+   utility module for box physical direction(top, right, bottom, left).
+
+   @namespace Nehan.BoxRect
+*/
+Nehan.BoxRect = {
+  /**
+     iterate all direction of [obj] by [fn]
+     @memberof Nehan.BoxRect
+     @param obj {Object}
+     @param fn {Function}
+   */
+  iter : function(obj, fn){
+    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
+      if(obj[dir]){
+	fn(dir, obj[dir]);
+      }
+    });
+  },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value {Object}
+   */
+  setValue : function(dst, flow, value){
+    if(typeof value.start != "undefined"){
+      this.setStart(dst, flow, value.start);
+    }
+    if(typeof value.end != "undefined"){
+      this.setEnd(dst, flow, value.end);
+    }
+    if(typeof value.before != "undefined"){
+      this.setBefore(dst, flow, value.before);
+    }
+    if(typeof value.after != "undefined"){
+      this.setAfter(dst, flow, value.after);
+    }
+    return dst;
+  },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value
+   */
+  setBefore : function(dst, flow, value){
+    dst[flow.getPropBefore()] = value;
+  },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value
+   */
+  setAfter : function(dst, flow, value){
+    dst[flow.getPropAfter()] = value;
+  },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value
+   */
+  setStart : function(dst, flow, value){
+    dst[flow.getPropStart()] = value;
+  },
+  /**
+     @memberof Nehan.BoxRect
+     @param dst {Object}
+     @param flow {Nehan.BoxFlow}
+     @param value
+   */
+  setEnd : function(dst, flow, value){
+    dst[flow.getPropEnd()] = value;
+  }
+};
+
+
+/**
+   @namespace Nehan.BoxCorner
+*/
+Nehan.BoxCorner = (function(){
+  var __sort = function(dir1, dir2){
+    var order = {top:0, bottom:1, left:2, right:3};
+    return [dir1, dir2].sort(function (c1, c2){
+      return order[c1] - order[c2];
+    });
+  };
+  return {
+    /**
+       get normalized(and camel-cased) corner property name
+       @memberof Nehan.BoxCorner
+       @param dir1 {string}
+       @param dir2 {string}
+       @return {string}
+       @example
+       * BoxCorner.getCornerName("right", "top"); // => "topRight"
+    */
+    getCornerName : function(dir1, dir2){
+      var dirs = __sort(dir1, dir2);
+      return [dirs[0], Nehan.Utils.capitalize(dirs[1])].join("");
+    }
+  };
+})();
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -6969,112 +7075,6 @@ var BoxFlows = {
   }
 };
 
-/**
-   utility module for box physical direction(top, right, bottom, left).
-
-   @namespace Nehan.BoxRect
-*/
-var BoxRect = {
-  /**
-     iterate all direction of [obj] by [fn]
-     @memberof Nehan.BoxRect
-     @param obj {Object}
-     @param fn {Function}
-   */
-  iter : function(obj, fn){
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
-      if(obj[dir]){
-	fn(dir, obj[dir]);
-      }
-    });
-  },
-  /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value {Object}
-   */
-  setValue : function(dst, flow, value){
-    if(typeof value.start != "undefined"){
-      this.setStart(dst, flow, value.start);
-    }
-    if(typeof value.end != "undefined"){
-      this.setEnd(dst, flow, value.end);
-    }
-    if(typeof value.before != "undefined"){
-      this.setBefore(dst, flow, value.before);
-    }
-    if(typeof value.after != "undefined"){
-      this.setAfter(dst, flow, value.after);
-    }
-    return dst;
-  },
-  /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value
-   */
-  setBefore : function(dst, flow, value){
-    dst[flow.getPropBefore()] = value;
-  },
-  /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value
-   */
-  setAfter : function(dst, flow, value){
-    dst[flow.getPropAfter()] = value;
-  },
-  /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value
-   */
-  setStart : function(dst, flow, value){
-    dst[flow.getPropStart()] = value;
-  },
-  /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value
-   */
-  setEnd : function(dst, flow, value){
-    dst[flow.getPropEnd()] = value;
-  }
-};
-
-
-/**
-   @namespace Nehan.BoxCorner
-*/
-var BoxCorner = (function(){
-  var __sort = function(dir1, dir2){
-    var order = {top:0, bottom:1, left:2, right:3};
-    return [dir1, dir2].sort(function (c1, c2){
-      return order[c1] - order[c2];
-    });
-  };
-  return {
-    /**
-       get normalized(and camel-cased) corner property name
-       @memberof Nehan.BoxCorner
-       @param dir1 {string}
-       @param dir2 {string}
-       @return {string}
-       @example
-       * BoxCorner.getCornerName("right", "top"); // => "topRight"
-    */
-    getCornerName : function(dir1, dir2){
-      var dirs = __sort(dir1, dir2);
-      return [dirs[0], Nehan.Utils.capitalize(dirs[1])].join("");
-    }
-  };
-})();
-
 var Font = (function(){
   /**
      @memberof Nehan
@@ -7246,7 +7246,7 @@ var Edge = (function(){
        @param size.left {int}
     */
     setSize : function(flow, size){
-      BoxRect.setValue(this, flow, size);
+      Nehan.BoxRect.setValue(this, flow, size);
     },
     /**
        @memberof Nehan.Edge
@@ -7506,7 +7506,7 @@ var BorderRadius = (function(){
        @return {Nehan.Radius2d}
     */
     getCorner : function(dir1, dir2){
-      var name = BoxCorner.getCornerName(dir1, dir2);
+      var name = Nehan.BoxCorner.getCornerName(dir1, dir2);
       return this[name];
     },
     /**
@@ -7644,10 +7644,10 @@ var BorderColor = (function(){
       var self = this;
 
       // first, set as it is(obj, array, string).
-      BoxRect.setValue(this, flow, value);
+      Nehan.BoxRect.setValue(this, flow, value);
 
       // second, map as color class.
-      BoxRect.iter(this, function(dir, val){
+      Nehan.BoxRect.iter(this, function(dir, val){
 	self[dir] = new Nehan.Color(val);
       });
     },
@@ -7659,7 +7659,7 @@ var BorderColor = (function(){
     */
     getCss : function(){
       var css = {};
-      BoxRect.iter(this, function(dir, color){
+      Nehan.BoxRect.iter(this, function(dir, color){
 	var prop = ["border", dir, "color"].join("-");
 	css[prop] = color.getCssValue();
       });
@@ -7706,7 +7706,7 @@ var BorderStyle = (function(){
        @param value.start {string}
     */
     setStyle : function(flow, value){
-      BoxRect.setValue(this, flow, value);
+      Nehan.BoxRect.setValue(this, flow, value);
     },
     /**
        get css object of logical border style
@@ -7715,7 +7715,7 @@ var BorderStyle = (function(){
     */
     getCss : function(){
       var css = {};
-      BoxRect.iter(this, function(dir, style){
+      Nehan.BoxRect.iter(this, function(dir, style){
 	var prop = ["border", dir, "style"].join("-");
 	css[prop] = style;
       });

@@ -34,7 +34,7 @@ var BorderStyle = (function(){
        @param value.start {string}
     */
     setStyle : function(flow, value){
-      BoxRect.setValue(this, flow, value);
+      Nehan.BoxRect.setValue(this, flow, value);
     },
     /**
        get css object of logical border style
@@ -43,7 +43,7 @@ var BorderStyle = (function(){
     */
     getCss : function(){
       var css = {};
-      BoxRect.iter(this, function(dir, style){
+      Nehan.BoxRect.iter(this, function(dir, style){
 	var prop = ["border", dir, "style"].join("-");
 	css[prop] = style;
       });

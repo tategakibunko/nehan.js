@@ -3,7 +3,7 @@
 
    @namespace Nehan.BoxRect
 */
-var BoxRect = {
+Nehan.BoxRect = {
   /**
      iterate all direction of [obj] by [fn]
      @memberof Nehan.BoxRect
