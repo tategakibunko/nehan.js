@@ -100,7 +100,7 @@ var Border = (function(){
      @param style {Nehan.BorderStyle}
   */
   Border.prototype.setStyle = function(flow, style){
-    this.style = new BorderStyle();
+    this.style = new Nehan.BorderStyle();
     this.style.setStyle(flow, style);
   };
 

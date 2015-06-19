@@ -1,4 +1,4 @@
-var BorderStyle = (function(){
+Nehan.BorderStyle = (function(){
   /**
      @memberof Nehan
      @class BorderStyle

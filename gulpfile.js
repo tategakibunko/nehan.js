@@ -60,6 +60,7 @@ var sources = [
   "src/radius-2d.js",
   "src/border-radius.js",
   "src/border-color.js",
+  "src/border-style.js",
 
   // closed modules
   "src/nehan-setup-start.js",
@@ -86,7 +87,6 @@ var sources = [
   "src/box-flow.js",
   "src/box-flows.js",
 
-  "src/border-style.js",
   "src/padding.js",
   "src/margin.js",
   "src/border.js",
