@@ -99,7 +99,7 @@ var Selector = (function(){
       return parseInt([a,b,c].join(""), 10); // maybe ok in most case.
     },
     _getSelectorElements : function(key){
-      var lexer = new SelectorLexer(key);
+      var lexer = new Nehan.SelectorLexer(key);
       return lexer.getTokens();
     },
     _normalizeKey : function(key){

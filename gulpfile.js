@@ -45,6 +45,7 @@ var sources = [
   "src/attr-selector.js",
   "src/pseudo-selector.js",
   "src/type-selector.js",
+  "src/selector-lexer.js",
 
   // closed modules
   "src/nehan-setup-start.js",
@@ -53,7 +54,6 @@ var sources = [
   "src/lexing-rule.js",
   "src/style.js",
   "src/anim.js",
-  "src/selector-lexer.js",
   "src/selector-state-machine.js",
   "src/selector.js",
   "src/selectors.js",

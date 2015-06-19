@@ -1,4 +1,4 @@
-var SelectorLexer = (function(){
+Nehan.SelectorLexer = (function(){
   /**
      @memberof Nehan
      @class SelectorLexer
