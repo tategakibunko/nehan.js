@@ -7,9 +7,9 @@ var Border = (function(){
      @extends {Nehan.Edge}
   */
   function Border(){
-    Edge.call(this, "border");
+    Nehan.Edge.call(this, "border");
   }
-  Nehan.Class.extend(Border, Edge);
+  Nehan.Class.extend(Border, Nehan.Edge);
 
   /**
      return cloned border object
@@ -111,7 +111,7 @@ var Border = (function(){
      @return {Object}
   */
   Border.prototype.getCss = function(){
-    var css = Edge.prototype.getCss.call(this);
+    var css = Nehan.Edge.prototype.getCss.call(this);
     if(this.radius){
       Nehan.Args.copy(css, this.radius.getCss());
     }

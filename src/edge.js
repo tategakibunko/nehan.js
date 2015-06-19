@@ -1,4 +1,4 @@
-var Edge = (function(){
+Nehan.Edge = (function(){
   /**
      @memberof Nehan
      @class Edge

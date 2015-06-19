@@ -7,9 +7,9 @@ var Margin = (function(){
      @extends {Nehan.Edge}
   */
   function Margin(){
-    Edge.call(this, "margin");
+    Nehan.Edge.call(this, "margin");
   }
-  Nehan.Class.extend(Margin, Edge);
+  Nehan.Class.extend(Margin, Nehan.Edge);
 
   /**
      @memberof Nehan.Margin

@@ -6,9 +6,9 @@ var Padding = (function(){
      @extends {Nehan.Edge}
   */
   function Padding(){
-    Edge.call(this, "padding");
+    Nehan.Edge.call(this, "padding");
   }
-  Nehan.Class.extend(Padding, Edge);
+  Nehan.Class.extend(Padding, Nehan.Edge);
 
   /**
      @memberof Nehan.Padding
