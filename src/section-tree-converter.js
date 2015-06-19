@@ -23,7 +23,7 @@
 
    @namespace Nehan.SectionTreeConverter
 */
-var SectionTreeConverter = (function(){
+Nehan.SectionTreeConverter = (function(){
   var default_callbacks = {
     onClickLink : function(toc){
       return false;

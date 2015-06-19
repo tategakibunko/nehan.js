@@ -73,6 +73,7 @@ var sources = [
   "src/toc-context.js",
   "src/outline-context.js",
   "src/outline-context-parser.js",
+  "src/section-tree-converter.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
@@ -107,7 +108,6 @@ var sources = [
   "src/html-lexer.js",
   "src/text-lexer.js",
 
-  "src/section-tree-converter.js",
   "src/document-header.js",
   "src/document-context.js",
   "src/token-stream.js",

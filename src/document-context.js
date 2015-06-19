@@ -22,7 +22,7 @@ var DocumentContext = (function(){
 
   var __convert_outline_context_to_element = function(context, callbacks){
     var tree = Nehan.OutlineContextParser.parse(context);
-    return tree? SectionTreeConverter.convert(tree, callbacks) : null;
+    return tree? Nehan.SectionTreeConverter.convert(tree, callbacks) : null;
   };
 
   var __create_outline_elements_by_name = function(section_root_name, callbacks){
