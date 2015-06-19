@@ -23,7 +23,7 @@ var ListStyleImage = (function(){
       var url = this.image.url;
       var width = this.image.width || Display.fontSize;
       var height = this.image.height || Display.fontSize;
-      return Html.tagSingle("img", {
+      return Nehan.Html.tagSingle("img", {
 	"src":url,
 	"class":"nehan-list-image",
 	"width":width,

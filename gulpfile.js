@@ -31,6 +31,7 @@ var sources = [
   "src/utils.js",
   "src/const.js",
   "src/css.js",
+  "src/html.js",
 
   // closed modules
   "src/nehan-setup-start.js",
@@ -40,7 +41,6 @@ var sources = [
   "src/style.js",
   "src/class.js",
   "src/anim.js",
-  "src/html.js",
   "src/closure.js",
   "src/args.js",
   "src/hash-set.js",

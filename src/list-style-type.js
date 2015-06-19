@@ -82,7 +82,7 @@ var ListStyleType = (function(){
     getMarkerHtml : function(count){
       var text = this.getMarkerText(count);
       if(this.isZenkaku()){
-	return Html.tagWrap("span", text, {
+	return Nehan.Html.tagWrap("span", text, {
 	  "class":"nehan-tcy"
 	});
       }

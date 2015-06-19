@@ -3,7 +3,7 @@
 
    @namespace Nehan.Html
 */
-var Html = {
+Nehan.Html = {
   /**
      escape special text like &lt;, &gt;, etc.
 
@@ -45,7 +45,7 @@ var Html = {
     @param args {Object}
     @return {String}
     @example
-    * Html.attr({width:"100", height:"200"}); // width='100' height = '200'
+    * Nehan.Html.attr({width:"100", height:"200"}); // width='100' height = '200'
   */
   attr : function(args){
     var tmp = [];
@@ -66,7 +66,7 @@ var Html = {
      @param args {Object} - tag attributes
      @return {String}
      @example
-     * Html.tagWrap("a", "homepage", {href:"#"}); // "<a href='#'>homepage</a>"
+     * Nehan.Html.tagWrap("a", "homepage", {href:"#"}); // "<a href='#'>homepage</a>"
   */
   tagWrap : function(name, content, args){
     return [this.tagStart(name, args || {}), content, this.tagEnd(name)].join("");
@@ -80,7 +80,7 @@ var Html = {
      @param args {Object} - tag attributes
      @return {String}
      @example
-     * Html.tagSingle("img", {src:"/path/to/img"}); // "<img src='/path/to/img' />"
+     * Nehan.Html.tagSingle("img", {src:"/path/to/img"}); // "<img src='/path/to/img' />"
   */
   tagSingle : function(name, args){
     return "<" + name + " " + this.attr(args) + "/>";
@@ -94,7 +94,7 @@ var Html = {
      @param name {String} - tag name
      @param args {Object} - tag attributes
      @example
-     * Html.tagStart("div"); // "<div>"
+     * Nehan.Html.tagStart("div"); // "<div>"
   */
   tagStart : function(name, args){
     return "<" + name + " " + this.attr(args) + ">";
@@ -107,7 +107,7 @@ var Html = {
      @return {String}
      @param name {String} - tag name
      @example
-     * Html.tagEnd("div"); // "</div>"
+     * Nehan.Html.tagEnd("div"); // "</div>"
   */
   tagEnd : function(name){
     return "</" + name + ">";

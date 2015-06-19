@@ -915,6 +915,122 @@ Nehan.Css = {
   }
 };
 
+/**
+   html utility module
+
+   @namespace Nehan.Html
+*/
+Nehan.Html = {
+  /**
+     escape special text like &lt;, &gt;, etc.
+
+     @memberof Nehan.Html
+     @method escape
+     @param str {String}
+     @return {String}
+  */
+  escape : function(str){
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/'/g, "&#039;")
+      .replace(/"/g, "&quot;");
+  },
+  /**
+     unescape special text.
+
+     @memberof Nehan.Html
+     @method unescape
+     @param str {String}
+     @return {String}
+  */
+  unescape : function(str) {
+    var div = document.createElement("div");
+    div.innerHTML = str.replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/ /g, "&nbsp;")
+      .replace(/\r/g, "&#13;")
+      .replace(/\n/g, "&#10;");
+    return div.textContent || div.innerText;
+  },
+  /*
+    generate html attribute string
+
+    @memberof Nehan.Html
+    @method attr
+    @param args {Object}
+    @return {String}
+    @example
+    * Nehan.Html.attr({width:"100", height:"200"}); // width='100' height = '200'
+  */
+  attr : function(args){
+    var tmp = [];
+    for(var prop in args){
+      if(typeof args[prop] !== "undefined" && args[prop] !== ""){
+	tmp.push(prop + "='" + this.escape(args[prop] + "") + "'");
+      }
+    }
+    return (tmp == [])? "" : tmp.join(" ");
+  },
+  /**
+     generate html tag string
+
+     @memberof Nehan.Html
+     @method tagWrap
+     @param name {String} - tag name
+     @param content {String} - tag content text
+     @param args {Object} - tag attributes
+     @return {String}
+     @example
+     * Nehan.Html.tagWrap("a", "homepage", {href:"#"}); // "<a href='#'>homepage</a>"
+  */
+  tagWrap : function(name, content, args){
+    return [this.tagStart(name, args || {}), content, this.tagEnd(name)].join("");
+  },
+  /**
+     generate unwrapped single html tag string
+
+     @memberof Nehan.Html
+     @method tagSingle
+     @param name {String} - tag name
+     @param args {Object} - tag attributes
+     @return {String}
+     @example
+     * Nehan.Html.tagSingle("img", {src:"/path/to/img"}); // "<img src='/path/to/img' />"
+  */
+  tagSingle : function(name, args){
+    return "<" + name + " " + this.attr(args) + "/>";
+  },
+  /**
+     generate open tag string
+
+     @memberof Nehan.Html
+     @method tagStart
+     @return {String}
+     @param name {String} - tag name
+     @param args {Object} - tag attributes
+     @example
+     * Nehan.Html.tagStart("div"); // "<div>"
+  */
+  tagStart : function(name, args){
+    return "<" + name + " " + this.attr(args) + ">";
+  },
+  /**
+     generate enclose tag string
+
+     @memberof Nehan.Html
+     @method tagEnd
+     @return {String}
+     @param name {String} - tag name
+     @example
+     * Nehan.Html.tagEnd("div"); // "</div>"
+  */
+  tagEnd : function(name){
+    return "</" + name + ">";
+  }
+};
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -2421,122 +2537,6 @@ var reqAnimationFrame = (function(){
     };
 })();
 
-
-/**
-   html utility module
-
-   @namespace Nehan.Html
-*/
-var Html = {
-  /**
-     escape special text like &lt;, &gt;, etc.
-
-     @memberof Nehan.Html
-     @method escape
-     @param str {String}
-     @return {String}
-  */
-  escape : function(str){
-    return str
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/'/g, "&#039;")
-      .replace(/"/g, "&quot;");
-  },
-  /**
-     unescape special text.
-
-     @memberof Nehan.Html
-     @method unescape
-     @param str {String}
-     @return {String}
-  */
-  unescape : function(str) {
-    var div = document.createElement("div");
-    div.innerHTML = str.replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/ /g, "&nbsp;")
-      .replace(/\r/g, "&#13;")
-      .replace(/\n/g, "&#10;");
-    return div.textContent || div.innerText;
-  },
-  /*
-    generate html attribute string
-
-    @memberof Nehan.Html
-    @method attr
-    @param args {Object}
-    @return {String}
-    @example
-    * Html.attr({width:"100", height:"200"}); // width='100' height = '200'
-  */
-  attr : function(args){
-    var tmp = [];
-    for(var prop in args){
-      if(typeof args[prop] !== "undefined" && args[prop] !== ""){
-	tmp.push(prop + "='" + this.escape(args[prop] + "") + "'");
-      }
-    }
-    return (tmp == [])? "" : tmp.join(" ");
-  },
-  /**
-     generate html tag string
-
-     @memberof Nehan.Html
-     @method tagWrap
-     @param name {String} - tag name
-     @param content {String} - tag content text
-     @param args {Object} - tag attributes
-     @return {String}
-     @example
-     * Html.tagWrap("a", "homepage", {href:"#"}); // "<a href='#'>homepage</a>"
-  */
-  tagWrap : function(name, content, args){
-    return [this.tagStart(name, args || {}), content, this.tagEnd(name)].join("");
-  },
-  /**
-     generate unwrapped single html tag string
-
-     @memberof Nehan.Html
-     @method tagSingle
-     @param name {String} - tag name
-     @param args {Object} - tag attributes
-     @return {String}
-     @example
-     * Html.tagSingle("img", {src:"/path/to/img"}); // "<img src='/path/to/img' />"
-  */
-  tagSingle : function(name, args){
-    return "<" + name + " " + this.attr(args) + "/>";
-  },
-  /**
-     generate open tag string
-
-     @memberof Nehan.Html
-     @method tagStart
-     @return {String}
-     @param name {String} - tag name
-     @param args {Object} - tag attributes
-     @example
-     * Html.tagStart("div"); // "<div>"
-  */
-  tagStart : function(name, args){
-    return "<" + name + " " + this.attr(args) + ">";
-  },
-  /**
-     generate enclose tag string
-
-     @memberof Nehan.Html
-     @method tagEnd
-     @return {String}
-     @param name {String} - tag name
-     @example
-     * Html.tagEnd("div"); // "</div>"
-  */
-  tagEnd : function(name){
-    return "</" + name + ">";
-  }
-};
 
 /**
    closure factory
@@ -6363,7 +6363,7 @@ var ListStyleType = (function(){
     getMarkerHtml : function(count){
       var text = this.getMarkerText(count);
       if(this.isZenkaku()){
-	return Html.tagWrap("span", text, {
+	return Nehan.Html.tagWrap("span", text, {
 	  "class":"nehan-tcy"
 	});
       }
@@ -6447,7 +6447,7 @@ var ListStyleImage = (function(){
       var url = this.image.url;
       var width = this.image.width || Display.fontSize;
       var height = this.image.height || Display.fontSize;
-      return Html.tagSingle("img", {
+      return Nehan.Html.tagSingle("img", {
 	"src":url,
 	"class":"nehan-list-image",
 	"width":width,
@@ -12268,21 +12268,21 @@ var StyleContext = (function(){
       var content = this.getCssAttr("content") || this.markup.getContent();
       var before = Selectors.getValuePe(this, "before");
       if(!Nehan.Obj.isEmpty(before)){
-	content = Html.tagWrap("before", before.content || "") + content;
+	content = Nehan.Html.tagWrap("before", before.content || "") + content;
       }
       var after = Selectors.getValuePe(this, "after");
       if(!Nehan.Obj.isEmpty(after)){
-	content = content + Html.tagWrap("after", after.content || "");
+	content = content + Nehan.Html.tagWrap("after", after.content || "");
       }
       var first_letter = Selectors.getValuePe(this, "first-letter");
       if(!Nehan.Obj.isEmpty(first_letter)){
 	content = content.replace(__rex_first_letter, function(match, p1, p2, p3){
-	  return p1 + Html.tagWrap("first-letter", p3);
+	  return p1 + Nehan.Html.tagWrap("first-letter", p3);
 	});
       }
       var first_line = Selectors.getValuePe(this, "first-line");
       if(!Nehan.Obj.isEmpty(first_line)){
-	content = Html.tagWrap("first-line", content);
+	content = Nehan.Html.tagWrap("first-line", content);
       }
       return content;
     },
@@ -16784,7 +16784,7 @@ var VertEvaluator = (function(){
   // for example, if we use <div> instead, parent bg-color is not inherited.
   VertEvaluator.prototype._evalCharWithBr = function(line, chr){
     chr.withBr = true;
-    return document.createTextNode(Html.unescape(chr.getData()));
+    return document.createTextNode(Nehan.Html.unescape(chr.getData()));
   };
 
   VertEvaluator.prototype._evalCharLetterSpacing = function(line, chr){
@@ -16967,7 +16967,7 @@ var HoriEvaluator = (function(){
       return this._evalTabChar(line, chr);
     }
     if(chr.isCharRef()){
-      return document.createTextNode(Html.unescape(chr.getData()));
+      return document.createTextNode(Nehan.Html.unescape(chr.getData()));
     }
     if(chr.isKerningChar()){
       return this._evalKerningChar(line, chr);

@@ -158,7 +158,7 @@ var VertEvaluator = (function(){
   // for example, if we use <div> instead, parent bg-color is not inherited.
   VertEvaluator.prototype._evalCharWithBr = function(line, chr){
     chr.withBr = true;
-    return document.createTextNode(Html.unescape(chr.getData()));
+    return document.createTextNode(Nehan.Html.unescape(chr.getData()));
   };
 
   VertEvaluator.prototype._evalCharLetterSpacing = function(line, chr){

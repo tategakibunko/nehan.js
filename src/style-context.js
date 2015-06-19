@@ -1084,21 +1084,21 @@ var StyleContext = (function(){
       var content = this.getCssAttr("content") || this.markup.getContent();
       var before = Selectors.getValuePe(this, "before");
       if(!Nehan.Obj.isEmpty(before)){
-	content = Html.tagWrap("before", before.content || "") + content;
+	content = Nehan.Html.tagWrap("before", before.content || "") + content;
       }
       var after = Selectors.getValuePe(this, "after");
       if(!Nehan.Obj.isEmpty(after)){
-	content = content + Html.tagWrap("after", after.content || "");
+	content = content + Nehan.Html.tagWrap("after", after.content || "");
       }
       var first_letter = Selectors.getValuePe(this, "first-letter");
       if(!Nehan.Obj.isEmpty(first_letter)){
 	content = content.replace(__rex_first_letter, function(match, p1, p2, p3){
-	  return p1 + Html.tagWrap("first-letter", p3);
+	  return p1 + Nehan.Html.tagWrap("first-letter", p3);
 	});
       }
       var first_line = Selectors.getValuePe(this, "first-line");
       if(!Nehan.Obj.isEmpty(first_line)){
-	content = Html.tagWrap("first-line", content);
+	content = Nehan.Html.tagWrap("first-line", content);
       }
       return content;
     },

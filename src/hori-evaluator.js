@@ -74,7 +74,7 @@ var HoriEvaluator = (function(){
       return this._evalTabChar(line, chr);
     }
     if(chr.isCharRef()){
-      return document.createTextNode(Html.unescape(chr.getData()));
+      return document.createTextNode(Nehan.Html.unescape(chr.getData()));
     }
     if(chr.isKerningChar()){
       return this._evalKerningChar(line, chr);
