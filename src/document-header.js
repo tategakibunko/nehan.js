@@ -1,4 +1,4 @@
-var DocumentHeader = (function(){
+Nehan.DocumentHeader = (function(){
   /**
      @memberof Nehan
      @class DocumentHeader

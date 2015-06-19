@@ -64,7 +64,7 @@ var HtmlGenerator = (function(){
       return new BodyGenerator(text);
     },
     _parseDocumentHeader : function(stream){
-      var document_header = new DocumentHeader();
+      var document_header = new Nehan.DocumentHeader();
       while(stream.hasNext()){
 	var tag = stream.get();
 	switch(tag.getName()){
