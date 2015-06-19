@@ -3,7 +3,7 @@
 
    @namespace Nehan.SelectorStateMachine
 */
-var SelectorStateMachine = (function(){
+Nehan.SelectorStateMachine = (function(){
   var __find_parent = function(style, parent_type){
     var ptr = style.parent;
     while(ptr !== null){

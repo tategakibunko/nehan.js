@@ -22,7 +22,7 @@ var Selector = (function(){
        @return {boolean}
     */
     test : function(style){
-      return SelectorStateMachine.accept(style, this.elements);
+      return Nehan.SelectorStateMachine.accept(style, this.elements);
     },
     /**
        @memberof Nehan.Selector
