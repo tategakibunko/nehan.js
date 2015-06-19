@@ -1104,6 +1104,49 @@ Nehan.Html = {
   }
 };
 
+Nehan.Uri = (function(){
+  /**
+     @memberof Nehan
+     @class Uri
+     @classdesc abstraction of URI. 
+     @constructor
+     @param address {String}
+  */
+  function Uri(address){
+    this.address = this._normalize(address || "");
+  }
+
+  Uri.prototype = {
+    _normalize : function(address){
+      return address.replace(/\s/g, "");
+    },
+    /**
+       @memberof Nehan.Uri
+       @return {String}
+    */
+    getAddress : function(){
+      return this.address;
+    },
+    /**
+       @memberof Nehan.Uri
+       @return {String}
+       @example
+       * new Uri("http://example.com/top#foo").getAnchorName(); // "foo"
+    */
+    getAnchorName : function(){
+      var sharp_pos = this.address.indexOf("#");
+      if(sharp_pos < 0){
+	return "";
+      }
+      var anchor_name = this.address.substring(sharp_pos + 1);
+      return (anchor_name.length > 0)? anchor_name : "";
+    }
+  };
+
+  return Uri;
+})();
+
+
 Nehan.TagAttrLexer = (function(){
   var __rex_symbol = /[^=\s]+/;
 
@@ -8093,49 +8136,6 @@ var TextEmpha = (function(){
   };
 
   return TextEmpha;
-})();
-
-
-var Uri = (function(){
-  /**
-     @memberof Nehan
-     @class Uri
-     @classdesc abstraction of URI. 
-     @constructor
-     @param address {String}
-  */
-  function Uri(address){
-    this.address = this._normalize(address || "");
-  }
-
-  Uri.prototype = {
-    _normalize : function(address){
-      return address.replace(/\s/g, "");
-    },
-    /**
-       @memberof Nehan.Uri
-       @return {String}
-    */
-    getAddress : function(){
-      return this.address;
-    },
-    /**
-       @memberof Nehan.Uri
-       @return {String}
-       @example
-       * new Uri("http://example.com/top#foo").getAnchorName(); // "foo"
-    */
-    getAnchorName : function(){
-      var sharp_pos = this.address.indexOf("#");
-      if(sharp_pos < 0){
-	return "";
-      }
-      var anchor_name = this.address.substring(sharp_pos + 1);
-      return (anchor_name.length > 0)? anchor_name : "";
-    }
-  };
-
-  return Uri;
 })();
 
 
@@ -16594,7 +16594,7 @@ var LayoutEvaluator = (function(){
     },
     // if link uri has anchor address, add page-no to dataset where the anchor is defined.
     _evalLink : function(line, link){
-      var uri = new Uri(link.style.getMarkupAttr("href"));
+      var uri = new Nehan.Uri(link.style.getMarkupAttr("href"));
       var anchor_name = uri.getAnchorName();
       if(anchor_name){
 	var page_no = DocumentContext.getAnchorPageNo(anchor_name);

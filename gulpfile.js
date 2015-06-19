@@ -34,6 +34,7 @@ var sources = [
   "src/const.js",
   "src/css.js",
   "src/html.js",
+  "src/uri.js",
   "src/tag-attr-lexer.js",
   "src/tag-attr-parser.js",
   "src/tag-attrs.js",
@@ -89,11 +90,10 @@ var sources = [
   "src/inline-flow.js",
   "src/box-flow.js",
   "src/box-flows.js",
-
   "src/text-empha-style.js",
   "src/text-empha-pos.js",
   "src/text-empha.js",
-  "src/uri.js",
+
   "src/box-edge.js",
   "src/box-size.js",
   "src/box-position.js",

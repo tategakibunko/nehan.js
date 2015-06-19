@@ -1,4 +1,4 @@
-var Uri = (function(){
+Nehan.Uri = (function(){
   /**
      @memberof Nehan
      @class Uri
