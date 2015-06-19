@@ -22,9 +22,9 @@ var BlockFlow = (function(){
      @method flip
      @return {string} fliped block direction
      @example
-     * new BlockFlow("tb").flip(); // => "tb" (nothing happened)
-     * new BlockFlow("lr").flip(); // => "rl"
-     * new BlockFlow("rl").flip(); // => "lr"
+     * new BlockFlow("tb").flip(); // => "lr" or "rl"(nothing happened)
+     * new BlockFlow("lr").flip(); // => "tb"
+     * new BlockFlow("rl").flip(); // => "tb"
   */
   BlockFlow.prototype.flip = function(){
     switch(this.dir){

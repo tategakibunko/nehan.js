@@ -231,6 +231,13 @@ var Display = {
   },
   /**
      @memberof Nehan.Display
+     @return {string}
+  */
+  getVertBlockDir: function(){
+    return this.boxFlow.vert.splice("-")[1];
+  },
+  /**
+     @memberof Nehan.Display
      @return {Nehan.BoxFlow}
   */
   getStdFont : function(){

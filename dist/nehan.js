@@ -5673,6 +5673,13 @@ var Display = {
   },
   /**
      @memberof Nehan.Display
+     @return {string}
+  */
+  getVertBlockDir: function(){
+    return this.boxFlow.vert.splice("-")[1];
+  },
+  /**
+     @memberof Nehan.Display
      @return {Nehan.BoxFlow}
   */
   getStdFont : function(){
@@ -8580,9 +8587,9 @@ var BlockFlow = (function(){
      @method flip
      @return {string} fliped block direction
      @example
-     * new BlockFlow("tb").flip(); // => "tb" (nothing happened)
-     * new BlockFlow("lr").flip(); // => "rl"
-     * new BlockFlow("rl").flip(); // => "lr"
+     * new BlockFlow("tb").flip(); // => "lr" or "rl"(nothing happened)
+     * new BlockFlow("lr").flip(); // => "tb"
+     * new BlockFlow("rl").flip(); // => "tb"
   */
   BlockFlow.prototype.flip = function(){
     switch(this.dir){
