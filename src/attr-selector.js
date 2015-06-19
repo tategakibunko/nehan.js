@@ -36,12 +36,12 @@ var AttrSelector = (function(){
     _parseExpr : function(expr){
       this.left = this._parseSymbol(expr);
       if(this.left){
-	expr = Utils.trim(expr.slice(this.left.length));
+	expr = Nehan.Utils.trim(expr.slice(this.left.length));
       }
       this.op = this._parseOp(expr);
       if(this.op){
-	expr = Utils.trim(expr.slice(this.op.length));
-	this.right = Utils.cutQuote(Utils.trim(expr));
+	expr = Nehan.Utils.trim(expr.slice(this.op.length));
+	this.right = Nehan.Utils.cutQuote(Nehan.Utils.trim(expr));
       }
     },
     _testHasAttr : function(style){

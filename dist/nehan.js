@@ -650,6 +650,86 @@ Nehan.Obj = (function(){
   };
 })();
 
+/**
+   misc utility module.
+
+   @namespace Nehan.Utils
+*/
+Nehan.Utils = {
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
+  trimHeadCRLF : function(str){
+    return str.replace(/^\n+/, "");
+  },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
+  trimFootCRLF : function(str){
+    return str.replace(/\n+$/, "");
+  },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
+  trimCRLF : function(str){
+    return this.trimFootCRLF(this.trimHeadCRLF(str));
+  },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
+  trim : function(str){
+    return str.replace(/^\s+/, "").replace(/\s+$/, "");
+  },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
+  cutQuote : function(str){
+    return str.replace(/['\"]/g, "");
+  },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+     @example
+     * Nehan.Utils.capitalize("japan"); // "Japan"
+  */
+  capitalize : function(str){
+    if(str === ""){
+      return "";
+    }
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  },
+  /**
+     @memberof Nehan.Utils
+     @param p1 {String}
+     @param p2 {String}
+     @example
+     * Nehan.Utils.filenameConcat("/path/to", "foo"); // "/path/to/foo"
+     * Nehan.Utils.filenameConcat("/path/to/", "foo"); // "/path/to/foo"
+  */
+  filenameConcat : function(p1, p2){
+    p1 = (p1==="")? "" : (p1.slice(-1) === "/")? p1 : p1 + "/";
+    p2 = (p2==="")? "" : (p2[0] === "/")? p2.substring(1, p2.length) : p2;
+    return p1 + p2;
+  },
+  /**
+     @memberof Nehan.Utils
+     @param name {String}
+     @example
+     * Nehan.Utils.camelize("font-size"); // "fontSize"
+  */
+  camelize : function(name){
+    var self = this;
+    return (name.indexOf("-") < 0)? name : Nehan.List.mapi(name.split("-"), function(i, part){
+      return (i === 0)? part : self.capitalize(part);
+    }).join("");
+  }
+};
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -2140,86 +2220,6 @@ Class.extend = function(childCtor, parentCtor) {
 
 
 /**
-   misc utility module.
-
-   @namespace Nehan.Utils
-*/
-var Utils = {
-  /**
-     @memberof Nehan.Utils
-     @param str {String}
-  */
-  trimHeadCRLF : function(str){
-    return str.replace(/^\n+/, "");
-  },
-  /**
-     @memberof Nehan.Utils
-     @param str {String}
-  */
-  trimFootCRLF : function(str){
-    return str.replace(/\n+$/, "");
-  },
-  /**
-     @memberof Nehan.Utils
-     @param str {String}
-  */
-  trimCRLF : function(str){
-    return this.trimFootCRLF(this.trimHeadCRLF(str));
-  },
-  /**
-     @memberof Nehan.Utils
-     @param str {String}
-  */
-  trim : function(str){
-    return str.replace(/^\s+/, "").replace(/\s+$/, "");
-  },
-  /**
-     @memberof Nehan.Utils
-     @param str {String}
-  */
-  cutQuote : function(str){
-    return str.replace(/['\"]/g, "");
-  },
-  /**
-     @memberof Nehan.Utils
-     @param str {String}
-     @example
-     * Nehan.Utils.capitalize("japan"); // "Japan"
-  */
-  capitalize : function(str){
-    if(str === ""){
-      return "";
-    }
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  },
-  /**
-     @memberof Nehan.Utils
-     @param p1 {String}
-     @param p2 {String}
-     @example
-     * Nehan.Utils.filenameConcat("/path/to", "foo"); // "/path/to/foo"
-     * Nehan.Utils.filenameConcat("/path/to/", "foo"); // "/path/to/foo"
-  */
-  filenameConcat : function(p1, p2){
-    p1 = (p1==="")? "" : (p1.slice(-1) === "/")? p1 : p1 + "/";
-    p2 = (p2==="")? "" : (p2[0] === "/")? p2.substring(1, p2.length) : p2;
-    return p1 + p2;
-  },
-  /**
-     @memberof Nehan.Utils
-     @param name {String}
-     @example
-     * Nehan.Utils.camelize("font-size"); // "fontSize"
-  */
-  camelize : function(name){
-    var self = this;
-    return (name.indexOf("-") < 0)? name : Nehan.List.mapi(name.split("-"), function(i, part){
-      return (i === 0)? part : self.capitalize(part);
-    }).join("");
-  }
-};
-
-/**
    @namespace Nehan.MathUtils
 */
 var MathUtils = {
@@ -2838,7 +2838,7 @@ var CssHashSet = (function(){
 */
 var CssParser = (function(){
   var __normalize = function(value){
-    return Utils.trim(String(value))
+    return Nehan.Utils.trim(String(value))
       .replace(/;/g, "")
       .replace(/\n/g, "");
   };
@@ -3078,12 +3078,12 @@ var AttrSelector = (function(){
     _parseExpr : function(expr){
       this.left = this._parseSymbol(expr);
       if(this.left){
-	expr = Utils.trim(expr.slice(this.left.length));
+	expr = Nehan.Utils.trim(expr.slice(this.left.length));
       }
       this.op = this._parseOp(expr);
       if(this.op){
-	expr = Utils.trim(expr.slice(this.op.length));
-	this.right = Utils.cutQuote(Utils.trim(expr));
+	expr = Nehan.Utils.trim(expr.slice(this.op.length));
+	this.right = Nehan.Utils.cutQuote(Nehan.Utils.trim(expr));
       }
     },
     _testHasAttr : function(style){
@@ -3401,7 +3401,7 @@ var SelectorLexer = (function(){
       return tokens;
     },
     _getNextToken : function(){
-      this.buff = Utils.trim(this.buff);
+      this.buff = Nehan.Utils.trim(this.buff);
       if(this.buff === ""){
 	return null;
       }
@@ -3416,10 +3416,10 @@ var SelectorLexer = (function(){
       throw "invalid selector:[" + this.buff + "]";
     },
     _normalize : function(src){
-      return Utils.trim(src).replace(/\s+/g, " ");
+      return Nehan.Utils.trim(src).replace(/\s+/g, " ");
     },
     _stepBuff : function(count){
-      this.buff = Utils.trim(this.buff.slice(count));
+      this.buff = Nehan.Utils.trim(this.buff.slice(count));
     },
     _getByRex : function(rex){
       var ret = null;
@@ -3721,7 +3721,7 @@ var Selector = (function(){
     },
     _normalizeKey : function(key){
       key = (key instanceof RegExp)? "/" + key.source + "/" : key;
-      return Utils.trim(key).toLowerCase().replace(/\s+/g, " ");
+      return Nehan.Utils.trim(key).toLowerCase().replace(/\s+/g, " ");
     },
     _formatValue : function(value){
       var ret = {};
@@ -4021,7 +4021,7 @@ var TagAttrs = (function(){
   }
 
   var __data_name_of = function(name){
-    return Utils.camelize(name.slice(5));
+    return Nehan.Utils.camelize(name.slice(5));
   };
 
   TagAttrs.prototype = {
@@ -4112,7 +4112,7 @@ var TagAttrs = (function(){
     // => ["nehan-hi", "nehan-hey"]
     _parseClasses : function(attrs_raw){
       var class_name = attrs_raw["class"] || "";
-      class_name = Utils.trim(class_name.replace(/\s+/g, " "));
+      class_name = Nehan.Utils.trim(class_name.replace(/\s+/g, " "));
       var classes = (class_name === "")? [] : class_name.split(/\s+/);
 
       // replace 'nehan-' prefix for backword compatibility(version <= 5.1.0).
@@ -7077,7 +7077,7 @@ var BoxCorner = (function(){
     */
     getCornerName : function(dir1, dir2){
       var dirs = __sort(dir1, dir2);
-      return [dirs[0], Utils.capitalize(dirs[1])].join("");
+      return [dirs[0], Nehan.Utils.capitalize(dirs[1])].join("");
     }
   };
 })();
@@ -12836,8 +12836,8 @@ var StyleContext = (function(){
       var values = Nehan.List.fold(stmts, {}, function(ret, stmt){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
-	  var prop = Utils.trim(nv[0]).toLowerCase();
-	  var value = Utils.trim(nv[1]);
+	  var prop = Nehan.Utils.trim(nv[0]).toLowerCase();
+	  var value = Nehan.Utils.trim(nv[1]);
 	  var fmt_prop = CssParser.formatProp(prop);
 	  var fmt_value = CssParser.formatValue(prop, value);
 	  if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Closure.eq(fmt_prop))){
@@ -16480,7 +16480,7 @@ var LayoutEvaluator = (function(){
       // store css value to dom.style[<camelized-css-property>]
       Nehan.Obj.iter(css, function(style_name, value){
 	try {
-	  dom.style[Utils.camelize(style_name)] = value;
+	  dom.style[Nehan.Utils.camelize(style_name)] = value;
 	} catch(error){
 	  //console.warn(error);
 	}

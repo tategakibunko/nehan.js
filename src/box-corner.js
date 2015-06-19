@@ -20,7 +20,7 @@ var BoxCorner = (function(){
     */
     getCornerName : function(dir1, dir2){
       var dirs = __sort(dir1, dir2);
-      return [dirs[0], Utils.capitalize(dirs[1])].join("");
+      return [dirs[0], Nehan.Utils.capitalize(dirs[1])].join("");
     }
   };
 })();

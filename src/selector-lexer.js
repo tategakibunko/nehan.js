@@ -33,7 +33,7 @@ var SelectorLexer = (function(){
       return tokens;
     },
     _getNextToken : function(){
-      this.buff = Utils.trim(this.buff);
+      this.buff = Nehan.Utils.trim(this.buff);
       if(this.buff === ""){
 	return null;
       }
@@ -48,10 +48,10 @@ var SelectorLexer = (function(){
       throw "invalid selector:[" + this.buff + "]";
     },
     _normalize : function(src){
-      return Utils.trim(src).replace(/\s+/g, " ");
+      return Nehan.Utils.trim(src).replace(/\s+/g, " ");
     },
     _stepBuff : function(count){
-      this.buff = Utils.trim(this.buff.slice(count));
+      this.buff = Nehan.Utils.trim(this.buff.slice(count));
     },
     _getByRex : function(rex){
       var ret = null;

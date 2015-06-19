@@ -1645,8 +1645,8 @@ var StyleContext = (function(){
       var values = Nehan.List.fold(stmts, {}, function(ret, stmt){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
-	  var prop = Utils.trim(nv[0]).toLowerCase();
-	  var value = Utils.trim(nv[1]);
+	  var prop = Nehan.Utils.trim(nv[0]).toLowerCase();
+	  var value = Nehan.Utils.trim(nv[1]);
 	  var fmt_prop = CssParser.formatProp(prop);
 	  var fmt_value = CssParser.formatValue(prop, value);
 	  if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Closure.eq(fmt_prop))){

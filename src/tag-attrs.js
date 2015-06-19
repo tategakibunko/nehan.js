@@ -14,7 +14,7 @@ var TagAttrs = (function(){
   }
 
   var __data_name_of = function(name){
-    return Utils.camelize(name.slice(5));
+    return Nehan.Utils.camelize(name.slice(5));
   };
 
   TagAttrs.prototype = {
@@ -105,7 +105,7 @@ var TagAttrs = (function(){
     // => ["nehan-hi", "nehan-hey"]
     _parseClasses : function(attrs_raw){
       var class_name = attrs_raw["class"] || "";
-      class_name = Utils.trim(class_name.replace(/\s+/g, " "));
+      class_name = Nehan.Utils.trim(class_name.replace(/\s+/g, " "));
       var classes = (class_name === "")? [] : class_name.split(/\s+/);
 
       // replace 'nehan-' prefix for backword compatibility(version <= 5.1.0).

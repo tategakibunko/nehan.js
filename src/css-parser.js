@@ -44,7 +44,7 @@
 */
 var CssParser = (function(){
   var __normalize = function(value){
-    return Utils.trim(String(value))
+    return Nehan.Utils.trim(String(value))
       .replace(/;/g, "")
       .replace(/\n/g, "");
   };

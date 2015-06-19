@@ -104,7 +104,7 @@ var Selector = (function(){
     },
     _normalizeKey : function(key){
       key = (key instanceof RegExp)? "/" + key.source + "/" : key;
-      return Utils.trim(key).toLowerCase().replace(/\s+/g, " ");
+      return Nehan.Utils.trim(key).toLowerCase().replace(/\s+/g, " ");
     },
     _formatValue : function(value){
       var ret = {};

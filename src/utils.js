@@ -3,7 +3,7 @@
 
    @namespace Nehan.Utils
 */
-var Utils = {
+Nehan.Utils = {
   /**
      @memberof Nehan.Utils
      @param str {String}
