@@ -65,7 +65,7 @@ var CssParser = (function(){
     if(props.length !== values.length){
       throw "invalid args:__zip_obj";
     }
-    List.iteri(props, function(i, prop){ ret[prop] = values[i]; });
+    Nehan.List.iteri(props, function(i, prop){ ret[prop] = values[i]; });
     return ret;
   };
 
@@ -82,7 +82,7 @@ var CssParser = (function(){
   // => [values[0], values[1], values[0], values[1]]
   // => [a, b, a, b]
   var __make_values_by_map = function(values, map){
-    return List.map(map, function(index){ return values[index]; });
+    return Nehan.List.map(map, function(index){ return values[index]; });
   };
 
   // values:[0] => [0,0]
@@ -104,7 +104,7 @@ var CssParser = (function(){
   var __make_edge_4d = function(values){
     var props = Const.cssBoxDirsLogical; // len = 4
     var values_4d = __make_values_4d(values); // len = 4
-    return List.zipObj(props, values_4d);
+    return Nehan.List.zipObj(props, values_4d);
   };
 
   var __make_corner_4d = function(values){
@@ -119,10 +119,10 @@ var CssParser = (function(){
 
   var __parse_corner_4d = function(value){
     var values_2d = __make_values_2d(__split_slash(value));
-    var values_4d_2d = List.map(values_2d, function(val){
+    var values_4d_2d = Nehan.List.map(values_2d, function(val){
       return __make_values_4d(__split_space(val));
     });
-    var values = List.zip(values_4d_2d[0], values_4d_2d[1]);
+    var values = Nehan.List.zip(values_4d_2d[0], values_4d_2d[1]);
     return __make_corner_4d(values);
   };
 

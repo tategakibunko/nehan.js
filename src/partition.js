@@ -12,7 +12,7 @@ var Partition = (function(){
 
   var __levelize = function(sizes, min_size){
     // filter parts that is smaller than min_size.
-    var smaller_parts = List.filter(sizes, function(size){ return size < min_size; });
+    var smaller_parts = Nehan.List.filter(sizes, function(size){ return size < min_size; });
 
     // if all elements has enough space for min_size, nothing to do.
     if(smaller_parts.length === 0){
@@ -20,10 +20,10 @@ var Partition = (function(){
     }
 
     // total size that must be added to small parts.
-    var delta_plus_total = List.fold(smaller_parts, 0, function(ret, size){ return ret + (min_size - size); });
+    var delta_plus_total = Nehan.List.fold(smaller_parts, 0, function(ret, size){ return ret + (min_size - size); });
 
     // filter parts that has enough space.
-    var larger_parts = List.filter(sizes, function(size){
+    var larger_parts = Nehan.List.filter(sizes, function(size){
       return size - min_size >= min_size; // check if size is more than min_size and over even if min_size is subtracted.
     });
 
@@ -33,7 +33,7 @@ var Partition = (function(){
     }
 
     var delta_minus_avg = Math.floor(delta_plus_total / larger_parts.length);
-    return List.map(sizes, function(size){
+    return Nehan.List.map(sizes, function(size){
       return (size < min_size)? min_size : ((size - min_size >= min_size)? size - delta_minus_avg : size);
     });
   };
@@ -59,7 +59,7 @@ var Partition = (function(){
        @return {int}
     */
     getTotalWeight : function(){
-      return List.fold(this._punits, 0, function(ret, punit){
+      return Nehan.List.fold(this._punits, 0, function(ret, punit){
 	return ret + punit.weight;
       });
     },
@@ -76,7 +76,7 @@ var Partition = (function(){
       // merge(this._punits[1], partition._punits[1]),
       // ...
       // merge(this._punits[n-1], partition._punits[n-1])
-      var merged_punits =  List.mapi(this._punits, function(i, punit){
+      var merged_punits =  Nehan.List.mapi(this._punits, function(i, punit){
 	return punit.mergeTo(partition.get(i));
       });
       return new Partition(merged_punits);
@@ -88,7 +88,7 @@ var Partition = (function(){
     */
     mapMeasure : function(measure){
       var total_weight = this.getTotalWeight();
-      var sizes =  List.map(this._punits, function(punit){
+      var sizes =  Nehan.List.map(this._punits, function(punit){
 	return punit.getSize(measure, total_weight);
       });
       return __levelize(sizes, Display.minTableCellSize);

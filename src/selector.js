@@ -89,7 +89,7 @@ var Selector = (function(){
     // see http://www.w3.org/TR/css3-selectors/#specificity
     _countSpec : function(elements){
       var a = 0, b = 0, c = 0;
-      List.iter(elements, function(token){
+      Nehan.List.iter(elements, function(token){
 	if(token instanceof TypeSelector){
 	  a += token.getIdSpec();
 	  b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();

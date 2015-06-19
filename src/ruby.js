@@ -47,7 +47,7 @@ var Ruby = (function(){
        @return {String}
     */
     getRbString : function(){
-      return List.map(this.rbs, function(rb){
+      return Nehan.List.map(this.rbs, function(rb){
 	return rb.data || "";
       }).join("");
     },
@@ -122,7 +122,7 @@ var Ruby = (function(){
     */
     setMetrics : function(flow, font, letter_spacing){
       this.rtFontSize = Display.getRtFontSize(font.size);
-      var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
+      var advance_rbs = Nehan.List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font);
 	return ret + rb.getAdvance(flow, letter_spacing);
       });

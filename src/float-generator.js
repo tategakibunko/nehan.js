@@ -37,7 +37,7 @@ var FloatGenerator = (function(){
   };
 
   FloatGenerator.prototype._hasNextFloat = function(){
-    return List.exists(this.generators, function(gen){
+    return Nehan.List.exists(this.generators, function(gen){
       return gen.hasNext();
     });
   };
@@ -129,15 +129,15 @@ var FloatGenerator = (function(){
   FloatGenerator.prototype._sortFloatRest = function(floated, rest){
     var floated_elements = floated.getElements();
     var elements = floated.isFloatStart()? floated_elements.concat(rest) : [rest].concat(floated_elements);
-    return List.filter(elements, function(element){ return element !== null; });
+    return Nehan.List.filter(elements, function(element){ return element !== null; });
   };
 
   FloatGenerator.prototype._wrapBlocks = function(blocks){
     var flow = this.style.flow;
-    var elements = List.filter(blocks, function(block){ return block !== null; });
+    var elements = Nehan.List.filter(blocks, function(block){ return block !== null; });
     var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
-    var extent = List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
-    var break_after = List.exists(elements, function(element){ return element.breakAfter; });
+    var extent = Nehan.List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
+    var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
 
     // wrapping block always float to start direction
     return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
@@ -151,7 +151,7 @@ var FloatGenerator = (function(){
     var flow = this.style.flow;
     var extent = floated.getExtent(flow);
     var elements = this._sortFloatRest(floated, rest || null);
-    var break_after = List.exists(elements, function(element){ return element.breakAfter; });
+    var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
     return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
       elements:elements,
       breakAfter:break_after,
@@ -167,7 +167,7 @@ var FloatGenerator = (function(){
   
   FloatGenerator.prototype._yieldFloatStack = function(context){
     var start_blocks = [], end_blocks = [];
-    List.iter(this.generators, function(gen){
+    Nehan.List.iter(this.generators, function(gen){
       var block = gen.yield(context);
       if(block){
 	if(gen.style.isFloatStart()){

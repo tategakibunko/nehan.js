@@ -49,7 +49,7 @@ var FloatGroupStack = (function(){
     this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
       return g1.getExtent(flow) - g2.getExtent(flow);
     });
-    var max_group = List.maxobj(this.stack, function(group){
+    var max_group = Nehan.List.maxobj(this.stack, function(group){
       return group.getExtent(flow);
     });
     //console.log("max group from %o is %o", this.stack, max_group);

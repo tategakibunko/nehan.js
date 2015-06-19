@@ -3,7 +3,7 @@
 
    @namespace Nehan.List
 */
-var List = {
+Nehan.List = {
   /**
      @memberof Nehan.List
      @param lst {Array}
@@ -311,7 +311,7 @@ var List = {
      @param values {Array}
      @return {Object}
      @example
-     * List.zipObj(["a", "b", "c"], [1, 2, 3]); // {a:1, b:2, c:3}
+     * Nehan.List.zipObj(["a", "b", "c"], [1, 2, 3]); // {a:1, b:2, c:3}
   */
   zipObj : function(props, values){
     var ret = {};

@@ -220,6 +220,348 @@ Nehan.Env = (function(){
   };
 })();
 
+/**
+   list utility module
+
+   @namespace Nehan.List
+*/
+Nehan.List = {
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> ()
+  */
+  iter : function(lst, fn){
+    for(var i = 0, len = lst.length; i < len; i++){
+      fn(lst[i]);
+    }
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun index -> obj -> ()
+  */
+  iteri : function(lst, fn){
+    for(var i = 0, len = lst.length; i < len; i++){
+      fn(i, lst[i]);
+    }
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> ()
+  */
+  reviter : function(lst, fn){
+    for(var i = lst.length - 1; i >= 0; i--){
+      fn(lst[i]);
+    }
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun index -> obj -> ()
+  */
+  reviteri : function(lst, fn){
+    for(var i = lst.length - 1; i >= 0; i--){
+      fn(i, lst[i]);
+    }
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {boolean}
+  */
+  forall : function(lst, fn){
+    for(var i = 0, len = lst.length; i < len; i++){
+      if(!fn(lst[i])){
+	return false;
+      }
+    }
+    return true;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> obj
+     @return {Array}
+  */
+  map : function(lst, fn){
+    var ret = [];
+    for(var i = 0, len = lst.length; i < len; i++){
+      ret.push(fn(lst[i]));
+    }
+    return ret;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun index -> obj -> obj
+     @return {Array}
+  */
+  mapi : function(lst, fn){
+    var ret = [];
+    for(var i = 0, len = lst.length; i < len; i++){
+      ret.push(fn(i, lst[i]));
+    }
+    return ret;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param acm {foldable_value} - accumulator
+     @param fn {Function} - fun acm -> obj -> acm
+     @return {folded_value}
+  */
+  fold : function(lst, acm, fn){
+    var ret = acm;
+    for(var i = 0, len = lst.length; i < len; i++){
+      ret = fn(ret, lst[i]);
+    }
+    return ret;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {Array}
+  */
+  filter : function(lst, fn){
+    var ret = [];
+    for(var i = 0, len = lst.length; i < len; i++){
+      if(fn(lst[i])){
+	ret.push(lst[i]);
+      }
+    }
+    return ret;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {first_founded_object}
+  */
+  find : function(lst, fn){
+    for(var i = 0, len = lst.length; i < len; i++){
+      var obj = lst[i];
+      if(fn(obj)){
+	return obj;
+      }
+    }
+    return null;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {first_founded_object}
+  */
+  revfind : function(lst, fn){
+    for(var i = lst.length - 1; i >= 0; i--){
+      var obj = lst[i];
+      if(fn(obj)){
+	return obj;
+      }
+    }
+    return null;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {int}
+  */
+  indexOf : function(lst, fn){
+    for(var i = 0, len = lst.length; i < len; i++){
+      var obj = lst[i];
+      if(fn(obj)){
+	return i;
+      }
+    }
+    return -1;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {boolean}
+  */
+  exists : function(lst, fn){
+    for(var i = 0, len = lst.length; i < len; i++){
+      if(fn(lst[i])){
+	return true;
+      }
+    }
+    return false;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {boolean}
+  */
+  mem : function(lst, val){
+    for(var i = 0, len = lst.length; i < len; i++){
+      if(lst[i] == val){
+	return true;
+      }
+    }
+    return false;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param start {Number}
+     @param fn {Function}
+     @return {Number}
+  */
+  sum : function(lst, start, fn){
+    return this.fold(lst, start, function(ret, obj){
+      return ret + fn(obj);
+    });
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {Number}
+     @return {min_obj}
+  */
+  minobj : function(lst, fn){
+    var min_obj = null, min_val = null;
+    this.iter(lst, function(obj){
+      var val = fn(obj);
+      if(min_val === null || val < min_val){
+	min_obj = obj;
+	min_val = val;
+      }
+    });
+    return min_obj;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {Number}
+     @return {max_obj}
+  */
+  maxobj : function(lst, fn){
+    var max_obj = null, max_val = null;
+    this.iter(lst, function(obj){
+      var val = fn(obj);
+      if(max_val === null || val > max_val){
+	max_obj = obj;
+	max_val = val;
+      }
+    });
+    return max_obj;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {Array}
+  */
+  refcopy : function(lst){
+    var ret = [];
+    for(var i = 0, len = lst.length; i < len; i++){
+      ret[i] = lst[i];
+    }
+    return ret;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @param fn {Function} - fun obj -> {boolean}
+     @return {int}
+  */
+  count : function(lst, fn){
+    var ret = 0;
+    for(var i = 0, len = lst.length; i < len; i++){
+      if(fn(lst[i])){
+	ret++;
+      }
+    }
+    return ret;
+  },
+  /**
+     @memberof Nehan.List
+     @param count {int} - array length
+     @param init_val - initialized value filled in new array
+     @return {Array}
+  */
+  create : function(count, init_val){
+    var ret = [];
+    for(var i = 0; i < count; i++){
+      ret.push((typeof init_val !== "undefined")? init_val : i);
+    }
+    return ret;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {first_object | null}
+  */
+  first : function(lst){
+    return lst[0] || null;
+  },
+  /**
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {last_object | null}
+  */
+  last : function(lst){
+    var len = lst.length;
+    if(len === 0){
+      return null;
+    }
+    return lst[len - 1];
+  },
+  /**
+     @memberof Nehan.List
+     @param lst1 {Array}
+     @param lst2 {Array}
+     @return {Array.<Array>}
+  */
+  zip : function(lst1, lst2){
+    var ret = [];
+    for(var i = 0, len = Math.min(lst1.length, lst2.length); i < len; i++){
+      ret[i] = [lst1[i], lst2[i]];
+    }
+    return ret;
+  },
+  /**
+     @memberof Nehan.List
+     @param props {Array}
+     @param values {Array}
+     @return {Object}
+     @example
+     * Nehan.List.zipObj(["a", "b", "c"], [1, 2, 3]); // {a:1, b:2, c:3}
+  */
+  zipObj : function(props, values){
+    var ret = {};
+    if(props.length !== values.length){
+      throw "invalid args:List.zipObj";
+    }
+    for(var i = 0, len = props.length; i < len; i++){
+      ret[props[i]] = values[i];
+    }
+    return ret;
+  },
+  /**
+     non destructive reverse
+
+     @memberof Nehan.List
+     @param lst {Array}
+     @return {Array}
+  */
+  reverse : function(lst){
+    var ret = [];
+    this.reviter(lst, function(obj){
+      ret.push(obj);
+    });
+    return ret;
+  }
+};
+
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -708,7 +1050,7 @@ var LexingRule = (function(){
   ];
 
   var __is_single_tag = function(tag_name){
-    return List.exists(__single_tag_names__, Closure.eq(tag_name));
+    return Nehan.List.exists(__single_tag_names__, Closure.eq(tag_name));
   };
 
   return {
@@ -1710,348 +2052,6 @@ Class.extend = function(childCtor, parentCtor) {
 
 
 /**
-   list utility module
-
-   @namespace Nehan.List
-*/
-var List = {
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> ()
-  */
-  iter : function(lst, fn){
-    for(var i = 0, len = lst.length; i < len; i++){
-      fn(lst[i]);
-    }
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun index -> obj -> ()
-  */
-  iteri : function(lst, fn){
-    for(var i = 0, len = lst.length; i < len; i++){
-      fn(i, lst[i]);
-    }
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> ()
-  */
-  reviter : function(lst, fn){
-    for(var i = lst.length - 1; i >= 0; i--){
-      fn(lst[i]);
-    }
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun index -> obj -> ()
-  */
-  reviteri : function(lst, fn){
-    for(var i = lst.length - 1; i >= 0; i--){
-      fn(i, lst[i]);
-    }
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {boolean}
-  */
-  forall : function(lst, fn){
-    for(var i = 0, len = lst.length; i < len; i++){
-      if(!fn(lst[i])){
-	return false;
-      }
-    }
-    return true;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> obj
-     @return {Array}
-  */
-  map : function(lst, fn){
-    var ret = [];
-    for(var i = 0, len = lst.length; i < len; i++){
-      ret.push(fn(lst[i]));
-    }
-    return ret;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun index -> obj -> obj
-     @return {Array}
-  */
-  mapi : function(lst, fn){
-    var ret = [];
-    for(var i = 0, len = lst.length; i < len; i++){
-      ret.push(fn(i, lst[i]));
-    }
-    return ret;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param acm {foldable_value} - accumulator
-     @param fn {Function} - fun acm -> obj -> acm
-     @return {folded_value}
-  */
-  fold : function(lst, acm, fn){
-    var ret = acm;
-    for(var i = 0, len = lst.length; i < len; i++){
-      ret = fn(ret, lst[i]);
-    }
-    return ret;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {Array}
-  */
-  filter : function(lst, fn){
-    var ret = [];
-    for(var i = 0, len = lst.length; i < len; i++){
-      if(fn(lst[i])){
-	ret.push(lst[i]);
-      }
-    }
-    return ret;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {first_founded_object}
-  */
-  find : function(lst, fn){
-    for(var i = 0, len = lst.length; i < len; i++){
-      var obj = lst[i];
-      if(fn(obj)){
-	return obj;
-      }
-    }
-    return null;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {first_founded_object}
-  */
-  revfind : function(lst, fn){
-    for(var i = lst.length - 1; i >= 0; i--){
-      var obj = lst[i];
-      if(fn(obj)){
-	return obj;
-      }
-    }
-    return null;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {int}
-  */
-  indexOf : function(lst, fn){
-    for(var i = 0, len = lst.length; i < len; i++){
-      var obj = lst[i];
-      if(fn(obj)){
-	return i;
-      }
-    }
-    return -1;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {boolean}
-  */
-  exists : function(lst, fn){
-    for(var i = 0, len = lst.length; i < len; i++){
-      if(fn(lst[i])){
-	return true;
-      }
-    }
-    return false;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {boolean}
-  */
-  mem : function(lst, val){
-    for(var i = 0, len = lst.length; i < len; i++){
-      if(lst[i] == val){
-	return true;
-      }
-    }
-    return false;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param start {Number}
-     @param fn {Function}
-     @return {Number}
-  */
-  sum : function(lst, start, fn){
-    return this.fold(lst, start, function(ret, obj){
-      return ret + fn(obj);
-    });
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {Number}
-     @return {min_obj}
-  */
-  minobj : function(lst, fn){
-    var min_obj = null, min_val = null;
-    this.iter(lst, function(obj){
-      var val = fn(obj);
-      if(min_val === null || val < min_val){
-	min_obj = obj;
-	min_val = val;
-      }
-    });
-    return min_obj;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {Number}
-     @return {max_obj}
-  */
-  maxobj : function(lst, fn){
-    var max_obj = null, max_val = null;
-    this.iter(lst, function(obj){
-      var val = fn(obj);
-      if(max_val === null || val > max_val){
-	max_obj = obj;
-	max_val = val;
-      }
-    });
-    return max_obj;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @return {Array}
-  */
-  refcopy : function(lst){
-    var ret = [];
-    for(var i = 0, len = lst.length; i < len; i++){
-      ret[i] = lst[i];
-    }
-    return ret;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {int}
-  */
-  count : function(lst, fn){
-    var ret = 0;
-    for(var i = 0, len = lst.length; i < len; i++){
-      if(fn(lst[i])){
-	ret++;
-      }
-    }
-    return ret;
-  },
-  /**
-     @memberof Nehan.List
-     @param count {int} - array length
-     @param init_val - initialized value filled in new array
-     @return {Array}
-  */
-  create : function(count, init_val){
-    var ret = [];
-    for(var i = 0; i < count; i++){
-      ret.push((typeof init_val !== "undefined")? init_val : i);
-    }
-    return ret;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @return {first_object | null}
-  */
-  first : function(lst){
-    return lst[0] || null;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @return {last_object | null}
-  */
-  last : function(lst){
-    var len = lst.length;
-    if(len === 0){
-      return null;
-    }
-    return lst[len - 1];
-  },
-  /**
-     @memberof Nehan.List
-     @param lst1 {Array}
-     @param lst2 {Array}
-     @return {Array.<Array>}
-  */
-  zip : function(lst1, lst2){
-    var ret = [];
-    for(var i = 0, len = Math.min(lst1.length, lst2.length); i < len; i++){
-      ret[i] = [lst1[i], lst2[i]];
-    }
-    return ret;
-  },
-  /**
-     @memberof Nehan.List
-     @param props {Array}
-     @param values {Array}
-     @return {Object}
-     @example
-     * List.zipObj(["a", "b", "c"], [1, 2, 3]); // {a:1, b:2, c:3}
-  */
-  zipObj : function(props, values){
-    var ret = {};
-    if(props.length !== values.length){
-      throw "invalid args:List.zipObj";
-    }
-    for(var i = 0, len = props.length; i < len; i++){
-      ret[props[i]] = values[i];
-    }
-    return ret;
-  },
-  /**
-     non destructive reverse
-
-     @memberof Nehan.List
-     @param lst {Array}
-     @return {Array}
-  */
-  reverse : function(lst){
-    var ret = [];
-    this.reviter(lst, function(obj){
-      ret.push(obj);
-    });
-    return ret;
-  }
-};
-
-
-/**
    object utility module
 
    @namespace Nehan.Obj
@@ -2213,7 +2213,7 @@ var Utils = {
   */
   camelize : function(name){
     var self = this;
-    return (name.indexOf("-") < 0)? name : List.mapi(name.split("-"), function(i, part){
+    return (name.indexOf("-") < 0)? name : Nehan.List.mapi(name.split("-"), function(i, part){
       return (i === 0)? part : self.capitalize(part);
     }).join("");
   }
@@ -2422,7 +2422,7 @@ var Css = {
   */
   setCssValueWithVender: function(dst, name, value){
     dst[name] = value; // no prefixed version
-    List.iter(Const.cssVenderPrefixes, function(prefix){
+    Nehan.List.iter(Const.cssVenderPrefixes, function(prefix){
       dst[prefix + "-" + name] = value;
     });
     return dst;
@@ -2595,7 +2595,7 @@ var Closure = {
 	return false;
       }
       var tag_name = token.getName();
-      return List.exists(names, function(name){
+      return Nehan.List.exists(names, function(name){
 	return name === tag_name;
       });
     };
@@ -2859,7 +2859,7 @@ var CssParser = (function(){
     if(props.length !== values.length){
       throw "invalid args:__zip_obj";
     }
-    List.iteri(props, function(i, prop){ ret[prop] = values[i]; });
+    Nehan.List.iteri(props, function(i, prop){ ret[prop] = values[i]; });
     return ret;
   };
 
@@ -2876,7 +2876,7 @@ var CssParser = (function(){
   // => [values[0], values[1], values[0], values[1]]
   // => [a, b, a, b]
   var __make_values_by_map = function(values, map){
-    return List.map(map, function(index){ return values[index]; });
+    return Nehan.List.map(map, function(index){ return values[index]; });
   };
 
   // values:[0] => [0,0]
@@ -2898,7 +2898,7 @@ var CssParser = (function(){
   var __make_edge_4d = function(values){
     var props = Const.cssBoxDirsLogical; // len = 4
     var values_4d = __make_values_4d(values); // len = 4
-    return List.zipObj(props, values_4d);
+    return Nehan.List.zipObj(props, values_4d);
   };
 
   var __make_corner_4d = function(values){
@@ -2913,10 +2913,10 @@ var CssParser = (function(){
 
   var __parse_corner_4d = function(value){
     var values_2d = __make_values_2d(__split_slash(value));
-    var values_4d_2d = List.map(values_2d, function(val){
+    var values_4d_2d = Nehan.List.map(values_2d, function(val){
       return __make_values_4d(__split_space(val));
     });
-    var values = List.zip(values_4d_2d[0], values_4d_2d[1]);
+    var values = Nehan.List.zip(values_4d_2d[0], values_4d_2d[1]);
     return __make_corner_4d(values);
   };
 
@@ -3071,7 +3071,7 @@ var AttrSelector = (function(){
       return "";
     },
     _parseOp : function(expr){
-      return List.find(__op_symbols, function(symbol){
+      return Nehan.List.find(__op_symbols, function(symbol){
 	return expr.indexOf(symbol) >= 0;
       });
     },
@@ -3106,7 +3106,7 @@ var AttrSelector = (function(){
     _testTildeEqual : function(style){
       var value = style.getMarkupAttr(this.left);
       var values = value? value.split(/\s+/) : [];
-      return List.exists(values, Closure.eq(this.right));
+      return Nehan.List.exists(values, Closure.eq(this.right));
     },
     _testPipeEqual : function(style){
       var value = style.getMarkupAttr(this.left);
@@ -3327,8 +3327,8 @@ var TypeSelector = (function(){
       return this.nameRex.test(markup_name);
     },
     testClassNames : function(markup_classes){
-      return List.forall(this.classes, function(klass){
-	return List.exists(markup_classes, Closure.eq(klass));
+      return Nehan.List.forall(this.classes, function(klass){
+	return Nehan.List.exists(markup_classes, Closure.eq(klass));
       });
     },
     getNameSpec : function(){
@@ -3356,7 +3356,7 @@ var TypeSelector = (function(){
       return 0;
     },
     _testAttrs : function(style){
-      return List.forall(this.attrs, function(attr){
+      return Nehan.List.forall(this.attrs, function(attr){
 	return attr.test(style);
       });
     }
@@ -3706,7 +3706,7 @@ var Selector = (function(){
     // see http://www.w3.org/TR/css3-selectors/#specificity
     _countSpec : function(elements){
       var a = 0, b = 0, c = 0;
-      List.iter(elements, function(token){
+      Nehan.List.iter(elements, function(token){
 	if(token instanceof TypeSelector){
 	  a += token.getIdSpec();
 	  b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();
@@ -3758,7 +3758,7 @@ var Selectors = (function(){
   };
 
   var __find_selector = function(selectors, selector_key){
-    return List.find(selectors, function(selector){
+    return Nehan.List.find(selectors, function(selector){
       return selector.getKey() === selector_key;
     });
   };
@@ -3779,19 +3779,19 @@ var Selectors = (function(){
   };
 
   var __get_value_pe = function(style, pseudo_element_name){
-    var matched_selectors = List.filter(__selectors_pe, function(selector){
+    var matched_selectors = Nehan.List.filter(__selectors_pe, function(selector){
       return selector.testPseudoElement(style, pseudo_element_name);
     });
-    return (matched_selectors.length === 0)? {} : List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
+    return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
       return ret.union(new CssHashSet(selector.getValue()));
     }).getValues();
   };
 
   var __get_value = function(style){
-    var matched_selectors = List.filter(__selectors, function(selector){
+    var matched_selectors = Nehan.List.filter(__selectors, function(selector){
       return selector.test(style);
     });
-    return (matched_selectors.length === 0)? {} : List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
+    return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
       return ret.union(new CssHashSet(selector.getValue()));
     }).getValues();
   };
@@ -4039,7 +4039,7 @@ var TagAttrs = (function(){
        @return {boolean}
     */
     hasClass : function(klass){
-      return List.exists(this.classes, Closure.eq(klass));
+      return Nehan.List.exists(this.classes, Closure.eq(klass));
     },
     /**
        @memberof Nehan.TagAttrs
@@ -4058,7 +4058,7 @@ var TagAttrs = (function(){
        @param klass {String} - css class name(prefiex by "nehan-")
     */
     removeClass : function(klass){
-      this.classes = List.filter(this.classes, function(cls){
+      this.classes = Nehan.List.filter(this.classes, function(cls){
 	return cls != klass;
       });
       this.setAttr("class", this.classes.join(" "));
@@ -4116,7 +4116,7 @@ var TagAttrs = (function(){
       var classes = (class_name === "")? [] : class_name.split(/\s+/);
 
       // replace 'nehan-' prefix for backword compatibility(version <= 5.1.0).
-      return List.map(classes, function(klass){
+      return Nehan.List.map(classes, function(klass){
 	return (klass.indexOf("nehan-") === 0)? klass.replace("nehan-", "") : klass;
       }); 
     },
@@ -4373,7 +4373,7 @@ var Tag = (function (){
        @return {boolean}
     */
     isHeaderTag : function(){
-      return List.exists(["h1", "h2", "h3", "h4", "h5", "h6"], Closure.eq(this.name));
+      return Nehan.List.exists(["h1", "h2", "h3", "h4", "h5", "h6"], Closure.eq(this.name));
     },
     /**
        @memberof Nehan.Tag
@@ -5230,21 +5230,21 @@ var Char = (function(){
        @return {boolean}
      */
     isHeadNg : function(){
-      return List.mem(__head_ng, this.data);
+      return Nehan.List.mem(__head_ng, this.data);
     },
     /**
        @memberof Nehan.Char
        @return {boolean}
      */
     isTailNg : function(){
-      return List.mem(__tail_ng, this.data);
+      return Nehan.List.mem(__tail_ng, this.data);
     },
     /**
        @memberof Nehan.Char
        @return {boolean}
      */
     isSmallKana : function(){
-      return List.mem(__small_kana, this.data);
+      return Nehan.List.mem(__small_kana, this.data);
     },
     /**
        @memberof Nehan.Char
@@ -5258,14 +5258,14 @@ var Char = (function(){
        @return {boolean}
      */
     isKakkoStart : function(){
-      return List.mem(__kakko_start, this.data);
+      return Nehan.List.mem(__kakko_start, this.data);
     },
     /**
        @memberof Nehan.Char
        @return {boolean}
      */
     isKakkoEnd : function(){
-      return List.mem(__kakko_end, this.data);
+      return Nehan.List.mem(__kakko_end, this.data);
     },
     /**
        @memberof Nehan.Char
@@ -5279,14 +5279,14 @@ var Char = (function(){
        @return {boolean}
      */
     isKuten : function(){
-      return List.mem(__kuten, this.data);
+      return Nehan.List.mem(__kuten, this.data);
     },
     /**
        @memberof Nehan.Char
        @return {boolean}
      */
     isTouten : function(){
-      return List.mem(__touten, this.data);
+      return Nehan.List.mem(__touten, this.data);
     },
     /**
        @memberof Nehan.Char
@@ -5328,7 +5328,7 @@ var Char = (function(){
        @return {boolean}
      */
     isLigature : function(){
-      return List.mem(__voiced_mark, this.data);
+      return Nehan.List.mem(__voiced_mark, this.data);
     },
     /**
        @memberof Nehan.Char
@@ -5711,7 +5711,7 @@ var Ruby = (function(){
        @return {String}
     */
     getRbString : function(){
-      return List.map(this.rbs, function(rb){
+      return Nehan.List.map(this.rbs, function(rb){
 	return rb.data || "";
       }).join("");
     },
@@ -5786,7 +5786,7 @@ var Ruby = (function(){
     */
     setMetrics : function(flow, font, letter_spacing){
       this.rtFontSize = Display.getRtFontSize(font.size);
-      var advance_rbs = List.fold(this.rbs, 0, function(ret, rb){
+      var advance_rbs = Nehan.List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font);
 	return ret + rb.getAdvance(flow, letter_spacing);
       });
@@ -6108,10 +6108,10 @@ var Palette = (function(){
   };
 
   var __find_palette = function(ival, palette){
-    if(List.exists(palette, Closure.eq(ival))){
+    if(Nehan.List.exists(palette, Closure.eq(ival))){
       return ival;
     }
-    return List.minobj(palette, function(pval){
+    return Nehan.List.minobj(palette, function(pval){
       return Math.abs(pval - ival);
     });
   };
@@ -6989,7 +6989,7 @@ var BoxRect = {
      @param fn {Function}
    */
   iter : function(obj, fn){
-    List.iter(Const.cssBoxDirs, function(dir){
+    Nehan.List.iter(Const.cssBoxDirs, function(dir){
       if(obj[dir]){
 	fn(dir, obj[dir]);
       }
@@ -7185,7 +7185,7 @@ var Edge = (function(){
     */
     copyTo : function(dst){
       var self = this;
-      List.iter(Const.cssBoxDirs, function(dir){
+      Nehan.List.iter(Const.cssBoxDirs, function(dir){
 	dst[dir] = self[dir];
       });
       return dst;
@@ -7205,7 +7205,7 @@ var Edge = (function(){
     getCss : function(){
       var css = {};
       var self = this;
-      List.iter(["top", "right", "bottom", "left"], function(dir){
+      Nehan.List.iter(["top", "right", "bottom", "left"], function(dir){
 	var value = self[dir];
 	if(value > 0){
 	  css[self.getDirProp(dir)] = self[dir] + "px";
@@ -7464,7 +7464,7 @@ var BorderRadius = (function(){
        @return {Object}
     */
     getCssValueHori : function(){
-      return List.map(this.getArray(), function(radius){
+      return Nehan.List.map(this.getArray(), function(radius){
 	return radius.getCssValueHori();
       }).join(" ");
     },
@@ -7475,7 +7475,7 @@ var BorderRadius = (function(){
        @return {Object}
     */
     getCssValueVert : function(){
-      return List.map(this.getArray(), function(radius){
+      return Nehan.List.map(this.getArray(), function(radius){
 	return radius.getCssValueVert();
       }).join(" ");
     },
@@ -7498,7 +7498,7 @@ var BorderRadius = (function(){
       var css = {};
       var css_value = this.getCssValue();
       css["border-radius"] = css_value; // without vender prefix
-      List.iter(Const.cssVenderPrefixes, function(prefix){
+      Nehan.List.iter(Const.cssVenderPrefixes, function(prefix){
 	var prop = [prefix, "border-radius"].join("-"); // with vender prefix
 	css[prop] = css_value;
       });
@@ -7630,7 +7630,7 @@ var BorderColor = (function(){
     */
     clone : function(){
       var border_color = new BorderColor();
-      List.iter(Const.cssBoxDirs, function(dir){
+      Nehan.List.iter(Const.cssBoxDirs, function(dir){
 	if(this[dir]){
 	  border_color[dir] = this[dir];
 	}
@@ -7695,7 +7695,7 @@ var BorderStyle = (function(){
     */
     clone : function(){
       var style = new BorderStyle();
-      List.iter(Const.cssBoxDirs, function(dir){
+      Nehan.List.iter(Const.cssBoxDirs, function(dir){
 	if(this[dir]){
 	  style[dir] = this[dir];
 	}
@@ -8494,7 +8494,7 @@ var Box = (function(){
   }
 
   var __filter_text = function(elements){
-    return List.fold(elements, [], function(ret, element){
+    return Nehan.List.fold(elements, [], function(ret, element){
       if(element instanceof Box){
 	return ret.concat(__filter_text(element.elements || []));
       }
@@ -8516,7 +8516,7 @@ var Box = (function(){
        @param element {Array.<Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy>}
     */
     addElements : function(elements){
-      List.iter(elements, function(element){
+      Nehan.List.iter(elements, function(element){
 	this.addElement(element);
       }.bind(this));
     },
@@ -8556,7 +8556,7 @@ var Box = (function(){
     */
     toString : function(){
       var texts = __filter_text(this.elements || []);
-      return List.fold(texts, "", function(ret, text){
+      return Nehan.List.fold(texts, "", function(ret, text){
 	var str = (text instanceof Ruby)? text.getRbString() : (text.data || "");
 	return ret + str;
       });
@@ -8573,7 +8573,7 @@ var Box = (function(){
        @return {Array.<string>}
     */
     getClassName : function(){
-      return this.classes? List.map(this.classes, Css.addNehanPrefix).join(" ") : "";
+      return this.classes? Nehan.List.map(this.classes, Css.addNehanPrefix).join(" ") : "";
     },
     /**
        @memberof Nehan.Box
@@ -8810,7 +8810,7 @@ var HtmlLexer = (function (){
 
   // discard close tags defined as single tag in LexingRule.
   var __replace_single_close_tags = function(str){
-    return List.fold(LexingRule.getSingleTagNames(), str, function(ret, name){
+    return Nehan.List.fold(LexingRule.getSingleTagNames(), str, function(ret, name){
       return ret.replace(new RegExp("</" + name + ">", "g"), "");
     });
   };
@@ -9622,7 +9622,7 @@ var DocumentHeader = (function(){
        @return {Nehan.Tag}
     */
     getMetaByName : function(name){
-      return List.find(this.metas, function(meta){
+      return Nehan.List.find(this.metas, function(meta){
 	return meta.getTagAttr("name") === name;
       });
     },
@@ -9686,7 +9686,7 @@ var DocumentContext = (function(){
   var __root_block_id = 0; // unique block-id for direct children of <body>.
 
   var __get_outline_contexts_by_name = function(section_root_name){
-    return List.filter(__outline_contexts, function(context){
+    return Nehan.List.filter(__outline_contexts, function(context){
       return context.getMarkupName() === section_root_name;
     });
   };
@@ -9698,7 +9698,7 @@ var DocumentContext = (function(){
 
   var __create_outline_elements_by_name = function(section_root_name, callbacks){
     var contexts = __get_outline_contexts_by_name(section_root_name);
-    return List.fold(contexts, [], function(ret, context){
+    return Nehan.List.fold(contexts, [], function(ret, context){
       var element = __convert_outline_context_to_element(context, callbacks);
       return element? ret.concat(element) : ret;
     });
@@ -10086,7 +10086,7 @@ var TokenStream = (function(){
 	  break;
 	}
 	if(token instanceof Char && token.isLigature()){
-	  var last = List.last(this.tokens);
+	  var last = Nehan.List.last(this.tokens);
 	  if(last instanceof Char){
 	    last.setLigature(token.data);
 	    continue;
@@ -10102,14 +10102,14 @@ var TokenStream = (function(){
       this._setPseudoAttribute(this.tokens);
     },
     _setPseudoAttribute : function(tokens){
-      var tags = List.filter(tokens, function(token){
+      var tags = Nehan.List.filter(tokens, function(token){
 	return (token instanceof Tag);
       });
       if(tags.length === 0){
 	return;
       }
       var type_of_tags = {};
-      List.iter(tags, function(tag){
+      Nehan.List.iter(tags, function(tag){
 	var tag_name = tag.getName();
 	if(type_of_tags[tag_name]){
 	  type_of_tags[tag_name].push(tag);
@@ -10401,7 +10401,7 @@ var PageStream = (function(){
        @return {Nehan.Box}
     */
     findTree : function(fn){
-      return List.find(this._trees, fn);
+      return Nehan.List.find(this._trees, fn);
     },
     /**
        find page object by fn(Nehan.Page -> bool).
@@ -10411,7 +10411,7 @@ var PageStream = (function(){
        @return {Nehan.Page}
     */
     findPage : function(fn){
-      return List.find(this._pages, fn);
+      return Nehan.List.find(this._pages, fn);
     },
     // () -> tree
     _yield : function(){
@@ -10859,7 +10859,7 @@ var Partition = (function(){
 
   var __levelize = function(sizes, min_size){
     // filter parts that is smaller than min_size.
-    var smaller_parts = List.filter(sizes, function(size){ return size < min_size; });
+    var smaller_parts = Nehan.List.filter(sizes, function(size){ return size < min_size; });
 
     // if all elements has enough space for min_size, nothing to do.
     if(smaller_parts.length === 0){
@@ -10867,10 +10867,10 @@ var Partition = (function(){
     }
 
     // total size that must be added to small parts.
-    var delta_plus_total = List.fold(smaller_parts, 0, function(ret, size){ return ret + (min_size - size); });
+    var delta_plus_total = Nehan.List.fold(smaller_parts, 0, function(ret, size){ return ret + (min_size - size); });
 
     // filter parts that has enough space.
-    var larger_parts = List.filter(sizes, function(size){
+    var larger_parts = Nehan.List.filter(sizes, function(size){
       return size - min_size >= min_size; // check if size is more than min_size and over even if min_size is subtracted.
     });
 
@@ -10880,7 +10880,7 @@ var Partition = (function(){
     }
 
     var delta_minus_avg = Math.floor(delta_plus_total / larger_parts.length);
-    return List.map(sizes, function(size){
+    return Nehan.List.map(sizes, function(size){
       return (size < min_size)? min_size : ((size - min_size >= min_size)? size - delta_minus_avg : size);
     });
   };
@@ -10906,7 +10906,7 @@ var Partition = (function(){
        @return {int}
     */
     getTotalWeight : function(){
-      return List.fold(this._punits, 0, function(ret, punit){
+      return Nehan.List.fold(this._punits, 0, function(ret, punit){
 	return ret + punit.weight;
       });
     },
@@ -10923,7 +10923,7 @@ var Partition = (function(){
       // merge(this._punits[1], partition._punits[1]),
       // ...
       // merge(this._punits[n-1], partition._punits[n-1])
-      var merged_punits =  List.mapi(this._punits, function(i, punit){
+      var merged_punits =  Nehan.List.mapi(this._punits, function(i, punit){
 	return punit.mergeTo(partition.get(i));
       });
       return new Partition(merged_punits);
@@ -10935,7 +10935,7 @@ var Partition = (function(){
     */
     mapMeasure : function(measure){
       var total_weight = this.getTotalWeight();
-      var sizes =  List.map(this._punits, function(punit){
+      var sizes =  Nehan.List.map(this._punits, function(punit){
 	return punit.getSize(measure, total_weight);
       });
       return __levelize(sizes, Display.minTableCellSize);
@@ -11259,11 +11259,11 @@ var StyleContext = (function(){
   ];
 
   var __is_managed_css_prop = function(prop){
-    return List.exists(__managed_css_props, Closure.eq(prop));
+    return Nehan.List.exists(__managed_css_props, Closure.eq(prop));
   };
 
   var __is_callback_css_prop = function(prop){
-    return List.exists(__callback_css_props, Closure.eq(prop));
+    return Nehan.List.exists(__callback_css_props, Closure.eq(prop));
   };
 
   /**
@@ -11553,7 +11553,7 @@ var StyleContext = (function(){
       this.initContextSize(measure, extent);
 
       // force re-culculate context-size of children based on new context-size of parent.
-      List.iter(this.childs, function(child){
+      Nehan.List.iter(this.childs, function(child){
 	child.forceUpdateContextSize(null, null);
       });
     },
@@ -11581,7 +11581,7 @@ var StyleContext = (function(){
     */
     appendChild : function(child_style){
       if(this.childs.length > 0){
-	var last_child = List.last(this.childs);
+	var last_child = Nehan.List.last(this.childs);
 	last_child.next = child_style;
 	child_style.prev = last_child;
       }
@@ -11593,7 +11593,7 @@ var StyleContext = (function(){
        @return {Nehan.StyleContext | null} removed child or null if nothing removed.
     */
     removeChild : function(child_style){
-      var index = List.indexOf(this.childs, function(child){
+      var index = Nehan.List.indexOf(this.childs, function(child){
 	return child === child_style;
       });
       if(index >= 0){
@@ -11696,7 +11696,7 @@ var StyleContext = (function(){
       box.edge = edge;
       box.addElements(elements);
       box.classes = classes;
-      box.charCount = List.fold(elements, 0, function(total, element){
+      box.charCount = Nehan.List.fold(elements, 0, function(total, element){
 	return total + (element.charCount || 0);
       });
       box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
@@ -11861,7 +11861,7 @@ var StyleContext = (function(){
       if(this.display === "none"){
 	return true;
       }
-      if(List.exists(__disabled_markups, Closure.eq(this.getMarkupName()))){
+      if(Nehan.List.exists(__disabled_markups, Closure.eq(this.getMarkupName()))){
 	return true;
       }
       if(this.contentMeasure <= 0 || this.contentExtent <= 0){
@@ -12401,7 +12401,7 @@ var StyleContext = (function(){
     */
     getChildIndex : function(){
       var self = this;
-      return List.indexOf(this.getParentChilds(), function(child){
+      return Nehan.List.indexOf(this.getParentChilds(), function(child){
 	return child === self;
       });
     },
@@ -12411,7 +12411,7 @@ var StyleContext = (function(){
     */
     getChildIndexOfType : function(){
       var self = this;
-      return List.indexOf(this.getParentChildsOfType(this.getMarkupName()), function(child){
+      return Nehan.List.indexOf(this.getParentChildsOfType(this.getMarkupName()), function(child){
 	return child === self;
       });
     },
@@ -12443,7 +12443,7 @@ var StyleContext = (function(){
        @return {Nehan.StyleContext}
     */
     getParentChildsOfType : function(markup_name){
-      return List.filter(this.getParentChilds(), function(child){
+      return Nehan.List.filter(this.getParentChilds(), function(child){
 	return child.getMarkupName() === markup_name;
       });
     },
@@ -12779,7 +12779,7 @@ var StyleContext = (function(){
     // In nehan.js, 'central' is used when vertical writing mode.
     // see http://dev.w3.org/csswg/css-writing-modes-3/#text-baselines
     _setVertBaseline : function(root_line, baseline){
-      List.iter(root_line.elements, function(element){
+      Nehan.List.iter(root_line.elements, function(element){
 	var font_size = element.maxFontSize;
 	var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
 	if (from_after > 0){
@@ -12794,7 +12794,7 @@ var StyleContext = (function(){
       }.bind(this));
     },
     _setHoriBaseline : function(root_line, baseline){
-      List.iter(root_line.elements, function(element){
+      Nehan.List.iter(root_line.elements, function(element){
 	var font_size = element.maxFontSize;
 	var from_after = root_line.maxExtent - element.maxExtent;
 	if (from_after > 0){
@@ -12833,14 +12833,14 @@ var StyleContext = (function(){
       }
       var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];
       var allowed_props = Config.allowedInlineStyleProps || [];
-      var values = List.fold(stmts, {}, function(ret, stmt){
+      var values = Nehan.List.fold(stmts, {}, function(ret, stmt){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]).toLowerCase();
 	  var value = Utils.trim(nv[1]);
 	  var fmt_prop = CssParser.formatProp(prop);
 	  var fmt_value = CssParser.formatValue(prop, value);
-	  if(allowed_props.length === 0 || List.exists(allowed_props, Closure.eq(fmt_prop))){
+	  if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Closure.eq(fmt_prop))){
 	    ret[fmt_prop] = fmt_value;
 	  }
 	}
@@ -12894,7 +12894,7 @@ var StyleContext = (function(){
       }
       var position = new BoxPosition(value);
       var self = this;
-      List.iter(Const.cssBoxDirsLogical, function(dir){
+      Nehan.List.iter(Const.cssBoxDirsLogical, function(dir){
 	var value = self.getCssAttr(dir, "auto");
 	if(value !== "auto"){
 	  position[value] = self._computeUnitSize(start, self.font.size);
@@ -14021,7 +14021,7 @@ var InlineContext = (function(){
        @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
     */
     getLastElement : function(){
-      return List.last(this.elements);
+      return Nehan.List.last(this.elements);
     },
     /**
        get all elements.
@@ -14121,7 +14121,7 @@ var InlineContext = (function(){
       // if ptr moved, justification is executed.
       if(0 <= ptr && ptr < last){
 	// disable text after new tail pos.
-	this.elements = List.filter(this.elements, function(element){
+	this.elements = Nehan.List.filter(this.elements, function(element){
 	  return element.pos? (element.pos < head.pos) : true;
 	});
 	return head; // return new head
@@ -14282,7 +14282,7 @@ var LayoutGenerator = (function(){
      @return {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
   */
   LayoutGenerator.prototype.peekLastCache = function(){
-    return List.last(this._cachedElements);
+    return Nehan.List.last(this._cachedElements);
   };
 
   /**
@@ -14965,7 +14965,7 @@ var InlineBlockGenerator = (function (){
   Class.extend(InlineBlockGenerator, BlockGenerator);
 
   InlineBlockGenerator.prototype._onCreate = function(context, block){
-    var max_inline = List.maxobj(block.elements, function(element){
+    var max_inline = Nehan.List.maxobj(block.elements, function(element){
       return element.getContentMeasure();
     });
     if(max_inline){
@@ -15497,14 +15497,14 @@ var FloatGroup = (function(){
        @return {Array.<Nehan.Box>}
     */
     getElements : function(){
-      return this.isFloatStart()? this.elements : List.reverse(this.elements);
+      return this.isFloatStart()? this.elements : Nehan.List.reverse(this.elements);
     },
     /**
        @memberof Nehan.FloatGroup
        @return {int}
     */
     getMeasure : function(flow){
-      return List.fold(this.elements, 0, function(measure, element){
+      return Nehan.List.fold(this.elements, 0, function(measure, element){
 	return measure + element.getLayoutMeasure(flow);
       });
     },
@@ -15513,7 +15513,7 @@ var FloatGroup = (function(){
        @return {int}
     */
     getExtent : function(flow){
-      return List.fold(this.elements, 0, function(extent, element){
+      return Nehan.List.fold(this.elements, 0, function(extent, element){
 	return Math.max(extent, element.getLayoutExtent(flow));
       });
     }
@@ -15574,7 +15574,7 @@ var FloatGroupStack = (function(){
     this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
       return g1.getExtent(flow) - g2.getExtent(flow);
     });
-    var max_group = List.maxobj(this.stack, function(group){
+    var max_group = Nehan.List.maxobj(this.stack, function(group){
       return group.getExtent(flow);
     });
     //console.log("max group from %o is %o", this.stack, max_group);
@@ -15649,7 +15649,7 @@ var FloatGenerator = (function(){
   };
 
   FloatGenerator.prototype._hasNextFloat = function(){
-    return List.exists(this.generators, function(gen){
+    return Nehan.List.exists(this.generators, function(gen){
       return gen.hasNext();
     });
   };
@@ -15741,15 +15741,15 @@ var FloatGenerator = (function(){
   FloatGenerator.prototype._sortFloatRest = function(floated, rest){
     var floated_elements = floated.getElements();
     var elements = floated.isFloatStart()? floated_elements.concat(rest) : [rest].concat(floated_elements);
-    return List.filter(elements, function(element){ return element !== null; });
+    return Nehan.List.filter(elements, function(element){ return element !== null; });
   };
 
   FloatGenerator.prototype._wrapBlocks = function(blocks){
     var flow = this.style.flow;
-    var elements = List.filter(blocks, function(block){ return block !== null; });
+    var elements = Nehan.List.filter(blocks, function(block){ return block !== null; });
     var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
-    var extent = List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
-    var break_after = List.exists(elements, function(element){ return element.breakAfter; });
+    var extent = Nehan.List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
+    var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
 
     // wrapping block always float to start direction
     return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
@@ -15763,7 +15763,7 @@ var FloatGenerator = (function(){
     var flow = this.style.flow;
     var extent = floated.getExtent(flow);
     var elements = this._sortFloatRest(floated, rest || null);
-    var break_after = List.exists(elements, function(element){ return element.breakAfter; });
+    var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
     return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
       elements:elements,
       breakAfter:break_after,
@@ -15779,7 +15779,7 @@ var FloatGenerator = (function(){
   
   FloatGenerator.prototype._yieldFloatStack = function(context){
     var start_blocks = [], end_blocks = [];
-    List.iter(this.generators, function(gen){
+    Nehan.List.iter(this.generators, function(gen){
       var block = gen.yield(context);
       if(block){
 	if(gen.style.isFloatStart()){
@@ -15844,21 +15844,21 @@ var ParallelGenerator = (function(){
     if(this.hasCache()){
       return true;
     }
-    return List.exists(this.generators, function(gen){
+    return Nehan.List.exists(this.generators, function(gen){
       return gen.hasNext();
     });
   };
 
   ParallelGenerator.prototype._yieldParallelBlocks = function(context){
-    var blocks = List.map(this.generators, function(gen){
+    var blocks = Nehan.List.map(this.generators, function(gen){
       return gen.yield(context);
     });
-    return List.forall(blocks, function(block){ return block === null; })? null : blocks;
+    return Nehan.List.forall(blocks, function(block){ return block === null; })? null : blocks;
   };
 
   ParallelGenerator.prototype._findMaxBlock = function(blocks){
     var flow = this.style.flow;
-    return List.maxobj(blocks, function(block){
+    return Nehan.List.maxobj(blocks, function(block){
       return block? block.getLayoutExtent(flow) : 0;
     });
   };
@@ -15866,7 +15866,7 @@ var ParallelGenerator = (function(){
   ParallelGenerator.prototype._alignContentExtent = function(blocks, content_extent){
     var flow = this.style.flow;
     var generators = this.generators;
-    return List.mapi(blocks, function(i, block){
+    return Nehan.List.mapi(blocks, function(i, block){
       if(block === null){
 	return generators[i].style.createBlock({
 	  elements:[],
@@ -16080,7 +16080,7 @@ var TableGenerator = (function(){
 
   TableGenerator.prototype._getPartition = function(cell_tags){
     var partition_count = cell_tags.length;
-    var partition_units = List.map(cell_tags, function(cell_tag){
+    var partition_units = Nehan.List.map(cell_tags, function(cell_tag){
       return this._getPartitionUnit(cell_tag, partition_count);
     }.bind(this));
     return new Partition(partition_units);
@@ -16095,7 +16095,7 @@ var TableGenerator = (function(){
     var lines = cell_tag.getContent().replace(/<br \/>/g, "\n").replace(/<br>/g, "\n").split("\n");
     // this sizing algorithem is not strict, but still effective,
     // especially for text only table.
-    var max_line = List.maxobj(lines, function(line){ return line.length; });
+    var max_line = Nehan.List.maxobj(lines, function(line){ return line.length; });
     var max_weight = Math.floor(this.style.contentMeasure / 2);
     var min_weight = Math.floor(this.style.contentMeasure / (partition_count * 2));
     var weight = max_line.length * this.style.getFontSize();
@@ -16133,7 +16133,7 @@ var TableRowGenerator = (function(){
 
   TableRowGenerator.prototype._getGenerators = function(style_tr, stream){
     var child_styles = this._getChildStyles(style_tr, stream);
-    return List.map(child_styles, function(child_style){
+    return Nehan.List.map(child_styles, function(child_style){
       return new TableCellGenerator(child_style, this._createStream(child_style));
     }.bind(this));
   };
@@ -16147,7 +16147,7 @@ var TableRowGenerator = (function(){
       partitionCount:child_tags.length,
       measure:style_tr.contentMeasure
     }) : [];
-    return List.mapi(child_tags, function(i, tag){
+    return Nehan.List.mapi(child_tags, function(i, tag){
       var default_style = new StyleContext(tag, style_tr);
       var static_measure = default_style.staticMeasure;
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_tags.length - i));
@@ -16162,7 +16162,7 @@ var TableRowGenerator = (function(){
   };
 
   TableRowGenerator.prototype._getChildTags = function(stream){
-    return List.filter(stream.getTokens(), function(token){
+    return Nehan.List.filter(stream.getTokens(), function(token){
       return (token instanceof Tag && (token.getName() === "td" || token.getName() === "th"));
     });
   };
@@ -16512,7 +16512,7 @@ var LayoutEvaluator = (function(){
     },
     _appendChild : function(root, child){
       if(child instanceof Array){
-	List.iter(child, function(child){
+	Nehan.List.iter(child, function(child){
 	  this._appendChild(root, child);
 	}.bind(this));
       } else {
@@ -16521,7 +16521,7 @@ var LayoutEvaluator = (function(){
     },
     _evaluate : function(tree, opt){
       var root = this._evalElementRoot(tree, opt || {});
-      var dom = root.innerHTML? root : List.fold(tree.elements, root, function(root, child){
+      var dom = root.innerHTML? root : Nehan.List.fold(tree.elements, root, function(root, child){
 	if(child._type === "void"){
 	  return root; // do nothing
 	}
@@ -17073,10 +17073,7 @@ Selectors.setValues(Nehan.globalStyle || {}); // set global style.
 Selectors.setValues(__engine_args.style || {}); // set local style
 
 // register global single tags
-List.iter(Nehan.singleTagNames, LexingRule.addSingleTagByName);
-
-// export utilities
-Nehan.List = List;
+Nehan.List.iter(Nehan.singleTagNames, LexingRule.addSingleTagByName);
 
 /**
    @memberof Nehan

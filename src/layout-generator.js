@@ -129,7 +129,7 @@ var LayoutGenerator = (function(){
      @return {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
   */
   LayoutGenerator.prototype.peekLastCache = function(){
-    return List.last(this._cachedElements);
+    return Nehan.List.last(this._cachedElements);
   };
 
   /**

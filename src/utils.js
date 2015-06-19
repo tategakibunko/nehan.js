@@ -72,7 +72,7 @@ var Utils = {
   */
   camelize : function(name){
     var self = this;
-    return (name.indexOf("-") < 0)? name : List.mapi(name.split("-"), function(i, part){
+    return (name.indexOf("-") < 0)? name : Nehan.List.mapi(name.split("-"), function(i, part){
       return (i === 0)? part : self.capitalize(part);
     }).join("");
   }

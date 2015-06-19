@@ -16,7 +16,7 @@ var Box = (function(){
   }
 
   var __filter_text = function(elements){
-    return List.fold(elements, [], function(ret, element){
+    return Nehan.List.fold(elements, [], function(ret, element){
       if(element instanceof Box){
 	return ret.concat(__filter_text(element.elements || []));
       }
@@ -38,7 +38,7 @@ var Box = (function(){
        @param element {Array.<Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy>}
     */
     addElements : function(elements){
-      List.iter(elements, function(element){
+      Nehan.List.iter(elements, function(element){
 	this.addElement(element);
       }.bind(this));
     },
@@ -78,7 +78,7 @@ var Box = (function(){
     */
     toString : function(){
       var texts = __filter_text(this.elements || []);
-      return List.fold(texts, "", function(ret, text){
+      return Nehan.List.fold(texts, "", function(ret, text){
 	var str = (text instanceof Ruby)? text.getRbString() : (text.data || "");
 	return ret + str;
       });
@@ -95,7 +95,7 @@ var Box = (function(){
        @return {Array.<string>}
     */
     getClassName : function(){
-      return this.classes? List.map(this.classes, Css.addNehanPrefix).join(" ") : "";
+      return this.classes? Nehan.List.map(this.classes, Css.addNehanPrefix).join(" ") : "";
     },
     /**
        @memberof Nehan.Box

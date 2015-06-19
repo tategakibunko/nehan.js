@@ -20,7 +20,7 @@ var TableRowGenerator = (function(){
 
   TableRowGenerator.prototype._getGenerators = function(style_tr, stream){
     var child_styles = this._getChildStyles(style_tr, stream);
-    return List.map(child_styles, function(child_style){
+    return Nehan.List.map(child_styles, function(child_style){
       return new TableCellGenerator(child_style, this._createStream(child_style));
     }.bind(this));
   };
@@ -34,7 +34,7 @@ var TableRowGenerator = (function(){
       partitionCount:child_tags.length,
       measure:style_tr.contentMeasure
     }) : [];
-    return List.mapi(child_tags, function(i, tag){
+    return Nehan.List.mapi(child_tags, function(i, tag){
       var default_style = new StyleContext(tag, style_tr);
       var static_measure = default_style.staticMeasure;
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_tags.length - i));
@@ -49,7 +49,7 @@ var TableRowGenerator = (function(){
   };
 
   TableRowGenerator.prototype._getChildTags = function(stream){
-    return List.filter(stream.getTokens(), function(token){
+    return Nehan.List.filter(stream.getTokens(), function(token){
       return (token instanceof Tag && (token.getName() === "td" || token.getName() === "th"));
     });
   };

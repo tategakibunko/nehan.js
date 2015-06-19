@@ -634,21 +634,21 @@ var Char = (function(){
        @return {boolean}
      */
     isHeadNg : function(){
-      return List.mem(__head_ng, this.data);
+      return Nehan.List.mem(__head_ng, this.data);
     },
     /**
        @memberof Nehan.Char
        @return {boolean}
      */
     isTailNg : function(){
-      return List.mem(__tail_ng, this.data);
+      return Nehan.List.mem(__tail_ng, this.data);
     },
     /**
        @memberof Nehan.Char
        @return {boolean}
      */
     isSmallKana : function(){
-      return List.mem(__small_kana, this.data);
+      return Nehan.List.mem(__small_kana, this.data);
     },
     /**
        @memberof Nehan.Char
@@ -662,14 +662,14 @@ var Char = (function(){
        @return {boolean}
      */
     isKakkoStart : function(){
-      return List.mem(__kakko_start, this.data);
+      return Nehan.List.mem(__kakko_start, this.data);
     },
     /**
        @memberof Nehan.Char
        @return {boolean}
      */
     isKakkoEnd : function(){
-      return List.mem(__kakko_end, this.data);
+      return Nehan.List.mem(__kakko_end, this.data);
     },
     /**
        @memberof Nehan.Char
@@ -683,14 +683,14 @@ var Char = (function(){
        @return {boolean}
      */
     isKuten : function(){
-      return List.mem(__kuten, this.data);
+      return Nehan.List.mem(__kuten, this.data);
     },
     /**
        @memberof Nehan.Char
        @return {boolean}
      */
     isTouten : function(){
-      return List.mem(__touten, this.data);
+      return Nehan.List.mem(__touten, this.data);
     },
     /**
        @memberof Nehan.Char
@@ -732,7 +732,7 @@ var Char = (function(){
        @return {boolean}
      */
     isLigature : function(){
-      return List.mem(__voiced_mark, this.data);
+      return Nehan.List.mem(__voiced_mark, this.data);
     },
     /**
        @memberof Nehan.Char

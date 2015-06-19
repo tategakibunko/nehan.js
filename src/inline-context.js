@@ -139,7 +139,7 @@ var InlineContext = (function(){
        @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
     */
     getLastElement : function(){
-      return List.last(this.elements);
+      return Nehan.List.last(this.elements);
     },
     /**
        get all elements.
@@ -239,7 +239,7 @@ var InlineContext = (function(){
       // if ptr moved, justification is executed.
       if(0 <= ptr && ptr < last){
 	// disable text after new tail pos.
-	this.elements = List.filter(this.elements, function(element){
+	this.elements = Nehan.List.filter(this.elements, function(element){
 	  return element.pos? (element.pos < head.pos) : true;
 	});
 	return head; // return new head

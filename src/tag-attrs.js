@@ -32,7 +32,7 @@ var TagAttrs = (function(){
        @return {boolean}
     */
     hasClass : function(klass){
-      return List.exists(this.classes, Closure.eq(klass));
+      return Nehan.List.exists(this.classes, Closure.eq(klass));
     },
     /**
        @memberof Nehan.TagAttrs
@@ -51,7 +51,7 @@ var TagAttrs = (function(){
        @param klass {String} - css class name(prefiex by "nehan-")
     */
     removeClass : function(klass){
-      this.classes = List.filter(this.classes, function(cls){
+      this.classes = Nehan.List.filter(this.classes, function(cls){
 	return cls != klass;
       });
       this.setAttr("class", this.classes.join(" "));
@@ -109,7 +109,7 @@ var TagAttrs = (function(){
       var classes = (class_name === "")? [] : class_name.split(/\s+/);
 
       // replace 'nehan-' prefix for backword compatibility(version <= 5.1.0).
-      return List.map(classes, function(klass){
+      return Nehan.List.map(classes, function(klass){
 	return (klass.indexOf("nehan-") === 0)? klass.replace("nehan-", "") : klass;
       }); 
     },

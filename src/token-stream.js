@@ -240,7 +240,7 @@ var TokenStream = (function(){
 	  break;
 	}
 	if(token instanceof Char && token.isLigature()){
-	  var last = List.last(this.tokens);
+	  var last = Nehan.List.last(this.tokens);
 	  if(last instanceof Char){
 	    last.setLigature(token.data);
 	    continue;
@@ -256,14 +256,14 @@ var TokenStream = (function(){
       this._setPseudoAttribute(this.tokens);
     },
     _setPseudoAttribute : function(tokens){
-      var tags = List.filter(tokens, function(token){
+      var tags = Nehan.List.filter(tokens, function(token){
 	return (token instanceof Tag);
       });
       if(tags.length === 0){
 	return;
       }
       var type_of_tags = {};
-      List.iter(tags, function(tag){
+      Nehan.List.iter(tags, function(tag){
 	var tag_name = tag.getName();
 	if(type_of_tags[tag_name]){
 	  type_of_tags[tag_name].push(tag);

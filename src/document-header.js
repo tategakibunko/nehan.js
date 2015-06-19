@@ -62,7 +62,7 @@ var DocumentHeader = (function(){
        @return {Nehan.Tag}
     */
     getMetaByName : function(name){
-      return List.find(this.metas, function(meta){
+      return Nehan.List.find(this.metas, function(meta){
 	return meta.getTagAttr("name") === name;
       });
     },

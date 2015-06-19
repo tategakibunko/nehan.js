@@ -144,7 +144,7 @@ var PageStream = (function(){
        @return {Nehan.Box}
     */
     findTree : function(fn){
-      return List.find(this._trees, fn);
+      return Nehan.List.find(this._trees, fn);
     },
     /**
        find page object by fn(Nehan.Page -> bool).
@@ -154,7 +154,7 @@ var PageStream = (function(){
        @return {Nehan.Page}
     */
     findPage : function(fn){
-      return List.find(this._pages, fn);
+      return Nehan.List.find(this._pages, fn);
     },
     // () -> tree
     _yield : function(){

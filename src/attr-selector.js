@@ -29,7 +29,7 @@ var AttrSelector = (function(){
       return "";
     },
     _parseOp : function(expr){
-      return List.find(__op_symbols, function(symbol){
+      return Nehan.List.find(__op_symbols, function(symbol){
 	return expr.indexOf(symbol) >= 0;
       });
     },
@@ -64,7 +64,7 @@ var AttrSelector = (function(){
     _testTildeEqual : function(style){
       var value = style.getMarkupAttr(this.left);
       var values = value? value.split(/\s+/) : [];
-      return List.exists(values, Closure.eq(this.right));
+      return Nehan.List.exists(values, Closure.eq(this.right));
     },
     _testPipeEqual : function(style){
       var value = style.getMarkupAttr(this.left);

@@ -48,7 +48,7 @@ var Closure = {
 	return false;
       }
       var tag_name = token.getName();
-      return List.exists(names, function(name){
+      return Nehan.List.exists(names, function(name){
 	return name === tag_name;
       });
     };

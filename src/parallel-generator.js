@@ -46,21 +46,21 @@ var ParallelGenerator = (function(){
     if(this.hasCache()){
       return true;
     }
-    return List.exists(this.generators, function(gen){
+    return Nehan.List.exists(this.generators, function(gen){
       return gen.hasNext();
     });
   };
 
   ParallelGenerator.prototype._yieldParallelBlocks = function(context){
-    var blocks = List.map(this.generators, function(gen){
+    var blocks = Nehan.List.map(this.generators, function(gen){
       return gen.yield(context);
     });
-    return List.forall(blocks, function(block){ return block === null; })? null : blocks;
+    return Nehan.List.forall(blocks, function(block){ return block === null; })? null : blocks;
   };
 
   ParallelGenerator.prototype._findMaxBlock = function(blocks){
     var flow = this.style.flow;
-    return List.maxobj(blocks, function(block){
+    return Nehan.List.maxobj(blocks, function(block){
       return block? block.getLayoutExtent(flow) : 0;
     });
   };
@@ -68,7 +68,7 @@ var ParallelGenerator = (function(){
   ParallelGenerator.prototype._alignContentExtent = function(blocks, content_extent){
     var flow = this.style.flow;
     var generators = this.generators;
-    return List.mapi(blocks, function(i, block){
+    return Nehan.List.mapi(blocks, function(i, block){
       if(block === null){
 	return generators[i].style.createBlock({
 	  elements:[],

@@ -220,7 +220,7 @@ var Tag = (function (){
        @return {boolean}
     */
     isHeaderTag : function(){
-      return List.exists(["h1", "h2", "h3", "h4", "h5", "h6"], Closure.eq(this.name));
+      return Nehan.List.exists(["h1", "h2", "h3", "h4", "h5", "h6"], Closure.eq(this.name));
     },
     /**
        @memberof Nehan.Tag

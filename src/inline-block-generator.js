@@ -13,7 +13,7 @@ var InlineBlockGenerator = (function (){
   Class.extend(InlineBlockGenerator, BlockGenerator);
 
   InlineBlockGenerator.prototype._onCreate = function(context, block){
-    var max_inline = List.maxobj(block.elements, function(element){
+    var max_inline = Nehan.List.maxobj(block.elements, function(element){
       return element.getContentMeasure();
     });
     if(max_inline){

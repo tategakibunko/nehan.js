@@ -86,7 +86,7 @@ var LayoutEvaluator = (function(){
     },
     _appendChild : function(root, child){
       if(child instanceof Array){
-	List.iter(child, function(child){
+	Nehan.List.iter(child, function(child){
 	  this._appendChild(root, child);
 	}.bind(this));
       } else {
@@ -95,7 +95,7 @@ var LayoutEvaluator = (function(){
     },
     _evaluate : function(tree, opt){
       var root = this._evalElementRoot(tree, opt || {});
-      var dom = root.innerHTML? root : List.fold(tree.elements, root, function(root, child){
+      var dom = root.innerHTML? root : Nehan.List.fold(tree.elements, root, function(root, child){
 	if(child._type === "void"){
 	  return root; // do nothing
 	}

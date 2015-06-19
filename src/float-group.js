@@ -47,14 +47,14 @@ var FloatGroup = (function(){
        @return {Array.<Nehan.Box>}
     */
     getElements : function(){
-      return this.isFloatStart()? this.elements : List.reverse(this.elements);
+      return this.isFloatStart()? this.elements : Nehan.List.reverse(this.elements);
     },
     /**
        @memberof Nehan.FloatGroup
        @return {int}
     */
     getMeasure : function(flow){
-      return List.fold(this.elements, 0, function(measure, element){
+      return Nehan.List.fold(this.elements, 0, function(measure, element){
 	return measure + element.getLayoutMeasure(flow);
       });
     },
@@ -63,7 +63,7 @@ var FloatGroup = (function(){
        @return {int}
     */
     getExtent : function(flow){
-      return List.fold(this.elements, 0, function(extent, element){
+      return Nehan.List.fold(this.elements, 0, function(extent, element){
 	return Math.max(extent, element.getLayoutExtent(flow));
       });
     }

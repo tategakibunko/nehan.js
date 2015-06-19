@@ -118,8 +118,8 @@ var TypeSelector = (function(){
       return this.nameRex.test(markup_name);
     },
     testClassNames : function(markup_classes){
-      return List.forall(this.classes, function(klass){
-	return List.exists(markup_classes, Closure.eq(klass));
+      return Nehan.List.forall(this.classes, function(klass){
+	return Nehan.List.exists(markup_classes, Closure.eq(klass));
       });
     },
     getNameSpec : function(){
@@ -147,7 +147,7 @@ var TypeSelector = (function(){
       return 0;
     },
     _testAttrs : function(style){
-      return List.forall(this.attrs, function(attr){
+      return Nehan.List.forall(this.attrs, function(attr){
 	return attr.test(style);
       });
     }

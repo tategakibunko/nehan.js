@@ -17,10 +17,10 @@ var Palette = (function(){
   };
 
   var __find_palette = function(ival, palette){
-    if(List.exists(palette, Closure.eq(ival))){
+    if(Nehan.List.exists(palette, Closure.eq(ival))){
       return ival;
     }
-    return List.minobj(palette, function(pval){
+    return Nehan.List.minobj(palette, function(pval){
       return Math.abs(pval - ival);
     });
   };

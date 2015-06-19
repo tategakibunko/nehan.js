@@ -18,7 +18,7 @@ var Selectors = (function(){
   };
 
   var __find_selector = function(selectors, selector_key){
-    return List.find(selectors, function(selector){
+    return Nehan.List.find(selectors, function(selector){
       return selector.getKey() === selector_key;
     });
   };
@@ -39,19 +39,19 @@ var Selectors = (function(){
   };
 
   var __get_value_pe = function(style, pseudo_element_name){
-    var matched_selectors = List.filter(__selectors_pe, function(selector){
+    var matched_selectors = Nehan.List.filter(__selectors_pe, function(selector){
       return selector.testPseudoElement(style, pseudo_element_name);
     });
-    return (matched_selectors.length === 0)? {} : List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
+    return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
       return ret.union(new CssHashSet(selector.getValue()));
     }).getValues();
   };
 
   var __get_value = function(style){
-    var matched_selectors = List.filter(__selectors, function(selector){
+    var matched_selectors = Nehan.List.filter(__selectors, function(selector){
       return selector.test(style);
     });
-    return (matched_selectors.length === 0)? {} : List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
+    return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new CssHashSet(), function(ret, selector){
       return ret.union(new CssHashSet(selector.getValue()));
     }).getValues();
   };

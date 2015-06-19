@@ -43,7 +43,7 @@ var Edge = (function(){
     */
     copyTo : function(dst){
       var self = this;
-      List.iter(Const.cssBoxDirs, function(dir){
+      Nehan.List.iter(Const.cssBoxDirs, function(dir){
 	dst[dir] = self[dir];
       });
       return dst;
@@ -63,7 +63,7 @@ var Edge = (function(){
     getCss : function(){
       var css = {};
       var self = this;
-      List.iter(["top", "right", "bottom", "left"], function(dir){
+      Nehan.List.iter(["top", "right", "bottom", "left"], function(dir){
 	var value = self[dir];
 	if(value > 0){
 	  css[self.getDirProp(dir)] = self[dir] + "px";

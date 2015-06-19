@@ -64,7 +64,7 @@ var TableGenerator = (function(){
 
   TableGenerator.prototype._getPartition = function(cell_tags){
     var partition_count = cell_tags.length;
-    var partition_units = List.map(cell_tags, function(cell_tag){
+    var partition_units = Nehan.List.map(cell_tags, function(cell_tag){
       return this._getPartitionUnit(cell_tag, partition_count);
     }.bind(this));
     return new Partition(partition_units);
@@ -79,7 +79,7 @@ var TableGenerator = (function(){
     var lines = cell_tag.getContent().replace(/<br \/>/g, "\n").replace(/<br>/g, "\n").split("\n");
     // this sizing algorithem is not strict, but still effective,
     // especially for text only table.
-    var max_line = List.maxobj(lines, function(line){ return line.length; });
+    var max_line = Nehan.List.maxobj(lines, function(line){ return line.length; });
     var max_weight = Math.floor(this.style.contentMeasure / 2);
     var min_weight = Math.floor(this.style.contentMeasure / (partition_count * 2));
     var weight = max_line.length * this.style.getFontSize();

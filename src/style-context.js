@@ -68,11 +68,11 @@ var StyleContext = (function(){
   ];
 
   var __is_managed_css_prop = function(prop){
-    return List.exists(__managed_css_props, Closure.eq(prop));
+    return Nehan.List.exists(__managed_css_props, Closure.eq(prop));
   };
 
   var __is_callback_css_prop = function(prop){
-    return List.exists(__callback_css_props, Closure.eq(prop));
+    return Nehan.List.exists(__callback_css_props, Closure.eq(prop));
   };
 
   /**
@@ -362,7 +362,7 @@ var StyleContext = (function(){
       this.initContextSize(measure, extent);
 
       // force re-culculate context-size of children based on new context-size of parent.
-      List.iter(this.childs, function(child){
+      Nehan.List.iter(this.childs, function(child){
 	child.forceUpdateContextSize(null, null);
       });
     },
@@ -390,7 +390,7 @@ var StyleContext = (function(){
     */
     appendChild : function(child_style){
       if(this.childs.length > 0){
-	var last_child = List.last(this.childs);
+	var last_child = Nehan.List.last(this.childs);
 	last_child.next = child_style;
 	child_style.prev = last_child;
       }
@@ -402,7 +402,7 @@ var StyleContext = (function(){
        @return {Nehan.StyleContext | null} removed child or null if nothing removed.
     */
     removeChild : function(child_style){
-      var index = List.indexOf(this.childs, function(child){
+      var index = Nehan.List.indexOf(this.childs, function(child){
 	return child === child_style;
       });
       if(index >= 0){
@@ -505,7 +505,7 @@ var StyleContext = (function(){
       box.edge = edge;
       box.addElements(elements);
       box.classes = classes;
-      box.charCount = List.fold(elements, 0, function(total, element){
+      box.charCount = Nehan.List.fold(elements, 0, function(total, element){
 	return total + (element.charCount || 0);
       });
       box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
@@ -670,7 +670,7 @@ var StyleContext = (function(){
       if(this.display === "none"){
 	return true;
       }
-      if(List.exists(__disabled_markups, Closure.eq(this.getMarkupName()))){
+      if(Nehan.List.exists(__disabled_markups, Closure.eq(this.getMarkupName()))){
 	return true;
       }
       if(this.contentMeasure <= 0 || this.contentExtent <= 0){
@@ -1210,7 +1210,7 @@ var StyleContext = (function(){
     */
     getChildIndex : function(){
       var self = this;
-      return List.indexOf(this.getParentChilds(), function(child){
+      return Nehan.List.indexOf(this.getParentChilds(), function(child){
 	return child === self;
       });
     },
@@ -1220,7 +1220,7 @@ var StyleContext = (function(){
     */
     getChildIndexOfType : function(){
       var self = this;
-      return List.indexOf(this.getParentChildsOfType(this.getMarkupName()), function(child){
+      return Nehan.List.indexOf(this.getParentChildsOfType(this.getMarkupName()), function(child){
 	return child === self;
       });
     },
@@ -1252,7 +1252,7 @@ var StyleContext = (function(){
        @return {Nehan.StyleContext}
     */
     getParentChildsOfType : function(markup_name){
-      return List.filter(this.getParentChilds(), function(child){
+      return Nehan.List.filter(this.getParentChilds(), function(child){
 	return child.getMarkupName() === markup_name;
       });
     },
@@ -1588,7 +1588,7 @@ var StyleContext = (function(){
     // In nehan.js, 'central' is used when vertical writing mode.
     // see http://dev.w3.org/csswg/css-writing-modes-3/#text-baselines
     _setVertBaseline : function(root_line, baseline){
-      List.iter(root_line.elements, function(element){
+      Nehan.List.iter(root_line.elements, function(element){
 	var font_size = element.maxFontSize;
 	var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
 	if (from_after > 0){
@@ -1603,7 +1603,7 @@ var StyleContext = (function(){
       }.bind(this));
     },
     _setHoriBaseline : function(root_line, baseline){
-      List.iter(root_line.elements, function(element){
+      Nehan.List.iter(root_line.elements, function(element){
 	var font_size = element.maxFontSize;
 	var from_after = root_line.maxExtent - element.maxExtent;
 	if (from_after > 0){
@@ -1642,14 +1642,14 @@ var StyleContext = (function(){
       }
       var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];
       var allowed_props = Config.allowedInlineStyleProps || [];
-      var values = List.fold(stmts, {}, function(ret, stmt){
+      var values = Nehan.List.fold(stmts, {}, function(ret, stmt){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
 	  var prop = Utils.trim(nv[0]).toLowerCase();
 	  var value = Utils.trim(nv[1]);
 	  var fmt_prop = CssParser.formatProp(prop);
 	  var fmt_value = CssParser.formatValue(prop, value);
-	  if(allowed_props.length === 0 || List.exists(allowed_props, Closure.eq(fmt_prop))){
+	  if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Closure.eq(fmt_prop))){
 	    ret[fmt_prop] = fmt_value;
 	  }
 	}
@@ -1703,7 +1703,7 @@ var StyleContext = (function(){
       }
       var position = new BoxPosition(value);
       var self = this;
-      List.iter(Const.cssBoxDirsLogical, function(dir){
+      Nehan.List.iter(Const.cssBoxDirsLogical, function(dir){
 	var value = self.getCssAttr(dir, "auto");
 	if(value !== "auto"){
 	  position[value] = self._computeUnitSize(start, self.font.size);
