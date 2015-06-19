@@ -1,4 +1,4 @@
-var Margin = (function(){
+Nehan.Margin = (function(){
   /**
      @memberof Nehan
      @class Margin

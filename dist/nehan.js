@@ -4041,6 +4041,187 @@ Nehan.BorderStyle = (function(){
   return BorderStyle;
 })();
 
+Nehan.Padding = (function(){
+  /**
+     @memberof Nehan
+     @class Padding
+     @classdesc abstraction of padding.
+     @extends {Nehan.Edge}
+  */
+  function Padding(){
+    Nehan.Edge.call(this, "padding");
+  }
+  Nehan.Class.extend(Padding, Nehan.Edge);
+
+  /**
+     @memberof Nehan.Padding
+     @override
+     @return {Nehan.Padding}
+  */
+  Padding.prototype.clone = function(){
+    return this.copyTo(new Padding());
+  };
+
+  return Padding;
+})();
+
+
+Nehan.Margin = (function(){
+  /**
+     @memberof Nehan
+     @class Margin
+     @classdesc abstraction of physical margin
+     @constructor
+     @extends {Nehan.Edge}
+  */
+  function Margin(){
+    Nehan.Edge.call(this, "margin");
+  }
+  Nehan.Class.extend(Margin, Nehan.Edge);
+
+  /**
+     @memberof Nehan.Margin
+     @method clone
+     @override
+     @return {Nehan.Margin}
+  */
+  Margin.prototype.clone = function(){
+    return this.copyTo(new Margin());
+  };
+
+  return Margin;
+})();
+
+
+Nehan.Border = (function(){
+  /**
+     @memberof Nehan
+     @class Border
+     @classdesc logical border object that contains border-width, border-radius, border-style, border-color for each logical directions.
+     @constructor
+     @extends {Nehan.Edge}
+  */
+  function Border(){
+    Nehan.Edge.call(this, "border");
+  }
+  Nehan.Class.extend(Border, Nehan.Edge);
+
+  /**
+     return cloned border object
+     @memberof Nehan.Border
+     @method clone
+     @return {Nehan.Border}
+  */
+  Border.prototype.clone = function(){
+    var border = this.copyTo(new Border());
+    if(this.radius){
+      border.radius = this.radius.clone();
+    }
+    if(this.style){
+      border.style = this.style.clone();
+    }
+    if(this.color){
+      border.color = this.color.clone();
+    }
+    return border;
+  };
+
+  /**
+     clear border values of logical before
+     @memberof Nehan.Border
+     @method clearBefore
+     @param flow {Nehan.BoxFlow}
+  */
+  Border.prototype.clearBefore = function(flow){
+    this.setBefore(flow, 0);
+    if(this.radius){
+      this.radius.clearBefore(flow);
+    }
+  };
+
+  /**
+     clear border values of logical after
+     @memberof Nehan.Border
+     @method clearAfter
+     @param flow {Nehan.BoxFlow}
+  */
+  Border.prototype.clearAfter = function(flow){
+    this.setAfter(flow, 0);
+    if(this.radius){
+      this.radius.clearAfter(flow);
+    }
+  };
+
+  /**
+     @memberof Nehan.Border
+     @method getDirProp
+     @param dir {string} - "top", "right", "bottom", "left"
+     @example
+     * new Border().getDirProp("top"); // => "border-top-width"
+  */
+  Border.prototype.getDirProp = function(dir){
+    return ["border", dir, "width"].join("-");
+  };
+
+  /**
+     set border radius
+     @memberof Nehan.Border
+     @method setRadius
+     @param flow {Nehan.BoxFlow}
+     @param radius {Nehan.BorderRadius}
+  */
+  Border.prototype.setRadius = function(flow, radius){
+    this.radius = new Nehan.BorderRadius();
+    this.radius.setSize(flow, radius);
+  };
+
+  /**
+     set border color
+     @memberof Nehan.Border
+     @method setColor
+     @param flow {Nehan.BoxFlow}
+     @param color {Nehan.Color}
+  */
+  Border.prototype.setColor = function(flow, color){
+    this.color = new Nehan.BorderColor();
+    this.color.setColor(flow, color);
+  };
+
+  /**
+     set border style
+     @memberof Nehan.Border
+     @method setStyle
+     @param flow {Nehan.BoxFlow}
+     @param style {Nehan.BorderStyle}
+  */
+  Border.prototype.setStyle = function(flow, style){
+    this.style = new Nehan.BorderStyle();
+    this.style.setStyle(flow, style);
+  };
+
+  /**
+     get css object
+     @memberof Nehan.Border
+     @method getCss
+     @return {Object}
+  */
+  Border.prototype.getCss = function(){
+    var css = Nehan.Edge.prototype.getCss.call(this);
+    if(this.radius){
+      Nehan.Args.copy(css, this.radius.getCss());
+    }
+    if(this.color){
+      Nehan.Args.copy(css, this.color.getCss());
+    }
+    if(this.style){
+      Nehan.Args.copy(css, this.style.getCss());
+    }
+    return css;
+  };
+
+  return Border;
+})();
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -5813,7 +5994,7 @@ var Char = (function(){
        @return {Object}
     */
     getCssPadding : function(line){
-      var padding = new Padding();
+      var padding = new Nehan.Padding();
       if(this.paddingStart){
 	padding.setStart(line.style.flow, this.paddingStart);
       }
@@ -6970,7 +7151,7 @@ var Ruby = (function(){
       if(advance_rt > advance_rbs){
 	var ctx_space = Math.ceil((advance_rt - advance_rbs) / 2);
 	if(this.rbs.length > 0){
-	  this.padding = new Padding();
+	  this.padding = new Nehan.Padding();
 	  this.padding.setStart(flow, ctx_space);
 	  this.padding.setEnd(flow, ctx_space);
 	}
@@ -7726,187 +7907,6 @@ var BoxFlows = {
   }
 };
 
-var Padding = (function(){
-  /**
-     @memberof Nehan
-     @class Padding
-     @classdesc abstraction of padding.
-     @extends {Nehan.Edge}
-  */
-  function Padding(){
-    Nehan.Edge.call(this, "padding");
-  }
-  Nehan.Class.extend(Padding, Nehan.Edge);
-
-  /**
-     @memberof Nehan.Padding
-     @override
-     @return {Nehan.Padding}
-  */
-  Padding.prototype.clone = function(){
-    return this.copyTo(new Padding());
-  };
-
-  return Padding;
-})();
-
-
-var Margin = (function(){
-  /**
-     @memberof Nehan
-     @class Margin
-     @classdesc abstraction of physical margin
-     @constructor
-     @extends {Nehan.Edge}
-  */
-  function Margin(){
-    Nehan.Edge.call(this, "margin");
-  }
-  Nehan.Class.extend(Margin, Nehan.Edge);
-
-  /**
-     @memberof Nehan.Margin
-     @method clone
-     @override
-     @return {Nehan.Margin}
-  */
-  Margin.prototype.clone = function(){
-    return this.copyTo(new Margin());
-  };
-
-  return Margin;
-})();
-
-
-var Border = (function(){
-  /**
-     @memberof Nehan
-     @class Border
-     @classdesc logical border object that contains border-width, border-radius, border-style, border-color for each logical directions.
-     @constructor
-     @extends {Nehan.Edge}
-  */
-  function Border(){
-    Nehan.Edge.call(this, "border");
-  }
-  Nehan.Class.extend(Border, Nehan.Edge);
-
-  /**
-     return cloned border object
-     @memberof Nehan.Border
-     @method clone
-     @return {Nehan.Border}
-  */
-  Border.prototype.clone = function(){
-    var border = this.copyTo(new Border());
-    if(this.radius){
-      border.radius = this.radius.clone();
-    }
-    if(this.style){
-      border.style = this.style.clone();
-    }
-    if(this.color){
-      border.color = this.color.clone();
-    }
-    return border;
-  };
-
-  /**
-     clear border values of logical before
-     @memberof Nehan.Border
-     @method clearBefore
-     @param flow {Nehan.BoxFlow}
-  */
-  Border.prototype.clearBefore = function(flow){
-    this.setBefore(flow, 0);
-    if(this.radius){
-      this.radius.clearBefore(flow);
-    }
-  };
-
-  /**
-     clear border values of logical after
-     @memberof Nehan.Border
-     @method clearAfter
-     @param flow {Nehan.BoxFlow}
-  */
-  Border.prototype.clearAfter = function(flow){
-    this.setAfter(flow, 0);
-    if(this.radius){
-      this.radius.clearAfter(flow);
-    }
-  };
-
-  /**
-     @memberof Nehan.Border
-     @method getDirProp
-     @param dir {string} - "top", "right", "bottom", "left"
-     @example
-     * new Border().getDirProp("top"); // => "border-top-width"
-  */
-  Border.prototype.getDirProp = function(dir){
-    return ["border", dir, "width"].join("-");
-  };
-
-  /**
-     set border radius
-     @memberof Nehan.Border
-     @method setRadius
-     @param flow {Nehan.BoxFlow}
-     @param radius {Nehan.BorderRadius}
-  */
-  Border.prototype.setRadius = function(flow, radius){
-    this.radius = new Nehan.BorderRadius();
-    this.radius.setSize(flow, radius);
-  };
-
-  /**
-     set border color
-     @memberof Nehan.Border
-     @method setColor
-     @param flow {Nehan.BoxFlow}
-     @param color {Nehan.Color}
-  */
-  Border.prototype.setColor = function(flow, color){
-    this.color = new Nehan.BorderColor();
-    this.color.setColor(flow, color);
-  };
-
-  /**
-     set border style
-     @memberof Nehan.Border
-     @method setStyle
-     @param flow {Nehan.BoxFlow}
-     @param style {Nehan.BorderStyle}
-  */
-  Border.prototype.setStyle = function(flow, style){
-    this.style = new Nehan.BorderStyle();
-    this.style.setStyle(flow, style);
-  };
-
-  /**
-     get css object
-     @memberof Nehan.Border
-     @method getCss
-     @return {Object}
-  */
-  Border.prototype.getCss = function(){
-    var css = Nehan.Edge.prototype.getCss.call(this);
-    if(this.radius){
-      Nehan.Args.copy(css, this.radius.getCss());
-    }
-    if(this.color){
-      Nehan.Args.copy(css, this.color.getCss());
-    }
-    if(this.style){
-      Nehan.Args.copy(css, this.style.getCss());
-    }
-    return css;
-  };
-
-  return Border;
-})();
-
 var TextEmphaStyle = (function(){
   var __default_empha_style = "filled dot";
   var __empha_marks = {
@@ -8152,9 +8152,9 @@ var BoxEdge = (function (){
   */
   function BoxEdge(opt){
     opt = opt || {};
-    this.padding = opt.padding || new Padding();
-    this.border = opt.border || new Border();
-    this.margin = opt.margin || new Margin();
+    this.padding = opt.padding || new Nehan.Padding();
+    this.border = opt.border || new Nehan.Border();
+    this.margin = opt.margin || new Nehan.Margin();
   }
 
   BoxEdge.prototype = {
@@ -12754,7 +12754,7 @@ var StyleContext = (function(){
       if(space_measure <= 0){
 	return;
       }
-      var padding = new Padding();
+      var padding = new Nehan.Padding();
       if(text_align.isCenter()){
 	var start_offset = Math.floor(space_measure / 2);
 	line.size.setMeasure(this.flow, content_measure - start_offset);
@@ -12969,7 +12969,7 @@ var StyleContext = (function(){
       if(edge_size === null){
 	return null;
       }
-      var padding = new Padding();
+      var padding = new Nehan.Padding();
       padding.setSize(flow, edge_size);
       return padding;
     },
@@ -12978,7 +12978,7 @@ var StyleContext = (function(){
       if(edge_size === null){
 	return null;
       }
-      var margin = new Margin();
+      var margin = new Nehan.Margin();
       margin.setSize(flow, edge_size);
 
       // if inline, disable margin-before and margin-after.
@@ -13216,7 +13216,7 @@ var StyleContext = (function(){
       if(edge_size === null && border_radius === null){
 	return null;
       }
-      var border = new Border();
+      var border = new Nehan.Border();
       if(edge_size){
 	border.setSize(flow, edge_size);
       }

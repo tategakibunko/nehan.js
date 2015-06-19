@@ -1,4 +1,4 @@
-var Padding = (function(){
+Nehan.Padding = (function(){
   /**
      @memberof Nehan
      @class Padding

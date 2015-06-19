@@ -61,6 +61,9 @@ var sources = [
   "src/border-radius.js",
   "src/border-color.js",
   "src/border-style.js",
+  "src/padding.js",
+  "src/margin.js",
+  "src/border.js",
 
   // closed modules
   "src/nehan-setup-start.js",
@@ -87,9 +90,6 @@ var sources = [
   "src/box-flow.js",
   "src/box-flows.js",
 
-  "src/padding.js",
-  "src/margin.js",
-  "src/border.js",
   "src/text-empha-style.js",
   "src/text-empha-pos.js",
   "src/text-empha.js",

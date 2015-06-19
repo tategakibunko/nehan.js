@@ -42,7 +42,7 @@ var Char = (function(){
        @return {Object}
     */
     getCssPadding : function(line){
-      var padding = new Padding();
+      var padding = new Nehan.Padding();
       if(this.paddingStart){
 	padding.setStart(line.style.flow, this.paddingStart);
       }

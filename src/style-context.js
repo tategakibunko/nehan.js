@@ -1570,7 +1570,7 @@ var StyleContext = (function(){
       if(space_measure <= 0){
 	return;
       }
-      var padding = new Padding();
+      var padding = new Nehan.Padding();
       if(text_align.isCenter()){
 	var start_offset = Math.floor(space_measure / 2);
 	line.size.setMeasure(this.flow, content_measure - start_offset);
@@ -1785,7 +1785,7 @@ var StyleContext = (function(){
       if(edge_size === null){
 	return null;
       }
-      var padding = new Padding();
+      var padding = new Nehan.Padding();
       padding.setSize(flow, edge_size);
       return padding;
     },
@@ -1794,7 +1794,7 @@ var StyleContext = (function(){
       if(edge_size === null){
 	return null;
       }
-      var margin = new Margin();
+      var margin = new Nehan.Margin();
       margin.setSize(flow, edge_size);
 
       // if inline, disable margin-before and margin-after.
@@ -2032,7 +2032,7 @@ var StyleContext = (function(){
       if(edge_size === null && border_radius === null){
 	return null;
       }
-      var border = new Border();
+      var border = new Nehan.Border();
       if(edge_size){
 	border.setSize(flow, edge_size);
       }

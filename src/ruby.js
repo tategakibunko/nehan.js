@@ -131,7 +131,7 @@ var Ruby = (function(){
       if(advance_rt > advance_rbs){
 	var ctx_space = Math.ceil((advance_rt - advance_rbs) / 2);
 	if(this.rbs.length > 0){
-	  this.padding = new Padding();
+	  this.padding = new Nehan.Padding();
 	  this.padding.setStart(flow, ctx_space);
 	  this.padding.setEnd(flow, ctx_space);
 	}

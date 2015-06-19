@@ -11,9 +11,9 @@ var BoxEdge = (function (){
   */
   function BoxEdge(opt){
     opt = opt || {};
-    this.padding = opt.padding || new Padding();
-    this.border = opt.border || new Border();
-    this.margin = opt.margin || new Margin();
+    this.padding = opt.padding || new Nehan.Padding();
+    this.border = opt.border || new Nehan.Border();
+    this.margin = opt.margin || new Nehan.Margin();
   }
 
   BoxEdge.prototype = {
