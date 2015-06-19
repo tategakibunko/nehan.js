@@ -51,6 +51,7 @@ var FloatGroup = (function(){
     },
     /**
        @memberof Nehan.FloatGroup
+       @param flow {Nehan.BoxFlow}
        @return {int}
     */
     getMeasure : function(flow){
@@ -60,6 +61,7 @@ var FloatGroup = (function(){
     },
     /**
        @memberof Nehan.FloatGroup
+       @param flow {Nehan.BoxFlow}
        @return {int}
     */
     getExtent : function(flow){
