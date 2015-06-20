@@ -74,7 +74,8 @@
 
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript"><span class="keyword">var</span> pages = Nehan.createPagedElement().setStyle(<span class="string"><span class="delimiter">"</span><span class="content">body</span><span class="delimiter">"</span></span>, {
   <span class="key"><span class="delimiter">"</span><span class="content">flow</span><span class="delimiter">"</span></span>:<span class="string"><span class="delimiter">"</span><span class="content">lr-tb</span><span class="delimiter">"</span></span>, <span class="comment">// or "tb-rl"</span>
-  <span class="key"><span class="delimiter">"</span><span class="content">font-size</span><span class="delimiter">"</span></span>:<span class="integer">16</span>, <span class="comment">// camel case like "fontSize" is not allowed.</span>
+  <span class="key"><span class="delimiter">"</span><span class="content">font-size</span><span class="delimiter">"</span></span>:<span class="integer">16</span>,
+  <span class="comment">// fontSize:16, // camel-case is supported(version &gt;= 5.1.1)</span>
   <span class="key"><span class="delimiter">"</span><span class="content">width</span><span class="delimiter">"</span></span>:<span class="integer">640</span>, <span class="comment">// page width</span>
   <span class="key"><span class="delimiter">"</span><span class="content">height</span><span class="delimiter">"</span></span>:<span class="integer">480</span> <span class="comment">// page height</span>
 }).setContent(<span class="string"><span class="delimiter">"</span><span class="content">&lt;p&gt;hello, nehan.js!!&lt;/p&gt;</span><span class="delimiter">"</span></span>, {
@@ -87,7 +88,7 @@
 });</code></pre></div></div></div>
 
 <div class="ui icon warning message">
-<i class="warning icon"></i><p class="content">Note that camel cased property(like <code>fontSize</code>) is not allowed in <code>setStyle</code>.</p>
+<i class="info icon"></i><p class="content">Camel cased property(like <code>fontSize</code>) is supported since version <code>5.1.1</code>.</p>
 </div>
 
 <h4 class="ui dividing header">Set paged media to some target.</h4>
