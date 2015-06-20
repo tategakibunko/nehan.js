@@ -9,6 +9,9 @@ Mark "!": change that can break compatibility with older version
 version 5.1.1 2015/??/??
 ========================
 ! Now class selectors and id selectors are not required to be "nehan-" prefixed in setStyle method.
+! Now you can use not only chain case name but also camel case for style property.
+  Nehan.setStyle(".foo", {"font-size":"2em"}); // ok!
+  Nehan.setStyle(".foo", {fontSize:"2em"}); // ok!
 o Add new parameter maxPageCount to PageStream::syncGet, PageStream.asyncGet, PagedElement::asyncGet.
 o Export shared modules to outside of engine closure.
 * Fix emphasis size and position.

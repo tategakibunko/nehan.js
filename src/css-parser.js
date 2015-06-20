@@ -164,6 +164,7 @@ Nehan.CssParser = (function(){
   // for example, 'margin-before:1em' => 'margin:1em 0 0 0'.
   // so subdivided properties must be renamed to unified property('margin-before' => 'margin').
   var __format_prop = function(prop){
+    prop = Nehan.Utils.camelToChain(prop);
     if(prop.indexOf("margin-") >= 0 || prop.indexOf("padding-") >= 0 || prop.indexOf("border-width-") >= 0){
       return prop.split("-")[0];
     }

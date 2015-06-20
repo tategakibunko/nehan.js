@@ -88,6 +88,17 @@ Nehan.Utils = {
      @memberof Nehan.Utils
      @param name {String}
      @example
+     * Nehan.Utils.camelToChain("fontSize"); // "font-size"
+  */
+  camelToChain : function(name){
+    return name.replace(/([A-Z])/g, function(match, p1){
+      return "-" + p1.toLowerCase();
+    });
+  },
+  /**
+     @memberof Nehan.Utils
+     @param name {String}
+     @example
      * Nehan.Utils.camelize("font-size"); // "fontSize"
   */
   camelize : function(name){
