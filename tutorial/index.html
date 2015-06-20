@@ -52,17 +52,19 @@
 	<h2 class="ui header">Tutorial</h2>
 
 <h3 class="ui dividing header">
-<i class="idea icon"></i><div class="content">Getting started</div>
+<i class="idea icon"></i><div class="content">Install</div>
 </h3>
-
-<h4 class="ui dividing header">Install</h4>
 
 <p>Just include nehan.js, nehan.css in the <code>head</code>.</p>
 
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-markup">&lt;link rel="stylesheet" href="/path/to/nehan.css"&gt;
 &lt;script type="text/javascript" src="/path/to/nehan.js"&gt;&lt;/script&gt;</code></pre></div></div></div>
 
-<h4 class="ui dividing header">Create paged-element</h4>
+<h3 class="ui dividing header">
+<i class="idea icon"></i><div class="content">Getting started</div>
+</h3>
+
+<h4 class="ui dividing header">STEP1 - Create paged-element</h4>
 
 <p>First of all, create paged-element that contains all generated pages by <code>Nehan.createPagedElement</code>.</p>
 
@@ -91,13 +93,13 @@
 <i class="info icon"></i><p class="content">Camel cased property(like <code>fontSize</code>) is supported since version <code>5.1.1</code>.</p>
 </div>
 
-<h4 class="ui dividing header">Set paged media to some target.</h4>
+<h4 class="ui dividing header">STEP2 - Set paged media to some target.</h4>
 
 <p>All paged media are stored in paged-element internally, so if you want to display them, you need to obtain the DOM node that wraps paged media by <code>getElement</code>.</p>
 
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript"><span class="predefined">$</span>(<span class="string"><span class="delimiter">"</span><span class="content">#target-element</span><span class="delimiter">"</span></span>).append(pages.getElement());</code></pre></div></div></div>
 
-<h4 class="ui dividing header">Bind events</h4>
+<h4 class="ui dividing header">STEP3 - Bind events</h4>
 
 <p>Paged-element contains all pages and <strong>state</strong> of current page, so <code>setNextPage</code> and <code>setPrevPage</code> is the method that updates the inner state of current page no of paged-element.</p>
 
@@ -116,11 +118,11 @@
 
 <h5>logical property</h5>
 
-<p>As nehan.js is <strong>logical</strong> layout engine, you must define all layouting properties as <strong>logical</strong> property name.</p>
+<p>Because nehan.js is <strong>logical</strong> layout engine, you must use <strong>logical</strong> property.</p>
 
-<p>For example, you set width of some element like <code>width:300px</code> normally, but in nehan.js, the meaning of <code>width</code> is different as to <code>flow</code> of document.</p>
+<p>For example, generally you might set width of some element like <code>width:300px</code>, but in nehan.js, the meaning of <code>width</code> is different as to <code>flow</code> of document.</p>
 
-<p>If <code>flow</code> of document is <code>lr-tb</code>, <code>width</code> is the size along inline level direction, but if <code>flow</code> is <code>tb-rl</code>, <code>width</code> is the size along block level direction, because in vertical mode, block level flows from left to right(or right to left).</p>
+<p>If <code>flow</code> of document is <code>lr-tb</code>, <code>width</code> means the size along inline level direction, but if <code>flow</code> is <code>tb-rl</code>, <code>width</code> means the size along block level direction, because in vertical mode, block level flows from left to right(or right to left).</p>
 
 <p>So if you want to set the size of inline direction, you must use the property <code>measure</code>, and use the property <code>extent</code> for the block level direction.</p>
 
