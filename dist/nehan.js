@@ -8368,7 +8368,10 @@ var Tcy = (function(){
     getCssHori : function(line){
       var css = {};
       if(this.data.length === 1){
-	css["margin-left"] = "0.25em";
+	//css["margin-left"] = "0.25em";
+	css.display = "inline-block";
+	css.width = "1em";
+	css["text-align"] = "center";
       }
       return css;
     },
