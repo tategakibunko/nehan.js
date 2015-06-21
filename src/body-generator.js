@@ -18,6 +18,9 @@ var BodyGenerator = (function(){
     block.charPos = DocumentContext.getCharPos();
     block.percent = this.stream.getSeekPercent();
     block.pageNo = DocumentContext.getPageNo();
+    if(Config.capturePageText){
+      block.text = block.toString();
+    }
 
     DocumentContext.stepCharPos(block.charCount || 0);
     DocumentContext.stepPageNo();

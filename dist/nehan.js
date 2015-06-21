@@ -5544,6 +5544,7 @@ Nehan.Page = (function(){
   function Page(opt){
     Nehan.Args.merge(this, {
       element:null,
+      text:"",
       seekPos:0,
       pageNo:0,
       charPos:0,
@@ -5784,6 +5785,15 @@ var Config = {
   enableAutoCloseTag:false,
 
   /**
+     enable capturing text of each page.
+
+     @memberof Nehan.Config
+     @type {string}
+     @default false
+  */
+  capturePageText:false,
+
+  /**
      allowed inline style properties.
      allow all properties if not defined or list is empty.
 
@@ -5793,7 +5803,6 @@ var Config = {
   */
   allowedInlineStyleProps:[]
 };
-
 
 /**
    standard page settings.
@@ -16271,6 +16280,9 @@ var BodyGenerator = (function(){
     block.charPos = DocumentContext.getCharPos();
     block.percent = this.stream.getSeekPercent();
     block.pageNo = DocumentContext.getPageNo();
+    if(Config.capturePageText){
+      block.text = block.toString();
+    }
 
     DocumentContext.stepCharPos(block.charCount || 0);
     DocumentContext.stepPageNo();

@@ -15,6 +15,7 @@ Nehan.Page = (function(){
   function Page(opt){
     Nehan.Args.merge(this, {
       element:null,
+      text:"",
       seekPos:0,
       pageNo:0,
       charPos:0,

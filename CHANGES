@@ -14,6 +14,7 @@ version 5.1.1 2015/??/??
   Nehan.setStyle(".foo", {fontSize:"2em"}); // ok!
 o Add new parameter maxPageCount to PageStream::syncGet, PageStream.asyncGet, PagedElement::asyncGet.
 o Export shared modules to outside of engine closure.
+o Config.capturePageText is added. If enabled, page-stream output the text of each page.
 * Fix emphasis size and position.
 * Fix half size kana position.
 
