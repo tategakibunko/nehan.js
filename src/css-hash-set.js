@@ -11,6 +11,18 @@ Nehan.CssHashSet = (function(){
   Nehan.Class.extend(CssHashSet, Nehan.HashSet);
 
   /**
+     add [value] by [name]. CssHashSet::merge is called if [name] is already registered.
+
+     @memberof Nehan.CssHashSet
+     @param name {String} - css property name(camel-cased, or chain-cased)
+     @param value
+  */
+  CssHashSet.prototype.add = function(name, value){
+    name = Nehan.Utils.camelToChain(name);
+    Nehan.HashSet.prototype.add.call(this, name, value);
+  };
+
+  /**
    * merge css value<br>
    * 1. if old_value is object, merge each properties.<br>
    * 2. other case, simplly overwrite new_value to old_value(even if new_value is function).<br>
