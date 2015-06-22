@@ -24,7 +24,7 @@
   font-family(required to get accurate text-metrics especially latin words)
   height
   letter-spacing
-  line-rate(nehan.js local property)
+  line-height
   list-style
   list-style-image
   list-style-position

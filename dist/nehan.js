@@ -2005,7 +2005,7 @@ Nehan.CssHashSet = (function(){
   font-family(required to get accurate text-metrics especially latin words)
   height
   letter-spacing
-  line-rate(nehan.js local property)
+  line-height
   list-style
   list-style-image
   list-style-position
@@ -14411,15 +14411,20 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createStream = function(style){
-    if(style.getTextCombine() === "horizontal"){
-      var content = style.getMarkupContent();
-      return new TokenStream(content, {
-	tokens:[new Tcy(content)]
+    var markup_name = style.getMarkupName();
+    var markup_content = style.getMarkupContent();
+    if(style.getTextCombine() === "horizontal" || markup_name === "tcy"){
+      return new TokenStream(markup_content, {
+	tokens:[new Tcy(markup_content)]
       });
     }
-    switch(style.getMarkupName()){
+    switch(markup_name){
+    case "word":
+      return new TokenStream(markup_content, {
+	tokens:[new Word(markup_content)]
+      });
     case "ruby":
-      return new RubyTokenStream(style.getMarkupContent());
+      return new RubyTokenStream(markup_content);
     case "tbody": case "thead": case "tfoot":
       return new TokenStream(style.getContent(), {
 	filter:Nehan.Closure.isTagName(["tr"])
@@ -14524,7 +14529,7 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createTextGenerator = function(style, text){
-    if(text instanceof Tcy){
+    if(text instanceof Tcy || text instanceof Word){
       return new TextGenerator(this.style, new TokenStream(text.getData(), {
 	tokens:[text]
       }));
@@ -14902,7 +14907,7 @@ var InlineGenerator = (function(){
     //console.log("inline token:%o", token);
 
     // text block
-    if(token instanceof Text || token instanceof Tcy){
+    if(token instanceof Text || token instanceof Tcy || token instanceof Word){
       this.setChildLayout(this._createTextGenerator(this.style, token));
       return this.yieldChildLayout(context);
     }
