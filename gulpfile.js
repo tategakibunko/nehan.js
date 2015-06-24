@@ -109,13 +109,12 @@ var sources = [
   "src/partition-hash-set.js",
 
   // closed modules
-  // these modules/classes are referenced by Display/Config/style module.
-  // so can't be shared with other engines.
-  "src/nehan-setup-start.js",
+  // these modules/classes are referenced by Config/Style/LexingRule/Selectors module.
+  // so independent from other engines.
+  "src/nehan-setup-start.js", // closure start
   "src/config.js",
   "src/lexing-rule.js",
   "src/style.js",
-  "src/anim.js",
   "src/selectors.js",
   "src/box.js",
   "src/html-lexer.js",
@@ -124,6 +123,7 @@ var sources = [
   "src/token-stream.js",
   "src/ruby-token-stream.js",
   "src/page-evaluator.js",
+  "src/anim.js",
   "src/page-stream.js",
   "src/selector-prop-context.js",
   "src/selector-context.js",
@@ -161,7 +161,7 @@ var sources = [
   "src/vert-evaluator.js",
   "src/hori-evaluator.js",
   "src/nehan-setup-main.js",
-  "src/nehan-setup-end.js",
+  "src/nehan-setup-end.js", // closure end
   "src/paged-element.js"
 ];
 

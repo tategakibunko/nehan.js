@@ -9530,24 +9530,6 @@ var Style = {
 };
 
 /**
-   requestAnimationFrame wrapper function
-   @namespace Nehan
-   @function reqAnimationFrame
-*/
-var reqAnimationFrame = (function(){
-  var default_wait = 1000 / 60;
-  return window.requestAnimationFrame  ||
-    window.webkitRequestAnimationFrame ||
-    window.mozRequestAnimationFrame    ||
-    window.msRequestAnimationFrame     ||
-    function(callback, wait){
-      var _wait = (typeof wait === "undefined")? default_wait : wait;
-      window.setTimeout(callback, _wait);
-    };
-})();
-
-
-/**
    all selector values managed by layout engine.
 
    @namespace Nehan.Selectors
@@ -10764,6 +10746,24 @@ var PageEvaluator = (function(){
   };
 
   return PageEvaluator;
+})();
+
+
+/**
+   requestAnimationFrame wrapper function
+   @namespace Nehan
+   @function reqAnimationFrame
+*/
+var reqAnimationFrame = (function(){
+  var default_wait = 1000 / 60;
+  return window.requestAnimationFrame  ||
+    window.webkitRequestAnimationFrame ||
+    window.mozRequestAnimationFrame    ||
+    window.msRequestAnimationFrame     ||
+    function(callback, wait){
+      var _wait = (typeof wait === "undefined")? default_wait : wait;
+      window.setTimeout(callback, _wait);
+    };
 })();
 
 
