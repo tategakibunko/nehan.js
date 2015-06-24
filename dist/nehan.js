@@ -5462,18 +5462,20 @@ Nehan.Break = (function(){
       return this.value === "avoid";
     },
     /**
+       true if breaking at first page of 2-page spread.
        @memberof Nehan.Break
        @return {boolean}
      */
-    isFirst : function(){
-      return (Display.getPagingDirection() === "lr")? (this.value === "left") : (this.value === "right");
+    isFirst : function(flow){
+      return flow.isLeftToRight()? (this.value === "left") : (this.value === "right");
     },
     /**
+       true if breaking at second page of 2-page spread.
        @memberof Nehan.Break
        @return {boolean}
      */
-    isSecond : function(){
-      return (Display.getPagingDirection() === "lr")? (this.value === "right") : (this.value === "left");
+    isSecond : function(flow){
+      return flow.isLeftToRight()? (this.value === "right") : (this.value === "left");
     },
     /**
        (TODO)
@@ -5828,13 +5830,13 @@ var Display = {
   root:"document",
 
   /**
-     standard inline direction, "vert" or "hori".
+     standard flow, "tb-rl" or "tb-lr" or "lr-tb".
 
      @memberof Nehan.Display
      @type {String}
-     @default "vert"
+     @default "tb-rl"
   */
-  direction:"vert",
+  flow:"tb-rl",
   /**
      standard box flow for "vert" and "hori".
 
@@ -5845,17 +5847,6 @@ var Display = {
   boxFlow:{
     hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
     vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
-  },
-  /**
-     standard paging direction for "vert" and "hori". "lr" means left to right, "rl" means right to left.
-     
-     @memberof Nehan.Display
-     @type {Object}
-     @default {hori:"lr", vert:"rl"}
-  */
-  pagingDirection:{
-    hori:"lr", // paging direction 'left to right'
-    vert:"rl"  // paging direction 'right to left'
   },
   /**
      standard page width, used when Style["body"].width is not defined.
@@ -6030,13 +6021,6 @@ var Display = {
   },
   /**
      @memberof Nehan.Display
-     @return {String} "lr" or "rl"
-  */
-  getPagingDirection : function(){
-    return this.pagingDirection[this.direction];
-  },
-  /**
-     @memberof Nehan.Display
      @return {string}
   */
   getVertBlockDir: function(){
@@ -6058,8 +6042,9 @@ var Display = {
      @return {Nehan.BoxFlow}
   */
   getStdBoxFlow : function(){
-    var flow_name = this.boxFlow[this.direction];
-    return BoxFlows.getByName(flow_name);
+    //var flow_name = this.boxFlow[this.direction];
+    //return BoxFlows.getByName(flow_name);
+    return BoxFlows.getByName(this.flow);
   },
   /**
      @memberof Nehan.Display
@@ -7391,12 +7376,6 @@ var Char = (function(){
   var __rex_half_char = /[\w!\.\?\/:#;"',]/;
   var __rex_half_kana = /[\uff65-\uff9f]/;
   var __rex_half_kana_small = /[\uff67-\uff6f]/;
-  var __space_size_rate = {
-    thinsp:0.2, // &thinsp;
-    nbsp:0.38,  // &nbsp;
-    ensp:0.5,   // &ensp;
-    emsp:1.0    // &emsp;
-  };
 
   Char.prototype = {
     /**
@@ -7710,13 +7689,13 @@ var Char = (function(){
 	this._setupNbsp();
 	break;
       case "&thinsp;":
-	this.vscale = this.hscale = __space_size_rate.thinsp;
+	this.vscale = this.hscale = Display.spaceSizeRate.thinsp;
 	break;
       case "&ensp;":
-	this.vscale = this.hscale = __space_size_rate.ensp;
+	this.vscale = this.hscale = Display.spaceSizeRate.ensp;
 	break;
       case "&emsp;":
-	this.vscale = this.hscale = __space_size_rate.emsp;
+	this.vscale = this.hscale = Display.spaceSizeRate.emsp;
 	break;
       case "&#09;":
 	this._setupTabSpace();
@@ -7730,7 +7709,7 @@ var Char = (function(){
       }
     },
     _setupNbsp : function(){
-      this.vscale = this.hscale = __space_size_rate.nbsp;
+      this.vscale = this.hscale = Display.spaceSizeRate.nbsp;
     },
     _setupTabSpace : function(){
       this.vscale = this.hscale = Math.floor(Display.tabCount / 2);
@@ -7973,12 +7952,11 @@ var Char = (function(){
     },
     /**
        @memberof Nehan.Char
-       @param font_image_root {string}
        @param color {Nehan.Color}
        @return {string}
      */
-    getImgSrc : function(font_image_root, color){
-      return [font_image_root, this.img, color + ".png"].join("/");
+    getImgSrc : function(color){
+      return [Display.fontImgRoot, this.img, color + ".png"].join("/");
     },
     /**
        @memberof Nehan.Char
@@ -7986,13 +7964,6 @@ var Char = (function(){
      */
     isPaddingEnable : function(){
       return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
-    },
-    /**
-       @memberof Nehan.Char
-       @return {boolean}
-     */
-    isVertGlyphEnable : function(){
-      return Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
     },
     /**
        @memberof Nehan.Char
@@ -10515,7 +10486,9 @@ var PageEvaluator = (function(){
 
   PageEvaluator.prototype = {
     _getEvaluator : function(){
-      return (Display.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
+      var body_selector = Selectors.get("body") || new Selector("body", {flow:Display.flow});
+      var flow = body_selector.getValue().flow || Display.flow;
+      return (flow === "tb-rl" || flow === "tb-lr")? new VertEvaluator() : new HoriEvaluator();
     },
     /**
        evaluate {@link Nehan.Box}, output {@link Nehan.Page}.
@@ -16695,6 +16668,8 @@ var VertEvaluator = (function(){
   }
   Nehan.Class.extend(VertEvaluator, LayoutEvaluator);
 
+  var __is_vert_glyph_enable = Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
+
   VertEvaluator.prototype._evalLinkElement = function(line, link){
     return this._evaluate(link, {
       name:(link.isTextBlock()? "div" : "a")
@@ -16812,7 +16787,7 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalChar = function(line, chr){
     if(chr.isImgChar()){
-      if(chr.isVertGlyphEnable()){
+      if(__is_vert_glyph_enable){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalImgChar(line, chr);
@@ -16821,7 +16796,7 @@ var VertEvaluator = (function(){
     } else if(chr.isTabSpace()){
       return this._evalTabChar(line, chr);
     } else if(chr.isRotateChar()){
-      if(chr.isVertGlyphEnable()){
+      if(__is_vert_glyph_enable){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalRotateChar(line, chr);
@@ -16907,7 +16882,7 @@ var VertEvaluator = (function(){
     return this._createElement("img", {
       className:"nehan-img-char",
       attrs:{
-	src:chr.getImgSrc(Display.fontImgRoot, palette_color)
+	src:chr.getImgSrc(palette_color)
       },
       css:chr.getCssVertImgChar(line)
     });

@@ -27,12 +27,6 @@ var Char = (function(){
   var __rex_half_char = /[\w!\.\?\/:#;"',]/;
   var __rex_half_kana = /[\uff65-\uff9f]/;
   var __rex_half_kana_small = /[\uff67-\uff6f]/;
-  var __space_size_rate = {
-    thinsp:0.2, // &thinsp;
-    nbsp:0.38,  // &nbsp;
-    ensp:0.5,   // &ensp;
-    emsp:1.0    // &emsp;
-  };
 
   Char.prototype = {
     /**
@@ -346,13 +340,13 @@ var Char = (function(){
 	this._setupNbsp();
 	break;
       case "&thinsp;":
-	this.vscale = this.hscale = __space_size_rate.thinsp;
+	this.vscale = this.hscale = Display.spaceSizeRate.thinsp;
 	break;
       case "&ensp;":
-	this.vscale = this.hscale = __space_size_rate.ensp;
+	this.vscale = this.hscale = Display.spaceSizeRate.ensp;
 	break;
       case "&emsp;":
-	this.vscale = this.hscale = __space_size_rate.emsp;
+	this.vscale = this.hscale = Display.spaceSizeRate.emsp;
 	break;
       case "&#09;":
 	this._setupTabSpace();
@@ -366,7 +360,7 @@ var Char = (function(){
       }
     },
     _setupNbsp : function(){
-      this.vscale = this.hscale = __space_size_rate.nbsp;
+      this.vscale = this.hscale = Display.spaceSizeRate.nbsp;
     },
     _setupTabSpace : function(){
       this.vscale = this.hscale = Math.floor(Display.tabCount / 2);
@@ -609,12 +603,11 @@ var Char = (function(){
     },
     /**
        @memberof Nehan.Char
-       @param font_image_root {string}
        @param color {Nehan.Color}
        @return {string}
      */
-    getImgSrc : function(font_image_root, color){
-      return [font_image_root, this.img, color + ".png"].join("/");
+    getImgSrc : function(color){
+      return [Display.fontImgRoot, this.img, color + ".png"].join("/");
     },
     /**
        @memberof Nehan.Char
@@ -622,13 +615,6 @@ var Char = (function(){
      */
     isPaddingEnable : function(){
       return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
-    },
-    /**
-       @memberof Nehan.Char
-       @return {boolean}
-     */
-    isVertGlyphEnable : function(){
-      return Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
     },
     /**
        @memberof Nehan.Char

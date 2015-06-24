@@ -11,7 +11,9 @@ var PageEvaluator = (function(){
 
   PageEvaluator.prototype = {
     _getEvaluator : function(){
-      return (Display.direction === "vert")? new VertEvaluator() : new HoriEvaluator();
+      var body_selector = Selectors.get("body") || new Selector("body", {flow:Display.flow});
+      var flow = body_selector.getValue().flow || Display.flow;
+      return (flow === "tb-rl" || flow === "tb-lr")? new VertEvaluator() : new HoriEvaluator();
     },
     /**
        evaluate {@link Nehan.Box}, output {@link Nehan.Page}.

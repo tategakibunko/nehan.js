@@ -22,13 +22,13 @@ var Display = {
   root:"document",
 
   /**
-     standard inline direction, "vert" or "hori".
+     standard flow, "tb-rl" or "tb-lr" or "lr-tb".
 
      @memberof Nehan.Display
      @type {String}
-     @default "vert"
+     @default "tb-rl"
   */
-  direction:"vert",
+  flow:"tb-rl",
   /**
      standard box flow for "vert" and "hori".
 
@@ -39,17 +39,6 @@ var Display = {
   boxFlow:{
     hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
     vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
-  },
-  /**
-     standard paging direction for "vert" and "hori". "lr" means left to right, "rl" means right to left.
-     
-     @memberof Nehan.Display
-     @type {Object}
-     @default {hori:"lr", vert:"rl"}
-  */
-  pagingDirection:{
-    hori:"lr", // paging direction 'left to right'
-    vert:"rl"  // paging direction 'right to left'
   },
   /**
      standard page width, used when Style["body"].width is not defined.
@@ -224,13 +213,6 @@ var Display = {
   },
   /**
      @memberof Nehan.Display
-     @return {String} "lr" or "rl"
-  */
-  getPagingDirection : function(){
-    return this.pagingDirection[this.direction];
-  },
-  /**
-     @memberof Nehan.Display
      @return {string}
   */
   getVertBlockDir: function(){
@@ -252,8 +234,9 @@ var Display = {
      @return {Nehan.BoxFlow}
   */
   getStdBoxFlow : function(){
-    var flow_name = this.boxFlow[this.direction];
-    return BoxFlows.getByName(flow_name);
+    //var flow_name = this.boxFlow[this.direction];
+    //return BoxFlows.getByName(flow_name);
+    return BoxFlows.getByName(this.flow);
   },
   /**
      @memberof Nehan.Display

@@ -26,18 +26,20 @@ Nehan.Break = (function(){
       return this.value === "avoid";
     },
     /**
+       true if breaking at first page of 2-page spread.
        @memberof Nehan.Break
        @return {boolean}
      */
-    isFirst : function(){
-      return (Display.getPagingDirection() === "lr")? (this.value === "left") : (this.value === "right");
+    isFirst : function(flow){
+      return flow.isLeftToRight()? (this.value === "left") : (this.value === "right");
     },
     /**
+       true if breaking at second page of 2-page spread.
        @memberof Nehan.Break
        @return {boolean}
      */
-    isSecond : function(){
-      return (Display.getPagingDirection() === "lr")? (this.value === "right") : (this.value === "left");
+    isSecond : function(flow){
+      return flow.isLeftToRight()? (this.value === "right") : (this.value === "left");
     },
     /**
        (TODO)

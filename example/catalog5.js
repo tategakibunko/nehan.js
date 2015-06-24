@@ -4,14 +4,24 @@ var LayoutTest = (function(){
   };
 
   var create_engine = function(opt){
+    var dir = opt.direction || "vert";
+    var flow = (dir === "vert")? "tb-rl" : "lr-tb";
     var engine = Nehan.setup({
+      style:{
+	body:{
+	  flow:flow,
+	  fontSize:(opt.fontSize || 16),
+	  width:(opt.width || 500),
+	  height:400
+	},
+      },
       display:{
-	root:"body",
-	direction:(opt.direction || "vert"),
-	fontSize:(opt.fontSize || 16),
-	width:(opt.width || 500),
+	root:"body"
+	//direction:(opt.direction || "vert"),
+	//fontSize:(opt.fontSize || 16),
+	//width:(opt.width || 500),
 	//height:(opt.height || 450)
-	height:400
+	//height:400
       }
     });
 
