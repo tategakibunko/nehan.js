@@ -110,7 +110,7 @@ var LayoutEvaluator = (function(){
       }.bind(this));
       var oncreate = tree.getOnCreate();
       if(oncreate){
-	oncreate(new EvalContext(dom, tree));
+	oncreate(new DomCreateContext(dom, tree));
       }
       return dom;
     },

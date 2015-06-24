@@ -128,7 +128,7 @@ var sources = [
   "src/selector-prop-context.js",
   "src/selector-context.js",
   "src/style-context.js",
-  "src/eval-context.js",
+  "src/dom-create-context.js",
   "src/cursor-context.js",
   "src/block-context.js",
   "src/inline-context.js",
