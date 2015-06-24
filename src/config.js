@@ -77,14 +77,6 @@ var Config = {
   useVerticalGlyphIfEnable:true,
 
   /**
-     calculate strict alphabetical metrics using hidden canvas.
-     @memberof Nehan.Config
-     @type {boolean}
-     @default true
-   */
-  useStrictWordMetrics:true,
-
-  /**
      enable ommiting element by start tag.
      @memberof Nehan.Config
      @type {boolean}

@@ -220,7 +220,7 @@ var InlineContext = (function(){
       //    [char][word]<br>[char(head_ng)]
       // => [char][word1]<br>[word2][char(head_ng)]
       // so nothing to justify.
-      if(tail && tail instanceof Word && tail.isDivided()){
+      if(tail && tail instanceof Nehan.Word && tail.isDivided()){
 	return null;
       }
 

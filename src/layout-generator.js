@@ -235,7 +235,7 @@ var LayoutGenerator = (function(){
     switch(markup_name){
     case "word":
       return new TokenStream(markup_content, {
-	tokens:[new Word(markup_content)]
+	tokens:[new Nehan.Word(markup_content)]
       });
     case "ruby":
       return new RubyTokenStream(markup_content);
@@ -343,7 +343,7 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createTextGenerator = function(style, text){
-    if(text instanceof Tcy || text instanceof Word){
+    if(text instanceof Tcy || text instanceof Nehan.Word){
       return new TextGenerator(this.style, new TokenStream(text.getData(), {
 	tokens:[text]
       }));

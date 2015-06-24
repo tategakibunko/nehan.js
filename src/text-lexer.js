@@ -31,7 +31,7 @@ var TextLexer = (function (){
       } else if(str.length === 2 && str.match(__rex_tcy)){
 	return new Tcy(this._stepBuff(str.length));
       }
-      return new Word(this._stepBuff(str.length));
+      return new Nehan.Word(this._stepBuff(str.length));
     }
     str = this._getByRex(__rex_char_ref);
     if(str){

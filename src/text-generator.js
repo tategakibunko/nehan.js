@@ -42,7 +42,7 @@ var TextGenerator = (function(){
       // skip head space for first word element if not 'white-space:pre'
       if(is_head_output && context.getInlineCurMeasure() === 0 && element instanceof Nehan.Char && element.isWhiteSpace() && !this.style.isPre()){
 	var next = this.stream.peek();
-	if(next && next instanceof Word){
+	if(next && next instanceof Nehan.Word){
 	  continue; // skip head space
 	}
       }

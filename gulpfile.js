@@ -92,6 +92,7 @@ var sources = [
   "src/text-metrics.js",
   "src/text.js",
   "src/char.js",
+  "src/word.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
@@ -103,7 +104,6 @@ var sources = [
   "src/anim.js",
   "src/selectors.js",
   "src/token.js",
-  "src/word.js",
   "src/tcy.js",
   "src/ruby.js",
   "src/list-style-type.js",

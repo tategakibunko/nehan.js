@@ -21,7 +21,7 @@ var Token = {
     return (
       token instanceof Nehan.Text ||
       token instanceof Nehan.Char ||
-      token instanceof Word ||
+      token instanceof Nehan.Word ||
       token instanceof Tcy ||
       token instanceof Ruby
     );
@@ -40,7 +40,7 @@ var Token = {
      @return {boolean}
   */
   isWord : function(token){
-    return token instanceof Word;
+    return token instanceof Nehan.Word;
   },
   /**
      @memberof Nehan.Token

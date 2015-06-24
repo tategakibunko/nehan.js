@@ -135,7 +135,7 @@ var InlineGenerator = (function(){
     //console.log("inline token:%o", token);
 
     // text block
-    if(token instanceof Nehan.Text || token instanceof Tcy || token instanceof Word){
+    if(token instanceof Nehan.Text || token instanceof Tcy || token instanceof Nehan.Word){
       this.setChildLayout(this._createTextGenerator(this.style, token));
       return this.yieldChildLayout(context);
     }

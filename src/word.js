@@ -1,4 +1,4 @@
-var Word = (function(){
+Nehan.Word = (function(){
 
   var __cut_word_by_metrics = function(word, font, measure){
     for(var i = word.data.length - 1; i >= 1; i--){
@@ -6,7 +6,7 @@ var Word = (function(){
       var part_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, head_part));
       //console.log("head_part:%s(%d) for %d", head_part, part_measure, measure);
       if(part_measure <= measure){
-	var head_word = new Word(head_part, true);
+	var head_word = new Nehan.Word(head_part, true);
 	head_word.bodySize = measure;
 	return head_word;
       }
@@ -17,7 +17,7 @@ var Word = (function(){
   var __cut_word_rough = function(word, font, measure){
     var half_size = Math.round(font.size / 2);
     var head_count = Math.round(measure / half_size);
-    var head_word = new Word(word.data.substring(0, head_count), true);
+    var head_word = new Nehan.Word(word.data.substring(0, head_count), true);
     head_word.bodySize = measure;
     return head_word
   };
@@ -165,7 +165,7 @@ var Word = (function(){
     */
     setMetrics : function(flow, font){
       var rough_measure = Math.ceil(this.data.length * font.size * 0.5);
-      if(Config.useStrictWordMetrics && Nehan.TextMetrics.isEnable()){
+      if(Nehan.TextMetrics.isEnable()){
 	var text_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, this.data));
 	//console.log("[%s]:%d(rough = %d)", this.data, text_measure, rough_measure);
 	this.bodySize = Math.max(text_measure, rough_measure); // use longer one
