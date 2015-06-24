@@ -1,4 +1,4 @@
-var Partition = (function(){
+Nehan.Partition = (function(){
   /**
      @memberof Nehan
      @class Partition
@@ -79,7 +79,7 @@ var Partition = (function(){
       var merged_punits =  Nehan.List.mapi(this._punits, function(i, punit){
 	return punit.mergeTo(partition.get(i));
       });
-      return new Partition(merged_punits);
+      return new Nehan.Partition(merged_punits);
     },
     /**
        @memberof Nehan.Partition

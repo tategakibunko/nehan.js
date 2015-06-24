@@ -8159,6 +8159,196 @@ Nehan.Kerning = {
   }
 };
 
+Nehan.PartitionUnit = (function(){
+  /**
+     @memberof Nehan
+     @class PartitionUnit
+     @classdesc abstraction for unit size of partition.
+     @constructor
+     @param opt {Object}
+     @param opt.weight {int} - partition weight, larger one gets more measure.
+     @param opt.isStatic {boolean} - if true, size is fixed.
+  */
+  function PartitionUnit(opt){
+    this.weight = opt.weight || 0;
+    this.isStatic = opt.isStatic || false;
+  }
+
+  PartitionUnit.prototype = {
+    /**
+       get unit size in px.
+
+       @memberof Nehan.PartitionUnit
+       @param measure {int}
+       @param total_weight {int}
+       @return {int} size in px
+    */
+    getSize : function(measure, total_weight){
+      return Math.floor(measure * this.weight / total_weight);
+    },
+    /**
+       @memberof Nehan.PartitionUnit
+       @param punit {Nehan.ParitionUnit}
+       @return {Nehan.PartitionUnit}
+    */
+    mergeTo : function(punit){
+      if(this.isStatic && !punit.isStatic){
+	return this;
+      }
+      if(!this.isStatic && punit.isStatic){
+	return punit;
+      }
+      return (this.weight > punit.weight)? this : punit;
+    }
+  };
+
+  return PartitionUnit;
+})();
+
+
+Nehan.Partition = (function(){
+  /**
+     @memberof Nehan
+     @class Partition
+     @classdesc abstraction for partition of measure size.
+     @constructor
+     @param punits {Array.<PartitionUnit>}
+  */
+  function Partition(punits){
+    this._punits = punits || []; // partition units
+  }
+
+  var __levelize = function(sizes, min_size){
+    // filter parts that is smaller than min_size.
+    var smaller_parts = Nehan.List.filter(sizes, function(size){ return size < min_size; });
+
+    // if all elements has enough space for min_size, nothing to do.
+    if(smaller_parts.length === 0){
+      return sizes;
+    }
+
+    // total size that must be added to small parts.
+    var delta_plus_total = Nehan.List.fold(smaller_parts, 0, function(ret, size){ return ret + (min_size - size); });
+
+    // filter parts that has enough space.
+    var larger_parts = Nehan.List.filter(sizes, function(size){
+      return size - min_size >= min_size; // check if size is more than min_size and over even if min_size is subtracted.
+    });
+
+    // if there are no enough rest space, nothing to do.
+    if(larger_parts.length === 0){
+      return sizes;
+    }
+
+    var delta_minus_avg = Math.floor(delta_plus_total / larger_parts.length);
+    return Nehan.List.map(sizes, function(size){
+      return (size < min_size)? min_size : ((size - min_size >= min_size)? size - delta_minus_avg : size);
+    });
+  };
+
+  Partition.prototype = {
+    /**
+       @memberof Nehan.Partition
+       @param index {int}
+       @return {Nehan.PartitionUnit}
+    */
+    get : function(index){
+      return this._punits[index] || null;
+    },
+    /**
+       @memberof Nehan.Partition
+       @return {int}
+    */
+    getLength : function(){
+      return this._punits.length;
+    },
+    /**
+       @memberof Nehan.Partition
+       @return {int}
+    */
+    getTotalWeight : function(){
+      return Nehan.List.fold(this._punits, 0, function(ret, punit){
+	return ret + punit.weight;
+      });
+    },
+    /**
+       @memberof Nehan.Partition
+       @param partition {Nehan.Partition}
+       @return {Nehan.Partition}
+    */
+    mergeTo : function(partition){
+      if(this.getLength() !== partition.getLength()){
+	throw "Partition::mergeTo, invalid merge target(length not same)";
+      }
+      // merge(this._punits[0], partition._punits[0]),
+      // merge(this._punits[1], partition._punits[1]),
+      // ...
+      // merge(this._punits[n-1], partition._punits[n-1])
+      var merged_punits =  Nehan.List.mapi(this._punits, function(i, punit){
+	return punit.mergeTo(partition.get(i));
+      });
+      return new Nehan.Partition(merged_punits);
+    },
+    /**
+       @memberof Nehan.Partition
+       @param measure {int} - max measure size in px
+       @return {Array<int>} - divided size array
+    */
+    mapMeasure : function(measure){
+      var total_weight = this.getTotalWeight();
+      var sizes =  Nehan.List.map(this._punits, function(punit){
+	return punit.getSize(measure, total_weight);
+      });
+      return __levelize(sizes, Nehan.Display.minTableCellSize);
+    }
+  };
+
+  return Partition;
+})();
+
+
+// key : partition count
+// value : Partition
+Nehan.PartitionHashSet = (function(){
+  /**
+     @memberof Nehan
+     @class PartitionHashSet
+     @classdesc hash set to manage partitioning of layout. key = partition_count, value = {@link Nehan.Partition}.
+     @extends {Nehan.HashSet}
+   */
+  function PartitionHashSet(){
+    Nehan.HashSet.call(this);
+  }
+  Nehan.Class.extend(PartitionHashSet, Nehan.HashSet);
+
+  /**
+     @memberof Nehan.PartitionHashSet
+     @param old_part {Nehan.Partition}
+     @param new_part {Nehan.Partition}
+     @return {Nehan.Partition}
+  */
+  PartitionHashSet.prototype.merge = function(old_part, new_part){
+    return old_part.mergeTo(new_part);
+  };
+
+  /**
+     get partition size(in px) array.
+
+     @memberof Nehan.PartitionHashSet
+     @param opt {Object}
+     @param opt.partitionCount {int}
+     @param opt.measure {int}
+     @return {Array.<int>}
+  */
+  PartitionHashSet.prototype.getSizes = function(opt){
+    var partition = this.get(opt.partitionCount);
+    return partition.mapMeasure(opt.measure);
+  };
+
+  return PartitionHashSet;
+})();
+
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -10790,196 +10980,6 @@ var PageStream = (function(){
   };
 
   return PageStream;
-})();
-
-
-var PartitionUnit = (function(){
-  /**
-     @memberof Nehan
-     @class PartitionUnit
-     @classdesc abstraction for unit size of partition.
-     @constructor
-     @param opt {Object}
-     @param opt.weight {int} - partition weight, larger one gets more measure.
-     @param opt.isStatic {boolean} - if true, size is fixed.
-  */
-  function PartitionUnit(opt){
-    this.weight = opt.weight || 0;
-    this.isStatic = opt.isStatic || false;
-  }
-
-  PartitionUnit.prototype = {
-    /**
-       get unit size in px.
-
-       @memberof Nehan.PartitionUnit
-       @param measure {int}
-       @param total_weight {int}
-       @return {int} size in px
-    */
-    getSize : function(measure, total_weight){
-      return Math.floor(measure * this.weight / total_weight);
-    },
-    /**
-       @memberof Nehan.PartitionUnit
-       @param punit {Nehan.ParitionUnit}
-       @return {Nehan.PartitionUnit}
-    */
-    mergeTo : function(punit){
-      if(this.isStatic && !punit.isStatic){
-	return this;
-      }
-      if(!this.isStatic && punit.isStatic){
-	return punit;
-      }
-      return (this.weight > punit.weight)? this : punit;
-    }
-  };
-
-  return PartitionUnit;
-})();
-
-
-var Partition = (function(){
-  /**
-     @memberof Nehan
-     @class Partition
-     @classdesc abstraction for partition of measure size.
-     @constructor
-     @param punits {Array.<PartitionUnit>}
-  */
-  function Partition(punits){
-    this._punits = punits || []; // partition units
-  }
-
-  var __levelize = function(sizes, min_size){
-    // filter parts that is smaller than min_size.
-    var smaller_parts = Nehan.List.filter(sizes, function(size){ return size < min_size; });
-
-    // if all elements has enough space for min_size, nothing to do.
-    if(smaller_parts.length === 0){
-      return sizes;
-    }
-
-    // total size that must be added to small parts.
-    var delta_plus_total = Nehan.List.fold(smaller_parts, 0, function(ret, size){ return ret + (min_size - size); });
-
-    // filter parts that has enough space.
-    var larger_parts = Nehan.List.filter(sizes, function(size){
-      return size - min_size >= min_size; // check if size is more than min_size and over even if min_size is subtracted.
-    });
-
-    // if there are no enough rest space, nothing to do.
-    if(larger_parts.length === 0){
-      return sizes;
-    }
-
-    var delta_minus_avg = Math.floor(delta_plus_total / larger_parts.length);
-    return Nehan.List.map(sizes, function(size){
-      return (size < min_size)? min_size : ((size - min_size >= min_size)? size - delta_minus_avg : size);
-    });
-  };
-
-  Partition.prototype = {
-    /**
-       @memberof Nehan.Partition
-       @param index {int}
-       @return {Nehan.PartitionUnit}
-    */
-    get : function(index){
-      return this._punits[index] || null;
-    },
-    /**
-       @memberof Nehan.Partition
-       @return {int}
-    */
-    getLength : function(){
-      return this._punits.length;
-    },
-    /**
-       @memberof Nehan.Partition
-       @return {int}
-    */
-    getTotalWeight : function(){
-      return Nehan.List.fold(this._punits, 0, function(ret, punit){
-	return ret + punit.weight;
-      });
-    },
-    /**
-       @memberof Nehan.Partition
-       @param partition {Nehan.Partition}
-       @return {Nehan.Partition}
-    */
-    mergeTo : function(partition){
-      if(this.getLength() !== partition.getLength()){
-	throw "Partition::mergeTo, invalid merge target(length not same)";
-      }
-      // merge(this._punits[0], partition._punits[0]),
-      // merge(this._punits[1], partition._punits[1]),
-      // ...
-      // merge(this._punits[n-1], partition._punits[n-1])
-      var merged_punits =  Nehan.List.mapi(this._punits, function(i, punit){
-	return punit.mergeTo(partition.get(i));
-      });
-      return new Partition(merged_punits);
-    },
-    /**
-       @memberof Nehan.Partition
-       @param measure {int} - max measure size in px
-       @return {Array<int>} - divided size array
-    */
-    mapMeasure : function(measure){
-      var total_weight = this.getTotalWeight();
-      var sizes =  Nehan.List.map(this._punits, function(punit){
-	return punit.getSize(measure, total_weight);
-      });
-      return __levelize(sizes, Nehan.Display.minTableCellSize);
-    }
-  };
-
-  return Partition;
-})();
-
-
-// key : partition count
-// value : Partition
-var PartitionHashSet = (function(){
-  /**
-     @memberof Nehan
-     @class PartitionHashSet
-     @classdesc hash set to manage partitioning of layout. key = partition_count, value = {@link Nehan.Partition}.
-     @extends {Nehan.HashSet}
-   */
-  function PartitionHashSet(){
-    Nehan.HashSet.call(this);
-  }
-  Nehan.Class.extend(PartitionHashSet, Nehan.HashSet);
-
-  /**
-     @memberof Nehan.PartitionHashSet
-     @param old_part {Nehan.Partition}
-     @param new_part {Nehan.Partition}
-     @return {Nehan.Partition}
-  */
-  PartitionHashSet.prototype.merge = function(old_part, new_part){
-    return old_part.mergeTo(new_part);
-  };
-
-  /**
-     get partition size(in px) array.
-
-     @memberof Nehan.PartitionHashSet
-     @param opt {Object}
-     @param opt.partitionCount {int}
-     @param opt.measure {int}
-     @return {Array.<int>}
-  */
-  PartitionHashSet.prototype.getSizes = function(opt){
-    var partition = this.get(opt.partitionCount);
-    return partition.mapMeasure(opt.measure);
-  };
-
-  return PartitionHashSet;
 })();
 
 
@@ -16056,7 +16056,7 @@ var TableGenerator = (function(){
   Nehan.Class.extend(TableGenerator, BlockGenerator);
 
   TableGenerator.prototype._createAutoPartition = function(stream){
-    var pset = new PartitionHashSet();
+    var pset = new Nehan.PartitionHashSet();
     while(stream.hasNext()){
       var token = stream.get();
       if(token === null){
@@ -16091,13 +16091,13 @@ var TableGenerator = (function(){
     var partition_units = Nehan.List.map(cell_tags, function(cell_tag){
       return this._getPartitionUnit(cell_tag, partition_count);
     }.bind(this));
-    return new Partition(partition_units);
+    return new Nehan.Partition(partition_units);
   };
 
   TableGenerator.prototype._getPartitionUnit = function(cell_tag, partition_count){
     var measure = cell_tag.getAttr("measure") || cell_tag.getAttr("width") || null;
     if(measure){
-      return new PartitionUnit({weight:measure, isStatic:true});
+      return new Nehan.PartitionUnit({weight:measure, isStatic:true});
     }
     var content = cell_tag.getContent();
     var lines = cell_tag.getContent().replace(/<br \/>/g, "\n").replace(/<br>/g, "\n").split("\n");
@@ -16112,7 +16112,7 @@ var TableGenerator = (function(){
 
     // but confirm that weight is more than single font size of parent style.
     weight = Math.max(this.style.getFontSize(), weight);
-    return new PartitionUnit({weight:weight, isStatic:false});
+    return new Nehan.PartitionUnit({weight:weight, isStatic:false});
   };
 
   return TableGenerator;

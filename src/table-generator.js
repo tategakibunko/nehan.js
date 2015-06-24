@@ -32,7 +32,7 @@ var TableGenerator = (function(){
   Nehan.Class.extend(TableGenerator, BlockGenerator);
 
   TableGenerator.prototype._createAutoPartition = function(stream){
-    var pset = new PartitionHashSet();
+    var pset = new Nehan.PartitionHashSet();
     while(stream.hasNext()){
       var token = stream.get();
       if(token === null){
@@ -67,13 +67,13 @@ var TableGenerator = (function(){
     var partition_units = Nehan.List.map(cell_tags, function(cell_tag){
       return this._getPartitionUnit(cell_tag, partition_count);
     }.bind(this));
-    return new Partition(partition_units);
+    return new Nehan.Partition(partition_units);
   };
 
   TableGenerator.prototype._getPartitionUnit = function(cell_tag, partition_count){
     var measure = cell_tag.getAttr("measure") || cell_tag.getAttr("width") || null;
     if(measure){
-      return new PartitionUnit({weight:measure, isStatic:true});
+      return new Nehan.PartitionUnit({weight:measure, isStatic:true});
     }
     var content = cell_tag.getContent();
     var lines = cell_tag.getContent().replace(/<br \/>/g, "\n").replace(/<br>/g, "\n").split("\n");
@@ -88,7 +88,7 @@ var TableGenerator = (function(){
 
     // but confirm that weight is more than single font size of parent style.
     weight = Math.max(this.style.getFontSize(), weight);
-    return new PartitionUnit({weight:weight, isStatic:false});
+    return new Nehan.PartitionUnit({weight:weight, isStatic:false});
   };
 
   return TableGenerator;

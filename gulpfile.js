@@ -104,6 +104,9 @@ var sources = [
   "src/text-empha-pos.js",
   "src/text-empha.js",
   "src/kerning.js",
+  "src/partition-unit.js",
+  "src/partition.js",
+  "src/partition-hash-set.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
@@ -122,9 +125,6 @@ var sources = [
   "src/ruby-token-stream.js",
   "src/page-evaluator.js",
   "src/page-stream.js",
-  "src/partition-unit.js",
-  "src/partition.js",
-  "src/partition-hash-set.js",
   "src/selector-prop-context.js",
   "src/selector-context.js",
   "src/style-context.js",

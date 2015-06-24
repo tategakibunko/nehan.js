@@ -1,6 +1,6 @@
 // key : partition count
 // value : Partition
-var PartitionHashSet = (function(){
+Nehan.PartitionHashSet = (function(){
   /**
      @memberof Nehan
      @class PartitionHashSet

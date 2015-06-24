@@ -1,4 +1,4 @@
-var PartitionUnit = (function(){
+Nehan.PartitionUnit = (function(){
   /**
      @memberof Nehan
      @class PartitionUnit
