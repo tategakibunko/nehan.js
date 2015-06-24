@@ -223,7 +223,7 @@ var VertEvaluator = (function(){
     return this._createElement("img", {
       className:"nehan-img-char",
       attrs:{
-	src:chr.getImgSrc(palette_color)
+	src:chr.getImgSrc(Display.fontImgRoot, palette_color)
       },
       css:chr.getCssVertImgChar(line)
     });

@@ -7391,6 +7391,12 @@ var Char = (function(){
   var __rex_half_char = /[\w!\.\?\/:#;"',]/;
   var __rex_half_kana = /[\uff65-\uff9f]/;
   var __rex_half_kana_small = /[\uff67-\uff6f]/;
+  var __space_size_rate = {
+    thinsp:0.2, // &thinsp;
+    nbsp:0.38,  // &nbsp;
+    ensp:0.5,   // &ensp;
+    emsp:1.0    // &emsp;
+  };
 
   Char.prototype = {
     /**
@@ -7704,13 +7710,13 @@ var Char = (function(){
 	this._setupNbsp();
 	break;
       case "&thinsp;":
-	this.vscale = this.hscale = Display.spaceSizeRate.thinsp;
+	this.vscale = this.hscale = __space_size_rate.thinsp;
 	break;
       case "&ensp;":
-	this.vscale = this.hscale = Display.spaceSizeRate.ensp;
+	this.vscale = this.hscale = __space_size_rate.ensp;
 	break;
       case "&emsp;":
-	this.vscale = this.hscale = Display.spaceSizeRate.emsp;
+	this.vscale = this.hscale = __space_size_rate.emsp;
 	break;
       case "&#09;":
 	this._setupTabSpace();
@@ -7724,7 +7730,7 @@ var Char = (function(){
       }
     },
     _setupNbsp : function(){
-      this.vscale = this.hscale = Display.spaceSizeRate.nbsp;
+      this.vscale = this.hscale = __space_size_rate.nbsp;
     },
     _setupTabSpace : function(){
       this.vscale = this.hscale = Math.floor(Display.tabCount / 2);
@@ -7967,10 +7973,12 @@ var Char = (function(){
     },
     /**
        @memberof Nehan.Char
+       @param font_image_root {string}
+       @param color {Nehan.Color}
        @return {string}
      */
-    getImgSrc : function(color){
-      return [Display.fontImgRoot, this.img, color + ".png"].join("/");
+    getImgSrc : function(font_image_root, color){
+      return [font_image_root, this.img, color + ".png"].join("/");
     },
     /**
        @memberof Nehan.Char
@@ -16899,7 +16907,7 @@ var VertEvaluator = (function(){
     return this._createElement("img", {
       className:"nehan-img-char",
       attrs:{
-	src:chr.getImgSrc(palette_color)
+	src:chr.getImgSrc(Display.fontImgRoot, palette_color)
       },
       css:chr.getCssVertImgChar(line)
     });
