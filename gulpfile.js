@@ -109,7 +109,8 @@ var sources = [
   "src/partition-hash-set.js",
 
   // closed modules
-  // these modules/classes are referenced by Config/Style/LexingRule/Selectors module.
+  // these modules/classes are referenced by
+  // Config/Style/LexingRule/Selectors/DocumentContext module,
   // so independent from other engines.
   "src/nehan-setup-start.js", // closure start
   "src/config.js",
