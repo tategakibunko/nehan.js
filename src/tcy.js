@@ -1,4 +1,4 @@
-var Tcy = (function(){
+Nehan.Tcy = (function(){
   /**
      @memberof Nehan
      @class Tcy

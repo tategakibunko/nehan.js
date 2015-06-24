@@ -25,11 +25,11 @@ var TextLexer = (function (){
     if(str){
       if(str.length === 1){
 	if(__rex_half_single_tcy.test(str)){
-	  return new Tcy(this._stepBuff(1));
+	  return new Nehan.Tcy(this._stepBuff(1));
 	}
 	return new Nehan.Char(this._stepBuff(1), false);
       } else if(str.length === 2 && str.match(__rex_tcy)){
-	return new Tcy(this._stepBuff(str.length));
+	return new Nehan.Tcy(this._stepBuff(str.length));
       }
       return new Nehan.Word(this._stepBuff(str.length));
     }

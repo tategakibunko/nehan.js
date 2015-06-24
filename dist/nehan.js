@@ -7334,6 +7334,104 @@ Nehan.Word = (function(){
 })();
 
 
+Nehan.Tcy = (function(){
+  /**
+     @memberof Nehan
+     @class Tcy
+     @classdesc abstraction of tcy(tate-chu-yoko) character.
+     @constructor
+     @param tcy {String}
+  */
+  function Tcy(tcy){
+    this.data = tcy;
+    this._type = "tcy";
+  }
+
+  Tcy.prototype = {
+    /**
+       @memberof Nehan.Tcy
+       @return {bool}
+    */
+    isHeadNg: function(){
+      return false; // TODO
+    },
+    /**
+       @memberof Nehan.Tcy
+       @return {bool}
+    */
+    isTailNg: function(){
+      return false; // TODO
+    },
+    /**
+       @memberof Nehan.Tcy
+       @return {string}
+     */
+    getData : function(){
+      return this.data;
+    },
+    /**
+       @memberof Nehan.Tcy
+       @return {int}
+    */
+    getCharCount : function(){
+      return 1;
+    },
+    /**
+       @memberof Nehan.Tcy
+       @return {int}
+    */
+    getAdvance : function(flow, letter_spacing){
+      return this.bodySize + letter_spacing;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
+    getCssVert : function(line){
+      var css = {};
+      css["text-align"] = "center";
+      css["font-family"] = "monospace";
+      css["font-weight"] = "normal";
+      return css;
+    },
+    /**
+       @memberof Nehan.Char
+       @return {Object}
+    */
+    getCssHori : function(line){
+      var css = {};
+      if(this.data.length === 1){
+	css.display = "inline-block";
+	css.width = "1em";
+	css["text-align"] = "center";
+      }
+      return css;
+    },
+    /**
+       @memberof Nehan.Tcy
+       @return {boolean}
+    */
+    hasMetrics : function(){
+      return (typeof this.bodySize != "undefined");
+    },
+    /**
+       @memberof Nehan.Tcy
+       @param flow {Nehan.BoxFlow}
+       @param font {Nehan.Font}
+    */
+    setMetrics : function(flow, font){
+      if(flow.isTextVertical()){
+	this.bodySize = font.size;
+      } else {
+	this.bodySize = (this.data.length <= 1)? font.size : Math.floor(1.2 * font.size);
+      }
+    }
+  };
+
+  return Tcy;
+})();
+
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -8690,7 +8788,7 @@ var Token = {
       token instanceof Nehan.Text ||
       token instanceof Nehan.Char ||
       token instanceof Nehan.Word ||
-      token instanceof Tcy ||
+      token instanceof Nehan.Tcy ||
       token instanceof Ruby
     );
   },
@@ -8716,7 +8814,7 @@ var Token = {
      @return {boolean}
   */
   isTcy : function(token){
-    return token instanceof Tcy;
+    return token instanceof Nehan.Tcy;
   },
   /**
      @memberof Nehan.Token
@@ -8724,7 +8822,7 @@ var Token = {
      @return {boolean}
   */
   isEmphaTargetable : function(token){
-    return token instanceof Nehan.Char || token instanceof Tcy;
+    return token instanceof Nehan.Char || token instanceof Nehan.Tcy;
   },
   /**
      @memberof Nehan.Token
@@ -8743,104 +8841,6 @@ var Token = {
     return token instanceof Nehan.Char && token.isWhiteSpace();
   }
 };
-
-
-var Tcy = (function(){
-  /**
-     @memberof Nehan
-     @class Tcy
-     @classdesc abstraction of tcy(tate-chu-yoko) character.
-     @constructor
-     @param tcy {String}
-  */
-  function Tcy(tcy){
-    this.data = tcy;
-    this._type = "tcy";
-  }
-
-  Tcy.prototype = {
-    /**
-       @memberof Nehan.Tcy
-       @return {bool}
-    */
-    isHeadNg: function(){
-      return false; // TODO
-    },
-    /**
-       @memberof Nehan.Tcy
-       @return {bool}
-    */
-    isTailNg: function(){
-      return false; // TODO
-    },
-    /**
-       @memberof Nehan.Tcy
-       @return {string}
-     */
-    getData : function(){
-      return this.data;
-    },
-    /**
-       @memberof Nehan.Tcy
-       @return {int}
-    */
-    getCharCount : function(){
-      return 1;
-    },
-    /**
-       @memberof Nehan.Tcy
-       @return {int}
-    */
-    getAdvance : function(flow, letter_spacing){
-      return this.bodySize + letter_spacing;
-    },
-    /**
-       @memberof Nehan.Char
-       @return {Object}
-    */
-    getCssVert : function(line){
-      var css = {};
-      css["text-align"] = "center";
-      css["font-family"] = "monospace";
-      css["font-weight"] = "normal";
-      return css;
-    },
-    /**
-       @memberof Nehan.Char
-       @return {Object}
-    */
-    getCssHori : function(line){
-      var css = {};
-      if(this.data.length === 1){
-	css.display = "inline-block";
-	css.width = "1em";
-	css["text-align"] = "center";
-      }
-      return css;
-    },
-    /**
-       @memberof Nehan.Tcy
-       @return {boolean}
-    */
-    hasMetrics : function(){
-      return (typeof this.bodySize != "undefined");
-    },
-    /**
-       @memberof Nehan.Tcy
-       @param flow {Nehan.BoxFlow}
-       @param font {Nehan.Font}
-    */
-    setMetrics : function(flow, font){
-      if(flow.isTextVertical()){
-	this.bodySize = font.size;
-      } else {
-	this.bodySize = (this.data.length <= 1)? font.size : Math.floor(1.2 * font.size);
-      }
-    }
-  };
-
-  return Tcy;
-})();
 
 
 var Ruby = (function(){
@@ -9916,11 +9916,11 @@ var TextLexer = (function (){
     if(str){
       if(str.length === 1){
 	if(__rex_half_single_tcy.test(str)){
-	  return new Tcy(this._stepBuff(1));
+	  return new Nehan.Tcy(this._stepBuff(1));
 	}
 	return new Nehan.Char(this._stepBuff(1), false);
       } else if(str.length === 2 && str.match(__rex_tcy)){
-	return new Tcy(this._stepBuff(str.length));
+	return new Nehan.Tcy(this._stepBuff(str.length));
       }
       return new Nehan.Word(this._stepBuff(str.length));
     }
@@ -14383,7 +14383,7 @@ var LayoutGenerator = (function(){
     var markup_content = style.getMarkupContent();
     if(style.getTextCombine() === "horizontal" || markup_name === "tcy"){
       return new TokenStream(markup_content, {
-	tokens:[new Tcy(markup_content)]
+	tokens:[new Nehan.Tcy(markup_content)]
       });
     }
     switch(markup_name){
@@ -14497,7 +14497,7 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createTextGenerator = function(style, text){
-    if(text instanceof Tcy || text instanceof Nehan.Word){
+    if(text instanceof Nehan.Tcy || text instanceof Nehan.Word){
       return new TextGenerator(this.style, new TokenStream(text.getData(), {
 	tokens:[text]
       }));
@@ -14875,7 +14875,7 @@ var InlineGenerator = (function(){
     //console.log("inline token:%o", token);
 
     // text block
-    if(token instanceof Nehan.Text || token instanceof Tcy || token instanceof Nehan.Word){
+    if(token instanceof Nehan.Text || token instanceof Nehan.Tcy || token instanceof Nehan.Word){
       this.setChildLayout(this._createTextGenerator(this.style, token));
       return this.yieldChildLayout(context);
     }

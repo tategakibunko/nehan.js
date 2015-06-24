@@ -22,7 +22,7 @@ var Token = {
       token instanceof Nehan.Text ||
       token instanceof Nehan.Char ||
       token instanceof Nehan.Word ||
-      token instanceof Tcy ||
+      token instanceof Nehan.Tcy ||
       token instanceof Ruby
     );
   },
@@ -48,7 +48,7 @@ var Token = {
      @return {boolean}
   */
   isTcy : function(token){
-    return token instanceof Tcy;
+    return token instanceof Nehan.Tcy;
   },
   /**
      @memberof Nehan.Token
@@ -56,7 +56,7 @@ var Token = {
      @return {boolean}
   */
   isEmphaTargetable : function(token){
-    return token instanceof Nehan.Char || token instanceof Tcy;
+    return token instanceof Nehan.Char || token instanceof Nehan.Tcy;
   },
   /**
      @memberof Nehan.Token

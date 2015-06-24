@@ -229,7 +229,7 @@ var LayoutGenerator = (function(){
     var markup_content = style.getMarkupContent();
     if(style.getTextCombine() === "horizontal" || markup_name === "tcy"){
       return new TokenStream(markup_content, {
-	tokens:[new Tcy(markup_content)]
+	tokens:[new Nehan.Tcy(markup_content)]
       });
     }
     switch(markup_name){
@@ -343,7 +343,7 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createTextGenerator = function(style, text){
-    if(text instanceof Tcy || text instanceof Nehan.Word){
+    if(text instanceof Nehan.Tcy || text instanceof Nehan.Word){
       return new TextGenerator(this.style, new TokenStream(text.getData(), {
 	tokens:[text]
       }));
