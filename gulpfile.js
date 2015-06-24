@@ -91,6 +91,7 @@ var sources = [
   "src/box-flows.js",
   "src/text-metrics.js",
   "src/text.js",
+  "src/char.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
@@ -102,7 +103,6 @@ var sources = [
   "src/anim.js",
   "src/selectors.js",
   "src/token.js",
-  "src/char.js",
   "src/word.js",
   "src/tcy.js",
   "src/ruby.js",

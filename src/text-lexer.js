@@ -27,7 +27,7 @@ var TextLexer = (function (){
 	if(__rex_half_single_tcy.test(str)){
 	  return new Tcy(this._stepBuff(1));
 	}
-	return new Char(this._stepBuff(1), false);
+	return new Nehan.Char(this._stepBuff(1), false);
       } else if(str.length === 2 && str.match(__rex_tcy)){
 	return new Tcy(this._stepBuff(str.length));
       }
@@ -35,10 +35,10 @@ var TextLexer = (function (){
     }
     str = this._getByRex(__rex_char_ref);
     if(str){
-      return new Char(this._stepBuff(str.length), true);
+      return new Nehan.Char(this._stepBuff(str.length), true);
     }
     str = this.buff.substring(0, 1);
-    return new Char(this._stepBuff(1), false);
+    return new Nehan.Char(this._stepBuff(1), false);
   };
 
   TextLexer.prototype._getByRex = function(rex){

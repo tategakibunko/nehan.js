@@ -1,4 +1,4 @@
-var Char = (function(){
+Nehan.Char = (function(){
   /**
      @memberof Nehan
      @class Char

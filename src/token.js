@@ -20,7 +20,7 @@ var Token = {
   isText : function(token){
     return (
       token instanceof Nehan.Text ||
-      token instanceof Char ||
+      token instanceof Nehan.Char ||
       token instanceof Word ||
       token instanceof Tcy ||
       token instanceof Ruby
@@ -32,7 +32,7 @@ var Token = {
      @return {boolean}
   */
   isChar : function(token){
-    return token instanceof Char;
+    return token instanceof Nehan.Char;
   },
   /**
      @memberof Nehan.Token
@@ -56,7 +56,7 @@ var Token = {
      @return {boolean}
   */
   isEmphaTargetable : function(token){
-    return token instanceof Char || token instanceof Tcy;
+    return token instanceof Nehan.Char || token instanceof Tcy;
   },
   /**
      @memberof Nehan.Token
@@ -64,7 +64,7 @@ var Token = {
      @return {boolean}
   */
   isNewLine : function(token){
-    return token instanceof Char && token.isNewLine();
+    return token instanceof Nehan.Char && token.isNewLine();
   },
   /**
      @memberof Nehan.Token
@@ -72,7 +72,7 @@ var Token = {
      @return {boolean}
   */
   isWhiteSpace : function(token){
-    return token instanceof Char && token.isWhiteSpace();
+    return token instanceof Nehan.Char && token.isWhiteSpace();
   }
 };
 

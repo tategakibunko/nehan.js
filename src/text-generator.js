@@ -40,7 +40,7 @@ var TextGenerator = (function(){
 	break;
       }
       // skip head space for first word element if not 'white-space:pre'
-      if(is_head_output && context.getInlineCurMeasure() === 0 && element instanceof Char && element.isWhiteSpace() && !this.style.isPre()){
+      if(is_head_output && context.getInlineCurMeasure() === 0 && element instanceof Nehan.Char && element.isWhiteSpace() && !this.style.isPre()){
 	var next = this.stream.peek();
 	if(next && next instanceof Word){
 	  continue; // skip head space
@@ -49,7 +49,7 @@ var TextGenerator = (function(){
       // if token is last one and maybe tail text, check tail/head NG between two inline generators.
       if(Config.justify && !this.stream.hasNext() && !context.hasInlineSpaceFor(measure + next_head_measure)){
 	// avoid tail/head NG between two generators
-	if(element instanceof Char && element.isTailNg() || is_next_head_ng){
+	if(element instanceof Nehan.Char && element.isTailNg() || is_next_head_ng){
 	  context.setLineBreak(true);
 	  context.setJustified(true);
 	  //console.log("justified at %o:type:%s", (element.data || ""), (is_next_head_ng? "head" : "tail"));
@@ -133,13 +133,13 @@ var TextGenerator = (function(){
   TextGenerator.prototype._peekParentNextHeadChar = function(token){
     if(token instanceof Nehan.Text){
       var head_c1 = token.getContent().substring(0,1);
-      return new Char(head_c1);
+      return new Nehan.Char(head_c1);
     } else if(token instanceof Nehan.Tag){
       if(token.name === "ruby"){
 	return null; // generally, ruby is not both tail-NG and head-NG.
       }
       var head_c1 = token.getContent().replace(/^[\s]*<.+?>/, "").substring(0,1);
-      return new Char(head_c1);
+      return new Nehan.Char(head_c1);
     }
     return null;
   };
@@ -234,7 +234,7 @@ var TextGenerator = (function(){
 
     // first new-line and tab are treated as single half space.
     if(token.isNewLine() || token.isTabSpace()){
-      Char.call(token, " "); // update by half-space
+      Nehan.Char.call(token, " "); // update by half-space
     }
     // if white-space is not new-line, use first one.
     return this._getText(context, token);
@@ -265,7 +265,7 @@ var TextGenerator = (function(){
   TextGenerator.prototype._setTextMetrics = function(context, token){
     // if charactor token, set kerning before setting metrics.
     // because some additional space is added if kerning is enabled or not.
-    if(token instanceof Char && token.isKerningChar() && Config.kerning){
+    if(token instanceof Nehan.Char && token.isKerningChar() && Config.kerning){
       this._setCharKerning(context, token);
     }
     token.setMetrics(this.style.flow, this.style.getFont());

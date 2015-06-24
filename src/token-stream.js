@@ -239,9 +239,9 @@ var TokenStream = (function(){
 	if(token === null){
 	  break;
 	}
-	if(token instanceof Char && token.isLigature()){
+	if(token instanceof Nehan.Char && token.isLigature()){
 	  var last = Nehan.List.last(this.tokens);
-	  if(last instanceof Char){
+	  if(last instanceof Nehan.Char){
 	    last.setLigature(token.data);
 	    continue;
 	  }

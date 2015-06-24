@@ -255,10 +255,10 @@ var InlineContext = (function(){
        @return {bool}
     */
     justifyDangling : function(head, head_next){
-      if(!(head instanceof Char) || !head.isHeadNg()){
+      if(!(head instanceof Nehan.Char) || !head.isHeadNg()){
 	return false;
       }
-      if(head_next instanceof Char && head_next.isHeadNg()){
+      if(head_next instanceof Nehan.Char && head_next.isHeadNg()){
 	return false;
       }
       return true;
