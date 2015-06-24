@@ -79,7 +79,7 @@ var Box = (function(){
     toString : function(){
       var texts = __filter_text(this.elements || []);
       return Nehan.List.fold(texts, "", function(ret, text){
-	var str = (text instanceof Ruby)? text.getRbString() : (text.data || "");
+	var str = (text instanceof Nehan.Ruby)? text.getRbString() : (text.data || "");
 	return ret + str;
       });
     },

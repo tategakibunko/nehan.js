@@ -23,7 +23,7 @@ var Token = {
       token instanceof Nehan.Char ||
       token instanceof Nehan.Word ||
       token instanceof Nehan.Tcy ||
-      token instanceof Ruby
+      token instanceof Nehan.Ruby
     );
   },
   /**

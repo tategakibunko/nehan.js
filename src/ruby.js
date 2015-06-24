@@ -1,4 +1,4 @@
-var Ruby = (function(){
+Nehan.Ruby = (function(){
   /**
      @memberof Nehan
      @class Ruby

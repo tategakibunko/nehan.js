@@ -42,7 +42,7 @@ var RubyTokenStream = (function(){
 	rbs = this._parseRb(token.getContent());
       }
     }
-    return new Ruby(rbs, rt);
+    return new Nehan.Ruby(rbs, rt);
   };
 
   RubyTokenStream.prototype._parseRb = function(content){

@@ -94,6 +94,7 @@ var sources = [
   "src/char.js",
   "src/word.js",
   "src/tcy.js",
+  "src/ruby.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
@@ -105,7 +106,6 @@ var sources = [
   "src/anim.js",
   "src/selectors.js",
   "src/token.js",
-  "src/ruby.js",
   "src/list-style-type.js",
   "src/list-style-pos.js",
   "src/list-style-image.js",
