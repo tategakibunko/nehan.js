@@ -5,7 +5,7 @@
 
  @namespace Nehan.Kerning
 */
-var Kerning = {
+Nehan.Kerning = {
   /**
      @memberof Nehan.Kerning
      @param cur_char(zenkaku) {Nehan.Char}

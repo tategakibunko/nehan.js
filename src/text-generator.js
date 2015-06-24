@@ -275,7 +275,7 @@ var TextGenerator = (function(){
     var next_token = this.stream.peek();
     var prev_text = context.getInlineLastElement();
     var next_text = next_token && Nehan.Token.isText(next_token)? next_token : null;
-    Kerning.set(char_token, prev_text, next_text);
+    Nehan.Kerning.set(char_token, prev_text, next_text);
   };
 
   TextGenerator.prototype._getWord = function(context, token){
