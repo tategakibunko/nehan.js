@@ -21,8 +21,8 @@ var ListStyleImage = (function(){
     */
     getMarkerHtml : function(count){
       var url = this.image.url;
-      var width = this.image.width || Display.fontSize;
-      var height = this.image.height || Display.fontSize;
+      var width = this.image.width || Nehan.Display.fontSize;
+      var height = this.image.height || Nehan.Display.fontSize;
       return Nehan.Html.tagSingle("img", {
 	"src":url,
 	"class":"nehan-list-image",

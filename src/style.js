@@ -15,7 +15,7 @@
   --------------------------------------------
 
     [examples]
-    Assume that Display.direction is "hori" and Display["hori"] is "lr-tb".
+    Assume that Nehan.Display.direction is "hori" and Display["hori"] is "lr-tb".
 
     ex1. {margin:{before:"10px"}} // => {margin:{top:"10px"}}
     ex2. {float:"start"} // => {float:"left"}.
@@ -77,7 +77,7 @@
 
   'flip' means toggle Display["hori"] and Display["vert"].
   for example, assume that Display["hori"] is "lr-tb", and Display["vert"] is "tb-rl",
-  and current document direction(Display.direction) is "hori",
+  and current document direction(Nehan.Display.direction) is "hori",
   flow:"flip" means Display["vert"], "tb-rl".
 </pre>
 */
@@ -681,31 +681,31 @@ var Style = {
   // font-size classes
   //-------------------------------------------------------
   ".xx-large":{
-    "font-size": Display.fontSizeNames["xx-large"]
+    "font-size": Nehan.Display.fontSizeNames["xx-large"]
   },
   ".x-large":{
-    "font-size": Display.fontSizeNames["x-large"]
+    "font-size": Nehan.Display.fontSizeNames["x-large"]
   },
   ".large":{
-    "font-size": Display.fontSizeNames.large
+    "font-size": Nehan.Display.fontSizeNames.large
   },
   ".medium":{
-    "font-size": Display.fontSizeNames.medium
+    "font-size": Nehan.Display.fontSizeNames.medium
   },
   ".small":{
-    "font-size": Display.fontSizeNames.small
+    "font-size": Nehan.Display.fontSizeNames.small
   },
   ".x-small":{
-    "font-size": Display.fontSizeNames["x-small"]
+    "font-size": Nehan.Display.fontSizeNames["x-small"]
   },
   ".xx-small":{
-    "font-size": Display.fontSizeNames["xx-small"]
+    "font-size": Nehan.Display.fontSizeNames["xx-small"]
   },
   ".larger":{
-    "font-size": Display.fontSizeNames.larger
+    "font-size": Nehan.Display.fontSizeNames.larger
   },
   ".smaller":{
-    "font-size": Display.fontSizeNames.smaller
+    "font-size": Nehan.Display.fontSizeNames.smaller
   },
   //-------------------------------------------------------
   // box-sizing classes

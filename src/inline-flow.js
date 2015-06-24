@@ -1,4 +1,4 @@
-var InlineFlow = (function(){
+Nehan.InlineFlow = (function(){
   /**
      @memberof Nehan
      @class InlineFlow

@@ -121,7 +121,7 @@ var Ruby = (function(){
        @param letter_spacing {int}
     */
     setMetrics : function(flow, font, letter_spacing){
-      this.rtFontSize = Display.getRtFontSize(font.size);
+      this.rtFontSize = Nehan.Display.getRtFontSize(font.size);
       var advance_rbs = Nehan.List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font);
 	return ret + rb.getAdvance(flow, letter_spacing);

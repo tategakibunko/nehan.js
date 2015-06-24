@@ -34,6 +34,280 @@
 var Nehan = Nehan || {};
 Nehan.version = "5.1.1";
 
+/**
+   standard page settings.
+   @namespace Nehan.Display
+*/
+Nehan.Display = {
+  /**
+     <pre>
+      define root where content text starts from.
+      'body' or 'html' or 'document' are enabled.
+
+      1. 'document'
+         &lt;!doctype xxx&gt; tag is included in content text.
+      2. 'html'
+         &lt;head&gt; and &lt;html&gt; are included in content text.
+      3. 'body'
+         &lt;body&gt; or content of body itself is included in content text.
+     </pre>
+     @memberof Nehan.Display
+     @type {String}
+     @default "document"
+  */
+  root:"document",
+
+  /**
+     standard flow, "tb-rl" or "tb-lr" or "lr-tb".
+
+     @memberof Nehan.Display
+     @type {String}
+     @default "tb-rl"
+  */
+  flow:"tb-rl",
+  /**
+     standard box flow for "vert" and "hori".
+
+     @memberof Nehan.Display
+     @type {Object}
+     @default {hori:"lr-tb", vert:"tb-rl"}
+  */
+  boxFlow:{
+    hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
+    vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
+  },
+  /**
+     standard page width, used when Style["body"].width is not defined.
+
+     @memberof Nehan.Display
+     @type {int}
+     @default screen.width
+  */
+  width: screen.width,
+  /**
+     standard page height, used when Style["body"].height is not defined.
+
+     @memberof Nehan.Display
+     @type {int}
+     @default screen.height
+  */
+  height: screen.height,
+  /**
+     standard font size, used when Style["body"]["font-size"] is not defined.
+
+     @memberof Nehan.Display
+     @type {int}
+     @default 16
+  */
+  fontSize:16,
+  /**
+     standard minimum font size.
+
+     @memberof Nehan.Display
+     @type {int}
+     @default 12
+  */
+  minFontSize:12,
+  /**
+     standard maximum font size.
+
+     @memberof Nehan.Display
+     @type {int}
+     @default 90
+  */
+  maxFontSize:90,
+  /**
+     standard minimum table cell size. if table-layout is set to 'auto', all sizes of cell are larger than this value.
+
+     @memberof Nehan.Display
+     @type {int}
+     @default 48
+  */
+  minTableCellSize:48,
+  /**
+     standard rate of ruby font size. used when Style.rt["font-size"] is not defined.
+
+     @memberof Nehan.Display
+     @type {Float}
+     @default 0.5
+  */
+  rubyRate:0.5,
+  /**
+     standard bold plus size rate, it's used to calculate sketchy bold metrics in the environment with no canvas element.
+
+     @memberof Nehan.Display
+  */
+  boldRate:0.12,
+  /**
+     standard line-height.
+
+     @memberof Nehan.Display
+     @type {Float}
+     @default 2.0
+  */
+  lineHeight: 2.0,
+  /**
+     various kind of spacing rate
+
+     @memberof Nehan.Display
+     @type {Array.<Float>}
+  */
+  spaceSizeRate:{
+    thinsp:0.2, // &thinsp;
+    nbsp:0.38,  // &nbsp;
+    ensp:0.5,   // &ensp;
+    emsp:1.0    // &emsp;
+  },
+  /**
+     count of tab space
+
+     @memberof Nehan.Display
+     @type {int}
+     @default 4
+  */
+  tabCount: 4,
+  /**
+     standard font color. this is required for browsers not supporting writing-mode to display vertical font-images.
+
+     @memberof Nehan.Display
+     @type {String}
+     @default "000000"
+  */
+  fontColor:"000000",
+  /**
+     standard link color. this is required for browsers not supporting writing-mode to display vertical font-images.
+
+     @memberof Nehan.Display
+     @type {String}
+     @default "0000FF"
+  */
+  linkColor:"0000FF",
+  /**
+     font image url. this is required for browsers not supporting writing-mode to display vertical font-images.
+
+     @memberof Nehan.Display
+     @type {String}
+     @default "https://raw.githubusercontent.com/tategakibunko/nehan.js/master/char-img"
+  */
+  fontImgRoot:"https://raw.githubusercontent.com/tategakibunko/nehan.js/master/char-img",
+
+  /**
+     standard font family. this is required to calculate proper text-metrics of alphabetical word.
+
+     @memberof Nehan.Display
+     @type {String}
+     @default "'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace"
+  */
+  fontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
+  //fontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+
+  /**
+     font sizes defined by name
+
+     @memberof Nehan.Display
+     @type {Object}
+     @default <pre>
+     {
+      "xx-large":"33px",
+      "x-large":"24px",
+      "large":"18px",
+      "medium":"16px",
+      "small":"13px",
+      "x-small":"10px",
+      "xx-small":"8px",
+      "larger":"1.2em",
+      "smaller":"0.8em"
+    }
+     </pre>
+  */
+  fontSizeNames:{
+    "xx-large":"33px",
+    "x-large":"24px",
+    "large":"18px",
+    "medium":"16px",
+    "small":"13px",
+    "x-small":"10px",
+    "xx-small":"8px",
+    "larger":"1.2em",
+    "smaller":"0.8em"
+  },
+  /**
+     @memberof Nehan.Display
+     @param flow {Nehan.BoxFlow}
+     @return {int}
+  */
+  getMeasure : function(flow){
+    return this[flow.getPropMeasure()];
+  },
+  /**
+     @memberof Nehan.Display
+     @param flow {Nehan.BoxFlow}
+     @return {int}
+  */
+  getExtent : function(flow){
+    return this[flow.getPropExtent()];
+  },
+  /**
+     @memberof Nehan.Display
+     @return {string}
+  */
+  getVertBlockDir: function(){
+    return this.boxFlow.vert.splice("-")[1];
+  },
+  /**
+     @memberof Nehan.Display
+     @return {Nehan.BoxFlow}
+  */
+  getStdFont : function(){
+    var font = new Nehan.Font(this.fontSize);
+    font.family = this.fontFamily;
+    font.weight = "normal";
+    font.style = "normal";
+    return font;
+  },
+  /**
+     @memberof Nehan.Display
+     @return {Nehan.BoxFlow}
+  */
+  getStdBoxFlow : function(){
+    //var flow_name = this.boxFlow[this.direction];
+    //return BoxFlows.getByName(flow_name);
+    return Nehan.BoxFlows.getByName(this.flow);
+  },
+  /**
+     @memberof Nehan.Display
+     @return {Nehan.BoxFlow}
+  */
+  getStdVertFlow : function(){
+    return Nehan.BoxFlows.getByName(this.boxFlow.vert);
+  },
+  /**
+     @memberof Nehan.Display
+     @return {Nehan.BoxFlow}
+  */
+  getStdHoriFlow : function(){
+    return Nehan.BoxFlows.getByName(this.boxFlow.hori);
+  },
+  /**
+     @memberof Nehan.Display
+     @return {int}
+  */
+  getRtFontSize : function(base_font_size){
+    return Math.round(this.rubyRate * base_font_size);
+  },
+  /**
+     @memberof Nehan.Display
+     @return {String}
+  */
+  getPaletteFontColor : function(color){
+    if(color.getValue().toLowerCase() !== this.fontColor.toLowerCase()){
+      return color.getPaletteValue();
+    }
+    return this.fontColor;
+  }
+};
+
+
 Nehan.Client = (function(){
   /**
      @memberof Nehan
@@ -5621,6 +5895,451 @@ Nehan.Flow = (function(){
 })();
 
 
+Nehan.BlockFlow = (function(){
+  /**
+     @memberof Nehan
+     @class BlockFlow
+     @classdesc flow direction at block level.
+     @constructor
+     @param dir {string} - "lr" or "rl" or "tb"
+     @extends Nehan.Flow
+     @example
+     * var bf = new BlockFlow("tb");
+  */
+  function BlockFlow(dir){
+    Nehan.Flow.call(this, dir);
+  }
+
+  Nehan.Class.extend(BlockFlow, Nehan.Flow);
+
+  /**
+     get flipped block direction. If direction is "tb", nothing happend.
+
+     @memberof Nehan.BlockFlow
+     @method flip
+     @return {string} fliped block direction
+     @example
+     * new BlockFlow("tb").flip(); // => "lr" or "rl"(nothing happened)
+     * new BlockFlow("lr").flip(); // => "tb"
+     * new BlockFlow("rl").flip(); // => "tb"
+  */
+  BlockFlow.prototype.flip = function(){
+    switch(this.dir){
+    case "lr": case "rl": return "tb";
+    case "tb": return Nehan.Display.getVertBlockdir();
+    default: return "";
+    }
+  };
+
+  /**
+     get physical directional property of logical before.
+
+     @memberof Nehan.BlockFlow
+     @method getPropBefore
+     @return {string}
+     @example
+     * new BlockFlow("tb").getPropBefore(); // => "top"
+     * new BlockFlow("lr").getPropBefore(); // => "left"
+     * new BlockFlow("rl").getPropBefore(); // => "right"
+  */
+  BlockFlow.prototype.getPropBefore = function(){
+    switch(this.dir){
+    case "lr": return "left";
+    case "rl": return "right";
+    case "tb": return "top";
+    default: return "";
+    }
+  };
+
+  /**
+     get physical directional property of logical before.
+
+     @memberof Nehan.BlockFlow
+     @method getPropAfter
+     @return {string}
+     @example
+     * new BlockFlow("tb").getPropAfter(); // => "bottom"
+     * new BlockFlow("lr").getPropAfter(); // => "right"
+     * new BlockFlow("rl").getPropAfter(); // => "left"
+  */
+  BlockFlow.prototype.getPropAfter = function(){
+    switch(this.dir){
+    case "lr": return "right";
+    case "rl": return "left";
+    case "tb": return "bottom";
+    default: return "";
+    }
+  };
+
+  return BlockFlow;
+})();
+
+
+Nehan.InlineFlow = (function(){
+  /**
+     @memberof Nehan
+     @class InlineFlow
+     @classdesc flow abstraction at inline level.
+     @constructor
+     @extends {Nehan.Flow}
+     @param dir {String} - "lr" or "rl"(but not supported) or "tb"
+   */
+  function InlineFlow(dir){
+    Nehan.Flow.call(this, dir);
+  }
+  Nehan.Class.extend(InlineFlow, Nehan.Flow);
+
+  /**
+     @memberof Nehan.InlineFlow
+     @return {String}
+     @example
+     * new InlineFlow("lr").getPropStart(); // "left"
+     * new InlineFlow("rl").getPropStart(); // "right"
+     * new InlineFlow("tb").getPropStart(); // "top"
+  */
+  InlineFlow.prototype.getPropStart = function(){
+    switch(this.dir){
+    case "lr": return "left";
+    case "rl": return "right";
+    case "tb": return "top";
+    default: return "";
+    }
+  };
+
+  /**
+     @memberof Nehan.InlineFlow
+     @return {String}
+     @example
+     * new InlineFlow("lr").getPropEnd(); // "right"
+     * new InlineFlow("rl").getPropEnd(); // "left"
+     * new InlineFlow("tb").getPropEnd(); // "bottom"
+  */
+  InlineFlow.prototype.getPropEnd = function(){
+    switch(this.dir){
+    case "lr": return "right";
+    case "rl": return "left";
+    case "tb": return "bottom";
+    default: return "";
+    }
+  };
+
+  return InlineFlow;
+})();
+
+
+Nehan.BoxFlow = (function(){
+  /**
+     @memberof Nehan
+     @class BoxFlow
+     @classdesc abstract inline and block direction
+     @constructor
+     @param indir {string} - "lr" or "tb"("rl" not supported yet)
+     @param blockdir {string} - "tb" or "lr" or "rl"
+  */
+  function BoxFlow(indir, blockdir){
+    this.inflow = new Nehan.InlineFlow(indir);
+    this.blockflow = new Nehan.BlockFlow(blockdir);
+  }
+
+  BoxFlow.prototype = {
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isTextLineFirst : function(){
+      if(this.isTextVertical() && this.blockflow.isLeftToRight()){
+	return true;
+      }
+      return false;
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isBlockflowVertical : function(){
+      return this.blockflow.isVertical();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isTextVertical : function(){
+      return this.inflow.isVertical();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isTextHorizontal : function(){
+      return this.inflow.isHorizontal();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isTextLeftToRight : function(){
+      return this.inflow.isLeftToRight();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isTextRightToLeft : function(){
+      return this.inflow.isRightToLeft();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isBlockLeftToRight : function(){
+      return this.blockflow.isLeftToRight();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {boolean}
+    */
+    isBlockRightToLeft : function(){
+      return this.blockflow.isRightToLeft();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {Object}
+    */
+    getCss : function(){
+      var css = {};
+
+      // notice that "float" property is converted into "cssFloat" in evaluation time.
+      if(this.isTextVertical()){
+	css["css-float"] = this.isBlockLeftToRight()? "left" : "right";
+      } else {
+	css["css-float"] = this.isTextLeftToRight()? "left" : "right";
+      }
+      return css;
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+       @example
+       * new BlockFlow("tb", "rl").getName(); // "tb-rl"
+       * new BlockFlow("lr", "tb").getName(); // "lr-tb"
+    */
+    getName : function(){
+      return [this.inflow.dir, this.blockflow.dir].join("-");
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {String}
+       @example
+       * new BlockFlow("tb", "rl").getTextHorizontalDir(); // "rl"
+       * new BlockFlow("tb", "lr").getTextHorizontalDir(); // "lr"
+       * new BlockFlow("lr", "tb").getTextHorizontalDir(); // "" (empty)
+    */
+    getTextHorizontalDir : function(){
+      if(this.isTextHorizontal()){
+	return this.inflow.dir;
+      }
+      return "";
+    },
+    /**
+       get physical property name from logical property.
+       @memberof Nehan.BoxFlow
+       @param prop {string} - logical direction name
+       @return {string}
+       @example
+       * new BlockFlow("tb", "rl").getProp("start"); // "top"
+       * new BlockFlow("lr", "tb").getProp("end"); // "right"
+    */
+    getProp : function(prop){
+      switch(prop){
+      case "start":
+	return this.getPropStart();
+      case "end":
+	return this.getPropEnd();
+      case "before":
+	return this.getPropBefore();
+      case "after":
+	return this.getPropAfter();
+      }
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
+    getPropStart : function(){
+      return this.inflow.getPropStart();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
+    getPropEnd : function(){
+      return this.inflow.getPropEnd();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
+    getPropBefore : function(){
+      return this.blockflow.getPropBefore();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
+    getPropAfter : function(){
+      return this.blockflow.getPropAfter();
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
+    getPropExtent : function(){
+      return this.isTextVertical()? "width" : "height";
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
+    getPropMeasure : function(){
+      return this.isTextVertical()? "height" : "width";
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
+    getPropWidth : function(){
+      return this.isTextVertical()? "extent" : "measure";
+    },
+    /**
+       @memberof Nehan.BoxFlow
+       @return {string}
+    */
+    getPropHeight : function(){
+      return this.isTextVertical()? "measure" : "extent";
+    },
+    /**
+       get flipped box flow, but result depends on setting of Nehan.Display.boxFlow.
+
+       @memberof Nehan.BoxFlow
+       @return {Nehan.BoxFlow}
+       @example
+       * // if  Nehan.Display.boxFlow.hori = "lr-tb"
+       * // and Nehan.Display.boxFlow.vert = "tb-rl"
+       * new BlockFlow("tb", "rl").getFlipFlow(); // BoxFlow("lr", "tb")
+       * new BlockFlow("lr", "tb").getFlipFlow(); // BoxFlow("tb", "rl")
+    */
+    getFlipFlow : function(){
+      return this.isTextVertical()? Nehan.Display.getStdHoriFlow() : Nehan.Display.getStdVertFlow();
+    },
+    /**
+       get physical box size interpreted by this box flow.
+
+       @memberof Nehan.BoxFlow
+       @param measure {int}
+       @param extent {int}
+       @return {Nehan.BoxSize}
+       @example
+       * new BoxFlow("lr", "tb").getBoxSize(100, 200); // BoxSize(100, 200)
+       * new BoxFlow("tb", "rl").getBoxSize(100, 200); // BoxSize(200, 100)
+       * new BoxFlow("tb", "lr").getBoxSize(100, 200); // BoxSize(200, 100)
+     */
+    getBoxSize : function(measure, extent){
+      var size = new Nehan.BoxSize(0, 0);
+      size[this.getPropMeasure()] = measure;
+      size[this.getPropExtent()] = extent;
+      return size;
+    }
+  };
+
+  return BoxFlow;
+})();
+
+
+/**
+   pre defined box flow collection.
+   @namespace Nehan.BoxFlows
+*/
+Nehan.BoxFlows = {
+  "tb-rl":(new Nehan.BoxFlow("tb", "rl")),
+  "tb-lr":(new Nehan.BoxFlow("tb", "lr")),
+  "lr-tb":(new Nehan.BoxFlow("lr", "tb")),
+  "rl-tb":(new Nehan.BoxFlow("rl", "tb")),
+  /**
+     get box flow by inflow and blockflow.
+
+     @memberof Nehan.BoxFlows
+     @param inflow {string} - "tb" or "lr"
+     @param blockflow {string} - "tb" or "lr" or "rl"
+     @return {Nehan.BoxFlow}
+  */
+  get: function(inflow, blockflow){
+    return this.getByName([inflow, blockflow].join("-"));
+  },
+  /**
+     get box flow by flow-name.
+
+     @memberof Nehan.BoxFlows
+     @param name {string} - "lr-tb" or "tb-rl" or "tb-lr"
+     @return {Nehan.BoxFlow}
+  */
+  getByName : function(name){
+    return this[name] || null;
+  }
+};
+
+/**
+   utility module to get more strict metrics using canvas.
+
+   @namespace Nehan.TextMetrics
+*/
+Nehan.TextMetrics = (function(){
+  var __canvas = document.createElement("canvas");
+  __canvas.style.width = Math.max(Nehan.Display.width, Nehan.Display.height) + "px";
+  __canvas.style.height = Nehan.Display.maxFontSize + "px";
+
+  var __canvas_context;
+  if(__canvas.getContext){
+    __canvas_context = __canvas.getContext("2d");
+    __canvas_context.textAlign = "left";
+  }
+
+  return {
+    /**
+       check if client browser is supported.
+
+       @memberof Nehan.TextMetrics
+       @return {boolean}
+    */
+    isEnable : function(){
+      return __canvas_context && (typeof __canvas_context.measureText !== "undefined");
+    },
+    /**
+       @memberof Nehan.TextMetrics
+       @param font {Nehan.Font}
+       @param text {String}
+       @return {Object} - {width:xxx, height:yyy}
+    */
+    getMetrics : function(font, text){
+      __canvas_context.font = font.toString(); // to get accurate metrics, font info is required.
+      // caution: this metrics is not always correct(especially webkit), but firefox is well done.
+      var metrics = __canvas_context.measureText(text);
+      return metrics;
+    },
+    /**
+       @memberof Nehan.TextMetrics
+       @param font {Nehan.Font}
+       @param text {String}
+       @return {int}
+    */
+    getMeasure : function(font, text){
+      var metrics = this.getMetrics(font, text);
+      //console.log("[%s] - %f", text, metrics.width);
+      return metrics.width;
+    }
+  };
+})();
+
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -5807,285 +6526,6 @@ var Config = {
 };
 
 /**
-   standard page settings.
-   @namespace Nehan.Display
-*/
-var Display = {
-  /**
-     <pre>
-      define root where content text starts from.
-      'body' or 'html' or 'document' are enabled.
-      
-      1. 'document'
-         &lt;!doctype xxx&gt; tag is included in content text.
-      2. 'html'
-         &lt;head&gt; and &lt;html&gt; are included in content text.
-      3. 'body'
-         &lt;body&gt; or content of body itself is included in content text.
-     </pre>
-     @memberof Nehan.Display
-     @type {String}
-     @default "document"
-  */
-  root:"document",
-
-  /**
-     standard flow, "tb-rl" or "tb-lr" or "lr-tb".
-
-     @memberof Nehan.Display
-     @type {String}
-     @default "tb-rl"
-  */
-  flow:"tb-rl",
-  /**
-     standard box flow for "vert" and "hori".
-
-     @memberof Nehan.Display
-     @type {Object}
-     @default {hori:"lr-tb", vert:"tb-rl"}
-  */
-  boxFlow:{
-    hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
-    vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
-  },
-  /**
-     standard page width, used when Style["body"].width is not defined.
-
-     @memberof Nehan.Display
-     @type {int}
-     @default screen.width
-  */
-  width: screen.width,
-  /**
-     standard page height, used when Style["body"].height is not defined.
-
-     @memberof Nehan.Display
-     @type {int}
-     @default screen.height
-  */
-  height: screen.height,
-  /**
-     standard font size, used when Style["body"]["font-size"] is not defined.
-
-     @memberof Nehan.Display
-     @type {int}
-     @default 16
-  */
-  fontSize:16,
-  /**
-     standard minimum font size.
-
-     @memberof Nehan.Display
-     @type {int}
-     @default 12
-  */
-  minFontSize:12,
-  /**
-     standard maximum font size.
-
-     @memberof Nehan.Display
-     @type {int}
-     @default 90
-  */
-  maxFontSize:90,
-  /**
-     standard minimum table cell size. if table-layout is set to 'auto', all sizes of cell are larger than this value.
-
-     @memberof Nehan.Display
-     @type {int}
-     @default 48
-  */
-  minTableCellSize:48,
-  /**
-     standard rate of ruby font size. used when Style.rt["font-size"] is not defined.
-
-     @memberof Nehan.Display
-     @type {Float}
-     @default 0.5
-  */
-  rubyRate:0.5,
-  /**
-     standard bold plus size rate, it's used to calculate sketchy bold metrics in the environment with no canvas element.
-
-     @memberof Nehan.Display
-  */
-  boldRate:0.12,
-  /**
-     standard line-height.
-
-     @memberof Nehan.Display
-     @type {Float}
-     @default 2.0
-  */
-  lineHeight: 2.0,
-  /**
-     various kind of spacing rate
-
-     @memberof Nehan.Display
-     @type {Array.<Float>}
-  */
-  spaceSizeRate:{
-    thinsp:0.2, // &thinsp;
-    nbsp:0.38,  // &nbsp;
-    ensp:0.5,   // &ensp;
-    emsp:1.0    // &emsp;
-  },
-  /**
-     count of tab space
-
-     @memberof Nehan.Display
-     @type {int}
-     @default 4
-  */
-  tabCount: 4,
-  /**
-     standard font color. this is required for browsers not supporting writing-mode to display vertical font-images.
-
-     @memberof Nehan.Display
-     @type {String}
-     @default "000000"
-  */
-  fontColor:"000000",
-  /**
-     standard link color. this is required for browsers not supporting writing-mode to display vertical font-images.
-
-     @memberof Nehan.Display
-     @type {String}
-     @default "0000FF"
-  */
-  linkColor:"0000FF",
-  /**
-     font image url. this is required for browsers not supporting writing-mode to display vertical font-images.
-
-     @memberof Nehan.Display
-     @type {String}
-     @default "https://raw.githubusercontent.com/tategakibunko/nehan.js/master/char-img"
-  */
-  fontImgRoot:"https://raw.githubusercontent.com/tategakibunko/nehan.js/master/char-img",
-
-  /**
-     standard font family. this is required to calculate proper text-metrics of alphabetical word.
-
-     @memberof Nehan.Display
-     @type {String}
-     @default "'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace"
-  */
-  fontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
-  //fontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-
-  /**
-     font sizes defined by name
-
-     @memberof Nehan.Display
-     @type {Object}
-     @default <pre>
-     {
-      "xx-large":"33px",
-      "x-large":"24px",
-      "large":"18px",
-      "medium":"16px",
-      "small":"13px",
-      "x-small":"10px",
-      "xx-small":"8px",
-      "larger":"1.2em",
-      "smaller":"0.8em"
-    }
-     </pre>
-  */
-  fontSizeNames:{
-    "xx-large":"33px",
-    "x-large":"24px",
-    "large":"18px",
-    "medium":"16px",
-    "small":"13px",
-    "x-small":"10px",
-    "xx-small":"8px",
-    "larger":"1.2em",
-    "smaller":"0.8em"
-  },
-  /**
-     @memberof Nehan.Display
-     @param flow {Nehan.BoxFlow}
-     @return {int}
-  */
-  getMeasure : function(flow){
-    return this[flow.getPropMeasure()];
-  },
-  /**
-     @memberof Nehan.Display
-     @param flow {Nehan.BoxFlow}
-     @return {int}
-  */
-  getExtent : function(flow){
-    return this[flow.getPropExtent()];
-  },
-  /**
-     @memberof Nehan.Display
-     @return {string}
-  */
-  getVertBlockDir: function(){
-    return this.boxFlow.vert.splice("-")[1];
-  },
-  /**
-     @memberof Nehan.Display
-     @return {Nehan.BoxFlow}
-  */
-  getStdFont : function(){
-    var font = new Nehan.Font(Display.fontSize);
-    font.family = Display.fontFamily;
-    font.weight = "normal";
-    font.style = "normal";
-    return font;
-  },
-  /**
-     @memberof Nehan.Display
-     @return {Nehan.BoxFlow}
-  */
-  getStdBoxFlow : function(){
-    //var flow_name = this.boxFlow[this.direction];
-    //return BoxFlows.getByName(flow_name);
-    return BoxFlows.getByName(this.flow);
-  },
-  /**
-     @memberof Nehan.Display
-     @return {Nehan.BoxFlow}
-  */
-  getStdVertFlow : function(){
-    return BoxFlows.getByName(this.boxFlow.vert);
-  },
-  /**
-     @memberof Nehan.Display
-     @return {Nehan.BoxFlow}
-  */
-  getStdHoriFlow : function(){
-    return BoxFlows.getByName(this.boxFlow.hori);
-  },
-  /**
-     @memberof Nehan.Display
-     @return {Float}
-  */
-  getRtFontSize : function(base_font_size){
-    var rt = Style.rt || null;
-    var rt_font_size = rt? rt["font-size"] : null;
-    if(rt === null || rt_font_size === null){
-      return Math.round(this.rubyRate * base_font_size);
-    }
-    return StyleContext.prototype._computeUnitSize.call(this, rt_font_size, base_font_size);
-  },
-  /**
-     @memberof Nehan.Display
-     @return {String}
-  */
-  getPaletteFontColor : function(color){
-    if(color.getValue().toLowerCase() !== this.fontColor.toLowerCase()){
-      return color.getPaletteValue();
-    }
-    return this.fontColor;
-  }
-};
-
-
-/**
    module of html lexing rule
 
    @namespace Nehan.LexingRule
@@ -6164,7 +6604,7 @@ var LexingRule = (function(){
   --------------------------------------------
 
     [examples]
-    Assume that Display.direction is "hori" and Display["hori"] is "lr-tb".
+    Assume that Nehan.Display.direction is "hori" and Display["hori"] is "lr-tb".
 
     ex1. {margin:{before:"10px"}} // => {margin:{top:"10px"}}
     ex2. {float:"start"} // => {float:"left"}.
@@ -6226,7 +6666,7 @@ var LexingRule = (function(){
 
   'flip' means toggle Display["hori"] and Display["vert"].
   for example, assume that Display["hori"] is "lr-tb", and Display["vert"] is "tb-rl",
-  and current document direction(Display.direction) is "hori",
+  and current document direction(Nehan.Display.direction) is "hori",
   flow:"flip" means Display["vert"], "tb-rl".
 </pre>
 */
@@ -6830,31 +7270,31 @@ var Style = {
   // font-size classes
   //-------------------------------------------------------
   ".xx-large":{
-    "font-size": Display.fontSizeNames["xx-large"]
+    "font-size": Nehan.Display.fontSizeNames["xx-large"]
   },
   ".x-large":{
-    "font-size": Display.fontSizeNames["x-large"]
+    "font-size": Nehan.Display.fontSizeNames["x-large"]
   },
   ".large":{
-    "font-size": Display.fontSizeNames.large
+    "font-size": Nehan.Display.fontSizeNames.large
   },
   ".medium":{
-    "font-size": Display.fontSizeNames.medium
+    "font-size": Nehan.Display.fontSizeNames.medium
   },
   ".small":{
-    "font-size": Display.fontSizeNames.small
+    "font-size": Nehan.Display.fontSizeNames.small
   },
   ".x-small":{
-    "font-size": Display.fontSizeNames["x-small"]
+    "font-size": Nehan.Display.fontSizeNames["x-small"]
   },
   ".xx-small":{
-    "font-size": Display.fontSizeNames["xx-small"]
+    "font-size": Nehan.Display.fontSizeNames["xx-small"]
   },
   ".larger":{
-    "font-size": Display.fontSizeNames.larger
+    "font-size": Nehan.Display.fontSizeNames.larger
   },
   ".smaller":{
-    "font-size": Display.fontSizeNames.smaller
+    "font-size": Nehan.Display.fontSizeNames.smaller
   },
   //-------------------------------------------------------
   // box-sizing classes
@@ -7689,13 +8129,13 @@ var Char = (function(){
 	this._setupNbsp();
 	break;
       case "&thinsp;":
-	this.vscale = this.hscale = Display.spaceSizeRate.thinsp;
+	this.vscale = this.hscale = Nehan.Display.spaceSizeRate.thinsp;
 	break;
       case "&ensp;":
-	this.vscale = this.hscale = Display.spaceSizeRate.ensp;
+	this.vscale = this.hscale = Nehan.Display.spaceSizeRate.ensp;
 	break;
       case "&emsp;":
-	this.vscale = this.hscale = Display.spaceSizeRate.emsp;
+	this.vscale = this.hscale = Nehan.Display.spaceSizeRate.emsp;
 	break;
       case "&#09;":
 	this._setupTabSpace();
@@ -7709,10 +8149,10 @@ var Char = (function(){
       }
     },
     _setupNbsp : function(){
-      this.vscale = this.hscale = Display.spaceSizeRate.nbsp;
+      this.vscale = this.hscale = Nehan.Display.spaceSizeRate.nbsp;
     },
     _setupTabSpace : function(){
-      this.vscale = this.hscale = Math.floor(Display.tabCount / 2);
+      this.vscale = this.hscale = Math.floor(Nehan.Display.tabCount / 2);
     },
     _setupNormal : function(code){
       // for half-size char, rotate 90 and half-scale in horizontal by default.
@@ -7956,7 +8396,7 @@ var Char = (function(){
        @return {string}
      */
     getImgSrc : function(color){
-      return [Display.fontImgRoot, this.img, color + ".png"].join("/");
+      return [Nehan.Display.fontImgRoot, this.img, color + ".png"].join("/");
     },
     /**
        @memberof Nehan.Char
@@ -8094,7 +8534,7 @@ var Word = (function(){
   var __cut_word_by_metrics = function(word, font, measure){
     for(var i = word.data.length - 1; i >= 1; i--){
       var head_part = word.data.substring(0, i);
-      var part_measure = Math.ceil(TextMetrics.getMeasure(font, head_part));
+      var part_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, head_part));
       //console.log("head_part:%s(%d) for %d", head_part, part_measure, measure);
       if(part_measure <= measure){
 	var head_word = new Word(head_part, true);
@@ -8114,7 +8554,7 @@ var Word = (function(){
   };
 
   var __cut_word = function(word, font, measure){
-    if(TextMetrics.isEnable()){
+    if(Nehan.TextMetrics.isEnable()){
       return __cut_word_by_metrics(word, font, measure);
     }
     return __cut_word_rough(word, font, measure);
@@ -8256,15 +8696,15 @@ var Word = (function(){
     */
     setMetrics : function(flow, font){
       var rough_measure = Math.ceil(this.data.length * font.size * 0.5);
-      if(Config.useStrictWordMetrics && TextMetrics.isEnable()){
-	var text_measure = Math.ceil(TextMetrics.getMeasure(font, this.data));
+      if(Config.useStrictWordMetrics && Nehan.TextMetrics.isEnable()){
+	var text_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, this.data));
 	//console.log("[%s]:%d(rough = %d)", this.data, text_measure, rough_measure);
 	this.bodySize = Math.max(text_measure, rough_measure); // use longer one
 	return;
       }
       this.bodySize = rough_measure;
       if(font.isBold()){
-	this.bodySize += Math.floor(Display.boldRate * this.bodySize);
+	this.bodySize += Math.floor(Nehan.Display.boldRate * this.bodySize);
       }
     },
     /**
@@ -8534,7 +8974,7 @@ var Ruby = (function(){
        @param letter_spacing {int}
     */
     setMetrics : function(flow, font, letter_spacing){
-      this.rtFontSize = Display.getRtFontSize(font.size);
+      this.rtFontSize = Nehan.Display.getRtFontSize(font.size);
       var advance_rbs = Nehan.List.fold(this.rbs, 0, function(ret, rb){
 	rb.setMetrics(flow, font);
 	return ret + rb.getAdvance(flow, letter_spacing);
@@ -8554,59 +8994,6 @@ var Ruby = (function(){
   };
 
   return Ruby;
-})();
-
-
-/**
-   utility module to get more strict metrics using canvas.
-
-   @namespace Nehan.TextMetrics
-*/
-var TextMetrics = (function(){
-  var __canvas = document.createElement("canvas");
-  __canvas.style.width = Math.max(Display.width, Display.height) + "px";
-  __canvas.style.height = Display.maxFontSize + "px";
-
-  var __canvas_context;
-  if(__canvas.getContext){
-    __canvas_context = __canvas.getContext("2d");
-    __canvas_context.textAlign = "left";
-  }
-
-  return {
-    /**
-       check if client browser is supported.
-
-       @memberof Nehan.TextMetrics
-       @return {boolean}
-    */
-    isEnable : function(){
-      return __canvas_context && (typeof __canvas_context.measureText !== "undefined");
-    },
-    /**
-       @memberof Nehan.TextMetrics
-       @param font {Nehan.Font}
-       @param text {String}
-       @return {Object} - {width:xxx, height:yyy}
-    */
-    getMetrics : function(font, text){
-      __canvas_context.font = font.toString(); // to get accurate metrics, font info is required.
-      // caution: this metrics is not always correct(especially webkit), but firefox is well done.
-      var metrics = __canvas_context.measureText(text);
-      return metrics;
-    },
-    /**
-       @memberof Nehan.TextMetrics
-       @param font {Nehan.Font}
-       @param text {String}
-       @return {int}
-    */
-    getMeasure : function(font, text){
-      var metrics = this.getMetrics(font, text);
-      //console.log("[%s] - %f", text, metrics.width);
-      return metrics.width;
-    }
-  };
 })();
 
 
@@ -8776,8 +9163,8 @@ var ListStyleImage = (function(){
     */
     getMarkerHtml : function(count){
       var url = this.image.url;
-      var width = this.image.width || Display.fontSize;
-      var height = this.image.height || Display.fontSize;
+      var width = this.image.width || Nehan.Display.fontSize;
+      var height = this.image.height || Nehan.Display.fontSize;
       return Nehan.Html.tagSingle("img", {
 	"src":url,
 	"class":"nehan-list-image",
@@ -8845,398 +9232,6 @@ var ListStyle = (function(){
 
   return ListStyle;
 })();
-
-var BlockFlow = (function(){
-  /**
-     @memberof Nehan
-     @class BlockFlow
-     @classdesc flow direction at block level.
-     @constructor
-     @param dir {string} - "lr" or "rl" or "tb"
-     @extends Nehan.Flow
-     @example
-     * var bf = new BlockFlow("tb");
-  */
-  function BlockFlow(dir){
-    Nehan.Flow.call(this, dir);
-  }
-
-  Nehan.Class.extend(BlockFlow, Nehan.Flow);
-
-  /**
-     get flipped block direction. If direction is "tb", nothing happend.
-
-     @memberof Nehan.BlockFlow
-     @method flip
-     @return {string} fliped block direction
-     @example
-     * new BlockFlow("tb").flip(); // => "lr" or "rl"(nothing happened)
-     * new BlockFlow("lr").flip(); // => "tb"
-     * new BlockFlow("rl").flip(); // => "tb"
-  */
-  BlockFlow.prototype.flip = function(){
-    switch(this.dir){
-    case "lr": case "rl": return "tb";
-    case "tb": return Display.getVertBlockdir();
-    default: return "";
-    }
-  };
-
-  /**
-     get physical directional property of logical before.
-
-     @memberof Nehan.BlockFlow
-     @method getPropBefore
-     @return {string}
-     @example
-     * new BlockFlow("tb").getPropBefore(); // => "top"
-     * new BlockFlow("lr").getPropBefore(); // => "left"
-     * new BlockFlow("rl").getPropBefore(); // => "right"
-  */
-  BlockFlow.prototype.getPropBefore = function(){
-    switch(this.dir){
-    case "lr": return "left";
-    case "rl": return "right";
-    case "tb": return "top";
-    default: return "";
-    }
-  };
-
-  /**
-     get physical directional property of logical before.
-
-     @memberof Nehan.BlockFlow
-     @method getPropAfter
-     @return {string}
-     @example
-     * new BlockFlow("tb").getPropAfter(); // => "bottom"
-     * new BlockFlow("lr").getPropAfter(); // => "right"
-     * new BlockFlow("rl").getPropAfter(); // => "left"
-  */
-  BlockFlow.prototype.getPropAfter = function(){
-    switch(this.dir){
-    case "lr": return "right";
-    case "rl": return "left";
-    case "tb": return "bottom";
-    default: return "";
-    }
-  };
-
-  return BlockFlow;
-})();
-
-
-var InlineFlow = (function(){
-  /**
-     @memberof Nehan
-     @class InlineFlow
-     @classdesc flow abstraction at inline level.
-     @constructor
-     @extends {Nehan.Flow}
-     @param dir {String} - "lr" or "rl"(but not supported) or "tb"
-   */
-  function InlineFlow(dir){
-    Nehan.Flow.call(this, dir);
-  }
-  Nehan.Class.extend(InlineFlow, Nehan.Flow);
-
-  /**
-     @memberof Nehan.InlineFlow
-     @return {String}
-     @example
-     * new InlineFlow("lr").getPropStart(); // "left"
-     * new InlineFlow("rl").getPropStart(); // "right"
-     * new InlineFlow("tb").getPropStart(); // "top"
-  */
-  InlineFlow.prototype.getPropStart = function(){
-    switch(this.dir){
-    case "lr": return "left";
-    case "rl": return "right";
-    case "tb": return "top";
-    default: return "";
-    }
-  };
-
-  /**
-     @memberof Nehan.InlineFlow
-     @return {String}
-     @example
-     * new InlineFlow("lr").getPropEnd(); // "right"
-     * new InlineFlow("rl").getPropEnd(); // "left"
-     * new InlineFlow("tb").getPropEnd(); // "bottom"
-  */
-  InlineFlow.prototype.getPropEnd = function(){
-    switch(this.dir){
-    case "lr": return "right";
-    case "rl": return "left";
-    case "tb": return "bottom";
-    default: return "";
-    }
-  };
-
-  return InlineFlow;
-})();
-
-
-var BoxFlow = (function(){
-  /**
-     @memberof Nehan
-     @class BoxFlow
-     @classdesc abstract inline and block direction
-     @constructor
-     @param indir {string} - "lr" or "tb"("rl" not supported yet)
-     @param blockdir {string} - "tb" or "lr" or "rl"
-  */
-  function BoxFlow(indir, blockdir){
-    this.inflow = new InlineFlow(indir);
-    this.blockflow = new BlockFlow(blockdir);
-  }
-
-  BoxFlow.prototype = {
-    /**
-       @memberof Nehan.BoxFlow
-       @return {boolean}
-    */
-    isTextLineFirst : function(){
-      if(this.isTextVertical() && this.blockflow.isLeftToRight()){
-	return true;
-      }
-      return false;
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {boolean}
-    */
-    isBlockflowVertical : function(){
-      return this.blockflow.isVertical();
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {boolean}
-    */
-    isTextVertical : function(){
-      return this.inflow.isVertical();
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {boolean}
-    */
-    isTextHorizontal : function(){
-      return this.inflow.isHorizontal();
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {boolean}
-    */
-    isTextLeftToRight : function(){
-      return this.inflow.isLeftToRight();
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {boolean}
-    */
-    isTextRightToLeft : function(){
-      return this.inflow.isRightToLeft();
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {boolean}
-    */
-    isBlockLeftToRight : function(){
-      return this.blockflow.isLeftToRight();
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {boolean}
-    */
-    isBlockRightToLeft : function(){
-      return this.blockflow.isRightToLeft();
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {Object}
-    */
-    getCss : function(){
-      var css = {};
-
-      // notice that "float" property is converted into "cssFloat" in evaluation time.
-      if(this.isTextVertical()){
-	css["css-float"] = this.isBlockLeftToRight()? "left" : "right";
-      } else {
-	css["css-float"] = this.isTextLeftToRight()? "left" : "right";
-      }
-      return css;
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {string}
-       @example
-       * new BlockFlow("tb", "rl").getName(); // "tb-rl"
-       * new BlockFlow("lr", "tb").getName(); // "lr-tb"
-    */
-    getName : function(){
-      return [this.inflow.dir, this.blockflow.dir].join("-");
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {String}
-       @example
-       * new BlockFlow("tb", "rl").getTextHorizontalDir(); // "rl"
-       * new BlockFlow("tb", "lr").getTextHorizontalDir(); // "lr"
-       * new BlockFlow("lr", "tb").getTextHorizontalDir(); // "" (empty)
-    */
-    getTextHorizontalDir : function(){
-      if(this.isTextHorizontal()){
-	return this.inflow.dir;
-      }
-      return "";
-    },
-    /**
-       get physical property name from logical property.
-       @memberof Nehan.BoxFlow
-       @param prop {string} - logical direction name
-       @return {string}
-       @example
-       * new BlockFlow("tb", "rl").getProp("start"); // "top"
-       * new BlockFlow("lr", "tb").getProp("end"); // "right"
-    */
-    getProp : function(prop){
-      switch(prop){
-      case "start":
-	return this.getPropStart();
-      case "end":
-	return this.getPropEnd();
-      case "before":
-	return this.getPropBefore();
-      case "after":
-	return this.getPropAfter();
-      }
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {string}
-    */
-    getPropStart : function(){
-      return this.inflow.getPropStart();
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {string}
-    */
-    getPropEnd : function(){
-      return this.inflow.getPropEnd();
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {string}
-    */
-    getPropBefore : function(){
-      return this.blockflow.getPropBefore();
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {string}
-    */
-    getPropAfter : function(){
-      return this.blockflow.getPropAfter();
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {string}
-    */
-    getPropExtent : function(){
-      return this.isTextVertical()? "width" : "height";
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {string}
-    */
-    getPropMeasure : function(){
-      return this.isTextVertical()? "height" : "width";
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {string}
-    */
-    getPropWidth : function(){
-      return this.isTextVertical()? "extent" : "measure";
-    },
-    /**
-       @memberof Nehan.BoxFlow
-       @return {string}
-    */
-    getPropHeight : function(){
-      return this.isTextVertical()? "measure" : "extent";
-    },
-    /**
-       get flipped box flow, but result depends on setting of Display.boxFlow.
-
-       @memberof Nehan.BoxFlow
-       @return {Nehan.BoxFlow}
-       @example
-       * // if  Display.boxFlow.hori = "lr-tb"
-       * // and Display.boxFlow.vert = "tb-rl"
-       * new BlockFlow("tb", "rl").getFlipFlow(); // BoxFlow("lr", "tb")
-       * new BlockFlow("lr", "tb").getFlipFlow(); // BoxFlow("tb", "rl")
-    */
-    getFlipFlow : function(){
-      return this.isTextVertical()? Display.getStdHoriFlow() : Display.getStdVertFlow();
-    },
-    /**
-       get physical box size interpreted by this box flow.
-
-       @memberof Nehan.BoxFlow
-       @param measure {int}
-       @param extent {int}
-       @return {Nehan.BoxSize}
-       @example
-       * new BoxFlow("lr", "tb").getBoxSize(100, 200); // BoxSize(100, 200)
-       * new BoxFlow("tb", "rl").getBoxSize(100, 200); // BoxSize(200, 100)
-       * new BoxFlow("tb", "lr").getBoxSize(100, 200); // BoxSize(200, 100)
-     */
-    getBoxSize : function(measure, extent){
-      var size = new Nehan.BoxSize(0, 0);
-      size[this.getPropMeasure()] = measure;
-      size[this.getPropExtent()] = extent;
-      return size;
-    }
-  };
-
-  return BoxFlow;
-})();
-
-
-/**
-   pre defined box flow collection.
-   @namespace Nehan.BoxFlows
-*/
-var BoxFlows = {
-  "tb-rl":(new BoxFlow("tb", "rl")),
-  "tb-lr":(new BoxFlow("tb", "lr")),
-  "lr-tb":(new BoxFlow("lr", "tb")),
-  "rl-tb":(new BoxFlow("rl", "tb")),
-  /**
-     get box flow by inflow and blockflow.
-
-     @memberof Nehan.BoxFlows
-     @param inflow {string} - "tb" or "lr"
-     @param blockflow {string} - "tb" or "lr" or "rl"
-     @return {Nehan.BoxFlow}
-  */
-  get: function(inflow, blockflow){
-    return this.getByName([inflow, blockflow].join("-"));
-  },
-  /**
-     get box flow by flow-name.
-
-     @memberof Nehan.BoxFlows
-     @param name {string} - "lr-tb" or "tb-rl" or "tb-lr"
-     @return {Nehan.BoxFlow}
-  */
-  getByName : function(name){
-    return this[name] || null;
-  }
-};
 
 var TextEmphaStyle = (function(){
   var __default_empha_style = "filled dot";
@@ -9367,7 +9362,7 @@ var TextEmpha = (function(){
     opt = opt || {};
     this.style = opt.style || new TextEmphaStyle();
     this.pos = opt.pos || new TextEmphaPos();
-    this.color = opt.color || new Nehan.Color(Display.fontColor);
+    this.color = opt.color || new Nehan.Color(Nehan.Display.fontColor);
   }
 
   TextEmpha.prototype = {
@@ -10486,8 +10481,8 @@ var PageEvaluator = (function(){
 
   PageEvaluator.prototype = {
     _getEvaluator : function(){
-      var body_selector = Selectors.get("body") || new Selector("body", {flow:Display.flow});
-      var flow = body_selector.getValue().flow || Display.flow;
+      var body_selector = Selectors.get("body") || new Selector("body", {flow:Nehan.Display.flow});
+      var flow = body_selector.getValue().flow || Nehan.Display.flow;
       return (flow === "tb-rl" || flow === "tb-lr")? new VertEvaluator() : new HoriEvaluator();
     },
     /**
@@ -10711,7 +10706,7 @@ var PageStream = (function(){
 	.replace(/<rt><\/rt>/gi, ""); // discard empty rt
     },
     _createGenerator : function(text){
-      switch(Display.root){
+      switch(Nehan.Display.root){
       case "document":
 	return new DocumentGenerator(text);
       case "html":
@@ -10946,7 +10941,7 @@ var Partition = (function(){
       var sizes =  Nehan.List.map(this._punits, function(punit){
 	return punit.getSize(measure, total_weight);
       });
-      return __levelize(sizes, Display.minTableCellSize);
+      return __levelize(sizes, Nehan.Display.minTableCellSize);
     }
   };
 
@@ -11031,7 +11026,7 @@ var SelectorPropContext = (function(){
     */
     getParentFlow : function(){
       var parent = this.getParentStyleContext();
-      return parent? parent.flow : Display.getStdBoxFlow();
+      return parent? parent.flow : Nehan.Display.getStdBoxFlow();
     },
     /**
        @memberof Nehan.SelectorPropContext
@@ -11160,7 +11155,7 @@ var SelectorContext = (function(){
     // so this._style.flow is not ready at this time, that is, we need to get the box-flow in manual.
     var parent_flow = this.getParentFlow();
     var flow_name = this.getCssAttr("flow", parent_flow.getName());
-    var flow = BoxFlows.getByName(flow_name);
+    var flow = Nehan.BoxFlows.getByName(flow_name);
     return (flow && flow.isTextVertical())? true : false;
   };
 
@@ -11526,7 +11521,7 @@ var StyleContext = (function(){
        @param measure {int}
     */
     initContextMeasure : function(measure){
-      this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : Display.getMeasure(this.flow));
+      this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : Nehan.Display.getMeasure(this.flow));
       this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
     },
     /**
@@ -11537,7 +11532,7 @@ var StyleContext = (function(){
        @param extent {int}
     */
     initContextExtent : function(extent){
-      this.outerExtent = extent || (this.parent? this.parent.contentExtent : Display.getExtent(this.flow));
+      this.outerExtent = extent || (this.parent? this.parent.contentExtent : Nehan.Display.getExtent(this.flow));
       this.contentExtent = this._computeContentExtent(this.outerExtent);
     },
     /**
@@ -12318,7 +12313,7 @@ var StyleContext = (function(){
        @return {Nehan.Font}
     */
     getFont : function(){
-      return this.font || (this.parent? this.parent.getFont() : Display.getStdFont());
+      return this.font || (this.parent? this.parent.getFont() : Nehan.Display.getStdFont());
     },
     /**
        @memberof Nehan.StyleContext
@@ -12382,7 +12377,7 @@ var StyleContext = (function(){
        @return {Nehan.Color}
     */
     getColor : function(){
-      return this.color || (this.parent? this.parent.getColor() : new Nehan.Color(Display.fontColor));
+      return this.color || (this.parent? this.parent.getColor() : new Nehan.Color(Nehan.Display.fontColor));
     },
     /**
        @memberof Nehan.StyleContext
@@ -12472,21 +12467,21 @@ var StyleContext = (function(){
        @return {int}
     */
     getParentFontSize : function(){
-      return this.parent? this.parent.getFontSize() : Display.fontSize;
+      return this.parent? this.parent.getFontSize() : Nehan.Display.fontSize;
     },
     /**
        @memberof Nehan.StyleContext
        @return {int}
     */
     getParentContentMeasure : function(){
-      return this.parent? this.parent.contentMeasure : Display.getMeasure(this.flow);
+      return this.parent? this.parent.contentMeasure : Nehan.Display.getMeasure(this.flow);
     },
     /**
        @memberof Nehan.StyleContext
        @return {int}
     */
     getParentContentExtent : function(){
-      return this.parent? this.parent.contentExtent : Display.getExtent(this.flow);
+      return this.parent? this.parent.contentExtent : Nehan.Display.getExtent(this.flow);
     },
     /**
        @memberof Nehan.StyleContext
@@ -12500,7 +12495,7 @@ var StyleContext = (function(){
        @return {float | int}
     */
     getLineHeight : function(){
-      return this.lineHeight || Display.lineHeight || 2;
+      return this.lineHeight || Nehan.Display.lineHeight || 2;
     },
     /**
        @memberof Nehan.StyleContext
@@ -12515,7 +12510,7 @@ var StyleContext = (function(){
     */
     getRubyTextBlockExtent : function(){
       var base_font_size = this.getFontSize();
-      var extent = Math.floor(base_font_size * (1 + Display.rubyRate));
+      var extent = Math.floor(base_font_size * (1 + Nehan.Display.rubyRate));
       return (base_font_size % 2 === 0)? extent : extent + 1;
     },
     /**
@@ -12729,16 +12724,16 @@ var StyleContext = (function(){
     },
     _computeFontSize : function(val, unit_size){
       var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
-      var size = Display.fontSizeNames[str] || str;
+      var size = Nehan.Display.fontSizeNames[str] || str;
       var max_size = this.getParentFontSize();
       var font_size = this._computeUnitSize(size, unit_size, max_size);
-      return Math.min(font_size, Display.maxFontSize);
+      return Math.min(font_size, Nehan.Display.maxFontSize);
     },
     _computeUnitSize : function(val, unit_size, max_size){
       var str = String(val);
       if(str.indexOf("rem") > 0){
 	var rem_scale = parseFloat(str.replace("rem",""));
-	return Math.round(Display.fontSize * rem_scale); // use root font-size
+	return Math.round(Nehan.Display.fontSize * rem_scale); // use root font-size
       }
       if(str.indexOf("em") > 0){
 	var em_scale = parseFloat(str.replace("em",""));
@@ -12892,14 +12887,14 @@ var StyleContext = (function(){
     },
     _loadFlow : function(){
       var value = this.getCssAttr("flow", "inherit");
-      var parent_flow = this.parent? this.parent.flow : Display.getStdBoxFlow();
+      var parent_flow = this.parent? this.parent.flow : Nehan.Display.getStdBoxFlow();
       if(value === "inherit"){
 	return parent_flow;
       }
       if(value === "flip"){
 	return parent_flow.getFlipFlow();
       }
-      return BoxFlows.getByName(value);
+      return Nehan.BoxFlows.getByName(value);
     },
     _loadPosition : function(){
       var value = this.getCssAttr("position", "static");
@@ -13259,7 +13254,7 @@ var StyleContext = (function(){
       if(value === "inherit" && this.parent && this.parent.lineHeight){
 	return this.parent.lineHeight;
       }
-      return parseFloat(value || Display.lineHeight);
+      return parseFloat(value || Nehan.Display.lineHeight);
     },
     _loadTextAlign : function(){
       var value = this.getCssAttr("text-align", "inherit");
@@ -16876,7 +16871,7 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalImgChar = function(line, chr){
-    var color = line.color || new Nehan.Color(Display.fontColor);
+    var color = line.color || new Nehan.Color(Nehan.Display.fontColor);
     var font_rgb = color.getRgb();
     var palette_color = Nehan.Palette.getColor(font_rgb).toUpperCase();
     return this._createElement("img", {
@@ -17093,7 +17088,7 @@ var HoriEvaluator = (function(){
 
 // set engine args
 Nehan.Args.copy(Config, __engine_args.config || {});
-Nehan.Args.copy2(Display, __engine_args.display || {});
+Nehan.Args.copy2(Nehan.Display, __engine_args.display || {});
 
 Selectors.setValues(Nehan.globalStyle || {}); // set global style.
 Selectors.setValues(__engine_args.style || {}); // set local style

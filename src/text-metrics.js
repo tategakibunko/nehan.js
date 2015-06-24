@@ -3,10 +3,10 @@
 
    @namespace Nehan.TextMetrics
 */
-var TextMetrics = (function(){
+Nehan.TextMetrics = (function(){
   var __canvas = document.createElement("canvas");
-  __canvas.style.width = Math.max(Display.width, Display.height) + "px";
-  __canvas.style.height = Display.maxFontSize + "px";
+  __canvas.style.width = Math.max(Nehan.Display.width, Nehan.Display.height) + "px";
+  __canvas.style.height = Nehan.Display.maxFontSize + "px";
 
   var __canvas_context;
   if(__canvas.getContext){

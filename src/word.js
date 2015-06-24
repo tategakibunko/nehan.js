@@ -3,7 +3,7 @@ var Word = (function(){
   var __cut_word_by_metrics = function(word, font, measure){
     for(var i = word.data.length - 1; i >= 1; i--){
       var head_part = word.data.substring(0, i);
-      var part_measure = Math.ceil(TextMetrics.getMeasure(font, head_part));
+      var part_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, head_part));
       //console.log("head_part:%s(%d) for %d", head_part, part_measure, measure);
       if(part_measure <= measure){
 	var head_word = new Word(head_part, true);
@@ -23,7 +23,7 @@ var Word = (function(){
   };
 
   var __cut_word = function(word, font, measure){
-    if(TextMetrics.isEnable()){
+    if(Nehan.TextMetrics.isEnable()){
       return __cut_word_by_metrics(word, font, measure);
     }
     return __cut_word_rough(word, font, measure);
@@ -165,15 +165,15 @@ var Word = (function(){
     */
     setMetrics : function(flow, font){
       var rough_measure = Math.ceil(this.data.length * font.size * 0.5);
-      if(Config.useStrictWordMetrics && TextMetrics.isEnable()){
-	var text_measure = Math.ceil(TextMetrics.getMeasure(font, this.data));
+      if(Config.useStrictWordMetrics && Nehan.TextMetrics.isEnable()){
+	var text_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, this.data));
 	//console.log("[%s]:%d(rough = %d)", this.data, text_measure, rough_measure);
 	this.bodySize = Math.max(text_measure, rough_measure); // use longer one
 	return;
       }
       this.bodySize = rough_measure;
       if(font.isBold()){
-	this.bodySize += Math.floor(Display.boldRate * this.bodySize);
+	this.bodySize += Math.floor(Nehan.Display.boldRate * this.bodySize);
       }
     },
     /**

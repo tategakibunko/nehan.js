@@ -340,13 +340,13 @@ var Char = (function(){
 	this._setupNbsp();
 	break;
       case "&thinsp;":
-	this.vscale = this.hscale = Display.spaceSizeRate.thinsp;
+	this.vscale = this.hscale = Nehan.Display.spaceSizeRate.thinsp;
 	break;
       case "&ensp;":
-	this.vscale = this.hscale = Display.spaceSizeRate.ensp;
+	this.vscale = this.hscale = Nehan.Display.spaceSizeRate.ensp;
 	break;
       case "&emsp;":
-	this.vscale = this.hscale = Display.spaceSizeRate.emsp;
+	this.vscale = this.hscale = Nehan.Display.spaceSizeRate.emsp;
 	break;
       case "&#09;":
 	this._setupTabSpace();
@@ -360,10 +360,10 @@ var Char = (function(){
       }
     },
     _setupNbsp : function(){
-      this.vscale = this.hscale = Display.spaceSizeRate.nbsp;
+      this.vscale = this.hscale = Nehan.Display.spaceSizeRate.nbsp;
     },
     _setupTabSpace : function(){
-      this.vscale = this.hscale = Math.floor(Display.tabCount / 2);
+      this.vscale = this.hscale = Math.floor(Nehan.Display.tabCount / 2);
     },
     _setupNormal : function(code){
       // for half-size char, rotate 90 and half-scale in horizontal by default.
@@ -607,7 +607,7 @@ var Char = (function(){
        @return {string}
      */
     getImgSrc : function(color){
-      return [Display.fontImgRoot, this.img, color + ".png"].join("/");
+      return [Nehan.Display.fontImgRoot, this.img, color + ".png"].join("/");
     },
     /**
        @memberof Nehan.Char

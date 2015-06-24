@@ -25,6 +25,7 @@ var sources = [
 
   // shared modules
   "src/nehan-start.js",
+  "src/display.js",
   "src/client.js",
   "src/env.js",
   "src/class.js",
@@ -84,13 +85,17 @@ var sources = [
   "src/breaks.js",
   "src/page.js",
   "src/flow.js",
+  "src/block-flow.js",
+  "src/inline-flow.js",
+  "src/box-flow.js",
+  "src/box-flows.js",
+  "src/text-metrics.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
   // so can't be shared with other engines.
   "src/nehan-setup-start.js",
   "src/config.js",
-  "src/display.js",
   "src/lexing-rule.js",
   "src/style.js",
   "src/anim.js",
@@ -101,15 +106,10 @@ var sources = [
   "src/word.js",
   "src/tcy.js",
   "src/ruby.js",
-  "src/text-metrics.js",
   "src/list-style-type.js",
   "src/list-style-pos.js",
   "src/list-style-image.js",
   "src/list-style.js",
-  "src/block-flow.js",
-  "src/inline-flow.js",
-  "src/box-flow.js",
-  "src/box-flows.js",
   "src/text-empha-style.js",
   "src/text-empha-pos.js",
   "src/text-empha.js",

@@ -1,4 +1,4 @@
-var BoxFlow = (function(){
+Nehan.BoxFlow = (function(){
   /**
      @memberof Nehan
      @class BoxFlow
@@ -8,8 +8,8 @@ var BoxFlow = (function(){
      @param blockdir {string} - "tb" or "lr" or "rl"
   */
   function BoxFlow(indir, blockdir){
-    this.inflow = new InlineFlow(indir);
-    this.blockflow = new BlockFlow(blockdir);
+    this.inflow = new Nehan.InlineFlow(indir);
+    this.blockflow = new Nehan.BlockFlow(blockdir);
   }
 
   BoxFlow.prototype = {
@@ -189,18 +189,18 @@ var BoxFlow = (function(){
       return this.isTextVertical()? "measure" : "extent";
     },
     /**
-       get flipped box flow, but result depends on setting of Display.boxFlow.
+       get flipped box flow, but result depends on setting of Nehan.Display.boxFlow.
 
        @memberof Nehan.BoxFlow
        @return {Nehan.BoxFlow}
        @example
-       * // if  Display.boxFlow.hori = "lr-tb"
-       * // and Display.boxFlow.vert = "tb-rl"
+       * // if  Nehan.Display.boxFlow.hori = "lr-tb"
+       * // and Nehan.Display.boxFlow.vert = "tb-rl"
        * new BlockFlow("tb", "rl").getFlipFlow(); // BoxFlow("lr", "tb")
        * new BlockFlow("lr", "tb").getFlipFlow(); // BoxFlow("tb", "rl")
     */
     getFlipFlow : function(){
-      return this.isTextVertical()? Display.getStdHoriFlow() : Display.getStdVertFlow();
+      return this.isTextVertical()? Nehan.Display.getStdHoriFlow() : Nehan.Display.getStdVertFlow();
     },
     /**
        get physical box size interpreted by this box flow.

@@ -327,7 +327,7 @@ var StyleContext = (function(){
        @param measure {int}
     */
     initContextMeasure : function(measure){
-      this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : Display.getMeasure(this.flow));
+      this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : Nehan.Display.getMeasure(this.flow));
       this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
     },
     /**
@@ -338,7 +338,7 @@ var StyleContext = (function(){
        @param extent {int}
     */
     initContextExtent : function(extent){
-      this.outerExtent = extent || (this.parent? this.parent.contentExtent : Display.getExtent(this.flow));
+      this.outerExtent = extent || (this.parent? this.parent.contentExtent : Nehan.Display.getExtent(this.flow));
       this.contentExtent = this._computeContentExtent(this.outerExtent);
     },
     /**
@@ -1119,7 +1119,7 @@ var StyleContext = (function(){
        @return {Nehan.Font}
     */
     getFont : function(){
-      return this.font || (this.parent? this.parent.getFont() : Display.getStdFont());
+      return this.font || (this.parent? this.parent.getFont() : Nehan.Display.getStdFont());
     },
     /**
        @memberof Nehan.StyleContext
@@ -1183,7 +1183,7 @@ var StyleContext = (function(){
        @return {Nehan.Color}
     */
     getColor : function(){
-      return this.color || (this.parent? this.parent.getColor() : new Nehan.Color(Display.fontColor));
+      return this.color || (this.parent? this.parent.getColor() : new Nehan.Color(Nehan.Display.fontColor));
     },
     /**
        @memberof Nehan.StyleContext
@@ -1273,21 +1273,21 @@ var StyleContext = (function(){
        @return {int}
     */
     getParentFontSize : function(){
-      return this.parent? this.parent.getFontSize() : Display.fontSize;
+      return this.parent? this.parent.getFontSize() : Nehan.Display.fontSize;
     },
     /**
        @memberof Nehan.StyleContext
        @return {int}
     */
     getParentContentMeasure : function(){
-      return this.parent? this.parent.contentMeasure : Display.getMeasure(this.flow);
+      return this.parent? this.parent.contentMeasure : Nehan.Display.getMeasure(this.flow);
     },
     /**
        @memberof Nehan.StyleContext
        @return {int}
     */
     getParentContentExtent : function(){
-      return this.parent? this.parent.contentExtent : Display.getExtent(this.flow);
+      return this.parent? this.parent.contentExtent : Nehan.Display.getExtent(this.flow);
     },
     /**
        @memberof Nehan.StyleContext
@@ -1301,7 +1301,7 @@ var StyleContext = (function(){
        @return {float | int}
     */
     getLineHeight : function(){
-      return this.lineHeight || Display.lineHeight || 2;
+      return this.lineHeight || Nehan.Display.lineHeight || 2;
     },
     /**
        @memberof Nehan.StyleContext
@@ -1316,7 +1316,7 @@ var StyleContext = (function(){
     */
     getRubyTextBlockExtent : function(){
       var base_font_size = this.getFontSize();
-      var extent = Math.floor(base_font_size * (1 + Display.rubyRate));
+      var extent = Math.floor(base_font_size * (1 + Nehan.Display.rubyRate));
       return (base_font_size % 2 === 0)? extent : extent + 1;
     },
     /**
@@ -1530,16 +1530,16 @@ var StyleContext = (function(){
     },
     _computeFontSize : function(val, unit_size){
       var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
-      var size = Display.fontSizeNames[str] || str;
+      var size = Nehan.Display.fontSizeNames[str] || str;
       var max_size = this.getParentFontSize();
       var font_size = this._computeUnitSize(size, unit_size, max_size);
-      return Math.min(font_size, Display.maxFontSize);
+      return Math.min(font_size, Nehan.Display.maxFontSize);
     },
     _computeUnitSize : function(val, unit_size, max_size){
       var str = String(val);
       if(str.indexOf("rem") > 0){
 	var rem_scale = parseFloat(str.replace("rem",""));
-	return Math.round(Display.fontSize * rem_scale); // use root font-size
+	return Math.round(Nehan.Display.fontSize * rem_scale); // use root font-size
       }
       if(str.indexOf("em") > 0){
 	var em_scale = parseFloat(str.replace("em",""));
@@ -1693,14 +1693,14 @@ var StyleContext = (function(){
     },
     _loadFlow : function(){
       var value = this.getCssAttr("flow", "inherit");
-      var parent_flow = this.parent? this.parent.flow : Display.getStdBoxFlow();
+      var parent_flow = this.parent? this.parent.flow : Nehan.Display.getStdBoxFlow();
       if(value === "inherit"){
 	return parent_flow;
       }
       if(value === "flip"){
 	return parent_flow.getFlipFlow();
       }
-      return BoxFlows.getByName(value);
+      return Nehan.BoxFlows.getByName(value);
     },
     _loadPosition : function(){
       var value = this.getCssAttr("position", "static");
@@ -2060,7 +2060,7 @@ var StyleContext = (function(){
       if(value === "inherit" && this.parent && this.parent.lineHeight){
 	return this.parent.lineHeight;
       }
-      return parseFloat(value || Display.lineHeight);
+      return parseFloat(value || Nehan.Display.lineHeight);
     },
     _loadTextAlign : function(){
       var value = this.getCssAttr("text-align", "inherit");

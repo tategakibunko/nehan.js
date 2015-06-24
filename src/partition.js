@@ -91,7 +91,7 @@ var Partition = (function(){
       var sizes =  Nehan.List.map(this._punits, function(punit){
 	return punit.getSize(measure, total_weight);
       });
-      return __levelize(sizes, Display.minTableCellSize);
+      return __levelize(sizes, Nehan.Display.minTableCellSize);
     }
   };
 

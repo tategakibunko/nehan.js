@@ -33,7 +33,7 @@ var SelectorPropContext = (function(){
     */
     getParentFlow : function(){
       var parent = this.getParentStyleContext();
-      return parent? parent.flow : Display.getStdBoxFlow();
+      return parent? parent.flow : Nehan.Display.getStdBoxFlow();
     },
     /**
        @memberof Nehan.SelectorPropContext

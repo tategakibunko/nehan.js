@@ -1,4 +1,4 @@
-var BlockFlow = (function(){
+Nehan.BlockFlow = (function(){
   /**
      @memberof Nehan
      @class BlockFlow
@@ -29,7 +29,7 @@ var BlockFlow = (function(){
   BlockFlow.prototype.flip = function(){
     switch(this.dir){
     case "lr": case "rl": return "tb";
-    case "tb": return Display.getVertBlockdir();
+    case "tb": return Nehan.Display.getVertBlockdir();
     default: return "";
     }
   };

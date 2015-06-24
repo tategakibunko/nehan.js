@@ -2,12 +2,12 @@
    standard page settings.
    @namespace Nehan.Display
 */
-var Display = {
+Nehan.Display = {
   /**
      <pre>
       define root where content text starts from.
       'body' or 'html' or 'document' are enabled.
-      
+
       1. 'document'
          &lt;!doctype xxx&gt; tag is included in content text.
       2. 'html'
@@ -223,8 +223,8 @@ var Display = {
      @return {Nehan.BoxFlow}
   */
   getStdFont : function(){
-    var font = new Nehan.Font(Display.fontSize);
-    font.family = Display.fontFamily;
+    var font = new Nehan.Font(this.fontSize);
+    font.family = this.fontFamily;
     font.weight = "normal";
     font.style = "normal";
     return font;
@@ -236,33 +236,28 @@ var Display = {
   getStdBoxFlow : function(){
     //var flow_name = this.boxFlow[this.direction];
     //return BoxFlows.getByName(flow_name);
-    return BoxFlows.getByName(this.flow);
+    return Nehan.BoxFlows.getByName(this.flow);
   },
   /**
      @memberof Nehan.Display
      @return {Nehan.BoxFlow}
   */
   getStdVertFlow : function(){
-    return BoxFlows.getByName(this.boxFlow.vert);
+    return Nehan.BoxFlows.getByName(this.boxFlow.vert);
   },
   /**
      @memberof Nehan.Display
      @return {Nehan.BoxFlow}
   */
   getStdHoriFlow : function(){
-    return BoxFlows.getByName(this.boxFlow.hori);
+    return Nehan.BoxFlows.getByName(this.boxFlow.hori);
   },
   /**
      @memberof Nehan.Display
-     @return {Float}
+     @return {int}
   */
   getRtFontSize : function(base_font_size){
-    var rt = Style.rt || null;
-    var rt_font_size = rt? rt["font-size"] : null;
-    if(rt === null || rt_font_size === null){
-      return Math.round(this.rubyRate * base_font_size);
-    }
-    return StyleContext.prototype._computeUnitSize.call(this, rt_font_size, base_font_size);
+    return Math.round(this.rubyRate * base_font_size);
   },
   /**
      @memberof Nehan.Display

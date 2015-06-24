@@ -2,11 +2,11 @@
    pre defined box flow collection.
    @namespace Nehan.BoxFlows
 */
-var BoxFlows = {
-  "tb-rl":(new BoxFlow("tb", "rl")),
-  "tb-lr":(new BoxFlow("tb", "lr")),
-  "lr-tb":(new BoxFlow("lr", "tb")),
-  "rl-tb":(new BoxFlow("rl", "tb")),
+Nehan.BoxFlows = {
+  "tb-rl":(new Nehan.BoxFlow("tb", "rl")),
+  "tb-lr":(new Nehan.BoxFlow("tb", "lr")),
+  "lr-tb":(new Nehan.BoxFlow("lr", "tb")),
+  "rl-tb":(new Nehan.BoxFlow("rl", "tb")),
   /**
      get box flow by inflow and blockflow.
 

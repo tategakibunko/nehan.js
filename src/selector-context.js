@@ -31,7 +31,7 @@ var SelectorContext = (function(){
     // so this._style.flow is not ready at this time, that is, we need to get the box-flow in manual.
     var parent_flow = this.getParentFlow();
     var flow_name = this.getCssAttr("flow", parent_flow.getName());
-    var flow = BoxFlows.getByName(flow_name);
+    var flow = Nehan.BoxFlows.getByName(flow_name);
     return (flow && flow.isTextVertical())? true : false;
   };
 
