@@ -2076,9 +2076,9 @@ var StyleContext = (function(){
       }
       var empha_pos = this.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
       var empha_color = this.getCssAttr("text-emphasis-color");
-      return new TextEmpha({
-	style:new TextEmphaStyle(empha_style),
-	pos:new TextEmphaPos(empha_pos),
+      return new Nehan.TextEmpha({
+	style:new Nehan.TextEmphaStyle(empha_style),
+	pos:new Nehan.TextEmphaPos(empha_pos),
 	color:(empha_color? new Nehan.Color(empha_color) : this.getColor())
       });
     },

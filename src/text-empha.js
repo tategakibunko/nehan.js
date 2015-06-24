@@ -1,4 +1,4 @@
-var TextEmpha = (function(){
+Nehan.TextEmpha = (function(){
   /**
      @memberof Nehan
      @class TextEmpha
@@ -11,8 +11,8 @@ var TextEmpha = (function(){
   */
   function TextEmpha(opt){
     opt = opt || {};
-    this.style = opt.style || new TextEmphaStyle();
-    this.pos = opt.pos || new TextEmphaPos();
+    this.style = opt.style || new Nehan.TextEmphaStyle();
+    this.pos = opt.pos || new Nehan.TextEmphaPos();
     this.color = opt.color || new Nehan.Color(Nehan.Display.fontColor);
   }
 

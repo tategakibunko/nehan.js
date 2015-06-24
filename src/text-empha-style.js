@@ -1,4 +1,4 @@
-var TextEmphaStyle = (function(){
+Nehan.TextEmphaStyle = (function(){
   var __default_empha_style = "filled dot";
   var __empha_marks = {
     // dot

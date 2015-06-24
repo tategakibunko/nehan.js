@@ -7893,6 +7893,195 @@ Nehan.ListStyle = (function(){
   return ListStyle;
 })();
 
+Nehan.TextEmphaStyle = (function(){
+  var __default_empha_style = "filled dot";
+  var __empha_marks = {
+    // dot
+    "filled dot":"&#x2022;",
+    "open dot":"&#x25e6;",
+
+    // circle
+    "filled circle":"&#x25cf;",
+    "open circle":"&#x25cb;",
+
+    // double-circle
+    "filled double-circle":"&#x25c9;",
+    "open double-circle":"&#x25ce;",
+
+    // triangle
+    "filled triangle":"&#x25b2;",
+    "open triangle":"&#x25b3;",
+
+    // sesame
+    "filled sesame":"&#xfe45;",
+    "open sesame":"&#xfe46;"
+  };
+
+  /**
+     @memberof Nehan
+     @class TextEmphaStyle
+     @classdesc abstraction of text-empha-position.
+     @constructor
+     @param value {String} - style name. default "none".
+     @example
+     * new TextEmphaStyle().getText(); // ""
+     * new TextEmphaStyle().getText("none"); // ""
+     * new TextEmphaStyle("filled dot").getText(); // "&#x2022";
+     * new TextEmphaStyle("foo").getText(); // "foo";
+  */
+  function TextEmphaStyle(value){
+    this.value = value || "none";
+  }
+
+  TextEmphaStyle.prototype = {
+    /**
+       @memberof Nehan.TextEmphaStyle
+       @return {bool}
+    */
+    isEnable : function(){
+      return this.value != "none";
+    },
+    /**
+       @memberof Nehan.TextEmphaStyle
+       @param value {String} - empha style name
+    */
+    setValue : function(value){
+      this.value = value;
+    },
+    /**
+       @memberof Nehan.TextEmphaStyle
+       @return {String}
+    */
+    getText : function(){
+      if(!this.isEnable()){
+	return "";
+      }
+      return __empha_marks[this.value] || this.value || __empha_marks[__default_empha_style];
+    },
+    /**
+       @memberof Nehan.TextEmphaStyle
+       @return {Object}
+    */
+    getCss : function(){
+      var css = {};
+      //return css["text-emphasis-style"] = this.value;
+      return css;
+    }
+  };
+
+  return TextEmphaStyle;
+})();
+
+
+Nehan.TextEmphaPos = (function(){
+  /**
+     @memberof Nehan
+     @class TextEmphaPos
+     @classdesc abstraction of text-empha-position, but not impremented yet.
+     @constructor
+     @param opt {Object}
+     @param opt.hori {String} - horizontal empha pos, default "over"
+     @param opt.vert {String} - vertical empha pos, default "right"
+  */
+  function TextEmphaPos(opt){
+    Nehan.Args.merge(this, {
+      hori:"over",
+      vert:"right"
+    }, opt || {});
+  }
+
+  TextEmphaPos.prototype = {
+    /**
+       not implemented yet.
+
+       @memberof Nehan.TextEmphaPos
+       @return {Object}
+    */
+    getCss : function(line){
+      var css = {};
+      return css;
+    }
+  };
+
+  return TextEmphaPos;
+})();
+
+
+Nehan.TextEmpha = (function(){
+  /**
+     @memberof Nehan
+     @class TextEmpha
+     @classdesc abstraction of text emphasis.
+     @constructor
+     @param opt {Object}
+     @param opt.style {Nehan.TextEmphaStyle}
+     @param opt.pos {Nehan.TextEmphaPos}
+     @param opt.color {Nehan.Color}
+  */
+  function TextEmpha(opt){
+    opt = opt || {};
+    this.style = opt.style || new Nehan.TextEmphaStyle();
+    this.pos = opt.pos || new Nehan.TextEmphaPos();
+    this.color = opt.color || new Nehan.Color(Nehan.Display.fontColor);
+  }
+
+  TextEmpha.prototype = {
+    /**
+       @memberof Nehan.TextEmpha
+       @return {boolean}
+    */
+    isEnable : function(){
+      return this.style && this.style.isEnable();
+    },
+    /**
+       get text of empha style, see {@link Nehan.TextEmphaStyle}.
+
+       @memberof Nehan.TextEmpha
+       @return {String}
+    */
+    getText : function(){
+      return this.style? this.style.getText() : "";
+    },
+    /**
+       @memberof Nehan.TextEmpha
+       @return {int}
+    */
+    getExtent : function(font_size){
+      return font_size * 3;
+    },
+    /**
+       @memberof Nehan.TextEmpha
+       @param line {Nehan.Box}
+       @param chr {Nehan.Char}
+       @return {Object}
+    */
+    getCssVertEmphaWrap : function(line, chr){
+      var css = {}, font_size = line.style.getFontSize();
+      css["text-align"] = "left";
+      css.width = this.getExtent(font_size) + "px";
+      css.height = chr.getAdvance(line.style.flow, line.style.letterSpacing || 0) + "px";
+      css.position = "relative";
+      return css;
+    },
+    /**
+       @memberof Nehan.TextEmpha
+       @param line {Nehan.Box}
+       @param chr {Nehan.Char}
+       @return {Object}
+    */
+    getCssHoriEmphaWrap : function(line, chr){
+      var css = {}, font_size = line.style.getFontSize();
+      css.display = "inline-block";
+      css.width = chr.getAdvance(line.style.flow, line.style.letterSpacing) + "px";
+      css.height = this.getExtent(font_size) + "px";
+      return css;
+    }
+  };
+
+  return TextEmpha;
+})();
+
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -9224,195 +9413,6 @@ var Selectors = (function(){
     }
   };
 })();
-
-var TextEmphaStyle = (function(){
-  var __default_empha_style = "filled dot";
-  var __empha_marks = {
-    // dot
-    "filled dot":"&#x2022;",
-    "open dot":"&#x25e6;",
-
-    // circle
-    "filled circle":"&#x25cf;",
-    "open circle":"&#x25cb;",
-
-    // double-circle
-    "filled double-circle":"&#x25c9;",
-    "open double-circle":"&#x25ce;",
-
-    // triangle
-    "filled triangle":"&#x25b2;",
-    "open triangle":"&#x25b3;",
-
-    // sesame
-    "filled sesame":"&#xfe45;",
-    "open sesame":"&#xfe46;"
-  };
-
-  /**
-     @memberof Nehan
-     @class TextEmphaStyle
-     @classdesc abstraction of text-empha-position.
-     @constructor
-     @param value {String} - style name. default "none".
-     @example
-     * new TextEmphaStyle().getText(); // ""
-     * new TextEmphaStyle().getText("none"); // ""
-     * new TextEmphaStyle("filled dot").getText(); // "&#x2022";
-     * new TextEmphaStyle("foo").getText(); // "foo";
-  */
-  function TextEmphaStyle(value){
-    this.value = value || "none";
-  }
-
-  TextEmphaStyle.prototype = {
-    /**
-       @memberof Nehan.TextEmphaStyle
-       @return {bool}
-    */
-    isEnable : function(){
-      return this.value != "none";
-    },
-    /**
-       @memberof Nehan.TextEmphaStyle
-       @param value {String} - empha style name
-    */
-    setValue : function(value){
-      this.value = value;
-    },
-    /**
-       @memberof Nehan.TextEmphaStyle
-       @return {String}
-    */
-    getText : function(){
-      if(!this.isEnable()){
-	return "";
-      }
-      return __empha_marks[this.value] || this.value || __empha_marks[__default_empha_style];
-    },
-    /**
-       @memberof Nehan.TextEmphaStyle
-       @return {Object}
-    */
-    getCss : function(){
-      var css = {};
-      //return css["text-emphasis-style"] = this.value;
-      return css;
-    }
-  };
-
-  return TextEmphaStyle;
-})();
-
-
-var TextEmphaPos = (function(){
-  /**
-     @memberof Nehan
-     @class TextEmphaPos
-     @classdesc abstraction of text-empha-position, but not impremented yet.
-     @constructor
-     @param opt {Object}
-     @param opt.hori {String} - horizontal empha pos, default "over"
-     @param opt.vert {String} - vertical empha pos, default "right"
-  */
-  function TextEmphaPos(opt){
-    Nehan.Args.merge(this, {
-      hori:"over",
-      vert:"right"
-    }, opt || {});
-  }
-
-  TextEmphaPos.prototype = {
-    /**
-       not implemented yet.
-
-       @memberof Nehan.TextEmphaPos
-       @return {Object}
-    */
-    getCss : function(line){
-      var css = {};
-      return css;
-    }
-  };
-
-  return TextEmphaPos;
-})();
-
-
-var TextEmpha = (function(){
-  /**
-     @memberof Nehan
-     @class TextEmpha
-     @classdesc abstraction of text emphasis.
-     @constructor
-     @param opt {Object}
-     @param opt.style {Nehan.TextEmphaStyle}
-     @param opt.pos {Nehan.TextEmphaPos}
-     @param opt.color {Nehan.Color}
-  */
-  function TextEmpha(opt){
-    opt = opt || {};
-    this.style = opt.style || new TextEmphaStyle();
-    this.pos = opt.pos || new TextEmphaPos();
-    this.color = opt.color || new Nehan.Color(Nehan.Display.fontColor);
-  }
-
-  TextEmpha.prototype = {
-    /**
-       @memberof Nehan.TextEmpha
-       @return {boolean}
-    */
-    isEnable : function(){
-      return this.style && this.style.isEnable();
-    },
-    /**
-       get text of empha style, see {@link Nehan.TextEmphaStyle}.
-
-       @memberof Nehan.TextEmpha
-       @return {String}
-    */
-    getText : function(){
-      return this.style? this.style.getText() : "";
-    },
-    /**
-       @memberof Nehan.TextEmpha
-       @return {int}
-    */
-    getExtent : function(font_size){
-      return font_size * 3;
-    },
-    /**
-       @memberof Nehan.TextEmpha
-       @param line {Nehan.Box}
-       @param chr {Nehan.Char}
-       @return {Object}
-    */
-    getCssVertEmphaWrap : function(line, chr){
-      var css = {}, font_size = line.style.getFontSize();
-      css["text-align"] = "left";
-      css.width = this.getExtent(font_size) + "px";
-      css.height = chr.getAdvance(line.style.flow, line.style.letterSpacing || 0) + "px";
-      css.position = "relative";
-      return css;
-    },
-    /**
-       @memberof Nehan.TextEmpha
-       @param line {Nehan.Box}
-       @param chr {Nehan.Char}
-       @return {Object}
-    */
-    getCssHoriEmphaWrap : function(line, chr){
-      var css = {}, font_size = line.style.getFontSize();
-      css.display = "inline-block";
-      css.width = chr.getAdvance(line.style.flow, line.style.letterSpacing) + "px";
-      css.height = this.getExtent(font_size) + "px";
-      return css;
-    }
-  };
-
-  return TextEmpha;
-})();
-
 
 var Box = (function(){
   /**
@@ -13262,9 +13262,9 @@ var StyleContext = (function(){
       }
       var empha_pos = this.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
       var empha_color = this.getCssAttr("text-emphasis-color");
-      return new TextEmpha({
-	style:new TextEmphaStyle(empha_style),
-	pos:new TextEmphaPos(empha_pos),
+      return new Nehan.TextEmpha({
+	style:new Nehan.TextEmphaStyle(empha_style),
+	pos:new Nehan.TextEmphaPos(empha_pos),
 	color:(empha_color? new Nehan.Color(empha_color) : this.getColor())
       });
     },

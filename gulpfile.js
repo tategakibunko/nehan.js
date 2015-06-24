@@ -100,6 +100,9 @@ var sources = [
   "src/list-style-pos.js",
   "src/list-style-image.js",
   "src/list-style.js",
+  "src/text-empha-style.js",
+  "src/text-empha-pos.js",
+  "src/text-empha.js",
 
   // closed modules
   // these modules/classes are referenced by Display/Config/style module.
@@ -110,9 +113,6 @@ var sources = [
   "src/style.js",
   "src/anim.js",
   "src/selectors.js",
-  "src/text-empha-style.js",
-  "src/text-empha-pos.js",
-  "src/text-empha.js",
   "src/box.js",
   "src/html-lexer.js",
   "src/text-lexer.js",

@@ -1,4 +1,4 @@
-var TextEmphaPos = (function(){
+Nehan.TextEmphaPos = (function(){
   /**
      @memberof Nehan
      @class TextEmphaPos
