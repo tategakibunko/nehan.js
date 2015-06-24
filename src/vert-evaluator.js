@@ -11,8 +11,6 @@ var VertEvaluator = (function(){
   }
   Nehan.Class.extend(VertEvaluator, LayoutEvaluator);
 
-  var __is_vert_glyph_enable = Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
-
   VertEvaluator.prototype._evalLinkElement = function(line, link){
     return this._evaluate(link, {
       name:(link.isTextBlock()? "div" : "a")
@@ -129,8 +127,9 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalChar = function(line, chr){
+    var is_vert_glyph_enable = Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
     if(chr.isImgChar()){
-      if(__is_vert_glyph_enable){
+      if(is_vert_glyph_enable){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalImgChar(line, chr);
@@ -139,7 +138,7 @@ var VertEvaluator = (function(){
     } else if(chr.isTabSpace()){
       return this._evalTabChar(line, chr);
     } else if(chr.isRotateChar()){
-      if(__is_vert_glyph_enable){
+      if(is_vert_glyph_enable){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalRotateChar(line, chr);
