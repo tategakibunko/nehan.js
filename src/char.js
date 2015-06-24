@@ -556,6 +556,13 @@ Nehan.Char = (function(){
        @memberof Nehan.Char
        @return {boolean}
      */
+    isIdeographicSpace: function(){
+      return this.data === "\u3000";
+    },
+    /**
+       @memberof Nehan.Char
+       @return {boolean}
+     */
     isWhiteSpace : function(){
       return this.isNewLine() || this.isSpace();
     },
