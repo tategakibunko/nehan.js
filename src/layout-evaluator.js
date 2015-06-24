@@ -162,7 +162,7 @@ var LayoutEvaluator = (function(){
       return this._evaluate(element);
     },
     _evalInlineChildText : function(parent, element){
-      if(parent.style.isTextEmphaEnable() && Token.isEmphaTargetable(element)){
+      if(parent.style.isTextEmphaEnable() && Nehan.Token.isEmphaTargetable(element)){
 	return this._evalEmpha(parent, element);
       }
       return this._evalTextElement(parent, element);

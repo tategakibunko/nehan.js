@@ -258,7 +258,7 @@ var LayoutGenerator = (function(){
       if(token instanceof Nehan.Text && token.isWhiteSpaceOnly()){
 	return true;
       }
-      if(!Token.isTag(token)){
+      if(!Nehan.Token.isTag(token)){
 	return false;
       }
       var child_style = new StyleContext(token, parent_style, {cursorContext:context});

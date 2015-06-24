@@ -38,7 +38,7 @@ var TableGenerator = (function(){
       if(token === null){
 	break;
       }
-      if(!Token.isTag(token)){
+      if(!Nehan.Token.isTag(token)){
 	continue;
       }
       switch(token.getName()){

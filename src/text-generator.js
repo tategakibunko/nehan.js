@@ -206,7 +206,7 @@ var TextGenerator = (function(){
     //console.log("text token:%o", token);
 
     // if white-space
-    if(Token.isWhiteSpace(token)){
+    if(Nehan.Token.isWhiteSpace(token)){
       return this._getWhiteSpace(context, token);
     }
 
@@ -230,7 +230,7 @@ var TextGenerator = (function(){
       return this._getWhiteSpacePre(context, token);
     }
     // skip continuous white-spaces.
-    this.stream.skipUntil(Token.isWhiteSpace);
+    this.stream.skipUntil(Nehan.Token.isWhiteSpace);
 
     // first new-line and tab are treated as single half space.
     if(token.isNewLine() || token.isTabSpace()){
@@ -241,7 +241,7 @@ var TextGenerator = (function(){
   };
 
   TextGenerator.prototype._getWhiteSpacePre = function(context, token){
-    if(Token.isNewLine(token)){
+    if(Nehan.Token.isNewLine(token)){
       context.setLineBreak(true);
       return null;
     }
@@ -274,7 +274,7 @@ var TextGenerator = (function(){
   TextGenerator.prototype._setCharKerning = function(context, char_token){
     var next_token = this.stream.peek();
     var prev_text = context.getInlineLastElement();
-    var next_text = next_token && Token.isText(next_token)? next_token : null;
+    var next_text = next_token && Nehan.Token.isText(next_token)? next_token : null;
     Kerning.set(char_token, prev_text, next_text);
   };
 

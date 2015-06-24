@@ -3,7 +3,7 @@
 
    @namespace Nehan.Token
 */
-var Token = {
+Nehan.Token = {
   /**
      @memberof Nehan.Token
      @param {token}

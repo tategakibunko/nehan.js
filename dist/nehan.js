@@ -7578,6 +7578,85 @@ Nehan.Ruby = (function(){
 })();
 
 
+/**
+   utility module to check token type.
+
+   @namespace Nehan.Token
+*/
+Nehan.Token = {
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
+  isTag : function(token){
+    return token instanceof Nehan.Tag;
+  },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
+  isText : function(token){
+    return (
+      token instanceof Nehan.Text ||
+      token instanceof Nehan.Char ||
+      token instanceof Nehan.Word ||
+      token instanceof Nehan.Tcy ||
+      token instanceof Nehan.Ruby
+    );
+  },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
+  isChar : function(token){
+    return token instanceof Nehan.Char;
+  },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
+  isWord : function(token){
+    return token instanceof Nehan.Word;
+  },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
+  isTcy : function(token){
+    return token instanceof Nehan.Tcy;
+  },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
+  isEmphaTargetable : function(token){
+    return token instanceof Nehan.Char || token instanceof Nehan.Tcy;
+  },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
+  isNewLine : function(token){
+    return token instanceof Nehan.Char && token.isNewLine();
+  },
+  /**
+     @memberof Nehan.Token
+     @param {token}
+     @return {boolean}
+  */
+  isWhiteSpace : function(token){
+    return token instanceof Nehan.Char && token.isWhiteSpace();
+  }
+};
+
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -8909,85 +8988,6 @@ var Selectors = (function(){
     }
   };
 })();
-
-/**
-   utility module to check token type.
-
-   @namespace Nehan.Token
-*/
-var Token = {
-  /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
-  isTag : function(token){
-    return token instanceof Nehan.Tag;
-  },
-  /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
-  isText : function(token){
-    return (
-      token instanceof Nehan.Text ||
-      token instanceof Nehan.Char ||
-      token instanceof Nehan.Word ||
-      token instanceof Nehan.Tcy ||
-      token instanceof Nehan.Ruby
-    );
-  },
-  /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
-  isChar : function(token){
-    return token instanceof Nehan.Char;
-  },
-  /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
-  isWord : function(token){
-    return token instanceof Nehan.Word;
-  },
-  /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
-  isTcy : function(token){
-    return token instanceof Nehan.Tcy;
-  },
-  /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
-  isEmphaTargetable : function(token){
-    return token instanceof Nehan.Char || token instanceof Nehan.Tcy;
-  },
-  /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
-  isNewLine : function(token){
-    return token instanceof Nehan.Char && token.isNewLine();
-  },
-  /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
-  isWhiteSpace : function(token){
-    return token instanceof Nehan.Char && token.isWhiteSpace();
-  }
-};
-
 
 var ListStyleType = (function(){
   /**
@@ -10436,11 +10436,11 @@ var RubyTokenStream = (function(){
       if(token === null){
 	break;
       }
-      if(Token.isTag(token) && token.getName() === "rt"){
+      if(Nehan.Token.isTag(token) && token.getName() === "rt"){
 	rt = token;
 	break;
       }
-      if(Token.isTag(token) && token.getName() === "rb"){
+      if(Nehan.Token.isTag(token) && token.getName() === "rb"){
 	rbs = this._parseRb(token.getContent())
       }
       if(token instanceof Nehan.Text){
@@ -14412,7 +14412,7 @@ var LayoutGenerator = (function(){
       if(token instanceof Nehan.Text && token.isWhiteSpaceOnly()){
 	return true;
       }
-      if(!Token.isTag(token)){
+      if(!Nehan.Token.isTag(token)){
 	return false;
       }
       var child_style = new StyleContext(token, parent_style, {cursorContext:context});
@@ -15198,7 +15198,7 @@ var TextGenerator = (function(){
     //console.log("text token:%o", token);
 
     // if white-space
-    if(Token.isWhiteSpace(token)){
+    if(Nehan.Token.isWhiteSpace(token)){
       return this._getWhiteSpace(context, token);
     }
 
@@ -15222,7 +15222,7 @@ var TextGenerator = (function(){
       return this._getWhiteSpacePre(context, token);
     }
     // skip continuous white-spaces.
-    this.stream.skipUntil(Token.isWhiteSpace);
+    this.stream.skipUntil(Nehan.Token.isWhiteSpace);
 
     // first new-line and tab are treated as single half space.
     if(token.isNewLine() || token.isTabSpace()){
@@ -15233,7 +15233,7 @@ var TextGenerator = (function(){
   };
 
   TextGenerator.prototype._getWhiteSpacePre = function(context, token){
-    if(Token.isNewLine(token)){
+    if(Nehan.Token.isNewLine(token)){
       context.setLineBreak(true);
       return null;
     }
@@ -15266,7 +15266,7 @@ var TextGenerator = (function(){
   TextGenerator.prototype._setCharKerning = function(context, char_token){
     var next_token = this.stream.peek();
     var prev_text = context.getInlineLastElement();
-    var next_text = next_token && Token.isText(next_token)? next_token : null;
+    var next_text = next_token && Nehan.Token.isText(next_token)? next_token : null;
     Kerning.set(char_token, prev_text, next_text);
   };
 
@@ -16062,7 +16062,7 @@ var TableGenerator = (function(){
       if(token === null){
 	break;
       }
-      if(!Token.isTag(token)){
+      if(!Nehan.Token.isTag(token)){
 	continue;
       }
       switch(token.getName()){
@@ -16599,7 +16599,7 @@ var LayoutEvaluator = (function(){
       return this._evaluate(element);
     },
     _evalInlineChildText : function(parent, element){
-      if(parent.style.isTextEmphaEnable() && Token.isEmphaTargetable(element)){
+      if(parent.style.isTextEmphaEnable() && Nehan.Token.isEmphaTargetable(element)){
 	return this._evalEmpha(parent, element);
       }
       return this._evalTextElement(parent, element);

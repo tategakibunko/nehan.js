@@ -31,11 +31,11 @@ var RubyTokenStream = (function(){
       if(token === null){
 	break;
       }
-      if(Token.isTag(token) && token.getName() === "rt"){
+      if(Nehan.Token.isTag(token) && token.getName() === "rt"){
 	rt = token;
 	break;
       }
-      if(Token.isTag(token) && token.getName() === "rb"){
+      if(Nehan.Token.isTag(token) && token.getName() === "rb"){
 	rbs = this._parseRb(token.getContent())
       }
       if(token instanceof Nehan.Text){
