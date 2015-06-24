@@ -133,13 +133,13 @@ var HtmlLexer = (function (){
       match = this.buff.match(__rex_tag);
       if(match === null){
 	content = this._stepBuff(this.buff.length);
-	return new Text(content);
+	return new Nehan.Text(content);
       }
       if(match.index === 0){
 	return this._parseTag(match[0]);
       }
       content = this._stepBuff(match.index);
-      return new Text(content);
+      return new Nehan.Text(content);
     },
     _getTagContent : function(tag_name){
       // why we added [\\s|>] for open_tag_rex?

@@ -38,7 +38,7 @@ var RubyTokenStream = (function(){
       if(Token.isTag(token) && token.getName() === "rb"){
 	rbs = this._parseRb(token.getContent())
       }
-      if(token instanceof Text){
+      if(token instanceof Nehan.Text){
 	rbs = this._parseRb(token.getContent());
       }
     }

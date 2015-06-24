@@ -135,7 +135,7 @@ var InlineGenerator = (function(){
     //console.log("inline token:%o", token);
 
     // text block
-    if(token instanceof Text || token instanceof Tcy || token instanceof Word){
+    if(token instanceof Nehan.Text || token instanceof Tcy || token instanceof Word){
       this.setChildLayout(this._createTextGenerator(this.style, token));
       return this.yieldChildLayout(context);
     }
@@ -173,7 +173,7 @@ var InlineGenerator = (function(){
       context.setLineBreak(true);
       if(!this.style.isPre()){
 	this.stream.skipUntil(function(token){
-	  return (token instanceof Text && token.isWhiteSpaceOnly());
+	  return (token instanceof Nehan.Text && token.isWhiteSpaceOnly());
 	});
       }
       return null;

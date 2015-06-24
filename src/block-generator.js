@@ -104,7 +104,7 @@ var BlockGenerator = (function(){
     //console.log("block token:%o", token);
 
     // text block
-    if(token instanceof Text){
+    if(token instanceof Nehan.Text){
       if(token.isWhiteSpaceOnly()){
 	return this._getNext(context);
       }

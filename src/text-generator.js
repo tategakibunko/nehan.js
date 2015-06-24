@@ -131,7 +131,7 @@ var TextGenerator = (function(){
   };
 
   TextGenerator.prototype._peekParentNextHeadChar = function(token){
-    if(token instanceof Text){
+    if(token instanceof Nehan.Text){
       var head_c1 = token.getContent().substring(0,1);
       return new Char(head_c1);
     } else if(token instanceof Nehan.Tag){

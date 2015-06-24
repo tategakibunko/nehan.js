@@ -6340,6 +6340,34 @@ Nehan.TextMetrics = (function(){
 })();
 
 
+Nehan.Text = (function(){
+  /**
+     @memberof Nehan
+     @class Text
+     @param content {String}
+  */
+  function Text(content){
+    this.content = content;
+  }
+
+  Text.prototype = {
+    isWhiteSpaceOnly: function(){
+      // \s contain multi character space,
+      // but we want to replace half one only.
+      var replaced = this.content
+	.replace(/ /g, "") // half space
+	.replace(/\n/g, "")
+	.replace(/\t/g, "");
+      return replaced === "";
+    },
+    getContent: function(){
+      return this.content;
+    }
+  };
+
+  return Text;
+})();
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -7701,7 +7729,7 @@ var Token = {
   */
   isText : function(token){
     return (
-      token instanceof Text ||
+      token instanceof Nehan.Text ||
       token instanceof Char ||
       token instanceof Word ||
       token instanceof Tcy ||
@@ -7758,34 +7786,6 @@ var Token = {
   }
 };
 
-
-var Text = (function(){
-  /**
-     @memberof Nehan
-     @class Text
-     @param content {String}
-  */
-  function Text(content){
-    this.content = content;
-  }
-
-  Text.prototype = {
-    isWhiteSpaceOnly: function(){
-      // \s contain multi character space,
-      // but we want to replace half one only.
-      var replaced = this.content
-	.replace(/ /g, "") // half space
-	.replace(/\n/g, "")
-	.replace(/\t/g, "");
-      return replaced === "";
-    },
-    getContent: function(){
-      return this.content;
-    }
-  };
-
-  return Text;
-})();
 
 var Char = (function(){
   /**
@@ -9837,13 +9837,13 @@ var HtmlLexer = (function (){
       match = this.buff.match(__rex_tag);
       if(match === null){
 	content = this._stepBuff(this.buff.length);
-	return new Text(content);
+	return new Nehan.Text(content);
       }
       if(match.index === 0){
 	return this._parseTag(match[0]);
       }
       content = this._stepBuff(match.index);
-      return new Text(content);
+      return new Nehan.Text(content);
     },
     _getTagContent : function(tag_name){
       // why we added [\\s|>] for open_tag_rex?
@@ -10451,7 +10451,7 @@ var RubyTokenStream = (function(){
       if(Token.isTag(token) && token.getName() === "rb"){
 	rbs = this._parseRb(token.getContent())
       }
-      if(token instanceof Text){
+      if(token instanceof Nehan.Text){
 	rbs = this._parseRb(token.getContent());
       }
     }
@@ -14417,7 +14417,7 @@ var LayoutGenerator = (function(){
     var self = this, parent_style = this.style;
     var floated_generators = [first_float_gen];
     var tokens = this.stream.iterWhile(function(token){
-      if(token instanceof Text && token.isWhiteSpaceOnly()){
+      if(token instanceof Nehan.Text && token.isWhiteSpaceOnly()){
 	return true;
       }
       if(!Token.isTag(token)){
@@ -14646,7 +14646,7 @@ var BlockGenerator = (function(){
     //console.log("block token:%o", token);
 
     // text block
-    if(token instanceof Text){
+    if(token instanceof Nehan.Text){
       if(token.isWhiteSpaceOnly()){
 	return this._getNext(context);
       }
@@ -14883,7 +14883,7 @@ var InlineGenerator = (function(){
     //console.log("inline token:%o", token);
 
     // text block
-    if(token instanceof Text || token instanceof Tcy || token instanceof Word){
+    if(token instanceof Nehan.Text || token instanceof Tcy || token instanceof Word){
       this.setChildLayout(this._createTextGenerator(this.style, token));
       return this.yieldChildLayout(context);
     }
@@ -14921,7 +14921,7 @@ var InlineGenerator = (function(){
       context.setLineBreak(true);
       if(!this.style.isPre()){
 	this.stream.skipUntil(function(token){
-	  return (token instanceof Text && token.isWhiteSpaceOnly());
+	  return (token instanceof Nehan.Text && token.isWhiteSpaceOnly());
 	});
       }
       return null;
@@ -15131,7 +15131,7 @@ var TextGenerator = (function(){
   };
 
   TextGenerator.prototype._peekParentNextHeadChar = function(token){
-    if(token instanceof Text){
+    if(token instanceof Nehan.Text){
       var head_c1 = token.getContent().substring(0,1);
       return new Char(head_c1);
     } else if(token instanceof Nehan.Tag){

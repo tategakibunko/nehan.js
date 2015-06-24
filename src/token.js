@@ -19,7 +19,7 @@ var Token = {
   */
   isText : function(token){
     return (
-      token instanceof Text ||
+      token instanceof Nehan.Text ||
       token instanceof Char ||
       token instanceof Word ||
       token instanceof Tcy ||

@@ -255,7 +255,7 @@ var LayoutGenerator = (function(){
     var self = this, parent_style = this.style;
     var floated_generators = [first_float_gen];
     var tokens = this.stream.iterWhile(function(token){
-      if(token instanceof Text && token.isWhiteSpaceOnly()){
+      if(token instanceof Nehan.Text && token.isWhiteSpaceOnly()){
 	return true;
       }
       if(!Token.isTag(token)){
