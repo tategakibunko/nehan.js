@@ -2122,7 +2122,7 @@ var StyleContext = (function(){
       if(list_style_type === "none"){
 	return null;
       }
-      return new ListStyle({
+      return new Nehan.ListStyle({
 	type:list_style_type,
 	position:this.getCssAttr("list-style-position", "outside"),
 	image:this.getCssAttr("list-style-image", "none")

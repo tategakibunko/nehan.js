@@ -1,4 +1,4 @@
-var ListStyleType = (function(){
+Nehan.ListStyleType = (function(){
   /**
      @memberof Nehan
      @class ListStyleType

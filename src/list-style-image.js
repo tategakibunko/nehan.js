@@ -1,4 +1,4 @@
-var ListStyleImage = (function(){
+Nehan.ListStyleImage = (function(){
   /**
      @memberof Nehan
      @class ListStyleImage

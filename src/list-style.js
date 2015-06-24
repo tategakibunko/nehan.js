@@ -1,4 +1,4 @@
-var ListStyle = (function(){
+Nehan.ListStyle = (function(){
   /**
      @memberof Nehan
      @class ListStyle
@@ -10,9 +10,9 @@ var ListStyle = (function(){
      @param opt.image {Nehan.ListStyleImage}
   */
   function ListStyle(opt){
-    this.type = new ListStyleType(opt.type || "none");
-    this.position = new ListStylePos(opt.position || "outside");
-    this.image = (opt.image !== "none")? new ListStyleImage(opt.image) : null;
+    this.type = new Nehan.ListStyleType(opt.type || "none");
+    this.position = new Nehan.ListStylePos(opt.position || "outside");
+    this.image = (opt.image !== "none")? new Nehan.ListStyleImage(opt.image) : null;
   }
 
   ListStyle.prototype = {

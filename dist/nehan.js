@@ -7657,6 +7657,242 @@ Nehan.Token = {
 };
 
 
+Nehan.ListStyleType = (function(){
+  /**
+     @memberof Nehan
+     @class ListStyleType
+     @classdesc abstraction of list-style-type.
+     @constructor
+     @param pos {String} - "disc", "circle", "square", "lower-alpha" .. etc
+  */
+  function ListStyleType(type){
+    this.type = type;
+  }
+
+  var __marker_text = {
+    "disc": "&#x2022;",
+    "circle":"&#x25CB;",
+    "square":"&#x25A0;"
+  };
+
+  ListStyleType.prototype = {
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
+    isDecimalList : function(){
+      return (this.type === "decimal" || this.type === "decimal-leading-zero");
+    },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
+    isNoneList : function(){
+      return this.type === "none";
+    },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
+    isMarkList : function(){
+      return (this.type === "disc" ||
+	      this.type === "circle" ||
+	      this.type === "square");
+    },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
+    isCountableList : function(){
+      return (!this.isNoneList() && !this.isMarkList());
+    },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
+    isHankaku : function(){
+      return (this.type === "lower-alpha" || this.type === "upper-alpha" ||
+	      this.type === "lower-roman" || this.type === "upper-roman" ||
+	      this.isDecimalList());
+    },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {boolean}
+    */
+    isZenkaku : function(){
+      return !this.isHankaku();
+    },
+    _getMarkerDigitString : function(decimal){
+      if(this.type === "decimal"){
+	return decimal.toString(10);
+      }
+      if(this.type === "decimal-leading-zero"){
+	if(decimal < 10){
+	  return "0" + decimal.toString(10);
+	}
+	return decimal.toString(10);
+      }
+      return Nehan.Cardinal.getStringByName(this.type, decimal);
+    },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {String}
+    */
+    getMarkerHtml : function(count){
+      var text = this.getMarkerText(count);
+      if(this.isZenkaku()){
+	return Nehan.Html.tagWrap("span", text, {
+	  "class":"nehan-tcy"
+	});
+      }
+      return text;
+    },
+    /**
+       @memberof Nehan.ListStyleType
+       @return {String}
+    */
+    getMarkerText : function(count){
+      if(this.isNoneList()){
+	return Nehan.Const.space;
+      }
+      if(this.isMarkList()){
+	return __marker_text[this.type] || "";
+      }
+      var digit = this._getMarkerDigitString(count);
+      return digit + "."; // add period as postfix.
+    }
+  };
+
+  return ListStyleType;
+})();
+
+
+Nehan.ListStylePos = (function(){
+  /**
+     @memberof Nehan
+     @class ListStylePos
+     @classdesc abstraction of list-style-pos.
+     @constructor
+     @param pos {String} - "outside" or "inside"
+  */
+  function ListStylePos(pos){
+    this.pos = pos;
+  }
+
+  ListStylePos.prototype = {
+    /**
+       @memberof Nehan.ListStylePos
+       @return {boolean}
+    */
+    isOutside : function(){
+      return this.pos === "outside";
+    },
+    /**
+       @memberof Nehan.ListStylePos
+       @return {boolean}
+    */
+    isInside : function(){
+      return this.pos === "inside";
+    }
+  };
+
+  return ListStylePos;
+})();
+
+
+Nehan.ListStyleImage = (function(){
+  /**
+     @memberof Nehan
+     @class ListStyleImage
+     @classdesc abstraction of list-style-image.
+     @constructor
+     @param image {Object}
+     @param image.width {Int} - if undefined, use {@link Nehan.Display}.fontSize
+     @param image.height {Int} - if undefined, use {@link Nehan.Display}.fontSize
+     @param image.url {String}
+  */
+  function ListStyleImage(image){
+    this.image = image;
+  }
+
+  ListStyleImage.prototype = {
+    /**
+       @memberof Nehan.ListStyleImage
+       @param count {int}
+       @return {string}
+    */
+    getMarkerHtml : function(count){
+      var url = this.image.url;
+      var width = this.image.width || Nehan.Display.fontSize;
+      var height = this.image.height || Nehan.Display.fontSize;
+      return Nehan.Html.tagSingle("img", {
+	"src":url,
+	"class":"nehan-list-image",
+	"width":width,
+	"height":height
+      });
+    }
+  };
+
+  return ListStyleImage;
+})();
+
+
+Nehan.ListStyle = (function(){
+  /**
+     @memberof Nehan
+     @class ListStyle
+     @classdesc abstraction of list-style.
+     @constructor
+     @param opt {Object}
+     @param opt.type {Nehan.ListStyleType}
+     @param opt.position {Nehan.ListStylePos}
+     @param opt.image {Nehan.ListStyleImage}
+  */
+  function ListStyle(opt){
+    this.type = new Nehan.ListStyleType(opt.type || "none");
+    this.position = new Nehan.ListStylePos(opt.position || "outside");
+    this.image = (opt.image !== "none")? new Nehan.ListStyleImage(opt.image) : null;
+  }
+
+  ListStyle.prototype = {
+    /**
+       @memberof Nehan.ListStyle
+       @return {boolean}
+    */
+    isMultiCol : function(){
+      return this.position.isOutside();
+    },
+    /**
+       @memberof Nehan.ListStyle
+       @return {boolean}
+    */
+    isInside : function(){
+      return this.position.isInside();
+    },
+    /**
+       @memberof Nehan.ListStyle
+       @return {boolean}
+    */
+    isImageList : function(){
+      return (this.image !== null);
+    },
+    /**
+       @memberof Nehan.ListStyle
+       @param count {int}
+       @return {String}
+    */
+    getMarkerHtml : function(count){
+      if(this.image !== null){
+	return this.image.getMarkerHtml(count);
+      }
+      return this.type.getMarkerHtml(count);
+    }
+  };
+
+  return ListStyle;
+})();
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -8987,242 +9223,6 @@ var Selectors = (function(){
       return __get_value_pe(style, pseudo_element_name);
     }
   };
-})();
-
-var ListStyleType = (function(){
-  /**
-     @memberof Nehan
-     @class ListStyleType
-     @classdesc abstraction of list-style-type.
-     @constructor
-     @param pos {String} - "disc", "circle", "square", "lower-alpha" .. etc
-  */
-  function ListStyleType(type){
-    this.type = type;
-  }
-
-  var __marker_text = {
-    "disc": "&#x2022;",
-    "circle":"&#x25CB;",
-    "square":"&#x25A0;"
-  };
-
-  ListStyleType.prototype = {
-    /**
-       @memberof Nehan.ListStyleType
-       @return {boolean}
-    */
-    isDecimalList : function(){
-      return (this.type === "decimal" || this.type === "decimal-leading-zero");
-    },
-    /**
-       @memberof Nehan.ListStyleType
-       @return {boolean}
-    */
-    isNoneList : function(){
-      return this.type === "none";
-    },
-    /**
-       @memberof Nehan.ListStyleType
-       @return {boolean}
-    */
-    isMarkList : function(){
-      return (this.type === "disc" ||
-	      this.type === "circle" ||
-	      this.type === "square");
-    },
-    /**
-       @memberof Nehan.ListStyleType
-       @return {boolean}
-    */
-    isCountableList : function(){
-      return (!this.isNoneList() && !this.isMarkList());
-    },
-    /**
-       @memberof Nehan.ListStyleType
-       @return {boolean}
-    */
-    isHankaku : function(){
-      return (this.type === "lower-alpha" || this.type === "upper-alpha" ||
-	      this.type === "lower-roman" || this.type === "upper-roman" ||
-	      this.isDecimalList());
-    },
-    /**
-       @memberof Nehan.ListStyleType
-       @return {boolean}
-    */
-    isZenkaku : function(){
-      return !this.isHankaku();
-    },
-    _getMarkerDigitString : function(decimal){
-      if(this.type === "decimal"){
-	return decimal.toString(10);
-      }
-      if(this.type === "decimal-leading-zero"){
-	if(decimal < 10){
-	  return "0" + decimal.toString(10);
-	}
-	return decimal.toString(10);
-      }
-      return Nehan.Cardinal.getStringByName(this.type, decimal);
-    },
-    /**
-       @memberof Nehan.ListStyleType
-       @return {String}
-    */
-    getMarkerHtml : function(count){
-      var text = this.getMarkerText(count);
-      if(this.isZenkaku()){
-	return Nehan.Html.tagWrap("span", text, {
-	  "class":"nehan-tcy"
-	});
-      }
-      return text;
-    },
-    /**
-       @memberof Nehan.ListStyleType
-       @return {String}
-    */
-    getMarkerText : function(count){
-      if(this.isNoneList()){
-	return Nehan.Const.space;
-      }
-      if(this.isMarkList()){
-	return __marker_text[this.type] || "";
-      }
-      var digit = this._getMarkerDigitString(count);
-      return digit + "."; // add period as postfix.
-    }
-  };
-
-  return ListStyleType;
-})();
-
-
-var ListStylePos = (function(){
-  /**
-     @memberof Nehan
-     @class ListStylePos
-     @classdesc abstraction of list-style-pos.
-     @constructor
-     @param pos {String} - "outside" or "inside"
-  */
-  function ListStylePos(pos){
-    this.pos = pos;
-  }
-
-  ListStylePos.prototype = {
-    /**
-       @memberof Nehan.ListStylePos
-       @return {boolean}
-    */
-    isOutside : function(){
-      return this.pos === "outside";
-    },
-    /**
-       @memberof Nehan.ListStylePos
-       @return {boolean}
-    */
-    isInside : function(){
-      return this.pos === "inside";
-    }
-  };
-
-  return ListStylePos;
-})();
-
-
-var ListStyleImage = (function(){
-  /**
-     @memberof Nehan
-     @class ListStyleImage
-     @classdesc abstraction of list-style-image.
-     @constructor
-     @param image {Object}
-     @param image.width {Int} - if undefined, use {@link Nehan.Display}.fontSize
-     @param image.height {Int} - if undefined, use {@link Nehan.Display}.fontSize
-     @param image.url {String}
-  */
-  function ListStyleImage(image){
-    this.image = image;
-  }
-
-  ListStyleImage.prototype = {
-    /**
-       @memberof Nehan.ListStyleImage
-       @param count {int}
-       @return {string}
-    */
-    getMarkerHtml : function(count){
-      var url = this.image.url;
-      var width = this.image.width || Nehan.Display.fontSize;
-      var height = this.image.height || Nehan.Display.fontSize;
-      return Nehan.Html.tagSingle("img", {
-	"src":url,
-	"class":"nehan-list-image",
-	"width":width,
-	"height":height
-      });
-    }
-  };
-
-  return ListStyleImage;
-})();
-
-
-var ListStyle = (function(){
-  /**
-     @memberof Nehan
-     @class ListStyle
-     @classdesc abstraction of list-style.
-     @constructor
-     @param opt {Object}
-     @param opt.type {Nehan.ListStyleType}
-     @param opt.position {Nehan.ListStylePos}
-     @param opt.image {Nehan.ListStyleImage}
-  */
-  function ListStyle(opt){
-    this.type = new ListStyleType(opt.type || "none");
-    this.position = new ListStylePos(opt.position || "outside");
-    this.image = (opt.image !== "none")? new ListStyleImage(opt.image) : null;
-  }
-
-  ListStyle.prototype = {
-    /**
-       @memberof Nehan.ListStyle
-       @return {boolean}
-    */
-    isMultiCol : function(){
-      return this.position.isOutside();
-    },
-    /**
-       @memberof Nehan.ListStyle
-       @return {boolean}
-    */
-    isInside : function(){
-      return this.position.isInside();
-    },
-    /**
-       @memberof Nehan.ListStyle
-       @return {boolean}
-    */
-    isImageList : function(){
-      return (this.image !== null);
-    },
-    /**
-       @memberof Nehan.ListStyle
-       @param count {int}
-       @return {String}
-    */
-    getMarkerHtml : function(count){
-      if(this.image !== null){
-	return this.image.getMarkerHtml(count);
-      }
-      return this.type.getMarkerHtml(count);
-    }
-  };
-
-  return ListStyle;
 })();
 
 var TextEmphaStyle = (function(){
@@ -13308,7 +13308,7 @@ var StyleContext = (function(){
       if(list_style_type === "none"){
 	return null;
       }
-      return new ListStyle({
+      return new Nehan.ListStyle({
 	type:list_style_type,
 	position:this.getCssAttr("list-style-position", "outside"),
 	image:this.getCssAttr("list-style-image", "none")
