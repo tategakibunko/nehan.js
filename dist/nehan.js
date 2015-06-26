@@ -8520,6 +8520,631 @@ Nehan.PartitionHashSet = (function(){
 })();
 
 
+Nehan.CursorContext = (function(){
+  /**
+     @memberof Nehan
+     @class CursorContext
+     @classdesc generator cursor position set(inline and block).
+     @constructor
+     @param block {Nehan.BlockContext}
+     @param inline {Nehan.InlineContext}
+  */
+  function CursorContext(block, inline){
+    this.block = block;
+    this.inline = inline;
+  }
+
+  CursorContext.prototype = {
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
+    hasBlockSpaceFor : function(extent, opt){
+      return this.block.hasSpaceFor(extent, opt);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
+    hasBreakAfter : function(){
+      return this.block.hasBreakAfter() || this.inline.hasBreakAfter() || false;
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @param element {Nehan.Box}
+       @param extent {int}
+    */
+    addBlockElement : function(element, extent){
+      this.block.addElement(element, extent);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {Array.<Nehan.Box>}
+    */
+    getBlockElements : function(){
+      return this.block.getElements();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    getBlockCurExtent : function(){
+      return this.block.getCurExtent();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    getBlockMaxExtent : function(){
+      return this.block.getMaxExtent();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    getBlockRestExtent : function(){
+      return this.block.getRestExtent();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    getBlockLineNo : function(){
+      return this.block.getLineNo();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    incBlockLineNo : function(){
+      return this.block.incLineNo();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
+    isInlineEmpty : function(){
+      return this.inline.isEmpty();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
+    isJustified : function(){
+      return this.inline.isJustified();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
+    isLineOver : function(){
+      return this.inline.isLineOver();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
+    hasInlineSpaceFor : function(measure){
+      return this.inline.hasSpaceFor(measure);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {boolean}
+    */
+    hasLineBreak : function(){
+      return this.inline.hasLineBreak();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @param status {boolean}
+    */
+    setLineBreak : function(status){
+      this.inline.setLineBreak(status);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @param status {boolean}
+    */
+    setLineOver: function(status){
+      this.inline.setLineOver(status);
+    },
+    /**
+       @memberof Nehan.CursorContext
+    */
+    setBreakAfter : function(status){
+      this.inline.setBreakAfter(status);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @param status {boolean}
+    */
+    setJustified : function(status){
+      this.inline.setJustified(status);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @param measure {int}
+    */
+    addInlineMeasure : function(measure){
+      this.inline.addMeasure(measure);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @param element {Nehan.Box}
+       @param measure {int}
+    */
+    addInlineBoxElement : function(element, measure){
+      this.inline.addBoxElement(element, measure);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @param element {Nehan.Box}
+       @param measure {int}
+    */
+    addInlineTextElement : function(element, measure){
+      this.inline.addTextElement(element, measure);
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
+    */
+    getInlineLastElement : function(){
+      return this.inline.getLastElement();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {Array}
+    */
+    getInlineElements : function(){
+      return this.inline.getElements();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    getInlineCurMeasure : function(){
+      return this.inline.getCurMeasure();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    getInlineRestMeasure : function(){
+      return this.inline.getRestMeasure();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    getInlineMaxMeasure : function(){
+      return this.inline.getMaxMeasure();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    getInlineMaxExtent : function(){
+      return this.inline.getMaxExtent();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    getInlineMaxFontSize : function(){
+      return this.inline.getMaxFontSize();
+    },
+    /**
+       @memberof Nehan.CursorContext
+       @return {int}
+    */
+    getInlineCharCount : function(){
+      return this.inline.getCharCount();
+    },
+    /**
+       justify(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if justified.
+       @memberof Nehan.CursorContext
+       @param head_char {Nehan.Char}
+       @return {Nehan.Char | null}
+    */
+    justifySweep : function(head_char){
+      return this.inline.justifySweep(head_char);
+    },
+    /**
+       justify(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
+       @memberof Nehan.CursorContext
+       @param head_char {Nehan.Char}
+       @param head_next {Nehan.Char}
+       @return {Nehan.Char | null}
+    */
+    justifyDangling : function(head_char, head_next){
+      return this.inline.justifyDangling(head_char, head_next);
+    }
+  };
+
+  return CursorContext;
+})();
+
+
+Nehan.BlockContext = (function(){
+  /** @memberof Nehan
+      @class BlockContext
+      @classdesc context data of block level.
+      @constructor
+      @param {int} max_extent - maximus position of block in px.
+      @param opt {Object} - optional argument
+  */
+  function BlockContext(max_extent, opt){
+    opt = opt || {};
+    this.curExtent = 0;
+    this.maxExtent = max_extent; // const
+    this.pushedElements = [];
+    this.elements = [];
+    this.pulledElements = [];
+    this.breakAfter = false;
+    this.lineNo = opt.lineNo || 0;
+  }
+
+  BlockContext.prototype = {
+    /**
+       check if this block context has enough size of [extent]
+       @memberof Nehan.BlockContext
+       @method hasSpaceFor
+       @param extent {int} - size of extent in px
+       @return {boolean}
+    */
+    hasSpaceFor : function(extent){
+      return this.getRestExtent() >= extent;
+    },
+    /**
+       check if this block context has break after flag.
+       @memberof Nehan.BlockContext
+       @method hasBreakAfter
+       @return {boolean}
+    */
+    hasBreakAfter : function(){
+      return this.breakAfter;
+    },
+    /**
+       add box element to this block context
+       @memberof Nehan.BlockContext
+       @method addElement
+       @param element {Nehan.Box} - Box object added to this context
+       @param extent {int} - extent size of this element
+    */
+    addElement : function(element, extent){
+      this.curExtent += extent;
+      if(element.breakAfter){
+	this.breakAfter = true;
+      }
+      if(element.pushed){
+	this.pushedElements.push(element);
+      } else if(element.pulled){
+	this.pulledElements.unshift(element);
+      } else {
+	this.elements.push(element);
+      }
+    },
+    /**
+       @memberof Nehan.BlockContext
+       @return {int} current extent
+    */
+    getCurExtent : function(){
+      return this.curExtent;
+    },
+    /**
+       @memberof Nehan.BlockContext
+       @return {int} current rest size of extent
+    */
+    getRestExtent : function(){
+      return this.maxExtent - this.curExtent;
+    },
+    /**
+       @memberof Nehan.BlockContext
+       @return {int} max available size of this block context
+    */
+    getMaxExtent : function(){
+      return this.maxExtent;
+    },
+    /**
+       @memberof Nehan.BlockContext
+       @return {int} max available size of this block context
+    */
+    getLineNo : function(){
+      return this.lineNo;
+    },
+    /**
+       @memberof Nehan.BlockContext
+       @return {int} max available size of this block context
+    */
+    incLineNo : function(){
+      return this.lineNo++;
+    },
+    /**
+       @memberof Nehan.BlockContext
+       @return {Array.<Nehan.Box>} current elements added to this block context
+    */
+    getElements : function(){
+      return this.pulledElements
+	.concat(this.elements)
+	.concat(this.pushedElements);
+    }
+  };
+
+  return BlockContext;
+})();
+
+
+Nehan.InlineContext = (function(){
+  /**
+     @memberof Nehan
+     @class InlineContext
+     @classdesc context data of inline level.
+     @constructor
+     @param max_measure {int} - maximum posistion of inline in px.
+  */
+  function InlineContext(max_measure){
+    this.charCount = 0;
+    this.curMeasure = 0;
+    this.maxMeasure = max_measure; // const
+    this.maxExtent = 0;
+    this.maxFontSize = 0;
+    this.elements = [];
+    this.lineBreak = false; // is line-break included in line?
+    this.lineOver = false; // is line full-filled?
+    this.breakAfter = false; // is break-after incuded in line?
+    this.justified = false; // is line justified?
+  }
+
+  InlineContext.prototype = {
+    /**
+       @memberof Nehan.InlineContext
+       @return {boolean}
+    */
+    isEmpty : function(){
+      return !this.lineBreak && !this.breakAfter && this.elements.length === 0;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {boolean}
+    */
+    isJustified : function(){
+      return this.justified;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {boolean}
+    */
+    isLineOver: function(){
+      return this.lineOver;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param measure {int}
+       @return {boolean}
+    */
+    hasSpaceFor : function(measure){
+      return this.getRestMeasure() >= measure;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {boolean}
+    */
+    hasLineBreak : function(){
+      return this.lineBreak;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param status {boolean}
+    */
+    setLineBreak : function(status){
+      this.lineBreak = status;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param status {boolean}
+    */
+    setLineOver : function(status){
+      this.lineOver = status;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param status {boolean}
+    */
+    setJustified : function(status){
+      this.justified = status;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {boolean}
+    */
+    hasBreakAfter : function(){
+      return this.breakAfter;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param status {boolean}
+    */
+    setBreakAfter : function(status){
+      this.breakAfter = status;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param measure {int}
+    */
+    addMeasure : function(measure){
+      this.curMeasure += measure;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param element {Nehan.Box}
+       @param measure {int}
+    */
+    addTextElement : function(element, measure){
+      this.elements.push(element);
+      this.curMeasure += measure;
+      if(element.getCharCount){
+	this.charCount += element.getCharCount();
+      }
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @param element {Nehan.Box}
+       @param measure {int}
+    */
+    addBoxElement : function(element, measure){
+      this.elements.push(element);
+      this.curMeasure += measure;
+      this.charCount += (element.charCount || 0);
+      if(element.maxExtent){
+	this.maxExtent = Math.max(this.maxExtent, element.maxExtent);
+      } else {
+	this.maxExtent = Math.max(this.maxExtent, element.getLayoutExtent());
+      }
+      if(element.maxFontSize){
+	this.maxFontSize = Math.max(this.maxFontSize, element.maxFontSize);
+      }
+      if(element.breakAfter){
+	this.breakAfter = true;
+      }
+      if(element.justified){
+	this.justified = true;
+      }
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
+    */
+    getLastElement : function(){
+      return Nehan.List.last(this.elements);
+    },
+    /**
+       get all elements.
+
+       @memberof Nehan.InlineContext
+       @return {Array}
+    */
+    getElements : function(){
+      return this.elements;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {int}
+    */
+    getCurMeasure : function(){
+      return this.curMeasure;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {int}
+    */
+    getRestMeasure : function(){
+      return this.maxMeasure - this.curMeasure;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {int}
+    */
+    getMaxMeasure : function(){
+      return this.maxMeasure;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {int}
+    */
+    getMaxExtent : function(){
+      return this.isEmpty()? 0 : this.maxExtent;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {int}
+    */
+    getMaxFontSize : function(){
+      return this.maxFontSize;
+    },
+    /**
+       @memberof Nehan.InlineContext
+       @return {int}
+    */
+    getCharCount : function(){
+      return this.charCount;
+    },
+    /**
+       justify(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if justified.
+
+       @memberof Nehan.InlineContext
+       @param head {Nehan.Char} - head_char at next line.
+       @return {Nehan.Char | null}
+    */
+    justifySweep : function(head){
+      var last = this.elements.length - 1;
+      var ptr = last;
+      var tail = this.elements[ptr] || null;
+      var is_tail_ng = function(tail){
+	return (tail && tail.isTailNg && tail.isTailNg())? true : false;
+      };
+      var is_head_ng = function(head){
+	return (head && head.isHeadNg && head.isHeadNg())? true : false;
+      };
+
+      if(!is_tail_ng(tail) && !is_head_ng(head)){
+	return null;
+      }
+
+      //console.log("start justify:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng(tail), head, is_head_ng(head));
+
+      // if [word] is divided into [word1], [word2], then
+      //    [char][word]<br>[char(head_ng)]
+      // => [char][word1]<br>[word2][char(head_ng)]
+      // so nothing to justify.
+      if(tail && tail instanceof Nehan.Word && tail.isDivided()){
+	return null;
+      }
+
+      while(ptr >= 0){
+	tail = this.elements[ptr];
+	if(is_head_ng(head) || is_tail_ng(tail)){
+	  head = tail;
+	  ptr--;
+	} else {
+	  break;
+	}
+      }
+      if(ptr < 0){
+	return tail;
+      }
+      // if ptr moved, justification is executed.
+      if(0 <= ptr && ptr < last){
+	// disable text after new tail pos.
+	this.elements = Nehan.List.filter(this.elements, function(element){
+	  return element.pos? (element.pos < head.pos) : true;
+	});
+	return head; // return new head
+      }
+      return null; // justify failed or not required.
+    },
+    /**
+       justify(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
+
+       @memberof Nehan.InlineContext
+       @param head {Nehan.Char}
+       @param head_next {Nehan.Char}
+       @return {bool}
+    */
+    justifyDangling : function(head, head_next){
+      if(!(head instanceof Nehan.Char) || !head.isHeadNg()){
+	return false;
+      }
+      if(head_next instanceof Nehan.Char && head_next.isHeadNg()){
+	return false;
+      }
+      return true;
+    }
+  };
+
+  return InlineContext;
+})();
+
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -13698,631 +14323,6 @@ var DomCreateContext = (function(){
   return DomCreateContext;
 })();
 
-var CursorContext = (function(){
-  /**
-     @memberof Nehan
-     @class CursorContext
-     @classdesc generator cursor position set(inline and block).
-     @constructor
-     @param block {Nehan.BlockContext}
-     @param inline {Nehan.InlineContext}
-  */
-  function CursorContext(block, inline){
-    this.block = block;
-    this.inline = inline;
-  }
-
-  CursorContext.prototype = {
-    /**
-       @memberof Nehan.CursorContext
-       @return {boolean}
-    */
-    hasBlockSpaceFor : function(extent, opt){
-      return this.block.hasSpaceFor(extent, opt);
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {boolean}
-    */
-    hasBreakAfter : function(){
-      return this.block.hasBreakAfter() || this.inline.hasBreakAfter() || false;
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @param element {Nehan.Box}
-       @param extent {int}
-    */
-    addBlockElement : function(element, extent){
-      this.block.addElement(element, extent);
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {Array.<Nehan.Box>}
-    */
-    getBlockElements : function(){
-      return this.block.getElements();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {int}
-    */
-    getBlockCurExtent : function(){
-      return this.block.getCurExtent();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {int}
-    */
-    getBlockMaxExtent : function(){
-      return this.block.getMaxExtent();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {int}
-    */
-    getBlockRestExtent : function(){
-      return this.block.getRestExtent();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {int}
-    */
-    getBlockLineNo : function(){
-      return this.block.getLineNo();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {int}
-    */
-    incBlockLineNo : function(){
-      return this.block.incLineNo();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {boolean}
-    */
-    isInlineEmpty : function(){
-      return this.inline.isEmpty();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {boolean}
-    */
-    isJustified : function(){
-      return this.inline.isJustified();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {boolean}
-    */
-    isLineOver : function(){
-      return this.inline.isLineOver();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {boolean}
-    */
-    hasInlineSpaceFor : function(measure){
-      return this.inline.hasSpaceFor(measure);
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {boolean}
-    */
-    hasLineBreak : function(){
-      return this.inline.hasLineBreak();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @param status {boolean}
-    */
-    setLineBreak : function(status){
-      this.inline.setLineBreak(status);
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @param status {boolean}
-    */
-    setLineOver: function(status){
-      this.inline.setLineOver(status);
-    },
-    /**
-       @memberof Nehan.CursorContext
-    */
-    setBreakAfter : function(status){
-      this.inline.setBreakAfter(status);
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @param status {boolean}
-    */
-    setJustified : function(status){
-      this.inline.setJustified(status);
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @param measure {int}
-    */
-    addInlineMeasure : function(measure){
-      this.inline.addMeasure(measure);
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @param element {Nehan.Box}
-       @param measure {int}
-    */
-    addInlineBoxElement : function(element, measure){
-      this.inline.addBoxElement(element, measure);
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @param element {Nehan.Box}
-       @param measure {int}
-    */
-    addInlineTextElement : function(element, measure){
-      this.inline.addTextElement(element, measure);
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
-    */
-    getInlineLastElement : function(){
-      return this.inline.getLastElement();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {Array}
-    */
-    getInlineElements : function(){
-      return this.inline.getElements();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {int}
-    */
-    getInlineCurMeasure : function(){
-      return this.inline.getCurMeasure();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {int}
-    */
-    getInlineRestMeasure : function(){
-      return this.inline.getRestMeasure();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {int}
-    */
-    getInlineMaxMeasure : function(){
-      return this.inline.getMaxMeasure();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {int}
-    */
-    getInlineMaxExtent : function(){
-      return this.inline.getMaxExtent();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {int}
-    */
-    getInlineMaxFontSize : function(){
-      return this.inline.getMaxFontSize();
-    },
-    /**
-       @memberof Nehan.CursorContext
-       @return {int}
-    */
-    getInlineCharCount : function(){
-      return this.inline.getCharCount();
-    },
-    /**
-       justify(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if justified.
-       @memberof Nehan.CursorContext
-       @param head_char {Nehan.Char}
-       @return {Nehan.Char | null}
-    */
-    justifySweep : function(head_char){
-      return this.inline.justifySweep(head_char);
-    },
-    /**
-       justify(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
-       @memberof Nehan.CursorContext
-       @param head_char {Nehan.Char}
-       @param head_next {Nehan.Char}
-       @return {Nehan.Char | null}
-    */
-    justifyDangling : function(head_char, head_next){
-      return this.inline.justifyDangling(head_char, head_next);
-    }
-  };
-
-  return CursorContext;
-})();
-
-
-var BlockContext = (function(){
-  /** @memberof Nehan
-      @class BlockContext
-      @classdesc context data of block level.
-      @constructor
-      @param {int} max_extent - maximus position of block in px.
-      @param opt {Object} - optional argument
-  */
-  function BlockContext(max_extent, opt){
-    opt = opt || {};
-    this.curExtent = 0;
-    this.maxExtent = max_extent; // const
-    this.pushedElements = [];
-    this.elements = [];
-    this.pulledElements = [];
-    this.breakAfter = false;
-    this.lineNo = opt.lineNo || 0;
-  }
-
-  BlockContext.prototype = {
-    /**
-       check if this block context has enough size of [extent]
-       @memberof Nehan.BlockContext
-       @method hasSpaceFor
-       @param extent {int} - size of extent in px
-       @return {boolean}
-    */
-    hasSpaceFor : function(extent){
-      return this.getRestExtent() >= extent;
-    },
-    /**
-       check if this block context has break after flag.
-       @memberof Nehan.BlockContext
-       @method hasBreakAfter
-       @return {boolean}
-    */
-    hasBreakAfter : function(){
-      return this.breakAfter;
-    },
-    /**
-       add box element to this block context
-       @memberof Nehan.BlockContext
-       @method addElement
-       @param element {Nehan.Box} - Box object added to this context
-       @param extent {int} - extent size of this element
-    */
-    addElement : function(element, extent){
-      this.curExtent += extent;
-      if(element.breakAfter){
-	this.breakAfter = true;
-      }
-      if(element.pushed){
-	this.pushedElements.push(element);
-      } else if(element.pulled){
-	this.pulledElements.unshift(element);
-      } else {
-	this.elements.push(element);
-      }
-    },
-    /**
-       @memberof Nehan.BlockContext
-       @return {int} current extent
-    */
-    getCurExtent : function(){
-      return this.curExtent;
-    },
-    /**
-       @memberof Nehan.BlockContext
-       @return {int} current rest size of extent
-    */
-    getRestExtent : function(){
-      return this.maxExtent - this.curExtent;
-    },
-    /**
-       @memberof Nehan.BlockContext
-       @return {int} max available size of this block context
-    */
-    getMaxExtent : function(){
-      return this.maxExtent;
-    },
-    /**
-       @memberof Nehan.BlockContext
-       @return {int} max available size of this block context
-    */
-    getLineNo : function(){
-      return this.lineNo;
-    },
-    /**
-       @memberof Nehan.BlockContext
-       @return {int} max available size of this block context
-    */
-    incLineNo : function(){
-      return this.lineNo++;
-    },
-    /**
-       @memberof Nehan.BlockContext
-       @return {Array.<Nehan.Box>} current elements added to this block context
-    */
-    getElements : function(){
-      return this.pulledElements
-	.concat(this.elements)
-	.concat(this.pushedElements);
-    }
-  };
-
-  return BlockContext;
-})();
-
-
-var InlineContext = (function(){
-  /**
-     @memberof Nehan
-     @class InlineContext
-     @classdesc context data of inline level.
-     @constructor
-     @param max_measure {int} - maximum posistion of inline in px.
-  */
-  function InlineContext(max_measure){
-    this.charCount = 0;
-    this.curMeasure = 0;
-    this.maxMeasure = max_measure; // const
-    this.maxExtent = 0;
-    this.maxFontSize = 0;
-    this.elements = [];
-    this.lineBreak = false; // is line-break included in line?
-    this.lineOver = false; // is line full-filled?
-    this.breakAfter = false; // is break-after incuded in line?
-    this.justified = false; // is line justified?
-  }
-
-  InlineContext.prototype = {
-    /**
-       @memberof Nehan.InlineContext
-       @return {boolean}
-    */
-    isEmpty : function(){
-      return !this.lineBreak && !this.breakAfter && this.elements.length === 0;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {boolean}
-    */
-    isJustified : function(){
-      return this.justified;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {boolean}
-    */
-    isLineOver: function(){
-      return this.lineOver;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param measure {int}
-       @return {boolean}
-    */
-    hasSpaceFor : function(measure){
-      return this.getRestMeasure() >= measure;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {boolean}
-    */
-    hasLineBreak : function(){
-      return this.lineBreak;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param status {boolean}
-    */
-    setLineBreak : function(status){
-      this.lineBreak = status;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param status {boolean}
-    */
-    setLineOver : function(status){
-      this.lineOver = status;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param status {boolean}
-    */
-    setJustified : function(status){
-      this.justified = status;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {boolean}
-    */
-    hasBreakAfter : function(){
-      return this.breakAfter;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param status {boolean}
-    */
-    setBreakAfter : function(status){
-      this.breakAfter = status;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param measure {int}
-    */
-    addMeasure : function(measure){
-      this.curMeasure += measure;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param element {Nehan.Box}
-       @param measure {int}
-    */
-    addTextElement : function(element, measure){
-      this.elements.push(element);
-      this.curMeasure += measure;
-      if(element.getCharCount){
-	this.charCount += element.getCharCount();
-      }
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param element {Nehan.Box}
-       @param measure {int}
-    */
-    addBoxElement : function(element, measure){
-      this.elements.push(element);
-      this.curMeasure += measure;
-      this.charCount += (element.charCount || 0);
-      if(element.maxExtent){
-	this.maxExtent = Math.max(this.maxExtent, element.maxExtent);
-      } else {
-	this.maxExtent = Math.max(this.maxExtent, element.getLayoutExtent());
-      }
-      if(element.maxFontSize){
-	this.maxFontSize = Math.max(this.maxFontSize, element.maxFontSize);
-      }
-      if(element.breakAfter){
-	this.breakAfter = true;
-      }
-      if(element.justified){
-	this.justified = true;
-      }
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
-    */
-    getLastElement : function(){
-      return Nehan.List.last(this.elements);
-    },
-    /**
-       get all elements.
-
-       @memberof Nehan.InlineContext
-       @return {Array}
-    */
-    getElements : function(){
-      return this.elements;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {int}
-    */
-    getCurMeasure : function(){
-      return this.curMeasure;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {int}
-    */
-    getRestMeasure : function(){
-      return this.maxMeasure - this.curMeasure;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {int}
-    */
-    getMaxMeasure : function(){
-      return this.maxMeasure;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {int}
-    */
-    getMaxExtent : function(){
-      return this.isEmpty()? 0 : this.maxExtent;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {int}
-    */
-    getMaxFontSize : function(){
-      return this.maxFontSize;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {int}
-    */
-    getCharCount : function(){
-      return this.charCount;
-    },
-    /**
-       justify(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if justified.
-
-       @memberof Nehan.InlineContext
-       @param head {Nehan.Char} - head_char at next line.
-       @return {Nehan.Char | null}
-    */
-    justifySweep : function(head){
-      var last = this.elements.length - 1;
-      var ptr = last;
-      var tail = this.elements[ptr] || null;
-      var is_tail_ng = function(tail){
-	return (tail && tail.isTailNg && tail.isTailNg())? true : false;
-      };
-      var is_head_ng = function(head){
-	return (head && head.isHeadNg && head.isHeadNg())? true : false;
-      };
-
-      if(!is_tail_ng(tail) && !is_head_ng(head)){
-	return null;
-      }
-
-      //console.log("start justify:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng(tail), head, is_head_ng(head));
-
-      // if [word] is divided into [word1], [word2], then
-      //    [char][word]<br>[char(head_ng)]
-      // => [char][word1]<br>[word2][char(head_ng)]
-      // so nothing to justify.
-      if(tail && tail instanceof Nehan.Word && tail.isDivided()){
-	return null;
-      }
-
-      while(ptr >= 0){
-	tail = this.elements[ptr];
-	if(is_head_ng(head) || is_tail_ng(tail)){
-	  head = tail;
-	  ptr--;
-	} else {
-	  break;
-	}
-      }
-      if(ptr < 0){
-	return tail;
-      }
-      // if ptr moved, justification is executed.
-      if(0 <= ptr && ptr < last){
-	// disable text after new tail pos.
-	this.elements = Nehan.List.filter(this.elements, function(element){
-	  return element.pos? (element.pos < head.pos) : true;
-	});
-	return head; // return new head
-      }
-      return null; // justify failed or not required.
-    },
-    /**
-       justify(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
-
-       @memberof Nehan.InlineContext
-       @param head {Nehan.Char}
-       @param head_next {Nehan.Char}
-       @return {bool}
-    */
-    justifyDangling : function(head, head_next){
-      if(!(head instanceof Nehan.Char) || !head.isHeadNg()){
-	return false;
-      }
-      if(head_next instanceof Nehan.Char && head_next.isHeadNg()){
-	return false;
-      }
-      return true;
-    }
-  };
-
-  return InlineContext;
-})();
-
-
 var LayoutGenerator = (function(){
   /**
      @memberof Nehan
@@ -14524,9 +14524,9 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createStartContext = function(){
     var edge_size = this._getContextEdgeSize();
-    var context = new CursorContext(
-      new BlockContext(this.style.outerExtent - edge_size),
-      new InlineContext(this.style.contentMeasure)
+    var context = new Nehan.CursorContext(
+      new Nehan.BlockContext(this.style.outerExtent - edge_size),
+      new Nehan.InlineContext(this.style.contentMeasure)
     );
     //console.info("[%s]start context:%o", this.style.markupName, context);
     return context;
@@ -14535,11 +14535,11 @@ var LayoutGenerator = (function(){
   LayoutGenerator.prototype._createChildContext = function(parent_context){
     var edge_size = this._getContextEdgeSize();
     var max_extent = parent_context.getBlockRestExtent() - edge_size;
-    var child_context = new CursorContext(
-      new BlockContext(max_extent, {
+    var child_context = new Nehan.CursorContext(
+      new Nehan.BlockContext(max_extent, {
 	lineNo:parent_context.lineNo
       }),
-      new InlineContext(this.style.contentMeasure)
+      new Nehan.InlineContext(this.style.contentMeasure)
     );
     //console.info("[%s]child context:%o", this.style.markupName, child_context);
     return child_context;
@@ -14979,9 +14979,9 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createChildContext = function(context){
-    var child_context = new CursorContext(
+    var child_context = new Nehan.CursorContext(
       context.block, // inline generator inherits block context as it is.
-      new InlineContext(context.getInlineRestMeasure())
+      new Nehan.InlineContext(context.getInlineRestMeasure())
     );
     //console.log("create child context:%o", child_context);
     return child_context;
@@ -15152,9 +15152,9 @@ var InlineBlockGenerator = (function (){
   };
 
   InlineBlockGenerator.prototype._createChildContext = function(parent_context){
-    return new CursorContext(
-      new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
-      new InlineContext(parent_context.getInlineRestMeasure() - this.style.getEdgeMeasure())
+    return new Nehan.CursorContext(
+      new Nehan.BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
+      new Nehan.InlineContext(parent_context.getInlineRestMeasure() - this.style.getEdgeMeasure())
     );
   };
 
@@ -15238,9 +15238,9 @@ var TextGenerator = (function(){
   };
 
   TextGenerator.prototype._createChildContext = function(context){
-    return new CursorContext(
+    return new Nehan.CursorContext(
       context.block, // inline generator inherits block context as it is.
-      new InlineContext(context.getInlineRestMeasure())
+      new Nehan.InlineContext(context.getInlineRestMeasure())
     );
   };
 

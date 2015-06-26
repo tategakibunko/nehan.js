@@ -1,4 +1,4 @@
-var BlockContext = (function(){
+Nehan.BlockContext = (function(){
   /** @memberof Nehan
       @class BlockContext
       @classdesc context data of block level.

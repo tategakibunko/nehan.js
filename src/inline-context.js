@@ -1,4 +1,4 @@
-var InlineContext = (function(){
+Nehan.InlineContext = (function(){
   /**
      @memberof Nehan
      @class InlineContext

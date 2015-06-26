@@ -1,4 +1,4 @@
-var CursorContext = (function(){
+Nehan.CursorContext = (function(){
   /**
      @memberof Nehan
      @class CursorContext

@@ -75,9 +75,9 @@ var TextGenerator = (function(){
   };
 
   TextGenerator.prototype._createChildContext = function(context){
-    return new CursorContext(
+    return new Nehan.CursorContext(
       context.block, // inline generator inherits block context as it is.
-      new InlineContext(context.getInlineRestMeasure())
+      new Nehan.InlineContext(context.getInlineRestMeasure())
     );
   };
 

@@ -109,6 +109,9 @@ var sources = [
   "src/partition-unit.js",
   "src/partition.js",
   "src/partition-hash-set.js",
+  "src/cursor-context.js",
+  "src/block-context.js",
+  "src/inline-context.js",
 
   // closed modules
   // these modules/classes are referenced by
@@ -132,9 +135,6 @@ var sources = [
   "src/selector-context.js",
   "src/style-context.js",
   "src/dom-create-context.js",
-  "src/cursor-context.js",
-  "src/block-context.js",
-  "src/inline-context.js",
   "src/layout-generator.js",
   "src/block-generator.js",
   "src/inline-generator.js",

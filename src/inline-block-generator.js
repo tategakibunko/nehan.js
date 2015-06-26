@@ -23,9 +23,9 @@ var InlineBlockGenerator = (function (){
   };
 
   InlineBlockGenerator.prototype._createChildContext = function(parent_context){
-    return new CursorContext(
-      new BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
-      new InlineContext(parent_context.getInlineRestMeasure() - this.style.getEdgeMeasure())
+    return new Nehan.CursorContext(
+      new Nehan.BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
+      new Nehan.InlineContext(parent_context.getInlineRestMeasure() - this.style.getEdgeMeasure())
     );
   };
 

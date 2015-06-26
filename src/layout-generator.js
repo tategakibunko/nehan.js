@@ -199,9 +199,9 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createStartContext = function(){
     var edge_size = this._getContextEdgeSize();
-    var context = new CursorContext(
-      new BlockContext(this.style.outerExtent - edge_size),
-      new InlineContext(this.style.contentMeasure)
+    var context = new Nehan.CursorContext(
+      new Nehan.BlockContext(this.style.outerExtent - edge_size),
+      new Nehan.InlineContext(this.style.contentMeasure)
     );
     //console.info("[%s]start context:%o", this.style.markupName, context);
     return context;
@@ -210,11 +210,11 @@ var LayoutGenerator = (function(){
   LayoutGenerator.prototype._createChildContext = function(parent_context){
     var edge_size = this._getContextEdgeSize();
     var max_extent = parent_context.getBlockRestExtent() - edge_size;
-    var child_context = new CursorContext(
-      new BlockContext(max_extent, {
+    var child_context = new Nehan.CursorContext(
+      new Nehan.BlockContext(max_extent, {
 	lineNo:parent_context.lineNo
       }),
-      new InlineContext(this.style.contentMeasure)
+      new Nehan.InlineContext(this.style.contentMeasure)
     );
     //console.info("[%s]child context:%o", this.style.markupName, child_context);
     return child_context;
