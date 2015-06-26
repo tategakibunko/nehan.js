@@ -177,7 +177,7 @@ var FloatGenerator = (function(){
 	}
       }
     });
-    return new FloatGroupStack(this.style.flow, start_blocks, end_blocks);
+    return new Nehan.FloatGroupStack(this.style.flow, start_blocks, end_blocks);
   };
 
   return FloatGenerator;

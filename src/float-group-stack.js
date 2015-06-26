@@ -1,4 +1,4 @@
-var FloatGroupStack = (function(){
+Nehan.FloatGroupStack = (function(){
 
   // [float block] -> FloatGroup
   var __pop_float_group = function(flow, float_direction, blocks){
@@ -7,7 +7,7 @@ var FloatGroupStack = (function(){
       return null;
     }
     var extent = head.getLayoutExtent(flow);
-    var group = new FloatGroup([head], float_direction);
+    var group = new Nehan.FloatGroup([head], float_direction);
 
     // group while previous floated-element has smaller extent than the head
     while(true){

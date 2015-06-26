@@ -5649,6 +5649,170 @@ Nehan.FloatDirections = {
   }
 };
 
+Nehan.FloatGroup = (function(){
+  /**
+     @memberof Nehan
+     @class FloatGroup
+     @classdesc element set with same floated direction.
+     @constructor
+     @param elements {Array.<Nehan.Box>}
+     @param float_direction {Nehan.FloatDirection}
+  */
+  function FloatGroup(elements, float_direction){
+    this.elements = elements || [];
+    this.floatDirection = float_direction || Nehan.FloatDirections.get("start");
+  }
+
+  FloatGroup.prototype = {
+    /**
+       element is popped from float-stack, but unshifted to elements in float-group to keep original stack order.
+     *<pre>
+     * float-stack  | float-group
+     *     [f1,f2]  |  []
+     *  => [f1]     |  [f2] (pop f2 from float-stack, unshift f2 to float-group)
+     *  => []       |  [f1, f2] (pop f1 from float-stack, unshift f1 to float-group)
+     *</pre>
+
+      @memberof Nehan.FloatGroup
+      @param element {Nehan.Box}
+    */
+    add : function(element){
+      this.elements.unshift(element); // keep original stack order
+    },
+    /**
+       @memberof Nehan.FloatGroup
+       @return {boolean}
+    */
+    isFloatStart : function(){
+      return this.floatDirection.isStart();
+    },
+    /**
+       @memberof Nehan.FloatGroup
+       @return {boolean}
+    */
+    isFloatEnd : function(){
+      return this.floatDirection.isEnd();
+    },
+    /**
+       @memberof Nehan.FloatGroup
+       @return {Array.<Nehan.Box>}
+    */
+    getElements : function(){
+      return this.isFloatStart()? this.elements : Nehan.List.reverse(this.elements);
+    },
+    /**
+       @memberof Nehan.FloatGroup
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
+    getMeasure : function(flow){
+      return Nehan.List.fold(this.elements, 0, function(measure, element){
+	return measure + element.getLayoutMeasure(flow);
+      });
+    },
+    /**
+       @memberof Nehan.FloatGroup
+       @param flow {Nehan.BoxFlow}
+       @return {int}
+    */
+    getExtent : function(flow){
+      return Nehan.List.fold(this.elements, 0, function(extent, element){
+	return Math.max(extent, element.getLayoutExtent(flow));
+      });
+    }
+  };
+
+  return FloatGroup;
+})();
+
+
+Nehan.FloatGroupStack = (function(){
+
+  // [float block] -> FloatGroup
+  var __pop_float_group = function(flow, float_direction, blocks){
+    var head = blocks.pop() || null;
+    if(head === null){
+      return null;
+    }
+    var extent = head.getLayoutExtent(flow);
+    var group = new Nehan.FloatGroup([head], float_direction);
+
+    // group while previous floated-element has smaller extent than the head
+    while(true){
+      var next = blocks.pop();
+      if(next && next.getLayoutExtent(flow) <= extent){
+	group.add(next);
+      } else {
+	blocks.push(next); // push back
+	break;
+      }
+    }
+    return group;
+  };
+
+  // [float block] -> [FloatGroup]
+  var __make_float_groups = function(flow, float_direction, blocks){
+    var ret = [], group;
+    do{
+      group = __pop_float_group(flow, float_direction, blocks);
+      if(group){
+	ret.push(group);
+      }
+    } while(group !== null);
+    return ret;
+  };
+
+  /**
+     @memberof Nehan
+     @class FloatGroupStack
+     @classdesc pop {@link Nehan.FloatGroup} with larger extent from start or end.
+     @constructor
+     @param flow {Nehan.BoxFlow}
+     @param start_blocks {Array.<Nehan.Box>}
+     @param end_blocks {Array.<Nehan.Box>}
+  */
+  function FloatGroupStack(flow, start_blocks, end_blocks){
+    var start_groups = __make_float_groups(flow, Nehan.FloatDirections.get("start"), start_blocks);
+    var end_groups = __make_float_groups(flow, Nehan.FloatDirections.get("end"), end_blocks);
+    this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
+      return g1.getExtent(flow) - g2.getExtent(flow);
+    });
+    var max_group = Nehan.List.maxobj(this.stack, function(group){
+      return group.getExtent(flow);
+    });
+    //console.log("max group from %o is %o", this.stack, max_group);
+    this.extent = max_group? max_group.getExtent(flow) : 0;
+  }
+
+  FloatGroupStack.prototype = {
+    /**
+       @memberof Nehan.FloatGroupStack
+       @return {boolean}
+    */
+    isEmpty : function(){
+      return this.stack.length === 0;
+    },
+    /**
+       @memberof Nehan.FloatGroupStack
+       @return {int}
+    */
+    getExtent : function(){
+      return this.extent;
+    },
+    /**
+       pop {@link Nehan.FloatGroup} with larger extent from start or end.
+       @memberof Nehan.FloatGroupStack
+       @return {Nehan.FloatGroup}
+    */
+    pop : function(){
+      return this.stack.pop() || null;
+    }
+  };
+
+  return FloatGroupStack;
+})();
+
+
 Nehan.TextAlign = (function(){
   /**
      @memberof Nehan
@@ -15461,170 +15625,6 @@ var FlipGenerator = (function(){
 })();
 
 
-var FloatGroup = (function(){
-  /**
-     @memberof Nehan
-     @class FloatGroup
-     @classdesc element set with same floated direction.
-     @constructor
-     @param elements {Array.<Nehan.Box>}
-     @param float_direction {Nehan.FloatDirection}
-  */
-  function FloatGroup(elements, float_direction){
-    this.elements = elements || [];
-    this.floatDirection = float_direction || Nehan.FloatDirections.get("start");
-  }
-
-  FloatGroup.prototype = {
-    /**
-       element is popped from float-stack, but unshifted to elements in float-group to keep original stack order.
-     *<pre>
-     * float-stack  | float-group
-     *     [f1,f2]  |  []
-     *  => [f1]     |  [f2] (pop f2 from float-stack, unshift f2 to float-group)
-     *  => []       |  [f1, f2] (pop f1 from float-stack, unshift f1 to float-group)
-     *</pre>
-
-      @memberof Nehan.FloatGroup
-      @param element {Nehan.Box}
-    */
-    add : function(element){
-      this.elements.unshift(element); // keep original stack order
-    },
-    /**
-       @memberof Nehan.FloatGroup
-       @return {boolean}
-    */
-    isFloatStart : function(){
-      return this.floatDirection.isStart();
-    },
-    /**
-       @memberof Nehan.FloatGroup
-       @return {boolean}
-    */
-    isFloatEnd : function(){
-      return this.floatDirection.isEnd();
-    },
-    /**
-       @memberof Nehan.FloatGroup
-       @return {Array.<Nehan.Box>}
-    */
-    getElements : function(){
-      return this.isFloatStart()? this.elements : Nehan.List.reverse(this.elements);
-    },
-    /**
-       @memberof Nehan.FloatGroup
-       @param flow {Nehan.BoxFlow}
-       @return {int}
-    */
-    getMeasure : function(flow){
-      return Nehan.List.fold(this.elements, 0, function(measure, element){
-	return measure + element.getLayoutMeasure(flow);
-      });
-    },
-    /**
-       @memberof Nehan.FloatGroup
-       @param flow {Nehan.BoxFlow}
-       @return {int}
-    */
-    getExtent : function(flow){
-      return Nehan.List.fold(this.elements, 0, function(extent, element){
-	return Math.max(extent, element.getLayoutExtent(flow));
-      });
-    }
-  };
-
-  return FloatGroup;
-})();
-
-
-var FloatGroupStack = (function(){
-
-  // [float block] -> FloatGroup
-  var __pop_float_group = function(flow, float_direction, blocks){
-    var head = blocks.pop() || null;
-    if(head === null){
-      return null;
-    }
-    var extent = head.getLayoutExtent(flow);
-    var group = new FloatGroup([head], float_direction);
-
-    // group while previous floated-element has smaller extent than the head
-    while(true){
-      var next = blocks.pop();
-      if(next && next.getLayoutExtent(flow) <= extent){
-	group.add(next);
-      } else {
-	blocks.push(next); // push back
-	break;
-      }
-    }
-    return group;
-  };
-
-  // [float block] -> [FloatGroup]
-  var __make_float_groups = function(flow, float_direction, blocks){
-    var ret = [], group;
-    do{
-      group = __pop_float_group(flow, float_direction, blocks);
-      if(group){
-	ret.push(group);
-      }
-    } while(group !== null);
-    return ret;
-  };
-
-  /**
-     @memberof Nehan
-     @class FloatGroupStack
-     @classdesc pop {@link Nehan.FloatGroup} with larger extent from start or end.
-     @constructor
-     @param flow {Nehan.BoxFlow}
-     @param start_blocks {Array.<Nehan.Box>}
-     @param end_blocks {Array.<Nehan.Box>}
-  */
-  function FloatGroupStack(flow, start_blocks, end_blocks){
-    var start_groups = __make_float_groups(flow, Nehan.FloatDirections.get("start"), start_blocks);
-    var end_groups = __make_float_groups(flow, Nehan.FloatDirections.get("end"), end_blocks);
-    this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
-      return g1.getExtent(flow) - g2.getExtent(flow);
-    });
-    var max_group = Nehan.List.maxobj(this.stack, function(group){
-      return group.getExtent(flow);
-    });
-    //console.log("max group from %o is %o", this.stack, max_group);
-    this.extent = max_group? max_group.getExtent(flow) : 0;
-  }
-
-  FloatGroupStack.prototype = {
-    /**
-       @memberof Nehan.FloatGroupStack
-       @return {boolean}
-    */
-    isEmpty : function(){
-      return this.stack.length === 0;
-    },
-    /**
-       @memberof Nehan.FloatGroupStack
-       @return {int}
-    */
-    getExtent : function(){
-      return this.extent;
-    },
-    /**
-       pop {@link Nehan.FloatGroup} with larger extent from start or end.
-       @memberof Nehan.FloatGroupStack
-       @return {Nehan.FloatGroup}
-    */
-    pop : function(){
-      return this.stack.pop() || null;
-    }
-  };
-
-  return FloatGroupStack;
-})();
-
-
 var FloatGenerator = (function(){
   /**
    * [caution]<br>
@@ -15804,7 +15804,7 @@ var FloatGenerator = (function(){
 	}
       }
     });
-    return new FloatGroupStack(this.style.flow, start_blocks, end_blocks);
+    return new Nehan.FloatGroupStack(this.style.flow, start_blocks, end_blocks);
   };
 
   return FloatGenerator;

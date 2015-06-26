@@ -1,4 +1,4 @@
-var FloatGroup = (function(){
+Nehan.FloatGroup = (function(){
   /**
      @memberof Nehan
      @class FloatGroup
