@@ -25,6 +25,7 @@ var PageEvaluator = (function(){
     evaluate : function(tree){
       return tree? new Nehan.Page({
 	element:this.evaluator.evaluate(tree),
+	text:tree.text,
 	percent:tree.percent,
 	seekPos:tree.seekPos,
 	pageNo:tree.pageNo,

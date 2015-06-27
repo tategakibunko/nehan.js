@@ -5,13 +5,7 @@
   Important notices about style.js
   ================================
 
-  1. camel case property is not allowed
-  -------------------------------------
-
-    OK: {font-size:"16px"}
-    NG: {fontSize:"16px"}
-
-  2. some properties uses 'logical' properties
+  1. some properties uses 'logical' properties
   --------------------------------------------
 
     [examples]
@@ -21,12 +15,12 @@
     ex2. {float:"start"} // => {float:"left"}.
     ex3. {measure:"100px", extent:"50px"} // => {width:"100px", height:"50px"}
 
-  3. about functional css value
+  2. about functional css value
   ------------------------------
 
   you can use functional css value in each css property.
 
-  (3.1) callback argument 'context' in functional css value is 'SelectorPropContext'
+  (2.1) callback argument 'context' in functional css value is 'SelectorPropContext'
 
   // [example]
   // change backgroiund-color by child index.
@@ -36,7 +30,7 @@
     }
   }
 
-  (3.2) callback argument 'context' in 'onload' is 'SelectorContext'
+  (2.2) callback argument 'context' in 'onload' is 'SelectorContext'
 
   this context is 'extended class' of 'SelectorPropContext', with some extra interfaces
   that can touch css object, because 'onload' is called after all css of matched elements are loaded.
@@ -54,10 +48,10 @@
     }
   }
 
- 4. special properties in nehan.js
+ 3. special properties in nehan.js
   ----------------------------------
 
-  (4.1) box-sizing:[content-box | border-box | margin-box(default)]
+  (3.1) box-sizing:[content-box | border-box | margin-box(default)]
 
   In box-sizing, 'margin-box' is special value in nehan.js, and is box-sizing default value.
   In margin-box, even if margin is included in box-size.
@@ -67,7 +61,7 @@
   So if you represent margin/border/padding(called in edge in nehan.js),
   the only way is 'eliminating content space'.
 
-  (4.2) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
+  (3.2) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
 
   This property represent document-mode in nehan.js.
 
