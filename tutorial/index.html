@@ -207,9 +207,7 @@ Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class=
 
 <p>Note that type of argument <code>ctx</code> at <code>onload</code> is NOT <a href="http://tb.antiscroll.com/static/nehan-api/Nehan.SelectorPropContext.html">SelectorPropContext</a> but <a href="http://tb.antiscroll.com/static/nehan-api/Nehan.SelectorContext.html">SelectorContext</a>.</p>
 
-<p><code>SelectorContext</code> extends <code>SelectorPropContext</code>.</p>
-
-<p>Because <code>onload</code> is called after all css properties of the target selector are loaded, <code>SelectorContext</code> has more infomation than <code>SelectorPropContext</code>.</p>
+<p><code>SelectorContext</code> extends <code>SelectorPropContext</code> and <code>onload</code> is called after all css properties of the target selector are loaded, so <code>SelectorContext</code> has more infomation than <code>SelectorPropContext</code>.</p>
 
 <h4 class="ui dividing header">Example5</h4>
 
