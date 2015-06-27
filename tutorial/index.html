@@ -81,7 +81,7 @@
   <span class="key"><span class="delimiter">"</span><span class="content">width</span><span class="delimiter">"</span></span>:<span class="integer">640</span>, <span class="comment">// page width</span>
   <span class="key"><span class="delimiter">"</span><span class="content">height</span><span class="delimiter">"</span></span>:<span class="integer">480</span> <span class="comment">// page height</span>
 }).setContent(<span class="string"><span class="delimiter">"</span><span class="content">&lt;p&gt;hello, nehan.js!!&lt;/p&gt;</span><span class="delimiter">"</span></span>, {
-  <span class="function">onProgress</span>: <span class="keyword">function</span>(tree){
+  <span class="function">onProgress</span>: <span class="keyword">function</span>(tree, ctx){
     <span class="comment">// tree.pageNo, tree.percent available</span>
   },
   <span class="function">onComplete</span>: <span class="keyword">function</span>(time){
@@ -116,7 +116,7 @@
 
 <h4 class="ui dividing header">Preface</h4>
 
-<h5>logical property</h5>
+<h5>1. logical property</h5>
 
 <p>Because nehan.js is <strong>logical</strong> layout engine, you must use <strong>logical</strong> property.</p>
 
@@ -130,7 +130,7 @@
 <i class="info icon"></i><p class="content">For more details for logical property, see <a href="http://www.w3.org/TR/2012/WD-css3-writing-modes-20121115/#abstract-box">CSS Writing Modes Module Level3 - Abstract box dimemsions.</a>.</p>
 </div>
 
-<h5>logical direction</h5>
+<h5>2. logical direction</h5>
 
 <p>For example, lets define some simple style like bellow.</p>
 
@@ -143,7 +143,7 @@ pages.setStyle(<span class="string"><span class="delimiter">"</span><span class=
 
 <p>You might wonder what is <code>{start:0, end:0, before:0, after:"20px"}</code>?<br></p>
 
-<p>This is <b>logical direction</b> of abstract box, <code>start</code> and <code>end</code> are along inline direction, and <code>before</code> and <code>after</code> are along block level direction.<br></p>
+<p>This is <b>logical direction</b>, <code>start</code> and <code>end</code> are along inline direction, and <code>before</code> and <code>after</code> are along block level direction.<br></p>
 
 <p>So if flow is <code>lr-tb</code>, <code>margin:{after:"20px"}</code> means <code>margin-bottom:"20px"</code>.<br></p>
 
@@ -163,7 +163,9 @@ pages.setStyle(<span class="string"><span class="delimiter">"</span><span class=
   }
 });</code></pre></div></div></div>
 
-<p>For functional value is supported in nehan.js, you don't need to remember css property <code>nth-child</code>, you can set them by javascript <code>if/else</code> clause by looking selector context object.</p>
+<p>Because functional value is supported in nehan.js, you don't have to use css property like <code>nth-child</code>, instead, you can use context object and javascript logic, it's more natual and powerfull isn't it?</p>
+
+<p>Note that type of argument <code>ctx</code> in css-property is <a href="http://tb.antiscroll.com/static/nehan-api/Nehan.SelectorPropContext.html">SelectorPropContext</a>.</p>
 
 <h4 class="ui dividing header">Example3</h4>
 
@@ -203,9 +205,13 @@ Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class=
   }
 });</code></pre></div></div></div>
 
+<p>Note that type of argument <code>ctx</code> at <code>onload</code> is NOT <a href="http://tb.antiscroll.com/static/nehan-api/Nehan.SelectorPropContext.html">SelectorPropContext</a> but <a href="http://tb.antiscroll.com/static/nehan-api/Nehan.SelectorContext.html">SelectorContext</a>.</p>
+
+<p>Unlike <code>SelectorPropContext</code> at css-property, <code>onload</code> is called after all css properties of the target selector are loaded, so compared to <code>SelectorPropContext</code>, <code>SelectorContext</code> has more infomation.</p>
+
 <h4 class="ui dividing header">Example5</h4>
 
-<p>Using <code>oncreate</code> property, you can hook the evaluation phase just after converting from layout tree to DOM node.</p>
+<p>By using <code>oncreate</code> property, you can hook just after the target selector is converted into DOM.</p>
 
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">pages.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">p</span><span class="delimiter">"</span></span>, {
 <span class="function">oncreate</span>:<span class="keyword">function</span>(context){
@@ -215,6 +221,8 @@ Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class=
     });
   }
 });</code></pre></div></div></div>
+
+<p>Note that type of argument <code>ctx</code> at <code>oncreate</code> is <a href="http://tb.antiscroll.com/static/nehan-api/Nehan.DomCreateContext.html">DomCreateContext</a>.</p>
 
       </div>
     </main>
