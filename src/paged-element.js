@@ -156,12 +156,12 @@ Nehan.PagedElement = (function(){
        @memberof Nehan.PagedElement
        @param content {String} - html text.
        @param opt {Object} - optinal argument
-       @param opt.onProgress {Function} - fun tree -> ()
-       @param opt.onComplete {Function} - fun time -> ()
+       @param opt.onProgress {Function} - fun tree ctx -> ()
+       @param opt.onComplete {Function} - fun time ctx -> ()
        @param opt.maxPageCount {int} - upper bound of page count
        @example
        * paged_element.setContent("<h1>hello, nehan.js!!</h1>", {
-       *   onProgress:function(tree){
+       *   onProgress:function(tree, ctx){
        *     console.log("page no:%d", tree.pageNo);
        *     console.log("progress:%d", tree.percent);
        *   },
