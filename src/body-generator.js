@@ -18,6 +18,7 @@ var BodyGenerator = (function(){
     block.charPos = DocumentContext.getCharPos();
     block.percent = this.stream.getSeekPercent();
     block.pageNo = DocumentContext.getPageNo();
+
     if(Nehan.Config.capturePageText){
       block.text = block.toString();
     }
