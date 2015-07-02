@@ -9948,8 +9948,6 @@ Nehan.setStyles = function(values){
    @memberof Nehan
    @method createEngine
    @param engine_args {Object}
-   @param engine_args.config {Nehan.Config} - system config
-   @param engine_args.display {Nehan.Display} - standard page parameters
    @param engine_args.style {Nehan.Style} - engine local style
    @return {Nehan.Engine}
 */

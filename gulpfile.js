@@ -121,7 +121,7 @@ var sources = [
 
   // closed modules
   // these modules/classes are referenced by
-  // Style/Selectors/DocumentContext module,
+  // engine local modules(Style/Selectors/DocumentContext etc).
   // so independent from other engines.
   "src/nehan-setup-start.js", // closure start
   "src/style.js",
