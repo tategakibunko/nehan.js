@@ -55,7 +55,6 @@ Nehan.TagAttrLexer = (function(){
       this.buff = this.buff.substring(length);
     },
     _getSymbol : function(){
-      //var symbol = HtmlLexer.prototype._getByRex.call(this, __rex_symbol);
       var match = this.buff.match(__rex_symbol);
       var symbol = match? match[0] : null;
       if(symbol){

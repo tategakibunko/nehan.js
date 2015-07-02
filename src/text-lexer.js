@@ -12,10 +12,10 @@ var TextLexer = (function (){
      @param src {String}
   */
   function TextLexer(src){
-    HtmlLexer.call(this, src);
+    Nehan.HtmlLexer.call(this, src);
   }
 
-  Nehan.Class.extend(TextLexer, HtmlLexer);
+  Nehan.Class.extend(TextLexer, Nehan.HtmlLexer);
 
   TextLexer.prototype._getToken = function(){
     if(this.buff === ""){

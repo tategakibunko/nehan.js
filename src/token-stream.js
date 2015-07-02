@@ -277,7 +277,7 @@ var TokenStream = (function(){
       }
     },
     _createLexer : function(src){
-      return new HtmlLexer(src);
+      return new Nehan.HtmlLexer(src);
     }
   };
 

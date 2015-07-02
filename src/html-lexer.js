@@ -1,4 +1,4 @@
-var HtmlLexer = (function (){
+Nehan.HtmlLexer = (function (){
   var __rex_tag = /<[a-zA-Z][^>]*>/;
 
   /*

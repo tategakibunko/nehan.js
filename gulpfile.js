@@ -114,6 +114,7 @@ var sources = [
   "src/cursor-context.js",
   "src/block-context.js",
   "src/inline-context.js",
+  "src/html-lexer.js",
 
   // closed modules
   // these modules/classes are referenced by
@@ -123,7 +124,6 @@ var sources = [
   "src/style.js",
   "src/selectors.js",
   "src/box.js",
-  "src/html-lexer.js",
   "src/text-lexer.js",
   "src/document-context.js",
   "src/token-stream.js",
