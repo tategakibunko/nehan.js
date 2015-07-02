@@ -350,7 +350,7 @@ var LayoutGenerator = (function(){
     }
     var content = text.getContent();
     return new TextGenerator(this.style, new TokenStream(content, {
-      lexer:new TextLexer(content)
+      lexer:new Nehan.TextLexer(content)
     }));
   };
 

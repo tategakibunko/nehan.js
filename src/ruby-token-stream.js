@@ -47,7 +47,7 @@ var RubyTokenStream = (function(){
 
   RubyTokenStream.prototype._parseRb = function(content){
     return new TokenStream(content, {
-      lexer:new TextLexer(content)
+      lexer:new Nehan.TextLexer(content)
     }).getTokens();
   };
 
