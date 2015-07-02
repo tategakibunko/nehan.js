@@ -3,7 +3,7 @@
 // license: MIT
 
 /**
-   plugin name: nehan-font-awesome
+   plugin name: font-awesome
    description: shortcut tag for font-awesome(http://fortawesome.github.io/Font-Awesome/)
    tag_name: fa
    close_tag: not required
@@ -16,7 +16,7 @@
      <fa name="user">
      <fa name="spin spinner">
 */
-Nehan.addSingleTagByName("fa");
+Nehan.LexingRule.addSingleTagByName("fa");
 Nehan.setStyle("fa", {
   "display":"inline",
   "width":"1em",

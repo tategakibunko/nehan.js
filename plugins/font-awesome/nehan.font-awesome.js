@@ -16,7 +16,7 @@
      <fa name="user">
      <fa name="spin spinner">
 */
-Nehan.addSingleTagByName("fa");
+Nehan.LexingRule.addSingleTagByName("fa");
 Nehan.setStyle("fa", {
   "display":"inline",
   "width":"1em",
