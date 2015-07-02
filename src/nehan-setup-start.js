@@ -4,9 +4,6 @@ Nehan.engineId = Nehan.engineId || 0;
 // global style
 Nehan.globalStyle = Nehan.globalStyle || {};
 
-// global single tags
-Nehan.singleTagNames = Nehan.singleTagNames || [];
-
 /**
    set global style. see example at setStyle of {@link Nehan.Engine}.
 
@@ -32,16 +29,6 @@ Nehan.setStyles = function(values){
   for(var selector_key in values){
     Nehan.setStyle(selector_key, values[selector_key]);
   }
-};
-
-/**
-   set global single tag name. see example at addSingleTagByName of {@link Nehan.LexingRule}.
-
-   @memberof Nehan
-   @param tag_name {String}
-*/
-Nehan.addSingleTagByName = function(tag_name){
-  Nehan.singleTagNames.push(tag_name);
 };
 
 /**

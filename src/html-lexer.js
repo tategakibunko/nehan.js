@@ -52,7 +52,7 @@ var HtmlLexer = (function (){
 
   // discard close tags defined as single tag in LexingRule.
   var __replace_single_close_tags = function(str){
-    return Nehan.List.fold(LexingRule.getSingleTagNames(), str, function(ret, name){
+    return Nehan.List.fold(Nehan.LexingRule.getSingleTagNames(), str, function(ret, name){
       return ret.replace(new RegExp("</" + name + ">", "g"), "");
     });
   };
@@ -171,7 +171,7 @@ var HtmlLexer = (function (){
       var tag = new Nehan.Tag(tagstr);
       this._stepBuff(tagstr.length);
       var tag_name = tag.getName();
-      if(LexingRule.isSingleTag(tag_name)){
+      if(Nehan.LexingRule.isSingleTag(tag_name)){
 	tag._single = true;
 	return tag;
       }

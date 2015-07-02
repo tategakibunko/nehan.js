@@ -1,12 +1,5 @@
-// set engine args
-Nehan.Args.copy(Nehan.Config, __engine_args.config || {});
-Nehan.Args.copy2(Nehan.Display, __engine_args.display || {});
-
 Selectors.setValues(Nehan.globalStyle || {}); // set global style.
 Selectors.setValues(__engine_args.style || {}); // set local style
-
-// register global single tags
-Nehan.List.iter(Nehan.singleTagNames, LexingRule.addSingleTagByName);
 
 /**
    @memberof Nehan
@@ -14,17 +7,14 @@ Nehan.List.iter(Nehan.singleTagNames, LexingRule.addSingleTagByName);
    @constructor
    @classdesc this is logical layout engine module, enclosing following environments.<br>
    * <ul>
-   * <li>{@link Nehan.DocumentContext}</li>
-   * <li>{@link Nehan.LexingRule}</li>
    * <li>{@link Nehan.Style}</li>
+   * <li>{@link Nehan.StyleContext}</li>
    * <li>{@link Nehan.Selectors}</li>
-   * <li>{@link Nehan.Display}</li>
-   * <li>{@link Nehan.Config}</li>
+   * <li>{@link Nehan.DocumentContext}</li>
    * </ul>
 */
 function Engine(){
   this.documentContext = DocumentContext;
-  this.lexingRule = LexingRule;
   this.selectors = Selectors;
 }
 
@@ -56,15 +46,6 @@ Engine.prototype = {
   */
   getAnchorPageNo : function(anchor_name){
     return this.documentContext.getAnchorPageNo(anchor_name);
-  },
-  /**
-     register engine local single tag by name.
-
-     @memberof Nehan.Engine
-     @param name {String}
-  */
-  addSingleTagByName : function(name){
-    this.lexingRule.addSingleTagByName(name);
   },
   /**
      set engine local style

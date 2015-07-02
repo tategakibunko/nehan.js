@@ -601,6 +601,68 @@ Nehan.Env = (function(){
 })();
 
 /**
+   module of html lexing rule
+
+   @namespace Nehan.LexingRule
+*/
+Nehan.LexingRule = (function(){
+  var __single_tag_names__ = [
+    "br",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "wbr",
+    "?xml",
+    "!doctype",
+    "page-break",
+    "end-page",
+    "pbr"
+  ];
+
+  var __is_single_tag = function(tag_name){
+    return Nehan.List.exists(__single_tag_names__, Nehan.Closure.eq(tag_name));
+  };
+
+  return {
+    /**
+       @memberof Nehan.LexingRule
+       @return {Array.<String>}
+    */
+    getSingleTagNames : function(){
+      return __single_tag_names__;
+    },
+    /**
+       @memberof Nehan.LexingRule
+       @param tag_name {String}
+       @return {boolean}
+       @example
+       * Nehan.LexingRule.isSingleTag("img"); // true
+       * Nehan.LexingRule.isSingleTag("br"); // true
+       * Nehan.LexingRule.isSingleTag("div"); // false
+    */
+    isSingleTag : function(tag_name){
+      return __is_single_tag(tag_name) || false;
+    },
+    /**
+       @memberof Nehan.LexingRule
+       @param tag_name {String}
+       @example
+       * Nehan.LexingRule.addSingleTagByName("my-custom-single-tag");
+       * Nehan.LexingRule.isSingleTag("my-custom-single-tag"); // true
+    */
+    addSingleTagByName : function(tag_name){
+      tag_name = tag_name.toLowerCase();
+      if(!__is_single_tag(tag_name)){
+	__single_tag_names__.push(tag_name);
+      }
+    }
+  };
+})();
+
+
+/**
    @namespace Nehan.Class
 */
 Nehan.Class = {};
@@ -9258,9 +9320,6 @@ Nehan.engineId = Nehan.engineId || 0;
 // global style
 Nehan.globalStyle = Nehan.globalStyle || {};
 
-// global single tags
-Nehan.singleTagNames = Nehan.singleTagNames || [];
-
 /**
    set global style. see example at setStyle of {@link Nehan.Engine}.
 
@@ -9289,16 +9348,6 @@ Nehan.setStyles = function(values){
 };
 
 /**
-   set global single tag name. see example at addSingleTagByName of {@link Nehan.LexingRule}.
-
-   @memberof Nehan
-   @param tag_name {String}
-*/
-Nehan.addSingleTagByName = function(tag_name){
-  Nehan.singleTagNames.push(tag_name);
-};
-
-/**
  * This function ends at nehan-setup-end.js(tail part of all source code),<br>
  * to enclose local environment(Style, Display, Config, DocumentContext etc).<br>
  * So each engine has it's own environment.<br>
@@ -9322,68 +9371,6 @@ var __engine_args = engine_args || {};
 Nehan.engineId++;
 
 // this function is closed by nehan-setup-end.js
-
-/**
-   module of html lexing rule
-
-   @namespace Nehan.LexingRule
-*/
-var LexingRule = (function(){
-  var __single_tag_names__ = [
-    "br",
-    "hr",
-    "img",
-    "input",
-    "link",
-    "meta",
-    "wbr",
-    "?xml",
-    "!doctype",
-    "page-break",
-    "end-page",
-    "pbr"
-  ];
-
-  var __is_single_tag = function(tag_name){
-    return Nehan.List.exists(__single_tag_names__, Nehan.Closure.eq(tag_name));
-  };
-
-  return {
-    /**
-       @memberof Nehan.LexingRule
-       @return {Array.<String>}
-    */
-    getSingleTagNames : function(){
-      return __single_tag_names__;
-    },
-    /**
-       @memberof Nehan.LexingRule
-       @param tag_name {String}
-       @return {boolean}
-       @example
-       * LexingRule.isSingleTag("img"); // true
-       * LexingRule.isSingleTag("br"); // true
-       * LexingRule.isSingleTag("div"); // false
-    */
-    isSingleTag : function(tag_name){
-      return __is_single_tag(tag_name) || false;
-    },
-    /**
-       @memberof Nehan.LexingRule
-       @param tag_name {String}
-       @example
-       * LexingRule.addSingleTagByName("my-custom-single-tag");
-       * LexingRule.isSingleTag("my-custom-single-tag"); // true
-    */
-    addSingleTagByName : function(tag_name){
-      tag_name = tag_name.toLowerCase();
-      if(!__is_single_tag(tag_name)){
-	__single_tag_names__.push(tag_name);
-      }
-    }
-  };
-})();
-
 
 /**
    @namespace Nehan.Style
@@ -10788,7 +10775,7 @@ var HtmlLexer = (function (){
 
   // discard close tags defined as single tag in LexingRule.
   var __replace_single_close_tags = function(str){
-    return Nehan.List.fold(LexingRule.getSingleTagNames(), str, function(ret, name){
+    return Nehan.List.fold(Nehan.LexingRule.getSingleTagNames(), str, function(ret, name){
       return ret.replace(new RegExp("</" + name + ">", "g"), "");
     });
   };
@@ -10907,7 +10894,7 @@ var HtmlLexer = (function (){
       var tag = new Nehan.Tag(tagstr);
       this._stepBuff(tagstr.length);
       var tag_name = tag.getName();
-      if(LexingRule.isSingleTag(tag_name)){
+      if(Nehan.LexingRule.isSingleTag(tag_name)){
 	tag._single = true;
 	return tag;
       }
@@ -17080,15 +17067,8 @@ var HoriEvaluator = (function(){
 })();
 
 
-// set engine args
-Nehan.Args.copy(Nehan.Config, __engine_args.config || {});
-Nehan.Args.copy2(Nehan.Display, __engine_args.display || {});
-
 Selectors.setValues(Nehan.globalStyle || {}); // set global style.
 Selectors.setValues(__engine_args.style || {}); // set local style
-
-// register global single tags
-Nehan.List.iter(Nehan.singleTagNames, LexingRule.addSingleTagByName);
 
 /**
    @memberof Nehan
@@ -17096,17 +17076,14 @@ Nehan.List.iter(Nehan.singleTagNames, LexingRule.addSingleTagByName);
    @constructor
    @classdesc this is logical layout engine module, enclosing following environments.<br>
    * <ul>
-   * <li>{@link Nehan.DocumentContext}</li>
-   * <li>{@link Nehan.LexingRule}</li>
    * <li>{@link Nehan.Style}</li>
+   * <li>{@link Nehan.StyleContext}</li>
    * <li>{@link Nehan.Selectors}</li>
-   * <li>{@link Nehan.Display}</li>
-   * <li>{@link Nehan.Config}</li>
+   * <li>{@link Nehan.DocumentContext}</li>
    * </ul>
 */
 function Engine(){
   this.documentContext = DocumentContext;
-  this.lexingRule = LexingRule;
   this.selectors = Selectors;
 }
 
@@ -17138,15 +17115,6 @@ Engine.prototype = {
   */
   getAnchorPageNo : function(anchor_name){
     return this.documentContext.getAnchorPageNo(anchor_name);
-  },
-  /**
-     register engine local single tag by name.
-
-     @memberof Nehan.Engine
-     @param name {String}
-  */
-  addSingleTagByName : function(name){
-    this.lexingRule.addSingleTagByName(name);
   },
   /**
      set engine local style

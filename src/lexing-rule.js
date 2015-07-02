@@ -3,7 +3,7 @@
 
    @namespace Nehan.LexingRule
 */
-var LexingRule = (function(){
+Nehan.LexingRule = (function(){
   var __single_tag_names__ = [
     "br",
     "hr",
@@ -36,9 +36,9 @@ var LexingRule = (function(){
        @param tag_name {String}
        @return {boolean}
        @example
-       * LexingRule.isSingleTag("img"); // true
-       * LexingRule.isSingleTag("br"); // true
-       * LexingRule.isSingleTag("div"); // false
+       * Nehan.LexingRule.isSingleTag("img"); // true
+       * Nehan.LexingRule.isSingleTag("br"); // true
+       * Nehan.LexingRule.isSingleTag("div"); // false
     */
     isSingleTag : function(tag_name){
       return __is_single_tag(tag_name) || false;
@@ -47,8 +47,8 @@ var LexingRule = (function(){
        @memberof Nehan.LexingRule
        @param tag_name {String}
        @example
-       * LexingRule.addSingleTagByName("my-custom-single-tag");
-       * LexingRule.isSingleTag("my-custom-single-tag"); // true
+       * Nehan.LexingRule.addSingleTagByName("my-custom-single-tag");
+       * Nehan.LexingRule.isSingleTag("my-custom-single-tag"); // true
     */
     addSingleTagByName : function(tag_name){
       tag_name = tag_name.toLowerCase();

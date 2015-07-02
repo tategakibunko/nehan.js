@@ -29,6 +29,7 @@ var sources = [
   "src/display.js",
   "src/client.js",
   "src/env.js",
+  "src/lexing-rule.js",
   "src/class.js",
   "src/list.js",
   "src/args.js",
@@ -116,10 +117,9 @@ var sources = [
 
   // closed modules
   // these modules/classes are referenced by
-  // Config/Style/LexingRule/Selectors/DocumentContext module,
+  // Style/Selectors/DocumentContext module,
   // so independent from other engines.
   "src/nehan-setup-start.js", // closure start
-  "src/lexing-rule.js",
   "src/style.js",
   "src/selectors.js",
   "src/box.js",
