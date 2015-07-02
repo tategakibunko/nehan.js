@@ -5,8 +5,6 @@ Nehan.PagedElement = (function(){
      @classdesc DOM element with {@link Nehan.PageStream}
      @constructor
      @param engine_args {Object}
-     @param engine_args.config {Nehan.Config} - system config
-     @param engine_args.display {Nehan.Display} - standard page parameters
      @param engine_args.style {Nehan.Style} - engine local style
   */
   function NehanPagedElement(engine_args){

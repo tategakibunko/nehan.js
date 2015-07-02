@@ -9939,7 +9939,7 @@ Nehan.setStyles = function(values){
 
 /**
  * This function ends at nehan-setup-end.js(tail part of all source code),<br>
- * to enclose local environment(Style, Display, Config, DocumentContext etc).<br>
+ * to enclose local environment(Style, Selectors, DocumentContext etc).<br>
  * So each engine has it's own environment.<br>
  * This is usefull to show multiple layout(vertical and horizontal) in a single page.<br>
  * Note that Nehan.setup is alias name of Nehan.createEngine.
@@ -17152,8 +17152,6 @@ Nehan.PagedElement = (function(){
      @classdesc DOM element with {@link Nehan.PageStream}
      @constructor
      @param engine_args {Object}
-     @param engine_args.config {Nehan.Config} - system config
-     @param engine_args.display {Nehan.Display} - standard page parameters
      @param engine_args.style {Nehan.Style} - engine local style
   */
   function NehanPagedElement(engine_args){
