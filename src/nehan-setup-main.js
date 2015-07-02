@@ -67,15 +67,6 @@ Engine.prototype = {
     this.lexingRule.addSingleTagByName(name);
   },
   /**
-     register engine local single tag by regexp object.
-
-     @memberof Nehan.Engine
-     @param rex {RegExp}
-  */
-  addSingleTagByRex : function(rex){
-    this.lexingRule.addSingleTagRex(name);
-  },
-  /**
      set engine local style
 
      @memberof Nehan.Engine
