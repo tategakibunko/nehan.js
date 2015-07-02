@@ -148,7 +148,7 @@ var TextGenerator = (function(){
   TextGenerator.prototype._estimateParentNextHeadMeasure = function(token){
     var font_size = this.style.getFontSize();
     if(token instanceof Nehan.Tag && token.name === "ruby"){
-      var ruby = new RubyTokenStream(token.getContent()).get();
+      var ruby = new Nehan.RubyTokenStream(token.getContent()).get();
       var char_count = ruby.getCharCount();
       var rt_char_count = ruby.getRtString().length;
       return Math.max(Math.floor(rt_char_count * font_size / 2), char_count * font_size);

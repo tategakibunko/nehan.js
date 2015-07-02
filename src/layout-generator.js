@@ -238,7 +238,7 @@ var LayoutGenerator = (function(){
 	tokens:[new Nehan.Word(markup_content)]
       });
     case "ruby":
-      return new RubyTokenStream(markup_content);
+      return new Nehan.RubyTokenStream(markup_content);
     case "tbody": case "thead": case "tfoot":
       return new Nehan.TokenStream(style.getContent(), {
 	filter:Nehan.Closure.isTagName(["tr"])

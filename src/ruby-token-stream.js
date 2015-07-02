@@ -1,10 +1,10 @@
-var RubyTokenStream = (function(){
+Nehan.RubyTokenStream = (function(){
   /**
      token stream of &lt;ruby&gt; tag content.
 
      @memberof Nehan
      @class RubyTokenStream
-     @classdesc 
+     @classdesc
      @constructor
      @extends {Nehan.TokenStream}
      @param str {String}

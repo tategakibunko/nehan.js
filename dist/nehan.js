@@ -9847,6 +9847,63 @@ Nehan.TokenStream = (function(){
 })();
 
 
+Nehan.RubyTokenStream = (function(){
+  /**
+     token stream of &lt;ruby&gt; tag content.
+
+     @memberof Nehan
+     @class RubyTokenStream
+     @classdesc
+     @constructor
+     @extends {Nehan.TokenStream}
+     @param str {String}
+  */
+  function RubyTokenStream(str){
+    this.tokens = this._parse(new Nehan.TokenStream(str));
+    this.pos = 0;
+  }
+  Nehan.Class.extend(RubyTokenStream, Nehan.TokenStream);
+
+  RubyTokenStream.prototype._parse = function(stream){
+    var tokens = [];
+    while(stream.hasNext()){
+      tokens.push(this._parseRuby(stream));
+    }
+    return tokens;
+  };
+
+  RubyTokenStream.prototype._parseRuby = function(stream){
+    var rbs = [];
+    var rt = null;
+    while(true){
+      var token = stream.get();
+      if(token === null){
+	break;
+      }
+      if(Nehan.Token.isTag(token) && token.getName() === "rt"){
+	rt = token;
+	break;
+      }
+      if(Nehan.Token.isTag(token) && token.getName() === "rb"){
+	rbs = this._parseRb(token.getContent())
+      }
+      if(token instanceof Nehan.Text){
+	rbs = this._parseRb(token.getContent());
+      }
+    }
+    return new Nehan.Ruby(rbs, rt);
+  };
+
+  RubyTokenStream.prototype._parseRb = function(content){
+    return new Nehan.TokenStream(content, {
+      lexer:new Nehan.TextLexer(content)
+    }).getTokens();
+  };
+
+  return RubyTokenStream;
+})();
+
+
 // current engine id
 Nehan.engineId = Nehan.engineId || 0;
 
@@ -11426,63 +11483,6 @@ var DocumentContext = (function(){
       return __create_outline_elements_by_name(section_root_name, callbacks);
     }
   };
-})();
-
-
-var RubyTokenStream = (function(){
-  /**
-     token stream of &lt;ruby&gt; tag content.
-
-     @memberof Nehan
-     @class RubyTokenStream
-     @classdesc 
-     @constructor
-     @extends {Nehan.TokenStream}
-     @param str {String}
-  */
-  function RubyTokenStream(str){
-    this.tokens = this._parse(new Nehan.TokenStream(str));
-    this.pos = 0;
-  }
-  Nehan.Class.extend(RubyTokenStream, Nehan.TokenStream);
-
-  RubyTokenStream.prototype._parse = function(stream){
-    var tokens = [];
-    while(stream.hasNext()){
-      tokens.push(this._parseRuby(stream));
-    }
-    return tokens;
-  };
-
-  RubyTokenStream.prototype._parseRuby = function(stream){
-    var rbs = [];
-    var rt = null;
-    while(true){
-      var token = stream.get();
-      if(token === null){
-	break;
-      }
-      if(Nehan.Token.isTag(token) && token.getName() === "rt"){
-	rt = token;
-	break;
-      }
-      if(Nehan.Token.isTag(token) && token.getName() === "rb"){
-	rbs = this._parseRb(token.getContent())
-      }
-      if(token instanceof Nehan.Text){
-	rbs = this._parseRb(token.getContent());
-      }
-    }
-    return new Nehan.Ruby(rbs, rt);
-  };
-
-  RubyTokenStream.prototype._parseRb = function(content){
-    return new Nehan.TokenStream(content, {
-      lexer:new Nehan.TextLexer(content)
-    }).getTokens();
-  };
-
-  return RubyTokenStream;
 })();
 
 
@@ -14545,7 +14545,7 @@ var LayoutGenerator = (function(){
 	tokens:[new Nehan.Word(markup_content)]
       });
     case "ruby":
-      return new RubyTokenStream(markup_content);
+      return new Nehan.RubyTokenStream(markup_content);
     case "tbody": case "thead": case "tfoot":
       return new Nehan.TokenStream(style.getContent(), {
 	filter:Nehan.Closure.isTagName(["tr"])
@@ -15293,7 +15293,7 @@ var TextGenerator = (function(){
   TextGenerator.prototype._estimateParentNextHeadMeasure = function(token){
     var font_size = this.style.getFontSize();
     if(token instanceof Nehan.Tag && token.name === "ruby"){
-      var ruby = new RubyTokenStream(token.getContent()).get();
+      var ruby = new Nehan.RubyTokenStream(token.getContent()).get();
       var char_count = ruby.getCharCount();
       var rt_char_count = ruby.getRtString().length;
       return Math.max(Math.floor(rt_char_count * font_size / 2), char_count * font_size);
