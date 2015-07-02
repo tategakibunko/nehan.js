@@ -1,4 +1,4 @@
-var TokenStream = (function(){
+Nehan.TokenStream = (function(){
   /**
      @memberof Nehan
      @class TokenStream

@@ -116,6 +116,7 @@ var sources = [
   "src/inline-context.js",
   "src/html-lexer.js",
   "src/text-lexer.js",
+  "src/token-stream.js",
 
   // closed modules
   // these modules/classes are referenced by
@@ -126,7 +127,6 @@ var sources = [
   "src/selectors.js",
   "src/box.js",
   "src/document-context.js",
-  "src/token-stream.js",
   "src/ruby-token-stream.js",
   "src/page-evaluator.js",
   "src/anim.js",

@@ -7,7 +7,7 @@ var DocumentGenerator = (function(){
      @param text {String} - html source text
   */
   function DocumentGenerator(text){
-    this.stream = new TokenStream(text, {
+    this.stream = new Nehan.TokenStream(text, {
       filter:Nehan.Closure.isTagName(["!doctype", "html"])
     });
     if(this.stream.isEmptyTokens()){

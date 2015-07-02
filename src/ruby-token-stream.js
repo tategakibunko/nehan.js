@@ -10,10 +10,10 @@ var RubyTokenStream = (function(){
      @param str {String}
   */
   function RubyTokenStream(str){
-    this.tokens = this._parse(new TokenStream(str));
+    this.tokens = this._parse(new Nehan.TokenStream(str));
     this.pos = 0;
   }
-  Nehan.Class.extend(RubyTokenStream, TokenStream);
+  Nehan.Class.extend(RubyTokenStream, Nehan.TokenStream);
 
   RubyTokenStream.prototype._parse = function(stream){
     var tokens = [];
@@ -46,7 +46,7 @@ var RubyTokenStream = (function(){
   };
 
   RubyTokenStream.prototype._parseRb = function(content){
-    return new TokenStream(content, {
+    return new Nehan.TokenStream(content, {
       lexer:new Nehan.TextLexer(content)
     }).getTokens();
   };

@@ -7,7 +7,7 @@ var HtmlGenerator = (function(){
      @param text {String}
   */
   function HtmlGenerator(text){
-    this.stream = new TokenStream(text, {
+    this.stream = new Nehan.TokenStream(text, {
       filter:Nehan.Closure.isTagName(["head", "body"])
     });
     if(this.stream.isEmptyTokens()){
@@ -50,7 +50,7 @@ var HtmlGenerator = (function(){
 	var tag = this.stream.get();
 	switch(tag.getName()){
 	case "head":
-	  this._parseDocumentHeader(new TokenStream(tag.getContent(), {
+	  this._parseDocumentHeader(new Nehan.TokenStream(tag.getContent(), {
 	    filter:Nehan.Closure.isTagName(["title", "meta", "link", "style", "script"])
 	  }));
 	  break;

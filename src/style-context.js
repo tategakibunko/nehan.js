@@ -440,7 +440,7 @@ var StyleContext = (function(){
       var max_marker_html = this.getListMarkerHtml(item_count);
       // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
       // and we have to avoid 'appendChild' from child-generator of this tmp generator.
-      var tmp_gen = new InlineGenerator(this.clone(), new TokenStream(max_marker_html));
+      var tmp_gen = new InlineGenerator(this.clone(), new Nehan.TokenStream(max_marker_html));
       var line = tmp_gen.yield();
       var marker_measure = line? line.inlineMeasure + Math.floor(this.getFontSize() / 2) : this.getFontSize();
       var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
