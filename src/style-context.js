@@ -1647,7 +1647,7 @@ var StyleContext = (function(){
 	return {};
       }
       var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];
-      var allowed_props = Config.allowedInlineStyleProps || [];
+      var allowed_props = Nehan.Config.allowedInlineStyleProps || [];
       var values = Nehan.List.fold(stmts, {}, function(ret, stmt){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){

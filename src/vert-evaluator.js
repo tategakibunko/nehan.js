@@ -127,7 +127,7 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalChar = function(line, chr){
-    var is_vert_glyph_enable = Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
+    var is_vert_glyph_enable = Nehan.Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
     if(chr.isImgChar()){
       if(is_vert_glyph_enable){
 	return this._evalVerticalGlyph(line, chr);

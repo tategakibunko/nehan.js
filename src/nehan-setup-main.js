@@ -1,5 +1,5 @@
 // set engine args
-Nehan.Args.copy(Config, __engine_args.config || {});
+Nehan.Args.copy(Nehan.Config, __engine_args.config || {});
 Nehan.Args.copy2(Nehan.Display, __engine_args.display || {});
 
 Selectors.setValues(Nehan.globalStyle || {}); // set global style.

@@ -35,6 +35,112 @@ var Nehan = Nehan || {};
 Nehan.version = "5.1.1";
 
 /**
+   system configuration
+   @namespace Nehan.Config
+*/
+Nehan.Config = {
+  /**
+     language setting
+     @memberof Nehan.Config
+     @type {string}
+     @default "ja-JP"
+  */
+  lang:"ja-JP",
+
+  /**
+     is debug mode?
+     @memberof Nehan.Config
+     @type {boolean}
+     @default false
+  */
+  debug:false,
+
+  /**
+     is kerning enabled?
+     @memberof Nehan.Config
+     @type {boolean}
+     @default true
+  */
+  kerning:true,
+
+  /**
+     is justify enabled?
+     @memberof Nehan.Config
+     @type {boolean}
+     @default true
+  */
+  justify:true,
+
+  /**
+     is dangling justify enable?
+     Note that this property is enabled only when Nehan.Config.justify is enabled.
+     @memberof Nehan.Config
+     @type {boolean}
+     @default true
+  */
+  danglingJustify:true,
+
+  /**
+     max rety count when something troubles.
+     @memberof Nehan.Config
+     @type {int}
+     @default 20
+  */
+  maxRollbackCount:20,
+
+  /**
+     max yield count to block infinite loop.
+     @memberof Nehan.Config
+     @type {int}
+     @default 20000
+  */
+  maxYieldCount:20000,
+
+  /**
+     max available page count for each engine.
+     @memberof Nehan.Config
+     @type {int}
+     @default 5000
+  */
+  maxPageCount:5000,
+
+  /**
+     use vertical glyph if browser support 'writing-mode'.
+     @memberof Nehan.Config
+     @type {boolean}
+     @default true
+  */
+  useVerticalGlyphIfEnable:true,
+
+  /**
+     enable ommiting element by start tag.
+     @memberof Nehan.Config
+     @type {boolean}
+     @default false
+  */
+  enableAutoCloseTag:false,
+
+  /**
+     enable capturing text of each page.
+
+     @memberof Nehan.Config
+     @type {string}
+     @default false
+  */
+  capturePageText:false,
+
+  /**
+     allowed inline style properties.
+     allow all properties if not defined or list is empty.
+
+     @memberof Nehan.Config
+     @type {Array.<string>}
+     @default []
+  */
+  allowedInlineStyleProps:[]
+};
+
+/**
    standard page settings.
    @namespace Nehan.Display
 */
@@ -9218,112 +9324,6 @@ Nehan.engineId++;
 // this function is closed by nehan-setup-end.js
 
 /**
-   system configuration
-   @namespace Nehan.Config
-*/
-var Config = {
-  /**
-     language setting
-     @memberof Nehan.Config
-     @type {string}
-     @default "ja-JP"
-  */
-  lang:"ja-JP",
-
-  /**
-     is debug mode?
-     @memberof Nehan.Config
-     @type {boolean}
-     @default false
-  */
-  debug:false,
-
-  /**
-     is kerning enabled?
-     @memberof Nehan.Config
-     @type {boolean}
-     @default true
-  */
-  kerning:true,
-
-  /**
-     is justify enabled?
-     @memberof Nehan.Config
-     @type {boolean}
-     @default true
-  */
-  justify:true,
-
-  /**
-     is dangling justify enable?
-     Note that this property is enabled only when Config.justify is enabled.
-     @memberof Nehan.Config
-     @type {boolean}
-     @default true
-  */
-  danglingJustify:true,
-
-  /**
-     max rety count when something troubles.
-     @memberof Nehan.Config
-     @type {int}
-     @default 20
-  */
-  maxRollbackCount:20,
-
-  /**
-     max yield count to block infinite loop.
-     @memberof Nehan.Config
-     @type {int}
-     @default 20000
-  */
-  maxYieldCount:20000,
-
-  /**
-     max available page count for each engine.
-     @memberof Nehan.Config
-     @type {int}
-     @default 5000
-  */
-  maxPageCount:5000,
-
-  /**
-     use vertical glyph if browser support 'writing-mode'.
-     @memberof Nehan.Config
-     @type {boolean}
-     @default true
-  */
-  useVerticalGlyphIfEnable:true,
-
-  /**
-     enable ommiting element by start tag.
-     @memberof Nehan.Config
-     @type {boolean}
-     @default false
-  */
-  enableAutoCloseTag:false,
-
-  /**
-     enable capturing text of each page.
-
-     @memberof Nehan.Config
-     @type {string}
-     @default false
-  */
-  capturePageText:false,
-
-  /**
-     allowed inline style properties.
-     allow all properties if not defined or list is empty.
-
-     @memberof Nehan.Config
-     @type {Array.<string>}
-     @default []
-  */
-  allowedInlineStyleProps:[]
-};
-
-/**
    module of html lexing rule
 
    @namespace Nehan.LexingRule
@@ -10889,11 +10889,11 @@ var HtmlLexer = (function (){
 	return {closed:true, content:this.buff.substring(0, close_pos)};
       }
 
-      // if close pos not found and Config.enableAutoClose is true,
+      // if close pos not found and Nehan.Config.enableAutoClose is true,
       // 1. return the text until next same start tag.
       // 2. or else, return whole rest buff.
       // (TODO): this is not strict lexing, especially when dt, dd, td, etc.
-      if(Config.enableAutoCloseTag){
+      if(Nehan.Config.enableAutoCloseTag){
 	var next_open_match = this.buff.match(open_tag_rex);
 	if(next_open_match){
 	  return {closed:false, content:this.buff.substring(0, nexd_open_match.index)};
@@ -13625,7 +13625,7 @@ var StyleContext = (function(){
 	return {};
       }
       var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];
-      var allowed_props = Config.allowedInlineStyleProps || [];
+      var allowed_props = Nehan.Config.allowedInlineStyleProps || [];
       var values = Nehan.List.fold(stmts, {}, function(ret, stmt){
 	var nv = stmt.split(":");
 	if(nv.length >= 2){
@@ -14355,7 +14355,7 @@ var LayoutGenerator = (function(){
     if(result !== null){
       this._yieldCount++;
     }
-    if(this._yieldCount > Config.maxYieldCount){
+    if(this._yieldCount > Nehan.Config.maxYieldCount){
       console.error("[%s]too many yield! gen:%o, context:%o, stream:%o", this.style.markupName, this, context, this.stream);
       throw "too many yield";
     }
@@ -14461,7 +14461,7 @@ var LayoutGenerator = (function(){
   LayoutGenerator.prototype.pushCache = function(element){
     var cache_count = element.cacheCount || 0;
     if(cache_count > 0){
-      if(cache_count >= Config.maxRollbackCount){
+      if(cache_count >= Nehan.Config.maxRollbackCount){
 	var element_str = (element instanceof Box)? element.toString() : (element.data || "??");
 	console.warn("[%s] too many retry:%o, element:%o(%s)", this.style.getMarkupName(), this.style, element, element_str);
 	// to avoid infinite loop, force child or this generator terminate!
@@ -15181,7 +15181,7 @@ var TextGenerator = (function(){
     if(!context.hasInlineSpaceFor(1)){
       return null;
     }
-    var next_head = Config.justify? this._peekParentNextToken() : null;
+    var next_head = Nehan.Config.justify? this._peekParentNextToken() : null;
     var next_head_char = next_head? this._peekParentNextHeadChar(next_head) : null;
     var next_head_measure = next_head? this._estimateParentNextHeadMeasure(next_head) : this.style.getFontSize();
     var is_next_head_ng = next_head_char? next_head_char.isHeadNg() : false;
@@ -15206,7 +15206,7 @@ var TextGenerator = (function(){
 	}
       }
       // if token is last one and maybe tail text, check tail/head NG between two inline generators.
-      if(Config.justify && !this.stream.hasNext() && !context.hasInlineSpaceFor(measure + next_head_measure)){
+      if(Nehan.Config.justify && !this.stream.hasNext() && !context.hasInlineSpaceFor(measure + next_head_measure)){
 	// avoid tail/head NG between two generators
 	if(element instanceof Nehan.Char && element.isTailNg() || is_next_head_ng){
 	  context.setLineBreak(true);
@@ -15245,7 +15245,7 @@ var TextGenerator = (function(){
       return null;
     }
     // justify if this line is generated by overflow(not line-break).
-    if(Config.justify && !context.isInlineEmpty() && !context.hasLineBreak()){
+    if(Nehan.Config.justify && !context.isInlineEmpty() && !context.hasLineBreak()){
       this._justifyLine(context);
     }
     var line = this.style.createTextBlock({
@@ -15324,7 +15324,7 @@ var TextGenerator = (function(){
     // justify by dangling.
     var head_next = this.stream.peek();
     head_next = (head_next && old_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
-    if(Config.danglingJustify && context.justifyDangling(old_head, head_next) === true){
+    if(Nehan.Config.danglingJustify && context.justifyDangling(old_head, head_next) === true){
       this._addElement(context, old_head, 0); // push tail as zero element
       if(head_next){
 	this.stream.setPos(head_next.pos);
@@ -15424,7 +15424,7 @@ var TextGenerator = (function(){
   TextGenerator.prototype._setTextMetrics = function(context, token){
     // if charactor token, set kerning before setting metrics.
     // because some additional space is added if kerning is enabled or not.
-    if(token instanceof Nehan.Char && token.isKerningChar() && Config.kerning){
+    if(token instanceof Nehan.Char && token.isKerningChar() && Nehan.Config.kerning){
       this._setCharKerning(context, token);
     }
     token.setMetrics(this.style.flow, this.style.getFont());
@@ -16256,7 +16256,7 @@ var BodyGenerator = (function(){
     block.charPos = DocumentContext.getCharPos();
     block.percent = this.stream.getSeekPercent();
     block.pageNo = DocumentContext.getPageNo();
-    if(Config.capturePageText){
+    if(Nehan.Config.capturePageText){
       block.text = block.toString();
     }
 
@@ -16265,7 +16265,7 @@ var BodyGenerator = (function(){
 
     // sometimes layout engine causes inlinite loop,
     // so terminate generator by restricting page count.
-    if(DocumentContext.getPageNo() >= Config.maxPageCount){
+    if(DocumentContext.getPageNo() >= Nehan.Config.maxPageCount){
       this.setTerminate(true);
     }
   };
@@ -16774,7 +16774,7 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalChar = function(line, chr){
-    var is_vert_glyph_enable = Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
+    var is_vert_glyph_enable = Nehan.Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
     if(chr.isImgChar()){
       if(is_vert_glyph_enable){
 	return this._evalVerticalGlyph(line, chr);
@@ -17081,7 +17081,7 @@ var HoriEvaluator = (function(){
 
 
 // set engine args
-Nehan.Args.copy(Config, __engine_args.config || {});
+Nehan.Args.copy(Nehan.Config, __engine_args.config || {});
 Nehan.Args.copy2(Nehan.Display, __engine_args.display || {});
 
 Selectors.setValues(Nehan.globalStyle || {}); // set global style.

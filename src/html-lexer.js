@@ -153,11 +153,11 @@ var HtmlLexer = (function (){
 	return {closed:true, content:this.buff.substring(0, close_pos)};
       }
 
-      // if close pos not found and Config.enableAutoClose is true,
+      // if close pos not found and Nehan.Config.enableAutoClose is true,
       // 1. return the text until next same start tag.
       // 2. or else, return whole rest buff.
       // (TODO): this is not strict lexing, especially when dt, dd, td, etc.
-      if(Config.enableAutoCloseTag){
+      if(Nehan.Config.enableAutoCloseTag){
 	var next_open_match = this.buff.match(open_tag_rex);
 	if(next_open_match){
 	  return {closed:false, content:this.buff.substring(0, nexd_open_match.index)};

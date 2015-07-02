@@ -18,7 +18,7 @@ var BodyGenerator = (function(){
     block.charPos = DocumentContext.getCharPos();
     block.percent = this.stream.getSeekPercent();
     block.pageNo = DocumentContext.getPageNo();
-    if(Config.capturePageText){
+    if(Nehan.Config.capturePageText){
       block.text = block.toString();
     }
 
@@ -27,7 +27,7 @@ var BodyGenerator = (function(){
 
     // sometimes layout engine causes inlinite loop,
     // so terminate generator by restricting page count.
-    if(DocumentContext.getPageNo() >= Config.maxPageCount){
+    if(DocumentContext.getPageNo() >= Nehan.Config.maxPageCount){
       this.setTerminate(true);
     }
   };

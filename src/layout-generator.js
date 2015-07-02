@@ -34,7 +34,7 @@ var LayoutGenerator = (function(){
     if(result !== null){
       this._yieldCount++;
     }
-    if(this._yieldCount > Config.maxYieldCount){
+    if(this._yieldCount > Nehan.Config.maxYieldCount){
       console.error("[%s]too many yield! gen:%o, context:%o, stream:%o", this.style.markupName, this, context, this.stream);
       throw "too many yield";
     }
@@ -140,7 +140,7 @@ var LayoutGenerator = (function(){
   LayoutGenerator.prototype.pushCache = function(element){
     var cache_count = element.cacheCount || 0;
     if(cache_count > 0){
-      if(cache_count >= Config.maxRollbackCount){
+      if(cache_count >= Nehan.Config.maxRollbackCount){
 	var element_str = (element instanceof Box)? element.toString() : (element.data || "??");
 	console.warn("[%s] too many retry:%o, element:%o(%s)", this.style.getMarkupName(), this.style, element, element_str);
 	// to avoid infinite loop, force child or this generator terminate!

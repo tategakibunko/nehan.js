@@ -25,6 +25,7 @@ var sources = [
 
   // shared modules
   "src/nehan-start.js",
+  "src/config.js",
   "src/display.js",
   "src/client.js",
   "src/env.js",
@@ -118,7 +119,6 @@ var sources = [
   // Config/Style/LexingRule/Selectors/DocumentContext module,
   // so independent from other engines.
   "src/nehan-setup-start.js", // closure start
-  "src/config.js",
   "src/lexing-rule.js",
   "src/style.js",
   "src/selectors.js",

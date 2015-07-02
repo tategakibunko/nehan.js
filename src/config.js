@@ -2,7 +2,7 @@
    system configuration
    @namespace Nehan.Config
 */
-var Config = {
+Nehan.Config = {
   /**
      language setting
      @memberof Nehan.Config
@@ -37,7 +37,7 @@ var Config = {
 
   /**
      is dangling justify enable?
-     Note that this property is enabled only when Config.justify is enabled.
+     Note that this property is enabled only when Nehan.Config.justify is enabled.
      @memberof Nehan.Config
      @type {boolean}
      @default true
