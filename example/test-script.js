@@ -433,12 +433,12 @@ var Script = {
     "<speak src='128x128.gif'>" + Text["long"] + "</speak>"
   ].join("\n"),
 
-  "gravator-test":[
-    "<h2>my gravator</h2>",
-    "<gravator size='64' email='someone@example.com'>",
+  "gravatar-test":[
+    "<h2>my gravatar</h2>",
+    "<gravatar size='64' email='someone@example.com'>",
     "<div>" + Text["middle"] + "</div>",
     "<h2>my gravator floated</h2>",
-    "<gravator class='float-start disp-block' size='64' email='someone@example.com'>",
+    "<gravatar class='float-start disp-block' size='64' email='someone@example.com'>",
     "<div>" + Text["middle"] + "</div>"
   ].join("\n"),
 
