@@ -6,7 +6,7 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.1.1 2015/??/??
+version 5.2.0 2015/??/??
 ========================
 ! Now class selectors and id selectors are not required to be "nehan-" prefixed in setStyle method.
 ! Now you can use not only chain case name but also camel case for style property.
