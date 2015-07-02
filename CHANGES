@@ -6,6 +6,10 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 5.2.1
+========================
+o Add tree object to page output.
+
 version 5.2.0 2015/07/02
 ========================
 ! Now class selectors and id selectors are not required to be "nehan-" prefixed in setStyle method.
@@ -14,7 +18,6 @@ version 5.2.0 2015/07/02
   Nehan.setStyle(".foo", {fontSize:"2em"}); // ok!
 o Add new parameter maxPageCount to PageStream::syncGet, PageStream.asyncGet, PagedElement::asyncGet.
 o Export shared modules to outside of engine closure.
-o Config.capturePageText is added. If enabled, page-stream output the text of each page.
 * Fix emphasis size and position.
 * Fix half size kana position.
 

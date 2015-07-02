@@ -15,6 +15,7 @@ Nehan.Page = (function(){
   */
   function Page(opt){
     Nehan.Args.merge(this, {
+      tree:null,
       element:null,
       text:"",
       seekPos:0,

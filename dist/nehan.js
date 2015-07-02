@@ -32,7 +32,7 @@
    @namespace Nehan
 */
 var Nehan = Nehan || {};
-Nehan.version = "5.2.0";
+Nehan.version = "5.2.1";
 
 /**
    system configuration
@@ -6151,6 +6151,7 @@ Nehan.Page = (function(){
   */
   function Page(opt){
     Nehan.Args.merge(this, {
+      tree:null,
       element:null,
       text:"",
       seekPos:0,
@@ -11510,6 +11511,7 @@ var PageEvaluator = (function(){
     */
     evaluate : function(tree){
       return tree? new Nehan.Page({
+	tree:tree,
 	element:this.evaluator.evaluate(tree),
 	text:tree.text,
 	percent:tree.percent,
