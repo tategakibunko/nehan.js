@@ -7,7 +7,7 @@ Nehan.TagAttrs = (function(){
      @param src {String}
   */
   function TagAttrs(src){
-    var attrs_raw = src? (new Nehan.TagAttrParser(src)).parse() : {};
+    var attrs_raw = src? Nehan.TagAttrParser.parse(src) : {};
     this.classes = this._parseClasses(attrs_raw);
     this.attrs = this._parseAttrs(attrs_raw, this.classes);
     this.dataset = this._parseDataset(attrs_raw);
