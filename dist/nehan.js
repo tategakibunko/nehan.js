@@ -15269,7 +15269,7 @@ var TextGenerator = (function(){
       if(token.name === "ruby"){
 	return null; // generally, ruby is not both tail-NG and head-NG.
       }
-      var head_c1 = token.getContent().replace(/^[\s]*<.+?>/, "").substring(0,1);
+      var head_c1 = token.getContent().replace(/^[\s]*<[^>]+>/, "").substring(0,1);
       return new Nehan.Char(head_c1);
     }
     return null;
