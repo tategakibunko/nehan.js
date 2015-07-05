@@ -9,6 +9,8 @@ Mark "!": change that can break compatibility with older version
 version 5.2.1
 ========================
 o Add tree object to page output.
+o Add new option 'capturePageText' added to Nehan.PageStream::asyncGet or Nehan.PagedElement::setContent for adding text node to page object.
+! Config.capture is removed.
 
 version 5.2.0 2015/07/02
 ========================

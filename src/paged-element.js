@@ -156,6 +156,7 @@ Nehan.PagedElement = (function(){
        @param opt {Object} - optinal argument
        @param opt.onProgress {Function} - fun tree ctx -> ()
        @param opt.onComplete {Function} - fun time ctx -> ()
+       @param opt.capturePageText {bool} output text node or not for each page object.
        @param opt.maxPageCount {int} - upper bound of page count
        @example
        * paged_element.setContent("<h1>hello, nehan.js!!</h1>", {
@@ -220,6 +221,7 @@ Nehan.PagedElement = (function(){
     },
     _asyncGet : function(opt){
       this._pageStream.asyncGet({
+	capturePageText:(opt.capturePageText || false),
 	maxPageCount:(opt.maxPageCount || -1),
 	onProgress : function(sender, tree){
 	  if(tree.pageNo === 0){

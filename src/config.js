@@ -85,15 +85,6 @@ Nehan.Config = {
   enableAutoCloseTag:false,
 
   /**
-     enable capturing text of each page.
-
-     @memberof Nehan.Config
-     @type {string}
-     @default false
-  */
-  capturePageText:false,
-
-  /**
      allowed inline style properties.
      allow all properties if not defined or list is empty.
 
