@@ -84,7 +84,7 @@ var StyleContext = (function(){
      @param paernt {Nehan.StyleContext} - parent style context
      @param args {Object} - option arguments
      @param args.forceCss {Object} - system css that must be applied.
-     @param args.cursorContext {Nehan.CursorContext} - cursor context at the point of this style context created.
+     @param args.cursorContext {Nehan.LayoutContext} - cursor context at the point of this style context created.
   */
   function StyleContext(markup, parent, args){
     this._initialize(markup, parent, args);

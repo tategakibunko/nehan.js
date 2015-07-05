@@ -8,7 +8,7 @@ var SelectorContext = (function(){
      @constructor
      @extends {Nehan.SelectorPropContext}
      @param style {Nehan.StyleContext}
-     @param cursor_context {Nehan.CursorContext}
+     @param cursor_context {Nehan.LayoutContext}
      @example
      * Nehan.setStyle("body", {
      *   onload:function(selector_context){

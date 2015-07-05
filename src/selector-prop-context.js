@@ -5,7 +5,7 @@ var SelectorPropContext = (function(){
      @classdesc selector context for functional value of style. see example.
      @constructor
      @param style {Nehan.StyleContext}
-     @param cursor_context {Nehan.CursorContext}
+     @param cursor_context {Nehan.LayoutContext}
      @example
      * Nehan.setStyle("body", {
      *   // selector prop context is at callback of functional css value!

@@ -68,7 +68,7 @@ var InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createChildContext = function(context){
-    var child_context = new Nehan.CursorContext(
+    var child_context = new Nehan.LayoutContext(
       context.block, // inline generator inherits block context as it is.
       new Nehan.InlineContext(context.getInlineRestMeasure())
     );

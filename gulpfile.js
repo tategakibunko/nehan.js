@@ -111,7 +111,7 @@ var sources = [
   "src/partition-unit.js",
   "src/partition.js",
   "src/partition-hash-set.js",
-  "src/cursor-context.js",
+  "src/layout-context.js",
   "src/block-context.js",
   "src/inline-context.js",
   "src/html-lexer.js",

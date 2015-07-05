@@ -20,7 +20,7 @@ var LayoutGenerator = (function(){
   /**
      @memberof Nehan.LayoutGenerator
      @method yield
-     @param parent_context {Nehan.CursorContext} - cursor context from parent generator
+     @param parent_context {Nehan.LayoutContext} - cursor context from parent generator
      @return {Nehan.Box}
   */
   LayoutGenerator.prototype.yield = function(parent_context){
@@ -115,7 +115,7 @@ var LayoutGenerator = (function(){
   /**
      @memberof Nehan.LayoutGenerator
      @method yieldChildLayout
-     @param context {Nehan.CursorContext}
+     @param context {Nehan.LayoutContext}
      @return {Nehan.Box}
   */
   LayoutGenerator.prototype.yieldChildLayout = function(context){
@@ -199,7 +199,7 @@ var LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._createStartContext = function(){
     var edge_size = this._getContextEdgeSize();
-    var context = new Nehan.CursorContext(
+    var context = new Nehan.LayoutContext(
       new Nehan.BlockContext(this.style.outerExtent - edge_size),
       new Nehan.InlineContext(this.style.contentMeasure)
     );
@@ -210,7 +210,7 @@ var LayoutGenerator = (function(){
   LayoutGenerator.prototype._createChildContext = function(parent_context){
     var edge_size = this._getContextEdgeSize();
     var max_extent = parent_context.getBlockRestExtent() - edge_size;
-    var child_context = new Nehan.CursorContext(
+    var child_context = new Nehan.LayoutContext(
       new Nehan.BlockContext(max_extent, {
 	lineNo:parent_context.lineNo
       }),

@@ -15,7 +15,7 @@ var FlipGenerator = (function(){
   /**
      @memberof Nehan.FlipGenerator
      @method yield
-     @param context {Nehan.CursorContext}
+     @param context {Nehan.LayoutContext}
      @return {Nehan.Box}
   */
   FlipGenerator.prototype.yield = function(context){

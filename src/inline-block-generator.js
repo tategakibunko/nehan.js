@@ -23,7 +23,7 @@ var InlineBlockGenerator = (function (){
   };
 
   InlineBlockGenerator.prototype._createChildContext = function(parent_context){
-    return new Nehan.CursorContext(
+    return new Nehan.LayoutContext(
       new Nehan.BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
       new Nehan.InlineContext(parent_context.getInlineRestMeasure() - this.style.getEdgeMeasure())
     );
