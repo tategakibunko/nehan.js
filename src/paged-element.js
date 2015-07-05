@@ -182,6 +182,7 @@ Nehan.PagedElement = (function(){
        @param opt {Object} - optinal argument
        @param opt.onProgress {Function} - fun tree ctx -> ()
        @param opt.onComplete {Function} - fun time ctx -> ()
+       @param opt.capturePageText {bool} output text node or not for each page object.
        @param opt.maxPageCount {int} - upper bound of page count
     */
     addContent : function(content, opt){
