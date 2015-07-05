@@ -10,6 +10,7 @@ version 5.2.1
 ========================
 o Add tree object to page output.
 o Add new option 'capturePageText' added to Nehan.PageStream::asyncGet or Nehan.PagedElement::setContent for adding text node to page object.
+o Add new  method 'filter' to 'Nehan::PagedElement' and 'Nehan::PageStream'.
 ! Config.capture is removed.
 
 version 5.2.0 2015/07/02

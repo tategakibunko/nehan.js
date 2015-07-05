@@ -83,24 +83,24 @@ Nehan.PagedElement = (function(){
       return this.pageNo;
     },
     /**
-       find tree object by fn(Nehan.Box -> bool).
+       find logical page object by fn(Nehan.Box -> bool).
 
        @memberof Nehan.PagedElement
        @param fn {Function} - Nehan.Box -> bool
        @return {Nehan.Box}
     */
-    findTree : function(fn){
-      return this._pageStream? this._pageStream.findTree(fn) : null;
+    find : function(fn){
+      return this._pageStream? this._pageStream.find(fn) : null;
     },
     /**
-       find page object by fn(Nehan.Page -> bool).
+       filter logical page object by fn(Nehan.Box -> bool).
 
        @memberof Nehan.PagedElement
-       @param fn {Function} - Nehan.Page -> bool
-       @return {Nehan.Page}
+       @param fn {Function} - Nehan.Box -> bool
+       @return {Array.<Nehan.Page>}
     */
-    findPage : function(fn){
-      return this._pageStream? this._pageStream.findPage(fn) : null;
+    filter: function(fn){
+      return this._pageStream? this._pageStream.filter(fn) : [];
     },
     /**
        set inner page position to next page and return next page if exists, else null.

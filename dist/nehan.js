@@ -11673,24 +11673,24 @@ var PageStream = (function(){
       return this._trees[page_no] || null;
     },
     /**
-       find tree object by fn(Nehan.Box -> bool).
+       find logical page object by fn(Nehan.Box -> bool).
 
        @memberof Nehan.PageStream
        @param fn {Function} - Nehan.Box -> bool
        @return {Nehan.Box}
     */
-    findTree : function(fn){
+    find : function(fn){
       return Nehan.List.find(this._trees, fn);
     },
     /**
-       find page object by fn(Nehan.Page -> bool).
+       filter logical page object by fn(Nehan.Box -> bool).
 
        @memberof Nehan.PageStream
-       @param fn {Function} - Nehan.Page -> bool
-       @return {Nehan.Page}
-    */
-    findPage : function(fn){
-      return Nehan.List.find(this._pages, fn);
+       @param fn {Function} - Nehan.Box -> bool
+       @return {Array.<Nehan.Box>}
+     */
+    filter: function(fn){
+      return Nehan.List.filter(this._trees, fn);
     },
     // () -> tree
     _yield : function(){
@@ -17238,24 +17238,24 @@ Nehan.PagedElement = (function(){
       return this.pageNo;
     },
     /**
-       find tree object by fn(Nehan.Box -> bool).
+       find logical page object by fn(Nehan.Box -> bool).
 
        @memberof Nehan.PagedElement
        @param fn {Function} - Nehan.Box -> bool
        @return {Nehan.Box}
     */
-    findTree : function(fn){
-      return this._pageStream? this._pageStream.findTree(fn) : null;
+    find : function(fn){
+      return this._pageStream? this._pageStream.find(fn) : null;
     },
     /**
-       find page object by fn(Nehan.Page -> bool).
+       filter logical page object by fn(Nehan.Box -> bool).
 
        @memberof Nehan.PagedElement
-       @param fn {Function} - Nehan.Page -> bool
-       @return {Nehan.Page}
+       @param fn {Function} - Nehan.Box -> bool
+       @return {Array.<Nehan.Page>}
     */
-    findPage : function(fn){
-      return this._pageStream? this._pageStream.findPage(fn) : null;
+    filter: function(fn){
+      return this._pageStream? this._pageStream.filter(fn) : [];
     },
     /**
        set inner page position to next page and return next page if exists, else null.
