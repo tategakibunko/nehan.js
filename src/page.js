@@ -6,7 +6,7 @@ Nehan.Page = (function(){
      @constructor
      @param opt {Object}
      @param opt.element {DOMElement} - generated DOMElement.
-     @ramao opt.text {string} - text in page.
+     @param opt.text {string} - text in page.
      @param opt.seekPos {int} - page seek position in literal string pos.
      @param opt.pageNo {int} - page index starts from 0.
      @param opt.charPos {int} - character position of this page from first page.
