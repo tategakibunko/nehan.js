@@ -9364,8 +9364,8 @@ Nehan.HtmlLexer = (function (){
       }); // convert close tag to lower case(for innerHTML of IE)
       src = __replace_single_close_tags(src);
       //src = src.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
-      return src
-	.replace(/“(.*?)”/g, "”$1”")
+      src = src
+	.replace(/“([^”]+)”/g, "”$1”")
 	.replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
 	.replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
 	.replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
@@ -9373,6 +9373,8 @@ Nehan.HtmlLexer = (function (){
 	//.replace(/^[\s]+/, "") // shorten head space
 	//.replace(/[\s]+$/, "") // discard tail space
 	.replace(/\r/g, ""); // discard CR
+      //console.log("HtmlLexer::normalized to:", src);
+      return src;
     },
     /**
        @memberof Nehan.HtmlLexer
