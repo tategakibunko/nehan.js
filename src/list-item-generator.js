@@ -27,7 +27,9 @@ var ListItemGenerator = (function(){
     }, {
       "class":"nehan-li-marker"
     });
-    return new BlockGenerator(marker_style, new Nehan.TokenStream(marker_text));
+    return new BlockGenerator(marker_style, new Nehan.TokenStream(marker_text, {
+      flow:style.flow
+    }));
   };
 
   ListItemGenerator.prototype._createListBodyGenerator = function(style, stream){

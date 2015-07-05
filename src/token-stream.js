@@ -7,11 +7,13 @@ Nehan.TokenStream = (function(){
      @param src {String}
      @param opt {Object}
      @param opt.lexer {Lexer} - lexer class(optional)
+     @param opt.flow {Nehan.BoxFlow} - document flow(optional)
      @param opt.filter {Function} - token filter function(optional)
   */
   function TokenStream(src, opt){
     opt = opt || {};
-    this.lexer = opt.lexer || this._createLexer(src);
+    this.flow = opt.flow || null;
+    this.lexer = opt.lexer || this._createLexer(src, this.flow);
     this.tokens = opt.tokens || [];
     this.pos = 0;
     this._filter = opt.filter || null;
@@ -276,8 +278,8 @@ Nehan.TokenStream = (function(){
 	__set_pseudo_of_type(type_of_tags[tag_name]);
       }
     },
-    _createLexer : function(src){
-      return new Nehan.HtmlLexer(src);
+    _createLexer : function(src, flow){
+      return new Nehan.HtmlLexer(src, {flow:flow});
     }
   };
 

@@ -229,26 +229,33 @@ var LayoutGenerator = (function(){
     var markup_content = style.getMarkupContent();
     if(style.getTextCombine() === "horizontal" || markup_name === "tcy"){
       return new Nehan.TokenStream(markup_content, {
+	flow:style.flow,
 	tokens:[new Nehan.Tcy(markup_content)]
       });
     }
     switch(markup_name){
     case "word":
       return new Nehan.TokenStream(markup_content, {
+	flow:style.flow,
 	tokens:[new Nehan.Word(markup_content)]
       });
     case "ruby":
       return new Nehan.RubyTokenStream(markup_content);
     case "tbody": case "thead": case "tfoot":
       return new Nehan.TokenStream(style.getContent(), {
+	flow:style.flow,
 	filter:Nehan.Closure.isTagName(["tr"])
       });
     case "tr":
       return new Nehan.TokenStream(style.getContent(), {
+	flow:style.flow,
 	filter:Nehan.Closure.isTagName(["td", "th"])
       });
-    default: return new Nehan.TokenStream(style.getContent());
-    } 
+    default:
+      return new Nehan.TokenStream(style.getContent(), {
+	flow:style.flow
+      });
+    }
   };
 
   LayoutGenerator.prototype._createFloatGenerator = function(context, first_float_gen){
@@ -345,11 +352,13 @@ var LayoutGenerator = (function(){
   LayoutGenerator.prototype._createTextGenerator = function(style, text){
     if(text instanceof Nehan.Tcy || text instanceof Nehan.Word){
       return new TextGenerator(this.style, new Nehan.TokenStream(text.getData(), {
+	flow:style.flow,
 	tokens:[text]
       }));
     }
     var content = text.getContent();
     return new TextGenerator(this.style, new Nehan.TokenStream(content, {
+      flow:style.flow,
       lexer:new Nehan.TextLexer(content)
     }));
   };

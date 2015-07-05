@@ -9343,10 +9343,14 @@ Nehan.HtmlLexer = (function (){
      @classdesc lexer of html tag elements.
      @constructor
      @param src {String}
+     @param opt {Object}
+     @param opt.flow {Nehan.BoxFlow} - document flow(optional)
   */
-  function HtmlLexer(src){
+  function HtmlLexer(src, opt){
+    opt = opt || {};
     this.pos = 0;
-    this.buff = this._normalize(src);
+    this.flow = opt.flow || null;
+    this.buff = this._normalize(src, this.flow);
     this.src = this.buff;
   }
 
@@ -9358,21 +9362,22 @@ Nehan.HtmlLexer = (function (){
   };
 
   HtmlLexer.prototype = {
-    _normalize : function(src){
+    _normalize : function(src, flow){
       var src = src.replace(/(<\/[^>]+>)/gm, function(str, p1){
 	  return p1.toLowerCase();
       }); // convert close tag to lower case(for innerHTML of IE)
       src = __replace_single_close_tags(src);
       //src = src.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
-      src = src
-	.replace(/“([^”]+)”/g, "”$1”")
-	.replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
-	.replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
-	.replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
-	.replace(/｡/g, "。") // half size ideographic full stop -> full size
-	//.replace(/^[\s]+/, "") // shorten head space
-	//.replace(/[\s]+$/, "") // discard tail space
-	.replace(/\r/g, ""); // discard CR
+      src = src.replace(/\r/g, ""); // discard CR
+      if(flow && flow.isTextVertical()){
+	src = src
+	  .replace(/“([^”]+)”/g, "”$1”")
+	  .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
+	  .replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
+	  .replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
+	  .replace(/｡/g, "。") // half size ideographic full stop -> full size
+	;
+      }
       //console.log("HtmlLexer::normalized to:", src);
       return src;
     },
@@ -9419,7 +9424,7 @@ Nehan.HtmlLexer = (function (){
        @param text {String}
      */
     addText : function(text){
-      this.buff = this.buff + this._normalize(text);
+      this.buff = this.buff + this._normalize(text, this.flow);
     },
     _stepBuff : function(count){
       var part = this.buff.substring(0, count);
@@ -9556,11 +9561,13 @@ Nehan.TokenStream = (function(){
      @param src {String}
      @param opt {Object}
      @param opt.lexer {Lexer} - lexer class(optional)
+     @param opt.flow {Nehan.BoxFlow} - document flow(optional)
      @param opt.filter {Function} - token filter function(optional)
   */
   function TokenStream(src, opt){
     opt = opt || {};
-    this.lexer = opt.lexer || this._createLexer(src);
+    this.flow = opt.flow || null;
+    this.lexer = opt.lexer || this._createLexer(src, this.flow);
     this.tokens = opt.tokens || [];
     this.pos = 0;
     this._filter = opt.filter || null;
@@ -9825,8 +9832,8 @@ Nehan.TokenStream = (function(){
 	__set_pseudo_of_type(type_of_tags[tag_name]);
       }
     },
-    _createLexer : function(src){
-      return new Nehan.HtmlLexer(src);
+    _createLexer : function(src, flow){
+      return new Nehan.HtmlLexer(src, {flow:flow});
     }
   };
 
@@ -14522,26 +14529,33 @@ var LayoutGenerator = (function(){
     var markup_content = style.getMarkupContent();
     if(style.getTextCombine() === "horizontal" || markup_name === "tcy"){
       return new Nehan.TokenStream(markup_content, {
+	flow:style.flow,
 	tokens:[new Nehan.Tcy(markup_content)]
       });
     }
     switch(markup_name){
     case "word":
       return new Nehan.TokenStream(markup_content, {
+	flow:style.flow,
 	tokens:[new Nehan.Word(markup_content)]
       });
     case "ruby":
       return new Nehan.RubyTokenStream(markup_content);
     case "tbody": case "thead": case "tfoot":
       return new Nehan.TokenStream(style.getContent(), {
+	flow:style.flow,
 	filter:Nehan.Closure.isTagName(["tr"])
       });
     case "tr":
       return new Nehan.TokenStream(style.getContent(), {
+	flow:style.flow,
 	filter:Nehan.Closure.isTagName(["td", "th"])
       });
-    default: return new Nehan.TokenStream(style.getContent());
-    } 
+    default:
+      return new Nehan.TokenStream(style.getContent(), {
+	flow:style.flow
+      });
+    }
   };
 
   LayoutGenerator.prototype._createFloatGenerator = function(context, first_float_gen){
@@ -14638,11 +14652,13 @@ var LayoutGenerator = (function(){
   LayoutGenerator.prototype._createTextGenerator = function(style, text){
     if(text instanceof Nehan.Tcy || text instanceof Nehan.Word){
       return new TextGenerator(this.style, new Nehan.TokenStream(text.getData(), {
+	flow:style.flow,
 	tokens:[text]
       }));
     }
     var content = text.getContent();
     return new TextGenerator(this.style, new Nehan.TokenStream(content, {
+      flow:style.flow,
       lexer:new Nehan.TextLexer(content)
     }));
   };
@@ -15978,7 +15994,9 @@ var ListItemGenerator = (function(){
     }, {
       "class":"nehan-li-marker"
     });
-    return new BlockGenerator(marker_style, new Nehan.TokenStream(marker_text));
+    return new BlockGenerator(marker_style, new Nehan.TokenStream(marker_text, {
+      flow:style.flow
+    }));
   };
 
   ListItemGenerator.prototype._createListBodyGenerator = function(style, stream){
@@ -16043,6 +16061,7 @@ var TableGenerator = (function(){
       switch(token.getName()){
       case "tbody": case "thead": case "tfoot":
 	var pset2 = this._createAutoPartition(new Nehan.TokenStream(token.getContent(), {
+	  flow:this.style.flow,
 	  filter:Nehan.Closure.isTagName(["tr"])
 	}));
 	pset = pset.union(pset2);
@@ -16050,6 +16069,7 @@ var TableGenerator = (function(){
 
       case "tr":
 	var cell_tags = new Nehan.TokenStream(token.getContent(), {
+	  flow:this.style.flow,
 	  filter:Nehan.Closure.isTagName(["td", "th"])
 	}).getTokens();
 	var cell_count = cell_tags.length;
@@ -16219,7 +16239,9 @@ var BodyGenerator = (function(){
   */
   function BodyGenerator(text){
     var tag = new Nehan.Tag("<body>", text);
-    SectionRootGenerator.call(this, new StyleContext(tag, null), new Nehan.TokenStream(text));
+    var style = new StyleContext(tag, null);
+    var stream = new Nehan.TokenStream(text, {flow:style.flow});
+    SectionRootGenerator.call(this, style, stream)
   }
   Nehan.Class.extend(BodyGenerator, SectionRootGenerator);
 
@@ -16657,7 +16679,9 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalRt = function(line, ruby){
     var rt = (new InlineGenerator(
       new StyleContext(ruby.rt, line.style),
-      new Nehan.TokenStream(ruby.getRtString()),
+      new Nehan.TokenStream(ruby.getRtString(), {
+	flow:line.style.flow
+      }),
       null // outline context
     )).yield();
     Nehan.Args.copy(rt.css, ruby.getCssVertRt(line));

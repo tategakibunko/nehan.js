@@ -37,7 +37,9 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalRt = function(line, ruby){
     var rt = (new InlineGenerator(
       new StyleContext(ruby.rt, line.style),
-      new Nehan.TokenStream(ruby.getRtString()),
+      new Nehan.TokenStream(ruby.getRtString(), {
+	flow:line.style.flow
+      }),
       null // outline context
     )).yield();
     Nehan.Args.copy(rt.css, ruby.getCssVertRt(line));

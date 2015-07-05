@@ -9,7 +9,9 @@ var BodyGenerator = (function(){
   */
   function BodyGenerator(text){
     var tag = new Nehan.Tag("<body>", text);
-    SectionRootGenerator.call(this, new StyleContext(tag, null), new Nehan.TokenStream(text));
+    var style = new StyleContext(tag, null);
+    var stream = new Nehan.TokenStream(text, {flow:style.flow});
+    SectionRootGenerator.call(this, style, stream)
   }
   Nehan.Class.extend(BodyGenerator, SectionRootGenerator);
 

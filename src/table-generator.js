@@ -44,6 +44,7 @@ var TableGenerator = (function(){
       switch(token.getName()){
       case "tbody": case "thead": case "tfoot":
 	var pset2 = this._createAutoPartition(new Nehan.TokenStream(token.getContent(), {
+	  flow:this.style.flow,
 	  filter:Nehan.Closure.isTagName(["tr"])
 	}));
 	pset = pset.union(pset2);
@@ -51,6 +52,7 @@ var TableGenerator = (function(){
 
       case "tr":
 	var cell_tags = new Nehan.TokenStream(token.getContent(), {
+	  flow:this.style.flow,
 	  filter:Nehan.Closure.isTagName(["td", "th"])
 	}).getTokens();
 	var cell_count = cell_tags.length;

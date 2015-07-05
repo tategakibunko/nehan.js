@@ -43,10 +43,14 @@ Nehan.HtmlLexer = (function (){
      @classdesc lexer of html tag elements.
      @constructor
      @param src {String}
+     @param opt {Object}
+     @param opt.flow {Nehan.BoxFlow} - document flow(optional)
   */
-  function HtmlLexer(src){
+  function HtmlLexer(src, opt){
+    opt = opt || {};
     this.pos = 0;
-    this.buff = this._normalize(src);
+    this.flow = opt.flow || null;
+    this.buff = this._normalize(src, this.flow);
     this.src = this.buff;
   }
 
@@ -58,21 +62,22 @@ Nehan.HtmlLexer = (function (){
   };
 
   HtmlLexer.prototype = {
-    _normalize : function(src){
+    _normalize : function(src, flow){
       var src = src.replace(/(<\/[^>]+>)/gm, function(str, p1){
 	  return p1.toLowerCase();
       }); // convert close tag to lower case(for innerHTML of IE)
       src = __replace_single_close_tags(src);
       //src = src.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
-      src = src
-	.replace(/“([^”]+)”/g, "”$1”")
-	.replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
-	.replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
-	.replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
-	.replace(/｡/g, "。") // half size ideographic full stop -> full size
-	//.replace(/^[\s]+/, "") // shorten head space
-	//.replace(/[\s]+$/, "") // discard tail space
-	.replace(/\r/g, ""); // discard CR
+      src = src.replace(/\r/g, ""); // discard CR
+      if(flow && flow.isTextVertical()){
+	src = src
+	  .replace(/“([^”]+)”/g, "”$1”")
+	  .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
+	  .replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
+	  .replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
+	  .replace(/｡/g, "。") // half size ideographic full stop -> full size
+	;
+      }
       //console.log("HtmlLexer::normalized to:", src);
       return src;
     },
@@ -119,7 +124,7 @@ Nehan.HtmlLexer = (function (){
        @param text {String}
      */
     addText : function(text){
-      this.buff = this.buff + this._normalize(text);
+      this.buff = this.buff + this._normalize(text, this.flow);
     },
     _stepBuff : function(count){
       var part = this.buff.substring(0, count);
