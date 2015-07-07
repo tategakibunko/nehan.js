@@ -78,7 +78,7 @@
         fontSize:16
       }).setContent(text, {
         onProgress: function(tree, ctx){
-          var page = ctx.sender.getPage(tree.pageNo);
+          var page = ctx.getPage(tree.pageNo);
           var wrap = document.createElement("div");
           wrap.style.width = "500px";
           wrap.appendChild(page.element);

@@ -35,11 +35,11 @@ var LayoutTest = (function(){
     var engine = create_engine(opt);
 
     engine.createPageStream(script).asyncGet({
-      onProgress : function(stream, tree){
-	var page = stream.getPage(tree.pageNo); // tree -> page
+      onProgress : function(tree, ctx){
+	var page = ctx.getPage(tree.pageNo); // tree -> page
 	$dom.append(page.element);
       },
-      onComplete : function(stream, time){
+      onComplete : function(time, ctx){
 	$dom.append($("<p />").html(time + "msec"));
 	$dom.append($("<h2 />").html("outline"));
 	$dom.append(engine.createOutlineElement());

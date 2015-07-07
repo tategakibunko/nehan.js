@@ -154,8 +154,8 @@ Nehan.PagedElement = (function(){
        @memberof Nehan.PagedElement
        @param content {String} - html text.
        @param opt {Object} - optinal argument
-       @param opt.onProgress {Function} - fun tree ctx -> ()
-       @param opt.onComplete {Function} - fun time ctx -> ()
+       @param opt.onProgress {Function} - fun {@link Nehan.Box} -> {@link Nehan.PagedElement} -> ()
+       @param opt.onComplete {Function} - fun time:{Float} -> {@link Nehan.PagedElement} -> ()
        @param opt.capturePageText {bool} output text node or not for each page object.
        @param opt.maxPageCount {int} - upper bound of page count
        @example
@@ -224,21 +224,17 @@ Nehan.PagedElement = (function(){
       this._pageStream.asyncGet({
 	capturePageText:(opt.capturePageText || false),
 	maxPageCount:(opt.maxPageCount || -1),
-	onProgress : function(sender, tree){
+	onProgress : function(tree, ctx){
 	  if(tree.pageNo === 0){
 	    this.setPage(tree.pageNo);
 	  }
 	  if(opt.onProgress){
-	    opt.onProgress(tree, {
-	      sender:this
-	    });
+	    opt.onProgress(tree, this);
 	  }
 	}.bind(this),
-	onComplete : function(sender, time){
+	onComplete : function(time, ctx){
 	  if(opt.onComplete){
-	    opt.onComplete(time, {
-	      sender:this
-	    });
+	    opt.onComplete(time, this);
 	  }
 	}.bind(this)
       });
