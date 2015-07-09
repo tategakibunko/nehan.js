@@ -11,17 +11,7 @@ Nehan.List = {
   */
   iter : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
-      fn(lst[i]);
-    }
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun index -> obj -> ()
-  */
-  iteri : function(lst, fn){
-    for(var i = 0, len = lst.length; i < len; i++){
-      fn(i, lst[i]);
+      fn(lst[i], i);
     }
   },
   /**
@@ -31,17 +21,7 @@ Nehan.List = {
   */
   reviter : function(lst, fn){
     for(var i = lst.length - 1; i >= 0; i--){
-      fn(lst[i]);
-    }
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun index -> obj -> ()
-  */
-  reviteri : function(lst, fn){
-    for(var i = lst.length - 1; i >= 0; i--){
-      fn(i, lst[i]);
+      fn(lst[i], i);
     }
   },
   /**
@@ -52,7 +32,7 @@ Nehan.List = {
   */
   forall : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
-      if(!fn(lst[i])){
+      if(!fn(lst[i], i)){
 	return false;
       }
     }
@@ -67,20 +47,7 @@ Nehan.List = {
   map : function(lst, fn){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
-      ret.push(fn(lst[i]));
-    }
-    return ret;
-  },
-  /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun index -> obj -> obj
-     @return {Array}
-  */
-  mapi : function(lst, fn){
-    var ret = [];
-    for(var i = 0, len = lst.length; i < len; i++){
-      ret.push(fn(i, lst[i]));
+      ret.push(fn(lst[i], i));
     }
     return ret;
   },
@@ -94,7 +61,7 @@ Nehan.List = {
   fold : function(lst, acm, fn){
     var ret = acm;
     for(var i = 0, len = lst.length; i < len; i++){
-      ret = fn(ret, lst[i]);
+      ret = fn(ret, lst[i], i);
     }
     return ret;
   },
@@ -107,7 +74,7 @@ Nehan.List = {
   filter : function(lst, fn){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
-      if(fn(lst[i])){
+      if(fn(lst[i], i)){
 	ret.push(lst[i]);
       }
     }
@@ -122,7 +89,7 @@ Nehan.List = {
   find : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       var obj = lst[i];
-      if(fn(obj)){
+      if(fn(obj, i)){
 	return obj;
       }
     }
@@ -137,7 +104,7 @@ Nehan.List = {
   revfind : function(lst, fn){
     for(var i = lst.length - 1; i >= 0; i--){
       var obj = lst[i];
-      if(fn(obj)){
+      if(fn(obj, i)){
 	return obj;
       }
     }
@@ -152,7 +119,7 @@ Nehan.List = {
   indexOf : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       var obj = lst[i];
-      if(fn(obj)){
+      if(fn(obj, i)){
 	return i;
       }
     }
@@ -166,7 +133,7 @@ Nehan.List = {
   */
   exists : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
-      if(fn(lst[i])){
+      if(fn(lst[i], i)){
 	return true;
       }
     }
@@ -206,8 +173,8 @@ Nehan.List = {
   */
   minobj : function(lst, fn){
     var min_obj = null, min_val = null;
-    this.iter(lst, function(obj){
-      var val = fn(obj);
+    this.iter(lst, function(obj, i){
+      var val = fn(obj, i);
       if(min_val === null || val < min_val){
 	min_obj = obj;
 	min_val = val;
@@ -223,8 +190,8 @@ Nehan.List = {
   */
   maxobj : function(lst, fn){
     var max_obj = null, max_val = null;
-    this.iter(lst, function(obj){
-      var val = fn(obj);
+    this.iter(lst, function(obj, i){
+      var val = fn(obj, i);
       if(max_val === null || val > max_val){
 	max_obj = obj;
 	max_val = val;
@@ -253,7 +220,7 @@ Nehan.List = {
   count : function(lst, fn){
     var ret = 0;
     for(var i = 0, len = lst.length; i < len; i++){
-      if(fn(lst[i])){
+      if(fn(lst[i], i)){
 	ret++;
       }
     }

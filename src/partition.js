@@ -76,7 +76,7 @@ Nehan.Partition = (function(){
       // merge(this._punits[1], partition._punits[1]),
       // ...
       // merge(this._punits[n-1], partition._punits[n-1])
-      var merged_punits =  Nehan.List.mapi(this._punits, function(i, punit){
+      var merged_punits =  Nehan.List.map(this._punits, function(punit, i){
 	return punit.mergeTo(partition.get(i));
       });
       return new Nehan.Partition(merged_punits);

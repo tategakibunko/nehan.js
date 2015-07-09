@@ -68,7 +68,7 @@ var ParallelGenerator = (function(){
   ParallelGenerator.prototype._alignContentExtent = function(blocks, content_extent){
     var flow = this.style.flow;
     var generators = this.generators;
-    return Nehan.List.mapi(blocks, function(i, block){
+    return Nehan.List.map(blocks, function(block, i){
       if(block === null){
 	return generators[i].style.createBlock({
 	  elements:[],
