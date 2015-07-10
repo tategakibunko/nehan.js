@@ -113,6 +113,17 @@ Nehan.Config = {
   useVerticalGlyphIfEnable:true,
 
   /**
+   convert horizontal-bar(U+2015)  to em-dash(U+2014) for vertical writing-mode.
+   note that this flag is not available for IE.
+   because in IE, we convert all em-dash to horizontal-bar for em-dash glyph problem(see vert-evaluator.js).
+
+   @memberof Nehan.Config
+   @type {boolean}
+   @default true
+  */
+  convertHbarToEmDashIfVert:true,
+
+  /**
      enable ommiting element by start tag.
      @memberof Nehan.Config
      @type {boolean}
@@ -6708,7 +6719,7 @@ Nehan.Char = (function(){
       var is_kakko_end = this.isKakkoEnd();
       var padding_enable = this.isPaddingEnable();
       if(Nehan.Env.client.isIE()){
-	css.height = this.isDash()? "0.9em" : "1em";
+	css.height = "1em";
       }
       if(is_zenkaku && is_kakko_start && !padding_enable){
 	css.height = "1em";
@@ -7125,7 +7136,6 @@ Nehan.Char = (function(){
       case 8212: // Em dash
 	this._setRotate(90); break;
       case 8213: // Horizontal bar(General Punctuation)
-	this._setCnv("&#8212;", 1, 1);
 	this._setRotate(90); break;
       case 8221: // Right Double Quotation Mark
 	this._setRotate(90); break;
@@ -16846,8 +16856,23 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalVerticalGlyph = function(line, chr){
+    if(Nehan.Env.client.isIE()){
+      return this._evalVerticalGlyphIE(line, chr);
+    }
+    var data = (Nehan.Config.convertHbarToEmDashIfVert && chr.isDash())? "&#8212;" : chr.getData();
     return this._createElement("div", {
-      content:chr.getData(),
+      content:data,
+      className:"nehan-vert-glyph",
+      css:chr.getCssVertGlyph(line)
+    });
+  };
+
+  VertEvaluator.prototype._evalVerticalGlyphIE = function(line, chr){
+    // use horizontal bar(U+2015) instead of em-dash(U+2014).
+    // because em-dash is not rotated in IE.
+    var data = chr.isDash()? "&#8213;" : chr.getData();
+    return this._createElement("div", {
+      content:data,
       className:"nehan-vert-glyph",
       css:chr.getCssVertGlyph(line)
     });

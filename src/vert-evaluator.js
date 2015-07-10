@@ -233,8 +233,23 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalVerticalGlyph = function(line, chr){
+    if(Nehan.Env.client.isIE()){
+      return this._evalVerticalGlyphIE(line, chr);
+    }
+    var data = (Nehan.Config.convertHbarToEmDashIfVert && chr.isDash())? "&#8212;" : chr.getData();
     return this._createElement("div", {
-      content:chr.getData(),
+      content:data,
+      className:"nehan-vert-glyph",
+      css:chr.getCssVertGlyph(line)
+    });
+  };
+
+  VertEvaluator.prototype._evalVerticalGlyphIE = function(line, chr){
+    // use horizontal bar(U+2015) instead of em-dash(U+2014).
+    // because em-dash is not rotated in IE.
+    var data = chr.isDash()? "&#8213;" : chr.getData();
+    return this._createElement("div", {
+      content:data,
       className:"nehan-vert-glyph",
       css:chr.getCssVertGlyph(line)
     });

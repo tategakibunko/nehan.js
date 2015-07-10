@@ -62,7 +62,7 @@ Nehan.Char = (function(){
       var is_kakko_end = this.isKakkoEnd();
       var padding_enable = this.isPaddingEnable();
       if(Nehan.Env.client.isIE()){
-	css.height = this.isDash()? "0.9em" : "1em";
+	css.height = "1em";
       }
       if(is_zenkaku && is_kakko_start && !padding_enable){
 	css.height = "1em";
@@ -479,7 +479,6 @@ Nehan.Char = (function(){
       case 8212: // Em dash
 	this._setRotate(90); break;
       case 8213: // Horizontal bar(General Punctuation)
-	this._setCnv("&#8212;", 1, 1);
 	this._setRotate(90); break;
       case 8221: // Right Double Quotation Mark
 	this._setRotate(90); break;

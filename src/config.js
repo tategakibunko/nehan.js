@@ -77,6 +77,17 @@ Nehan.Config = {
   useVerticalGlyphIfEnable:true,
 
   /**
+   convert horizontal-bar(U+2015)  to em-dash(U+2014) for vertical writing-mode.
+   note that this flag is not available for IE.
+   because in IE, we convert all em-dash to horizontal-bar for em-dash glyph problem(see vert-evaluator.js).
+
+   @memberof Nehan.Config
+   @type {boolean}
+   @default true
+  */
+  convertHbarToEmDashIfVert:true,
+
+  /**
      enable ommiting element by start tag.
      @memberof Nehan.Config
      @type {boolean}
