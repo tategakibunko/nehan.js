@@ -106,7 +106,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalRotateCharTransform = function(line, chr){
     var css = (Nehan.Env.client.isIE() && chr.isDash())? chr.getCssVertDashIE() : {};
     return this._createElement("div", {
-      content:chr.getData(),
+      content:chr.getData(line.getFlow()),
       className:"nehan-rotate-90",
       css:css
     });
@@ -114,7 +114,7 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalRotateCharIE = function(line, chr){
     return this._createElement("div", {
-      content:chr.getData(),
+      content:chr.getData(line.getFlow()),
       className:"nehan-vert-ie",
       css:chr.getCssVertRotateCharIE(line)
     }); // NOTE(or TODO):clearfix in older version after this code
@@ -171,7 +171,7 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalDashChar = function(line, chr){
     return this._createElement("div", {
-      content:chr.getData(),
+      content:chr.getData(line.getFlow()),
       css:chr.getCssVertDash(line)
     });
   };
@@ -179,26 +179,26 @@ var VertEvaluator = (function(){
   // for example, if we use <div> instead, parent bg-color is not inherited.
   VertEvaluator.prototype._evalCharWithBr = function(line, chr){
     chr.withBr = true;
-    return document.createTextNode(Nehan.Html.unescape(chr.getData()));
+    return document.createTextNode(Nehan.Html.unescape(chr.getData(line.getFlow())));
   };
 
   VertEvaluator.prototype._evalCharLetterSpacing = function(line, chr){
     return this._createElement("div", {
-      content:chr.getData(),
+      content:chr.getData(line.getFlow()),
       css:chr.getCssVertLetterSpacing(line)
     });
   };
 
   VertEvaluator.prototype._evalCharSingleHalfChar = function(line, chr){
     return this._createElement("div", {
-      content:chr.getData(),
+      content:chr.getData(line.getFlow()),
       css:chr.getCssVertSingleHalfChar(line)
     });
   };
 
   VertEvaluator.prototype._evalCharHalfKana = function(line, chr){
     return this._createElement("div", {
-      content:chr.getData(),
+      content:chr.getData(line.getFlow()),
       css:chr.getCssVertHalfKana(line)
     });
   };
@@ -217,7 +217,7 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalEmphaSrc = function(line, chr){
     return this._createElement("span", {
-      content:chr.getData(),
+      content:chr.getData(line.getFlow()),
       className:"nehan-empha-src"
     });
   };
@@ -232,7 +232,7 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalPaddingChar = function(line, chr){
     return this._createElement("div", {
-      content:chr.getData(),
+      content:chr.getData(line.getFlow()),
       css:chr.getCssPadding(line)
     });
   };
@@ -252,7 +252,7 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalVerticalGlyph = function(line, chr){
     return this._createElement("div", {
-      content:chr.getData(),
+      content:chr.getData(line.getFlow()),
       className:"nehan-vert-glyph",
       css:chr.getCssVertGlyph(line)
     });
@@ -261,7 +261,7 @@ var VertEvaluator = (function(){
   VertEvaluator.prototype._evalSmallKana = function(line, chr){
     var tag_name = (line.style.textEmpha && line.style.textEmpha.isEnable())? "span" : "div";
     return this._createElement(tag_name, {
-      content:chr.getData(),
+      content:chr.getData(line.getFlow()),
       css:chr.getCssVertSmallKana()
     });
   };

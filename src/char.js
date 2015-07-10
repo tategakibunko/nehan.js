@@ -31,11 +31,12 @@ Nehan.Char = (function(){
 
   Char.prototype = {
     /**
-       @memberof Nehan.Char
-       @return {string}
+     @memberof Nehan.Char
+     @param is_vert {bool}
+     @return {string}
     */
-    getData : function(){
-      var data = this.cnv || this.data;
+    getData : function(flow){
+      var data = flow.isTextVertical()? (this.cnv || this.data) : this.data;
       return data + (this.ligature || "");
     },
     /**

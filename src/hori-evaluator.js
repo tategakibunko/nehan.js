@@ -67,9 +67,6 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalChar = function(line, chr){
-    if(chr.isDash()){
-      return document.createTextNode(chr.data);
-    }
     if(chr.isSpace()){
       return this._evalSpace(line, chr);
     }
@@ -77,12 +74,12 @@ var HoriEvaluator = (function(){
       return this._evalTabChar(line, chr);
     }
     if(chr.isCharRef()){
-      return document.createTextNode(Nehan.Html.unescape(chr.getData()));
+      return document.createTextNode(Nehan.Html.unescape(chr.getData(line.getFlow())));
     }
     if(chr.isKerningChar()){
       return this._evalKerningChar(line, chr);
     }
-    return document.createTextNode(chr.getData());
+    return document.createTextNode(chr.getData(line.getFlow()));
   };
 
   HoriEvaluator.prototype._evalEmpha = function(line, chr){
@@ -98,7 +95,7 @@ var HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._evalEmphaSrc = function(line, chr){
     return this._createElement("div", {
-      content:chr.getData(),
+      content:chr.getData(line.getFlow()),
       className:"nehan-empha-src",
       css:chr.getCssHoriEmphaSrc(line)
     });
@@ -117,7 +114,7 @@ var HoriEvaluator = (function(){
     if(chr.isKakkoStart()){
       css["margin-left"] = "-0.5em";
       return this._createElement("span", {
-	content:chr.getData(),
+	content:chr.getData(line.getFlow()),
 	className:"nehan-char-kakko-start",
 	css:css
       });
@@ -125,7 +122,7 @@ var HoriEvaluator = (function(){
     if(chr.isKakkoEnd()){
       css["margin-right"] = "-0.5em";
       return this._createElement("span", {
-	content:chr.getData(),
+	content:chr.getData(line.getFlow()),
 	className:"nehan-char-kakko-end",
 	css:css
       });
@@ -133,17 +130,17 @@ var HoriEvaluator = (function(){
     if(chr.isKutenTouten()){
       css["margin-right"] = "-0.5em";
       return this._createElement("span", {
-	content:chr.getData(),
+	content:chr.getData(line.getFlow()),
 	className:"nehan-char-kuto",
 	css:css
       });
     }
-    return document.createTextNode(chr.getData());
+    return document.createTextNode(chr.getData(line.getFlow()));
   };
 
   HoriEvaluator.prototype._evalPaddingChar = function(line, chr){
     return this._createElement("span", {
-      content:chr.getData(),
+      content:chr.getData(line.getFlow()),
       css:chr.getCssPadding(line)
     });
   };

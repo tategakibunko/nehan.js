@@ -144,6 +144,9 @@ var Box = (function(){
       console.error("undefined display:", this.display);
       throw "Box::getBoxCss, undefined display";
     },
+    getFlow: function(){
+      return this.style.flow;
+    },
     /**
        @memberof Nehan.Box
        @return {Object}
