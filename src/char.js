@@ -27,6 +27,7 @@ Nehan.Char = (function(){
   var __rex_half_char = /[\w!\.\?\/:#;"',]/;
   var __rex_half_kana = /[\uff65-\uff9f]/;
   var __rex_half_kana_small = /[\uff67-\uff6f]/;
+  var __is_ie = Nehan.Env.client.isIE();
 
   Char.prototype = {
     /**
@@ -74,6 +75,11 @@ Nehan.Char = (function(){
 	css.height = "0.5em";
 	Nehan.Args.copy(css, this.getCssPadding(line));
       }
+      return css;
+    },
+    getCssVertDash : function(line){
+      var css = {};
+      css.height = Nehan.Env.client.isIE()? "1.0em" : "0.9em";
       return css;
     },
     /**
@@ -477,9 +483,11 @@ Nehan.Char = (function(){
       case 61:
 	this._setImg("equal", 1, 1); break;
       case 8212: // Em dash
-	this._setRotate(90); break;
+	//this._setRotate(90); break;
+	this._setCnv("&#65372", !__is_ie? 0.9 : 1.0, 1); break;
       case 8213: // Horizontal bar(General Punctuation)
-	this._setRotate(90); break;
+	//this._setRotate(90); break;
+	this._setCnv("&#65372", !__is_ie? 0.9 : 1.0, 1); break;
       case 8221: // Right Double Quotation Mark
 	this._setRotate(90); break;
       case 12540:

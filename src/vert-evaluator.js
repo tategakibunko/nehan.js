@@ -130,32 +130,50 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalChar = function(line, chr){
     var is_vert_glyph_enable = Nehan.Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
+    if(chr.isDash()){
+      return this._evalDashChar(line, chr);
+    }
     if(chr.isImgChar()){
       if(is_vert_glyph_enable){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalImgChar(line, chr);
-    } else if(chr.isSpace()){
+    }
+    if(chr.isSpace()){
       return this._evalSpace(line, chr);
-    } else if(chr.isTabSpace()){
+    }
+    if(chr.isTabSpace()){
       return this._evalTabChar(line, chr);
-    } else if(chr.isRotateChar()){
+    }
+    if(chr.isRotateChar()){
       if(is_vert_glyph_enable){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalRotateChar(line, chr);
-    } else if(chr.isSmallKana()){
+    }
+    if(chr.isSmallKana()){
       return this._evalSmallKana(line, chr);
-    } else if(chr.isPaddingEnable()){
+    }
+    if(chr.isPaddingEnable()){
       return this._evalPaddingChar(line, chr);
-    } else if(line.letterSpacing){
+    }
+    if(line.letterSpacing){
       return this._evalCharLetterSpacing(line, chr);
-    } else if(chr.isSingleHalfChar()){
+    }
+    if(chr.isSingleHalfChar()){
       return this._evalCharSingleHalfChar(line, chr);
-    } else if(chr.isHalfKana()){
+    }
+    if(chr.isHalfKana()){
       return this._evalCharHalfKana(line, chr);
     }
     return this._evalCharWithBr(line, chr);
+  };
+
+  VertEvaluator.prototype._evalDashChar = function(line, chr){
+    return this._createElement("div", {
+      content:chr.getData(),
+      css:chr.getCssVertDash(line)
+    });
   };
 
   // for example, if we use <div> instead, parent bg-color is not inherited.
@@ -233,23 +251,8 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalVerticalGlyph = function(line, chr){
-    if(Nehan.Env.client.isIE()){
-      return this._evalVerticalGlyphIE(line, chr);
-    }
-    var data = (Nehan.Config.convertHbarToEmDashIfVert && chr.isDash())? "&#8212;" : chr.getData();
     return this._createElement("div", {
-      content:data,
-      className:"nehan-vert-glyph",
-      css:chr.getCssVertGlyph(line)
-    });
-  };
-
-  VertEvaluator.prototype._evalVerticalGlyphIE = function(line, chr){
-    // use horizontal bar(U+2015) instead of em-dash(U+2014).
-    // because em-dash is not rotated in IE.
-    var data = chr.isDash()? "&#8213;" : chr.getData();
-    return this._createElement("div", {
-      content:data,
+      content:chr.getData(),
       className:"nehan-vert-glyph",
       css:chr.getCssVertGlyph(line)
     });

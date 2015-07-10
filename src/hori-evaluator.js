@@ -67,6 +67,9 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalChar = function(line, chr){
+    if(chr.isDash()){
+      return document.createTextNode(chr.data);
+    }
     if(chr.isSpace()){
       return this._evalSpace(line, chr);
     }

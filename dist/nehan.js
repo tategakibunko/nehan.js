@@ -113,17 +113,6 @@ Nehan.Config = {
   useVerticalGlyphIfEnable:true,
 
   /**
-   convert horizontal-bar(U+2015)  to em-dash(U+2014) for vertical writing-mode.
-   note that this flag is not available for IE.
-   because in IE, we convert all em-dash to horizontal-bar for em-dash glyph problem(see vert-evaluator.js).
-
-   @memberof Nehan.Config
-   @type {boolean}
-   @default true
-  */
-  convertHbarToEmDashIfVert:true,
-
-  /**
      enable ommiting element by start tag.
      @memberof Nehan.Config
      @type {boolean}
@@ -6686,6 +6675,7 @@ Nehan.Char = (function(){
   var __rex_half_char = /[\w!\.\?\/:#;"',]/;
   var __rex_half_kana = /[\uff65-\uff9f]/;
   var __rex_half_kana_small = /[\uff67-\uff6f]/;
+  var __is_ie = Nehan.Env.client.isIE();
 
   Char.prototype = {
     /**
@@ -6733,6 +6723,11 @@ Nehan.Char = (function(){
 	css.height = "0.5em";
 	Nehan.Args.copy(css, this.getCssPadding(line));
       }
+      return css;
+    },
+    getCssVertDash : function(line){
+      var css = {};
+      css.height = Nehan.Env.client.isIE()? "1.0em" : "0.9em";
       return css;
     },
     /**
@@ -7136,9 +7131,11 @@ Nehan.Char = (function(){
       case 61:
 	this._setImg("equal", 1, 1); break;
       case 8212: // Em dash
-	this._setRotate(90); break;
+	//this._setRotate(90); break;
+	this._setCnv("&#65372", !__is_ie? 0.9 : 1.0, 1); break;
       case 8213: // Horizontal bar(General Punctuation)
-	this._setRotate(90); break;
+	//this._setRotate(90); break;
+	this._setCnv("&#65372", !__is_ie? 0.9 : 1.0, 1); break;
       case 8221: // Right Double Quotation Mark
 	this._setRotate(90); break;
       case 12540:
@@ -16759,32 +16756,50 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalChar = function(line, chr){
     var is_vert_glyph_enable = Nehan.Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
+    if(chr.isDash()){
+      return this._evalDashChar(line, chr);
+    }
     if(chr.isImgChar()){
       if(is_vert_glyph_enable){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalImgChar(line, chr);
-    } else if(chr.isSpace()){
+    }
+    if(chr.isSpace()){
       return this._evalSpace(line, chr);
-    } else if(chr.isTabSpace()){
+    }
+    if(chr.isTabSpace()){
       return this._evalTabChar(line, chr);
-    } else if(chr.isRotateChar()){
+    }
+    if(chr.isRotateChar()){
       if(is_vert_glyph_enable){
 	return this._evalVerticalGlyph(line, chr);
       }
       return this._evalRotateChar(line, chr);
-    } else if(chr.isSmallKana()){
+    }
+    if(chr.isSmallKana()){
       return this._evalSmallKana(line, chr);
-    } else if(chr.isPaddingEnable()){
+    }
+    if(chr.isPaddingEnable()){
       return this._evalPaddingChar(line, chr);
-    } else if(line.letterSpacing){
+    }
+    if(line.letterSpacing){
       return this._evalCharLetterSpacing(line, chr);
-    } else if(chr.isSingleHalfChar()){
+    }
+    if(chr.isSingleHalfChar()){
       return this._evalCharSingleHalfChar(line, chr);
-    } else if(chr.isHalfKana()){
+    }
+    if(chr.isHalfKana()){
       return this._evalCharHalfKana(line, chr);
     }
     return this._evalCharWithBr(line, chr);
+  };
+
+  VertEvaluator.prototype._evalDashChar = function(line, chr){
+    return this._createElement("div", {
+      content:chr.getData(),
+      css:chr.getCssVertDash(line)
+    });
   };
 
   // for example, if we use <div> instead, parent bg-color is not inherited.
@@ -16862,23 +16877,8 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalVerticalGlyph = function(line, chr){
-    if(Nehan.Env.client.isIE()){
-      return this._evalVerticalGlyphIE(line, chr);
-    }
-    var data = (Nehan.Config.convertHbarToEmDashIfVert && chr.isDash())? "&#8212;" : chr.getData();
     return this._createElement("div", {
-      content:data,
-      className:"nehan-vert-glyph",
-      css:chr.getCssVertGlyph(line)
-    });
-  };
-
-  VertEvaluator.prototype._evalVerticalGlyphIE = function(line, chr){
-    // use horizontal bar(U+2015) instead of em-dash(U+2014).
-    // because em-dash is not rotated in IE.
-    var data = chr.isDash()? "&#8213;" : chr.getData();
-    return this._createElement("div", {
-      content:data,
+      content:chr.getData(),
       className:"nehan-vert-glyph",
       css:chr.getCssVertGlyph(line)
     });
@@ -16981,6 +16981,9 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalChar = function(line, chr){
+    if(chr.isDash()){
+      return document.createTextNode(chr.data);
+    }
     if(chr.isSpace()){
       return this._evalSpace(line, chr);
     }
