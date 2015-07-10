@@ -182,7 +182,7 @@ var LayoutEvaluator = (function(){
 	link.classes.push("nehan-anchor-link");
 	link.style.markup.setAttr("data-page", page_no);
       }
-      return this._evalLinkElement(line, link)
+      return this._evalLinkElement(line, link);
     },
     _evalTextElement : function(line, text){
       switch(text._type){

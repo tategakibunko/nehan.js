@@ -119,7 +119,7 @@ Nehan.Config = {
 
    @memberof Nehan.Config
    @type {boolean}
-   @default false
+   @default true
   */
   convertHbarToEmDashIfVert:true,
 
@@ -6447,6 +6447,8 @@ Nehan.BoxFlow = (function(){
       case "after":
 	return this.getPropAfter();
       }
+      console.error("BoxFlow::getProp, undefined property(%o)", prop);
+      throw "BoxFlow::getProp, undefined property";
     },
     /**
        @memberof Nehan.BoxFlow
@@ -11143,6 +11145,8 @@ var Box = (function(){
       case "inline": return this.getCssInline();
       case "inline-block": return this.getCssInlineBlock();
       }
+      console.error("undefined display:", this.display);
+      throw "Box::getBoxCss, undefined display";
     },
     /**
        @memberof Nehan.Box
@@ -13415,7 +13419,7 @@ var StyleContext = (function(){
 	// enable line-height only when horizontal mode.
 	// this logic is required for drop-caps of horizontal mode.
 	// TODO: more simple solution.
-	var line_height = this.getCssAttr("line-height")
+	var line_height = this.getCssAttr("line-height");
 	if(line_height){
 	  css["line-height"] = this._computeUnitSize(line_height, this.getFontSize()) + "px";
 	}
@@ -13667,6 +13671,7 @@ var StyleContext = (function(){
       if(value !== "inherit"){
 	return new Nehan.Color(value);
       }
+      return null;
     },
     _loadFont : function(){
       var parent_font = this.getFont();
@@ -14075,6 +14080,7 @@ var StyleContext = (function(){
       if(letter_spacing){
 	return this._computeUnitSize(letter_spacing, font_size);
       }
+      return null;
     },
     _loadStaticMeasure : function(){
       var prop = this.flow.getPropMeasure();
@@ -16598,7 +16604,7 @@ var LayoutEvaluator = (function(){
 	link.classes.push("nehan-anchor-link");
 	link.style.markup.setAttr("data-page", page_no);
       }
-      return this._evalLinkElement(line, link)
+      return this._evalLinkElement(line, link);
     },
     _evalTextElement : function(line, text){
       switch(text._type){

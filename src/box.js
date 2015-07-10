@@ -141,6 +141,8 @@ var Box = (function(){
       case "inline": return this.getCssInline();
       case "inline-block": return this.getCssInlineBlock();
       }
+      console.error("undefined display:", this.display);
+      throw "Box::getBoxCss, undefined display";
     },
     /**
        @memberof Nehan.Box

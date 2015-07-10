@@ -131,6 +131,8 @@ Nehan.BoxFlow = (function(){
       case "after":
 	return this.getPropAfter();
       }
+      console.error("BoxFlow::getProp, undefined property(%o)", prop);
+      throw "BoxFlow::getProp, undefined property";
     },
     /**
        @memberof Nehan.BoxFlow
