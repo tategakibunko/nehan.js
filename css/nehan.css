@@ -18,6 +18,18 @@
 .nehan-body a img {
   border:none;
 }
+/* box-sizing */
+.nehan-block,
+.nehan-inline,
+.nehan-text-block,
+.nehan-img-char,
+.nehan-vert-glyph {
+  -o-box-sizing:content-box !important;
+  -ms-box-sizing:content-box !important;
+  -moz-box-sizing:content-box !important;
+  -webkit-box-sizing:content-box !important;
+  box-sizing:content-box !important;
+}
 .nehan-inline.nehan-inline-lr-tb{
   float:left;
   white-space:nowrap;
@@ -37,11 +49,6 @@
   -ms-writing-mode:tb-rl;
   -webkit-writing-mode:vertical-rl;
   writing-mode:vertical-rl;
-  -o-box-sizing:content-box !important;
-  -ms-box-sizing:content-box !important;
-  -moz-box-sizing:content-box !important;
-  -webkit-box-sizing:content-box !important;
-  box-sizing:content-box !important;
 }
 .nehan-rotate-90{
   word-break:normal;
@@ -61,14 +68,4 @@
 .nehan-vert-ie{
   writing-mode:tb-rl;
   float:left;
-}
-.nehan-block,
-.nehan-inline,
-.nehan-text-block,
-.nehan-img-char{
-  -o-box-sizing:content-box !important;
-  -ms-box-sizing:content-box !important;
-  -moz-box-sizing:content-box !important;
-  -webkit-box-sizing:content-box !important;
-  box-sizing:content-box !important;
 }
