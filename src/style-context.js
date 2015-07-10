@@ -1725,6 +1725,7 @@ var StyleContext = (function(){
       if(value !== "inherit"){
 	return new Nehan.Color(value);
       }
+      return null;
     },
     _loadFont : function(){
       var parent_font = this.getFont();

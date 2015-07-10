@@ -119,7 +119,7 @@ Nehan.Config = {
 
    @memberof Nehan.Config
    @type {boolean}
-   @default true
+   @default false
   */
   convertHbarToEmDashIfVert:true,
 
