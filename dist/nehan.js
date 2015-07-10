@@ -6708,7 +6708,7 @@ Nehan.Char = (function(){
       var is_kakko_end = this.isKakkoEnd();
       var padding_enable = this.isPaddingEnable();
       if(Nehan.Env.client.isIE()){
-	css.height = "1em";
+	css.height = this.isDash()? "0.9em" : "1em";
       }
       if(is_zenkaku && is_kakko_start && !padding_enable){
 	css.height = "1em";
@@ -7123,11 +7123,14 @@ Nehan.Char = (function(){
       case 61:
 	this._setImg("equal", 1, 1); break;
       case 8212: // Em dash
+	this._setRotate(90); break;
+      case 8213: // Horizontal bar(General Punctuation)
+	this._setCnv("&#8212;", 1, 1);
+	this._setRotate(90); break;
       case 8221: // Right Double Quotation Mark
 	this._setRotate(90); break;
       case 12540:
 	this._setImg("onbiki", 1, 1); break;
-      case 8213: // Horizontal bar(General Punctuation)
       case 65293: // Halfwidth and Fullwidth Forms
       case 9472: // Box drawings light horizontal(Box Drawing)
 	this._setCnv("&#8212;", 1, 1);
@@ -7255,7 +7258,9 @@ Nehan.Char = (function(){
        @return {boolean}
     */
     isDash : function(){
-      return this.cnv === "&#8212;";
+      var data = this.data.charCodeAt(0);
+      return (data === 8212 || // em dash
+	      data === 8213);  // horizontal bar
     },
     /**
        @memberof Nehan.Char
