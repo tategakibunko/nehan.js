@@ -61,6 +61,9 @@ Nehan.Char = (function(){
       var is_kakko_start = this.isKakkoStart();
       var is_kakko_end = this.isKakkoEnd();
       var padding_enable = this.isPaddingEnable();
+      if(Nehan.Env.client.isIE()){
+	css.height = "1em";
+      }
       if(is_zenkaku && is_kakko_start && !padding_enable){
 	css.height = "1em";
 	css["margin-top"] = "-0.5em";

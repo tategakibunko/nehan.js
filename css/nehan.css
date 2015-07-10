@@ -34,6 +34,7 @@
   word-wrap:normal !important;
 }
 .nehan-vert-glyph{
+  -ms-writing-mode:tb-rl;
   -webkit-writing-mode:vertical-rl;
   writing-mode:vertical-rl;
   -o-box-sizing:content-box !important;

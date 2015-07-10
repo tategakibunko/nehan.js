@@ -562,9 +562,10 @@ Nehan.Client = (function(){
 Nehan.Env = (function(){
   var __client = new Nehan.Client();
   var __is_transform_enable = !(__client.isIE() && __client.version <= 8);
+  var __is_ie_vert_glyph_enable = __client.isIE() && __client.version >= 10;
   var __is_chrome_vert_glyph_enable = __client.isChrome() && __client.version >= 24;
   var __is_safari_vert_glyph_enable = __client.isSafari() && __client.version >= 5;
-  var __is_vertical_glyph_enable = __is_chrome_vert_glyph_enable || __is_safari_vert_glyph_enable;
+  var __is_vertical_glyph_enable = __is_chrome_vert_glyph_enable || __is_safari_vert_glyph_enable || __is_ie_vert_glyph_enable;
 
   return {
     /**
@@ -6706,6 +6707,9 @@ Nehan.Char = (function(){
       var is_kakko_start = this.isKakkoStart();
       var is_kakko_end = this.isKakkoEnd();
       var padding_enable = this.isPaddingEnable();
+      if(Nehan.Env.client.isIE()){
+	css.height = "1em";
+      }
       if(is_zenkaku && is_kakko_start && !padding_enable){
 	css.height = "1em";
 	css["margin-top"] = "-0.5em";
