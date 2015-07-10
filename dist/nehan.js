@@ -6711,7 +6711,7 @@ Nehan.Char = (function(){
       var is_kakko_start = this.isKakkoStart();
       var is_kakko_end = this.isKakkoEnd();
       var padding_enable = this.isPaddingEnable();
-      if(Nehan.Env.client.isIE()){
+      if(__is_ie){
 	css.height = "1em";
       }
       if(is_zenkaku && is_kakko_start && !padding_enable){
@@ -6728,7 +6728,7 @@ Nehan.Char = (function(){
     },
     getCssVertDash : function(line){
       var css = {};
-      css.height = Nehan.Env.client.isIE()? "1.0em" : "0.9em";
+      css.height = __is_ie? "1.0em" : "0.9em";
       return css;
     },
     /**
