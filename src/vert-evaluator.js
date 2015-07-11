@@ -130,9 +130,6 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalChar = function(line, chr){
     var is_vert_glyph_enable = Nehan.Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
-    if(chr.isDash()){
-      return this._evalDashChar(line, chr);
-    }
     if(chr.isImgChar()){
       if(is_vert_glyph_enable){
 	return this._evalVerticalGlyph(line, chr);
@@ -167,13 +164,6 @@ var VertEvaluator = (function(){
       return this._evalCharHalfKana(line, chr);
     }
     return this._evalCharWithBr(line, chr);
-  };
-
-  VertEvaluator.prototype._evalDashChar = function(line, chr){
-    return this._createElement("div", {
-      content:chr.getData(line.getFlow()),
-      css:chr.getCssVertDash(line)
-    });
   };
 
   // for example, if we use <div> instead, parent bg-color is not inherited.

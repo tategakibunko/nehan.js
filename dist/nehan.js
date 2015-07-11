@@ -6726,11 +6726,6 @@ Nehan.Char = (function(){
       }
       return css;
     },
-    getCssVertDash : function(line){
-      var css = {};
-      css.height = __is_ie? "1.0em" : "0.9em";
-      return css;
-    },
     /**
        @memberof Nehan.Char
        @return {Object}
@@ -7132,11 +7127,18 @@ Nehan.Char = (function(){
       case 61:
 	this._setImg("equal", 1, 1); break;
       case 8212: // Em dash
-	//this._setRotate(90); break;
-	this._setCnv("&#65372", !__is_ie? 0.9 : 1.0, 1); break;
+	if(__is_ie){
+	  this._setCnv("&#65372", 1, 1);
+	} else {
+	  this._setRotate(90);
+	}
+	break;
       case 8213: // Horizontal bar(General Punctuation)
-	//this._setRotate(90); break;
-	this._setCnv("&#65372", !__is_ie? 0.9 : 1.0, 1); break;
+	this._setRotate(90);
+	if(!__is_ie){
+	  this._setCnv("&#8212;", 1, 1);
+	}
+	break;
       case 8221: // Right Double Quotation Mark
 	this._setRotate(90); break;
       case 12540:
@@ -16764,9 +16766,6 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalChar = function(line, chr){
     var is_vert_glyph_enable = Nehan.Config.useVerticalGlyphIfEnable && Nehan.Env.isVerticalGlyphEnable;
-    if(chr.isDash()){
-      return this._evalDashChar(line, chr);
-    }
     if(chr.isImgChar()){
       if(is_vert_glyph_enable){
 	return this._evalVerticalGlyph(line, chr);
@@ -16801,13 +16800,6 @@ var VertEvaluator = (function(){
       return this._evalCharHalfKana(line, chr);
     }
     return this._evalCharWithBr(line, chr);
-  };
-
-  VertEvaluator.prototype._evalDashChar = function(line, chr){
-    return this._createElement("div", {
-      content:chr.getData(line.getFlow()),
-      css:chr.getCssVertDash(line)
-    });
   };
 
   // for example, if we use <div> instead, parent bg-color is not inherited.
