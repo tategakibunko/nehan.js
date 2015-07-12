@@ -71,7 +71,6 @@ Nehan.HtmlLexer = (function (){
       src = src.replace(/\r/g, ""); // discard CR
       if(flow && flow.isTextVertical()){
 	src = src
-	  .replace(/“([^”]+)”/g, "”$1”")
 	  .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
 	  .replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
 	  .replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma

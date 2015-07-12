@@ -7128,7 +7128,7 @@ Nehan.Char = (function(){
 	this._setImg("equal", 1, 1); break;
       case 8212: // Em dash
 	if(__is_ie){
-	  this._setCnv("&#65372", 1, 1);
+	  this._setCnv("&#65372", 1, 1); // FULLWIDTH VERTICAL LINE
 	} else {
 	  this._setRotate(90);
 	}
@@ -7136,11 +7136,17 @@ Nehan.Char = (function(){
       case 8213: // Horizontal bar(General Punctuation)
 	this._setRotate(90);
 	if(!__is_ie){
-	  this._setCnv("&#8212;", 1, 1);
+	  this._setCnv("&#8212;", 1, 1); // Hbar -> Em dash
 	}
 	break;
+      case 8220: // Left Double Quotation Mark
+	this._setRotate(90);
+	this.hscale = this.vscale = 0.5;
+	break;
       case 8221: // Right Double Quotation Mark
-	this._setRotate(90); break;
+	this._setRotate(90);
+	this.hscale = this.vscale = 0.5;
+	break;
       case 12540:
 	this._setImg("onbiki", 1, 1); break;
       case 65293: // Halfwidth and Fullwidth Forms
@@ -9350,7 +9356,6 @@ Nehan.HtmlLexer = (function (){
       src = src.replace(/\r/g, ""); // discard CR
       if(flow && flow.isTextVertical()){
 	src = src
-	  .replace(/“([^”]+)”/g, "”$1”")
 	  .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
 	  .replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
 	  .replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
