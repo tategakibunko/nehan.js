@@ -472,6 +472,8 @@ Nehan.Char = (function(){
 	this._setImg("mm", 1, 1); break;
       case 12317:
 	this._setImg("dmn1", 1, 1); break;
+      case 12318:
+	this._setRotate(90); break;
       case 12319:
 	this._setImg("dmn2", 1, 1); break;
       case 65309:
