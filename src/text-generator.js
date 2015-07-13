@@ -260,6 +260,8 @@ var TextGenerator = (function(){
     case "word":
       return this._getWord(context, token);
     }
+    console.error("Nehan::TextGenerator, undefined token:", token);
+    throw "Nehan::TextGenerator, undefined token";
   };
 
   TextGenerator.prototype._setTextMetrics = function(context, token){

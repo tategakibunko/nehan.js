@@ -1,7 +1,7 @@
 /**
  * kerning utility module<br>
  * Note that charactors that can be kerned are already kerned in nehan.js.<br>
- * So this module only 'add' the space to start/end direction.
+ * So purpose of this module is only 'adding' the space to char at start/end direction.
 
  @namespace Nehan.Kerning
 */
