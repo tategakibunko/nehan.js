@@ -314,6 +314,9 @@ Nehan.Char = (function(){
       if(!is_vert && !this.isRef && this.isHankaku()){
 	this.bodySize = Math.round(font.size / 2);
       }
+      if(this.isSmallKana()){
+	this.bodySize -= Math.floor(font.size * 0.1);
+      }
     },
     _setImg : function(img, vscale, hscale){
       this.img = img;
