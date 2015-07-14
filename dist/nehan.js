@@ -11946,6 +11946,24 @@ var SelectorContext = (function(){
 
   /**
      @memberof Nehan.SelectorContext
+     @method getMarkupContent
+     @return {String}
+  */
+  SelectorContext.prototype.getMarkupContent = function(){
+    return this.getMarkup().getContent();
+  };
+
+  /**
+     @memberof Nehan.SelectorContext
+     @method setMarkupContent
+     @param content {String}
+  */
+  SelectorContext.prototype.setMarkupContent = function(content){
+    this.getMarkup().setContent(content);
+  };
+
+  /**
+     @memberof Nehan.SelectorContext
      @method getCssAttr
      @param name {String}
      @param def_value {default_value} - [def_value] is returned if [name] not found.
