@@ -511,6 +511,13 @@ Nehan.Client = (function(){
     isSafari : function(){
       return this.name === "safari";
     },
+    /**
+       @memberof Nehan.Client
+       @return {boolean}
+    */
+    isFirefox : function(){
+      return this.name === "firefox";
+    },
     _parseUserAgent : function(user_agent){
       // in latest agent style of MSIE, 'Trident' is specified but 'MSIE' is not.
       if(user_agent.indexOf("trident") >= 0 && user_agent.indexOf("msie") < 0){
