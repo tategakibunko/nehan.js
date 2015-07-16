@@ -14046,8 +14046,8 @@ var StyleContext = (function(){
     },
     _loadLineHeight : function(){
       var value = this.getCssAttr("line-height", "inherit");
-      if(value === "inherit" && this.parent && this.parent.lineHeight){
-	return this.parent.lineHeight;
+      if(value === "inherit"){
+	return (this.parent && this.parent.lineHeight)? this.parent.lineHeight : Nehan.Display.lineHeight;
       }
       return parseFloat(value || Nehan.Display.lineHeight);
     },
