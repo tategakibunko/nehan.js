@@ -2465,8 +2465,8 @@ Nehan.CssParser = (function(){
   };
 
   // values:[0] => [0,0,0,0],
-  // values:[0,1] => [0, 1, 0, 1]
-  // values:[0,2,3] => [0,1,2,1]
+  // values:[0,1] => [0,1,0,1]
+  // values:[0,1,2] => [0,1,2,1]
   // values:[0,1,2,3] => [0,1,2,3]
   var __make_values_4d = function(values){
     var map = __get_map_4d(values.length);
@@ -12973,7 +12973,7 @@ var StyleContext = (function(){
       if(typeof value === "function"){
 	return Nehan.CssParser.formatValue(name, value(this.selectorPropContext));
       }
-      return value; // already formatted
+      return Nehan.CssParser.formatValue(name, value);
     },
     /**
        @memberof Nehan.StyleContext

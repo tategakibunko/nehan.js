@@ -985,7 +985,7 @@ var StyleContext = (function(){
       if(typeof value === "function"){
 	return Nehan.CssParser.formatValue(name, value(this.selectorPropContext));
       }
-      return value; // already formatted
+      return Nehan.CssParser.formatValue(name, value);
     },
     /**
        @memberof Nehan.StyleContext
