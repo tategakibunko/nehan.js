@@ -466,18 +466,20 @@ var StyleContext = (function(){
     },
     /**
      @memberof Nehan.StyleContext
+     @param direction {string}
      @return {bool}
     */
-    isFloatClear : function(){
-      return this.clear && !this.clear.isDone();
+    hasClearDirection : function(direction){
+      return this.clear && this.clear.hasDirection(direction) && !this.clear.isDone(direction);
     },
     /**
      @memberof Nehan.StyleContext
+     @param direction {string}
      @param status {bool}
      */
-    setFloatClear : function(status){
+    setClearDone : function(direction){
       if(this.clear){
-	this.clear.setDone(status);
+	this.clear.setDone(direction);
       }
     },
     /**

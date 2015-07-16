@@ -7,45 +7,44 @@ Nehan.Clear = (function(){
    @param direction {String} - "start" or "end" or "both"
    */
   function Clear(direction){
-    this.direction = direction || "both";
-    this.done = false;
+    this.status = this._createStatus(direction || "both");
   }
 
   Clear.prototype = {
-    /**
-     @memberof Nehan.Clear
-     @param status {bool}
-     */
-    setDone : function(status){
-      this.done = status;
+    _createStatus : function(direction){
+      var status = {};
+      switch(direction){
+      case "start": case "end":
+	status[direction] = false;
+	break;
+      case "both":
+	status.start = status.end = false;
+	break;
+      }
+      return status;
     },
     /**
      @memberof Nehan.Clear
+     @param direction {String}
      @return {bool}
      */
-    isDone : function(){
-      return this.done;
+    hasDirection : function(direction){
+      return (typeof this.status[direction]) !== "undefined";
     },
     /**
      @memberof Nehan.Clear
-     @return {bool}
+     @param direction {String}
      */
-    isStart : function(){
-      return this.direction === "start";
+    setDone : function(direction){
+      this.status[direction] = true;
     },
     /**
      @memberof Nehan.Clear
+     @param direction {String}
      @return {bool}
      */
-    isEnd : function(){
-      return this.direction === "end";
-    },
-    /**
-     @memberof Nehan.Clear
-     @return {bool}
-     */
-    isBoth : function(){
-      return this.direction === "both";
+    isDone : function(direction){
+      return this.status[direction];
     }
   };
 
