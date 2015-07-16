@@ -14615,15 +14615,15 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createChildBlockGenerator = function(style, stream, context){
-    if(style.hasFlipFlow()){
-      return new FlipGenerator(style, stream, context);
-    }
-
     // if child style with 'pasted' attribute, yield block with direct content by LazyGenerator.
     // notice that this is nehan.js original attribute,
     // is required to show some html(like form, input etc) that can't be handled by nehan.js.
     if(style.isPasted()){
       return new LazyGenerator(style, style.createBlock({content:style.getContent()}));
+    }
+
+    if(style.hasFlipFlow()){
+      return new FlipGenerator(style, stream, context);
     }
 
     // switch generator by display
@@ -14697,11 +14697,11 @@ var LayoutGenerator = (function(){
   };
 
   LayoutGenerator.prototype._createChildInlineGenerator = function(style, stream, context){
-    if(style.isInlineBlock()){
-      return new InlineBlockGenerator(style, stream);
-    }
     if(style.isPasted()){
       return new LazyGenerator(style, style.createLine({content:style.getContent()}));
+    }
+    if(style.isInlineBlock()){
+      return new InlineBlockGenerator(style, stream);
     }
     switch(style.getMarkupName()){
     case "ruby":
