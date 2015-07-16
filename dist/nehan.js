@@ -5678,6 +5678,60 @@ Nehan.DocumentHeader = (function(){
 })();
 
 
+Nehan.Clear = (function(){
+  /**
+   @memberof Nehan
+   @class Clear
+   @classdesc abstraction of logical float clearance.
+   @constructor
+   @param direction {String} - "start" or "end" or "both"
+   */
+  function Clear(direction){
+    this.direction = direction || "both";
+    this.done = false;
+  }
+
+  Clear.prototype = {
+    /**
+     @memberof Nehan.Clear
+     @param status {bool}
+     */
+    setDone : function(status){
+      this.done = status;
+    },
+    /**
+     @memberof Nehan.Clear
+     @return {bool}
+     */
+    isDone : function(){
+      return this.done;
+    },
+    /**
+     @memberof Nehan.Clear
+     @return {bool}
+     */
+    isStart : function(){
+      return this.direction === "start";
+    },
+    /**
+     @memberof Nehan.Clear
+     @return {bool}
+     */
+    isEnd : function(){
+      return this.direction === "end";
+    },
+    /**
+     @memberof Nehan.Clear
+     @return {bool}
+     */
+    isBoth : function(){
+      return this.direction === "both";
+    }
+  };
+
+  return Clear;
+})();
+
 Nehan.FloatDirection = (function(){
   /**
      @memberof Nehan
@@ -12213,6 +12267,10 @@ var StyleContext = (function(){
       if(float_direction){
 	this.floatDirection = float_direction;
       }
+      var clear = this._loadClear();
+      if(clear){
+	this.clear = clear;
+      }
       var break_before = this._loadBreakBefore();
       if(break_before){
 	this.breakBefore = break_before;
@@ -12478,6 +12536,22 @@ var StyleContext = (function(){
     */
     setClone : function(state){
       this._isClone = state;
+    },
+    /**
+     @memberof Nehan.StyleContext
+     @return {bool}
+    */
+    isFloatClear : function(){
+      return this.clear && !this.clear.isDone();
+    },
+    /**
+     @memberof Nehan.StyleContext
+     @param status {bool}
+     */
+    setFloatClear : function(status){
+      if(this.clear){
+	this.clear.setDone(status);
+      }
     },
     /**
        @memberof Nehan.StyleContext
@@ -14121,6 +14195,10 @@ var StyleContext = (function(){
 	return null;
       }
       return Nehan.FloatDirections.get(name);
+    },
+    _loadClear : function(){
+      var value = this.getCssAttr("clear");
+      return value? new Nehan.Clear(value) : null;
     },
     _loadBreakBefore : function(){
       var value = this.getCssAttr("break-before");

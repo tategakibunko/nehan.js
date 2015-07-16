@@ -79,6 +79,7 @@ var sources = [
   "src/outline-context-parser.js",
   "src/section-tree-converter.js",
   "src/document-header.js",
+  "src/clear.js",
   "src/float-direction.js",
   "src/float-directions.js",
   "src/float-group.js",

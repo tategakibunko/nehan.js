@@ -194,6 +194,10 @@ var StyleContext = (function(){
       if(float_direction){
 	this.floatDirection = float_direction;
       }
+      var clear = this._loadClear();
+      if(clear){
+	this.clear = clear;
+      }
       var break_before = this._loadBreakBefore();
       if(break_before){
 	this.breakBefore = break_before;
@@ -459,6 +463,22 @@ var StyleContext = (function(){
     */
     setClone : function(state){
       this._isClone = state;
+    },
+    /**
+     @memberof Nehan.StyleContext
+     @return {bool}
+    */
+    isFloatClear : function(){
+      return this.clear && !this.clear.isDone();
+    },
+    /**
+     @memberof Nehan.StyleContext
+     @param status {bool}
+     */
+    setFloatClear : function(status){
+      if(this.clear){
+	this.clear.setDone(status);
+      }
     },
     /**
        @memberof Nehan.StyleContext
@@ -2102,6 +2122,10 @@ var StyleContext = (function(){
 	return null;
       }
       return Nehan.FloatDirections.get(name);
+    },
+    _loadClear : function(){
+      var value = this.getCssAttr("clear");
+      return value? new Nehan.Clear(value) : null;
     },
     _loadBreakBefore : function(){
       var value = this.getCssAttr("break-before");
