@@ -163,7 +163,7 @@ Nehan.CssParser = (function(){
   // all subdivided properties are evaluated as unified value.
   // for example, 'margin-before:1em' => 'margin:1em 0 0 0'.
   // so subdivided properties must be renamed to unified property('margin-before' => 'margin').
-  var __format_prop = function(prop){
+  var __normalize_prop = function(prop){
     prop = Nehan.Utils.camelToChain(prop);
     if(prop.indexOf("margin-") >= 0 || prop.indexOf("padding-") >= 0 || prop.indexOf("border-width-") >= 0){
       return prop.split("-")[0];
@@ -226,10 +226,10 @@ Nehan.CssParser = (function(){
        @param prop {String} - css property name
        @return {String} normalized property name
        @example
-       * CssParser.formatProp("margin-start"); // => "margin"
+       * CssParser.normalizeProp("margin-start"); // => "margin"
     */
-    formatProp : function(prop){
-      return __format_prop(prop);
+    normalizeProp : function(prop){
+      return __normalize_prop(prop);
     },
     /**
        @memberof Nehan.CssParser
@@ -241,7 +241,7 @@ Nehan.CssParser = (function(){
        * CssParser.formatValue("margin", "1em 1em 0 0"); // => {before:"1em", end:"1em", after:0, start:0}
     */
     formatValue : function(prop, value){
-      return __format_value(prop, value);
+      return __format_value(Nehan.Utils.camelToChain(prop), value);
     }
   };
 })();

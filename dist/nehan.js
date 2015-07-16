@@ -2535,7 +2535,7 @@ Nehan.CssParser = (function(){
   // all subdivided properties are evaluated as unified value.
   // for example, 'margin-before:1em' => 'margin:1em 0 0 0'.
   // so subdivided properties must be renamed to unified property('margin-before' => 'margin').
-  var __format_prop = function(prop){
+  var __normalize_prop = function(prop){
     prop = Nehan.Utils.camelToChain(prop);
     if(prop.indexOf("margin-") >= 0 || prop.indexOf("padding-") >= 0 || prop.indexOf("border-width-") >= 0){
       return prop.split("-")[0];
@@ -2598,10 +2598,10 @@ Nehan.CssParser = (function(){
        @param prop {String} - css property name
        @return {String} normalized property name
        @example
-       * CssParser.formatProp("margin-start"); // => "margin"
+       * CssParser.normalizeProp("margin-start"); // => "margin"
     */
-    formatProp : function(prop){
-      return __format_prop(prop);
+    normalizeProp : function(prop){
+      return __normalize_prop(prop);
     },
     /**
        @memberof Nehan.CssParser
@@ -2613,7 +2613,7 @@ Nehan.CssParser = (function(){
        * CssParser.formatValue("margin", "1em 1em 0 0"); // => {before:"1em", end:"1em", after:0, start:0}
     */
     formatValue : function(prop, value){
-      return __format_value(prop, value);
+      return __format_value(Nehan.Utils.camelToChain(prop), value);
     }
   };
 })();
@@ -3236,12 +3236,12 @@ Nehan.Selector = (function(){
     updateValue : function(value){
       for(var prop in value){
 	var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
-	var fmt_prop = Nehan.CssParser.formatProp(prop);
-	var old_value = this.value[fmt_prop] || null;
+	var norm_prop = Nehan.CssParser.normalizeProp(prop);
+	var old_value = this.value[norm_prop] || null;
 	if(old_value !== null && typeof old_value === "object" && typeof fmt_value === "object"){
 	  Nehan.Args.copy(old_value, fmt_value);
 	} else {
-	  this.value[fmt_prop] = fmt_value; // direct value or function
+	  this.value[norm_prop] = fmt_value; // direct value or function
 	}
       }
     },
@@ -3305,9 +3305,9 @@ Nehan.Selector = (function(){
     _formatValue : function(value){
       var ret = {};
       for(var prop in value){
-	var fmt_prop = Nehan.CssParser.formatProp(prop);
+	var norm_prop = Nehan.CssParser.normalizeProp(prop);
 	var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
-	ret[fmt_prop] = fmt_value;
+	ret[norm_prop] = fmt_value;
       }
       return ret;
     }
@@ -13641,10 +13641,10 @@ var StyleContext = (function(){
 	if(nv.length >= 2){
 	  var prop = Nehan.Utils.trim(nv[0]).toLowerCase();
 	  var value = Nehan.Utils.trim(nv[1]);
-	  var fmt_prop = Nehan.CssParser.formatProp(prop);
+	  var norm_prop = Nehan.CssParser.normalizeProp(prop);
 	  var fmt_value = Nehan.CssParser.formatValue(prop, value);
-	  if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Nehan.Closure.eq(fmt_prop))){
-	    ret[fmt_prop] = fmt_value;
+	  if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Nehan.Closure.eq(norm_prop))){
+	    ret[norm_prop] = fmt_value;
 	  }
 	}
 	return ret;

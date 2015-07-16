@@ -40,12 +40,12 @@ Nehan.Selector = (function(){
     updateValue : function(value){
       for(var prop in value){
 	var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
-	var fmt_prop = Nehan.CssParser.formatProp(prop);
-	var old_value = this.value[fmt_prop] || null;
+	var norm_prop = Nehan.CssParser.normalizeProp(prop);
+	var old_value = this.value[norm_prop] || null;
 	if(old_value !== null && typeof old_value === "object" && typeof fmt_value === "object"){
 	  Nehan.Args.copy(old_value, fmt_value);
 	} else {
-	  this.value[fmt_prop] = fmt_value; // direct value or function
+	  this.value[norm_prop] = fmt_value; // direct value or function
 	}
       }
     },
@@ -109,9 +109,9 @@ Nehan.Selector = (function(){
     _formatValue : function(value){
       var ret = {};
       for(var prop in value){
-	var fmt_prop = Nehan.CssParser.formatProp(prop);
+	var norm_prop = Nehan.CssParser.normalizeProp(prop);
 	var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
-	ret[fmt_prop] = fmt_value;
+	ret[norm_prop] = fmt_value;
       }
       return ret;
     }
