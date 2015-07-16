@@ -73,7 +73,7 @@ var FloatGenerator = (function(){
       --------------------------
     */
     var flow = this.style.flow;
-    var group = stack.pop(); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
+    var group = stack.pop(flow); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
     var rest_rest_measure = rest_measure - group.getMeasure(flow); // rest of 'rest measure'
     var rest = this._yieldFloat(context, stack, root_measure, rest_rest_measure, group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
     var group_set = this._wrapFloat(group, rest, rest_measure); // wrap these 2 floated layout as one block.
