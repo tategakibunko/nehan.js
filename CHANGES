@@ -8,6 +8,7 @@ Mark "!": change that can break compatibility with older version
 
 version 5.3.1
 ========================
+o Support float clearance.
 * Fix css property bug when it's written by camel cased style.
 
 version 5.3.0 2015/07/14
