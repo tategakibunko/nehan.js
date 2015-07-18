@@ -18,6 +18,15 @@ Nehan.FloatGroup = (function(){
      @memberof Nehan.FloatGroup
      @return {bool}
      */
+    hasNext : function(){
+      return Nehan.List.exists(this.elements, function(element){
+	return element.hasNext === true;
+      });
+    },
+    /**
+     @memberof Nehan.FloatGroup
+     @return {bool}
+     */
     isLast : function(){
       return this._last;
     },

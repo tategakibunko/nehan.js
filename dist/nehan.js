@@ -5870,6 +5870,15 @@ Nehan.FloatGroup = (function(){
      @memberof Nehan.FloatGroup
      @return {bool}
      */
+    hasNext : function(){
+      return Nehan.List.exists(this.elements, function(element){
+	return element.hasNext === true;
+      });
+    },
+    /**
+     @memberof Nehan.FloatGroup
+     @return {bool}
+     */
     isLast : function(){
       return this._last;
     },
@@ -5979,11 +5988,13 @@ Nehan.FloatGroupStack = (function(){
     do{
       group = __pop_float_group(flow, float_direction, blocks);
       if(group){
-	ret.push(group);
+	//console.log("add group:%o(extent=%d)", group, group.getExtent(flow));
+	ret.unshift(group);
       }
     } while(group !== null);
     if(ret.length > 0){
-      ret[0].setLast(true);
+      ret[0].setLast(true); // first in last out
+      //console.log("last group:%o(extent=%d)", ret[0], ret[0].getExtent(flow));
     }
     return ret;
   };
@@ -6003,11 +6014,13 @@ Nehan.FloatGroupStack = (function(){
     this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
       return g1.getExtent(flow) - g2.getExtent(flow);
     });
-    this.lastGroup = Nehan.List.maxobj(this.stack, function(group){
+    var max_group =  Nehan.List.maxobj(this.stack, function(group){
       return group.getExtent(flow);
     });
+    this.flow = flow;
+    this.lastGroup = null;
     //console.log("max group from %o is %o", this.stack, max_group);
-    this.extent = this.lastGroup? this.lastGroup.getExtent(flow) : 0;
+    this.extent = max_group? max_group.getExtent(flow) : 0;
   }
 
   FloatGroupStack.prototype = {
@@ -14886,10 +14899,13 @@ var BlockGenerator = (function(){
     if(clear && !clear.isDoneAll() && this._parent && this._parent.floatGroup){
       var float_group = this._parent.floatGroup;
       var float_direction = float_group.getFloatDirection();
-      if(float_group.isLast() && clear.hasDirection(float_direction.getName())){
+      if(float_group.isLast() && !float_group.hasNext() && clear.hasDirection(float_direction.getName())){
 	clear.setDone(float_direction.getName());
+	return this._createWhiteSpace(context);
       }
-      return this._createWhiteSpace(context);
+      if(!clear.isDoneAll()){
+	return this._createWhiteSpace(context);
+      }
     }
 
     // if break-before available, page-break but only once.
@@ -15878,6 +15894,7 @@ var FloatGenerator = (function(){
       --------------------------
     */
     var flow = this.style.flow;
+    var prev_group = stack.getLastGroup();
     var group = stack.pop(flow); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
     var rest_rest_measure = rest_measure - group.getMeasure(flow); // rest of 'rest measure'
     var rest = this._yieldFloat(context, stack, root_measure, rest_rest_measure, group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
@@ -15927,7 +15944,7 @@ var FloatGenerator = (function(){
       --------------------------
     */
     // if there is space in block-flow direction, yield rest space and wrap tfloated-set and rest-space as one.
-    var space = this._yieldFloatSpace(context, group, rest_measure, rest_extent_space);
+    var space = this._yieldFloatSpace(context, prev_group, rest_measure, rest_extent_space);
     return this._wrapBlocks([group_set, space]);
   };
   
@@ -15964,10 +15981,10 @@ var FloatGenerator = (function(){
     });
   };
   
-  FloatGenerator.prototype._yieldFloatSpace = function(context, last_float_group, measure, extent){
-    //console.log("yieldFloatSpace(c = %o, m = %d, e = %d)", context, measure, extent);
+  FloatGenerator.prototype._yieldFloatSpace = function(context, float_group, measure, extent){
+    //console.log("yieldFloatSpace(c = %o, m = %d, e = %d), page_no:%d", context, measure, extent, DocumentContext.getPageNo());
     this._child.style.forceUpdateContextSize(measure, extent);
-    this._child.floatGroup = last_float_group;
+    this._child.floatGroup = float_group;
     return this.yieldChildLayout();
   };
   
@@ -15976,6 +15993,7 @@ var FloatGenerator = (function(){
     Nehan.List.iter(this.generators, function(gen){
       var block = gen.yield(context);
       if(block){
+	block.hasNext = gen.hasNext();
 	if(gen.style.isFloatStart()){
 	  start_blocks.push(block);
 	} else if(gen.style.isFloatEnd()){

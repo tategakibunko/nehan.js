@@ -73,6 +73,7 @@ var FloatGenerator = (function(){
       --------------------------
     */
     var flow = this.style.flow;
+    var prev_group = stack.getLastGroup();
     var group = stack.pop(flow); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
     var rest_rest_measure = rest_measure - group.getMeasure(flow); // rest of 'rest measure'
     var rest = this._yieldFloat(context, stack, root_measure, rest_rest_measure, group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
@@ -122,7 +123,7 @@ var FloatGenerator = (function(){
       --------------------------
     */
     // if there is space in block-flow direction, yield rest space and wrap tfloated-set and rest-space as one.
-    var space = this._yieldFloatSpace(context, group, rest_measure, rest_extent_space);
+    var space = this._yieldFloatSpace(context, prev_group, rest_measure, rest_extent_space);
     return this._wrapBlocks([group_set, space]);
   };
   
@@ -159,10 +160,10 @@ var FloatGenerator = (function(){
     });
   };
   
-  FloatGenerator.prototype._yieldFloatSpace = function(context, last_float_group, measure, extent){
-    //console.log("yieldFloatSpace(c = %o, m = %d, e = %d)", context, measure, extent);
+  FloatGenerator.prototype._yieldFloatSpace = function(context, float_group, measure, extent){
+    //console.log("yieldFloatSpace(c = %o, m = %d, e = %d), page_no:%d", context, measure, extent, DocumentContext.getPageNo());
     this._child.style.forceUpdateContextSize(measure, extent);
-    this._child.floatGroup = last_float_group;
+    this._child.floatGroup = float_group;
     return this.yieldChildLayout();
   };
   
@@ -171,6 +172,7 @@ var FloatGenerator = (function(){
     Nehan.List.iter(this.generators, function(gen){
       var block = gen.yield(context);
       if(block){
+	block.hasNext = gen.hasNext();
 	if(gen.style.isFloatStart()){
 	  start_blocks.push(block);
 	} else if(gen.style.isFloatEnd()){

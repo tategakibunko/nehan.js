@@ -28,11 +28,13 @@ Nehan.FloatGroupStack = (function(){
     do{
       group = __pop_float_group(flow, float_direction, blocks);
       if(group){
-	ret.push(group);
+	//console.log("add group:%o(extent=%d)", group, group.getExtent(flow));
+	ret.unshift(group);
       }
     } while(group !== null);
     if(ret.length > 0){
-      ret[0].setLast(true);
+      ret[0].setLast(true); // first in last out
+      //console.log("last group:%o(extent=%d)", ret[0], ret[0].getExtent(flow));
     }
     return ret;
   };
@@ -52,11 +54,13 @@ Nehan.FloatGroupStack = (function(){
     this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
       return g1.getExtent(flow) - g2.getExtent(flow);
     });
-    this.lastGroup = Nehan.List.maxobj(this.stack, function(group){
+    var max_group =  Nehan.List.maxobj(this.stack, function(group){
       return group.getExtent(flow);
     });
+    this.flow = flow;
+    this.lastGroup = null;
     //console.log("max group from %o is %o", this.stack, max_group);
-    this.extent = this.lastGroup? this.lastGroup.getExtent(flow) : 0;
+    this.extent = max_group? max_group.getExtent(flow) : 0;
   }
 
   FloatGroupStack.prototype = {

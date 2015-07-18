@@ -25,10 +25,13 @@ var BlockGenerator = (function(){
     if(clear && !clear.isDoneAll() && this._parent && this._parent.floatGroup){
       var float_group = this._parent.floatGroup;
       var float_direction = float_group.getFloatDirection();
-      if(float_group.isLast() && clear.hasDirection(float_direction.getName())){
+      if(float_group.isLast() && !float_group.hasNext() && clear.hasDirection(float_direction.getName())){
 	clear.setDone(float_direction.getName());
+	return this._createWhiteSpace(context);
       }
-      return this._createWhiteSpace(context);
+      if(!clear.isDoneAll()){
+	return this._createWhiteSpace(context);
+      }
     }
 
     // if break-before available, page-break but only once.
