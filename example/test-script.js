@@ -89,6 +89,24 @@ var Script = {
     "<p>あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをんあいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをんあいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん</p>"
   ].join(""),
 
+  "float-clear-start":[
+    Snipet["float"],
+    Text["short"],
+    "<div class='clear-start'>" + Text["middle"] + "</div>"
+  ].join(""),
+
+  "float-clear-end":[
+    Snipet["float"],
+    Text["short"],
+    "<div class='clear-end'>" + Text["middle"] + "</div>"
+  ].join(""),
+
+  "float-clear-both":[
+    Snipet["float"],
+    Text["short"],
+    "<div class='clear-both'>" + Text["middle"] + "</div>"
+  ].join(""),
+
   "table":[
     "<table>",
     "<thead>",

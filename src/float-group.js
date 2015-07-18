@@ -10,9 +10,24 @@ Nehan.FloatGroup = (function(){
   function FloatGroup(elements, float_direction){
     this.elements = elements || [];
     this.floatDirection = float_direction || Nehan.FloatDirections.get("start");
+    this._last = false;
   }
 
   FloatGroup.prototype = {
+    /**
+     @memberof Nehan.FloatGroup
+     @return {bool}
+     */
+    isLast : function(){
+      return this._last;
+    },
+    /**
+     @memberof Nehan.FloatGroup
+     @param is_last {bool}
+     */
+    setLast : function(is_last){
+      this._last = is_last;
+    },
     /**
        element is popped from float-stack, but unshifted to elements in float-group to keep original stack order.
      *<pre>
@@ -68,6 +83,13 @@ Nehan.FloatGroup = (function(){
       return Nehan.List.fold(this.elements, 0, function(extent, element){
 	return Math.max(extent, element.getLayoutExtent(flow));
       });
+    },
+    /**
+       @memberof Nehan.FloatGroup
+       @return {Nehan.FloatDirection}
+    */
+    getFloatDirection : function(){
+      return this.floatDirection;
     }
   };
 

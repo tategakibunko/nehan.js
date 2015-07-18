@@ -25,6 +25,7 @@ var StyleContext = (function(){
     "box-sizing",
     "break-after",
     "break-before",
+    "clear",
     "color",
     "display",
     "extent",
@@ -463,24 +464,6 @@ var StyleContext = (function(){
     */
     setClone : function(state){
       this._isClone = state;
-    },
-    /**
-     @memberof Nehan.StyleContext
-     @param direction {string}
-     @return {bool}
-    */
-    hasClearDirection : function(direction){
-      return this.clear && this.clear.hasDirection(direction) && !this.clear.isDone(direction);
-    },
-    /**
-     @memberof Nehan.StyleContext
-     @param direction {string}
-     @param status {bool}
-     */
-    setClearDone : function(direction){
-      if(this.clear){
-	this.clear.setDone(direction);
-      }
     },
     /**
        @memberof Nehan.StyleContext

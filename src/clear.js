@@ -7,6 +7,7 @@ Nehan.Clear = (function(){
    @param direction {String} - "start" or "end" or "both"
    */
   function Clear(direction){
+    this.value = direction;
     this.status = this._createStatus(direction || "both");
   }
 
@@ -45,6 +46,16 @@ Nehan.Clear = (function(){
      */
     isDone : function(direction){
       return this.status[direction];
+    },
+    /**
+     @memberof Nehan.Clear
+     @param direction {String}
+     @return {bool}
+     */
+    isDoneAll : function(){
+      return Nehan.Obj.forall(this.status, function(prop, state){
+	return state === true;
+      });
     }
   };
 

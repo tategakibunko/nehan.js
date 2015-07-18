@@ -21,6 +21,15 @@ var BlockGenerator = (function(){
     if(!context.hasBlockSpaceFor(1, !this.hasNext())){
       return null;
     }
+    var clear = this.style.clear;
+    if(clear && !clear.isDoneAll() && this._parent && this._parent.floatGroup){
+      var float_group = this._parent.floatGroup;
+      var float_direction = float_group.getFloatDirection();
+      if(float_group.isLast() && clear.hasDirection(float_direction.getName())){
+	clear.setDone(float_direction.getName());
+      }
+      return this._createWhiteSpace(context);
+    }
 
     // if break-before available, page-break but only once.
     if(this.style.isBreakBefore()){
@@ -157,6 +166,17 @@ var BlockGenerator = (function(){
   BlockGenerator.prototype._addElement = function(context, element, extent){
     context.addBlockElement(element, extent);
     this._onAddElement(context, element);
+  };
+
+  BlockGenerator.prototype._createWhiteSpace = function(context){
+    return this.style.createBlock({
+      extent:context.getBlockMaxExtent(),
+      elements:[],
+      useBeforeEdge:false,
+      useAfterEdge:false,
+      restMeasure:0,
+      resetExtent:0
+    });
   };
 
   BlockGenerator.prototype._createOutput = function(context){

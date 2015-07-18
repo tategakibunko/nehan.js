@@ -31,6 +31,9 @@ Nehan.FloatGroupStack = (function(){
 	ret.push(group);
       }
     } while(group !== null);
+    if(ret.length > 0){
+      ret[0].setLast(true);
+    }
     return ret;
   };
 
@@ -46,29 +49,17 @@ Nehan.FloatGroupStack = (function(){
   function FloatGroupStack(flow, start_blocks, end_blocks){
     var start_groups = __make_float_groups(flow, Nehan.FloatDirections.get("start"), start_blocks);
     var end_groups = __make_float_groups(flow, Nehan.FloatDirections.get("end"), end_blocks);
-    this.flow = flow;
     this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
       return g1.getExtent(flow) - g2.getExtent(flow);
     });
-    this.maxGroup = Nehan.List.maxobj(this.stack, function(group){
+    this.lastGroup = Nehan.List.maxobj(this.stack, function(group){
       return group.getExtent(flow);
     });
     //console.log("max group from %o is %o", this.stack, max_group);
-    this.extent = 0;
-    this.lastStartExtent = 0;
-    this.lastEndExtent = 0;
-    if(this.maxGroup){
-      this.extent = this.maxGroup.getExtent(flow);
-      this._updateLastExtent(this.maxGroup);
-    }
+    this.extent = this.lastGroup? this.lastGroup.getExtent(flow) : 0;
   }
 
   FloatGroupStack.prototype = {
-    _updateLastExtent : function(group){
-      var prop = group.isFloatStart()? "lastStartExtent" : "lastEndExtent";
-      var extent = group.getExtent(this.flow);
-      this[prop] = extent;
-    },
     /**
      @memberof Nehan.FloatGroupStack
      @return {boolean}
@@ -85,17 +76,10 @@ Nehan.FloatGroupStack = (function(){
     },
     /**
      @memberof Nehan.FloatGroupStack
-     @return {int}
+     @return {Nehan.FloatGroup}
      */
-    getLastStartExtent : function(){
-      return this.lastStartExtent;
-    },
-    /**
-     @memberof Nehan.FloatGroupStack
-     @return {int}
-     */
-    getLastEndExtent : function(){
-      return this.lastEndExtent;
+    getLastGroup : function(){
+      return this.lastGroup;
     },
     /**
      pop {@link Nehan.FloatGroup} with larger extent from start or end.
@@ -104,11 +88,8 @@ Nehan.FloatGroupStack = (function(){
      @return {Nehan.FloatGroup}
      */
     pop : function(){
-      var group = this.stack.pop() || null;
-      if(group){
-	this._updateLastExtent(group);
-      }
-      return group
+      this.lastGroup = this.stack.pop() || null;
+      return this.lastGroup;
     }
   };
 

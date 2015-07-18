@@ -29,6 +29,13 @@ Nehan.FloatDirection = (function(){
     },
     /**
        @memberof Nehan.FloatDirection
+       @return {string}
+    */
+    getName : function(){
+      return this.value;
+    },
+    /**
+       @memberof Nehan.FloatDirection
        @return {boolean}
     */
     isStart : function(){

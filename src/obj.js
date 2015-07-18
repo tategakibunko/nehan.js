@@ -31,7 +31,7 @@ Nehan.Obj = (function(){
     /**
        @memberof Nehan.Obj
        @param obj {Object}
-       @return {boolean}
+       @return {bool}
     */
     isEmpty: function(obj){
       for(var name in obj){
@@ -62,7 +62,7 @@ Nehan.Obj = (function(){
     /**
        @memberof Nehan.Obj
        @param obj {Object}
-       @param fn {Function} - fun prop -> value -> {boolean}
+       @param fn {Function} - fun prop -> value -> {bool}
     */
     filter : function(obj, fn){
       var ret = {};
@@ -82,6 +82,19 @@ Nehan.Obj = (function(){
       for(var prop in obj){
 	fn(prop, obj[prop]);
       }
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @param fn {Function} - fun prop -> value -> {bool}
+    */
+    forall : function(obj, fn){
+      for(var prop in obj){
+	if(!fn(prop, obj[prop])){
+	  return false;
+	}
+      }
+      return true;
     }
   };
 })();

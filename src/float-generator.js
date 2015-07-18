@@ -62,7 +62,7 @@ var FloatGenerator = (function(){
 
     // no more floated layout, just yield rest area.
     if(stack.isEmpty()){
-      return this._yieldFloatSpace(context, rest_measure, rest_extent);
+      return this._yieldFloatSpace(context, stack.getLastGroup(), rest_measure, rest_extent);
     }
     /*
       <------ rest_measure ---->
@@ -122,7 +122,7 @@ var FloatGenerator = (function(){
       --------------------------
     */
     // if there is space in block-flow direction, yield rest space and wrap tfloated-set and rest-space as one.
-    var space = this._yieldFloatSpace(context, rest_measure, rest_extent_space);
+    var space = this._yieldFloatSpace(context, group, rest_measure, rest_extent_space);
     return this._wrapBlocks([group_set, space]);
   };
   
@@ -159,9 +159,10 @@ var FloatGenerator = (function(){
     });
   };
   
-  FloatGenerator.prototype._yieldFloatSpace = function(context, measure, extent){
+  FloatGenerator.prototype._yieldFloatSpace = function(context, last_float_group, measure, extent){
     //console.log("yieldFloatSpace(c = %o, m = %d, e = %d)", context, measure, extent);
     this._child.style.forceUpdateContextSize(measure, extent);
+    this._child.floatGroup = last_float_group;
     return this.yieldChildLayout();
   };
   
