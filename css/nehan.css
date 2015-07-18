@@ -29,6 +29,9 @@
   -moz-box-sizing:content-box !important;
   -webkit-box-sizing:content-box !important;
   box-sizing:content-box !important;
+}
+.nehan-inline.nehan-inline-tb-rl,
+.nehan-inline.nehan-inline-tb-lr{
   -webkit-locale:'ja';
 }
 .nehan-inline.nehan-inline-lr-tb{
