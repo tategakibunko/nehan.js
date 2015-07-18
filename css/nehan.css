@@ -29,6 +29,7 @@
   -moz-box-sizing:content-box !important;
   -webkit-box-sizing:content-box !important;
   box-sizing:content-box !important;
+  -webkit-locale:'ja';
 }
 .nehan-inline.nehan-inline-lr-tb{
   float:left;
