@@ -4,26 +4,21 @@
    @namespace Nehan.TextMetrics
 */
 Nehan.TextMetrics = (function(){
-  var __canvas = document.createElement("canvas");
-  __canvas.style.width = Math.max(Nehan.Display.width, Nehan.Display.height) + "px";
-  __canvas.style.height = Nehan.Display.maxFontSize + "px";
-
-  var __canvas_context;
-  if(__canvas.getContext){
-    __canvas_context = __canvas.getContext("2d");
-    __canvas_context.textAlign = "left";
-  }
+  var __span = (function(){
+    var span = document.createElement("span");
+    Nehan.Args.copy(span.style, {
+      display:"inline-block",
+      margin:0,
+      padding:0,
+      border:0,
+      lineHeight:1,
+      height:"auto",
+      visibility:"hidden"
+    });
+    return span;
+  })();
 
   return {
-    /**
-       check if client browser is supported.
-
-       @memberof Nehan.TextMetrics
-       @return {boolean}
-    */
-    isEnable : function(){
-      return __canvas_context && (typeof __canvas_context.measureText !== "undefined");
-    },
     /**
        @memberof Nehan.TextMetrics
        @param font {Nehan.Font}
@@ -31,9 +26,15 @@ Nehan.TextMetrics = (function(){
        @return {Object} - {width:xxx, height:yyy}
     */
     getMetrics : function(font, text){
-      __canvas_context.font = font.toString(); // to get accurate metrics, font info is required.
-      // caution: this metrics is not always correct(especially webkit), but firefox is well done.
-      var metrics = __canvas_context.measureText(text);
+      var body = document.body;
+      var style = __span.style;
+      body.style.display = "block"; // must be visible
+      style.font = font.toString();
+      __span.innerHTML = text;
+      body.appendChild(__span);
+      var metrics = {width:__span.offsetWidth, height:__span.offsetHeight};
+      body.removeChild(__span);
+      //console.log("metrics(%s):(%d,%d)", text, metrics.width, metrics.height);
       return metrics;
     },
     /**

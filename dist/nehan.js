@@ -6709,26 +6709,21 @@ Nehan.BoxFlows = {
    @namespace Nehan.TextMetrics
 */
 Nehan.TextMetrics = (function(){
-  var __canvas = document.createElement("canvas");
-  __canvas.style.width = Math.max(Nehan.Display.width, Nehan.Display.height) + "px";
-  __canvas.style.height = Nehan.Display.maxFontSize + "px";
-
-  var __canvas_context;
-  if(__canvas.getContext){
-    __canvas_context = __canvas.getContext("2d");
-    __canvas_context.textAlign = "left";
-  }
+  var __span = (function(){
+    var span = document.createElement("span");
+    Nehan.Args.copy(span.style, {
+      display:"inline-block",
+      margin:0,
+      padding:0,
+      border:0,
+      lineHeight:1,
+      height:"auto",
+      visibility:"hidden"
+    });
+    return span;
+  })();
 
   return {
-    /**
-       check if client browser is supported.
-
-       @memberof Nehan.TextMetrics
-       @return {boolean}
-    */
-    isEnable : function(){
-      return __canvas_context && (typeof __canvas_context.measureText !== "undefined");
-    },
     /**
        @memberof Nehan.TextMetrics
        @param font {Nehan.Font}
@@ -6736,9 +6731,15 @@ Nehan.TextMetrics = (function(){
        @return {Object} - {width:xxx, height:yyy}
     */
     getMetrics : function(font, text){
-      __canvas_context.font = font.toString(); // to get accurate metrics, font info is required.
-      // caution: this metrics is not always correct(especially webkit), but firefox is well done.
-      var metrics = __canvas_context.measureText(text);
+      var body = document.body;
+      var style = __span.style;
+      body.style.display = "block"; // must be visible
+      style.font = font.toString();
+      __span.innerHTML = text;
+      body.appendChild(__span);
+      var metrics = {width:__span.offsetWidth, height:__span.offsetHeight};
+      body.removeChild(__span);
+      //console.log("metrics(%s):(%d,%d)", text, metrics.width, metrics.height);
       return metrics;
     },
     /**
@@ -7564,7 +7565,7 @@ Nehan.Char = (function(){
 
 Nehan.Word = (function(){
 
-  var __cut_word_by_metrics = function(word, font, measure){
+  var __cut_word = function(word, font, measure){
     for(var i = word.data.length - 1; i >= 1; i--){
       var head_part = word.data.substring(0, i);
       var part_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, head_part));
@@ -7576,21 +7577,6 @@ Nehan.Word = (function(){
       }
     }
     return word;
-  };
-
-  var __cut_word_rough = function(word, font, measure){
-    var half_size = Math.round(font.size / 2);
-    var head_count = Math.round(measure / half_size);
-    var head_word = new Nehan.Word(word.data.substring(0, head_count), true);
-    head_word.bodySize = measure;
-    return head_word
-  };
-
-  var __cut_word = function(word, font, measure){
-    if(Nehan.TextMetrics.isEnable()){
-      return __cut_word_by_metrics(word, font, measure);
-    }
-    return __cut_word_rough(word, font, measure);
   };
 
   /**
@@ -7728,17 +7714,7 @@ Nehan.Word = (function(){
        @param font {Nehan.Font}
     */
     setMetrics : function(flow, font){
-      var rough_measure = Math.ceil(this.data.length * font.size * 0.5);
-      if(Nehan.TextMetrics.isEnable()){
-	var text_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, this.data));
-	//console.log("[%s]:%d(rough = %d)", this.data, text_measure, rough_measure);
-	this.bodySize = Math.max(text_measure, rough_measure); // use longer one
-	return;
-      }
-      this.bodySize = rough_measure;
-      if(font.isBold()){
-	this.bodySize += Math.floor(Nehan.Display.boldRate * this.bodySize);
-      }
+      this.bodySize = Math.ceil(Nehan.TextMetrics.getMeasure(font, this.data));
     },
     /**
        @memberof Nehan.Word
