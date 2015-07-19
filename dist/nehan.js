@@ -8554,7 +8554,7 @@ Nehan.Spacing = {
     if(prev_text && prev_text instanceof Nehan.Char && !prev_text.isSpace() && (typeof prev_text.spaceRateEnd === "undefined")){
       cur_word.spaceRateStart = 0.25;
     }
-    if(next_text && next_text instanceof Nehan.Char && !next_text.isSpace() && !next_text.isKerningChar()){
+    if(next_text && next_text instanceof Nehan.Char && !next_text.isSpace() && !next_text.isKakkoStart() && !(next_text.isKutenTouten() && next_text.isZenkaku())){
       cur_word.spaceRateEnd = 0.25;
     }
   },
