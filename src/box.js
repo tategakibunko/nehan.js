@@ -71,6 +71,15 @@ var Box = (function(){
       return this.isRootLine || false;
     },
     /**
+       filter text objects.
+
+       @memberof Nehan.Box
+       @return {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy | Nehan.Ruby>}
+    */
+    getTextElements : function(){
+      return __filter_text(this.elements || []);
+    },
+    /**
        filter text object and concat it as string, mainly used for debugging.
 
        @memberof Nehan.Box

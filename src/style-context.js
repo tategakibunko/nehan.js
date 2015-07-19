@@ -1581,15 +1581,25 @@ var StyleContext = (function(){
     },
     // TODO
     _setTextJustify : function(line){
-      /*
+      var font_size = this.getFontSize();
       var measure = line.getContentMeasure(this.flow);
       var real_measure = line.inlineMeasure;
-      var total_space = measure - real_measure;
+      var ideal_measure = font_size * Math.floor(measure / font_size);
+      var total_space = ideal_measure - real_measure;
       var min_thres = Math.floor(this.getFontSize() / 4);
       var max_thres = this.getFontSize() * 2;
       if(!line.hasLineBreak && min_thres < total_space && total_space < max_thres){
-	console.log("[%s]some spacing needed! %dpx", line.toString(), total_space);
-      }*/
+	//console.log("[%s]some spacing needed! %dpx", line.toString(), total_space);
+	var words = Nehan.List.filter(line.getTextElements(), function(element){
+	  return element instanceof Nehan.Word;
+	});
+	if(words.length > 0){
+	  var unit_space = Math.floor(total_space / words.length);
+	  Nehan.List.iter(words, function(word){
+	    word.paddingEnd = (word.paddingEnd || 0) + unit_space;
+	  });
+	}
+      }
     },
     _setTextAlign : function(line, text_align){
       var content_measure  = line.getContentMeasure(this.flow);
