@@ -7622,11 +7622,14 @@ Nehan.Word = (function(){
     */
     getCssVertTrans : function(line){
       var css = {};
+      var font_size = line.style.getFontSize();
       if(line.style.letterSpacing){
 	css["letter-spacing"] = line.style.letterSpacing + "px";
       }
-      css.width = line.style.getFontSize() + "px";
+      css.width = font_size + "px";
       css.height = this.bodySize + "px";
+      css["padding-top"] = this.paddingStart + "px";
+      css["padding-bottom"] = this.paddingEnd + "px";
       return css;
     },
     /**
@@ -7686,7 +7689,9 @@ Nehan.Word = (function(){
        @return {int}
     */
     getAdvance : function(flow, letter_spacing){
-      return Math.floor(this.bodySize + (letter_spacing || 0) * this.getLetterCount());
+      var letter_spacing_size = (letter_spacing || 0) * this.getLetterCount();
+      var padding_size = (this.paddingStart || 0) + (this.paddingEnd || 0);
+      return this.bodySize + letter_spacing_size + padding_size;
     },
     /**
        @memberof Nehan.Word
@@ -7714,7 +7719,9 @@ Nehan.Word = (function(){
        @param font {Nehan.Font}
     */
     setMetrics : function(flow, font){
-      this.bodySize = Math.ceil(Nehan.TextMetrics.getMeasure(font, this.data));
+      this.paddingStart = Math.floor(font.size * (this.spaceRateStart || 0));
+      this.paddingEnd = Math.floor(font.size * (this.spaceRateEnd || 0));
+      this.bodySize = Nehan.TextMetrics.getMeasure(font, this.data);
     },
     /**
        @memberof Nehan.Word
@@ -8519,15 +8526,36 @@ Nehan.TextEmpha = (function(){
 Nehan.Spacing = {
   /**
      @memberof Nehan.Spacing
+     @param cur_text {Nehan.Char | Nehan.Word}
+     @param prev_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
+     @param next_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
+  */
+  add : function(cur_text, prev_text, next_text){
+    if(cur_text instanceof Nehan.Char){
+      this._addCharSpacing(cur_text, prev_text, next_text);
+    } else if(cur_text instanceof Nehan.Word){
+      this._addWordSpacing(cur_text, prev_text, next_text);
+    }
+  },
+  /**
+     @memberof Nehan.Spacing
      @param cur_char(zenkaku) {Nehan.Char}
      @param prev_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
      @param next_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
   */
-  add : function(cur_char, prev_text, next_text){
+  _addCharSpacing : function(cur_char, prev_text, next_text){
     if(cur_char.isKakkoStart()){
       this._setSpacingStart(cur_char, prev_text);
     } else if(cur_char.isKakkoEnd() || cur_char.isKutenTouten()){
       this._setSpacingEnd(cur_char, next_text);
+    }
+  },
+  _addWordSpacing : function(cur_word, prev_text, next_text){
+    if(prev_text && prev_text instanceof Nehan.Char && !prev_text.isSpace()){
+      cur_word.spaceRateStart = 0.25;
+    }
+    if(next_text && next_text instanceof Nehan.Char && !next_text.isSpace()){
+      cur_word.spaceRateEnd = 0.25;
     }
   },
   _setSpacingStart : function(cur_char, prev_text){
@@ -15597,17 +15625,21 @@ var TextGenerator = (function(){
   TextGenerator.prototype._setTextMetrics = function(context, token){
     // if charactor token, set kerning before setting metrics.
     // because some additional space is added if kerning is enabled or not.
-    if(token instanceof Nehan.Char && token.isKerningChar() && Nehan.Config.kerning){
-      this._setCharSpacing(context, token);
+    if(Nehan.Config.kerning){
+      if(token instanceof Nehan.Char && token.isKerningChar()){
+	this._setTextSpacing(context, token);
+      } else if(token instanceof Nehan.Word){
+	this._setTextSpacing(context, token);
+      }
     }
     token.setMetrics(this.style.flow, this.style.getFont());
   };
 
-  TextGenerator.prototype._setCharSpacing = function(context, char_token){
+  TextGenerator.prototype._setTextSpacing = function(context, token){
     var next_token = this.stream.peek();
     var prev_text = context.getInlineLastElement();
     var next_text = next_token && Nehan.Token.isText(next_token)? next_token : null;
-    Nehan.Spacing.add(char_token, prev_text, next_text);
+    Nehan.Spacing.add(token, prev_text, next_text);
   };
 
   TextGenerator.prototype._getWord = function(context, token){

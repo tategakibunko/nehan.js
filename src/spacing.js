@@ -7,15 +7,36 @@
 Nehan.Spacing = {
   /**
      @memberof Nehan.Spacing
+     @param cur_text {Nehan.Char | Nehan.Word}
+     @param prev_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
+     @param next_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
+  */
+  add : function(cur_text, prev_text, next_text){
+    if(cur_text instanceof Nehan.Char){
+      this._addCharSpacing(cur_text, prev_text, next_text);
+    } else if(cur_text instanceof Nehan.Word){
+      this._addWordSpacing(cur_text, prev_text, next_text);
+    }
+  },
+  /**
+     @memberof Nehan.Spacing
      @param cur_char(zenkaku) {Nehan.Char}
      @param prev_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
      @param next_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
   */
-  add : function(cur_char, prev_text, next_text){
+  _addCharSpacing : function(cur_char, prev_text, next_text){
     if(cur_char.isKakkoStart()){
       this._setSpacingStart(cur_char, prev_text);
     } else if(cur_char.isKakkoEnd() || cur_char.isKutenTouten()){
       this._setSpacingEnd(cur_char, next_text);
+    }
+  },
+  _addWordSpacing : function(cur_word, prev_text, next_text){
+    if(prev_text && prev_text instanceof Nehan.Char && !prev_text.isSpace()){
+      cur_word.spaceRateStart = 0.25;
+    }
+    if(next_text && next_text instanceof Nehan.Char && !next_text.isSpace()){
+      cur_word.spaceRateEnd = 0.25;
     }
   },
   _setSpacingStart : function(cur_char, prev_text){

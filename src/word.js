@@ -57,11 +57,14 @@ Nehan.Word = (function(){
     */
     getCssVertTrans : function(line){
       var css = {};
+      var font_size = line.style.getFontSize();
       if(line.style.letterSpacing){
 	css["letter-spacing"] = line.style.letterSpacing + "px";
       }
-      css.width = line.style.getFontSize() + "px";
+      css.width = font_size + "px";
       css.height = this.bodySize + "px";
+      css["padding-top"] = this.paddingStart + "px";
+      css["padding-bottom"] = this.paddingEnd + "px";
       return css;
     },
     /**
@@ -121,7 +124,9 @@ Nehan.Word = (function(){
        @return {int}
     */
     getAdvance : function(flow, letter_spacing){
-      return Math.floor(this.bodySize + (letter_spacing || 0) * this.getLetterCount());
+      var letter_spacing_size = (letter_spacing || 0) * this.getLetterCount();
+      var padding_size = (this.paddingStart || 0) + (this.paddingEnd || 0);
+      return this.bodySize + letter_spacing_size + padding_size;
     },
     /**
        @memberof Nehan.Word
@@ -149,7 +154,9 @@ Nehan.Word = (function(){
        @param font {Nehan.Font}
     */
     setMetrics : function(flow, font){
-      this.bodySize = Math.ceil(Nehan.TextMetrics.getMeasure(font, this.data));
+      this.paddingStart = Math.floor(font.size * (this.spaceRateStart || 0));
+      this.paddingEnd = Math.floor(font.size * (this.spaceRateEnd || 0));
+      this.bodySize = Nehan.TextMetrics.getMeasure(font, this.data);
     },
     /**
        @memberof Nehan.Word

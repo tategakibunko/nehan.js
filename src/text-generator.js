@@ -267,17 +267,21 @@ var TextGenerator = (function(){
   TextGenerator.prototype._setTextMetrics = function(context, token){
     // if charactor token, set kerning before setting metrics.
     // because some additional space is added if kerning is enabled or not.
-    if(token instanceof Nehan.Char && token.isKerningChar() && Nehan.Config.kerning){
-      this._setCharSpacing(context, token);
+    if(Nehan.Config.kerning){
+      if(token instanceof Nehan.Char && token.isKerningChar()){
+	this._setTextSpacing(context, token);
+      } else if(token instanceof Nehan.Word){
+	this._setTextSpacing(context, token);
+      }
     }
     token.setMetrics(this.style.flow, this.style.getFont());
   };
 
-  TextGenerator.prototype._setCharSpacing = function(context, char_token){
+  TextGenerator.prototype._setTextSpacing = function(context, token){
     var next_token = this.stream.peek();
     var prev_text = context.getInlineLastElement();
     var next_text = next_token && Nehan.Token.isText(next_token)? next_token : null;
-    Nehan.Spacing.add(char_token, prev_text, next_text);
+    Nehan.Spacing.add(token, prev_text, next_text);
   };
 
   TextGenerator.prototype._getWord = function(context, token){
