@@ -8511,33 +8511,32 @@ Nehan.TextEmpha = (function(){
 
 
 /**
- * kerning utility module<br>
- * Note that charactors that can be kerned are already kerned in nehan.js.<br>
- * So purpose of this module is only 'adding' the space to char at start/end direction.
+ * spacing utility module<br>
+ * this module add spacing to char at start/end direction in some contextual condition.
 
- @namespace Nehan.Kerning
+ @namespace Nehan.Spacing
 */
-Nehan.Kerning = {
+Nehan.Spacing = {
   /**
-     @memberof Nehan.Kerning
+     @memberof Nehan.Spacing
      @param cur_char(zenkaku) {Nehan.Char}
      @param prev_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
      @param next_text {Nehan.Char | Nehan.Word | Nehan.Tcy}
   */
-  set : function(cur_char, prev_text, next_text){
+  add : function(cur_char, prev_text, next_text){
     if(cur_char.isKakkoStart()){
-      this._setKerningStart(cur_char, prev_text);
+      this._setSpacingStart(cur_char, prev_text);
     } else if(cur_char.isKakkoEnd() || cur_char.isKutenTouten()){
-      this._setKerningEnd(cur_char, next_text);
+      this._setSpacingEnd(cur_char, next_text);
     }
   },
-  _setKerningStart : function(cur_char, prev_text){
+  _setSpacingStart : function(cur_char, prev_text){
     var space_rate = this._getTextSpaceStart(cur_char, prev_text);
     if(space_rate > 0){
       cur_char.spaceRateStart = space_rate;
     }
   },
-  _setKerningEnd : function(cur_char, next_text){
+  _setSpacingEnd : function(cur_char, next_text){
     var space_rate = this._getTextSpaceEnd(cur_char, next_text);
     if(space_rate > 0){
       cur_char.spaceRateEnd = space_rate;
@@ -15599,16 +15598,16 @@ var TextGenerator = (function(){
     // if charactor token, set kerning before setting metrics.
     // because some additional space is added if kerning is enabled or not.
     if(token instanceof Nehan.Char && token.isKerningChar() && Nehan.Config.kerning){
-      this._setCharKerning(context, token);
+      this._setCharSpacing(context, token);
     }
     token.setMetrics(this.style.flow, this.style.getFont());
   };
 
-  TextGenerator.prototype._setCharKerning = function(context, char_token){
+  TextGenerator.prototype._setCharSpacing = function(context, char_token){
     var next_token = this.stream.peek();
     var prev_text = context.getInlineLastElement();
     var next_text = next_token && Nehan.Token.isText(next_token)? next_token : null;
-    Nehan.Kerning.set(char_token, prev_text, next_text);
+    Nehan.Spacing.add(char_token, prev_text, next_text);
   };
 
   TextGenerator.prototype._getWord = function(context, token){

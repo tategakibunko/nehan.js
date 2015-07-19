@@ -108,7 +108,7 @@ var sources = [
   "src/text-empha-style.js",
   "src/text-empha-pos.js",
   "src/text-empha.js",
-  "src/kerning.js",
+  "src/spacing.js",
   "src/partition-unit.js",
   "src/partition.js",
   "src/partition-hash-set.js",
