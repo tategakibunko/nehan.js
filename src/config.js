@@ -28,21 +28,21 @@ Nehan.Config = {
   kerning:true,
 
   /**
-     is justify enabled?
+     is hyphenation enabled?
      @memberof Nehan.Config
      @type {boolean}
      @default true
   */
-  justify:true,
+  hyphenate:true,
 
   /**
-     is dangling justify enable?
-     Note that this property is enabled only when Nehan.Config.justify is enabled.
+     is dangling hyphenate enable?
+     Note that this property is enabled only when Nehan.Config.hyphenate is enabled.
      @memberof Nehan.Config
      @type {boolean}
      @default true
   */
-  danglingJustify:true,
+  danglingHyphenate:true,
 
   /**
      max rety count when something troubles.

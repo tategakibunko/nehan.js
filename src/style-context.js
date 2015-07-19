@@ -567,7 +567,7 @@ var StyleContext = (function(){
        @param opt.elements {Array.<Nehan.Box>}
        @param opt.maxFontSize {int}
        @param opt.maxExtent {int}
-       @param opt.lineBreak {boolean}
+       @param opt.hasLineBreak {boolean}
        @param opt.breakAfter {boolean}
        @return {Nehan.Box}
     */
@@ -594,7 +594,7 @@ var StyleContext = (function(){
       line.maxExtent = max_extent;
       line.content = content;
       line.isRootLine = is_root_line;
-      line.lineBreak = opt.lineBreak || false;
+      line.hasLineBreak = opt.hasLineBreak || false;
 
       // edge of top level line is disabled.
       // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
@@ -606,7 +606,7 @@ var StyleContext = (function(){
       if(is_root_line){
 	line.lineNo = opt.lineNo;
 	line.breakAfter = opt.breakAfter || false;
-	line.justified = opt.justified || false;
+	line.hyphenated = opt.hyphenated || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;
 
 	// if vertical line, needs some position fix for decorated element(ruby, empha) to align baseline.
@@ -615,8 +615,12 @@ var StyleContext = (function(){
 	} else {
 	  this._setHoriBaseline(line);
 	}
-	if(this.textAlign && !this.textAlign.isStart()){
-	  this._setTextAlign(line, this.textAlign);
+	if(this.textAlign){
+	  if(this.textAlign.isJustify()){
+	    this._setTextJustify(line);
+	  } else if(!this.textAlign.isStart()){
+	    this._setTextAlign(line, this.textAlign);
+	  }
 	}
 	var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
 	if(line.elements.length > 0 && edge_size > 0){
@@ -636,7 +640,7 @@ var StyleContext = (function(){
        @param opt.elements {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
        @param opt.maxFontSize {int}
        @param opt.maxExtent {int}
-       @param opt.lineBreak {boolean}
+       @param opt.hasLineBreak {boolean}
        @param opt.breakAfter {boolean}
        @return {Nehan.Box}
     */
@@ -666,8 +670,8 @@ var StyleContext = (function(){
       line.maxFontSize = font_size;
       line.maxExtent = extent;
       line.content = content;
-      line.lineBreak = opt.lineBreak || false;
-      line.justified = opt.justified || false;
+      line.hasLineBreak = opt.hasLineBreak || false;
+      line.hyphenated = opt.hyphenated || false;
       line.lineOver = opt.lineOver || false;
       //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
       return line;
@@ -1574,6 +1578,9 @@ var StyleContext = (function(){
 	ret[prop] = this._computeUnitSize(val[prop], unit_size);
       }
       return ret;
+    },
+    _setTextJustify : function(line){
+      // TODO
     },
     _setTextAlign : function(line, text_align){
       var content_measure  = line.getContentMeasure(this.flow);

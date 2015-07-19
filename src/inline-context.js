@@ -16,7 +16,7 @@ Nehan.InlineContext = (function(){
     this.lineBreak = false; // is line-break included in line?
     this.lineOver = false; // is line full-filled?
     this.breakAfter = false; // is break-after incuded in line?
-    this.justified = false; // is line justified?
+    this.hyphenated = false; // is line hyphenated?
   }
 
   InlineContext.prototype = {
@@ -31,8 +31,8 @@ Nehan.InlineContext = (function(){
        @memberof Nehan.InlineContext
        @return {boolean}
     */
-    isJustified : function(){
-      return this.justified;
+    isHyphenated : function(){
+      return this.hyphenated;
     },
     /**
        @memberof Nehan.InlineContext
@@ -74,8 +74,8 @@ Nehan.InlineContext = (function(){
        @memberof Nehan.InlineContext
        @param status {boolean}
     */
-    setJustified : function(status){
-      this.justified = status;
+    setHyphenated : function(status){
+      this.hyphenated = status;
     },
     /**
        @memberof Nehan.InlineContext
@@ -130,8 +130,8 @@ Nehan.InlineContext = (function(){
       if(element.breakAfter){
 	this.breakAfter = true;
       }
-      if(element.justified){
-	this.justified = true;
+      if(element.hyphenated){
+	this.hyphenated = true;
       }
     },
     /**
@@ -193,13 +193,13 @@ Nehan.InlineContext = (function(){
       return this.charCount;
     },
     /**
-       justify(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if justified.
+       hyphenate(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if hyphenated.
 
        @memberof Nehan.InlineContext
        @param head {Nehan.Char} - head_char at next line.
        @return {Nehan.Char | null}
     */
-    justifySweep : function(head){
+    hyphenateSweep : function(head){
       var last = this.elements.length - 1;
       var ptr = last;
       var tail = this.elements[ptr] || null;
@@ -214,12 +214,12 @@ Nehan.InlineContext = (function(){
 	return null;
       }
 
-      //console.log("start justify:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng(tail), head, is_head_ng(head));
+      //console.log("start hyphenate:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng(tail), head, is_head_ng(head));
 
       // if [word] is divided into [word1], [word2], then
       //    [char][word]<br>[char(head_ng)]
       // => [char][word1]<br>[word2][char(head_ng)]
-      // so nothing to justify.
+      // so nothing to hyphenate.
       if(tail && tail instanceof Nehan.Word && tail.isDivided()){
 	return null;
       }
@@ -244,17 +244,17 @@ Nehan.InlineContext = (function(){
 	});
 	return head; // return new head
       }
-      return null; // justify failed or not required.
+      return null; // hyphenate failed or not required.
     },
     /**
-       justify(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
+       hyphenate(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
 
        @memberof Nehan.InlineContext
        @param head {Nehan.Char}
        @param head_next {Nehan.Char}
        @return {bool}
     */
-    justifyDangling : function(head, head_next){
+    hyphenateDangling : function(head, head_next){
       if(!(head instanceof Nehan.Char) || !head.isHeadNg()){
 	return false;
       }

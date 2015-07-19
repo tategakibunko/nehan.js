@@ -31,6 +31,9 @@ Nehan.TextAlign = (function(){
     */
     isCenter : function(){
       return this.value === "center";
+    },
+    isJustify : function(){
+      return this.value === "justify";
     }
   };
 

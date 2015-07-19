@@ -64,21 +64,21 @@ Nehan.Config = {
   kerning:true,
 
   /**
-     is justify enabled?
+     is hyphenation enabled?
      @memberof Nehan.Config
      @type {boolean}
      @default true
   */
-  justify:true,
+  hyphenate:true,
 
   /**
-     is dangling justify enable?
-     Note that this property is enabled only when Nehan.Config.justify is enabled.
+     is dangling hyphenate enable?
+     Note that this property is enabled only when Nehan.Config.hyphenate is enabled.
      @memberof Nehan.Config
      @type {boolean}
      @default true
   */
-  danglingJustify:true,
+  danglingHyphenate:true,
 
   /**
      max rety count when something troubles.
@@ -6094,6 +6094,9 @@ Nehan.TextAlign = (function(){
     */
     isCenter : function(){
       return this.value === "center";
+    },
+    isJustify : function(){
+      return this.value === "justify";
     }
   };
 
@@ -6110,6 +6113,7 @@ Nehan.TextAligns = {
   start:(new Nehan.TextAlign("start")),
   end:(new Nehan.TextAlign("end")),
   center:(new Nehan.TextAlign("center")),
+  justify:(new Nehan.TextAlign("justify")),
   /**
      @memberof Nehan.TextAligns
      @param value - logical text align direction, "start" or "end" or "center".
@@ -8894,8 +8898,8 @@ Nehan.LayoutContext = (function(){
        @memberof Nehan.LayoutContext
        @return {boolean}
     */
-    isJustified : function(){
-      return this.inline.isJustified();
+    isHyphenated : function(){
+      return this.inline.isHyphenated();
     },
     /**
        @memberof Nehan.LayoutContext
@@ -8942,8 +8946,8 @@ Nehan.LayoutContext = (function(){
        @memberof Nehan.LayoutContext
        @param status {boolean}
     */
-    setJustified : function(status){
-      this.inline.setJustified(status);
+    setHyphenated : function(status){
+      this.inline.setHyphenated(status);
     },
     /**
        @memberof Nehan.LayoutContext
@@ -9025,23 +9029,23 @@ Nehan.LayoutContext = (function(){
       return this.inline.getCharCount();
     },
     /**
-       justify(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if justified.
+       hyphenate(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if hyphenated.
        @memberof Nehan.LayoutContext
        @param head_char {Nehan.Char}
        @return {Nehan.Char | null}
     */
-    justifySweep : function(head_char){
-      return this.inline.justifySweep(head_char);
+    hyphenateSweep : function(head_char){
+      return this.inline.hyphenateSweep(head_char);
     },
     /**
-       justify(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
+       hyphenate(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
        @memberof Nehan.LayoutContext
        @param head_char {Nehan.Char}
        @param head_next {Nehan.Char}
        @return {Nehan.Char | null}
     */
-    justifyDangling : function(head_char, head_next){
-      return this.inline.justifyDangling(head_char, head_next);
+    hyphenateDangling : function(head_char, head_next){
+      return this.inline.hyphenateDangling(head_char, head_next);
     }
   };
 
@@ -9176,7 +9180,7 @@ Nehan.InlineContext = (function(){
     this.lineBreak = false; // is line-break included in line?
     this.lineOver = false; // is line full-filled?
     this.breakAfter = false; // is break-after incuded in line?
-    this.justified = false; // is line justified?
+    this.hyphenated = false; // is line hyphenated?
   }
 
   InlineContext.prototype = {
@@ -9191,8 +9195,8 @@ Nehan.InlineContext = (function(){
        @memberof Nehan.InlineContext
        @return {boolean}
     */
-    isJustified : function(){
-      return this.justified;
+    isHyphenated : function(){
+      return this.hyphenated;
     },
     /**
        @memberof Nehan.InlineContext
@@ -9234,8 +9238,8 @@ Nehan.InlineContext = (function(){
        @memberof Nehan.InlineContext
        @param status {boolean}
     */
-    setJustified : function(status){
-      this.justified = status;
+    setHyphenated : function(status){
+      this.hyphenated = status;
     },
     /**
        @memberof Nehan.InlineContext
@@ -9290,8 +9294,8 @@ Nehan.InlineContext = (function(){
       if(element.breakAfter){
 	this.breakAfter = true;
       }
-      if(element.justified){
-	this.justified = true;
+      if(element.hyphenated){
+	this.hyphenated = true;
       }
     },
     /**
@@ -9353,13 +9357,13 @@ Nehan.InlineContext = (function(){
       return this.charCount;
     },
     /**
-       justify(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if justified.
+       hyphenate(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if hyphenated.
 
        @memberof Nehan.InlineContext
        @param head {Nehan.Char} - head_char at next line.
        @return {Nehan.Char | null}
     */
-    justifySweep : function(head){
+    hyphenateSweep : function(head){
       var last = this.elements.length - 1;
       var ptr = last;
       var tail = this.elements[ptr] || null;
@@ -9374,12 +9378,12 @@ Nehan.InlineContext = (function(){
 	return null;
       }
 
-      //console.log("start justify:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng(tail), head, is_head_ng(head));
+      //console.log("start hyphenate:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng(tail), head, is_head_ng(head));
 
       // if [word] is divided into [word1], [word2], then
       //    [char][word]<br>[char(head_ng)]
       // => [char][word1]<br>[word2][char(head_ng)]
-      // so nothing to justify.
+      // so nothing to hyphenate.
       if(tail && tail instanceof Nehan.Word && tail.isDivided()){
 	return null;
       }
@@ -9404,17 +9408,17 @@ Nehan.InlineContext = (function(){
 	});
 	return head; // return new head
       }
-      return null; // justify failed or not required.
+      return null; // hyphenate failed or not required.
     },
     /**
-       justify(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
+       hyphenate(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
 
        @memberof Nehan.InlineContext
        @param head {Nehan.Char}
        @param head_next {Nehan.Char}
        @return {bool}
     */
-    justifyDangling : function(head, head_next){
+    hyphenateDangling : function(head, head_next){
       if(!(head instanceof Nehan.Char) || !head.isHeadNg()){
 	return false;
       }
@@ -12701,7 +12705,7 @@ var StyleContext = (function(){
        @param opt.elements {Array.<Nehan.Box>}
        @param opt.maxFontSize {int}
        @param opt.maxExtent {int}
-       @param opt.lineBreak {boolean}
+       @param opt.hasLineBreak {boolean}
        @param opt.breakAfter {boolean}
        @return {Nehan.Box}
     */
@@ -12728,7 +12732,7 @@ var StyleContext = (function(){
       line.maxExtent = max_extent;
       line.content = content;
       line.isRootLine = is_root_line;
-      line.lineBreak = opt.lineBreak || false;
+      line.hasLineBreak = opt.hasLineBreak || false;
 
       // edge of top level line is disabled.
       // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
@@ -12740,7 +12744,7 @@ var StyleContext = (function(){
       if(is_root_line){
 	line.lineNo = opt.lineNo;
 	line.breakAfter = opt.breakAfter || false;
-	line.justified = opt.justified || false;
+	line.hyphenated = opt.hyphenated || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;
 
 	// if vertical line, needs some position fix for decorated element(ruby, empha) to align baseline.
@@ -12749,8 +12753,12 @@ var StyleContext = (function(){
 	} else {
 	  this._setHoriBaseline(line);
 	}
-	if(this.textAlign && !this.textAlign.isStart()){
-	  this._setTextAlign(line, this.textAlign);
+	if(this.textAlign){
+	  if(this.textAlign.isJustify()){
+	    this._setTextJustify(line);
+	  } else if(!this.textAlign.isStart()){
+	    this._setTextAlign(line, this.textAlign);
+	  }
 	}
 	var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
 	if(line.elements.length > 0 && edge_size > 0){
@@ -12770,7 +12778,7 @@ var StyleContext = (function(){
        @param opt.elements {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
        @param opt.maxFontSize {int}
        @param opt.maxExtent {int}
-       @param opt.lineBreak {boolean}
+       @param opt.hasLineBreak {boolean}
        @param opt.breakAfter {boolean}
        @return {Nehan.Box}
     */
@@ -12800,8 +12808,8 @@ var StyleContext = (function(){
       line.maxFontSize = font_size;
       line.maxExtent = extent;
       line.content = content;
-      line.lineBreak = opt.lineBreak || false;
-      line.justified = opt.justified || false;
+      line.hasLineBreak = opt.hasLineBreak || false;
+      line.hyphenated = opt.hyphenated || false;
       line.lineOver = opt.lineOver || false;
       //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
       return line;
@@ -13708,6 +13716,9 @@ var StyleContext = (function(){
 	ret[prop] = this._computeUnitSize(val[prop], unit_size);
       }
       return ret;
+    },
+    _setTextJustify : function(line){
+      // TODO
     },
     _setTextAlign : function(line, text_align){
       var content_measure  = line.getContentMeasure(this.flow);
@@ -14955,7 +14966,7 @@ var BlockGenerator = (function(){
       }
       // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
       // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
-      if((!cache.lineBreak || (cache.lineBreak && cache.justified)) && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child){
+      if((!cache.hasLineBreak || (cache.hasLineBreak && cache.hyphenated)) && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child){
 	//console.info("inline float fix, line = %o(%s), context = %o, child_gen = %o", cache, cache.toString(), context, this._child);
 
 	// resume inline context
@@ -15159,7 +15170,7 @@ var InlineGenerator = (function(){
       if(!context.hasInlineSpaceFor(1)){
 	context.setLineOver(true);
       }*/
-      if(element.lineBreak){
+      if(element.hasLineBreak){
 	context.setLineBreak(true);
 	break;
       }
@@ -15190,7 +15201,7 @@ var InlineGenerator = (function(){
       lineNo:context.getBlockLineNo(),
       lineBreak:context.hasLineBreak(), // is line break included in?
       breakAfter:context.hasBreakAfter(), // is break after included in?
-      justified:context.isJustified(), // is line justified?
+      hyphenated:context.isHyphenated(), // is line hyphenated?
       measure:context.getInlineCurMeasure(), // actual measure
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       charCount:context.getInlineCharCount(),
@@ -15380,7 +15391,7 @@ var TextGenerator = (function(){
     if(!context.hasInlineSpaceFor(1)){
       return null;
     }
-    var next_head = Nehan.Config.justify? this._peekParentNextToken() : null;
+    var next_head = Nehan.Config.hyphenate? this._peekParentNextToken() : null;
     var next_head_char = next_head? this._peekParentNextHeadChar(next_head) : null;
     var next_head_measure = next_head? this._estimateParentNextHeadMeasure(next_head) : this.style.getFontSize();
     var is_next_head_ng = next_head_char? next_head_char.isHeadNg() : false;
@@ -15405,12 +15416,12 @@ var TextGenerator = (function(){
 	}
       }
       // if token is last one and maybe tail text, check tail/head NG between two inline generators.
-      if(Nehan.Config.justify && !this.stream.hasNext() && !context.hasInlineSpaceFor(measure + next_head_measure)){
+      if(Nehan.Config.hyphenate && !this.stream.hasNext() && !context.hasInlineSpaceFor(measure + next_head_measure)){
 	// avoid tail/head NG between two generators
 	if(element instanceof Nehan.Char && element.isTailNg() || is_next_head_ng){
 	  context.setLineBreak(true);
-	  context.setJustified(true);
-	  //console.log("justified at %o:type:%s", (element.data || ""), (is_next_head_ng? "head" : "tail"));
+	  context.setHyphenated(true);
+	  //console.log("hyphenated at %o:type:%s", (element.data || ""), (is_next_head_ng? "head" : "tail"));
 	  //console.log("next head:%s", (next_head_char? next_head_char.data : ""));
 	  this.pushCache(element);
 	  break;
@@ -15443,15 +15454,15 @@ var TextGenerator = (function(){
     if(context.isInlineEmpty()){
       return null;
     }
-    // justify if this line is generated by overflow(not line-break).
-    if(Nehan.Config.justify && !context.isInlineEmpty() && !context.hasLineBreak()){
-      this._justifyLine(context);
+    // hyphenate if this line is generated by overflow(not line-break).
+    if(Nehan.Config.hyphenate && !context.isInlineEmpty() && !context.hasLineBreak()){
+      this._hyphenateLine(context);
     }
     var line = this.style.createTextBlock({
       lineBreak:context.hasLineBreak(), // is line break included in?
       lineOver:context.isLineOver(), // is line full-filled?
       breakAfter:context.hasBreakAfter(), // is break after included in?
-      justified:context.isJustified(), // is line justified?
+      hyphenated:context.isHyphenated(), // is line hyphenated?
       measure:context.getInlineCurMeasure(), // actual measure
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       charCount:context.getInlineCharCount(),
@@ -15514,16 +15525,16 @@ var TextGenerator = (function(){
     return font_size;
   };
 
-  TextGenerator.prototype._justifyLine = function(context){
+  TextGenerator.prototype._hyphenateLine = function(context){
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var old_head = this.peekLastCache() || this.stream.peek();
     if(old_head === null){
       return;
     }
-    // justify by dangling.
+    // hyphenate by dangling.
     var head_next = this.stream.peek();
     head_next = (head_next && old_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
-    if(Nehan.Config.danglingJustify && context.justifyDangling(old_head, head_next) === true){
+    if(Nehan.Config.danglingHyphenate && context.hyphenateDangling(old_head, head_next) === true){
       this._addElement(context, old_head, 0); // push tail as zero element
       if(head_next){
 	this.stream.setPos(head_next.pos);
@@ -15531,20 +15542,20 @@ var TextGenerator = (function(){
 	this.stream.get();
       }
       context.setLineBreak(true);
-      context.setJustified(true);
+      context.setHyphenated(true);
       this.clearCache();
       return;
     }
-    // justify by sweep.
-    var new_head = context.justifySweep(old_head, head_next); // if justified, new_head token is returned.
+    // hyphenate by sweep.
+    var new_head = context.hyphenateSweep(old_head, head_next); // if fixed, new_head token is returned.
     if(new_head){
       //console.log("old_head:%o, new_head:%o", old_head, new_head);
-      var justified_measure = (new_head.pos - old_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
-      context.addInlineMeasure(justified_measure);
-      //console.log("justify and new head:%o", new_head);
+      var hyphenated_measure = (new_head.pos - old_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
+      context.addInlineMeasure(hyphenated_measure);
+      //console.log("hyphenate and new head:%o", new_head);
       this.stream.setPos(new_head.pos);
       context.setLineBreak(true);
-      context.setJustified(true);
+      context.setHyphenated(true);
       this.clearCache(); // stream position changed, so disable cache.
     }
   };

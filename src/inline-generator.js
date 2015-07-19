@@ -53,7 +53,7 @@ var InlineGenerator = (function(){
       if(!context.hasInlineSpaceFor(1)){
 	context.setLineOver(true);
       }*/
-      if(element.lineBreak){
+      if(element.hasLineBreak){
 	context.setLineBreak(true);
 	break;
       }
@@ -84,7 +84,7 @@ var InlineGenerator = (function(){
       lineNo:context.getBlockLineNo(),
       lineBreak:context.hasLineBreak(), // is line break included in?
       breakAfter:context.hasBreakAfter(), // is break after included in?
-      justified:context.isJustified(), // is line justified?
+      hyphenated:context.isHyphenated(), // is line hyphenated?
       measure:context.getInlineCurMeasure(), // actual measure
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       charCount:context.getInlineCharCount(),

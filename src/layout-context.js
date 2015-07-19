@@ -88,8 +88,8 @@ Nehan.LayoutContext = (function(){
        @memberof Nehan.LayoutContext
        @return {boolean}
     */
-    isJustified : function(){
-      return this.inline.isJustified();
+    isHyphenated : function(){
+      return this.inline.isHyphenated();
     },
     /**
        @memberof Nehan.LayoutContext
@@ -136,8 +136,8 @@ Nehan.LayoutContext = (function(){
        @memberof Nehan.LayoutContext
        @param status {boolean}
     */
-    setJustified : function(status){
-      this.inline.setJustified(status);
+    setHyphenated : function(status){
+      this.inline.setHyphenated(status);
     },
     /**
        @memberof Nehan.LayoutContext
@@ -219,23 +219,23 @@ Nehan.LayoutContext = (function(){
       return this.inline.getCharCount();
     },
     /**
-       justify(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if justified.
+       hyphenate(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if hyphenated.
        @memberof Nehan.LayoutContext
        @param head_char {Nehan.Char}
        @return {Nehan.Char | null}
     */
-    justifySweep : function(head_char){
-      return this.inline.justifySweep(head_char);
+    hyphenateSweep : function(head_char){
+      return this.inline.hyphenateSweep(head_char);
     },
     /**
-       justify(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
+       hyphenate(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
        @memberof Nehan.LayoutContext
        @param head_char {Nehan.Char}
        @param head_next {Nehan.Char}
        @return {Nehan.Char | null}
     */
-    justifyDangling : function(head_char, head_next){
-      return this.inline.justifyDangling(head_char, head_next);
+    hyphenateDangling : function(head_char, head_next){
+      return this.inline.hyphenateDangling(head_char, head_next);
     }
   };
 
