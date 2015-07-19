@@ -63,11 +63,10 @@ Nehan.HtmlLexer = (function (){
 
   HtmlLexer.prototype = {
     _normalize : function(src, flow){
-      var src = src.replace(/(<\/[^>]+>)/gm, function(str, p1){
+      src = src.replace(/(<\/[^>]+>)/gm, function(str, p1){
 	  return p1.toLowerCase();
       }); // convert close tag to lower case(for innerHTML of IE)
       src = __replace_single_close_tags(src);
-      //src = src.replace(/“([^”]+)”/g, "〝$1〟") // convert double quote to double quotation mark
       src = src.replace(/\r/g, ""); // discard CR
       if(flow && flow.isTextVertical()){
 	src = src
@@ -145,6 +144,7 @@ Nehan.HtmlLexer = (function (){
 	return this._parseTag(match[0]);
       }
       content = this._stepBuff(match.index);
+      content = Nehan.Utils.trimHeadCRLF(content);
       return new Nehan.Text(content);
     },
     _getTagContent : function(tag_name){
