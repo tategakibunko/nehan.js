@@ -6,10 +6,11 @@ Nehan.Char = (function(){
      @param c1 {String}
      @param is_ref {boolean} - is character reference?
   */
-  function Char(c1, is_ref){
+  function Char(c1, opt){
+    opt = opt || {};
     this.data = c1;
     this._type = "char";
-    this.isRef = is_ref || false;
+    this.isRef = opt.isRef || false;
     if(this.isRef){
       this._setupRef(c1);
     } else {

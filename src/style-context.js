@@ -1579,8 +1579,17 @@ var StyleContext = (function(){
       }
       return ret;
     },
+    // TODO
     _setTextJustify : function(line){
-      // TODO
+      /*
+      var measure = line.getContentMeasure(this.flow);
+      var real_measure = line.inlineMeasure;
+      var total_space = measure - real_measure;
+      var min_thres = Math.floor(this.getFontSize() / 4);
+      var max_thres = this.getFontSize() * 2;
+      if(!line.hasLineBreak && min_thres < total_space && total_space < max_thres){
+	console.log("[%s]some spacing needed! %dpx", line.toString(), total_space);
+      }*/
     },
     _setTextAlign : function(line, text_align){
       var content_measure  = line.getContentMeasure(this.flow);

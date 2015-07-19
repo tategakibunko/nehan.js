@@ -27,7 +27,7 @@ Nehan.TextLexer = (function (){
 	if(__rex_half_single_tcy.test(str)){
 	  return new Nehan.Tcy(this._stepBuff(1));
 	}
-	return new Nehan.Char(this._stepBuff(1), false);
+	return new Nehan.Char(this._stepBuff(1));
       } else if(str.length === 2 && str.match(__rex_tcy)){
 	return new Nehan.Tcy(this._stepBuff(str.length));
       }
@@ -35,10 +35,10 @@ Nehan.TextLexer = (function (){
     }
     str = this._getByRex(__rex_char_ref);
     if(str){
-      return new Nehan.Char(this._stepBuff(str.length), true);
+      return new Nehan.Char(this._stepBuff(str.length), {isRef:true});
     }
     str = this.buff.substring(0, 1);
-    return new Nehan.Char(this._stepBuff(1), false);
+    return new Nehan.Char(this._stepBuff(1));
   };
 
   TextLexer.prototype._getByRex = function(rex){

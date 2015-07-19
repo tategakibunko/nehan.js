@@ -6797,10 +6797,11 @@ Nehan.Char = (function(){
      @param c1 {String}
      @param is_ref {boolean} - is character reference?
   */
-  function Char(c1, is_ref){
+  function Char(c1, opt){
+    opt = opt || {};
     this.data = c1;
     this._type = "char";
-    this.isRef = is_ref || false;
+    this.isRef = opt.isRef || false;
     if(this.isRef){
       this._setupRef(c1);
     } else {
@@ -9663,7 +9664,7 @@ Nehan.TextLexer = (function (){
 	if(__rex_half_single_tcy.test(str)){
 	  return new Nehan.Tcy(this._stepBuff(1));
 	}
-	return new Nehan.Char(this._stepBuff(1), false);
+	return new Nehan.Char(this._stepBuff(1));
       } else if(str.length === 2 && str.match(__rex_tcy)){
 	return new Nehan.Tcy(this._stepBuff(str.length));
       }
@@ -9671,10 +9672,10 @@ Nehan.TextLexer = (function (){
     }
     str = this._getByRex(__rex_char_ref);
     if(str){
-      return new Nehan.Char(this._stepBuff(str.length), true);
+      return new Nehan.Char(this._stepBuff(str.length), {isRef:true});
     }
     str = this.buff.substring(0, 1);
-    return new Nehan.Char(this._stepBuff(1), false);
+    return new Nehan.Char(this._stepBuff(1));
   };
 
   TextLexer.prototype._getByRex = function(rex){
@@ -13717,8 +13718,17 @@ var StyleContext = (function(){
       }
       return ret;
     },
+    // TODO
     _setTextJustify : function(line){
-      // TODO
+      /*
+      var measure = line.getContentMeasure(this.flow);
+      var real_measure = line.inlineMeasure;
+      var total_space = measure - real_measure;
+      var min_thres = Math.floor(this.getFontSize() / 4);
+      var max_thres = this.getFontSize() * 2;
+      if(!line.hasLineBreak && min_thres < total_space && total_space < max_thres){
+	console.log("[%s]some spacing needed! %dpx", line.toString(), total_space);
+      }*/
     },
     _setTextAlign : function(line, text_align){
       var content_measure  = line.getContentMeasure(this.flow);
