@@ -45,6 +45,14 @@ Nehan.Config = {
   danglingHyphenate:true,
 
   /**
+     force justify line if vertical writing mode.
+     @memberof Nehan.Config
+     @type {boolean}
+     @default true
+  */
+  forceJustifyIfVert:true,
+
+  /**
      max rety count when something troubles.
      @memberof Nehan.Config
      @type {int}

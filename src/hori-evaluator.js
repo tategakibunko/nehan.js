@@ -56,7 +56,10 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalWord = function(line, word){
-    return document.createTextNode(word.data);
+    return this._createElement("span", {
+      content:word.data,
+      css:word.getCssHori(line)
+    });
   };
 
   HoriEvaluator.prototype._evalTcy = function(line, tcy){

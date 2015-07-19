@@ -81,6 +81,14 @@ Nehan.Config = {
   danglingHyphenate:true,
 
   /**
+     force justify line if vertical writing mode.
+     @memberof Nehan.Config
+     @type {boolean}
+     @default true
+  */
+  forceJustifyIfVert:true,
+
+  /**
      max rety count when something troubles.
      @memberof Nehan.Config
      @type {int}
@@ -7625,6 +7633,17 @@ Nehan.Word = (function(){
        @param line {Nehan.Box}
        @return {Object}
     */
+    getCssHori : function(line){
+      var css = {};
+      css["padding-left"] = this.paddingStart + "px";
+      css["padding-right"] = this.paddingEnd + "px";
+      return css;
+    },
+    /**
+       @memberof Nehan.Word
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertTrans : function(line){
       var css = {};
       var font_size = line.style.getFontSize();
@@ -12757,19 +12776,19 @@ var StyleContext = (function(){
 	line.hyphenated = opt.hyphenated || false;
 	line.inlineMeasure = opt.measure || this.contentMeasure;
 
-	// if vertical line, needs some position fix for decorated element(ruby, empha) to align baseline.
+	// set baseline
 	if(this.isTextVertical()){
 	  this._setVertBaseline(line);
 	} else {
 	  this._setHoriBaseline(line);
 	}
-	if(this.textAlign){
-	  if(this.textAlign.isJustify()){
-	    this._setTextJustify(line);
-	  } else if(!this.textAlign.isStart()){
-	    this._setTextAlign(line, this.textAlign);
-	  }
+	// set text-align
+	if((Nehan.Config.forceJustifyIfVert && this.isTextVertical()) || (this.textAlign && this.textAlign.isJustify())){
+	  this._setTextJustify(line);
+	} else if(this.textAlign && !this.textAlign.isStart()){
+	  this._setTextAlign(line, this.textAlign);
 	}
+	// set edge
 	var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
 	if(line.elements.length > 0 && edge_size > 0){
 	  line.edge = new Nehan.BoxEdge();
@@ -13727,26 +13746,82 @@ var StyleContext = (function(){
       }
       return ret;
     },
-    // TODO
     _setTextJustify : function(line){
       var font_size = this.getFontSize();
-      var measure = line.getContentMeasure(this.flow);
+      var half_font_size = Math.floor(font_size);
+      var cont_measure = line.getContentMeasure(this.flow);
       var real_measure = line.inlineMeasure;
-      var ideal_measure = font_size * Math.floor(measure / font_size);
-      var total_space = ideal_measure - real_measure;
-      var min_thres = Math.floor(this.getFontSize() / 4);
+      var ideal_measure = font_size * Math.floor(cont_measure / font_size);
+      var rest_space = ideal_measure - real_measure;
       var max_thres = this.getFontSize() * 2;
-      if(!line.hasLineBreak && min_thres < total_space && total_space < max_thres){
-	//console.log("[%s]some spacing needed! %dpx", line.toString(), total_space);
-	var words = Nehan.List.filter(line.getTextElements(), function(element){
-	  return element instanceof Nehan.Word;
+      var add_space, del_space;
+      if(line.hasLineBreak || rest_space >= max_thres || rest_space === 0){
+	return;
+      }
+      var text_elements = line.getTextElements();
+      if(text_elements.length === 0){
+	return;
+      }
+      var words = Nehan.List.filter(text_elements, function(element){
+	return element instanceof Nehan.Word;
+      });
+      var special_chars = Nehan.List.filter(text_elements, function(element){
+	return element instanceof Nehan.Char && (element.paddingStart || element.paddingEnd);
+      });
+      // shrink first(remove space between word)
+      if(rest_space < 0){
+	//console.warn("[%s]minus space! %dpx", line.toString(), rest_space);
+	del_space = -1 * Math.floor(rest_space / words.length / 2);
+	Nehan.List.iter(words, function(word){
+	  word.paddingStart = Math.max(0, (word.paddingStart || 0) - del_space);
+	  rest_space += del_space;
+	  word.paddingEnd = Math.max(0, (word.paddingEnd || 0) - del_space);
+	  rest_space += del_space;
 	});
-	if(words.length > 0){
-	  var unit_space = Math.floor(total_space / words.length);
-	  Nehan.List.iter(words, function(word){
-	    word.paddingEnd = (word.paddingEnd || 0) + unit_space;
-	  });
-	}
+	del_space = -1 * Math.floor(rest_space / special_chars.length / 2);
+	Nehan.List.iter(special_chars, function(chr){
+	  if(chr.paddingStart){
+	    chr.paddingStart = Math.max(0, chr.paddingStart - del_space);
+	    rest_space += del_space;
+	  }
+	  if(chr.paddingEnd){
+	    chr.paddingEnd = Math.max(0, chr.paddingEnd - del_space);
+	    rest_space += del_space;
+	  }
+	});
+	//console.log("word shurinked! rest_space:%d", rest_space);
+	return;
+      }
+      //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
+
+      // rest_space > 0
+      // so space is not enough, add 'more' space to word.
+      if(words.length > 0){
+	add_space = Math.min(half_font_size, Math.floor(rest_space / words.length / 2));
+	Nehan.List.iter(words, function(word){
+	  word.paddingStart = (word.paddingStart || 0) + add_space;
+	  rest_space -= add_space;
+	  word.paddingEnd = (word.paddingEnd || 0) + add_space;
+	  rest_space -= add_space;
+	});
+      }
+      if(rest_space <= 0){
+	return;
+      }
+      // rest_space is still exists.
+      // so add 'more' space to special vertical characters like parenthesis.
+      if(special_chars.length > 0){
+	add_space = Math.min(half_font_size, Math.floor(rest_space / special_chars.length / 2));
+	Nehan.List.iter(special_chars, function(chr){
+	  if(chr.paddingStart){
+	    chr.paddingStart += add_space;
+	    rest_space -= add_space;
+	  }
+	  if(chr.paddingEnd){
+	    chr.paddingEnd += add_space;
+	    rest_space -= add_space;
+	  }
+	});
       }
     },
     _setTextAlign : function(line, text_align){
@@ -17232,7 +17307,10 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalWord = function(line, word){
-    return document.createTextNode(word.data);
+    return this._createElement("span", {
+      content:word.data,
+      css:word.getCssHori(line)
+    });
   };
 
   HoriEvaluator.prototype._evalTcy = function(line, tcy){

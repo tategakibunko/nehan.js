@@ -55,6 +55,17 @@ Nehan.Word = (function(){
        @param line {Nehan.Box}
        @return {Object}
     */
+    getCssHori : function(line){
+      var css = {};
+      css["padding-left"] = this.paddingStart + "px";
+      css["padding-right"] = this.paddingEnd + "px";
+      return css;
+    },
+    /**
+       @memberof Nehan.Word
+       @param line {Nehan.Box}
+       @return {Object}
+    */
     getCssVertTrans : function(line){
       var css = {};
       var font_size = line.style.getFontSize();
