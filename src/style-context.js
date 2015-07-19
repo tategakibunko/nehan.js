@@ -616,10 +616,10 @@ var StyleContext = (function(){
 	  this._setHoriBaseline(line);
 	}
 	// set text-align
-	if((Nehan.Config.forceJustifyIfVert && this.isTextVertical()) || (this.textAlign && this.textAlign.isJustify())){
-	  this._setTextJustify(line);
-	} else if(this.textAlign && !this.textAlign.isStart()){
+	if(this.textAlign && (this.textAlign.isCenter() || this.textAlign.isEnd())){
 	  this._setTextAlign(line, this.textAlign);
+	} else if((Nehan.Config.forceJustifyIfVert && this.isTextVertical()) || (this.textAlign && this.textAlign.isJustify())){
+	  this._setTextJustify(line);
 	}
 	// set edge
 	var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
@@ -1611,15 +1611,16 @@ var StyleContext = (function(){
 	  word.paddingEnd = Math.max(0, (word.paddingEnd || 0) - del_space);
 	  rest_space += del_space;
 	});
-	del_space = -1 * Math.floor(rest_space / special_chars.length / 2);
+	del_space = -1 * Math.min(half_font_size, Math.floor(rest_space / special_chars.length));
 	Nehan.List.iter(special_chars, function(chr){
-	  if(chr.paddingStart){
-	    chr.paddingStart = Math.max(0, chr.paddingStart - del_space);
-	    rest_space += del_space;
-	  }
 	  if(chr.paddingEnd){
 	    chr.paddingEnd = Math.max(0, chr.paddingEnd - del_space);
 	    rest_space += del_space;
+	    //console.log("del space %d from [%s]", del_space, chr.data);
+	  } else if(chr.paddingStart){
+	    chr.paddingStart = Math.max(0, chr.paddingStart - del_space);
+	    rest_space += del_space;
+	    //console.log("del space %d from [%s]", del_space, chr.data);
 	  }
 	});
 	//console.log("word shurinked! rest_space:%d", rest_space);
@@ -1636,6 +1637,7 @@ var StyleContext = (function(){
 	  rest_space -= add_space;
 	  word.paddingEnd = (word.paddingEnd || 0) + add_space;
 	  rest_space -= add_space;
+	  //console.log("add space %d to [%s]", add_space, word.data);
 	});
       }
       if(rest_space <= 0){
@@ -1644,15 +1646,19 @@ var StyleContext = (function(){
       // rest_space is still exists.
       // so add 'more' space to special vertical characters like parenthesis.
       if(special_chars.length > 0){
-	add_space = Math.min(half_font_size, Math.floor(rest_space / special_chars.length / 2));
+	add_space = Math.min(font_size, Math.floor(rest_space / special_chars.length));
+	if(add_space <= 0){
+	  return;
+	}
 	Nehan.List.iter(special_chars, function(chr){
-	  if(chr.paddingStart){
-	    chr.paddingStart += add_space;
-	    rest_space -= add_space;
-	  }
 	  if(chr.paddingEnd){
 	    chr.paddingEnd += add_space;
 	    rest_space -= add_space;
+	    //console.log("add space %d to [%s]", add_space, chr.data);
+	  } else if(chr.paddingStart){
+	    chr.paddingStart += add_space;
+	    rest_space -= add_space;
+	    //console.log("add space %d to [%s]", add_space, chr.data);
 	  }
 	});
       }
