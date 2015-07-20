@@ -1581,7 +1581,8 @@ var StyleContext = (function(){
     },
     _setTextJustify : function(line){
       var font_size = this.getFontSize();
-      var half_font_size = Math.floor(font_size);
+      var half_font_size = Math.floor(font_size / 2);
+      var quat_font_size = Math.floor(half_font_size / 2);
       var cont_measure = line.getContentMeasure(this.flow);
       var real_measure = line.inlineMeasure;
       var ideal_measure = font_size * Math.floor(cont_measure / font_size);
@@ -1603,63 +1604,87 @@ var StyleContext = (function(){
       });
       // shrink first(remove space between word)
       if(rest_space < 0){
-	//console.warn("[%s]minus space! %dpx", line.toString(), rest_space);
-	del_space = -1 * Math.floor(rest_space / words.length / 2);
+	console.warn("[%s]minus space! %dpx", line.toString(), rest_space);
+	del_space = -1 * Math.max(1, Math.floor(rest_space / words.length / 2));
 	Nehan.List.iter(words, function(word){
 	  word.paddingStart = Math.max(0, (word.paddingStart || 0) - del_space);
 	  rest_space += del_space;
+	  console.log("del space %d from [%s]", del_space, word.data);
+	  if(rest_space >= 0){
+	    return false;
+	  }
 	  word.paddingEnd = Math.max(0, (word.paddingEnd || 0) - del_space);
 	  rest_space += del_space;
+	  console.log("del space %d from [%s]", del_space, word.data);
+	  if(rest_space >= 0){
+	    return false;
+	  }
+	  return true;
 	});
-	del_space = -1 * Math.min(half_font_size, Math.floor(rest_space / special_chars.length));
+	del_space = -1 * Math.max(1, Math.min(half_font_size, Math.floor(rest_space / special_chars.length)));
 	Nehan.List.iter(special_chars, function(chr){
 	  if(chr.paddingEnd){
 	    chr.paddingEnd = Math.max(0, chr.paddingEnd - del_space);
 	    rest_space += del_space;
-	    //console.log("del space %d from [%s]", del_space, chr.data);
-	  } else if(chr.paddingStart){
+	    console.log("del space %d from [%s]", del_space, chr.data);
+	    if(rest_space >= 0){
+	      return false;
+	    }
+	  }
+	  if(chr.paddingStart){
 	    chr.paddingStart = Math.max(0, chr.paddingStart - del_space);
 	    rest_space += del_space;
-	    //console.log("del space %d from [%s]", del_space, chr.data);
+	    console.log("del space %d from [%s]", del_space, chr.data);
+	    if(rest_space >= 0){
+	      return false;
+	    }
 	  }
+	  return true;
 	});
-	//console.log("word shurinked! rest_space:%d", rest_space);
 	return;
       }
-      //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
+      console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
 
       // rest_space > 0
       // so space is not enough, add 'more' space to word.
       if(words.length > 0){
-	add_space = Math.min(half_font_size, Math.floor(rest_space / words.length / 2));
+	add_space = Math.max(1, Math.min(half_font_size, Math.floor(rest_space / words.length / 2)));
 	Nehan.List.iter(words, function(word){
 	  word.paddingStart = (word.paddingStart || 0) + add_space;
 	  rest_space -= add_space;
+	  console.log("add space %d to [%s]", add_space, word.data);
+	  if(rest_space <= 0){
+	    return false;
+	  }
 	  word.paddingEnd = (word.paddingEnd || 0) + add_space;
 	  rest_space -= add_space;
-	  //console.log("add space %d to [%s]", add_space, word.data);
+	  console.log("add space %d to [%s]", add_space, word.data);
+	  if(rest_space <= 0){
+	    return false;
+	  }
+	  return true;
 	});
       }
       if(rest_space <= 0){
 	return;
       }
+      var normal_chars = Nehan.List.filter(text_elements, function(element){
+	return element instanceof Nehan.Char && !element.isKerningChar();
+      });
       // rest_space is still exists.
-      // so add 'more' space to special vertical characters like parenthesis.
-      if(special_chars.length > 0){
-	add_space = Math.min(font_size, Math.floor(rest_space / special_chars.length));
-	if(add_space <= 0){
-	  return;
-	}
-	Nehan.List.iter(special_chars, function(chr){
-	  if(chr.paddingEnd){
-	    chr.paddingEnd += add_space;
+      // so add space to characters.
+      if(normal_chars.length > 0){
+	add_space = Math.max(1, Math.min(quat_font_size, Math.floor(rest_space / normal_chars.length)));
+	Nehan.List.iter(normal_chars, function(chr){
+	  if(typeof chr.paddingEnd === "undefined"){
+	    chr.paddingEnd = add_space;
 	    rest_space -= add_space;
-	    //console.log("add space %d to [%s]", add_space, chr.data);
-	  } else if(chr.paddingStart){
-	    chr.paddingStart += add_space;
-	    rest_space -= add_space;
-	    //console.log("add space %d to [%s]", add_space, chr.data);
+	    console.log("add space %d to [%s]", add_space, chr.data);
+	    if(rest_space <= 0){
+	      return false;
+	    }
 	  }
+	  return true;
 	});
       }
     },

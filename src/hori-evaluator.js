@@ -82,7 +82,17 @@ var HoriEvaluator = (function(){
     if(chr.isKerningChar()){
       return this._evalKerningChar(line, chr);
     }
+    if(chr.isPaddingEnable()){
+      return this._evalCharWithSpacing(line, chr);
+    }
     return document.createTextNode(chr.getData(line.getFlow()));
+  };
+
+  HoriEvaluator.prototype._evalCharWithSpacing = function(line, chr){
+    return this._createElement("span", {
+      content:chr.getData(line.getFlow()),
+      css:chr.getCssPadding(line)
+    });
   };
 
   HoriEvaluator.prototype._evalEmpha = function(line, chr){

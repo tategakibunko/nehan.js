@@ -163,7 +163,17 @@ var VertEvaluator = (function(){
     if(chr.isHalfKana()){
       return this._evalCharHalfKana(line, chr);
     }
+    if(chr.isPaddingEnable()){
+      return this._evalCharWithSpacing(line, chr);
+    }
     return this._evalCharWithBr(line, chr);
+  };
+
+  VertEvaluator.prototype._evalCharWithSpacing = function(line, chr){
+    return this._createElement("div", {
+      content:chr.getData(line.getFlow()),
+      css:chr.getCssPadding(line)
+    });
   };
 
   // for example, if we use <div> instead, parent bg-color is not inherited.

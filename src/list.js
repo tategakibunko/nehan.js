@@ -11,7 +11,9 @@ Nehan.List = {
   */
   iter : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
-      fn(lst[i], i);
+      if(fn(lst[i], i) === false){
+	break;
+      }
     }
   },
   /**
@@ -21,7 +23,9 @@ Nehan.List = {
   */
   reviter : function(lst, fn){
     for(var i = lst.length - 1; i >= 0; i--){
-      fn(lst[i], i);
+      if(fn(lst[i], i) === false){
+	break;
+      }
     }
   },
   /**
@@ -32,7 +36,7 @@ Nehan.List = {
   */
   forall : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
-      if(!fn(lst[i], i)){
+      if(fn(lst[i], i) === false){
 	return false;
       }
     }
