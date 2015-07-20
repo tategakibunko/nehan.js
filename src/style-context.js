@@ -1643,10 +1643,10 @@ var StyleContext = (function(){
 	});
 	return;
       }
-      //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
 
       // rest_space > 0
       // so space is not enough, add 'more' space to word.
+      //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
       if(words.length > 0){
 	add_space = Math.max(1, Math.min(half_font_size, Math.floor(rest_space / words.length / 2)));
 	Nehan.List.iter(words, function(word){
