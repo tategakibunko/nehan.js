@@ -82,7 +82,7 @@ var InlineGenerator = (function(){
     }
     var line = this.style.createLine({
       lineNo:context.getBlockLineNo(),
-      lineBreak:context.hasLineBreak(), // is line break included in?
+      hasLineBreak:context.hasLineBreak(), // is line break included in?
       breakAfter:context.hasBreakAfter(), // is break after included in?
       hyphenated:context.isHyphenated(), // is line hyphenated?
       measure:context.getInlineCurMeasure(), // actual measure

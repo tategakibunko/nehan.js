@@ -90,7 +90,7 @@ var TextGenerator = (function(){
       this._hyphenateLine(context);
     }
     var line = this.style.createTextBlock({
-      lineBreak:context.hasLineBreak(), // is line break included in?
+      hasLineBreak:context.hasLineBreak(), // is line break included in?
       lineOver:context.isLineOver(), // is line full-filled?
       breakAfter:context.hasBreakAfter(), // is break after included in?
       hyphenated:context.isHyphenated(), // is line hyphenated?
