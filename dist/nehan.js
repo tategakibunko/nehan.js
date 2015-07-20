@@ -10037,7 +10037,7 @@ Nehan.RubyTokenStream = (function(){
 	break;
       }
       if(Nehan.Token.isTag(token) && token.getName() === "rb"){
-	rbs = this._parseRb(token.getContent())
+	rbs = this._parseRb(token.getContent());
       }
       if(token instanceof Nehan.Text){
 	rbs = this._parseRb(token.getContent());
