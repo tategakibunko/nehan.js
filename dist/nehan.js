@@ -13762,7 +13762,6 @@ var StyleContext = (function(){
       var ideal_measure = font_size * Math.floor(cont_measure / font_size);
       var rest_space = ideal_measure - real_measure;
       var max_thres = this.getFontSize() * 2;
-      var add_space, del_space;
       if(line.hasLineBreak || rest_space >= max_thres || rest_space === 0){
 	return;
       }
@@ -13770,97 +13769,45 @@ var StyleContext = (function(){
       if(text_elements.length === 0){
 	return;
       }
-      var words = Nehan.List.filter(text_elements, function(element){
-	return element instanceof Nehan.Word;
+      var targets = Nehan.List.filter(text_elements, function(element){
+	return ((element instanceof Nehan.Word) ||
+		(element instanceof Nehan.Char && !element.isKerningChar()));
       });
-      var special_chars = Nehan.List.filter(text_elements, function(element){
-	return element instanceof Nehan.Char && (element.paddingStart || element.paddingEnd);
-      });
-      // shrink first(remove space between word)
-      if(rest_space < 0){
-	//console.warn("[%s]minus space! %dpx", line.toString(), rest_space);
-	del_space = -1 * Math.max(1, Math.floor(rest_space / words.length / 2));
-	Nehan.List.iter(words, function(word){
-	  word.paddingStart = Math.max(0, (word.paddingStart || 0) - del_space);
-	  rest_space += del_space;
-	  //console.log("del space %d from [%s]", del_space, word.data);
-	  if(rest_space >= 0){
-	    return false;
-	  }
-	  word.paddingEnd = Math.max(0, (word.paddingEnd || 0) - del_space);
-	  rest_space += del_space;
-	  //console.log("del space %d from [%s]", del_space, word.data);
-	  if(rest_space >= 0){
-	    return false;
-	  }
-	  return true;
-	});
-	del_space = -1 * Math.max(1, Math.min(half_font_size, Math.floor(rest_space / special_chars.length)));
-	Nehan.List.iter(special_chars, function(chr){
-	  if(chr.paddingEnd){
-	    chr.paddingEnd = Math.max(0, chr.paddingEnd - del_space);
-	    rest_space += del_space;
-	    //console.log("del space %d from [%s]", del_space, chr.data);
-	    if(rest_space >= 0){
-	      return false;
-	    }
-	  }
-	  if(chr.paddingStart){
-	    chr.paddingStart = Math.max(0, chr.paddingStart - del_space);
-	    rest_space += del_space;
-	    //console.log("del space %d from [%s]", del_space, chr.data);
-	    if(rest_space >= 0){
-	      return false;
-	    }
-	  }
-	  return true;
-	});
+      if(targets.length === 0){
 	return;
       }
-
       // rest_space > 0
       // so space is not enough, add 'more' space to word.
       //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
-      if(words.length > 0){
-	add_space = Math.max(1, Math.min(half_font_size, Math.floor(rest_space / words.length / 2)));
-	Nehan.List.iter(words, function(word){
-	  word.paddingStart = (word.paddingStart || 0) + add_space;
+      var add_space = Math.max(1, Math.min(quat_font_size, Math.floor(rest_space / targets.length / 2)));
+      var flow = this.flow;
+      var extend_parent = function(parent, add_size){
+	if(parent){
+	  var pre_size = parent.size.getMeasure(flow);
+	  var new_size = pre_size + add_size;
+	  //console.log("extend parent:%d -> %d", pre_size, new_size);
+	  parent.size.setMeasure(flow, new_size);
+	}
+      };
+      Nehan.List.iter(targets, function(text){
+	text.paddingEnd = (text.paddingEnd || 0) + add_space;
+	rest_space -= add_space;
+	extend_parent(text.parent, add_space);
+	//console.log("add space end %d to [%s]", add_space, text.data);
+	if(rest_space <= 0){
+	  return false;
+	}
+	if(text instanceof Nehan.Word){
+	  text.paddingStart = (text.paddingStart || 0) + add_space;
 	  rest_space -= add_space;
-	  //console.log("add space %d to [%s]", add_space, word.data);
+	  extend_parent(text.parent, add_space);
+	  //console.log("add space %d to [%s]", add_space, text.data);
 	  if(rest_space <= 0){
 	    return false;
 	  }
-	  word.paddingEnd = (word.paddingEnd || 0) + add_space;
-	  rest_space -= add_space;
-	  //console.log("add space %d to [%s]", add_space, word.data);
-	  if(rest_space <= 0){
-	    return false;
-	  }
-	  return true;
-	});
-      }
-      if(rest_space <= 0){
-	return;
-      }
-      var normal_chars = Nehan.List.filter(text_elements, function(element){
-	return element instanceof Nehan.Char && !element.isKerningChar();
+	}
+	return true;
       });
-      // rest_space is still exists.
-      // so add space to characters.
-      if(normal_chars.length > 0){
-	add_space = Math.max(1, Math.min(quat_font_size, Math.floor(rest_space / normal_chars.length)));
-	Nehan.List.iter(normal_chars, function(chr){
-	  if(typeof chr.paddingEnd === "undefined"){
-	    chr.paddingEnd = add_space;
-	    rest_space -= add_space;
-	    //console.log("add space %d to [%s]", add_space, chr.data);
-	    if(rest_space <= 0){
-	      return false;
-	    }
-	  }
-	  return true;
-	});
-      }
     },
     _setTextAlign : function(line, text_align){
       var content_measure  = line.getContentMeasure(this.flow);
