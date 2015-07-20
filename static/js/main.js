@@ -43,6 +43,7 @@ Ndoc.Settings = {
 
 Nehan.setStyles({
   body:{
+    textAlign:"justify",
     width:"90%",
     height:function(){
       return Math.floor(screen.height * 55 / 100);
