@@ -48,9 +48,9 @@ Nehan.Config = {
      force justify line if vertical writing mode.
      @memberof Nehan.Config
      @type {boolean}
-     @default true
+     @default false
   */
-  forceJustifyIfVert:true,
+  forceJustifyIfVert:false,
 
   /**
      max rety count when something troubles.

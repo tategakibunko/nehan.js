@@ -84,9 +84,9 @@ Nehan.Config = {
      force justify line if vertical writing mode.
      @memberof Nehan.Config
      @type {boolean}
-     @default true
+     @default false
   */
-  forceJustifyIfVert:true,
+  forceJustifyIfVert:false,
 
   /**
      max rety count when something troubles.
@@ -13775,18 +13775,18 @@ var StyleContext = (function(){
       });
       // shrink first(remove space between word)
       if(rest_space < 0){
-	console.warn("[%s]minus space! %dpx", line.toString(), rest_space);
+	//console.warn("[%s]minus space! %dpx", line.toString(), rest_space);
 	del_space = -1 * Math.max(1, Math.floor(rest_space / words.length / 2));
 	Nehan.List.iter(words, function(word){
 	  word.paddingStart = Math.max(0, (word.paddingStart || 0) - del_space);
 	  rest_space += del_space;
-	  console.log("del space %d from [%s]", del_space, word.data);
+	  //console.log("del space %d from [%s]", del_space, word.data);
 	  if(rest_space >= 0){
 	    return false;
 	  }
 	  word.paddingEnd = Math.max(0, (word.paddingEnd || 0) - del_space);
 	  rest_space += del_space;
-	  console.log("del space %d from [%s]", del_space, word.data);
+	  //console.log("del space %d from [%s]", del_space, word.data);
 	  if(rest_space >= 0){
 	    return false;
 	  }
@@ -13797,7 +13797,7 @@ var StyleContext = (function(){
 	  if(chr.paddingEnd){
 	    chr.paddingEnd = Math.max(0, chr.paddingEnd - del_space);
 	    rest_space += del_space;
-	    console.log("del space %d from [%s]", del_space, chr.data);
+	    //console.log("del space %d from [%s]", del_space, chr.data);
 	    if(rest_space >= 0){
 	      return false;
 	    }
@@ -13805,7 +13805,7 @@ var StyleContext = (function(){
 	  if(chr.paddingStart){
 	    chr.paddingStart = Math.max(0, chr.paddingStart - del_space);
 	    rest_space += del_space;
-	    console.log("del space %d from [%s]", del_space, chr.data);
+	    //console.log("del space %d from [%s]", del_space, chr.data);
 	    if(rest_space >= 0){
 	      return false;
 	    }
@@ -13814,7 +13814,7 @@ var StyleContext = (function(){
 	});
 	return;
       }
-      console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
+      //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
 
       // rest_space > 0
       // so space is not enough, add 'more' space to word.
@@ -13823,13 +13823,13 @@ var StyleContext = (function(){
 	Nehan.List.iter(words, function(word){
 	  word.paddingStart = (word.paddingStart || 0) + add_space;
 	  rest_space -= add_space;
-	  console.log("add space %d to [%s]", add_space, word.data);
+	  //console.log("add space %d to [%s]", add_space, word.data);
 	  if(rest_space <= 0){
 	    return false;
 	  }
 	  word.paddingEnd = (word.paddingEnd || 0) + add_space;
 	  rest_space -= add_space;
-	  console.log("add space %d to [%s]", add_space, word.data);
+	  //console.log("add space %d to [%s]", add_space, word.data);
 	  if(rest_space <= 0){
 	    return false;
 	  }
@@ -13850,7 +13850,7 @@ var StyleContext = (function(){
 	  if(typeof chr.paddingEnd === "undefined"){
 	    chr.paddingEnd = add_space;
 	    rest_space -= add_space;
-	    console.log("add space %d to [%s]", add_space, chr.data);
+	    //console.log("add space %d to [%s]", add_space, chr.data);
 	    if(rest_space <= 0){
 	      return false;
 	    }
