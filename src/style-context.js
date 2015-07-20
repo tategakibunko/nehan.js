@@ -1837,12 +1837,9 @@ var StyleContext = (function(){
       }
       var font = new Nehan.Font(parent_font.size);
 
-      // if root font, initialize font by default styles.
-      if(this.parent === null){
-	font.family = parent_font.family;
-	font.style = parent_font.style;
-	font.weight = parent_font.weight;
-      }
+      font.family = parent_font.family;
+      font.style = parent_font.style;
+      font.weight = parent_font.weight;
 
       if(font_size !== "inherit"){
 	font.size = this._computeFontSize(font_size, parent_font.size);
