@@ -1588,6 +1588,15 @@ var StyleContext = (function(){
       var ideal_measure = font_size * Math.floor(cont_measure / font_size);
       var rest_space = ideal_measure - real_measure;
       var max_thres = this.getFontSize() * 2;
+      var flow = this.flow;
+      var extend_parent = function(parent, add_size){
+	if(parent){
+	  var pre_size = parent.size.getMeasure(flow);
+	  var new_size = pre_size + add_size;
+	  //console.log("extend parent:%d -> %d", pre_size, new_size);
+	  parent.size.setMeasure(flow, new_size);
+	}
+      };
       if(line.hasLineBreak || rest_space >= max_thres || rest_space === 0){
 	return;
       }
@@ -1602,19 +1611,39 @@ var StyleContext = (function(){
       if(targets.length === 0){
 	return;
       }
+      if(rest_space < 0){
+	Nehan.List.iter(targets, function(text){
+	  if(text instanceof Nehan.Word){
+	    var del_size;
+	    del_size = text.paddingEnd || 0;
+	    if(del_size > 0){
+	      rest_space += del_size;
+	      extend_parent(text.parent, -1 * del_size);
+	      text.paddingEnd = 0;
+	      //console.log("del space %d from %s", del_size, text.data);
+	      if(rest_space >= 0){
+		return false;
+	      }
+	    }
+	    del_size = text.paddingStart || 0;
+	    if(del_size > 0){
+	      rest_space += del_size;
+	      extend_parent(text.parent, -1 * del_size);
+	      text.paddingStart = 0;
+	      //console.log("del space %d from %s", del_size, text.data);
+	      if(rest_space >= 0){
+		return false;
+	      }
+	    }
+	  }
+	  return true;
+	});
+	return;
+      }
       // rest_space > 0
       // so space is not enough, add 'more' space to word.
       //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
       var add_space = Math.max(1, Math.min(quat_font_size, Math.floor(rest_space / targets.length / 2)));
-      var flow = this.flow;
-      var extend_parent = function(parent, add_size){
-	if(parent){
-	  var pre_size = parent.size.getMeasure(flow);
-	  var new_size = pre_size + add_size;
-	  //console.log("extend parent:%d -> %d", pre_size, new_size);
-	  parent.size.setMeasure(flow, new_size);
-	}
-      };
       Nehan.List.iter(targets, function(text){
 	text.paddingEnd = (text.paddingEnd || 0) + add_space;
 	rest_space -= add_space;
