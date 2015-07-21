@@ -63,6 +63,20 @@ Nehan.Obj = (function(){
        @memberof Nehan.Obj
        @param obj {Object}
        @param fn {Function} - fun prop -> value -> {bool}
+       @return {bool}
+    */
+    exists : function(obj, fn){
+      for(var prop in obj){
+	if(fn(prop, obj[prop])){
+	  return true;
+	}
+      }
+      return false;
+    },
+    /**
+       @memberof Nehan.Obj
+       @param obj {Object}
+       @param fn {Function} - fun prop -> value -> {bool}
     */
     filter : function(obj, fn){
       var ret = {};
