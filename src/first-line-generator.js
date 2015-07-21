@@ -22,6 +22,10 @@ var FirstLineGenerator = (function(){
       var child = this._child, parent = this;
       while(child){
 	child.style = parent.style;
+	var cache = child.peekLastCache();
+	if(cache && Nehan.Token.isText(cache) && cache.setMetrics){
+	  cache.setMetrics(child.style.flow, child.style.getFont());
+	}
 	parent = child;
 	child = child._child;
       }
