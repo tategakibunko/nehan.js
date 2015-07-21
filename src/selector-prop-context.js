@@ -43,6 +43,22 @@ var SelectorPropContext = (function(){
       return this._style.markup;
     },
     /**
+     @memberof Nehan.SelectorPropContext
+     @method getMarkupContent
+     @return {String}
+     */
+    getMarkupContent : function(){
+      return this.getMarkup().getContent();
+    },
+    /**
+     @memberof Nehan.SelectorContext
+     @method setMarkupContent
+     @param content {String}
+     */
+    setMarkupContent : function(content){
+      this.getMarkup().setContent(content);
+    },
+    /**
        @memberof Nehan.SelectorPropContext
        @return {int}
     */
