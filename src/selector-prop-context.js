@@ -51,7 +51,7 @@ var SelectorPropContext = (function(){
       return this.getMarkup().getContent();
     },
     /**
-     @memberof Nehan.SelectorContext
+     @memberof Nehan.SelectorPropContext
      @method setMarkupContent
      @param content {String}
      */
