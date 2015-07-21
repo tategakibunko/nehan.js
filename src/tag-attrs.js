@@ -9,7 +9,7 @@ Nehan.TagAttrs = (function(){
   function TagAttrs(src){
     var attrs_raw = src? Nehan.TagAttrParser.parse(src) : {};
     this.classes = this._parseClasses(attrs_raw);
-    this.attrs = this._parseAttrs(attrs_raw, this.classes);
+    this.attrs = this._parseAttrs(attrs_raw);
     this.dataset = this._parseDataset(attrs_raw);
   }
 
@@ -113,7 +113,7 @@ Nehan.TagAttrs = (function(){
 	return (klass.indexOf("nehan-") === 0)? klass.replace("nehan-", "") : klass;
       }); 
     },
-    _parseAttrs : function(attrs_raw, classes){
+    _parseAttrs : function(attrs_raw){
       var attrs = {};
       Nehan.Obj.iter(attrs_raw, function(name, value){
 	if(name.indexOf("data-") < 0){

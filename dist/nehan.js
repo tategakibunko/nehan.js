@@ -1732,7 +1732,7 @@ Nehan.TagAttrs = (function(){
   function TagAttrs(src){
     var attrs_raw = src? Nehan.TagAttrParser.parse(src) : {};
     this.classes = this._parseClasses(attrs_raw);
-    this.attrs = this._parseAttrs(attrs_raw, this.classes);
+    this.attrs = this._parseAttrs(attrs_raw);
     this.dataset = this._parseDataset(attrs_raw);
   }
 
@@ -1836,7 +1836,7 @@ Nehan.TagAttrs = (function(){
 	return (klass.indexOf("nehan-") === 0)? klass.replace("nehan-", "") : klass;
       }); 
     },
-    _parseAttrs : function(attrs_raw, classes){
+    _parseAttrs : function(attrs_raw){
       var attrs = {};
       Nehan.Obj.iter(attrs_raw, function(name, value){
 	if(name.indexOf("data-") < 0){
@@ -13410,9 +13410,9 @@ var StyleContext = (function(){
     */
     getChildIndex : function(){
       var self = this;
-      return Nehan.List.indexOf(this.getParentChilds(), function(child){
+      return Math.max(0, Nehan.List.indexOf(this.getParentChilds(), function(child){
 	return child === self;
-      });
+      }));
     },
     /**
        @memberof Nehan.StyleContext
@@ -13420,9 +13420,9 @@ var StyleContext = (function(){
     */
     getChildIndexOfType : function(){
       var self = this;
-      return Nehan.List.indexOf(this.getParentChildsOfType(this.getMarkupName()), function(child){
+      return Math.max(0, Nehan.List.indexOf(this.getParentChildsOfType(this.getMarkupName()), function(child){
 	return child === self;
-      });
+      }));
     },
     /**
        @memberof Nehan.StyleContext
@@ -13915,7 +13915,6 @@ var StyleContext = (function(){
 	return pe_values;
 
       default:
-	//return Selectors.getValue(this);
 	var values = Selectors.getValue(this);
 	//console.log("[%s] selector values:%o", this.markup.name, values);
 	return values;

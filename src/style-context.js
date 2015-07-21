@@ -1224,9 +1224,9 @@ var StyleContext = (function(){
     */
     getChildIndex : function(){
       var self = this;
-      return Nehan.List.indexOf(this.getParentChilds(), function(child){
+      return Math.max(0, Nehan.List.indexOf(this.getParentChilds(), function(child){
 	return child === self;
-      });
+      }));
     },
     /**
        @memberof Nehan.StyleContext
@@ -1234,9 +1234,9 @@ var StyleContext = (function(){
     */
     getChildIndexOfType : function(){
       var self = this;
-      return Nehan.List.indexOf(this.getParentChildsOfType(this.getMarkupName()), function(child){
+      return Math.max(0, Nehan.List.indexOf(this.getParentChildsOfType(this.getMarkupName()), function(child){
 	return child === self;
-      });
+      }));
     },
     /**
        @memberof Nehan.StyleContext
@@ -1729,7 +1729,6 @@ var StyleContext = (function(){
 	return pe_values;
 
       default:
-	//return Selectors.getValue(this);
 	var values = Selectors.getValue(this);
 	//console.log("[%s] selector values:%o", this.markup.name, values);
 	return values;
