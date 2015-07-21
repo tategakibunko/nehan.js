@@ -15860,19 +15860,20 @@ var FirstLineGenerator = (function(){
   Nehan.Class.extend(FirstLineGenerator, BlockGenerator);
 
   FirstLineGenerator.prototype._onAddElement = function(context, element){
+    if(context.getBlockLineNo() !== 1){
+      return;
+    }
     // first-line yieled, so switch style to parent one.
-    if(context.getBlockLineNo() === 1){
-      this.style = this.style.parent;
-      var child = this._child, parent = this;
-      while(child){
-	child.style = parent.style;
-	var cache = child.peekLastCache();
-	if(cache && Nehan.Token.isText(cache) && cache.setMetrics){
-	  cache.setMetrics(child.style.flow, child.style.getFont());
-	}
-	parent = child;
-	child = child._child;
+    this.style = this.style.parent;
+    var child = this._child, parent = this;
+    while(child){
+      child.style = parent.style;
+      var cache = child.peekLastCache();
+      if(cache && child instanceof TextGenerator && cache.setMetrics){
+	cache.setMetrics(child.style.flow, child.style.getFont());
       }
+      parent = child;
+      child = child._child;
     }
   };
 
