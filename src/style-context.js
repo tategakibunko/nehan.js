@@ -1135,6 +1135,14 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @param pseudo_element_name {String}
+       @return {String}
+    */
+    getSelectorCacheKeyPe : function(pseudo_element_name){
+      return this.selectorCacheKey + "::" + pseudo_element_name;
+    },
+    /**
+       @memberof Nehan.StyleContext
        @return {Nehan.Font}
     */
     getFont : function(){

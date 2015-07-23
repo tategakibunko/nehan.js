@@ -11157,9 +11157,14 @@ var Selectors = (function(){
   };
 
   var __get_value_pe = function(style, pseudo_element_name){
-    var matched_selectors = Nehan.List.filter(__selectors_pe, function(selector){
+    var cache_key = style.getSelectorCacheKeyPe(pseudo_element_name);
+    var cache = __selectors_cache[cache_key] || null;
+    var matched_selectors = cache || Nehan.List.filter(__selectors_pe, function(selector){
       return selector.testPseudoElement(style, pseudo_element_name);
     });
+    if(cache === null){
+      __selectors_cache[cache_key] = matched_selectors;
+    }
     return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new Nehan.CssHashSet(), function(ret, selector){
       return ret.union(new Nehan.CssHashSet(selector.getValue()));
     }).getValues();
@@ -13367,6 +13372,14 @@ var StyleContext = (function(){
     */
     getSelectorCacheKey : function(){
       return this.selectorCacheKey;
+    },
+    /**
+       @memberof Nehan.StyleContext
+       @param pseudo_element_name {String}
+       @return {String}
+    */
+    getSelectorCacheKeyPe : function(pseudo_element_name){
+      return this.selectorCacheKey + "::" + pseudo_element_name;
     },
     /**
        @memberof Nehan.StyleContext
