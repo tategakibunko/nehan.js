@@ -38,6 +38,7 @@ var TestStyles = {
 	ctx.setCssAttr("color", "yellow");
 	ctx.setCssAttr("background", "blue");
       }
+      return null;
     }
   },
   ".gen-adj-test a~b":{

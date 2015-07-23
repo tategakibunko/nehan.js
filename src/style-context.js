@@ -116,6 +116,9 @@ var StyleContext = (function(){
 	parent.appendChild(this);
       }
 
+      // create selector cache key
+      this.selectorCacheKey = this._computeSelectorCacheKey();
+
       // create context for each functional css property.
       this.selectorPropContext = new SelectorPropContext(this, args.cursorContext || null);
 
@@ -1125,6 +1128,13 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {String}
+    */
+    getSelectorCacheKey : function(){
+      return this.selectorCacheKey;
+    },
+    /**
+       @memberof Nehan.StyleContext
        @return {Nehan.Font}
     */
     getFont : function(){
@@ -1520,6 +1530,11 @@ var StyleContext = (function(){
     */
     getCssHoriInlineImage : function(line, image){
       return this.flow.getCss();
+    },
+    _computeSelectorCacheKey : function(){
+      var keys = this.parent? [this.parent.getSelectorCacheKey()] : [];
+      keys.push(this.markup.getKey());
+      return keys.join(">");
     },
     _computeContentMeasure : function(outer_measure){
       switch(this.boxSizing){

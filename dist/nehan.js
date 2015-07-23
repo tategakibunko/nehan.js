@@ -1803,6 +1803,19 @@ Nehan.TagAttrs = (function(){
       return (typeof this.dataset[name] === "undefined")? def_value : this.dataset[name];
     },
     /**
+       get cache key
+
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @return {string}
+    */
+    getKey : function(){
+      var props = Object.keys(this.attrs).sort();
+      return Nehan.List.map(props, function(prop){
+	return prop + "=" + this.attrs[prop];
+      }.bind(this)).join("&");
+    },
+    /**
        @memberof Nehan.TagAttrs
        @param name {String}
        @param value {attribute_value}
@@ -1885,6 +1898,7 @@ Nehan.Tag = (function (){
     this.content = content || "";
     this.name = this._parseName(this.src);
     this.attrs = this._parseTagAttrs(this.name, this.src);
+    this._key = this._createKey();
     this._firstChild = false;
     this._firstOfType = false;
     this._lastChild = false;
@@ -2071,6 +2085,13 @@ Nehan.Tag = (function (){
     },
     /**
        @memberof Nehan.Tag
+       @return {String}
+    */
+    getKey : function(){
+      return this._key;
+    },
+    /**
+       @memberof Nehan.Tag
        @return {boolean}
     */
     hasClass : function(klass){
@@ -2186,6 +2207,9 @@ Nehan.Tag = (function (){
 	.replace(/[　|\s]+/g, " ") // conv from multi space to single space
 	.replace(/\s+=/g, "=") // cut multi space before '='
 	.replace(/=\s+/g, "="); // cut multi space after '='
+    },
+    _createKey : function(){
+      return this.getName() + "[" + this.attrs.getKey() + "]";
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();
@@ -11082,13 +11106,19 @@ var Style = {
    @namespace Nehan.Selectors
  */
 var Selectors = (function(){
-  var __selectors = []; // selector (without pseudo-element) list.
-  var __selectors_pe = []; // selector (with pseudo-element) list.
+  var __selectors = []; // static selectors without pseudo-element or pseudo-class.
+  var __selectors_pe = []; // selectors with pseudo-element.
+  var __selectors_pc = []; // selectors with pseudo-class.
+  var __selectors_cache = {}; // cache for static selectors
 
   // sort __selectors by specificity asc.
   var __sort_selectors = function(selectors){
     selectors.sort(function(s1,s2){ return s1.spec - s2.spec; });
     return selectors;
+  };
+
+  var __is_pc_key = function(selector_key){
+    return selector_key.indexOf("::") < 0 && selector_key.indexOf(":") >= 0;
   };
 
   var __is_pe_key = function(selector_key){
@@ -11101,17 +11131,27 @@ var Selectors = (function(){
     });
   };
 
+  var __get_target_selectors = function(selector_key){
+    if(__is_pe_key(selector_key)){
+      return __selectors_pe;
+    }
+    if(__is_pc_key(selector_key)){
+      return __selectors_pc;
+    }
+    return __selectors;
+  };
+
   var __update_value = function(selector_key, value){
     var style_value = new Nehan.CssHashSet(Style[selector_key]); // old style value, must be found
     style_value = style_value.union(new Nehan.CssHashSet(value)); // merge new value to old
-    var target_selectors = __is_pe_key(selector_key)? __selectors_pe : __selectors;
+    var target_selectors = __get_target_selectors(selector_key);
     var selector = __find_selector(target_selectors, selector_key); // selector object for selector_key, must be found
     selector.updateValue(style_value.getValues());
   };
 
   var __insert_value = function(selector_key, value){
     var selector = new Nehan.Selector(selector_key, value);
-    var target_selectors = __is_pe_key(selector_key)? __selectors_pe : __selectors;
+    var target_selectors = __get_target_selectors(selector_key);
     target_selectors.push(selector);
     return selector;
   };
@@ -11126,9 +11166,18 @@ var Selectors = (function(){
   };
 
   var __get_value = function(style){
-    var matched_selectors = Nehan.List.filter(__selectors, function(selector){
+    var cache_key = style.getSelectorCacheKey();
+    var cache = __selectors_cache[cache_key] || null;
+    var matched_static_selectors = cache || Nehan.List.filter(__selectors, function(selector){
       return selector.test(style);
     });
+    if(cache === null){
+      __selectors_cache[cache_key] = matched_static_selectors;
+    }
+    var matched_pc_selectors = Nehan.List.filter(__selectors_pc, function(selector){
+      return selector.test(style);
+    });
+    var matched_selectors = matched_static_selectors.concat(matched_pc_selectors);
     return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new Nehan.CssHashSet(), function(ret, selector){
       return ret.union(new Nehan.CssHashSet(selector.getValue()));
     }).getValues();
@@ -12302,6 +12351,9 @@ var StyleContext = (function(){
 	parent.appendChild(this);
       }
 
+      // create selector cache key
+      this.selectorCacheKey = this._computeSelectorCacheKey();
+
       // create context for each functional css property.
       this.selectorPropContext = new SelectorPropContext(this, args.cursorContext || null);
 
@@ -13311,6 +13363,13 @@ var StyleContext = (function(){
     },
     /**
        @memberof Nehan.StyleContext
+       @return {String}
+    */
+    getSelectorCacheKey : function(){
+      return this.selectorCacheKey;
+    },
+    /**
+       @memberof Nehan.StyleContext
        @return {Nehan.Font}
     */
     getFont : function(){
@@ -13706,6 +13765,11 @@ var StyleContext = (function(){
     */
     getCssHoriInlineImage : function(line, image){
       return this.flow.getCss();
+    },
+    _computeSelectorCacheKey : function(){
+      var keys = this.parent? [this.parent.getSelectorCacheKey()] : [];
+      keys.push(this.markup.getKey());
+      return keys.join(">");
     },
     _computeContentMeasure : function(outer_measure){
       switch(this.boxSizing){

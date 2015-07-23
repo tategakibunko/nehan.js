@@ -235,7 +235,11 @@ var Script = {
   "text-align":[
     "<p class='ta-start'>先頭寄せ</p>",
     "<p class='ta-center'>中央寄せ</p>",
-    "<p class='ta-end'>後方寄せ</p>"
+    "<p class='ta-end'>後方寄せ</p>",
+    "<h4>with justify</h4>",
+    "<p class='ta-justify'>" + Text["middle2"] + "</p>",
+    "<h4>without justify</h4>",
+    "<p>" + Text["middle2"] + "</p>"
   ].join(""),
 
   "iblock":[

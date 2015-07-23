@@ -16,6 +16,7 @@ Nehan.Tag = (function (){
     this.content = content || "";
     this.name = this._parseName(this.src);
     this.attrs = this._parseTagAttrs(this.name, this.src);
+    this._key = this._createKey();
     this._firstChild = false;
     this._firstOfType = false;
     this._lastChild = false;
@@ -202,6 +203,13 @@ Nehan.Tag = (function (){
     },
     /**
        @memberof Nehan.Tag
+       @return {String}
+    */
+    getKey : function(){
+      return this._key;
+    },
+    /**
+       @memberof Nehan.Tag
        @return {boolean}
     */
     hasClass : function(klass){
@@ -317,6 +325,9 @@ Nehan.Tag = (function (){
 	.replace(/[　|\s]+/g, " ") // conv from multi space to single space
 	.replace(/\s+=/g, "=") // cut multi space before '='
 	.replace(/=\s+/g, "="); // cut multi space after '='
+    },
+    _createKey : function(){
+      return this.getName() + "[" + this.attrs.getKey() + "]";
     },
     _parseName : function(src){
       return src.replace(/</g, "").replace(/\/?>/g, "").split(/\s/)[0].toLowerCase();

@@ -80,6 +80,19 @@ Nehan.TagAttrs = (function(){
       return (typeof this.dataset[name] === "undefined")? def_value : this.dataset[name];
     },
     /**
+       get cache key
+
+       @memberof Nehan.TagAttrs
+       @param name {String}
+       @return {string}
+    */
+    getKey : function(){
+      var props = Object.keys(this.attrs).sort();
+      return Nehan.List.map(props, function(prop){
+	return prop + "=" + this.attrs[prop];
+      }.bind(this)).join("&");
+    },
+    /**
        @memberof Nehan.TagAttrs
        @param name {String}
        @param value {attribute_value}
