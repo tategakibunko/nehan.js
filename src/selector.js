@@ -40,7 +40,7 @@ Nehan.Selector = (function(){
     updateValue : function(value){
       for(var prop in value){
 	var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
-	var norm_prop = Nehan.CssParser.normalizeProp(prop);
+	var norm_prop = (typeof fmt_value !== "function")? Nehan.CssParser.normalizeProp(prop) : Nehan.Utils.camelToChain(prop);
 	var old_value = this.value[norm_prop] || null;
 	if(old_value !== null && typeof old_value === "object" && typeof fmt_value === "object"){
 	  Nehan.Args.copy(old_value, fmt_value);

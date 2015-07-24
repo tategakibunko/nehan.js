@@ -39,7 +39,12 @@ var StyleContext = (function(){
     "height",
     "interactive", // flag
     "letter-spacing",
+
+    // In style-context, we load 'line-height' prop and stored the value to this.lineHeight, so why this prop is unmanaged?
+    // Because in vertical mode, native 'line-height' is used in special purpose to make vertical line.
+    // So we avoid this prop stored as managed css prop.
     //"line-height",
+
     "list-style-type",
     "list-style-position",
     "list-style-image",
@@ -987,12 +992,6 @@ var StyleContext = (function(){
       return this.markup.getAttr(name, def_value);
     },
     _evalCssAttr : function(name, value){
-      // "oncreate", "onblock", "online", "ontext" not return style,
-      // it's a hook called after this style is converted into dom element on each layout level(block, line, text).
-      // so leave it as it is.
-      if(name === "oncreate" || name === "onblock" || name == "online" || name === "ontext"){
-	return value;
-      }
       // if value is function, call with selector context, and format the returned value.
       if(typeof value === "function"){
 	return Nehan.CssParser.formatValue(name, value(this.selectorPropContext));
@@ -1788,12 +1787,13 @@ var StyleContext = (function(){
     },
     _registerCssValues : function(values){
       Nehan.Obj.iter(values, function(prop, value){
-	if(__is_callback_css_prop(prop)){
-	  this.callbackCss.add(prop, value);
-	} else if(__is_managed_css_prop(prop)){
-	  this.managedCss.add(prop, this._evalCssAttr(prop, value));
+	var norm_prop = Nehan.CssParser.normalizeProp(prop);
+	if(__is_callback_css_prop(norm_prop)){
+	  this.callbackCss.add(norm_prop, value);
+	} else if(__is_managed_css_prop(norm_prop)){
+	  this.managedCss.add(norm_prop, this._evalCssAttr(prop, value));
 	} else {
-	  this.unmanagedCss.add(prop, this._evalCssAttr(prop, value));
+	  this.unmanagedCss.add(norm_prop, this._evalCssAttr(prop, value));
 	}
       }.bind(this));
     },
