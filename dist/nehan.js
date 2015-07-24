@@ -12388,7 +12388,7 @@ var StyleContext = (function(){
       this._registerCssValues(this._loadInlineCss(markup));
       var onload = this.callbackCss.get("onload");
       if(onload){
-	this._registerCssValues(onload(this.selectorContext));
+	this._registerCssValues(onload(this.selectorContext) || {});
       }
       this._registerCssValues(args.forceCss || {});
 
