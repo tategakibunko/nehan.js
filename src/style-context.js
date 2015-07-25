@@ -626,7 +626,7 @@ var StyleContext = (function(){
 	// set text-align
 	if(this.textAlign && (this.textAlign.isCenter() || this.textAlign.isEnd())){
 	  this._setTextAlign(line, this.textAlign);
-	} else if((Nehan.Config.forceJustifyIfVert && this.isTextVertical()) || (this.textAlign && this.textAlign.isJustify())){
+	} else if(this.textAlign && this.textAlign.isJustify()){
 	  this._setTextJustify(line);
 	}
 	// set edge

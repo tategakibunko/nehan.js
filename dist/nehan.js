@@ -81,14 +81,6 @@ Nehan.Config = {
   danglingHyphenate:true,
 
   /**
-     force justify line if vertical writing mode.
-     @memberof Nehan.Config
-     @type {boolean}
-     @default false
-  */
-  forceJustifyIfVert:false,
-
-  /**
      max rety count when something troubles.
      @memberof Nehan.Config
      @type {int}
@@ -12866,7 +12858,7 @@ var StyleContext = (function(){
 	// set text-align
 	if(this.textAlign && (this.textAlign.isCenter() || this.textAlign.isEnd())){
 	  this._setTextAlign(line, this.textAlign);
-	} else if((Nehan.Config.forceJustifyIfVert && this.isTextVertical()) || (this.textAlign && this.textAlign.isJustify())){
+	} else if(this.textAlign && this.textAlign.isJustify()){
 	  this._setTextJustify(line);
 	}
 	// set edge
