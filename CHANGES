@@ -10,7 +10,7 @@ version 5.3.1
 ========================
 o Support logical float clearance(clear:start, clear:end, clear:both).
 o Support text-justify:justify.
-o Cache mached static selector for each style, speed up about 112%.
+o Cache mached static selector for each style(speed up about 15%).
 * Fix css property bug when it's written by camel cased style.
 
 version 5.3.0 2015/07/14
