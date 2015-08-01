@@ -15,39 +15,37 @@ Nehan.ListStyle = (function(){
     this.image = (opt.image !== "none")? new Nehan.ListStyleImage(opt.image) : null;
   }
 
-  ListStyle.prototype = {
-    /**
-       @memberof Nehan.ListStyle
-       @return {boolean}
-    */
-    isMultiCol : function(){
-      return this.position.isOutside();
-    },
-    /**
-       @memberof Nehan.ListStyle
-       @return {boolean}
-    */
-    isInside : function(){
-      return this.position.isInside();
-    },
-    /**
-       @memberof Nehan.ListStyle
-       @return {boolean}
-    */
-    isImageList : function(){
-      return (this.image !== null);
-    },
-    /**
-       @memberof Nehan.ListStyle
-       @param count {int}
-       @return {String}
-    */
-    getMarkerHtml : function(count){
-      if(this.image !== null){
-	return this.image.getMarkerHtml(count);
-      }
-      return this.type.getMarkerHtml(count);
+  /**
+   @memberof Nehan.ListStyle
+   @return {boolean}
+   */
+  ListStyle.prototype.isMultiCol = function(){
+    return this.position.isOutside();
+  };
+  /**
+   @memberof Nehan.ListStyle
+   @return {boolean}
+   */
+  ListStyle.prototype.isInside = function(){
+    return this.position.isInside();
+  };
+  /**
+   @memberof Nehan.ListStyle
+   @return {boolean}
+   */
+  ListStyle.prototype.isImageList = function(){
+    return (this.image !== null);
+  };
+  /**
+   @memberof Nehan.ListStyle
+   @param count {int}
+   @return {String}
+   */
+  ListStyle.prototype.getMarkerHtml = function(count){
+    if(this.image !== null){
+      return this.image.getMarkerHtml(count);
     }
+    return this.type.getMarkerHtml(count);
   };
 
   return ListStyle;

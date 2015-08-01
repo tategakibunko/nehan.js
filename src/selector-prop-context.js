@@ -19,126 +19,124 @@ var SelectorPropContext = (function(){
     this._cursorContext = cursor_context || null;
   }
 
-  SelectorPropContext.prototype = {
-    /**
-       @memberof Nehan.SelectorPropContext
-       @return {Nehan.StyleContext}
-    */
-    getParentStyleContext : function(){
-      return this._style.parent;
-    },
-    /**
-       @memberof Nehan.SelectorPropContext
-       @return {Nehan.BoxFlow}
-    */
-    getParentFlow : function(){
-      var parent = this.getParentStyleContext();
-      return parent? parent.flow : Nehan.Display.getStdBoxFlow();
-    },
-    /**
-       @memberof Nehan.SelectorPropContext
-       @return {Nehan.Tag}
-    */
-    getMarkup : function(){
-      return this._style.markup;
-    },
-    /**
-     @memberof Nehan.SelectorPropContext
-     @method getMarkupContent
-     @return {String}
-     */
-    getMarkupContent : function(){
-      return this.getMarkup().getContent();
-    },
-    /**
-     @memberof Nehan.SelectorPropContext
-     @method setMarkupContent
-     @param content {String}
-     */
-    setMarkupContent : function(content){
-      this.getMarkup().setContent(content);
-    },
-    /**
-       @memberof Nehan.SelectorPropContext
-       @return {int}
-    */
-    getRestMeasure : function(){
-      return this._cursorContext? this._cursorContext.getInlineRestMeasure() : null;
-    },
-    /**
-       @memberof Nehan.SelectorPropContext
-       @return {int}
-    */
-    getRestExtent : function(){
-      return this._cursorContext? this._cursorContext.getBlockRestExtent() : null;
-    },
-    /**
-       index number of nth-child
+  /**
+   @memberof Nehan.SelectorPropContext
+   @return {Nehan.StyleContext}
+   */
+  SelectorPropContext.prototype.getParentStyleContext = function(){
+    return this._style.parent;
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @return {Nehan.BoxFlow}
+   */
+  SelectorPropContext.prototype.getParentFlow = function(){
+    var parent = this.getParentStyleContext();
+    return parent? parent.flow : Nehan.Display.getStdBoxFlow();
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @return {Nehan.Tag}
+   */
+  SelectorPropContext.prototype.getMarkup = function(){
+    return this._style.markup;
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @method getMarkupContent
+   @return {String}
+   */
+  SelectorPropContext.prototype.getMarkupContent = function(){
+    return this.getMarkup().getContent();
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @method setMarkupContent
+   @param content {String}
+   */
+  SelectorPropContext.prototype.setMarkupContent = function(content){
+    this.getMarkup().setContent(content);
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @return {int}
+   */
+  SelectorPropContext.prototype.getRestMeasure = function(){
+    return this._cursorContext? this._cursorContext.getInlineRestMeasure() : null;
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @return {int}
+   */
+  SelectorPropContext.prototype.getRestExtent = function(){
+    return this._cursorContext? this._cursorContext.getBlockRestExtent() : null;
+  };
+  /**
+   index number of nth-child
 
-       @memberof Nehan.SelectorPropContext
-       @return {int}
-    */
-    getChildIndex : function(){
-      return this._style.getChildIndex();
-    },
-    /**
-       index number of nth-child-of-type
+   @memberof Nehan.SelectorPropContext
+   @return {int}
+   */
+  SelectorPropContext.prototype.getChildIndex = function(){
+    return this._style.getChildIndex();
+  };
+  /**
+   index number of nth-child-of-type
 
-       @memberof Nehan.SelectorPropContext
-       @return {int}
-    */
-    getChildIndexOfType : function(){
-      return this._style.getChildIndexOfType;
-    },
-    /**
-       @memberof Nehan.SelectorPropContext
-       @return {bool}
-    */
-    isFirstChild : function(){
-      return this._style.isFirstChild();
-    },
-    /**
-       @memberof Nehan.SelectorPropContext
-       @return {bool}
-    */
-    isFirstOfType : function(){
-      return this._style.isFirstOfType();
-    },
-    /**
-       @memberof Nehan.SelectorPropContext
-       @return {bool}
-    */
-    isLastChild : function(){
-      return this._style.isLastChild();
-    },
-    /**
-       @memberof Nehan.SelectorPropContext
-       @return {bool}
-    */
-    isLastOfType : function(){
-      return this._style.isLastOfType();
-    },
-    /**
-       @memberof Nehan.SelectorPropContext
-       @return {bool}
-    */
-    isOnlyChild : function(){
-      return this._style.isOnlyChild();
-    },
-    /**
-       @memberof Nehan.SelectorPropContext
-       @return {bool}
-    */
-    isOnlyOfType : function(){
-      return this._style.isOnlyOfType();
-    },
-    /**
-       @memberof Nehan.SelectorPropContext
-       @return {bool}
-    */
-    isMarkupEmpty : function(){
-      return this._style.isMarkupEmpty();
-    }
+   @memberof Nehan.SelectorPropContext
+   @return {int}
+   */
+  SelectorPropContext.prototype.getChildIndexOfType = function(){
+    return this._style.getChildIndexOfType;
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @return {bool}
+   */
+  SelectorPropContext.prototype.isFirstChild = function(){
+    return this._style.isFirstChild();
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @return {bool}
+   */
+  SelectorPropContext.prototype.isFirstOfType = function(){
+    return this._style.isFirstOfType();
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @return {bool}
+   */
+  SelectorPropContext.prototype.isLastChild = function(){
+    return this._style.isLastChild();
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @return {bool}
+   */
+  SelectorPropContext.prototype.isLastOfType = function(){
+    return this._style.isLastOfType();
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @return {bool}
+   */
+  SelectorPropContext.prototype.isOnlyChild = function(){
+    return this._style.isOnlyChild();
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @return {bool}
+   */
+  SelectorPropContext.prototype.isOnlyOfType = function(){
+    return this._style.isOnlyOfType();
+  };
+  /**
+   @memberof Nehan.SelectorPropContext
+   @return {bool}
+   */
+  SelectorPropContext.prototype.isMarkupEmpty = function(){
+    return this._style.isMarkupEmpty();
   };
 
   return SelectorPropContext;

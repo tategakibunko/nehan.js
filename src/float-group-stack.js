@@ -63,38 +63,36 @@ Nehan.FloatGroupStack = (function(){
     this.extent = max_group? max_group.getExtent(flow) : 0;
   }
 
-  FloatGroupStack.prototype = {
-    /**
-     @memberof Nehan.FloatGroupStack
-     @return {boolean}
-     */
-    isEmpty : function(){
-      return this.stack.length === 0;
-    },
-    /**
-     @memberof Nehan.FloatGroupStack
-     @return {int}
-     */
-    getExtent : function(){
-      return this.extent;
-    },
-    /**
-     @memberof Nehan.FloatGroupStack
-     @return {Nehan.FloatGroup}
-     */
-    getLastGroup : function(){
-      return this.lastGroup;
-    },
-    /**
-     pop {@link Nehan.FloatGroup} with larger extent from start or end.
+  /**
+   @memberof Nehan.FloatGroupStack
+   @return {boolean}
+   */
+  FloatGroupStack.prototype.isEmpty = function(){
+    return this.stack.length === 0;
+  };
+  /**
+   @memberof Nehan.FloatGroupStack
+   @return {int}
+   */
+  FloatGroupStack.prototype.getExtent = function(){
+    return this.extent;
+  };
+  /**
+   @memberof Nehan.FloatGroupStack
+   @return {Nehan.FloatGroup}
+   */
+  FloatGroupStack.prototype.getLastGroup = function(){
+    return this.lastGroup;
+  };
+  /**
+   pop {@link Nehan.FloatGroup} with larger extent from start or end.
 
-     @memberof Nehan.FloatGroupStack
-     @return {Nehan.FloatGroup}
-     */
-    pop : function(){
-      this.lastGroup = this.stack.pop() || null;
-      return this.lastGroup;
-    }
+   @memberof Nehan.FloatGroupStack
+   @return {Nehan.FloatGroup}
+   */
+  FloatGroupStack.prototype.pop = function(){
+    this.lastGroup = this.stack.pop() || null;
+    return this.lastGroup;
   };
 
   return FloatGroupStack;

@@ -10,31 +10,33 @@ Nehan.TextAlign = (function(){
     this.value = value || "start";
   }
 
-  TextAlign.prototype = {
-    /**
-       @memberof Nehan.TextAlign
-       @return {boolean}
-    */
-    isStart : function(){
-      return this.value === "start";
-    },
-    /**
-       @memberof Nehan.TextAlign
-       @return {boolean}
-    */
-    isEnd : function(){
-      return this.value === "end";
-    },
-    /**
-       @memberof Nehan.TextAlign
-       @return {boolean}
-    */
-    isCenter : function(){
-      return this.value === "center";
-    },
-    isJustify : function(){
-      return this.value === "justify";
-    }
+  /**
+   @memberof Nehan.TextAlign
+   @return {boolean}
+   */
+  TextAlign.prototype.isStart = function(){
+    return this.value === "start";
+  };
+  /**
+   @memberof Nehan.TextAlign
+   @return {boolean}
+   */
+  TextAlign.prototype.isEnd = function(){
+    return this.value === "end";
+  };
+  /**
+   @memberof Nehan.TextAlign
+   @return {boolean}
+   */
+  TextAlign.prototype.isCenter = function(){
+    return this.value === "center";
+  };
+  /**
+   @memberof Nehan.TextAlign
+   @return {boolean}
+   */
+  TextAlign.prototype.isJustify = function(){
+    return this.value === "justify";
   };
 
   return TextAlign;

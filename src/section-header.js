@@ -11,14 +11,12 @@ Nehan.SectionHeader = (function(){
     this._id = id || 0;
   }
 
-  SectionHeader.prototype = {
-    /**
-       @memberof Nehan.SectionHeader
-       @return {int}
-    */
-    getId : function(){
-      return this._id;
-    }
+  /**
+   @memberof Nehan.SectionHeader
+   @return {int}
+   */
+  SectionHeader.prototype.getId = function(){
+    return this._id;
   };
 
   return SectionHeader;

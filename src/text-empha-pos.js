@@ -15,17 +15,15 @@ Nehan.TextEmphaPos = (function(){
     }, opt || {});
   }
 
-  TextEmphaPos.prototype = {
-    /**
-       not implemented yet.
+  /**
+   not implemented yet.
 
-       @memberof Nehan.TextEmphaPos
-       @return {Object}
-    */
-    getCss : function(line){
-      var css = {};
-      return css;
-    }
+   @memberof Nehan.TextEmphaPos
+   @return {Object}
+   */
+  TextEmphaPos.prototype.getCss = function(line){
+    var css = {};
+    return css;
   };
 
   return TextEmphaPos;

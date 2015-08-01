@@ -19,250 +19,248 @@ Nehan.InlineContext = (function(){
     this.hyphenated = false; // is line hyphenated?
   }
 
-  InlineContext.prototype = {
-    /**
-       @memberof Nehan.InlineContext
-       @return {boolean}
-    */
-    isEmpty : function(){
-      return !this.lineBreak && !this.breakAfter && this.elements.length === 0;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {boolean}
-    */
-    isHyphenated : function(){
-      return this.hyphenated;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {boolean}
-    */
-    isLineOver: function(){
-      return this.lineOver;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param measure {int}
-       @return {boolean}
-    */
-    hasSpaceFor : function(measure){
-      return this.getRestMeasure() >= measure;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {boolean}
-    */
-    hasLineBreak : function(){
-      return this.lineBreak;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param status {boolean}
-    */
-    setLineBreak : function(status){
-      this.lineBreak = status;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param status {boolean}
-    */
-    setLineOver : function(status){
-      this.lineOver = status;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param status {boolean}
-    */
-    setHyphenated : function(status){
-      this.hyphenated = status;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {boolean}
-    */
-    hasBreakAfter : function(){
-      return this.breakAfter;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param status {boolean}
-    */
-    setBreakAfter : function(status){
-      this.breakAfter = status;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param measure {int}
-    */
-    addMeasure : function(measure){
-      this.curMeasure += measure;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param element {Nehan.Box}
-       @param measure {int}
-    */
-    addTextElement : function(element, measure){
-      this.elements.push(element);
-      this.curMeasure += measure;
-      if(element.getCharCount){
-	this.charCount += element.getCharCount();
-      }
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @param element {Nehan.Box}
-       @param measure {int}
-    */
-    addBoxElement : function(element, measure){
-      this.elements.push(element);
-      this.curMeasure += measure;
-      this.charCount += (element.charCount || 0);
-      if(element.maxExtent){
-	this.maxExtent = Math.max(this.maxExtent, element.maxExtent);
-      } else {
-	this.maxExtent = Math.max(this.maxExtent, element.getLayoutExtent());
-      }
-      if(element.maxFontSize){
-	this.maxFontSize = Math.max(this.maxFontSize, element.maxFontSize);
-      }
-      if(element.breakAfter){
-	this.breakAfter = true;
-      }
-      if(element.hyphenated){
-	this.hyphenated = true;
-      }
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
-    */
-    getLastElement : function(){
-      return Nehan.List.last(this.elements);
-    },
-    /**
-       get all elements.
-
-       @memberof Nehan.InlineContext
-       @return {Array}
-    */
-    getElements : function(){
-      return this.elements;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {int}
-    */
-    getCurMeasure : function(){
-      return this.curMeasure;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {int}
-    */
-    getRestMeasure : function(){
-      return this.maxMeasure - this.curMeasure;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {int}
-    */
-    getMaxMeasure : function(){
-      return this.maxMeasure;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {int}
-    */
-    getMaxExtent : function(){
-      return this.isEmpty()? 0 : this.maxExtent;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {int}
-    */
-    getMaxFontSize : function(){
-      return this.maxFontSize;
-    },
-    /**
-       @memberof Nehan.InlineContext
-       @return {int}
-    */
-    getCharCount : function(){
-      return this.charCount;
-    },
-    /**
-       hyphenate(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if hyphenated.
-
-       @memberof Nehan.InlineContext
-       @param head {Nehan.Char} - head_char at next line.
-       @return {Nehan.Char | null}
-    */
-    hyphenateSweep : function(head){
-      var last = this.elements.length - 1;
-      var ptr = last;
-      var tail = this.elements[ptr] || null;
-      var is_tail_ng = function(tail){
-	return (tail && tail.isTailNg && tail.isTailNg())? true : false;
-      };
-      var is_head_ng = function(head){
-	return (head && head.isHeadNg && head.isHeadNg())? true : false;
-      };
-
-      if(!is_tail_ng(tail) && !is_head_ng(head)){
-	return null;
-      }
-
-      //console.log("start hyphenate:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng(tail), head, is_head_ng(head));
-
-      // if [word] is divided into [word1], [word2], then
-      //    [char][word]<br>[char(head_ng)]
-      // => [char][word1]<br>[word2][char(head_ng)]
-      // so nothing to hyphenate.
-      if(tail && tail instanceof Nehan.Word && tail.isDivided()){
-	return null;
-      }
-
-      while(ptr >= 0){
-	tail = this.elements[ptr];
-	if(is_head_ng(head) || is_tail_ng(tail)){
-	  head = tail;
-	  ptr--;
-	} else {
-	  break;
-	}
-      }
-      if(ptr < 0){
-	return tail;
-      }
-      // if ptr moved, justification is executed.
-      if(0 <= ptr && ptr < last){
-	// disable text after new tail pos.
-	this.elements = Nehan.List.filter(this.elements, function(element){
-	  return element.pos? (element.pos < head.pos) : true;
-	});
-	return head; // return new head
-      }
-      return null; // hyphenate failed or not required.
-    },
-    /**
-       hyphenate(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
-
-       @memberof Nehan.InlineContext
-       @param head {Nehan.Char}
-       @param head_next {Nehan.Char}
-       @return {bool}
-    */
-    hyphenateDangling : function(head, head_next){
-      if(!(head instanceof Nehan.Char) || !head.isHeadNg()){
-	return false;
-      }
-      if(head_next instanceof Nehan.Char && head_next.isHeadNg()){
-	return false;
-      }
-      return true;
+  /**
+   @memberof Nehan.InlineContext
+   @return {boolean}
+   */
+  InlineContext.prototype.isEmpty = function(){
+    return !this.lineBreak && !this.breakAfter && this.elements.length === 0;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @return {boolean}
+   */
+  InlineContext.prototype.isHyphenated = function(){
+    return this.hyphenated;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @return {boolean}
+   */
+  InlineContext.prototype.isLineOver= function(){
+    return this.lineOver;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @param measure {int}
+   @return {boolean}
+   */
+  InlineContext.prototype.hasSpaceFor = function(measure){
+    return this.getRestMeasure() >= measure;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @return {boolean}
+   */
+  InlineContext.prototype.hasLineBreak = function(){
+    return this.lineBreak;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @param status {boolean}
+   */
+  InlineContext.prototype.setLineBreak = function(status){
+    this.lineBreak = status;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @param status {boolean}
+   */
+  InlineContext.prototype.setLineOver = function(status){
+    this.lineOver = status;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @param status {boolean}
+   */
+  InlineContext.prototype.setHyphenated = function(status){
+    this.hyphenated = status;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @return {boolean}
+   */
+  InlineContext.prototype.hasBreakAfter = function(){
+    return this.breakAfter;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @param status {boolean}
+   */
+  InlineContext.prototype.setBreakAfter = function(status){
+    this.breakAfter = status;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @param measure {int}
+   */
+  InlineContext.prototype.addMeasure = function(measure){
+    this.curMeasure += measure;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @param element {Nehan.Box}
+   @param measure {int}
+   */
+  InlineContext.prototype.addTextElement = function(element, measure){
+    this.elements.push(element);
+    this.curMeasure += measure;
+    if(element.getCharCount){
+      this.charCount += element.getCharCount();
     }
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @param element {Nehan.Box}
+   @param measure {int}
+   */
+  InlineContext.prototype.addBoxElement = function(element, measure){
+    this.elements.push(element);
+    this.curMeasure += measure;
+    this.charCount += (element.charCount || 0);
+    if(element.maxExtent){
+      this.maxExtent = Math.max(this.maxExtent, element.maxExtent);
+    } else {
+      this.maxExtent = Math.max(this.maxExtent, element.getLayoutExtent());
+    }
+    if(element.maxFontSize){
+      this.maxFontSize = Math.max(this.maxFontSize, element.maxFontSize);
+    }
+    if(element.breakAfter){
+      this.breakAfter = true;
+    }
+    if(element.hyphenated){
+      this.hyphenated = true;
+    }
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
+   */
+  InlineContext.prototype.getLastElement = function(){
+    return Nehan.List.last(this.elements);
+  };
+  /**
+   get all elements.
+
+   @memberof Nehan.InlineContext
+   @return {Array}
+   */
+  InlineContext.prototype.getElements = function(){
+    return this.elements;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @return {int}
+   */
+  InlineContext.prototype.getCurMeasure = function(){
+    return this.curMeasure;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @return {int}
+   */
+  InlineContext.prototype.getRestMeasure = function(){
+    return this.maxMeasure - this.curMeasure;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @return {int}
+   */
+  InlineContext.prototype.getMaxMeasure = function(){
+    return this.maxMeasure;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @return {int}
+   */
+  InlineContext.prototype.getMaxExtent = function(){
+    return this.isEmpty()? 0 : this.maxExtent;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @return {int}
+   */
+  InlineContext.prototype.getMaxFontSize = function(){
+    return this.maxFontSize;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @return {int}
+   */
+  InlineContext.prototype.getCharCount = function(){
+    return this.charCount;
+  };
+  /**
+   hyphenate(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if hyphenated.
+
+   @memberof Nehan.InlineContext
+   @param head {Nehan.Char} - head_char at next line.
+   @return {Nehan.Char | null}
+   */
+  InlineContext.prototype.hyphenateSweep = function(head){
+    var last = this.elements.length - 1;
+    var ptr = last;
+    var tail = this.elements[ptr] || null;
+    var is_tail_ng = function(tail){
+      return (tail && tail.isTailNg && tail.isTailNg())? true : false;
+    };
+    var is_head_ng = function(head){
+      return (head && head.isHeadNg && head.isHeadNg())? true : false;
+    };
+
+    if(!is_tail_ng(tail) && !is_head_ng(head)){
+      return null;
+    }
+
+    //console.log("start hyphenate:tail:%o(tail NG:%o), head:%o(head NG:%o)", tail, is_tail_ng(tail), head, is_head_ng(head));
+
+    // if [word] is divided into [word1], [word2], then
+    //    [char][word]<br>[char(head_ng)]
+    // => [char][word1]<br>[word2][char(head_ng)]
+    // so nothing to hyphenate.
+    if(tail && tail instanceof Nehan.Word && tail.isDivided()){
+      return null;
+    }
+
+    while(ptr >= 0){
+      tail = this.elements[ptr];
+      if(is_head_ng(head) || is_tail_ng(tail)){
+	head = tail;
+	ptr--;
+      } else {
+	break;
+      }
+    }
+    if(ptr < 0){
+      return tail;
+    }
+    // if ptr moved, justification is executed.
+    if(0 <= ptr && ptr < last){
+      // disable text after new tail pos.
+      this.elements = Nehan.List.filter(this.elements, function(element){
+	return element.pos? (element.pos < head.pos) : true;
+      });
+      return head; // return new head
+    }
+    return null; // hyphenate failed or not required.
+  };
+  /**
+   hyphenate(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
+
+   @memberof Nehan.InlineContext
+   @param head {Nehan.Char}
+   @param head_next {Nehan.Char}
+   @return {bool}
+   */
+  InlineContext.prototype.hyphenateDangling = function(head, head_next){
+    if(!(head instanceof Nehan.Char) || !head.isHeadNg()){
+      return false;
+    }
+    if(head_next instanceof Nehan.Char && head_next.isHeadNg()){
+      return false;
+    }
+    return true;
   };
 
   return InlineContext;

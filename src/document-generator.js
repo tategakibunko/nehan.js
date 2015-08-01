@@ -16,52 +16,52 @@ var DocumentGenerator = (function(){
     this.generator = this._createGenerator();
   }
 
-  DocumentGenerator.prototype = {
-    /**
-       @memberof Nehan.DocumentGenerator
-       @return {Nehan.Box}
-    */
-    yield : function(){
-      return this.generator.yield();
-    },
-    /**
-       @memberof Nehan.DocumentGenerator
-       @return {boolean}
-    */
-    hasNext : function(){
-      return this.generator.hasNext();
-    },
-    /**
-       @memberof Nehan.DocumentGenerator
-       @param status {boolean}
-    */
-    setTerminate : function(status){
-      this.generator.setTerminate(status);
-    },
-    /**
-       @memberof Nehan.DocumentGenerator
-       @param text {String}
-    */
-    addText : function(text){
-      this.generator.addText(text);
-    },
-    _createGenerator : function(){
-      while(this.stream.hasNext()){
-	var tag = this.stream.get();
-	switch(tag.getName()){
-	case "!doctype":
-	  DocumentContext.setDocumentType("html"); // TODO
-	  break;
-	case "html":
-	  return this._createHtmlGenerator(tag);
-	}
+  /**
+   @memberof Nehan.DocumentGenerator
+   @return {Nehan.Box}
+   */
+  DocumentGenerator.prototype.yield = function(){
+    return this.generator.yield();
+  };
+  /**
+   @memberof Nehan.DocumentGenerator
+   @return {boolean}
+   */
+  DocumentGenerator.prototype.hasNext = function(){
+    return this.generator.hasNext();
+  };
+  /**
+   @memberof Nehan.DocumentGenerator
+   @param status {boolean}
+   */
+  DocumentGenerator.prototype.setTerminate = function(status){
+    this.generator.setTerminate(status);
+  };
+  /**
+   @memberof Nehan.DocumentGenerator
+   @param text {String}
+   */
+  DocumentGenerator.prototype.addText = function(text){
+    this.generator.addText(text);
+  };
+
+  DocumentGenerator.prototype._createGenerator = function(){
+    while(this.stream.hasNext()){
+      var tag = this.stream.get();
+      switch(tag.getName()){
+      case "!doctype":
+	DocumentContext.setDocumentType("html"); // TODO
+	break;
+      case "html":
+	return this._createHtmlGenerator(tag);
       }
-      var html_tag = new Nehan.Tag("<html>", this.stream.getSrc());
-      return this._createHtmlGenerator(html_tag);
-    },
-    _createHtmlGenerator : function(html_tag){
-      return new HtmlGenerator(html_tag.getContent());
     }
+    var html_tag = new Nehan.Tag("<html>", this.stream.getSrc());
+    return this._createHtmlGenerator(html_tag);
+  };
+
+  DocumentGenerator.prototype._createHtmlGenerator = function(html_tag){
+    return new HtmlGenerator(html_tag.getContent());
   };
 
   return DocumentGenerator;

@@ -13,23 +13,21 @@ Nehan.ListStyleImage = (function(){
     this.image = image;
   }
 
-  ListStyleImage.prototype = {
-    /**
-       @memberof Nehan.ListStyleImage
-       @param count {int}
-       @return {string}
-    */
-    getMarkerHtml : function(count){
-      var url = this.image.url;
-      var width = this.image.width || Nehan.Display.fontSize;
-      var height = this.image.height || Nehan.Display.fontSize;
-      return Nehan.Html.tagSingle("img", {
-	"src":url,
-	"class":"nehan-list-image",
-	"width":width,
-	"height":height
-      });
-    }
+  /**
+   @memberof Nehan.ListStyleImage
+   @param count {int}
+   @return {string}
+   */
+  ListStyleImage.prototype.getMarkerHtml = function(count){
+    var url = this.image.url;
+    var width = this.image.width || Nehan.Display.fontSize;
+    var height = this.image.height || Nehan.Display.fontSize;
+    return Nehan.Html.tagSingle("img", {
+      "src":url,
+      "class":"nehan-list-image",
+      "width":width,
+      "height":height
+    });
   };
 
   return ListStyleImage;

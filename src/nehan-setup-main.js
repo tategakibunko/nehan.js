@@ -18,60 +18,58 @@ function Engine(){
   this.selectors = Selectors;
 }
 
-Engine.prototype = {
-  /**
-     @memberof Nehan.Engine
-     @param text {String} - html text
-     @return {Nehan.PageStream}
-  */
-  createPageStream : function(text){
-    return new PageStream(text);
-  },
-  /**<pre>
-   * create outline element of "<body>",
-   * if multiple body exists, only first one is returned.
-   * about callback argument, see {@link Nehan.SectionTreeConverter}.
-   *</pre>
-     @memberof Nehan.Engine
-     @param callbacks {Object} - see {@link Nehan.SectionTreeConverter}
-   */
-  createOutlineElement : function(callbacks){
-    return this.documentContext.createBodyOutlineElement(callbacks);
-  },
-  /*
-    get the page index where [anchor_name] is defined in from {@link Nehan.DocumentContext}.
+/**
+ @memberof Nehan.Engine
+ @param text {String} - html text
+ @return {Nehan.PageStream}
+ */
+Engine.prototype.createPageStream = function(text){
+  return new PageStream(text);
+};
+/**<pre>
+ * create outline element of "<body>",
+ * if multiple body exists, only first one is returned.
+ * about callback argument, see {@link Nehan.SectionTreeConverter}.
+ *</pre>
+ @memberof Nehan.Engine
+ @param callbacks {Object} - see {@link Nehan.SectionTreeConverter}
+ */
+Engine.prototype.createOutlineElement = function(callbacks){
+  return this.documentContext.createBodyOutlineElement(callbacks);
+};
+/*
+ get the page index where [anchor_name] is defined in from {@link Nehan.DocumentContext}.
 
-    @memberof Nehan.Engine
-    @param anchor_name {String}
-  */
-  getAnchorPageNo : function(anchor_name){
-    return this.documentContext.getAnchorPageNo(anchor_name);
-  },
-  /**
-     set engine local style
+ @memberof Nehan.Engine
+ @param anchor_name {String}
+ */
+Engine.prototype.getAnchorPageNo = function(anchor_name){
+  return this.documentContext.getAnchorPageNo(anchor_name);
+};
+/**
+ set engine local style
 
-     @memberof Nehan.Engine
-     @example
-     * engine.setStyle("p", {"font-size":"1.6em"});
-  */
-  setStyle : function(selector_key, value){
-    this.selectors.setValue(selector_key, value);
-    return this;
-  },
-  /**
-     set engine local styles
+ @memberof Nehan.Engine
+ @example
+ * engine.setStyle("p", {"font-size":"1.6em"});
+ */
+Engine.prototype.setStyle = function(selector_key, value){
+  this.selectors.setValue(selector_key, value);
+  return this;
+};
+/**
+ set engine local styles
 
-     @memberof Nehan.Engine
-     @example
-     * engine.setStyles({
-     *   "body":{"font-size":18},
-     *   "a[href^=#]":{"background-color":"gold"}
-     * });
-  */
-  setStyles : function(values){
-    this.selectors.setValues(values);
-    return this;
-  }
+ @memberof Nehan.Engine
+ @example
+ * engine.setStyles({
+ *   "body":{"font-size":18},
+ *   "a[href^=#]":{"background-color":"gold"}
+ * });
+ */
+Engine.prototype.setStyles = function(values){
+  this.selectors.setValues(values);
+  return this;
 };
 
 // this is the returned value of Nehan.setup(defined in nehan-setup-start.js).

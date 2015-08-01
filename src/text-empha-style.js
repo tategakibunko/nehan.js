@@ -38,40 +38,38 @@ Nehan.TextEmphaStyle = (function(){
     this.value = value || "none";
   }
 
-  TextEmphaStyle.prototype = {
-    /**
-       @memberof Nehan.TextEmphaStyle
-       @return {bool}
-    */
-    isEnable : function(){
-      return this.value != "none";
-    },
-    /**
-       @memberof Nehan.TextEmphaStyle
-       @param value {String} - empha style name
-    */
-    setValue : function(value){
-      this.value = value;
-    },
-    /**
-       @memberof Nehan.TextEmphaStyle
-       @return {String}
-    */
-    getText : function(){
-      if(!this.isEnable()){
-	return "";
-      }
-      return __empha_marks[this.value] || this.value || __empha_marks[__default_empha_style];
-    },
-    /**
-       @memberof Nehan.TextEmphaStyle
-       @return {Object}
-    */
-    getCss : function(){
-      var css = {};
-      //return css["text-emphasis-style"] = this.value;
-      return css;
+  /**
+   @memberof Nehan.TextEmphaStyle
+   @return {bool}
+   */
+  TextEmphaStyle.prototype.isEnable = function(){
+    return this.value != "none";
+  };
+  /**
+   @memberof Nehan.TextEmphaStyle
+   @param value {String} - empha style name
+   */
+  TextEmphaStyle.prototype.setValue = function(value){
+    this.value = value;
+  };
+  /**
+   @memberof Nehan.TextEmphaStyle
+   @return {String}
+   */
+  TextEmphaStyle.prototype.getText = function(){
+    if(!this.isEnable()){
+      return "";
     }
+    return __empha_marks[this.value] || this.value || __empha_marks[__default_empha_style];
+  };
+  /**
+   @memberof Nehan.TextEmphaStyle
+   @return {Object}
+   */
+  TextEmphaStyle.prototype.getCss = function(){
+    var css = {};
+    //return css["text-emphasis-style"] = this.value;
+    return css;
   };
 
   return TextEmphaStyle;

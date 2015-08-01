@@ -12,63 +12,61 @@ Nehan.BoxSize = (function(){
     this.height = height; // content height
   }
 
-  BoxSize.prototype = {
-    /**
-       clone box size object with same values.
+  /**
+   clone box size object with same values.
 
-       @memberof Nehan.BoxSize
-       @return {Nehan.BoxSize}
-    */
-    clone : function(){
-      return new BoxSize(this.width, this.height);
-    },
-    /**
-       @memberof Nehan.BoxSize
-       @param flow {Nehan.BoxFlow}
-       @param extent {int}
-     */
-    setExtent : function(flow, extent){
-      this[flow.getPropExtent()] = extent;
-    },
-    /**
-       @memberof Nehan.BoxSize
-       @param flow {Nehan.BoxFlow}
-       @param measure {int}
-     */
-    setMeasure : function(flow, measure){
-      this[flow.getPropMeasure()] = measure;
-    },
-    /**
-       @memberof Nehan.BoxSize
-       @param flow {Nehan.BoxFlow}
-       @return {Object}
-     */
-    getCss : function(flow){
-      var css = {};
-      css.width = this.width + "px";
-      css.height = this.height + "px";
-      return css;
-    },
-    /**
-       get content size of measure
+   @memberof Nehan.BoxSize
+   @return {Nehan.BoxSize}
+   */
+  BoxSize.prototype.clone = function(){
+    return new BoxSize(this.width, this.height);
+  };
+  /**
+   @memberof Nehan.BoxSize
+   @param flow {Nehan.BoxFlow}
+   @param extent {int}
+   */
+  BoxSize.prototype.setExtent = function(flow, extent){
+    this[flow.getPropExtent()] = extent;
+  };
+  /**
+   @memberof Nehan.BoxSize
+   @param flow {Nehan.BoxFlow}
+   @param measure {int}
+   */
+  BoxSize.prototype.setMeasure = function(flow, measure){
+    this[flow.getPropMeasure()] = measure;
+  };
+  /**
+   @memberof Nehan.BoxSize
+   @param flow {Nehan.BoxFlow}
+   @return {Object}
+   */
+  BoxSize.prototype.getCss = function(flow){
+    var css = {};
+    css.width = this.width + "px";
+    css.height = this.height + "px";
+    return css;
+  };
+  /**
+   get content size of measure
 
-       @memberof Nehan.BoxSize
-       @param flow {Nehan.BoxFlow}
-       @return {int}
-     */
-    getMeasure : function(flow){
-      return this[flow.getPropMeasure()];
-    },
-    /**
-       get content size of extent
+   @memberof Nehan.BoxSize
+   @param flow {Nehan.BoxFlow}
+   @return {int}
+   */
+  BoxSize.prototype.getMeasure = function(flow){
+    return this[flow.getPropMeasure()];
+  };
+  /**
+   get content size of extent
 
-       @memberof Nehan.BoxSize
-       @param flow {Nehan.BoxFlow}
-       @return {int}
-    */
-    getExtent : function(flow){
-      return this[flow.getPropExtent()];
-    }
+   @memberof Nehan.BoxSize
+   @param flow {Nehan.BoxFlow}
+   @return {int}
+   */
+  BoxSize.prototype.getExtent = function(flow){
+    return this[flow.getPropExtent()];
   };
 
   return BoxSize;

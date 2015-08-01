@@ -18,42 +18,40 @@ Nehan.Flow = (function(){
     this.dir = dir;
   }
 
-  Flow.prototype = {
-    /**
-       @memberof Nehan.Flow
-       @param dir {String}
-    */
-    init : function(dir){
-      this.dir = dir;
-    },
-    /**
-       @memberof Nehan.Flow
-       @return {boolean}
-    */
-    isHorizontal : function(){
-      return (this.dir === "lr" || this.dir === "rl");
-    },
-    /**
-       @memberof Nehan.Flow
-       @return {boolean}
-    */
-    isVertical : function(){
-      return (this.dir === "tb");
-    },
-    /**
-       @memberof Nehan.Flow
-       @return {boolean}
-    */
-    isLeftToRight : function(){
-      return this.dir === "lr";
-    },
-    /**
-       @memberof Nehan.Flow
-       @return {boolean}
-    */
-    isRightToLeft : function(){
-      return this.dir === "rl";
-    }
+  /**
+   @memberof Nehan.Flow
+   @param dir {String}
+   */
+  Flow.prototype.init = function(dir){
+    this.dir = dir;
+  };
+  /**
+   @memberof Nehan.Flow
+   @return {boolean}
+   */
+  Flow.prototype.isHorizontal = function(){
+    return (this.dir === "lr" || this.dir === "rl");
+  };
+  /**
+   @memberof Nehan.Flow
+   @return {boolean}
+   */
+  Flow.prototype.isVertical = function(){
+    return (this.dir === "tb");
+  };
+  /**
+   @memberof Nehan.Flow
+   @return {boolean}
+   */
+  Flow.prototype.isLeftToRight = function(){
+    return this.dir === "lr";
+  };
+  /**
+   @memberof Nehan.Flow
+   @return {boolean}
+   */
+  Flow.prototype.isRightToLeft = function(){
+    return this.dir === "rl";
   };
 
   return Flow;

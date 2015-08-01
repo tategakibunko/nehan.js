@@ -10,21 +10,19 @@ Nehan.ListStylePos = (function(){
     this.pos = pos;
   }
 
-  ListStylePos.prototype = {
-    /**
-       @memberof Nehan.ListStylePos
-       @return {boolean}
-    */
-    isOutside : function(){
-      return this.pos === "outside";
-    },
-    /**
-       @memberof Nehan.ListStylePos
-       @return {boolean}
-    */
-    isInside : function(){
-      return this.pos === "inside";
-    }
+  /**
+   @memberof Nehan.ListStylePos
+   @return {boolean}
+   */
+  ListStylePos.prototype.isOutside = function(){
+    return this.pos === "outside";
+  };
+  /**
+   @memberof Nehan.ListStylePos
+   @return {boolean}
+   */
+  ListStylePos.prototype.isInside = function(){
+    return this.pos === "inside";
   };
 
   return ListStylePos;
