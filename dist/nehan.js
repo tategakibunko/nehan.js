@@ -1062,7 +1062,7 @@ Nehan.Obj = (function(){
     }
     if(obj instanceof Array) {
       copy = [];
-      for(var i = 0; i < obj.len; i++){
+      for(var i = 0; i < obj.length; i++){
         copy[i] = __clone(obj[i]);
       }
       return copy;
