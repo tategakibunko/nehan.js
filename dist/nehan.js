@@ -7197,7 +7197,8 @@ Nehan.Char = (function(){
       this.paddingEnd = Math.round(this.spaceRateEnd * font.size);
     }
     if(this.img && this.img === "tenten"){
-      this.bodySize = font.size;
+      this.bodySize = Math.round(font.size / 2);
+      this.paddingStart = this.paddingEnd = Math.round(font.size / 4);
     }
     if(!is_vert && !this.isRef && this.isHankaku()){
       this.bodySize = Math.round(font.size / 2);
@@ -7334,9 +7335,9 @@ Nehan.Char = (function(){
     case 12305:
       this._setImg("kakko18", 0.5, 0.5); break;
     case 65306:
-      this._setImg("tenten", 1, 1); break;
+      this._setImg("tenten", 0.5, 0.5); break;
     case 58:
-      this._setImg("tenten", 1, 1); break;
+      this._setImg("tenten", 0.5, 0.5); break;
     case 12290:
       this._setImg("kuten", 0.5, 0.5); break;
     case 65377:
@@ -8656,6 +8657,9 @@ Nehan.Spacing = {
     }
   },
   _setSpacingEnd : function(cur_char, next_text){
+    if(next_text instanceof Nehan.Char && next_text.isTenten()){
+      return;
+    }
     var space_rate = this._getTextSpaceEnd(cur_char, next_text);
     if(space_rate > 0){
       cur_char.spaceRateEnd = space_rate;
@@ -15679,7 +15683,7 @@ var TextGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
-      //console.log("[t:%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.data || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
+      console.log("[t:%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.data || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
       if(measure === 0){
 	break;
       }

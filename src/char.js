@@ -309,7 +309,8 @@ Nehan.Char = (function(){
       this.paddingEnd = Math.round(this.spaceRateEnd * font.size);
     }
     if(this.img && this.img === "tenten"){
-      this.bodySize = font.size;
+      this.bodySize = Math.round(font.size / 2);
+      this.paddingStart = this.paddingEnd = Math.round(font.size / 4);
     }
     if(!is_vert && !this.isRef && this.isHankaku()){
       this.bodySize = Math.round(font.size / 2);
@@ -446,9 +447,9 @@ Nehan.Char = (function(){
     case 12305:
       this._setImg("kakko18", 0.5, 0.5); break;
     case 65306:
-      this._setImg("tenten", 1, 1); break;
+      this._setImg("tenten", 0.5, 0.5); break;
     case 58:
-      this._setImg("tenten", 1, 1); break;
+      this._setImg("tenten", 0.5, 0.5); break;
     case 12290:
       this._setImg("kuten", 0.5, 0.5); break;
     case 65377:

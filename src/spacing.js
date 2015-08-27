@@ -46,6 +46,9 @@ Nehan.Spacing = {
     }
   },
   _setSpacingEnd : function(cur_char, next_text){
+    if(next_text instanceof Nehan.Char && next_text.isTenten()){
+      return;
+    }
     var space_rate = this._getTextSpaceEnd(cur_char, next_text);
     if(space_rate > 0){
       cur_char.spaceRateEnd = space_rate;
