@@ -62,6 +62,7 @@ Nehan.Char = (function(){
     var is_zenkaku = this.isZenkaku();
     var is_kakko_start = this.isKakkoStart();
     var is_kakko_end = this.isKakkoEnd();
+    var is_tenten = this.isTenten();
     var padding_enable = this.isPaddingEnable();
     if(__is_ie){
       css.height = "1em";
@@ -72,7 +73,7 @@ Nehan.Char = (function(){
     } else if(is_zenkaku && is_kakko_end && !padding_enable){
       css.height = "1em";
       css["margin-bottom"] = "-0.5em";
-    } else if(!is_kakko_start && !is_kakko_end && this.vscale < 1){
+    } else if(!is_kakko_start && !is_kakko_end && !is_tenten && this.vscale < 1){
       css.height = "0.5em";
       Nehan.Args.copy(css, this.getCssPadding(line));
     }
