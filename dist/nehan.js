@@ -7196,9 +7196,6 @@ Nehan.Char = (function(){
     if(this.spaceRateEnd){
       this.paddingEnd = Math.round(this.spaceRateEnd * font.size);
     }
-    if(this.img && this.img === "tenten"){
-      this.bodySize = Math.round(font.size / 2);
-    }
     if(!is_vert && !this.isRef && this.isHankaku()){
       this.bodySize = Math.round(font.size / 2);
     }
