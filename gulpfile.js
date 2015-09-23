@@ -16,7 +16,6 @@ var gulp = require("gulp");
 var concat = require("gulp-concat");
 var uglify = require("gulp-uglify");
 var rename = require("gulp-rename");
-var jshint = require("gulp-jshint");
 var ignore = require("gulp-ignore");
 
 // note that orders of these sources matter!
@@ -178,10 +177,4 @@ gulp.task("nehan.min.js", function(){
     .pipe(uglify({preserveComments:"some"}))
     .pipe(rename("nehan.min.js"))
     .pipe(gulp.dest("dist/"));
-});
-
-gulp.task("jshint", function(){
-  return gulp.src(["src/*.js", "!src/nehan-setup-start.js", "!src/nehan-setup-end.js"])
-    .pipe(jshint())
-    .pipe(jshint.reporter("jshint-stylish"));
 });
