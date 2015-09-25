@@ -8061,9 +8061,10 @@ Nehan.Ruby = (function(){
    */
   Ruby.prototype.getCssHoriRt = function(line){
     var css = {};
+    var rt_font_size = this.getRtFontSize();
     var offset = Math.floor((line.style.getFontSize() - this.getRtFontSize()) / 3);
-    css["font-size"] = this.getRtFontSize() + "px";
-    css["line-height"] = "1em";
+    css["font-size"] = rt_font_size + "px";
+    css["line-height"] = rt_font_size + "px";
     return css;
   };
   /**
