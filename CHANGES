@@ -6,6 +6,9 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 5.3.3
+========================
+
 version 5.3.2 2015/09/23
 ========================
 o Enable vertical glyph for Firefox(ver >= 41).
