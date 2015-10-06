@@ -413,6 +413,7 @@ Nehan.Client = (function(){
      @constructor
   */
   function Client(){
+    this.platform = navigator.platform.toLowerCase();
     this.userAgent = navigator.userAgent.toLowerCase();
     this.name = navigator.appName.toLowerCase();
     this.version = parseInt(navigator.appVersion, 10);
@@ -438,7 +439,7 @@ Nehan.Client = (function(){
    @return {boolean}
    */
   Client.prototype.isIphone = function(){
-    return this.userAgent.indexOf("iphone") >= 0;
+    return this.userAgent.indexOf("iphone") >= 0 && this.platform.indexOf("nintendo") < 0;
   };
   /**
    @memberof Nehan.Client
@@ -453,6 +454,13 @@ Nehan.Client = (function(){
    */
   Client.prototype.isIpad = function(){
     return this.userAgent.indexOf("ipad") >= 0;
+  };
+  /**
+   @memberof Nehan.Client
+   @return {boolean}
+   */
+  Client.prototype.isNintendoBrowser = function(){
+    return this.platform.indexOf("nintendo") >= 0;
   };
   /**
    @memberof Nehan.Client
@@ -572,7 +580,7 @@ Nehan.Env = (function(){
   var __client = new Nehan.Client();
   var __is_transform_enable = !(__client.isIE() && __client.version <= 8);
   var __is_ie_vert_glyph_enable = __client.isIE() && __client.version >= 10;
-  var __is_chrome_vert_glyph_enable = __client.isChrome() && __client.version >= 24;
+  var __is_chrome_vert_glyph_enable = __client.isChrome() && __client.version >= 24 && !__client.isNintendoBrowser();
   var __is_safari_vert_glyph_enable = __client.isSafari() && __client.version >= 5;
   var __is_firefox_vert_glyph_enable = __client.isFirefox() && __client.version >= 41;
   var __is_vertical_glyph_enable = (

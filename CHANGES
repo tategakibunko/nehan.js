@@ -8,6 +8,7 @@ Mark "!": change that can break compatibility with older version
 
 version 5.3.3
 ========================
+* Disabled vertical glyph on nintendo browser.
 
 version 5.3.2 2015/09/23
 ========================

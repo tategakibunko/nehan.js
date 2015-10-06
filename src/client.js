@@ -6,6 +6,7 @@ Nehan.Client = (function(){
      @constructor
   */
   function Client(){
+    this.platform = navigator.platform.toLowerCase();
     this.userAgent = navigator.userAgent.toLowerCase();
     this.name = navigator.appName.toLowerCase();
     this.version = parseInt(navigator.appVersion, 10);
@@ -31,7 +32,7 @@ Nehan.Client = (function(){
    @return {boolean}
    */
   Client.prototype.isIphone = function(){
-    return this.userAgent.indexOf("iphone") >= 0;
+    return this.userAgent.indexOf("iphone") >= 0 && this.platform.indexOf("nintendo") < 0;
   };
   /**
    @memberof Nehan.Client
@@ -46,6 +47,13 @@ Nehan.Client = (function(){
    */
   Client.prototype.isIpad = function(){
     return this.userAgent.indexOf("ipad") >= 0;
+  };
+  /**
+   @memberof Nehan.Client
+   @return {boolean}
+   */
+  Client.prototype.isNintendoBrowser = function(){
+    return this.platform.indexOf("nintendo") >= 0;
   };
   /**
    @memberof Nehan.Client
