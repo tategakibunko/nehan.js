@@ -29,6 +29,8 @@
   -moz-box-sizing:content-box !important;
   -webkit-box-sizing:content-box !important;
   box-sizing:content-box !important;
+}
+.nehan-vert-glyph {
   max-height:1em; /* for MS Edge browser */
 }
 .nehan-inline.nehan-inline-tb-rl,
