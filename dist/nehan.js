@@ -13906,7 +13906,12 @@ var StyleContext = (function(){
     if(line.hasLineBreak || rest_space >= max_thres || rest_space === 0){
       return;
     }
-    var text_elements = line.getTextElements();
+    // 2015/10/8 update
+    // skip recursive child inline, only select text element of root line.
+    //var text_elements = line.getTextElements();
+    var text_elements = Nehan.List.filter(line.elements, function(element){
+      return (element instanceof Box === false);
+    });
     if(text_elements.length === 0){
       return;
     }
