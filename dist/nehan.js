@@ -13906,12 +13906,18 @@ var StyleContext = (function(){
     if(line.hasLineBreak || rest_space >= max_thres || rest_space === 0){
       return;
     }
-    // 2015/10/8 update
-    // skip recursive child inline, only select text element of root line.
-    //var text_elements = line.getTextElements();
-    var text_elements = Nehan.List.filter(line.elements, function(element){
-      return (element instanceof Box === false);
-    });
+
+    var filter_text = function(elements){
+      return Nehan.List.fold(elements, [], function(ret, element){
+	if(element instanceof Box){
+	  // 2015/10/8 update
+	  // skip recursive child inline, only select text element of root line.
+	  return element.isTextBlock()? ret.concat(filter_text(element.elements || [])) : ret;
+	}
+	return element? ret.concat(element) : ret;
+      });
+    };
+    var text_elements = filter_text(line.elements);
     if(text_elements.length === 0){
       return;
     }
