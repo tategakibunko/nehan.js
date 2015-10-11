@@ -40,7 +40,7 @@ var InlineGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
-      //console.log("[i:%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.toString() || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
+      //console.log("[i:%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.toString() || ""), measure, (context.inline.curMeasure + measure), context.inline.maxMeasure);
       if(measure === 0){
 	break;
       }

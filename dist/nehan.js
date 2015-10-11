@@ -15459,7 +15459,7 @@ var InlineGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
-      //console.log("[i:%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.toString() || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
+      //console.log("[i:%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.toString() || ""), measure, (context.inline.curMeasure + measure), context.inline.maxMeasure);
       if(measure === 0){
 	break;
       }
@@ -15693,12 +15693,7 @@ var TextGenerator = (function(){
     if(!context.hasInlineSpaceFor(1)){
       return null;
     }
-    var next_head = Nehan.Config.hyphenate? this._peekParentNextToken() : null;
-    var next_head_char = next_head? this._peekParentNextHeadChar(next_head) : null;
-    var next_head_measure = next_head? this._estimateParentNextHeadMeasure(next_head) : this.style.getFontSize();
-    var is_next_head_ng = next_head_char? next_head_char.isHeadNg() : false;
     var is_head_output = this.style.contentMeasure === context.getInlineMaxMeasure();
-    //console.log("[t:%s]next head:%o, next_head_char:%s, next size:%d", this.style.markupName, next_head, (next_head_char? next_head_char.data : "null"), next_head_measure);
 
     while(this.hasNext()){
       var element = this._getNext(context);
@@ -15706,7 +15701,7 @@ var TextGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
-      //console.log("[t:%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.data || ""), measure, context.inline.curMeasure, context.inline.maxMeasure);
+      //console.log("[t:%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.data || ""), measure, (context.inline.curMeasure + measure), context.inline.maxMeasure);
       if(measure === 0){
 	break;
       }
@@ -15715,18 +15710,6 @@ var TextGenerator = (function(){
 	var next = this.stream.peek();
 	if(next && next instanceof Nehan.Word){
 	  continue; // skip head space
-	}
-      }
-      // if token is last one and maybe tail text, check tail/head NG between two inline generators.
-      if(Nehan.Config.hyphenate && !this.stream.hasNext() && !context.hasInlineSpaceFor(measure + next_head_measure)){
-	// avoid tail/head NG between two generators
-	if(element instanceof Nehan.Char && element.isTailNg() || is_next_head_ng){
-	  context.setLineBreak(true);
-	  context.setHyphenated(true);
-	  //console.log("hyphenated at %o:type:%s", (element.data || ""), (is_next_head_ng? "head" : "tail"));
-	  //console.log("next head:%s", (next_head_char? next_head_char.data : ""));
-	  this.pushCache(element);
-	  break;
 	}
       }
       if(!context.hasInlineSpaceFor(measure)){
@@ -15851,9 +15834,12 @@ var TextGenerator = (function(){
     // hyphenate by sweep.
     var new_head = context.hyphenateSweep(old_head, head_next); // if fixed, new_head token is returned.
     if(new_head){
-      //console.log("old_head:%o, new_head:%o", old_head, new_head);
-      var hyphenated_measure = (new_head.pos - old_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
-      context.addInlineMeasure(hyphenated_measure);
+      //console.log("hyphenate by sweep:old_head:%o, new_head:%o", old_head, new_head);
+      var hyphenated_measure = new_head.bodySize || 0;
+      if(Math.abs(new_head.pos - old_head.pos) > 1){
+	hyphenated_measure = Math.abs(new_head.pos - old_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
+      }
+      context.addInlineMeasure(-1 * hyphenated_measure); // subtract sweeped measure.
       //console.log("hyphenate and new head:%o", new_head);
       this.stream.setPos(new_head.pos);
       context.setLineBreak(true);
