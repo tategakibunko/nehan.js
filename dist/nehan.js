@@ -15785,14 +15785,15 @@ var TextGenerator = (function(){
   };
 
   TextGenerator.prototype._peekParentNextHeadChar = function(token){
+    var head_c1;
     if(token instanceof Nehan.Text){
-      var head_c1 = token.getContent().substring(0,1);
+      head_c1 = token.getContent().substring(0,1);
       return new Nehan.Char(head_c1);
     } else if(token instanceof Nehan.Tag){
       if(token.name === "ruby"){
 	return null; // generally, ruby is not both tail-NG and head-NG.
       }
-      var head_c1 = token.getContent().replace(/^[\s]*<[^>]+>/, "").substring(0,1);
+      head_c1 = token.getContent().replace(/^[\s]*<[^>]+>/, "").substring(0,1);
       return new Nehan.Char(head_c1);
     }
     return null;
