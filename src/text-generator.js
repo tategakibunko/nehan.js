@@ -113,14 +113,14 @@ var TextGenerator = (function(){
     return (root_line && root_line.stream)? root_line.stream : null;
   };
 
-  TextGenerator.prototype._peekParentNextToken = function(){
+  TextGenerator.prototype._peekSiblingNextToken = function(){
     var sibling_stream = this._getSiblingStream();
     return sibling_stream? sibling_stream.peek() : null;
   };
 
-  TextGenerator.prototype._peekParentNextHeadChar = function(){
+  TextGenerator.prototype._peekSiblingNextHeadChar = function(){
     var head_c1;
-    var token = this._peekParentNextToken();
+    var token = this._peekSiblingNextToken();
     if(token instanceof Nehan.Text){
       head_c1 = token.getContent().substring(0,1);
       return new Nehan.Char(head_c1);
