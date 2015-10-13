@@ -101,7 +101,7 @@ var TextGenerator = (function(){
     return line;
   };
 
-  TextGenerator.prototype._peekParentNextToken = function(){
+  TextGenerator.prototype._getSiblingStream = function(){
     if(this.style.markupName === "rt"){
       return null;
     }
@@ -110,21 +110,23 @@ var TextGenerator = (function(){
       root_line = root_line._parent || null;
     }
     root_line = root_line || this._parent;
-    return (root_line && root_line.stream)? root_line.stream.peek() : null;
+    return (root_line && root_line.stream)? root_line.stream : null;
   };
 
-  TextGenerator.prototype._peekParentNextHeadChar = function(token){
+  TextGenerator.prototype._peekParentNextToken = function(){
+    var sibling_stream = this._getSiblingStream();
+    return sibling_stream? sibling_stream.peek() : null;
+  };
+
+  TextGenerator.prototype._peekParentNextHeadChar = function(){
     var head_c1;
+    var token = this._peekParentNextToken();
     if(token instanceof Nehan.Text){
       head_c1 = token.getContent().substring(0,1);
       return new Nehan.Char(head_c1);
-    } else if(token instanceof Nehan.Tag){
-      if(token.name === "ruby"){
-	return null; // generally, ruby is not both tail-NG and head-NG.
-      }
-      head_c1 = token.getContent().replace(/^[\s]*<[^>]+>/, "").substring(0,1);
-      return new Nehan.Char(head_c1);
     }
+    // if parent next token is not Nehan::Text,
+    // it's hard to find first character, so skip it.
     return null;
   };
 
