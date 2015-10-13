@@ -15747,7 +15747,7 @@ var TextGenerator = (function(){
     return line;
   };
 
-  TextGenerator.prototype._getSiblingStream = function(){
+  TextGenerator.prototype._getSiblingGenerator = function(){
     if(this.style.markupName === "rt"){
       return null;
     }
@@ -15755,8 +15755,12 @@ var TextGenerator = (function(){
     while(root_line && root_line.style === this.style){
       root_line = root_line._parent || null;
     }
-    root_line = root_line || this._parent;
-    return (root_line && root_line.stream)? root_line.stream : null;
+    return root_line || this._parent || null;
+  };
+
+  TextGenerator.prototype._getSiblingStream = function(){
+    var sibling_gen = this._getSiblingGenerator();
+    return (sibling_gen && sibling_gen.stream)? sibling_gen.stream : null;
   };
 
   TextGenerator.prototype._peekSiblingNextToken = function(){
