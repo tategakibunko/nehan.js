@@ -149,7 +149,11 @@ var TextGenerator = (function(){
     // hyphenate by dangling.
     var head_next = this.stream.peek();
     head_next = (head_next && old_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
-    if(Nehan.Config.danglingHyphenate && context.hyphenateDangling(old_head, head_next) === true){
+    var is_single_head_ng = function(head, head_next){
+      return (head instanceof Nehan.Char && head.isHeadNg()) &&
+	!(head_next instanceof Nehan.Char && head_next.isHeadNg());
+    };
+    if(Nehan.Config.danglingHyphenate && is_single_head_ng(old_head, head_next)){
       this._addElement(context, old_head, 0); // push tail as zero element
       if(head_next){
 	this.stream.setPos(head_next.pos);
@@ -164,7 +168,7 @@ var TextGenerator = (function(){
     // hyphenate by sweep.
     var new_head = context.hyphenateSweep(old_head, head_next); // if fixed, new_head token is returned.
     if(new_head){
-      //console.log("hyphenate by sweep:old_head:%o, new_head:%o", old_head, new_head);
+      console.log("hyphenate by sweep:old_head:%o, new_head:%o", old_head, new_head);
       var hyphenated_measure = new_head.bodySize || 0;
       if(Math.abs(new_head.pos - old_head.pos) > 1){
 	hyphenated_measure = Math.abs(new_head.pos - old_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.

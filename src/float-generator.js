@@ -122,7 +122,7 @@ var FloatGenerator = (function(){
       |  rest_extent_space     | => rest_extent - group_set.extent
       --------------------------
     */
-    // if there is space in block-flow direction, yield rest space and wrap tfloated-set and rest-space as one.
+    // if there is space in block-flow direction, yield rest space and wrap them(floated-set and rest-space).
     var space = this._yieldFloatSpace(context, prev_group, rest_measure, rest_extent_space);
     return this._wrapBlocks([group_set, space]);
   };

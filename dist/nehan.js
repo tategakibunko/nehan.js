@@ -9136,16 +9136,6 @@ Nehan.LayoutContext = (function(){
   LayoutContext.prototype.hyphenateSweep = function(head_char){
     return this.inline.hyphenateSweep(head_char);
   };
-  /**
-   hyphenate(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
-   @memberof Nehan.LayoutContext
-   @param head_char {Nehan.Char}
-   @param head_next {Nehan.Char}
-   @return {Nehan.Char | null}
-   */
-  LayoutContext.prototype.hyphenateDangling = function(head_char, head_next){
-    return this.inline.hyphenateDangling(head_char, head_next);
-  };
 
   return LayoutContext;
 })();
@@ -9505,24 +9495,7 @@ Nehan.InlineContext = (function(){
     }
     return null; // hyphenate failed or not required.
   };
-  /**
-   hyphenate(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
-
-   @memberof Nehan.InlineContext
-   @param head {Nehan.Char}
-   @param head_next {Nehan.Char}
-   @return {bool}
-   */
-  InlineContext.prototype.hyphenateDangling = function(head, head_next){
-    if(!(head instanceof Nehan.Char) || !head.isHeadNg()){
-      return false;
-    }
-    if(head_next instanceof Nehan.Char && head_next.isHeadNg()){
-      return false;
-    }
-    return true;
-  };
-
+  
   return InlineContext;
 })();
 
@@ -15817,12 +15790,18 @@ var TextGenerator = (function(){
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var old_head = this.peekLastCache() || this.stream.peek();
     if(old_head === null){
+      console.log("no next");
       return;
     }
     // hyphenate by dangling.
     var head_next = this.stream.peek();
     head_next = (head_next && old_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
-    if(Nehan.Config.danglingHyphenate && context.hyphenateDangling(old_head, head_next) === true){
+    var is_single_head_ng = function(head, head_next){
+      return (head instanceof Nehan.Char && head.isHeadNg()) &&
+	!(head_next instanceof Nehan.Char && head_next.isHeadNg());
+    };
+    console.log("original head:%o, next head:%o", old_head, head_next);
+    if(Nehan.Config.danglingHyphenate && is_single_head_ng(old_head, head_next)){
       this._addElement(context, old_head, 0); // push tail as zero element
       if(head_next){
 	this.stream.setPos(head_next.pos);
@@ -15837,7 +15816,7 @@ var TextGenerator = (function(){
     // hyphenate by sweep.
     var new_head = context.hyphenateSweep(old_head, head_next); // if fixed, new_head token is returned.
     if(new_head){
-      //console.log("hyphenate by sweep:old_head:%o, new_head:%o", old_head, new_head);
+      console.log("hyphenate by sweep:old_head:%o, new_head:%o", old_head, new_head);
       var hyphenated_measure = new_head.bodySize || 0;
       if(Math.abs(new_head.pos - old_head.pos) > 1){
 	hyphenated_measure = Math.abs(new_head.pos - old_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
@@ -16257,7 +16236,7 @@ var FloatGenerator = (function(){
       |  rest_extent_space     | => rest_extent - group_set.extent
       --------------------------
     */
-    // if there is space in block-flow direction, yield rest space and wrap tfloated-set and rest-space as one.
+    // if there is space in block-flow direction, yield rest space and wrap them(floated-set and rest-space).
     var space = this._yieldFloatSpace(context, prev_group, rest_measure, rest_extent_space);
     return this._wrapBlocks([group_set, space]);
   };

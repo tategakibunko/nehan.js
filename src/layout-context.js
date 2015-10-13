@@ -226,16 +226,6 @@ Nehan.LayoutContext = (function(){
   LayoutContext.prototype.hyphenateSweep = function(head_char){
     return this.inline.hyphenateSweep(head_char);
   };
-  /**
-   hyphenate(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
-   @memberof Nehan.LayoutContext
-   @param head_char {Nehan.Char}
-   @param head_next {Nehan.Char}
-   @return {Nehan.Char | null}
-   */
-  LayoutContext.prototype.hyphenateDangling = function(head_char, head_next){
-    return this.inline.hyphenateDangling(head_char, head_next);
-  };
 
   return LayoutContext;
 })();

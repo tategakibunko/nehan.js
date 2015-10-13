@@ -245,24 +245,7 @@ Nehan.InlineContext = (function(){
     }
     return null; // hyphenate failed or not required.
   };
-  /**
-   hyphenate(by dangling) inline element with next head character, return null if nothing happend, or return true if dangling is ready.
-
-   @memberof Nehan.InlineContext
-   @param head {Nehan.Char}
-   @param head_next {Nehan.Char}
-   @return {bool}
-   */
-  InlineContext.prototype.hyphenateDangling = function(head, head_next){
-    if(!(head instanceof Nehan.Char) || !head.isHeadNg()){
-      return false;
-    }
-    if(head_next instanceof Nehan.Char && head_next.isHeadNg()){
-      return false;
-    }
-    return true;
-  };
-
+  
   return InlineContext;
 })();
 
