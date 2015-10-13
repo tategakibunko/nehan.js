@@ -15814,7 +15814,7 @@ var TextGenerator = (function(){
     // hyphenate by sweep.
     var new_head = context.hyphenateSweep(old_head, head_next); // if fixed, new_head token is returned.
     if(new_head){
-      console.log("hyphenate by sweep:old_head:%o, new_head:%o", old_head, new_head);
+      //console.log("hyphenate by sweep:old_head:%o, new_head:%o", old_head, new_head);
       var hyphenated_measure = new_head.bodySize || 0;
       if(Math.abs(new_head.pos - old_head.pos) > 1){
 	hyphenated_measure = Math.abs(new_head.pos - old_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
