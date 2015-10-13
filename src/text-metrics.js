@@ -7,7 +7,6 @@ Nehan.TextMetrics = (function(){
   var __span = (function(){
     var span = document.createElement("span");
     Nehan.Args.copy(span.style, {
-      display:"inline-block",
       margin:0,
       padding:0,
       border:0,
@@ -32,7 +31,9 @@ Nehan.TextMetrics = (function(){
       style.font = font.toString();
       __span.innerHTML = text;
       body.appendChild(__span);
-      var metrics = {width:__span.offsetWidth, height:__span.offsetHeight};
+      var rect = __span.getBoundingClientRect();
+      var metrics = {width:rect.right - rect.left, height:rect.bottom - rect.top};
+      //var metrics = {width:__span.offsetWidth, height:__span.offsetHeight};
       body.removeChild(__span);
       //console.log("metrics(%s):(%d,%d)", text, metrics.width, metrics.height);
       return metrics;
