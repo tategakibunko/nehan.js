@@ -15790,7 +15790,6 @@ var TextGenerator = (function(){
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var old_head = this.peekLastCache() || this.stream.peek();
     if(old_head === null){
-      console.log("no next");
       return;
     }
     // hyphenate by dangling.
@@ -15800,7 +15799,6 @@ var TextGenerator = (function(){
       return (head instanceof Nehan.Char && head.isHeadNg()) &&
 	!(head_next instanceof Nehan.Char && head_next.isHeadNg());
     };
-    console.log("original head:%o, next head:%o", old_head, head_next);
     if(Nehan.Config.danglingHyphenate && is_single_head_ng(old_head, head_next)){
       this._addElement(context, old_head, 0); // push tail as zero element
       if(head_next){
