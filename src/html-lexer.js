@@ -67,6 +67,7 @@ Nehan.HtmlLexer = (function (){
     }); // convert close tag to lower case(for innerHTML of IE)
     src = __replace_single_close_tags(src);
     src = src.replace(/\r/g, ""); // discard CR
+    src = src.replace(/’/g, "'"); // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
     if(flow && flow.isTextVertical()){
       src = src
 	.replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
