@@ -36,15 +36,6 @@ Nehan.Config = {
   hyphenate:true,
 
   /**
-     is dangling hyphenate enable?
-     Note that this property is enabled only when Nehan.Config.hyphenate is enabled.
-     @memberof Nehan.Config
-     @type {boolean}
-     @default true
-  */
-  danglingHyphenate:true,
-
-  /**
      max rety count when something troubles.
      @memberof Nehan.Config
      @type {int}

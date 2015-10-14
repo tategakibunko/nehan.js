@@ -222,6 +222,10 @@ var StyleContext = (function(){
     if(white_space){
       this.whiteSpace = white_space;
     }
+    var hanging_punctuation = this._loadHangingPunctuation();
+    if(hanging_punctuation){
+      this.hangingPunctuation = hanging_punctuation;
+    }
     // static size is defined in selector or tag attr, hightest priority
     this.staticMeasure = this._loadStaticMeasure();
     this.staticExtent = this._loadStaticExtent();
@@ -602,7 +606,7 @@ var StyleContext = (function(){
     line.content = content;
     line.isRootLine = is_root_line;
     line.hasLineBreak = opt.hasLineBreak || false;
-    line.dangling = opt.dangling || null;
+    line.hangingPunctuation = opt.hangingPunctuation || null;
 
     // edge of top level line is disabled.
     // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
@@ -681,7 +685,7 @@ var StyleContext = (function(){
     line.hasLineBreak = opt.hasLineBreak || false;
     line.hyphenated = opt.hyphenated || false;
     line.lineOver = opt.lineOver || false;
-    line.dangling = opt.dangling || null;
+    line.hangingPunctuation = opt.hangingPunctuation || null;
     //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
     return line;
   };
@@ -2298,6 +2302,11 @@ var StyleContext = (function(){
   StyleContext.prototype._loadWhiteSpace = function(){
     var inherit = this.parent? this.parent.whiteSpace : "normal";
     return this.getCssAttr("white-space", inherit);
+  };
+
+  StyleContext.prototype._loadHangingPunctuation = function(){
+    var inherit = this.parent? this.parent.hangingPunctuation : "none";
+    return this.getCssAttr("hanging-punctuation", inherit);
   };
 
   StyleContext.prototype._loadListStyle = function(){

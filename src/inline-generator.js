@@ -49,12 +49,12 @@ var InlineGenerator = (function(){
 	break;
       }
       this._addElement(context, element, measure);
-      if(element.dangling){
-	if(element.dangling.style === this.style){
-	  var chr = this._yieldDanglingChar(context, element.dangling.data);
+      if(element.hangingPunctuation){
+	if(element.hangingPunctuation.style === this.style){
+	  var chr = this._yieldHangingChar(context, element.hangingPunctuation.data);
 	  this._addElement(context, chr, 0);
 	} else {
-	  context.setDangling(element.dangling); // inherit dangling data to parent generator
+	  context.setHangingPunctuation(element.hangingPunctuation); // inherit dangling data to parent generator
 	}
       }
       if(element.hasLineBreak){
@@ -71,7 +71,7 @@ var InlineGenerator = (function(){
     return this._createOutput(context);
   };
 
-  InlineGenerator.prototype._yieldDanglingChar = function(context, chr){
+  InlineGenerator.prototype._yieldHangingChar = function(context, chr){
     chr.setMetrics(this.style.flow, this.style.getFont());
     var font_size = this.style.getFontSize();
     return this.style.createTextBlock({
@@ -107,7 +107,7 @@ var InlineGenerator = (function(){
       charCount:context.getInlineCharCount(),
       maxExtent:(context.getInlineMaxExtent() || this.style.getFontSize()),
       maxFontSize:context.getInlineMaxFontSize(),
-      dangling:context.getDangling()
+      hangingPunctuation:context.getHangingPunctuation()
     });
 
     //console.log("%o create output(%s): conetxt max measure = %d, context:%o", this, line.toString(), context.inline.maxMeasure, context);

@@ -82,7 +82,7 @@ var TextGenerator = (function(){
       charCount:context.getInlineCharCount(),
       maxExtent:context.getInlineMaxExtent(),
       maxFontSize:context.getInlineMaxFontSize(),
-      dangling:context.getDangling(),
+      hangingPunctuation:context.getHangingPunctuation(),
       isEmpty:context.isInlineEmpty()
     });
 
@@ -140,9 +140,9 @@ var TextGenerator = (function(){
     var next_token = generator.stream.peek();
     var tail = context.getInlineLastElement();
     var head = (next_token instanceof Nehan.Text)? next_token.getHeadChar() : null;
-    if(Nehan.Config.danglingHyphenate && head && head.isHeadNg()){
+    if(this.style.hangingPunctuation === "allow-end" && head && head.isHeadNg()){
       next_token.cutHeadChar();
-      context.setDangling({
+      context.setHangingPunctuation({
 	data:head,
 	style:this._getSiblingGenerator().style
       });
@@ -166,14 +166,14 @@ var TextGenerator = (function(){
       }
       return;
     }
-    // hyphenate by dangling.
+    // hyphenate by hanging punctuation.
     var head_next = this.stream.peek();
     head_next = (head_next && orig_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
     var is_single_head_ng = function(head, head_next){
       return (head instanceof Nehan.Char && head.isHeadNg()) &&
 	!(head_next instanceof Nehan.Char && head_next.isHeadNg());
     };
-    if(Nehan.Config.danglingHyphenate && is_single_head_ng(orig_head, head_next)){
+    if(this.style.hangingPunctuation === "allow-end" && is_single_head_ng(orig_head, head_next)){
       this._addElement(context, orig_head, 0); // push tail as zero element
       if(head_next){
 	this.stream.setPos(head_next.pos);

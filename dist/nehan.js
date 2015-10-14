@@ -72,15 +72,6 @@ Nehan.Config = {
   hyphenate:true,
 
   /**
-     is dangling hyphenate enable?
-     Note that this property is enabled only when Nehan.Config.hyphenate is enabled.
-     @memberof Nehan.Config
-     @type {boolean}
-     @default true
-  */
-  danglingHyphenate:true,
-
-  /**
      max rety count when something troubles.
      @memberof Nehan.Config
      @type {int}
@@ -9064,14 +9055,14 @@ Nehan.LayoutContext = (function(){
     this.inline.setHyphenated(status);
   };
   /**
-   set dangling hyphenation across multiple inline-generators.
+   set hanging punctuation across multiple inline-generators.
 
    [example]
    Think text-gen1(foo) and text-gen2(, and fuga),
    and assume that 'foo' is at the tail of line,
    and ', and fuga' is at the head of next line.
 
-     ## before dangling
+     ## before
      body
        span
          text-gen1(foo)
@@ -9079,7 +9070,7 @@ Nehan.LayoutContext = (function(){
      
    But ',' is head-NG, so ',' is borrowed to text-gen1, and content of text-gen2 is sliced.
 
-     ## after dangling
+     ## after
      body
        span
          text-gen1(foo,)
@@ -9090,15 +9081,15 @@ Nehan.LayoutContext = (function(){
    @param dangling.data {Nehan.Char}
    @param dangline.style {Nehan.StyleContext}
    */
-  LayoutContext.prototype.setDangling = function(dangling){
-    this._dangling = dangling;
+  LayoutContext.prototype.setHangingPunctuation = function(hunging_punctuation){
+    this._hangingPunctuation = hunging_punctuation;
   };
   /**
    @memberof Nehan.LayoutContext
    @return danglingData {Object}
    */
-  LayoutContext.prototype.getDangling = function(){
-    return this._dangling || null;
+  LayoutContext.prototype.getHangingPunctuation = function(){
+    return this._hangingPunctuation || null;
   };
   /**
    @memberof Nehan.LayoutContext
@@ -10363,7 +10354,8 @@ var Style = {
   "body":{
     "display":"block",
     //"box-sizing":"content-box",
-    "section-root":true
+    "section-root":true,
+    "hanging-punctuation":"allow-end"
   },
   "br":{
     "display":"inline"
@@ -12540,6 +12532,10 @@ var StyleContext = (function(){
     if(white_space){
       this.whiteSpace = white_space;
     }
+    var hanging_punctuation = this._loadHangingPunctuation();
+    if(hanging_punctuation){
+      this.hangingPunctuation = hanging_punctuation;
+    }
     // static size is defined in selector or tag attr, hightest priority
     this.staticMeasure = this._loadStaticMeasure();
     this.staticExtent = this._loadStaticExtent();
@@ -12920,7 +12916,7 @@ var StyleContext = (function(){
     line.content = content;
     line.isRootLine = is_root_line;
     line.hasLineBreak = opt.hasLineBreak || false;
-    line.dangling = opt.dangling || null;
+    line.hangingPunctuation = opt.hangingPunctuation || null;
 
     // edge of top level line is disabled.
     // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
@@ -12999,7 +12995,7 @@ var StyleContext = (function(){
     line.hasLineBreak = opt.hasLineBreak || false;
     line.hyphenated = opt.hyphenated || false;
     line.lineOver = opt.lineOver || false;
-    line.dangling = opt.dangling || null;
+    line.hangingPunctuation = opt.hangingPunctuation || null;
     //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
     return line;
   };
@@ -14618,6 +14614,11 @@ var StyleContext = (function(){
     return this.getCssAttr("white-space", inherit);
   };
 
+  StyleContext.prototype._loadHangingPunctuation = function(){
+    var inherit = this.parent? this.parent.hangingPunctuation : "none";
+    return this.getCssAttr("hanging-punctuation", inherit);
+  };
+
   StyleContext.prototype._loadListStyle = function(){
     var list_style_type = this.getCssAttr("list-style-type", "none");
     if(list_style_type === "none"){
@@ -15512,12 +15513,12 @@ var InlineGenerator = (function(){
 	break;
       }
       this._addElement(context, element, measure);
-      if(element.dangling){
-	if(element.dangling.style === this.style){
-	  var chr = this._yieldDanglingChar(context, element.dangling.data);
+      if(element.hangingPunctuation){
+	if(element.hangingPunctuation.style === this.style){
+	  var chr = this._yieldHangingChar(context, element.hangingPunctuation.data);
 	  this._addElement(context, chr, 0);
 	} else {
-	  context.setDangling(element.dangling); // inherit dangling data to parent generator
+	  context.setHangingPunctuation(element.hangingPunctuation); // inherit dangling data to parent generator
 	}
       }
       if(element.hasLineBreak){
@@ -15534,7 +15535,7 @@ var InlineGenerator = (function(){
     return this._createOutput(context);
   };
 
-  InlineGenerator.prototype._yieldDanglingChar = function(context, chr){
+  InlineGenerator.prototype._yieldHangingChar = function(context, chr){
     chr.setMetrics(this.style.flow, this.style.getFont());
     var font_size = this.style.getFontSize();
     return this.style.createTextBlock({
@@ -15570,7 +15571,7 @@ var InlineGenerator = (function(){
       charCount:context.getInlineCharCount(),
       maxExtent:(context.getInlineMaxExtent() || this.style.getFontSize()),
       maxFontSize:context.getInlineMaxFontSize(),
-      dangling:context.getDangling()
+      hangingPunctuation:context.getHangingPunctuation()
     });
 
     //console.log("%o create output(%s): conetxt max measure = %d, context:%o", this, line.toString(), context.inline.maxMeasure, context);
@@ -15815,7 +15816,7 @@ var TextGenerator = (function(){
       charCount:context.getInlineCharCount(),
       maxExtent:context.getInlineMaxExtent(),
       maxFontSize:context.getInlineMaxFontSize(),
-      dangling:context.getDangling(),
+      hangingPunctuation:context.getHangingPunctuation(),
       isEmpty:context.isInlineEmpty()
     });
 
@@ -15873,9 +15874,9 @@ var TextGenerator = (function(){
     var next_token = generator.stream.peek();
     var tail = context.getInlineLastElement();
     var head = (next_token instanceof Nehan.Text)? next_token.getHeadChar() : null;
-    if(Nehan.Config.danglingHyphenate && head && head.isHeadNg()){
+    if(this.style.hangingPunctuation === "allow-end" && head && head.isHeadNg()){
       next_token.cutHeadChar();
-      context.setDangling({
+      context.setHangingPunctuation({
 	data:head,
 	style:this._getSiblingGenerator().style
       });
@@ -15899,14 +15900,14 @@ var TextGenerator = (function(){
       }
       return;
     }
-    // hyphenate by dangling.
+    // hyphenate by hanging punctuation.
     var head_next = this.stream.peek();
     head_next = (head_next && orig_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
     var is_single_head_ng = function(head, head_next){
       return (head instanceof Nehan.Char && head.isHeadNg()) &&
 	!(head_next instanceof Nehan.Char && head_next.isHeadNg());
     };
-    if(Nehan.Config.danglingHyphenate && is_single_head_ng(orig_head, head_next)){
+    if(this.style.hangingPunctuation === "allow-end" && is_single_head_ng(orig_head, head_next)){
       this._addElement(context, orig_head, 0); // push tail as zero element
       if(head_next){
 	this.stream.setPos(head_next.pos);
