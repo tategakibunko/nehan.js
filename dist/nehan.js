@@ -13306,6 +13306,10 @@ var StyleContext = (function(){
    @return {boolean}
    */
   StyleContext.prototype.isHangingPuncEnable = function(){
+    // if floating inline, avoid hanging pucntuation.
+    if(this.isClone()){
+      return false;
+    }
     return this.hangingPunctuation && this.hangingPunctuation === "allow-end";
   };
   /**
