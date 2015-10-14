@@ -192,6 +192,13 @@ Nehan.InlineContext = (function(){
     return this.charCount;
   };
   /**
+   @memberof Nehan.InlineContext
+   @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
+   */
+  InlineContext.prototype.popElement = function(){
+    return this.elements.pop();
+  };
+  /**
    hyphenate(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if hyphenated.
 
    @memberof Nehan.InlineContext

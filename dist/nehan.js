@@ -6898,6 +6898,21 @@ Nehan.Text = (function(){
     return this.content;
   };
 
+  /**
+   @memberof Nehan.Text
+   @return {Nehan.Char}
+   */
+  Text.prototype.getHeadChar = function(){
+    return new Nehan.Char(this.content.substring(0,1));
+  };
+
+  /**
+   @memberof Nehan.Text
+   */
+  Text.prototype.cutHeadChar = function(){
+    this.content = this.content.substring(1);
+  };
+
   return Text;
 })();
 
@@ -9049,6 +9064,43 @@ Nehan.LayoutContext = (function(){
     this.inline.setHyphenated(status);
   };
   /**
+   set dangling hyphenation across multiple inline-generators.
+
+   [example]
+   Think text-gen1(foo) and text-gen2(, and fuga),
+   and assume that 'foo' is at the tail of line,
+   and ', and fuga' is at the head of next line.
+
+     ## before dangling
+     body
+       span
+         text-gen1(foo)
+       text-gen2(, and fuga)
+     
+   But ',' is head-NG, so ',' is borrowed to text-gen1, and content of text-gen2 is sliced.
+
+     ## after dangling
+     body
+       span
+         text-gen1(foo,)
+       text-gen2(and fuga)
+
+   @memberof Nehan.LayoutContext
+   @param dangling {Object}
+   @param dangling.data {Nehan.Char}
+   @param dangline.style {Nehan.StyleContext}
+   */
+  LayoutContext.prototype.setDangling = function(dangling){
+    this._dangling = dangling;
+  };
+  /**
+   @memberof Nehan.LayoutContext
+   @return danglingData {Object}
+   */
+  LayoutContext.prototype.getDangling = function(){
+    return this._dangling || null;
+  };
+  /**
    @memberof Nehan.LayoutContext
    @param measure {int}
    */
@@ -9135,6 +9187,14 @@ Nehan.LayoutContext = (function(){
    */
   LayoutContext.prototype.hyphenateSweep = function(head_char){
     return this.inline.hyphenateSweep(head_char);
+  };
+
+  /**
+   @memberof Nehan.LayoutContext
+   @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
+   */
+  LayoutContext.prototype.popInlineElement = function(){
+    return this.inline.popElement();
   };
 
   return LayoutContext;
@@ -9440,6 +9500,13 @@ Nehan.InlineContext = (function(){
    */
   InlineContext.prototype.getCharCount = function(){
     return this.charCount;
+  };
+  /**
+   @memberof Nehan.InlineContext
+   @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
+   */
+  InlineContext.prototype.popElement = function(){
+    return this.elements.pop();
   };
   /**
    hyphenate(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if hyphenated.
@@ -12853,6 +12920,7 @@ var StyleContext = (function(){
     line.content = content;
     line.isRootLine = is_root_line;
     line.hasLineBreak = opt.hasLineBreak || false;
+    line.dangling = opt.dangling || null;
 
     // edge of top level line is disabled.
     // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
@@ -12931,6 +12999,7 @@ var StyleContext = (function(){
     line.hasLineBreak = opt.hasLineBreak || false;
     line.hyphenated = opt.hyphenated || false;
     line.lineOver = opt.lineOver || false;
+    line.dangling = opt.dangling || null;
     //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
     return line;
   };
@@ -15443,10 +15512,14 @@ var InlineGenerator = (function(){
 	break;
       }
       this._addElement(context, element, measure);
-      /*
-      if(!context.hasInlineSpaceFor(1)){
-	context.setLineOver(true);
-      }*/
+      if(element.dangling){
+	if(element.dangling.style === this.style){
+	  var chr = this._yieldDanglingChar(context, element.dangling.data);
+	  this._addElement(context, chr, 0);
+	} else {
+	  context.setDangling(element.dangling); // inherit dangling data to parent generator
+	}
+      }
       if(element.hasLineBreak){
 	context.setLineBreak(true);
 	break;
@@ -15459,6 +15532,19 @@ var InlineGenerator = (function(){
       });
     }
     return this._createOutput(context);
+  };
+
+  InlineGenerator.prototype._yieldDanglingChar = function(context, chr){
+    chr.setMetrics(this.style.flow, this.style.getFont());
+    var font_size = this.style.getFontSize();
+    return this.style.createTextBlock({
+      elements:[chr],
+      measure:chr.bodySize,
+      extent:font_size,
+      charCount:0,
+      maxExtent:font_size,
+      maxFontSize:font_size
+    });
   };
 
   InlineGenerator.prototype._createChildContext = function(context){
@@ -15483,7 +15569,8 @@ var InlineGenerator = (function(){
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       charCount:context.getInlineCharCount(),
       maxExtent:(context.getInlineMaxExtent() || this.style.getFontSize()),
-      maxFontSize:context.getInlineMaxFontSize()
+      maxFontSize:context.getInlineMaxFontSize(),
+      dangling:context.getDangling()
     });
 
     //console.log("%o create output(%s): conetxt max measure = %d, context:%o", this, line.toString(), context.inline.maxMeasure, context);
@@ -15728,6 +15815,7 @@ var TextGenerator = (function(){
       charCount:context.getInlineCharCount(),
       maxExtent:context.getInlineMaxExtent(),
       maxFontSize:context.getInlineMaxFontSize(),
+      dangling:context.getDangling(),
       isEmpty:context.isInlineEmpty()
     });
 
@@ -15780,10 +15868,35 @@ var TextGenerator = (function(){
     return null;
   };
 
+  // hyphenate between two different inline generator.
+  TextGenerator.prototype._hyphenateSibling = function(context, generator){
+    var next_token = generator.stream.peek();
+    var tail = context.getInlineLastElement();
+    var head = (next_token instanceof Nehan.Text)? next_token.getHeadChar() : null;
+    if(head && head.isHeadNg()){
+      next_token.cutHeadChar();
+      context.setDangling({
+	data:head,
+	style:this._getSiblingGenerator().style
+      });
+      return;
+    } else if(tail && tail instanceof Nehan.Char && tail.isTailNg() && context.getInlineElements().length > 1){
+      context.popInlineElement();
+      this.stream.setPos(tail.pos);
+      context.setLineBreak(true);
+      context.setHyphenated(true);
+      this.clearCache();
+    }
+  };
+
   TextGenerator.prototype._hyphenateLine = function(context){
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var old_head = this.peekLastCache() || this.stream.peek();
     if(old_head === null){
+      var sibling_generator = this._getSiblingGenerator();
+      if(sibling_generator && sibling_generator.stream){
+	this._hyphenateSibling(context, sibling_generator);
+      }
       return;
     }
     // hyphenate by dangling.
@@ -15806,7 +15919,7 @@ var TextGenerator = (function(){
       return;
     }
     // hyphenate by sweep.
-    var new_head = context.hyphenateSweep(old_head, head_next); // if fixed, new_head token is returned.
+    var new_head = context.hyphenateSweep(old_head); // if fixed, new_head token is returned.
     if(new_head){
       //console.log("hyphenate by sweep:old_head:%o, new_head:%o", old_head, new_head);
       var hyphenated_measure = new_head.bodySize || 0;

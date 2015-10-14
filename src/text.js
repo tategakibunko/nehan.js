@@ -32,5 +32,20 @@ Nehan.Text = (function(){
     return this.content;
   };
 
+  /**
+   @memberof Nehan.Text
+   @return {Nehan.Char}
+   */
+  Text.prototype.getHeadChar = function(){
+    return new Nehan.Char(this.content.substring(0,1));
+  };
+
+  /**
+   @memberof Nehan.Text
+   */
+  Text.prototype.cutHeadChar = function(){
+    this.content = this.content.substring(1);
+  };
+
   return Text;
 })();

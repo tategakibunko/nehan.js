@@ -49,10 +49,14 @@ var InlineGenerator = (function(){
 	break;
       }
       this._addElement(context, element, measure);
-      /*
-      if(!context.hasInlineSpaceFor(1)){
-	context.setLineOver(true);
-      }*/
+      if(element.dangling){
+	if(element.dangling.style === this.style){
+	  var chr = this._yieldDanglingChar(context, element.dangling.data);
+	  this._addElement(context, chr, 0);
+	} else {
+	  context.setDangling(element.dangling); // inherit dangling data to parent generator
+	}
+      }
       if(element.hasLineBreak){
 	context.setLineBreak(true);
 	break;
@@ -65,6 +69,19 @@ var InlineGenerator = (function(){
       });
     }
     return this._createOutput(context);
+  };
+
+  InlineGenerator.prototype._yieldDanglingChar = function(context, chr){
+    chr.setMetrics(this.style.flow, this.style.getFont());
+    var font_size = this.style.getFontSize();
+    return this.style.createTextBlock({
+      elements:[chr],
+      measure:chr.bodySize,
+      extent:font_size,
+      charCount:0,
+      maxExtent:font_size,
+      maxFontSize:font_size
+    });
   };
 
   InlineGenerator.prototype._createChildContext = function(context){
@@ -89,7 +106,8 @@ var InlineGenerator = (function(){
       elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
       charCount:context.getInlineCharCount(),
       maxExtent:(context.getInlineMaxExtent() || this.style.getFontSize()),
-      maxFontSize:context.getInlineMaxFontSize()
+      maxFontSize:context.getInlineMaxFontSize(),
+      dangling:context.getDangling()
     });
 
     //console.log("%o create output(%s): conetxt max measure = %d, context:%o", this, line.toString(), context.inline.maxMeasure, context);

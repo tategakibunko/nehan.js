@@ -602,6 +602,7 @@ var StyleContext = (function(){
     line.content = content;
     line.isRootLine = is_root_line;
     line.hasLineBreak = opt.hasLineBreak || false;
+    line.dangling = opt.dangling || null;
 
     // edge of top level line is disabled.
     // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
@@ -680,6 +681,7 @@ var StyleContext = (function(){
     line.hasLineBreak = opt.hasLineBreak || false;
     line.hyphenated = opt.hyphenated || false;
     line.lineOver = opt.lineOver || false;
+    line.dangling = opt.dangling || null;
     //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
     return line;
   };

@@ -82,6 +82,7 @@ var TextGenerator = (function(){
       charCount:context.getInlineCharCount(),
       maxExtent:context.getInlineMaxExtent(),
       maxFontSize:context.getInlineMaxFontSize(),
+      dangling:context.getDangling(),
       isEmpty:context.isInlineEmpty()
     });
 
@@ -134,10 +135,35 @@ var TextGenerator = (function(){
     return null;
   };
 
+  // hyphenate between two different inline generator.
+  TextGenerator.prototype._hyphenateSibling = function(context, generator){
+    var next_token = generator.stream.peek();
+    var tail = context.getInlineLastElement();
+    var head = (next_token instanceof Nehan.Text)? next_token.getHeadChar() : null;
+    if(head && head.isHeadNg()){
+      next_token.cutHeadChar();
+      context.setDangling({
+	data:head,
+	style:this._getSiblingGenerator().style
+      });
+      return;
+    } else if(tail && tail instanceof Nehan.Char && tail.isTailNg() && context.getInlineElements().length > 1){
+      context.popInlineElement();
+      this.stream.setPos(tail.pos);
+      context.setLineBreak(true);
+      context.setHyphenated(true);
+      this.clearCache();
+    }
+  };
+
   TextGenerator.prototype._hyphenateLine = function(context){
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var old_head = this.peekLastCache() || this.stream.peek();
     if(old_head === null){
+      var sibling_generator = this._getSiblingGenerator();
+      if(sibling_generator && sibling_generator.stream){
+	this._hyphenateSibling(context, sibling_generator);
+      }
       return;
     }
     // hyphenate by dangling.
@@ -160,7 +186,7 @@ var TextGenerator = (function(){
       return;
     }
     // hyphenate by sweep.
-    var new_head = context.hyphenateSweep(old_head, head_next); // if fixed, new_head token is returned.
+    var new_head = context.hyphenateSweep(old_head); // if fixed, new_head token is returned.
     if(new_head){
       //console.log("hyphenate by sweep:old_head:%o, new_head:%o", old_head, new_head);
       var hyphenated_measure = new_head.bodySize || 0;

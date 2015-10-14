@@ -139,6 +139,43 @@ Nehan.LayoutContext = (function(){
     this.inline.setHyphenated(status);
   };
   /**
+   set dangling hyphenation across multiple inline-generators.
+
+   [example]
+   Think text-gen1(foo) and text-gen2(, and fuga),
+   and assume that 'foo' is at the tail of line,
+   and ', and fuga' is at the head of next line.
+
+     ## before dangling
+     body
+       span
+         text-gen1(foo)
+       text-gen2(, and fuga)
+     
+   But ',' is head-NG, so ',' is borrowed to text-gen1, and content of text-gen2 is sliced.
+
+     ## after dangling
+     body
+       span
+         text-gen1(foo,)
+       text-gen2(and fuga)
+
+   @memberof Nehan.LayoutContext
+   @param dangling {Object}
+   @param dangling.data {Nehan.Char}
+   @param dangline.style {Nehan.StyleContext}
+   */
+  LayoutContext.prototype.setDangling = function(dangling){
+    this._dangling = dangling;
+  };
+  /**
+   @memberof Nehan.LayoutContext
+   @return danglingData {Object}
+   */
+  LayoutContext.prototype.getDangling = function(){
+    return this._dangling || null;
+  };
+  /**
    @memberof Nehan.LayoutContext
    @param measure {int}
    */
@@ -225,6 +262,14 @@ Nehan.LayoutContext = (function(){
    */
   LayoutContext.prototype.hyphenateSweep = function(head_char){
     return this.inline.hyphenateSweep(head_char);
+  };
+
+  /**
+   @memberof Nehan.LayoutContext
+   @return {Nehan.Char | Nehan.Word | Nehan.Tcy}
+   */
+  LayoutContext.prototype.popInlineElement = function(){
+    return this.inline.popElement();
   };
 
   return LayoutContext;
