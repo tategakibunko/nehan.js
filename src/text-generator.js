@@ -158,8 +158,8 @@ var TextGenerator = (function(){
 
   TextGenerator.prototype._hyphenateLine = function(context){
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
-    var old_head = this.peekLastCache() || this.stream.peek();
-    if(old_head === null){
+    var orig_head = this.peekLastCache() || this.stream.peek(); // original head token at next line.
+    if(orig_head === null){
       var sibling_generator = this._getSiblingGenerator();
       if(sibling_generator && sibling_generator.stream){
 	this._hyphenateSibling(context, sibling_generator);
@@ -168,13 +168,13 @@ var TextGenerator = (function(){
     }
     // hyphenate by dangling.
     var head_next = this.stream.peek();
-    head_next = (head_next && old_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
+    head_next = (head_next && orig_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
     var is_single_head_ng = function(head, head_next){
       return (head instanceof Nehan.Char && head.isHeadNg()) &&
 	!(head_next instanceof Nehan.Char && head_next.isHeadNg());
     };
-    if(Nehan.Config.danglingHyphenate && is_single_head_ng(old_head, head_next)){
-      this._addElement(context, old_head, 0); // push tail as zero element
+    if(Nehan.Config.danglingHyphenate && is_single_head_ng(orig_head, head_next)){
+      this._addElement(context, orig_head, 0); // push tail as zero element
       if(head_next){
 	this.stream.setPos(head_next.pos);
       } else {
@@ -186,12 +186,12 @@ var TextGenerator = (function(){
       return;
     }
     // hyphenate by sweep.
-    var new_head = context.hyphenateSweep(old_head); // if fixed, new_head token is returned.
+    var new_head = context.hyphenateSweep(orig_head); // if fixed, new_head token is returned.
     if(new_head){
-      //console.log("hyphenate by sweep:old_head:%o, new_head:%o", old_head, new_head);
+      //console.log("hyphenate by sweep:orig_head:%o, new_head:%o", orig_head, new_head);
       var hyphenated_measure = new_head.bodySize || 0;
-      if(Math.abs(new_head.pos - old_head.pos) > 1){
-	hyphenated_measure = Math.abs(new_head.pos - old_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
+      if(Math.abs(new_head.pos - orig_head.pos) > 1){
+	hyphenated_measure = Math.abs(new_head.pos - orig_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
       }
       context.addInlineMeasure(-1 * hyphenated_measure); // subtract sweeped measure.
       //console.log("hyphenate and new head:%o", new_head);
