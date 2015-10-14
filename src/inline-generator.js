@@ -54,7 +54,7 @@ var InlineGenerator = (function(){
 	  var chr = this._yieldHangingChar(context, element.hangingPunctuation.data);
 	  this._addElement(context, chr, 0);
 	} else {
-	  context.setHangingPunctuation(element.hangingPunctuation); // inherit dangling data to parent generator
+	  context.setHangingPunctuation(element.hangingPunctuation); // inherit to parent generator
 	}
       }
       if(element.hasLineBreak){

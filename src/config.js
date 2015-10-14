@@ -28,14 +28,6 @@ Nehan.Config = {
   kerning:true,
 
   /**
-     is hyphenation enabled?
-     @memberof Nehan.Config
-     @type {boolean}
-     @default true
-  */
-  hyphenate:true,
-
-  /**
      max rety count when something troubles.
      @memberof Nehan.Config
      @type {int}

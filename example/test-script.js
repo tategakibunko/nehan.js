@@ -447,7 +447,7 @@ var Script = {
     "<h2>word break all</h2>",
     "<p style='word-break:break-all'>" + Text["lorem"] + "</p>",
     "<h2>word break normal</h2>",
-    "<p>" + Text["lorem"] + "</p>"
+    "<p style='word-break:normal'>" + Text["lorem"] + "</p>"
   ].join("\n"),
 
   "speak-test":[

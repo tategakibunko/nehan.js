@@ -161,16 +161,16 @@ Nehan.LayoutContext = (function(){
        text-gen2(and fuga)
 
    @memberof Nehan.LayoutContext
-   @param dangling {Object}
-   @param dangling.data {Nehan.Char}
-   @param dangline.style {Nehan.StyleContext}
+   @param hanging_punctuation {Object}
+   @param hanging_punctuation.data {Nehan.Char}
+   @param hanging_punctuation.style {Nehan.StyleContext}
    */
   LayoutContext.prototype.setHangingPunctuation = function(hunging_punctuation){
     this._hangingPunctuation = hunging_punctuation;
   };
   /**
    @memberof Nehan.LayoutContext
-   @return danglingData {Object}
+   @return hanging_punctuation {Object}
    */
   LayoutContext.prototype.getHangingPunctuation = function(){
     return this._hangingPunctuation || null;

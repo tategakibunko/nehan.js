@@ -942,7 +942,21 @@ var StyleContext = (function(){
    @return {boolean}
    */
   StyleContext.prototype.isWordBreakAll = function(){
-    return this.wordBreak && this.wordBreak === "break-all";
+    return this.wordBreak? this.wordBreak.isWordBreakAll() : false;
+  };
+  /**
+   @memberof Nehan.StyleContext
+   @return {boolean}
+   */
+  StyleContext.prototype.isHyphenationEnable = function(){
+    return this.wordBreak? this.wordBreak.isHyphenationEnable() : false;
+  };
+  /**
+   @memberof Nehan.StyleContext
+   @return {boolean}
+   */
+  StyleContext.prototype.isHangingPuncEnable = function(){
+    return this.hangingPunctuation && this.hangingPunctuation === "allow-end";
   };
   /**
    @memberof Nehan.StyleContext
@@ -2296,7 +2310,9 @@ var StyleContext = (function(){
   };
 
   StyleContext.prototype._loadWordBreak = function(){
-    return this.getCssAttr("word-break");
+    var inherit = this.parent? this.parent.wordBreak : null;
+    var value = this.getCssAttr("word-break");
+    return value? Nehan.WordBreaks.getByName(value) : inherit;
   };
 
   StyleContext.prototype._loadWhiteSpace = function(){

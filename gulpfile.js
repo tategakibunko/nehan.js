@@ -93,6 +93,8 @@ var sources = [
   "src/inline-flow.js",
   "src/box-flow.js",
   "src/box-flows.js",
+  "src/word-break.js",
+  "src/word-breaks.js",
   "src/text-metrics.js",
   "src/text.js",
   "src/char.js",
