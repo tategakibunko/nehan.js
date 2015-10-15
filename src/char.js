@@ -309,7 +309,7 @@ Nehan.Char = (function(){
     if(this.spaceRateEnd){
       this.paddingEnd = Math.round(this.spaceRateEnd * font.size);
     }
-    if(!is_vert && !this.isRef && this.isHankaku()){
+    if(!is_vert && !this.isRef && this.isHankaku() && !this.isWhiteSpace()){
       this.bodySize = Math.round(font.size / 2);
     }
     if(this.isSmallKana()){
