@@ -104,7 +104,8 @@ Ndoc.Reader = Vue.extend({
 	"flow":this.flow,
 	"width":this.width,
 	"height":this.height,
-	"font-size":this.fontSize
+	"font-size":this.fontSize,
+	"word-break":((this.flow === "tb-rl")? "break-all" : "normal")
       }).setContent(this.text, {
 	onProgress: function(){
 	  this.pageCount++;
