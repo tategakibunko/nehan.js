@@ -158,6 +158,11 @@ var InlineGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
+    if(token.getName() === "wbr"){
+      // context.setInlineWordBreakable(true); // TODO
+      return this._getNext(context);
+    }
+
     // if not text, it's tag token, inherit style
     var child_style = new StyleContext(token, this.style, {cursorContext:context});
 
