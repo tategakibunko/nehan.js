@@ -32,7 +32,10 @@ Nehan.TextMetrics = (function(){
       __span.innerHTML = text;
       body.appendChild(__span);
       var rect = __span.getBoundingClientRect();
-      var metrics = {width:rect.right - rect.left, height:rect.bottom - rect.top};
+      var metrics = {
+	width:Math.round(rect.right - rect.left),
+	height:Math.round(rect.bottom - rect.top)
+      };
       //var metrics = {width:__span.offsetWidth, height:__span.offsetHeight};
       body.removeChild(__span);
       //console.log("metrics(%s):(%d,%d)", text, metrics.width, metrics.height);
