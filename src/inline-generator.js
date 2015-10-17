@@ -158,9 +158,27 @@ var InlineGenerator = (function(){
       return this.yieldChildLayout(context);
     }
 
-    if(token.getName() === "wbr"){
+    // child inline without stream.
+    switch(token.getName()){
+    case "br":
+      context.setLineBreak(true);
+      if(!this.style.isPre()){
+	this.stream.skipUntil(function(token){
+	  return (token instanceof Nehan.Text && token.isWhiteSpaceOnly());
+	});
+      }
+      return null;
+
+    case "wbr":
       // context.setInlineWordBreakable(true); // TODO
       return this._getNext(context);
+
+    case "page-break": case "pbr": case "end-page":
+      context.setBreakAfter(true);
+      return null;
+
+    default:
+      break;
     }
 
     // if not text, it's tag token, inherit style
@@ -191,19 +209,6 @@ var InlineGenerator = (function(){
     switch(child_style.getMarkupName()){
     case "img":
       return child_style.createImage();
-
-    case "br":
-      context.setLineBreak(true);
-      if(!this.style.isPre()){
-	this.stream.skipUntil(function(token){
-	  return (token instanceof Nehan.Text && token.isWhiteSpaceOnly());
-	});
-      }
-      return null;
-
-    case "page-break": case "pbr": case "end-page":
-      context.setBreakAfter(true);
-      return null;
 
     default:
       var child_generator = this._createChildInlineGenerator(child_style, child_stream, context);
