@@ -312,6 +312,9 @@ Nehan.Char = (function(){
     if(!is_vert && !this.isRef && this.isHankaku() && !this.isWhiteSpace()){
       this.bodySize = Math.round(font.size / 2);
     }
+    if(!is_vert && this.isHalfKana()){
+      this.bodySize = Math.round(font.size / 2);
+    }
     if(this.isSmallKana()){
       this.bodySize -= Math.floor(font.size * 0.1);
     }
