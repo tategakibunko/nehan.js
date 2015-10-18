@@ -24,7 +24,7 @@ Nehan.WordBreak = (function(){
    @return {boolean}
    */
   WordBreak.prototype.isHyphenationEnable = function(){
-    return this.value === "normal" || this.value === "break-all";
+    return this.value === "normal";
   };
 
   return WordBreak;

@@ -6818,7 +6818,7 @@ Nehan.WordBreak = (function(){
    @return {boolean}
    */
   WordBreak.prototype.isHyphenationEnable = function(){
-    return this.value === "normal" || this.value === "break-all";
+    return this.value === "normal";
   };
 
   return WordBreak;
@@ -10400,8 +10400,7 @@ var Style = {
     "display":"block",
     //"box-sizing":"content-box",
     "section-root":true,
-    "hanging-punctuation":"allow-end",
-    "word-break":"break-all"
+    "hanging-punctuation":"allow-end"
   },
   "br":{
     "display":"inline"
@@ -12407,6 +12406,7 @@ var StyleContext = (function(){
     "margin",
     "measure",
     "meta", // flag
+    //"overflow-wrap", // draft
     "padding",
     "position",
     "section", // flag
@@ -14670,10 +14670,18 @@ var StyleContext = (function(){
   };
 
   StyleContext.prototype._loadWordBreak = function(){
-    var inherit = this.parent? this.parent.wordBreak : null;
+    var inherit = this.parent? this.parent.wordBreak : Nehan.WordBreaks.getByName("normal");
     var value = this.getCssAttr("word-break");
     return value? Nehan.WordBreaks.getByName(value) : inherit;
   };
+
+  // same as 'word-wrap' in IE.
+  // value: 'break-word' or 'normal'
+  /*
+  StyleContext.prototype._loadOverflowWrap = function(){
+    var inherit = this.parent? this.parent.overflowWrap : "normal";
+    return this.getCssAttr("overflow-wrap") || inherit;
+  };*/
 
   StyleContext.prototype._loadWhiteSpace = function(){
     var inherit = this.parent? this.parent.whiteSpace : "normal";

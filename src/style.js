@@ -135,8 +135,7 @@ var Style = {
     "display":"block",
     //"box-sizing":"content-box",
     "section-root":true,
-    "hanging-punctuation":"allow-end",
-    "word-break":"break-all"
+    "hanging-punctuation":"allow-end"
   },
   "br":{
     "display":"inline"
