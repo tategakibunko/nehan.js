@@ -38,7 +38,7 @@ Nehan.Display = {
   */
   boxFlow:{
     hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
-    vert:"tb-rl", // used when direction is 'vert'. "tb-lr" is also supported.
+    vert:"tb-rl"  // used when direction is 'vert'. "tb-lr" is also supported.
   },
   /**
      standard page width, used when Style["body"].width is not defined.
@@ -234,8 +234,6 @@ Nehan.Display = {
      @return {Nehan.BoxFlow}
   */
   getStdBoxFlow : function(){
-    //var flow_name = this.boxFlow[this.direction];
-    //return BoxFlows.getByName(flow_name);
     return Nehan.BoxFlows.getByName(this.flow);
   },
   /**
