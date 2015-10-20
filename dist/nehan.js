@@ -12444,6 +12444,8 @@ var StyleContext = (function(){
     "ontext"
   ];
 
+  var __body_font = Nehan.Display.getStdFont();
+
   var __is_managed_css_prop = function(prop){
     return Nehan.List.exists(__managed_css_props, Nehan.Closure.eq(prop));
   };
@@ -13543,6 +13545,13 @@ var StyleContext = (function(){
   };
   /**
    @memberof Nehan.StyleContext
+   @return {Nehan.Font}
+   */
+  StyleContext.prototype.getRootFont = function(){
+    return __body_font;
+  };
+  /**
+   @memberof Nehan.StyleContext
    @return {int}
    */
   StyleContext.prototype.getFontSize = function(){
@@ -13970,7 +13979,7 @@ var StyleContext = (function(){
     var str = String(val);
     if(str.indexOf("rem") > 0){
       var rem_scale = parseFloat(str.replace("rem",""));
-      return Math.round(Nehan.Display.fontSize * rem_scale); // use root font-size
+      return Math.round(__body_font.size * rem_scale); // use root font-size
     }
     if(str.indexOf("em") > 0){
       var em_scale = parseFloat(str.replace("em",""));
@@ -14301,6 +14310,9 @@ var StyleContext = (function(){
     }
     if(font_style !== "inherit"){
       font.style = font_style;
+    }
+    if(this.getMarkupName() === "body"){
+      __body_font = font;
     }
     return font;
   };
