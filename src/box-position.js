@@ -8,6 +8,10 @@ Nehan.BoxPosition = (function(){
   */
   function BoxPosition(position){
     this.position = position;
+    this.before = null;
+    this.end = null;
+    this.after = null;
+    this.start = null;
   }
 
   /**

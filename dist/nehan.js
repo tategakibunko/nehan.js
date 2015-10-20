@@ -5092,6 +5092,10 @@ Nehan.BoxPosition = (function(){
   */
   function BoxPosition(position){
     this.position = position;
+    this.before = null;
+    this.end = null;
+    this.after = null;
+    this.start = null;
   }
 
   /**
@@ -12534,9 +12538,9 @@ var StyleContext = (function(){
     if(font){
       this.font = font;
     }
-    var position = this._loadPosition();
-    if(position){
-      this.position = position;
+    var box_position = this._loadBoxPosition();
+    if(box_position){
+      this.boxPosition = box_position;
     }
     var border_collapse = this._loadBorderCollapse();
     if(border_collapse){
@@ -13215,7 +13219,7 @@ var StyleContext = (function(){
    @return {boolean}
    */
   StyleContext.prototype.isPositionAbsolute = function(){
-    return this.position.isAbsolute();
+    return this.boxPosition? this.boxPosition.isAbsolute() : false;
   };
   /**
    @memberof Nehan.StyleContext
@@ -13818,8 +13822,8 @@ var StyleContext = (function(){
     if(this.floatDirection){
       Nehan.Args.copy(css, this.floatDirection.getCss(is_vert));
     }
-    if(this.position){
-      Nehan.Args.copy(css, this.position.getCss());
+    if(this.boxPosition){
+      Nehan.Args.copy(css, this.boxPosition.getCss());
     }
     if(this.zIndex){
       css["z-index"] = this.zIndex;
@@ -14240,20 +14244,20 @@ var StyleContext = (function(){
     return Nehan.BoxFlows.getByName(value);
   };
 
-  StyleContext.prototype._loadPosition = function(){
-    var value = this.getCssAttr("position", "static");
-    if(value === "start"){
+  StyleContext.prototype._loadBoxPosition = function(){
+    var pos_value = this.getCssAttr("position");
+    if(!pos_value){
       return null;
     }
-    var position = new Nehan.BoxPosition(value);
-    var self = this;
+    var box_pos = new Nehan.BoxPosition(pos_value);
+    var font_size = this.getFontSize();
     Nehan.List.iter(Nehan.Const.cssBoxDirsLogical, function(dir){
-      var value = self.getCssAttr(dir, "auto");
-      if(value !== "auto"){
-	position[value] = self._computeUnitSize(start, self.font.size);
+      var value = this.getCssAttr(dir);
+      if(value){
+	box_pos[value] = this._computeUnitSize(value, font_size);
       }
-    });
-    return position;
+    }.bind(this));
+    return box_pos;
   };
 
   StyleContext.prototype._loadBorderCollapse = function(){
