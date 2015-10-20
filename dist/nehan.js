@@ -12170,7 +12170,7 @@ var SelectorPropContext = (function(){
      * });
   */
   function SelectorPropContext(style, cursor_context){
-    this._style = style;
+    this.style = style;
     this._cursorContext = cursor_context || null;
   }
 
@@ -12179,7 +12179,7 @@ var SelectorPropContext = (function(){
    @return {Nehan.StyleContext}
    */
   SelectorPropContext.prototype.getParentStyleContext = function(){
-    return this._style.parent;
+    return this.style.parent;
   };
   /**
    @memberof Nehan.SelectorPropContext
@@ -12194,7 +12194,7 @@ var SelectorPropContext = (function(){
    @return {Nehan.Tag}
    */
   SelectorPropContext.prototype.getMarkup = function(){
-    return this._style.markup;
+    return this.style.markup;
   };
   /**
    @memberof Nehan.SelectorPropContext
@@ -12233,7 +12233,7 @@ var SelectorPropContext = (function(){
    @return {int}
    */
   SelectorPropContext.prototype.getChildIndex = function(){
-    return this._style.getChildIndex();
+    return this.style.getChildIndex();
   };
   /**
    index number of nth-child-of-type
@@ -12242,56 +12242,56 @@ var SelectorPropContext = (function(){
    @return {int}
    */
   SelectorPropContext.prototype.getChildIndexOfType = function(){
-    return this._style.getChildIndexOfType;
+    return this.style.getChildIndexOfType;
   };
   /**
    @memberof Nehan.SelectorPropContext
    @return {bool}
    */
   SelectorPropContext.prototype.isFirstChild = function(){
-    return this._style.isFirstChild();
+    return this.style.isFirstChild();
   };
   /**
    @memberof Nehan.SelectorPropContext
    @return {bool}
    */
   SelectorPropContext.prototype.isFirstOfType = function(){
-    return this._style.isFirstOfType();
+    return this.style.isFirstOfType();
   };
   /**
    @memberof Nehan.SelectorPropContext
    @return {bool}
    */
   SelectorPropContext.prototype.isLastChild = function(){
-    return this._style.isLastChild();
+    return this.style.isLastChild();
   };
   /**
    @memberof Nehan.SelectorPropContext
    @return {bool}
    */
   SelectorPropContext.prototype.isLastOfType = function(){
-    return this._style.isLastOfType();
+    return this.style.isLastOfType();
   };
   /**
    @memberof Nehan.SelectorPropContext
    @return {bool}
    */
   SelectorPropContext.prototype.isOnlyChild = function(){
-    return this._style.isOnlyChild();
+    return this.style.isOnlyChild();
   };
   /**
    @memberof Nehan.SelectorPropContext
    @return {bool}
    */
   SelectorPropContext.prototype.isOnlyOfType = function(){
-    return this._style.isOnlyOfType();
+    return this.style.isOnlyOfType();
   };
   /**
    @memberof Nehan.SelectorPropContext
    @return {bool}
    */
   SelectorPropContext.prototype.isMarkupEmpty = function(){
-    return this._style.isMarkupEmpty();
+    return this.style.isMarkupEmpty();
   };
 
   return SelectorPropContext;
