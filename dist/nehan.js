@@ -12327,8 +12327,8 @@ var SelectorContext = (function(){
      @return {boolean}
   */
   SelectorContext.prototype.isTextVertical = function(){
-    // this function called before initializing style objects in this._style.
-    // so this._style.flow is not ready at this time, that is, we need to get the box-flow in manual.
+    // this function called before initializing style objects in this.style.
+    // so this.style.flow is not ready at this time, that is, we need to get the box-flow in manual.
     var parent_flow = this.getParentFlow();
     var flow_name = this.getCssAttr("flow", parent_flow.getName());
     var flow = Nehan.BoxFlows.getByName(flow_name);
@@ -12351,7 +12351,7 @@ var SelectorContext = (function(){
      @param def_value {default_value} - [def_value] is returned if [name] not found.
   */
   SelectorContext.prototype.getCssAttr = function(name, def_value){
-    return this._style.getCssAttr(name, def_value);
+    return this.style.getCssAttr(name, def_value);
   };
 
   /**
@@ -12361,7 +12361,7 @@ var SelectorContext = (function(){
      @param value {css_value}
   */
   SelectorContext.prototype.setCssAttr = function(name, value){
-    this._style.setCssAttr(name, value);
+    this.style.setCssAttr(name, value);
   };
 
   return SelectorContext;
