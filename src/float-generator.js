@@ -130,12 +130,16 @@ var FloatGenerator = (function(){
   FloatGenerator.prototype._sortFloatRest = function(floated, rest){
     var floated_elements = floated.getElements();
     var elements = floated.isFloatStart()? floated_elements.concat(rest) : [rest].concat(floated_elements);
-    return Nehan.List.filter(elements, function(element){ return element !== null; });
+    return elements.filter(function(element){
+      return element !== null;
+    });
   };
 
   FloatGenerator.prototype._wrapBlocks = function(blocks){
     var flow = this.style.flow;
-    var elements = Nehan.List.filter(blocks, function(block){ return block !== null; });
+    var elements = blocks.filter(function(block){
+      return block !== null;
+    });
     var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
     var extent = Nehan.List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
     var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
@@ -169,7 +173,7 @@ var FloatGenerator = (function(){
   
   FloatGenerator.prototype._yieldFloatStack = function(context){
     var start_blocks = [], end_blocks = [];
-    Nehan.List.iter(this.generators, function(gen){
+    this.generators.forEach(function(gen){
       var block = gen.yield(context);
       if(block){
 	block.hasNext = gen.hasNext();

@@ -65,7 +65,9 @@ Nehan.CssParser = (function(){
     if(props.length !== values.length){
       throw "invalid args:__zip_obj";
     }
-    Nehan.List.iter(props, function(prop, i){ ret[prop] = values[i]; });
+    props.forEach(function(prop, i){
+      ret[prop] = values[i];
+    });
     return ret;
   };
 
@@ -82,7 +84,9 @@ Nehan.CssParser = (function(){
   // => [values[0], values[1], values[0], values[1]]
   // => [a, b, a, b]
   var __make_values_by_map = function(values, map){
-    return Nehan.List.map(map, function(index){ return values[index]; });
+    return map.map(function(index){
+      return values[index];
+    });
   };
 
   // values:[0] => [0,0]
@@ -119,7 +123,7 @@ Nehan.CssParser = (function(){
 
   var __parse_corner_4d = function(value){
     var values_2d = __make_values_2d(__split_slash(value));
-    var values_4d_2d = Nehan.List.map(values_2d, function(val){
+    var values_4d_2d = values_2d.map(function(val){
       return __make_values_4d(__split_space(val));
     });
     var values = Nehan.List.zip(values_4d_2d[0], values_4d_2d[1]);

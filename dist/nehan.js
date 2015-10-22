@@ -1264,7 +1264,7 @@ Nehan.Utils = {
   */
   camelize : function(name){
     var self = this;
-    return (name.indexOf("-") < 0)? name : Nehan.List.map(name.split("-"), function(part, i){
+    return (name.indexOf("-") < 0)? name : name.split("-").map(function(part, i){
       return (i === 0)? part : self.capitalize(part);
     }).join("");
   }
@@ -1428,7 +1428,7 @@ Nehan.Css = {
   */
   setCssValueWithVender: function(dst, name, value){
     dst[name] = value; // no prefixed version
-    Nehan.List.iter(Nehan.Const.cssVenderPrefixes, function(prefix){
+    Nehan.Const.cssVenderPrefixes.forEach(function(prefix){
       dst[prefix + "-" + name] = value;
     });
     return dst;
@@ -1762,7 +1762,7 @@ Nehan.TagAttrs = (function(){
    @param klass {String} - css class name(prefiex by "nehan-")
    */
   TagAttrs.prototype.removeClass = function(klass){
-    this.classes = Nehan.List.filter(this.classes, function(cls){
+    this.classes = this.classes.filter(function(cls){
       return cls != klass;
     });
     this.setAttr("class", this.classes.join(" "));
@@ -1799,7 +1799,7 @@ Nehan.TagAttrs = (function(){
    */
   TagAttrs.prototype.getKey = function(){
     var props = Object.keys(this.attrs).sort();
-    return Nehan.List.map(props, function(prop){
+    return props.map(function(prop){
       return prop + "=" + this.attrs[prop];
     }.bind(this)).join("&");
   };
@@ -1834,7 +1834,7 @@ Nehan.TagAttrs = (function(){
     var classes = (class_name === "")? [] : class_name.split(/\s+/);
 
     // replace 'nehan-' prefix for backword compatibility(version <= 5.1.0).
-    return Nehan.List.map(classes, function(klass){
+    return classes.map(function(klass){
       return (klass.indexOf("nehan-") === 0)? klass.replace("nehan-", "") : klass;
     }); 
   };
@@ -2498,7 +2498,9 @@ Nehan.CssParser = (function(){
     if(props.length !== values.length){
       throw "invalid args:__zip_obj";
     }
-    Nehan.List.iter(props, function(prop, i){ ret[prop] = values[i]; });
+    props.forEach(function(prop, i){
+      ret[prop] = values[i];
+    });
     return ret;
   };
 
@@ -2515,7 +2517,9 @@ Nehan.CssParser = (function(){
   // => [values[0], values[1], values[0], values[1]]
   // => [a, b, a, b]
   var __make_values_by_map = function(values, map){
-    return Nehan.List.map(map, function(index){ return values[index]; });
+    return map.map(function(index){
+      return values[index];
+    });
   };
 
   // values:[0] => [0,0]
@@ -2552,7 +2556,7 @@ Nehan.CssParser = (function(){
 
   var __parse_corner_4d = function(value){
     var values_2d = __make_values_2d(__split_slash(value));
-    var values_4d_2d = Nehan.List.map(values_2d, function(val){
+    var values_4d_2d = values_2d.map(function(val){
       return __make_values_4d(__split_space(val));
     });
     var values = Nehan.List.zip(values_4d_2d[0], values_4d_2d[1]);
@@ -3003,7 +3007,7 @@ Nehan.TypeSelector = (function(){
    @return {boolean}
    */
   TypeSelector.prototype.testClassNames = function(markup_classes){
-    return Nehan.List.forall(this.classes, function(klass){
+    return this.classes.every(function(klass){
       return Nehan.List.exists(markup_classes, Nehan.Closure.eq(klass));
     });
   };
@@ -3063,7 +3067,7 @@ Nehan.TypeSelector = (function(){
   };
 
   TypeSelector.prototype._testAttrs = function(style){
-    return Nehan.List.forall(this.attrs, function(attr){
+    return this.attrs.every(function(attr){
       return attr.test(style);
     });
   };
@@ -3422,7 +3426,7 @@ Nehan.Selector = (function(){
   // see http://www.w3.org/TR/css3-selectors/#specificity
   Selector.prototype._countSpec = function(elements){
     var a = 0, b = 0, c = 0;
-    Nehan.List.iter(elements, function(token){
+    elements.forEach(function(token){
       if(token instanceof Nehan.TypeSelector){
 	a += token.getIdSpec();
 	b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();
@@ -3890,7 +3894,7 @@ Nehan.BoxRect = {
      @param fn {Function}
    */
   iter : function(obj, fn){
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
+    Nehan.Const.cssBoxDirs.forEach(function(dir){
       if(obj[dir]){
 	fn(dir, obj[dir]);
       }
@@ -4083,7 +4087,7 @@ Nehan.Edge = (function(){
    */
   Edge.prototype.copyTo = function(dst){
     var self = this;
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
+    Nehan.Const.cssBoxDirs.forEach(function(dir){
       dst[dir] = self[dir];
     });
     return dst;
@@ -4103,7 +4107,7 @@ Nehan.Edge = (function(){
   Edge.prototype.getCss = function(){
     var css = {};
     var self = this;
-    Nehan.List.iter(["top", "right", "bottom", "left"], function(dir){
+    Nehan.Const.cssBoxDirs.forEach(function(dir){
       var value = self[dir];
       if(value > 0){
 	css[self.getDirProp(dir)] = self[dir] + "px";
@@ -4358,7 +4362,7 @@ Nehan.BorderRadius = (function(){
    @return {Object}
    */
   BorderRadius.prototype.getCssValueHori = function(){
-    return Nehan.List.map(this.getArray(), function(radius){
+    return this.getArray().map(function(radius){
       return radius.getCssValueHori();
     }).join(" ");
   };
@@ -4369,7 +4373,7 @@ Nehan.BorderRadius = (function(){
    @return {Object}
    */
   BorderRadius.prototype.getCssValueVert = function(){
-    return Nehan.List.map(this.getArray(), function(radius){
+    return this.getArray().map(function(radius){
       return radius.getCssValueVert();
     }).join(" ");
   };
@@ -4392,7 +4396,7 @@ Nehan.BorderRadius = (function(){
     var css = {};
     var css_value = this.getCssValue();
     css["border-radius"] = css_value; // without vender prefix
-    Nehan.List.iter(Nehan.Const.cssVenderPrefixes, function(prefix){
+    Nehan.Const.cssVenderPrefixes.forEach(function(prefix){
       var prop = [prefix, "border-radius"].join("-"); // with vender prefix
       css[prop] = css_value;
     });
@@ -4522,7 +4526,7 @@ Nehan.BorderColor = (function(){
    */
   BorderColor.prototype.clone = function(){
     var border_color = new BorderColor();
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
+    Nehan.Const.cssBoxDirs.forEach(function(dir){
       if(this[dir]){
 	border_color[dir] = this[dir];
       }
@@ -4585,7 +4589,7 @@ Nehan.BorderStyle = (function(){
    */
   BorderStyle.prototype.clone = function(){
     var style = new BorderStyle();
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
+    Nehan.Const.cssBoxDirs.forEach(function(dir){
       if(this[dir]){
 	style[dir] = this[dir];
       }
@@ -6025,9 +6029,9 @@ Nehan.FloatGroup = (function(){
    @return {int}
    */
   FloatGroup.prototype.getMeasure = function(flow){
-    return Nehan.List.fold(this.elements, 0, function(measure, element){
+    return this.elements.reduce(function(measure, element){
       return measure + element.getLayoutMeasure(flow);
-    });
+    }, 0);
   };
   /**
    @memberof Nehan.FloatGroup
@@ -6035,9 +6039,9 @@ Nehan.FloatGroup = (function(){
    @return {int}
    */
   FloatGroup.prototype.getExtent = function(flow){
-    return Nehan.List.fold(this.elements, 0, function(extent, element){
+    return this.elements.reduce(function(extent, element){
       return Math.max(extent, element.getLayoutExtent(flow));
-    });
+    }, 0);
   };
   /**
    @memberof Nehan.FloatGroup
@@ -8088,7 +8092,7 @@ Nehan.Ruby = (function(){
    @return {String}
    */
   Ruby.prototype.getRbString = function(){
-    return Nehan.List.map(this.rbs, function(rb){
+    return this.rbs.map(function(rb){
       return rb.data || "";
     }).join("");
   };
@@ -8164,10 +8168,10 @@ Nehan.Ruby = (function(){
    */
   Ruby.prototype.setMetrics = function(flow, font, letter_spacing){
     this.rtFontSize = Nehan.Display.getRtFontSize(font.size);
-    var advance_rbs = Nehan.List.fold(this.rbs, 0, function(ret, rb){
+    var advance_rbs = this.rbs.reduce(function(ret, rb){
       rb.setMetrics(flow, font);
       return ret + rb.getAdvance(flow, letter_spacing);
-    });
+    }, 0);
     var advance_rt = this.rtFontSize * this.getRtString().length;
     this.advanceSize = advance_rbs;
     if(advance_rt > advance_rbs){
@@ -8834,7 +8838,9 @@ Nehan.Partition = (function(){
 
   var __levelize = function(sizes, min_size){
     // filter parts that is smaller than min_size.
-    var smaller_parts = Nehan.List.filter(sizes, function(size){ return size < min_size; });
+    var smaller_parts = sizes.filter(function(size){
+      return size < min_size;
+    });
 
     // if all elements has enough space for min_size, nothing to do.
     if(smaller_parts.length === 0){
@@ -8842,10 +8848,12 @@ Nehan.Partition = (function(){
     }
 
     // total size that must be added to small parts.
-    var delta_plus_total = Nehan.List.fold(smaller_parts, 0, function(ret, size){ return ret + (min_size - size); });
+    var delta_plus_total = smaller_parts.reduce(function(ret, size){
+      return ret + (min_size - size);
+    }, 0);
 
     // filter parts that has enough space.
-    var larger_parts = Nehan.List.filter(sizes, function(size){
+    var larger_parts = sizes.filter(function(size){
       return size - min_size >= min_size; // check if size is more than min_size and over even if min_size is subtracted.
     });
 
@@ -8855,7 +8863,7 @@ Nehan.Partition = (function(){
     }
 
     var delta_minus_avg = Math.floor(delta_plus_total / larger_parts.length);
-    return Nehan.List.map(sizes, function(size){
+    return sizes.map(function(size){
       return (size < min_size)? min_size : ((size - min_size >= min_size)? size - delta_minus_avg : size);
     });
   };
@@ -8880,9 +8888,9 @@ Nehan.Partition = (function(){
    @return {int}
    */
   Partition.prototype.getTotalWeight = function(){
-    return Nehan.List.fold(this._punits, 0, function(ret, punit){
+    return this._punits.reduce(function(ret, punit){
       return ret + punit.weight;
-    });
+    }, 0);
   },
   /**
    @memberof Nehan.Partition
@@ -8897,7 +8905,7 @@ Nehan.Partition = (function(){
     // merge(this._punits[1], partition._punits[1]),
     // ...
     // merge(this._punits[n-1], partition._punits[n-1])
-    var merged_punits =  Nehan.List.map(this._punits, function(punit, i){
+    var merged_punits =  this._punits.map(function(punit, i){
       return punit.mergeTo(partition.get(i));
     });
     return new Nehan.Partition(merged_punits);
@@ -8909,7 +8917,7 @@ Nehan.Partition = (function(){
    */
   Partition.prototype.mapMeasure = function(measure){
     var total_weight = this.getTotalWeight();
-    var sizes =  Nehan.List.map(this._punits, function(punit){
+    var sizes =  this._punits.map(function(punit){
       return punit.getSize(measure, total_weight);
     });
     return __levelize(sizes, Nehan.Display.minTableCellSize);
@@ -9593,7 +9601,7 @@ Nehan.InlineContext = (function(){
     // if ptr moved, hyphenation is executed.
     if(0 <= ptr && ptr < last){
       // disable text after new tail pos.
-      this.elements = Nehan.List.filter(this.elements, function(element){
+      this.elements = this.elements.filter(function(element){
 	return element.pos? (element.pos < head.pos) : true;
       });
       return head; // return new head
@@ -9646,9 +9654,9 @@ Nehan.HtmlLexer = (function (){
 
   // discard close tags defined as single tag in LexingRule.
   var __replace_single_close_tags = function(str){
-    return Nehan.List.fold(Nehan.LexingRule.getSingleTagNames(), str, function(ret, name){
+    return Nehan.LexingRule.getSingleTagNames().reduce(function(ret, name){
       return ret.replace(new RegExp("</" + name + ">", "g"), "");
-    });
+    }, str);
   };
 
   /**
@@ -10123,14 +10131,14 @@ Nehan.TokenStream = (function(){
   };
 
   TokenStream.prototype._setPseudoAttribute  = function(tokens){
-    var tags = Nehan.List.filter(tokens, function(token){
+    var tags = tokens.filter(function(token){
       return (token instanceof Nehan.Tag);
     });
     if(tags.length === 0){
       return;
     }
     var type_of_tags = {};
-    Nehan.List.iter(tags, function(tag){
+    tags.forEach(function(tag){
       var tag_name = tag.getName();
       if(type_of_tags[tag_name]){
 	type_of_tags[tag_name].push(tag);
@@ -11288,33 +11296,33 @@ var Selectors = (function(){
   var __get_value_pe = function(style, pseudo_element_name){
     var cache_key = style.getSelectorCacheKeyPe(pseudo_element_name);
     var cache = __selectors_cache[cache_key] || null;
-    var matched_selectors = cache || Nehan.List.filter(__selectors_pe, function(selector){
+    var matched_selectors = cache || __selectors_pe.filter(function(selector){
       return selector.testPseudoElement(style, pseudo_element_name);
     });
     if(cache === null){
       __selectors_cache[cache_key] = matched_selectors;
     }
-    return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new Nehan.CssHashSet(), function(ret, selector){
+    return (matched_selectors.length === 0)? {} : __sort_selectors(matched_selectors).reduce(function(ret, selector){
       return ret.union(new Nehan.CssHashSet(selector.getValue()));
-    }).getValues();
+    }, new Nehan.CssHashSet()).getValues();
   };
 
   var __get_value = function(style){
     var cache_key = style.getSelectorCacheKey();
     var cache = __selectors_cache[cache_key] || null;
-    var matched_static_selectors = cache || Nehan.List.filter(__selectors, function(selector){
+    var matched_static_selectors = cache || __selectors.filter(function(selector){
       return selector.test(style);
     });
     if(cache === null){
       __selectors_cache[cache_key] = matched_static_selectors;
     }
-    var matched_pc_selectors = Nehan.List.filter(__selectors_pc, function(selector){
+    var matched_pc_selectors = __selectors_pc.filter(function(selector){
       return selector.test(style);
     });
     var matched_selectors = matched_static_selectors.concat(matched_pc_selectors);
-    return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new Nehan.CssHashSet(), function(ret, selector){
+    return (matched_selectors.length === 0)? {} : __sort_selectors(matched_selectors).reduce(function(ret, selector){
       return ret.union(new Nehan.CssHashSet(selector.getValue()));
-    }).getValues();
+    }, new Nehan.CssHashSet()).getValues();
   };
 
   var __set_value = function(selector_key, value){
@@ -11411,12 +11419,12 @@ var Box = (function(){
   }
 
   var __filter_text = function(elements){
-    return Nehan.List.fold(elements, [], function(ret, element){
+    return elements.reduce(function(ret, element){
       if(element instanceof Box){
 	return ret.concat(__filter_text(element.elements || []));
       }
       return element? ret.concat(element) : ret;
-    });
+    }, []);
   };
 
   /**
@@ -11432,7 +11440,7 @@ var Box = (function(){
    @param element {Array.<Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy>}
    */
   Box.prototype.addElements = function(elements){
-    Nehan.List.iter(elements, function(element){
+    elements.forEach(function(element){
       this.addElement(element);
     }.bind(this));
   };
@@ -11481,10 +11489,10 @@ var Box = (function(){
    */
   Box.prototype.toString = function(){
     var texts = __filter_text(this.elements || []);
-    return Nehan.List.fold(texts, "", function(ret, text){
+    return texts.reduce(function(ret, text){
       var str = (text instanceof Nehan.Ruby)? text.getRbString() : (text.data || "");
       return ret + str;
-    });
+    }, "");
   };
   /**
    @memberof Nehan.Box
@@ -11498,7 +11506,7 @@ var Box = (function(){
    @return {Array.<string>}
    */
   Box.prototype.getClassName = function(){
-    return this.classes? Nehan.List.map(this.classes, Nehan.Css.addNehanPrefix).join(" ") : "";
+    return this.classes? this.classes.map(Nehan.Css.addNehanPrefix).join(" ") : "";
   };
   /**
    @memberof Nehan.Box
@@ -11706,7 +11714,7 @@ var DocumentContext = (function(){
   var __root_block_id = 0; // unique block-id for direct children of <body>.
 
   var __get_outline_contexts_by_name = function(section_root_name){
-    return Nehan.List.filter(__outline_contexts, function(context){
+    return __outline_contexts.filter(function(context){
       return context.getMarkupName() === section_root_name;
     });
   };
@@ -11718,10 +11726,10 @@ var DocumentContext = (function(){
 
   var __create_outline_elements_by_name = function(section_root_name, callbacks){
     var contexts = __get_outline_contexts_by_name(section_root_name);
-    return Nehan.List.fold(contexts, [], function(ret, context){
+    return contexts.reduce(function(ret, context){
       var element = __convert_outline_context_to_element(context, callbacks);
       return element? ret.concat(element) : ret;
-    });
+    }, []);
   };
 
   return {
@@ -12083,7 +12091,7 @@ var PageStream = (function(){
    @return {Array.<Nehan.Box>}
    */
   PageStream.prototype.filter= function(fn){
-    return Nehan.List.filter(this._trees, fn);
+    return this._trees.filter(fn);
   };
 
   // () -> tree
@@ -12756,7 +12764,7 @@ var StyleContext = (function(){
     this.initContextSize(measure, extent);
 
     // force re-culculate context-size of children based on new context-size of parent.
-    Nehan.List.iter(this.childs, function(child){
+    this.childs.forEach(function(child){
       child.forceUpdateContextSize(null, null);
     });
   };
@@ -12899,9 +12907,9 @@ var StyleContext = (function(){
     box.edge = edge;
     box.addElements(elements);
     box.classes = classes;
-    box.charCount = Nehan.List.fold(elements, 0, function(total, element){
+    box.charCount = elements.reduce(function(total, element){
       return total + (element.charCount || 0);
-    });
+    }, 0);
     box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
     box.content = opt.content || null;
     box.isFirst = opt.isFirst || false;
@@ -13686,7 +13694,7 @@ var StyleContext = (function(){
    @return {Nehan.StyleContext}
    */
   StyleContext.prototype.getParentChildsOfType = function(markup_name){
-    return Nehan.List.filter(this.getParentChilds(), function(child){
+    return this.getParentChilds().filter(function(child){
       return child.getMarkupName() === markup_name;
     });
   };
@@ -14036,20 +14044,20 @@ var StyleContext = (function(){
     }
 
     var filter_text = function(elements){
-      return Nehan.List.fold(elements, [], function(ret, element){
+      return elements.reduce(function(ret, element){
 	if(element instanceof Box){
 	  // 2015/10/8 update
 	  // skip recursive child inline, only select text element of root line.
 	  return element.isTextBlock()? ret.concat(filter_text(element.elements || [])) : ret;
 	}
 	return element? ret.concat(element) : ret;
-      });
+      }, []);
     };
     var text_elements = filter_text(line.elements);
     if(text_elements.length === 0){
       return;
     }
-    var targets = Nehan.List.filter(text_elements, function(element){
+    var targets = text_elements.filter(function(element){
       return ((element instanceof Nehan.Word) ||
 	      (element instanceof Nehan.Char && !element.isKerningChar()));
     });
@@ -14057,7 +14065,7 @@ var StyleContext = (function(){
       return;
     }
     if(rest_space < 0){
-      Nehan.List.iter(targets, function(text){
+      targets.forEach(function(text){
 	if(text instanceof Nehan.Word){
 	  var del_size;
 	  del_size = text.paddingEnd || 0;
@@ -14089,7 +14097,7 @@ var StyleContext = (function(){
     // so space is not enough, add 'more' space to word.
     //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
     var add_space = Math.max(1, Math.min(quat_font_size, Math.floor(rest_space / targets.length / 2)));
-    Nehan.List.iter(targets, function(text){
+    targets.forEach(function(text){
       text.paddingEnd = (text.paddingEnd || 0) + add_space;
       rest_space -= add_space;
       extend_parent(text.parent, add_space);
@@ -14135,7 +14143,7 @@ var StyleContext = (function(){
   // In nehan.js, 'central' is used when vertical writing mode.
   // see http://dev.w3.org/csswg/css-writing-modes-3/#text-baselines
   StyleContext.prototype._setVertBaseline = function(root_line, baseline){
-    Nehan.List.iter(root_line.elements, function(element){
+    root_line.elements.forEach(function(element){
       var font_size = element.maxFontSize;
       var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
       if (from_after > 0){
@@ -14151,7 +14159,7 @@ var StyleContext = (function(){
   };
 
   StyleContext.prototype._setHoriBaseline = function(root_line, baseline){
-    Nehan.List.iter(root_line.elements, function(element){
+    root_line.elements.forEach(function(element){
       var font_size = element.maxFontSize;
       var from_after = root_line.maxExtent - element.maxExtent;
       if (from_after > 0){
@@ -14191,7 +14199,7 @@ var StyleContext = (function(){
     }
     var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];
     var allowed_props = Nehan.Config.allowedInlineStyleProps || [];
-    var values = Nehan.List.fold(stmts, {}, function(ret, stmt){
+    var values = stmts.reduce(function(ret, stmt){
       var nv = stmt.split(":");
       if(nv.length >= 2){
 	var prop = Nehan.Utils.trim(nv[0]).toLowerCase();
@@ -14203,7 +14211,7 @@ var StyleContext = (function(){
 	}
       }
       return ret;
-    });
+    }, {});
     //console.log("[%s] load inline css:%o", this.markup.name, values);
     return values;
   };
@@ -14258,7 +14266,7 @@ var StyleContext = (function(){
     }
     var box_pos = new Nehan.BoxPosition(pos_value);
     var font_size = this.getFontSize();
-    Nehan.List.iter(Nehan.Const.cssBoxDirsLogical, function(dir){
+    Nehan.Const.cssBoxDirsLogical.forEach(function(dir){
       var value = this.getCssAttr(dir);
       if(value){
 	box_pos[value] = this._computeUnitSize(value, font_size);
@@ -16461,12 +16469,16 @@ var FloatGenerator = (function(){
   FloatGenerator.prototype._sortFloatRest = function(floated, rest){
     var floated_elements = floated.getElements();
     var elements = floated.isFloatStart()? floated_elements.concat(rest) : [rest].concat(floated_elements);
-    return Nehan.List.filter(elements, function(element){ return element !== null; });
+    return elements.filter(function(element){
+      return element !== null;
+    });
   };
 
   FloatGenerator.prototype._wrapBlocks = function(blocks){
     var flow = this.style.flow;
-    var elements = Nehan.List.filter(blocks, function(block){ return block !== null; });
+    var elements = blocks.filter(function(block){
+      return block !== null;
+    });
     var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
     var extent = Nehan.List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
     var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
@@ -16500,7 +16512,7 @@ var FloatGenerator = (function(){
   
   FloatGenerator.prototype._yieldFloatStack = function(context){
     var start_blocks = [], end_blocks = [];
-    Nehan.List.iter(this.generators, function(gen){
+    this.generators.forEach(function(gen){
       var block = gen.yield(context);
       if(block){
 	block.hasNext = gen.hasNext();
@@ -16572,10 +16584,12 @@ var ParallelGenerator = (function(){
   };
 
   ParallelGenerator.prototype._yieldParallelBlocks = function(context){
-    var blocks = Nehan.List.map(this.generators, function(gen){
+    var blocks = this.generators.map(function(gen){
       return gen.yield(context);
     });
-    return Nehan.List.forall(blocks, function(block){ return block === null; })? null : blocks;
+    return blocks.every(function(block){
+      return block === null;
+    })? null : blocks;
   };
 
   ParallelGenerator.prototype._findMaxBlock = function(blocks){
@@ -16588,7 +16602,7 @@ var ParallelGenerator = (function(){
   ParallelGenerator.prototype._alignContentExtent = function(blocks, content_extent){
     var flow = this.style.flow;
     var generators = this.generators;
-    return Nehan.List.map(blocks, function(block, i){
+    return blocks.map(function(block, i){
       if(block === null){
 	return generators[i].style.createBlock({
 	  elements:[],
@@ -16806,7 +16820,7 @@ var TableGenerator = (function(){
 
   TableGenerator.prototype._getPartition = function(cell_tags){
     var partition_count = cell_tags.length;
-    var partition_units = Nehan.List.map(cell_tags, function(cell_tag){
+    var partition_units = cell_tags.map(function(cell_tag){
       return this._getPartitionUnit(cell_tag, partition_count);
     }.bind(this));
     return new Nehan.Partition(partition_units);
@@ -16859,7 +16873,7 @@ var TableRowGenerator = (function(){
 
   TableRowGenerator.prototype._getGenerators = function(style_tr, stream){
     var child_styles = this._getChildStyles(style_tr, stream);
-    return Nehan.List.map(child_styles, function(child_style){
+    return child_styles.map(function(child_style){
       return new TableCellGenerator(child_style, this._createStream(child_style));
     }.bind(this));
   };
@@ -16873,7 +16887,7 @@ var TableRowGenerator = (function(){
       partitionCount:child_tags.length,
       measure:style_tr.contentMeasure
     }) : [];
-    return Nehan.List.map(child_tags, function(tag, i){
+    return child_tags.map(function(tag, i){
       var default_style = new StyleContext(tag, style_tr);
       var static_measure = default_style.staticMeasure;
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_tags.length - i));
@@ -16888,7 +16902,7 @@ var TableRowGenerator = (function(){
   };
 
   TableRowGenerator.prototype._getChildTags = function(stream){
-    return Nehan.List.filter(stream.getTokens(), function(token){
+    return stream.getTokens().filter(function(token){
       return (token instanceof Nehan.Tag && (token.getName() === "td" || token.getName() === "th"));
     });
   };
@@ -17244,7 +17258,7 @@ var LayoutEvaluator = (function(){
 
   LayoutEvaluator.prototype._appendChild = function(root, child){
     if(child instanceof Array){
-      Nehan.List.iter(child, function(child){
+      child.forEach(function(child){
 	this._appendChild(root, child);
       }.bind(this));
     } else {
@@ -17254,7 +17268,7 @@ var LayoutEvaluator = (function(){
 
   LayoutEvaluator.prototype._evaluate = function(tree, opt){
     var root = this._evalElementRoot(tree, opt || {});
-    var dom = root.innerHTML? root : Nehan.List.fold(tree.elements, root, function(root, child){
+    var dom = root.innerHTML? root : tree.elements.reduce(function(root, child){
       if(child._type === "void"){
 	return root; // do nothing
       }
@@ -17266,7 +17280,7 @@ var LayoutEvaluator = (function(){
 	this._appendChild(root, this._createClearFix());
       }
       return root;
-    }.bind(this));
+    }.bind(this), root);
     var oncreate = tree.getOnCreate();
     if(oncreate){
       oncreate(new DomCreateContext(dom, tree));

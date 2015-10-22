@@ -158,7 +158,7 @@ var PageStream = (function(){
    @return {Array.<Nehan.Box>}
    */
   PageStream.prototype.filter= function(fn){
-    return Nehan.List.filter(this._trees, fn);
+    return this._trees.filter(fn);
   };
 
   // () -> tree

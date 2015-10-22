@@ -57,33 +57,33 @@ var Selectors = (function(){
   var __get_value_pe = function(style, pseudo_element_name){
     var cache_key = style.getSelectorCacheKeyPe(pseudo_element_name);
     var cache = __selectors_cache[cache_key] || null;
-    var matched_selectors = cache || Nehan.List.filter(__selectors_pe, function(selector){
+    var matched_selectors = cache || __selectors_pe.filter(function(selector){
       return selector.testPseudoElement(style, pseudo_element_name);
     });
     if(cache === null){
       __selectors_cache[cache_key] = matched_selectors;
     }
-    return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new Nehan.CssHashSet(), function(ret, selector){
+    return (matched_selectors.length === 0)? {} : __sort_selectors(matched_selectors).reduce(function(ret, selector){
       return ret.union(new Nehan.CssHashSet(selector.getValue()));
-    }).getValues();
+    }, new Nehan.CssHashSet()).getValues();
   };
 
   var __get_value = function(style){
     var cache_key = style.getSelectorCacheKey();
     var cache = __selectors_cache[cache_key] || null;
-    var matched_static_selectors = cache || Nehan.List.filter(__selectors, function(selector){
+    var matched_static_selectors = cache || __selectors.filter(function(selector){
       return selector.test(style);
     });
     if(cache === null){
       __selectors_cache[cache_key] = matched_static_selectors;
     }
-    var matched_pc_selectors = Nehan.List.filter(__selectors_pc, function(selector){
+    var matched_pc_selectors = __selectors_pc.filter(function(selector){
       return selector.test(style);
     });
     var matched_selectors = matched_static_selectors.concat(matched_pc_selectors);
-    return (matched_selectors.length === 0)? {} : Nehan.List.fold(__sort_selectors(matched_selectors), new Nehan.CssHashSet(), function(ret, selector){
+    return (matched_selectors.length === 0)? {} : __sort_selectors(matched_selectors).reduce(function(ret, selector){
       return ret.union(new Nehan.CssHashSet(selector.getValue()));
-    }).getValues();
+    }, new Nehan.CssHashSet()).getValues();
   };
 
   var __set_value = function(selector_key, value){

@@ -15,7 +15,7 @@ Nehan.BorderStyle = (function(){
    */
   BorderStyle.prototype.clone = function(){
     var style = new BorderStyle();
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
+    Nehan.Const.cssBoxDirs.forEach(function(dir){
       if(this[dir]){
 	style[dir] = this[dir];
       }

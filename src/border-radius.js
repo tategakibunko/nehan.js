@@ -45,7 +45,7 @@ Nehan.BorderRadius = (function(){
    @return {Object}
    */
   BorderRadius.prototype.getCssValueHori = function(){
-    return Nehan.List.map(this.getArray(), function(radius){
+    return this.getArray().map(function(radius){
       return radius.getCssValueHori();
     }).join(" ");
   };
@@ -56,7 +56,7 @@ Nehan.BorderRadius = (function(){
    @return {Object}
    */
   BorderRadius.prototype.getCssValueVert = function(){
-    return Nehan.List.map(this.getArray(), function(radius){
+    return this.getArray().map(function(radius){
       return radius.getCssValueVert();
     }).join(" ");
   };
@@ -79,7 +79,7 @@ Nehan.BorderRadius = (function(){
     var css = {};
     var css_value = this.getCssValue();
     css["border-radius"] = css_value; // without vender prefix
-    Nehan.List.iter(Nehan.Const.cssVenderPrefixes, function(prefix){
+    Nehan.Const.cssVenderPrefixes.forEach(function(prefix){
       var prop = [prefix, "border-radius"].join("-"); // with vender prefix
       css[prop] = css_value;
     });

@@ -245,7 +245,7 @@ Nehan.InlineContext = (function(){
     // if ptr moved, hyphenation is executed.
     if(0 <= ptr && ptr < last){
       // disable text after new tail pos.
-      this.elements = Nehan.List.filter(this.elements, function(element){
+      this.elements = this.elements.filter(function(element){
 	return element.pos? (element.pos < head.pos) : true;
       });
       return head; // return new head

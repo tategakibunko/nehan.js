@@ -15,7 +15,7 @@ var DocumentContext = (function(){
   var __root_block_id = 0; // unique block-id for direct children of <body>.
 
   var __get_outline_contexts_by_name = function(section_root_name){
-    return Nehan.List.filter(__outline_contexts, function(context){
+    return __outline_contexts.filter(function(context){
       return context.getMarkupName() === section_root_name;
     });
   };
@@ -27,10 +27,10 @@ var DocumentContext = (function(){
 
   var __create_outline_elements_by_name = function(section_root_name, callbacks){
     var contexts = __get_outline_contexts_by_name(section_root_name);
-    return Nehan.List.fold(contexts, [], function(ret, context){
+    return contexts.reduce(function(ret, context){
       var element = __convert_outline_context_to_element(context, callbacks);
       return element? ret.concat(element) : ret;
-    });
+    }, []);
   };
 
   return {

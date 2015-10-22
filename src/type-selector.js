@@ -145,7 +145,7 @@ Nehan.TypeSelector = (function(){
    @return {boolean}
    */
   TypeSelector.prototype.testClassNames = function(markup_classes){
-    return Nehan.List.forall(this.classes, function(klass){
+    return this.classes.every(function(klass){
       return Nehan.List.exists(markup_classes, Nehan.Closure.eq(klass));
     });
   };
@@ -205,7 +205,7 @@ Nehan.TypeSelector = (function(){
   };
 
   TypeSelector.prototype._testAttrs = function(style){
-    return Nehan.List.forall(this.attrs, function(attr){
+    return this.attrs.every(function(attr){
       return attr.test(style);
     });
   };

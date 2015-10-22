@@ -386,7 +386,7 @@ var StyleContext = (function(){
     this.initContextSize(measure, extent);
 
     // force re-culculate context-size of children based on new context-size of parent.
-    Nehan.List.iter(this.childs, function(child){
+    this.childs.forEach(function(child){
       child.forceUpdateContextSize(null, null);
     });
   };
@@ -529,9 +529,9 @@ var StyleContext = (function(){
     box.edge = edge;
     box.addElements(elements);
     box.classes = classes;
-    box.charCount = Nehan.List.fold(elements, 0, function(total, element){
+    box.charCount = elements.reduce(function(total, element){
       return total + (element.charCount || 0);
-    });
+    }, 0);
     box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
     box.content = opt.content || null;
     box.isFirst = opt.isFirst || false;
@@ -1316,7 +1316,7 @@ var StyleContext = (function(){
    @return {Nehan.StyleContext}
    */
   StyleContext.prototype.getParentChildsOfType = function(markup_name){
-    return Nehan.List.filter(this.getParentChilds(), function(child){
+    return this.getParentChilds().filter(function(child){
       return child.getMarkupName() === markup_name;
     });
   };
@@ -1666,20 +1666,20 @@ var StyleContext = (function(){
     }
 
     var filter_text = function(elements){
-      return Nehan.List.fold(elements, [], function(ret, element){
+      return elements.reduce(function(ret, element){
 	if(element instanceof Box){
 	  // 2015/10/8 update
 	  // skip recursive child inline, only select text element of root line.
 	  return element.isTextBlock()? ret.concat(filter_text(element.elements || [])) : ret;
 	}
 	return element? ret.concat(element) : ret;
-      });
+      }, []);
     };
     var text_elements = filter_text(line.elements);
     if(text_elements.length === 0){
       return;
     }
-    var targets = Nehan.List.filter(text_elements, function(element){
+    var targets = text_elements.filter(function(element){
       return ((element instanceof Nehan.Word) ||
 	      (element instanceof Nehan.Char && !element.isKerningChar()));
     });
@@ -1687,7 +1687,7 @@ var StyleContext = (function(){
       return;
     }
     if(rest_space < 0){
-      Nehan.List.iter(targets, function(text){
+      targets.forEach(function(text){
 	if(text instanceof Nehan.Word){
 	  var del_size;
 	  del_size = text.paddingEnd || 0;
@@ -1719,7 +1719,7 @@ var StyleContext = (function(){
     // so space is not enough, add 'more' space to word.
     //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
     var add_space = Math.max(1, Math.min(quat_font_size, Math.floor(rest_space / targets.length / 2)));
-    Nehan.List.iter(targets, function(text){
+    targets.forEach(function(text){
       text.paddingEnd = (text.paddingEnd || 0) + add_space;
       rest_space -= add_space;
       extend_parent(text.parent, add_space);
@@ -1765,7 +1765,7 @@ var StyleContext = (function(){
   // In nehan.js, 'central' is used when vertical writing mode.
   // see http://dev.w3.org/csswg/css-writing-modes-3/#text-baselines
   StyleContext.prototype._setVertBaseline = function(root_line, baseline){
-    Nehan.List.iter(root_line.elements, function(element){
+    root_line.elements.forEach(function(element){
       var font_size = element.maxFontSize;
       var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
       if (from_after > 0){
@@ -1781,7 +1781,7 @@ var StyleContext = (function(){
   };
 
   StyleContext.prototype._setHoriBaseline = function(root_line, baseline){
-    Nehan.List.iter(root_line.elements, function(element){
+    root_line.elements.forEach(function(element){
       var font_size = element.maxFontSize;
       var from_after = root_line.maxExtent - element.maxExtent;
       if (from_after > 0){
@@ -1821,7 +1821,7 @@ var StyleContext = (function(){
     }
     var stmts = (style.indexOf(";") >= 0)? style.split(";") : [style];
     var allowed_props = Nehan.Config.allowedInlineStyleProps || [];
-    var values = Nehan.List.fold(stmts, {}, function(ret, stmt){
+    var values = stmts.reduce(function(ret, stmt){
       var nv = stmt.split(":");
       if(nv.length >= 2){
 	var prop = Nehan.Utils.trim(nv[0]).toLowerCase();
@@ -1833,7 +1833,7 @@ var StyleContext = (function(){
 	}
       }
       return ret;
-    });
+    }, {});
     //console.log("[%s] load inline css:%o", this.markup.name, values);
     return values;
   };
@@ -1888,7 +1888,7 @@ var StyleContext = (function(){
     }
     var box_pos = new Nehan.BoxPosition(pos_value);
     var font_size = this.getFontSize();
-    Nehan.List.iter(Nehan.Const.cssBoxDirsLogical, function(dir){
+    Nehan.Const.cssBoxDirsLogical.forEach(function(dir){
       var value = this.getCssAttr(dir);
       if(value){
 	box_pos[value] = this._computeUnitSize(value, font_size);

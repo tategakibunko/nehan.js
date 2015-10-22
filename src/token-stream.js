@@ -258,14 +258,14 @@ Nehan.TokenStream = (function(){
   };
 
   TokenStream.prototype._setPseudoAttribute  = function(tokens){
-    var tags = Nehan.List.filter(tokens, function(token){
+    var tags = tokens.filter(function(token){
       return (token instanceof Nehan.Tag);
     });
     if(tags.length === 0){
       return;
     }
     var type_of_tags = {};
-    Nehan.List.iter(tags, function(tag){
+    tags.forEach(function(tag){
       var tag_name = tag.getName();
       if(type_of_tags[tag_name]){
 	type_of_tags[tag_name].push(tag);

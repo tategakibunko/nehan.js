@@ -50,7 +50,7 @@ Nehan.TagAttrs = (function(){
    @param klass {String} - css class name(prefiex by "nehan-")
    */
   TagAttrs.prototype.removeClass = function(klass){
-    this.classes = Nehan.List.filter(this.classes, function(cls){
+    this.classes = this.classes.filter(function(cls){
       return cls != klass;
     });
     this.setAttr("class", this.classes.join(" "));
@@ -87,7 +87,7 @@ Nehan.TagAttrs = (function(){
    */
   TagAttrs.prototype.getKey = function(){
     var props = Object.keys(this.attrs).sort();
-    return Nehan.List.map(props, function(prop){
+    return props.map(function(prop){
       return prop + "=" + this.attrs[prop];
     }.bind(this)).join("&");
   };
@@ -122,7 +122,7 @@ Nehan.TagAttrs = (function(){
     var classes = (class_name === "")? [] : class_name.split(/\s+/);
 
     // replace 'nehan-' prefix for backword compatibility(version <= 5.1.0).
-    return Nehan.List.map(classes, function(klass){
+    return classes.map(function(klass){
       return (klass.indexOf("nehan-") === 0)? klass.replace("nehan-", "") : klass;
     }); 
   };

@@ -103,7 +103,7 @@ Nehan.Utils = {
   */
   camelize : function(name){
     var self = this;
-    return (name.indexOf("-") < 0)? name : Nehan.List.map(name.split("-"), function(part, i){
+    return (name.indexOf("-") < 0)? name : name.split("-").map(function(part, i){
       return (i === 0)? part : self.capitalize(part);
     }).join("");
   }

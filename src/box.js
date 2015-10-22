@@ -16,12 +16,12 @@ var Box = (function(){
   }
 
   var __filter_text = function(elements){
-    return Nehan.List.fold(elements, [], function(ret, element){
+    return elements.reduce(function(ret, element){
       if(element instanceof Box){
 	return ret.concat(__filter_text(element.elements || []));
       }
       return element? ret.concat(element) : ret;
-    });
+    }, []);
   };
 
   /**
@@ -37,7 +37,7 @@ var Box = (function(){
    @param element {Array.<Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy>}
    */
   Box.prototype.addElements = function(elements){
-    Nehan.List.iter(elements, function(element){
+    elements.forEach(function(element){
       this.addElement(element);
     }.bind(this));
   };
@@ -86,10 +86,10 @@ var Box = (function(){
    */
   Box.prototype.toString = function(){
     var texts = __filter_text(this.elements || []);
-    return Nehan.List.fold(texts, "", function(ret, text){
+    return texts.reduce(function(ret, text){
       var str = (text instanceof Nehan.Ruby)? text.getRbString() : (text.data || "");
       return ret + str;
-    });
+    }, "");
   };
   /**
    @memberof Nehan.Box
@@ -103,7 +103,7 @@ var Box = (function(){
    @return {Array.<string>}
    */
   Box.prototype.getClassName = function(){
-    return this.classes? Nehan.List.map(this.classes, Nehan.Css.addNehanPrefix).join(" ") : "";
+    return this.classes? this.classes.map(Nehan.Css.addNehanPrefix).join(" ") : "";
   };
   /**
    @memberof Nehan.Box

@@ -39,9 +39,9 @@ Nehan.HtmlLexer = (function (){
 
   // discard close tags defined as single tag in LexingRule.
   var __replace_single_close_tags = function(str){
-    return Nehan.List.fold(Nehan.LexingRule.getSingleTagNames(), str, function(ret, name){
+    return Nehan.LexingRule.getSingleTagNames().reduce(function(ret, name){
       return ret.replace(new RegExp("</" + name + ">", "g"), "");
-    });
+    }, str);
   };
 
   /**

@@ -78,9 +78,9 @@ Nehan.FloatGroup = (function(){
    @return {int}
    */
   FloatGroup.prototype.getMeasure = function(flow){
-    return Nehan.List.fold(this.elements, 0, function(measure, element){
+    return this.elements.reduce(function(measure, element){
       return measure + element.getLayoutMeasure(flow);
-    });
+    }, 0);
   };
   /**
    @memberof Nehan.FloatGroup
@@ -88,9 +88,9 @@ Nehan.FloatGroup = (function(){
    @return {int}
    */
   FloatGroup.prototype.getExtent = function(flow){
-    return Nehan.List.fold(this.elements, 0, function(extent, element){
+    return this.elements.reduce(function(extent, element){
       return Math.max(extent, element.getLayoutExtent(flow));
-    });
+    }, 0);
   };
   /**
    @memberof Nehan.FloatGroup

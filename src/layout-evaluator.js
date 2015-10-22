@@ -89,7 +89,7 @@ var LayoutEvaluator = (function(){
 
   LayoutEvaluator.prototype._appendChild = function(root, child){
     if(child instanceof Array){
-      Nehan.List.iter(child, function(child){
+      child.forEach(function(child){
 	this._appendChild(root, child);
       }.bind(this));
     } else {
@@ -99,7 +99,7 @@ var LayoutEvaluator = (function(){
 
   LayoutEvaluator.prototype._evaluate = function(tree, opt){
     var root = this._evalElementRoot(tree, opt || {});
-    var dom = root.innerHTML? root : Nehan.List.fold(tree.elements, root, function(root, child){
+    var dom = root.innerHTML? root : tree.elements.reduce(function(root, child){
       if(child._type === "void"){
 	return root; // do nothing
       }
@@ -111,7 +111,7 @@ var LayoutEvaluator = (function(){
 	this._appendChild(root, this._createClearFix());
       }
       return root;
-    }.bind(this));
+    }.bind(this), root);
     var oncreate = tree.getOnCreate();
     if(oncreate){
       oncreate(new DomCreateContext(dom, tree));

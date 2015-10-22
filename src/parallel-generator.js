@@ -52,10 +52,12 @@ var ParallelGenerator = (function(){
   };
 
   ParallelGenerator.prototype._yieldParallelBlocks = function(context){
-    var blocks = Nehan.List.map(this.generators, function(gen){
+    var blocks = this.generators.map(function(gen){
       return gen.yield(context);
     });
-    return Nehan.List.forall(blocks, function(block){ return block === null; })? null : blocks;
+    return blocks.every(function(block){
+      return block === null;
+    })? null : blocks;
   };
 
   ParallelGenerator.prototype._findMaxBlock = function(blocks){
@@ -68,7 +70,7 @@ var ParallelGenerator = (function(){
   ParallelGenerator.prototype._alignContentExtent = function(blocks, content_extent){
     var flow = this.style.flow;
     var generators = this.generators;
-    return Nehan.List.map(blocks, function(block, i){
+    return blocks.map(function(block, i){
       if(block === null){
 	return generators[i].style.createBlock({
 	  elements:[],

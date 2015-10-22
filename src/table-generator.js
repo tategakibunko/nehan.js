@@ -66,7 +66,7 @@ var TableGenerator = (function(){
 
   TableGenerator.prototype._getPartition = function(cell_tags){
     var partition_count = cell_tags.length;
-    var partition_units = Nehan.List.map(cell_tags, function(cell_tag){
+    var partition_units = cell_tags.map(function(cell_tag){
       return this._getPartitionUnit(cell_tag, partition_count);
     }.bind(this));
     return new Nehan.Partition(partition_units);

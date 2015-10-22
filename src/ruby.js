@@ -46,7 +46,7 @@ Nehan.Ruby = (function(){
    @return {String}
    */
   Ruby.prototype.getRbString = function(){
-    return Nehan.List.map(this.rbs, function(rb){
+    return this.rbs.map(function(rb){
       return rb.data || "";
     }).join("");
   };
@@ -122,10 +122,10 @@ Nehan.Ruby = (function(){
    */
   Ruby.prototype.setMetrics = function(flow, font, letter_spacing){
     this.rtFontSize = Nehan.Display.getRtFontSize(font.size);
-    var advance_rbs = Nehan.List.fold(this.rbs, 0, function(ret, rb){
+    var advance_rbs = this.rbs.reduce(function(ret, rb){
       rb.setMetrics(flow, font);
       return ret + rb.getAdvance(flow, letter_spacing);
-    });
+    }, 0);
     var advance_rt = this.rtFontSize * this.getRtString().length;
     this.advanceSize = advance_rbs;
     if(advance_rt > advance_rbs){
