@@ -79,7 +79,7 @@ Nehan.BorderRadius = (function(){
     var css = {};
     var css_value = this.getCssValue();
     css["border-radius"] = css_value; // without vender prefix
-    Nehan.Const.cssVenderPrefixes.forEach(function(prefix){
+    Nehan.List.iter(Nehan.Const.cssVenderPrefixes, function(prefix){
       var prop = [prefix, "border-radius"].join("-"); // with vender prefix
       css[prop] = css_value;
     });

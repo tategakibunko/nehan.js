@@ -89,7 +89,7 @@ var LayoutEvaluator = (function(){
 
   LayoutEvaluator.prototype._appendChild = function(root, child){
     if(child instanceof Array){
-      child.forEach(function(child){
+      Nehan.List.iter(child, function(child){
 	this._appendChild(root, child);
       }.bind(this));
     } else {

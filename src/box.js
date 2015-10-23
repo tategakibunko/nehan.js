@@ -37,7 +37,7 @@ var Box = (function(){
    @param element {Array.<Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy>}
    */
   Box.prototype.addElements = function(elements){
-    elements.forEach(function(element){
+    Nehan.List.iter(elements, function(element){
       this.addElement(element);
     }.bind(this));
   };

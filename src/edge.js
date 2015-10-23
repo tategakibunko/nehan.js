@@ -42,7 +42,7 @@ Nehan.Edge = (function(){
    */
   Edge.prototype.copyTo = function(dst){
     var self = this;
-    Nehan.Const.cssBoxDirs.forEach(function(dir){
+    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
       dst[dir] = self[dir];
     });
     return dst;
@@ -62,7 +62,7 @@ Nehan.Edge = (function(){
   Edge.prototype.getCss = function(){
     var css = {};
     var self = this;
-    Nehan.Const.cssBoxDirs.forEach(function(dir){
+    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
       var value = self[dir];
       if(value > 0){
 	css[self.getDirProp(dir)] = self[dir] + "px";

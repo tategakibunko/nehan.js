@@ -173,7 +173,7 @@ var FloatGenerator = (function(){
   
   FloatGenerator.prototype._yieldFloatStack = function(context){
     var start_blocks = [], end_blocks = [];
-    this.generators.forEach(function(gen){
+    Nehan.List.iter(this.generators, function(gen){
       var block = gen.yield(context);
       if(block){
 	block.hasNext = gen.hasNext();

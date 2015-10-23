@@ -1428,7 +1428,7 @@ Nehan.Css = {
   */
   setCssValueWithVender: function(dst, name, value){
     dst[name] = value; // no prefixed version
-    Nehan.Const.cssVenderPrefixes.forEach(function(prefix){
+    Nehan.List.iter(Nehan.Const.cssVenderPrefixes, function(prefix){
       dst[prefix + "-" + name] = value;
     });
     return dst;
@@ -2498,7 +2498,7 @@ Nehan.CssParser = (function(){
     if(props.length !== values.length){
       throw "invalid args:__zip_obj";
     }
-    props.forEach(function(prop, i){
+    Nehan.List.iter(props, function(prop, i){
       ret[prop] = values[i];
     });
     return ret;
@@ -3426,7 +3426,7 @@ Nehan.Selector = (function(){
   // see http://www.w3.org/TR/css3-selectors/#specificity
   Selector.prototype._countSpec = function(elements){
     var a = 0, b = 0, c = 0;
-    elements.forEach(function(token){
+    Nehan.List.iter(elements, function(token){
       if(token instanceof Nehan.TypeSelector){
 	a += token.getIdSpec();
 	b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();
@@ -3894,7 +3894,7 @@ Nehan.BoxRect = {
      @param fn {Function}
    */
   iter : function(obj, fn){
-    Nehan.Const.cssBoxDirs.forEach(function(dir){
+    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
       if(obj[dir]){
 	fn(dir, obj[dir]);
       }
@@ -4087,7 +4087,7 @@ Nehan.Edge = (function(){
    */
   Edge.prototype.copyTo = function(dst){
     var self = this;
-    Nehan.Const.cssBoxDirs.forEach(function(dir){
+    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
       dst[dir] = self[dir];
     });
     return dst;
@@ -4107,7 +4107,7 @@ Nehan.Edge = (function(){
   Edge.prototype.getCss = function(){
     var css = {};
     var self = this;
-    Nehan.Const.cssBoxDirs.forEach(function(dir){
+    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
       var value = self[dir];
       if(value > 0){
 	css[self.getDirProp(dir)] = self[dir] + "px";
@@ -4396,7 +4396,7 @@ Nehan.BorderRadius = (function(){
     var css = {};
     var css_value = this.getCssValue();
     css["border-radius"] = css_value; // without vender prefix
-    Nehan.Const.cssVenderPrefixes.forEach(function(prefix){
+    Nehan.List.iter(Nehan.Const.cssVenderPrefixes, function(prefix){
       var prop = [prefix, "border-radius"].join("-"); // with vender prefix
       css[prop] = css_value;
     });
@@ -4526,7 +4526,7 @@ Nehan.BorderColor = (function(){
    */
   BorderColor.prototype.clone = function(){
     var border_color = new BorderColor();
-    Nehan.Const.cssBoxDirs.forEach(function(dir){
+    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
       if(this[dir]){
 	border_color[dir] = this[dir];
       }
@@ -4589,7 +4589,7 @@ Nehan.BorderStyle = (function(){
    */
   BorderStyle.prototype.clone = function(){
     var style = new BorderStyle();
-    Nehan.Const.cssBoxDirs.forEach(function(dir){
+    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
       if(this[dir]){
 	style[dir] = this[dir];
       }
@@ -10138,7 +10138,7 @@ Nehan.TokenStream = (function(){
       return;
     }
     var type_of_tags = {};
-    tags.forEach(function(tag){
+    Nehan.List.iter(tags, function(tag){
       var tag_name = tag.getName();
       if(type_of_tags[tag_name]){
 	type_of_tags[tag_name].push(tag);
@@ -11440,7 +11440,7 @@ var Box = (function(){
    @param element {Array.<Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy>}
    */
   Box.prototype.addElements = function(elements){
-    elements.forEach(function(element){
+    Nehan.List.iter(elements, function(element){
       this.addElement(element);
     }.bind(this));
   };
@@ -12764,7 +12764,7 @@ var StyleContext = (function(){
     this.initContextSize(measure, extent);
 
     // force re-culculate context-size of children based on new context-size of parent.
-    this.childs.forEach(function(child){
+    Nehan.List.iter(this.childs, function(child){
       child.forceUpdateContextSize(null, null);
     });
   };
@@ -14065,7 +14065,7 @@ var StyleContext = (function(){
       return;
     }
     if(rest_space < 0){
-      targets.forEach(function(text){
+      Nehan.List.iter(targets, function(text){
 	if(text instanceof Nehan.Word){
 	  var del_size;
 	  del_size = text.paddingEnd || 0;
@@ -14097,7 +14097,7 @@ var StyleContext = (function(){
     // so space is not enough, add 'more' space to word.
     //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
     var add_space = Math.max(1, Math.min(quat_font_size, Math.floor(rest_space / targets.length / 2)));
-    targets.forEach(function(text){
+    Nehan.List.iter(targets, function(text){
       text.paddingEnd = (text.paddingEnd || 0) + add_space;
       rest_space -= add_space;
       extend_parent(text.parent, add_space);
@@ -14143,7 +14143,7 @@ var StyleContext = (function(){
   // In nehan.js, 'central' is used when vertical writing mode.
   // see http://dev.w3.org/csswg/css-writing-modes-3/#text-baselines
   StyleContext.prototype._setVertBaseline = function(root_line, baseline){
-    root_line.elements.forEach(function(element){
+    Nehan.List.iter(root_line.elements, function(element){
       var font_size = element.maxFontSize;
       var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
       if (from_after > 0){
@@ -14159,7 +14159,7 @@ var StyleContext = (function(){
   };
 
   StyleContext.prototype._setHoriBaseline = function(root_line, baseline){
-    root_line.elements.forEach(function(element){
+    Nehan.List.iter(root_line.elements, function(element){
       var font_size = element.maxFontSize;
       var from_after = root_line.maxExtent - element.maxExtent;
       if (from_after > 0){
@@ -14266,7 +14266,7 @@ var StyleContext = (function(){
     }
     var box_pos = new Nehan.BoxPosition(pos_value);
     var font_size = this.getFontSize();
-    Nehan.Const.cssBoxDirsLogical.forEach(function(dir){
+    Nehan.List.iter(Nehan.Const.cssBoxDirsLogical, function(dir){
       var value = this.getCssAttr(dir);
       if(value){
 	box_pos[value] = this._computeUnitSize(value, font_size);
@@ -16512,7 +16512,7 @@ var FloatGenerator = (function(){
   
   FloatGenerator.prototype._yieldFloatStack = function(context){
     var start_blocks = [], end_blocks = [];
-    this.generators.forEach(function(gen){
+    Nehan.List.iter(this.generators, function(gen){
       var block = gen.yield(context);
       if(block){
 	block.hasNext = gen.hasNext();
@@ -17258,7 +17258,7 @@ var LayoutEvaluator = (function(){
 
   LayoutEvaluator.prototype._appendChild = function(root, child){
     if(child instanceof Array){
-      child.forEach(function(child){
+      Nehan.List.iter(child, function(child){
 	this._appendChild(root, child);
       }.bind(this));
     } else {

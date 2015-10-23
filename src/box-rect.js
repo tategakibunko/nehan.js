@@ -11,7 +11,7 @@ Nehan.BoxRect = {
      @param fn {Function}
    */
   iter : function(obj, fn){
-    Nehan.Const.cssBoxDirs.forEach(function(dir){
+    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
       if(obj[dir]){
 	fn(dir, obj[dir]);
       }

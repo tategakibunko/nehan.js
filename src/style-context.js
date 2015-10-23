@@ -386,7 +386,7 @@ var StyleContext = (function(){
     this.initContextSize(measure, extent);
 
     // force re-culculate context-size of children based on new context-size of parent.
-    this.childs.forEach(function(child){
+    Nehan.List.iter(this.childs, function(child){
       child.forceUpdateContextSize(null, null);
     });
   };
@@ -1687,7 +1687,7 @@ var StyleContext = (function(){
       return;
     }
     if(rest_space < 0){
-      targets.forEach(function(text){
+      Nehan.List.iter(targets, function(text){
 	if(text instanceof Nehan.Word){
 	  var del_size;
 	  del_size = text.paddingEnd || 0;
@@ -1719,7 +1719,7 @@ var StyleContext = (function(){
     // so space is not enough, add 'more' space to word.
     //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
     var add_space = Math.max(1, Math.min(quat_font_size, Math.floor(rest_space / targets.length / 2)));
-    targets.forEach(function(text){
+    Nehan.List.iter(targets, function(text){
       text.paddingEnd = (text.paddingEnd || 0) + add_space;
       rest_space -= add_space;
       extend_parent(text.parent, add_space);
@@ -1765,7 +1765,7 @@ var StyleContext = (function(){
   // In nehan.js, 'central' is used when vertical writing mode.
   // see http://dev.w3.org/csswg/css-writing-modes-3/#text-baselines
   StyleContext.prototype._setVertBaseline = function(root_line, baseline){
-    root_line.elements.forEach(function(element){
+    Nehan.List.iter(root_line.elements, function(element){
       var font_size = element.maxFontSize;
       var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
       if (from_after > 0){
@@ -1781,7 +1781,7 @@ var StyleContext = (function(){
   };
 
   StyleContext.prototype._setHoriBaseline = function(root_line, baseline){
-    root_line.elements.forEach(function(element){
+    Nehan.List.iter(root_line.elements, function(element){
       var font_size = element.maxFontSize;
       var from_after = root_line.maxExtent - element.maxExtent;
       if (from_after > 0){
@@ -1888,7 +1888,7 @@ var StyleContext = (function(){
     }
     var box_pos = new Nehan.BoxPosition(pos_value);
     var font_size = this.getFontSize();
-    Nehan.Const.cssBoxDirsLogical.forEach(function(dir){
+    Nehan.List.iter(Nehan.Const.cssBoxDirsLogical, function(dir){
       var value = this.getCssAttr(dir);
       if(value){
 	box_pos[value] = this._computeUnitSize(value, font_size);

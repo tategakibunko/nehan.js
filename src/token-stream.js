@@ -265,7 +265,7 @@ Nehan.TokenStream = (function(){
       return;
     }
     var type_of_tags = {};
-    tags.forEach(function(tag){
+    Nehan.List.iter(tags, function(tag){
       var tag_name = tag.getName();
       if(type_of_tags[tag_name]){
 	type_of_tags[tag_name].push(tag);

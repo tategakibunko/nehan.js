@@ -65,7 +65,7 @@ Nehan.CssParser = (function(){
     if(props.length !== values.length){
       throw "invalid args:__zip_obj";
     }
-    props.forEach(function(prop, i){
+    Nehan.List.iter(props, function(prop, i){
       ret[prop] = values[i];
     });
     return ret;
