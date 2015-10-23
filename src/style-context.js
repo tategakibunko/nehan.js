@@ -176,10 +176,6 @@ var StyleContext = (function(){
     if(border_collapse){
       this.borderCollapse = border_collapse;
     }
-    var edge = this._loadEdge(this.flow, this.getFontSize());
-    if(edge){
-      this.edge = edge;
-    }
     var line_height = this._loadLineHeight();
     if(line_height){
       this.lineHeight = line_height;
@@ -228,6 +224,10 @@ var StyleContext = (function(){
     var hanging_punctuation = this._loadHangingPunctuation();
     if(hanging_punctuation){
       this.hangingPunctuation = hanging_punctuation;
+    }
+    var edge = this._loadEdge(this.flow, this.getFontSize());
+    if(edge){
+      this.edge = edge;
     }
     // static size is defined in selector or tag attr, hightest priority
     this.staticMeasure = this._loadStaticMeasure();
