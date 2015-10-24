@@ -9824,6 +9824,7 @@ Nehan.TextLexer = (function (){
   var __rex_word = /^[a-zA-Z0-9.!?\/:$#;"',_%]+/;
   var __rex_char_ref = /^&[^;\s]+;/;
   var __rex_half_single_tcy = /[a-zA-Z0-9!?]/;
+  var __rex_typographic_ligature = /[\ufb00-\uff06]/; // ff,fi,fl,ffi,ffl,ft
 
   /**
      @memberof Nehan
@@ -9859,6 +9860,9 @@ Nehan.TextLexer = (function (){
       return new Nehan.Char(this._stepBuff(str.length), {isRef:true});
     }
     str = this.buff.substring(0, 1);
+    if(__rex_typographic_ligature.test(str)){
+      return new Nehan.Word(this._stepBuff(1));
+    }
     return new Nehan.Char(this._stepBuff(1));
   };
 
