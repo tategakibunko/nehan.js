@@ -937,7 +937,7 @@ var Style = {
     "measure":"1em",
     "extent":"1em",
     "float":"start",
-    "line-height":"1.0em",
+    "line-height":"1em",
     "font-size":"4em"
   },
   ".gap-start":{
