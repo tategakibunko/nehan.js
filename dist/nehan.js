@@ -13022,7 +13022,7 @@ var StyleContext = (function(){
       var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
       if(line.elements.length > 0 && edge_size > 0){
 	line.edge = new Nehan.BoxEdge();
-	line.edge.padding.setBefore(this.flow, (line.lineNo > 0)? edge_size : Math.floor(edge_size / 2));
+	line.edge.padding.setBefore(this.flow, edge_size);
       }
     }
     //console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_root_line);
