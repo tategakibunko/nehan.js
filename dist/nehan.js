@@ -32,7 +32,7 @@
    @namespace Nehan
 */
 var Nehan = Nehan || {};
-Nehan.version = "5.3.3";
+Nehan.version = "5.3.4";
 
 /**
    system configuration

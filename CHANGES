@@ -6,6 +6,10 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 5.3.4 2015/10/26
+========================
+* Fix wrong ligature range.
+
 version 5.3.3 2015/10/25
 ========================
 o Avoid generating child generator if not required.
