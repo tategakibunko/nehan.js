@@ -3,7 +3,7 @@ Nehan.TextLexer = (function (){
   var __rex_word = /^[a-zA-Z0-9.!?\/:$#;"',_%]+/;
   var __rex_char_ref = /^&[^;\s]+;/;
   var __rex_half_single_tcy = /[a-zA-Z0-9!?]/;
-  var __rex_typographic_ligature = /[\ufb00-\uff06]/; // ff,fi,fl,ffi,ffl,ft
+  var __rex_typographic_ligature = /[\ufb00-\ufb06]/; // ff,fi,fl,ffi,ffl,ft
 
   /**
      @memberof Nehan

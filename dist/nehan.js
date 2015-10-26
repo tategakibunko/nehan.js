@@ -7431,11 +7431,11 @@ Nehan.Char = (function(){
       this._setVert("mmm", 1, 1); break;
     case 8229:
       this._setVert("mm", 1, 1); break;
-    case 12317:
+    case 12317: // REVERSED DOUBLE PRIME QUOTATION MARK
       this._setVert("dmn1", 1, 1); break;
-    case 12318:
+    case 12318: // DOUBLE PRIME QUOTATION MARK
       this._setRotate(90); break;
-    case 12319:
+    case 12319: // LOW DOUBLE PRIME QUOTATION MARK
       this._setVert("dmn2", 1, 1); break;
     case 61: // EQUALS SIGN
     case 8786: // APPROXIMATELY EQUAL TO OR THE IMAGE OF
@@ -9824,7 +9824,7 @@ Nehan.TextLexer = (function (){
   var __rex_word = /^[a-zA-Z0-9.!?\/:$#;"',_%]+/;
   var __rex_char_ref = /^&[^;\s]+;/;
   var __rex_half_single_tcy = /[a-zA-Z0-9!?]/;
-  var __rex_typographic_ligature = /[\ufb00-\uff06]/; // ff,fi,fl,ffi,ffl,ft
+  var __rex_typographic_ligature = /[\ufb00-\ufb06]/; // ff,fi,fl,ffi,ffl,ft
 
   /**
      @memberof Nehan

@@ -474,11 +474,11 @@ Nehan.Char = (function(){
       this._setVert("mmm", 1, 1); break;
     case 8229:
       this._setVert("mm", 1, 1); break;
-    case 12317:
+    case 12317: // REVERSED DOUBLE PRIME QUOTATION MARK
       this._setVert("dmn1", 1, 1); break;
-    case 12318:
+    case 12318: // DOUBLE PRIME QUOTATION MARK
       this._setRotate(90); break;
-    case 12319:
+    case 12319: // LOW DOUBLE PRIME QUOTATION MARK
       this._setVert("dmn2", 1, 1); break;
     case 61: // EQUALS SIGN
     case 8786: // APPROXIMATELY EQUAL TO OR THE IMAGE OF
