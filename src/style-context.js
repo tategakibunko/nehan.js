@@ -624,7 +624,7 @@ var StyleContext = (function(){
       line.breakAfter = opt.breakAfter || false;
       line.hyphenated = opt.hyphenated || false;
       line.inlineMeasure = opt.measure || this.contentMeasure;
-      line.classes.push("nehan-logical-paragraph");
+      line.classes.push("nehan-root-line");
 
       // set baseline
       if(this.isTextVertical()){
