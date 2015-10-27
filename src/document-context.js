@@ -12,7 +12,6 @@ var DocumentContext = (function(){
   var __outline_contexts = [];
   var __header_id = 0; // unique header-id
   var __block_id = 0; // unique block-id
-  var __paragraph_id = 0; // unique paragraph-id
   var __root_block_id = 0; // unique block-id for direct children of <body>.
 
   var __get_outline_contexts_by_name = function(section_root_name){
@@ -132,13 +131,6 @@ var DocumentContext = (function(){
     */
     genBlockId : function(){
       return __block_id++;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @return {int}
-    */
-    genParagraphId : function(){
-      return __paragraph_id++;
     },
     /**
        * this is shortcut function for __create_outline_elements_by_name("body", callbacks).<br>
