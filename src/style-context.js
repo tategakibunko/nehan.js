@@ -766,8 +766,10 @@ var StyleContext = (function(){
    @return {boolean}
    */
   StyleContext.prototype.isRootLine = function(){
-    // check if current inline is anonymous line block.
-    // 1. line-object is just under the block element.
+    // Check if current inline is anonymous line block.
+    // Note that inline-generators of root line share the style-context with parent block element,
+    // So we use 'this.isBlock() || tis.isInlineBlock()' for checking method.
+    // 1. line-object is just under the block element,
     //  <body>this text is included in anonymous line block</body>
     //
     // 2. line-object is just under the inline-block element.
