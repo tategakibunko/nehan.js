@@ -11217,7 +11217,8 @@ var Style = {
     "extent":"1em",
     "float":"start",
     "line-height":"1em",
-    "font-size":"4em"
+    "padding":{before:"0.33em"},
+    "font-size":"3em"
   },
   ".gap-start":{
     "margin":{
