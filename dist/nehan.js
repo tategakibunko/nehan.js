@@ -15424,7 +15424,7 @@ var BlockGenerator = (function(){
       // restore cached line with correct line no
       if(context.getBlockLineNo() === 0){
 	cache.lineNo = 0;
-	context.incBlockLineNo(); // cached line is next first line, so increment line no in block level context.
+	context.incBlockLineNo(); // cached line is next first line(of next block), so increment line no in block level context.
       }
       // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
       // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
