@@ -50,6 +50,9 @@ var BlockGenerator = (function(){
       if(element.isVoid()){
 	continue;
       }
+      if(element.hasLineBreak){
+	DocumentContext.incLineBreakCount();
+      }
       var extent = element.getLayoutExtent(this.style.flow);
       if(!context.hasBlockSpaceFor(extent)){
 	this.pushCache(element);

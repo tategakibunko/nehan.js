@@ -620,9 +620,11 @@ var StyleContext = (function(){
     // backup other line data. mainly required to restore inline-context.
     if(is_root_line){
       line.lineNo = opt.lineNo;
+      line.paragraphId = DocumentContext.getParagraphId();
       line.breakAfter = opt.breakAfter || false;
       line.hyphenated = opt.hyphenated || false;
       line.inlineMeasure = opt.measure || this.contentMeasure;
+      line.classes.push("nehan-logical-paragraph");
 
       // set baseline
       if(this.isTextVertical()){

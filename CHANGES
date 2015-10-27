@@ -6,6 +6,11 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 5.3.5
+========================
+o Set paragraph-id to each line-blocks.
+! Revert default styling of drop-caps.
+
 version 5.3.4 2015/10/26
 ========================
 * Fix wrong ligature range.

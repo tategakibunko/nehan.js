@@ -32,7 +32,7 @@
    @namespace Nehan
 */
 var Nehan = Nehan || {};
-Nehan.version = "5.3.4";
+Nehan.version = "5.3.5";
 
 /**
    system configuration
@@ -11717,6 +11717,7 @@ var DocumentContext = (function(){
   var __header_id = 0; // unique header-id
   var __block_id = 0; // unique block-id
   var __root_block_id = 0; // unique block-id for direct children of <body>.
+  var __line_break_count = 0; // count of <BR> tag, used to generate paragraph-id(<block_id>-<br_count>).
 
   var __get_outline_contexts_by_name = function(section_root_name){
     return __outline_contexts.filter(function(context){
@@ -11835,6 +11836,19 @@ var DocumentContext = (function(){
     */
     genBlockId : function(){
       return __block_id++;
+    },
+    /**
+       @memberof Nehan.DocumentContext
+    */
+    incLineBreakCount : function(){
+      __line_break_count++;
+    },
+    /**
+       @memberof Nehan.DocumentContext
+       @return {String}
+    */
+    getParagraphId : function(){
+      return [__block_id, __line_break_count].join("-");
     },
     /**
        * this is shortcut function for __create_outline_elements_by_name("body", callbacks).<br>
@@ -13003,9 +13017,11 @@ var StyleContext = (function(){
     // backup other line data. mainly required to restore inline-context.
     if(is_root_line){
       line.lineNo = opt.lineNo;
+      line.paragraphId = DocumentContext.getParagraphId();
       line.breakAfter = opt.breakAfter || false;
       line.hyphenated = opt.hyphenated || false;
       line.inlineMeasure = opt.measure || this.contentMeasure;
+      line.classes.push("nehan-logical-paragraph");
 
       // set baseline
       if(this.isTextVertical()){
@@ -15401,6 +15417,9 @@ var BlockGenerator = (function(){
       if(element.isVoid()){
 	continue;
       }
+      if(element.hasLineBreak){
+	DocumentContext.incLineBreakCount();
+      }
       var extent = element.getLayoutExtent(this.style.flow);
       if(!context.hasBlockSpaceFor(extent)){
 	this.pushCache(element);
@@ -17228,6 +17247,9 @@ var LayoutEvaluator = (function(){
     if(typeof opt.blockId !== "undefined"){
       dataset["blockId"] = opt.blockId;
     }
+    if(typeof opt.paragraphId !== "undefined"){
+      dataset["paragraphId"] = opt.paragraphId;
+    }
 
     // store css value to dom.style[<camelized-css-property>]
     Nehan.Obj.iter(css, function(style_name, value){
@@ -17305,6 +17327,7 @@ var LayoutEvaluator = (function(){
       content:(opt.content || tree.getContent()),
       rootBlockId:tree.rootBlockId,
       blockId:tree.blockId,
+      paragraphId:tree.paragraphId,
       css:(opt.css || tree.getBoxCss())
     });
   };

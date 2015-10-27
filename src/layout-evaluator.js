@@ -51,6 +51,9 @@ var LayoutEvaluator = (function(){
     if(typeof opt.blockId !== "undefined"){
       dataset["blockId"] = opt.blockId;
     }
+    if(typeof opt.paragraphId !== "undefined"){
+      dataset["paragraphId"] = opt.paragraphId;
+    }
 
     // store css value to dom.style[<camelized-css-property>]
     Nehan.Obj.iter(css, function(style_name, value){
@@ -128,6 +131,7 @@ var LayoutEvaluator = (function(){
       content:(opt.content || tree.getContent()),
       rootBlockId:tree.rootBlockId,
       blockId:tree.blockId,
+      paragraphId:tree.paragraphId,
       css:(opt.css || tree.getBoxCss())
     });
   };
