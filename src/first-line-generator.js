@@ -15,6 +15,7 @@ var FirstLineGenerator = (function(){
   }
   Nehan.Class.extend(FirstLineGenerator, BlockGenerator);
 
+  // this is called after each element(line-block) is yielded.
   FirstLineGenerator.prototype._onAddElement = function(context, element){
     if(context.getBlockLineNo() !== 1){
       return;
