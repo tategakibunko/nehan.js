@@ -1,4 +1,4 @@
-var VertEvaluator = (function(){
+Nehan.VertEvaluator = (function(){
   /**
      @memberof Nehan
      @class VertEvaluator
@@ -7,9 +7,9 @@ var VertEvaluator = (function(){
      @extends {Nehan.LayoutEvaluator}
   */
   function VertEvaluator(){
-    LayoutEvaluator.call(this, "vert");
+    Nehan.LayoutEvaluator.call(this, "vert");
   }
-  Nehan.Class.extend(VertEvaluator, LayoutEvaluator);
+  Nehan.Class.extend(VertEvaluator, Nehan.LayoutEvaluator);
 
   VertEvaluator.prototype._evalLinkElement = function(line, link){
     return this._evaluate(link, {
@@ -25,7 +25,7 @@ var VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalRb = function(line, ruby){
-    var rb_style = new StyleContext(new Nehan.Tag("<rb>"), line.style);
+    var rb_style = new Nehan.Style(new Nehan.Tag("<rb>"), line.style);
     var rb_line = rb_style.createLine({
       elements:ruby.getRbs()
     });
@@ -36,7 +36,7 @@ var VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalRt = function(line, ruby){
     var rt = (new InlineGenerator(
-      new StyleContext(ruby.rt, line.style),
+      new Nehan.Style(ruby.rt, line.style),
       new Nehan.TokenStream(ruby.getRtString(), {
 	flow:line.style.flow
       }),

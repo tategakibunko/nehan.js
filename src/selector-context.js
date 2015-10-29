@@ -1,13 +1,13 @@
-var SelectorContext = (function(){
+Nehan.SelectorContext = (function(){
   /**
      @memberof Nehan
      @class SelectorContext
-     @classdesc context object that is passed to "onload" callback in constructor of {Nehan.StyleContext}.<br>
+     @classdesc context object that is passed to "onload" callback in constructor of {Nehan.Style}.<br>
      * "onload" value is set by style definition(see example).<br>
      * unlike {@link Nehan.SelectorPropContext}, this context has all reference to css values associated with the selector key of "onload" argument in style.
      @constructor
      @extends {Nehan.SelectorPropContext}
-     @param style {Nehan.StyleContext}
+     @param style {Nehan.Style}
      @param cursor_context {Nehan.LayoutContext}
      @example
      * Nehan.setStyle("body", {

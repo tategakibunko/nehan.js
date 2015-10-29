@@ -17,7 +17,7 @@ Nehan.Selector = (function(){
 
   /**
    @memberof Nehan.Selector
-   @param style {Nehan.StyleContext}
+   @param style {Nehan.Style}
    @return {boolean}
    */
   Selector.prototype.test = function(style){
@@ -25,7 +25,7 @@ Nehan.Selector = (function(){
   };
   /**
    @memberof Nehan.Selector
-   @param style {Nehan.StyleContext}
+   @param style {Nehan.Style}
    @param element_name {String} - "before", "after", "first-line", "first-letter"
    @return {boolean}
    */

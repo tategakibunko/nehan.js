@@ -75,7 +75,7 @@ Nehan.TypeSelector = (function(){
    check if [style] is matched to this selector
 
    @memberof Nehan.TypeSelector
-   @param style {Nehan.StyleContext}
+   @param style {Nehan.Style}
    @return {boolean}
    */
   TypeSelector.prototype.test = function(style){

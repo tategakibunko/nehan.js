@@ -20,7 +20,7 @@ Nehan.AttrSelector = (function(){
   /**
    @memberof Nehan.AttrSelector
    @method test
-   @param style {Nehan.StyleContext}
+   @param style {Nehan.Style}
    @return {boolean} true if style is matched to this attribute selector.
    */
   AttrSelector.prototype.test = function(style){

@@ -1,4 +1,4 @@
-var BodyGenerator = (function(){
+Nehan.BodyGenerator = (function(){
   /**
      @memberof Nehan
      @class BodyGenerator
@@ -7,26 +7,23 @@ var BodyGenerator = (function(){
      @constructor
      @param text {string} - content source of html
   */
-  function BodyGenerator(text){
-    var tag = new Nehan.Tag("<body>", text);
-    var style = new StyleContext(tag, null);
-    var stream = new Nehan.TokenStream(text, {flow:style.flow});
-    SectionRootGenerator.call(this, style, stream)
+  function BodyGenerator(context){
+    Nehan.SectionRootGenerator.call(this, context);
   }
-  Nehan.Class.extend(BodyGenerator, SectionRootGenerator);
+  Nehan.Class.extend(BodyGenerator, Nehan.SectionRootGenerator);
 
   BodyGenerator.prototype._onCreate = function(context, block){
-    block.seekPos = this.stream.getSeekPos();
-    block.charPos = DocumentContext.getCharPos();
-    block.percent = this.stream.getSeekPercent();
-    block.pageNo = DocumentContext.getPageNo();
+    block.seekPos = context.stream.getSeekPos();
+    block.charPos = context.documentContext.getCharPos();
+    block.percent = context.stream.getSeekPercent();
+    block.pageNo = context.documentContext.getPageNo();
 
-    DocumentContext.stepCharPos(block.charCount || 0);
-    DocumentContext.stepPageNo();
+    context.documentContext.stepCharPos(block.charCount || 0);
+    context.documentContext.stepPageNo();
 
     // sometimes layout engine causes inlinite loop,
     // so terminate generator by restricting page count.
-    if(DocumentContext.getPageNo() >= Nehan.Config.maxPageCount){
+    if(context.documentContext.getPageNo() >= Nehan.Config.maxPageCount){
       this.setTerminate(true);
     }
   };

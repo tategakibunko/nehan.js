@@ -1,4 +1,4 @@
-var FirstLineGenerator = (function(){
+Nehan.FirstLineGenerator = (function(){
   /**
    * style of first line generator is enabled until first line is yielded.<br>
    * after yielding first line, parent style is inherited.
@@ -6,14 +6,14 @@ var FirstLineGenerator = (function(){
    @class FirstLineGenerator
    @classdesc generator to yield first line block.
    @constructor
-   @param style {Nehan.StyleContext}
+   @param style {Nehan.Style}
    @param stream {Nehan.TokenStream}
    @extends {Nehan.BlockGenerator}
   */
   function FirstLineGenerator(style, stream){
-    BlockGenerator.call(this, style, stream);
+    Nehan.BlockGenerator.call(this, style, stream);
   }
-  Nehan.Class.extend(FirstLineGenerator, BlockGenerator);
+  Nehan.Class.extend(FirstLineGenerator, Nehan.BlockGenerator);
 
   // this is called after each element(line-block) is yielded.
   FirstLineGenerator.prototype._onAddElement = function(context, element){
@@ -26,7 +26,7 @@ var FirstLineGenerator = (function(){
     while(child){
       child.style = parent.style;
       var cache = child.peekLastCache();
-      if(cache && child instanceof TextGenerator && cache.setMetrics){
+      if(cache && child instanceof Nehan.TextGenerator && cache.setMetrics){
 	cache.setMetrics(child.style.flow, child.style.getFont());
       }
       parent = child;

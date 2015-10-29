@@ -1,18 +1,18 @@
-var TextGenerator = (function(){
+Nehan.TextGenerator = (function(){
   /**
      @memberof Nehan
      @class TextGenerator
      @classdesc inline level generator, output inline level block.
      @constructor
      @extends {Nehan.LayoutGenerator}
-     @param style {Nehan.StyleContext}
+     @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
      @param child_generator {Nehan.LayoutGenerator}
   */
   function TextGenerator(style, stream){
-    LayoutGenerator.call(this, style, stream);
+    Nehan.LayoutGenerator.call(this, style, stream);
   }
-  Nehan.Class.extend(TextGenerator, LayoutGenerator);
+  Nehan.Class.extend(TextGenerator, Nehan.LayoutGenerator);
 
   var __find_head_text = function(element){
     return (element instanceof Box)? __find_head_text(element.elements[0]) : element;

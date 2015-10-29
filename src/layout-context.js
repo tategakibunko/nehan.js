@@ -163,7 +163,7 @@ Nehan.LayoutContext = (function(){
    @memberof Nehan.LayoutContext
    @param hanging_punctuation {Object}
    @param hanging_punctuation.data {Nehan.Char}
-   @param hanging_punctuation.style {Nehan.StyleContext}
+   @param hanging_punctuation.style {Nehan.Style}
    */
   LayoutContext.prototype.setHangingPunctuation = function(hunging_punctuation){
     this._hangingPunctuation = hunging_punctuation;

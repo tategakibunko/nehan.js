@@ -1,4 +1,4 @@
-var LayoutEvaluator = (function(){
+Nehan.LayoutEvaluator = (function(){
   /**
      @memberof Nehan
      @class LayoutEvaluator
@@ -22,10 +22,10 @@ var LayoutEvaluator = (function(){
   LayoutEvaluator.prototype._getEvaluator = function(tree){
     var is_vert = tree.style.isTextVertical();
     if(this.direction === "vert" && !is_vert){
-      return new HoriEvaluator();
+      return new Nehan.HoriEvaluator();
     }
     if(this.direction === "hori" && is_vert){
-      return new VertEvaluator();
+      return new Nehan.VertEvaluator();
     }
     return this;
   };
@@ -117,7 +117,7 @@ var LayoutEvaluator = (function(){
     }.bind(this), root);
     var oncreate = tree.getOnCreate();
     if(oncreate){
-      oncreate(new DomCreateContext(dom, tree));
+      oncreate(new Nehan.DomCreateContext(dom, tree));
     }
     return dom;
   };

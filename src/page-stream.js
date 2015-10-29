@@ -1,4 +1,4 @@
-var PageStream = (function(){
+Nehan.PageStream = (function(){
   /**
      @memberof Nehan
      @class PageStream
@@ -6,12 +6,12 @@ var PageStream = (function(){
      @consturctor
      @param text {String} - html source text
   */
-  function PageStream(text){
-    this.text = this._createSource(text);
+  function PageStream(context){
+    this.context = context;
     this._trees = [];
     this._pages = [];
-    this.generator = this._createGenerator(this.text);
-    this.evaluator = this._createEvaluator();
+    this.generator = new Nehan.DocumentGenerator(context);
+    this.evaluator = new Nehan.PageEvaluator(context);
   }
 
   /**
@@ -190,38 +190,13 @@ var PageStream = (function(){
       this._addTree(tree);
       this.onProgress(tree, this);
     }
-    reqAnimationFrame(function(){
+    Nehan.reqAnimationFrame(function(){
       this._asyncGet(wait, opt);
     }.bind(this));
   };
 
   PageStream.prototype._addTree = function(tree){
     this._trees.push(tree);
-  };
-
-  PageStream.prototype._createSource = function(text){
-    return text
-    //.replace(/\t/g, "") // discard TAB
-      .replace(/<!--[\s\S]*?-->/g, "") // discard comment
-      .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
-      .replace(/<rb>/gi, "") // discard rb
-      .replace(/<\/rb>/gi, "") // discard /rb
-      .replace(/<rt><\/rt>/gi, ""); // discard empty rt
-  };
-
-  PageStream.prototype._createGenerator = function(text){
-    switch(Nehan.Display.root){
-    case "document":
-      return new DocumentGenerator(text);
-    case "html":
-      return new HtmlGenerator(text);
-    default:
-      return new BodyGenerator(text);
-    }
-  };
-
-  PageStream.prototype._createEvaluator = function(){
-    return new PageEvaluator();
   };
 
   return PageStream;

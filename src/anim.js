@@ -3,7 +3,7 @@
    @namespace Nehan
    @function reqAnimationFrame
 */
-var reqAnimationFrame = (function(){
+Nehan.reqAnimationFrame = (function(){
   var default_wait = 1000 / 60;
   return window.requestAnimationFrame  ||
     window.webkitRequestAnimationFrame ||

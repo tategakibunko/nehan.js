@@ -2,26 +2,26 @@
 // tag : tr | th
 // stream : [td | th]
 // yield : parallel([td | th])
-var TableRowGenerator = (function(){
+Nehan.TableRowGenerator = (function(){
   /**
      @memberof Nehan
      @class TableRowGenerator
      @classdesc generator of table row(TR) content.
      @constructor
      @extends {Nehan.ParallelGenerator}
-     @param style {Nehan.StyleContext}
+     @param style {Nehan.Style}
      @param stream {Nehan.TagStream}
   */
   function TableRowGenerator(style, stream){
     var generators = this._getGenerators(style, stream);
-    ParallelGenerator.call(this, style, generators);
+    Nehan.ParallelGenerator.call(this, style, generators);
   }
-  Nehan.Class.extend(TableRowGenerator, ParallelGenerator);
+  Nehan.Class.extend(TableRowGenerator, Nehan.ParallelGenerator);
 
   TableRowGenerator.prototype._getGenerators = function(style_tr, stream){
     var child_styles = this._getChildStyles(style_tr, stream);
     return child_styles.map(function(child_style){
-      return new TableCellGenerator(child_style, this._createStream(child_style));
+      return new Nehan.TableCellGenerator(child_style, this._createStream(child_style));
     }.bind(this));
   };
 
@@ -35,7 +35,7 @@ var TableRowGenerator = (function(){
       measure:style_tr.contentMeasure
     }) : [];
     return child_tags.map(function(tag, i){
-      var default_style = new StyleContext(tag, style_tr);
+      var default_style = new Nehan.Style(tag, style_tr);
       var static_measure = default_style.staticMeasure;
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_tags.length - i));
       if(part_sizes.length > 0){

@@ -1,16 +1,16 @@
-var InlineBlockGenerator = (function (){
+Nehan.InlineBlockGenerator = (function (){
   /**
      @memberof Nehan
      @class InlineBlockGenerator
      @classdesc generator of element with display:'inline-block'.
      @extends {Nehan.BlockGenerator}
-     @param style {Nehan.StyleContext}
+     @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
   */
   function InlineBlockGenerator(style, stream){
-    BlockGenerator.call(this, style, stream);
+    Nehan.BlockGenerator.call(this, style, stream);
   }
-  Nehan.Class.extend(InlineBlockGenerator, BlockGenerator);
+  Nehan.Class.extend(InlineBlockGenerator, Nehan.BlockGenerator);
 
   InlineBlockGenerator.prototype._onCreate = function(context, block){
     var max_inline = Nehan.List.maxobj(block.elements, function(element){

@@ -1,17 +1,17 @@
-var HeaderGenerator = (function(){
+Nehan.HeaderGenerator = (function(){
   /**
      @memberof Nehan
      @class HeaderGenerator
      @classdesc generator of header tag(h1 - h6) conetnt, and create header context when complete.
      @constructor
      @extends {Nehan.BlockGenerator}
-     @param style {Nehan.StyleContext}
+     @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
   */
   function HeaderGenerator(style, stream){
-    BlockGenerator.call(this, style, stream);
+    Nehan.BlockGenerator.call(this, style, stream);
   }
-  Nehan.Class.extend(HeaderGenerator, BlockGenerator);
+  Nehan.Class.extend(HeaderGenerator, Nehan.BlockGenerator);
 
   HeaderGenerator.prototype._getHeaderRank = function(block){
     if(this.style.getMarkupName().match(/h([1-6])/)){

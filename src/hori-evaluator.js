@@ -1,4 +1,4 @@
-var HoriEvaluator = (function(){
+Nehan.HoriEvaluator = (function(){
   /**
      @memberof Nehan
      @class HoriEvaluator
@@ -7,9 +7,9 @@ var HoriEvaluator = (function(){
      @extends {Nehan.LayoutEvaluator}
   */
   function HoriEvaluator(){
-    LayoutEvaluator.call(this, "hori");
+    Nehan.LayoutEvaluator.call(this, "hori");
   }
-  Nehan.Class.extend(HoriEvaluator, LayoutEvaluator);
+  Nehan.Class.extend(HoriEvaluator, Nehan.LayoutEvaluator);
 
   HoriEvaluator.prototype._evalInlineChildTree = function(line, tree){
     return this._evaluate(tree, {
@@ -38,7 +38,7 @@ var HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalRb = function(line, ruby){
-    var rb_style = new StyleContext(new Nehan.Tag("<rb>"), line.style);
+    var rb_style = new Nehan.Style(new Nehan.Tag("<rb>"), line.style);
     var rb_line = rb_style.createLine({
       elements:ruby.getRbs()
     });

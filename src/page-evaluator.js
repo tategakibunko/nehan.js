@@ -1,4 +1,4 @@
-var PageEvaluator = (function(){
+Nehan.PageEvaluator = (function(){
   /**
      @memberof Nehan
      @class PageEvaluator
@@ -12,7 +12,7 @@ var PageEvaluator = (function(){
   PageEvaluator.prototype._getEvaluator = function(){
     var body_selector = Selectors.get("body") || new Selector("body", {flow:Nehan.Display.flow});
     var flow = body_selector.getValue().flow || Nehan.Display.flow;
-    return (flow === "tb-rl" || flow === "tb-lr")? new VertEvaluator() : new HoriEvaluator();
+    return (flow === "tb-rl" || flow === "tb-lr")? new Nehan.VertEvaluator() : new Nehan.HoriEvaluator();
   };
 
   /**

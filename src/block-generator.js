@@ -1,29 +1,29 @@
-var BlockGenerator = (function(){
+Nehan.BlockGenerator = (function(){
   /**
      @memberof Nehan
      @class BlockGenerator
      @classdesc generator of generic block element
      @constructor
      @extends Nehan.LayoutGenerator
-     @param style {Nehan.StyleContext}
+     @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
   */
-  function BlockGenerator(style, stream){
-    LayoutGenerator.call(this, style, stream);
-    if(this.style.getParentMarkupName() === "body"){
-      this.rootBlockId = DocumentContext.genRootBlockId();
+  function BlockGenerator(context){
+    Nehan.LayoutGenerator.call(this, context);
+    if(context.parent && context.parent.markup.getName() === "body"){
+      this.rootBlockId = context.genRootBlockId();
     }
-    this.blockId = DocumentContext.genBlockId();
+    this.blockId = context.genBlockId();
   }
-  Nehan.Class.extend(BlockGenerator, LayoutGenerator);
+  Nehan.Class.extend(BlockGenerator, Nehan.LayoutGenerator);
 
   BlockGenerator.prototype._yield = function(context){
-    if(!context.hasBlockSpaceFor(1, !this.hasNext())){
+    if(!context.hasBlockSpaceFor(1, !context.hasNext())){
       return null;
     }
-    var clear = this.style.clear;
-    if(clear && !clear.isDoneAll() && this._parent && this._parent.floatGroup){
-      var float_group = this._parent.floatGroup;
+    var clear = context.style.clear;
+    if(clear && !clear.isDoneAll() && context.parent && context.parent.floatGroup){
+      var float_group = context.parent.floatGroup;
       var float_direction = float_group.getFloatDirection();
       if(float_group.isLast() && !float_group.hasNext() && clear.hasDirection(float_direction.getName())){
 	clear.setDone(float_direction.getName());
@@ -35,12 +35,12 @@ var BlockGenerator = (function(){
     }
 
     // if break-before available, page-break but only once.
-    if(this.style.isBreakBefore()){
-      this.style.clearBreakBefore();
+    if(context.style.isBreakBefore()){
+      context.style.clearBreakBefore(); // [TODO] move clearance status to rendering-context class.
       return null;
     }
     while(true){
-      if(!this.hasNext()){
+      if(!context.hasNext()){
 	return this._createOutput(context); // output last block
       }
       var element = this._getNext(context);
@@ -51,11 +51,11 @@ var BlockGenerator = (function(){
 	continue;
       }
       if(element.hasLineBreak){
-	DocumentContext.incLineBreakCount();
+	context.incLineBreakCount();
       }
-      var extent = element.getLayoutExtent(this.style.flow);
+      var extent = context.getElementLayoutExtent(element);
       if(!context.hasBlockSpaceFor(extent)){
-	this.pushCache(element);
+	context.pushCache(element);
 	return this._createOutput(context);
       }
       this._addElement(context, element, extent);
@@ -71,7 +71,7 @@ var BlockGenerator = (function(){
      @return {Nehan.Box} temporary stored cached element for next time yielding.
   */
   BlockGenerator.prototype.popCache = function(context){
-    var cache = LayoutGenerator.prototype.popCache.call(this);
+    var cache = context.popCache();
 
     if(cache && cache.isLine()){
       // restore cached line with correct line no
@@ -123,13 +123,14 @@ var BlockGenerator = (function(){
       if(token.isWhiteSpaceOnly()){
 	return this._getNext(context);
       }
-      var text_gen = this._createTextGenerator(this.style, token);
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, text_gen));
+      var text_gen = context.createTextGenerator(token);
+      var inline_gen = context.createChildInlineGenerator(text_gen);
+      context.setChildGenerator(inline_gen);
       return this.yieldChildLayout(context);
     }
 
     // if tag token, inherit style
-    var child_style = new StyleContext(token, this.style, {cursorContext:context});
+    var child_style = new Nehan.Style(token, this.style, {cursorContext:context});
 
     // if disabled style, just skip
     if(child_style.isDisabled()){
@@ -196,7 +197,7 @@ var BlockGenerator = (function(){
       */
       if(!this.hasCache() && this.isFirstOutput()){
 	// size 'zero' has special meaning... so we use 1.
-	return new Box(new Nehan.BoxSize(1,1), this.style, "void"); // empty void element
+	return new Nehan.Box(new Nehan.BoxSize(1,1), this.style, "void"); // empty void element
       }
       return null;
     }

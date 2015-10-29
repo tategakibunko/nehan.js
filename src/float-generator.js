@@ -1,4 +1,4 @@
-var FloatGenerator = (function(){
+Nehan.FloatGenerator = (function(){
   /**
    * [caution]<br>
    * constructor argument 'style' is the style of <b>parent</b>.<br>
@@ -9,21 +9,21 @@ var FloatGenerator = (function(){
      @class FloatGenerator
      @classdesc generator of float layout
      @constructor
-     @param style {Nehan.StyleContext}
+     @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
      @param floated_generators {Array.<Nehan.LayoutGenerator>} - continuous floated generator collection
   */
   function FloatGenerator(style, stream, floated_generators){
-    BlockGenerator.call(this, style, stream);
+    Nehan.BlockGenerator.call(this, style, stream);
     this.generators = floated_generators;
 
     // create child generator to yield rest-space of float-elements with logical-float "start".
     // notice that this generator uses 'clone' of original style, because content size changes by position,
     // but on the other hand, original style is referenced by float-elements as their parent style.
     // so we must keep original style immutable.
-    this.setChildLayout(new BlockGenerator(style.clone({"float":"start"}), stream));
+    this.setChildLayout(new Nehan.BlockGenerator(style.clone({"float":"start"}), stream));
   }
-  Nehan.Class.extend(FloatGenerator, LayoutGenerator);
+  Nehan.Class.extend(FloatGenerator, Nehan.LayoutGenerator);
 
   /**
      @memberof Nehan.FloatGenerator
@@ -166,8 +166,8 @@ var FloatGenerator = (function(){
   
   FloatGenerator.prototype._yieldFloatSpace = function(context, float_group, measure, extent){
     //console.log("yieldFloatSpace(c = %o, m = %d, e = %d), page_no:%d", context, measure, extent, DocumentContext.getPageNo());
-    this._child.style.forceUpdateContextSize(measure, extent);
-    this._child.floatGroup = float_group;
+    context.child.style.forceUpdateContextSize(measure, extent);
+    context.child.floatGroup = float_group;
     return this.yieldChildLayout();
   };
   

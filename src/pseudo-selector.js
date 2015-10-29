@@ -24,7 +24,7 @@ Nehan.PseudoSelector = (function(){
   };
   /**
    @memberof Nehan.PseudoSelector
-   @param style {Nehan.StyleContext}
+   @param style {Nehan.Style}
    @return {boolean}
    */
   PseudoSelector.prototype.test = function(style){

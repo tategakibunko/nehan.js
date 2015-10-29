@@ -1,4 +1,4 @@
-var DomCreateContext = (function(){
+Nehan.DomCreateContext = (function(){
   /**
      @memberof Nehan
      @class DomCreateContext
@@ -64,16 +64,16 @@ var DomCreateContext = (function(){
   };
   /**
    @memberof Nehan.DomCreateContext
-   @return {Nehan.StyleContext}
+   @return {Nehan.Style}
    */
-  DomCreateContext.prototype.getStyleContext = function(){
+  DomCreateContext.prototype.getStyle = function(){
     return this.box.style;
   };
   /**
    @memberof Nehan.DomCreateContext
-   @return {Nehan.StyleContext}
+   @return {Nehan.Style}
    */
-  DomCreateContext.prototype.getParentStyleContext = function(){
+  DomCreateContext.prototype.getParentStyle = function(){
     return this.box.style.parent;
   };
   /**
@@ -81,105 +81,105 @@ var DomCreateContext = (function(){
    @return {Nehan.Tag}
    */
   DomCreateContext.prototype.getMarkup = function(){
-    return this.getStyleContext().getMarkup();
+    return this.getStyle().getMarkup();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {Nehan.Tag}
    */
   DomCreateContext.prototype.getParentMarkup = function(){
-    return this.getParentStyleContext().getMarkup();
+    return this.getParentStyle().getMarkup();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {int}
    */
   DomCreateContext.prototype.getChildCount = function(){
-    return this.getStyleContext().getChildCount();
+    return this.getStyle().getChildCount();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {int}
    */
   DomCreateContext.prototype.getParentChildCount = function(){
-    return this.getParentStyleContext().getChildCount();
+    return this.getParentStyle().getChildCount();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {int}
    */
   DomCreateContext.prototype.getChildIndex = function(){
-    return this.getStyleContext().getChildIndex();
+    return this.getStyle().getChildIndex();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {int}
    */
   DomCreateContext.prototype.getChildIndexOfType = function(){
-    return this.getStyleContext().getChildIndexOfType();
+    return this.getStyle().getChildIndexOfType();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {bool}
    */
   DomCreateContext.prototype.isTextVertical = function(){
-    return this.getStyleContext().isTextVertical();
+    return this.getStyle().isTextVertical();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {bool}
    */
   DomCreateContext.prototype.isTextHorizontal = function(){
-    return this.getStyleContext().isTextHorizontal();
+    return this.getStyle().isTextHorizontal();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {bool}
    */
   DomCreateContext.prototype.isMarkupEmpty = function(){
-    return this.getStyleContext().isMarkupEmpty();
+    return this.getStyle().isMarkupEmpty();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {bool}
    */
   DomCreateContext.prototype.isFirstChild = function(){
-    return this.getStyleContext().isFirstChild();
+    return this.getStyle().isFirstChild();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {bool}
    */
   DomCreateContext.prototype.isFirstOfType = function(){
-    return this.getStyleContext().isFirstChild();
+    return this.getStyle().isFirstChild();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {bool}
    */
   DomCreateContext.prototype.isOnlyChild = function(){
-    return this.getStyleContext().isFirstOfType();
+    return this.getStyle().isFirstOfType();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {bool}
    */
   DomCreateContext.prototype.isOnlyOfType = function(){
-    return this.getStyleContext().isOnlyOfType();
+    return this.getStyle().isOnlyOfType();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {bool}
    */
   DomCreateContext.prototype.isLastChild = function(){
-    return this.getStyleContext().isLastChild();
+    return this.getStyle().isLastChild();
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {bool}
    */
   DomCreateContext.prototype.isLastOfType = function(){
-    return this.getStyleContext().isLastOfType();
+    return this.getStyle().isLastOfType();
   };
 
   return DomCreateContext;

@@ -1,22 +1,24 @@
-/**
-   global context data for all layout engines defined in same browser window.
-
-   @namespace Nehan.DocumentContext
-*/
-var DocumentContext = (function(){
-  var __document_type = "html";
-  var __document_header = null;
-  var __page_no = 0;
-  var __char_pos = 0;
-  var __anchors = {};
-  var __outline_contexts = [];
-  var __header_id = 0; // unique header-id
-  var __block_id = 0; // unique block-id
-  var __root_block_id = 0; // unique block-id for direct children of <body>.
-  var __line_break_count = 0; // count of <BR> tag, used to generate paragraph-id(<block_id>-<br_count>).
+Nehan.DocumentContext = (function(){
+  /**
+   @memberof Nehan
+   @class Nehan.DocumentContext
+   @constructor
+  */
+  function DocumentContext(){
+    this.documentType = "html";
+    this.documentHeader = null;
+    this.pageNo = 0;
+    this.charPos = 0;
+    this.anchors = {};
+    this.outlineContexts = [];
+    this.headerId = 0; // unique header-id
+    this.blockId = 0; // unique block-id
+    this.rootBlockId = 0; // unique block-id for direct children of <body>.
+    this.lineBreakCount = 0; // count of <BR> tag, used to generate paragraph-id(<block_id>-<br_count>).
+  }
 
   var __get_outline_contexts_by_name = function(section_root_name){
-    return __outline_contexts.filter(function(context){
+    return this.outlineContexts.filter(function(context){
       return context.getMarkupName() === section_root_name;
     });
   };
@@ -34,155 +36,155 @@ var DocumentContext = (function(){
     }, []);
   };
 
-  return {
-    /**
-       @memberof Nehan.DocumentContext
-       @param document_type {String}
-    */
-    setDocumentType : function(document_type){
-      __document_type = document_type;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @return {String}
-    */
-    getDocumentType : function(){
-      return __document_type;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @param document_header {Nehan.DocumentHeader}
-    */
-    setDocumentHeader : function(document_header){
-      __document_header = document_header;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @return {Nehan.DocumentHeader}
-    */
-    getDocumentHeader : function(){
-      return __document_header;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @param char_pos {int}
-    */
-    stepCharPos : function(char_pos){
-      __char_pos += char_pos;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @return {int}
-    */
-    getCharPos : function(){
-      return __char_pos;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-    */
-    stepPageNo : function(){
-      __page_no++;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @return {int}
-    */
-    getPageNo : function(){
-      return __page_no;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @param outline_context {Nehan.OutlineContext}
-    */
-    addOutlineContext : function(outline_context){
-      __outline_contexts.push(outline_context);
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @param name {String}
-    */
-    addAnchor : function(name){
-      __anchors[name] = __page_no;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @param name {String}
-       @return {int}
-    */
-    getAnchorPageNo : function(name){
-      return (typeof __anchors[name] === "undefined")? null : __anchors[name];
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @return {String}
-    */
-    genHeaderId : function(){
-      return [Nehan.engineId, __header_id++].join("-");
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @return {int}
-    */
-    genRootBlockId : function(){
-      return __root_block_id++;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @return {int}
-    */
-    genBlockId : function(){
-      return __block_id++;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-    */
-    incLineBreakCount : function(){
-      __line_break_count++;
-    },
-    /**
-       @memberof Nehan.DocumentContext
-       @return {String}
-    */
-    getParagraphId : function(){
-      return [__block_id, __line_break_count].join("-");
-    },
-    /**
-       * this is shortcut function for __create_outline_elements_by_name("body", callbacks).<br>
-       * if many outline elements exists(that is, multiple '&lt;body&gt;' exists), use first one only.<br>
-       * for details of callback function, see {@link Nehan.SectionTreeConverter}.
-
-       @memberof Nehan.DocumentContext
-       @param callbacks {Object} - hooks for each outline element.
-       @param callbacks.onClickLink {Function}
-       @param callbacks.createRoot {Function}
-       @param callbacks.createChild {Function}
-       @param callbacks.createLink {Function}
-       @param callbacks.createToc {Function}
-       @param callbacks.createPageNoItem {Function}
-       @return {DOMElement}
-    */
-    createBodyOutlineElement : function(callbacks){
-      var elements = __create_outline_elements_by_name("body", callbacks);
-      return (elements.length === 0)? null : elements[0];
-    },
-    /**
-     * create outline element for [section_root_name], returns multiple elements,<br>
-     * because there may be multiple section root(&lt;figure&gt;, &lt;fieldset&gt; ... etc) in document.<br>
-     * for details of callback function, see {@link Nehan.SectionTreeConverter}.
-
-       @memberof Nehan.DocumentContext
-       @param section_root_name {String}
-       @param callbacks {Object} - hooks for each outline element.
-       @param callbacks.onClickLink {Function}
-       @param callbacks.createRoot {Function}
-       @param callbacks.createChild {Function}
-       @param callbacks.createLink {Function}
-       @param callbacks.createToc {Function}
-       @param callbacks.createPageNoItem {Function}
-    */
-    createOutlineElementsByName : function(section_root_name, callbacks){
-      return __create_outline_elements_by_name(section_root_name, callbacks);
-    }
+  /**
+   @memberof Nehan.DocumentContext
+   @param document_type {String}
+   */
+  DocumentContext.prototype.setDocumentType = function(document_type){
+    this.documentType = document_type;
   };
+  /**
+   @memberof Nehan.DocumentContext
+   @return {String}
+   */
+  DocumentContext.prototype.getDocumentType = function(){
+    return this.documentType;
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   @param document_header {Nehan.DocumentHeader}
+   */
+  DocumentContext.prototype.setDocumentHeader = function(document_header){
+    this.documentHeader = document_header;
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   @return {Nehan.DocumentHeader}
+   */
+  DocumentContext.prototype.getDocumentHeader = function(){
+    return this.documentHeader;
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   @param char_pos {int}
+   */
+  DocumentContext.prototype.stepCharPos = function(char_pos){
+    this.charPos += char_pos;
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   @return {int}
+   */
+  DocumentContext.prototype.getCharPos = function(){
+    return this.charPos;
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   */
+  DocumentContext.prototype.stepPageNo = function(){
+    this.pageNo++;
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   @return {int}
+   */
+  DocumentContext.prototype.getPageNo = function(){
+    return this.pageNo;
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   @param outline_context {Nehan.OutlineContext}
+   */
+  DocumentContext.prototype.addOutlineContext = function(outline_context){
+    this.outlineContexts.push(outline_context);
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   @param name {String}
+   */
+  DocumentContext.prototype.addAnchor = function(name){
+    this.anchors[name] = this.pageNo;
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   @param name {String}
+   @return {int}
+   */
+  DocumentContext.prototype.getAnchorPageNo = function(name){
+    return (typeof this.anchors[name] === "undefined")? null : this.anchors[name];
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   @return {String}
+   */
+  DocumentContext.prototype.genHeaderId = function(){
+    return [Nehan.engineId, this.headerId++].join("-");
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   @return {int}
+   */
+  DocumentContext.prototype.genRootBlockId = function(){
+    return this.rootBlockId++;
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   @return {int}
+   */
+  DocumentContext.prototype.genBlockId = function(){
+    return this.blockId++;
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   */
+  DocumentContext.prototype.incLineBreakCount = function(){
+    this.lineBreakCount++;
+  };
+  /**
+   @memberof Nehan.DocumentContext
+   @return {String}
+   */
+  DocumentContext.prototype.getParagraphId = function(){
+    return [this.blockId, this.lineBreakCount].join("-");
+  };
+  /**
+   * this is shortcut function for __create_outline_elements_by_name("body", callbacks).<br>
+   * if many outline elements exists(that is, multiple '&lt;body&gt;' exists), use first one only.<br>
+   * for details of callback function, see {@link Nehan.SectionTreeConverter}.
+
+   @memberof Nehan.DocumentContext
+   @param callbacks {Object} - hooks for each outline element.
+   @param callbacks.onClickLink {Function}
+   @param callbacks.createRoot {Function}
+   @param callbacks.createChild {Function}
+   @param callbacks.createLink {Function}
+   @param callbacks.createToc {Function}
+   @param callbacks.createPageNoItem {Function}
+   @return {DOMElement}
+   */
+  DocumentContext.prototype.createBodyOutlineElement = function(callbacks){
+    var elements = __create_outline_elements_by_name("body", callbacks);
+    return (elements.length === 0)? null : elements[0];
+  };
+  /**
+   * create outline element for [section_root_name], returns multiple elements,<br>
+   * because there may be multiple section root(&lt;figure&gt;, &lt;fieldset&gt; ... etc) in document.<br>
+   * for details of callback function, see {@link Nehan.SectionTreeConverter}.
+
+   @memberof Nehan.DocumentContext
+   @param section_root_name {String}
+   @param callbacks {Object} - hooks for each outline element.
+   @param callbacks.onClickLink {Function}
+   @param callbacks.createRoot {Function}
+   @param callbacks.createChild {Function}
+   @param callbacks.createLink {Function}
+   @param callbacks.createToc {Function}
+   @param callbacks.createPageNoItem {Function}
+   */
+  DocumentContext.prototype.createOutlineElementsByName = function(section_root_name, callbacks){
+    return __create_outline_elements_by_name(section_root_name, callbacks);
+  };
+
+  return DocumentContext;
 })();
 

@@ -1,11 +1,11 @@
-var InlineGenerator = (function(){
+Nehan.InlineGenerator = (function(){
   /**
      @memberof Nehan
      @class InlineGenerator
      @classdesc inline level generator, output inline level block.
      @constructor
      @extends {Nehan.LayoutGenerator}
-     @param style {Nehan.StyleContext}
+     @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
      @param child_generator {Nehan.LayoutGenerator}
      @description <pre>
@@ -23,12 +23,12 @@ var InlineGenerator = (function(){
      *</pre>
   */
   function InlineGenerator(style, stream, child_generator){
-    LayoutGenerator.call(this, style, stream);
+    Nehan.LayoutGenerator.call(this, style, stream);
     if(child_generator){
       this.setChildLayout(child_generator);
     }
   }
-  Nehan.Class.extend(InlineGenerator, LayoutGenerator);
+  Nehan.Class.extend(InlineGenerator, Nehan.LayoutGenerator);
 
   InlineGenerator.prototype._yield = function(context){
     if(!context.hasInlineSpaceFor(1)){
@@ -154,7 +154,7 @@ var InlineGenerator = (function(){
 
     // text block
     if(token instanceof Nehan.Text || token instanceof Nehan.Tcy || token instanceof Nehan.Word){
-      this.setChildLayout(this._createTextGenerator(this.style, token));
+      this.setChildLayout(context.createTextGenerator(token));
       return this.yieldChildLayout(context);
     }
 
@@ -182,7 +182,7 @@ var InlineGenerator = (function(){
     }
 
     // if not text, it's tag token, inherit style
-    var child_style = new StyleContext(token, this.style, {cursorContext:context});
+    var child_style = new Nehan.Style(token, this.style, {cursorContext:context});
 
     if(child_style.isDisabled()){
       return this._getNext(context); // just skip

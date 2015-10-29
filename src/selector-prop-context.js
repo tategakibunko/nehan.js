@@ -1,10 +1,10 @@
-var SelectorPropContext = (function(){
+Nehan.SelectorPropContext = (function(){
   /**
      @memberof Nehan
      @class SelectorPropContext
      @classdesc selector context for functional value of style. see example.
      @constructor
-     @param style {Nehan.StyleContext}
+     @param style {Nehan.Style}
      @param cursor_context {Nehan.LayoutContext}
      @example
      * Nehan.setStyle("body", {
@@ -21,9 +21,9 @@ var SelectorPropContext = (function(){
 
   /**
    @memberof Nehan.SelectorPropContext
-   @return {Nehan.StyleContext}
+   @return {Nehan.Style}
    */
-  SelectorPropContext.prototype.getParentStyleContext = function(){
+  SelectorPropContext.prototype.getParentStyle = function(){
     return this.style.parent;
   };
   /**
@@ -31,7 +31,7 @@ var SelectorPropContext = (function(){
    @return {Nehan.BoxFlow}
    */
   SelectorPropContext.prototype.getParentFlow = function(){
-    var parent = this.getParentStyleContext();
+    var parent = this.getParentStyle();
     return parent? parent.flow : Nehan.Display.getStdBoxFlow();
   };
   /**

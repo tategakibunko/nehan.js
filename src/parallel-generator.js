@@ -1,18 +1,18 @@
-var ParallelGenerator = (function(){
+Nehan.ParallelGenerator = (function(){
   /**
      @memberof Nehan
      @class ParallelGenerator
      @classdesc wrapper generator to generate multicolumn layout like LI(list-mark,list-body) or TR(child TD).
      @constructor
      @extends {Nehan.LayoutGenerator}
-     @param style {Nehan.StyleContext}
+     @param style {Nehan.Style}
      @param generators {Array<Nehan.LayoutGenerator>}
   */
   function ParallelGenerator(style, generators){
-    LayoutGenerator.call(this, style, null);
+    Nehan.LayoutGenerator.call(this, style, null);
     this.generators = generators;
   }
-  Nehan.Class.extend(ParallelGenerator, LayoutGenerator);
+  Nehan.Class.extend(ParallelGenerator, Nehan.LayoutGenerator);
 
   ParallelGenerator.prototype._yield = function(context){
     if(this.hasCache()){

@@ -41,7 +41,7 @@ Nehan.Display = {
     vert:"tb-rl"  // used when direction is 'vert'. "tb-lr" is also supported.
   },
   /**
-     standard page width, used when Style["body"].width is not defined.
+     standard page width, used when <body>.width is not defined.
 
      @memberof Nehan.Display
      @type {int}
@@ -49,7 +49,7 @@ Nehan.Display = {
   */
   width: screen.width,
   /**
-     standard page height, used when Style["body"].height is not defined.
+     standard page height, used when <body>.height is not defined.
 
      @memberof Nehan.Display
      @type {int}
@@ -57,7 +57,7 @@ Nehan.Display = {
   */
   height: screen.height,
   /**
-     standard font size, used when Style["body"]["font-size"] is not defined.
+     standard font size, used when <body>.fontSize is not defined.
 
      @memberof Nehan.Display
      @type {int}

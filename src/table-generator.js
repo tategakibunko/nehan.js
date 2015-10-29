@@ -10,18 +10,18 @@
 // tag : table
 // stream : [thead | tbody | tfoot]
 // yield : [thead | tbody | tfoot]
-var TableGenerator = (function(){
+Nehan.TableGenerator = (function(){
   /**
      @memberof Nehan
      @class TableGenerator
      @classdesc generator of table tag content.
      @constructor
      @extends {Nehan.BlockGenerator}
-     @param style {Nehan.StyleContext}
+     @param style {Nehan.Style}
      @param stream {Nehan.TagStream}
   */
   function TableGenerator(style, stream){
-    BlockGenerator.call(this, style, stream);
+    Nehan.BlockGenerator.call(this, style, stream);
 
     // load partition set after context size is calculated.
     if(style.getCssAttr("table-layout") === "auto"){
@@ -29,7 +29,7 @@ var TableGenerator = (function(){
       stream.rewind();
     }
   }
-  Nehan.Class.extend(TableGenerator, BlockGenerator);
+  Nehan.Class.extend(TableGenerator, Nehan.BlockGenerator);
 
   TableGenerator.prototype._createAutoPartition = function(stream){
     var pset = new Nehan.PartitionHashSet();

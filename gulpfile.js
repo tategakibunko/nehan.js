@@ -18,11 +18,8 @@ var uglify = require("gulp-uglify");
 var rename = require("gulp-rename");
 var ignore = require("gulp-ignore");
 
-// note that orders of these sources matter!
 var sources = [
   "COPYING",
-
-  // shared modules
   "src/nehan-start.js",
   "src/config.js",
   "src/display.js",
@@ -120,13 +117,7 @@ var sources = [
   "src/text-lexer.js",
   "src/token-stream.js",
   "src/ruby-token-stream.js",
-
-  // closed modules
-  // these modules/classes are referenced by
-  // engine local modules(Style/Selectors/DocumentContext etc).
-  // so independent from other engines.
-  "src/nehan-setup-start.js", // closure start
-  "src/style.js",
+  "src/stylesheet.js",
   "src/selectors.js",
   "src/box.js",
   "src/document-context.js",
@@ -135,8 +126,8 @@ var sources = [
   "src/page-stream.js",
   "src/selector-prop-context.js",
   "src/selector-context.js",
-  "src/style-context.js",
   "src/dom-create-context.js",
+  "src/style-context.js",
   "src/layout-generator.js",
   "src/block-generator.js",
   "src/inline-generator.js",
@@ -163,8 +154,6 @@ var sources = [
   "src/layout-evaluator.js",
   "src/vert-evaluator.js",
   "src/hori-evaluator.js",
-  "src/nehan-setup-main.js",
-  "src/nehan-setup-end.js", // closure end
   "src/paged-element.js"
 ];
 

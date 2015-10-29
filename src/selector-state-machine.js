@@ -47,7 +47,7 @@ Nehan.SelectorStateMachine = (function(){
        return true if all the selector-tokens({@link Nehan.TypeSelector} or combinator) matches the style-context.
 
        @memberof Nehan.SelectorStateMachine
-       @param style {Nehan.StyleContext}
+       @param style {Nehan.Style}
        @param tokens {Array.<Nehan.TypeSelector> | combinator_string}
        @return {boolean}
     */
