@@ -49,6 +49,7 @@ var sources = [
   "src/selector-lexer.js",
   "src/selector-state-machine.js",
   "src/selector.js",
+  "src/selectors.js",
   "src/rgb.js",
   "src/colors.js",
   "src/color.js",
@@ -118,7 +119,6 @@ var sources = [
   "src/token-stream.js",
   "src/ruby-token-stream.js",
   "src/stylesheet.js",
-  "src/selectors.js",
   "src/box.js",
   "src/document-context.js",
   "src/page-evaluator.js",
@@ -127,7 +127,7 @@ var sources = [
   "src/selector-prop-context.js",
   "src/selector-context.js",
   "src/dom-create-context.js",
-  "src/style-context.js",
+  "src/style.js",
   "src/layout-generator.js",
   "src/block-generator.js",
   "src/inline-generator.js",
@@ -154,7 +154,8 @@ var sources = [
   "src/layout-evaluator.js",
   "src/vert-evaluator.js",
   "src/hori-evaluator.js",
-  "src/paged-element.js"
+  "src/rendering-context.js",
+  "src/document.js"
 ];
 
 gulp.task("nehan.js", function(){

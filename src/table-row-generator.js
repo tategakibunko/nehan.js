@@ -12,21 +12,22 @@ Nehan.TableRowGenerator = (function(){
      @param style {Nehan.Style}
      @param stream {Nehan.TagStream}
   */
-  function TableRowGenerator(style, stream){
-    var generators = this._getGenerators(style, stream);
-    Nehan.ParallelGenerator.call(this, style, generators);
+  function TableRowGenerator(context){
+    Nehan.ParallelGenerator.call(this, context.extend({
+      parallelGenerators:this._getGenerators(context)
+    }));
   }
   Nehan.Class.extend(TableRowGenerator, Nehan.ParallelGenerator);
 
-  TableRowGenerator.prototype._getGenerators = function(style_tr, stream){
-    var child_styles = this._getChildStyles(style_tr, stream);
-    return child_styles.map(function(child_style){
-      return new Nehan.TableCellGenerator(child_style, this._createStream(child_style));
-    }.bind(this));
+  TableRowGenerator.prototype._getGenerators = function(context){
+    var child_styles = this._getChildStyles(context);
+    return child_styles.map(context.createChildBlockGenerator);
   };
 
-  TableRowGenerator.prototype._getChildStyles = function(style_tr, stream){
+  TableRowGenerator.prototype._getChildStyles = function(context){
     var self = this;
+    var style_tr = context.style;
+    var stream = context.stream;
     var child_tags = stream.getTokens();
     var rest_measure = style_tr.contentMeasure;
     var partition = style_tr.getTablePartition();
@@ -34,8 +35,8 @@ Nehan.TableRowGenerator = (function(){
       partitionCount:child_tags.length,
       measure:style_tr.contentMeasure
     }) : [];
-    return child_tags.map(function(tag, i){
-      var default_style = new Nehan.Style(tag, style_tr);
+    return child_tags.map(function(cell_tag, i){
+      var default_style = context.createStyle(cell_tag, style_tr);
       var static_measure = default_style.staticMeasure;
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_tags.length - i));
       if(part_sizes.length > 0){
@@ -49,9 +50,7 @@ Nehan.TableRowGenerator = (function(){
   };
 
   TableRowGenerator.prototype._getChildTags = function(stream){
-    return stream.getTokens().filter(function(token){
-      return (token instanceof Nehan.Tag && (token.getName() === "td" || token.getName() === "th"));
-    });
+    return stream.getTokens().filter(Nehan.Closure.isTagName(["td", "th"]));
   };
 
   return TableRowGenerator;

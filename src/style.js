@@ -95,14 +95,14 @@ Nehan.Style = (function(){
      @param args.forceCss {Object} - system css that must be applied.
      @param args.cursorContext {Nehan.LayoutContext} - cursor context at the point of this style context created.
   */
-  function Style(context, markup, parent, args){
-    this._initialize(context, markup, parent, args);
+  function Style(selectors, markup, parent, args){
+    this._initialize(selectors, markup, parent, args);
   }
-
-  Style.prototype._initialize = function(context, markup, parent, args){
+  
+  Style.prototype._initialize = function(selectors, markup, parent, args){
     args = args || {};
 
-    this.selectors = context.selectors;
+    this.selectors = selectors;
     this.markup = markup;
     this.markupName = markup.getName();
     this.parent = parent || null;
@@ -400,7 +400,7 @@ Nehan.Style = (function(){
     var max_marker_html = this.getListMarkerHtml(item_count);
     // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
     // and we have to avoid 'appendChild' from child-generator of this tmp generator.
-    var tmp_gen = new InlineGenerator(this.clone(), new Nehan.TokenStream(max_marker_html));
+    var tmp_gen = new Nehan.InlineGenerator(this.clone(), new Nehan.TokenStream(max_marker_html));
     var line = tmp_gen.yield();
     var marker_measure = line? line.inlineMeasure + Math.floor(this.getFontSize() / 2) : this.getFontSize();
     var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
@@ -561,7 +561,7 @@ Nehan.Style = (function(){
     // backup other line data. mainly required to restore inline-context.
     if(is_root_line){
       line.lineNo = opt.lineNo;
-      line.paragraphId = DocumentContext.getParagraphId();
+      //line.paragraphId = DocumentContext.getParagraphId();
       line.breakAfter = opt.breakAfter || false;
       line.hyphenated = opt.hyphenated || false;
       line.inlineMeasure = opt.measure || this.contentMeasure;

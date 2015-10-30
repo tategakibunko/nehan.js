@@ -1,59 +1,32 @@
+/*
+ if <body>[float1][float2][other elements]</body>
+ style of this generator is 'body.context.style'.
+ */
 Nehan.FloatGenerator = (function(){
   /**
-   * [caution]<br>
-   * constructor argument 'style' is the style of <b>parent</b>.<br>
-   * so if &lt;body&gt;&lt;float1&gt;..&lt;/float1&gt;&lt;float2&gt;...&lt;/float2&gt;&lt;/body&gt;,<br>
-   * style of this contructor is 'body.style'
-
      @memberof Nehan
      @class FloatGenerator
      @classdesc generator of float layout
      @constructor
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
-     @param floated_generators {Array.<Nehan.LayoutGenerator>} - continuous floated generator collection
+     @param context {Nehan.RenderingContext}
   */
-  function FloatGenerator(style, stream, floated_generators){
-    Nehan.BlockGenerator.call(this, style, stream);
-    this.generators = floated_generators;
-
-    // create child generator to yield rest-space of float-elements with logical-float "start".
-    // notice that this generator uses 'clone' of original style, because content size changes by position,
-    // but on the other hand, original style is referenced by float-elements as their parent style.
-    // so we must keep original style immutable.
-    this.setChildLayout(new Nehan.BlockGenerator(style.clone({"float":"start"}), stream));
+  function FloatGenerator(context){
+    Nehan.BlockGenerator.call(this, context);
   }
   Nehan.Class.extend(FloatGenerator, Nehan.LayoutGenerator);
 
-  /**
-     @memberof Nehan.FloatGenerator
-     @return {boolean}
-  */
-  FloatGenerator.prototype.hasNext = function(){
-    if(this._terminate){
-      return false;
-    }
-    return this._hasNextFloat() || this.hasCache();
-  };
-
-  FloatGenerator.prototype._hasNextFloat = function(){
-    return Nehan.List.exists(this.generators, function(gen){
-      return gen.hasNext();
-    });
-  };
-
-  FloatGenerator.prototype._yield = function(context){
-    var stack = this._yieldFloatStack(context);
-    var rest_measure = context.getInlineRestMeasure();
+  FloatGenerator.prototype._yield = function(){
+    var stack = this._yieldFloatStack();
+    var rest_measure = this.context.layoutContext.getInlineRestMeasure();
     var rest_extent = stack.getExtent();
     var root_measure = rest_measure;
     if(rest_measure <= 0 || rest_extent <= 0){
       return null;
     }
-    return this._yieldFloat(context, stack, root_measure, rest_measure, rest_extent);
+    return this._yieldFloat(stack, root_measure, rest_measure, rest_extent);
   };
 
-  FloatGenerator.prototype._yieldFloat = function(context, stack, root_measure, rest_measure, rest_extent){
+  FloatGenerator.prototype._yieldFloat = function(stack, root_measure, rest_measure, rest_extent){
     //console.log("_yieldFloat(root_m:%d, rest_m:%d, rest_e:%d)", root_measure, rest_measure, rest_extent);
 
     if(rest_measure <= 0){
@@ -62,7 +35,7 @@ Nehan.FloatGenerator = (function(){
 
     // no more floated layout, just yield rest area.
     if(stack.isEmpty()){
-      return this._yieldFloatSpace(context, stack.getLastGroup(), rest_measure, rest_extent);
+      return this._yieldFloatSpace(stack.getLastGroup(), rest_measure, rest_extent);
     }
     /*
       <------ rest_measure ---->
@@ -72,11 +45,11 @@ Nehan.FloatGenerator = (function(){
       |       |                |
       --------------------------
     */
-    var flow = this.style.flow;
+    var flow = this.context.style.flow;
     var prev_group = stack.getLastGroup();
     var group = stack.pop(flow); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
     var rest_rest_measure = rest_measure - group.getMeasure(flow); // rest of 'rest measure'
-    var rest = this._yieldFloat(context, stack, root_measure, rest_rest_measure, group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
+    var rest = this._yieldFloat(stack, root_measure, rest_rest_measure, group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
     var group_set = this._wrapFloat(group, rest, rest_measure); // wrap these 2 floated layout as one block.
 
     /*
@@ -97,6 +70,8 @@ Nehan.FloatGenerator = (function(){
     // if no more rest extent is left, continuous layout is displayed in context of parent generator.
     if(rest_extent_space <= 0){
       if(!this.hasNext()){
+	// TODO
+	/*
 	// before: [root] -> [float(this)] -> [root(clone)] -> [child]
 	//  after: [root] -> [child]
 	var root = this._parent;
@@ -108,6 +83,7 @@ Nehan.FloatGenerator = (function(){
 	}
 	root._child = root_child;
 	root._cachedElements = root_clone._cachedElements || [];
+	 */
       }
       return group_set;
     }
@@ -123,7 +99,7 @@ Nehan.FloatGenerator = (function(){
       --------------------------
     */
     // if there is space in block-flow direction, yield rest space and wrap them(floated-set and rest-space).
-    var space = this._yieldFloatSpace(context, prev_group, rest_measure, rest_extent_space);
+    var space = this._yieldFloatSpace(prev_group, rest_measure, rest_extent_space);
     return this._wrapBlocks([group_set, space]);
   };
   
@@ -136,7 +112,7 @@ Nehan.FloatGenerator = (function(){
   };
 
   FloatGenerator.prototype._wrapBlocks = function(blocks){
-    var flow = this.style.flow;
+    var flow = this.context.style.flow;
     var elements = blocks.filter(function(block){
       return block !== null;
     });
@@ -145,7 +121,7 @@ Nehan.FloatGenerator = (function(){
     var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
 
     // wrapping block always float to start direction
-    return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
+    return this.context.style.createChild("div", {"float":"start", measure:measure}).createBlock({
       elements:elements,
       breakAfter:break_after,
       extent:extent
@@ -153,38 +129,38 @@ Nehan.FloatGenerator = (function(){
   };
 
   FloatGenerator.prototype._wrapFloat = function(floated, rest, measure){
-    var flow = this.style.flow;
+    var flow = this.context.style.flow;
     var extent = floated.getExtent(flow);
     var elements = this._sortFloatRest(floated, rest || null);
     var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
-    return this.style.createChild("div", {"float":"start", measure:measure}).createBlock({
+    return this.context.style.createChild("div", {"float":"start", measure:measure}).createBlock({
       elements:elements,
       breakAfter:break_after,
       extent:extent
     });
   };
   
-  FloatGenerator.prototype._yieldFloatSpace = function(context, float_group, measure, extent){
+  FloatGenerator.prototype._yieldFloatSpace = function(float_group, measure, extent){
     //console.log("yieldFloatSpace(c = %o, m = %d, e = %d), page_no:%d", context, measure, extent, DocumentContext.getPageNo());
-    context.child.style.forceUpdateContextSize(measure, extent);
-    context.child.floatGroup = float_group;
-    return this.yieldChildLayout();
+    this.context.childGenerator.context.style.forceUpdateContextSize(measure, extent);
+    this.context.childGenerator.context.floatGroup = float_group;
+    return this.context.yieldChildLayout();
   };
   
-  FloatGenerator.prototype._yieldFloatStack = function(context){
+  FloatGenerator.prototype._yieldFloatStack = function(){
     var start_blocks = [], end_blocks = [];
-    Nehan.List.iter(this.generators, function(gen){
-      var block = gen.yield(context);
+    Nehan.List.iter(this.context.floatedGenerators, function(gen){
+      var block = gen.yield();
       if(block){
 	block.hasNext = gen.hasNext();
-	if(gen.style.isFloatStart()){
+	if(gen.context.style.isFloatStart()){
 	  start_blocks.push(block);
-	} else if(gen.style.isFloatEnd()){
+	} else if(gen.context.style.isFloatEnd()){
 	  end_blocks.push(block);
 	}
       }
     });
-    return new Nehan.FloatGroupStack(this.style.flow, start_blocks, end_blocks);
+    return new Nehan.FloatGroupStack(this.context.style.flow, start_blocks, end_blocks);
   };
 
   return FloatGenerator;

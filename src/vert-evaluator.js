@@ -35,7 +35,7 @@ Nehan.VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalRt = function(line, ruby){
-    var rt = (new InlineGenerator(
+    var rt = (new Nehan.InlineGenerator(
       new Nehan.Style(ruby.rt, line.style),
       new Nehan.TokenStream(ruby.getRtString(), {
 	flow:line.style.flow

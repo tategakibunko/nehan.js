@@ -8,10 +8,9 @@ Nehan.TableCellGenerator = (function(){
      @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
   */
-  function TableCellGenerator(style, stream){
-    Nehan.SectionRootGenerator.call(this, style, stream);
+  function TableCellGenerator(context){
+    Nehan.SectionRootGenerator.call(this, context);
   }
-  // notice that table-cell is sectioning root, so extends SectionRootGenerator.
   Nehan.Class.extend(TableCellGenerator, Nehan.SectionRootGenerator);
 
   return TableCellGenerator;

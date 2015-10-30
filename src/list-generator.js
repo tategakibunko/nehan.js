@@ -8,11 +8,11 @@ Nehan.ListGenerator = (function(){
      @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
   */
-  function ListGenerator(style, stream){
-    Nehan.BlockGenerator.call(this, style, stream);
+  function ListGenerator(context){
+    Nehan.BlockGenerator.call(this, context);
 
-    // by setting max item count, 'this.style.listMarkerSize' is created.
-    this.style.setListItemCount(this.stream.getTokenCount());
+    // by setting max item count, 'this.context.style.listMarkerSize' is created.
+    this.context.style.setListItemCount(this.context.stream.getTokenCount());
   }
   Nehan.Class.extend(ListGenerator, Nehan.BlockGenerator);
 

@@ -17,9 +17,9 @@ Nehan.SelectorContext = (function(){
      * });
   */
   function SelectorContext(style, cursor_context){
-    SelectorPropContext.call(this, style, cursor_context);
+    Nehan.SelectorPropContext.call(this, style, cursor_context);
   }
-  Nehan.Class.extend(SelectorContext, SelectorPropContext);
+  Nehan.Class.extend(SelectorContext, Nehan.SelectorPropContext);
 
   /**
      @memberof Nehan.SelectorContext

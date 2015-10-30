@@ -20,13 +20,13 @@ Nehan.TableGenerator = (function(){
      @param style {Nehan.Style}
      @param stream {Nehan.TagStream}
   */
-  function TableGenerator(style, stream){
-    Nehan.BlockGenerator.call(this, style, stream);
+  function TableGenerator(context){
+    Nehan.BlockGenerator.call(this, context);
 
     // load partition set after context size is calculated.
-    if(style.getCssAttr("table-layout") === "auto"){
-      style.tablePartition = this._createAutoPartition(stream);
-      stream.rewind();
+    if(context.style.getCssAttr("table-layout") === "auto"){
+      context.style.tablePartition = this._createAutoPartition(context.stream);
+      context.stream.rewind();
     }
   }
   Nehan.Class.extend(TableGenerator, Nehan.BlockGenerator);
@@ -44,7 +44,7 @@ Nehan.TableGenerator = (function(){
       switch(token.getName()){
       case "tbody": case "thead": case "tfoot":
 	var pset2 = this._createAutoPartition(new Nehan.TokenStream(token.getContent(), {
-	  flow:this.style.flow,
+	  flow:this.context.style.flow,
 	  filter:Nehan.Closure.isTagName(["tr"])
 	}));
 	pset = pset.union(pset2);
@@ -52,7 +52,7 @@ Nehan.TableGenerator = (function(){
 
       case "tr":
 	var cell_tags = new Nehan.TokenStream(token.getContent(), {
-	  flow:this.style.flow,
+	  flow:this.context.style.flow,
 	  filter:Nehan.Closure.isTagName(["td", "th"])
 	}).getTokens();
 	var cell_count = cell_tags.length;
@@ -82,14 +82,14 @@ Nehan.TableGenerator = (function(){
     // this sizing algorithem is not strict, but still effective,
     // especially for text only table.
     var max_line = Nehan.List.maxobj(lines, function(line){ return line.length; });
-    var max_weight = Math.floor(this.style.contentMeasure / 2);
-    var min_weight = Math.floor(this.style.contentMeasure / (partition_count * 2));
-    var weight = max_line.length * this.style.getFontSize();
+    var max_weight = Math.floor(this.context.style.contentMeasure / 2);
+    var min_weight = Math.floor(this.context.style.contentMeasure / (partition_count * 2));
+    var weight = max_line.length * this.context.style.getFontSize();
     // less than 50% of parent size, but more than 50% of average partition size.
     weight = Math.max(min_weight, Math.min(weight, max_weight));
 
     // but confirm that weight is more than single font size of parent style.
-    weight = Math.max(this.style.getFontSize(), weight);
+    weight = Math.max(this.context.style.getFontSize(), weight);
     return new Nehan.PartitionUnit({weight:weight, isStatic:false});
   };
 

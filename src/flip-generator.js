@@ -7,8 +7,8 @@ Nehan.FlipGenerator = (function(){
      @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
   */
-  function FlipGenerator(style, stream){
-    Nehan.BlockGenerator.call(this, style, stream);
+  function FlipGenerator(context){
+    Nehan.BlockGenerator.call(this, context);
   }
   Nehan.Class.extend(FlipGenerator, Nehan.BlockGenerator);
 
@@ -18,10 +18,11 @@ Nehan.FlipGenerator = (function(){
      @param context {Nehan.LayoutContext}
      @return {Nehan.Box}
   */
-  FlipGenerator.prototype.yield = function(context){
-    // [measure of this.style] -> [extent of this.style.parent]
-    // [extent of this.style]  -> [measure of this.style.parent]
-    this.style.updateContextSize(context.getBlockRestExtent(), context.getInlineMaxMeasure());
+  FlipGenerator.prototype.yield = function(){
+    this.context.style.updateContextSize(
+      this.context.layoutContext.getBlockRestExtent(), // measure -> extent
+      this.context.layoutContext.getInlineMaxMeasure() // extent -> measure
+    );
     return Nehan.BlockGenerator.prototype.yield.call(this);
   };
 

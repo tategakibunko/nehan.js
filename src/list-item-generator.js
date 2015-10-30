@@ -8,40 +8,44 @@ Nehan.ListItemGenerator = (function(){
      @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
   */
-  function ListItemGenerator(style, stream){
-    Nehan.ParallelGenerator.call(this, style, [
-      this._createListMarkGenerator(style),
-      this._createListBodyGenerator(style, stream)
-    ]);
+  function ListItemGenerator(context){
+    Nehan.ParallelGenerator.call(this, context.extend({
+      parallelGenerators:[
+	this._createListMarkGenerator(context),
+	this._createListBodyGenerator(context)
+      ]
+    }));
   }
   Nehan.Class.extend(ListItemGenerator, Nehan.ParallelGenerator);
 
-  ListItemGenerator.prototype._createListMarkGenerator = function(style){
-    var marker_size = style.getListMarkerSize();
-    var item_order = style.getChildIndex();
-    var marker_text = style.getListMarkerHtml(item_order + 1);
-    var measure = marker_size.getMeasure(style.flow);
-    var marker_style = style.createChild("li-marker", {
+  ListItemGenerator.prototype._createListMarkGenerator = function(context){
+    var marker_size = context.style.getListMarkerSize();
+    var item_order = context.style.getChildIndex();
+    var marker_text = context.style.getListMarkerHtml(item_order + 1);
+    var measure = marker_size.getMeasure(context.style.flow);
+    var marker_style = context.style.createChild("li-marker", {
       "float":"start",
       "measure":measure
     }, {
       "class":"nehan-li-marker"
     });
-    return new Nehan.BlockGenerator(marker_style, new Nehan.TokenStream(marker_text, {
-      flow:style.flow
-    }));
+    var marker_stream = new Nehan.TokenStream(marker_text, {
+      flow:context.style.flow
+    });
+    return context.createChildBlockGenerator(marker_style, marker_stream);
   };
 
-  ListItemGenerator.prototype._createListBodyGenerator = function(style, stream){
-    var marker_size = style.getListMarkerSize();
-    var measure = style.contentMeasure - marker_size.getMeasure(style.flow);
-    var body_style = style.createChild("li-body", {
+  ListItemGenerator.prototype._createListBodyGenerator = function(context){
+    var marker_size = context.style.getListMarkerSize();
+    var measure = context.style.contentMeasure - marker_size.getMeasure(context.style.flow);
+    var body_style = context.style.createChild("li-body", {
       "float":"start",
       "measure":measure
     }, {
       "class":"nehan-li-body"
     });
-    return new Nehan.BlockGenerator(body_style, stream);
+    var body_stream = context.stream;
+    return context.createChildBlockGenerator(body_style, body_stream);
   };
 
   return ListItemGenerator;

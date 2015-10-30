@@ -10,27 +10,27 @@ Nehan.FirstLineGenerator = (function(){
    @param stream {Nehan.TokenStream}
    @extends {Nehan.BlockGenerator}
   */
-  function FirstLineGenerator(style, stream){
-    Nehan.BlockGenerator.call(this, style, stream);
+  function FirstLineGenerator(context){
+    Nehan.BlockGenerator.call(this, context);
   }
   Nehan.Class.extend(FirstLineGenerator, Nehan.BlockGenerator);
 
   // this is called after each element(line-block) is yielded.
-  FirstLineGenerator.prototype._onAddElement = function(context, element){
-    if(context.getBlockLineNo() !== 1){
+  FirstLineGenerator.prototype._onAddElement = function(element){
+    if(this.context.getBlockLineNo() !== 1){
       return;
     }
     // first-line yieled, so switch style to parent one.
-    this.style = this.style.parent;
-    var child = this._child, parent = this;
-    while(child){
-      child.style = parent.style;
-      var cache = child.peekLastCache();
-      if(cache && child instanceof Nehan.TextGenerator && cache.setMetrics){
-	cache.setMetrics(child.style.flow, child.style.getFont());
+    this.context.style = this.context.parent.style;
+    var child_gen = this.context.childGenerator, parent_gen = this;
+    while(child_gen){
+      child_gen.context.style = parent_gen.context.style;
+      var cache = child_gen.context.peekLastCache();
+      if(cache && child_gen instanceof Nehan.TextGenerator && cache.setMetrics){
+	cache.setMetrics(child_gen.context.style.flow, child_gen.context.style.getFont());
       }
-      parent = child;
-      child = child._child;
+      parent_gen = child_gen;
+      child_gen = child_gen.context.childGenerator;
     }
   };
 

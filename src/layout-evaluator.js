@@ -139,7 +139,7 @@ Nehan.LayoutEvaluator = (function(){
   LayoutEvaluator.prototype._evalElementChild = function(parent, child){
     switch(parent.display){
     case "inline":
-      if(child instanceof Box){
+      if(child instanceof Nehan.Box){
 	return this._evalInlineChildElement(parent, child);
       }
       return this._evalInlineChildText(parent, child);

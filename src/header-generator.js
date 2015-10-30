@@ -8,23 +8,16 @@ Nehan.HeaderGenerator = (function(){
      @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
   */
-  function HeaderGenerator(style, stream){
-    Nehan.BlockGenerator.call(this, style, stream);
+  function HeaderGenerator(context){
+    Nehan.BlockGenerator.call(this, context);
   }
   Nehan.Class.extend(HeaderGenerator, Nehan.BlockGenerator);
 
-  HeaderGenerator.prototype._getHeaderRank = function(block){
-    if(this.style.getMarkupName().match(/h([1-6])/)){
-      return parseInt(RegExp.$1, 10);
-    }
-    return 0;
-  };
-
-  HeaderGenerator.prototype._onComplete = function(context, block){
-    var header_id = this.style.startHeaderContext({
-      type:this.style.getMarkupName(),
-      rank:this._getHeaderRank(),
-      title:this.style.getMarkupContent()
+  HeaderGenerator.prototype._onComplete = function(block){
+    var header_id = this.context.startHeaderContext({
+      type:this.context.markup.getName(),
+      rank:this.context.getHeaderRank(),
+      title:this.context.markup.getContent()
     });
     block.id = Nehan.Css.addNehanHeaderPrefix(header_id);
   };

@@ -14,8 +14,8 @@ Nehan.SectionRootGenerator = (function(){
   }
   Nehan.Class.extend(SectionRootGenerator, Nehan.BlockGenerator);
 
-  SectionRootGenerator.prototype._onComplete = function(context, block){
-    context.endOutlineContext();
+  SectionRootGenerator.prototype._onComplete = function(block){
+    this.context.endOutlineContext();
   };
 
   return SectionRootGenerator;

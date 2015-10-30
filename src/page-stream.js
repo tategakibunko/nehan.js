@@ -7,12 +7,23 @@ Nehan.PageStream = (function(){
      @param text {String} - html source text
   */
   function PageStream(context){
-    this.context = context;
     this._trees = [];
     this._pages = [];
     this.generator = new Nehan.DocumentGenerator(context);
     this.evaluator = new Nehan.PageEvaluator(context);
   }
+
+  var reqAnimationFrame = (function(){
+    var default_wait = 1000 / 60;
+    return window.requestAnimationFrame  ||
+      window.webkitRequestAnimationFrame ||
+      window.mozRequestAnimationFrame    ||
+      window.msRequestAnimationFrame     ||
+      function(callback, wait){
+	var _wait = (typeof wait === "undefined")? default_wait : wait;
+	window.setTimeout(callback, _wait);
+      };
+  })();
 
   /**
    @memberof Nehan.PageStream
@@ -28,13 +39,6 @@ Nehan.PageStream = (function(){
    */
   PageStream.prototype.hasNext = function(){
     return this.generator.hasNext();
-  };
-  /**
-   @memberof Nehan.PageStream
-   @param text {String}
-   */
-  PageStream.prototype.addText = function(text){
-    this.generator.addText(text);
   };
   /**
    @memberof Nehan.PageStream
@@ -61,7 +65,7 @@ Nehan.PageStream = (function(){
       if(!this.hasPage(page_no)){
 	var tree = this._yield();
 	if(tree){
-	  this._addTree(tree);
+	  this._trees.push(tree);
 	  page_no++;
 	}
       }
@@ -100,16 +104,6 @@ Nehan.PageStream = (function(){
    */
   PageStream.prototype.getPageCount = function(){
     return this._trees.length;
-  };
-  /**
-   same as getPage, defined to keep compatibility of older version of nehan.js
-
-   @memberof Nehan.PageStream
-   @param page_no {int} - page index starts from 0.
-   @deprecated
-   */
-  PageStream.prototype.get = function(page_no){
-    return this.getPage(page_no);
   };
   /**
    get evaluated page object.
@@ -187,16 +181,12 @@ Nehan.PageStream = (function(){
       if(opt.capturePageText){
 	tree.text = tree.toString();
       }
-      this._addTree(tree);
+      this._trees.push(tree);
       this.onProgress(tree, this);
     }
-    Nehan.reqAnimationFrame(function(){
+    reqAnimationFrame(function(){
       this._asyncGet(wait, opt);
     }.bind(this));
-  };
-
-  PageStream.prototype._addTree = function(tree){
-    this._trees.push(tree);
   };
 
   return PageStream;

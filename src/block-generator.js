@@ -10,57 +10,54 @@ Nehan.BlockGenerator = (function(){
   */
   function BlockGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
-    if(context.parent && context.parent.markup.getName() === "body"){
-      this.rootBlockId = context.genRootBlockId();
-    }
     this.blockId = context.genBlockId();
   }
   Nehan.Class.extend(BlockGenerator, Nehan.LayoutGenerator);
 
-  BlockGenerator.prototype._yield = function(context){
-    if(!context.hasBlockSpaceFor(1, !context.hasNext())){
+  BlockGenerator.prototype._yield = function(){
+    if(!this.context.layoutContext.hasBlockSpaceFor(1, !this.hasNext())){
       return null;
     }
-    var clear = context.style.clear;
-    if(clear && !clear.isDoneAll() && context.parent && context.parent.floatGroup){
-      var float_group = context.parent.floatGroup;
+    var clear = this.context.style.clear;
+    if(clear && !clear.isDoneAll() && this.context.parent && this.context.parent.floatGroup){
+      var float_group = this.context.parent.floatGroup;
       var float_direction = float_group.getFloatDirection();
       if(float_group.isLast() && !float_group.hasNext() && clear.hasDirection(float_direction.getName())){
 	clear.setDone(float_direction.getName());
-	return this._createWhiteSpace(context);
+	return this._createWhiteSpace();
       }
       if(!clear.isDoneAll()){
-	return this._createWhiteSpace(context);
+	return this._createWhiteSpace();
       }
     }
 
     // if break-before available, page-break but only once.
-    if(context.style.isBreakBefore()){
-      context.style.clearBreakBefore(); // [TODO] move clearance status to rendering-context class.
+    if(this.context.style.isBreakBefore()){
+      this.context.style.clearBreakBefore(); // [TODO] move clearance status to rendering-context class.
       return null;
     }
     while(true){
-      if(!context.hasNext()){
-	return this._createOutput(context); // output last block
+      if(!this.hasNext()){
+	return this._createOutput(); // output last block
       }
-      var element = this._getNext(context);
+      var element = this._getNext();
       if(element === null){
-	return this._createOutput(context);
+	return this._createOutput();
       }
       if(element.isVoid()){
 	continue;
       }
       if(element.hasLineBreak){
-	context.incLineBreakCount();
+	this.context.documentContext.incLineBreakCount();
       }
-      var extent = context.getElementLayoutExtent(element);
-      if(!context.hasBlockSpaceFor(extent)){
-	context.pushCache(element);
-	return this._createOutput(context);
+      var extent = this.context.getElementLayoutExtent(element);
+      if(!this.context.layoutContext.hasBlockSpaceFor(extent)){
+	this.context.pushCache(element);
+	return this._createOutput();
       }
-      this._addElement(context, element, extent);
-      if(!context.hasBlockSpaceFor(1) || context.hasBreakAfter()){
-	return this._createOutput(context);
+      this._addElement(element, extent);
+      if(!this.context.layoutContext.hasBlockSpaceFor(1) || this.context.layoutContext.hasBreakAfter()){
+	return this._createOutput();
       }
     }
   };
@@ -70,25 +67,25 @@ Nehan.BlockGenerator = (function(){
      @method popCache
      @return {Nehan.Box} temporary stored cached element for next time yielding.
   */
-  BlockGenerator.prototype.popCache = function(context){
-    var cache = context.popCache();
+  BlockGenerator.prototype.popCache = function(){
+    var cache = this.context.popCache();
 
     if(cache && cache.isLine()){
       // restore cached line with correct line no
-      if(context.getBlockLineNo() === 0){
+      if(this.context.getBlockLineNo() === 0){
 	cache.lineNo = 0;
-	context.incBlockLineNo(); // cached line is next first line(of next block), so increment line no in block level context.
+	this.context.incBlockLineNo(); // cached line is next first line(of next block), so increment line no in block level this.context.
       }
       // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
       // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
-      if((!cache.hasLineBreak || (cache.hasLineBreak && cache.hyphenated)) && cache.getLayoutMeasure(this.style.flow) < this.style.contentMeasure && this._child){
+      if((!cache.hasLineBreak || (cache.hasLineBreak && cache.hyphenated)) && cache.getLayoutMeasure(this.context.style.flow) < this.context.style.contentMeasure && this._child){
 	//console.info("inline float fix, line = %o(%s), context = %o, child_gen = %o", cache, cache.toString(), context, this._child);
 
 	// resume inline context
-	var context2 = this._createChildContext(context);
+	var context2 = this._createChildContext();
 	context2.inline.elements = cache.elements;
-	context2.inline.curMeasure = cache.getLayoutMeasure(this.style.flow);
-	context2.inline.maxFontSize = cache.maxFontSize || this.style.getFontSize();
+	context2.inline.curMeasure = cache.getLayoutMeasure(this.context.style.flow);
+	context2.inline.maxFontSize = cache.maxFontSize || this.context.style.getFontSize();
 	context2.inline.maxExtent = cache.maxExtent || 0;
 	context2.inline.charCount = cache.charCount || 0;
 	var line = this._child._yield(context2);
@@ -99,19 +96,19 @@ Nehan.BlockGenerator = (function(){
     return cache;
   };
 
-  BlockGenerator.prototype._getNext = function(context){
-    if(this.hasCache()){
-      var cache = this.popCache(context);
+  BlockGenerator.prototype._getNext = function(){
+    if(this.context.hasCache()){
+      var cache = this.context.popCache();
       return cache;
     }
 
-    if(this.hasChildLayout()){
-      var child = this.yieldChildLayout(context);
+    if(this.context.hasChildLayout()){
+      var child = this.context.yieldChildLayout();
       return child;
     }
 
     // read next token
-    var token = this.stream? this.stream.get() : null;
+    var token = this.context.stream? this.context.stream.get() : null;
     if(token === null){
       return null;
     }
@@ -121,63 +118,60 @@ Nehan.BlockGenerator = (function(){
     // text block
     if(token instanceof Nehan.Text){
       if(token.isWhiteSpaceOnly()){
-	return this._getNext(context);
+	return this._getNext();
       }
-      var text_gen = context.createTextGenerator(token);
-      var inline_gen = context.createChildInlineGenerator(text_gen);
-      context.setChildGenerator(inline_gen);
-      return this.yieldChildLayout(context);
+      var text_gen = this.context.createTextGenerator(token);
+      var inline_gen = this.context.createChildInlineGenerator(this.context.style, this.context.stream, text_gen); // share same style
+      this.context.setChildGenerator(inline_gen);
+      return this.context.yieldChildLayout();
     }
 
     // if tag token, inherit style
-    var child_style = new Nehan.Style(token, this.style, {cursorContext:context});
+    var child_style = this.context.createChildStyle(token);
 
     // if disabled style, just skip
     if(child_style.isDisabled()){
-      return this._getNext(context);
+      return this._getNext();
     }
 
     // if page-break, end page
     if(child_style.isPageBreak()){
-      context.setBreakAfter(true);
+      this.context.setBreakAfter(true);
       return null;
     }
 
     // if line-break, output empty line(extent = font-size).
     if(child_style.isLineBreak()){
-      return this.style.createLine({
-	maxExtent:this.style.getFontSize()
+      return this.context.style.createLine({
+	maxExtent:this.context.style.getFontSize()
       });
     }
 
-    var child_stream = this._createStream(child_style);
-
     if(child_style.isFloated()){
-      var first_float_gen = this._createChildBlockGenerator(child_style, child_stream, context);
-      this.setChildLayout(this._createFloatGenerator(context, first_float_gen));
-      return this.yieldChildLayout(context);
+      this.context.setChildGenerator(this.context.createFloatGenerator(child_style));
+      return this.context.yieldChildLayout();
     }
 
     // if child inline or child inline-block,
     if(child_style.isInline() || child_style.isInlineBlock()){
-      var first_inline_gen = this._createChildInlineGenerator(child_style, child_stream, context);
-      this.setChildLayout(new InlineGenerator(this.style, this.stream, first_inline_gen));
-      return this.yieldChildLayout(context);
+      var first_inline_gen = this.context.createChildInlineGenerator(child_style, null, null);
+      this.context.setChildGenerator(this.context.createChildInlineGenerator(this.context.style, this.context.stream, first_inline_gen));
+      return this.context.yieldChildLayout();
     }
 
     // other case, start child block generator
-    this.setChildLayout(this._createChildBlockGenerator(child_style, child_stream, context));
-    return this.yieldChildLayout(context);
+    this.context.setChildGenerator(this.context.createChildBlockGenerator(child_style));
+    return this.context.yieldChildLayout();
   };
 
-  BlockGenerator.prototype._addElement = function(context, element, extent){
-    context.addBlockElement(element, extent);
-    this._onAddElement(context, element);
+  BlockGenerator.prototype._addElement = function(element, extent){
+    this.context.layoutContext.addBlockElement(element, extent);
+    this._onAddElement(element);
   };
 
-  BlockGenerator.prototype._createWhiteSpace = function(context){
-    return this.style.createBlock({
-      extent:context.getBlockMaxExtent(),
+  BlockGenerator.prototype._createWhiteSpace = function(){
+    return this.context.style.createBlock({
+      extent:this.context.getBlockMaxExtent(),
       elements:[],
       useBeforeEdge:false,
       useAfterEdge:false,
@@ -186,43 +180,38 @@ Nehan.BlockGenerator = (function(){
     });
   };
 
-  BlockGenerator.prototype._createOutput = function(context){
-    var extent = context.getBlockCurExtent();
-    var elements = context.getBlockElements();
+  BlockGenerator.prototype._createOutput = function(){
+    var extent = this.context.layoutContext.getBlockCurExtent();
+    var elements = this.context.layoutContext.getBlockElements();
     if(extent === 0 || elements.length === 0){
-      /*
-      var cache = (this._cachedElements.length > 0)? this._cachedElements[0] : null;
-      var cache_str = cache? cache.toString() : "null";
-      //console.log("void, gen:%o(yielded=%d), context:%o, cache:%o(%s), stream at:%d(has next:%o)", this, this._yieldCount, context, cache, cache_str, this.stream.getPos(), this.stream.hasNext());
-      */
-      if(!this.hasCache() && this.isFirstOutput()){
+      if(!this.context.hasCache() && this.context.isFirstOutput()){
 	// size 'zero' has special meaning... so we use 1.
-	return new Nehan.Box(new Nehan.BoxSize(1,1), this.style, "void"); // empty void element
+	return new Nehan.Box(new Nehan.BoxSize(1,1), this.context.style, "void"); // empty void element
       }
       return null;
     }
-    var after_edge_size = this.style.getEdgeAfter();
+    var after_edge_size = this.context.style.getEdgeAfter();
     var block_args = {
       blockId:this.blockId,
       extent:extent,
       elements:elements,
-      breakAfter:context.hasBreakAfter(),
-      useBeforeEdge:this.isFirstOutput(),
-      useAfterEdge:(!this.hasNext() && after_edge_size <= context.getBlockRestExtent()),
-      restMeasure:context.getInlineRestMeasure(),
-      restExtent:context.getBlockRestExtent()
+      breakAfter:this.context.layoutContext.hasBreakAfter(),
+      useBeforeEdge:this.context.isFirstOutput(),
+      useAfterEdge:(!this.hasNext() && after_edge_size <= this.context.layoutContext.getBlockRestExtent()),
+      restMeasure:this.context.layoutContext.getInlineRestMeasure(),
+      restExtent:this.context.layoutContext.getBlockRestExtent()
     };
     if(typeof this.rootBlockId !== "undefined"){
       block_args.rootBlockId = this.rootBlockId;
     }
-    var block = this.style.createBlock(block_args);
+    var block = this.context.style.createBlock(block_args);
 
     // call _onCreate callback for 'each' output
-    this._onCreate(context, block);
+    this._onCreate(block);
 
     // call _onComplete callback for 'final' output
     if(!this.hasNext()){
-      this._onComplete(context, block);
+      this._onComplete(block);
     }
     return block;
   };

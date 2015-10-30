@@ -1,11 +1,4 @@
 Nehan.LinkGenerator = (function(){
-  var __add_anchor = function(style){
-    var anchor_name = style.getMarkupAttr("name");
-    if(anchor_name){
-      DocumentContext.addAnchor(anchor_name);
-    }
-  };
-
   /**
      @memberof Nehan
      @class LinkGenerator
@@ -15,14 +8,14 @@ Nehan.LinkGenerator = (function(){
      @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
   */
-  function LinkGenerator(style, stream){
-    Nehan.InlineGenerator.call(this, style, stream);
-    __add_anchor(style); // set anchor at this point
+  function LinkGenerator(context){
+    Nehan.InlineGenerator.call(this, context);
+    //context.addAnchor();
   }
   Nehan.Class.extend(LinkGenerator, Nehan.InlineGenerator);
 
-  LinkGenerator.prototype._onComplete = function(context, output){
-    __add_anchor(this.style); // overwrite anchor on complete
+  LinkGenerator.prototype._onComplete = function(element){
+    this.context.addAnchor(); 
   };
 
   return LinkGenerator;

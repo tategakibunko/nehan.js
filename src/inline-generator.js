@@ -22,59 +22,56 @@ Nehan.InlineGenerator = (function(){
      * we pass the first child generator to the consctuctor of inline generator.
      *</pre>
   */
-  function InlineGenerator(style, stream, child_generator){
-    Nehan.LayoutGenerator.call(this, style, stream);
-    if(child_generator){
-      this.setChildLayout(child_generator);
-    }
+  function InlineGenerator(context){
+    Nehan.LayoutGenerator.call(this, context);
   }
   Nehan.Class.extend(InlineGenerator, Nehan.LayoutGenerator);
 
-  InlineGenerator.prototype._yield = function(context){
-    if(!context.hasInlineSpaceFor(1)){
+  InlineGenerator.prototype._yield = function(){
+    if(!this.context.layoutContext.hasInlineSpaceFor(1)){
       return null;
     }
     while(this.hasNext()){
-      var element = this._getNext(context);
+      var element = this._getNext();
       if(element === null){
 	break;
       }
-      var measure = this._getMeasure(element);
-      //console.log("[i:%s]%o(%s), m = %d (%d/%d)", this.style.markupName, element, (element.toString() || ""), measure, (context.inline.curMeasure + measure), context.inline.maxMeasure);
+      var measure = this.context.getElementLayoutMeasure(element);
+      //console.log("[i:%s]%o(%s), m = %d (%d/%d)", this.context.style.markupName, element, (element.toString() || ""), measure, (context.inline.curMeasure + measure), context.inline.maxMeasure);
       if(measure === 0){
 	break;
       }
-      if(!context.hasInlineSpaceFor(measure)){
-	this.pushCache(element);
+      if(!this.context.layoutContext.hasInlineSpaceFor(measure)){
+	this.context.pushCache(element);
 	break;
       }
-      this._addElement(context, element, measure);
+      this._addElement(element, measure);
       if(element.hangingPunctuation){
-	if(element.hangingPunctuation.style === this.style){
-	  var chr = this._yieldHangingChar(context, element.hangingPunctuation.data);
-	  this._addElement(context, chr, 0);
+	if(element.hangingPunctuation.style === this.context.style){
+	  var chr = this._yieldHangingChar(element.hangingPunctuation.data);
+	  this._addElement(chr, 0);
 	} else {
-	  context.setHangingPunctuation(element.hangingPunctuation); // inherit to parent generator
+	  this.context.layoutContext.setHangingPunctuation(element.hangingPunctuation); // inherit to parent generator
 	}
       }
       if(element.hasLineBreak){
-	context.setLineBreak(true);
+	this.context.layoutContext.setLineBreak(true);
 	break;
       }
     }
     // if element is the last full-filled line, skip continuous <br>.
-    if(element && element.lineOver && this._child && !this._child.hasNext()){
-      this.stream.skipIf(function(token){
+    if(element && element.lineOver && this.context.childGenerator && !this.context.childGenerator.hasNext()){
+      this.context.stream.skipIf(function(token){
 	return (token instanceof Nehan.Tag && token.getName() === "br");
       });
     }
-    return this._createOutput(context);
+    return this._createOutput();
   };
 
-  InlineGenerator.prototype._yieldHangingChar = function(context, chr){
-    chr.setMetrics(this.style.flow, this.style.getFont());
-    var font_size = this.style.getFontSize();
-    return this.style.createTextBlock({
+  InlineGenerator.prototype._yieldHangingChar = function(chr){
+    chr.setMetrics(this.context.style.flow, this.context.style.getFont());
+    var font_size = this.context.style.getFontSize();
+    return this.context.style.createTextBlock({
       elements:[chr],
       measure:chr.bodySize,
       extent:font_size,
@@ -84,68 +81,59 @@ Nehan.InlineGenerator = (function(){
     });
   };
 
-  InlineGenerator.prototype._createChildContext = function(context){
-    var child_context = new Nehan.LayoutContext(
-      context.block, // inline generator inherits block context as it is.
-      new Nehan.InlineContext(context.getInlineRestMeasure())
-    );
-    //console.log("create child context:%o", child_context);
-    return child_context;
-  };
-
-  InlineGenerator.prototype._createOutput = function(context){
-    if(context.isInlineEmpty()){
+  InlineGenerator.prototype._createOutput = function(){
+    if(this.context.layoutContext.isInlineEmpty()){
       return null;
     }
-    var line = this.style.createLine({
-      lineNo:context.getBlockLineNo(),
-      hasLineBreak:context.hasLineBreak(), // is line break included in?
-      breakAfter:context.hasBreakAfter(), // is break after included in?
-      hyphenated:context.isHyphenated(), // is line hyphenated?
-      measure:context.getInlineCurMeasure(), // actual measure
-      elements:context.getInlineElements(), // all inline-child, not only text, but recursive child box.
-      charCount:context.getInlineCharCount(),
-      maxExtent:(context.getInlineMaxExtent() || this.style.getFontSize()),
-      maxFontSize:context.getInlineMaxFontSize(),
-      hangingPunctuation:context.getHangingPunctuation()
+    var line = this.context.style.createLine({
+      lineNo:this.context.layoutContext.getBlockLineNo(),
+      hasLineBreak:this.context.layoutContext.hasLineBreak(), // is line break included in?
+      breakAfter:this.context.layoutContext.hasBreakAfter(), // is break after included in?
+      hyphenated:this.context.layoutContext.isHyphenated(), // is line hyphenated?
+      measure:this.context.layoutContext.getInlineCurMeasure(), // actual measure
+      elements:this.context.layoutContext.getInlineElements(), // all inline-child, not only text, but recursive child box.
+      charCount:this.context.layoutContext.getInlineCharCount(),
+      maxExtent:(this.context.layoutContext.getInlineMaxExtent() || this.context.style.getFontSize()),
+      maxFontSize:this.context.layoutContext.getInlineMaxFontSize(),
+      hangingPunctuation:this.context.layoutContext.getHangingPunctuation()
     });
 
     //console.log("%o create output(%s): conetxt max measure = %d, context:%o", this, line.toString(), context.inline.maxMeasure, context);
 
     // set position in parent stream.
-    if(this._parent && this._parent.stream){
-      line.pos = Math.max(0, this._parent.stream.getPos() - 1);
+    if(this.context.parent && this.context.parent.context.stream){
+      line.pos = Math.max(0, this.context.parent.context.stream.getPos() - 1);
     }
 
-    if(this.style.isRootLine()){
-      context.incBlockLineNo();
+    if(this.context.style.isRootLine()){
+      this.context.layoutContext.incBlockLineNo();
     }
 
     // call _onCreate callback for 'each' output
-    this._onCreate(context, line);
+    this._onCreate(line);
 
     // call _onComplete callback for 'final' output
     if(!this.hasNext()){
-      this._onComplete(context, line);
+      this._onComplete(line);
     }
     //console.log(">> line:%o, context = %o", line, context);
     return line;
   };
 
-  InlineGenerator.prototype._getNext = function(context){
-    if(this.hasCache()){
-      var cache = this.popCache(context);
+  InlineGenerator.prototype._getNext = function(){
+    if(this.context.hasCache()){
+      var cache = this.context.popCache();
       return cache;
     }
 
-    if(this.hasChildLayout()){
+    if(this.context.hasChildLayout()){
       // block context is delegated, but inline context is always re-constructed.
       // see LayoutGenerator::_createChildContext
-      return this.yieldChildLayout(context);
+      return this.context.yieldChildLayout();
     }
 
     // read next token
-    var token = this.stream.get();
+    var token = this.context.stream.get();
     if(token === null){
       return null;
     }
@@ -154,27 +142,27 @@ Nehan.InlineGenerator = (function(){
 
     // text block
     if(token instanceof Nehan.Text || token instanceof Nehan.Tcy || token instanceof Nehan.Word){
-      this.setChildLayout(context.createTextGenerator(token));
-      return this.yieldChildLayout(context);
+      this.context.setChildGenerator(this.context.createTextGenerator(token));
+      return this.context.yieldChildLayout();
     }
 
     // child inline without stream.
     switch(token.getName()){
     case "br":
-      context.setLineBreak(true);
-      if(!this.style.isPre()){
-	this.stream.skipUntil(function(token){
+      this.context.layoutContext.setLineBreak(true);
+      if(!this.context.style.isPre()){
+	this.context.stream.skipUntil(function(token){
 	  return (token instanceof Nehan.Text && token.isWhiteSpaceOnly());
 	});
       }
       return null;
 
     case "wbr":
-      // context.setInlineWordBreakable(true); // TODO
-      return this._getNext(context);
+      // this.context.layoutContext.setInlineWordBreakable(true); // TODO
+      return this._getNext();
 
     case "page-break": case "pbr": case "end-page":
-      context.setBreakAfter(true);
+      this.context.layoutContext.setBreakAfter(true);
       return null;
 
     default:
@@ -182,26 +170,26 @@ Nehan.InlineGenerator = (function(){
     }
 
     // if not text, it's tag token, inherit style
-    var child_style = new Nehan.Style(token, this.style, {cursorContext:context});
+    var child_style = this.context.createChildStyle(token);
 
     if(child_style.isDisabled()){
-      return this._getNext(context); // just skip
+      return this._getNext(); // just skip
     }
 
-    var child_stream = this._createStream(child_style);
+    var child_stream = this.context.createStream(token, child_style);
 
     // if inline -> block(or floated layout), force terminate inline
     if(child_style.isBlock() || child_style.isFloated()){
-      var child_gen = this._createChildBlockGenerator(child_style, child_stream, context);
+      var child_gen = this.context.createChildBlockGenerator(child_style, child_stream);
       if(child_style.isFloated()){
-	child_gen = this._createFloatGenerator(context, child_gen);
+	child_gen = this.context.createFloatGenerator(child_gen);
       }
-      this._breakInline(child_gen);
+      this.context.layoutContext.breakInline(child_gen);
 
       // add line-break to avoid empty-line.
       // because empty-line is returned as null to parent block generator,
       // and it causes page-break of parent block generator.
-      context.setLineBreak(true);
+      this.context.layoutContext.setLineBreak(true);
       return null;
     }
 
@@ -211,33 +199,17 @@ Nehan.InlineGenerator = (function(){
       return child_style.createImage();
 
     default:
-      var child_generator = this._createChildInlineGenerator(child_style, child_stream, context);
-      this.setChildLayout(child_generator);
-      return this.yieldChildLayout(context);
+      var child_generator = this.context.createChildInlineGenerator(child_style, child_stream);
+      this.context.setChildGenerator(child_generator);
+      return this.context.yieldChildLayout();
     }
   };
 
-  InlineGenerator.prototype._breakInline = function(block_gen){
-    this.setTerminate(true);
-    if(this._parent === null){
-      return;
-    }
-    if(this._parent instanceof InlineGenerator){
-      this._parent._breakInline(block_gen);
-    } else {
-      this._parent.setChildLayout(block_gen);
-    }
-  };
-
-  InlineGenerator.prototype._getMeasure = function(element){
-    return element.getLayoutMeasure(this.style.flow);
-  };
-
-  InlineGenerator.prototype._addElement = function(context, element, measure){
-    context.addInlineBoxElement(element, measure);
+  InlineGenerator.prototype._addElement = function(element, measure){
+    this.context.layoutContext.addInlineBoxElement(element, measure);
 
     // call _onAddElement callback for each 'element' of output.
-    this._onAddElement(context, element);
+    this._onAddElement(element);
   };
 
   return InlineGenerator;

@@ -17,7 +17,7 @@ Nehan.Selectors = (function(){
   Selectors.prototype._initialize = function(){
     Nehan.Obj.iter(this.stylesheet, function(key, value){
       this._insertValue(key, value);
-    });
+    }.bind(this));
     this.setValues(Nehan.globalStyle || {}); // set global style.
   };
 

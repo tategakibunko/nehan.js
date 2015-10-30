@@ -8,14 +8,14 @@ Nehan.SectionContentGenerator = (function(){
      @param style {Nehan.Style}
      @param stream {Nehan.TokenStream}
   */
-  function SectionContentGenerator(style, stream){
-    Nehan.BlockGenerator.call(this, style, stream);
-    this.style.startSectionContext();
+  function SectionContentGenerator(context){
+    Nehan.BlockGenerator.call(this, context);
+    this.context.startSectionContext();
   }
   Nehan.Class.extend(SectionContentGenerator, Nehan.BlockGenerator);
 
-  SectionContentGenerator.prototype._onComplete = function(context, block){
-    this.style.endSectionContext();
+  SectionContentGenerator.prototype._onComplete = function(block){
+    this.context.endSectionContext();
   };
 
   return SectionContentGenerator;

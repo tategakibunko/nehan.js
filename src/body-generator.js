@@ -9,22 +9,23 @@ Nehan.BodyGenerator = (function(){
   */
   function BodyGenerator(context){
     Nehan.SectionRootGenerator.call(this, context);
+    this.rootBlockId = context.genRootBlockId();
   }
   Nehan.Class.extend(BodyGenerator, Nehan.SectionRootGenerator);
 
-  BodyGenerator.prototype._onCreate = function(context, block){
-    block.seekPos = context.stream.getSeekPos();
-    block.charPos = context.documentContext.getCharPos();
-    block.percent = context.stream.getSeekPercent();
-    block.pageNo = context.documentContext.getPageNo();
+  BodyGenerator.prototype._onCreate = function(block){
+    block.seekPos = this.context.stream.getSeekPos();
+    block.charPos = this.context.documentContext.getCharPos();
+    block.percent = this.context.stream.getSeekPercent();
+    block.pageNo = this.context.documentContext.getPageNo();
 
-    context.documentContext.stepCharPos(block.charCount || 0);
-    context.documentContext.stepPageNo();
+    this.context.documentContext.stepCharPos(block.charCount || 0);
+    this.context.documentContext.stepPageNo();
 
     // sometimes layout engine causes inlinite loop,
     // so terminate generator by restricting page count.
-    if(context.documentContext.getPageNo() >= Nehan.Config.maxPageCount){
-      this.setTerminate(true);
+    if(this.context.documentContext.getPageNo() >= Nehan.Config.maxPageCount){
+      this.context.setTerminate(true);
     }
   };
 

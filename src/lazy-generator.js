@@ -7,10 +7,9 @@ Nehan.LazyGenerator = (function(){
      @extends {Nehan.LayoutGenerator}
      @param style {Nehan.Style}
      @param output {Nehan.Box} - pre yielded output
-  */
-  function LazyGenerator(style, output){
-    Nehan.LayoutGenerator.call(this, style, null);
-    this.output = output; // only output this gen yields.
+   */
+  function LazyGenerator(context){
+    Nehan.LayoutGenerator.call(this, context);
   }
   Nehan.Class.extend(LazyGenerator, Nehan.LayoutGenerator);
 
@@ -21,7 +20,7 @@ Nehan.LazyGenerator = (function(){
      @return {boolean}
   */
   LazyGenerator.prototype.hasNext = function(){
-    return !this._terminate;
+    return this.context.terminate !== true;
   };
 
   /**
@@ -31,11 +30,11 @@ Nehan.LazyGenerator = (function(){
      @return {Nehan.Box}
   */
   LazyGenerator.prototype.yield = function(context){
-    if(this._terminate){ // already yielded
+    if(this.context.terminate){
       return null;
     }
-    this._terminate = true; // yield only once.
-    return this.output;
+    this.context.setTerminate(true);
+    return this.context.lazyOutput;
   };
 
   return LazyGenerator;

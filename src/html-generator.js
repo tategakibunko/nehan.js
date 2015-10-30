@@ -7,24 +7,23 @@ Nehan.HtmlGenerator = (function(){
      @param text {String}
   */
   function HtmlGenerator(context){
-    this.generator = this._createGenerator(context);
+    Nehan.LayoutGenerator.call(this, context.extend({
+      childGenerator:this._createBodyGenerator(context)
+    }));
   }
+  Nehan.Class.extend(HtmlGenerator, Nehan.LayoutGenerator);
 
-  /**
-   @memberof Nehan.HtmlGenerator
-   @return {Nehan.Box}
-   */
-  HtmlGenerator.prototype.yield = function(context){
-    return this.generator.yield(context);
+  HtmlGenerator.prototype._yield = function(){
+    return this.context.yieldChildLayout();
   };
 
-  HtmlGenerator.prototype._createGenerator = function(context){
+  HtmlGenerator.prototype._createBodyGenerator = function(context){
     var body_tag = null;
     while(context.stream.hasNext()){
       var tag = context.stream.get();
       switch(tag.getName()){
       case "head":
-	this._parseDocumentHeader(new Nehan.TokenStream(tag.getContent(), {
+	this._parseDocumentHeader(context, new Nehan.TokenStream(tag.getContent(), {
 	  filter:Nehan.Closure.isTagName(["title", "meta", "link", "style", "script"])
 	}));
 	break;
@@ -34,10 +33,12 @@ Nehan.HtmlGenerator = (function(){
       }
     }
     body_tag = body_tag || new Nehan.Tag("body", context.stream.getSrc());
-    return new Nehan.BodyGenerator(context.createChildContext(body_tag));
+    return new Nehan.BodyGenerator(context.createChildContext({
+      markup:body_tag
+    }));
   };
 
-  HtmlGenerator.prototype._parseDocumentHeader = function(stream){
+  HtmlGenerator.prototype._parseDocumentHeader = function(context, stream){
     var document_header = new Nehan.DocumentHeader();
     while(stream.hasNext()){
       var tag = stream.get();
@@ -59,7 +60,7 @@ Nehan.HtmlGenerator = (function(){
 	break;
       }
     }
-    DocumentContext.setDocumentHeader(document_header);
+    context.documentContext.setDocumentHeader(document_header);
   };
 
   return HtmlGenerator;
