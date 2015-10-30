@@ -86,10 +86,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createLayoutContext = function(){
-    if(!this.style){
-      return null;
-    }
-    if(this.style.getMarkupName() === "html"){
+    if(!this.style || this.style.getMarkupName() === "html"){
       return null;
     }
     // inline
@@ -221,10 +218,6 @@ Nehan.RenderingContext = (function(){
     return this.cachedElements.pop();
   };
 
-  RenderingContext.prototype.setChildGenerator = function(generator){
-    this.childGenerator = generator;
-  };
-
   RenderingContext.prototype.getElementLayoutExtent = function(element){
     return element.getLayoutExtent(this.style.flow);
   };
@@ -315,7 +308,7 @@ Nehan.RenderingContext = (function(){
     case "ruby":
       return new Nehan.RubyTokenStream(markup_content);
     default:
-      return new Nehan.TokenStream(this.style.getContent(), {
+      return new Nehan.TokenStream(markup_content, {
 	flow:style.flow
       });
     }
@@ -369,6 +362,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createChildBlockGenerator = function(child_style, child_stream){
+    console.log("createChildBlockGenerator(%s):%s", child_style.getMarkupName(), child_style.markup.getContent());
     // if child style with 'pasted' attribute, yield block with direct content by LazyGenerator.
     // notice that this is nehan.js original attribute,
     // is required to show some html(like form, input etc) that can't be handled by nehan.js.
@@ -384,9 +378,9 @@ Nehan.RenderingContext = (function(){
 
     var child_markup = child_style.markup;
     var child_context = this.createChildContext({
-      markup:child_style.markup,
+      markup:child_markup,
       style:child_style,
-      stream:child_stream || this.createStream(child_style.markup)
+      stream:child_stream || this.createStream(child_markup)
     });
 
     if(child_style.hasFlipFlow()){

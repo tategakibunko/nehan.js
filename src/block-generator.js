@@ -42,6 +42,7 @@ Nehan.BlockGenerator = (function(){
       }
       var element = this._getNext();
       if(element === null){
+	console.log("[%s]:EOF", this.context.getMarkupName());
 	return this._createOutput();
       }
       if(element.isVoid()){
@@ -51,6 +52,9 @@ Nehan.BlockGenerator = (function(){
 	this.context.documentContext.incLineBreakCount();
       }
       var extent = this.context.getElementLayoutExtent(element);
+
+      this._debugElement(element, extent);
+
       if(!this.context.layoutContext.hasBlockSpaceFor(extent)){
 	this.context.pushCache(element);
 	return this._createOutput();
@@ -60,6 +64,12 @@ Nehan.BlockGenerator = (function(){
 	return this._createOutput();
       }
     }
+  };
+
+  BlockGenerator.prototype._debugElement = function(element, extent){
+    var name = this.context.getMarkupName();
+    var bc = this.context.layoutContext.block;
+    console.log("[%s]:%o (%d / %d)", name, element, (bc.curExtent + extent), bc.maxExtent);
   };
 
   /**
@@ -160,6 +170,7 @@ Nehan.BlockGenerator = (function(){
     }
 
     // other case, start child block generator
+    console.log("[%s]:other case -> child block gen", this.context.getMarkupName());
     this.context.setChildGenerator(this.context.createChildBlockGenerator(child_style));
     return this.context.yieldChildLayout();
   };
