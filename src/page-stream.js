@@ -7,8 +7,8 @@ Nehan.PageStream = (function(){
      @param text {String} - html source text
   */
   function PageStream(context){
-    this._trees = [];
-    this._pages = [];
+    this.trees = [];
+    this.pages = [];
     this.generator = new Nehan.DocumentGenerator(context);
     this.evaluator = new Nehan.PageEvaluator(context);
   }
@@ -31,7 +31,7 @@ Nehan.PageStream = (function(){
    @return {boolean}
    */
   PageStream.prototype.hasPage = function(page_no){
-    return (typeof this._trees[page_no] != "undefined");
+    return (typeof this.trees[page_no] != "undefined");
   };
   /**
    @memberof Nehan.PageStream
@@ -63,9 +63,9 @@ Nehan.PageStream = (function(){
 	break;
       }
       if(!this.hasPage(page_no)){
-	var tree = this._yield();
+	var tree = this.generator.yield();
 	if(tree){
-	  this._trees.push(tree);
+	  this.trees.push(tree);
 	  page_no++;
 	}
       }
@@ -103,7 +103,7 @@ Nehan.PageStream = (function(){
    @return {int}
    */
   PageStream.prototype.getPageCount = function(){
-    return this._trees.length;
+    return this.trees.length;
   };
   /**
    get evaluated page object.
@@ -113,15 +113,15 @@ Nehan.PageStream = (function(){
    @return {Nehan.Page}
    */
   PageStream.prototype.getPage = function(page_no){
-    if(this._pages[page_no]){
-      return this._pages[page_no];
+    if(this.pages[page_no]){
+      return this.pages[page_no];
     }
-    var tree = this._trees[page_no] || null;
+    var tree = this.trees[page_no] || null;
     if(tree === null){
       return null;
     }
     var page = this.evaluator.evaluate(tree);
-    this._pages[page_no] = page;
+    this.pages[page_no] = page;
     return page;
   };
   /**
@@ -132,7 +132,7 @@ Nehan.PageStream = (function(){
    @return {Nehan.Box}
    */
   PageStream.prototype.getTree = function(page_no){
-    return this._trees[page_no] || null;
+    return this.trees[page_no] || null;
   };
   /**
    find logical page object by fn(Nehan.Box -> bool).
@@ -142,7 +142,7 @@ Nehan.PageStream = (function(){
    @return {Nehan.Box}
    */
   PageStream.prototype.find = function(fn){
-    return Nehan.List.find(this._trees, fn);
+    return Nehan.List.find(this.trees, fn);
   };
   /**
    filter logical page object by fn(Nehan.Box -> bool).
@@ -152,12 +152,7 @@ Nehan.PageStream = (function(){
    @return {Array.<Nehan.Box>}
    */
   PageStream.prototype.filter= function(fn){
-    return this._trees.filter(fn);
-  };
-
-  // () -> tree
-  PageStream.prototype._yield = function(){
-    return this.generator.yield();
+    return this.trees.filter(fn);
   };
 
   PageStream.prototype._setTimeStart = function(){
@@ -170,19 +165,21 @@ Nehan.PageStream = (function(){
   };
 
   PageStream.prototype._asyncGet = function(wait, opt){
-    if(!this.generator.hasNext() || (opt.maxPageCount >= 0 && this._trees.length >= opt.maxPageCount)){
-      this.onComplete(this._getTimeElapsed(), this);
+    if(!this.generator.hasNext() || (opt.maxPageCount >= 0 && this.trees.length >= opt.maxPageCount)){
+      //this.onComplete(this._getTimeElapsed(), this);
+      this.onComplete.call(this, this._getTimeElapsed(), this);
       return;
     }
     // notice that result of yield is not a page object, it's abstruct layout tree,
     // so you need to call 'getPage' to get actual page object.
-    var tree = this._yield();
+    var tree = this.generator.yield();
     if(tree){
       if(opt.capturePageText){
 	tree.text = tree.toString();
       }
-      this._trees.push(tree);
-      this.onProgress(tree, this);
+      this.trees.push(tree);
+      //this.onProgress(tree, this);
+      this.onProgress.call(this, tree, this);
     }
     reqAnimationFrame(function(){
       this._asyncGet(wait, opt);

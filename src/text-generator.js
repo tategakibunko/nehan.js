@@ -220,6 +220,7 @@ Nehan.TextGenerator = (function(){
     return this._getText(token);
   };
 
+  /*
   TextGenerator.prototype._breakInline = function(block_gen){
     this.setTerminate(true);
     if(this._parent === null){
@@ -230,7 +231,7 @@ Nehan.TextGenerator = (function(){
     } else {
       this._parent.setChildLayout(block_gen);
     }
-  };
+  };*/
 
   TextGenerator.prototype._getWhiteSpace = function(token){
     if(this.context.style.isPre()){

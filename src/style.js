@@ -681,7 +681,8 @@ Nehan.Style = (function(){
    @return {boolean}
    */
   Style.prototype.isRoot = function(){
-    return this.parent === null;
+    //return this.parent === null;
+    return this.getMarkupName() === "body";
   };
   /**
    @memberof Nehan.Style
@@ -1392,7 +1393,7 @@ Nehan.Style = (function(){
     if(this.font){
       Nehan.Args.copy(css, this.font.getCss());
     }
-    if(this.parent){
+    if(this.parent && !this.isRoot()){
       Nehan.Args.copy(css, this.parent.flow.getCss());
     }
     if(this.color){

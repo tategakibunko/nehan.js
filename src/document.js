@@ -1,13 +1,4 @@
 Nehan.Document = (function(){
-  var __normalize = function(text){
-    return text
-      .replace(/<!--[\s\S]*?-->/g, "") // discard comment
-      .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
-      .replace(/<rb>/gi, "") // discard rb
-      .replace(/<\/rb>/gi, "") // discard /rb
-      .replace(/<rt><\/rt>/gi, ""); // discard empty rt
-  };
-
   var __create_stream = function(text){
     var stream = new Nehan.TokenStream(text, {
       filter:Nehan.Closure.isTagName(["!doctype", "html"])
@@ -22,7 +13,7 @@ Nehan.Document = (function(){
     this.context = new Nehan.RenderingContext({
       markup:null,
       style:null,
-      stream:__create_stream(__normalize(text))
+      stream:__create_stream(Nehan.Html.normalize(text))
     });
   }
 

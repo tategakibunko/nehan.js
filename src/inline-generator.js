@@ -184,7 +184,7 @@ Nehan.InlineGenerator = (function(){
       if(child_style.isFloated()){
 	child_gen = this.context.createFloatGenerator(child_gen);
       }
-      this.context.layoutContext.breakInline(child_gen);
+      this.context.breakInline(child_gen);
 
       // add line-break to avoid empty-line.
       // because empty-line is returned as null to parent block generator,

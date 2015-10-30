@@ -1464,19 +1464,19 @@ Nehan.Css = {
 };
 
 /**
-   html utility module
+ html utility module
 
-   @namespace Nehan.Html
-*/
+ @namespace Nehan.Html
+ */
 Nehan.Html = {
   /**
-     escape special text like &lt;, &gt;, etc.
+   escape special text like &lt;, &gt;, etc.
 
-     @memberof Nehan.Html
-     @method escape
-     @param str {String}
-     @return {String}
-  */
+   @memberof Nehan.Html
+   @method escape
+   @param str {String}
+   @return {String}
+   */
   escape : function(str){
     return str
       .replace(/&/g, "&amp;")
@@ -1486,13 +1486,13 @@ Nehan.Html = {
       .replace(/"/g, "&quot;");
   },
   /**
-     unescape special text.
+   unescape special text.
 
-     @memberof Nehan.Html
-     @method unescape
-     @param str {String}
-     @return {String}
-  */
+   @memberof Nehan.Html
+   @method unescape
+   @param str {String}
+   @return {String}
+   */
   unescape : function(str) {
     var div = document.createElement("div");
     div.innerHTML = str.replace(/</g,"&lt;")
@@ -1503,15 +1503,15 @@ Nehan.Html = {
     return div.textContent || div.innerText;
   },
   /*
-    generate html attribute string
+   generate html attribute string
 
-    @memberof Nehan.Html
-    @method attr
-    @param args {Object}
-    @return {String}
-    @example
-    * Nehan.Html.attr({width:"100", height:"200"}); // width='100' height = '200'
-  */
+   @memberof Nehan.Html
+   @method attr
+   @param args {Object}
+   @return {String}
+   @example
+   * Nehan.Html.attr({width:"100", height:"200"}); // width='100' height = '200'
+   */
   attr : function(args){
     var tmp = [];
     for(var prop in args){
@@ -1522,60 +1522,75 @@ Nehan.Html = {
     return (tmp == [])? "" : tmp.join(" ");
   },
   /**
-     generate html tag string
+   generate html tag string
 
-     @memberof Nehan.Html
-     @method tagWrap
-     @param name {String} - tag name
-     @param content {String} - tag content text
-     @param args {Object} - tag attributes
-     @return {String}
-     @example
-     * Nehan.Html.tagWrap("a", "homepage", {href:"#"}); // "<a href='#'>homepage</a>"
-  */
+   @memberof Nehan.Html
+   @method tagWrap
+   @param name {String} - tag name
+   @param content {String} - tag content text
+   @param args {Object} - tag attributes
+   @return {String}
+   @example
+   * Nehan.Html.tagWrap("a", "homepage", {href:"#"}); // "<a href='#'>homepage</a>"
+   */
   tagWrap : function(name, content, args){
     return [this.tagStart(name, args || {}), content, this.tagEnd(name)].join("");
   },
   /**
-     generate unwrapped single html tag string
+   generate unwrapped single html tag string
 
-     @memberof Nehan.Html
-     @method tagSingle
-     @param name {String} - tag name
-     @param args {Object} - tag attributes
-     @return {String}
-     @example
-     * Nehan.Html.tagSingle("img", {src:"/path/to/img"}); // "<img src='/path/to/img' />"
-  */
+   @memberof Nehan.Html
+   @method tagSingle
+   @param name {String} - tag name
+   @param args {Object} - tag attributes
+   @return {String}
+   @example
+   * Nehan.Html.tagSingle("img", {src:"/path/to/img"}); // "<img src='/path/to/img' />"
+   */
   tagSingle : function(name, args){
     return "<" + name + " " + this.attr(args) + "/>";
   },
   /**
-     generate open tag string
+   generate open tag string
 
-     @memberof Nehan.Html
-     @method tagStart
-     @return {String}
-     @param name {String} - tag name
-     @param args {Object} - tag attributes
-     @example
-     * Nehan.Html.tagStart("div"); // "<div>"
-  */
+   @memberof Nehan.Html
+   @method tagStart
+   @return {String}
+   @param name {String} - tag name
+   @param args {Object} - tag attributes
+   @example
+   * Nehan.Html.tagStart("div"); // "<div>"
+   */
   tagStart : function(name, args){
     return "<" + name + " " + this.attr(args) + ">";
   },
   /**
-     generate enclose tag string
+   generate enclose tag string
 
-     @memberof Nehan.Html
-     @method tagEnd
-     @return {String}
-     @param name {String} - tag name
-     @example
-     * Nehan.Html.tagEnd("div"); // "</div>"
-  */
+   @memberof Nehan.Html
+   @method tagEnd
+   @return {String}
+   @param name {String} - tag name
+   @example
+   * Nehan.Html.tagEnd("div"); // "</div>"
+   */
   tagEnd : function(name){
     return "</" + name + ">";
+  },
+  /**
+   normalize html text
+   @memberof Nehan.Html
+   @method normalize
+   @return {String}
+   @param name {String} - html text
+   */
+  normalize : function(text){
+    return text
+      .replace(/<!--[\s\S]*?-->/g, "") // discard comment
+      .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
+      .replace(/<rb>/gi, "") // discard rb
+      .replace(/<\/rb>/gi, "") // discard /rb
+      .replace(/<rt><\/rt>/gi, ""); // discard empty rt
   }
 };
 
@@ -11939,8 +11954,8 @@ Nehan.PageStream = (function(){
      @param text {String} - html source text
   */
   function PageStream(context){
-    this._trees = [];
-    this._pages = [];
+    this.trees = [];
+    this.pages = [];
     this.generator = new Nehan.DocumentGenerator(context);
     this.evaluator = new Nehan.PageEvaluator(context);
   }
@@ -11963,7 +11978,7 @@ Nehan.PageStream = (function(){
    @return {boolean}
    */
   PageStream.prototype.hasPage = function(page_no){
-    return (typeof this._trees[page_no] != "undefined");
+    return (typeof this.trees[page_no] != "undefined");
   };
   /**
    @memberof Nehan.PageStream
@@ -11995,9 +12010,9 @@ Nehan.PageStream = (function(){
 	break;
       }
       if(!this.hasPage(page_no)){
-	var tree = this._yield();
+	var tree = this.generator.yield();
 	if(tree){
-	  this._trees.push(tree);
+	  this.trees.push(tree);
 	  page_no++;
 	}
       }
@@ -12035,7 +12050,7 @@ Nehan.PageStream = (function(){
    @return {int}
    */
   PageStream.prototype.getPageCount = function(){
-    return this._trees.length;
+    return this.trees.length;
   };
   /**
    get evaluated page object.
@@ -12045,15 +12060,15 @@ Nehan.PageStream = (function(){
    @return {Nehan.Page}
    */
   PageStream.prototype.getPage = function(page_no){
-    if(this._pages[page_no]){
-      return this._pages[page_no];
+    if(this.pages[page_no]){
+      return this.pages[page_no];
     }
-    var tree = this._trees[page_no] || null;
+    var tree = this.trees[page_no] || null;
     if(tree === null){
       return null;
     }
     var page = this.evaluator.evaluate(tree);
-    this._pages[page_no] = page;
+    this.pages[page_no] = page;
     return page;
   };
   /**
@@ -12064,7 +12079,7 @@ Nehan.PageStream = (function(){
    @return {Nehan.Box}
    */
   PageStream.prototype.getTree = function(page_no){
-    return this._trees[page_no] || null;
+    return this.trees[page_no] || null;
   };
   /**
    find logical page object by fn(Nehan.Box -> bool).
@@ -12074,7 +12089,7 @@ Nehan.PageStream = (function(){
    @return {Nehan.Box}
    */
   PageStream.prototype.find = function(fn){
-    return Nehan.List.find(this._trees, fn);
+    return Nehan.List.find(this.trees, fn);
   };
   /**
    filter logical page object by fn(Nehan.Box -> bool).
@@ -12084,12 +12099,7 @@ Nehan.PageStream = (function(){
    @return {Array.<Nehan.Box>}
    */
   PageStream.prototype.filter= function(fn){
-    return this._trees.filter(fn);
-  };
-
-  // () -> tree
-  PageStream.prototype._yield = function(){
-    return this.generator.yield();
+    return this.trees.filter(fn);
   };
 
   PageStream.prototype._setTimeStart = function(){
@@ -12102,19 +12112,21 @@ Nehan.PageStream = (function(){
   };
 
   PageStream.prototype._asyncGet = function(wait, opt){
-    if(!this.generator.hasNext() || (opt.maxPageCount >= 0 && this._trees.length >= opt.maxPageCount)){
-      this.onComplete(this._getTimeElapsed(), this);
+    if(!this.generator.hasNext() || (opt.maxPageCount >= 0 && this.trees.length >= opt.maxPageCount)){
+      //this.onComplete(this._getTimeElapsed(), this);
+      this.onComplete.call(this, this._getTimeElapsed(), this);
       return;
     }
     // notice that result of yield is not a page object, it's abstruct layout tree,
     // so you need to call 'getPage' to get actual page object.
-    var tree = this._yield();
+    var tree = this.generator.yield();
     if(tree){
       if(opt.capturePageText){
 	tree.text = tree.toString();
       }
-      this._trees.push(tree);
-      this.onProgress(tree, this);
+      this.trees.push(tree);
+      //this.onProgress(tree, this);
+      this.onProgress.call(this, tree, this);
     }
     reqAnimationFrame(function(){
       this._asyncGet(wait, opt);
@@ -13210,7 +13222,8 @@ Nehan.Style = (function(){
    @return {boolean}
    */
   Style.prototype.isRoot = function(){
-    return this.parent === null;
+    //return this.parent === null;
+    return this.getMarkupName() === "body";
   };
   /**
    @memberof Nehan.Style
@@ -13921,7 +13934,7 @@ Nehan.Style = (function(){
     if(this.font){
       Nehan.Args.copy(css, this.font.getCss());
     }
-    if(this.parent){
+    if(this.parent && !this.isRoot()){
       Nehan.Args.copy(css, this.parent.flow.getCss());
     }
     if(this.color){
@@ -15336,7 +15349,7 @@ Nehan.InlineGenerator = (function(){
       if(child_style.isFloated()){
 	child_gen = this.context.createFloatGenerator(child_gen);
       }
-      this.context.layoutContext.breakInline(child_gen);
+      this.context.breakInline(child_gen);
 
       // add line-break to avoid empty-line.
       // because empty-line is returned as null to parent block generator,
@@ -15617,6 +15630,7 @@ Nehan.TextGenerator = (function(){
     return this._getText(token);
   };
 
+  /*
   TextGenerator.prototype._breakInline = function(block_gen){
     this.setTerminate(true);
     if(this._parent === null){
@@ -15627,7 +15641,7 @@ Nehan.TextGenerator = (function(){
     } else {
       this._parent.setChildLayout(block_gen);
     }
-  };
+  };*/
 
   TextGenerator.prototype._getWhiteSpace = function(token){
     if(this.context.style.isPre()){
@@ -17416,7 +17430,7 @@ Nehan.RenderingContext = (function(){
     var edge_extent = this.getContextEdgeExtent();
 
     // block with parent
-    if(this.parent){
+    if(this.parent && this.parent.layoutContext){
       var max_extent = this.getParentRestExtent() - edge_extent;
       return this.layoutContext = new Nehan.LayoutContext(
 	new Nehan.BlockContext(max_extent, {
@@ -17565,6 +17579,7 @@ Nehan.RenderingContext = (function(){
     var style = opt.style || this.createChildStyle(markup);
     var stream = opt.stream || this.createStream(markup, style);
     return this.create({
+      parent:this,
       markup:markup,
       style:style,
       stream:stream
@@ -17906,15 +17921,6 @@ Nehan.RenderingContext = (function(){
 })();
 
 Nehan.Document = (function(){
-  var __normalize = function(text){
-    return text
-      .replace(/<!--[\s\S]*?-->/g, "") // discard comment
-      .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
-      .replace(/<rb>/gi, "") // discard rb
-      .replace(/<\/rb>/gi, "") // discard /rb
-      .replace(/<rt><\/rt>/gi, ""); // discard empty rt
-  };
-
   var __create_stream = function(text){
     var stream = new Nehan.TokenStream(text, {
       filter:Nehan.Closure.isTagName(["!doctype", "html"])
@@ -17929,7 +17935,7 @@ Nehan.Document = (function(){
     this.context = new Nehan.RenderingContext({
       markup:null,
       style:null,
-      stream:__create_stream(__normalize(text))
+      stream:__create_stream(Nehan.Html.normalize(text))
     });
   }
 

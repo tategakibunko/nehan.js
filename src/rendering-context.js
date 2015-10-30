@@ -109,7 +109,7 @@ Nehan.RenderingContext = (function(){
     var edge_extent = this.getContextEdgeExtent();
 
     // block with parent
-    if(this.parent){
+    if(this.parent && this.parent.layoutContext){
       var max_extent = this.getParentRestExtent() - edge_extent;
       return this.layoutContext = new Nehan.LayoutContext(
 	new Nehan.BlockContext(max_extent, {
@@ -258,6 +258,7 @@ Nehan.RenderingContext = (function(){
     var style = opt.style || this.createChildStyle(markup);
     var stream = opt.stream || this.createStream(markup, style);
     return this.create({
+      parent:this,
       markup:markup,
       style:style,
       stream:stream
