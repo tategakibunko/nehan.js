@@ -1,15 +1,33 @@
 Nehan.Document = (function(){
+  var __normalize = function(text){
+    return text
+      .replace(/<!--[\s\S]*?-->/g, "") // discard comment
+      .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
+      .replace(/<rb>/gi, "") // discard rb
+      .replace(/<\/rb>/gi, "") // discard /rb
+      .replace(/<rt><\/rt>/gi, ""); // discard empty rt
+  };
+
+  var __create_stream = function(text){
+    var stream = new Nehan.TokenStream(text, {
+      filter:Nehan.Closure.isTagName(["!doctype", "html"])
+    });
+    if(stream.isEmptyTokens()){
+      stream.tokens = [new Nehan.Tag("html", text)];
+    }
+    return stream;
+  };
+
   function Document(text){
-    var normalized_text = this._normalizeSource(text);
     this.context = new Nehan.RenderingContext({
       markup:null,
       style:null,
-      stream:this._createStream(normalized_text)
+      stream:__create_stream(__normalize(text))
     });
-    this.pageStream = new Nehan.PageStream(this.context);
   }
 
   Document.prototype.render = function(opt){
+    this.pageStream = new Nehan.PageStream(this.context);
     this.pageStream.asyncGet(opt);
     return this;
   };
@@ -42,25 +60,6 @@ Nehan.Document = (function(){
 
   Document.prototype.createOutlineElement = function(callbacks){
     return this.context.createBodyOutlineElement(callbacks);
-  };
-
-  Document.prototype._createStream = function(text){
-    var stream = new Nehan.TokenStream(text, {
-      filter:Nehan.Closure.isTagName(["!doctype", "html"])
-    });
-    if(stream.isEmptyTokens()){
-      stream.tokens = [new Nehan.Tag("<html>", text)];
-    }
-    return stream;
-  };
-
-  Document.prototype._normalizeSource = function(text){
-    return text
-      .replace(/<!--[\s\S]*?-->/g, "") // discard comment
-      .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
-      .replace(/<rb>/gi, "") // discard rb
-      .replace(/<\/rb>/gi, "") // discard /rb
-      .replace(/<rt><\/rt>/gi, ""); // discard empty rt
   };
 
   return Document;

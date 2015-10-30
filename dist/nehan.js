@@ -17393,11 +17393,11 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createLayoutContext = function(){
-    if(!this.style){ // document, html
-      return new Nehan.LayoutContext(
-	new Nehan.BlockContext(screen.width),
-	new Nehan.InlineContext(screen.height)
-      );
+    if(!this.style){
+      return null;
+    }
+    if(this.style.getMarkupName() === "html"){
+      return null;
     }
     // inline
     if(this.style.isInline()){
@@ -17431,6 +17431,10 @@ Nehan.RenderingContext = (function(){
       new Nehan.BlockContext(this.style.outerExtent - edge_extent),
       new Nehan.InlineContext(this.style.contentMeasure)
     );
+  };
+
+  RenderingContext.prototype.getMarkupName = function(){
+    return this.markup? this.markup.getName() : "";
   };
 
   RenderingContext.prototype.initLayoutContext = function(){
@@ -17572,7 +17576,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createChildStyle = function(markup, args){
-    return new Nehan.Style(this.selectors, markup, this.getParentStyle(), args || {});
+    return new Nehan.Style(this.selectors, markup, this.style, args || {});
   };
 
   RenderingContext.prototype.createStyle = function(markup, parent, args){
@@ -17902,18 +17906,37 @@ Nehan.RenderingContext = (function(){
 })();
 
 Nehan.Document = (function(){
+  var __normalize = function(text){
+    return text
+      .replace(/<!--[\s\S]*?-->/g, "") // discard comment
+      .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
+      .replace(/<rb>/gi, "") // discard rb
+      .replace(/<\/rb>/gi, "") // discard /rb
+      .replace(/<rt><\/rt>/gi, ""); // discard empty rt
+  };
+
+  var __create_stream = function(text){
+    var stream = new Nehan.TokenStream(text, {
+      filter:Nehan.Closure.isTagName(["!doctype", "html"])
+    });
+    if(stream.isEmptyTokens()){
+      stream.tokens = [new Nehan.Tag("html", text)];
+    }
+    return stream;
+  };
+
   function Document(text){
-    var normalized_text = this._normalizeSource(text);
     this.context = new Nehan.RenderingContext({
       markup:null,
       style:null,
-      stream:this._createStream(normalized_text)
+      stream:__create_stream(__normalize(text))
     });
-    this.pageStream = new Nehan.PageStream(this.context);
   }
 
   Document.prototype.render = function(opt){
+    this.pageStream = new Nehan.PageStream(this.context);
     this.pageStream.asyncGet(opt);
+    return this;
   };
   
   Document.prototype.getPage = function(index){
@@ -17944,25 +17967,6 @@ Nehan.Document = (function(){
 
   Document.prototype.createOutlineElement = function(callbacks){
     return this.context.createBodyOutlineElement(callbacks);
-  };
-
-  Document.prototype._createStream = function(text){
-    var stream = new Nehan.TokenStream(text, {
-      filter:Nehan.Closure.isTagName(["!doctype", "html"])
-    });
-    if(stream.isEmptyTokens()){
-      stream.tokens = [new Nehan.Tag("<html>", text)];
-    }
-    return stream;
-  };
-
-  Document.prototype._normalizeSource = function(text){
-    return text
-      .replace(/<!--[\s\S]*?-->/g, "") // discard comment
-      .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
-      .replace(/<rb>/gi, "") // discard rb
-      .replace(/<\/rb>/gi, "") // discard /rb
-      .replace(/<rt><\/rt>/gi, ""); // discard empty rt
   };
 
   return Document;

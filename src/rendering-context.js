@@ -86,11 +86,11 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createLayoutContext = function(){
-    if(!this.style){ // document, html
-      return new Nehan.LayoutContext(
-	new Nehan.BlockContext(screen.width),
-	new Nehan.InlineContext(screen.height)
-      );
+    if(!this.style){
+      return null;
+    }
+    if(this.style.getMarkupName() === "html"){
+      return null;
     }
     // inline
     if(this.style.isInline()){
@@ -124,6 +124,10 @@ Nehan.RenderingContext = (function(){
       new Nehan.BlockContext(this.style.outerExtent - edge_extent),
       new Nehan.InlineContext(this.style.contentMeasure)
     );
+  };
+
+  RenderingContext.prototype.getMarkupName = function(){
+    return this.markup? this.markup.getName() : "";
   };
 
   RenderingContext.prototype.initLayoutContext = function(){
@@ -265,7 +269,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createChildStyle = function(markup, args){
-    return new Nehan.Style(this.selectors, markup, this.getParentStyle(), args || {});
+    return new Nehan.Style(this.selectors, markup, this.style, args || {});
   };
 
   RenderingContext.prototype.createStyle = function(markup, parent, args){
