@@ -15,7 +15,7 @@ Nehan.TextGenerator = (function(){
   Nehan.Class.extend(TextGenerator, Nehan.LayoutGenerator);
 
   var __find_head_text = function(element){
-    return (element instanceof Box)? __find_head_text(element.elements[0]) : element;
+    return (element instanceof Nehan.Box)? __find_head_text(element.elements[0]) : element;
   };
 
   TextGenerator.prototype._yield = function(){
@@ -219,19 +219,6 @@ Nehan.TextGenerator = (function(){
 
     return this._getText(token);
   };
-
-  /*
-  TextGenerator.prototype._breakInline = function(block_gen){
-    this.setTerminate(true);
-    if(this._parent === null){
-      return;
-    }
-    if(this._parent instanceof TextGenerator){
-      this._parent._breakInline(block_gen);
-    } else {
-      this._parent.setChildLayout(block_gen);
-    }
-  };*/
 
   TextGenerator.prototype._getWhiteSpace = function(token){
     if(this.context.style.isPre()){

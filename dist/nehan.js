@@ -11417,7 +11417,7 @@ Nehan.Box = (function(){
 
   var __filter_text = function(elements){
     return elements.reduce(function(ret, element){
-      if(element instanceof Box){
+      if(element instanceof Nehan.Box){
 	return ret.concat(__filter_text(element.elements || []));
       }
       return element? ret.concat(element) : ret;
@@ -14154,7 +14154,7 @@ Nehan.Style = (function(){
 
     var filter_text = function(elements){
       return elements.reduce(function(ret, element){
-	if(element instanceof Box){
+	if(element instanceof Nehan.Box){
 	  // 2015/10/8 update
 	  // skip recursive child inline, only select text element of root line.
 	  return element.isTextBlock()? ret.concat(filter_text(element.elements || [])) : ret;
@@ -15431,7 +15431,7 @@ Nehan.TextGenerator = (function(){
   Nehan.Class.extend(TextGenerator, Nehan.LayoutGenerator);
 
   var __find_head_text = function(element){
-    return (element instanceof Box)? __find_head_text(element.elements[0]) : element;
+    return (element instanceof Nehan.Box)? __find_head_text(element.elements[0]) : element;
   };
 
   TextGenerator.prototype._yield = function(){
@@ -15635,19 +15635,6 @@ Nehan.TextGenerator = (function(){
 
     return this._getText(token);
   };
-
-  /*
-  TextGenerator.prototype._breakInline = function(block_gen){
-    this.setTerminate(true);
-    if(this._parent === null){
-      return;
-    }
-    if(this._parent instanceof TextGenerator){
-      this._parent._breakInline(block_gen);
-    } else {
-      this._parent.setChildLayout(block_gen);
-    }
-  };*/
 
   TextGenerator.prototype._getWhiteSpace = function(token){
     if(this.context.style.isPre()){
@@ -17497,6 +17484,8 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.setOwnerGenerator = function(generator){
     this.generator = generator;
+    var markup = this.style? this.style.markup : null;
+    console.log("%s created, context = %o", this.getGeneratorName(), this);
   };
 
   RenderingContext.prototype.hasChildLayout = function(){
@@ -17549,7 +17538,7 @@ Nehan.RenderingContext = (function(){
     this.cachedElements.push(element);
   };
 
-  RenderingContext.prototype.pushCache = function(){
+  RenderingContext.prototype.popCache = function(){
     return this.cachedElements.pop();
   };
 
@@ -17573,6 +17562,20 @@ Nehan.RenderingContext = (function(){
     return this.yieldCount === 0;
   };
 
+  RenderingContext.prototype.getGeneratorName = function(){
+    var markup_name = this.getMarkupName();
+    if(this.generator instanceof Nehan.DocumentGenerator){
+      return "(root)";
+    }
+    if(this.generator instanceof Nehan.TextGenerator){
+      return markup_name + "(text)";
+    }
+    if(this.generator instanceof Nehan.InlineGenerator){
+      return markup_name + "(inline)";
+    }
+    return markup_name;
+  };
+
   RenderingContext.prototype.getAnchorPageNo = function(anchor_name){
     return this.documentContext.getAnchorPageNo(anchor_name);
   };
@@ -17588,7 +17591,6 @@ Nehan.RenderingContext = (function(){
       style:child_style,
       stream:(opt.stream || this.createStream(child_style))
     });
-    console.log("%s::createChildContext -> %s", this.getMarkupName(), this.child.getMarkupName());
     return this.child;
   };
 

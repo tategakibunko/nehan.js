@@ -162,6 +162,8 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.setOwnerGenerator = function(generator){
     this.generator = generator;
+    var markup = this.style? this.style.markup : null;
+    console.log("%s created, context = %o", this.getGeneratorName(), this);
   };
 
   RenderingContext.prototype.hasChildLayout = function(){
@@ -214,7 +216,7 @@ Nehan.RenderingContext = (function(){
     this.cachedElements.push(element);
   };
 
-  RenderingContext.prototype.pushCache = function(){
+  RenderingContext.prototype.popCache = function(){
     return this.cachedElements.pop();
   };
 
@@ -238,6 +240,20 @@ Nehan.RenderingContext = (function(){
     return this.yieldCount === 0;
   };
 
+  RenderingContext.prototype.getGeneratorName = function(){
+    var markup_name = this.getMarkupName();
+    if(this.generator instanceof Nehan.DocumentGenerator){
+      return "(root)";
+    }
+    if(this.generator instanceof Nehan.TextGenerator){
+      return markup_name + "(text)";
+    }
+    if(this.generator instanceof Nehan.InlineGenerator){
+      return markup_name + "(inline)";
+    }
+    return markup_name;
+  };
+
   RenderingContext.prototype.getAnchorPageNo = function(anchor_name){
     return this.documentContext.getAnchorPageNo(anchor_name);
   };
@@ -253,7 +269,6 @@ Nehan.RenderingContext = (function(){
       style:child_style,
       stream:(opt.stream || this.createStream(child_style))
     });
-    console.log("%s::createChildContext -> %s", this.getMarkupName(), this.child.getMarkupName());
     return this.child;
   };
 

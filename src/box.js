@@ -17,7 +17,7 @@ Nehan.Box = (function(){
 
   var __filter_text = function(elements){
     return elements.reduce(function(ret, element){
-      if(element instanceof Box){
+      if(element instanceof Nehan.Box){
 	return ret.concat(__filter_text(element.elements || []));
       }
       return element? ret.concat(element) : ret;

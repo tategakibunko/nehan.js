@@ -1613,7 +1613,7 @@ Nehan.Style = (function(){
 
     var filter_text = function(elements){
       return elements.reduce(function(ret, element){
-	if(element instanceof Box){
+	if(element instanceof Nehan.Box){
 	  // 2015/10/8 update
 	  // skip recursive child inline, only select text element of root line.
 	  return element.isTextBlock()? ret.concat(filter_text(element.elements || [])) : ret;
