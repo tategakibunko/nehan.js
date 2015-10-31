@@ -15277,8 +15277,8 @@ Nehan.InlineGenerator = (function(){
     //console.log("%o create output(%s): conetxt max measure = %d, context:%o", this, line.toString(), context.inline.maxMeasure, context);
 
     // set position in parent stream.
-    if(this.context.parent && this.context.parent.context.stream){
-      line.pos = Math.max(0, this.context.parent.context.stream.getPos() - 1);
+    if(this.context.parent && this.context.parent.stream){
+      line.pos = Math.max(0, this.context.parent.stream.getPos() - 1);
     }
 
     if(this.context.style.isRootLine()){
@@ -15356,6 +15356,7 @@ Nehan.InlineGenerator = (function(){
 
     // if inline -> block(or floated layout), force terminate inline
     if(child_style.isBlock() || child_style.isFloated()){
+      console.log("[%s] inline -> block:%o", this.context.getMarkupName(), child_style);
       var child_gen = this.context.createChildBlockGenerator(child_style, child_stream);
       if(child_style.isFloated()){
 	child_gen = this.context.createFloatGenerator(child_gen);
@@ -17648,6 +17649,13 @@ Nehan.RenderingContext = (function(){
 
   // inline is recursively broken by 'block_gen'.
   RenderingContext.prototype.breakInline = function(block_gen){
+    console.log("[%s] break inline:%o", this.getMarkupName(), this);
+    if(this.childGenerator && this.childGenerator.context.style.isInline()){
+      this.childGenerator.context.setTerminate(true);
+      this.childGenerator.context.breakInline(true);
+      this.childGenerator = block_gen;
+    }
+    /*
     this.setTerminate(true);
     if(this.parent === null){
       return;
@@ -17657,6 +17665,7 @@ Nehan.RenderingContext = (function(){
     } else {
       this.parent.setChildGenerator(block_gen);
     }
+     */
   };
 
   RenderingContext.prototype.createFloatGenerator = function(first_float_style){
@@ -17694,7 +17703,8 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createChildBlockGenerator = function(child_style, child_stream){
-    console.log("createChildBlockGenerator(%s):%s", child_style.getMarkupName(), child_style.markup.getContent());
+    //console.log("createChildBlockGenerator(%s):%s", child_style.getMarkupName(), child_style.markup.getContent());
+
     // if child style with 'pasted' attribute, yield block with direct content by LazyGenerator.
     // notice that this is nehan.js original attribute,
     // is required to show some html(like form, input etc) that can't be handled by nehan.js.
@@ -17813,6 +17823,7 @@ Nehan.RenderingContext = (function(){
     if(style.isPasted()){
       return new Nehan.LazyGenerator(
 	this.create({
+	  parent:this,
 	  lazyOutput:style.createLine({
 	    content:style.getContent()
 	  })
@@ -17824,12 +17835,14 @@ Nehan.RenderingContext = (function(){
       // if inline img, no content text is included in img tag, so we yield it by lazy generator.
       return new Nehan.LazyGenerator(
 	this.create({
+	  parent:this,
 	  lazyOutput:style.createImage()
 	})
       );
     }
 
     var child_context = this.create({
+      parent:this,
       markup:style.markup,
       style:style,
       stream:(stream || this.createStream(style.markup)),

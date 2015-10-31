@@ -316,6 +316,13 @@ Nehan.RenderingContext = (function(){
 
   // inline is recursively broken by 'block_gen'.
   RenderingContext.prototype.breakInline = function(block_gen){
+    console.log("[%s] break inline:%o", this.getMarkupName(), this);
+    if(this.childGenerator && this.childGenerator.context.style.isInline()){
+      this.childGenerator.context.setTerminate(true);
+      this.childGenerator.context.breakInline(true);
+      this.childGenerator = block_gen;
+    }
+    /*
     this.setTerminate(true);
     if(this.parent === null){
       return;
@@ -325,6 +332,7 @@ Nehan.RenderingContext = (function(){
     } else {
       this.parent.setChildGenerator(block_gen);
     }
+     */
   };
 
   RenderingContext.prototype.createFloatGenerator = function(first_float_style){
@@ -362,7 +370,8 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createChildBlockGenerator = function(child_style, child_stream){
-    console.log("createChildBlockGenerator(%s):%s", child_style.getMarkupName(), child_style.markup.getContent());
+    //console.log("createChildBlockGenerator(%s):%s", child_style.getMarkupName(), child_style.markup.getContent());
+
     // if child style with 'pasted' attribute, yield block with direct content by LazyGenerator.
     // notice that this is nehan.js original attribute,
     // is required to show some html(like form, input etc) that can't be handled by nehan.js.
@@ -481,6 +490,7 @@ Nehan.RenderingContext = (function(){
     if(style.isPasted()){
       return new Nehan.LazyGenerator(
 	this.create({
+	  parent:this,
 	  lazyOutput:style.createLine({
 	    content:style.getContent()
 	  })
@@ -492,12 +502,14 @@ Nehan.RenderingContext = (function(){
       // if inline img, no content text is included in img tag, so we yield it by lazy generator.
       return new Nehan.LazyGenerator(
 	this.create({
+	  parent:this,
 	  lazyOutput:style.createImage()
 	})
       );
     }
 
     var child_context = this.create({
+      parent:this,
       markup:style.markup,
       style:style,
       stream:(stream || this.createStream(style.markup)),

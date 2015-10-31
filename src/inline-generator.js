@@ -101,8 +101,8 @@ Nehan.InlineGenerator = (function(){
     //console.log("%o create output(%s): conetxt max measure = %d, context:%o", this, line.toString(), context.inline.maxMeasure, context);
 
     // set position in parent stream.
-    if(this.context.parent && this.context.parent.context.stream){
-      line.pos = Math.max(0, this.context.parent.context.stream.getPos() - 1);
+    if(this.context.parent && this.context.parent.stream){
+      line.pos = Math.max(0, this.context.parent.stream.getPos() - 1);
     }
 
     if(this.context.style.isRootLine()){
@@ -180,6 +180,7 @@ Nehan.InlineGenerator = (function(){
 
     // if inline -> block(or floated layout), force terminate inline
     if(child_style.isBlock() || child_style.isFloated()){
+      console.log("[%s] inline -> block:%o", this.context.getMarkupName(), child_style);
       var child_gen = this.context.createChildBlockGenerator(child_style, child_stream);
       if(child_style.isFloated()){
 	child_gen = this.context.createFloatGenerator(child_gen);
