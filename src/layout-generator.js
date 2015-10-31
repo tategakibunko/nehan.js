@@ -8,6 +8,7 @@ Nehan.LayoutGenerator = (function(){
    */
   function LayoutGenerator(context){
     this.context = context;
+    this.context.setOwnerGenerator(this);
   }
 
   /**

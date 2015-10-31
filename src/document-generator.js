@@ -6,15 +6,26 @@ Nehan.DocumentGenerator = (function(){
      @constructor
      @param text {String} - html source text
   */
-  function DocumentGenerator(context){
+  function DocumentGenerator(text, context){
     Nehan.LayoutGenerator.call(this, context.extend({
-      childGenerator:this._createHtmlGenerator(context)
+      stream:this._createDocumentStream(Nehan.Html.normalize(text))
     }));
+    this.generator = this._createHtmlGenerator(this.context);
   }
   Nehan.Class.extend(DocumentGenerator, Nehan.LayoutGenerator);
 
   DocumentGenerator.prototype._yield = function(){
-    return this.context.yieldChildLayout();
+    return this.generator.yield();
+  };
+
+  DocumentGenerator.prototype._createDocumentStream = function(text){
+    var stream = new Nehan.TokenStream(text, {
+      filter:Nehan.Closure.isTagName(["!doctype", "html"])
+    });
+    if(stream.isEmptyTokens()){
+      stream.tokens = [new Nehan.Tag("html", text)];
+    }
+    return stream;
   };
 
   DocumentGenerator.prototype._createHtmlGenerator = function(context){
@@ -32,9 +43,8 @@ Nehan.DocumentGenerator = (function(){
       }
     }
     html_tag = html_tag || new Nehan.Tag("html", context.stream.getSrc());
-    return new Nehan.HtmlGenerator(context.createChildContext({
-      markup:html_tag
-    }));
+    var html_style = context.createChildStyle(html_tag);
+    return new Nehan.HtmlGenerator(context.createChildContext(html_style));
   };
 
   return DocumentGenerator;

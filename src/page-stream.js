@@ -6,10 +6,10 @@ Nehan.PageStream = (function(){
      @consturctor
      @param text {String} - html source text
   */
-  function PageStream(context){
+  function PageStream(text, context){
     this.trees = [];
     this.pages = [];
-    this.generator = new Nehan.DocumentGenerator(context);
+    this.generator = new Nehan.DocumentGenerator(text, context);
     this.evaluator = new Nehan.PageEvaluator(context);
   }
 

@@ -142,7 +142,8 @@ Nehan.InlineGenerator = (function(){
 
     // text block
     if(token instanceof Nehan.Text || token instanceof Nehan.Tcy || token instanceof Nehan.Word){
-      this.context.setChildGenerator(this.context.createTextGenerator(token));
+      //this.context.setChildGenerator(this.context.createTextGenerator(token));
+      this.context.createTextGenerator(token);
       return this.context.yieldChildLayout();
     }
 
@@ -200,8 +201,9 @@ Nehan.InlineGenerator = (function(){
       return child_style.createImage();
 
     default:
-      var child_generator = this.context.createChildInlineGenerator(child_style, child_stream);
-      this.context.setChildGenerator(child_generator);
+      //var child_generator = this.context.createChildInlineGenerator(child_style, child_stream);
+      //this.context.setChildGenerator(child_generator);
+      this.context.createChildInlineGenerator(child_style, child_stream);
       return this.context.yieldChildLayout();
     }
   };

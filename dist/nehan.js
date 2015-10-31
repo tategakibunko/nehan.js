@@ -11953,10 +11953,10 @@ Nehan.PageStream = (function(){
      @consturctor
      @param text {String} - html source text
   */
-  function PageStream(context){
+  function PageStream(text, context){
     this.trees = [];
     this.pages = [];
-    this.generator = new Nehan.DocumentGenerator(context);
+    this.generator = new Nehan.DocumentGenerator(text, context);
     this.evaluator = new Nehan.PageEvaluator(context);
   }
 
@@ -14885,6 +14885,7 @@ Nehan.LayoutGenerator = (function(){
    */
   function LayoutGenerator(context){
     this.context = context;
+    this.context.setOwnerGenerator(this);
   }
 
   /**
@@ -15074,8 +15075,9 @@ Nehan.BlockGenerator = (function(){
 	return this._getNext();
       }
       var text_gen = this.context.createTextGenerator(token);
-      var inline_gen = this.context.createChildInlineGenerator(this.context.style, this.context.stream, text_gen); // share same style
-      this.context.setChildGenerator(inline_gen);
+      //var inline_gen = this.context.createChildInlineGenerator(this.context.style, this.context.stream, text_gen); // share same style
+      //this.context.setChildGenerator(inline_gen);
+      this.context.createChildInlineGenerator(this.context.style, this.context.stream, text_gen); // share same style
       return this.context.yieldChildLayout();
     }
 
@@ -15101,7 +15103,8 @@ Nehan.BlockGenerator = (function(){
     }
 
     if(child_style.isFloated()){
-      this.context.setChildGenerator(this.context.createFloatGenerator(child_style));
+      //this.context.setChildGenerator(this.context.createFloatGenerator(child_style));
+      this.context.createFloatGenerator(child_style);
       return this.context.yieldChildLayout();
     }
 
@@ -15114,7 +15117,8 @@ Nehan.BlockGenerator = (function(){
 
     // other case, start child block generator
     console.log("[%s]:other case -> child block gen", this.context.getMarkupName());
-    this.context.setChildGenerator(this.context.createChildBlockGenerator(child_style));
+    //this.context.setChildGenerator(this.context.createChildBlockGenerator(child_style));
+    this.context.createChildBlockGenerator(child_style);
     return this.context.yieldChildLayout();
   };
 
@@ -15318,7 +15322,8 @@ Nehan.InlineGenerator = (function(){
 
     // text block
     if(token instanceof Nehan.Text || token instanceof Nehan.Tcy || token instanceof Nehan.Word){
-      this.context.setChildGenerator(this.context.createTextGenerator(token));
+      //this.context.setChildGenerator(this.context.createTextGenerator(token));
+      this.context.createTextGenerator(token);
       return this.context.yieldChildLayout();
     }
 
@@ -15376,8 +15381,9 @@ Nehan.InlineGenerator = (function(){
       return child_style.createImage();
 
     default:
-      var child_generator = this.context.createChildInlineGenerator(child_style, child_stream);
-      this.context.setChildGenerator(child_generator);
+      //var child_generator = this.context.createChildInlineGenerator(child_style, child_stream);
+      //this.context.setChildGenerator(child_generator);
+      this.context.createChildInlineGenerator(child_style, child_stream);
       return this.context.yieldChildLayout();
     }
   };
@@ -16536,14 +16542,13 @@ Nehan.HtmlGenerator = (function(){
      @param text {String}
   */
   function HtmlGenerator(context){
-    Nehan.LayoutGenerator.call(this, context.extend({
-      childGenerator:this._createBodyGenerator(context)
-    }));
+    Nehan.LayoutGenerator.call(this, context);
+    this.generator = this._createBodyGenerator(context);
   }
   Nehan.Class.extend(HtmlGenerator, Nehan.LayoutGenerator);
 
   HtmlGenerator.prototype._yield = function(){
-    return this.context.yieldChildLayout();
+    return this.generator.yield();
   };
 
   HtmlGenerator.prototype._createBodyGenerator = function(context){
@@ -16562,9 +16567,8 @@ Nehan.HtmlGenerator = (function(){
       }
     }
     body_tag = body_tag || new Nehan.Tag("body", context.stream.getSrc());
-    return new Nehan.BodyGenerator(context.createChildContext({
-      markup:body_tag
-    }));
+    var body_style = context.createChildStyle(body_tag);
+    return new Nehan.BodyGenerator(context.createChildContext(body_style));
   };
 
   HtmlGenerator.prototype._parseDocumentHeader = function(context, stream){
@@ -16604,15 +16608,26 @@ Nehan.DocumentGenerator = (function(){
      @constructor
      @param text {String} - html source text
   */
-  function DocumentGenerator(context){
+  function DocumentGenerator(text, context){
     Nehan.LayoutGenerator.call(this, context.extend({
-      childGenerator:this._createHtmlGenerator(context)
+      stream:this._createDocumentStream(Nehan.Html.normalize(text))
     }));
+    this.generator = this._createHtmlGenerator(this.context);
   }
   Nehan.Class.extend(DocumentGenerator, Nehan.LayoutGenerator);
 
   DocumentGenerator.prototype._yield = function(){
-    return this.context.yieldChildLayout();
+    return this.generator.yield();
+  };
+
+  DocumentGenerator.prototype._createDocumentStream = function(text){
+    var stream = new Nehan.TokenStream(text, {
+      filter:Nehan.Closure.isTagName(["!doctype", "html"])
+    });
+    if(stream.isEmptyTokens()){
+      stream.tokens = [new Nehan.Tag("html", text)];
+    }
+    return stream;
   };
 
   DocumentGenerator.prototype._createHtmlGenerator = function(context){
@@ -16630,9 +16645,8 @@ Nehan.DocumentGenerator = (function(){
       }
     }
     html_tag = html_tag || new Nehan.Tag("html", context.stream.getSrc());
-    return new Nehan.HtmlGenerator(context.createChildContext({
-      markup:html_tag
-    }));
+    var html_style = context.createChildStyle(html_tag);
+    return new Nehan.HtmlGenerator(context.createChildContext(html_style));
   };
 
   return DocumentGenerator;
@@ -17336,14 +17350,14 @@ Nehan.RenderingContext = (function(){
     opt = opt || {};
     this.yieldCount = 0;
     this.terminate = false;
+    this.generator = null; // set by constructor of LayoutGenerator
     //this.breakBefore = false; // TODO
     this.cachedElements = [];
     this.parent = opt.parent || null;
-    this.markup = opt.markup || null;
+    this.child = opt.child || null;
     this.style = opt.style || null;
     this.stream = opt.stream || null;
     this.lazyOutput = opt.lazyOutput || null;
-    this.childGenerator = opt.childGenerator || null;
     this.floatedGenerators = opt.floatedGenerators || [];
     this.parallelGenerators = opt.parallelGenerators || [];
     this.layoutContext = opt.layoutContext || null;
@@ -17354,10 +17368,8 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.create = function(opt){
     return new RenderingContext({
       parent:opt.parent || null,
-      markup:opt.markup || null,
       style:opt.style || null,
       stream:opt.stream || null,
-      childGenerator:opt.childGenerator || null,
       floatedGenerators:opt.floatedGenerators || [],
       parallelGenerators:opt.parallelGenerators || [],
       layoutContext:this.layoutContext || null,
@@ -17369,10 +17381,8 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.extend = function(opt){
     return new RenderingContext({
       parent:opt.parent || this.parent,
-      markup:opt.markup || this.markup,
       style:opt.style || this.style,
       stream:opt.stream || this.stream,
-      childGenerator:opt.childGenerator || this.childGenerator,
       floatedGenerators:opt.floatedGenerators || this.floatedGenerators,
       parallelGenerators:opt.parallelGenerators || this.parallelGenerators,
       layoutContext:this.layoutContext || this.layoutContext,
@@ -17381,12 +17391,16 @@ Nehan.RenderingContext = (function(){
     });
   };
 
+  RenderingContext.prototype.getChildContext = function(){
+    return this.child || null;
+  };
+
   RenderingContext.prototype.getContent = function(){
     return this.stream? this.stream.getSrc() : "";
   };
 
   RenderingContext.prototype.yieldChildLayout = function(){
-    return this.childGenerator.yield();
+    return this.child.generator.yield();
   };
 
   RenderingContext.prototype.setStyle = function(key, value){
@@ -17400,7 +17414,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.addAnchor = function(){
-    var anchor_name = this.markup.getAttr("name");
+    var anchor_name = this.style.getMarkupAttr("name");
     if(anchor_name){
       this.documentContext.addAnchor(anchor_name);
     }
@@ -17457,7 +17471,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.getMarkupName = function(){
-    return this.markup? this.markup.getName() : "";
+    return this.style? this.style.getMarkupName() : "";
   };
 
   RenderingContext.prototype.initLayoutContext = function(){
@@ -17493,12 +17507,13 @@ Nehan.RenderingContext = (function(){
     this.terminate = status;
   };
 
-  RenderingContext.prototype.setChildGenerator = function(generator){
-    this.childGenerator = generator;
+  RenderingContext.prototype.setOwnerGenerator = function(generator){
+    console.log("%o::setOwnerGenerator(%o)", this, generator);
+    this.generator = generator;
   };
 
   RenderingContext.prototype.hasChildLayout = function(){
-    if(this.childGenerator && this.childGenerator.hasNext()){
+    if(this.child && this.child.generator && this.child.generator.hasNext()){
       return true;
     }
     return false;
@@ -17579,16 +17594,15 @@ Nehan.RenderingContext = (function(){
     return this.documentContext.createBodyOutlineElement(callbacks);
   };
 
-  RenderingContext.prototype.createChildContext = function(opt){
-    var markup = opt.markup || null;
-    var style = opt.style || this.createChildStyle(markup);
-    var stream = opt.stream || this.createStream(markup, style);
-    return this.create({
+  RenderingContext.prototype.createChildContext = function(child_style, opt){
+    opt = opt || {};
+    this.child = this.create({
       parent:this,
-      markup:markup,
-      style:style,
-      stream:stream
+      style:child_style,
+      stream:(opt.stream || this.createStream(child_style))
     });
+    console.log("%o::createChildContext -> %o", this, this.child);
+    return this.child;
   };
 
   RenderingContext.prototype.getParentStyle = function(){
@@ -17599,14 +17613,13 @@ Nehan.RenderingContext = (function(){
     return new Nehan.Style(this.selectors, markup, this.style, args || {});
   };
 
-  RenderingContext.prototype.createStyle = function(markup, parent, args){
-    return new Nehan.Style(this.selectors, markup, parent, args || {});
+  RenderingContext.prototype.createStyle = function(markup, parent_style, args){
+    return new Nehan.Style(this.selectors, markup, parent_style, args || {});
   };
 
-  RenderingContext.prototype.createStream = function(markup, style){
-    var markup_name = markup.getName();
-    var markup_content = markup.getContent();
-    style = style || this.createChildStyle(markup);
+  RenderingContext.prototype.createStream = function(style){
+    var markup_name = style.getMarkupName();
+    var markup_content = style.getContent();
     if(style.getTextCombine() === "horizontal" || markup_name === "tcy"){
       return new Nehan.TokenStream(markup_content, {
 	flow:style.flow,
@@ -17650,12 +17663,14 @@ Nehan.RenderingContext = (function(){
   // inline is recursively broken by 'block_gen'.
   RenderingContext.prototype.breakInline = function(block_gen){
     console.log("[%s] break inline:%o", this.getMarkupName(), this);
+    /* old version
     if(this.childGenerator && this.childGenerator.context.style.isInline()){
       this.childGenerator.context.setTerminate(true);
       this.childGenerator.context.breakInline(true);
       this.childGenerator = block_gen;
-    }
-    /*
+    }*/
+
+    /* new drafp
     this.setTerminate(true);
     if(this.parent === null){
       return;
@@ -17718,11 +17733,8 @@ Nehan.RenderingContext = (function(){
       );
     }
 
-    var child_markup = child_style.markup;
-    var child_context = this.createChildContext({
-      markup:child_markup,
-      style:child_style,
-      stream:child_stream || this.createStream(child_markup)
+    var child_context = this.createChildContext(child_style, {
+      stream:child_stream || this.createStream(child_style)
     });
 
     if(child_style.hasFlipFlow()){
@@ -17745,7 +17757,7 @@ Nehan.RenderingContext = (function(){
     }
 
     // switch generator by markup name
-    switch(child_markup.getName()){
+    switch(child_style.getMarkupName()){
     case "img":
       return new Nehan.LazyGenerator(
 	this.create({
@@ -17793,32 +17805,6 @@ Nehan.RenderingContext = (function(){
     }
   };
 
-  RenderingContext.prototype.createTextGenerator = function(text){
-    if(text instanceof Nehan.Tcy || text instanceof Nehan.Word){
-      return new Nehan.TextGenerator(
-	this.create({
-	  markup:this.style.markup,
-	  style:this.style,
-	  stream:new Nehan.TokenStream(text.getData(), {
-	    flow:this.style.flow,
-	    tokens:[text]
-	  })
-	})
-      );
-    }
-    var content = text.getContent();
-    return new Nehan.TextGenerator(
-      this.create({
-	markup:this.style.markup,
-	style:this.style,
-	stream:new Nehan.TokenStream(content, {
-	  flow:this.style.flow,
-	  lexer:new Nehan.TextLexer(content)
-	})
-      })
-    );
-  };
-
   RenderingContext.prototype.createChildInlineGenerator = function(style, stream, text_gen){
     if(style.isPasted()){
       return new Nehan.LazyGenerator(
@@ -17841,12 +17827,8 @@ Nehan.RenderingContext = (function(){
       );
     }
 
-    var child_context = this.create({
-      parent:this,
-      markup:style.markup,
-      style:style,
-      stream:(stream || this.createStream(style.markup)),
-      childGenerator:(text_gen || null)
+    var child_context = this.createChildContext(style, {
+      stream:(stream || this.createStream(style))
     });
 
     if(style.isInlineBlock()){
@@ -17862,9 +17844,31 @@ Nehan.RenderingContext = (function(){
     }
   };
 
+  RenderingContext.prototype.createTextStream = function(text){
+    if(text instanceof Nehan.Tcy || text instanceof Nehan.Word){
+      return new Nehan.TokenStream(text.getData(), {
+	flow:this.style.flow,
+	tokens:[text]
+      });
+    }
+    var content = text.getContent();
+    return new Nehan.TokenStream(content, {
+      flow:this.style.flow,
+      lexer:new Nehan.TextLexer(content)
+    });
+  };
+
+  RenderingContext.prototype.createTextGenerator = function(text){
+    return new Nehan.TextGenerator(
+      this.createChildContext(this.style, {
+	stream:this.createTextStream(text)
+      })
+    );
+  };
+
   RenderingContext.prototype.getHeaderRank = function(){
-    if(this.markup.getName().match(/h([1-6])/)){
-      return parseInt(RegExp.$1, 10);
+    if(this.style){
+      return this.style.getHeaderRank();
     }
     return 0;
   };
@@ -17883,7 +17887,7 @@ Nehan.RenderingContext = (function(){
    @memberof Nehan.RenderingContext
    */
   RenderingContext.prototype.startOutlineContext = function(){
-    this.outlineContext = new Nehan.OutlineContext(this.markup.getName());
+    this.outlineContext = new Nehan.OutlineContext(this.getMarkupName());
   };
 
   /**
@@ -17904,7 +17908,7 @@ Nehan.RenderingContext = (function(){
    */
   RenderingContext.prototype.startSectionContext = function(){
     this.getOutlineContext().startSection({
-      type:this.markup.getName(),
+      type:this.getMarkupName(),
       pageNo:this.documentContext.getPageNo()
     });
   };
@@ -17915,7 +17919,7 @@ Nehan.RenderingContext = (function(){
    @method startSectionContext
    */
   RenderingContext.prototype.endSectionContext = function(){
-    this.getOutlineContext().endSection(this.markup.getName());
+    this.getOutlineContext().endSection(this.getMarkupName());
   };
 
   /**
@@ -17939,26 +17943,13 @@ Nehan.RenderingContext = (function(){
 })();
 
 Nehan.Document = (function(){
-  var __create_stream = function(text){
-    var stream = new Nehan.TokenStream(text, {
-      filter:Nehan.Closure.isTagName(["!doctype", "html"])
-    });
-    if(stream.isEmptyTokens()){
-      stream.tokens = [new Nehan.Tag("html", text)];
-    }
-    return stream;
-  };
-
   function Document(text){
-    this.context = new Nehan.RenderingContext({
-      markup:null,
-      style:null,
-      stream:__create_stream(Nehan.Html.normalize(text))
-    });
+    this.text = text;
+    this.context = new Nehan.RenderingContext();
   }
 
   Document.prototype.render = function(opt){
-    this.pageStream = new Nehan.PageStream(this.context);
+    this.pageStream = new Nehan.PageStream(this.text, this.context);
     this.pageStream.asyncGet(opt);
     return this;
   };

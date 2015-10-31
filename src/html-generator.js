@@ -7,14 +7,13 @@ Nehan.HtmlGenerator = (function(){
      @param text {String}
   */
   function HtmlGenerator(context){
-    Nehan.LayoutGenerator.call(this, context.extend({
-      childGenerator:this._createBodyGenerator(context)
-    }));
+    Nehan.LayoutGenerator.call(this, context);
+    this.generator = this._createBodyGenerator(context);
   }
   Nehan.Class.extend(HtmlGenerator, Nehan.LayoutGenerator);
 
   HtmlGenerator.prototype._yield = function(){
-    return this.context.yieldChildLayout();
+    return this.generator.yield();
   };
 
   HtmlGenerator.prototype._createBodyGenerator = function(context){
@@ -33,9 +32,8 @@ Nehan.HtmlGenerator = (function(){
       }
     }
     body_tag = body_tag || new Nehan.Tag("body", context.stream.getSrc());
-    return new Nehan.BodyGenerator(context.createChildContext({
-      markup:body_tag
-    }));
+    var body_style = context.createChildStyle(body_tag);
+    return new Nehan.BodyGenerator(context.createChildContext(body_style));
   };
 
   HtmlGenerator.prototype._parseDocumentHeader = function(context, stream){

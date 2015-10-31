@@ -131,8 +131,9 @@ Nehan.BlockGenerator = (function(){
 	return this._getNext();
       }
       var text_gen = this.context.createTextGenerator(token);
-      var inline_gen = this.context.createChildInlineGenerator(this.context.style, this.context.stream, text_gen); // share same style
-      this.context.setChildGenerator(inline_gen);
+      //var inline_gen = this.context.createChildInlineGenerator(this.context.style, this.context.stream, text_gen); // share same style
+      //this.context.setChildGenerator(inline_gen);
+      this.context.createChildInlineGenerator(this.context.style, this.context.stream, text_gen); // share same style
       return this.context.yieldChildLayout();
     }
 
@@ -158,7 +159,8 @@ Nehan.BlockGenerator = (function(){
     }
 
     if(child_style.isFloated()){
-      this.context.setChildGenerator(this.context.createFloatGenerator(child_style));
+      //this.context.setChildGenerator(this.context.createFloatGenerator(child_style));
+      this.context.createFloatGenerator(child_style);
       return this.context.yieldChildLayout();
     }
 
@@ -171,7 +173,8 @@ Nehan.BlockGenerator = (function(){
 
     // other case, start child block generator
     console.log("[%s]:other case -> child block gen", this.context.getMarkupName());
-    this.context.setChildGenerator(this.context.createChildBlockGenerator(child_style));
+    //this.context.setChildGenerator(this.context.createChildBlockGenerator(child_style));
+    this.context.createChildBlockGenerator(child_style);
     return this.context.yieldChildLayout();
   };
 

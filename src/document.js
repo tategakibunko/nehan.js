@@ -1,24 +1,11 @@
 Nehan.Document = (function(){
-  var __create_stream = function(text){
-    var stream = new Nehan.TokenStream(text, {
-      filter:Nehan.Closure.isTagName(["!doctype", "html"])
-    });
-    if(stream.isEmptyTokens()){
-      stream.tokens = [new Nehan.Tag("html", text)];
-    }
-    return stream;
-  };
-
   function Document(text){
-    this.context = new Nehan.RenderingContext({
-      markup:null,
-      style:null,
-      stream:__create_stream(Nehan.Html.normalize(text))
-    });
+    this.text = text;
+    this.context = new Nehan.RenderingContext();
   }
 
   Document.prototype.render = function(opt){
-    this.pageStream = new Nehan.PageStream(this.context);
+    this.pageStream = new Nehan.PageStream(this.text, this.context);
     this.pageStream.asyncGet(opt);
     return this;
   };
