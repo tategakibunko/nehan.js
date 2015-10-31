@@ -161,7 +161,6 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.setOwnerGenerator = function(generator){
-    console.log("%o::setOwnerGenerator(%o)", this, generator);
     this.generator = generator;
   };
 
@@ -254,7 +253,7 @@ Nehan.RenderingContext = (function(){
       style:child_style,
       stream:(opt.stream || this.createStream(child_style))
     });
-    console.log("%o::createChildContext -> %o", this, this.child);
+    console.log("%s::createChildContext -> %s", this.getMarkupName(), this.child.getMarkupName());
     return this.child;
   };
 
@@ -458,7 +457,7 @@ Nehan.RenderingContext = (function(){
     }
   };
 
-  RenderingContext.prototype.createChildInlineGenerator = function(style, stream, text_gen){
+  RenderingContext.prototype.createChildInlineGenerator = function(style, stream){
     if(style.isPasted()){
       return new Nehan.LazyGenerator(
 	this.create({
@@ -511,7 +510,7 @@ Nehan.RenderingContext = (function(){
     });
   };
 
-  RenderingContext.prototype.createTextGenerator = function(text){
+  RenderingContext.prototype.createChildTextGenerator = function(text){
     return new Nehan.TextGenerator(
       this.createChildContext(this.style, {
 	stream:this.createTextStream(text)

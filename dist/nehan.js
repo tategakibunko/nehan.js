@@ -15069,15 +15069,13 @@ Nehan.BlockGenerator = (function(){
 
     //console.log("block token:%o", token);
 
-    // text block
+    // if texts just under block level, it's delegated to same style inline-generator.
     if(token instanceof Nehan.Text){
       if(token.isWhiteSpaceOnly()){
 	return this._getNext();
       }
-      var text_gen = this.context.createTextGenerator(token);
-      //var inline_gen = this.context.createChildInlineGenerator(this.context.style, this.context.stream, text_gen); // share same style
-      //this.context.setChildGenerator(inline_gen);
-      this.context.createChildInlineGenerator(this.context.style, this.context.stream, text_gen); // share same style
+      var igen = this.context.createChildInlineGenerator(this.context.style, this.context.stream); // share same style and stream.
+      var tgen = igen.context.createChildTextGenerator(token); // text-generator is child of igen.
       return this.context.yieldChildLayout();
     }
 
@@ -15103,21 +15101,17 @@ Nehan.BlockGenerator = (function(){
     }
 
     if(child_style.isFloated()){
-      //this.context.setChildGenerator(this.context.createFloatGenerator(child_style));
       this.context.createFloatGenerator(child_style);
       return this.context.yieldChildLayout();
     }
 
     // if child inline or child inline-block,
     if(child_style.isInline() || child_style.isInlineBlock()){
-      var first_inline_gen = this.context.createChildInlineGenerator(child_style, null, null);
-      this.context.setChildGenerator(this.context.createChildInlineGenerator(this.context.style, this.context.stream, first_inline_gen));
+      this.context.createChildInlineGenerator(child_style);
       return this.context.yieldChildLayout();
     }
 
     // other case, start child block generator
-    console.log("[%s]:other case -> child block gen", this.context.getMarkupName());
-    //this.context.setChildGenerator(this.context.createChildBlockGenerator(child_style));
     this.context.createChildBlockGenerator(child_style);
     return this.context.yieldChildLayout();
   };
@@ -15322,8 +15316,7 @@ Nehan.InlineGenerator = (function(){
 
     // text block
     if(token instanceof Nehan.Text || token instanceof Nehan.Tcy || token instanceof Nehan.Word){
-      //this.context.setChildGenerator(this.context.createTextGenerator(token));
-      this.context.createTextGenerator(token);
+      this.context.createChildTextGenerator(token);
       return this.context.yieldChildLayout();
     }
 
@@ -15357,12 +15350,9 @@ Nehan.InlineGenerator = (function(){
       return this._getNext(); // just skip
     }
 
-    var child_stream = this.context.createStream(token, child_style);
-
     // if inline -> block(or floated layout), force terminate inline
     if(child_style.isBlock() || child_style.isFloated()){
-      console.log("[%s] inline -> block:%o", this.context.getMarkupName(), child_style);
-      var child_gen = this.context.createChildBlockGenerator(child_style, child_stream);
+      var child_gen = this.context.createChildBlockGenerator(child_style);
       if(child_style.isFloated()){
 	child_gen = this.context.createFloatGenerator(child_gen);
       }
@@ -15381,9 +15371,7 @@ Nehan.InlineGenerator = (function(){
       return child_style.createImage();
 
     default:
-      //var child_generator = this.context.createChildInlineGenerator(child_style, child_stream);
-      //this.context.setChildGenerator(child_generator);
-      this.context.createChildInlineGenerator(child_style, child_stream);
+      this.context.createChildInlineGenerator(child_style);
       return this.context.yieldChildLayout();
     }
   };
@@ -17508,7 +17496,6 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.setOwnerGenerator = function(generator){
-    console.log("%o::setOwnerGenerator(%o)", this, generator);
     this.generator = generator;
   };
 
@@ -17601,7 +17588,7 @@ Nehan.RenderingContext = (function(){
       style:child_style,
       stream:(opt.stream || this.createStream(child_style))
     });
-    console.log("%o::createChildContext -> %o", this, this.child);
+    console.log("%s::createChildContext -> %s", this.getMarkupName(), this.child.getMarkupName());
     return this.child;
   };
 
@@ -17805,7 +17792,7 @@ Nehan.RenderingContext = (function(){
     }
   };
 
-  RenderingContext.prototype.createChildInlineGenerator = function(style, stream, text_gen){
+  RenderingContext.prototype.createChildInlineGenerator = function(style, stream){
     if(style.isPasted()){
       return new Nehan.LazyGenerator(
 	this.create({
@@ -17858,7 +17845,7 @@ Nehan.RenderingContext = (function(){
     });
   };
 
-  RenderingContext.prototype.createTextGenerator = function(text){
+  RenderingContext.prototype.createChildTextGenerator = function(text){
     return new Nehan.TextGenerator(
       this.createChildContext(this.style, {
 	stream:this.createTextStream(text)

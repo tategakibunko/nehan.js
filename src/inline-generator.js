@@ -142,8 +142,7 @@ Nehan.InlineGenerator = (function(){
 
     // text block
     if(token instanceof Nehan.Text || token instanceof Nehan.Tcy || token instanceof Nehan.Word){
-      //this.context.setChildGenerator(this.context.createTextGenerator(token));
-      this.context.createTextGenerator(token);
+      this.context.createChildTextGenerator(token);
       return this.context.yieldChildLayout();
     }
 
@@ -177,12 +176,9 @@ Nehan.InlineGenerator = (function(){
       return this._getNext(); // just skip
     }
 
-    var child_stream = this.context.createStream(token, child_style);
-
     // if inline -> block(or floated layout), force terminate inline
     if(child_style.isBlock() || child_style.isFloated()){
-      console.log("[%s] inline -> block:%o", this.context.getMarkupName(), child_style);
-      var child_gen = this.context.createChildBlockGenerator(child_style, child_stream);
+      var child_gen = this.context.createChildBlockGenerator(child_style);
       if(child_style.isFloated()){
 	child_gen = this.context.createFloatGenerator(child_gen);
       }
@@ -201,9 +197,7 @@ Nehan.InlineGenerator = (function(){
       return child_style.createImage();
 
     default:
-      //var child_generator = this.context.createChildInlineGenerator(child_style, child_stream);
-      //this.context.setChildGenerator(child_generator);
-      this.context.createChildInlineGenerator(child_style, child_stream);
+      this.context.createChildInlineGenerator(child_style);
       return this.context.yieldChildLayout();
     }
   };
