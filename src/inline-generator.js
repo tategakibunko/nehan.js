@@ -84,32 +84,7 @@ Nehan.InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createOutput = function(){
-    if(this.context.layoutContext.isInlineEmpty()){
-      return null;
-    }
-    var line = this.context.style.createLine({
-      lineNo:this.context.layoutContext.getBlockLineNo(),
-      hasLineBreak:this.context.layoutContext.hasLineBreak(), // is line break included in?
-      breakAfter:this.context.layoutContext.hasBreakAfter(), // is break after included in?
-      hyphenated:this.context.layoutContext.isHyphenated(), // is line hyphenated?
-      measure:this.context.layoutContext.getInlineCurMeasure(), // actual measure
-      elements:this.context.layoutContext.getInlineElements(), // all inline-child, not only text, but recursive child box.
-      charCount:this.context.layoutContext.getInlineCharCount(),
-      maxExtent:(this.context.layoutContext.getInlineMaxExtent() || this.context.style.getFontSize()),
-      maxFontSize:this.context.layoutContext.getInlineMaxFontSize(),
-      hangingPunctuation:this.context.layoutContext.getHangingPunctuation()
-    });
-
-    //console.log("%o create output(%s): conetxt max measure = %d, context:%o", this, line.toString(), context.inline.maxMeasure, context);
-
-    // set position in parent stream.
-    if(this.context.parent && this.context.parent.stream){
-      line.pos = Math.max(0, this.context.parent.stream.getPos() - 1);
-    }
-
-    if(this.context.style.isRootLine()){
-      this.context.layoutContext.incBlockLineNo();
-    }
+    var line = this.context.createLine();
 
     // call _onCreate callback for 'each' output
     this._onCreate(line);
@@ -184,8 +159,6 @@ Nehan.InlineGenerator = (function(){
       if(child_style.isFloated()){
 	child_gen = this.context.createFloatGenerator(child_gen);
       }
-      this.context.breakInline(child_gen);
-
       // add line-break to avoid empty-line.
       // because empty-line is returned as null to parent block generator,
       // and it causes page-break of parent block generator.

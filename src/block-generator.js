@@ -24,10 +24,10 @@ Nehan.BlockGenerator = (function(){
       var float_direction = float_group.getFloatDirection();
       if(float_group.isLast() && !float_group.hasNext() && clear.hasDirection(float_direction.getName())){
 	clear.setDone(float_direction.getName());
-	return this._createWhiteSpace();
+	return this.context.createWhiteSpace();
       }
       if(!clear.isDoneAll()){
-	return this._createWhiteSpace();
+	return this.context.createWhiteSpace();
       }
     }
 
@@ -169,42 +169,8 @@ Nehan.BlockGenerator = (function(){
     this._onAddElement(element);
   };
 
-  BlockGenerator.prototype._createWhiteSpace = function(){
-    return this.context.style.createBlock({
-      extent:this.context.getBlockMaxExtent(),
-      elements:[],
-      useBeforeEdge:false,
-      useAfterEdge:false,
-      restMeasure:0,
-      resetExtent:0
-    });
-  };
-
   BlockGenerator.prototype._createOutput = function(){
-    var extent = this.context.layoutContext.getBlockCurExtent();
-    var elements = this.context.layoutContext.getBlockElements();
-    if(extent === 0 || elements.length === 0){
-      if(!this.context.hasCache() && this.context.isFirstOutput()){
-	// size 'zero' has special meaning... so we use 1.
-	return new Nehan.Box(new Nehan.BoxSize(1,1), this.context.style, "void"); // empty void element
-      }
-      return null;
-    }
-    var after_edge_size = this.context.style.getEdgeAfter();
-    var block_args = {
-      blockId:this.blockId,
-      extent:extent,
-      elements:elements,
-      breakAfter:this.context.layoutContext.hasBreakAfter(),
-      useBeforeEdge:this.context.isFirstOutput(),
-      useAfterEdge:(!this.hasNext() && after_edge_size <= this.context.layoutContext.getBlockRestExtent()),
-      restMeasure:this.context.layoutContext.getInlineRestMeasure(),
-      restExtent:this.context.layoutContext.getBlockRestExtent()
-    };
-    if(typeof this.rootBlockId !== "undefined"){
-      block_args.rootBlockId = this.rootBlockId;
-    }
-    var block = this.context.style.createBlock(block_args);
+    var block = this.context.createBlock();
 
     // call _onCreate callback for 'each' output
     this._onCreate(block);

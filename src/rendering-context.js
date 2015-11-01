@@ -114,16 +114,15 @@ Nehan.RenderingContext = (function(){
 
     // inline with parent
     if(this.parent && this.parent.layoutContext){
-      var max_measure = this.getParentRestMeasure() - edge_measure;
       return this.layoutContext = new Nehan.LayoutContext(
 	this.layoutContext.block,
-	new Nehan.InlineContext(max_measure)
+	new Nehan.InlineContext(this.getParentRestMeasure() - edge_measure)
       );
     }
 
     return new Nehan.LayoutContext(
-      this.layoutContext.block, // inline generator inherits block context as it is.
-      new Nehan.InlineContext(this.layoutContext.getInlineRestMeasure())
+      this.layoutContext.block,
+      new Nehan.InlineContext(this.style.outerMeasure - edge_measure)
     );
   };
 
@@ -132,9 +131,8 @@ Nehan.RenderingContext = (function(){
 
     // block with parent
     if(this.parent && this.parent.layoutContext){
-      var max_extent = this.getParentRestExtent() - edge_extent;
       return this.layoutContext = new Nehan.LayoutContext(
-	new Nehan.BlockContext(max_extent, {
+	new Nehan.BlockContext(this.getParentRestExtent() - edge_extent, {
 	  lineNo:this.layoutContext.lineNo
 	}),
 	new Nehan.InlineContext(this.style.contentMeasure)
@@ -158,8 +156,8 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.isInline = function(){
     return (
       this.style.isInline() ||
-	this.generator instanceof Nehan.TextGenerator ||
-	this.generator instanceof Nehan.InlineGenerator
+      this.generator instanceof Nehan.TextGenerator ||
+      this.generator instanceof Nehan.InlineGenerator
     );
   };
 
@@ -253,6 +251,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.pushCache = function(element){
+    /*
     var cache_count = element.cacheCount || 0;
     if(cache_count > 0){
       if(cache_count >= Nehan.Config.maxRollbackCount){
@@ -268,6 +267,7 @@ Nehan.RenderingContext = (function(){
       }
     }
     element.cacheCount = cache_count + 1;
+     */
     this.cachedElements.push(element);
   };
 
@@ -380,29 +380,6 @@ Nehan.RenderingContext = (function(){
 	flow:style.flow
       });
     }
-  };
-
-  // inline is recursively broken by 'block_gen'.
-  RenderingContext.prototype.breakInline = function(block_gen){
-    console.log("[%s] break inline:%o", this.getMarkupName(), this);
-    /* old version
-    if(this.childGenerator && this.childGenerator.context.style.isInline()){
-      this.childGenerator.context.setTerminate(true);
-      this.childGenerator.context.breakInline(true);
-      this.childGenerator = block_gen;
-    }*/
-
-    /* new draft
-    this.setTerminate(true);
-    if(this.parent === null){
-      return;
-    }
-    if(this.parent && this.parent.style.isInline()){
-      this.parent.breakInline(block_gen);
-    } else {
-      this.parent.setChildGenerator(block_gen);
-    }
-     */
   };
 
   RenderingContext.prototype.createFloatGenerator = function(first_float_style){
@@ -588,6 +565,104 @@ Nehan.RenderingContext = (function(){
     );
   };
 
+  RenderingContext.prototype.createWhiteSpace = function(){
+    return this.style.createBlock({
+      extent:this.layoutContext.getBlockMaxExtent(),
+      elements:[],
+      useBeforeEdge:false,
+      useAfterEdge:false,
+      restMeasure:0,
+      resetExtent:0
+    });
+  };
+
+  RenderingContext.prototype.createBlock = function(){
+    var extent = this.layoutContext.getBlockCurExtent();
+    var elements = this.layoutContext.getBlockElements();
+    if(extent === 0 || elements.length === 0){
+      if(!this.hasCache() && this.isFirstOutput()){
+	// size 'zero' has special meaning... so we use 1.
+	return new Nehan.Box(new Nehan.BoxSize(1,1), this.style, "void"); // empty void element
+      }
+      return null;
+    }
+    var after_edge_size = this.style.getEdgeAfter();
+    var block_args = {
+      blockId:this.blockId,
+      extent:extent,
+      elements:elements,
+      breakAfter:this.layoutContext.hasBreakAfter(),
+      useBeforeEdge:this.isFirstOutput(),
+      useAfterEdge:(!this.hasNext() && after_edge_size <= this.layoutContext.getBlockRestExtent()),
+      restMeasure:this.layoutContext.getInlineRestMeasure(),
+      restExtent:this.layoutContext.getBlockRestExtent()
+    };
+    if(typeof this.rootBlockId !== "undefined"){
+      block_args.rootBlockId = this.rootBlockId;
+    }
+    return this.style.createBlock(block_args);
+  };
+
+  RenderingContext.prototype.createLine = function(){
+    if(this.layoutContext.isInlineEmpty()){
+      return null;
+    }
+    var line = this.style.createLine({
+      lineNo:this.layoutContext.getBlockLineNo(),
+      hasLineBreak:this.layoutContext.hasLineBreak(), // is line break included in?
+      breakAfter:this.layoutContext.hasBreakAfter(), // is break after included in?
+      hyphenated:this.layoutContext.isHyphenated(), // is line hyphenated?
+      measure:this.layoutContext.getInlineCurMeasure(), // actual measure
+      elements:this.layoutContext.getInlineElements(), // all inline-child, not only text, but recursive child box.
+      charCount:this.layoutContext.getInlineCharCount(),
+      maxExtent:(this.layoutContext.getInlineMaxExtent() || this.style.getFontSize()),
+      maxFontSize:this.layoutContext.getInlineMaxFontSize(),
+      hangingPunctuation:this.layoutContext.getHangingPunctuation()
+    });
+
+    //console.log("%o create output(%s): conetxt max measure = %d, context:%o", this, line.toString(), context.inline.maxMeasure, context);
+
+    // set position in parent stream.
+    if(this.parent && this.parent.stream){
+      line.pos = Math.max(0, this.parent.stream.getPos() - 1);
+    }
+
+    if(this.style.isRootLine()){
+      this.layoutContext.incBlockLineNo();
+    }
+    return line;
+  };
+ 
+  RenderingContext.prototype.createTextBlock = function(){
+    if(this.layoutContext.isInlineEmpty()){
+      return null;
+    }
+    // hyphenate if this line is generated by overflow(not line-break).
+    if(this.style.isHyphenationEnable() && !this.layoutContext.isInlineEmpty() &&
+       !this.layoutContext.hasLineBreak() && this.layoutContext.getInlineRestMeasure() <= this.style.getFontSize()){
+      this._hyphenate();
+    }
+    var line = this.style.createTextBlock({
+      hasLineBreak:this.layoutContext.hasLineBreak(), // is line break included in?
+      lineOver:this.layoutContext.isLineOver(), // is line full-filled?
+      breakAfter:this.layoutContext.hasBreakAfter(), // is break after included in?
+      hyphenated:this.layoutContext.isHyphenated(), // is line hyphenated?
+      measure:this.layoutContext.getInlineCurMeasure(), // actual measure
+      elements:this.layoutContext.getInlineElements(), // all inline-child, not only text, but recursive child box.
+      charCount:this.layoutContext.getInlineCharCount(),
+      maxExtent:this.layoutContext.getInlineMaxExtent(),
+      maxFontSize:this.layoutContext.getInlineMaxFontSize(),
+      hangingPunctuation:this.layoutContext.getHangingPunctuation(),
+      isEmpty:this.layoutContext.isInlineEmpty()
+    });
+
+    // set position in parent stream.
+    if(this.parent && this.parent.stream){
+      line.pos = Math.max(0, this.parent.stream.getPos() - 1);
+    }
+    return line;
+  };
+
   RenderingContext.prototype.getHeaderRank = function(){
     if(this.style){
       return this.style.getHeaderRank();
@@ -659,6 +734,111 @@ Nehan.RenderingContext = (function(){
       rank:opt.rank,
       title:opt.title
     });
+  };
+
+  // hyphenate between two different inline generator.
+  RenderingContext.prototype._hyphenateSibling = function(generator){
+    var next_token = generator.stream.peek();
+    var tail = this.layoutContext.getInlineLastElement();
+    var head = (next_token instanceof Nehan.Text)? next_token.getHeadChar() : null;
+    if(this.style.isHangingPuncEnable() && head && head.isHeadNg()){
+      next_token.cutHeadChar();
+      this.layoutContext.setHangingPunctuation({
+	data:head,
+	style:this._getSiblingStyle()
+      });
+      return;
+    } else if(tail && tail instanceof Nehan.Char && tail.isTailNg() && this.layoutContext.getInlineElements().length > 1){
+      this.layoutContext.popInlineElement();
+      this.stream.setPos(tail.pos);
+      this.layoutContext.setLineBreak(true);
+      this.layoutContext.setHyphenated(true);
+      this.clearCache();
+    }
+  };
+
+  RenderingContext.prototype._getSiblingContext = function(){
+    if(this.getMarkupName() === "rt"){
+      return null;
+    }
+    var root_line = this.parent;
+    while(root_line && root_line.style === this.style){
+      root_line = root_line.parent || null;
+    }
+    return root_line || this.parent || null;
+  };
+
+  RenderingContext.prototype._getSiblingStyle = function(){
+    var sibling = this._getSiblingContext();
+    return (sibling && sibling.style)? sibling.style : null;
+  };
+
+  RenderingContext.prototype._getSiblingStream = function(){
+    var sibling = this._getSiblingContext();
+    return (sibling && sibling.stream)? sibling.stream : null;
+  };
+
+  RenderingContext.prototype._peekSiblingNextToken = function(){
+    var sibling_stream = this._getSiblingStream();
+    return sibling_stream? sibling_stream.peek() : null;
+  };
+
+  RenderingContext.prototype._peekSiblingNextHeadChar = function(){
+    var head_c1;
+    var token = this._peekSiblingNextToken();
+    if(token instanceof Nehan.Text){
+      head_c1 = token.getContent().substring(0,1);
+      return new Nehan.Char(head_c1);
+    }
+    // if parent next token is not Nehan::Text,
+    // it's hard to find first character, so skip it.
+    return null;
+  };
+
+  RenderingContext.prototype._hyphenate = function(){
+    // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
+    var orig_head = this.peekLastCache() || this.stream.peek(); // original head token at next line.
+    if(orig_head === null){
+      var sibling = this._getSiblingContext();
+      if(sibling && sibling.stream){
+	this._hyphenateSibling(sibling);
+      }
+      return;
+    }
+    // hyphenate by hanging punctuation.
+    var head_next = this.stream.peek();
+    head_next = (head_next && orig_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
+    var is_single_head_ng = function(head, head_next){
+      return (head instanceof Nehan.Char && head.isHeadNg()) &&
+	!(head_next instanceof Nehan.Char && head_next.isHeadNg());
+    };
+    if(this.style.isHangingPuncEnable() && is_single_head_ng(orig_head, head_next)){
+      this.layoutContext.addInlineTextElement(orig_head, 0);
+      if(head_next){
+	this.stream.setPos(head_next.pos);
+      } else {
+	this.stream.get();
+      }
+      this.layoutContext.setLineBreak(true);
+      this.layoutContext.setHyphenated(true);
+      this.clearCache();
+      return;
+    }
+    // hyphenate by sweep.
+    var new_head = this.layoutContext.hyphenateSweep(orig_head); // if fixed, new_head token is returned.
+    if(new_head){
+      //console.log("hyphenate by sweep:orig_head:%o, new_head:%o", orig_head, new_head);
+      var hyphenated_measure = new_head.bodySize || 0;
+      if(Math.abs(new_head.pos - orig_head.pos) > 1){
+	hyphenated_measure = Math.abs(new_head.pos - orig_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
+      }
+      this.layoutContext.addInlineMeasure(-1 * hyphenated_measure); // subtract sweeped measure.
+      //console.log("hyphenate and new head:%o", new_head);
+      this.stream.setPos(new_head.pos);
+      this.layoutContext.setLineBreak(true);
+      this.layoutContext.setHyphenated(true);
+      this.clearCache(); // stream position changed, so disable cache.
+    }
   };
 
   return RenderingContext;
