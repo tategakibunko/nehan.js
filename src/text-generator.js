@@ -27,10 +27,11 @@ Nehan.TextGenerator = (function(){
     while(this.hasNext()){
       var element = this._getNext();
       if(element === null){
+	console.log("eof");
 	break;
       }
       var measure = this._getMeasure(element);
-      //console.log("[t:%s]%o(%s), m = %d (%d/%d)", this.context.markup.name, element, (element.data || ""), measure, (this.context.layoutContext.inline.curMeasure + measure), this.context.layoutContext.inline.maxMeasure);
+      this.context.debugTextElement(element, measure);
       if(measure === 0){
 	break;
       }
@@ -44,14 +45,14 @@ Nehan.TextGenerator = (function(){
 	}
       }
       if(!this.context.layoutContext.hasInlineSpaceFor(measure)){
-	//console.info("!> text overflow:%o(%s, m=%d)", element, element.data, measure);
+	console.log("over flow");
 	this.context.pushCache(element);
 	this.context.layoutContext.setLineOver(true);
 	break;
       }
       this._addElement(element, measure);
-      //console.log("cur measure:%d", context.inline.curMeasure);
       if(!this.context.layoutContext.hasInlineSpaceFor(1)){
+	console.log("over flow");
 	this.context.layoutContext.setLineOver(true);
 	break;
       }

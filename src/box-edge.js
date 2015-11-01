@@ -116,6 +116,18 @@ Nehan.BoxEdge = (function (){
     return ret;
   },
   /**
+   get start size amount in px.
+   @memberof Nehan.BoxEdge
+   @param flow {Nehan.BoxFlow}
+   */
+  BoxEdge.prototype.getStart= function(flow){
+    var ret = 0;
+    ret += this.padding.getStart(flow);
+    ret += this.border.getStart(flow);
+    ret += this.margin.getStart(flow);
+    return ret;
+  },
+  /**
    get before size amount in px.
    @memberof Nehan.BoxEdge
    @param flow {Nehan.BoxFlow}

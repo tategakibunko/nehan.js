@@ -52,9 +52,7 @@ Nehan.BlockGenerator = (function(){
 	this.context.documentContext.incLineBreakCount();
       }
       var extent = this.context.getElementLayoutExtent(element);
-
-      this._debugElement(element, extent);
-
+      this.context.debugBlockElement(element, extent);
       if(!this.context.layoutContext.hasBlockSpaceFor(extent)){
 	this.context.pushCache(element);
 	return this._createOutput();
@@ -64,12 +62,6 @@ Nehan.BlockGenerator = (function(){
 	return this._createOutput();
       }
     }
-  };
-
-  BlockGenerator.prototype._debugElement = function(element, extent){
-    var name = this.context.getMarkupName();
-    var bc = this.context.layoutContext.block;
-    console.log("[%s]:%o (%d / %d)", name, element, (bc.curExtent + extent), bc.maxExtent);
   };
 
   /**

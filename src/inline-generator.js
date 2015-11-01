@@ -34,10 +34,11 @@ Nehan.InlineGenerator = (function(){
     while(this.hasNext()){
       var element = this._getNext();
       if(element === null){
+	console.log("eof");
 	break;
       }
       var measure = this.context.getElementLayoutMeasure(element);
-      //console.log("[i:%s]%o(%s), m = %d (%d/%d)", this.context.style.markupName, element, (element.toString() || ""), measure, (context.inline.curMeasure + measure), context.inline.maxMeasure);
+      this.context.debugInlineElement(element, measure);
       if(measure === 0){
 	break;
       }
@@ -56,6 +57,7 @@ Nehan.InlineGenerator = (function(){
       }
       if(element.hasLineBreak){
 	this.context.layoutContext.setLineBreak(true);
+	console.log("line break");
 	break;
       }
     }

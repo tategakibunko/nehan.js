@@ -30,7 +30,9 @@ Nehan.LayoutGenerator = (function(){
     this.context.initLayoutContext();
     
     // call _yield implemented in inherited class.
+    console.group("%s _yield", this.context.getGeneratorName());
     var box = this._yield();
+    console.groupEnd();
 
     // increment yield count
     if(box !== null){

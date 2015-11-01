@@ -1351,6 +1351,14 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {int}
    */
+  Style.prototype.getEdgeStart = function(flow){
+    var edge = this.edge || null;
+    return edge? edge.getStart(flow || this.flow) : 0;
+  };
+  /**
+   @memberof Nehan.Style
+   @return {int}
+   */
   Style.prototype.getEdgeBefore = function(flow){
     var edge = this.edge || null;
     return edge? edge.getBefore(flow || this.flow) : 0;
