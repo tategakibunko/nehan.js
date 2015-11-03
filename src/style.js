@@ -1097,7 +1097,10 @@ Nehan.Style = (function(){
    @return {int}
    */
   Style.prototype.getHeaderRank = function(){
-    return this.markup.getHeaderRank();
+    if(this.getMarkupName().match(/h([1-6])/)){
+      return parseInt(RegExp.$1, 10);
+    }
+    return 0;
   };
   /**
    @memberof Nehan.Style
