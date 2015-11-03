@@ -16321,9 +16321,9 @@ Nehan.HeaderGenerator = (function(){
 
   HeaderGenerator.prototype._onComplete = function(block){
     var header_id = this.context.startHeaderContext({
-      type:this.context.markup.getName(),
-      rank:this.context.getHeaderRank(),
-      title:this.context.markup.getContent()
+      type:this.context.style.getMarkupName(),
+      rank:this.context.style.getHeaderRank(),
+      title:this.context.style.getContent()
     });
     block.id = Nehan.Css.addNehanHeaderPrefix(header_id);
   };
@@ -16755,7 +16755,6 @@ Nehan.VertEvaluator = (function(){
     var rt_generator = new Nehan.InlineGenerator(rt_context);
     var rt_line = rt_generator.yield();
     Nehan.Args.copy(rt_line.css, ruby.getCssVertRt(line));
-    console.log("rt_line context:", rt_line.context.stringOfTree());
     return this._evaluate(rt_line);
   };
 

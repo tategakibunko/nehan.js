@@ -15,9 +15,9 @@ Nehan.HeaderGenerator = (function(){
 
   HeaderGenerator.prototype._onComplete = function(block){
     var header_id = this.context.startHeaderContext({
-      type:this.context.markup.getName(),
-      rank:this.context.getHeaderRank(),
-      title:this.context.markup.getContent()
+      type:this.context.style.getMarkupName(),
+      rank:this.context.style.getHeaderRank(),
+      title:this.context.style.getContent()
     });
     block.id = Nehan.Css.addNehanHeaderPrefix(header_id);
   };
