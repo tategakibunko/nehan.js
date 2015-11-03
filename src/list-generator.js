@@ -10,9 +10,7 @@ Nehan.ListGenerator = (function(){
   */
   function ListGenerator(context){
     Nehan.BlockGenerator.call(this, context);
-
-    // by setting max item count, 'this.context.style.listMarkerSize' is created.
-    this.context.style.setListItemCount(this.context.stream.getTokenCount());
+    context.initListContext();
   }
   Nehan.Class.extend(ListGenerator, Nehan.BlockGenerator);
 

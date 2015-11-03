@@ -23,6 +23,7 @@ Nehan.RenderingContext = (function(){
       parent:opt.parent || null,
       style:opt.style || null,
       stream:opt.stream || null,
+      lazyOutput:opt.lazyOutput || null,
       floatedGenerators:opt.floatedGenerators || [],
       parallelGenerators:opt.parallelGenerators || [],
       layoutContext:this.layoutContext || null,
@@ -36,6 +37,7 @@ Nehan.RenderingContext = (function(){
       parent:opt.parent || this.parent,
       style:opt.style || this.style,
       stream:opt.stream || this.stream,
+      lazyOutput:opt.lazyOutput || this.lazyOutput,
       floatedGenerators:opt.floatedGenerators || this.floatedGenerators,
       parallelGenerators:opt.parallelGenerators || this.parallelGenerators,
       layoutContext:this.layoutContext || this.layoutContext,
@@ -115,13 +117,15 @@ Nehan.RenderingContext = (function(){
     // inline with parent
     if(this.parent && this.parent.layoutContext){
       return this.layoutContext = new Nehan.LayoutContext(
-	this.layoutContext.block,
+	//this.layoutContext.block,
+	new Nehan.BlockContext(this.getParentRestExtent()),
 	new Nehan.InlineContext(this.getParentRestMeasure() - edge_measure)
       );
     }
 
     return new Nehan.LayoutContext(
-      this.layoutContext.block,
+      //this.layoutContext.block,
+      new Nehan.BlockContext(this.getParentRestExtent()),
       new Nehan.InlineContext(this.style.outerMeasure - edge_measure)
     );
   };
@@ -174,12 +178,53 @@ Nehan.RenderingContext = (function(){
     return this.createBlockLayoutContext();
   };
 
+  RenderingContext.prototype.createListContext = function(){
+    var item_tags = this.stream.getTokens();
+    var item_count = item_tags.length;
+    var indent_size = 0;
+
+    // create <li> tags, but with content of marker html.
+    var marker_tags = item_tags.map(function(item_tag, index){
+      var marker_tag = item_tag.clone();
+      var content = this.style.getListMarkerHtml(index + 1);
+      console.log("marker_content:", content);
+      marker_tag.setContent(content);
+      return marker_tag;
+    }.bind(this));
+
+    // find max size of marker at the same time.
+    marker_tags.forEach(function(marker_tag, index){
+      var marker_style = this.createTmpChildStyle(marker_tag, {
+	forceCss:{display:"inline", textCombine:"horizontal"}
+      });
+      var marker_context = this.createChildContext(marker_style);
+      var marker_box = new Nehan.InlineGenerator(marker_context).yield();
+      //var marker_measure = (marker_box && marker_box.inlineMeasure)? marker_box.inlineMeasure : 0;
+      var marker_measure = marker_box? marker_box.getLayoutMeasure() : 0;
+      indent_size = Math.max(indent_size, marker_measure);
+    }.bind(this));
+
+    var list_context = {
+      itemCount:item_count,
+      indentSize:indent_size,
+      bodySize:(this.style.contentMeasure - indent_size)
+    };
+
+    console.log("list context:", list_context);
+
+    return list_context;
+  };
+
   RenderingContext.prototype.getMarkupName = function(){
     return this.style? this.style.getMarkupName() : "";
   };
 
   RenderingContext.prototype.initLayoutContext = function(){
     this.layoutContext = this.createLayoutContext();
+  };
+
+  RenderingContext.prototype.initListContext = function(){
+    this.listContext = this.createListContext();
   };
 
   RenderingContext.prototype.hasNext = function(){
@@ -216,7 +261,25 @@ Nehan.RenderingContext = (function(){
     var markup = this.style? this.style.markup : null;
     var measure = this.layoutContext? this.layoutContext.inline.maxMeasure : "auto";
     var extent = this.layoutContext? this.layoutContext.block.maxExtent : "auto";
-    console.log("%s created, context = %o(m=%o, e=%o)", this.getGeneratorName(), this, measure, extent);
+    //console.log("%s created, context = %o(m=%o, e=%o)", this.getGeneratorName(), this, measure, extent);
+  };
+
+  RenderingContext.prototype.yieldListMarker = function(){
+    var item_count = this.stream.getTokenCount();
+    var marker_html = this.style.getListMarkerHtml(item_count);
+    var marker_context = this.createChildContext(this.style.clone({
+      display:"inline-block"
+    }), {
+      stream:new Nehan.TokenStream(marker_html)
+    });
+
+    // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
+    // and we have to avoid 'appendChild' from child-generator of this tmp generator.
+    var tmp_gen = new Nehan.InlineGenerator(this.clone(), new Nehan.TokenStream(max_marker_html));
+    var line = tmp_gen.yield();
+    var marker_measure = line? line.inlineMeasure + Math.floor(this.getFontSize() / 2) : this.getFontSize();
+    var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
+    this.listMarkerSize = this.flow.getBoxSize(marker_measure, marker_extent);
   };
 
   RenderingContext.prototype.hasChildLayout = function(){
@@ -332,7 +395,14 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createChildStyle = function(markup, args){
+    //console.log("createChildStyle:%o", markup);
     return new Nehan.Style(this.selectors, markup, this.style, args || {});
+  };
+
+  RenderingContext.prototype.createTmpChildStyle = function(markup, args){
+    var style = this.createChildStyle(markup, args);
+    this.style.removeChild(style);
+    return style;
   };
 
   RenderingContext.prototype.createStyle = function(markup, parent_style, args){
@@ -367,6 +437,11 @@ Nehan.RenderingContext = (function(){
       return new Nehan.TokenStream(markup_content, {
 	flow:style.flow,
 	filter:Nehan.Closure.isTagName(["td", "th"])
+      });
+    case "ul": case "ol":
+      return new Nehan.TokenStream(markup_content, {
+	flow:style.flow,
+	filter:Nehan.Closure.isTagName(["li"])
       });
     case "word":
       return new Nehan.TokenStream(markup_content, {

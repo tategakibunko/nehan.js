@@ -340,7 +340,7 @@ Nehan.Style = (function(){
    */
   Style.prototype.clone = function(css){
     // no one can clone root style.
-    var clone_style = this.parent? new Style(this.markup, this.parent, {forceCss:(css || {})}) : this.createChild("div", css);
+    var clone_style = this.parent? new Style(this.selectors, this.markup, this.parent, {forceCss:(css || {})}) : this.createChild("div", css);
     if(clone_style.parent){
       clone_style.parent.removeChild(clone_style);
     }

@@ -45,14 +45,12 @@ Nehan.TextGenerator = (function(){
 	}
       }
       if(!this.context.layoutContext.hasInlineSpaceFor(measure)){
-	console.log("over flow");
 	this.context.pushCache(element);
 	this.context.layoutContext.setLineOver(true);
 	break;
       }
       this._addElement(element, measure);
       if(!this.context.layoutContext.hasInlineSpaceFor(1)){
-	console.log("over flow");
 	this.context.layoutContext.setLineOver(true);
 	break;
       }

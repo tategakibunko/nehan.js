@@ -14,7 +14,7 @@ Nehan.ParallelGenerator = (function(){
   Nehan.Class.extend(ParallelGenerator, Nehan.LayoutGenerator);
 
   ParallelGenerator.prototype._yield = function(){
-    if(this.hasCache()){
+    if(this.context.hasCache()){
       return this.context.popCache();
     }
     var blocks = this._yieldParallelBlocks();
@@ -69,7 +69,7 @@ Nehan.ParallelGenerator = (function(){
     var generators = this.context.parallelGenerators;
     return blocks.map(function(block, i){
       if(block === null){
-	return generators[i].style.createBlock({
+	return generators[i].context.style.createBlock({
 	  elements:[],
 	  extent:content_extent
 	});

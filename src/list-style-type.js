@@ -80,9 +80,9 @@ Nehan.ListStyleType = (function(){
    */
   ListStyleType.prototype.getMarkerHtml = function(count){
     var text = this.getMarkerText(count);
-    if(this.isZenkaku()){
+    if(this.isZenkaku() || (this.isDecimalList() && count < 100)){
       return Nehan.Html.tagWrap("span", text, {
-	"class":"nehan-tcy"
+	"class":"tcy"
       });
     }
     return text;

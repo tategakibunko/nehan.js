@@ -14,6 +14,9 @@ Nehan.BodyGenerator = (function(){
   Nehan.Class.extend(BodyGenerator, Nehan.SectionRootGenerator);
 
   BodyGenerator.prototype._onCreate = function(block){
+    if(!block){
+      return;
+    }
     block.seekPos = this.context.stream.getSeekPos();
     block.charPos = this.context.documentContext.getCharPos();
     block.percent = this.context.stream.getSeekPercent();
