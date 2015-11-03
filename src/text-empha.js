@@ -46,10 +46,10 @@ Nehan.TextEmpha = (function(){
    @return {Object}
    */
   TextEmpha.prototype.getCssVertEmphaWrap = function(line, chr){
-    var css = {}, font_size = line.style.getFontSize();
+    var css = {}, font_size = line.context.style.getFontSize();
     css["text-align"] = "left";
     css.width = this.getExtent(font_size) + "px";
-    css.height = chr.getAdvance(line.style.flow, line.style.letterSpacing || 0) + "px";
+    css.height = chr.getAdvance(line.context.style.flow, line.context.style.letterSpacing || 0) + "px";
     css.position = "relative";
     return css;
   };
@@ -60,9 +60,9 @@ Nehan.TextEmpha = (function(){
    @return {Object}
    */
   TextEmpha.prototype.getCssHoriEmphaWrap = function(line, chr){
-    var css = {}, font_size = line.style.getFontSize();
+    var css = {}, font_size = line.context.style.getFontSize();
     css.display = "inline-block";
-    css.width = chr.getAdvance(line.style.flow, line.style.letterSpacing) + "px";
+    css.width = chr.getAdvance(line.context.style.flow, line.context.style.letterSpacing) + "px";
     css.height = this.getExtent(font_size) + "px";
     return css;
   };

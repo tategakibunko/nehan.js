@@ -85,24 +85,26 @@ Nehan.Style = (function(){
   };
 
   /**
-     @memberof Nehan
-     @class Style
-     @classdesc abstraction of document tree hierarchy with selector values, associated markup, cursor_context.
-     @constructor
-     @param markup {Nehan.Tag} - markup of style
-     @param paernt {Nehan.Style} - parent style context
-     @param args {Object} - option arguments
-     @param args.forceCss {Object} - system css that must be applied.
-     @param args.cursorContext {Nehan.LayoutContext} - cursor context at the point of this style context created.
-  */
-  function Style(selectors, markup, parent, args){
-    this._initialize(selectors, markup, parent, args);
+   @memberof Nehan
+   @class Style
+   @classdesc abstraction of document tree hierarchy with selector values, associated markup, cursor_context.
+   @constructor
+
+   @param context {Nehan.RenderingContext}
+   @param markup {Nehan.Tag} - markup of style
+   @param paernt {Nehan.Style} - parent style
+   @param args {Object} - option arguments
+   @param args.forceCss {Object} - system css that must be applied.
+   @param args.cursorContext {Nehan.LayoutContext} - cursor context at the point of this style context created.
+   */
+  function Style(context, markup, parent, args){
+    this._initialize(context, markup, parent, args);
   }
   
-  Style.prototype._initialize = function(selectors, markup, parent, args){
+  Style.prototype._initialize = function(context, markup, parent, args){
     args = args || {};
 
-    this.selectors = selectors;
+    this.context = context;
     this.markup = markup;
     this.markupName = markup.getName();
     this.parent = parent || null;
@@ -340,7 +342,7 @@ Nehan.Style = (function(){
    */
   Style.prototype.clone = function(css){
     // no one can clone root style.
-    var clone_style = this.parent? new Style(this.selectors, this.markup, this.parent, {forceCss:(css || {})}) : this.createChild("div", css);
+    var clone_style = this.parent? new Style(this.context, this.markup, this.parent, {forceCss:(css || {})}) : this.createChild("div", css);
     if(clone_style.parent){
       clone_style.parent.removeChild(clone_style);
     }
@@ -388,7 +390,7 @@ Nehan.Style = (function(){
   Style.prototype.createChild = function(tag_name, css, tag_attr){
     var tag = new Nehan.Tag("<" + tag_name + ">");
     tag.setAttrs(tag_attr || {});
-    return new Style(tag, this, {forceCss:(css || {})});
+    return new Style(this.context, tag, this, {forceCss:(css || {})});
   };
   /**
    calclate max marker size by total child_count(item_count).
@@ -455,7 +457,7 @@ Nehan.Style = (function(){
 
     var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
     var box_size = this.flow.getBoxSize(measure, extent);
-    var box = new Nehan.Box(box_size, this);
+    var box = new Nehan.Box(box_size, this.context);
     if(this.markup.isHeaderTag()){
       classes.push("nehan-header");
     }
@@ -500,7 +502,7 @@ Nehan.Style = (function(){
     var height = this.getMarkupAttr("height")? parseInt(this.getMarkupAttr("height"), 10) : (this.staticExtent || this.getFontSize());
     var classes = ["nehan-block", "nehan-image"].concat(this.markup.getClasses());
     var image_size = new Nehan.BoxSize(width, height);
-    var image = new Nehan.Box(image_size, this);
+    var image = new Nehan.Box(image_size, this.context);
     image.display = this.display; // inline, block, inline-block
     image.edge = this.edge || null;
     image.classes = classes;
@@ -540,7 +542,7 @@ Nehan.Style = (function(){
     }
     var line_size = this.flow.getBoxSize(measure, max_extent);
     var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.getClasses());
-    var line = new Nehan.Box(line_size, this, "line-block");
+    var line = new Nehan.Box(line_size, this.context, "line-block");
     line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
     line.addElements(elements);
     line.classes = is_root_line? classes : classes.concat("nehan-" + this.getMarkupName());
@@ -620,7 +622,7 @@ Nehan.Style = (function(){
     }
     var line_size = this.flow.getBoxSize(measure, extent);
     var classes = ["nehan-text-block"].concat(this.markup.getClasses());
-    var line = new Nehan.Box(line_size, this, "text-block");
+    var line = new Nehan.Box(line_size, this.context, "text-block");
     line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
     line.addElements(elements);
     line.classes = classes;
@@ -1070,21 +1072,21 @@ Nehan.Style = (function(){
    */
   Style.prototype.getContent = function(){
     var content = this.getCssAttr("content") || this.markup.getContent();
-    var before = this.selectors.getValuePe(this, "before");
+    var before = this.context.selectors.getValuePe(this, "before");
     if(!Nehan.Obj.isEmpty(before)){
       content = Nehan.Html.tagWrap("before", before.content || "") + content;
     }
-    var after = this.selectors.getValuePe(this, "after");
+    var after = this.context.selectors.getValuePe(this, "after");
     if(!Nehan.Obj.isEmpty(after)){
       content = content + Nehan.Html.tagWrap("after", after.content || "");
     }
-    var first_letter = this.selectors.getValuePe(this, "first-letter");
+    var first_letter = this.context.selectors.getValuePe(this, "first-letter");
     if(!Nehan.Obj.isEmpty(first_letter)){
       content = content.replace(__rex_first_letter, function(match, p1, p2, p3){
 	return p1 + Nehan.Html.tagWrap("first-letter", p3);
       });
     }
-    var first_line = this.selectors.getValuePe(this, "first-line");
+    var first_line = this.context.selectors.getValuePe(this, "first-line");
     if(!Nehan.Obj.isEmpty(first_line)){
       content = Nehan.Html.tagWrap("first-line", content);
     }
@@ -1757,12 +1759,12 @@ Nehan.Style = (function(){
     case "first-letter":
     case "first-line":
       // notice that style of pseudo-element is defined with parent context.
-      var pe_values = this.selectors.getValuePe(parent, markup.getName());
+      var pe_values = this.context.selectors.getValuePe(parent, markup.getName());
       // console.log("[%s::%s] pseudo values:%o", parent.markupName, this.markup.name, pe_values);
       return pe_values;
 
     default:
-      var values = this.selectors.getValue(this);
+      var values = this.context.selectors.getValue(this);
       //console.log("[%s] selector values:%o", this.markup.name, values);
       return values;
     }

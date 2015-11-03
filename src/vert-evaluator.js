@@ -25,7 +25,7 @@ Nehan.VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalRb = function(line, ruby){
-    var rb_style = new Nehan.Style(new Nehan.Tag("<rb>"), line.style);
+    var rb_style = line.context.createChildStyle(new Nehan.Tag("<rb>"));
     var rb_line = rb_style.createLine({
       elements:ruby.getRbs()
     });
@@ -35,15 +35,12 @@ Nehan.VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalRt = function(line, ruby){
-    var rt = (new Nehan.InlineGenerator(
-      new Nehan.Style(ruby.rt, line.style),
-      new Nehan.TokenStream(ruby.getRtString(), {
-	flow:line.style.flow
-      }),
-      null // outline context
-    )).yield();
-    Nehan.Args.copy(rt.css, ruby.getCssVertRt(line));
-    return this._evaluate(rt);
+    var rt_style = line.context.createChildStyle(ruby.rt);
+    var rt_context = line.context.createChildContext(rt_style);
+    var rt_generator = new Nehan.InlineGenerator(rt_context);
+    var rt_line = rt_generator.yield();
+    Nehan.Args.copy(rt_line.css, ruby.getCssVertRt(line));
+    return this._evaluate(rt_line);
   };
 
   VertEvaluator.prototype._evalWord = function(line, word){
@@ -208,7 +205,7 @@ Nehan.VertEvaluator = (function(){
     var empha_part = this._evalEmphaText(line, chr);
     var wrap = this._createElement("div", {
       className:"nehan-empha-wrap",
-      css:line.style.textEmpha.getCssVertEmphaWrap(line, chr)
+      css:line.context.style.textEmpha.getCssVertEmphaWrap(line, chr)
     });
     wrap.appendChild(char_part);
     wrap.appendChild(empha_part);
@@ -224,7 +221,7 @@ Nehan.VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalEmphaText = function(line, chr){
     return this._createElement("span", {
-      content:line.style.textEmpha.getText(),
+      content:line.context.style.textEmpha.getText(),
       className:"nehan-empha-text",
       css:chr.getCssVertEmphaText(line)
     });
@@ -259,7 +256,7 @@ Nehan.VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalSmallKana = function(line, chr){
-    var tag_name = (line.style.textEmpha && line.style.textEmpha.isEnable())? "span" : "div";
+    var tag_name = (line.context.style.textEmpha && line.context.style.textEmpha.isEnable())? "span" : "div";
     return this._createElement(tag_name, {
       content:chr.getData(line.getFlow()),
       css:chr.getCssVertSmallKana()

@@ -46,10 +46,10 @@ Nehan.Char = (function(){
   Char.prototype.getCssPadding = function(line){
     var padding = new Nehan.Padding();
     if(this.paddingStart){
-      padding.setStart(line.style.flow, this.paddingStart);
+      padding.setStart(line.context.style.flow, this.paddingStart);
     }
     if(this.paddingEnd){
-      padding.setEnd(line.style.flow, this.paddingEnd);
+      padding.setEnd(line.context.style.flow, this.paddingEnd);
     }
     return padding.getCss();
   },
@@ -84,7 +84,7 @@ Nehan.Char = (function(){
    @return {Object}
    */
   Char.prototype.getCssVertImgChar = function(line){
-    var css = {}, font_size = line.style.getFontSize();
+    var css = {}, font_size = line.context.style.getFontSize();
     css.display = "block";
     css.width = font_size + "px";
     css.height = this.getVertHeight(font_size) + "px";
@@ -126,7 +126,7 @@ Nehan.Char = (function(){
    @return {Object}
    */
   Char.prototype.getCssVertRotateCharIE = function(line){
-    var css = {}, font_size = line.style.getFontSize();
+    var css = {}, font_size = line.context.style.getFontSize();
     css["css-float"] = "left";
     css["writing-mode"] = "tb-rl";
     css["padding-left"] = Math.round(font_size / 2) + "px";
@@ -147,7 +147,7 @@ Nehan.Char = (function(){
    @return {Object}
    */
   Char.prototype.getCssVertEmphaText = function(line){
-    var css = {}, font_size = line.style.getFontSize();
+    var css = {}, font_size = line.context.style.getFontSize();
     css["font-size"] = "0.5em";
     css.display = "inline-block";
     css.width = font_size + "px";

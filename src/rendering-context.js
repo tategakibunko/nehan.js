@@ -46,6 +46,14 @@ Nehan.RenderingContext = (function(){
     });
   };
 
+  RenderingContext.prototype.stringOfTree = function(){
+    var leaf = this.getGeneratorName();
+    if(this.parent){
+      return this.parent.stringOfTree() + ">" + leaf;
+    }
+    return leaf;
+  };
+
   RenderingContext.prototype.getChildContext = function(){
     return this.child || null;
   };
@@ -183,36 +191,26 @@ Nehan.RenderingContext = (function(){
     var item_count = item_tags.length;
     var indent_size = 0;
 
-    // create <li> tags, but with content of marker html.
-    var marker_tags = item_tags.map(function(item_tag, index){
+    // find max marker size from all list items.
+    item_tags.forEach(function(item_tag, index){
+      // create <li> tags, but with content of marker html.
       var marker_tag = item_tag.clone();
       var content = this.style.getListMarkerHtml(index + 1);
-      console.log("marker_content:", content);
       marker_tag.setContent(content);
-      return marker_tag;
-    }.bind(this));
-
-    // find max size of marker at the same time.
-    marker_tags.forEach(function(marker_tag, index){
       var marker_style = this.createTmpChildStyle(marker_tag, {
 	forceCss:{display:"inline", textCombine:"horizontal"}
       });
       var marker_context = this.createChildContext(marker_style);
       var marker_box = new Nehan.InlineGenerator(marker_context).yield();
-      //var marker_measure = (marker_box && marker_box.inlineMeasure)? marker_box.inlineMeasure : 0;
       var marker_measure = marker_box? marker_box.getLayoutMeasure() : 0;
       indent_size = Math.max(indent_size, marker_measure);
     }.bind(this));
 
-    var list_context = {
+    return {
       itemCount:item_count,
       indentSize:indent_size,
       bodySize:(this.style.contentMeasure - indent_size)
     };
-
-    console.log("list context:", list_context);
-
-    return list_context;
   };
 
   RenderingContext.prototype.getMarkupName = function(){
@@ -387,6 +385,7 @@ Nehan.RenderingContext = (function(){
       style:child_style,
       stream:(opt.stream || this.createStream(child_style))
     });
+    child_style.context = this.child;
     return this.child;
   };
 
@@ -396,7 +395,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createChildStyle = function(markup, args){
     //console.log("createChildStyle:%o", markup);
-    return new Nehan.Style(this.selectors, markup, this.style, args || {});
+    return new Nehan.Style(this, markup, this.style, args || {});
   };
 
   RenderingContext.prototype.createTmpChildStyle = function(markup, args){
@@ -406,7 +405,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createStyle = function(markup, parent_style, args){
-    return new Nehan.Style(this.selectors, markup, parent_style, args || {});
+    return new Nehan.Style(this, markup, parent_style, args || {});
   };
 
   RenderingContext.prototype.createStream = function(style){
@@ -657,7 +656,7 @@ Nehan.RenderingContext = (function(){
     if(extent === 0 || elements.length === 0){
       if(!this.hasCache() && this.isFirstOutput()){
 	// size 'zero' has special meaning... so we use 1.
-	return new Nehan.Box(new Nehan.BoxSize(1,1), this.style, "void"); // empty void element
+	return new Nehan.Box(new Nehan.BoxSize(1,1), this, "void"); // empty void element
       }
       return null;
     }

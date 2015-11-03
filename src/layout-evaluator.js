@@ -20,7 +20,7 @@ Nehan.LayoutEvaluator = (function(){
   };
 
   LayoutEvaluator.prototype._getEvaluator = function(tree){
-    var is_vert = tree.style.isTextVertical();
+    var is_vert = tree.context.style.isTextVertical();
     if(this.direction === "vert" && !is_vert){
       return new Nehan.HoriEvaluator();
     }
@@ -149,7 +149,7 @@ Nehan.LayoutEvaluator = (function(){
   };
 
   LayoutEvaluator.prototype._evalBlockChildElement = function(parent, element){
-    switch(element.style.getMarkupName()){
+    switch(element.context.style.getMarkupName()){
     case "img":
       return this._evalImage(element);
     case "a":
@@ -160,7 +160,7 @@ Nehan.LayoutEvaluator = (function(){
   };
 
   LayoutEvaluator.prototype._evalInlineChildElement = function(parent, element){
-    switch(element.style.getMarkupName()){
+    switch(element.context.style.getMarkupName()){
     case "img":
       return this._evalInlineImage(parent, element);
     case "a":
@@ -176,7 +176,7 @@ Nehan.LayoutEvaluator = (function(){
   };
 
   LayoutEvaluator.prototype._evalInlineChildText = function(parent, element){
-    if(parent.style.isTextEmphaEnable() && Nehan.Token.isEmphaTargetable(element)){
+    if(parent.context.style.isTextEmphaEnable() && Nehan.Token.isEmphaTargetable(element)){
       return this._evalEmpha(parent, element);
     }
     return this._evalTextElement(parent, element);
@@ -192,12 +192,12 @@ Nehan.LayoutEvaluator = (function(){
 
   // if link uri has anchor address, add page-no to dataset where the anchor is defined.
   LayoutEvaluator.prototype._evalLink = function(line, link){
-    var uri = new Nehan.Uri(link.style.getMarkupAttr("href"));
+    var uri = new Nehan.Uri(link.context.style.getMarkupAttr("href"));
     var anchor_name = uri.getAnchorName();
     if(anchor_name){
       var page_no = DocumentContext.getAnchorPageNo(anchor_name);
       link.classes.push("nehan-anchor-link");
-      link.style.markup.setAttr("data-page", page_no);
+      link.context.style.markup.setAttr("data-page", page_no);
     }
     return this._evalLinkElement(line, link);
   };

@@ -5,11 +5,11 @@ Nehan.Box = (function(){
      @classdesc box abstraction with size and style context
      @constrctor
      @param {Nehan.BoxSize} box size
-     @param {Nehan.Style}
+     @param {Nehan.RenderingContext}
   */
-  function Box(size, style, type){
+  function Box(size, context, type){
     this.size = size;
-    this.style = style;
+    this.context = context;
     this._type = type || "block";
     this.elements = [];
     this.css = {};
@@ -117,16 +117,16 @@ Nehan.Box = (function(){
    @return {Function}
    */
   Box.prototype.getOnCreate = function(){
-    var oncreate = this.style.getCssAttr("oncreate") || null;
+    var oncreate = this.context.style.getCssAttr("oncreate") || null;
 
     // on create of text-block is already captured by parent line
     if(this.isTextBlock()){
-      return this.style.getCssAttr("ontext") || null;
+      return this.context.style.getCssAttr("ontext") || null;
     }
     if(this.isLine()){
-      return this.style.getCssAttr("online") || oncreate;
+      return this.context.style.getCssAttr("online") || oncreate;
     }
-    return this.style.getCssAttr("onblock") || oncreate;
+    return this.context.style.getCssAttr("onblock") || oncreate;
   };
   /**
    @memberof Nehan.Box
@@ -137,7 +137,7 @@ Nehan.Box = (function(){
     if(this.isTextBlock()){
       return null;
     }
-    return this.style.markup.attrs;
+    return this.context.style.markup.attrs;
   };
   /**
    @memberof Nehan.Box
@@ -157,14 +157,14 @@ Nehan.Box = (function(){
    @return {Nehan.BoxFlow}
    */
   Box.prototype.getFlow = function(){
-    return this.style.flow;
+    return this.context.style.flow;
   };
   /**
    @memberof Nehan.Box
    @return {Object}
    */
   Box.prototype.getCssBlock = function(){
-    return this.style.getCssBlock(this);
+    return this.context.style.getCssBlock(this);
   };
   /**
    @memberof Nehan.Box
@@ -172,16 +172,16 @@ Nehan.Box = (function(){
    */
   Box.prototype.getCssInline = function(){
     if(this.isTextBlock()){
-      return this.style.getCssTextBlock(this);
+      return this.context.style.getCssTextBlock(this);
     }
-    return this.style.getCssLineBlock(this);
+    return this.context.style.getCssLineBlock(this);
   };
   /**
    @memberof Nehan.Box
    @return {Object}
    */
   Box.prototype.getCssInlineBlock = function(){
-    return this.style.getCssInlineBlock(this);
+    return this.context.style.getCssInlineBlock(this);
   };
   /**
    @memberof Nehan.Box
@@ -189,7 +189,7 @@ Nehan.Box = (function(){
    @return {Object}
    */
   Box.prototype.getCssHoriInlineImage = function(line){
-    return this.style.getCssHoriInlineImage(line, this);
+    return this.context.style.getCssHoriInlineImage(line, this);
   };
   /**
    @memberof Nehan.Box
@@ -197,7 +197,7 @@ Nehan.Box = (function(){
    @return {int}
    */
   Box.prototype.getContentMeasure = function(flow){
-    flow = flow || this.style.flow;
+    flow = flow || this.context.style.flow;
     return this.size.getMeasure(flow);
   };
   /**
@@ -206,7 +206,7 @@ Nehan.Box = (function(){
    @return {int}
    */
   Box.prototype.getContentExtent = function(flow){
-    flow = flow || this.style.flow;
+    flow = flow || this.context.style.flow;
     return this.size.getExtent(flow);
   };
   /**
@@ -229,7 +229,7 @@ Nehan.Box = (function(){
    @return {int}
    */
   Box.prototype.getEdgeMeasure = function(flow){
-    flow = flow || this.style.flow;
+    flow = flow || this.context.style.flow;
     return this.edge? this.edge.getMeasure(flow) : 0;
   };
   /**
@@ -238,7 +238,7 @@ Nehan.Box = (function(){
    @return {int}
    */
   Box.prototype.getEdgeExtent = function(flow){
-    flow = flow || this.style.flow;
+    flow = flow || this.context.style.flow;
     return this.edge? this.edge.getExtent(flow) : 0;
   };
   /**
@@ -247,8 +247,8 @@ Nehan.Box = (function(){
    @return {int}
    */
   Box.prototype.getLayoutMeasure = function(flow){
-    flow = flow || this.style.flow;
-    if(this.style.isPositionAbsolute()){
+    flow = flow || this.context.style.flow;
+    if(this.context.style.isPositionAbsolute()){
       return 0;
     }
     return this.getContentMeasure(flow) + this.getEdgeMeasure(flow);
@@ -259,8 +259,8 @@ Nehan.Box = (function(){
    @return {int}
    */
   Box.prototype.getLayoutExtent = function(flow){
-    flow = flow || this.style.flow;
-    if(this.style.isPositionAbsolute()){
+    flow = flow || this.context.style.flow;
+    if(this.context.style.isPositionAbsolute()){
       return 0;
     }
     return this.getContentExtent(flow) + this.getEdgeExtent(flow);
@@ -270,7 +270,7 @@ Nehan.Box = (function(){
    */
   Box.prototype.clearBorderBefore = function(){
     if(this.edge){
-      this.edge.clearBorderBefore(this.style.flow);
+      this.edge.clearBorderBefore(this.context.style.flow);
     }
   };
   /**
@@ -278,7 +278,7 @@ Nehan.Box = (function(){
    */
   Box.prototype.clearBorderAfter = function(){
     if(this.edge){
-      this.edge.clearBorderAfter(this.style.flow);
+      this.edge.clearBorderAfter(this.context.style.flow);
     }
   };
   /**

@@ -67,9 +67,9 @@ Nehan.Word = (function(){
    */
   Word.prototype.getCssVertTrans = function(line){
     var css = {};
-    var font_size = line.style.getFontSize();
-    if(line.style.letterSpacing){
-      css["letter-spacing"] = line.style.letterSpacing + "px";
+    var font_size = line.context.style.getFontSize();
+    if(line.context.style.letterSpacing){
+      css["letter-spacing"] = line.context.style.letterSpacing + "px";
     }
     css.width = font_size + "px";
     css.height = this.bodySize + "px";
@@ -93,14 +93,14 @@ Nehan.Word = (function(){
    */
   Word.prototype.getCssVertTransBodyTrident = function(line){
     var css = {};
-    css.width = line.style.getFontSize() + "px";
+    css.width = line.context.style.getFontSize() + "px";
     css.height = this.bodySize + "px";
     css["transform-origin"] = "50% 50%";
 
     // force set line-height to measure(this.bodySize) before rotation,
     // and fix offset by translate after rotatation.
     css["line-height"] = this.bodySize + "px";
-    var trans = Math.floor((this.bodySize - line.style.getFontSize()) / 2);
+    var trans = Math.floor((this.bodySize - line.context.style.getFontSize()) / 2);
     if(trans > 0){
       css.transform = "rotate(90deg) translate(-" + trans + "px, 0)";
     }
@@ -112,10 +112,10 @@ Nehan.Word = (function(){
    @return {Object}
    */
   Word.prototype.getCssVertTransIE = function(line){
-    var css = {}, font_size = line.style.getFontSize();
+    var css = {}, font_size = line.context.style.getFontSize();
     css["css-float"] = "left";
     css["writing-mode"] = "tb-rl";
-    css["letter-spacing"] = (line.style.letterSpacing || 0) + "px";
+    css["letter-spacing"] = (line.context.style.letterSpacing || 0) + "px";
     css["padding-left"] = Math.round(font_size / 2) + "px";
     css["line-height"] = font_size + "px";
     return css;

@@ -38,7 +38,7 @@ Nehan.HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalRb = function(line, ruby){
-    var rb_style = new Nehan.Style(new Nehan.Tag("<rb>"), line.style);
+    var rb_style = line.context.createChildStyle(new Nehan.Tag("<rb>"));
     var rb_line = rb_style.createLine({
       elements:ruby.getRbs()
     });
@@ -99,7 +99,7 @@ Nehan.HoriEvaluator = (function(){
     var char_part = this._evalEmphaSrc(line, chr);
     var empha_part = this._evalEmphaText(line, chr);
     var wrap = this._createElement("span", {
-      css:line.style.textEmpha.getCssHoriEmphaWrap(line, chr)
+      css:line.context.style.textEmpha.getCssHoriEmphaWrap(line, chr)
     });
     wrap.appendChild(empha_part);
     wrap.appendChild(char_part);
@@ -116,7 +116,7 @@ Nehan.HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._evalEmphaText = function(line, chr){
     return this._createElement("div", {
-      content:line.style.textEmpha.getText(),
+      content:line.context.style.textEmpha.getText(),
       className:"nehan-empha-text",
       css:chr.getCssHoriEmphaText(line)
     });
