@@ -1440,7 +1440,7 @@ Nehan.Style = (function(){
     if(line.edge){
       Nehan.Args.copy(css, line.edge.getCss());
     }
-    if(this.isRootLine()){
+    if(true /*this.isRootLine()*/){
       Nehan.Args.copy(css, this.flow.getCss());
     }
     if(this.font && (!this.isRootLine() || this.isFirstLine())){
