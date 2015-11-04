@@ -18,67 +18,31 @@ Nehan.ListItemGenerator = (function(){
     //   [li-marker][li-body]
     context.parallelGenerators = [
       this._createListMarkerGenerator(context, list_context, list_index),
-      this._createListBodyGenerator(context, list_context, list_index)
+      this._createListBodyGenerator(context, list_context)
     ];
   }
   Nehan.Class.extend(ListItemGenerator, Nehan.ParallelGenerator);
 
   ListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
     var content = context.parent.style.getListMarkerHtml(list_index + 1);
-    var markup = new Nehan.Tag("li-marker", content);
-    var child_style = context.createChildStyle(markup, {
+    var marker_markup = new Nehan.Tag("li-marker", content);
+    var marker_style = context.createChildStyle(marker_markup, {
       forceCss:{float:"start", measure:list_context.indentSize}
     });
-    var child_context = context.createChildContext(child_style);
-    return new Nehan.BlockGenerator(child_context);
+    var marker_context = context.createChildContext(marker_style);
+    return new Nehan.InlineGenerator(marker_context);
   };
 
-  ListItemGenerator.prototype._createListBodyGenerator = function(context, list_context, list_index){
-    // we share li.stream for li-body.stream, so content not required for <li-body>.
-    //var markup = new Nehan.Tag("li-body", context.style.getContent()); 
-    var markup = new Nehan.Tag("li-body");
-    var style = context.createChildStyle(markup, {
+  ListItemGenerator.prototype._createListBodyGenerator = function(context, list_context){
+    var body_markup = new Nehan.Tag("li-body");
+    var body_style = context.createChildStyle(body_markup, {
       forceCss:{display:"block", float:"start", measure:list_context.bodySize}
     });
-    console.log("li-body style:", style);
-    return new Nehan.BlockGenerator(
-      context.createChildContext(style, {
-	stream:context.stream // share li.stream for li-body.stream.
-      })
-    );
-  };
-
-  /*
-  ListItemGenerator.prototype._createListMarkGenerator = function(context){
-    var marker_size = context.style.getListMarkerSize();
-    var item_order = context.style.getChildIndex();
-    var marker_text = context.style.getListMarkerHtml(item_order + 1);
-    var measure = marker_size.getMeasure(context.style.flow);
-    var marker_style = context.style.createChild("li-marker", {
-      "float":"start",
-      "measure":measure
-    }, {
-      "class":"nehan-li-marker"
+    var body_context =  context.createChildContext(body_style, {
+      stream:context.stream // share li.stream for li-body.stream.
     });
-    var marker_stream = new Nehan.TokenStream(marker_text, {
-      flow:context.style.flow
-    });
-    return context.createChildBlockGenerator(marker_style, marker_stream);
+    return new Nehan.BlockGenerator(body_context);
   };
-
-  ListItemGenerator.prototype._createListBodyGenerator = function(context){
-    var marker_size = context.style.getListMarkerSize();
-    var measure = context.style.contentMeasure - marker_size.getMeasure(context.style.flow);
-    var body_style = context.style.createChild("li-body", {
-      "float":"start",
-      "measure":measure
-    }, {
-      "class":"nehan-li-body"
-    });
-    var body_stream = context.stream;
-    return context.createChildBlockGenerator(body_style, body_stream);
-  };
-   */
 
   return ListItemGenerator;
 })();

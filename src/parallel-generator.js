@@ -68,8 +68,9 @@ Nehan.ParallelGenerator = (function(){
     var flow = this.context.style.flow;
     var generators = this.context.parallelGenerators;
     return blocks.map(function(block, i){
+      var context = generators[i].context;
       if(block === null){
-	return generators[i].context.style.createBlock({
+	return context.style.createBlock(context, {
 	  elements:[],
 	  extent:content_extent
 	});
@@ -85,7 +86,7 @@ Nehan.ParallelGenerator = (function(){
     var rest_extent = this.context.layoutContext.getBlockRestExtent() - wrap_extent;
     var after_edge_size = this.context.style.getEdgeAfter();
     var uniformed_blocks = this._alignContentExtent(blocks, wrap_extent);
-    return this.context.style.createBlock({
+    return this.context.style.createBlock(this.context, {
       elements:uniformed_blocks,
       extent:max_block.getLayoutExtent(flow),
       useBeforeEdge:this.context.isFirstOutput(),

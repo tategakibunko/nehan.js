@@ -12654,10 +12654,10 @@ Nehan.Style = (function(){
     this._initialize(context, markup, parent, args);
   }
   
-  Style.prototype._initialize = function(context, markup, parent, args){
+  Style.prototype._initialize = function(selectors, markup, parent, args){
     args = args || {};
 
-    this.context = context;
+    this.selectors = selectors;
     this.markup = markup;
     this.markupName = markup.getName();
     this.parent = parent || null;
@@ -12895,7 +12895,7 @@ Nehan.Style = (function(){
    */
   Style.prototype.clone = function(css){
     // no one can clone root style.
-    var clone_style = this.parent? new Style(this.context, this.markup, this.parent, {forceCss:(css || {})}) : this.createChild("div", css);
+    var clone_style = this.parent? new Style(this.selectors, this.markup, this.parent, {forceCss:(css || {})}) : this.createChild("div", css);
     if(clone_style.parent){
       clone_style.parent.removeChild(clone_style);
     }
@@ -12943,7 +12943,7 @@ Nehan.Style = (function(){
   Style.prototype.createChild = function(tag_name, css, tag_attr){
     var tag = new Nehan.Tag("<" + tag_name + ">");
     tag.setAttrs(tag_attr || {});
-    return new Style(this.context, tag, this, {forceCss:(css || {})});
+    return new Style(this.selectors, tag, this, {forceCss:(css || {})});
   };
   /**
    calclate max marker size by total child_count(item_count).
@@ -12986,7 +12986,7 @@ Nehan.Style = (function(){
    @param opt.content {String}
    @return {Nehan.Box}
    */
-  Style.prototype.createBlock = function(opt){
+  Style.prototype.createBlock = function(context, opt){
     opt = opt || {};
     var elements = opt.elements || [];
     var measure = this.contentMeasure;
@@ -13010,7 +13010,7 @@ Nehan.Style = (function(){
 
     var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
     var box_size = this.flow.getBoxSize(measure, extent);
-    var box = new Nehan.Box(box_size, this.context);
+    var box = new Nehan.Box(box_size, context);
     if(this.markup.isHeaderTag()){
       classes.push("nehan-header");
     }
@@ -13048,14 +13048,14 @@ Nehan.Style = (function(){
    @param opt.breakAfter {boolean}
    @return {Nehan.Box}
    */
-  Style.prototype.createImage = function(opt){
+  Style.prototype.createImage = function(context, opt){
     opt = opt || {};
     // image size always considered as horizontal mode.
     var width = this.getMarkupAttr("width")? parseInt(this.getMarkupAttr("width"), 10) : (this.staticMeasure || this.getFontSize());
     var height = this.getMarkupAttr("height")? parseInt(this.getMarkupAttr("height"), 10) : (this.staticExtent || this.getFontSize());
     var classes = ["nehan-block", "nehan-image"].concat(this.markup.getClasses());
     var image_size = new Nehan.BoxSize(width, height);
-    var image = new Nehan.Box(image_size, this.context);
+    var image = new Nehan.Box(image_size, context);
     image.display = this.display; // inline, block, inline-block
     image.edge = this.edge || null;
     image.classes = classes;
@@ -13081,7 +13081,7 @@ Nehan.Style = (function(){
    @param opt.breakAfter {boolean}
    @return {Nehan.Box}
    */
-  Style.prototype.createLine = function(opt){
+  Style.prototype.createLine = function(context, opt){
     opt = opt || {};
     var is_root_line = this.isRootLine();
     var elements = opt.elements || [];
@@ -13095,7 +13095,7 @@ Nehan.Style = (function(){
     }
     var line_size = this.flow.getBoxSize(measure, max_extent);
     var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.getClasses());
-    var line = new Nehan.Box(line_size, this.context, "line-block");
+    var line = new Nehan.Box(line_size, context, "line-block");
     line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
     line.addElements(elements);
     line.classes = is_root_line? classes : classes.concat("nehan-" + this.getMarkupName());
@@ -13157,7 +13157,7 @@ Nehan.Style = (function(){
    @param opt.breakAfter {boolean}
    @return {Nehan.Box}
    */
-  Style.prototype.createTextBlock = function(opt){
+  Style.prototype.createTextBlock = function(context, opt){
     opt = opt || {};
     var elements = opt.elements || [];
     var font_size = this.getFontSize();
@@ -13175,7 +13175,7 @@ Nehan.Style = (function(){
     }
     var line_size = this.flow.getBoxSize(measure, extent);
     var classes = ["nehan-text-block"].concat(this.markup.getClasses());
-    var line = new Nehan.Box(line_size, this.context, "text-block");
+    var line = new Nehan.Box(line_size, context, "text-block");
     line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
     line.addElements(elements);
     line.classes = classes;
@@ -13273,21 +13273,21 @@ Nehan.Style = (function(){
     //
     // 2. line-object is just under the inline-block element.
     //  <div style='display:inline-block'>this text is included in anonymous line block</div>
-    return this.isBlock() || this.isInlineBlock();
+    return this.isBlock() || this.isInlineBlock() || this.isFloated();
   };
   /**
    @memberof Nehan.Style
    @return {boolean}
    */
   Style.prototype.isFloatStart = function(){
-    return this.floatDirection && this.floatDirection.isStart();
+    return this.floatDirection? this.floatDirection.isStart() : false;
   };
   /**
    @memberof Nehan.Style
    @return {boolean}
    */
   Style.prototype.isFloatEnd = function(){
-    return this.floatDirection && this.floatDirection.isEnd();
+    return this.floatDirection? this.floatDirection.isEnd() : false;
   };
   /**
    @memberof Nehan.Style
@@ -13625,21 +13625,21 @@ Nehan.Style = (function(){
    */
   Style.prototype.getContent = function(){
     var content = this.getCssAttr("content") || this.markup.getContent();
-    var before = this.context.selectors.getValuePe(this, "before");
+    var before = this.selectors.getValuePe(this, "before");
     if(!Nehan.Obj.isEmpty(before)){
       content = Nehan.Html.tagWrap("before", before.content || "") + content;
     }
-    var after = this.context.selectors.getValuePe(this, "after");
+    var after = this.selectors.getValuePe(this, "after");
     if(!Nehan.Obj.isEmpty(after)){
       content = content + Nehan.Html.tagWrap("after", after.content || "");
     }
-    var first_letter = this.context.selectors.getValuePe(this, "first-letter");
+    var first_letter = this.selectors.getValuePe(this, "first-letter");
     if(!Nehan.Obj.isEmpty(first_letter)){
       content = content.replace(__rex_first_letter, function(match, p1, p2, p3){
 	return p1 + Nehan.Html.tagWrap("first-letter", p3);
       });
     }
-    var first_line = this.context.selectors.getValuePe(this, "first-line");
+    var first_line = this.selectors.getValuePe(this, "first-line");
     if(!Nehan.Obj.isEmpty(first_line)){
       content = Nehan.Html.tagWrap("first-line", content);
     }
@@ -14315,12 +14315,12 @@ Nehan.Style = (function(){
     case "first-letter":
     case "first-line":
       // notice that style of pseudo-element is defined with parent context.
-      var pe_values = this.context.selectors.getValuePe(parent, markup.getName());
+      var pe_values = this.selectors.getValuePe(parent, markup.getName());
       // console.log("[%s::%s] pseudo values:%o", parent.markupName, this.markup.name, pe_values);
       return pe_values;
 
     default:
-      var values = this.context.selectors.getValue(this);
+      var values = this.selectors.getValue(this);
       //console.log("[%s] selector values:%o", this.markup.name, values);
       return values;
     }
@@ -15114,7 +15114,7 @@ Nehan.BlockGenerator = (function(){
 
     // if line-break, output empty line(extent = font-size).
     if(child_style.isLineBreak()){
-      return this.context.style.createLine({
+      return this.context.style.createLine(this.context, {
 	maxExtent:this.context.style.getFontSize()
       });
     }
@@ -15232,7 +15232,7 @@ Nehan.InlineGenerator = (function(){
   InlineGenerator.prototype._yieldHangingChar = function(chr){
     chr.setMetrics(this.context.style.flow, this.context.style.getFont());
     var font_size = this.context.style.getFontSize();
-    return this.context.style.createTextBlock({
+    return this.context.style.createTextBlock(this.context, {
       elements:[chr],
       measure:chr.bodySize,
       extent:font_size,
@@ -15328,7 +15328,7 @@ Nehan.InlineGenerator = (function(){
     // inline child
     switch(child_style.getMarkupName()){
     case "img":
-      return child_style.createImage();
+      return child_style.createImage(this.context);
 
     default:
       this.context.createChildInlineGenerator(child_style);
@@ -15948,8 +15948,9 @@ Nehan.ParallelGenerator = (function(){
     var flow = this.context.style.flow;
     var generators = this.context.parallelGenerators;
     return blocks.map(function(block, i){
+      var context = generators[i].context;
       if(block === null){
-	return generators[i].context.style.createBlock({
+	return context.style.createBlock(context, {
 	  elements:[],
 	  extent:content_extent
 	});
@@ -15965,7 +15966,7 @@ Nehan.ParallelGenerator = (function(){
     var rest_extent = this.context.layoutContext.getBlockRestExtent() - wrap_extent;
     var after_edge_size = this.context.style.getEdgeAfter();
     var uniformed_blocks = this._alignContentExtent(blocks, wrap_extent);
-    return this.context.style.createBlock({
+    return this.context.style.createBlock(this.context, {
       elements:uniformed_blocks,
       extent:max_block.getLayoutExtent(flow),
       useBeforeEdge:this.context.isFirstOutput(),
@@ -16065,67 +16066,31 @@ Nehan.ListItemGenerator = (function(){
     //   [li-marker][li-body]
     context.parallelGenerators = [
       this._createListMarkerGenerator(context, list_context, list_index),
-      this._createListBodyGenerator(context, list_context, list_index)
+      this._createListBodyGenerator(context, list_context)
     ];
   }
   Nehan.Class.extend(ListItemGenerator, Nehan.ParallelGenerator);
 
   ListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
     var content = context.parent.style.getListMarkerHtml(list_index + 1);
-    var markup = new Nehan.Tag("li-marker", content);
-    var child_style = context.createChildStyle(markup, {
+    var marker_markup = new Nehan.Tag("li-marker", content);
+    var marker_style = context.createChildStyle(marker_markup, {
       forceCss:{float:"start", measure:list_context.indentSize}
     });
-    var child_context = context.createChildContext(child_style);
-    return new Nehan.BlockGenerator(child_context);
+    var marker_context = context.createChildContext(marker_style);
+    return new Nehan.InlineGenerator(marker_context);
   };
 
-  ListItemGenerator.prototype._createListBodyGenerator = function(context, list_context, list_index){
-    // we share li.stream for li-body.stream, so content not required for <li-body>.
-    //var markup = new Nehan.Tag("li-body", context.style.getContent()); 
-    var markup = new Nehan.Tag("li-body");
-    var style = context.createChildStyle(markup, {
+  ListItemGenerator.prototype._createListBodyGenerator = function(context, list_context){
+    var body_markup = new Nehan.Tag("li-body");
+    var body_style = context.createChildStyle(body_markup, {
       forceCss:{display:"block", float:"start", measure:list_context.bodySize}
     });
-    console.log("li-body style:", style);
-    return new Nehan.BlockGenerator(
-      context.createChildContext(style, {
-	stream:context.stream // share li.stream for li-body.stream.
-      })
-    );
-  };
-
-  /*
-  ListItemGenerator.prototype._createListMarkGenerator = function(context){
-    var marker_size = context.style.getListMarkerSize();
-    var item_order = context.style.getChildIndex();
-    var marker_text = context.style.getListMarkerHtml(item_order + 1);
-    var measure = marker_size.getMeasure(context.style.flow);
-    var marker_style = context.style.createChild("li-marker", {
-      "float":"start",
-      "measure":measure
-    }, {
-      "class":"nehan-li-marker"
+    var body_context =  context.createChildContext(body_style, {
+      stream:context.stream // share li.stream for li-body.stream.
     });
-    var marker_stream = new Nehan.TokenStream(marker_text, {
-      flow:context.style.flow
-    });
-    return context.createChildBlockGenerator(marker_style, marker_stream);
+    return new Nehan.BlockGenerator(body_context);
   };
-
-  ListItemGenerator.prototype._createListBodyGenerator = function(context){
-    var marker_size = context.style.getListMarkerSize();
-    var measure = context.style.contentMeasure - marker_size.getMeasure(context.style.flow);
-    var body_style = context.style.createChild("li-body", {
-      "float":"start",
-      "measure":measure
-    }, {
-      "class":"nehan-li-body"
-    });
-    var body_stream = context.stream;
-    return context.createChildBlockGenerator(body_style, body_stream);
-  };
-   */
 
   return ListItemGenerator;
 })();
@@ -16743,8 +16708,8 @@ Nehan.VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalRb = function(line, ruby){
-    var rb_style = line.context.createChildStyle(new Nehan.Tag("<rb>"));
-    var rb_line = rb_style.createLine({
+    var rb_style = line.context.createChildStyle(new Nehan.Tag("rb"));
+    var rb_line = rb_style.createLine(line.context, {
       elements:ruby.getRbs()
     });
     return this._evaluate(rb_line, {
@@ -17041,8 +17006,8 @@ Nehan.HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalRb = function(line, ruby){
-    var rb_style = line.context.createChildStyle(new Nehan.Tag("<rb>"));
-    var rb_line = rb_style.createLine({
+    var rb_style = line.context.createChildStyle(new Nehan.Tag("rb"));
+    var rb_line = rb_style.createLine(line.context, {
       elements:ruby.getRbs()
     });
     return this._evaluate(rb_line, {
@@ -17578,7 +17543,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createChildStyle = function(markup, args){
     //console.log("createChildStyle:%o", markup);
-    return new Nehan.Style(this, markup, this.style, args || {});
+    return new Nehan.Style(this.selectors, markup, this.style, args || {});
   };
 
   RenderingContext.prototype.createTmpChildStyle = function(markup, args){
@@ -17588,7 +17553,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createStyle = function(markup, parent_style, args){
-    return new Nehan.Style(this, markup, parent_style, args || {});
+    return new Nehan.Style(this.selectors, markup, parent_style, args || {});
   };
 
   RenderingContext.prototype.createStream = function(style){
@@ -17823,7 +17788,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createWhiteSpace = function(){
-    return this.style.createBlock({
+    return this.style.createBlock(this, {
       extent:this.layoutContext.getBlockMaxExtent(),
       elements:[],
       useBeforeEdge:false,
@@ -17844,7 +17809,8 @@ Nehan.RenderingContext = (function(){
       return null;
     }
     var after_edge_size = this.style.getEdgeAfter();
-    var block_args = {
+    return this.style.createBlock(this, {
+      rootBlockId:(this.rootBlockId || null),
       blockId:this.blockId,
       extent:extent,
       elements:elements,
@@ -17853,18 +17819,14 @@ Nehan.RenderingContext = (function(){
       useAfterEdge:(!this.hasNext() && after_edge_size <= this.layoutContext.getBlockRestExtent()),
       restMeasure:this.layoutContext.getInlineRestMeasure(),
       restExtent:this.layoutContext.getBlockRestExtent()
-    };
-    if(typeof this.rootBlockId !== "undefined"){
-      block_args.rootBlockId = this.rootBlockId;
-    }
-    return this.style.createBlock(block_args);
+    });
   };
 
   RenderingContext.prototype.createLine = function(){
     if(this.layoutContext.isInlineEmpty()){
       return null;
     }
-    var line = this.style.createLine({
+    var line = this.style.createLine(this, {
       lineNo:this.layoutContext.getBlockLineNo(),
       hasLineBreak:this.layoutContext.hasLineBreak(), // is line break included in?
       breakAfter:this.layoutContext.hasBreakAfter(), // is break after included in?
@@ -17899,7 +17861,7 @@ Nehan.RenderingContext = (function(){
        !this.layoutContext.hasLineBreak() && this.layoutContext.getInlineRestMeasure() <= this.style.getFontSize()){
       this._hyphenate();
     }
-    var line = this.style.createTextBlock({
+    var line = this.style.createTextBlock(this, {
       hasLineBreak:this.layoutContext.hasLineBreak(), // is line break included in?
       lineOver:this.layoutContext.isLineOver(), // is line full-filled?
       breakAfter:this.layoutContext.hasBreakAfter(), // is break after included in?

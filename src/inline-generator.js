@@ -73,7 +73,7 @@ Nehan.InlineGenerator = (function(){
   InlineGenerator.prototype._yieldHangingChar = function(chr){
     chr.setMetrics(this.context.style.flow, this.context.style.getFont());
     var font_size = this.context.style.getFontSize();
-    return this.context.style.createTextBlock({
+    return this.context.style.createTextBlock(this.context, {
       elements:[chr],
       measure:chr.bodySize,
       extent:font_size,
@@ -169,7 +169,7 @@ Nehan.InlineGenerator = (function(){
     // inline child
     switch(child_style.getMarkupName()){
     case "img":
-      return child_style.createImage();
+      return child_style.createImage(this.context);
 
     default:
       this.context.createChildInlineGenerator(child_style);

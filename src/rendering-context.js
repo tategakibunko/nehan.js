@@ -395,7 +395,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createChildStyle = function(markup, args){
     //console.log("createChildStyle:%o", markup);
-    return new Nehan.Style(this, markup, this.style, args || {});
+    return new Nehan.Style(this.selectors, markup, this.style, args || {});
   };
 
   RenderingContext.prototype.createTmpChildStyle = function(markup, args){
@@ -405,7 +405,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createStyle = function(markup, parent_style, args){
-    return new Nehan.Style(this, markup, parent_style, args || {});
+    return new Nehan.Style(this.selectors, markup, parent_style, args || {});
   };
 
   RenderingContext.prototype.createStream = function(style){
@@ -640,7 +640,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createWhiteSpace = function(){
-    return this.style.createBlock({
+    return this.style.createBlock(this, {
       extent:this.layoutContext.getBlockMaxExtent(),
       elements:[],
       useBeforeEdge:false,
@@ -661,7 +661,8 @@ Nehan.RenderingContext = (function(){
       return null;
     }
     var after_edge_size = this.style.getEdgeAfter();
-    var block_args = {
+    return this.style.createBlock(this, {
+      rootBlockId:(this.rootBlockId || null),
       blockId:this.blockId,
       extent:extent,
       elements:elements,
@@ -670,18 +671,14 @@ Nehan.RenderingContext = (function(){
       useAfterEdge:(!this.hasNext() && after_edge_size <= this.layoutContext.getBlockRestExtent()),
       restMeasure:this.layoutContext.getInlineRestMeasure(),
       restExtent:this.layoutContext.getBlockRestExtent()
-    };
-    if(typeof this.rootBlockId !== "undefined"){
-      block_args.rootBlockId = this.rootBlockId;
-    }
-    return this.style.createBlock(block_args);
+    });
   };
 
   RenderingContext.prototype.createLine = function(){
     if(this.layoutContext.isInlineEmpty()){
       return null;
     }
-    var line = this.style.createLine({
+    var line = this.style.createLine(this, {
       lineNo:this.layoutContext.getBlockLineNo(),
       hasLineBreak:this.layoutContext.hasLineBreak(), // is line break included in?
       breakAfter:this.layoutContext.hasBreakAfter(), // is break after included in?
@@ -716,7 +713,7 @@ Nehan.RenderingContext = (function(){
        !this.layoutContext.hasLineBreak() && this.layoutContext.getInlineRestMeasure() <= this.style.getFontSize()){
       this._hyphenate();
     }
-    var line = this.style.createTextBlock({
+    var line = this.style.createTextBlock(this, {
       hasLineBreak:this.layoutContext.hasLineBreak(), // is line break included in?
       lineOver:this.layoutContext.isLineOver(), // is line full-filled?
       breakAfter:this.layoutContext.hasBreakAfter(), // is break after included in?

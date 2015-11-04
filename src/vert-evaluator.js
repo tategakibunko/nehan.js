@@ -25,8 +25,8 @@ Nehan.VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalRb = function(line, ruby){
-    var rb_style = line.context.createChildStyle(new Nehan.Tag("<rb>"));
-    var rb_line = rb_style.createLine({
+    var rb_style = line.context.createChildStyle(new Nehan.Tag("rb"));
+    var rb_line = rb_style.createLine(line.context, {
       elements:ruby.getRbs()
     });
     return this._evaluate(rb_line, {
