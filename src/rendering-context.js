@@ -193,18 +193,24 @@ Nehan.RenderingContext = (function(){
 
     // find max marker size from all list items.
     item_tags.forEach(function(item_tag, index){
-      // create <li> tags, but with content of marker html.
-      var marker_tag = item_tag.clone();
-      var content = this.style.getListMarkerHtml(index + 1);
-      marker_tag.setContent(content);
-      var marker_style = this.createTmpChildStyle(marker_tag, {
-	forceCss:{display:"inline", textCombine:"horizontal"}
+      // wee neeed [li][::marker] context.
+      var li_tag = new Nehan.Tag("li", "&nbsp;"); // dummy content for PseudoSelector.test
+      var li_style = this.createTmpChildStyle(li_tag);
+      var li_context = this.createChildContext(li_style);
+      var marker_tag = new Nehan.Tag("marker");
+      var marker_content = this.style.getListMarkerHtml(index + 1);
+      marker_tag.setContent(marker_content);
+      var marker_style = li_context.createTmpChildStyle(marker_tag, {
+	forceCss:{display:"inline"}
       });
-      var marker_context = this.createChildContext(marker_style);
-      var marker_box = new Nehan.InlineGenerator(marker_context).yield();
+      var marker_context = li_context.createChildContext(marker_style);
+      var marker_box = new Nehan.InlineBlockGenerator(marker_context).yield();
+      //console.info("marker box:", marker_box);
       var marker_measure = marker_box? marker_box.getLayoutMeasure() : 0;
       indent_size = Math.max(indent_size, marker_measure);
     }.bind(this));
+
+    //console.info("indent size:%d", indent_size);
 
     return {
       itemCount:item_count,

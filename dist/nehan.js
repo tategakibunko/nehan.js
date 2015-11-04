@@ -2867,7 +2867,8 @@ Nehan.PseudoSelector = (function(){
     return (this.name === "before" ||
 	    this.name === "after" ||
 	    this.name === "first-letter" ||
-	    this.name === "first-line");
+	    this.name === "first-line" ||
+	    this.name === "marker");
   };
   /**
    @memberof Nehan.PseudoSelector
@@ -2881,6 +2882,7 @@ Nehan.PseudoSelector = (function(){
     case "after": return true;
     case "first-letter": return !style.isMarkupEmpty();
     case "first-line": return !style.isMarkupEmpty();
+    case "marker": return !style.isMarkupEmpty();
 
       // pseudo-class
     case "first-child": return style.isFirstChild();
@@ -3410,7 +3412,10 @@ Nehan.Selector = (function(){
    @return {boolean}
    */
   Selector.prototype.testPseudoElement = function(style, element_name){
-    return this.hasPseudoElementName(element_name) && this.test(style);
+    var has_pseudo_name = this.hasPseudoElementName(element_name);
+    var test_result = this.test(style);
+    return has_pseudo_name && test_result;
+    //return this.hasPseudoElementName(element_name) && this.test(style);
   };
   /**
    @memberof Nehan.Selector
@@ -8565,7 +8570,7 @@ Nehan.ListStyleType = (function(){
    */
   ListStyleType.prototype.getMarkerHtml = function(count){
     var text = this.getMarkerText(count);
-    if(this.isZenkaku() || (this.isDecimalList() && count < 100)){
+    if(this.isZenkaku() /*|| (this.isDecimalList() && count < 100)*/){
       return Nehan.Html.tagWrap("span", text, {
 	"class":"tcy"
       });
@@ -11371,6 +11376,13 @@ Nehan.Stylesheet = (function(){
 	},
 	"ol ul":{
 	  margin:{before:"0"}
+	},
+	//-------------------------------------------------------
+	// list marker
+	//-------------------------------------------------------
+	"li::marker":{
+	  "box-sizing":"content-box",
+	  padding:{end:"0.3em"}
 	},
 	//-------------------------------------------------------
 	// other utility classes
@@ -14310,13 +14322,14 @@ Nehan.Style = (function(){
 
   Style.prototype._loadSelectorCss = function(markup, parent){
     switch(markup.getName()){
+    case "marker":
     case "before":
     case "after":
     case "first-letter":
     case "first-line":
       // notice that style of pseudo-element is defined with parent context.
       var pe_values = this.selectors.getValuePe(parent, markup.getName());
-      // console.log("[%s::%s] pseudo values:%o", parent.markupName, this.markup.name, pe_values);
+      //console.log("[%s::%s] pseudo values:%o", parent.markupName, this.markup.name, pe_values);
       return pe_values;
 
     default:
@@ -16073,12 +16086,12 @@ Nehan.ListItemGenerator = (function(){
 
   ListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
     var content = context.parent.style.getListMarkerHtml(list_index + 1);
-    var marker_markup = new Nehan.Tag("li-marker", content);
+    var marker_markup = new Nehan.Tag("marker", content);
     var marker_style = context.createChildStyle(marker_markup, {
       forceCss:{float:"start", measure:list_context.indentSize}
     });
     var marker_context = context.createChildContext(marker_style);
-    return new Nehan.InlineGenerator(marker_context);
+    return new Nehan.BlockGenerator(marker_context);
   };
 
   ListItemGenerator.prototype._createListBodyGenerator = function(context, list_context){
@@ -17341,18 +17354,24 @@ Nehan.RenderingContext = (function(){
 
     // find max marker size from all list items.
     item_tags.forEach(function(item_tag, index){
-      // create <li> tags, but with content of marker html.
-      var marker_tag = item_tag.clone();
-      var content = this.style.getListMarkerHtml(index + 1);
-      marker_tag.setContent(content);
-      var marker_style = this.createTmpChildStyle(marker_tag, {
-	forceCss:{display:"inline", textCombine:"horizontal"}
+      // wee neeed [li][::marker] context.
+      var li_tag = new Nehan.Tag("li", "&nbsp;"); // dummy content for PseudoSelector.test
+      var li_style = this.createTmpChildStyle(li_tag);
+      var li_context = this.createChildContext(li_style);
+      var marker_tag = new Nehan.Tag("marker");
+      var marker_content = this.style.getListMarkerHtml(index + 1);
+      marker_tag.setContent(marker_content);
+      var marker_style = li_context.createTmpChildStyle(marker_tag, {
+	forceCss:{display:"inline"}
       });
-      var marker_context = this.createChildContext(marker_style);
-      var marker_box = new Nehan.InlineGenerator(marker_context).yield();
+      var marker_context = li_context.createChildContext(marker_style);
+      var marker_box = new Nehan.InlineBlockGenerator(marker_context).yield();
+      //console.info("marker box:", marker_box);
       var marker_measure = marker_box? marker_box.getLayoutMeasure() : 0;
       indent_size = Math.max(indent_size, marker_measure);
     }.bind(this));
+
+    //console.info("indent size:%d", indent_size);
 
     return {
       itemCount:item_count,

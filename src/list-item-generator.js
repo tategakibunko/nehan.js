@@ -25,12 +25,12 @@ Nehan.ListItemGenerator = (function(){
 
   ListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
     var content = context.parent.style.getListMarkerHtml(list_index + 1);
-    var marker_markup = new Nehan.Tag("li-marker", content);
+    var marker_markup = new Nehan.Tag("marker", content);
     var marker_style = context.createChildStyle(marker_markup, {
       forceCss:{float:"start", measure:list_context.indentSize}
     });
     var marker_context = context.createChildContext(marker_style);
-    return new Nehan.InlineGenerator(marker_context);
+    return new Nehan.BlockGenerator(marker_context);
   };
 
   ListItemGenerator.prototype._createListBodyGenerator = function(context, list_context){

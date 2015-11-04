@@ -30,7 +30,10 @@ Nehan.Selector = (function(){
    @return {boolean}
    */
   Selector.prototype.testPseudoElement = function(style, element_name){
-    return this.hasPseudoElementName(element_name) && this.test(style);
+    var has_pseudo_name = this.hasPseudoElementName(element_name);
+    var test_result = this.test(style);
+    return has_pseudo_name && test_result;
+    //return this.hasPseudoElementName(element_name) && this.test(style);
   };
   /**
    @memberof Nehan.Selector

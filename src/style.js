@@ -1757,13 +1757,14 @@ Nehan.Style = (function(){
 
   Style.prototype._loadSelectorCss = function(markup, parent){
     switch(markup.getName()){
+    case "marker":
     case "before":
     case "after":
     case "first-letter":
     case "first-line":
       // notice that style of pseudo-element is defined with parent context.
       var pe_values = this.selectors.getValuePe(parent, markup.getName());
-      // console.log("[%s::%s] pseudo values:%o", parent.markupName, this.markup.name, pe_values);
+      //console.log("[%s::%s] pseudo values:%o", parent.markupName, this.markup.name, pe_values);
       return pe_values;
 
     default:

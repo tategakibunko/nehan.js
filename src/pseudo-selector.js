@@ -20,7 +20,8 @@ Nehan.PseudoSelector = (function(){
     return (this.name === "before" ||
 	    this.name === "after" ||
 	    this.name === "first-letter" ||
-	    this.name === "first-line");
+	    this.name === "first-line" ||
+	    this.name === "marker");
   };
   /**
    @memberof Nehan.PseudoSelector
@@ -34,6 +35,7 @@ Nehan.PseudoSelector = (function(){
     case "after": return true;
     case "first-letter": return !style.isMarkupEmpty();
     case "first-line": return !style.isMarkupEmpty();
+    case "marker": return !style.isMarkupEmpty();
 
       // pseudo-class
     case "first-child": return style.isFirstChild();
