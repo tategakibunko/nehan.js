@@ -13878,7 +13878,7 @@ Nehan.Style = (function(){
     if(line.edge){
       Nehan.Args.copy(css, line.edge.getCss());
     }
-    if(true /*this.isRootLine()*/){
+    if(this.isRootLine()){
       Nehan.Args.copy(css, this.flow.getCss());
     }
     if(this.font && (!this.isRootLine() || this.isFirstLine())){
@@ -14974,8 +14974,7 @@ Nehan.BlockGenerator = (function(){
       if(token.isWhiteSpaceOnly()){
 	return this._getNext();
       }
-      var igen = this.context.createChildInlineGenerator(this.context.style, this.context.stream); // share same style and stream.
-      var tgen = igen.context.createChildTextGenerator(token); // text-generator is child of igen.
+      this.context.createInlineRoot();
       return this.context.yieldChildLayout();
     }
 
@@ -15007,7 +15006,7 @@ Nehan.BlockGenerator = (function(){
 
     // if child inline or child inline-block,
     if(child_style.isInline() || child_style.isInlineBlock()){
-      this.context.createChildInlineGenerator(child_style);
+      this.context.createInlineRoot();
       return this.context.yieldChildLayout();
     }
 
@@ -15074,7 +15073,6 @@ Nehan.InlineGenerator = (function(){
     while(this.hasNext()){
       var element = this._getNext();
       if(element === null){
-	console.log("eof");
 	break;
       }
       var measure = this.context.getElementLayoutMeasure(element);
@@ -15097,7 +15095,6 @@ Nehan.InlineGenerator = (function(){
       }
       if(element.hasLineBreak){
 	this.context.layoutContext.setLineBreak(true);
-	console.log("line break");
 	break;
       }
     }
@@ -17638,6 +17635,14 @@ Nehan.RenderingContext = (function(){
     default:
       return new Nehan.BlockGenerator(child_context);
     }
+  };
+
+  // create inline root, and parse again.
+  // example:
+  // [p(block)][text][/p(block)] ->[p(block)][p(inline)][text][/p(inline)][/p(block)]
+  RenderingContext.prototype.createInlineRoot = function(){
+    this.stream.prev();
+    this.createChildInlineGenerator(this.style, this.stream);
   };
 
   RenderingContext.prototype.createChildInlineGenerator = function(style, stream){

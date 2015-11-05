@@ -122,8 +122,7 @@ Nehan.BlockGenerator = (function(){
       if(token.isWhiteSpaceOnly()){
 	return this._getNext();
       }
-      var igen = this.context.createChildInlineGenerator(this.context.style, this.context.stream); // share same style and stream.
-      var tgen = igen.context.createChildTextGenerator(token); // text-generator is child of igen.
+      this.context.createInlineRoot();
       return this.context.yieldChildLayout();
     }
 
@@ -155,7 +154,7 @@ Nehan.BlockGenerator = (function(){
 
     // if child inline or child inline-block,
     if(child_style.isInline() || child_style.isInlineBlock()){
-      this.context.createChildInlineGenerator(child_style);
+      this.context.createInlineRoot();
       return this.context.yieldChildLayout();
     }
 

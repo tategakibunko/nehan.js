@@ -601,6 +601,14 @@ Nehan.RenderingContext = (function(){
     }
   };
 
+  // create inline root, and parse again.
+  // example:
+  // [p(block)][text][/p(block)] ->[p(block)][p(inline)][text][/p(inline)][/p(block)]
+  RenderingContext.prototype.createInlineRoot = function(){
+    this.stream.prev();
+    this.createChildInlineGenerator(this.style, this.stream);
+  };
+
   RenderingContext.prototype.createChildInlineGenerator = function(style, stream){
     if(style.isPasted()){
       return new Nehan.LazyGenerator(
