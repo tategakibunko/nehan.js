@@ -938,7 +938,6 @@ Nehan.Stylesheet = (function(){
 	// list marker
 	//-------------------------------------------------------
 	"li::marker":{
-	  "box-sizing":"content-box",
 	  padding:{end:"0.3em"}
 	},
 	//-------------------------------------------------------

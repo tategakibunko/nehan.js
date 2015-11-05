@@ -11381,7 +11381,6 @@ Nehan.Stylesheet = (function(){
 	// list marker
 	//-------------------------------------------------------
 	"li::marker":{
-	  "box-sizing":"content-box",
 	  padding:{end:"0.3em"}
 	},
 	//-------------------------------------------------------
@@ -11727,6 +11726,7 @@ Nehan.DocumentContext = (function(){
   function DocumentContext(){
     this.documentType = "html";
     this.documentHeader = null;
+    this.pages = [];
     this.pageNo = 0;
     this.charPos = 0;
     this.anchors = {};
@@ -11736,25 +11736,6 @@ Nehan.DocumentContext = (function(){
     this.rootBlockId = 0; // unique block-id for direct children of <body>.
     this.lineBreakCount = 0; // count of <BR> tag, used to generate paragraph-id(<block_id>-<br_count>).
   }
-
-  var __get_outline_contexts_by_name = function(section_root_name){
-    return this.outlineContexts.filter(function(context){
-      return context.getMarkupName() === section_root_name;
-    });
-  };
-
-  var __convert_outline_context_to_element = function(context, callbacks){
-    var tree = Nehan.OutlineContextParser.parse(context);
-    return tree? Nehan.SectionTreeConverter.convert(tree, callbacks) : null;
-  };
-
-  var __create_outline_elements_by_name = function(section_root_name, callbacks){
-    var contexts = __get_outline_contexts_by_name(section_root_name);
-    return contexts.reduce(function(ret, context){
-      var element = __convert_outline_context_to_element(context, callbacks);
-      return element? ret.concat(element) : ret;
-    }, []);
-  };
 
   /**
    @memberof Nehan.DocumentContext
@@ -11813,6 +11794,13 @@ Nehan.DocumentContext = (function(){
   };
   /**
    @memberof Nehan.DocumentContext
+   @param page {Nehan.Box | Nehan.Page}
+   */
+  DocumentContext.prototype.addPage = function(page){
+    this.pages.push(page);
+  };
+  /**
+   @memberof Nehan.DocumentContext
    @param outline_context {Nehan.OutlineContext}
    */
   DocumentContext.prototype.addOutlineContext = function(outline_context){
@@ -11868,25 +11856,6 @@ Nehan.DocumentContext = (function(){
     return [this.blockId, this.lineBreakCount].join("-");
   };
   /**
-   * this is shortcut function for __create_outline_elements_by_name("body", callbacks).<br>
-   * if many outline elements exists(that is, multiple '&lt;body&gt;' exists), use first one only.<br>
-   * for details of callback function, see {@link Nehan.SectionTreeConverter}.
-
-   @memberof Nehan.DocumentContext
-   @param callbacks {Object} - hooks for each outline element.
-   @param callbacks.onClickLink {Function}
-   @param callbacks.createRoot {Function}
-   @param callbacks.createChild {Function}
-   @param callbacks.createLink {Function}
-   @param callbacks.createToc {Function}
-   @param callbacks.createPageNoItem {Function}
-   @return {DOMElement}
-   */
-  DocumentContext.prototype.createBodyOutlineElement = function(callbacks){
-    var elements = __create_outline_elements_by_name("body", callbacks);
-    return (elements.length === 0)? null : elements[0];
-  };
-  /**
    * create outline element for [section_root_name], returns multiple elements,<br>
    * because there may be multiple section root(&lt;figure&gt;, &lt;fieldset&gt; ... etc) in document.<br>
    * for details of callback function, see {@link Nehan.SectionTreeConverter}.
@@ -11901,8 +11870,23 @@ Nehan.DocumentContext = (function(){
    @param callbacks.createToc {Function}
    @param callbacks.createPageNoItem {Function}
    */
-  DocumentContext.prototype.createOutlineElementsByName = function(section_root_name, callbacks){
-    return __create_outline_elements_by_name(section_root_name, callbacks);
+  DocumentContext.prototype.createOutlineElementByName = function(section_root_name, callbacks){
+    var contexts = this._getOutlineContextByName(section_root_name);
+    return contexts.reduce(function(ret, context){
+      var element = this._convertOutlineContextToElement(context, callbacks);
+      return element? ret.concat(element) : ret;
+    }.bind(this), []);
+  };
+
+  DocumentContext.prototype._getOutlineContextByName = function(section_root_name){
+    return this.outlineContexts.filter(function(context){
+      return context.getMarkupName() === section_root_name;
+    });
+  };
+
+  DocumentContext.prototype._convertOutlineContextToElement = function(context, callbacks){
+    var tree = Nehan.OutlineContextParser.parse(context);
+    return tree? Nehan.SectionTreeConverter.convert(tree, callbacks) : null;
   };
 
   return DocumentContext;
@@ -11924,7 +11908,7 @@ Nehan.PageEvaluator = (function(){
   PageEvaluator.prototype._getEvaluator = function(){
     var body_selector = this.context.selectors.get("body") || new Nehan.Selector("body", {flow:Nehan.Display.flow});
     var flow = body_selector.getValue().flow || Nehan.Display.flow;
-    return (flow === "tb-rl" || flow === "tb-lr")? new Nehan.VertEvaluator() : new Nehan.HoriEvaluator();
+    return (flow === "tb-rl" || flow === "tb-lr")? new Nehan.VertEvaluator(this.context) : new Nehan.HoriEvaluator(this.context);
   };
 
   /**
@@ -11969,19 +11953,16 @@ Nehan.reqAnimationFrame = (function(){
 })();
 
 
-Nehan.PageStream = (function(){
+Nehan.PageParser = (function(){
   /**
      @memberof Nehan
-     @class PageStream
-     @classdesc async stream of paged-media.
+     @class PageParser
      @consturctor
      @param text {String} - html source text
   */
-  function PageStream(text, context){
-    this.trees = [];
-    this.pages = [];
+  function PageParser(text, context){
+    this.context = context;
     this.generator = new Nehan.DocumentGenerator(text, context);
-    this.evaluator = new Nehan.PageEvaluator(context);
   }
 
   var reqAnimationFrame = (function(){
@@ -11997,167 +11978,54 @@ Nehan.PageStream = (function(){
   })();
 
   /**
-   @memberof Nehan.PageStream
-   @param page_no {int} - page index
-   @return {boolean}
-   */
-  PageStream.prototype.hasPage = function(page_no){
-    return (typeof this.trees[page_no] != "undefined");
-  };
-  /**
-   @memberof Nehan.PageStream
-   @return {boolean}
-   */
-  PageStream.prototype.hasNext = function(){
-    return this.generator.hasNext();
-  };
-  /**
-   @memberof Nehan.PageStream
-   @param status {boolean}
-   */
-  PageStream.prototype.setTerminate = function(status){
-    this.generator.setTerminate(status);
-  };
-  /**
-   calculate pages by blocking loop until max_page_count if defined.
-
-   @memberof Nehan.PageStream
-   @param max_page_count {int}
-   return {float} ellapsed time
-   */
-  PageStream.prototype.syncGet = function(max_page_count){
-    var page_no = 0;
-    max_page_count = max_page_count || -1;
-    this._setTimeStart();
-    while(this.hasNext()){
-      if(max_page_count >= 0 && page_no >= max_page_count){
-	break;
-      }
-      if(!this.hasPage(page_no)){
-	var tree = this.generator.yield();
-	if(tree){
-	  this.trees.push(tree);
-	  page_no++;
-	}
-      }
-    }
-    return this._getTimeElapsed();
-  };
-  /**
-   calculate all pages by asyncronous way.
-
-   @memberof Nehan.PageStream
+   @memberof Nehan.PageParser
    @param opt {Object}
-   @param opt.onProgress {Function} - fun {@link Nehan.Box} -> {@link Nehan.PageStream} -> ()
-   @param opt.onComplete {Function} - fun time:{Float} -> {@link Nehan.PageStream} -> ()
-   @param opt.onError {Function} - fun error:{String} -> {@link Nehan.PageStream} -> ()
+   @param opt.onProgress {Function} - fun {@link Nehan.Box} -> ()
+   @param opt.onComplete {Function} - fun time:{Float} -> ()
+   @param opt.onError {Function} - fun error:{String} -> ()
    @param opt.capturePageText {bool} output text node or not for each page object.
    @param opt.maxPageCount {int} upper bound of page count
    */
-  PageStream.prototype.asyncGet = function(opt){
-    var wait = opt.wait || 0;
-    var async_opt = {
-      capturePageText:(opt.capturePageText || false),
-      maxPageCount:(opt.maxPageCount || -1)
-    };
-    var max_page_count = opt.maxPageCount || -1;
-    Nehan.Args.merge(this, {
-      onComplete : function(time, ctx){},
-      onProgress : function(tree, ctx){},
-      onError : function(error, ctx){}
-    }, opt || {});
+  PageParser.prototype.parse = function(opt){
     this._setTimeStart();
-    this._asyncGet(wait, async_opt);
-  };
-  /**
-   @memberof Nehan.PageStream
-   @return {int}
-   */
-  PageStream.prototype.getPageCount = function(){
-    return this.trees.length;
-  };
-  /**
-   get evaluated page object.
-
-   @memberof Nehan.PageStream
-   @param page_no {int} - page index starts from 0.
-   @return {Nehan.Page}
-   */
-  PageStream.prototype.getPage = function(page_no){
-    if(this.pages[page_no]){
-      return this.pages[page_no];
-    }
-    var tree = this.trees[page_no] || null;
-    if(tree === null){
-      return null;
-    }
-    var page = this.evaluator.evaluate(tree);
-    this.pages[page_no] = page;
-    return page;
-  };
-  /**
-   get pre evaluated page tree.
-
-   @memberof Nehan.PageStream
-   @param page_no {int} - page index starts from 0.
-   @return {Nehan.Box}
-   */
-  PageStream.prototype.getTree = function(page_no){
-    return this.trees[page_no] || null;
-  };
-  /**
-   find logical page object by fn(Nehan.Box -> bool).
-
-   @memberof Nehan.PageStream
-   @param fn {Function} - Nehan.Box -> bool
-   @return {Nehan.Box}
-   */
-  PageStream.prototype.find = function(fn){
-    return Nehan.List.find(this.trees, fn);
-  };
-  /**
-   filter logical page object by fn(Nehan.Box -> bool).
-
-   @memberof Nehan.PageStream
-   @param fn {Function} - Nehan.Box -> bool
-   @return {Array.<Nehan.Box>}
-   */
-  PageStream.prototype.filter= function(fn){
-    return this.trees.filter(fn);
+    this._parse(
+      Nehan.Args.merge({}, {
+	capturePageText: false,
+	maxPageCount: Nehan.Config.maxPageCount,
+	onComplete: function(time){},
+	onProgress: function(tree){},
+	onError: function(error){}
+      }, opt || {})
+    );
   };
 
-  PageStream.prototype._setTimeStart = function(){
+  PageParser.prototype._setTimeStart = function(){
     this._timeStart = (new Date()).getTime();
     return this._timeStart;
   };
 
-  PageStream.prototype._getTimeElapsed = function(){
+  PageParser.prototype._getTimeElapsed = function(){
     return (new Date()).getTime() - this._timeStart;
   };
 
-  PageStream.prototype._asyncGet = function(wait, opt){
-    if(!this.generator.hasNext() || (opt.maxPageCount >= 0 && this.trees.length >= opt.maxPageCount)){
-      //this.onComplete(this._getTimeElapsed(), this);
-      this.onComplete.call(this, this._getTimeElapsed(), this);
+  PageParser.prototype._parse = function(opt){
+    if(!this.generator.hasNext() || (this.context.yieldCount >= opt.maxPageCount)){
+      opt.onComplete.call(this, this._getTimeElapsed(), this.context);
       return;
     }
-    // notice that result of yield is not a page object, it's abstruct layout tree,
-    // so you need to call 'getPage' to get actual page object.
     var tree = this.generator.yield();
     if(tree){
       if(opt.capturePageText){
 	tree.text = tree.toString();
       }
-      this.trees.push(tree);
-      //this.onProgress(tree, this);
-      this.onProgress.call(this, tree, this);
+      opt.onProgress.call(this, tree, this.context);
     }
     reqAnimationFrame(function(){
-      this._asyncGet(wait, opt);
+      this._parse(opt);
     }.bind(this));
   };
 
-  return PageStream;
+  return PageParser;
 })();
 
 
@@ -16088,7 +15956,10 @@ Nehan.ListItemGenerator = (function(){
     var content = context.parent.style.getListMarkerHtml(list_index + 1);
     var marker_markup = new Nehan.Tag("marker", content);
     var marker_style = context.createChildStyle(marker_markup, {
-      forceCss:{float:"start", measure:list_context.indentSize}
+      forceCss:{
+	float:"start",
+	measure:list_context.indentSize
+      }
     });
     var marker_context = context.createChildContext(marker_style);
     return new Nehan.BlockGenerator(marker_context);
@@ -16097,7 +15968,11 @@ Nehan.ListItemGenerator = (function(){
   ListItemGenerator.prototype._createListBodyGenerator = function(context, list_context){
     var body_markup = new Nehan.Tag("li-body");
     var body_style = context.createChildStyle(body_markup, {
-      forceCss:{display:"block", float:"start", measure:list_context.bodySize}
+      forceCss:{
+	display:"block",
+	float:"start",
+	measure:list_context.bodySize
+      }
     });
     var body_context =  context.createChildContext(body_style, {
       stream:context.stream // share li.stream for li-body.stream.
@@ -16434,7 +16309,9 @@ Nehan.DocumentGenerator = (function(){
   Nehan.Class.extend(DocumentGenerator, Nehan.LayoutGenerator);
 
   DocumentGenerator.prototype._yield = function(){
-    return this.generator.yield();
+    var page = this.generator.yield();
+    this.context.addPage(page);
+    return page;
   };
 
   DocumentGenerator.prototype._createDocumentStream = function(text){
@@ -16478,7 +16355,8 @@ Nehan.LayoutEvaluator = (function(){
      @constructor
      @param direction {String} - "hori" or "vert"
   */
-  function LayoutEvaluator(direction){
+  function LayoutEvaluator(context, direction){
+    this.context = context;
     this.direction = direction;
   }
 
@@ -16494,10 +16372,10 @@ Nehan.LayoutEvaluator = (function(){
   LayoutEvaluator.prototype._getEvaluator = function(tree){
     var is_vert = tree.context.style.isTextVertical();
     if(this.direction === "vert" && !is_vert){
-      return new Nehan.HoriEvaluator();
+      return new Nehan.HoriEvaluator(this.context);
     }
     if(this.direction === "hori" && is_vert){
-      return new Nehan.VertEvaluator();
+      return new Nehan.VertEvaluator(this.context);
     }
     return this;
   };
@@ -16667,7 +16545,7 @@ Nehan.LayoutEvaluator = (function(){
     var uri = new Nehan.Uri(link.context.style.getMarkupAttr("href"));
     var anchor_name = uri.getAnchorName();
     if(anchor_name){
-      var page_no = DocumentContext.getAnchorPageNo(anchor_name);
+      var page_no = this.context.getAnchorPageNo(anchor_name);
       link.classes.push("nehan-anchor-link");
       link.context.style.markup.setAttr("data-page", page_no);
     }
@@ -16702,8 +16580,8 @@ Nehan.VertEvaluator = (function(){
      @constructor
      @extends {Nehan.LayoutEvaluator}
   */
-  function VertEvaluator(){
-    Nehan.LayoutEvaluator.call(this, "vert");
+  function VertEvaluator(context){
+    Nehan.LayoutEvaluator.call(this, context, "vert");
   }
   Nehan.Class.extend(VertEvaluator, Nehan.LayoutEvaluator);
 
@@ -16987,8 +16865,8 @@ Nehan.HoriEvaluator = (function(){
      @constructor
      @extends {Nehan.LayoutEvaluator}
   */
-  function HoriEvaluator(){
-    Nehan.LayoutEvaluator.call(this, "hori");
+  function HoriEvaluator(context){
+    Nehan.LayoutEvaluator.call(this, context, "hori");
   }
   Nehan.Class.extend(HoriEvaluator, Nehan.LayoutEvaluator);
 
@@ -17177,6 +17055,7 @@ Nehan.RenderingContext = (function(){
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.Stylesheet.create());
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
+    this.pageEvaluator = opt.pageEvaluator || new Nehan.PageEvaluator(this);
   }
 
   RenderingContext.prototype.create = function(opt){
@@ -17189,7 +17068,8 @@ Nehan.RenderingContext = (function(){
       parallelGenerators:opt.parallelGenerators || [],
       layoutContext:this.layoutContext || null,
       selectors:this.selectors, // always same
-      documentContext:this.documentContext // always ame
+      documentContext:this.documentContext, // always saame
+      pageEvaluator:this.pageEvaluator // always same
     });
   };
 
@@ -17203,8 +17083,27 @@ Nehan.RenderingContext = (function(){
       parallelGenerators:opt.parallelGenerators || this.parallelGenerators,
       layoutContext:this.layoutContext || this.layoutContext,
       selectors:this.selectors, // always same
-      documentContext:this.documentContext // always ame
+      documentContext:this.documentContext, // always same
+      pageEvaluator:this.pageEvaluator // always same
     });
+  };
+
+  RenderingContext.prototype.addPage = function(page){
+    this.documentContext.addPage(page);
+  };
+
+  RenderingContext.prototype.getWritingDirection = function(){
+    return "vert"; // TODO
+  };
+
+  RenderingContext.prototype.getPage = function(index){
+    var page = this.documentContext.pages[index] || null;
+    if(page instanceof Nehan.Box){
+      page = this.pageEvaluator.evaluate(page);
+      this.documentContext.pages[index] = page;
+      return page;
+    }
+    return page;
   };
 
   RenderingContext.prototype.stringOfTree = function(){
@@ -17354,24 +17253,20 @@ Nehan.RenderingContext = (function(){
 
     // find max marker size from all list items.
     item_tags.forEach(function(item_tag, index){
-      // wee neeed [li][::marker] context.
-      var li_tag = new Nehan.Tag("li", "&nbsp;"); // dummy content for PseudoSelector.test
-      var li_style = this.createTmpChildStyle(li_tag);
-      var li_context = this.createChildContext(li_style);
+      // wee neeed [li][li::marker] context.
+      var item_style = this.createTmpChildStyle(item_tag);
+      var item_context = this.createChildContext(item_style);
       var marker_tag = new Nehan.Tag("marker");
       var marker_content = this.style.getListMarkerHtml(index + 1);
       marker_tag.setContent(marker_content);
-      var marker_style = li_context.createTmpChildStyle(marker_tag, {
-	forceCss:{display:"inline"}
-      });
-      var marker_context = li_context.createChildContext(marker_style);
+      var marker_style = item_context.createTmpChildStyle(marker_tag);
+      var marker_context = item_context.createChildContext(marker_style);
       var marker_box = new Nehan.InlineBlockGenerator(marker_context).yield();
-      //console.info("marker box:", marker_box);
       var marker_measure = marker_box? marker_box.getLayoutMeasure() : 0;
       indent_size = Math.max(indent_size, marker_measure);
     }.bind(this));
 
-    //console.info("indent size:%d", indent_size);
+    //console.info("indent size:%d, body size:%d", indent_size, (this.style.contentMeasure - indent_size));
 
     return {
       itemCount:item_count,
@@ -17541,8 +17436,8 @@ Nehan.RenderingContext = (function(){
     return this.documentContext.getAnchorPageNo(anchor_name);
   };
   
-  RenderingContext.prototype.createOutlineElement = function(callbacks){
-    return this.documentContext.createBodyOutlineElement(callbacks);
+  RenderingContext.prototype.createOutlineElementByName = function(outline_name, callbacks){
+    return this.documentContext.createOutlineElementByName(outline_name, callbacks);
   };
 
   RenderingContext.prototype.createChildContext = function(child_style, opt){
@@ -18084,22 +17979,30 @@ Nehan.RenderingContext = (function(){
 
 Nehan.Document = (function(){
   function Document(text){
-    this.text = text;
+    this.text = text || "no text";
     this.context = new Nehan.RenderingContext();
   }
 
   Document.prototype.render = function(opt){
-    this.pageStream = new Nehan.PageStream(this.text, this.context);
-    this.pageStream.asyncGet(opt);
+    new Nehan.PageParser(this.text, this.context).parse(opt);
     return this;
   };
   
   Document.prototype.getPage = function(index){
-    return this.pageStream.getPage(index);
+    return this.context.getPage(index);
   };
 
   Document.prototype.getPageCount = function(index){
-    return this.pageStream.getPageCount();
+    return this.context.yieldCount;
+  };
+
+  Document.prototype.setContent = function(text){
+    this.text = text;
+    return this;
+  };
+
+  Document.prototype.getContent = function(text){
+    return this.text;
   };
 
   Document.prototype.setStyle = function(key, value){
@@ -18121,7 +18024,7 @@ Nehan.Document = (function(){
   };
 
   Document.prototype.createOutlineElement = function(callbacks){
-    return this.context.createBodyOutlineElement(callbacks);
+    return this.context.createOutlineElementByName("body", callbacks);
   };
 
   return Document;

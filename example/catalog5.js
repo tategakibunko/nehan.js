@@ -4,37 +4,22 @@ var LayoutTest = (function(){
   };
 
   var create_engine = function(opt){
+    var document = new Nehan.Document();
     var dir = opt.direction || "vert";
-    var flow = (dir === "vert")? "tb-rl" : "lr-tb";
-    var engine = Nehan.setup({
-      style:{
-	body:{
-	  flow:flow,
-	  fontSize:(opt.fontSize || 16),
-	  width:(opt.width || 500),
-	  height:400
-	},
-      },
-      display:{
-	root:"body"
-	//direction:(opt.direction || "vert"),
-	//fontSize:(opt.fontSize || 16),
-	//width:(opt.width || 500),
-	//height:(opt.height || 450)
-	//height:400
-      }
+    document.setStyle("body", {
+      flow:((dir === "vert")? "tb-rl" : "lr-tb"),
+      fontSize:(opt.fontSize || 16),
+      width:(opt.width || 500),
+      height:400
     });
-
-    engine.setStyles(TestStyles);
-
-    return engine;
+    document.setStyles(TestStyles);
+    return document;
   };
 
   var run_test = function($dom, opt){
     var script = opt.script || get_script(opt.name || "plain");
     var engine = create_engine(opt);
-
-    engine.createPageStream(script).asyncGet({
+    engine.setContent(script).render({
       onProgress : function(tree, ctx){
 	var page = ctx.getPage(tree.pageNo); // tree -> page
 	$dom.append(page.element);

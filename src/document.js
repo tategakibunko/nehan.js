@@ -1,21 +1,29 @@
 Nehan.Document = (function(){
   function Document(text){
-    this.text = text;
+    this.text = text || "no text";
     this.context = new Nehan.RenderingContext();
   }
 
   Document.prototype.render = function(opt){
-    this.pageStream = new Nehan.PageStream(this.text, this.context);
-    this.pageStream.asyncGet(opt);
+    new Nehan.PageParser(this.text, this.context).parse(opt);
     return this;
   };
   
   Document.prototype.getPage = function(index){
-    return this.pageStream.getPage(index);
+    return this.context.getPage(index);
   };
 
   Document.prototype.getPageCount = function(index){
-    return this.pageStream.getPageCount();
+    return this.context.yieldCount;
+  };
+
+  Document.prototype.setContent = function(text){
+    this.text = text;
+    return this;
+  };
+
+  Document.prototype.getContent = function(text){
+    return this.text;
   };
 
   Document.prototype.setStyle = function(key, value){
@@ -37,7 +45,7 @@ Nehan.Document = (function(){
   };
 
   Document.prototype.createOutlineElement = function(callbacks){
-    return this.context.createBodyOutlineElement(callbacks);
+    return this.context.createOutlineElementByName("body", callbacks);
   };
 
   return Document;

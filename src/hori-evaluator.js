@@ -6,8 +6,8 @@ Nehan.HoriEvaluator = (function(){
      @constructor
      @extends {Nehan.LayoutEvaluator}
   */
-  function HoriEvaluator(){
-    Nehan.LayoutEvaluator.call(this, "hori");
+  function HoriEvaluator(context){
+    Nehan.LayoutEvaluator.call(this, context, "hori");
   }
   Nehan.Class.extend(HoriEvaluator, Nehan.LayoutEvaluator);
 

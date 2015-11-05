@@ -7,6 +7,7 @@ Nehan.DocumentContext = (function(){
   function DocumentContext(){
     this.documentType = "html";
     this.documentHeader = null;
+    this.pages = [];
     this.pageNo = 0;
     this.charPos = 0;
     this.anchors = {};
@@ -16,25 +17,6 @@ Nehan.DocumentContext = (function(){
     this.rootBlockId = 0; // unique block-id for direct children of <body>.
     this.lineBreakCount = 0; // count of <BR> tag, used to generate paragraph-id(<block_id>-<br_count>).
   }
-
-  var __get_outline_contexts_by_name = function(section_root_name){
-    return this.outlineContexts.filter(function(context){
-      return context.getMarkupName() === section_root_name;
-    });
-  };
-
-  var __convert_outline_context_to_element = function(context, callbacks){
-    var tree = Nehan.OutlineContextParser.parse(context);
-    return tree? Nehan.SectionTreeConverter.convert(tree, callbacks) : null;
-  };
-
-  var __create_outline_elements_by_name = function(section_root_name, callbacks){
-    var contexts = __get_outline_contexts_by_name(section_root_name);
-    return contexts.reduce(function(ret, context){
-      var element = __convert_outline_context_to_element(context, callbacks);
-      return element? ret.concat(element) : ret;
-    }, []);
-  };
 
   /**
    @memberof Nehan.DocumentContext
@@ -93,6 +75,13 @@ Nehan.DocumentContext = (function(){
   };
   /**
    @memberof Nehan.DocumentContext
+   @param page {Nehan.Box | Nehan.Page}
+   */
+  DocumentContext.prototype.addPage = function(page){
+    this.pages.push(page);
+  };
+  /**
+   @memberof Nehan.DocumentContext
    @param outline_context {Nehan.OutlineContext}
    */
   DocumentContext.prototype.addOutlineContext = function(outline_context){
@@ -148,25 +137,6 @@ Nehan.DocumentContext = (function(){
     return [this.blockId, this.lineBreakCount].join("-");
   };
   /**
-   * this is shortcut function for __create_outline_elements_by_name("body", callbacks).<br>
-   * if many outline elements exists(that is, multiple '&lt;body&gt;' exists), use first one only.<br>
-   * for details of callback function, see {@link Nehan.SectionTreeConverter}.
-
-   @memberof Nehan.DocumentContext
-   @param callbacks {Object} - hooks for each outline element.
-   @param callbacks.onClickLink {Function}
-   @param callbacks.createRoot {Function}
-   @param callbacks.createChild {Function}
-   @param callbacks.createLink {Function}
-   @param callbacks.createToc {Function}
-   @param callbacks.createPageNoItem {Function}
-   @return {DOMElement}
-   */
-  DocumentContext.prototype.createBodyOutlineElement = function(callbacks){
-    var elements = __create_outline_elements_by_name("body", callbacks);
-    return (elements.length === 0)? null : elements[0];
-  };
-  /**
    * create outline element for [section_root_name], returns multiple elements,<br>
    * because there may be multiple section root(&lt;figure&gt;, &lt;fieldset&gt; ... etc) in document.<br>
    * for details of callback function, see {@link Nehan.SectionTreeConverter}.
@@ -181,8 +151,23 @@ Nehan.DocumentContext = (function(){
    @param callbacks.createToc {Function}
    @param callbacks.createPageNoItem {Function}
    */
-  DocumentContext.prototype.createOutlineElementsByName = function(section_root_name, callbacks){
-    return __create_outline_elements_by_name(section_root_name, callbacks);
+  DocumentContext.prototype.createOutlineElementByName = function(section_root_name, callbacks){
+    var contexts = this._getOutlineContextByName(section_root_name);
+    return contexts.reduce(function(ret, context){
+      var element = this._convertOutlineContextToElement(context, callbacks);
+      return element? ret.concat(element) : ret;
+    }.bind(this), []);
+  };
+
+  DocumentContext.prototype._getOutlineContextByName = function(section_root_name){
+    return this.outlineContexts.filter(function(context){
+      return context.getMarkupName() === section_root_name;
+    });
+  };
+
+  DocumentContext.prototype._convertOutlineContextToElement = function(context, callbacks){
+    var tree = Nehan.OutlineContextParser.parse(context);
+    return tree? Nehan.SectionTreeConverter.convert(tree, callbacks) : null;
   };
 
   return DocumentContext;

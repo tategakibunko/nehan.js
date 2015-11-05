@@ -16,6 +16,7 @@ Nehan.RenderingContext = (function(){
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.Stylesheet.create());
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
+    this.pageEvaluator = opt.pageEvaluator || new Nehan.PageEvaluator(this);
   }
 
   RenderingContext.prototype.create = function(opt){
@@ -28,7 +29,8 @@ Nehan.RenderingContext = (function(){
       parallelGenerators:opt.parallelGenerators || [],
       layoutContext:this.layoutContext || null,
       selectors:this.selectors, // always same
-      documentContext:this.documentContext // always ame
+      documentContext:this.documentContext, // always saame
+      pageEvaluator:this.pageEvaluator // always same
     });
   };
 
@@ -42,8 +44,27 @@ Nehan.RenderingContext = (function(){
       parallelGenerators:opt.parallelGenerators || this.parallelGenerators,
       layoutContext:this.layoutContext || this.layoutContext,
       selectors:this.selectors, // always same
-      documentContext:this.documentContext // always ame
+      documentContext:this.documentContext, // always same
+      pageEvaluator:this.pageEvaluator // always same
     });
+  };
+
+  RenderingContext.prototype.addPage = function(page){
+    this.documentContext.addPage(page);
+  };
+
+  RenderingContext.prototype.getWritingDirection = function(){
+    return "vert"; // TODO
+  };
+
+  RenderingContext.prototype.getPage = function(index){
+    var page = this.documentContext.pages[index] || null;
+    if(page instanceof Nehan.Box){
+      page = this.pageEvaluator.evaluate(page);
+      this.documentContext.pages[index] = page;
+      return page;
+    }
+    return page;
   };
 
   RenderingContext.prototype.stringOfTree = function(){
@@ -193,24 +214,20 @@ Nehan.RenderingContext = (function(){
 
     // find max marker size from all list items.
     item_tags.forEach(function(item_tag, index){
-      // wee neeed [li][::marker] context.
-      var li_tag = new Nehan.Tag("li", "&nbsp;"); // dummy content for PseudoSelector.test
-      var li_style = this.createTmpChildStyle(li_tag);
-      var li_context = this.createChildContext(li_style);
+      // wee neeed [li][li::marker] context.
+      var item_style = this.createTmpChildStyle(item_tag);
+      var item_context = this.createChildContext(item_style);
       var marker_tag = new Nehan.Tag("marker");
       var marker_content = this.style.getListMarkerHtml(index + 1);
       marker_tag.setContent(marker_content);
-      var marker_style = li_context.createTmpChildStyle(marker_tag, {
-	forceCss:{display:"inline"}
-      });
-      var marker_context = li_context.createChildContext(marker_style);
+      var marker_style = item_context.createTmpChildStyle(marker_tag);
+      var marker_context = item_context.createChildContext(marker_style);
       var marker_box = new Nehan.InlineBlockGenerator(marker_context).yield();
-      //console.info("marker box:", marker_box);
       var marker_measure = marker_box? marker_box.getLayoutMeasure() : 0;
       indent_size = Math.max(indent_size, marker_measure);
     }.bind(this));
 
-    //console.info("indent size:%d", indent_size);
+    //console.info("indent size:%d, body size:%d", indent_size, (this.style.contentMeasure - indent_size));
 
     return {
       itemCount:item_count,
@@ -380,8 +397,8 @@ Nehan.RenderingContext = (function(){
     return this.documentContext.getAnchorPageNo(anchor_name);
   };
   
-  RenderingContext.prototype.createOutlineElement = function(callbacks){
-    return this.documentContext.createBodyOutlineElement(callbacks);
+  RenderingContext.prototype.createOutlineElementByName = function(outline_name, callbacks){
+    return this.documentContext.createOutlineElementByName(outline_name, callbacks);
   };
 
   RenderingContext.prototype.createChildContext = function(child_style, opt){

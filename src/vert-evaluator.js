@@ -6,8 +6,8 @@ Nehan.VertEvaluator = (function(){
      @constructor
      @extends {Nehan.LayoutEvaluator}
   */
-  function VertEvaluator(){
-    Nehan.LayoutEvaluator.call(this, "vert");
+  function VertEvaluator(context){
+    Nehan.LayoutEvaluator.call(this, context, "vert");
   }
   Nehan.Class.extend(VertEvaluator, Nehan.LayoutEvaluator);
 

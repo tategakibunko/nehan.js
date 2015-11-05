@@ -2,10 +2,11 @@ Nehan.PagedElement = (function(){
   /**
      @memberof Nehan
      @class PagedElement
-     @classdesc DOM element with {@link Nehan.PageStream}
+     @classdesc DOM element with {@link Nehan.Document}
   */
   function NehanPagedElement(){
     this.pageNo = 0;
+    this.document = new Nehan.Document();
     this.element = document.createElement("div");
   }
 
@@ -17,15 +18,6 @@ Nehan.PagedElement = (function(){
    */
   NehanPagedElement.prototype.isLastPage = function(){
     return this.getPageNo() + 1 >= this.getPageCount();
-  };
-  /**
-   get inner {@link Nehan.Engine} interfaces.
-
-   @memberof Nehan.PagedElement
-   @return {Nehan.Engine}
-   */
-  NehanPagedElement.prototype.getEngine = function(){
-    return this.engine;
   };
   /**
    get inner DOMElement containning current page element.
@@ -42,30 +34,22 @@ Nehan.PagedElement = (function(){
    @return {String}
    */
   NehanPagedElement.prototype.getContent = function(){
-    return this._pageStream? this._pageStream.text : "";
+    return this.document.getContent();
   };
   /**
    @memberof Nehan.PagedElement
    @return {int}
    */
   NehanPagedElement.prototype.getPageCount = function(){
-    return this._pageStream? this._pageStream.getPageCount() : 0;
+    return this.document.getPageCount();
   };
   /**
    @memberof Nehan.PagedElement
+   @param index {int}
    @return {Nehan.Page}
    */
-  NehanPagedElement.prototype.getPage = function(page_no){
-    return this._pageStream? this._pageStream.getPage(page_no) : null;
-  };
-  /**
-   @memberof Nehan.PagedElement
-   @param page_no {int} - page index starts from 0.
-   @return {DOMElement}
-   */
-  NehanPagedElement.prototype.getPagedElement = function(page_no){
-    var page = this.getPage(page_no);
-    return page? page.element : null;
+  NehanPagedElement.prototype.getPage = function(index){
+    return this.document.getPage(index);
   };
   /**
    get current page index
@@ -75,26 +59,6 @@ Nehan.PagedElement = (function(){
    */
   NehanPagedElement.prototype.getPageNo = function(){
     return this.pageNo;
-  };
-  /**
-   find logical page object by fn(Nehan.Box -> bool).
-
-   @memberof Nehan.PagedElement
-   @param fn {Function} - Nehan.Box -> bool
-   @return {Nehan.Box}
-   */
-  NehanPagedElement.prototype.find = function(fn){
-    return this._pageStream? this._pageStream.find(fn) : null;
-  };
-  /**
-   filter logical page object by fn(Nehan.Box -> bool).
-
-   @memberof Nehan.PagedElement
-   @param fn {Function} - Nehan.Box -> bool
-   @return {Array.<Nehan.Page>}
-   */
-  NehanPagedElement.prototype.filter= function(fn){
-    return this._pageStream? this._pageStream.filter(fn) : [];
   };
   /**
    set inner page position to next page and return next page if exists, else null.
@@ -129,7 +93,7 @@ Nehan.PagedElement = (function(){
    @param value {selector_value}
    */
   NehanPagedElement.prototype.setStyle = function(name, value){
-    this.engine.setStyle(name, value);
+    this.document.setStyle(name, value);
     return this;
   };
   /**
@@ -139,21 +103,28 @@ Nehan.PagedElement = (function(){
    @param value {Object}
    */
   NehanPagedElement.prototype.setStyles = function(values){
-    this.engine.setStyles(values);
+    this.document.setStyles(values);
     return this;
   };
   /**
-   set content string to paged element and start parsing.
-
+   set content string.
    @memberof Nehan.PagedElement
    @param content {String} - html text.
+   */
+  NehanPagedElement.prototype.setContent = function(content, opt){
+    this.document.setContent(content);
+    return this;
+  };
+  /**
+   start parsing.
+   @memberof Nehan.PagedElement
    @param opt {Object} - optinal argument
    @param opt.onProgress {Function} - fun {@link Nehan.Box} -> {@link Nehan.PagedElement} -> ()
    @param opt.onComplete {Function} - fun time:{Float} -> {@link Nehan.PagedElement} -> ()
    @param opt.capturePageText {bool} output text node or not for each page object.
    @param opt.maxPageCount {int} - upper bound of page count
    @example
-   * paged_element.setContent("<h1>hello, nehan.js!!</h1>", {
+   * paged_element.render({
    *   onProgress:function(tree, ctx){
    *     console.log("page no:%d", tree.pageNo);
    *     console.log("progress:%d", tree.percent);
@@ -163,27 +134,9 @@ Nehan.PagedElement = (function(){
    *   }
    * });
    */
-  NehanPagedElement.prototype.setContent = function(content, opt){
-    this.document = new Nehan.Document(content);
-    this.document.asyncGet(opt);
-    this._pageStream = this.engine.createPageStream(content);
-    this._asyncGet(opt || {});
+  NehanPagedElement.prototype.render = function(opt){
+    this.document.render(opt);
     return this;
-  };
-  /**
-   append additional text to paged element.
-
-   @memberof Nehan.PagedElement
-   @param content {String} - html text.
-   @param opt {Object} - optinal argument
-   @param opt.onProgress {Function} - fun tree ctx -> ()
-   @param opt.onComplete {Function} - fun time ctx -> ()
-   @param opt.capturePageText {bool} output text node or not for each page object.
-   @param opt.maxPageCount {int} - upper bound of page count
-   */
-  NehanPagedElement.prototype.addContent = function(content, opt){
-    this._pageStream.addText(content);
-    this._asyncGet(opt || {});
   };
   /**
    set current page index to [page_no]
@@ -214,29 +167,9 @@ Nehan.PagedElement = (function(){
    @param callbacks {Object} - see {@link Nehan.SectionTreeConverter}
    */
   NehanPagedElement.prototype.createOutlineElement = function(callbacks){
-    return this.engine.createOutlineElement(callbacks);
+    return this.document.createOutlineElement(callbacks);
   };
 
-  NehanPagedElement.prototype._asyncGet = function(opt){
-    this._pageStream.asyncGet({
-      capturePageText:(opt.capturePageText || false),
-      maxPageCount:(opt.maxPageCount || -1),
-      onProgress : function(tree, ctx){
-	if(tree.pageNo === 0){
-	  this.setPage(tree.pageNo);
-	}
-	if(opt.onProgress){
-	  opt.onProgress(tree, this);
-	}
-      }.bind(this),
-      onComplete : function(time, ctx){
-	if(opt.onComplete){
-	  opt.onComplete(time, this);
-	}
-      }.bind(this)
-    });
-  };
-  
   return NehanPagedElement;
 })();
 

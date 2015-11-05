@@ -6,7 +6,8 @@ Nehan.LayoutEvaluator = (function(){
      @constructor
      @param direction {String} - "hori" or "vert"
   */
-  function LayoutEvaluator(direction){
+  function LayoutEvaluator(context, direction){
+    this.context = context;
     this.direction = direction;
   }
 
@@ -22,10 +23,10 @@ Nehan.LayoutEvaluator = (function(){
   LayoutEvaluator.prototype._getEvaluator = function(tree){
     var is_vert = tree.context.style.isTextVertical();
     if(this.direction === "vert" && !is_vert){
-      return new Nehan.HoriEvaluator();
+      return new Nehan.HoriEvaluator(this.context);
     }
     if(this.direction === "hori" && is_vert){
-      return new Nehan.VertEvaluator();
+      return new Nehan.VertEvaluator(this.context);
     }
     return this;
   };
@@ -195,7 +196,7 @@ Nehan.LayoutEvaluator = (function(){
     var uri = new Nehan.Uri(link.context.style.getMarkupAttr("href"));
     var anchor_name = uri.getAnchorName();
     if(anchor_name){
-      var page_no = DocumentContext.getAnchorPageNo(anchor_name);
+      var page_no = this.context.getAnchorPageNo(anchor_name);
       link.classes.push("nehan-anchor-link");
       link.context.style.markup.setAttr("data-page", page_no);
     }

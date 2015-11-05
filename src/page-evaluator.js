@@ -13,7 +13,7 @@ Nehan.PageEvaluator = (function(){
   PageEvaluator.prototype._getEvaluator = function(){
     var body_selector = this.context.selectors.get("body") || new Nehan.Selector("body", {flow:Nehan.Display.flow});
     var flow = body_selector.getValue().flow || Nehan.Display.flow;
-    return (flow === "tb-rl" || flow === "tb-lr")? new Nehan.VertEvaluator() : new Nehan.HoriEvaluator();
+    return (flow === "tb-rl" || flow === "tb-lr")? new Nehan.VertEvaluator(this.context) : new Nehan.HoriEvaluator(this.context);
   };
 
   /**

@@ -15,7 +15,9 @@ Nehan.DocumentGenerator = (function(){
   Nehan.Class.extend(DocumentGenerator, Nehan.LayoutGenerator);
 
   DocumentGenerator.prototype._yield = function(){
-    return this.generator.yield();
+    var page = this.generator.yield();
+    this.context.addPage(page);
+    return page;
   };
 
   DocumentGenerator.prototype._createDocumentStream = function(text){
