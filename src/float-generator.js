@@ -16,18 +16,28 @@ Nehan.FloatGenerator = (function(){
   Nehan.Class.extend(FloatGenerator, Nehan.LayoutGenerator);
 
   FloatGenerator.prototype._yield = function(){
+    console.log("FloatGenerator::_yield");
     var stack = this._yieldFloatStack();
     var rest_measure = this.context.layoutContext.getInlineRestMeasure();
     var rest_extent = stack.getExtent();
     var root_measure = rest_measure;
     if(rest_measure <= 0 || rest_extent <= 0){
+      // [root]
+      //   [root_clone(this.context)]
+      //     [space(this.context.child)]
+      if(this.context.child.hasNext()){
+	this.context.parent.child = this.context.child;
+	this.context.child.parent = this.context.parent;
+	return this.context.parent.yieldChildLayout();
+      }
+      this.context.setTerminate(true);
       return null;
     }
     return this._yieldFloat(stack, root_measure, rest_measure, rest_extent);
   };
 
   FloatGenerator.prototype._yieldFloat = function(stack, root_measure, rest_measure, rest_extent){
-    //console.log("_yieldFloat(root_m:%d, rest_m:%d, rest_e:%d)", root_measure, rest_measure, rest_extent);
+    console.log("_yieldFloat(root_m:%d, rest_m:%d, rest_e:%d)", root_measure, rest_measure, rest_extent);
 
     if(rest_measure <= 0){
       return null;
@@ -50,7 +60,7 @@ Nehan.FloatGenerator = (function(){
     var group = stack.pop(flow); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
     var rest_rest_measure = rest_measure - group.getMeasure(flow); // rest of 'rest measure'
     var rest = this._yieldFloat(stack, root_measure, rest_rest_measure, group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
-    var group_set = this._wrapFloat(group, rest, rest_measure); // wrap these 2 floated layout as one block.
+    var group_set = this._wrapInlineSet(group, rest, rest_measure); // wrap these 2 floated layout as one block.
 
     /*
       To understand rest_extent_space, remember that this func is called recursivelly,
@@ -71,7 +81,12 @@ Nehan.FloatGenerator = (function(){
     if(rest_extent_space <= 0){
       if(!this.hasNext()){
 	// TODO
-	/*
+	// before: [root] -> [root(clone)] -> [child]
+	//  after: [root] -> [child]
+	
+
+
+	/* old version
 	// before: [root] -> [float(this)] -> [root(clone)] -> [child]
 	//  after: [root] -> [child]
 	var root = this._parent;
@@ -99,52 +114,19 @@ Nehan.FloatGenerator = (function(){
       --------------------------
     */
     // if there is space in block-flow direction, yield rest space and wrap them(floated-set and rest-space).
+    console.log("rest extent space:%d", rest_extent_space);
     var space = this._yieldFloatSpace(prev_group, rest_measure, rest_extent_space);
-    return this._wrapBlocks([group_set, space]);
-  };
-  
-  FloatGenerator.prototype._sortFloatRest = function(floated, rest){
-    var floated_elements = floated.getElements();
-    var elements = floated.isFloatStart()? floated_elements.concat(rest) : [rest].concat(floated_elements);
-    return elements.filter(function(element){
-      return element !== null;
-    });
-  };
-
-  FloatGenerator.prototype._wrapBlocks = function(blocks){
-    var flow = this.context.style.flow;
-    var elements = blocks.filter(function(block){
-      return block !== null;
-    });
-    var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
-    var extent = Nehan.List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
-    var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
-
-    // wrapping block always float to start direction
-    return this.context.style.createChild("div", {"float":"start", measure:measure}).createBlock({
-      elements:elements,
-      breakAfter:break_after,
-      extent:extent
-    });
-  };
-
-  FloatGenerator.prototype._wrapFloat = function(floated, rest, measure){
-    var flow = this.context.style.flow;
-    var extent = floated.getExtent(flow);
-    var elements = this._sortFloatRest(floated, rest || null);
-    var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
-    return this.context.style.createChild("div", {"float":"start", measure:measure}).createBlock({
-      elements:elements,
-      breakAfter:break_after,
-      extent:extent
-    });
+    return this._wrapBlockSet([group_set, space]);
   };
   
   FloatGenerator.prototype._yieldFloatSpace = function(float_group, measure, extent){
-    //console.log("yieldFloatSpace(c = %o, m = %d, e = %d), page_no:%d", context, measure, extent, DocumentContext.getPageNo());
-    this.context.childGenerator.context.style.forceUpdateContextSize(measure, extent);
-    this.context.childGenerator.context.floatGroup = float_group;
-    return this.context.yieldChildLayout();
+    console.info(">>>>>>>>>>>> _yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
+    this.context.layoutContext.inline.maxMeasure = measure;
+    this.context.layoutContext.block.maxExtent = extent;
+    this.context.style.forceUpdateContextSize(measure, extent);
+    var result =  this.context.yieldChildLayout();
+    console.log("context:%o, hasnext:%o", this.context.child, this.context.child.hasNext());
+    return result;
   };
   
   FloatGenerator.prototype._yieldFloatStack = function(){
@@ -161,6 +143,58 @@ Nehan.FloatGenerator = (function(){
       }
     });
     return new Nehan.FloatGroupStack(this.context.style.flow, start_blocks, end_blocks);
+  };
+
+  FloatGenerator.prototype._sortFloatRest = function(floated, rest){
+    var floated_elements = floated.getElements();
+    var elements = floated.isFloatStart()? floated_elements.concat(rest) : [rest].concat(floated_elements);
+    return elements.filter(function(element){
+      return element !== null;
+    });
+  };
+
+  // wrap.measure = e1.measure + e2.measure
+  // wrap.extent = max(e1.extent, e2.extent)
+  // [wrap][e1][e2][/wrap]
+  FloatGenerator.prototype._wrapInlineSet = function(floated, rest, measure){
+    var flow = this.context.style.flow;
+    var extent = floated.getExtent(flow);
+    var elements = this._sortFloatRest(floated, rest || null);
+    var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
+    var wrap_style = this.context.createTmpChildStyle(new Nehan.Tag("div"), {
+      measure:measure,
+      extent:extent
+    });
+    return wrap_style.createBlock(this.context, {
+      elements:elements,
+      breakAfter:break_after
+    });
+  };
+
+  // wrap.measure = e1.measure = e2.measure
+  // wrap.extent = e1.extent + e2.extent
+  // [wrap]
+  //   [e1]
+  //   [e2]
+  // [/wrap]
+  FloatGenerator.prototype._wrapBlockSet = function(blocks){
+    console.log("wrap blocks:%o", blocks);
+    var flow = this.context.style.flow;
+    var elements = blocks.filter(function(block){
+      return block !== null;
+    });
+    var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
+    var extent = Nehan.List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
+    var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
+    var wrap_style = this.context.createTmpChildStyle(new Nehan.Tag("div"), {
+      float:"start",
+      measure:measure,
+      extent:extent
+    });
+    return wrap_style.createBlock(this.context, {
+      elements:elements,
+      breakAfter:break_after
+    });
   };
 
   return FloatGenerator;

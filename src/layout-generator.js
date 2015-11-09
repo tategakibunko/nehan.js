@@ -35,13 +35,11 @@ Nehan.LayoutGenerator = (function(){
     console.groupEnd();
 
     // increment yield count
-    if(box !== null){
-      this.context.yieldCount++;
-    }
+    this.context.yieldCount++;
 
     // to avoid infinite loop, raise error if too many yielding.
     if(this.context.yieldCount > Nehan.Config.maxYieldCount){
-      console.error("[%s]too many yield! gen:%o, context:%o", this.context.markup.name, this, this.context);
+      console.error("[%s]too many yield!:%o", this.context.getGeneratorName(), this);
       throw "too many yield";
     }
     return box;

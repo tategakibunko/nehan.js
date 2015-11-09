@@ -40,7 +40,7 @@ Nehan.RenderingContext = (function(){
       style:opt.style || this.style,
       stream:opt.stream || this.stream,
       lazyOutput:opt.lazyOutput || this.lazyOutput,
-      floatedGenerators:opt.floatedGenerators || this.floatedGenerators,
+      floatGenerators:opt.floatedGenerators || this.floatedGenerator,
       parallelGenerators:opt.parallelGenerators || this.parallelGenerators,
       layoutContext:this.layoutContext || this.layoutContext,
       selectors:this.selectors, // always same
@@ -132,43 +132,27 @@ Nehan.RenderingContext = (function(){
     return this.isFirstOutput()? this.style.getEdgeStart() : 0;
   };
 
-  RenderingContext.prototype.getParentRestExtent = function(){
-    return this.parent.layoutContext.getBlockRestExtent();
-  };
-
-  RenderingContext.prototype.getParentRestMeasure = function(){
-    return this.parent.layoutContext.getInlineRestMeasure();
-  };
-
   RenderingContext.prototype.createInlineLayoutContext = function(){
     var edge_measure = this.getContextEdgeMeasure();
-
-    // inline with parent
-    if(this.parent && this.parent.layoutContext){
-      return this.layoutContext = new Nehan.LayoutContext(
-	//this.layoutContext.block,
-	new Nehan.BlockContext(this.getParentRestExtent()),
-	new Nehan.InlineContext(this.getParentRestMeasure() - edge_measure)
-      );
-    }
-
-    return new Nehan.LayoutContext(
-      //this.layoutContext.block,
-      new Nehan.BlockContext(this.getParentRestExtent()),
-      new Nehan.InlineContext(this.style.outerMeasure - edge_measure)
+    var parent_context = this.parent.layoutContext; // inline must have parent.
+    return this.layoutContext = new Nehan.LayoutContext(
+      new Nehan.BlockContext(parent_context.getBlockRestExtent()),
+      new Nehan.InlineContext(parent_context.getInlineRestMeasure() - edge_measure)
     );
   };
 
   RenderingContext.prototype.createBlockLayoutContext = function(){
     var edge_extent = this.getContextEdgeExtent();
+    var parent_context = this.parent? this.parent.layoutContext : null;
 
     // block with parent
-    if(this.parent && this.parent.layoutContext){
-      return this.layoutContext = new Nehan.LayoutContext(
-	new Nehan.BlockContext(this.getParentRestExtent() - edge_extent, {
+    if(parent_context){
+      return new Nehan.LayoutContext(
+	new Nehan.BlockContext(parent_context.getBlockRestExtent() - edge_extent, {
 	  lineNo:this.layoutContext.lineNo
 	}),
-	new Nehan.InlineContext(this.style.contentMeasure)
+	//new Nehan.InlineContext(this.style.contentMeasure)
+	new Nehan.InlineContext(parent_context.getInlineRestMeasure())
       );
     }
 
@@ -180,9 +164,10 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createInlineBlockLayoutContext = function(){
+    var parent_context = this.parent.layoutContext;
     return new Nehan.LayoutContext(
-      new Nehan.BlockContext(this.parent.layoutContext.getBlockRestExtent() - this.style.getEdgeExtent()),
-      new Nehan.InlineContext(this.parent.layoutContext.getInlineRestMeasure() - this.style.getEdgeMeasure())
+      new Nehan.BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
+      new Nehan.InlineContext(parent_context.getInlineRestMeasure() - this.style.getEdgeMeasure())
     );
   };
 
@@ -192,6 +177,12 @@ Nehan.RenderingContext = (function(){
       this.generator instanceof Nehan.TextGenerator ||
       this.generator instanceof Nehan.InlineGenerator
     );
+  };
+
+  RenderingContext.prototype.resizeLayout = function(measure, extent){
+    this.style.forceUpdateContextSize(measure, extent);
+    this.layoutContext.block.maxExtent = extent;
+    this.layoutContext.inline.maxMeasure = measure;
   };
 
   RenderingContext.prototype.createLayoutContext = function(){
@@ -242,6 +233,9 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.initLayoutContext = function(){
     this.layoutContext = this.createLayoutContext();
+    if(this.layoutContext){
+      console.log("start layout context:inline max = %d, block max = %d", this.layoutContext.inline.maxMeasure, this.layoutContext.block.maxExtent);
+    }
   };
 
   RenderingContext.prototype.initListContext = function(){
@@ -279,9 +273,6 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.setOwnerGenerator = function(generator){
     this.generator = generator;
-    var markup = this.style? this.style.markup : null;
-    var measure = this.layoutContext? this.layoutContext.inline.maxMeasure : "auto";
-    var extent = this.layoutContext? this.layoutContext.block.maxExtent : "auto";
     //console.log("%s created, context = %o(m=%o, e=%o)", this.getGeneratorName(), this, measure, extent);
   };
 
@@ -335,6 +326,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.pushCache = function(element){
+    console.log("push cache:", element);
     /*
     var cache_count = element.cacheCount || 0;
     if(cache_count > 0){
@@ -416,8 +408,11 @@ Nehan.RenderingContext = (function(){
     return this.parent? this.parent.style : null;
   };
 
+  RenderingContext.prototype.createStyle = function(markup, parent_style, args){
+    return new Nehan.Style(this.selectors, markup, parent_style, args || {});
+  };
+
   RenderingContext.prototype.createChildStyle = function(markup, args){
-    //console.log("createChildStyle:%o", markup);
     return new Nehan.Style(this.selectors, markup, this.style, args || {});
   };
 
@@ -425,10 +420,6 @@ Nehan.RenderingContext = (function(){
     var style = this.createChildStyle(markup, args);
     this.style.removeChild(style);
     return style;
-  };
-
-  RenderingContext.prototype.createStyle = function(markup, parent_style, args){
-    return new Nehan.Style(this.selectors, markup, parent_style, args || {});
   };
 
   RenderingContext.prototype.createStream = function(style){
@@ -499,18 +490,19 @@ Nehan.RenderingContext = (function(){
       return true; // continue
     }.bind(this));
 
-    // float-generator wraps floating-elements and rest-space-element.
-    return new Nehan.FloatGenerator(this.extend({
-      floatedGenerators:floated_generators,
+    var float_root_style = this.createChildStyle(new Nehan.Tag("space-root"), {
+      forceCss:{display:"block"}
+    });
+    var float_root_context = this.createChildContext(float_root_style);
+    float_root_context.floatedGenerators = floated_generators;
 
-      // create child generator to yield rest-space of float-elements with logical-float "start".
-      // notice that this generator uses 'clone' of original style, because content size changes by position,
-      // but on the other hand, original style is referenced by float-elements as their parent style.
-      // so we must keep original style immutable.
-      childGenerator:new Nehan.BlockGenerator(this.extend({
-	style:this.style.clone({"float":"start"})
-      }))
-    }));
+    var space_style = float_root_context.createChildStyle(new Nehan.Tag("space"), {
+      forceCss:{display:"block"}
+    });
+    var space_context = float_root_context.createChildContext(space_style, {stream:this.stream});
+    var space_gen = new Nehan.BlockGenerator(space_context);
+
+    return new Nehan.FloatGenerator(float_root_context);  // run under same context
   };
 
   RenderingContext.prototype.createChildBlockGenerator = function(child_style, child_stream){

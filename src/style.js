@@ -322,9 +322,9 @@ Nehan.Style = (function(){
    @param extent {int}
    */
   Style.prototype.forceUpdateContextSize = function(measure, extent){
-    // measure block size of marker block size or table is always fixed.
-    if(this.markupName === "li-marker" || this.display === "table"){
-      return;
+    // measure of marker or table is always fixed.
+    if(this.markupName === "marker" || this.display === "table"){
+      return this;
     }
     this.initContextSize(measure, extent);
 
@@ -332,6 +332,8 @@ Nehan.Style = (function(){
     Nehan.List.iter(this.childs, function(child){
       child.forceUpdateContextSize(null, null);
     });
+
+    return this;
   };
   /**
    clone style-context with temporary css
@@ -341,8 +343,9 @@ Nehan.Style = (function(){
    @return {Nehan.Style}
    */
   Style.prototype.clone = function(css){
-    // no one can clone root style.
-    var clone_style = this.parent? new Style(this.selectors, this.markup, this.parent, {forceCss:(css || {})}) : this.createChild("div", css);
+    var clone_style = this.parent?
+	new Style(this.selectors, this.markup, this.parent, {forceCss:(css || {})}) :
+	this.createChild("div", css); // can't use root style(body) twice, so use 'div' instead.
     if(clone_style.parent){
       clone_style.parent.removeChild(clone_style);
     }
@@ -1406,7 +1409,7 @@ Nehan.Style = (function(){
     if(this.font){
       Nehan.Args.copy(css, this.font.getCss());
     }
-    if(this.parent && !this.isRoot()){
+    if(this.parent && this.getMarkupName() !== "body"){
       Nehan.Args.copy(css, this.parent.flow.getCss());
     }
     if(this.color){
