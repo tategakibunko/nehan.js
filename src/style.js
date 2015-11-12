@@ -1,89 +1,4 @@
 Nehan.Style = (function(){
-
-  // to fetch first text part from content html.
-  var __rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
-  
-  // these markups are not parsed, just ignored.
-  var __disabled_markups = [
-    "script",
-    "noscript",
-    "style",
-    "iframe",
-    "form",
-    "input",
-    "select",
-    "button",
-    "textarea"
-  ];
-
-  // these properties must be under control of layout engine.
-  var __managed_css_props = [
-    "border-color",
-    "border-radius",
-    "border-style",
-    "border-width",
-    "box-sizing",
-    "break-after",
-    "break-before",
-    "clear",
-    "color",
-    "display",
-    "extent",
-    "embeddable", // flag
-    "float",
-    "flow",
-    "font-family",
-    "font-size",
-    "font-style",
-    "font-weight",
-    "height",
-    "interactive", // flag
-    "letter-spacing",
-
-    // In style-context, we load 'line-height' prop and stored the value to this.lineHeight, so why this prop is unmanaged?
-    // Because in vertical mode, native 'line-height' is used in special purpose to make vertical line.
-    // So we avoid this prop stored as managed css prop.
-    //"line-height",
-
-    "list-style-type",
-    "list-style-position",
-    "list-style-image",
-    "margin",
-    "measure",
-    "meta", // flag
-    //"overflow-wrap", // draft
-    "padding",
-    "position",
-    "section", // flag
-    "section-root", // flag
-    "text-align",
-    "text-emphasis-style",
-    "text-emphasis-position",
-    "text-emphasis-color",
-    "text-combine",
-    "width",
-    "word-break"
-  ];
-
-  // these property are special functional properties
-  var __callback_css_props = [
-    "onload",
-    "oncreate",
-    "onblock",
-    "online",
-    "ontext"
-  ];
-
-  var __body_font = Nehan.Display.getStdFont();
-
-  var __is_managed_css_prop = function(prop){
-    return Nehan.List.exists(__managed_css_props, Nehan.Closure.eq(prop));
-  };
-
-  var __is_callback_css_prop = function(prop){
-    return Nehan.List.exists(__callback_css_props, Nehan.Closure.eq(prop));
-  };
-
   /**
    @memberof Nehan
    @class Style
@@ -101,6 +16,18 @@ Nehan.Style = (function(){
     this._initialize(context, markup, parent, args);
   }
   
+  // to fetch first text part from content html.
+  var __rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+  var __body_font = Nehan.Display.getStdFont(); // just a cache
+
+  var __is_managed_css_prop = function(prop){
+    return Nehan.List.exists(Nehan.Config.managedCssProps, Nehan.Closure.eq(prop));
+  };
+
+  var __is_callback_css_prop = function(prop){
+    return Nehan.List.exists(Nehan.Config.callbackCssProps, Nehan.Closure.eq(prop));
+  };
+
   Style.prototype._initialize = function(selectors, markup, parent, args){
     args = args || {};
 
@@ -243,14 +170,14 @@ Nehan.Style = (function(){
     // 3. current edge size.
     this.initContextSize(this.staticMeasure, this.staticExtent);
 
-    // margin or edge collapse after context size is calculated.
+    // margin-cancel or edge-collapse after context size is calculated.
     if(this.edge){
       if(this.edge.margin){
-	this._collapseMargin();
+	Nehan.MarginCancel.cancel(this);
       }
       // border collapse after context size is calculated.
       if(this.edge.border && this.getBorderCollapse() === "collapse" && this.display !== "table"){
-	this._collapseBorder(this.edge.border);
+	Nehan.BorderCollapse.collapse(this);
       }
     }
 
@@ -265,8 +192,7 @@ Nehan.Style = (function(){
    @param measure {int}
    @param extent {int}
    @description <pre>
-   * [context_size] = (outer_size, content_size)
-
+   *
    * (a) outer_size
    * 1. if direct size is given, use it as outer_size.
    * 2. else if parent exists, use content_size of parent.
@@ -274,6 +200,12 @@ Nehan.Style = (function(){
    
    * (b) content_size
    * 1. if edge(margin/padding/border) is defined, content_size = outer_size - edge_size
+   *    1.1. if box-sizing is "margin-box", margin/padding/border are included in outer_size, so
+   *         content_size = outer_size - (margin + padding + border)
+   *    1.2  if box-siging is "border-box", padding/border are included in outer_size, so
+   *         content_size = outer_size - (padding + border)
+   *    1.3  if box-sizing is "content-box", edge_size is not included in outer_size, so
+   *         content_size = outer_size
    * 2. else(no edge),  content_size = outer_size
    *</pre>
    */
@@ -432,7 +364,6 @@ Nehan.Style = (function(){
    @param opt.elements {Array.<Nehan.Box>}
    @param opt.breakAfter {boolean}
    @param opt.blockId {int}
-   @param opt.rootBlockId {int}
    @param opt.content {String}
    @return {Nehan.Box}
    */
@@ -466,9 +397,6 @@ Nehan.Style = (function(){
     }
     if(this.isClone()){
       classes.push("nehan-clone");
-    }
-    if(typeof opt.rootBlockId !== "undefined"){
-      box.rootBlockId = opt.rootBlockId;
     }
     box.blockId = opt.blockId;
     box.display = (this.display === "inline-block")? this.display : "block";
@@ -533,14 +461,14 @@ Nehan.Style = (function(){
    */
   Style.prototype.createLine = function(context, opt){
     opt = opt || {};
-    var is_root_line = this.isRootLine();
+    var is_inline_root = this.isInlineRoot();
     var elements = opt.elements || [];
     var max_font_size = opt.maxFontSize || this.getFontSize();
     var max_extent = opt.maxExtent || this.staticExtent || 0;
     var char_count = opt.charCount || 0;
     var content = opt.content || null;
     var measure = this.contentMeasure;
-    if((this.parent && opt.measure && !is_root_line) || (this.display === "inline-block")){
+    if((this.parent && opt.measure && !is_inline_root) || (this.display === "inline-block")){
       measure = this.staticMeasure || opt.measure;
     }
     var line_size = this.flow.getBoxSize(measure, max_extent);
@@ -548,12 +476,12 @@ Nehan.Style = (function(){
     var line = new Nehan.Box(line_size, context, "line-block");
     line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
     line.addElements(elements);
-    line.classes = is_root_line? classes : classes.concat("nehan-" + this.getMarkupName());
+    line.classes = is_inline_root? classes : classes.concat("nehan-" + this.getMarkupName());
     line.charCount = char_count;
     line.maxFontSize = max_font_size;
     line.maxExtent = max_extent;
     line.content = content;
-    line.isRootLine = is_root_line;
+    line.isInlineRoot = is_inline_root;
     line.hasLineBreak = opt.hasLineBreak || false;
     line.hangingPunctuation = opt.hangingPunctuation || null;
 
@@ -561,28 +489,24 @@ Nehan.Style = (function(){
     // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
     // anonymous line block('aaa' and 'ccc') is already edged by <p> in block level.
     // so if line is anonymous, edge must be ignored.
-    line.edge = (this.edge && !is_root_line)? this.edge : null;
+    line.edge = (this.edge && !is_inline_root)? this.edge : null;
 
     // backup other line data. mainly required to restore inline-context.
-    if(is_root_line){
+    if(is_inline_root){
       line.lineNo = opt.lineNo;
-      //line.paragraphId = DocumentContext.getParagraphId();
       line.breakAfter = opt.breakAfter || false;
       line.hyphenated = opt.hyphenated || false;
       line.inlineMeasure = opt.measure || this.contentMeasure;
       line.classes.push("nehan-root-line");
 
       // set baseline
-      if(this.isTextVertical()){
-	this._setVertBaseline(line);
-      } else {
-	this._setHoriBaseline(line);
-      }
+      Nehan.Baseline.set(line);
+
       // set text-align
       if(this.textAlign && (this.textAlign.isCenter() || this.textAlign.isEnd())){
-	this._setTextAlign(line, this.textAlign);
+	this.textAlign.setAlign(line);
       } else if(this.textAlign && this.textAlign.isJustify()){
-	this._setTextJustify(line);
+	this.textAlign.setJustify(line);
       }
       // set edge
       var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
@@ -591,7 +515,7 @@ Nehan.Style = (function(){
 	line.edge.padding.setBefore(this.flow, edge_size);
       }
     }
-    //console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_root_line);
+    //console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_inline_root);
     return line;
   };
   /**
@@ -648,7 +572,7 @@ Nehan.Style = (function(){
     if(this.display === "none"){
       return true;
     }
-    if(Nehan.List.exists(__disabled_markups, Nehan.Closure.eq(this.getMarkupName()))){
+    if(Nehan.List.exists(Nehan.Config.disabledMarkups, Nehan.Closure.eq(this.getMarkupName()))){
       return true;
     }
     if(this.contentMeasure <= 0 || this.contentExtent <= 0){
@@ -714,7 +638,7 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {boolean}
    */
-  Style.prototype.isRootLine = function(){
+  Style.prototype.isInlineRoot = function(){
     // Check if current inline is anonymous line block.
     // Note that inline-generators of root line share the style-context with parent block element,
     // So we use 'this.isBlock() || tis.isInlineBlock()' for checking method.
@@ -1448,16 +1372,16 @@ Nehan.Style = (function(){
     if(line.edge){
       Nehan.Args.copy(css, line.edge.getCss());
     }
-    if(this.isRootLine()){
+    if(this.isInlineRoot()){
       Nehan.Args.copy(css, this.flow.getCss());
     }
-    if(this.font && (!this.isRootLine() || this.isFirstLine())){
+    if(this.font && (!this.isInlineRoot() || this.isFirstLine())){
       Nehan.Args.copy(css, this.font.getCss());
     }
     if(this.color){
       Nehan.Args.copy(css, this.color.getCss());
     }
-    if(this.isRootLine()){
+    if(this.isInlineRoot()){
       css["line-height"] = this.getFontSize() + "px";
     }
     if(this.isTextVertical()){
@@ -1603,159 +1527,6 @@ Nehan.Style = (function(){
       ret[prop] = this._computeUnitSize(val[prop], unit_size);
     }
     return ret;
-  };
-
-  Style.prototype._setTextJustify = function(line){
-    var font_size = this.getFontSize();
-    var half_font_size = Math.floor(font_size / 2);
-    var quat_font_size = Math.floor(half_font_size / 2);
-    var cont_measure = line.getContentMeasure(this.flow);
-    var real_measure = line.inlineMeasure;
-    var ideal_measure = font_size * Math.floor(cont_measure / font_size);
-    var rest_space = ideal_measure - real_measure;
-    var max_thres = this.getFontSize() * 2;
-    var flow = this.flow;
-    var extend_parent = function(parent, add_size){
-      if(parent){
-	var pre_size = parent.size.getMeasure(flow);
-	var new_size = pre_size + add_size;
-	//console.log("extend parent:%d -> %d", pre_size, new_size);
-	parent.size.setMeasure(flow, new_size);
-      }
-    };
-    if(line.hasLineBreak || rest_space >= max_thres || rest_space === 0){
-      return;
-    }
-
-    var filter_text = function(elements){
-      return elements.reduce(function(ret, element){
-	if(element instanceof Nehan.Box){
-	  // 2015/10/8 update
-	  // skip recursive child inline, only select text element of root line.
-	  return element.isTextBlock()? ret.concat(filter_text(element.elements || [])) : ret;
-	}
-	return element? ret.concat(element) : ret;
-      }, []);
-    };
-    var text_elements = filter_text(line.elements);
-    if(text_elements.length === 0){
-      return;
-    }
-    var targets = text_elements.filter(function(element){
-      return ((element instanceof Nehan.Word) ||
-	      (element instanceof Nehan.Char && !element.isKerningChar()));
-    });
-    if(targets.length === 0){
-      return;
-    }
-    if(rest_space < 0){
-      Nehan.List.iter(targets, function(text){
-	if(text instanceof Nehan.Word){
-	  var del_size;
-	  del_size = text.paddingEnd || 0;
-	  if(del_size > 0){
-	    rest_space += del_size;
-	    extend_parent(text.parent, -1 * del_size);
-	    text.paddingEnd = 0;
-	    //console.log("del space %d from %s", del_size, text.data);
-	    if(rest_space >= 0){
-	      return false;
-	    }
-	  }
-	  del_size = text.paddingStart || 0;
-	  if(del_size > 0){
-	    rest_space += del_size;
-	    extend_parent(text.parent, -1 * del_size);
-	    text.paddingStart = 0;
-	    //console.log("del space %d from %s", del_size, text.data);
-	    if(rest_space >= 0){
-	      return false;
-	    }
-	  }
-	}
-	return true;
-      });
-      return;
-    }
-    // rest_space > 0
-    // so space is not enough, add 'more' space to word.
-    //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
-    var add_space = Math.max(1, Math.min(quat_font_size, Math.floor(rest_space / targets.length / 2)));
-    Nehan.List.iter(targets, function(text){
-      text.paddingEnd = (text.paddingEnd || 0) + add_space;
-      rest_space -= add_space;
-      extend_parent(text.parent, add_space);
-      //console.log("add space end %d to [%s]", add_space, text.data);
-      if(rest_space <= 0){
-	return false;
-      }
-      if(text instanceof Nehan.Word){
-	text.paddingStart = (text.paddingStart || 0) + add_space;
-	rest_space -= add_space;
-	extend_parent(text.parent, add_space);
-	//console.log("add space %d to [%s]", add_space, text.data);
-	if(rest_space <= 0){
-	  return false;
-	}
-      }
-      return true;
-    });
-  };
-
-  Style.prototype._setTextAlign = function(line, text_align){
-    var content_measure  = line.getContentMeasure(this.flow);
-    var space_measure = content_measure - line.inlineMeasure;
-    if(space_measure <= 0){
-      return;
-    }
-    var padding = new Nehan.Padding();
-    if(text_align.isCenter()){
-      var start_offset = Math.floor(space_measure / 2);
-      line.size.setMeasure(this.flow, content_measure - start_offset);
-      padding.setStart(this.flow, start_offset);
-      Nehan.Args.copy(line.css, padding.getCss());
-    } else if(text_align.isEnd()){
-      line.size.setMeasure(this.flow, line.inlineMeasure);
-      padding.setStart(this.flow, space_measure);
-      Nehan.Args.copy(line.css, padding.getCss());
-    }
-  };
-
-  // argument 'baseline' is not used yet.
-  // baseline: central | alphabetic
-  // ----------------------------------------------------------------
-  // In nehan.js, 'central' is used when vertical writing mode.
-  // see http://dev.w3.org/csswg/css-writing-modes-3/#text-baselines
-  Style.prototype._setVertBaseline = function(root_line, baseline){
-    Nehan.List.iter(root_line.elements, function(element){
-      var font_size = element.maxFontSize;
-      var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
-      if (from_after > 0){
-	var edge = element.edge || null;
-	edge = edge? edge.clone() : new Nehan.BoxEdge();
-	edge.padding.setAfter(this.flow, from_after); // set offset to padding
-	element.size.width = (root_line.maxExtent - from_after);
-	
-	// set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
-	Nehan.Args.copy(element.css, edge.getCss(this.flow));
-      }
-    }.bind(this));
-  };
-
-  Style.prototype._setHoriBaseline = function(root_line, baseline){
-    Nehan.List.iter(root_line.elements, function(element){
-      var font_size = element.maxFontSize;
-      var from_after = root_line.maxExtent - element.maxExtent;
-      if (from_after > 0){
-	var edge = element.edge || null;
-	edge = edge? edge.clone() : new Nehan.BoxEdge();
-	edge.padding.setBefore(this.flow, from_after); // set offset to padding
-	//element.size.width = (root_line.maxExtent - from_after);
-	
-	// set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
-	Nehan.Args.copy(element.css, edge.getCss(this.flow));
-      }
-    }.bind(this));
   };
 
   Style.prototype._loadSelectorCss = function(markup, parent){
@@ -1962,239 +1733,6 @@ Nehan.Style = (function(){
     return margin;
   };
 
-  Style.prototype._findParentEnableBorder = function(style, target){
-    if(style.edge && style.edge.border && style.edge.border.getByName(this.flow, target) > 0){
-      return style.edge.border;
-    }
-    return style.parent? this._findParentEnableBorder(style.parent, target) : null;
-  };
-
-  Style.prototype._collapseBorder = function(border){
-    switch(this.display){
-    case "table-header-group":
-    case "table-row-group":
-    case "table-footer-group":
-    case "table-row":
-      this._collapseBorderTableRow(border);
-      break;
-    case "table-cell":
-      this._collapseBorderTableCell(border);
-      break;
-    }
-  };
-
-  Style.prototype._collapseBorderTableRow = function(border){
-    var parent_start_border = this._findParentEnableBorder(this.parent, "start");
-    if(parent_start_border){
-      this._collapseBorderBetween(
-	{border:parent_start_border, target:"start"},
-	{border:border, target:"start"}
-      );
-    }
-    var parent_end_border = this._findParentEnableBorder(this.parent, "end");
-    if(parent_end_border){
-      this._collapseBorderBetween(
-	{border:parent_end_border, target:"end"},
-	{border:border, target:"end"}
-      );
-    }
-    if(this.prev && this.prev.edge && this.prev.edge.border){
-      this._collapseBorderBetween(
-	{border:this.prev.edge.border, target:"after"},
-	{border:border, target:"before"}
-      );
-    }
-    if(this.isFirstChild()){
-      var parent_before_border = this._findParentEnableBorder(this.parent, "before");
-      if(parent_before_border){
-	this._collapseBorderBetween(
-	  {border:parent_before_border, target:"before"},
-	  {border:border, target:"before"}
-	);
-      }
-    }
-    if(this.isLastChild()){
-      var parent_after_border = this._findParentEnableBorder(this.parent, "after");
-      if(parent_after_border){
-	this._collapseBorderBetween(
-	  {border:parent_after_border, target:"after"},
-	  {border:border, target:"after"}
-	);
-      }
-    }
-  };
-
-  Style.prototype._collapseBorderTableCell = function(border){
-    if(this.prev && this.prev.edge && this.prev.edge.border){
-      this._collapseBorderBetween(
-	{border:this.prev.edge.border, target:"end"},
-	{border:border, target:"start"}
-      );
-    }
-    var parent_before_border = this._findParentEnableBorder(this.parent, "before");
-    if(parent_before_border){
-      this._collapseBorderBetween(
-	{border:parent_before_border, target:"before"},
-	{border:border, target:"before"}
-      );
-    }
-    var parent_after_border = this._findParentEnableBorder(this.parent, "after");
-    if(parent_after_border){
-      this._collapseBorderBetween(
-	{border:parent_after_border, target:"after"},
-	{border:border, target:"after"}
-      );
-    }
-    if(this.isFirstChild()){
-      var parent_start_border = this._findParentEnableBorder(this.parent, "start");
-      if(parent_start_border){
-	this._collapseBorderBetween(
-	  {border:parent_start_border, target:"start"},
-	  {border:border, target:"start"}
-	);
-      }
-    }
-    if(this.isLastChild()){
-      var parent_end_border = this._findParentEnableBorder(this.parent, "end");
-      if(parent_end_border){
-	this._collapseBorderBetween(
-	  {border:parent_end_border, target:"end"},
-	  {border:border, target:"end"}
-	);
-      }
-    }
-  };
-
-  Style.prototype._collapseBorderBetween = function(prev, cur){
-    var prev_size = prev.border.getByName(this.flow, prev.target);
-    var cur_size = cur.border.getByName(this.flow, cur.target);
-    var new_size = Math.max(0, cur_size - prev_size);
-    var rm_size = cur_size - new_size;
-    switch(cur.target){
-    case "before": case "after":
-      this.contentExtent += rm_size;
-      break;
-    case "start": case "end":
-      this.contentMeasure += rm_size;
-      break;
-    }
-    cur.border.setByName(this.flow, cur.target, new_size);
-  };
-
-  // precondition: this.edge.margin is available
-  Style.prototype._collapseMargin = function(){
-    if(this.parent && this.parent.edge && this.parent.edge.margin){
-      this._collapseMarginParent();
-    }
-    if(this.prev && this.prev.isBlock() && this.prev.edge){
-      // cancel margin between previous sibling and cur element.
-      if(this.prev.edge.margin && this.edge.margin){
-	this._collapseMarginSibling();
-      }
-    }
-  };
-
-  // cancel margin between parent and current element
-  Style.prototype._collapseMarginParent = function(){
-    if(this.isFirstChild()){
-      this._collapseMarginFirstChild();
-    }
-    if(this.isLastChild()){
-      this._collapseMarginLastChild();
-    }
-  };
-
-  // cancel margin between parent and first-child(current element)
-  Style.prototype._collapseMarginFirstChild = function(){
-    if(this.flow === this.parent.flow){
-      this._collapseMarginBetween(
-	{edge:this.parent.edge, target:"before"},
-	{edge:this.edge, target:"before"}
-      );
-    }
-  };
-
-  // cancel margin between parent and first-child(current element)
-  Style.prototype._collapseMarginLastChild = function(){
-    if(this.flow === this.parent.flow){
-      this._collapseMarginBetween(
-	{edge:this.parent.edge, target:"after"},
-	{edge:this.edge, target:"after"}
-      );
-    }
-  };
-
-  // cancel margin prev sibling and current element
-  Style.prototype._collapseMarginSibling = function(){
-    if(this.flow === this.prev.flow){
-      // both prev and cur are floated to same direction
-      if(this.isFloated() && this.prev.isFloated()){
-	if(this.isFloatStart() && this.prev.isFloatStart()){
-	  // [start] x [start]
-	  this._collapseMarginBetween(
-	    {edge:this.prev.edge, target:"end"},
-	    {edge:this.edge, target:"start"}
-	  );
-	} else if(this.isFloatEnd() && this.prev.isFloatEnd()){
-	  // [end] x [end]
-	  this._collapseMarginBetween(
-	    {edge:this.prev.edge, target:"start"},
-	    {edge:this.edge, target:"end"}
-	  );
-	}
-      } else if(!this.isFloated() && !this.prev.isFloated()){
-	// [block] x [block]
-	this._collapseMarginBetween(
-	  {edge:this.prev.edge, target:"after"},
-	  {edge:this.edge, target:"before"}
-	);
-      }
-    } else if(this.prev.isTextHorizontal() && this.isTextVertical()){
-      // [hori] x [vert]
-      this._collapseMarginBetween(
-	{edge:this.prev.edge, target:"after"},
-	{edge:this.edge, target:"before"}
-      );
-    } else if(this.prev.isTextVertical() && this.isTextHorizontal()){
-      if(this.prev.flow.isBlockRightToLeft()){
-	// [vert:tb-rl] x [hori]
-	this._collapseMarginBetween(
-	  {edge:this.prev.edge, target:"after"},
-	  {edge:this.edge, target:"end"}
-	);
-      } else {
-	// [vert:tb-lr] x [hori]
-	this._collapseMarginBetween(
-	  {edge:this.prev.edge, target:"after"},
-	  {edge:this.edge, target:"start"}
-	);
-      }
-    }
-  };
-
-  // if prev_margin > cur_margin, just clear cur_margin.
-  Style.prototype._collapseMarginBetween = function(prev, cur){
-    // margin collapsing is ignored if there is a border between two edge.
-    if(prev.edge.border && prev.edge.border.getByName(this.flow, prev.target) ||
-       cur.edge.border && cur.edge.border.getByName(this.flow, cur.target)){
-      return;
-    }
-    var prev_size = prev.edge.margin.getByName(this.flow, prev.target);
-    var cur_size = cur.edge.margin.getByName(this.flow, cur.target);
-
-    // we use float for layouting each block element in evaluation phase,
-    // so standard margin collapsing doesn't work.
-    // that is because we use 'differene' of margin for collapsed size.
-    var new_size = (prev_size > cur_size)? 0 : cur_size - prev_size;
-
-    cur.edge.margin.setByName(this.flow, cur.target, new_size);
-
-    var rm_size = cur_size - new_size;
-
-    // update content size
-    this.contentExtent += rm_size;
-  };
-
   Style.prototype._loadBorder = function(flow, font_size){
     var edge_size = this._loadEdgeSize(font_size, "border-width");
     var border_radius = this.getCssAttr("border-radius");
@@ -2349,4 +1887,3 @@ Nehan.Style = (function(){
 
   return Style;
 })();
-

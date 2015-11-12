@@ -46,9 +46,6 @@ Nehan.LayoutEvaluator = (function(){
     if(opt.content){
       dom.innerHTML = opt.content;
     }
-    if(typeof opt.rootBlockId !== "undefined"){
-      dataset["rootBlockId"] = opt.rootBlockId;
-    }
     if(typeof opt.blockId !== "undefined"){
       dataset["blockId"] = opt.blockId;
     }
@@ -130,7 +127,6 @@ Nehan.LayoutEvaluator = (function(){
       className:tree.getClassName(),
       attrs:tree.getAttrs(),
       content:(opt.content || tree.getContent()),
-      rootBlockId:tree.rootBlockId,
       blockId:tree.blockId,
       paragraphId:tree.paragraphId,
       css:(opt.css || tree.getBoxCss())

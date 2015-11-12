@@ -31,7 +31,7 @@ Nehan.TextGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
-      this.context.debugTextElement(element, measure);
+      //this.context.debugTextElement(element, measure);
       if(measure === 0){
 	break;
       }

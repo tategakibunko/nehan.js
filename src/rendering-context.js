@@ -49,72 +49,17 @@ Nehan.RenderingContext = (function(){
     });
   };
 
+  // -----------------------------------------------
+  // add
+  // -----------------------------------------------
+  RenderingContext.prototype.addText = function(text){
+    if(this.stream){
+      this.stream.addText(text);
+    }
+  };
+
   RenderingContext.prototype.addPage = function(page){
     this.documentContext.addPage(page);
-  };
-
-  RenderingContext.prototype.getWritingDirection = function(){
-    return "vert"; // TODO
-  };
-
-  RenderingContext.prototype.getPage = function(index){
-    var page = this.documentContext.pages[index] || null;
-    if(page instanceof Nehan.Box){
-      page = this.pageEvaluator.evaluate(page);
-      this.documentContext.pages[index] = page;
-      return page;
-    }
-    return page;
-  };
-
-  RenderingContext.prototype.stringOfTree = function(){
-    var leaf = this.getGeneratorName();
-    if(this.parent){
-      return this.parent.stringOfTree() + ">" + leaf;
-    }
-    return leaf;
-  };
-
-  RenderingContext.prototype.getChildContext = function(){
-    return this.child || null;
-  };
-
-  RenderingContext.prototype.getContent = function(){
-    return this.stream? this.stream.getSrc() : "";
-  };
-
-  RenderingContext.prototype.yieldChildLayout = function(){
-    return this.child.generator.yield();
-  };
-
-  RenderingContext.prototype.setStyle = function(key, value){
-    this.selectors.setValue(key, value);
-  };
-
-  RenderingContext.prototype.setStyles = function(values){
-    for(var key in values){
-      this.selectors.setValue(key, values[key]);
-    }
-  };
-
-  RenderingContext.prototype.debugBlockElement = function(element, extent){
-    var name = this.getGeneratorName();
-    var bc = this.layoutContext.block;
-    console.log("%s:%o, e(%d / %d)", name, element, (bc.curExtent + extent), bc.maxExtent);
-  };
-
-  RenderingContext.prototype.debugInlineElement = function(element, measure){
-    var name = this.getGeneratorName();
-    var ic = this.layoutContext.inline;
-    var data = element.toString();
-    console.log("%s:%o(%s), m(%d / %d)", name, element, data, (ic.curMeasure + measure), ic.maxMeasure);
-  };
-
-  RenderingContext.prototype.debugTextElement = function(element, measure){
-    var name = this.getGeneratorName();
-    var ic = this.layoutContext.inline;
-    var data = element.data || "";
-    console.log("%s:%o(%s), m(%d / %d)", name, element, data, (ic.curMeasure + measure), ic.maxMeasure);
   };
 
   RenderingContext.prototype.addAnchor = function(){
@@ -124,41 +69,49 @@ Nehan.RenderingContext = (function(){
     }
   };
 
-  RenderingContext.prototype.getContextEdgeExtent = function(){
-    return this.isFirstOutput()? this.style.getEdgeBefore() : 0;
+  RenderingContext.prototype.addBlockElement = function(element){
+    if(element === null){
+      console.log("[%s]:eof", this.getGeneratorName());
+      throw "eof"; // no more output
+    }
+    if(element.isVoid()){
+      return; // just skip
+    }
+    var element_size = element.getLayoutExtent(this.style.flow);
+    var cur_extent = this.layoutContext.getBlockCurExtent();
+    var max_size = this.layoutContext.getBlockMaxExtent();
+
+    this.debugBlockElement(element, element_size);
+
+    // tail edge is required for final output.
+    if(!this.hasNext()){
+      console.log("final output, subtract after edge:%d from %d", this.style.getEdgeAfter(), max_size);
+      max_size -= this.style.getEdgeAfter();
+    }
+    if(cur_extent + element_size > max_size){
+      console.log("%d > %d(max_size)", cur_extent + element_size, max_size);
+      this.pushCache(element);
+      throw "overflow";
+    }
+    if(element.hasLineBreak){
+      this.documentContext.incLineBreakCount();
+    }
+    this.layoutContext.addBlockElement(element, element_size);
   };
 
-  RenderingContext.prototype.getContextEdgeMeasure = function(){
-    return this.isFirstOutput()? this.style.getEdgeStart() : 0;
-  };
-
+  // -----------------------------------------------
+  // create
+  // -----------------------------------------------
   RenderingContext.prototype.createInlineLayoutContext = function(){
-    var edge_measure = this.getContextEdgeMeasure();
-    var parent_context = this.parent.layoutContext; // inline must have parent.
-    return this.layoutContext = new Nehan.LayoutContext(
-      new Nehan.BlockContext(parent_context.getBlockRestExtent()),
-      new Nehan.InlineContext(parent_context.getInlineRestMeasure() - edge_measure)
+    return new Nehan.LayoutContext(
+      new Nehan.BlockContext(this.getContextMaxExtent()),
+      new Nehan.InlineContext(this.getContextMaxMeasure())
     );
   };
 
   RenderingContext.prototype.createBlockLayoutContext = function(){
-    var edge_extent = this.getContextEdgeExtent();
-    var parent_context = this.parent? this.parent.layoutContext : null;
-
-    // block with parent
-    if(parent_context){
-      return new Nehan.LayoutContext(
-	new Nehan.BlockContext(parent_context.getBlockRestExtent() - edge_extent, {
-	  lineNo:this.layoutContext.lineNo
-	}),
-	//new Nehan.InlineContext(this.style.contentMeasure)
-	new Nehan.InlineContext(parent_context.getInlineRestMeasure())
-      );
-    }
-
-    // block witout parent
     return new Nehan.LayoutContext(
-      new Nehan.BlockContext(this.style.outerExtent - edge_extent),
+      new Nehan.BlockContext(this.getContextMaxExtent()),
       new Nehan.InlineContext(this.style.contentMeasure)
     );
   };
@@ -166,25 +119,25 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.createInlineBlockLayoutContext = function(){
     var parent_context = this.parent.layoutContext;
     return new Nehan.LayoutContext(
-      new Nehan.BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
-      new Nehan.InlineContext(parent_context.getInlineRestMeasure() - this.style.getEdgeMeasure())
+      new Nehan.BlockContext(this.getContextMaxExtent()),
+      new Nehan.InlineContext(this.getCotextInlineMeasure())
     );
   };
 
-  RenderingContext.prototype.isInline = function(){
-    return (
-      this.style.isInline() ||
-      this.generator instanceof Nehan.TextGenerator ||
-      this.generator instanceof Nehan.InlineGenerator
-    );
+  // -----------------------------------------------
+  // clear
+  // -----------------------------------------------
+  RenderingContext.prototype.clearCache = function(cache){
+    this.cachedElements = [];
   };
 
-  RenderingContext.prototype.resizeLayout = function(measure, extent){
-    this.style.forceUpdateContextSize(measure, extent);
-    this.layoutContext.block.maxExtent = extent;
-    this.layoutContext.inline.maxMeasure = measure;
+  RenderingContext.prototype.clearBreakBefore = function(){
+    this.breakBefore = true; // set already break flag.
   };
 
+  // -----------------------------------------------
+  // create
+  // -----------------------------------------------
   RenderingContext.prototype.createLayoutContext = function(){
     if(!this.style || this.style.getMarkupName() === "html"){
       return null;
@@ -227,168 +180,6 @@ Nehan.RenderingContext = (function(){
     };
   };
 
-  RenderingContext.prototype.getMarkupName = function(){
-    return this.style? this.style.getMarkupName() : "";
-  };
-
-  RenderingContext.prototype.initLayoutContext = function(){
-    this.layoutContext = this.createLayoutContext();
-    if(this.layoutContext){
-      console.log("start layout context:inline max = %d, block max = %d", this.layoutContext.inline.maxMeasure, this.layoutContext.block.maxExtent);
-    }
-  };
-
-  RenderingContext.prototype.initListContext = function(){
-    this.listContext = this.createListContext();
-  };
-
-  RenderingContext.prototype.hasNext = function(){
-    if(this.terminate){
-      return false;
-    }
-    if(this.hasCache()){
-      return true;
-    }
-    if(this.hasChildLayout()){
-      return true;
-    }
-    if(this.hasNextFloat()){
-      return true;
-    }
-    if(this.hasNextParallelLayout()){
-      return true;
-    }
-    return this.stream? this.stream.hasNext() : false;
-  };
-
-  RenderingContext.prototype.addText = function(text){
-    if(this.stream){
-      this.stream.addText(text);
-    }
-  };
-
-  RenderingContext.prototype.setTerminate = function(status){
-    this.terminate = status;
-  };
-
-  RenderingContext.prototype.setOwnerGenerator = function(generator){
-    this.generator = generator;
-    //console.log("%s created, context = %o(m=%o, e=%o)", this.getGeneratorName(), this, measure, extent);
-  };
-
-  RenderingContext.prototype.yieldListMarker = function(){
-    var item_count = this.stream.getTokenCount();
-    var marker_html = this.style.getListMarkerHtml(item_count);
-    var marker_context = this.createChildContext(this.style.clone({
-      display:"inline-block"
-    }), {
-      stream:new Nehan.TokenStream(marker_html)
-    });
-
-    // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
-    // and we have to avoid 'appendChild' from child-generator of this tmp generator.
-    var tmp_gen = new Nehan.InlineGenerator(this.clone(), new Nehan.TokenStream(max_marker_html));
-    var line = tmp_gen.yield();
-    var marker_measure = line? line.inlineMeasure + Math.floor(this.getFontSize() / 2) : this.getFontSize();
-    var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
-    this.listMarkerSize = this.flow.getBoxSize(marker_measure, marker_extent);
-  };
-
-  RenderingContext.prototype.hasChildLayout = function(){
-    if(this.child && this.child.generator && this.child.generator.hasNext()){
-      return true;
-    }
-    return false;
-  };
-
-  RenderingContext.prototype.hasNextFloat = function(){
-    return Nehan.List.exists(this.floatedGenerators, function(gen){
-      return gen.hasNext();
-    });
-  };
-
-  RenderingContext.prototype.hasNextParallelLayout = function(){
-    return Nehan.List.exists(this.parallelGenerators, function(gen){
-      return gen.hasNext();
-    });
-  };
-
-  RenderingContext.prototype.hasCache = function(){
-    return this.cachedElements.length > 0;
-  };
-
-  RenderingContext.prototype.peekLastCache = function(){
-    return Nehan.List.last(this.cachedElements);
-  };
-
-  RenderingContext.prototype.clearCache = function(cache){
-    this.cachedElements = [];
-  };
-
-  RenderingContext.prototype.pushCache = function(element){
-    console.log("push cache:", element);
-    /*
-    var cache_count = element.cacheCount || 0;
-    if(cache_count > 0){
-      if(cache_count >= Nehan.Config.maxRollbackCount){
-	var element_str = (element instanceof Nehan.Box)? element.toString() : (element.data || "??");
-	console.warn("[%s] too many retry:%o, element:%o(%s)", this.style.getMarkupName(), this.style, element, element_str);
-	// to avoid infinite loop, force child or this generator terminate!
-	if(this.child && this.child.hasNext()){
-	  this.child.setTerminate(true);
-	} else {
-	  this.setTerminate(true);
-	}
-	return;
-      }
-    }
-    element.cacheCount = cache_count + 1;
-     */
-    this.cachedElements.push(element);
-  };
-
-  RenderingContext.prototype.popCache = function(){
-    return this.cachedElements.pop();
-  };
-
-  RenderingContext.prototype.getElementLayoutExtent = function(element){
-    return element.getLayoutExtent(this.style.flow);
-  };
-
-  RenderingContext.prototype.getElementLayoutMeasure = function(element){
-    return element.getLayoutMeasure(this.style.flow);
-  };
-
-  RenderingContext.prototype.genBlockId = function(){
-    return this.documentContext.genBlockId();
-  };
-
-  RenderingContext.prototype.genRootBlockId = function(){
-    return this.documentContext.genRootBlockId();
-  };
-
-  RenderingContext.prototype.isFirstOutput = function(){
-    return this.yieldCount === 0;
-  };
-
-  RenderingContext.prototype.getGeneratorName = function(){
-    var markup_name = this.getMarkupName();
-    if(this.generator instanceof Nehan.DocumentGenerator){
-      return "(root)";
-    }
-    if(this.generator instanceof Nehan.TextGenerator){
-      return markup_name + "(text)";
-    }
-    if(this.generator instanceof Nehan.InlineGenerator){
-      return markup_name + "(inline)";
-    }
-    return markup_name + "(" + this.style.display + ")";
-  };
-
-  RenderingContext.prototype.getAnchorPageNo = function(anchor_name){
-    return this.documentContext.getAnchorPageNo(anchor_name);
-  };
-  
   RenderingContext.prototype.createOutlineElementByName = function(outline_name, callbacks){
     return this.documentContext.createOutlineElementByName(outline_name, callbacks);
   };
@@ -402,10 +193,6 @@ Nehan.RenderingContext = (function(){
     });
     child_style.context = this.child;
     return this.child;
-  };
-
-  RenderingContext.prototype.getParentStyle = function(){
-    return this.parent? this.parent.style : null;
   };
 
   RenderingContext.prototype.createStyle = function(markup, parent_style, args){
@@ -673,6 +460,18 @@ Nehan.RenderingContext = (function(){
     });
   };
 
+  RenderingContext.prototype.createWrapBlock = function(measure, extent, elements){
+    var wrap_style = this.createTmpChildStyle(new Nehan.Tag("div"), {
+      forceCss:{
+	measure:measure,
+	extent:extent
+      }
+    });
+    return wrap_style.createBlock(this, {
+      elements:elements
+    });
+  };
+
   RenderingContext.prototype.createBlock = function(){
     var extent = this.layoutContext.getBlockCurExtent();
     var elements = this.layoutContext.getBlockElements();
@@ -721,7 +520,7 @@ Nehan.RenderingContext = (function(){
       line.pos = Math.max(0, this.parent.stream.getPos() - 1);
     }
 
-    if(this.style.isRootLine()){
+    if(this.style.isInlineRoot()){
       this.layoutContext.incBlockLineNo();
     }
     return line;
@@ -757,6 +556,159 @@ Nehan.RenderingContext = (function(){
     return line;
   };
 
+  // -----------------------------------------------
+  // debug
+  // -----------------------------------------------
+  RenderingContext.prototype.debugBlockElement = function(element, extent){
+    var name = this.getGeneratorName();
+    var bc = this.layoutContext.block;
+    var str = element.toString();
+    console.info("%s:%o, e(%d / %d):%s", name, element, (bc.curExtent + extent), bc.maxExtent, str);
+  };
+
+  RenderingContext.prototype.debugInlineElement = function(element, measure){
+    var name = this.getGeneratorName();
+    var ic = this.layoutContext.inline;
+    var data = element.toString();
+    console.log("%s:%o(%s), m(%d / %d)", name, element, data, (ic.curMeasure + measure), ic.maxMeasure);
+  };
+
+  RenderingContext.prototype.debugTextElement = function(element, measure){
+    var name = this.getGeneratorName();
+    var ic = this.layoutContext.inline;
+    var data = element.data || "";
+    console.log("%s:%o(%s), m(%d / %d)", name, element, data, (ic.curMeasure + measure), ic.maxMeasure);
+  };
+
+  // -----------------------------------------------
+  // end
+  // -----------------------------------------------
+  /**
+   called when section root(body, blockquote, fieldset, figure, td) ends.
+
+   @memberof Nehan.RenderingContext
+   @method endOutlineContext
+   */
+  RenderingContext.prototype.endOutlineContext = function(){
+    this.documentContext.addOutlineContext(this.getOutlineContext());
+  };
+
+  /**
+   called when section content(article, aside, nav, section) ends.
+
+   @memberof Nehan.RenderingContext
+   @method startSectionContext
+   */
+  RenderingContext.prototype.endSectionContext = function(){
+    this.getOutlineContext().endSection(this.getMarkupName());
+  };
+
+  // -----------------------------------------------
+  // gen
+  // -----------------------------------------------
+  RenderingContext.prototype.genBlockId = function(){
+    return this.documentContext.genBlockId();
+  };
+
+  RenderingContext.prototype.genRootBlockId = function(){
+    return this.documentContext.genRootBlockId();
+  };
+
+  // -----------------------------------------------
+  // get
+  // -----------------------------------------------
+  RenderingContext.prototype.getFlow = function(){
+    return this.style.flow;
+  };
+
+  RenderingContext.prototype.getMarkupName = function(){
+    return this.style? this.style.getMarkupName() : "";
+  };
+
+  RenderingContext.prototype.getWritingDirection = function(){
+    return "vert"; // TODO
+  };
+
+  RenderingContext.prototype.getPage = function(index){
+    var page = this.documentContext.pages[index] || null;
+    if(page instanceof Nehan.Box){
+      page = this.pageEvaluator.evaluate(page);
+      this.documentContext.pages[index] = page;
+      return page;
+    }
+    return page;
+  };
+
+  RenderingContext.prototype.getChildContext = function(){
+    return this.child || null;
+  };
+
+  RenderingContext.prototype.getContent = function(){
+    return this.stream? this.stream.getSrc() : "";
+  };
+
+  RenderingContext.prototype.getBlockClear = function(){
+    var clear = this.style.clear;
+    if(clear && !clear.isDoneAll() && this.parent && this.parent.floatGroup){
+      return clear;
+    }
+    return null;
+  };
+
+  RenderingContext.prototype.getContextMaxMeasure = function(){
+    var max_size = (this.parent && this.parent.layoutContext)? this.parent.layoutContext.getInlineRestMeasure() : this.style.outerMeasure;
+    if(this.style.staticMeasure){
+      max_size = Math.min(max_size, this.style.staticMeasure);
+    }
+    // if child inline, start edge is included in first output.
+    if(!this.style.isInlineRoot() && this.isFirstOutput()){
+      max_size -= this.style.getEdgeStart();
+    }
+    return max_size;
+  };
+
+  RenderingContext.prototype.getContextMaxExtent = function(){
+    var max_size = (this.parent && this.parent.layoutContext)? this.parent.layoutContext.getBlockRestExtent() : this.style.outerExtent;
+    if(this.style.staticExtent){
+      max_size = Math.min(max_size, this.style.staticExtent);
+    }
+    // before edge is included in first output.
+    if(this.isFirstOutput()){
+      max_size -= this.style.getEdgeBefore();
+    }
+    return max_size;
+  };
+
+  RenderingContext.prototype.getElementLayoutExtent = function(element){
+    return element.getLayoutExtent(this.style.flow);
+  };
+
+  RenderingContext.prototype.getElementLayoutMeasure = function(element){
+    return element.getLayoutMeasure(this.style.flow);
+  };
+
+  RenderingContext.prototype.getGeneratorName = function(){
+    var markup_name = this.getMarkupName();
+    if(this.generator instanceof Nehan.DocumentGenerator){
+      return "(root)";
+    }
+    if(this.generator instanceof Nehan.TextGenerator){
+      return markup_name + "(text)";
+    }
+    if(this.generator instanceof Nehan.InlineGenerator){
+      return markup_name + "(inline)";
+    }
+    return markup_name + "(" + this.style.display + ")";
+  };
+
+  RenderingContext.prototype.getAnchorPageNo = function(anchor_name){
+    return this.documentContext.getAnchorPageNo(anchor_name);
+  };
+  
+  RenderingContext.prototype.getParentStyle = function(){
+    return this.parent? this.parent.style : null;
+  };
+
   RenderingContext.prototype.getHeaderRank = function(){
     if(this.style){
       return this.style.getHeaderRank();
@@ -772,6 +724,156 @@ Nehan.RenderingContext = (function(){
     return this.outlineContext || (this.parent? this.parent.getOutlineContext() : null);
   };
 
+  // -----------------------------------------------
+  // has
+  // -----------------------------------------------
+  RenderingContext.prototype.hasNext = function(){
+    if(this.terminate){
+      return false;
+    }
+    if(this.hasCache()){
+      return true;
+    }
+    if(this.hasChildLayout()){
+      return true;
+    }
+    if(this.hasNextFloat()){
+      return true;
+    }
+    if(this.hasNextParallelLayout()){
+      return true;
+    }
+    return this.stream? this.stream.hasNext() : false;
+  };
+
+  RenderingContext.prototype.hasChildLayout = function(){
+    if(this.child && this.child.generator && this.child.generator.hasNext()){
+      return true;
+    }
+    return false;
+  };
+
+  RenderingContext.prototype.hasNextFloat = function(){
+    return Nehan.List.exists(this.floatedGenerators, function(gen){
+      return gen.hasNext();
+    });
+  };
+
+  RenderingContext.prototype.hasNextParallelLayout = function(){
+    return Nehan.List.exists(this.parallelGenerators, function(gen){
+      return gen.hasNext();
+    });
+  };
+
+  RenderingContext.prototype.hasCache = function(){
+    return this.cachedElements.length > 0;
+  };
+
+  // -----------------------------------------------
+  // init
+  // -----------------------------------------------
+  RenderingContext.prototype.initLayoutContext = function(){
+    this.layoutContext = this.createLayoutContext();
+    if(this.layoutContext){
+      console.log("start layout context:(m = %d, e = %d)", this.layoutContext.inline.maxMeasure, this.layoutContext.block.maxExtent);
+    }
+  };
+
+  RenderingContext.prototype.initListContext = function(){
+    this.listContext = this.createListContext();
+  };
+
+  // -----------------------------------------------
+  // is
+  // -----------------------------------------------
+  RenderingContext.prototype.isInline = function(){
+    return (
+      this.style.isInline() ||
+      this.generator instanceof Nehan.TextGenerator ||
+      this.generator instanceof Nehan.InlineGenerator
+    );
+  };
+
+  RenderingContext.prototype.isBreakBefore = function(){
+    return this.style.isBreakBefore() && (typeof this.breakBefore === "undefined");
+  };
+
+  RenderingContext.prototype.isFirstOutput = function(){
+    return this.yieldCount === 0;
+  };
+
+  RenderingContext.prototype.isTextVertical = function(){
+    return this.style.isTextVertical();
+  };
+
+  // -----------------------------------------------
+  // peek
+  // -----------------------------------------------
+  RenderingContext.prototype.peekLastCache = function(){
+    return Nehan.List.last(this.cachedElements);
+  };
+
+  // -----------------------------------------------
+  // pop
+  // -----------------------------------------------
+  RenderingContext.prototype.popCache = function(){
+    return this.cachedElements.pop();
+  };
+
+  // -----------------------------------------------
+  // push
+  // -----------------------------------------------
+  RenderingContext.prototype.pushCache = function(element){
+    if(element instanceof Nehan.Box){
+      console.log("push cache:", element.toString());
+    } else {
+      console.log("push cache:", element);
+    }
+    /*
+    var cache_count = element.cacheCount || 0;
+    if(cache_count > 0){
+      if(cache_count >= Nehan.Config.maxRollbackCount){
+	var element_str = (element instanceof Nehan.Box)? element.toString() : (element.data || "??");
+	console.warn("[%s] too many retry:%o, element:%o(%s)", this.style.getMarkupName(), this.style, element, element_str);
+	// to avoid infinite loop, force child or this generator terminate!
+	if(this.child && this.child.hasNext()){
+	  this.child.setTerminate(true);
+	} else {
+	  this.setTerminate(true);
+	}
+	return;
+      }
+    }
+    element.cacheCount = cache_count + 1;
+     */
+    this.cachedElements.push(element);
+  };
+
+  // -----------------------------------------------
+  // set
+  // -----------------------------------------------
+  RenderingContext.prototype.setTerminate = function(status){
+    this.terminate = status;
+  };
+
+  RenderingContext.prototype.setOwnerGenerator = function(generator){
+    this.generator = generator;
+    //console.log("%s created, context = %o(m=%o, e=%o)", this.getGeneratorName(), this, measure, extent);
+  };
+
+  RenderingContext.prototype.setStyle = function(key, value){
+    this.selectors.setValue(key, value);
+  };
+
+  RenderingContext.prototype.setStyles = function(values){
+    for(var key in values){
+      this.selectors.setValue(key, values[key]);
+    }
+  };
+
+  // -----------------------------------------------
+  // start
+  // -----------------------------------------------
   /**
    called when section root(body, blockquote, fieldset, figure, td) starts.
 
@@ -779,16 +881,6 @@ Nehan.RenderingContext = (function(){
    */
   RenderingContext.prototype.startOutlineContext = function(){
     this.outlineContext = new Nehan.OutlineContext(this.getMarkupName());
-  };
-
-  /**
-   called when section root(body, blockquote, fieldset, figure, td) ends.
-
-   @memberof Nehan.RenderingContext
-   @method endOutlineContext
-   */
-  RenderingContext.prototype.endOutlineContext = function(){
-    this.documentContext.addOutlineContext(this.getOutlineContext());
   };
 
   /**
@@ -802,15 +894,6 @@ Nehan.RenderingContext = (function(){
       type:this.getMarkupName(),
       pageNo:this.documentContext.getPageNo()
     });
-  };
-  /**
-   called when section content(article, aside, nav, section) ends.
-
-   @memberof Nehan.RenderingContext
-   @method startSectionContext
-   */
-  RenderingContext.prototype.endSectionContext = function(){
-    this.getOutlineContext().endSection(this.getMarkupName());
   };
 
   /**
@@ -828,6 +911,62 @@ Nehan.RenderingContext = (function(){
       rank:opt.rank,
       title:opt.title
     });
+  };
+
+  // -----------------------------------------------
+  // stringOf
+  // -----------------------------------------------
+  RenderingContext.prototype.stringOfTree = function(){
+    var leaf = this.getGeneratorName();
+    if(this.parent){
+      return this.parent.stringOfTree() + ">" + leaf;
+    }
+    return leaf;
+  };
+
+  // -----------------------------------------------
+  // yield
+  // -----------------------------------------------
+  RenderingContext.prototype.yieldChildLayout = function(){
+    return this.child.generator.yield();
+  };
+
+  RenderingContext.prototype.yieldBlockClear = function(){
+    var clear = this.getBlockClear();
+    if(!clear){
+      return null;
+    }
+    var float_group = this.parent.floatGroup;
+    if(!float_group){
+      return null;
+    }
+    var float_direction = float_group.getFloatDirection();
+    if(float_group.isLast() && !float_group.hasNext() && clear.hasDirection(float_direction.getName())){
+      clear.setDone(float_direction.getName());
+      return this.createWhiteSpace();
+    }
+    if(!clear.isDoneAll()){
+      return this.createWhiteSpace();
+    }
+    return null;
+  };
+
+  RenderingContext.prototype.yieldListMarker = function(){
+    var item_count = this.stream.getTokenCount();
+    var marker_html = this.style.getListMarkerHtml(item_count);
+    var marker_context = this.createChildContext(this.style.clone({
+      display:"inline-block"
+    }), {
+      stream:new Nehan.TokenStream(marker_html)
+    });
+
+    // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
+    // and we have to avoid 'appendChild' from child-generator of this tmp generator.
+    var tmp_gen = new Nehan.InlineGenerator(this.clone(), new Nehan.TokenStream(max_marker_html));
+    var line = tmp_gen.yield();
+    var marker_measure = line? line.inlineMeasure + Math.floor(this.getFontSize() / 2) : this.getFontSize();
+    var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
+    this.listMarkerSize = this.flow.getBoxSize(marker_measure, marker_extent);
   };
 
   // hyphenate between two different inline generator.

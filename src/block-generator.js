@@ -15,53 +15,24 @@ Nehan.BlockGenerator = (function(){
   Nehan.Class.extend(BlockGenerator, Nehan.LayoutGenerator);
 
   BlockGenerator.prototype._yield = function(){
-    if(!this.context.layoutContext.hasBlockSpaceFor(1, !this.hasNext())){
-      return null;
+    var clearance = this.context.yieldBlockClear();
+    if(clearance){
+      return clearance;
     }
-    var clear = this.context.style.clear;
-    if(clear && !clear.isDoneAll() && this.context.parent && this.context.parent.floatGroup){
-      var float_group = this.context.parent.floatGroup;
-      var float_direction = float_group.getFloatDirection();
-      if(float_group.isLast() && !float_group.hasNext() && clear.hasDirection(float_direction.getName())){
-	clear.setDone(float_direction.getName());
-	return this.context.createWhiteSpace();
-      }
-      if(!clear.isDoneAll()){
-	return this.context.createWhiteSpace();
-      }
-    }
-
     // if break-before available, page-break but only once.
-    if(this.context.style.isBreakBefore()){
-      this.context.style.clearBreakBefore(); // [TODO] move clearance status to rendering-context class.
+    if(this.context.isBreakBefore()){
+      this.context.clearBreakBefore();
       return null;
     }
-    while(true){
-      if(!this.hasNext()){
-	return this._createOutput(); // output last block
-      }
+    while(this.hasNext()){
       var element = this._getNext();
-      if(element === null){
-	console.log("[%s]:EOF", this.context.getMarkupName());
-	return this._createOutput();
-      }
-      if(element.isVoid()){
-	continue;
-      }
-      if(element.hasLineBreak){
-	this.context.documentContext.incLineBreakCount();
-      }
-      var extent = this.context.getElementLayoutExtent(element);
-      this.context.debugBlockElement(element, extent);
-      if(!this.context.layoutContext.hasBlockSpaceFor(extent)){
-	this.context.pushCache(element);
-	return this._createOutput();
-      }
-      this._addElement(element, extent);
-      if(!this.context.layoutContext.hasBlockSpaceFor(1) || this.context.layoutContext.hasBreakAfter()){
-	return this._createOutput();
+      try {
+	this.context.addBlockElement(element);
+      } catch (e){
+	break;
       }
     }
+    return this._createOutput();
   };
 
   /**

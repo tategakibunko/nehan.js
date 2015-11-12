@@ -9,7 +9,6 @@ Nehan.BodyGenerator = (function(){
   */
   function BodyGenerator(context){
     Nehan.SectionRootGenerator.call(this, context);
-    this.rootBlockId = context.genRootBlockId();
   }
   Nehan.Class.extend(BodyGenerator, Nehan.SectionRootGenerator);
 

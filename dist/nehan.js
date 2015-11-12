@@ -139,7 +139,93 @@ Nehan.Config = {
      @type {Array.<string>}
      @default []
   */
-  allowedInlineStyleProps:[]
+  allowedInlineStyleProps:[],
+
+  /**
+   markups just ignored.
+
+   @memberof Nehan.Config
+   @type {Array.<string>}
+   */
+  disabledMarkups:[
+    "script",
+    "noscript",
+    "style",
+    "iframe",
+    "form",
+    "input",
+    "select",
+    "button",
+    "textarea"
+  ],
+
+  /**
+   all properties under control of layout engine.
+
+   @memberof Nehan.Config
+   @type {Array.<string>}
+   */
+  managedCssProps:[
+    "border-color",
+    "border-radius",
+    "border-style",
+    "border-width",
+    "box-sizing",
+    "break-after",
+    "break-before",
+    "clear",
+    "color",
+    "display",
+    "extent",
+    "embeddable", // flag
+    "float",
+    "flow",
+    "font-family",
+    "font-size",
+    "font-style",
+    "font-weight",
+    "height",
+    "interactive", // flag
+    "letter-spacing",
+
+    // In style-context, we load 'line-height' prop and stored the value to this.lineHeight, so why this prop is unmanaged?
+    // Because in vertical mode, native 'line-height' is used in special purpose to make vertical line.
+    // So we avoid this prop stored as managed css prop.
+    //"line-height",
+
+    "list-style-type",
+    "list-style-position",
+    "list-style-image",
+    "margin",
+    "measure",
+    "meta", // flag
+    //"overflow-wrap", // draft
+    "padding",
+    "position",
+    "section", // flag
+    "section-root", // flag
+    "text-align",
+    "text-emphasis-style",
+    "text-emphasis-position",
+    "text-emphasis-color",
+    "text-combine",
+    "width",
+    "word-break"
+  ],
+
+  /**
+   properties used for special functional callbacks in selector definitions.
+
+   @memberof Nehan.Config
+   @type {Array.<string>}
+   */
+  callbackCssProps:[
+    "onload",
+    "oncreate",
+    "onblock",
+    "online",
+    "ontext"
+  ]
 };
 
 /**
@@ -5015,6 +5101,288 @@ Nehan.Border = (function(){
   return Border;
 })();
 
+/**
+ @namespace Nehan.MarginCancel
+*/
+Nehan.MarginCancel = (function(){
+  // precondition: style.edge.margin is available
+  var __cancel_margin = function(style){
+    if(style.parent && style.parent.edge && style.parent.edge.margin){
+      __cancel_margin_parent(style);
+    }
+    if(style.prev && style.prev.isBlock() && style.prev.edge){
+      // cancel margin between previous sibling and cur element.
+      if(style.prev.edge.margin && style.edge.margin){
+	__cancel_margin_sibling(style);
+      }
+    }
+  };
+
+  // cancel margin between parent and current element
+  var __cancel_margin_parent = function(style){
+    if(style.isFirstChild()){
+      __cancel_margin_first_child(style);
+    }
+    if(style.isLastChild()){
+      __cancel_margin_last_child(style);
+    }
+  };
+
+  // cancel margin between parent and first-child(current element)
+  var __cancel_margin_first_child = function(style){
+    if(style.flow === style.parent.flow){
+      __cancel_margin_between(
+	style,
+	{edge:style.parent.edge, target:"before"},
+	{edge:style.edge, target:"before"}
+      );
+    }
+  };
+
+  // cancel margin between parent and first-child(current element)
+  var __cancel_margin_last_child = function(style){
+    if(style.flow === style.parent.flow){
+      __cancel_margin_between(
+	style,
+	{edge:style.parent.edge, target:"after"},
+	{edge:style.edge, target:"after"}
+      );
+    }
+  };
+
+  // cancel margin prev sibling and current element
+  var __cancel_margin_sibling = function(style){
+    if(style.flow === style.prev.flow){
+      // both prev and cur are floated to same direction
+      if(style.isFloated() && style.prev.isFloated()){
+	if(style.isFloatStart() && style.prev.isFloatStart()){
+	  // [start] x [start]
+	  __cancel_margin_between(
+	    style,
+	    {edge:style.prev.edge, target:"end"},
+	    {edge:style.edge, target:"start"}
+	  );
+	} else if(style.isFloatEnd() && style.prev.isFloatEnd()){
+	  // [end] x [end]
+	  __cancel_margin_between(
+	    style,
+	    {edge:style.prev.edge, target:"start"},
+	    {edge:style.edge, target:"end"}
+	  );
+	}
+      } else if(!style.isFloated() && !style.prev.isFloated()){
+	// [block] x [block]
+	__cancel_margin_between(
+	    style,
+	  {edge:style.prev.edge, target:"after"},
+	  {edge:style.edge, target:"before"}
+	);
+      }
+    } else if(style.prev.isTextHorizontal() && style.isTextVertical()){
+      // [hori] x [vert]
+      __cancel_margin_between(
+	style,
+	{edge:style.prev.edge, target:"after"},
+	{edge:style.edge, target:"before"}
+      );
+    } else if(style.prev.isTextVertical() && style.isTextHorizontal()){
+      if(style.prev.flow.isBlockRightToLeft()){
+	// [vert:tb-rl] x [hori]
+	__cancel_margin_between(
+	  style,
+	  {edge:style.prev.edge, target:"after"},
+	  {edge:style.edge, target:"end"}
+	);
+      } else {
+	// [vert:tb-lr] x [hori]
+	__cancel_margin_between(
+	  style,
+	  {edge:style.prev.edge, target:"after"},
+	  {edge:style.edge, target:"start"}
+	);
+      }
+    }
+  };
+
+  // if prev_margin > cur_margin, just clear cur_margin.
+  var __cancel_margin_between = function(style, prev, cur){
+    // margin collapsing is ignored if there is a border between two edge.
+    if(prev.edge.border && prev.edge.border.getByName(style.flow, prev.target) ||
+       cur.edge.border && cur.edge.border.getByName(style.flow, cur.target)){
+      return;
+    }
+    var prev_size = prev.edge.margin.getByName(style.flow, prev.target);
+    var cur_size = cur.edge.margin.getByName(style.flow, cur.target);
+
+    // we use float for layouting each block element in evaluation phase,
+    // so standard margin collapsing doesn't work.
+    // that is because we use 'differene' of margin for collapsed size.
+    var new_size = (prev_size > cur_size)? 0 : cur_size - prev_size;
+
+    cur.edge.margin.setByName(style.flow, cur.target, new_size);
+
+    var rm_size = cur_size - new_size;
+
+    // update content size
+    style.contentExtent += rm_size;
+  };
+
+  return {
+    /**
+     @memberof Nehan.MarginCancel
+     @param style {Nehan.Style}
+     */
+    cancel : function(style){
+      __cancel_margin(style);
+    }
+  };
+})();
+
+/**
+   @namespace Nehan.BorderCollapse
+*/
+Nehan.BorderCollapse = (function(){
+  var __find_parent_enable_border = function(style, target){
+    var parent_style = style.parent;
+    if(parent_style.edge && parent_style.edge.border && parent_style.edge.border.getByName(style.flow, target) > 0){
+      return parent_style.edge.border;
+    }
+    return parent_style.parent? __find_parent_enable_border(parent_style, target) : null;
+  };
+
+  var __collapse_border = function(style, border){
+    switch(style.display){
+    case "table-header-group":
+    case "table-row-group":
+    case "table-footer-group":
+    case "table-row":
+      __collapse_border_table_row(style, border);
+      break;
+    case "table-cell":
+      __collapse_border_table_cell(style, border);
+      break;
+    }
+  };
+
+  var __collapse_border_table_row = function(style, border){
+    var parent_start_border = __find_parent_enable_border(style, "start");
+    if(parent_start_border){
+      __collapse_border_between(
+	style,
+	{border:parent_start_border, target:"start"},
+	{border:border, target:"start"}
+      );
+    }
+    var parent_end_border = __find_parent_enable_border(style, "end");
+    if(parent_end_border){
+      __collapse_border_between(
+	style,
+	{border:parent_end_border, target:"end"},
+	{border:border, target:"end"}
+      );
+    }
+    if(style.prev && style.prev.edge && style.prev.edge.border){
+      __collapse_border_between(
+	style,
+	{border:style.prev.edge.border, target:"after"},
+	{border:border, target:"before"}
+      );
+    }
+    if(style.isFirstChild()){
+      var parent_before_border = __find_parent_enable_border(style, "before");
+      if(parent_before_border){
+	__collapse_border_between(
+	  style,
+	  {border:parent_before_border, target:"before"},
+	  {border:border, target:"before"}
+	);
+      }
+    }
+    if(style.isLastChild()){
+      var parent_after_border = __find_parent_enable_border(style, "after");
+      if(parent_after_border){
+	__collapse_border_between(
+	  style,
+	  {border:parent_after_border, target:"after"},
+	  {border:border, target:"after"}
+	);
+      }
+    }
+  };
+
+  var __collapse_border_table_cell = function(style, border){
+    if(style.prev && style.prev.edge && style.prev.edge.border){
+      __collapse_border_between(
+	style,
+	{border:style.prev.edge.border, target:"end"},
+	{border:border, target:"start"}
+      );
+    }
+    var parent_before_border = __find_parent_enable_border(style, "before");
+    if(parent_before_border){
+      __collapse_border_between(
+	style,
+	{border:parent_before_border, target:"before"},
+	{border:border, target:"before"}
+      );
+    }
+    var parent_after_border = __find_parent_enable_border(style, "after");
+    if(parent_after_border){
+      __collapse_border_between(
+	style,
+	{border:parent_after_border, target:"after"},
+	{border:border, target:"after"}
+      );
+    }
+    if(style.isFirstChild()){
+      var parent_start_border = __find_parent_enable_border(style, "start");
+      if(parent_start_border){
+	__collapse_border_between(
+	  style,
+	  {border:parent_start_border, target:"start"},
+	  {border:border, target:"start"}
+	);
+      }
+    }
+    if(style.isLastChild()){
+      var parent_end_border = __find_parent_enable_border(style, "end");
+      if(parent_end_border){
+	__collapse_border_between(
+	  style,
+	  {border:parent_end_border, target:"end"},
+	  {border:border, target:"end"}
+	);
+      }
+    }
+  };
+
+  var __collapse_border_between = function(style, prev, cur){
+    var prev_size = prev.border.getByName(style.flow, prev.target);
+    var cur_size = cur.border.getByName(style.flow, cur.target);
+    var new_size = Math.max(0, cur_size - prev_size);
+    var rm_size = cur_size - new_size;
+    switch(cur.target){
+    case "before": case "after":
+      style.contentExtent += rm_size;
+      break;
+    case "start": case "end":
+      style.contentMeasure += rm_size;
+      break;
+    }
+    cur.border.setByName(style.flow, cur.target, new_size);
+  };
+
+  return {
+    /**
+     @memberof Nehan.BorderCollapse
+     @param style {Nehan.Style}
+     */
+    collapse : function(style){
+      __collapse_border(style);
+    }
+  };
+})();
+
 Nehan.BoxEdge = (function (){
   /**
      @memberof Nehan
@@ -6376,6 +6744,64 @@ Nehan.FloatGroupStack = (function(){
 })();
 
 
+/**
+ @namespace Nehan.Baseline
+ */
+Nehan.Baseline = (function(){
+  var __set_vert_baseline = function(flow, root_line, baseline){
+    Nehan.List.iter(root_line.elements, function(element){
+      var font_size = element.maxFontSize;
+      var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
+      if (from_after > 0){
+	var edge = element.edge || null;
+	edge = edge? edge.clone() : new Nehan.BoxEdge();
+	edge.padding.setAfter(flow, from_after); // set offset to padding
+	element.size.width = (root_line.maxExtent - from_after);
+	
+	// set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
+	Nehan.Args.copy(element.css, edge.getCss(flow));
+      }
+    });
+  };
+
+  var __set_hori_baseline = function(flow, root_line, baseline){
+    Nehan.List.iter(root_line.elements, function(element){
+      var font_size = element.maxFontSize;
+      var from_after = root_line.maxExtent - element.maxExtent;
+      if (from_after > 0){
+	var edge = element.edge || null;
+	edge = edge? edge.clone() : new Nehan.BoxEdge();
+	edge.padding.setBefore(flow, from_after); // set offset to padding
+	//element.size.width = (root_line.maxExtent - from_after);
+	
+	// set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
+	Nehan.Args.copy(element.css, edge.getCss(flow));
+      }
+    });
+  };
+
+  return {
+    // argument 'baseline' is not used yet.
+    // baseline: central | alphabetic
+    // ----------------------------------------------------------------
+    // In nehan.js, 'central' is used when vertical writing mode.
+    // see http://dev.w3.org/csswg/css-writing-modes-3/#text-baselines
+    /**
+     @memberof Nehan.Baseline
+     @param line {Nehan.Box} - target line object.
+     @param baseline {String} - 'central' or 'alphabetic'.
+     */
+    set : function(line, baseline){
+      var flow = line.context.getFlow();
+      if(line.context.isTextVertical()){
+	__set_vert_baseline(flow, line, baseline);
+      } else {
+	__set_hori_baseline(flow, line, baseline);
+      }
+    }
+  };
+})();
+
 Nehan.TextAlign = (function(){
   /**
      @memberof Nehan
@@ -6415,6 +6841,133 @@ Nehan.TextAlign = (function(){
    */
   TextAlign.prototype.isJustify = function(){
     return this.value === "justify";
+  };
+
+  /**
+   @memberof Nehan.TextAlign
+   @param line {Nehan.Box}
+   */
+  TextAlign.prototype.setAlign = function(line){
+    var style = line.context.style;
+    var flow = style.flow;
+    var content_measure  = line.getContentMeasure(flow);
+    var space_measure = content_measure - line.inlineMeasure;
+    if(space_measure <= 0){
+      return;
+    }
+    var padding = new Nehan.Padding();
+    if(this.isCenter()){
+      var start_offset = Math.floor(space_measure / 2);
+      line.size.setMeasure(flow, content_measure - start_offset);
+      padding.setStart(flow, start_offset);
+      Nehan.Args.copy(line.css, padding.getCss());
+    } else if(this.isEnd()){
+      line.size.setMeasure(flow, line.inlineMeasure);
+      padding.setStart(flow, space_measure);
+      Nehan.Args.copy(line.css, padding.getCss());
+    }
+  };
+
+  /**
+   @memberof Nehan.TextAlign
+   @param line {Nehan.Box}
+   */
+  TextAlign.prototype.setJustify = function(line){
+    var style = line.context.style;
+    var flow = style.flow;
+    var font_size = style.getFontSize();
+    var half_font_size = Math.floor(font_size / 2);
+    var quat_font_size = Math.floor(half_font_size / 2);
+    var cont_measure = line.getContentMeasure(flow);
+    var real_measure = line.inlineMeasure;
+    var ideal_measure = font_size * Math.floor(cont_measure / font_size);
+    var rest_space = ideal_measure - real_measure;
+    var max_thres = style.getFontSize() * 2;
+    var extend_parent = function(parent, add_size){
+      if(parent){
+	var pre_size = parent.size.getMeasure(flow);
+	var new_size = pre_size + add_size;
+	//console.log("extend parent:%d -> %d", pre_size, new_size);
+	parent.size.setMeasure(flow, new_size);
+      }
+    };
+    if(line.hasLineBreak || rest_space >= max_thres || rest_space === 0){
+      return;
+    }
+
+    var filter_text = function(elements){
+      return elements.reduce(function(ret, element){
+	if(element instanceof Nehan.Box){
+	  // 2015/10/8 update
+	  // skip recursive child inline, only select text element of root line.
+	  return element.isTextBlock()? ret.concat(filter_text(element.elements || [])) : ret;
+	}
+	return element? ret.concat(element) : ret;
+      }, []);
+    };
+    var text_elements = filter_text(line.elements);
+    if(text_elements.length === 0){
+      return;
+    }
+    var targets = text_elements.filter(function(element){
+      return ((element instanceof Nehan.Word) ||
+	      (element instanceof Nehan.Char && !element.isKerningChar()));
+    });
+    if(targets.length === 0){
+      return;
+    }
+    if(rest_space < 0){
+      Nehan.List.iter(targets, function(text){
+	if(text instanceof Nehan.Word){
+	  var del_size;
+	  del_size = text.paddingEnd || 0;
+	  if(del_size > 0){
+	    rest_space += del_size;
+	    extend_parent(text.parent, -1 * del_size);
+	    text.paddingEnd = 0;
+	    //console.log("del space %d from %s", del_size, text.data);
+	    if(rest_space >= 0){
+	      return false;
+	    }
+	  }
+	  del_size = text.paddingStart || 0;
+	  if(del_size > 0){
+	    rest_space += del_size;
+	    extend_parent(text.parent, -1 * del_size);
+	    text.paddingStart = 0;
+	    //console.log("del space %d from %s", del_size, text.data);
+	    if(rest_space >= 0){
+	      return false;
+	    }
+	  }
+	}
+	return true;
+      });
+      return;
+    }
+    // rest_space > 0
+    // so space is not enough, add 'more' space to word.
+    //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
+    var add_space = Math.max(1, Math.min(quat_font_size, Math.floor(rest_space / targets.length / 2)));
+    Nehan.List.iter(targets, function(text){
+      text.paddingEnd = (text.paddingEnd || 0) + add_space;
+      rest_space -= add_space;
+      extend_parent(text.parent, add_space);
+      //console.log("add space end %d to [%s]", add_space, text.data);
+      if(rest_space <= 0){
+	return false;
+      }
+      if(text instanceof Nehan.Word){
+	text.paddingStart = (text.paddingStart || 0) + add_space;
+	rest_space -= add_space;
+	extend_parent(text.parent, add_space);
+	//console.log("add space %d to [%s]", add_space, text.data);
+	if(rest_space <= 0){
+	  return false;
+	}
+      }
+      return true;
+    });
   };
 
   return TextAlign;
@@ -11489,8 +12042,8 @@ Nehan.Box = (function(){
    @memberof Nehan.Box
    @return {boolean}
    */
-  Box.prototype.isRootLine = function(){
-    return this.isRootLine || false;
+  Box.prototype.isInlineRoot = function(){
+    return this.isInlineRoot || false;
   };
   /**
    filter text objects.
@@ -11733,7 +12286,6 @@ Nehan.DocumentContext = (function(){
     this.outlineContexts = [];
     this.headerId = 0; // unique header-id
     this.blockId = 0; // unique block-id
-    this.rootBlockId = 0; // unique block-id for direct children of <body>.
     this.lineBreakCount = 0; // count of <BR> tag, used to generate paragraph-id(<block_id>-<br_count>).
   }
 
@@ -11832,13 +12384,6 @@ Nehan.DocumentContext = (function(){
    @memberof Nehan.DocumentContext
    @return {int}
    */
-  DocumentContext.prototype.genRootBlockId = function(){
-    return this.rootBlockId++;
-  };
-  /**
-   @memberof Nehan.DocumentContext
-   @return {int}
-   */
   DocumentContext.prototype.genBlockId = function(){
     return this.blockId++;
   };
@@ -11932,24 +12477,6 @@ Nehan.PageEvaluator = (function(){
   };
 
   return PageEvaluator;
-})();
-
-
-/**
-   requestAnimationFrame wrapper function
-   @namespace Nehan
-   @function reqAnimationFrame
-*/
-Nehan.reqAnimationFrame = (function(){
-  var default_wait = 1000 / 60;
-  return window.requestAnimationFrame  ||
-    window.webkitRequestAnimationFrame ||
-    window.mozRequestAnimationFrame    ||
-    window.msRequestAnimationFrame     ||
-    function(callback, wait){
-      var _wait = (typeof wait === "undefined")? default_wait : wait;
-      window.setTimeout(callback, _wait);
-    };
 })();
 
 
@@ -12432,91 +12959,6 @@ Nehan.DomCreateContext = (function(){
 })();
 
 Nehan.Style = (function(){
-
-  // to fetch first text part from content html.
-  var __rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
-  
-  // these markups are not parsed, just ignored.
-  var __disabled_markups = [
-    "script",
-    "noscript",
-    "style",
-    "iframe",
-    "form",
-    "input",
-    "select",
-    "button",
-    "textarea"
-  ];
-
-  // these properties must be under control of layout engine.
-  var __managed_css_props = [
-    "border-color",
-    "border-radius",
-    "border-style",
-    "border-width",
-    "box-sizing",
-    "break-after",
-    "break-before",
-    "clear",
-    "color",
-    "display",
-    "extent",
-    "embeddable", // flag
-    "float",
-    "flow",
-    "font-family",
-    "font-size",
-    "font-style",
-    "font-weight",
-    "height",
-    "interactive", // flag
-    "letter-spacing",
-
-    // In style-context, we load 'line-height' prop and stored the value to this.lineHeight, so why this prop is unmanaged?
-    // Because in vertical mode, native 'line-height' is used in special purpose to make vertical line.
-    // So we avoid this prop stored as managed css prop.
-    //"line-height",
-
-    "list-style-type",
-    "list-style-position",
-    "list-style-image",
-    "margin",
-    "measure",
-    "meta", // flag
-    //"overflow-wrap", // draft
-    "padding",
-    "position",
-    "section", // flag
-    "section-root", // flag
-    "text-align",
-    "text-emphasis-style",
-    "text-emphasis-position",
-    "text-emphasis-color",
-    "text-combine",
-    "width",
-    "word-break"
-  ];
-
-  // these property are special functional properties
-  var __callback_css_props = [
-    "onload",
-    "oncreate",
-    "onblock",
-    "online",
-    "ontext"
-  ];
-
-  var __body_font = Nehan.Display.getStdFont();
-
-  var __is_managed_css_prop = function(prop){
-    return Nehan.List.exists(__managed_css_props, Nehan.Closure.eq(prop));
-  };
-
-  var __is_callback_css_prop = function(prop){
-    return Nehan.List.exists(__callback_css_props, Nehan.Closure.eq(prop));
-  };
-
   /**
    @memberof Nehan
    @class Style
@@ -12534,6 +12976,18 @@ Nehan.Style = (function(){
     this._initialize(context, markup, parent, args);
   }
   
+  // to fetch first text part from content html.
+  var __rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
+  var __body_font = Nehan.Display.getStdFont(); // just a cache
+
+  var __is_managed_css_prop = function(prop){
+    return Nehan.List.exists(Nehan.Config.managedCssProps, Nehan.Closure.eq(prop));
+  };
+
+  var __is_callback_css_prop = function(prop){
+    return Nehan.List.exists(Nehan.Config.callbackCssProps, Nehan.Closure.eq(prop));
+  };
+
   Style.prototype._initialize = function(selectors, markup, parent, args){
     args = args || {};
 
@@ -12676,14 +13130,14 @@ Nehan.Style = (function(){
     // 3. current edge size.
     this.initContextSize(this.staticMeasure, this.staticExtent);
 
-    // margin or edge collapse after context size is calculated.
+    // margin-cancel or edge-collapse after context size is calculated.
     if(this.edge){
       if(this.edge.margin){
-	this._collapseMargin();
+	Nehan.MarginCancel.cancel(this);
       }
       // border collapse after context size is calculated.
       if(this.edge.border && this.getBorderCollapse() === "collapse" && this.display !== "table"){
-	this._collapseBorder(this.edge.border);
+	Nehan.BorderCollapse.collapse(this);
       }
     }
 
@@ -12698,8 +13152,7 @@ Nehan.Style = (function(){
    @param measure {int}
    @param extent {int}
    @description <pre>
-   * [context_size] = (outer_size, content_size)
-
+   *
    * (a) outer_size
    * 1. if direct size is given, use it as outer_size.
    * 2. else if parent exists, use content_size of parent.
@@ -12707,6 +13160,12 @@ Nehan.Style = (function(){
    
    * (b) content_size
    * 1. if edge(margin/padding/border) is defined, content_size = outer_size - edge_size
+   *    1.1. if box-sizing is "margin-box", margin/padding/border are included in outer_size, so
+   *         content_size = outer_size - (margin + padding + border)
+   *    1.2  if box-siging is "border-box", padding/border are included in outer_size, so
+   *         content_size = outer_size - (padding + border)
+   *    1.3  if box-sizing is "content-box", edge_size is not included in outer_size, so
+   *         content_size = outer_size
    * 2. else(no edge),  content_size = outer_size
    *</pre>
    */
@@ -12865,7 +13324,6 @@ Nehan.Style = (function(){
    @param opt.elements {Array.<Nehan.Box>}
    @param opt.breakAfter {boolean}
    @param opt.blockId {int}
-   @param opt.rootBlockId {int}
    @param opt.content {String}
    @return {Nehan.Box}
    */
@@ -12899,9 +13357,6 @@ Nehan.Style = (function(){
     }
     if(this.isClone()){
       classes.push("nehan-clone");
-    }
-    if(typeof opt.rootBlockId !== "undefined"){
-      box.rootBlockId = opt.rootBlockId;
     }
     box.blockId = opt.blockId;
     box.display = (this.display === "inline-block")? this.display : "block";
@@ -12966,14 +13421,14 @@ Nehan.Style = (function(){
    */
   Style.prototype.createLine = function(context, opt){
     opt = opt || {};
-    var is_root_line = this.isRootLine();
+    var is_inline_root = this.isInlineRoot();
     var elements = opt.elements || [];
     var max_font_size = opt.maxFontSize || this.getFontSize();
     var max_extent = opt.maxExtent || this.staticExtent || 0;
     var char_count = opt.charCount || 0;
     var content = opt.content || null;
     var measure = this.contentMeasure;
-    if((this.parent && opt.measure && !is_root_line) || (this.display === "inline-block")){
+    if((this.parent && opt.measure && !is_inline_root) || (this.display === "inline-block")){
       measure = this.staticMeasure || opt.measure;
     }
     var line_size = this.flow.getBoxSize(measure, max_extent);
@@ -12981,12 +13436,12 @@ Nehan.Style = (function(){
     var line = new Nehan.Box(line_size, context, "line-block");
     line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
     line.addElements(elements);
-    line.classes = is_root_line? classes : classes.concat("nehan-" + this.getMarkupName());
+    line.classes = is_inline_root? classes : classes.concat("nehan-" + this.getMarkupName());
     line.charCount = char_count;
     line.maxFontSize = max_font_size;
     line.maxExtent = max_extent;
     line.content = content;
-    line.isRootLine = is_root_line;
+    line.isInlineRoot = is_inline_root;
     line.hasLineBreak = opt.hasLineBreak || false;
     line.hangingPunctuation = opt.hangingPunctuation || null;
 
@@ -12994,28 +13449,24 @@ Nehan.Style = (function(){
     // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
     // anonymous line block('aaa' and 'ccc') is already edged by <p> in block level.
     // so if line is anonymous, edge must be ignored.
-    line.edge = (this.edge && !is_root_line)? this.edge : null;
+    line.edge = (this.edge && !is_inline_root)? this.edge : null;
 
     // backup other line data. mainly required to restore inline-context.
-    if(is_root_line){
+    if(is_inline_root){
       line.lineNo = opt.lineNo;
-      //line.paragraphId = DocumentContext.getParagraphId();
       line.breakAfter = opt.breakAfter || false;
       line.hyphenated = opt.hyphenated || false;
       line.inlineMeasure = opt.measure || this.contentMeasure;
       line.classes.push("nehan-root-line");
 
       // set baseline
-      if(this.isTextVertical()){
-	this._setVertBaseline(line);
-      } else {
-	this._setHoriBaseline(line);
-      }
+      Nehan.Baseline.set(line);
+
       // set text-align
       if(this.textAlign && (this.textAlign.isCenter() || this.textAlign.isEnd())){
-	this._setTextAlign(line, this.textAlign);
+	this.textAlign.setAlign(line);
       } else if(this.textAlign && this.textAlign.isJustify()){
-	this._setTextJustify(line);
+	this.textAlign.setJustify(line);
       }
       // set edge
       var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
@@ -13024,7 +13475,7 @@ Nehan.Style = (function(){
 	line.edge.padding.setBefore(this.flow, edge_size);
       }
     }
-    //console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_root_line);
+    //console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_inline_root);
     return line;
   };
   /**
@@ -13081,7 +13532,7 @@ Nehan.Style = (function(){
     if(this.display === "none"){
       return true;
     }
-    if(Nehan.List.exists(__disabled_markups, Nehan.Closure.eq(this.getMarkupName()))){
+    if(Nehan.List.exists(Nehan.Config.disabledMarkups, Nehan.Closure.eq(this.getMarkupName()))){
       return true;
     }
     if(this.contentMeasure <= 0 || this.contentExtent <= 0){
@@ -13147,7 +13598,7 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {boolean}
    */
-  Style.prototype.isRootLine = function(){
+  Style.prototype.isInlineRoot = function(){
     // Check if current inline is anonymous line block.
     // Note that inline-generators of root line share the style-context with parent block element,
     // So we use 'this.isBlock() || tis.isInlineBlock()' for checking method.
@@ -13881,16 +14332,16 @@ Nehan.Style = (function(){
     if(line.edge){
       Nehan.Args.copy(css, line.edge.getCss());
     }
-    if(this.isRootLine()){
+    if(this.isInlineRoot()){
       Nehan.Args.copy(css, this.flow.getCss());
     }
-    if(this.font && (!this.isRootLine() || this.isFirstLine())){
+    if(this.font && (!this.isInlineRoot() || this.isFirstLine())){
       Nehan.Args.copy(css, this.font.getCss());
     }
     if(this.color){
       Nehan.Args.copy(css, this.color.getCss());
     }
-    if(this.isRootLine()){
+    if(this.isInlineRoot()){
       css["line-height"] = this.getFontSize() + "px";
     }
     if(this.isTextVertical()){
@@ -14036,159 +14487,6 @@ Nehan.Style = (function(){
       ret[prop] = this._computeUnitSize(val[prop], unit_size);
     }
     return ret;
-  };
-
-  Style.prototype._setTextJustify = function(line){
-    var font_size = this.getFontSize();
-    var half_font_size = Math.floor(font_size / 2);
-    var quat_font_size = Math.floor(half_font_size / 2);
-    var cont_measure = line.getContentMeasure(this.flow);
-    var real_measure = line.inlineMeasure;
-    var ideal_measure = font_size * Math.floor(cont_measure / font_size);
-    var rest_space = ideal_measure - real_measure;
-    var max_thres = this.getFontSize() * 2;
-    var flow = this.flow;
-    var extend_parent = function(parent, add_size){
-      if(parent){
-	var pre_size = parent.size.getMeasure(flow);
-	var new_size = pre_size + add_size;
-	//console.log("extend parent:%d -> %d", pre_size, new_size);
-	parent.size.setMeasure(flow, new_size);
-      }
-    };
-    if(line.hasLineBreak || rest_space >= max_thres || rest_space === 0){
-      return;
-    }
-
-    var filter_text = function(elements){
-      return elements.reduce(function(ret, element){
-	if(element instanceof Nehan.Box){
-	  // 2015/10/8 update
-	  // skip recursive child inline, only select text element of root line.
-	  return element.isTextBlock()? ret.concat(filter_text(element.elements || [])) : ret;
-	}
-	return element? ret.concat(element) : ret;
-      }, []);
-    };
-    var text_elements = filter_text(line.elements);
-    if(text_elements.length === 0){
-      return;
-    }
-    var targets = text_elements.filter(function(element){
-      return ((element instanceof Nehan.Word) ||
-	      (element instanceof Nehan.Char && !element.isKerningChar()));
-    });
-    if(targets.length === 0){
-      return;
-    }
-    if(rest_space < 0){
-      Nehan.List.iter(targets, function(text){
-	if(text instanceof Nehan.Word){
-	  var del_size;
-	  del_size = text.paddingEnd || 0;
-	  if(del_size > 0){
-	    rest_space += del_size;
-	    extend_parent(text.parent, -1 * del_size);
-	    text.paddingEnd = 0;
-	    //console.log("del space %d from %s", del_size, text.data);
-	    if(rest_space >= 0){
-	      return false;
-	    }
-	  }
-	  del_size = text.paddingStart || 0;
-	  if(del_size > 0){
-	    rest_space += del_size;
-	    extend_parent(text.parent, -1 * del_size);
-	    text.paddingStart = 0;
-	    //console.log("del space %d from %s", del_size, text.data);
-	    if(rest_space >= 0){
-	      return false;
-	    }
-	  }
-	}
-	return true;
-      });
-      return;
-    }
-    // rest_space > 0
-    // so space is not enough, add 'more' space to word.
-    //console.info("[%s]some spacing needed! %dpx", line.toString(), rest_space);
-    var add_space = Math.max(1, Math.min(quat_font_size, Math.floor(rest_space / targets.length / 2)));
-    Nehan.List.iter(targets, function(text){
-      text.paddingEnd = (text.paddingEnd || 0) + add_space;
-      rest_space -= add_space;
-      extend_parent(text.parent, add_space);
-      //console.log("add space end %d to [%s]", add_space, text.data);
-      if(rest_space <= 0){
-	return false;
-      }
-      if(text instanceof Nehan.Word){
-	text.paddingStart = (text.paddingStart || 0) + add_space;
-	rest_space -= add_space;
-	extend_parent(text.parent, add_space);
-	//console.log("add space %d to [%s]", add_space, text.data);
-	if(rest_space <= 0){
-	  return false;
-	}
-      }
-      return true;
-    });
-  };
-
-  Style.prototype._setTextAlign = function(line, text_align){
-    var content_measure  = line.getContentMeasure(this.flow);
-    var space_measure = content_measure - line.inlineMeasure;
-    if(space_measure <= 0){
-      return;
-    }
-    var padding = new Nehan.Padding();
-    if(text_align.isCenter()){
-      var start_offset = Math.floor(space_measure / 2);
-      line.size.setMeasure(this.flow, content_measure - start_offset);
-      padding.setStart(this.flow, start_offset);
-      Nehan.Args.copy(line.css, padding.getCss());
-    } else if(text_align.isEnd()){
-      line.size.setMeasure(this.flow, line.inlineMeasure);
-      padding.setStart(this.flow, space_measure);
-      Nehan.Args.copy(line.css, padding.getCss());
-    }
-  };
-
-  // argument 'baseline' is not used yet.
-  // baseline: central | alphabetic
-  // ----------------------------------------------------------------
-  // In nehan.js, 'central' is used when vertical writing mode.
-  // see http://dev.w3.org/csswg/css-writing-modes-3/#text-baselines
-  Style.prototype._setVertBaseline = function(root_line, baseline){
-    Nehan.List.iter(root_line.elements, function(element){
-      var font_size = element.maxFontSize;
-      var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
-      if (from_after > 0){
-	var edge = element.edge || null;
-	edge = edge? edge.clone() : new Nehan.BoxEdge();
-	edge.padding.setAfter(this.flow, from_after); // set offset to padding
-	element.size.width = (root_line.maxExtent - from_after);
-	
-	// set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
-	Nehan.Args.copy(element.css, edge.getCss(this.flow));
-      }
-    }.bind(this));
-  };
-
-  Style.prototype._setHoriBaseline = function(root_line, baseline){
-    Nehan.List.iter(root_line.elements, function(element){
-      var font_size = element.maxFontSize;
-      var from_after = root_line.maxExtent - element.maxExtent;
-      if (from_after > 0){
-	var edge = element.edge || null;
-	edge = edge? edge.clone() : new Nehan.BoxEdge();
-	edge.padding.setBefore(this.flow, from_after); // set offset to padding
-	//element.size.width = (root_line.maxExtent - from_after);
-	
-	// set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
-	Nehan.Args.copy(element.css, edge.getCss(this.flow));
-      }
-    }.bind(this));
   };
 
   Style.prototype._loadSelectorCss = function(markup, parent){
@@ -14395,239 +14693,6 @@ Nehan.Style = (function(){
     return margin;
   };
 
-  Style.prototype._findParentEnableBorder = function(style, target){
-    if(style.edge && style.edge.border && style.edge.border.getByName(this.flow, target) > 0){
-      return style.edge.border;
-    }
-    return style.parent? this._findParentEnableBorder(style.parent, target) : null;
-  };
-
-  Style.prototype._collapseBorder = function(border){
-    switch(this.display){
-    case "table-header-group":
-    case "table-row-group":
-    case "table-footer-group":
-    case "table-row":
-      this._collapseBorderTableRow(border);
-      break;
-    case "table-cell":
-      this._collapseBorderTableCell(border);
-      break;
-    }
-  };
-
-  Style.prototype._collapseBorderTableRow = function(border){
-    var parent_start_border = this._findParentEnableBorder(this.parent, "start");
-    if(parent_start_border){
-      this._collapseBorderBetween(
-	{border:parent_start_border, target:"start"},
-	{border:border, target:"start"}
-      );
-    }
-    var parent_end_border = this._findParentEnableBorder(this.parent, "end");
-    if(parent_end_border){
-      this._collapseBorderBetween(
-	{border:parent_end_border, target:"end"},
-	{border:border, target:"end"}
-      );
-    }
-    if(this.prev && this.prev.edge && this.prev.edge.border){
-      this._collapseBorderBetween(
-	{border:this.prev.edge.border, target:"after"},
-	{border:border, target:"before"}
-      );
-    }
-    if(this.isFirstChild()){
-      var parent_before_border = this._findParentEnableBorder(this.parent, "before");
-      if(parent_before_border){
-	this._collapseBorderBetween(
-	  {border:parent_before_border, target:"before"},
-	  {border:border, target:"before"}
-	);
-      }
-    }
-    if(this.isLastChild()){
-      var parent_after_border = this._findParentEnableBorder(this.parent, "after");
-      if(parent_after_border){
-	this._collapseBorderBetween(
-	  {border:parent_after_border, target:"after"},
-	  {border:border, target:"after"}
-	);
-      }
-    }
-  };
-
-  Style.prototype._collapseBorderTableCell = function(border){
-    if(this.prev && this.prev.edge && this.prev.edge.border){
-      this._collapseBorderBetween(
-	{border:this.prev.edge.border, target:"end"},
-	{border:border, target:"start"}
-      );
-    }
-    var parent_before_border = this._findParentEnableBorder(this.parent, "before");
-    if(parent_before_border){
-      this._collapseBorderBetween(
-	{border:parent_before_border, target:"before"},
-	{border:border, target:"before"}
-      );
-    }
-    var parent_after_border = this._findParentEnableBorder(this.parent, "after");
-    if(parent_after_border){
-      this._collapseBorderBetween(
-	{border:parent_after_border, target:"after"},
-	{border:border, target:"after"}
-      );
-    }
-    if(this.isFirstChild()){
-      var parent_start_border = this._findParentEnableBorder(this.parent, "start");
-      if(parent_start_border){
-	this._collapseBorderBetween(
-	  {border:parent_start_border, target:"start"},
-	  {border:border, target:"start"}
-	);
-      }
-    }
-    if(this.isLastChild()){
-      var parent_end_border = this._findParentEnableBorder(this.parent, "end");
-      if(parent_end_border){
-	this._collapseBorderBetween(
-	  {border:parent_end_border, target:"end"},
-	  {border:border, target:"end"}
-	);
-      }
-    }
-  };
-
-  Style.prototype._collapseBorderBetween = function(prev, cur){
-    var prev_size = prev.border.getByName(this.flow, prev.target);
-    var cur_size = cur.border.getByName(this.flow, cur.target);
-    var new_size = Math.max(0, cur_size - prev_size);
-    var rm_size = cur_size - new_size;
-    switch(cur.target){
-    case "before": case "after":
-      this.contentExtent += rm_size;
-      break;
-    case "start": case "end":
-      this.contentMeasure += rm_size;
-      break;
-    }
-    cur.border.setByName(this.flow, cur.target, new_size);
-  };
-
-  // precondition: this.edge.margin is available
-  Style.prototype._collapseMargin = function(){
-    if(this.parent && this.parent.edge && this.parent.edge.margin){
-      this._collapseMarginParent();
-    }
-    if(this.prev && this.prev.isBlock() && this.prev.edge){
-      // cancel margin between previous sibling and cur element.
-      if(this.prev.edge.margin && this.edge.margin){
-	this._collapseMarginSibling();
-      }
-    }
-  };
-
-  // cancel margin between parent and current element
-  Style.prototype._collapseMarginParent = function(){
-    if(this.isFirstChild()){
-      this._collapseMarginFirstChild();
-    }
-    if(this.isLastChild()){
-      this._collapseMarginLastChild();
-    }
-  };
-
-  // cancel margin between parent and first-child(current element)
-  Style.prototype._collapseMarginFirstChild = function(){
-    if(this.flow === this.parent.flow){
-      this._collapseMarginBetween(
-	{edge:this.parent.edge, target:"before"},
-	{edge:this.edge, target:"before"}
-      );
-    }
-  };
-
-  // cancel margin between parent and first-child(current element)
-  Style.prototype._collapseMarginLastChild = function(){
-    if(this.flow === this.parent.flow){
-      this._collapseMarginBetween(
-	{edge:this.parent.edge, target:"after"},
-	{edge:this.edge, target:"after"}
-      );
-    }
-  };
-
-  // cancel margin prev sibling and current element
-  Style.prototype._collapseMarginSibling = function(){
-    if(this.flow === this.prev.flow){
-      // both prev and cur are floated to same direction
-      if(this.isFloated() && this.prev.isFloated()){
-	if(this.isFloatStart() && this.prev.isFloatStart()){
-	  // [start] x [start]
-	  this._collapseMarginBetween(
-	    {edge:this.prev.edge, target:"end"},
-	    {edge:this.edge, target:"start"}
-	  );
-	} else if(this.isFloatEnd() && this.prev.isFloatEnd()){
-	  // [end] x [end]
-	  this._collapseMarginBetween(
-	    {edge:this.prev.edge, target:"start"},
-	    {edge:this.edge, target:"end"}
-	  );
-	}
-      } else if(!this.isFloated() && !this.prev.isFloated()){
-	// [block] x [block]
-	this._collapseMarginBetween(
-	  {edge:this.prev.edge, target:"after"},
-	  {edge:this.edge, target:"before"}
-	);
-      }
-    } else if(this.prev.isTextHorizontal() && this.isTextVertical()){
-      // [hori] x [vert]
-      this._collapseMarginBetween(
-	{edge:this.prev.edge, target:"after"},
-	{edge:this.edge, target:"before"}
-      );
-    } else if(this.prev.isTextVertical() && this.isTextHorizontal()){
-      if(this.prev.flow.isBlockRightToLeft()){
-	// [vert:tb-rl] x [hori]
-	this._collapseMarginBetween(
-	  {edge:this.prev.edge, target:"after"},
-	  {edge:this.edge, target:"end"}
-	);
-      } else {
-	// [vert:tb-lr] x [hori]
-	this._collapseMarginBetween(
-	  {edge:this.prev.edge, target:"after"},
-	  {edge:this.edge, target:"start"}
-	);
-      }
-    }
-  };
-
-  // if prev_margin > cur_margin, just clear cur_margin.
-  Style.prototype._collapseMarginBetween = function(prev, cur){
-    // margin collapsing is ignored if there is a border between two edge.
-    if(prev.edge.border && prev.edge.border.getByName(this.flow, prev.target) ||
-       cur.edge.border && cur.edge.border.getByName(this.flow, cur.target)){
-      return;
-    }
-    var prev_size = prev.edge.margin.getByName(this.flow, prev.target);
-    var cur_size = cur.edge.margin.getByName(this.flow, cur.target);
-
-    // we use float for layouting each block element in evaluation phase,
-    // so standard margin collapsing doesn't work.
-    // that is because we use 'differene' of margin for collapsed size.
-    var new_size = (prev_size > cur_size)? 0 : cur_size - prev_size;
-
-    cur.edge.margin.setByName(this.flow, cur.target, new_size);
-
-    var rm_size = cur_size - new_size;
-
-    // update content size
-    this.contentExtent += rm_size;
-  };
-
   Style.prototype._loadBorder = function(flow, font_size){
     var edge_size = this._loadEdgeSize(font_size, "border-width");
     var border_radius = this.getCssAttr("border-radius");
@@ -14783,7 +14848,6 @@ Nehan.Style = (function(){
   return Style;
 })();
 
-
 Nehan.LayoutGenerator = (function(){
   /**
    @memberof Nehan
@@ -14868,53 +14932,24 @@ Nehan.BlockGenerator = (function(){
   Nehan.Class.extend(BlockGenerator, Nehan.LayoutGenerator);
 
   BlockGenerator.prototype._yield = function(){
-    if(!this.context.layoutContext.hasBlockSpaceFor(1, !this.hasNext())){
-      return null;
+    var clearance = this.context.yieldBlockClear();
+    if(clearance){
+      return clearance;
     }
-    var clear = this.context.style.clear;
-    if(clear && !clear.isDoneAll() && this.context.parent && this.context.parent.floatGroup){
-      var float_group = this.context.parent.floatGroup;
-      var float_direction = float_group.getFloatDirection();
-      if(float_group.isLast() && !float_group.hasNext() && clear.hasDirection(float_direction.getName())){
-	clear.setDone(float_direction.getName());
-	return this.context.createWhiteSpace();
-      }
-      if(!clear.isDoneAll()){
-	return this.context.createWhiteSpace();
-      }
-    }
-
     // if break-before available, page-break but only once.
-    if(this.context.style.isBreakBefore()){
-      this.context.style.clearBreakBefore(); // [TODO] move clearance status to rendering-context class.
+    if(this.context.isBreakBefore()){
+      this.context.clearBreakBefore();
       return null;
     }
-    while(true){
-      if(!this.hasNext()){
-	return this._createOutput(); // output last block
-      }
+    while(this.hasNext()){
       var element = this._getNext();
-      if(element === null){
-	console.log("[%s]:EOF", this.context.getMarkupName());
-	return this._createOutput();
-      }
-      if(element.isVoid()){
-	continue;
-      }
-      if(element.hasLineBreak){
-	this.context.documentContext.incLineBreakCount();
-      }
-      var extent = this.context.getElementLayoutExtent(element);
-      this.context.debugBlockElement(element, extent);
-      if(!this.context.layoutContext.hasBlockSpaceFor(extent)){
-	this.context.pushCache(element);
-	return this._createOutput();
-      }
-      this._addElement(element, extent);
-      if(!this.context.layoutContext.hasBlockSpaceFor(1) || this.context.layoutContext.hasBreakAfter()){
-	return this._createOutput();
+      try {
+	this.context.addBlockElement(element);
+      } catch (e){
+	break;
       }
     }
+    return this._createOutput();
   };
 
   /**
@@ -15079,7 +15114,7 @@ Nehan.InlineGenerator = (function(){
 	break;
       }
       var measure = this.context.getElementLayoutMeasure(element);
-      this.context.debugInlineElement(element, measure);
+      //this.context.debugInlineElement(element, measure);
       if(measure === 0){
 	break;
       }
@@ -15288,7 +15323,7 @@ Nehan.TextGenerator = (function(){
 	break;
       }
       var measure = this._getMeasure(element);
-      this.context.debugTextElement(element, measure);
+      //this.context.debugTextElement(element, measure);
       if(measure === 0){
 	break;
       }
@@ -15607,6 +15642,20 @@ Nehan.FloatGenerator = (function(){
   }
   Nehan.Class.extend(FloatGenerator, Nehan.LayoutGenerator);
 
+  // before: [root] -> [root(clone)] -> [child]
+  //  after: [root] -> [child]
+  FloatGenerator.prototype._inheritChildContext = function(){
+    this.context.parent.child = this.context.child;
+    this.context.child.parent = this.context.parent;
+    this.context.child.style.forceUpdateContextSize(
+      this.context.parent.style.contentMeasure,
+      this.context.parent.style.contentExtent
+    );
+  };
+
+  FloatGenerator.prototype._inheritChildCache = function(measure, extent){
+  };
+
   FloatGenerator.prototype._yield = function(){
     console.log("FloatGenerator::_yield");
     var stack = this._yieldFloatStack();
@@ -15614,14 +15663,7 @@ Nehan.FloatGenerator = (function(){
     var rest_extent = stack.getExtent();
     var root_measure = rest_measure;
     if(rest_measure <= 0 || rest_extent <= 0){
-      // [root]
-      //   [root_clone(this.context)]
-      //     [space(this.context.child)]
-      if(this.context.child.hasNext()){
-	this.context.parent.child = this.context.child;
-	this.context.child.parent = this.context.parent;
-	return this.context.parent.yieldChildLayout();
-      }
+      this.inheritChildContext();
       this.context.setTerminate(true);
       return null;
     }
@@ -15643,7 +15685,7 @@ Nehan.FloatGenerator = (function(){
       <------ rest_measure ---->
       --------------------------
       |       |                |
-      | group | rest           | => group_set(wrap_float)
+      | group | rest           | => group_set(inline wrap set)
       |       |                |
       --------------------------
     */
@@ -15669,56 +15711,35 @@ Nehan.FloatGenerator = (function(){
     */
     var rest_extent_space = rest_extent - group.getExtent(flow);
 
-    // if no more rest extent is left, continuous layout is displayed in context of parent generator.
+    // if no more rest extent is left,
+    // continuous layout is displayed in parent context.
     if(rest_extent_space <= 0){
-      if(!this.hasNext()){
-	// TODO
-	// before: [root] -> [root(clone)] -> [child]
-	//  after: [root] -> [child]
-	
-
-
-	/* old version
-	// before: [root] -> [float(this)] -> [root(clone)] -> [child]
-	//  after: [root] -> [child]
-	var root = this._parent;
-	var root_clone = this._child;
-	var root_child = root_clone._child || null;
-	if(root_child){
-	  root_child._parent = root;
-	  root_child.style.forceUpdateContextSize(root_measure, root.style.contentExtent);
-	}
-	root._child = root_child;
-	root._cachedElements = root_clone._cachedElements || [];
-	 */
-      }
+      this._inheritChildContext();
       return group_set;
     }
+
+    console.log("rest extent space:%d", rest_extent_space);
 
     /*
       <------ rest_measure ---->
       --------------------------
       |       |                |
-      | group | rest           | => group_set(wrap_float)
+      | group | rest           | => group_set(inline wrap set)
       |       |                |
       --------------------------
       |  rest_extent_space     | => rest_extent - group_set.extent
       --------------------------
     */
-    // if there is space in block-flow direction, yield rest space and wrap them(floated-set and rest-space).
-    console.log("rest extent space:%d", rest_extent_space);
+    // if there is space in block direction, yield rest space and wrap them([inline wrap set, rest_extent_space]).
     var space = this._yieldFloatSpace(prev_group, rest_measure, rest_extent_space);
     return this._wrapBlockSet([group_set, space]);
   };
   
   FloatGenerator.prototype._yieldFloatSpace = function(float_group, measure, extent){
-    console.info(">>>>>>>>>>>> _yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
-    this.context.layoutContext.inline.maxMeasure = measure;
-    this.context.layoutContext.block.maxExtent = extent;
-    this.context.style.forceUpdateContextSize(measure, extent);
-    var result =  this.context.yieldChildLayout();
-    console.log("context:%o, hasnext:%o", this.context.child, this.context.child.hasNext());
-    return result;
+    console.info("_yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
+    this._inheritChildCache(measure, extent);
+    this.context.child.style.forceUpdateContextSize(measure, extent);
+    return this.context.yieldChildLayout();
   };
   
   FloatGenerator.prototype._yieldFloatStack = function(){
@@ -15752,15 +15773,15 @@ Nehan.FloatGenerator = (function(){
     var flow = this.context.style.flow;
     var extent = floated.getExtent(flow);
     var elements = this._sortFloatRest(floated, rest || null);
-    var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
-    var wrap_style = this.context.createTmpChildStyle(new Nehan.Tag("div"), {
-      measure:measure,
-      extent:extent
+    var wrap_box = this.context.createWrapBlock(measure, extent, elements);
+    wrap_box.breakAfter = Nehan.List.exists(elements, function(element){
+      return element.breakAfter;
     });
-    return wrap_style.createBlock(this.context, {
-      elements:elements,
-      breakAfter:break_after
+    var elements_strs = elements.map(function(element){
+      return element? element.toString() : "<null>";
     });
+    console.info("wrap inline, elements = %o, size = %o", elements_strs, wrap_box.size);
+    return wrap_box;
   };
 
   // wrap.measure = e1.measure = e2.measure
@@ -15770,23 +15791,21 @@ Nehan.FloatGenerator = (function(){
   //   [e2]
   // [/wrap]
   FloatGenerator.prototype._wrapBlockSet = function(blocks){
-    console.log("wrap blocks:%o", blocks);
     var flow = this.context.style.flow;
     var elements = blocks.filter(function(block){
       return block !== null;
     });
     var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
     var extent = Nehan.List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
-    var break_after = Nehan.List.exists(elements, function(element){ return element.breakAfter; });
-    var wrap_style = this.context.createTmpChildStyle(new Nehan.Tag("div"), {
-      float:"start",
-      measure:measure,
-      extent:extent
+    var wrap_box = this.context.createWrapBlock(measure, extent, elements);
+    wrap_box.breakAfter = Nehan.List.exists(elements, function(element){
+      return element.breakAfter;
     });
-    return wrap_style.createBlock(this.context, {
-      elements:elements,
-      breakAfter:break_after
+    var elements_strs = elements.map(function(element){
+      return element? element.toString() : "<null>";
     });
+    console.info("wrap block, elements = %o, size = %o", elements_strs, wrap_box.size);
+    return wrap_box;
   };
 
   return FloatGenerator;
@@ -16233,7 +16252,6 @@ Nehan.BodyGenerator = (function(){
   */
   function BodyGenerator(context){
     Nehan.SectionRootGenerator.call(this, context);
-    this.rootBlockId = context.genRootBlockId();
   }
   Nehan.Class.extend(BodyGenerator, Nehan.SectionRootGenerator);
 
@@ -16429,9 +16447,6 @@ Nehan.LayoutEvaluator = (function(){
     if(opt.content){
       dom.innerHTML = opt.content;
     }
-    if(typeof opt.rootBlockId !== "undefined"){
-      dataset["rootBlockId"] = opt.rootBlockId;
-    }
     if(typeof opt.blockId !== "undefined"){
       dataset["blockId"] = opt.blockId;
     }
@@ -16513,7 +16528,6 @@ Nehan.LayoutEvaluator = (function(){
       className:tree.getClassName(),
       attrs:tree.getAttrs(),
       content:(opt.content || tree.getContent()),
-      rootBlockId:tree.rootBlockId,
       blockId:tree.blockId,
       paragraphId:tree.paragraphId,
       css:(opt.css || tree.getBoxCss())
@@ -17122,72 +17136,17 @@ Nehan.RenderingContext = (function(){
     });
   };
 
+  // -----------------------------------------------
+  // add
+  // -----------------------------------------------
+  RenderingContext.prototype.addText = function(text){
+    if(this.stream){
+      this.stream.addText(text);
+    }
+  };
+
   RenderingContext.prototype.addPage = function(page){
     this.documentContext.addPage(page);
-  };
-
-  RenderingContext.prototype.getWritingDirection = function(){
-    return "vert"; // TODO
-  };
-
-  RenderingContext.prototype.getPage = function(index){
-    var page = this.documentContext.pages[index] || null;
-    if(page instanceof Nehan.Box){
-      page = this.pageEvaluator.evaluate(page);
-      this.documentContext.pages[index] = page;
-      return page;
-    }
-    return page;
-  };
-
-  RenderingContext.prototype.stringOfTree = function(){
-    var leaf = this.getGeneratorName();
-    if(this.parent){
-      return this.parent.stringOfTree() + ">" + leaf;
-    }
-    return leaf;
-  };
-
-  RenderingContext.prototype.getChildContext = function(){
-    return this.child || null;
-  };
-
-  RenderingContext.prototype.getContent = function(){
-    return this.stream? this.stream.getSrc() : "";
-  };
-
-  RenderingContext.prototype.yieldChildLayout = function(){
-    return this.child.generator.yield();
-  };
-
-  RenderingContext.prototype.setStyle = function(key, value){
-    this.selectors.setValue(key, value);
-  };
-
-  RenderingContext.prototype.setStyles = function(values){
-    for(var key in values){
-      this.selectors.setValue(key, values[key]);
-    }
-  };
-
-  RenderingContext.prototype.debugBlockElement = function(element, extent){
-    var name = this.getGeneratorName();
-    var bc = this.layoutContext.block;
-    console.log("%s:%o, e(%d / %d)", name, element, (bc.curExtent + extent), bc.maxExtent);
-  };
-
-  RenderingContext.prototype.debugInlineElement = function(element, measure){
-    var name = this.getGeneratorName();
-    var ic = this.layoutContext.inline;
-    var data = element.toString();
-    console.log("%s:%o(%s), m(%d / %d)", name, element, data, (ic.curMeasure + measure), ic.maxMeasure);
-  };
-
-  RenderingContext.prototype.debugTextElement = function(element, measure){
-    var name = this.getGeneratorName();
-    var ic = this.layoutContext.inline;
-    var data = element.data || "";
-    console.log("%s:%o(%s), m(%d / %d)", name, element, data, (ic.curMeasure + measure), ic.maxMeasure);
   };
 
   RenderingContext.prototype.addAnchor = function(){
@@ -17197,41 +17156,49 @@ Nehan.RenderingContext = (function(){
     }
   };
 
-  RenderingContext.prototype.getContextEdgeExtent = function(){
-    return this.isFirstOutput()? this.style.getEdgeBefore() : 0;
+  RenderingContext.prototype.addBlockElement = function(element){
+    if(element === null){
+      console.log("[%s]:eof", this.getGeneratorName());
+      throw "eof"; // no more output
+    }
+    if(element.isVoid()){
+      return; // just skip
+    }
+    var element_size = element.getLayoutExtent(this.style.flow);
+    var cur_extent = this.layoutContext.getBlockCurExtent();
+    var max_size = this.layoutContext.getBlockMaxExtent();
+
+    this.debugBlockElement(element, element_size);
+
+    // tail edge is required for final output.
+    if(!this.hasNext()){
+      console.log("final output, subtract after edge:%d from %d", this.style.getEdgeAfter(), max_size);
+      max_size -= this.style.getEdgeAfter();
+    }
+    if(cur_extent + element_size > max_size){
+      console.log("%d > %d(max_size)", cur_extent + element_size, max_size);
+      this.pushCache(element);
+      throw "overflow";
+    }
+    if(element.hasLineBreak){
+      this.documentContext.incLineBreakCount();
+    }
+    this.layoutContext.addBlockElement(element, element_size);
   };
 
-  RenderingContext.prototype.getContextEdgeMeasure = function(){
-    return this.isFirstOutput()? this.style.getEdgeStart() : 0;
-  };
-
+  // -----------------------------------------------
+  // create
+  // -----------------------------------------------
   RenderingContext.prototype.createInlineLayoutContext = function(){
-    var edge_measure = this.getContextEdgeMeasure();
-    var parent_context = this.parent.layoutContext; // inline must have parent.
-    return this.layoutContext = new Nehan.LayoutContext(
-      new Nehan.BlockContext(parent_context.getBlockRestExtent()),
-      new Nehan.InlineContext(parent_context.getInlineRestMeasure() - edge_measure)
+    return new Nehan.LayoutContext(
+      new Nehan.BlockContext(this.getContextMaxExtent()),
+      new Nehan.InlineContext(this.getContextMaxMeasure())
     );
   };
 
   RenderingContext.prototype.createBlockLayoutContext = function(){
-    var edge_extent = this.getContextEdgeExtent();
-    var parent_context = this.parent? this.parent.layoutContext : null;
-
-    // block with parent
-    if(parent_context){
-      return new Nehan.LayoutContext(
-	new Nehan.BlockContext(parent_context.getBlockRestExtent() - edge_extent, {
-	  lineNo:this.layoutContext.lineNo
-	}),
-	//new Nehan.InlineContext(this.style.contentMeasure)
-	new Nehan.InlineContext(parent_context.getInlineRestMeasure())
-      );
-    }
-
-    // block witout parent
     return new Nehan.LayoutContext(
-      new Nehan.BlockContext(this.style.outerExtent - edge_extent),
+      new Nehan.BlockContext(this.getContextMaxExtent()),
       new Nehan.InlineContext(this.style.contentMeasure)
     );
   };
@@ -17239,25 +17206,25 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.createInlineBlockLayoutContext = function(){
     var parent_context = this.parent.layoutContext;
     return new Nehan.LayoutContext(
-      new Nehan.BlockContext(parent_context.getBlockRestExtent() - this.style.getEdgeExtent()),
-      new Nehan.InlineContext(parent_context.getInlineRestMeasure() - this.style.getEdgeMeasure())
+      new Nehan.BlockContext(this.getContextMaxExtent()),
+      new Nehan.InlineContext(this.getCotextInlineMeasure())
     );
   };
 
-  RenderingContext.prototype.isInline = function(){
-    return (
-      this.style.isInline() ||
-      this.generator instanceof Nehan.TextGenerator ||
-      this.generator instanceof Nehan.InlineGenerator
-    );
+  // -----------------------------------------------
+  // clear
+  // -----------------------------------------------
+  RenderingContext.prototype.clearCache = function(cache){
+    this.cachedElements = [];
   };
 
-  RenderingContext.prototype.resizeLayout = function(measure, extent){
-    this.style.forceUpdateContextSize(measure, extent);
-    this.layoutContext.block.maxExtent = extent;
-    this.layoutContext.inline.maxMeasure = measure;
+  RenderingContext.prototype.clearBreakBefore = function(){
+    this.breakBefore = true; // set already break flag.
   };
 
+  // -----------------------------------------------
+  // create
+  // -----------------------------------------------
   RenderingContext.prototype.createLayoutContext = function(){
     if(!this.style || this.style.getMarkupName() === "html"){
       return null;
@@ -17300,168 +17267,6 @@ Nehan.RenderingContext = (function(){
     };
   };
 
-  RenderingContext.prototype.getMarkupName = function(){
-    return this.style? this.style.getMarkupName() : "";
-  };
-
-  RenderingContext.prototype.initLayoutContext = function(){
-    this.layoutContext = this.createLayoutContext();
-    if(this.layoutContext){
-      console.log("start layout context:inline max = %d, block max = %d", this.layoutContext.inline.maxMeasure, this.layoutContext.block.maxExtent);
-    }
-  };
-
-  RenderingContext.prototype.initListContext = function(){
-    this.listContext = this.createListContext();
-  };
-
-  RenderingContext.prototype.hasNext = function(){
-    if(this.terminate){
-      return false;
-    }
-    if(this.hasCache()){
-      return true;
-    }
-    if(this.hasChildLayout()){
-      return true;
-    }
-    if(this.hasNextFloat()){
-      return true;
-    }
-    if(this.hasNextParallelLayout()){
-      return true;
-    }
-    return this.stream? this.stream.hasNext() : false;
-  };
-
-  RenderingContext.prototype.addText = function(text){
-    if(this.stream){
-      this.stream.addText(text);
-    }
-  };
-
-  RenderingContext.prototype.setTerminate = function(status){
-    this.terminate = status;
-  };
-
-  RenderingContext.prototype.setOwnerGenerator = function(generator){
-    this.generator = generator;
-    //console.log("%s created, context = %o(m=%o, e=%o)", this.getGeneratorName(), this, measure, extent);
-  };
-
-  RenderingContext.prototype.yieldListMarker = function(){
-    var item_count = this.stream.getTokenCount();
-    var marker_html = this.style.getListMarkerHtml(item_count);
-    var marker_context = this.createChildContext(this.style.clone({
-      display:"inline-block"
-    }), {
-      stream:new Nehan.TokenStream(marker_html)
-    });
-
-    // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
-    // and we have to avoid 'appendChild' from child-generator of this tmp generator.
-    var tmp_gen = new Nehan.InlineGenerator(this.clone(), new Nehan.TokenStream(max_marker_html));
-    var line = tmp_gen.yield();
-    var marker_measure = line? line.inlineMeasure + Math.floor(this.getFontSize() / 2) : this.getFontSize();
-    var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
-    this.listMarkerSize = this.flow.getBoxSize(marker_measure, marker_extent);
-  };
-
-  RenderingContext.prototype.hasChildLayout = function(){
-    if(this.child && this.child.generator && this.child.generator.hasNext()){
-      return true;
-    }
-    return false;
-  };
-
-  RenderingContext.prototype.hasNextFloat = function(){
-    return Nehan.List.exists(this.floatedGenerators, function(gen){
-      return gen.hasNext();
-    });
-  };
-
-  RenderingContext.prototype.hasNextParallelLayout = function(){
-    return Nehan.List.exists(this.parallelGenerators, function(gen){
-      return gen.hasNext();
-    });
-  };
-
-  RenderingContext.prototype.hasCache = function(){
-    return this.cachedElements.length > 0;
-  };
-
-  RenderingContext.prototype.peekLastCache = function(){
-    return Nehan.List.last(this.cachedElements);
-  };
-
-  RenderingContext.prototype.clearCache = function(cache){
-    this.cachedElements = [];
-  };
-
-  RenderingContext.prototype.pushCache = function(element){
-    console.log("push cache:", element);
-    /*
-    var cache_count = element.cacheCount || 0;
-    if(cache_count > 0){
-      if(cache_count >= Nehan.Config.maxRollbackCount){
-	var element_str = (element instanceof Nehan.Box)? element.toString() : (element.data || "??");
-	console.warn("[%s] too many retry:%o, element:%o(%s)", this.style.getMarkupName(), this.style, element, element_str);
-	// to avoid infinite loop, force child or this generator terminate!
-	if(this.child && this.child.hasNext()){
-	  this.child.setTerminate(true);
-	} else {
-	  this.setTerminate(true);
-	}
-	return;
-      }
-    }
-    element.cacheCount = cache_count + 1;
-     */
-    this.cachedElements.push(element);
-  };
-
-  RenderingContext.prototype.popCache = function(){
-    return this.cachedElements.pop();
-  };
-
-  RenderingContext.prototype.getElementLayoutExtent = function(element){
-    return element.getLayoutExtent(this.style.flow);
-  };
-
-  RenderingContext.prototype.getElementLayoutMeasure = function(element){
-    return element.getLayoutMeasure(this.style.flow);
-  };
-
-  RenderingContext.prototype.genBlockId = function(){
-    return this.documentContext.genBlockId();
-  };
-
-  RenderingContext.prototype.genRootBlockId = function(){
-    return this.documentContext.genRootBlockId();
-  };
-
-  RenderingContext.prototype.isFirstOutput = function(){
-    return this.yieldCount === 0;
-  };
-
-  RenderingContext.prototype.getGeneratorName = function(){
-    var markup_name = this.getMarkupName();
-    if(this.generator instanceof Nehan.DocumentGenerator){
-      return "(root)";
-    }
-    if(this.generator instanceof Nehan.TextGenerator){
-      return markup_name + "(text)";
-    }
-    if(this.generator instanceof Nehan.InlineGenerator){
-      return markup_name + "(inline)";
-    }
-    return markup_name + "(" + this.style.display + ")";
-  };
-
-  RenderingContext.prototype.getAnchorPageNo = function(anchor_name){
-    return this.documentContext.getAnchorPageNo(anchor_name);
-  };
-  
   RenderingContext.prototype.createOutlineElementByName = function(outline_name, callbacks){
     return this.documentContext.createOutlineElementByName(outline_name, callbacks);
   };
@@ -17475,10 +17280,6 @@ Nehan.RenderingContext = (function(){
     });
     child_style.context = this.child;
     return this.child;
-  };
-
-  RenderingContext.prototype.getParentStyle = function(){
-    return this.parent? this.parent.style : null;
   };
 
   RenderingContext.prototype.createStyle = function(markup, parent_style, args){
@@ -17746,6 +17547,18 @@ Nehan.RenderingContext = (function(){
     });
   };
 
+  RenderingContext.prototype.createWrapBlock = function(measure, extent, elements){
+    var wrap_style = this.createTmpChildStyle(new Nehan.Tag("div"), {
+      forceCss:{
+	measure:measure,
+	extent:extent
+      }
+    });
+    return wrap_style.createBlock(this, {
+      elements:elements
+    });
+  };
+
   RenderingContext.prototype.createBlock = function(){
     var extent = this.layoutContext.getBlockCurExtent();
     var elements = this.layoutContext.getBlockElements();
@@ -17794,7 +17607,7 @@ Nehan.RenderingContext = (function(){
       line.pos = Math.max(0, this.parent.stream.getPos() - 1);
     }
 
-    if(this.style.isRootLine()){
+    if(this.style.isInlineRoot()){
       this.layoutContext.incBlockLineNo();
     }
     return line;
@@ -17830,6 +17643,159 @@ Nehan.RenderingContext = (function(){
     return line;
   };
 
+  // -----------------------------------------------
+  // debug
+  // -----------------------------------------------
+  RenderingContext.prototype.debugBlockElement = function(element, extent){
+    var name = this.getGeneratorName();
+    var bc = this.layoutContext.block;
+    var str = element.toString();
+    console.info("%s:%o, e(%d / %d):%s", name, element, (bc.curExtent + extent), bc.maxExtent, str);
+  };
+
+  RenderingContext.prototype.debugInlineElement = function(element, measure){
+    var name = this.getGeneratorName();
+    var ic = this.layoutContext.inline;
+    var data = element.toString();
+    console.log("%s:%o(%s), m(%d / %d)", name, element, data, (ic.curMeasure + measure), ic.maxMeasure);
+  };
+
+  RenderingContext.prototype.debugTextElement = function(element, measure){
+    var name = this.getGeneratorName();
+    var ic = this.layoutContext.inline;
+    var data = element.data || "";
+    console.log("%s:%o(%s), m(%d / %d)", name, element, data, (ic.curMeasure + measure), ic.maxMeasure);
+  };
+
+  // -----------------------------------------------
+  // end
+  // -----------------------------------------------
+  /**
+   called when section root(body, blockquote, fieldset, figure, td) ends.
+
+   @memberof Nehan.RenderingContext
+   @method endOutlineContext
+   */
+  RenderingContext.prototype.endOutlineContext = function(){
+    this.documentContext.addOutlineContext(this.getOutlineContext());
+  };
+
+  /**
+   called when section content(article, aside, nav, section) ends.
+
+   @memberof Nehan.RenderingContext
+   @method startSectionContext
+   */
+  RenderingContext.prototype.endSectionContext = function(){
+    this.getOutlineContext().endSection(this.getMarkupName());
+  };
+
+  // -----------------------------------------------
+  // gen
+  // -----------------------------------------------
+  RenderingContext.prototype.genBlockId = function(){
+    return this.documentContext.genBlockId();
+  };
+
+  RenderingContext.prototype.genRootBlockId = function(){
+    return this.documentContext.genRootBlockId();
+  };
+
+  // -----------------------------------------------
+  // get
+  // -----------------------------------------------
+  RenderingContext.prototype.getFlow = function(){
+    return this.style.flow;
+  };
+
+  RenderingContext.prototype.getMarkupName = function(){
+    return this.style? this.style.getMarkupName() : "";
+  };
+
+  RenderingContext.prototype.getWritingDirection = function(){
+    return "vert"; // TODO
+  };
+
+  RenderingContext.prototype.getPage = function(index){
+    var page = this.documentContext.pages[index] || null;
+    if(page instanceof Nehan.Box){
+      page = this.pageEvaluator.evaluate(page);
+      this.documentContext.pages[index] = page;
+      return page;
+    }
+    return page;
+  };
+
+  RenderingContext.prototype.getChildContext = function(){
+    return this.child || null;
+  };
+
+  RenderingContext.prototype.getContent = function(){
+    return this.stream? this.stream.getSrc() : "";
+  };
+
+  RenderingContext.prototype.getBlockClear = function(){
+    var clear = this.style.clear;
+    if(clear && !clear.isDoneAll() && this.parent && this.parent.floatGroup){
+      return clear;
+    }
+    return null;
+  };
+
+  RenderingContext.prototype.getContextMaxMeasure = function(){
+    var max_size = (this.parent && this.parent.layoutContext)? this.parent.layoutContext.getInlineRestMeasure() : this.style.outerMeasure;
+    if(this.style.staticMeasure){
+      max_size = Math.min(max_size, this.style.staticMeasure);
+    }
+    // if child inline, start edge is included in first output.
+    if(!this.style.isInlineRoot() && this.isFirstOutput()){
+      max_size -= this.style.getEdgeStart();
+    }
+    return max_size;
+  };
+
+  RenderingContext.prototype.getContextMaxExtent = function(){
+    var max_size = (this.parent && this.parent.layoutContext)? this.parent.layoutContext.getBlockRestExtent() : this.style.outerExtent;
+    if(this.style.staticExtent){
+      max_size = Math.min(max_size, this.style.staticExtent);
+    }
+    // before edge is included in first output.
+    if(this.isFirstOutput()){
+      max_size -= this.style.getEdgeBefore();
+    }
+    return max_size;
+  };
+
+  RenderingContext.prototype.getElementLayoutExtent = function(element){
+    return element.getLayoutExtent(this.style.flow);
+  };
+
+  RenderingContext.prototype.getElementLayoutMeasure = function(element){
+    return element.getLayoutMeasure(this.style.flow);
+  };
+
+  RenderingContext.prototype.getGeneratorName = function(){
+    var markup_name = this.getMarkupName();
+    if(this.generator instanceof Nehan.DocumentGenerator){
+      return "(root)";
+    }
+    if(this.generator instanceof Nehan.TextGenerator){
+      return markup_name + "(text)";
+    }
+    if(this.generator instanceof Nehan.InlineGenerator){
+      return markup_name + "(inline)";
+    }
+    return markup_name + "(" + this.style.display + ")";
+  };
+
+  RenderingContext.prototype.getAnchorPageNo = function(anchor_name){
+    return this.documentContext.getAnchorPageNo(anchor_name);
+  };
+  
+  RenderingContext.prototype.getParentStyle = function(){
+    return this.parent? this.parent.style : null;
+  };
+
   RenderingContext.prototype.getHeaderRank = function(){
     if(this.style){
       return this.style.getHeaderRank();
@@ -17845,6 +17811,156 @@ Nehan.RenderingContext = (function(){
     return this.outlineContext || (this.parent? this.parent.getOutlineContext() : null);
   };
 
+  // -----------------------------------------------
+  // has
+  // -----------------------------------------------
+  RenderingContext.prototype.hasNext = function(){
+    if(this.terminate){
+      return false;
+    }
+    if(this.hasCache()){
+      return true;
+    }
+    if(this.hasChildLayout()){
+      return true;
+    }
+    if(this.hasNextFloat()){
+      return true;
+    }
+    if(this.hasNextParallelLayout()){
+      return true;
+    }
+    return this.stream? this.stream.hasNext() : false;
+  };
+
+  RenderingContext.prototype.hasChildLayout = function(){
+    if(this.child && this.child.generator && this.child.generator.hasNext()){
+      return true;
+    }
+    return false;
+  };
+
+  RenderingContext.prototype.hasNextFloat = function(){
+    return Nehan.List.exists(this.floatedGenerators, function(gen){
+      return gen.hasNext();
+    });
+  };
+
+  RenderingContext.prototype.hasNextParallelLayout = function(){
+    return Nehan.List.exists(this.parallelGenerators, function(gen){
+      return gen.hasNext();
+    });
+  };
+
+  RenderingContext.prototype.hasCache = function(){
+    return this.cachedElements.length > 0;
+  };
+
+  // -----------------------------------------------
+  // init
+  // -----------------------------------------------
+  RenderingContext.prototype.initLayoutContext = function(){
+    this.layoutContext = this.createLayoutContext();
+    if(this.layoutContext){
+      console.log("start layout context:(m = %d, e = %d)", this.layoutContext.inline.maxMeasure, this.layoutContext.block.maxExtent);
+    }
+  };
+
+  RenderingContext.prototype.initListContext = function(){
+    this.listContext = this.createListContext();
+  };
+
+  // -----------------------------------------------
+  // is
+  // -----------------------------------------------
+  RenderingContext.prototype.isInline = function(){
+    return (
+      this.style.isInline() ||
+      this.generator instanceof Nehan.TextGenerator ||
+      this.generator instanceof Nehan.InlineGenerator
+    );
+  };
+
+  RenderingContext.prototype.isBreakBefore = function(){
+    return this.style.isBreakBefore() && (typeof this.breakBefore === "undefined");
+  };
+
+  RenderingContext.prototype.isFirstOutput = function(){
+    return this.yieldCount === 0;
+  };
+
+  RenderingContext.prototype.isTextVertical = function(){
+    return this.style.isTextVertical();
+  };
+
+  // -----------------------------------------------
+  // peek
+  // -----------------------------------------------
+  RenderingContext.prototype.peekLastCache = function(){
+    return Nehan.List.last(this.cachedElements);
+  };
+
+  // -----------------------------------------------
+  // pop
+  // -----------------------------------------------
+  RenderingContext.prototype.popCache = function(){
+    return this.cachedElements.pop();
+  };
+
+  // -----------------------------------------------
+  // push
+  // -----------------------------------------------
+  RenderingContext.prototype.pushCache = function(element){
+    if(element instanceof Nehan.Box){
+      console.log("push cache:", element.toString());
+    } else {
+      console.log("push cache:", element);
+    }
+    /*
+    var cache_count = element.cacheCount || 0;
+    if(cache_count > 0){
+      if(cache_count >= Nehan.Config.maxRollbackCount){
+	var element_str = (element instanceof Nehan.Box)? element.toString() : (element.data || "??");
+	console.warn("[%s] too many retry:%o, element:%o(%s)", this.style.getMarkupName(), this.style, element, element_str);
+	// to avoid infinite loop, force child or this generator terminate!
+	if(this.child && this.child.hasNext()){
+	  this.child.setTerminate(true);
+	} else {
+	  this.setTerminate(true);
+	}
+	return;
+      }
+    }
+    element.cacheCount = cache_count + 1;
+     */
+    this.cachedElements.push(element);
+  };
+
+  // -----------------------------------------------
+  // set
+  // -----------------------------------------------
+  RenderingContext.prototype.setTerminate = function(status){
+    this.terminate = status;
+  };
+
+  RenderingContext.prototype.setOwnerGenerator = function(generator){
+    this.generator = generator;
+    //console.log("%s created, context = %o(m=%o, e=%o)", this.getGeneratorName(), this, measure, extent);
+  };
+
+  RenderingContext.prototype.setStyle = function(key, value){
+    this.selectors.setValue(key, value);
+  };
+
+  RenderingContext.prototype.setStyles = function(values){
+    for(var key in values){
+      this.selectors.setValue(key, values[key]);
+    }
+  };
+
+  // -----------------------------------------------
+  // start
+  // -----------------------------------------------
   /**
    called when section root(body, blockquote, fieldset, figure, td) starts.
 
@@ -17852,16 +17968,6 @@ Nehan.RenderingContext = (function(){
    */
   RenderingContext.prototype.startOutlineContext = function(){
     this.outlineContext = new Nehan.OutlineContext(this.getMarkupName());
-  };
-
-  /**
-   called when section root(body, blockquote, fieldset, figure, td) ends.
-
-   @memberof Nehan.RenderingContext
-   @method endOutlineContext
-   */
-  RenderingContext.prototype.endOutlineContext = function(){
-    this.documentContext.addOutlineContext(this.getOutlineContext());
   };
 
   /**
@@ -17875,15 +17981,6 @@ Nehan.RenderingContext = (function(){
       type:this.getMarkupName(),
       pageNo:this.documentContext.getPageNo()
     });
-  };
-  /**
-   called when section content(article, aside, nav, section) ends.
-
-   @memberof Nehan.RenderingContext
-   @method startSectionContext
-   */
-  RenderingContext.prototype.endSectionContext = function(){
-    this.getOutlineContext().endSection(this.getMarkupName());
   };
 
   /**
@@ -17901,6 +17998,62 @@ Nehan.RenderingContext = (function(){
       rank:opt.rank,
       title:opt.title
     });
+  };
+
+  // -----------------------------------------------
+  // stringOf
+  // -----------------------------------------------
+  RenderingContext.prototype.stringOfTree = function(){
+    var leaf = this.getGeneratorName();
+    if(this.parent){
+      return this.parent.stringOfTree() + ">" + leaf;
+    }
+    return leaf;
+  };
+
+  // -----------------------------------------------
+  // yield
+  // -----------------------------------------------
+  RenderingContext.prototype.yieldChildLayout = function(){
+    return this.child.generator.yield();
+  };
+
+  RenderingContext.prototype.yieldBlockClear = function(){
+    var clear = this.getBlockClear();
+    if(!clear){
+      return null;
+    }
+    var float_group = this.parent.floatGroup;
+    if(!float_group){
+      return null;
+    }
+    var float_direction = float_group.getFloatDirection();
+    if(float_group.isLast() && !float_group.hasNext() && clear.hasDirection(float_direction.getName())){
+      clear.setDone(float_direction.getName());
+      return this.createWhiteSpace();
+    }
+    if(!clear.isDoneAll()){
+      return this.createWhiteSpace();
+    }
+    return null;
+  };
+
+  RenderingContext.prototype.yieldListMarker = function(){
+    var item_count = this.stream.getTokenCount();
+    var marker_html = this.style.getListMarkerHtml(item_count);
+    var marker_context = this.createChildContext(this.style.clone({
+      display:"inline-block"
+    }), {
+      stream:new Nehan.TokenStream(marker_html)
+    });
+
+    // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
+    // and we have to avoid 'appendChild' from child-generator of this tmp generator.
+    var tmp_gen = new Nehan.InlineGenerator(this.clone(), new Nehan.TokenStream(max_marker_html));
+    var line = tmp_gen.yield();
+    var marker_measure = line? line.inlineMeasure + Math.floor(this.getFontSize() / 2) : this.getFontSize();
+    var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
+    this.listMarkerSize = this.flow.getBoxSize(marker_measure, marker_extent);
   };
 
   // hyphenate between two different inline generator.

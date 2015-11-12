@@ -66,8 +66,8 @@ Nehan.Box = (function(){
    @memberof Nehan.Box
    @return {boolean}
    */
-  Box.prototype.isRootLine = function(){
-    return this.isRootLine || false;
+  Box.prototype.isInlineRoot = function(){
+    return this.isInlineRoot || false;
   };
   /**
    filter text objects.
