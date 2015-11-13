@@ -20,23 +20,24 @@ Nehan.FloatGenerator = (function(){
   FloatGenerator.prototype._inheritChildContext = function(){
     this.context.parent.child = this.context.child;
     this.context.child.parent = this.context.parent;
-    this.context.child.style.forceUpdateContextSize(
+    this.context.child.style.updateContextSize(
       this.context.parent.style.contentMeasure,
       this.context.parent.style.contentExtent
     );
-  };
-
-  FloatGenerator.prototype._inheritChildCache = function(measure, extent){
+    console.info(
+      "inherit child context:child m:%d, parent m:%d",
+      this.context.child.layoutContext.inline.maxMeasure,
+      this.context.parent.layoutContext.inline.maxMeasure
+    );
   };
 
   FloatGenerator.prototype._yield = function(){
-    console.log("FloatGenerator::_yield");
+    console.info("FloatGenerator::_yield");
     var stack = this._yieldFloatStack();
     var rest_measure = this.context.layoutContext.getInlineRestMeasure();
     var rest_extent = stack.getExtent();
     var root_measure = rest_measure;
     if(rest_measure <= 0 || rest_extent <= 0){
-      this.inheritChildContext();
       this.context.setTerminate(true);
       return null;
     }
@@ -110,8 +111,12 @@ Nehan.FloatGenerator = (function(){
   
   FloatGenerator.prototype._yieldFloatSpace = function(float_group, measure, extent){
     console.info("_yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
-    this._inheritChildCache(measure, extent);
-    this.context.child.style.forceUpdateContextSize(measure, extent);
+    this.context.child.style.updateContextSize(measure, extent);
+    var cache = this.context.child.peekLastCache();
+    if(cache && cache.isLine() && cache.inlineMeasure < measure){
+      this.context.child.popCache();
+      this.context.child.child.setResumeLine(cache);
+    }
     return this.context.yieldChildLayout();
   };
   
@@ -127,7 +132,7 @@ Nehan.FloatGenerator = (function(){
 	  end_blocks.push(block);
 	}
       }
-    });
+    }.bind(this));
     return new Nehan.FloatGroupStack(this.context.style.flow, start_blocks, end_blocks);
   };
 
@@ -153,7 +158,7 @@ Nehan.FloatGenerator = (function(){
     var elements_strs = elements.map(function(element){
       return element? element.toString() : "<null>";
     });
-    console.info("wrap inline, elements = %o, size = %o", elements_strs, wrap_box.size);
+    //console.info("wrap inline, elements = %o, size = %o", elements_strs, wrap_box.size);
     return wrap_box;
   };
 
@@ -177,7 +182,7 @@ Nehan.FloatGenerator = (function(){
     var elements_strs = elements.map(function(element){
       return element? element.toString() : "<null>";
     });
-    console.info("wrap block, elements = %o, size = %o", elements_strs, wrap_box.size);
+    //console.info("wrap block, elements = %o, size = %o", elements_strs, wrap_box.size);
     return wrap_box;
   };
 

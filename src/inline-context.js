@@ -199,6 +199,17 @@ Nehan.InlineContext = (function(){
     return this.elements.pop();
   };
   /**
+   @memberof Nehan.InlineContext
+   @param {Nehan.Box}
+   */
+  InlineContext.prototype.resumeLine = function(line){
+    this.elements = line.elements;
+    this.curMeasure = line.inlineMeasure;
+    this.maxFontSize = line.maxFontSize || this.maxFontSize;
+    this.maxExtent = line.maxExtent || this.maxExtent;
+    this.charCount = line.charCount || this.charCount;
+  };
+  /**
    hyphenate(by sweep) inline element with next head character, return null if nothing happend, or return new tail char if hyphenated.
 
    @memberof Nehan.InlineContext

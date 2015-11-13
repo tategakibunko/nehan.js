@@ -37,7 +37,7 @@ Nehan.InlineGenerator = (function(){
 	break;
       }
       var measure = this.context.getElementLayoutMeasure(element);
-      //this.context.debugInlineElement(element, measure);
+      this.context.debugInlineElement(element, measure);
       if(measure === 0){
 	break;
       }
@@ -153,9 +153,8 @@ Nehan.InlineGenerator = (function(){
 
     // if inline -> block(or floated layout), force terminate inline
     if(child_style.isBlock() || child_style.isFloated()){
-      var child_gen = this.context.createChildBlockGenerator(child_style);
       if(child_style.isFloated()){
-	child_gen = this.context.createFloatGenerator(child_gen);
+	this.context.createFloatGenerator(child_style);
       }
       // add line-break to avoid empty-line.
       // because empty-line is returned as null to parent block generator,
@@ -164,15 +163,8 @@ Nehan.InlineGenerator = (function(){
       return null;
     }
 
-    // inline child
-    switch(child_style.getMarkupName()){
-    case "img":
-      return child_style.createImage(this.context);
-
-    default:
-      this.context.createChildInlineGenerator(child_style);
-      return this.context.yieldChildLayout();
-    }
+    this.context.createChildInlineGenerator(child_style);
+    return this.context.yieldChildLayout();
   };
 
   InlineGenerator.prototype._addElement = function(element, measure){

@@ -236,24 +236,13 @@ Nehan.Style = (function(){
     this.contentExtent = this._computeContentExtent(this.outerExtent);
   };
   /**
-   update context size, but static size is preferred, called from {@link Nehan.FlipGenerator}.
+   update context size, and propagate update to children.
 
    @memberof Nehan.Style
-   @method updateContextSize
    @param measure {int}
    @param extent {int}
    */
   Style.prototype.updateContextSize = function(measure, extent){
-    this.forceUpdateContextSize(this.staticMeasure || measure, this.staticExtent || extent);
-  };
-  /**
-   force update context size, called from generator of floating-rest-generator.
-
-   @memberof Nehan.Style
-   @param measure {int}
-   @param extent {int}
-   */
-  Style.prototype.forceUpdateContextSize = function(measure, extent){
     // measure of marker or table is always fixed.
     if(this.markupName === "marker" || this.display === "table"){
       return this;
@@ -262,7 +251,7 @@ Nehan.Style = (function(){
 
     // force re-culculate context-size of children based on new context-size of parent.
     Nehan.List.iter(this.childs, function(child){
-      child.forceUpdateContextSize(null, null);
+      child.updateContextSize(null, null);
     });
 
     return this;

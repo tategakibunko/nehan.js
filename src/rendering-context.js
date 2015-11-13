@@ -50,7 +50,7 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // add
+  // [add]
   // -----------------------------------------------
   RenderingContext.prototype.addText = function(text){
     if(this.stream){
@@ -77,30 +77,33 @@ Nehan.RenderingContext = (function(){
     if(element.isVoid()){
       return; // just skip
     }
-    var element_size = element.getLayoutExtent(this.style.flow);
-    var cur_extent = this.layoutContext.getBlockCurExtent();
     var max_size = this.layoutContext.getBlockMaxExtent();
+    var element_size = element.getLayoutExtent(this.style.flow);
+    var prev_extent = this.layoutContext.getBlockCurExtent();
+    var next_extent = prev_extent + element_size;
 
-    this.debugBlockElement(element, element_size);
+    //this.debugBlockElement(element, element_size);
 
     // tail edge is required for final output.
     if(!this.hasNext()){
-      console.log("final output, subtract after edge:%d from %d", this.style.getEdgeAfter(), max_size);
       max_size -= this.style.getEdgeAfter();
     }
-    if(cur_extent + element_size > max_size){
-      console.log("%d > %d(max_size)", cur_extent + element_size, max_size);
+    if(next_extent <= max_size){
+      this.layoutContext.addBlockElement(element, element_size);
+      if(element.hasLineBreak){
+	this.documentContext.incLineBreakCount();
+      }
+    }
+    if(next_extent > max_size){
       this.pushCache(element);
+    }
+    if(next_extent >= max_size){
       throw "overflow";
     }
-    if(element.hasLineBreak){
-      this.documentContext.incLineBreakCount();
-    }
-    this.layoutContext.addBlockElement(element, element_size);
   };
 
   // -----------------------------------------------
-  // create
+  // [create]
   // -----------------------------------------------
   RenderingContext.prototype.createInlineLayoutContext = function(){
     return new Nehan.LayoutContext(
@@ -125,7 +128,7 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // clear
+  // [clear]
   // -----------------------------------------------
   RenderingContext.prototype.clearCache = function(cache){
     this.cachedElements = [];
@@ -136,7 +139,7 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // create
+  // [create]
   // -----------------------------------------------
   RenderingContext.prototype.createLayoutContext = function(){
     if(!this.style || this.style.getMarkupName() === "html"){
@@ -294,23 +297,15 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createChildBlockGenerator = function(child_style, child_stream){
     //console.log("createChildBlockGenerator(%s):%s", child_style.getMarkupName(), child_style.markup.getContent());
-
-    // if child style with 'pasted' attribute, yield block with direct content by LazyGenerator.
-    // notice that this is nehan.js original attribute,
-    // is required to show some html(like form, input etc) that can't be handled by nehan.js.
-    if(child_style.isPasted()){
-      return new Nehan.LazyGenerator(
-	this.create({
-	  lazyOutput:child_style.createBlock({
-	    content:child_style.getContent()
-	  })
-	})
-      );
-    }
-
     var child_context = this.createChildContext(child_style, {
       stream:child_stream || this.createStream(child_style)
     });
+
+    var direct_block = this.yieldBlockDirect(child_context);
+    if(direct_block){
+      child_context.lazyOutput = direct_block;
+      return new Nehan.LazyGenerator(child_context);
+    }
 
     if(child_style.hasFlipFlow()){
       return new Nehan.FlipGenerator(child_context);
@@ -333,21 +328,6 @@ Nehan.RenderingContext = (function(){
 
     // switch generator by markup name
     switch(child_style.getMarkupName()){
-    case "img":
-      return new Nehan.LazyGenerator(
-	this.create({
-	  lazyOutput:child_style.createImage()
-	})
-      );
-
-    case "hr":
-      // create block with no elements, but with edge(border).
-      return new Nehan.LazyGenerator(
-	this.create({
-	  lazyOutput:child_style.createBlock()
-	})
-      );
-
     case "first-line":
       return new Nehan.FirstLineGenerator(child_context);
 
@@ -389,35 +369,20 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createChildInlineGenerator = function(style, stream){
-    if(style.isPasted()){
-      return new Nehan.LazyGenerator(
-	this.create({
-	  parent:this,
-	  lazyOutput:style.createLine({
-	    content:style.getContent()
-	  })
-	})
-      );
-    }
-    var markup_name = style.getMarkupName();
-    if(markup_name === "img"){
-      // if inline img, no content text is included in img tag, so we yield it by lazy generator.
-      return new Nehan.LazyGenerator(
-	this.create({
-	  parent:this,
-	  lazyOutput:style.createImage()
-	})
-      );
-    }
-
     var child_context = this.createChildContext(style, {
       stream:(stream || this.createStream(style))
     });
 
+    var direct_block = this.yieldInlineDirect(child_context);
+    if(direct_block){
+      child_context.lazyOutput = direct_block;
+      return new Nehan.LazyGenerator(child_context);
+    }
+
     if(style.isInlineBlock()){
       return new Nehan.InlineBlockGenerator(child_context);
     }
-    switch(markup_name){
+    switch(style.getMarkupName()){
     case "ruby":
       return new Nehan.TextGenerator(child_context);
     case "a":
@@ -557,7 +522,7 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // debug
+  // [debug]
   // -----------------------------------------------
   RenderingContext.prototype.debugBlockElement = function(element, extent){
     var name = this.getGeneratorName();
@@ -581,7 +546,7 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // end
+  // [end]
   // -----------------------------------------------
   /**
    called when section root(body, blockquote, fieldset, figure, td) ends.
@@ -604,7 +569,7 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // gen
+  // [gen]
   // -----------------------------------------------
   RenderingContext.prototype.genBlockId = function(){
     return this.documentContext.genBlockId();
@@ -615,7 +580,7 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // get
+  // [get]
   // -----------------------------------------------
   RenderingContext.prototype.getFlow = function(){
     return this.style.flow;
@@ -657,9 +622,8 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.getContextMaxMeasure = function(){
     var max_size = (this.parent && this.parent.layoutContext)? this.parent.layoutContext.getInlineRestMeasure() : this.style.outerMeasure;
-    if(this.style.staticMeasure){
-      max_size = Math.min(max_size, this.style.staticMeasure);
-    }
+    max_size = Math.min(max_size, this.style.outerMeasure);
+
     // if child inline, start edge is included in first output.
     if(!this.style.isInlineRoot() && this.isFirstOutput()){
       max_size -= this.style.getEdgeStart();
@@ -669,9 +633,8 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.getContextMaxExtent = function(){
     var max_size = (this.parent && this.parent.layoutContext)? this.parent.layoutContext.getBlockRestExtent() : this.style.outerExtent;
-    if(this.style.staticExtent){
-      max_size = Math.min(max_size, this.style.staticExtent);
-    }
+    max_size = Math.min(max_size, this.style.outerExtent);
+
     // before edge is included in first output.
     if(this.isFirstOutput()){
       max_size -= this.style.getEdgeBefore();
@@ -725,7 +688,7 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // has
+  // [has]
   // -----------------------------------------------
   RenderingContext.prototype.hasNext = function(){
     if(this.terminate){
@@ -770,10 +733,14 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // init
+  // [init]
   // -----------------------------------------------
   RenderingContext.prototype.initLayoutContext = function(){
     this.layoutContext = this.createLayoutContext();
+    if(this.resumeLine){
+      this.layoutContext.resumeLine(this.resumeLine);
+      this.resumeLine = null;
+    }
     if(this.layoutContext){
       console.log("start layout context:(m = %d, e = %d)", this.layoutContext.inline.maxMeasure, this.layoutContext.block.maxExtent);
     }
@@ -784,7 +751,7 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // is
+  // [is]
   // -----------------------------------------------
   RenderingContext.prototype.isInline = function(){
     return (
@@ -807,53 +774,40 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // peek
+  // [peek]
   // -----------------------------------------------
   RenderingContext.prototype.peekLastCache = function(){
     return Nehan.List.last(this.cachedElements);
   };
 
   // -----------------------------------------------
-  // pop
+  // [pop]
   // -----------------------------------------------
   RenderingContext.prototype.popCache = function(){
     return this.cachedElements.pop();
   };
 
   // -----------------------------------------------
-  // push
+  // [push]
   // -----------------------------------------------
   RenderingContext.prototype.pushCache = function(element){
     if(element instanceof Nehan.Box){
-      console.log("push cache:", element.toString());
+      console.log("cache box:", element.toString());
     } else {
-      console.log("push cache:", element);
+      //console.log("cache text:", element);
     }
-    /*
-    var cache_count = element.cacheCount || 0;
-    if(cache_count > 0){
-      if(cache_count >= Nehan.Config.maxRollbackCount){
-	var element_str = (element instanceof Nehan.Box)? element.toString() : (element.data || "??");
-	console.warn("[%s] too many retry:%o, element:%o(%s)", this.style.getMarkupName(), this.style, element, element_str);
-	// to avoid infinite loop, force child or this generator terminate!
-	if(this.child && this.child.hasNext()){
-	  this.child.setTerminate(true);
-	} else {
-	  this.setTerminate(true);
-	}
-	return;
-      }
-    }
-    element.cacheCount = cache_count + 1;
-     */
     this.cachedElements.push(element);
   };
 
   // -----------------------------------------------
-  // set
+  // [set]
   // -----------------------------------------------
   RenderingContext.prototype.setTerminate = function(status){
     this.terminate = status;
+  };
+
+  RenderingContext.prototype.setResumeLine = function(line){
+    this.resumeLine = line;
   };
 
   RenderingContext.prototype.setOwnerGenerator = function(generator){
@@ -872,7 +826,7 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // start
+  // [start]
   // -----------------------------------------------
   /**
    called when section root(body, blockquote, fieldset, figure, td) starts.
@@ -914,7 +868,7 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // stringOf
+  // [stringOf]
   // -----------------------------------------------
   RenderingContext.prototype.stringOfTree = function(){
     var leaf = this.getGeneratorName();
@@ -925,7 +879,7 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
-  // yield
+  // [yield]
   // -----------------------------------------------
   RenderingContext.prototype.yieldChildLayout = function(){
     return this.child.generator.yield();
@@ -951,24 +905,51 @@ Nehan.RenderingContext = (function(){
     return null;
   };
 
-  RenderingContext.prototype.yieldListMarker = function(){
-    var item_count = this.stream.getTokenCount();
-    var marker_html = this.style.getListMarkerHtml(item_count);
-    var marker_context = this.createChildContext(this.style.clone({
-      display:"inline-block"
-    }), {
-      stream:new Nehan.TokenStream(marker_html)
-    });
-
-    // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
-    // and we have to avoid 'appendChild' from child-generator of this tmp generator.
-    var tmp_gen = new Nehan.InlineGenerator(this.clone(), new Nehan.TokenStream(max_marker_html));
-    var line = tmp_gen.yield();
-    var marker_measure = line? line.inlineMeasure + Math.floor(this.getFontSize() / 2) : this.getFontSize();
-    var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
-    this.listMarkerSize = this.flow.getBoxSize(marker_measure, marker_extent);
+  RenderingContext.prototype.yieldBlockDirect = function(child_context){
+    if(child_context.style.isPasted()){
+      return this.yieldPastedBlock(child_context);
+    }
+    switch(child_context.style.getMarkupName()){
+    case "img": return this.yieldImage(child_context);
+    case "hr": return this.yieldHorizontalRule(child_context);
+    }
+    return null;
   };
 
+  RenderingContext.prototype.yieldInlineDirect = function(child_context){
+    if(child_context.style.isPasted()){
+      return this.yieldPastedLine(child_context);
+      return this.yieldPastedBlock(child_context);
+    }
+    switch(child_context.style.getMarkupName()){
+    case "img": return this.yieldImage(child_context);
+    }
+    return null;
+  };
+
+  RenderingContext.prototype.yieldPastedLine = function(child_context){
+    return child_context.style.createLine(child_context, {
+      content:child_context.style.getContent()
+    });
+  };
+
+  RenderingContext.prototype.yieldPastedBlock = function(child_context){
+    return child_context.style.createBlock(child_context, {
+      content:child_context.style.getContent()
+    });
+  };
+
+  RenderingContext.prototype.yieldImage = function(child_context){
+    return child_context.style.createImage(child_context);
+  };
+
+  RenderingContext.prototype.yieldHorizontalRule = function(child_context){
+    return child_context.style.createBlock(child_context);
+  };
+
+  // -----------------------------------------------
+  // [private]
+  // -----------------------------------------------
   // hyphenate between two different inline generator.
   RenderingContext.prototype._hyphenateSibling = function(generator){
     var next_token = generator.stream.peek();

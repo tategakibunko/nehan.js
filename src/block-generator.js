@@ -35,42 +35,6 @@ Nehan.BlockGenerator = (function(){
     return this._createOutput();
   };
 
-  /**
-     @memberof Nehan.BlockGenerator
-     @method popCache
-     @return {Nehan.Box} temporary stored cached element for next time yielding.
-   */
-  /*
-  BlockGenerator.prototype.popCache = function(){
-    var cache = this.context.popCache();
-
-    if(cache && cache.isLine()){
-      // restore cached line with correct line no
-      if(this.context.getBlockLineNo() === 0){
-	cache.lineNo = 0;
-	this.context.incBlockLineNo(); // cached line is next first line(of next block), so increment line no in block level this.context.
-      }
-      // if cache is inline(with no <br>), and measure size is not same as current block measure, reget it.
-      // this is caused by float-generator, because in floating layout, inline measure is changed by it's cursor position.
-      if((!cache.hasLineBreak || (cache.hasLineBreak && cache.hyphenated)) && cache.getLayoutMeasure(this.context.style.flow) < this.context.style.contentMeasure && this._child){
-	//console.info("inline float fix, line = %o(%s), context = %o, child_gen = %o", cache, cache.toString(), context, this._child);
-
-	// resume inline context
-	var context2 = this._createChildContext();
-	context2.inline.elements = cache.elements;
-	context2.inline.curMeasure = cache.getLayoutMeasure(this.context.style.flow);
-	context2.inline.maxFontSize = cache.maxFontSize || this.context.style.getFontSize();
-	context2.inline.maxExtent = cache.maxExtent || 0;
-	context2.inline.charCount = cache.charCount || 0;
-	var line = this._child._yield(context2);
-	//console.log("line:%o(line no = %d)", line, line.lineNo);
-	return line;
-      }
-    }
-    return cache;
-  };
-   */
-
   BlockGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
       var cache = this.context.popCache();

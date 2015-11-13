@@ -115,6 +115,13 @@ Nehan.LayoutContext = (function(){
    @memberof Nehan.LayoutContext
    @param status {boolean}
    */
+  LayoutContext.prototype.resumeLine = function(line){
+    this.inline.resumeLine(line);
+  };
+  /**
+   @memberof Nehan.LayoutContext
+   @param status {boolean}
+   */
   LayoutContext.prototype.setLineBreak = function(status){
     this.inline.setLineBreak(status);
   };
