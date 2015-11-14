@@ -6,9 +6,8 @@ Nehan.FirstLineGenerator = (function(){
    @class FirstLineGenerator
    @classdesc generator to yield first line block.
    @constructor
-   @param style {Nehan.Style}
-   @param stream {Nehan.TokenStream}
    @extends {Nehan.BlockGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function FirstLineGenerator(context){
     Nehan.BlockGenerator.call(this, context);
@@ -16,6 +15,7 @@ Nehan.FirstLineGenerator = (function(){
   Nehan.Class.extend(FirstLineGenerator, Nehan.BlockGenerator);
 
   // this is called after each element(line-block) is yielded.
+  /*
   FirstLineGenerator.prototype._onAddElement = function(element){
     if(this.context.getBlockLineNo() !== 1){
       return;
@@ -32,7 +32,7 @@ Nehan.FirstLineGenerator = (function(){
       parent_gen = child_gen;
       child_gen = child_gen.context.childGenerator;
     }
-  };
+  };*/
 
   return FirstLineGenerator;
 })();

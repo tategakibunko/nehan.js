@@ -1,12 +1,11 @@
 Nehan.ListItemGenerator = (function(){
   /**
-     @memberof Nehan
-     @class ListItemGenerator
-     @classdesc generator of &lt;li&gt; tag, consists parallel generator of list-item and list-body.
-     @constructor
-     @extends {Nehan.ParallelGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
+   @memberof Nehan
+   @class ListItemGenerator
+   @classdesc generator of &lt;li&gt; tag, consists parallel generator of list-item and list-body.
+   @constructor
+   @extends {Nehan.ParallelGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function ListItemGenerator(context){
     Nehan.LayoutGenerator.call(this, context);

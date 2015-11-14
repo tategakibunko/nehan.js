@@ -5,8 +5,12 @@ Nehan.Text = (function(){
      @param content {String}
   */
   function Text(content){
-    this.content = content;
+    this.content = this._normalize(content);
   }
+
+  Text.prototype._normalize = function(text){
+    return text.replace(/^\n+/, "");
+  };
 
   /**
    check if text consists of white space only

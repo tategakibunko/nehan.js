@@ -1,57 +1,23 @@
 Nehan.TextGenerator = (function(){
   /**
-     @memberof Nehan
-     @class TextGenerator
-     @classdesc inline level generator, output inline level block.
-     @constructor
-     @extends {Nehan.LayoutGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
-     @param child_generator {Nehan.LayoutGenerator}
-  */
+   @memberof Nehan
+   @class TextGenerator
+   @classdesc inline level generator, output inline level block.
+   @constructor
+   @extends {Nehan.LayoutGenerator}
+   @param context {Nehan.RenderingContext}
+   */
   function TextGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
   }
   Nehan.Class.extend(TextGenerator, Nehan.LayoutGenerator);
 
-  var __find_head_text = function(element){
-    return (element instanceof Nehan.Box)? __find_head_text(element.elements[0]) : element;
-  };
-
   TextGenerator.prototype._yield = function(){
-    if(!this.context.layoutContext.hasInlineSpaceFor(1)){
-      return null;
-    }
-    var is_head_output = this.context.style.contentMeasure === this.context.layoutContext.getInlineMaxMeasure();
-
     while(this.hasNext()){
       var element = this._getNext();
-      if(element === null){
-	console.log("eof");
-	break;
-      }
-      var measure = this._getMeasure(element);
-      //this.context.debugTextElement(element, measure);
-      if(measure === 0){
-	break;
-      }
-      // skip head space for first word element if not 'white-space:pre'
-      if(is_head_output && this.context.layoutContext.getInlineCurMeasure() === 0 &&
-	 element instanceof Nehan.Char &&
-	 element.isWhiteSpace() && !this.context.style.isPre()){
-	var next = this.context.stream.peek();
-	if(next && next instanceof Nehan.Word){
-	  continue; // skip head space
-	}
-      }
-      if(!this.context.layoutContext.hasInlineSpaceFor(measure)){
-	this.context.pushCache(element);
-	this.context.layoutContext.setLineOver(true);
-	break;
-      }
-      this._addElement(element, measure);
-      if(!this.context.layoutContext.hasInlineSpaceFor(1)){
-	this.context.layoutContext.setLineOver(true);
+      try {
+	this.context.addTextElement(element);
+      } catch(e){
 	break;
       }
     }
@@ -182,13 +148,6 @@ Nehan.TextGenerator = (function(){
 
   TextGenerator.prototype._getMeasure = function(element){
     return element.getAdvance(this.context.style.flow, this.context.style.letterSpacing || 0);
-  };
-
-  TextGenerator.prototype._addElement = function(element, measure){
-    this.context.layoutContext.addInlineTextElement(element, measure);
-
-    // call _onAddElement callback for each 'element' of output.
-    this._onAddElement(element);
   };
 
   return TextGenerator;

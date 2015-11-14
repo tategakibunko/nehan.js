@@ -1,12 +1,11 @@
 Nehan.LazyGenerator = (function(){
   /**
-     @memberof Nehan
-     @class LazyGenerator
-     @classdesc lazy generator holds pre-yielded output in construction, and yields it once.
-     @constructor
-     @extends {Nehan.LayoutGenerator}
-     @param style {Nehan.Style}
-     @param output {Nehan.Box} - pre yielded output
+   @memberof Nehan
+   @class LazyGenerator
+   @classdesc lazy generator holds pre-yielded output in construction, and yields it once.
+   @constructor
+   @extends {Nehan.LayoutGenerator}
+   @param context {Nehan.RenderingContext}
    */
   function LazyGenerator(context){
     Nehan.LayoutGenerator.call(this, context);

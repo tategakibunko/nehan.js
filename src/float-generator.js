@@ -18,41 +18,37 @@ Nehan.FloatGenerator = (function(){
   // before: [root] -> [root(clone)] -> [child]
   //  after: [root] -> [child]
   FloatGenerator.prototype._inheritChildContext = function(){
-    this.context.parent.child = this.context.child;
-    this.context.child.parent = this.context.parent;
-    this.context.child.style.updateContextSize(
-      this.context.parent.style.contentMeasure,
-      this.context.parent.style.contentExtent
-    );
-    console.info(
-      "inherit child context:child m:%d, parent m:%d",
-      this.context.child.layoutContext.inline.maxMeasure,
-      this.context.parent.layoutContext.inline.maxMeasure
-    );
+    console.info("-------------- inherit child ---------------");
+    if(this.context.child.hasCache()){
+      this.context.parent.pushCache(this.context.child.popCache());
+    }
+    if(this.context.child.child && this.context.child.child.generator instanceof Nehan.InlineGenerator){
+      console.info("inherit inline!!!!!!");
+      this.context.child.child.updateInlineParent(this.context.parent);
+    }
+    this.context.child = null;
   };
 
   FloatGenerator.prototype._yield = function(){
-    console.info("FloatGenerator::_yield");
     var stack = this._yieldFloatStack();
     var rest_measure = this.context.layoutContext.getInlineRestMeasure();
     var rest_extent = stack.getExtent();
-    var root_measure = rest_measure;
-    if(rest_measure <= 0 || rest_extent <= 0){
-      this.context.setTerminate(true);
-      return null;
-    }
-    return this._yieldFloat(stack, root_measure, rest_measure, rest_extent);
+    return this._yieldFloat(stack, rest_measure, rest_extent);
   };
 
-  FloatGenerator.prototype._yieldFloat = function(stack, root_measure, rest_measure, rest_extent){
-    console.log("_yieldFloat(root_m:%d, rest_m:%d, rest_e:%d)", root_measure, rest_measure, rest_extent);
+  FloatGenerator.prototype._yieldFloat = function(stack, rest_measure, rest_extent){
+    console.log("_yieldFloat(rest_m:%d, rest_e:%d)", rest_measure, rest_extent);
 
+    // no more rest space
     if(rest_measure <= 0){
-      return null;
+      console.info("no more rest measure");
+      this._inheritChildContext();
+      return this.context.parent.child.yield();
     }
 
     // no more floated layout, just yield rest area.
     if(stack.isEmpty()){
+      console.info("no more floating elements");
       return this._yieldFloatSpace(stack.getLastGroup(), rest_measure, rest_extent);
     }
     /*
@@ -66,8 +62,7 @@ Nehan.FloatGenerator = (function(){
     var flow = this.context.style.flow;
     var prev_group = stack.getLastGroup();
     var group = stack.pop(flow); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
-    var rest_rest_measure = rest_measure - group.getMeasure(flow); // rest of 'rest measure'
-    var rest = this._yieldFloat(stack, root_measure, rest_rest_measure, group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
+    var rest = this._yieldFloat(stack, rest_measure - group.getMeasure(flow), group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
     var group_set = this._wrapInlineSet(group, rest, rest_measure); // wrap these 2 floated layout as one block.
 
     /*
@@ -114,6 +109,7 @@ Nehan.FloatGenerator = (function(){
     this.context.child.style.updateContextSize(measure, extent);
     var cache = this.context.child.peekLastCache();
     if(cache && cache.isLine() && cache.inlineMeasure < measure){
+      console.info("[resume line]");
       this.context.child.popCache();
       this.context.child.child.setResumeLine(cache);
     }

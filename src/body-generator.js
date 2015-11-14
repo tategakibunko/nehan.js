@@ -1,12 +1,12 @@
 Nehan.BodyGenerator = (function(){
   /**
-     @memberof Nehan
-     @class BodyGenerator
-     @classdesc generator of &lt;body&gt; element
-     @extends Nehan.SectionRootGenerator
-     @constructor
-     @param text {string} - content source of html
-  */
+   @memberof Nehan
+   @class BodyGenerator
+   @classdesc generator of &lt;body&gt; element
+   @extends Nehan.SectionRootGenerator
+   @constructor
+   @param context {Nehan.RenderingContext}
+   */
   function BodyGenerator(context){
     Nehan.SectionRootGenerator.call(this, context);
   }

@@ -1,10 +1,10 @@
 Nehan.HtmlGenerator = (function(){
   /**
-     @memberof Nehan
-     @class HtmlGenerator
-     @classdesc generator of &lt;html&gt; tag content.
-     @constructor
-     @param text {String}
+   @memberof Nehan
+   @class HtmlGenerator
+   @classdesc generator of &lt;html&gt; tag content.
+   @constructor
+   @param context {Nehan.RenderingContext}
   */
   function HtmlGenerator(context){
     Nehan.LayoutGenerator.call(this, context);

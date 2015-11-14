@@ -7683,8 +7683,12 @@ Nehan.Text = (function(){
      @param content {String}
   */
   function Text(content){
-    this.content = content;
+    this.content = this._normalize(content);
   }
+
+  Text.prototype._normalize = function(text){
+    return text.replace(/^\n+/, "");
+  };
 
   /**
    check if text consists of white space only
@@ -10875,10 +10879,11 @@ Nehan.TokenStream = (function(){
   TokenStream.prototype.skipUntil  = function(fn){
     while(this.hasNext()){
       var token = this.get();
+      /*
       if(token === null){
 	break;
-      }
-      if(!fn(token)){
+      }*/
+      if(fn(token) === false){
 	this.prev();
 	break;
       }
@@ -14888,6 +14893,14 @@ Nehan.LayoutGenerator = (function(){
     
     // call _yield implemented in inherited class.
     console.group("%s _yield", this.context.getGeneratorName());
+    console.log("_yield context:%o", this.context);
+    if(this.context.layoutContext){
+      console.log(
+	"layout(m = %d, e = %d)",
+	this.context.layoutContext.inline.maxMeasure,
+	this.context.layoutContext.block.maxExtent
+      );
+    }
     var box = this._yield();
     console.groupEnd();
 
@@ -14906,10 +14919,6 @@ Nehan.LayoutGenerator = (function(){
     throw "LayoutGenerator::_yield must be implemented in child class";
   };
 
-  // called 'after' generated each element of target output is added to each context.
-  LayoutGenerator.prototype._onAddElement = function(block){
-  };
-
   // called 'after' output element is generated.
   LayoutGenerator.prototype._onCreate = function(output){
   };
@@ -14924,14 +14933,13 @@ Nehan.LayoutGenerator = (function(){
 
 Nehan.BlockGenerator = (function(){
   /**
-     @memberof Nehan
-     @class BlockGenerator
-     @classdesc generator of generic block element
-     @constructor
-     @extends Nehan.LayoutGenerator
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
-  */
+   @memberof Nehan
+   @class BlockGenerator
+   @classdesc generator of generic block element
+   @constructor
+   @extends Nehan.LayoutGenerator
+   @param context {Nehan.RenderingContext}
+   */
   function BlockGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
     this.blockId = context.genBlockId();
@@ -14953,6 +14961,7 @@ Nehan.BlockGenerator = (function(){
       try {
 	this.context.addBlockElement(element);
       } catch (e){
+	console.warn(e);
 	break;
       }
     }
@@ -14983,12 +14992,14 @@ Nehan.BlockGenerator = (function(){
       if(token.isWhiteSpaceOnly()){
 	return this._getNext();
       }
-      this.context.createInlineRoot();
-      return this.context.yieldChildLayout();
+      this.context.stream.prev();
+      var inline_root_gen = this.context.createInlineRootGenerator();
+      return inline_root_gen.yield();
     }
 
     // if tag token, inherit style
     var child_style = this.context.createChildStyle(token);
+    var child_gen;
 
     // if disabled style, just skip
     if(child_style.isDisabled()){
@@ -15009,24 +15020,20 @@ Nehan.BlockGenerator = (function(){
     }
 
     if(child_style.isFloated()){
-      this.context.createFloatGenerator(child_style);
-      return this.context.yieldChildLayout();
+      child_gen = this.context.createFloatGenerator(child_style);
+      return child_gen.yield();
     }
 
     // if child inline or child inline-block,
     if(child_style.isInline() || child_style.isInlineBlock()){
-      this.context.createInlineRoot();
-      return this.context.yieldChildLayout();
+      this.context.stream.prev();
+      child_gen = this.context.createInlineRootGenerator();
+      return child_gen.yield();
     }
 
     // other case, start child block generator
-    this.context.createChildBlockGenerator(child_style);
-    return this.context.yieldChildLayout();
-  };
-
-  BlockGenerator.prototype._addElement = function(element, extent){
-    this.context.layoutContext.addBlockElement(element, extent);
-    this._onAddElement(element);
+    child_gen = this.context.createChildBlockGenerator(child_style);
+    return child_gen.yield();
   };
 
   BlockGenerator.prototype._createOutput = function(){
@@ -15048,85 +15055,35 @@ Nehan.BlockGenerator = (function(){
 
 Nehan.InlineGenerator = (function(){
   /**
-     @memberof Nehan
-     @class InlineGenerator
-     @classdesc inline level generator, output inline level block.
-     @constructor
-     @extends {Nehan.LayoutGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
-     @param child_generator {Nehan.LayoutGenerator}
-     @description <pre>
-     * constructor argument child_generator is available when block generator yield
-     * child inline level, but firt token is not text element but child inline markup.
-     * for example see below.
-     *
-     * &lt;p&gt;&lt;a href="#"&gt;foo&lt;/a&gt;text,text&lt;/p&gt;
-     *
-     * &lt;p&gt; is block level, and &lt;a&gt; is inline level, then inline generator is
-     * spawned sharing same token stream of &lt;p&gt; and with inline generator of &lt;a&gt; as 'first' inline child generator.
-     * this mechanism is mainly performance issue, because inline level markup(&lt;a&gt; in this case) is
-     * already parsed and selector style is calculated, so to avoid double parse,
-     * we pass the first child generator to the consctuctor of inline generator.
-     *</pre>
-  */
+   @memberof Nehan
+   @class InlineGenerator
+   @classdesc inline level generator, output inline level block.
+   @constructor
+   @extends {Nehan.LayoutGenerator}
+   @param context {Nehan.RenderingContext}
+   */
   function InlineGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
   }
   Nehan.Class.extend(InlineGenerator, Nehan.LayoutGenerator);
 
   InlineGenerator.prototype._yield = function(){
-    if(!this.context.layoutContext.hasInlineSpaceFor(1)){
-      return null;
-    }
     while(this.hasNext()){
       var element = this._getNext();
-      if(element === null){
+      try {
+	this.context.addInlineElement(element);
+      } catch(e){
+	console.log(e);
 	break;
-      }
-      var measure = this.context.getElementLayoutMeasure(element);
-      this.context.debugInlineElement(element, measure);
-      if(measure === 0){
-	break;
-      }
-      if(!this.context.layoutContext.hasInlineSpaceFor(measure)){
-	this.context.pushCache(element);
-	break;
-      }
-      this._addElement(element, measure);
-      if(element.hangingPunctuation){
-	if(element.hangingPunctuation.style === this.context.style){
-	  var chr = this._yieldHangingChar(element.hangingPunctuation.data);
-	  this._addElement(chr, 0);
-	} else {
-	  this.context.layoutContext.setHangingPunctuation(element.hangingPunctuation); // inherit to parent generator
-	}
-      }
-      if(element.hasLineBreak){
-	this.context.layoutContext.setLineBreak(true);
-	break;
-      }
+      }	
     }
-    // if element is the last full-filled line, skip continuous <br>.
-    if(element && element.lineOver && this.context.childGenerator && !this.context.childGenerator.hasNext()){
+    // skip continuous <br> if element is the last full-filled line.
+    if(element && element.lineOver && this.context.child && !this.context.child.hasNext()){
       this.context.stream.skipIf(function(token){
 	return (token instanceof Nehan.Tag && token.getName() === "br");
       });
     }
     return this._createOutput();
-  };
-
-  InlineGenerator.prototype._yieldHangingChar = function(chr){
-    chr.setMetrics(this.context.style.flow, this.context.style.getFont());
-    var font_size = this.context.style.getFontSize();
-    return this.context.style.createTextBlock(this.context, {
-      elements:[chr],
-      measure:chr.bodySize,
-      extent:font_size,
-      charCount:0,
-      maxExtent:font_size,
-      maxFontSize:font_size
-    });
   };
 
   InlineGenerator.prototype._createOutput = function(){
@@ -15199,27 +15156,25 @@ Nehan.InlineGenerator = (function(){
       return this._getNext(); // just skip
     }
 
-    // if inline -> block(or floated layout), force terminate inline
-    if(child_style.isBlock() || child_style.isFloated()){
-      if(child_style.isFloated()){
-	this.context.createFloatGenerator(child_style);
-      }
-      // add line-break to avoid empty-line.
-      // because empty-line is returned as null to parent block generator,
-      // and it causes page-break of parent block generator.
+    // if floated element
+    if(child_style.isFloated()){
+      // throw "float";
+      // output -> catch("float") -> createfloatgen
+      console.warn("inline -> block break! cache:%o", this.context.peekLastCache());
+      this.context.createFloatGenerator(child_style);
+      this.context.layoutContext.setLineBreak(true);
+      return null;
+    }
+    
+    // if block element
+    if(child_style.isBlock()){
+      this.context.createChildBlockGenerator(child_style);
       this.context.layoutContext.setLineBreak(true);
       return null;
     }
 
-    this.context.createChildInlineGenerator(child_style);
-    return this.context.yieldChildLayout();
-  };
-
-  InlineGenerator.prototype._addElement = function(element, measure){
-    this.context.layoutContext.addInlineBoxElement(element, measure);
-
-    // call _onAddElement callback for each 'element' of output.
-    this._onAddElement(element);
+    var child_gen = this.context.createChildInlineGenerator(child_style);
+    return child_gen.yield();
   };
 
   return InlineGenerator;
@@ -15228,12 +15183,11 @@ Nehan.InlineGenerator = (function(){
 
 Nehan.InlineBlockGenerator = (function (){
   /**
-     @memberof Nehan
-     @class InlineBlockGenerator
-     @classdesc generator of element with display:'inline-block'.
-     @extends {Nehan.BlockGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
+   @memberof Nehan
+   @class InlineBlockGenerator
+   @classdesc generator of element with display:'inline-block'.
+   @extends {Nehan.BlockGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function InlineBlockGenerator(context){
     Nehan.BlockGenerator.call(this, context);
@@ -15255,58 +15209,24 @@ Nehan.InlineBlockGenerator = (function (){
 
 Nehan.TextGenerator = (function(){
   /**
-     @memberof Nehan
-     @class TextGenerator
-     @classdesc inline level generator, output inline level block.
-     @constructor
-     @extends {Nehan.LayoutGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
-     @param child_generator {Nehan.LayoutGenerator}
-  */
+   @memberof Nehan
+   @class TextGenerator
+   @classdesc inline level generator, output inline level block.
+   @constructor
+   @extends {Nehan.LayoutGenerator}
+   @param context {Nehan.RenderingContext}
+   */
   function TextGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
   }
   Nehan.Class.extend(TextGenerator, Nehan.LayoutGenerator);
 
-  var __find_head_text = function(element){
-    return (element instanceof Nehan.Box)? __find_head_text(element.elements[0]) : element;
-  };
-
   TextGenerator.prototype._yield = function(){
-    if(!this.context.layoutContext.hasInlineSpaceFor(1)){
-      return null;
-    }
-    var is_head_output = this.context.style.contentMeasure === this.context.layoutContext.getInlineMaxMeasure();
-
     while(this.hasNext()){
       var element = this._getNext();
-      if(element === null){
-	console.log("eof");
-	break;
-      }
-      var measure = this._getMeasure(element);
-      //this.context.debugTextElement(element, measure);
-      if(measure === 0){
-	break;
-      }
-      // skip head space for first word element if not 'white-space:pre'
-      if(is_head_output && this.context.layoutContext.getInlineCurMeasure() === 0 &&
-	 element instanceof Nehan.Char &&
-	 element.isWhiteSpace() && !this.context.style.isPre()){
-	var next = this.context.stream.peek();
-	if(next && next instanceof Nehan.Word){
-	  continue; // skip head space
-	}
-      }
-      if(!this.context.layoutContext.hasInlineSpaceFor(measure)){
-	this.context.pushCache(element);
-	this.context.layoutContext.setLineOver(true);
-	break;
-      }
-      this._addElement(element, measure);
-      if(!this.context.layoutContext.hasInlineSpaceFor(1)){
-	this.context.layoutContext.setLineOver(true);
+      try {
+	this.context.addTextElement(element);
+      } catch(e){
 	break;
       }
     }
@@ -15439,30 +15359,21 @@ Nehan.TextGenerator = (function(){
     return element.getAdvance(this.context.style.flow, this.context.style.letterSpacing || 0);
   };
 
-  TextGenerator.prototype._addElement = function(element, measure){
-    this.context.layoutContext.addInlineTextElement(element, measure);
-
-    // call _onAddElement callback for each 'element' of output.
-    this._onAddElement(element);
-  };
-
   return TextGenerator;
 })();
 
 
 Nehan.LinkGenerator = (function(){
   /**
-     @memberof Nehan
-     @class LinkGenerator
-     @classdesc generator of &lt;a&gt; tag, set anchor context to {@link Nehan.DocumentContext} if exists.
-     @constructor
-     @extends {Nehan.InlineGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
-  */
+   @memberof Nehan
+   @class LinkGenerator
+   @classdesc generator of &lt;a&gt; tag, set anchor context to {@link Nehan.DocumentContext} if exists.
+   @constructor
+   @extends {Nehan.InlineGenerator}
+   @param context {Nehan.RenderingContext}
+   */
   function LinkGenerator(context){
     Nehan.InlineGenerator.call(this, context);
-    //context.addAnchor();
   }
   Nehan.Class.extend(LinkGenerator, Nehan.InlineGenerator);
 
@@ -15482,9 +15393,8 @@ Nehan.FirstLineGenerator = (function(){
    @class FirstLineGenerator
    @classdesc generator to yield first line block.
    @constructor
-   @param style {Nehan.Style}
-   @param stream {Nehan.TokenStream}
    @extends {Nehan.BlockGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function FirstLineGenerator(context){
     Nehan.BlockGenerator.call(this, context);
@@ -15492,6 +15402,7 @@ Nehan.FirstLineGenerator = (function(){
   Nehan.Class.extend(FirstLineGenerator, Nehan.BlockGenerator);
 
   // this is called after each element(line-block) is yielded.
+  /*
   FirstLineGenerator.prototype._onAddElement = function(element){
     if(this.context.getBlockLineNo() !== 1){
       return;
@@ -15508,7 +15419,7 @@ Nehan.FirstLineGenerator = (function(){
       parent_gen = child_gen;
       child_gen = child_gen.context.childGenerator;
     }
-  };
+  };*/
 
   return FirstLineGenerator;
 })();
@@ -15516,13 +15427,12 @@ Nehan.FirstLineGenerator = (function(){
 
 Nehan.LazyGenerator = (function(){
   /**
-     @memberof Nehan
-     @class LazyGenerator
-     @classdesc lazy generator holds pre-yielded output in construction, and yields it once.
-     @constructor
-     @extends {Nehan.LayoutGenerator}
-     @param style {Nehan.Style}
-     @param output {Nehan.Box} - pre yielded output
+   @memberof Nehan
+   @class LazyGenerator
+   @classdesc lazy generator holds pre-yielded output in construction, and yields it once.
+   @constructor
+   @extends {Nehan.LayoutGenerator}
+   @param context {Nehan.RenderingContext}
    */
   function LazyGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
@@ -15558,12 +15468,11 @@ Nehan.LazyGenerator = (function(){
 
 Nehan.FlipGenerator = (function(){
   /**
-     @memberof Nehan
-     @class FlipGenerator
-     @classdesc generate fliped layout of [style]
-     @constructor
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
+   @memberof Nehan
+   @class FlipGenerator
+   @classdesc generate fliped layout of [style]
+   @constructor
+   @param context {Nehan.RenderingContext}
   */
   function FlipGenerator(context){
     Nehan.BlockGenerator.call(this, context);
@@ -15608,41 +15517,37 @@ Nehan.FloatGenerator = (function(){
   // before: [root] -> [root(clone)] -> [child]
   //  after: [root] -> [child]
   FloatGenerator.prototype._inheritChildContext = function(){
-    this.context.parent.child = this.context.child;
-    this.context.child.parent = this.context.parent;
-    this.context.child.style.updateContextSize(
-      this.context.parent.style.contentMeasure,
-      this.context.parent.style.contentExtent
-    );
-    console.info(
-      "inherit child context:child m:%d, parent m:%d",
-      this.context.child.layoutContext.inline.maxMeasure,
-      this.context.parent.layoutContext.inline.maxMeasure
-    );
+    console.info("-------------- inherit child ---------------");
+    if(this.context.child.hasCache()){
+      this.context.parent.pushCache(this.context.child.popCache());
+    }
+    if(this.context.child.child && this.context.child.child.generator instanceof Nehan.InlineGenerator){
+      console.info("inherit inline!!!!!!");
+      this.context.child.child.updateInlineParent(this.context.parent);
+    }
+    this.context.child = null;
   };
 
   FloatGenerator.prototype._yield = function(){
-    console.info("FloatGenerator::_yield");
     var stack = this._yieldFloatStack();
     var rest_measure = this.context.layoutContext.getInlineRestMeasure();
     var rest_extent = stack.getExtent();
-    var root_measure = rest_measure;
-    if(rest_measure <= 0 || rest_extent <= 0){
-      this.context.setTerminate(true);
-      return null;
-    }
-    return this._yieldFloat(stack, root_measure, rest_measure, rest_extent);
+    return this._yieldFloat(stack, rest_measure, rest_extent);
   };
 
-  FloatGenerator.prototype._yieldFloat = function(stack, root_measure, rest_measure, rest_extent){
-    console.log("_yieldFloat(root_m:%d, rest_m:%d, rest_e:%d)", root_measure, rest_measure, rest_extent);
+  FloatGenerator.prototype._yieldFloat = function(stack, rest_measure, rest_extent){
+    console.log("_yieldFloat(rest_m:%d, rest_e:%d)", rest_measure, rest_extent);
 
+    // no more rest space
     if(rest_measure <= 0){
-      return null;
+      console.info("no more rest measure");
+      this._inheritChildContext();
+      return this.context.parent.child.yield();
     }
 
     // no more floated layout, just yield rest area.
     if(stack.isEmpty()){
+      console.info("no more floating elements");
       return this._yieldFloatSpace(stack.getLastGroup(), rest_measure, rest_extent);
     }
     /*
@@ -15656,8 +15561,7 @@ Nehan.FloatGenerator = (function(){
     var flow = this.context.style.flow;
     var prev_group = stack.getLastGroup();
     var group = stack.pop(flow); // pop float group(notice that this stack is ordered by extent asc, so largest one is first obtained).
-    var rest_rest_measure = rest_measure - group.getMeasure(flow); // rest of 'rest measure'
-    var rest = this._yieldFloat(stack, root_measure, rest_rest_measure, group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
+    var rest = this._yieldFloat(stack, rest_measure - group.getMeasure(flow), group.getExtent(flow)); // yield rest area of this group in inline-flow(recursive).
     var group_set = this._wrapInlineSet(group, rest, rest_measure); // wrap these 2 floated layout as one block.
 
     /*
@@ -15704,6 +15608,7 @@ Nehan.FloatGenerator = (function(){
     this.context.child.style.updateContextSize(measure, extent);
     var cache = this.context.child.peekLastCache();
     if(cache && cache.isLine() && cache.inlineMeasure < measure){
+      console.info("[resume line]");
       this.context.child.popCache();
       this.context.child.child.setResumeLine(cache);
     }
@@ -15782,13 +15687,12 @@ Nehan.FloatGenerator = (function(){
 
 Nehan.ParallelGenerator = (function(){
   /**
-     @memberof Nehan
-     @class ParallelGenerator
-     @classdesc wrapper generator to generate multicolumn layout like LI(list-mark,list-body) or TR(child TD).
-     @constructor
-     @extends {Nehan.LayoutGenerator}
-     @param style {Nehan.Style}
-     @param generators {Array<Nehan.LayoutGenerator>}
+   @memberof Nehan
+   @class ParallelGenerator
+   @classdesc wrapper generator to generate multicolumn layout like LI(list-mark,list-body) or TR(child TD).
+   @constructor
+   @extends {Nehan.LayoutGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function ParallelGenerator(context, generators){
     Nehan.LayoutGenerator.call(this, context);
@@ -15883,13 +15787,12 @@ Nehan.ParallelGenerator = (function(){
 
 Nehan.SectionRootGenerator = (function(){
   /**
-     @memberof Nehan
-     @class SectionRootGenerator
-     @classdesc generator of sectionning root tag (body, fieldset, figure, blockquote etc).
-     @constructor
-     @extends {Nehan.BlockGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
+   @memberof Nehan
+   @class SectionRootGenerator
+   @classdesc generator of sectionning root tag (body, fieldset, figure, blockquote etc).
+   @constructor
+   @extends {Nehan.BlockGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function SectionRootGenerator(context){
     Nehan.BlockGenerator.call(this, context);
@@ -15906,13 +15809,12 @@ Nehan.SectionRootGenerator = (function(){
 
 Nehan.SectionContentGenerator = (function(){
   /**
-     @memberof Nehan
-     @class SectionContentGenerator
-     @classdesc generator of sectionning content tag (section, article, nav, aside).
-     @constructor
-     @extends {Nehan.BlockGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
+   @memberof Nehan
+   @class SectionContentGenerator
+   @classdesc generator of sectionning content tag (section, article, nav, aside).
+   @constructor
+   @extends {Nehan.BlockGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function SectionContentGenerator(context){
     Nehan.BlockGenerator.call(this, context);
@@ -15930,13 +15832,12 @@ Nehan.SectionContentGenerator = (function(){
 
 Nehan.ListGenerator = (function(){
   /**
-     @memberof Nehan
-     @class ListGenerator
-     @classdesc generator of &lt;ul&gt;, &lt;ol&gt; tag. need to count child item if list-style is set to numeral property like 'decimal'.
-     @constructor
-     @extends {Nehan.BlockGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
+   @memberof Nehan
+   @class ListGenerator
+   @classdesc generator of &lt;ul&gt;, &lt;ol&gt; tag. need to count child item if list-style is set to numeral property like 'decimal'.
+   @constructor
+   @extends {Nehan.BlockGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function ListGenerator(context){
     Nehan.BlockGenerator.call(this, context);
@@ -15950,13 +15851,12 @@ Nehan.ListGenerator = (function(){
 
 Nehan.ListItemGenerator = (function(){
   /**
-     @memberof Nehan
-     @class ListItemGenerator
-     @classdesc generator of &lt;li&gt; tag, consists parallel generator of list-item and list-body.
-     @constructor
-     @extends {Nehan.ParallelGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
+   @memberof Nehan
+   @class ListItemGenerator
+   @classdesc generator of &lt;li&gt; tag, consists parallel generator of list-item and list-body.
+   @constructor
+   @extends {Nehan.ParallelGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function ListItemGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
@@ -16019,13 +15919,12 @@ Nehan.ListItemGenerator = (function(){
 // yield : [thead | tbody | tfoot]
 Nehan.TableGenerator = (function(){
   /**
-     @memberof Nehan
-     @class TableGenerator
-     @classdesc generator of table tag content.
-     @constructor
-     @extends {Nehan.BlockGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TagStream}
+   @memberof Nehan
+   @class TableGenerator
+   @classdesc generator of table tag content.
+   @constructor
+   @extends {Nehan.BlockGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function TableGenerator(context){
     Nehan.BlockGenerator.call(this, context);
@@ -16110,13 +16009,12 @@ Nehan.TableGenerator = (function(){
 // yield : parallel([td | th])
 Nehan.TableRowGenerator = (function(){
   /**
-     @memberof Nehan
-     @class TableRowGenerator
-     @classdesc generator of table row(TR) content.
-     @constructor
-     @extends {Nehan.ParallelGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TagStream}
+   @memberof Nehan
+   @class TableRowGenerator
+   @classdesc generator of table row(TR) content.
+   @constructor
+   @extends {Nehan.ParallelGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function TableRowGenerator(context){
     Nehan.ParallelGenerator.call(this, context.extend({
@@ -16164,13 +16062,12 @@ Nehan.TableRowGenerator = (function(){
 
 Nehan.TableCellGenerator = (function(){
   /**
-     @memberof Nehan
-     @class TableCellGenerator
-     @classdesc generator of table-cell(td, th) content.
-     @constructor
-     @extends {Nehan.SectionRootGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
+   @memberof Nehan
+   @class TableCellGenerator
+   @classdesc generator of table-cell(td, th) content.
+   @constructor
+   @extends {Nehan.SectionRootGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function TableCellGenerator(context){
     Nehan.SectionRootGenerator.call(this, context);
@@ -16183,14 +16080,13 @@ Nehan.TableCellGenerator = (function(){
 
 Nehan.HeaderGenerator = (function(){
   /**
-     @memberof Nehan
-     @class HeaderGenerator
-     @classdesc generator of header tag(h1 - h6) conetnt, and create header context when complete.
-     @constructor
-     @extends {Nehan.BlockGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
-  */
+   @memberof Nehan
+   @class HeaderGenerator
+   @classdesc generator of header tag(h1 - h6) conetnt, and create header context when complete.
+   @constructor
+   @extends {Nehan.BlockGenerator}
+   @param context {Nehan.RenderingContext}
+   */
   function HeaderGenerator(context){
     Nehan.BlockGenerator.call(this, context);
   }
@@ -16211,13 +16107,13 @@ Nehan.HeaderGenerator = (function(){
 
 Nehan.BodyGenerator = (function(){
   /**
-     @memberof Nehan
-     @class BodyGenerator
-     @classdesc generator of &lt;body&gt; element
-     @extends Nehan.SectionRootGenerator
-     @constructor
-     @param text {string} - content source of html
-  */
+   @memberof Nehan
+   @class BodyGenerator
+   @classdesc generator of &lt;body&gt; element
+   @extends Nehan.SectionRootGenerator
+   @constructor
+   @param context {Nehan.RenderingContext}
+   */
   function BodyGenerator(context){
     Nehan.SectionRootGenerator.call(this, context);
   }
@@ -16247,11 +16143,11 @@ Nehan.BodyGenerator = (function(){
 
 Nehan.HtmlGenerator = (function(){
   /**
-     @memberof Nehan
-     @class HtmlGenerator
-     @classdesc generator of &lt;html&gt; tag content.
-     @constructor
-     @param text {String}
+   @memberof Nehan
+   @class HtmlGenerator
+   @classdesc generator of &lt;html&gt; tag content.
+   @constructor
+   @param context {Nehan.RenderingContext}
   */
   function HtmlGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
@@ -16314,11 +16210,12 @@ Nehan.HtmlGenerator = (function(){
 
 Nehan.DocumentGenerator = (function(){
   /**
-     @memberof Nehan
-     @class DocumentGenerator
-     @classdesc generator of formal html content including &lt;!doctype&gt; tag.
-     @constructor
-     @param text {String} - html source text
+   @memberof Nehan
+   @class DocumentGenerator
+   @classdesc generator of formal html content including &lt;!doctype&gt; tag.
+   @constructor
+   @param text {String} - html source text
+   @param context {Nehan.RenderingContext}
   */
   function DocumentGenerator(text, context){
     Nehan.LayoutGenerator.call(this, context.extend({
@@ -17065,9 +16962,6 @@ Nehan.RenderingContext = (function(){
     this.child = opt.child || null;
     this.style = opt.style || null;
     this.stream = opt.stream || null;
-    this.lazyOutput = opt.lazyOutput || null;
-    this.floatedGenerators = opt.floatedGenerators || [];
-    this.parallelGenerators = opt.parallelGenerators || [];
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.Stylesheet.create());
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
@@ -17079,9 +16973,6 @@ Nehan.RenderingContext = (function(){
       parent:opt.parent || null,
       style:opt.style || null,
       stream:opt.stream || null,
-      lazyOutput:opt.lazyOutput || null,
-      floatedGenerators:opt.floatedGenerators || [],
-      parallelGenerators:opt.parallelGenerators || [],
       layoutContext:this.layoutContext || null,
       selectors:this.selectors, // always same
       documentContext:this.documentContext, // always saame
@@ -17094,9 +16985,6 @@ Nehan.RenderingContext = (function(){
       parent:opt.parent || this.parent,
       style:opt.style || this.style,
       stream:opt.stream || this.stream,
-      lazyOutput:opt.lazyOutput || this.lazyOutput,
-      floatGenerators:opt.floatedGenerators || this.floatedGenerator,
-      parallelGenerators:opt.parallelGenerators || this.parallelGenerators,
       layoutContext:this.layoutContext || this.layoutContext,
       selectors:this.selectors, // always same
       documentContext:this.documentContext, // always same
@@ -17137,7 +17025,7 @@ Nehan.RenderingContext = (function(){
     var prev_extent = this.layoutContext.getBlockCurExtent();
     var next_extent = prev_extent + element_size;
 
-    //this.debugBlockElement(element, element_size);
+    this.debugBlockElement(element, element_size);
 
     // tail edge is required for final output.
     if(!this.hasNext()){
@@ -17153,6 +17041,80 @@ Nehan.RenderingContext = (function(){
       this.pushCache(element);
     }
     if(next_extent >= max_size){
+      throw "overflow";
+    }
+  };
+
+  RenderingContext.prototype.addInlineElement = function(element){
+    if(element === null){
+      console.log("[%s]:eof", this.getGeneratorName());
+      throw "eof";
+    }
+    var max_size = this.layoutContext.getInlineMaxMeasure();
+    var element_size = this.getElementLayoutMeasure(element);
+    var prev_measure = this.layoutContext.getInlineCurMeasure(this.style.flow);
+    var next_measure = prev_measure + element_size;
+
+    this.debugInlineElement(element, element_size);
+
+    if(element_size === 0){
+      throw "zero";
+    }
+    if(next_measure <= max_size){
+      this.layoutContext.addInlineBoxElement(element, element_size);
+      if(element.hangingPunctuation){
+	if(element.hangingPunctuation.style === this.style){
+	  var chr = this.yieldHangingChar(element.hangingPunctuation.data);
+	  this.layoutContext.addInlineBoxElement(chr, 0);
+	} else {
+	  this.layoutContext.setHangingPunctuation(element.hangingPunctuation); // inherit to parent generator
+	}
+      }
+      if(element.hasLineBreak){
+	this.layoutContext.setLineBreak(true);
+	throw "line-break";
+      }
+    }
+    if(next_measure > max_size){
+      this.pushCache(element);
+    }
+    if(next_measure >= max_size){
+      throw "overflow";
+    }
+  };
+
+  RenderingContext.prototype.addTextElement = function(element){
+    if(element === null){
+      throw "eof";
+    }
+    var max_size = this.layoutContext.getInlineMaxMeasure();
+    var element_size = this.getTextMeasure(element);
+    var prev_measure = this.layoutContext.getInlineCurMeasure(this.style.flow);
+    var next_measure = prev_measure + element_size;
+    var next_token = this.stream.peek();
+
+    this.debugTextElement(element, element_size);
+    
+    if(element_size === 0){
+      throw "zero";
+    }
+    // skip head space for first word element if not 'white-space:pre'
+    if(prev_measure === 0 &&
+       max_size === this.style.contentMeasure &&
+       this.style.isPre() === false &&
+       next_token instanceof Nehan.Word &&
+       element instanceof Nehan.Char &&
+       element.isWhiteSpace()){
+      return;
+    }
+    if(next_measure <= max_size){
+      this.layoutContext.addInlineTextElement(element, element_size);
+    }
+    if(next_measure > max_size){
+      this.pushCache(element);
+    }
+    if(next_measure >= max_size){
+      this.layoutContext.setLineOver(true);
       throw "overflow";
     }
   };
@@ -17316,6 +17278,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createFloatGenerator = function(first_float_style){
+    console.log("create float generator!");
     var first_float_gen = this.createChildBlockGenerator(first_float_style);
     var floated_generators = [first_float_gen];
     this.stream.iterWhile(function(token){
@@ -17418,9 +17381,8 @@ Nehan.RenderingContext = (function(){
   // create inline root, and parse again.
   // example:
   // [p(block)][text][/p(block)] ->[p(block)][p(inline)][text][/p(inline)][/p(block)]
-  RenderingContext.prototype.createInlineRoot = function(){
-    this.stream.prev();
-    this.createChildInlineGenerator(this.style, this.stream);
+  RenderingContext.prototype.createInlineRootGenerator = function(){
+    return this.createChildInlineGenerator(this.style, this.stream);
   };
 
   RenderingContext.prototype.createChildInlineGenerator = function(style, stream){
@@ -17645,6 +17607,10 @@ Nehan.RenderingContext = (function(){
     return this.style? this.style.getMarkupName() : "";
   };
 
+  RenderingContext.prototype.getDisplay = function(){
+    return this.style? this.style.display : "";
+  };
+
   RenderingContext.prototype.getWritingDirection = function(){
     return "vert"; // TODO
   };
@@ -17705,6 +17671,10 @@ Nehan.RenderingContext = (function(){
     return element.getLayoutMeasure(this.style.flow);
   };
 
+  RenderingContext.prototype.getTextMeasure = function(element){
+    return element.getAdvance(this.style.flow, this.style.letterSpacing || 0);
+  };
+
   RenderingContext.prototype.getGeneratorName = function(){
     var markup_name = this.getMarkupName();
     if(this.generator instanceof Nehan.DocumentGenerator){
@@ -17716,7 +17686,7 @@ Nehan.RenderingContext = (function(){
     if(this.generator instanceof Nehan.InlineGenerator){
       return markup_name + "(inline)";
     }
-    return markup_name + "(" + this.style.display + ")";
+    return markup_name + "(" + this.getDisplay() + ")";
   };
 
   RenderingContext.prototype.getAnchorPageNo = function(anchor_name){
@@ -17772,13 +17742,13 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.hasNextFloat = function(){
-    return Nehan.List.exists(this.floatedGenerators, function(gen){
+    return Nehan.List.exists(this.floatedGenerators || [], function(gen){
       return gen.hasNext();
     });
   };
 
   RenderingContext.prototype.hasNextParallelLayout = function(){
-    return Nehan.List.exists(this.parallelGenerators, function(gen){
+    return Nehan.List.exists(this.parallelGenerators || [], function(gen){
       return gen.hasNext();
     });
   };
@@ -17795,9 +17765,6 @@ Nehan.RenderingContext = (function(){
     if(this.resumeLine){
       this.layoutContext.resumeLine(this.resumeLine);
       this.resumeLine = null;
-    }
-    if(this.layoutContext){
-      console.log("start layout context:(m = %d, e = %d)", this.layoutContext.inline.maxMeasure, this.layoutContext.block.maxExtent);
     }
   };
 
@@ -17934,6 +17901,22 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
+  // [update]
+  // -----------------------------------------------
+  RenderingContext.prototype.updateInlineParent = function(parent_context){
+    console.log("parent:%s, child:%s", parent_context.getGeneratorName(), this.getGeneratorName());
+    this.style = parent_context.style;
+    this.parent = parent_context;
+    if(parent_context.child === this){
+      return;
+    }
+    parent_context.child = this;
+    if(this.child){
+      this.child.updateInlineParent(this);
+    }
+  };
+
+  // -----------------------------------------------
   // [yield]
   // -----------------------------------------------
   RenderingContext.prototype.yieldChildLayout = function(){
@@ -18000,6 +17983,19 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.yieldHorizontalRule = function(child_context){
     return child_context.style.createBlock(child_context);
+  };
+
+  RenderingContext.prototype.yieldHangingChar = function(chr){
+    chr.setMetrics(this.style.flow, this.style.getFont());
+    var font_size = this.style.getFontSize();
+    return this.style.createTextBlock(this, {
+      elements:[chr],
+      measure:chr.bodySize,
+      extent:font_size,
+      charCount:0,
+      maxExtent:font_size,
+      maxFontSize:font_size
+    });
   };
 
   // -----------------------------------------------

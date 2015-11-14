@@ -1,13 +1,12 @@
 Nehan.BlockGenerator = (function(){
   /**
-     @memberof Nehan
-     @class BlockGenerator
-     @classdesc generator of generic block element
-     @constructor
-     @extends Nehan.LayoutGenerator
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
-  */
+   @memberof Nehan
+   @class BlockGenerator
+   @classdesc generator of generic block element
+   @constructor
+   @extends Nehan.LayoutGenerator
+   @param context {Nehan.RenderingContext}
+   */
   function BlockGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
     this.blockId = context.genBlockId();
@@ -29,6 +28,7 @@ Nehan.BlockGenerator = (function(){
       try {
 	this.context.addBlockElement(element);
       } catch (e){
+	console.warn(e);
 	break;
       }
     }
@@ -59,12 +59,14 @@ Nehan.BlockGenerator = (function(){
       if(token.isWhiteSpaceOnly()){
 	return this._getNext();
       }
-      this.context.createInlineRoot();
-      return this.context.yieldChildLayout();
+      this.context.stream.prev();
+      var inline_root_gen = this.context.createInlineRootGenerator();
+      return inline_root_gen.yield();
     }
 
     // if tag token, inherit style
     var child_style = this.context.createChildStyle(token);
+    var child_gen;
 
     // if disabled style, just skip
     if(child_style.isDisabled()){
@@ -85,24 +87,20 @@ Nehan.BlockGenerator = (function(){
     }
 
     if(child_style.isFloated()){
-      this.context.createFloatGenerator(child_style);
-      return this.context.yieldChildLayout();
+      child_gen = this.context.createFloatGenerator(child_style);
+      return child_gen.yield();
     }
 
     // if child inline or child inline-block,
     if(child_style.isInline() || child_style.isInlineBlock()){
-      this.context.createInlineRoot();
-      return this.context.yieldChildLayout();
+      this.context.stream.prev();
+      child_gen = this.context.createInlineRootGenerator();
+      return child_gen.yield();
     }
 
     // other case, start child block generator
-    this.context.createChildBlockGenerator(child_style);
-    return this.context.yieldChildLayout();
-  };
-
-  BlockGenerator.prototype._addElement = function(element, extent){
-    this.context.layoutContext.addBlockElement(element, extent);
-    this._onAddElement(element);
+    child_gen = this.context.createChildBlockGenerator(child_style);
+    return child_gen.yield();
   };
 
   BlockGenerator.prototype._createOutput = function(){

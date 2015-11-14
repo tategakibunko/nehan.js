@@ -31,6 +31,14 @@ Nehan.LayoutGenerator = (function(){
     
     // call _yield implemented in inherited class.
     console.group("%s _yield", this.context.getGeneratorName());
+    console.log("_yield context:%o", this.context);
+    if(this.context.layoutContext){
+      console.log(
+	"layout(m = %d, e = %d)",
+	this.context.layoutContext.inline.maxMeasure,
+	this.context.layoutContext.block.maxExtent
+      );
+    }
     var box = this._yield();
     console.groupEnd();
 
@@ -47,10 +55,6 @@ Nehan.LayoutGenerator = (function(){
 
   LayoutGenerator.prototype._yield = function(){
     throw "LayoutGenerator::_yield must be implemented in child class";
-  };
-
-  // called 'after' generated each element of target output is added to each context.
-  LayoutGenerator.prototype._onAddElement = function(block){
   };
 
   // called 'after' output element is generated.

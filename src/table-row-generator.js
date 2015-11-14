@@ -4,13 +4,12 @@
 // yield : parallel([td | th])
 Nehan.TableRowGenerator = (function(){
   /**
-     @memberof Nehan
-     @class TableRowGenerator
-     @classdesc generator of table row(TR) content.
-     @constructor
-     @extends {Nehan.ParallelGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TagStream}
+   @memberof Nehan
+   @class TableRowGenerator
+   @classdesc generator of table row(TR) content.
+   @constructor
+   @extends {Nehan.ParallelGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function TableRowGenerator(context){
     Nehan.ParallelGenerator.call(this, context.extend({

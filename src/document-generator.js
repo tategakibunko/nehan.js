@@ -1,10 +1,11 @@
 Nehan.DocumentGenerator = (function(){
   /**
-     @memberof Nehan
-     @class DocumentGenerator
-     @classdesc generator of formal html content including &lt;!doctype&gt; tag.
-     @constructor
-     @param text {String} - html source text
+   @memberof Nehan
+   @class DocumentGenerator
+   @classdesc generator of formal html content including &lt;!doctype&gt; tag.
+   @constructor
+   @param text {String} - html source text
+   @param context {Nehan.RenderingContext}
   */
   function DocumentGenerator(text, context){
     Nehan.LayoutGenerator.call(this, context.extend({

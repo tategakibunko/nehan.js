@@ -1,12 +1,11 @@
 Nehan.SectionContentGenerator = (function(){
   /**
-     @memberof Nehan
-     @class SectionContentGenerator
-     @classdesc generator of sectionning content tag (section, article, nav, aside).
-     @constructor
-     @extends {Nehan.BlockGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
+   @memberof Nehan
+   @class SectionContentGenerator
+   @classdesc generator of sectionning content tag (section, article, nav, aside).
+   @constructor
+   @extends {Nehan.BlockGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function SectionContentGenerator(context){
     Nehan.BlockGenerator.call(this, context);

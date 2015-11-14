@@ -1,11 +1,10 @@
 Nehan.FlipGenerator = (function(){
   /**
-     @memberof Nehan
-     @class FlipGenerator
-     @classdesc generate fliped layout of [style]
-     @constructor
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
+   @memberof Nehan
+   @class FlipGenerator
+   @classdesc generate fliped layout of [style]
+   @constructor
+   @param context {Nehan.RenderingContext}
   */
   function FlipGenerator(context){
     Nehan.BlockGenerator.call(this, context);

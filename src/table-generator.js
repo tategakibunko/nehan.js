@@ -12,13 +12,12 @@
 // yield : [thead | tbody | tfoot]
 Nehan.TableGenerator = (function(){
   /**
-     @memberof Nehan
-     @class TableGenerator
-     @classdesc generator of table tag content.
-     @constructor
-     @extends {Nehan.BlockGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TagStream}
+   @memberof Nehan
+   @class TableGenerator
+   @classdesc generator of table tag content.
+   @constructor
+   @extends {Nehan.BlockGenerator}
+   @param context {Nehan.RenderingContext}
   */
   function TableGenerator(context){
     Nehan.BlockGenerator.call(this, context);

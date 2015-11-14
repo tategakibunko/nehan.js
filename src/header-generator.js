@@ -1,13 +1,12 @@
 Nehan.HeaderGenerator = (function(){
   /**
-     @memberof Nehan
-     @class HeaderGenerator
-     @classdesc generator of header tag(h1 - h6) conetnt, and create header context when complete.
-     @constructor
-     @extends {Nehan.BlockGenerator}
-     @param style {Nehan.Style}
-     @param stream {Nehan.TokenStream}
-  */
+   @memberof Nehan
+   @class HeaderGenerator
+   @classdesc generator of header tag(h1 - h6) conetnt, and create header context when complete.
+   @constructor
+   @extends {Nehan.BlockGenerator}
+   @param context {Nehan.RenderingContext}
+   */
   function HeaderGenerator(context){
     Nehan.BlockGenerator.call(this, context);
   }
