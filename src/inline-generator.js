@@ -18,7 +18,6 @@ Nehan.InlineGenerator = (function(){
       try {
 	this.context.addInlineElement(element);
       } catch(e){
-	console.log(e);
 	break;
       }	
     }
@@ -67,8 +66,7 @@ Nehan.InlineGenerator = (function(){
 
     // text block
     if(token instanceof Nehan.Text || token instanceof Nehan.Tcy || token instanceof Nehan.Word){
-      this.context.createChildTextGenerator(token);
-      return this.context.yieldChildLayout();
+      return this.context.createChildTextGenerator(token).yield();
     }
 
     // child inline without stream.
@@ -101,19 +99,12 @@ Nehan.InlineGenerator = (function(){
       return this._getNext(); // just skip
     }
 
-    // if floated element
-    if(child_style.isFloated()){
-      // throw "float";
-      // output -> catch("float") -> createfloatgen
-      console.warn("inline -> block break! cache:%o", this.context.peekLastCache());
-      this.context.createFloatGenerator(child_style);
-      this.context.layoutContext.setLineBreak(true);
-      return null;
-    }
-    
-    // if block element
+    // if block element, break inline level, output current inline block,
+    // and force terminate generator.
+    // this token is parsed again by parent block generator.
     if(child_style.isBlock()){
-      this.context.createChildBlockGenerator(child_style);
+      this.context.stream.prev();
+      this.context.setTerminate(true);
       this.context.layoutContext.setLineBreak(true);
       return null;
     }

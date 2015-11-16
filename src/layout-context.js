@@ -10,6 +10,7 @@ Nehan.LayoutContext = (function(){
   function LayoutContext(block, inline){
     this.block = block;
     this.inline = inline;
+    this.breakAfter = false;
   }
 
   /**
@@ -24,7 +25,8 @@ Nehan.LayoutContext = (function(){
    @return {boolean}
    */
   LayoutContext.prototype.hasBreakAfter = function(){
-    return this.block.hasBreakAfter() || this.inline.hasBreakAfter() || false;
+    //return this.block.hasBreakAfter() || this.inline.hasBreakAfter() || false;
+    return this.breakAfter;
   };
   /**
    @memberof Nehan.LayoutContext
@@ -136,7 +138,7 @@ Nehan.LayoutContext = (function(){
    @memberof Nehan.LayoutContext
    */
   LayoutContext.prototype.setBreakAfter = function(status){
-    this.inline.setBreakAfter(status);
+    this.breakAfter = true;
   };
   /**
    @memberof Nehan.LayoutContext

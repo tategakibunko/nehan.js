@@ -85,9 +85,13 @@ Nehan.ParallelGenerator = (function(){
     var rest_extent = this.context.layoutContext.getBlockRestExtent() - wrap_extent;
     var after_edge_size = this.context.style.getEdgeAfter();
     var uniformed_blocks = this._alignContentExtent(blocks, wrap_extent);
+    var break_after = Nehan.List.exists(blocks, function(block){
+      return block && block.breakAfter;
+    });
     return this.context.style.createBlock(this.context, {
       elements:uniformed_blocks,
       extent:max_block.getLayoutExtent(flow),
+      breakAfter:break_after,
       useBeforeEdge:this.context.isFirstOutput(),
       useAfterEdge:(!this.hasNext() && after_edge_size <= rest_extent)
     });

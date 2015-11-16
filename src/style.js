@@ -395,7 +395,9 @@ Nehan.Style = (function(){
     box.charCount = elements.reduce(function(total, element){
       return total + (element.charCount || 0);
     }, 0);
-    box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
+    // [FIXME] css break-after is used only when last output.
+    //box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
+    box.breakAfter = opt.breakAfter || false;
     box.content = opt.content || null;
     box.isFirst = opt.isFirst || false;
     box.isLast = opt.isLast || false;
@@ -1275,6 +1277,14 @@ Nehan.Style = (function(){
   Style.prototype.getEdgeStart = function(flow){
     var edge = this.edge || null;
     return edge? edge.getStart(flow || this.flow) : 0;
+  };
+  /**
+   @memberof Nehan.Style
+   @return {int}
+   */
+  Style.prototype.getEdgeEnd = function(flow){
+    var edge = this.edge || null;
+    return edge? edge.getEnd(flow || this.flow) : 0;
   };
   /**
    @memberof Nehan.Style

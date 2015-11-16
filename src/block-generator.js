@@ -38,6 +38,7 @@ Nehan.BlockGenerator = (function(){
   BlockGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
       var cache = this.context.popCache();
+      console.info("use cache:", cache);
       return cache;
     }
 

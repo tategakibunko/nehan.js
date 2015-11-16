@@ -33,6 +33,7 @@ Nehan.ListItemGenerator = (function(){
     });
     var marker_context = context.createChildContext(marker_style);
     return new Nehan.BlockGenerator(marker_context);
+    //return new Nehan.InlineGenerator(marker_context);
   };
 
   ListItemGenerator.prototype._createListBodyGenerator = function(context, list_context){
@@ -47,6 +48,7 @@ Nehan.ListItemGenerator = (function(){
     var body_context =  context.createChildContext(body_style, {
       stream:context.stream // share li.stream for li-body.stream.
     });
+    console.log("li-body context:%o", body_context);
     return new Nehan.BlockGenerator(body_context);
   };
 

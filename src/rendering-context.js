@@ -75,9 +75,9 @@ Nehan.RenderingContext = (function(){
 
     this.debugBlockElement(element, element_size);
 
-    // tail edge is required for final output.
+    // if it's not last output, tail edge is not included.
     if(!this.hasNext()){
-      max_size -= this.style.getEdgeAfter();
+      max_size += this.style.getEdgeAfter();
     }
     if(next_extent <= max_size){
       this.layoutContext.addBlockElement(element, element_size);
@@ -88,7 +88,8 @@ Nehan.RenderingContext = (function(){
     if(next_extent > max_size){
       this.pushCache(element);
     }
-    if(next_extent >= max_size){
+    if(element.breakAfter || next_extent >= max_size){
+      this.layoutContext.setBreakAfter(true);
       throw "overflow";
     }
   };
@@ -103,7 +104,7 @@ Nehan.RenderingContext = (function(){
     var prev_measure = this.layoutContext.getInlineCurMeasure(this.style.flow);
     var next_measure = prev_measure + element_size;
 
-    this.debugInlineElement(element, element_size);
+    //this.debugInlineElement(element, element_size);
 
     if(element_size === 0){
       throw "zero";
@@ -141,7 +142,7 @@ Nehan.RenderingContext = (function(){
     var next_measure = prev_measure + element_size;
     var next_token = this.stream.peek();
 
-    this.debugTextElement(element, element_size);
+    //this.debugTextElement(element, element_size);
     
     if(element_size === 0){
       throw "zero";
@@ -185,10 +186,9 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createInlineBlockLayoutContext = function(){
-    var parent_context = this.parent.layoutContext;
     return new Nehan.LayoutContext(
       new Nehan.BlockContext(this.getContextMaxExtent()),
-      new Nehan.InlineContext(this.getCotextInlineMeasure())
+      new Nehan.InlineContext(this.getContextMaxMeasure())
     );
   };
 
@@ -230,12 +230,14 @@ Nehan.RenderingContext = (function(){
       var item_style = this.createTmpChildStyle(item_tag);
       var item_context = this.createChildContext(item_style);
       var marker_tag = new Nehan.Tag("marker");
-      var marker_content = this.style.getListMarkerHtml(index + 1);
-      marker_tag.setContent(marker_content);
+      var marker_html = this.style.getListMarkerHtml(index + 1);
+      marker_tag.setContent(marker_html);
       var marker_style = item_context.createTmpChildStyle(marker_tag);
+      console.log("marker style:%o", marker_style);
       var marker_context = item_context.createChildContext(marker_style);
-      var marker_box = new Nehan.InlineBlockGenerator(marker_context).yield();
+      var marker_box = new Nehan.InlineGenerator(marker_context).yield();
       var marker_measure = marker_box? marker_box.getLayoutMeasure() : 0;
+      console.log("marker box:%o, measure = %d", marker_box, marker_measure);
       indent_size = Math.max(indent_size, marker_measure);
     }.bind(this));
 
@@ -444,7 +446,7 @@ Nehan.RenderingContext = (function(){
       return new Nehan.LazyGenerator(child_context);
     }
 
-    if(style.isInlineBlock()){
+    if(this.parent.style !== style && style.isInlineBlock()){
       return new Nehan.InlineBlockGenerator(child_context);
     }
     switch(style.getMarkupName()){
@@ -520,7 +522,8 @@ Nehan.RenderingContext = (function(){
       elements:elements,
       breakAfter:this.layoutContext.hasBreakAfter(),
       useBeforeEdge:this.isFirstOutput(),
-      useAfterEdge:(!this.hasNext() && after_edge_size <= this.layoutContext.getBlockRestExtent()),
+      //useAfterEdge:(!this.hasNext() && after_edge_size <= this.layoutContext.getBlockRestExtent()),
+      useAfterEdge:!this.hasNext(),
       restMeasure:this.layoutContext.getInlineRestMeasure(),
       restExtent:this.layoutContext.getBlockRestExtent()
     });
@@ -690,23 +693,22 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.getContextMaxMeasure = function(){
-    var max_size = (this.parent && this.parent.layoutContext)? this.parent.layoutContext.getInlineRestMeasure() : this.style.outerMeasure;
-    max_size = Math.min(max_size, this.style.outerMeasure);
-
-    // if child inline, start edge is included in first output.
-    if(!this.style.isInlineRoot() && this.isFirstOutput()){
-      max_size -= this.style.getEdgeStart();
-    }
-    return max_size;
+    var max_size = (this.parent && this.parent.layoutContext)? this.parent.layoutContext.getInlineRestMeasure() : this.style.contentMeasure;
+    return Math.min(max_size, this.style.contentMeasure);
   };
 
   RenderingContext.prototype.getContextMaxExtent = function(){
-    var max_size = (this.parent && this.parent.layoutContext)? this.parent.layoutContext.getBlockRestExtent() : this.style.outerExtent;
-    max_size = Math.min(max_size, this.style.outerExtent);
+    var max_size = (this.parent && this.parent.layoutContext)? this.parent.layoutContext.getBlockRestExtent() : this.style.contentExtent;
+    max_size = Math.min(max_size, this.style.contentExtent);
 
-    // before edge is included in first output.
-    if(this.isFirstOutput()){
-      max_size -= this.style.getEdgeBefore();
+    // if inline root, edge size is already calculated by parent block, so just use it.
+    if(this.style.isInlineRoot()){
+      return max_size;
+    }
+
+    // if not first output, before edge is not included.
+    if(!this.isFirstOutput()){
+      return max_size + this.style.getEdgeBefore();
     }
     return max_size;
   };
@@ -861,10 +863,10 @@ Nehan.RenderingContext = (function(){
   // [push]
   // -----------------------------------------------
   RenderingContext.prototype.pushCache = function(element){
-    if(element instanceof Nehan.Box){
-      console.log("cache box:", element.toString());
-    } else {
-      //console.log("cache text:", element);
+    element.cacheCount = (element.cacheCount || 0) + 1;
+    if(element.cacheCount >= Nehan.Config.maxRollbackCount){
+      console.error("too many rollback! context:%o, element:%o", this, element);
+      throw "too many rollback";
     }
     this.cachedElements.push(element);
   };
@@ -878,6 +880,10 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.setResumeLine = function(line){
     this.resumeLine = line;
+  };
+
+  RenderingContext.prototype.setBreakAfter = function(line){
+    console.warn("[TODO] RenderingContext::setBreakAfter");
   };
 
   RenderingContext.prototype.setOwnerGenerator = function(generator){

@@ -11,7 +11,11 @@ Nehan.InlineBlockGenerator = (function (){
   }
   Nehan.Class.extend(InlineBlockGenerator, Nehan.BlockGenerator);
 
+  // shurink measure by inline level.
   InlineBlockGenerator.prototype._onCreate = function(block){
+    if(!block){
+      return null;
+    }
     var max_inline = Nehan.List.maxobj(block.elements, function(element){
       return element.getContentMeasure();
     });

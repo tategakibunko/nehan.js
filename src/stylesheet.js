@@ -139,7 +139,6 @@ Nehan.Stylesheet = (function(){
 	},
 	"body":{
 	  "display":"block",
-	  //"box-sizing":"content-box",
 	  "section-root":true,
 	  "hanging-punctuation":"allow-end"
 	},
@@ -322,7 +321,7 @@ Nehan.Stylesheet = (function(){
 	},
 	"hr":{
 	  "display":"block",
-	  "box-sizing":"content-box",
+	  //"box-sizing":"content-box",
 	  "border-color":"#b8b8b8",
 	  "border-style":"solid",
 	  "margin":{
@@ -352,8 +351,8 @@ Nehan.Stylesheet = (function(){
 	"ins":{
 	},
 	"img":{
-	  "display":"inline",
-	  "box-sizing":"content-box"
+	  "display":"inline"
+	  //"box-sizing":"content-box"
 	},
 	"input":{
 	  "display":"inline",
@@ -945,13 +944,12 @@ Nehan.Stylesheet = (function(){
 	//-------------------------------------------------------
 	".drop-caps::first-letter":{
 	  "display":"inline-block",
-	  "box-sizing":"content-box",
-	  "measure":"1em",
-	  "extent":"1em",
 	  "float":"start",
+	  "font-size":"4em",
+	  "measure":"1em",
+	  "extent":"1.3em",
 	  "line-height":"1em",
-	  "padding":{before:"0.33em"},
-	  "font-size":"3em"
+	  "padding":{before:"0.3em"}
 	},
 	".gap-start":{
 	  "margin":{
