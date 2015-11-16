@@ -32,8 +32,8 @@ Nehan.ListItemGenerator = (function(){
       }
     });
     var marker_context = context.createChildContext(marker_style);
+    //console.log("ListItemGenerator::marker context:%o", marker_context);
     return new Nehan.BlockGenerator(marker_context);
-    //return new Nehan.InlineGenerator(marker_context);
   };
 
   ListItemGenerator.prototype._createListBodyGenerator = function(context, list_context){

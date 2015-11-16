@@ -117,13 +117,6 @@ Nehan.HtmlLexer = (function (){
   HtmlLexer.prototype.getSeekPercent = function(seek_pos){
     return Math.round(100 * seek_pos / this.src.length);
   };
-  /**
-   @memberof Nehan.HtmlLexer
-   @param text {String}
-   */
-  HtmlLexer.prototype.addText = function(text){
-    this.buff = this.buff + this._normalize(text, this.flow);
-  };
 
   HtmlLexer.prototype._stepBuff = function(count){
     var part = this.buff.substring(0, count);

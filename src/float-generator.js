@@ -148,9 +148,10 @@ Nehan.FloatGenerator = (function(){
     var extent = floated.getExtent(flow);
     var elements = this._sortFloatRest(floated, rest || null);
     var wrap_box = this.context.createWrapBlock(measure, extent, elements);
+    /*
     wrap_box.breakAfter = Nehan.List.exists(elements, function(element){
-      return element.breakAfter;
-    });
+      return element && element.breakAfter;
+    });*/
     var elements_strs = elements.map(function(element){
       return element? element.toString() : "<null>";
     });
@@ -172,9 +173,10 @@ Nehan.FloatGenerator = (function(){
     var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
     var extent = Nehan.List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
     var wrap_box = this.context.createWrapBlock(measure, extent, elements);
+    /*
     wrap_box.breakAfter = Nehan.List.exists(elements, function(element){
-      return element.breakAfter;
-    });
+      return element && element.breakAfter;
+    });*/
     var elements_strs = elements.map(function(element){
       return element? element.toString() : "<null>";
     });

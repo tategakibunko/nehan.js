@@ -38,7 +38,7 @@ Nehan.BlockGenerator = (function(){
   BlockGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
       var cache = this.context.popCache();
-      console.info("use cache:", cache);
+      console.info("use cache:%o(%s)", cache, this.context.stringOfElement(cache));
       return cache;
     }
 
@@ -76,7 +76,7 @@ Nehan.BlockGenerator = (function(){
 
     // if page-break, end page
     if(child_style.isPageBreak()){
-      this.context.setBreakAfter(true);
+      this.setBreakAfter(true);
       return null;
     }
 

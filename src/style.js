@@ -371,9 +371,11 @@ Nehan.Style = (function(){
     if(edge && (!opt.useBeforeEdge || !opt.useAfterEdge) && this.markupName !== "hr"){
       edge = edge.clone();
       if(!opt.useBeforeEdge){
+	console.log("clear before edge:%d", edge.getBefore(this.flow));
 	edge.clearBefore(this.flow);
       }
       if(!opt.useAfterEdge){
+	console.log("clear after edge:%d", edge.getAfter(this.flow));
 	edge.clearAfter(this.flow);
       }
     }

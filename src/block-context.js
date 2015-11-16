@@ -13,7 +13,6 @@ Nehan.BlockContext = (function(){
     this.pushedElements = [];
     this.elements = [];
     this.pulledElements = [];
-    this.breakAfter = false;
     this.lineNo = opt.lineNo || 0;
   }
 
@@ -28,15 +27,6 @@ Nehan.BlockContext = (function(){
     return this.getRestExtent() >= extent;
   };
   /**
-   check if this block context has break after flag.
-   @memberof Nehan.BlockContext
-   @method hasBreakAfter
-   @return {boolean}
-   */
-  BlockContext.prototype.hasBreakAfter = function(){
-    return this.breakAfter;
-  };
-  /**
    add box element to this block context
    @memberof Nehan.BlockContext
    @method addElement
@@ -45,9 +35,6 @@ Nehan.BlockContext = (function(){
    */
   BlockContext.prototype.addElement = function(element, extent){
     this.curExtent += extent;
-    if(element.breakAfter){
-      this.breakAfter = true;
-    }
     if(element.pushed){
       this.pushedElements.push(element);
     } else if(element.pulled){

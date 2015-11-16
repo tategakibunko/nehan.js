@@ -15,7 +15,6 @@ Nehan.InlineContext = (function(){
     this.elements = [];
     this.lineBreak = false; // is line-break included in line?
     this.lineOver = false; // is line full-filled?
-    this.breakAfter = false; // is break-after incuded in line?
     this.hyphenated = false; // is line hyphenated?
   }
 
@@ -82,13 +81,6 @@ Nehan.InlineContext = (function(){
    */
   InlineContext.prototype.hasBreakAfter = function(){
     return this.breakAfter;
-  };
-  /**
-   @memberof Nehan.InlineContext
-   @param status {boolean}
-   */
-  InlineContext.prototype.setBreakAfter = function(status){
-    this.breakAfter = status;
   };
   /**
    @memberof Nehan.InlineContext

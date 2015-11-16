@@ -63,16 +63,6 @@ Nehan.TokenStream = (function(){
     return this.pos === 0;
   };
   /**
-   @memberof Nehan.TokenStream
-   @param text {String}
-   */
-  TokenStream.prototype.addText  = function(text){
-    if(text !== ""){
-      this.lexer.addText(text);
-      this._loadTokens(this._filter);
-    }
-  };
-  /**
    step backward current stream position.
 
    @memberof Nehan.TokenStream
