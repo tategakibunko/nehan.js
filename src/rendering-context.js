@@ -37,24 +37,13 @@ Nehan.RenderingContext = (function(){
     if(element.isVoid()){
       return; // just skip
     }
-    var max_size = this.layoutContext.getBlockMaxExtent();
+    var max_size = this.getContextMaxExtentForAdd();
     var max_measure = this.layoutContext.getInlineMaxMeasure();
     var element_size = element.getLayoutExtent(this.style.flow);
     var prev_extent = this.layoutContext.getBlockCurExtent();
     var next_extent = prev_extent + element_size;
-    var tail_edge_size = this.getEdgeAfter();
-    
-    this.debugBlockElement(element, element_size);
 
-    // if it's not last output, tail edge is not included.
-    if(this.hasNext()){
-      if(tail_edge_size > 0){
-	console.log("[add block] tail edge(%d) is not included", tail_edge_size);
-      }
-      max_size += tail_edge_size;
-    } else if(tail_edge_size > 0){
-      console.log("[add block] tail edge(%d) is available at last pos!", tail_edge_size);
-    }
+    this.debugBlockElement(element, element_size);
 
     if(element.isResumableLine(max_measure) && this.hasChildLayout() && this.child.isInline()){
       this.child.setResumeLine(element);
@@ -76,7 +65,6 @@ Nehan.RenderingContext = (function(){
       } else {
 	console.info("size over");
       }
-	
       this.setBreakAfter(true);
       throw "break-after";
     }
@@ -827,6 +815,21 @@ Nehan.RenderingContext = (function(){
     return max_size;
   };
 
+  // max extent size at the phase of adding actual element.
+  RenderingContext.prototype.getContextMaxExtentForAdd = function(){
+    var max_size = this.layoutContext.getBlockMaxExtent();
+
+    // if it's not last output, tail edge is not included.
+    if(this.hasNext()){
+      var tail_edge_size = this.getEdgeAfter();
+      if(tail_edge_size > 0){
+	console.log("tail edge %d is not included", tail_edge_size);
+      }
+      return max_size + tail_edge_size;
+    }
+    return max_size;
+  };
+
   RenderingContext.prototype.getElementLayoutExtent = function(element){
     return element.getLayoutExtent(this.style.flow);
   };
@@ -1117,12 +1120,26 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.updateParent = function(parent_context){
-    console.log("parent:%s, child:%s", parent_context.getGeneratorName(), this.getGeneratorName());
+    if(this.isInline()){
+      this.updateInlineParent(parent_context);
+    }
+    this.updateBlockParent(parent_context);
+  };
+
+  RenderingContext.prototype.updateBlockParent = function(parent_context){
+    console.log("[update block parent] %s > %s", parent_context._name, this._name);
+    this.parent = parent_context;
+    parent_context.child = this;
+    this.style.updateContextSize(parent_context.style.contentMeasure, parent_context.style.contentExtent);
+    if(this.child){
+      this.child.updateParent(this);
+    }
+  };
+
+  RenderingContext.prototype.updateInlineParent = function(parent_context){
+    console.log("[update inline parent] %s > %s", parent_context._name, this._name);
     this.style = parent_context.style;
     this.parent = parent_context;
-    if(parent_context.child === this){
-      return;
-    }
     parent_context.child = this;
     if(this.child){
       this.child.updateParent(this);
@@ -1245,12 +1262,13 @@ Nehan.RenderingContext = (function(){
     var start_blocks = [], end_blocks = [];
     Nehan.List.iter(this.floatedGenerators, function(gen){
       var block = gen.yield();
-      if(block){
-	if(gen.context.style.isFloatStart()){
-	  start_blocks.push(block);
-	} else if(gen.context.style.isFloatEnd()){
-	  end_blocks.push(block);
-	}
+      if(!block || block.getContentExtent() <= 0){
+	return;
+      }
+      if(gen.context.style.isFloatStart()){
+	start_blocks.push(block);
+      } else if(gen.context.style.isFloatEnd()){
+	end_blocks.push(block);
       }
     });
     return new Nehan.FloatGroupStack(this.style.flow, start_blocks, end_blocks);
@@ -1258,7 +1276,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.yieldFloatSpace = function(float_group, measure, extent){
     console.info("yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
-    this.updateContextSize(measure, extent);
+    this.child.updateContextSize(measure, extent);
     return this.yieldChildLayout();
   };
 

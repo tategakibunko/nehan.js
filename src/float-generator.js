@@ -18,7 +18,7 @@ Nehan.FloatGenerator = (function(){
   // before: [root] -> [space] -> [child]
   //  after: [root] -> [child]
   FloatGenerator.prototype._updateChildParent = function(){
-    if(!this.context.child){
+    if(this.context.hasNextFloat()){
       return;
     }
     console.info("FloatGenerator::_updateChildParent");
@@ -29,7 +29,6 @@ Nehan.FloatGenerator = (function(){
     if(this.context.child.child){
       this.context.child.child.updateParent(this.context.parent);
     }
-    this.context.child = null;
   };
 
   FloatGenerator.prototype._getNext = function(){
@@ -40,7 +39,9 @@ Nehan.FloatGenerator = (function(){
     var rest_measure = this.context.layoutContext.getInlineRestMeasure();
     var rest_extent = stack.getExtent();
 
-    if(rest_extent <= 0){
+    if(rest_extent <= 0 || rest_measure <= 0){
+      console.warn("no rest space:(m=%d, e=%d)", rest_measure, rest_extent);
+      this._updateChildParent();
       return null;
     }
     
@@ -51,10 +52,11 @@ Nehan.FloatGenerator = (function(){
     console.log("_yieldFloat(rest_m:%d, rest_e:%d)", rest_measure, rest_extent);
 
     // no more rest space
-    if(rest_measure <= 0){
-      console.info("no more rest measure");
+    if(rest_measure <= 0 || rest_extent <= 0){
+      console.warn("no rest space:(m=%d, e=%d)", rest_measure, rest_extent);
       this._updateChildParent();
-      return this.context.parent.child.yield();
+      //return this.context.parent.child.yield();
+      return null;
     }
 
     // no more floated layout, just yield rest area.
@@ -94,6 +96,7 @@ Nehan.FloatGenerator = (function(){
     // if no more rest extent is left,
     // continuous layout is displayed in parent context.
     if(rest_extent_space <= 0){
+      console.info("no more rest extent, group set:%o", group_set);
       this._updateChildParent();
       return group_set;
     }
@@ -134,6 +137,9 @@ Nehan.FloatGenerator = (function(){
     box.breakAfter = Nehan.List.exists(elements, function(element){
       return element && element.breakAfter;
     });
+    console.info(
+      "float:wrap-inline-set:%o(%s), extent = %d, current rest extent:%d",
+      box, box.toString(), box.getContentExtent(), this.context.layoutContext.getBlockRestExtent());
     return box;
   };
 
@@ -152,6 +158,10 @@ Nehan.FloatGenerator = (function(){
     box.breakAfter = Nehan.List.exists(elements, function(element){
       return element && element.breakAfter;
     });
+    console.info(
+      "float:wrap-block-set:%o(%s), extent = %d, current rest extent:%d",
+      box, box.toString(), box.getContentExtent(), this.context.layoutContext.getBlockRestExtent()
+    );
     return box;
   };
 
