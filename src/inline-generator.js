@@ -18,6 +18,7 @@ Nehan.InlineGenerator = (function(){
       try {
 	this.context.addInlineElement(element);
       } catch(e){
+	console.warn(e);
 	break;
       }	
     }
@@ -46,13 +47,10 @@ Nehan.InlineGenerator = (function(){
 
   InlineGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
-      var cache = this.context.popCache();
-      return cache;
+      return this.context.popCache();
     }
 
     if(this.context.hasChildLayout()){
-      // block context is delegated, but inline context is always re-constructed.
-      // see LayoutGenerator::_createChildContext
       return this.context.yieldChildLayout();
     }
 

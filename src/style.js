@@ -317,22 +317,6 @@ Nehan.Style = (function(){
     return new Style(this.selectors, tag, this, {forceCss:(css || {})});
   };
   /**
-   calclate max marker size by total child_count(item_count).
-
-   @memberof Nehan.Style
-   @param item_count {int}
-   */
-  Style.prototype.setListItemCount = function(item_count){
-    var max_marker_html = this.getListMarkerHtml(item_count);
-    // create temporary inilne-generator but using clone style, this is because sometimes marker html includes "<span>" element,
-    // and we have to avoid 'appendChild' from child-generator of this tmp generator.
-    var tmp_gen = new Nehan.InlineGenerator(this.clone(), new Nehan.TokenStream(max_marker_html));
-    var line = tmp_gen.yield();
-    var marker_measure = line? line.inlineMeasure + Math.floor(this.getFontSize() / 2) : this.getFontSize();
-    var marker_extent = line? line.size.getExtent(this.flow) : this.getFontSize();
-    this.listMarkerSize = this.flow.getBoxSize(marker_measure, marker_extent);
-  };
-  /**
    @memberof Nehan.Style
    @return {boolean}
    */
@@ -1092,7 +1076,7 @@ Nehan.Style = (function(){
    @return {String}
    */
   Style.prototype.getListMarkerHtml = function(order){
-    return this.listStyle? this.listStyle.getMarkerHtml(order) : (this.parent? this.parent.getListMarkerHtml(order) : "");
+    return this.listStyle? this.listStyle.getMarkerHtml(order) : (this.parent? this.parent.getListMarkerHtml(order) : "&nbsp;");
   };
   /**
    @memberof Nehan.Style
@@ -1875,14 +1859,14 @@ Nehan.Style = (function(){
   Style.prototype._loadStaticMeasure = function(){
     var prop = this.flow.getPropMeasure();
     var max_size = this.getParentContentMeasure();
-    var static_size = this.getAttr(prop) || this.getAttr("measure") || this.getCssAttr(prop) || this.getCssAttr("measure");
-    return static_size? this._computeUnitSize(static_size, this.getFontSize(), max_size) : null;
+    var static_size = this.getAttr(prop, null) || this.getAttr("measure", null) || this.getCssAttr(prop, null) || this.getCssAttr("measure", null);
+    return (static_size !== null)? this._computeUnitSize(static_size, this.getFontSize(), max_size) : null;
   };
 
   Style.prototype._loadStaticExtent = function(){
     var prop = this.flow.getPropExtent();
     var max_size = this.getParentContentExtent();
-    var static_size = this.getAttr(prop) || this.getAttr("extent") || this.getCssAttr(prop) || this.getCssAttr("extent");
+    var static_size = this.getAttr(prop, null) || this.getAttr("extent", null) || this.getCssAttr(prop, null) || this.getCssAttr("extent", null);
     return static_size? this._computeUnitSize(static_size, this.getFontSize(), max_size) : null;
   };
 

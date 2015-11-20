@@ -22,8 +22,14 @@ Nehan.ListItemGenerator = (function(){
   }
   Nehan.Class.extend(ListItemGenerator, Nehan.ParallelGenerator);
 
+  // inherit from ParallelGenerator::_isBreakAfter
+  ListItemGenerator.prototype._isBreakAfter = function(blocks){
+    return blocks[1] && blocks[1].breakAfter;
+  };
+
   ListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
     var content = context.parent.style.getListMarkerHtml(list_index + 1);
+    console.log("marker html:%s", content);
     var marker_markup = new Nehan.Tag("marker", content);
     var marker_style = context.createChildStyle(marker_markup, {
       forceCss:{

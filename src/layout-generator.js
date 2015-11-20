@@ -27,19 +27,20 @@ Nehan.LayoutGenerator = (function(){
    @return {Nehan.Box}
    */
   LayoutGenerator.prototype.yield = function(){
-    this.context.initLayoutContext();
-    
-    // call _yield implemented in inherited class.
     console.group("%s _yield", this.context.getGeneratorName());
-    console.log("_yield context:%o", this.context);
+    console.log("context:%o", this.context);
+
+    this.context.initLayoutContext();
+
     if(this.context.layoutContext){
-      console.log(
-	"layout(m = %d, e = %d)",
-	this.context.layoutContext.inline.maxMeasure,
-	this.context.layoutContext.block.maxExtent
-      );
+      console.log("layout(m = %d, e = %d)", this.context.layoutContext.inline.maxMeasure, this.context.layoutContext.block.maxExtent);
+      if(this.context.layoutContext.block.maxExtent <= 0){
+	return null;
+      }
     }
+    // call _yield implemented in inherited class.
     var box = this._yield();
+
     console.groupEnd();
 
     // increment yield count

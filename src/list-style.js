@@ -45,7 +45,11 @@ Nehan.ListStyle = (function(){
     if(this.image !== null){
       return this.image.getMarkerHtml(count);
     }
-    return this.type.getMarkerHtml(count);
+    var html = this.type.getMarkerHtml(count);
+    if(html === "" && this.isOutside()){
+      return "&nbsp;";
+    }
+    return html;
   };
 
   return ListStyle;

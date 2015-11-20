@@ -33,7 +33,7 @@ Nehan.Config = {
      @type {int}
      @default 20
   */
-  maxRollbackCount:3,
+  maxRollbackCount:4,
 
   /**
      max yield count to block infinite loop.

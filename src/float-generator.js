@@ -13,26 +13,37 @@ Nehan.FloatGenerator = (function(){
   function FloatGenerator(context){
     Nehan.BlockGenerator.call(this, context);
   }
-  Nehan.Class.extend(FloatGenerator, Nehan.LayoutGenerator);
+  Nehan.Class.extend(FloatGenerator, Nehan.BlockGenerator);
 
-  // before: [root] -> [root(clone)] -> [child]
+  // before: [root] -> [space] -> [child]
   //  after: [root] -> [child]
-  FloatGenerator.prototype._inheritChildContext = function(){
-    console.info("-------------- inherit child ---------------");
+  FloatGenerator.prototype._updateChildParent = function(){
+    if(!this.context.child){
+      return;
+    }
+    console.info("FloatGenerator::_updateChildParent");
     if(this.context.child.hasCache()){
+      console.log("inherit child cache:", this.context.child.peekLastCache());
       this.context.parent.pushCache(this.context.child.popCache());
     }
-    if(this.context.child.child && this.context.child.child.generator instanceof Nehan.InlineGenerator){
-      console.info("inherit inline!!!!!!");
-      this.context.child.child.updateInlineParent(this.context.parent);
+    if(this.context.child.child){
+      this.context.child.child.updateParent(this.context.parent);
     }
     this.context.child = null;
   };
 
-  FloatGenerator.prototype._yield = function(){
-    var stack = this._yieldFloatStack();
+  FloatGenerator.prototype._getNext = function(){
+    if(this.context.hasCache()){
+      return this.context.popCache();
+    }
+    var stack = this.context.yieldFloatStack();
     var rest_measure = this.context.layoutContext.getInlineRestMeasure();
     var rest_extent = stack.getExtent();
+
+    if(rest_extent <= 0){
+      return null;
+    }
+    
     return this._yieldFloat(stack, rest_measure, rest_extent);
   };
 
@@ -42,14 +53,14 @@ Nehan.FloatGenerator = (function(){
     // no more rest space
     if(rest_measure <= 0){
       console.info("no more rest measure");
-      this._inheritChildContext();
+      this._updateChildParent();
       return this.context.parent.child.yield();
     }
 
     // no more floated layout, just yield rest area.
     if(stack.isEmpty()){
       console.info("no more floating elements");
-      return this._yieldFloatSpace(stack.getLastGroup(), rest_measure, rest_extent);
+      return this.context.yieldFloatSpace(stack.getLastGroup(), rest_measure, rest_extent);
     }
     /*
       <------ rest_measure ---->
@@ -83,7 +94,7 @@ Nehan.FloatGenerator = (function(){
     // if no more rest extent is left,
     // continuous layout is displayed in parent context.
     if(rest_extent_space <= 0){
-      this._inheritChildContext();
+      this._updateChildParent();
       return group_set;
     }
 
@@ -100,36 +111,8 @@ Nehan.FloatGenerator = (function(){
       --------------------------
     */
     // if there is space in block direction, yield rest space and wrap them([inline wrap set, rest_extent_space]).
-    var space = this._yieldFloatSpace(prev_group, rest_measure, rest_extent_space);
+    var space = this.context.yieldFloatSpace(prev_group, rest_measure, rest_extent_space);
     return this._wrapBlockSet([group_set, space]);
-  };
-  
-  FloatGenerator.prototype._yieldFloatSpace = function(float_group, measure, extent){
-    console.info("_yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
-    this.context.child.style.updateContextSize(measure, extent);
-    var cache = this.context.child.peekLastCache();
-    if(cache && cache.isLine() && cache.inlineMeasure < measure){
-      console.info("[resume line]");
-      this.context.child.popCache();
-      this.context.child.child.setResumeLine(cache);
-    }
-    return this.context.yieldChildLayout();
-  };
-  
-  FloatGenerator.prototype._yieldFloatStack = function(){
-    var start_blocks = [], end_blocks = [];
-    Nehan.List.iter(this.context.floatedGenerators, function(gen){
-      var block = gen.yield();
-      if(block){
-	block.hasNext = gen.hasNext();
-	if(gen.context.style.isFloatStart()){
-	  start_blocks.push(block);
-	} else if(gen.context.style.isFloatEnd()){
-	  end_blocks.push(block);
-	}
-      }
-    }.bind(this));
-    return new Nehan.FloatGroupStack(this.context.style.flow, start_blocks, end_blocks);
   };
 
   FloatGenerator.prototype._sortFloatRest = function(floated, rest){
@@ -147,41 +130,29 @@ Nehan.FloatGenerator = (function(){
     var flow = this.context.style.flow;
     var extent = floated.getExtent(flow);
     var elements = this._sortFloatRest(floated, rest || null);
-    var wrap_box = this.context.createWrapBlock(measure, extent, elements);
-    /*
-    wrap_box.breakAfter = Nehan.List.exists(elements, function(element){
+    var box = this.context.createWrapBlock(measure, extent, elements);
+    box.breakAfter = Nehan.List.exists(elements, function(element){
       return element && element.breakAfter;
-    });*/
-    var elements_strs = elements.map(function(element){
-      return element? element.toString() : "<null>";
     });
-    //console.info("wrap inline, elements = %o, size = %o", elements_strs, wrap_box.size);
-    return wrap_box;
+    return box;
   };
 
   // wrap.measure = e1.measure = e2.measure
   // wrap.extent = e1.extent + e2.extent
   // [wrap]
-  //   [e1]
-  //   [e2]
+  // [ e1 ]
+  // [ e2 ]
   // [/wrap]
   FloatGenerator.prototype._wrapBlockSet = function(blocks){
     var flow = this.context.style.flow;
-    var elements = blocks.filter(function(block){
-      return block !== null;
-    });
+    var elements = blocks.filter(function(block){ return block !== null; });
     var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
     var extent = Nehan.List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
-    var wrap_box = this.context.createWrapBlock(measure, extent, elements);
-    /*
-    wrap_box.breakAfter = Nehan.List.exists(elements, function(element){
+    var box = this.context.createWrapBlock(measure, extent, elements);
+    box.breakAfter = Nehan.List.exists(elements, function(element){
       return element && element.breakAfter;
-    });*/
-    var elements_strs = elements.map(function(element){
-      return element? element.toString() : "<null>";
     });
-    //console.info("wrap block, elements = %o, size = %o", elements_strs, wrap_box.size);
-    return wrap_box;
+    return box;
   };
 
   return FloatGenerator;

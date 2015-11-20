@@ -29,6 +29,9 @@ Nehan.BlockGenerator = (function(){
 	this.context.addBlockElement(element);
       } catch (e){
 	console.warn(e);
+	if(e === "too many rollback"){
+	  throw e; // fail again
+	}
 	break;
       }
     }
@@ -37,9 +40,7 @@ Nehan.BlockGenerator = (function(){
 
   BlockGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
-      var cache = this.context.popCache();
-      console.info("use cache:%o(%s)", cache, this.context.stringOfElement(cache));
-      return cache;
+      return this.context.popCache();
     }
 
     if(this.context.hasChildLayout()){
@@ -88,8 +89,8 @@ Nehan.BlockGenerator = (function(){
     }
 
     if(child_style.isFloated()){
-      child_gen = this.context.createFloatGenerator(child_style);
-      return child_gen.yield();
+      var first_float_gen = this.context.createChildBlockGenerator(child_style);
+      return this.context.createFloatGenerator(first_float_gen).yield();
     }
 
     // if child inline or child inline-block,
@@ -105,7 +106,7 @@ Nehan.BlockGenerator = (function(){
   };
 
   BlockGenerator.prototype._createOutput = function(){
-    var block = this.context.createBlock();
+    var block = this.context.createBlockBox();
 
     // call _onCreate callback for 'each' output
     this._onCreate(block);

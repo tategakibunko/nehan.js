@@ -59,15 +59,34 @@ Nehan.Box = (function(){
    @memberof Nehan.Box
    @return {boolean}
    */
-  Box.prototype.isTextBlock = function(){
-    return this._type === "text-block";
+  Box.prototype.isResumableLine = function(max_measure){
+    if(!this.isLine()){
+      return false;
+    }
+    if(this.hasLineBreak){
+      return false;
+    }
+    if(this.hyphenated){
+      return false;
+    }
+    if(this.inlineMeasure >= max_measure){
+      return false;
+    }
+    return this.getCacheCount() > 0;
   };
   /**
    @memberof Nehan.Box
    @return {boolean}
    */
-  Box.prototype.isInlineRoot = function(){
-    return this.isInlineRoot || false;
+  Box.prototype.isTextBlock = function(){
+    return this._type === "text-block";
+  };
+  /**
+   @memberof Nehan.Box
+   @return {int}
+   */
+  Box.prototype.getCacheCount = function(){
+    return this.cacheCount || 0;
   };
   /**
    filter text objects.

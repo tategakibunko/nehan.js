@@ -943,13 +943,14 @@ Nehan.Stylesheet = (function(){
 	// other utility classes
 	//-------------------------------------------------------
 	".drop-caps::first-letter":{
-	  "display":"inline-block",
+	  "display":"block",
+	  "box-sizing":"content-box",
 	  "float":"start",
 	  "font-size":"4em",
 	  "measure":"1em",
-	  "extent":"1.3em",
-	  "line-height":"1em",
-	  "padding":{before:"0.3em"}
+	  "extent":"1em",
+	  "padding":{before:"0.1em"},
+	  "line-height":"1em"
 	},
 	".gap-start":{
 	  "margin":{

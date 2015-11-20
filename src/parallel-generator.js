@@ -7,94 +7,25 @@ Nehan.ParallelGenerator = (function(){
    @extends {Nehan.LayoutGenerator}
    @param context {Nehan.RenderingContext}
   */
-  function ParallelGenerator(context, generators){
+  function ParallelGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
   }
-  Nehan.Class.extend(ParallelGenerator, Nehan.LayoutGenerator);
+  Nehan.Class.extend(ParallelGenerator, Nehan.BlockGenerator);
 
-  ParallelGenerator.prototype._yield = function(){
+  ParallelGenerator.prototype._isBreakAfter = function(blocks){
+    return Nehan.List.exists(blocks, function(block){
+      console.info("para block:%o, breakAfter=%o", block, block.breakAfter);
+      return block && block.breakAfter;
+    });
+  };
+
+  ParallelGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
       return this.context.popCache();
     }
-    var blocks = this._yieldParallelBlocks();
-    if(blocks === null){
-      return null;
-    }
-    var wrap_block = this._wrapBlocks(blocks);
-    var wrap_extent = wrap_block.getLayoutExtent(this.context.style.flow);
-    if(!this.context.layoutContext.hasBlockSpaceFor(wrap_extent)){
-      this.context.pushCache(wrap_block);
-      return null;
-    }
-    this.context.layoutContext.addBlockElement(wrap_block, wrap_extent);
-    return wrap_block;
-  };
-
-  /**
-     @memberof Nehan.ParallelGenerator
-     @method hasNext
-     @override
-     @param context {Nehan.CurosrContext}
-     @return {boolean}
-  */
-  ParallelGenerator.prototype.hasNext = function(){
-    if(this.context.terminate){
-      return false;
-    }
-    if(this.context.hasCache()){
-      return true;
-    }
-    return this.context.hasNextParallelLayout();
-  };
-
-  ParallelGenerator.prototype._yieldParallelBlocks = function(){
-    var blocks = this.context.parallelGenerators.map(function(gen){
-      return gen.yield();
-    });
-    return blocks.every(function(block){
-      return block === null;
-    })? null : blocks;
-  };
-
-  ParallelGenerator.prototype._findMaxBlock = function(blocks){
-    var flow = this.context.style.flow;
-    return Nehan.List.maxobj(blocks, function(block){
-      return block? block.getLayoutExtent(flow) : 0;
-    });
-  };
-
-  ParallelGenerator.prototype._alignContentExtent = function(blocks, content_extent){
-    var flow = this.context.style.flow;
-    var generators = this.context.parallelGenerators;
-    return blocks.map(function(block, i){
-      var context = generators[i].context;
-      if(block === null){
-	return context.style.createBlock(context, {
-	  elements:[],
-	  extent:content_extent
-	});
-      }
-      return block.resizeExtent(flow, content_extent);
-    });
-  };
-
-  ParallelGenerator.prototype._wrapBlocks = function(blocks){
-    var flow = this.context.style.flow;
-    var max_block = this._findMaxBlock(blocks);
-    var wrap_extent = max_block.getContentExtent(flow);
-    var rest_extent = this.context.layoutContext.getBlockRestExtent() - wrap_extent;
-    var after_edge_size = this.context.style.getEdgeAfter();
-    var uniformed_blocks = this._alignContentExtent(blocks, wrap_extent);
-    var break_after = Nehan.List.exists(blocks, function(block){
-      return block && block.breakAfter;
-    });
-    return this.context.style.createBlock(this.context, {
-      elements:uniformed_blocks,
-      extent:max_block.getLayoutExtent(flow),
-      breakAfter:break_after,
-      useBeforeEdge:this.context.isFirstOutput(),
-      useAfterEdge:(!this.hasNext() && after_edge_size <= rest_extent)
-    });
+    var box = this.context.yieldParallelBlocks();
+    box.breakAfter = this._isBreakAfter(box.elements);
+    return box;
   };
 
   return ParallelGenerator;
