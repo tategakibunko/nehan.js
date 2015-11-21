@@ -80,7 +80,7 @@ Nehan.RenderingContext = (function(){
     var prev_measure = this.layoutContext.getInlineCurMeasure(this.style.flow);
     var next_measure = prev_measure + element_size;
 
-    this.debugInlineElement(element, element_size);
+    //this.debugInlineElement(element, element_size);
 
     if(element_size === 0){
       throw "zero";
@@ -332,7 +332,7 @@ Nehan.RenderingContext = (function(){
       return true; // continue
     }.bind(this));
 
-    var float_root_style = this.createTmpChildStyle(new Nehan.Tag("space-root"), {
+    var float_root_style = this.createTmpChildStyle(new Nehan.Tag("float-root"), {
       forceCss:{display:"block"}
     });
     var float_root_context = this.createChildContext(float_root_style);
@@ -349,8 +349,9 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createChildBlockGenerator = function(child_style, child_stream){
     //console.log("createChildBlockGenerator(%s):%s", child_style.getMarkupName(), child_style.markup.getContent());
+    child_stream = child_stream || this.createStream(child_style);
     var child_context = this.createChildContext(child_style, {
-      stream:child_stream || this.createStream(child_style)
+      stream:child_stream
     });
 
     var direct_block = this.yieldBlockDirect(child_context);
@@ -892,39 +893,40 @@ Nehan.RenderingContext = (function(){
     if(this.hasCache()){
       return true;
     }
-    if(this.hasChildLayout()){
+    if(this.child && this.hasChildLayout()){
       return true;
     }
-    if(this.hasNextFloat()){
+    if(this.floatGenerators && this.hasNextFloat()){
       return true;
     }
-    if(this.hasNextParallelLayout()){
+    if(this.parallelGenerators && this.hasNextParallelLayout()){
       return true;
     }
     return this.stream? this.stream.hasNext() : false;
   };
 
   RenderingContext.prototype.hasChildLayout = function(){
-    if(this.child && this.child.generator && this.child.generator.hasNext()){
-      return true;
-    }
-    return false;
+    return this.child && this.child.generator && this.child.generator.hasNext();
   };
 
   RenderingContext.prototype.hasNextFloat = function(){
-    return Nehan.List.exists(this.floatedGenerators || [], function(gen){
+    return this.floatedGenerators && Nehan.List.exists(this.floatedGenerators, function(gen){
       return gen.hasNext();
     });
   };
 
   RenderingContext.prototype.hasNextParallelLayout = function(){
-    return Nehan.List.exists(this.parallelGenerators || [], function(gen){
+    return this.parallelGenerators && Nehan.List.exists(this.parallelGenerators, function(gen){
       return gen.hasNext();
     });
   };
 
   RenderingContext.prototype.hasCache = function(){
     return this.cachedElements.length > 0;
+  };
+
+  RenderingContext.prototype.hasFloatStackCache = function(){
+    return this.floatStackCaches && this.floatStackCaches.length > 0;
   };
 
   // -----------------------------------------------
@@ -999,6 +1001,10 @@ Nehan.RenderingContext = (function(){
     return cache;
   };
 
+  RenderingContext.prototype.popFloatStackCache = function(){
+    return this.floatStackCaches.pop();
+  };
+
   // -----------------------------------------------
   // [push]
   // -----------------------------------------------
@@ -1006,14 +1012,20 @@ Nehan.RenderingContext = (function(){
     var size = (element instanceof Nehan.Box)? element.getLayoutExtent(this.style.flow) : (element.bodySize || 0);
     console.log("push cache:%o(e = %d, text = %s)", element, size, this.stringOfElement(element));
     element.cacheCount = (element.cacheCount || 0) + 1;
+    /*
     if(this.hasChildLayout()){
       this.child.yieldCount--;
-    }
+    }*/
     if(element.cacheCount >= Nehan.Config.maxRollbackCount){
       console.error("too many rollback! context:%o, element:%o", this, element);
       throw "too many rollback";
     }
     this.cachedElements.push(element);
+  };
+
+  RenderingContext.prototype.pushFloatStackCache = function(cache){
+    this.floatStackCaches = this.floatStackCaches || [];
+    this.floatStackCaches.push(cache);
   };
 
   // -----------------------------------------------
@@ -1233,8 +1245,11 @@ Nehan.RenderingContext = (function(){
       return gen.yield();
     });
 
-    if(blocks.every(Nehan.Closure.eq(null))){
-      console.error("yield parallel all null!");
+    if(blocks.every(function(block){
+      //console.error("yield parallel all null!");
+      return block === null || block.getContentExtent() <= 0;
+    })){
+      this.setTerminate(true);
       return null;
     }
 
@@ -1259,6 +1274,9 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.yieldFloatStack = function(){
+    if(this.hasFloatStackCache()){
+      return this.popFloatStackCache();
+    }
     var start_blocks = [], end_blocks = [];
     Nehan.List.iter(this.floatedGenerators, function(gen){
       var block = gen.yield();

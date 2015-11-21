@@ -25,7 +25,6 @@ Nehan.TableGenerator = (function(){
     // load partition set after context size is calculated.
     if(context.style.getCssAttr("table-layout") === "auto"){
       context.style.tablePartition = this._createAutoPartition(context.stream);
-      context.stream.rewind();
     }
   }
   Nehan.Class.extend(TableGenerator, Nehan.BlockGenerator);
@@ -60,6 +59,7 @@ Nehan.TableGenerator = (function(){
 	break;
       }
     }
+    stream.rewind();
     return pset;
   };
 

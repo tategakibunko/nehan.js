@@ -9,12 +9,17 @@ Nehan.ParallelGenerator = (function(){
   */
   function ParallelGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
+    context.parallelGenerators = this._createChildGenerators(context);
+    context.stream = null;
   }
   Nehan.Class.extend(ParallelGenerator, Nehan.BlockGenerator);
 
+  ParallelGenerator.prototype._createChildGenerators = function(context){
+    throw "ParallelGenerator::_createChildGenerators must be implemented in child class";
+  };
+
   ParallelGenerator.prototype._isBreakAfter = function(blocks){
     return Nehan.List.exists(blocks, function(block){
-      console.info("para block:%o, breakAfter=%o", block, block.breakAfter);
       return block && block.breakAfter;
     });
   };
@@ -24,6 +29,9 @@ Nehan.ParallelGenerator = (function(){
       return this.context.popCache();
     }
     var box = this.context.yieldParallelBlocks();
+    if(!box){
+      return null;
+    }
     box.breakAfter = this._isBreakAfter(box.elements);
     return box;
   };

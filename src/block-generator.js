@@ -77,7 +77,7 @@ Nehan.BlockGenerator = (function(){
 
     // if page-break, end page
     if(child_style.isPageBreak()){
-      this.setBreakAfter(true);
+      this.context.setBreakAfter(true);
       return null;
     }
 

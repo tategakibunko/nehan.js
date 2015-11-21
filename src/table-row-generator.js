@@ -12,15 +12,15 @@ Nehan.TableRowGenerator = (function(){
    @param context {Nehan.RenderingContext}
   */
   function TableRowGenerator(context){
-    Nehan.ParallelGenerator.call(this, context.extend({
-      parallelGenerators:this._getGenerators(context)
-    }));
+    Nehan.ParallelGenerator.call(this, context);
   }
   Nehan.Class.extend(TableRowGenerator, Nehan.ParallelGenerator);
 
-  TableRowGenerator.prototype._getGenerators = function(context){
+  TableRowGenerator.prototype._createChildGenerators = function(context){
     var child_styles = this._getChildStyles(context);
-    return child_styles.map(context.createChildBlockGenerator);
+    return child_styles.map(function(child_style){
+      return context.createChildBlockGenerator(child_style);
+    });
   };
 
   TableRowGenerator.prototype._getChildStyles = function(context){

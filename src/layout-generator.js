@@ -41,8 +41,6 @@ Nehan.LayoutGenerator = (function(){
     // call _yield implemented in inherited class.
     var box = this._yield();
 
-    console.groupEnd();
-
     // increment yield count
     this.context.yieldCount++;
 
@@ -51,6 +49,7 @@ Nehan.LayoutGenerator = (function(){
       console.error("[%s]too many yield!:%o", this.context.getGeneratorName(), this);
       throw "too many yield";
     }
+    console.groupEnd();
     return box;
   };
 

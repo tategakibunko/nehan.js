@@ -11,6 +11,7 @@ Nehan.BorderCollapse = (function(){
   };
 
   var __collapse_border = function(style, border){
+    //console.log("__collapse_border(%o, %o)", style, border);
     switch(style.display){
     case "table-header-group":
     case "table-row-group":
@@ -25,6 +26,7 @@ Nehan.BorderCollapse = (function(){
   };
 
   var __collapse_border_table_row = function(style, border){
+    //console.log("__collapse_border_table_row(%o, %o)", style, border);
     var parent_start_border = __find_parent_enable_border(style, "start");
     if(parent_start_border){
       __collapse_border_between(
@@ -117,6 +119,7 @@ Nehan.BorderCollapse = (function(){
   };
 
   var __collapse_border_between = function(style, prev, cur){
+    //console.log("__collapse_border_between(%o, %o, %o)", style, prev, cur);
     var prev_size = prev.border.getByName(style.flow, prev.target);
     var cur_size = cur.border.getByName(style.flow, cur.target);
     var new_size = Math.max(0, cur_size - prev_size);
@@ -138,7 +141,8 @@ Nehan.BorderCollapse = (function(){
      @param style {Nehan.Style}
      */
     collapse : function(style){
-      __collapse_border(style);
+      //console.log("collapse(%o)", style);
+      __collapse_border(style, style.edge.border);
     }
   };
 })();

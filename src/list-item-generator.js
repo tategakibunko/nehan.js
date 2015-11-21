@@ -8,19 +8,21 @@ Nehan.ListItemGenerator = (function(){
    @param context {Nehan.RenderingContext}
   */
   function ListItemGenerator(context){
-    Nehan.LayoutGenerator.call(this, context);
+    Nehan.ParallelGenerator.call(this, context);
+  }
+  Nehan.Class.extend(ListItemGenerator, Nehan.ParallelGenerator);
 
+  ListItemGenerator.prototype._createChildGenerators = function(context){
     var list_context = context.parent.listContext;
     var list_index = context.style.getChildIndex();
 
     // [li]
     //   [li-marker][li-body]
-    context.parallelGenerators = [
+    return [
       this._createListMarkerGenerator(context, list_context, list_index),
       this._createListBodyGenerator(context, list_context)
     ];
-  }
-  Nehan.Class.extend(ListItemGenerator, Nehan.ParallelGenerator);
+  };
 
   // inherit from ParallelGenerator::_isBreakAfter
   ListItemGenerator.prototype._isBreakAfter = function(blocks){
