@@ -1165,10 +1165,14 @@ Nehan.RenderingContext = (function(){
     var float_group = this.parent.floatGroup;
     var float_direction = float_group.getFloatDirection();
     var direction_name = float_direction.getName();
+
+    // if meet the final output of the last float stack with same clear direction,
+    // yield white space but set done status to clear object.
     if(float_group.isLast() && !float_group.hasNext() && this.clear.hasDirection(direction_name)){
       this.clear.setDone(direction_name);
       return this.createWhiteSpace();
     }
+    // if any other clear direction that is not cleared, continue yielding white space.
     if(!this.clear.isDoneAll()){
       return this.createWhiteSpace();
     }
