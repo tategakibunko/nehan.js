@@ -67,14 +67,14 @@ Nehan.DomCreateContext = (function(){
    @return {Nehan.Style}
    */
   DomCreateContext.prototype.getStyle = function(){
-    return this.box.style;
+    return this.box.context.style;
   };
   /**
    @memberof Nehan.DomCreateContext
    @return {Nehan.Style}
    */
   DomCreateContext.prototype.getParentStyle = function(){
-    return this.box.style.parent;
+    return this.box.context.style.parent;
   };
   /**
    @memberof Nehan.DomCreateContext

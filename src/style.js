@@ -8,12 +8,10 @@ Nehan.Style = (function(){
    @param context {Nehan.RenderingContext}
    @param markup {Nehan.Tag} - markup of style
    @param paernt {Nehan.Style} - parent style
-   @param args {Object} - option arguments
-   @param args.forceCss {Object} - system css that must be applied.
-   @param args.cursorContext {Nehan.LayoutContext} - cursor context at the point of this style context created.
+   @param force_css {Object} - system css that must be applied.
    */
-  function Style(context, markup, parent, args){
-    this._initialize(context, markup, parent, args);
+  function Style(context, markup, parent, force_css){
+    this._initialize(context, markup, parent, force_css || {});
   }
   
   // to fetch first text part from content html.
@@ -28,10 +26,8 @@ Nehan.Style = (function(){
     return Nehan.List.exists(Nehan.Config.callbackCssProps, Nehan.Closure.eq(prop));
   };
 
-  Style.prototype._initialize = function(selectors, markup, parent, args){
-    args = args || {};
-
-    this.selectors = selectors;
+  Style.prototype._initialize = function(context, markup, parent, force_css){
+    this.context = context;
     this.markup = markup;
     this.markupName = markup.getName();
     this.parent = parent || null;
@@ -58,7 +54,7 @@ Nehan.Style = (function(){
     this.selectorCacheKey = this._computeSelectorCacheKey();
 
     // create context for each functional css property.
-    this.selectorPropContext = new Nehan.SelectorPropContext(this, args.cursorContext || null);
+    this.selectorPropContext = new Nehan.SelectorPropContext(this, this.context.layoutContext || null);
 
     // create selector callback context,
     // this context is passed to "onload" callback.
@@ -66,7 +62,7 @@ Nehan.Style = (function(){
     // because 'onload' callback is called after loading selector css.
     // notice that at this phase, css values are not converted into internal style object.
     // so by updating css value, you can update calculation of internal style object.
-    this.selectorContext = new Nehan.SelectorContext(this, args.cursorContext || null);
+    this.selectorContext = new Nehan.SelectorContext(this, this.context.layoutContext || null);
 
     this.managedCss = new Nehan.CssHashSet();
     this.unmanagedCss = new Nehan.CssHashSet();
@@ -76,14 +72,14 @@ Nehan.Style = (function(){
     // 1. load selector css.
     // 2. load inline css from 'style' property of markup.
     // 3. load callback css 'onload'.
-    // 4. load system required css(args.forceCss).
+    // 4. load system required css(force_css).
     this._registerCssValues(this._loadSelectorCss(markup, parent));
     this._registerCssValues(this._loadInlineCss(markup));
     var onload = this.callbackCss.get("onload");
     if(onload){
       this._registerCssValues(onload(this.selectorContext) || {});
     }
-    this._registerCssValues(args.forceCss || {});
+    this._registerCssValues(force_css);
 
     // always required properties
     this.display = this._loadDisplay(); // required
@@ -261,10 +257,10 @@ Nehan.Style = (function(){
    @param css {Object}
    @return {Nehan.Style}
    */
-  Style.prototype.clone = function(css){
+  Style.prototype.clone = function(force_css){
     var clone_style = this.parent?
-	new Style(this.selectors, this.markup, this.parent, {forceCss:(css || {})}) :
-	this.createChild("div", css); // can't use root style(body) twice, so use 'div' instead.
+	  new Style(this.context, this.markup, this.parent, force_css || {}) :
+	this.createChild("div", force_css); // can't use root style(body) twice, so use 'div' instead.
     if(clone_style.parent){
       clone_style.parent.removeChild(clone_style);
     }
@@ -312,7 +308,7 @@ Nehan.Style = (function(){
   Style.prototype.createChild = function(tag_name, css, tag_attr){
     var tag = new Nehan.Tag("<" + tag_name + ">");
     tag.setAttrs(tag_attr || {});
-    return new Style(this.selectors, tag, this, {forceCss:(css || {})});
+    return new Style(this.context, tag, this, css);
   };
   /**
    @memberof Nehan.Style
@@ -974,21 +970,21 @@ Nehan.Style = (function(){
    */
   Style.prototype.getContent = function(){
     var content = this.getCssAttr("content") || this.markup.getContent();
-    var before = this.selectors.getValuePe(this, "before");
+    var before = this.context.selectors.getValuePe(this, "before");
     if(!Nehan.Obj.isEmpty(before)){
       content = Nehan.Html.tagWrap("before", before.content || "") + content;
     }
-    var after = this.selectors.getValuePe(this, "after");
+    var after = this.context.selectors.getValuePe(this, "after");
     if(!Nehan.Obj.isEmpty(after)){
       content = content + Nehan.Html.tagWrap("after", after.content || "");
     }
-    var first_letter = this.selectors.getValuePe(this, "first-letter");
+    var first_letter = this.context.selectors.getValuePe(this, "first-letter");
     if(!Nehan.Obj.isEmpty(first_letter)){
       content = content.replace(__rex_first_letter, function(match, p1, p2, p3){
 	return p1 + Nehan.Html.tagWrap("first-letter", p3);
       });
     }
-    var first_line = this.selectors.getValuePe(this, "first-line");
+    var first_line = this.context.selectors.getValuePe(this, "first-line");
     if(!Nehan.Obj.isEmpty(first_line)){
       content = Nehan.Html.tagWrap("first-line", content);
     }
@@ -1520,12 +1516,12 @@ Nehan.Style = (function(){
     case "first-letter":
     case "first-line":
       // notice that style of pseudo-element is defined with parent context.
-      var pe_values = this.selectors.getValuePe(parent, markup.getName());
+      var pe_values = this.context.selectors.getValuePe(parent, markup.getName());
       //console.log("[%s::%s] pseudo values:%o", parent.markupName, this.markup.name, pe_values);
       return pe_values;
 
     default:
-      var values = this.selectors.getValue(this);
+      var values = this.context.selectors.getValue(this);
       //console.log("[%s] selector values:%o", this.markup.name, values);
       return values;
     }

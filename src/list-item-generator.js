@@ -34,10 +34,8 @@ Nehan.ListItemGenerator = (function(){
     console.log("marker html:%s", content);
     var marker_markup = new Nehan.Tag("marker", content);
     var marker_style = context.createChildStyle(marker_markup, {
-      forceCss:{
-	float:"start",
-	measure:list_context.indentSize
-      }
+      float:"start",
+      measure:list_context.indentSize
     });
     var marker_context = context.createChildContext(marker_style);
     //console.log("ListItemGenerator::marker context:%o", marker_context);
@@ -47,11 +45,9 @@ Nehan.ListItemGenerator = (function(){
   ListItemGenerator.prototype._createListBodyGenerator = function(context, list_context){
     var body_markup = new Nehan.Tag("li-body");
     var body_style = context.createChildStyle(body_markup, {
-      forceCss:{
-	display:"block",
-	float:"start",
-	measure:list_context.bodySize
-      }
+      display:"block",
+      float:"start",
+      measure:list_context.bodySize
     });
     var body_context =  context.createChildContext(body_style, {
       stream:context.stream // share li.stream for li-body.stream.

@@ -5,18 +5,17 @@ Nehan.SelectorPropContext = (function(){
      @classdesc selector context for functional value of style. see example.
      @constructor
      @param style {Nehan.Style}
-     @param cursor_context {Nehan.LayoutContext}
+     @param layout_context {Nehan.LayoutContext}
      @example
      * Nehan.setStyle("body", {
-     *   // selector prop context is at callback of functional css value!
-     *   width:function(selector_prop_context){
+     *   width:function(context){
      *     return 500;
      *   }
      * });
   */
-  function SelectorPropContext(style, cursor_context){
+  function SelectorPropContext(style, layout_context){
     this.style = style;
-    this._cursorContext = cursor_context || null;
+    this.layoutContext = layout_context;
   }
 
   /**
@@ -62,14 +61,14 @@ Nehan.SelectorPropContext = (function(){
    @return {int}
    */
   SelectorPropContext.prototype.getRestMeasure = function(){
-    return this._cursorContext? this._cursorContext.getInlineRestMeasure() : null;
+    return this.layoutContext? this.layoutContext.getInlineRestMeasure() : null;
   };
   /**
    @memberof Nehan.SelectorPropContext
    @return {int}
    */
   SelectorPropContext.prototype.getRestExtent = function(){
-    return this._cursorContext? this._cursorContext.getBlockRestExtent() : null;
+    return this.layoutContext? this.layoutContext.getBlockRestExtent() : null;
   };
   /**
    index number of nth-child

@@ -260,11 +260,11 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createStyle = function(markup, parent_style, args){
-    return new Nehan.Style(this.selectors, markup, parent_style, args || {});
+    return new Nehan.Style(this, markup, parent_style, args || {});
   };
 
   RenderingContext.prototype.createChildStyle = function(markup, args){
-    return new Nehan.Style(this.selectors, markup, this.style, args || {});
+    return new Nehan.Style(this, markup, this.style, args || {});
   };
 
   RenderingContext.prototype.createTmpChildStyle = function(markup, args){
@@ -341,15 +341,11 @@ Nehan.RenderingContext = (function(){
       return true; // continue
     }.bind(this));
 
-    var float_root_style = this.createTmpChildStyle(new Nehan.Tag("float-root"), {
-      forceCss:{display:"block"}
-    });
+    var float_root_style = this.createTmpChildStyle(new Nehan.Tag("float-root"), {display:"block"});
     var float_root_context = this.createChildContext(float_root_style);
     float_root_context.floatedGenerators = floated_generators;
 
-    var space_style = float_root_context.createChildStyle(new Nehan.Tag("space"), {
-      forceCss:{display:"block"}
-    });
+    var space_style = float_root_context.createChildStyle(new Nehan.Tag("space"), {display:"block"});
     var space_context = float_root_context.createChildContext(space_style, {stream:this.stream});
     var space_gen = new Nehan.BlockGenerator(space_context);
 

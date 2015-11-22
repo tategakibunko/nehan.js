@@ -8,16 +8,16 @@ Nehan.SelectorContext = (function(){
      @constructor
      @extends {Nehan.SelectorPropContext}
      @param style {Nehan.Style}
-     @param cursor_context {Nehan.LayoutContext}
+     @param layout_context {Nehan.LayoutContext}
      @example
      * Nehan.setStyle("body", {
-     *   onload:function(selector_context){
+     *   onload:function(context){
      *      // do something
      *   }
      * });
   */
-  function SelectorContext(style, cursor_context){
-    Nehan.SelectorPropContext.call(this, style, cursor_context);
+  function SelectorContext(style, layout_context){
+    Nehan.SelectorPropContext.call(this, style, layout_context);
   }
   Nehan.Class.extend(SelectorContext, Nehan.SelectorPropContext);
 
