@@ -251,23 +251,6 @@ Nehan.Style = (function(){
     return this;
   };
   /**
-   clone style-context with temporary css
-
-   @memberof Nehan.Style
-   @param css {Object}
-   @return {Nehan.Style}
-   */
-  Style.prototype.clone = function(force_css){
-    var clone_style = this.parent?
-	  new Style(this.context, this.markup, this.parent, force_css || {}) :
-	this.createChild("div", force_css); // can't use root style(body) twice, so use 'div' instead.
-    if(clone_style.parent){
-      clone_style.parent.removeChild(clone_style);
-    }
-    clone_style.setClone(true);
-    return clone_style;
-  };
-  /**
    append child style context
 
    @memberof Nehan.Style
@@ -297,34 +280,6 @@ Nehan.Style = (function(){
     return null;
   };
   /**
-   inherit style with tag_name and css(optional).
-
-   @memberof Nehan.Style
-   @param tag_name {String}
-   @param css {Object}
-   @param tag_attr {Object}
-   @return {Nehan.Style}
-   */
-  Style.prototype.createChild = function(tag_name, css, tag_attr){
-    var tag = new Nehan.Tag("<" + tag_name + ">");
-    tag.setAttrs(tag_attr || {});
-    return new Style(this.context, tag, this, css);
-  };
-  /**
-   @memberof Nehan.Style
-   @return {boolean}
-   */
-  Style.prototype.isClone = function(){
-    return this._isClone || false;
-  };
-  /**
-   @memberof Nehan.Style
-   @param state {boolean}
-   */
-  Style.prototype.setClone = function(state){
-    this._isClone = state;
-  };
-  /**
    @memberof Nehan.Style
    @param opt {Object}
    @param opt.extent {int}
@@ -334,6 +289,7 @@ Nehan.Style = (function(){
    @param opt.content {String}
    @return {Nehan.Box}
    */
+  /*
   Style.prototype.createBlock = function(context, opt){
     opt = opt || {};
     var elements = opt.elements || [];
@@ -364,9 +320,6 @@ Nehan.Style = (function(){
     if(this.markup.isHeaderTag()){
       classes.push("nehan-header");
     }
-    if(this.isClone()){
-      classes.push("nehan-clone");
-    }
     box.blockId = opt.blockId;
     box.display = (this.display === "inline-block")? this.display : "block";
     box.edge = edge;
@@ -390,7 +343,7 @@ Nehan.Style = (function(){
     }
     //console.log("[%s]block(%o):%s:(%d,%d)", this.markupName, box, box.toString(), box.size.width, box.size.height);
     return box;
-  };
+  };*/
   /**
    @memberof Nehan.Style
    @param opt
@@ -805,10 +758,6 @@ Nehan.Style = (function(){
    @return {boolean}
    */
   Style.prototype.isHangingPuncEnable = function(){
-    // if floating inline, avoid hanging pucntuation.
-    if(this.isClone()){
-      return false;
-    }
     return this.hangingPunctuation && this.hangingPunctuation === "allow-end";
   };
   /**

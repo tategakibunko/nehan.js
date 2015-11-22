@@ -492,9 +492,6 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createBlockBoxClasses = function(){
     var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
-    if(this.style.isClone()){
-      classes.push("nehan-clone");
-    }
     if(this.style.markup.isHeaderTag()){
       classes.push("nehan-header");
     }
@@ -526,7 +523,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createBlockBox = function(opt){
     opt = opt || {};
-    var measure = this.layoutContext.getInlineMaxMeasure();
+    var measure =(typeof opt.measure !== "undefined")? opt.measure : this.layoutContext.getInlineMaxMeasure();
     var extent = (typeof opt.extent !== "undefined")? opt.extent : this.layoutContext.getBlockCurExtent();
     var elements = opt.elements || this.layoutContext.getBlockElements();
     if(this.isBody()){
@@ -1204,7 +1201,9 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.yieldPastedBlock = function(child_context){
-    return child_context.style.createBlock(child_context, {
+    return child_context.createBlockBox({
+      measure:child_context.style.contentMeasure,
+      extent:child_context.style.contentExtent,
       content:child_context.style.getContent()
     });
   };
@@ -1214,7 +1213,10 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.yieldHorizontalRule = function(child_context){
-    return child_context.style.createBlock(child_context);
+    return child_context.createBlockBox({
+      elements:[],
+      extent:1
+    });
   };
 
   RenderingContext.prototype.yieldHangingChar = function(chr){
@@ -1253,7 +1255,7 @@ Nehan.RenderingContext = (function(){
     var uniformed_blocks = blocks.map(function(block, i){
       var context = this.parallelGenerators[i].context;
       if(block === null){
-	return context.style.createBlock(context, {
+	return context.createBlockBox({
 	  elements:[],
 	  extent:inner_extent
 	});
