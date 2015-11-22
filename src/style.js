@@ -132,10 +132,6 @@ Nehan.Style = (function(){
     if(float_direction){
       this.floatDirection = float_direction;
     }
-    var clear = this._loadClear();
-    if(clear){
-      this.clear = clear;
-    }
     var break_before = this._loadBreakBefore();
     if(break_before){
       this.breakBefore = break_before;
@@ -1797,11 +1793,6 @@ Nehan.Style = (function(){
       return null;
     }
     return Nehan.FloatDirections.get(name);
-  };
-
-  Style.prototype._loadClear = function(){
-    var value = this.getCssAttr("clear");
-    return value? new Nehan.Clear(value) : null;
   };
 
   Style.prototype._loadBreakBefore = function(){

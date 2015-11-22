@@ -6431,7 +6431,10 @@ Nehan.Clear = (function(){
    @return {bool}
    */
   Clear.prototype.hasDirection = function(direction){
-    return (typeof this.status[direction]) !== "undefined";
+    if(this.value === "both"){
+      return true;
+    }
+    return this.value === direction;
   };
   /**
    @memberof Nehan.Clear
@@ -13132,10 +13135,6 @@ Nehan.Style = (function(){
     if(float_direction){
       this.floatDirection = float_direction;
     }
-    var clear = this._loadClear();
-    if(clear){
-      this.clear = clear;
-    }
     var break_before = this._loadBreakBefore();
     if(break_before){
       this.breakBefore = break_before;
@@ -14799,11 +14798,6 @@ Nehan.Style = (function(){
     return Nehan.FloatDirections.get(name);
   };
 
-  Style.prototype._loadClear = function(){
-    var value = this.getCssAttr("clear");
-    return value? new Nehan.Clear(value) : null;
-  };
-
   Style.prototype._loadBreakBefore = function(){
     var value = this.getCssAttr("break-before");
     return value? Nehan.Breaks.getBefore(value) : null;
@@ -14958,12 +14952,14 @@ Nehan.BlockGenerator = (function(){
   function BlockGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
     this.blockId = context.genBlockId();
+    this.context.initBlockClear();
   }
   Nehan.Class.extend(BlockGenerator, Nehan.LayoutGenerator);
 
   BlockGenerator.prototype._yield = function(){
-    var clearance = this.context.yieldBlockClear();
+    var clearance = this.context.yieldClearance();
     if(clearance){
+      console.log("clearance:", clearance);
       return clearance;
     }
     // if break-before available, page-break but only once.
@@ -17650,14 +17646,6 @@ Nehan.RenderingContext = (function(){
     return this.stream? this.stream.getSrc() : "";
   };
 
-  RenderingContext.prototype.getBlockClear = function(){
-    var clear = this.style.clear;
-    if(clear && !clear.isDoneAll() && this.parent && this.parent.floatGroup){
-      return clear;
-    }
-    return null;
-  };
-
   RenderingContext.prototype.getBlockRestExtent = function(){
     return this.layoutContext.getBlockRestExtent();
   };
@@ -17837,6 +17825,13 @@ Nehan.RenderingContext = (function(){
     if(this.resumeLine){
       this.layoutContext.resumeLine(this.resumeLine);
       this.resumeLine = null;
+    }
+  };
+
+  RenderingContext.prototype.initBlockClear = function(){
+    var value = this.style.getCssAttr("clear");
+    if(value){
+      this.clear = new Nehan.Clear(value);
     }
   };
 
@@ -18064,21 +18059,18 @@ Nehan.RenderingContext = (function(){
     return this.child.generator.yield();
   };
 
-  RenderingContext.prototype.yieldBlockClear = function(){
-    var clear = this.getBlockClear();
-    if(!clear){
+  RenderingContext.prototype.yieldClearance = function(){
+    if(!this.clear || !this.parent || !this.parent.floatGroup){
       return null;
     }
     var float_group = this.parent.floatGroup;
-    if(!float_group){
-      return null;
-    }
     var float_direction = float_group.getFloatDirection();
-    if(float_group.isLast() && !float_group.hasNext() && clear.hasDirection(float_direction.getName())){
-      clear.setDone(float_direction.getName());
+    var direction_name = float_direction.getName();
+    if(float_group.isLast() && !float_group.hasNext() && this.clear.hasDirection(direction_name)){
+      this.clear.setDone(direction_name);
       return this.createWhiteSpace();
     }
-    if(!clear.isDoneAll()){
+    if(!this.clear.isDoneAll()){
       return this.createWhiteSpace();
     }
     return null;
@@ -18195,6 +18187,7 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.yieldFloatSpace = function(float_group, measure, extent){
     console.info("yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
     this.child.updateContextSize(measure, extent);
+    this.child.floatGroup = float_group;
     return this.yieldChildLayout();
   };
 

@@ -10,12 +10,14 @@ Nehan.BlockGenerator = (function(){
   function BlockGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
     this.blockId = context.genBlockId();
+    this.context.initBlockClear();
   }
   Nehan.Class.extend(BlockGenerator, Nehan.LayoutGenerator);
 
   BlockGenerator.prototype._yield = function(){
-    var clearance = this.context.yieldBlockClear();
+    var clearance = this.context.yieldClearance();
     if(clearance){
+      console.log("clearance:", clearance);
       return clearance;
     }
     // if break-before available, page-break but only once.

@@ -17,7 +17,10 @@ Nehan.Clear = (function(){
    @return {bool}
    */
   Clear.prototype.hasDirection = function(direction){
-    return (typeof this.status[direction]) !== "undefined";
+    if(this.value === "both"){
+      return true;
+    }
+    return this.value === direction;
   };
   /**
    @memberof Nehan.Clear
