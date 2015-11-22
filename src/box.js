@@ -69,10 +69,10 @@ Nehan.Box = (function(){
     if(this.hyphenated){
       return false;
     }
-    if(this.inlineMeasure >= max_measure){
+    if(this.getCacheCount() === 0){
       return false;
     }
-    return this.getCacheCount() > 0;
+    return this.inlineMeasure < max_measure;
   };
   /**
    @memberof Nehan.Box

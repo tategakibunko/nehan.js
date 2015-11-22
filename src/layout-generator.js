@@ -33,7 +33,7 @@ Nehan.LayoutGenerator = (function(){
     this.context.initLayoutContext();
 
     if(this.context.layoutContext){
-      console.log("layout(m = %d, e = %d)", this.context.layoutContext.inline.maxMeasure, this.context.layoutContext.block.maxExtent);
+      console.log("available space(m = %d, e = %d)", this.context.layoutContext.inline.maxMeasure, this.context.layoutContext.block.maxExtent);
       if(this.context.layoutContext.block.maxExtent <= 0){
 	return null;
       }

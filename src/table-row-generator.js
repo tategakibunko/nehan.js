@@ -16,6 +16,12 @@ Nehan.TableRowGenerator = (function(){
   }
   Nehan.Class.extend(TableRowGenerator, Nehan.ParallelGenerator);
 
+  TableRowGenerator.prototype._isBreakAfter = function(blocks){
+    return Nehan.List.exists(blocks, function(block){
+      return block && block.breakAfter;
+    }) && this.hasNext();
+  };
+
   TableRowGenerator.prototype._createChildGenerators = function(context){
     var child_styles = this._getChildStyles(context);
     return child_styles.map(function(child_style){

@@ -5564,6 +5564,33 @@ Nehan.BoxEdge = (function (){
   /**
    @memberof Nehan.BoxEdge
    @param flow {Nehan.BoxFlow}
+   @param required_size {Nehan.BoxFlow}
+   */
+  BoxEdge.prototype.cancelAfter = function(flow, required_size){
+    var cancel_size = 0;
+    // first, try to clear margin
+    cancel_size += this.margin.getAfter(flow);
+    this.margin.clearAfter(flow);
+    if(cancel_size >= required_size){
+      console.warn("cancel edge(margin):%d", cancel_size);
+      return cancel_size;
+    }
+    // second, try to clear padding
+    cancel_size += this.padding.getAfter(flow);
+    this.padding.clearAfter(flow);
+    if(cancel_size >= required_size){
+      console.warn("cancel edge(margin/padding):%d", cancel_size);
+      return cancel_size;
+    }
+    // finally, try to clear border
+    cancel_size += this.border.getAfter(flow);
+    this.border.clearAfter(flow);
+    console.warn("cancel edge(margin/padding/border):%d", cancel_size);
+    return cancel_size;
+  };
+  /**
+   @memberof Nehan.BoxEdge
+   @param flow {Nehan.BoxFlow}
    */
   BoxEdge.prototype.clearBefore = function(flow){
     this.padding.clearBefore(flow);
@@ -12039,10 +12066,10 @@ Nehan.Box = (function(){
     if(this.hyphenated){
       return false;
     }
-    if(this.inlineMeasure >= max_measure){
+    if(this.getCacheCount() === 0){
       return false;
     }
-    return this.getCacheCount() > 0;
+    return this.inlineMeasure < max_measure;
   };
   /**
    @memberof Nehan.Box
@@ -13220,6 +13247,8 @@ Nehan.Style = (function(){
     if(this.markupName === "marker" || this.display === "table"){
       return this;
     }
+    this.staticMeasure = measure;
+    this.staticExtent = extent;
     this.initContextSize(measure, extent);
 
     // force re-culculate context-size of children based on new context-size of parent.
@@ -14881,7 +14910,7 @@ Nehan.LayoutGenerator = (function(){
     this.context.initLayoutContext();
 
     if(this.context.layoutContext){
-      console.log("layout(m = %d, e = %d)", this.context.layoutContext.inline.maxMeasure, this.context.layoutContext.block.maxExtent);
+      console.log("available space(m = %d, e = %d)", this.context.layoutContext.inline.maxMeasure, this.context.layoutContext.block.maxExtent);
       if(this.context.layoutContext.block.maxExtent <= 0){
 	return null;
       }
@@ -15939,6 +15968,12 @@ Nehan.TableRowGenerator = (function(){
   }
   Nehan.Class.extend(TableRowGenerator, Nehan.ParallelGenerator);
 
+  TableRowGenerator.prototype._isBreakAfter = function(blocks){
+    return Nehan.List.exists(blocks, function(block){
+      return block && block.breakAfter;
+    }) && this.hasNext();
+  };
+
   TableRowGenerator.prototype._createChildGenerators = function(context){
     var child_styles = this._getChildStyles(context);
     return child_styles.map(function(child_style){
@@ -16913,12 +16948,21 @@ Nehan.RenderingContext = (function(){
     var prev_extent = this.layoutContext.getBlockCurExtent();
     var next_extent = prev_extent + element_size;
 
+    // first output, but child layout over, try to cancel after edge.
+    if(this.layoutContext.block.elements.length === 0 && next_extent > max_size && element.edge){
+      var over_size = next_extent - max_size;
+      var cancel_size = element.edge.cancelAfter(this.style.flow, over_size);
+      next_extent -= cancel_size;
+      element_size -= cancel_size;
+    }
+
     this.debugBlockElement(element, element_size);
 
     if(element.isResumableLine(max_measure) && this.hasChildLayout() && this.child.isInline()){
       this.child.setResumeLine(element);
       return;
     }
+
     if(next_extent <= max_size){
       this.layoutContext.addBlockElement(element, element_size);
       if(element.hasLineBreak){
@@ -17407,7 +17451,6 @@ Nehan.RenderingContext = (function(){
     box.charCount = elements.reduce(function(total, element){
       return total + (element.charCount || 0);
     }, 0);
-    //box.breakAfter = !this.hasNext() && this.layoutContext.hasBreakAfter();
     box.breakAfter = this.layoutContext.hasBreakAfter();
     this.layoutContext.setBreakAfter(false); // clear flag
     if(extent === 0 || elements.length === 0){
@@ -17488,13 +17531,14 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   RenderingContext.prototype.debugBlockElement = function(element, extent){
     var name = this.getGeneratorName();
+    var size = element.size;
     var bc = this.layoutContext.block;
     var str = element.toString();
     var max = bc.maxExtent;
     var prev = bc.curExtent;
     var next = prev + extent;
     var parent_rest = this.parent && this.parent.layoutContext? this.parent.layoutContext.getBlockRestExtent() : this.layoutContext.getBlockRestExtent();
-    console.info("[add block] %s:%o, e(%d / %d) -> e(%d / %d), +%d(prest:%d)\n%s", name, element, prev, max, next, max, extent, parent_rest, str);
+    console.info("[add block] %s:%o(%d x %d), e(%d / %d) -> e(%d / %d), +%d(prest:%d)\n%s", name, element, size.width, size.height, prev, max, next, max, extent, parent_rest, str);
     if(next > max){
       console.log("over %c%d", "color:red", (next - max));
     }
@@ -17614,6 +17658,10 @@ Nehan.RenderingContext = (function(){
     return null;
   };
 
+  RenderingContext.prototype.getBlockRestExtent = function(){
+    return this.layoutContext.getBlockRestExtent();
+  };
+
   RenderingContext.prototype.getContextMaxMeasure = function(){
     var max_size = (this.parent && this.parent.layoutContext)? this.parent.layoutContext.getInlineRestMeasure() : this.style.contentMeasure;
     return Math.min(max_size, this.style.contentMeasure);
@@ -17649,54 +17697,36 @@ Nehan.RenderingContext = (function(){
     return this.style.getEdgeAfter();
   };
 
-  RenderingContext.prototype.getContextMaxExtent = function(){
-    var max_size;
-    var edge_size = this.getEdgeExtent();
-    var first_edge_size = this.getEdgeBefore();
-    var tail_edge_size = this.getEdgeAfter();
-
+  RenderingContext.prototype.getParentRestExtent = function(){
     if(this.parent && this.parent.layoutContext){
-      max_size = this.parent.layoutContext.getBlockRestExtent() - edge_size;
-    } else {
-      max_size = this.style.contentExtent;
+      return this.parent.layoutContext.getBlockRestExtent();
+    }
+    return null;
+  };
+
+  RenderingContext.prototype.getContextMaxExtent = function(){
+    var max_size = this.getParentRestExtent() || this.style.outerExtent;
+    var first_edge_size = this.getEdgeBefore();
+
+    if(this.style.staticExtent){
+      max_size = Math.min(max_size, this.style.outerExtent);
     }
 
-    max_size = Math.min(max_size, this.style.contentExtent);
-
-    //console.log("%s max extent:%d", this.getGeneratorName(), max_size);
-
-    // if inline root, edge size is already calculated by parent block, so just use it.
-    if(this.isInlineRoot()){
-      return max_size;
+    if(this.isFirstOutput()){
+      return Math.max(0, max_size - first_edge_size);
     }
 
-    // if not first output, before edge is not included.
-    if(!this.isFirstOutput()){
-      if(first_edge_size > 0){
-	console.log("[context extent] first edge(%d) is not included", first_edge_size);
-      }
-      return max_size + first_edge_size;
-    } else if(first_edge_size > 0){
-      console.log("[context extent] first edge(%d) is available", first_edge_size);
-    }
-    /*
-    if(tail_edge_size > 0){
-      console.log("[context extent] tail edge(%d) is temporily included", tail_edge_size);
-    }*/
     return max_size;
   };
 
   // max extent size at the phase of adding actual element.
   RenderingContext.prototype.getContextMaxExtentForAdd = function(){
     var max_size = this.layoutContext.getBlockMaxExtent();
+    var tail_edge_size = this.getEdgeAfter();
 
-    // if it's not last output, tail edge is not included.
-    if(this.hasNext()){
-      var tail_edge_size = this.getEdgeAfter();
-      if(tail_edge_size > 0){
-	console.log("tail edge %d is not included", tail_edge_size);
-      }
-      return max_size + tail_edge_size;
+    // if final, tail edge size is required.
+    if(!this.hasNext()){
+      return max_size - tail_edge_size;
     }
     return max_size;
   };
@@ -17803,7 +17833,6 @@ Nehan.RenderingContext = (function(){
   // [init]
   // -----------------------------------------------
   RenderingContext.prototype.initLayoutContext = function(){
-    console.log("initLayoutContext, yieldCount=%o", this.yieldCount);
     this.layoutContext = this.createLayoutContext();
     if(this.resumeLine){
       this.layoutContext.resumeLine(this.resumeLine);
@@ -17917,8 +17946,8 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.setResumeLine = function(line){
+    console.warn("setResumeLine:%o", line);
     this.resumeLine = line;
-    console.warn("[TODO]setResumeLine:%o", line);
   };
 
   RenderingContext.prototype.setStyle = function(key, value){
@@ -18116,10 +18145,9 @@ Nehan.RenderingContext = (function(){
     });
 
     if(blocks.every(function(block){
-      //console.error("yield parallel all null!");
       return block === null || block.getContentExtent() <= 0;
     })){
-      this.setTerminate(true);
+      //this.setTerminate(true);
       return null;
     }
 
@@ -18127,17 +18155,19 @@ Nehan.RenderingContext = (function(){
     var max_block =  Nehan.List.maxobj(blocks, function(block){
       return block? block.getLayoutExtent(flow) : 0;
     });
+    //console.log("max parallel cell:%o(extent = %d)", max_block, max_block.getLayoutExtent());
     var wrap_measure = this.layoutContext.getInlineMaxMeasure();
     var wrap_extent = max_block.getLayoutExtent(flow);
+    var inner_extent = max_block.getContentExtent(flow);
     var uniformed_blocks = blocks.map(function(block, i){
       var context = this.parallelGenerators[i].context;
       if(block === null){
 	return context.style.createBlock(context, {
 	  elements:[],
-	  extent:wrap_extent
+	  extent:inner_extent
 	});
       }
-      return block.resizeExtent(flow, wrap_extent);
+      return block.resizeExtent(flow, inner_extent);
     }.bind(this));
 
     return this.createWrapBlock(wrap_measure, wrap_extent, uniformed_blocks);

@@ -247,6 +247,8 @@ Nehan.Style = (function(){
     if(this.markupName === "marker" || this.display === "table"){
       return this;
     }
+    this.staticMeasure = measure;
+    this.staticExtent = extent;
     this.initContextSize(measure, extent);
 
     // force re-culculate context-size of children based on new context-size of parent.
