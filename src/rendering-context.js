@@ -481,6 +481,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createPageBreak = function(){
+    // TODO
   };
 
   RenderingContext.prototype.createWhiteSpace = function(){
@@ -492,11 +493,12 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createWrapBlock = function(measure, extent, elements){
-    var size = this.style.flow.getBoxSize(measure, extent);
-    var box = new Nehan.Box(size, this);
-    box.display = "block";
-    box.elements = elements;
-    return box;
+    return new Nehan.Box({
+      size:this.style.flow.getBoxSize(measure, extent),
+      display:"block",
+      context:this,
+      elements:elements
+    });
   };
 
   RenderingContext.prototype.createBlockBoxClasses = function(){
@@ -538,25 +540,25 @@ Nehan.RenderingContext = (function(){
     if(this.isBody()){
       extent = this.style.contentExtent;
     }
-    var box_size = this.style.flow.getBoxSize(measure, extent);
-    var box = new Nehan.Box(box_size, this);
-    box.elements = elements;
-    box.content = opt.content || null;
-    box.display = (this.style.display === "inline-block")? this.style.display : "block";
-    box.edge = opt.noEdge? null : this.createBlockBoxContextEdge();
-    box.classes = this.createBlockBoxClasses();
-    box.charCount = elements.reduce(function(total, element){
-      return total + (element.charCount || 0);
-    }, 0);
-    box.breakAfter = this.layoutContext.hasBreakAfter();
+    var box = new Nehan.Box({
+      display:((this.style.display === "inline-block")? this.style.display : "block"),
+      type:"block",
+      size:this.style.flow.getBoxSize(measure, extent),
+      edge:(opt.noEdge? null : this.createBlockBoxContextEdge()),
+      context:this,
+      elements:elements,
+      content:(opt.content || null),
+      classes:this.createBlockBoxClasses(),
+      charCount:elements.reduce(function(total, element){
+	return total + (element.charCount || 0);
+      }, 0),
+      breakAfter:this.layoutContext.hasBreakAfter(),
+      pushed:this.style.isPushed(),
+      pulled:this.style.isPulled()
+    });
     if(this.style.getMarkupName() !== "hr" && (extent === 0 || elements.length === 0)){
       console.warn("zero block? %o", box);
       box.breakAfter = true;
-    }
-    if(this.style.isPushed()){
-      box.pushed = true;
-    } else if(this.style.isPulled()){
-      box.pulled = true;
     }
     console.log("box(%s) break after:%o", box.toString(), box.breakAfter);
     return box;
@@ -573,26 +575,26 @@ Nehan.RenderingContext = (function(){
     }
     var line_size = this.style.flow.getBoxSize(measure, max_extent);
     var classes = ["nehan-inline", "nehan-inline-" + this.style.flow.getName()].concat(this.style.markup.getClasses());
-    var line = new Nehan.Box(line_size, this, "line-block");
-    line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
-    line.elements = elements;
-    line.classes = is_inline_root? classes : classes.concat("nehan-" + this.style.getMarkupName());
-    line.charCount = opt.charCount || this.layoutContext.getInlineCharCount();
+    var line = new Nehan.Box({
+      type:"line-block",
+      display:"inline",
+      size:line_size,
+      context:this,
+      elements:elements,
+      classes:(is_inline_root? classes : classes.concat("nehan-" + this.style.getMarkupName())),
+      charCount:(opt.charCount || this.layoutContext.getInlineCharCount()),
+      edge:((this.style.edge && !is_inline_root)? this.style.edge : null), // edge of root line is disabled because it's already included by parent block.,
+      content:opt.content || null
+    });
+
     line.maxFontSize = this.layoutContext.getInlineMaxFontSize();
     line.maxExtent = this.layoutContext.getInlineMaxExtent();
-    line.content = opt.content || null;
     line.isInlineRoot = is_inline_root;
     line.hasLineBreak = this.layoutContext.hasLineBreak();
     line.hangingPunctuation = this.layoutContext.getHangingPunctuation();
 
-    // edge of root line is disabled.
-    // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
-    // anonymous line block('aaa' and 'ccc') is already edged by <p> in block level.
-    // so if line is anonymous, edge must be ignored.
-    line.edge = (this.style.edge && !is_inline_root)? this.style.edge : null;
-
-    // backup other line data. mainly required to restore inline-context.
     if(is_inline_root){
+      // backup other line data. mainly required to restore inline-context.
       line.lineNo = opt.lineNo;
       line.breakAfter = this.layoutContext.hasBreakAfter();
       line.hyphenated = this.layoutContext.isHyphenated();
@@ -609,10 +611,12 @@ Nehan.RenderingContext = (function(){
 	this.style.textAlign.setJustify(line);
       }
       // set edge for line-height
-      var edge_size = Math.floor(line.maxFontSize * this.style.getLineHeight()) - line.maxExtent;
-      if(line.elements.length > 0 && edge_size > 0){
-	line.edge = new Nehan.BoxEdge();
-	line.edge.padding.setBefore(this.style.flow, edge_size);
+      var line_fix_size = Math.floor(line.maxFontSize * this.style.getLineHeight()) - line.maxExtent;
+      if(line.elements.length > 0 && line_fix_size > 0){
+	// notice that edge of line-root is already included in parent block,
+	// so this edge is set to create proper line-height.
+	line.edge = new Nehan.BoxEdge(); 
+	line.edge.padding.setBefore(this.style.flow, line_fix_size);
       }
     }
 
@@ -640,16 +644,18 @@ Nehan.RenderingContext = (function(){
     } else if(this.style.markup.name === "ruby"){
       extent = this.style.getRubyTextBlockExtent();
     }
-    var line_size = this.style.flow.getBoxSize(measure, extent);
-    var classes = ["nehan-text-block"].concat(this.style.markup.getClasses());
-    var line = new Nehan.Box(line_size, this, "text-block");
-    line.display = "inline";
-    line.elements = elements;
-    line.classes = classes;
-    line.charCount = this.layoutContext.getInlineCharCount();
+    var line = new Nehan.Box({
+      size:this.style.flow.getBoxSize(measure, extent),
+      context:this,
+      type:"text-block",
+      display:"inline",
+      elements:elements,
+      classes:["nehan-text-block"].concat(this.style.markup.getClasses()),
+      charCount:this.layoutContext.getInlineCharCount(),
+      content:opt.content || null
+    });
     line.maxFontSize = this.layoutContext.getInlineMaxFontSize() || this.style.getFontSize();
     line.maxExtent = extent;
-    line.content = opt.content || null;
     line.hasLineBreak = this.layoutContext.hasLineBreak(); // is line-break is included?
     line.hyphenated = this.layoutContext.isHyphenated();
     line.lineOver = this.layoutContext.isLineOver(); // is line full-filled?
@@ -1293,19 +1299,16 @@ Nehan.RenderingContext = (function(){
     // image size always considered as horizontal mode.
     var width = this.style.getMarkupAttr("width")? parseInt(this.style.getMarkupAttr("width"), 10) : (this.style.staticMeasure || this.style.getFontSize());
     var height = this.style.getMarkupAttr("height")? parseInt(this.style.getMarkupAttr("height"), 10) : (this.style.staticExtent || this.style.getFontSize());
-    var classes = ["nehan-block", "nehan-image"].concat(this.style.markup.getClasses());
-    var image_size = new Nehan.BoxSize(width, height);
-    var image = new Nehan.Box(image_size, this);
-    image.display = this.style.display; // inline, block, inline-block
-    image.edge = this.style.edge || null;
-    image.classes = classes;
-    image.charCount = 0;
-    if(this.style.isPushed()){
-      image.pushed = true;
-    } else if(this.style.isPulled()){
-      image.pulled = true;
-    }
-    image.breakAfter = this.style.isBreakAfter() || opt.breakAfter || false;
+    var image = new Nehan.Box({
+      display:this.style.display, // inline, block, inline-block
+      size:new Nehan.BoxSize(width, height),
+      context:this,
+      edge:this.style.edge || null,
+      classes:["nehan-block", "nehan-image"].concat(this.style.markup.getClasses()),
+      pushed:this.style.isPushed(),
+      pulled:this.style.isPulled(),
+      breakAfter:this.style.isBreakAfter() || opt.breakAfter || false
+    });
     return image;
   };
 

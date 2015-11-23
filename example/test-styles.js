@@ -127,7 +127,7 @@ var TestStyles = {
     "line-height":"1em",
     "color":function(ctx){
       var child_index = ctx.getChildIndex();
-      var parent_style = ctx.getParentStyleContext();
+      var parent_style = ctx.getParentStyle();
       var active = parseInt(parent_style.markup.getAttr("active", 1), 10);
       return (child_index + 1 === active)? "red" : "black";
     },
@@ -135,7 +135,7 @@ var TestStyles = {
       var index = ctx.getChildIndex();
       var is_vert = ctx.isTextVertical();
       var child_count = ctx.getParentChildCount();
-      var font_size = ctx.getStyleContext().getFontSize();
+      var font_size = ctx.getStyle().getFontSize();
       var center_pos = Math.floor((ctx.getParentBox().getContentExtent() - font_size) / 2);
       var unit_degree = Math.floor(360 / child_count);
       var start_degree = is_vert? 30 : 120;

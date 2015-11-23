@@ -74,7 +74,7 @@ Nehan.DomCreateContext = (function(){
    @return {Nehan.Style}
    */
   DomCreateContext.prototype.getParentStyle = function(){
-    return this.box.context.style.parent;
+    return this.box.context.parent.style;
   };
   /**
    @memberof Nehan.DomCreateContext

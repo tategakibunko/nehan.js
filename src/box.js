@@ -1,18 +1,30 @@
 Nehan.Box = (function(){
   /**
-     @memberof Nehan
-     @class Box
-     @classdesc box abstraction with size and style context
-     @constrctor
-     @param {Nehan.BoxSize} box size
-     @param {Nehan.RenderingContext}
-  */
-  function Box(size, context, type){
-    this.size = size;
-    this.context = context;
-    this._type = type || "block";
+   @memberof Nehan
+   @class Box
+   @classdesc box abstraction with size and style context
+   @constrctor
+   @param args {Nehan.Object}
+   @param args.size {Nehan.BoxSize}
+   @param args.context {Nehan.RenderingContext}
+   @param args.type {string}
+   @param args.elements {Array.<Nehan.Box|Nehan.Tcy|Nehan.Char|Nehan.Word|Nehan.Ruby>}
+   @param {Nehan.RenderingContext}
+   */
+  function Box(args){
+    args = args || {};
+    this._type = args.type || "block";
+    this.size = args.size;
+    this.display = args.display || "block";
+    this.context = args.context;
     this.elements = [];
-    this.css = {};
+    this.css = args.css || {};
+    this.content = args.content || null;
+    this.edge = args.edge || null;
+    this.classes = args.classes || [];
+    this.charCount = args.charCount || 0;
+    this.breakAfter = args.breakAfter || false;
+    this.addElements(args.elements || []);
   }
 
   var __filter_text = function(elements){
@@ -24,6 +36,23 @@ Nehan.Box = (function(){
     }, []);
   };
 
+  /**
+   @memberof Nehan.Box
+   @param element {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
+   */
+  Box.prototype.addElement = function(element){
+    element.parent = this;
+    this.elements.push(element);
+  };
+  /**
+   @memberof Nehan.Box
+   @param element {Array.<Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy>}
+   */
+  Box.prototype.addElements = function(elements){
+    Nehan.List.iter(elements, function(element){
+      this.addElement(element);
+    }.bind(this));
+  };
   /**
    @memberof Nehan.Box
    @return {boolean}
