@@ -790,16 +790,20 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
+   @return {Nehan.Style}
+   */
+  Style.prototype.getRootStyle = function(){
+    if(this.isRoot() || !this.parent){
+      return this;
+    }
+    return this.parent.getRootStyle();
+  };
+  /**
+   @memberof Nehan.Style
    @return {Nehan.Font}
    */
   Style.prototype.getRootFont = function(){
-    if(this.isRoot()){
-      return this.getFont();
-    }
-    if(this.parent){
-      return this.parent.getFont();
-    }
-    return this.getFont();
+    return this.getRootStyle().getFont();
   };
   /**
    @memberof Nehan.Style

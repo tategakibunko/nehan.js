@@ -49,9 +49,9 @@ Nehan.RenderingContext = (function(){
 	next_extent -= cancel_size;
 	element_size -= cancel_size;
       }
-      // still too large, this element is never included, so skip it without caching.
-      if(next_extent > max_size){
-	console.error("too large block element:%o(%d for %d)", element, element_size, max_size);
+      // if element size is large than root size, it's never included, so skip it without caching.
+      if(next_extent > max_size && element_size > this.getRootContentExtent()){
+	console.error("skip too large block element:%o(%d)", element, element_size);
 	return;
       }
     }
@@ -99,8 +99,8 @@ Nehan.RenderingContext = (function(){
     if(element_size === 0){
       throw "zero";
     }
-    if(this.layoutContext.getInlineElements().length === 0 && next_measure > max_size){
-      console.error("too large inline element:%o(%d for %d)", element, element_size, max_size);
+    if(this.layoutContext.getInlineElements().length === 0 && next_measure > max_size && element_size > this.getRootContentMeasure()){
+      console.error("skip too large inline element:%o(%d", element, element_size);
       return; // just skip it.
     }
     if(next_measure <= max_size){
@@ -781,6 +781,14 @@ Nehan.RenderingContext = (function(){
     return this.style? this.style.display : "";
   };
 
+  RenderingContext.prototype.getRootContentExtent = function(){
+    return this.style.getRootStyle().contentExtent;
+  };
+
+  RenderingContext.prototype.getRootContentMeasure = function(){
+    return this.style.getRootStyle().contentMeasure;
+  };
+
   RenderingContext.prototype.getWritingDirection = function(){
     return "vert"; // TODO
   };
@@ -985,6 +993,14 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.hasFloatStackCache = function(){
     return this.floatStackCaches && this.floatStackCaches.length > 0;
+  };
+
+  RenderingContext.prototype.hasStaticExtent = function(){
+    return (typeof this.style.staticExtent !== "undefined");
+  };
+
+  RenderingContext.prototype.hasStaticMeasure = function(){
+    return (typeof this.style.staticMeasure !== "undefined");
   };
 
   // -----------------------------------------------
