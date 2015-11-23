@@ -17,14 +17,16 @@ Nehan.Box = (function(){
     this.size = args.size;
     this.display = args.display || "block";
     this.context = args.context;
-    this.elements = [];
     this.css = args.css || {};
     this.content = args.content || null;
     this.edge = args.edge || null;
     this.classes = args.classes || [];
     this.charCount = args.charCount || 0;
     this.breakAfter = args.breakAfter || false;
-    this.addElements(args.elements || []);
+    this.elements = args.elements || [];
+    this.elements.forEach(function(element){
+      element.parent = this;
+    }.bind(this));
   }
 
   var __filter_text = function(elements){
@@ -36,23 +38,6 @@ Nehan.Box = (function(){
     }, []);
   };
 
-  /**
-   @memberof Nehan.Box
-   @param element {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
-   */
-  Box.prototype.addElement = function(element){
-    element.parent = this;
-    this.elements.push(element);
-  };
-  /**
-   @memberof Nehan.Box
-   @param element {Array.<Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy>}
-   */
-  Box.prototype.addElements = function(elements){
-    Nehan.List.iter(elements, function(element){
-      this.addElement(element);
-    }.bind(this));
-  };
   /**
    @memberof Nehan.Box
    @return {boolean}
