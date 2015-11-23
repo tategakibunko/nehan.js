@@ -807,6 +807,17 @@ Nehan.RenderingContext = (function(){
     return this.style.getEdgeExtent(this.style.flow);
   };
 
+  // for box-sizing:border-box
+  RenderingContext.prototype.getInnerEdgeBefore = function(){
+    if(this.generator instanceof Nehan.TextGenerator){
+      return 0;
+    }
+    if(this.isInlineRoot()){
+      return 0;
+    }
+    return this.style.getInnerEdgeBefore(this.style.flow);
+  };
+
   RenderingContext.prototype.getEdgeBefore = function(){
     if(this.generator instanceof Nehan.TextGenerator){
       return 0;
@@ -831,22 +842,24 @@ Nehan.RenderingContext = (function(){
     if(this.parent && this.parent.layoutContext){
       return this.parent.layoutContext.getBlockRestExtent();
     }
-    return null;
+    return this.style.extent;
   };
 
+  // Size of after edge is not removed from content size,
+  // because edge of extent direction can be sweeped to next page.
+  // In constrast, size of start/end edge is always included,
+  // because size of measure direction is fixed in each pages.
   RenderingContext.prototype.getContextMaxExtent = function(){
-    var max_size = this.getParentRestExtent() || this.style.outerExtent;
-    var first_edge_size = this.getEdgeBefore();
-
-    if(this.style.staticExtent){
-      max_size = Math.min(max_size, this.style.outerExtent);
+    var rest_size = this.getParentRestExtent();
+    var max_size = this.style.staticExtent? Math.min(rest_size, this.style.staticExtent) : rest_size;
+    switch(this.style.boxSizing){
+    case "content-box":
+      return max_size;
+    case "border-box":
+      return this.isFirstOutput()? Math.max(0, max_size - this.getInnerEdgeBefore()) : max_size;
+    case "margin-box": default:
+      return this.isFirstOutput()? Math.max(0, max_size - this.getEdgeBefore()) : max_size;
     }
-
-    if(this.isFirstOutput()){
-      return Math.max(0, max_size - first_edge_size);
-    }
-
-    return max_size;
   };
 
   // max extent size at the phase of adding actual element.

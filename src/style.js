@@ -216,8 +216,9 @@ Nehan.Style = (function(){
    @param measure {int}
    */
   Style.prototype.initContextMeasure = function(measure){
-    this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : Nehan.Display.getMeasure(this.flow));
-    this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
+    //this.measure = measure || (this.parent? this.parent.contentMeasure : Nehan.Display.getMeasure(this.flow));
+    this.measure = measure || this.getParentContentMeasure();
+    this.contentMeasure = this._computeContentMeasure(this.measure);
   };
   /**
    calculate contexual box extent
@@ -227,8 +228,9 @@ Nehan.Style = (function(){
    @param extent {int}
    */
   Style.prototype.initContextExtent = function(extent){
-    this.outerExtent = extent || (this.parent? this.parent.contentExtent : Nehan.Display.getExtent(this.flow));
-    this.contentExtent = this._computeContentExtent(this.outerExtent);
+    //this.extent = extent || (this.parent? this.parent.contentExtent : Nehan.Display.getExtent(this.flow));
+    this.extent = extent || this.getParentContentExtent();
+    this.contentExtent = this._computeContentExtent(this.extent);
   };
   /**
    update context size, and propagate update to children.
@@ -556,6 +558,27 @@ Nehan.Style = (function(){
    */
   Style.prototype.isHangingPuncEnable = function(){
     return this.hangingPunctuation && this.hangingPunctuation === "allow-end";
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
+  Style.prototype.isContentBox = function(){
+    return this.boxSizing === "content-box";
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
+  Style.prototype.isBorderBox = function(){
+    return this.boxSizing === "border-box";
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
+  Style.prototype.isMarginBox = function(){
+    return this.boxSizing === "margin-box";
   };
   /**
    @memberof Nehan.Style
@@ -1046,6 +1069,14 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
+   @return {int}
+   */
+  Style.prototype.getInnerEdgeBefore = function(flow){
+    var edge = this.edge || null;
+    return edge? edge.getInnerBefore(flow || this.flow) : 0;
+  };
+  /**
+   @memberof Nehan.Style
    @param block {Nehan.Box}
    @return {Object}
    */
@@ -1190,21 +1221,21 @@ Nehan.Style = (function(){
     return keys.join(">");
   };
 
-  Style.prototype._computeContentMeasure = function(outer_measure){
+  Style.prototype._computeContentMeasure = function(measure){
     switch(this.boxSizing){
-    case "margin-box": return outer_measure - this.getEdgeMeasure();
-    case "border-box": return outer_measure - this.getInnerEdgeMeasure();
-    case "content-box": return outer_measure;
-    default: return outer_measure;
+    case "margin-box": return measure - this.getEdgeMeasure();
+    case "border-box": return measure - this.getInnerEdgeMeasure();
+    case "content-box": return measure;
+    default: return measure;
     }
   };
 
-  Style.prototype._computeContentExtent = function(outer_extent){
+  Style.prototype._computeContentExtent = function(extent){
     switch(this.boxSizing){
-    case "margin-box": return outer_extent - this.getEdgeExtent();
-    case "border-box": return outer_extent - this.getInnerEdgeExtent();
-    case "content-box": return outer_extent;
-    default: return outer_extent;
+    case "margin-box": return extent - this.getEdgeExtent();
+    case "border-box": return extent - this.getInnerEdgeExtent();
+    case "content-box": return extent;
+    default: return extent;
     }
   };
 

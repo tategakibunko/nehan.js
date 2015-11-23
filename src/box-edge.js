@@ -140,6 +140,17 @@ Nehan.BoxEdge = (function (){
     return ret;
   },
   /**
+   get before size amount in px.
+   @memberof Nehan.BoxEdge
+   @param flow {Nehan.BoxFlow}
+   */
+  BoxEdge.prototype.getInnerBefore = function(flow){
+    var ret = 0;
+    ret += this.padding.getBefore(flow);
+    ret += this.border.getBefore(flow);
+    return ret;
+  },
+  /**
    get after size amount in px.
    @memberof Nehan.BoxEdge
    @param flow {Nehan.BoxFlow}

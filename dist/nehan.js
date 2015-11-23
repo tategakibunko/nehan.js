@@ -5529,6 +5529,17 @@ Nehan.BoxEdge = (function (){
     return ret;
   },
   /**
+   get before size amount in px.
+   @memberof Nehan.BoxEdge
+   @param flow {Nehan.BoxFlow}
+   */
+  BoxEdge.prototype.getInnerBefore = function(flow){
+    var ret = 0;
+    ret += this.padding.getBefore(flow);
+    ret += this.border.getBefore(flow);
+    return ret;
+  },
+  /**
    get after size amount in px.
    @memberof Nehan.BoxEdge
    @param flow {Nehan.BoxFlow}
@@ -13149,7 +13160,7 @@ Nehan.Style = (function(){
     if(edge){
       this.edge = edge;
     }
-    // static size is defined in selector or tag attr, hightest priority
+    // static size is defined in selector or tag attr.
     this.staticMeasure = this._loadStaticMeasure();
     this.staticExtent = this._loadStaticExtent();
 
@@ -13188,13 +13199,16 @@ Nehan.Style = (function(){
    * 3. else if parent not exists(root), use layout size defined in display.js.
    
    * (b) content_size
-   * 1. if edge(margin/padding/border) is defined, content_size = outer_size - edge_size
-   *    1.1. if box-sizing is "margin-box", margin/padding/border are included in outer_size, so
-   *         content_size = outer_size - (margin + padding + border)
-   *    1.2  if box-siging is "border-box", padding/border are included in outer_size, so
-   *         content_size = outer_size - (padding + border)
-   *    1.3  if box-sizing is "content-box", edge_size is not included in outer_size, so
-   *         content_size = outer_size
+   * 1. if edge(margin/padding/border) is defined, content_size = parent_content_size - edge_size
+   *    1.1. if box-sizing is "margin-box", margin/padding/border are included in width/height, so
+   *         content_width  = width  - (margin + padding + border).width
+   *         content_height = height - (margin + padding + border).height
+   *    1.2  if box-sizing is "border-box", padding/border are included in width/height, so
+   *         content_width  = width  - (padding + border).width
+   *         content_height = height - (padding + border).height
+   *    1.3  if box-sizing is "content-box", edge_size is not included in width/height, so
+   *         content_width  = width
+   *         content_height = height
    * 2. else(no edge),  content_size = outer_size
    *</pre>
    */
@@ -13210,8 +13224,9 @@ Nehan.Style = (function(){
    @param measure {int}
    */
   Style.prototype.initContextMeasure = function(measure){
-    this.outerMeasure = measure  || (this.parent? this.parent.contentMeasure : Nehan.Display.getMeasure(this.flow));
-    this.contentMeasure = this._computeContentMeasure(this.outerMeasure);
+    //this.measure = measure || (this.parent? this.parent.contentMeasure : Nehan.Display.getMeasure(this.flow));
+    this.measure = measure || this.getParentContentMeasure();
+    this.contentMeasure = this._computeContentMeasure(this.measure);
   };
   /**
    calculate contexual box extent
@@ -13221,8 +13236,9 @@ Nehan.Style = (function(){
    @param extent {int}
    */
   Style.prototype.initContextExtent = function(extent){
-    this.outerExtent = extent || (this.parent? this.parent.contentExtent : Nehan.Display.getExtent(this.flow));
-    this.contentExtent = this._computeContentExtent(this.outerExtent);
+    //this.extent = extent || (this.parent? this.parent.contentExtent : Nehan.Display.getExtent(this.flow));
+    this.extent = extent || this.getParentContentExtent();
+    this.contentExtent = this._computeContentExtent(this.extent);
   };
   /**
    update context size, and propagate update to children.
@@ -13550,6 +13566,27 @@ Nehan.Style = (function(){
    */
   Style.prototype.isHangingPuncEnable = function(){
     return this.hangingPunctuation && this.hangingPunctuation === "allow-end";
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
+  Style.prototype.isContentBox = function(){
+    return this.boxSizing === "content-box";
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
+  Style.prototype.isBorderBox = function(){
+    return this.boxSizing === "border-box";
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
+  Style.prototype.isMarginBox = function(){
+    return this.boxSizing === "margin-box";
   };
   /**
    @memberof Nehan.Style
@@ -14040,6 +14077,14 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
+   @return {int}
+   */
+  Style.prototype.getInnerEdgeBefore = function(flow){
+    var edge = this.edge || null;
+    return edge? edge.getInnerBefore(flow || this.flow) : 0;
+  };
+  /**
+   @memberof Nehan.Style
    @param block {Nehan.Box}
    @return {Object}
    */
@@ -14184,21 +14229,21 @@ Nehan.Style = (function(){
     return keys.join(">");
   };
 
-  Style.prototype._computeContentMeasure = function(outer_measure){
+  Style.prototype._computeContentMeasure = function(measure){
     switch(this.boxSizing){
-    case "margin-box": return outer_measure - this.getEdgeMeasure();
-    case "border-box": return outer_measure - this.getInnerEdgeMeasure();
-    case "content-box": return outer_measure;
-    default: return outer_measure;
+    case "margin-box": return measure - this.getEdgeMeasure();
+    case "border-box": return measure - this.getInnerEdgeMeasure();
+    case "content-box": return measure;
+    default: return measure;
     }
   };
 
-  Style.prototype._computeContentExtent = function(outer_extent){
+  Style.prototype._computeContentExtent = function(extent){
     switch(this.boxSizing){
-    case "margin-box": return outer_extent - this.getEdgeExtent();
-    case "border-box": return outer_extent - this.getInnerEdgeExtent();
-    case "content-box": return outer_extent;
-    default: return outer_extent;
+    case "margin-box": return extent - this.getEdgeExtent();
+    case "border-box": return extent - this.getInnerEdgeExtent();
+    case "content-box": return extent;
+    default: return extent;
     }
   };
 
@@ -17437,6 +17482,17 @@ Nehan.RenderingContext = (function(){
     return this.style.getEdgeExtent(this.style.flow);
   };
 
+  // for box-sizing:border-box
+  RenderingContext.prototype.getInnerEdgeBefore = function(){
+    if(this.generator instanceof Nehan.TextGenerator){
+      return 0;
+    }
+    if(this.isInlineRoot()){
+      return 0;
+    }
+    return this.style.getInnerEdgeBefore(this.style.flow);
+  };
+
   RenderingContext.prototype.getEdgeBefore = function(){
     if(this.generator instanceof Nehan.TextGenerator){
       return 0;
@@ -17461,22 +17517,24 @@ Nehan.RenderingContext = (function(){
     if(this.parent && this.parent.layoutContext){
       return this.parent.layoutContext.getBlockRestExtent();
     }
-    return null;
+    return this.style.extent;
   };
 
+  // Size of after edge is not removed from content size,
+  // because edge of extent direction can be sweeped to next page.
+  // In constrast, size of start/end edge is always included,
+  // because size of measure direction is fixed in each pages.
   RenderingContext.prototype.getContextMaxExtent = function(){
-    var max_size = this.getParentRestExtent() || this.style.outerExtent;
-    var first_edge_size = this.getEdgeBefore();
-
-    if(this.style.staticExtent){
-      max_size = Math.min(max_size, this.style.outerExtent);
+    var rest_size = this.getParentRestExtent();
+    var max_size = this.style.staticExtent? Math.min(rest_size, this.style.staticExtent) : rest_size;
+    switch(this.style.boxSizing){
+    case "content-box":
+      return max_size;
+    case "border-box":
+      return this.isFirstOutput()? Math.max(0, max_size - this.getInnerEdgeBefore()) : max_size;
+    case "margin-box": default:
+      return this.isFirstOutput()? Math.max(0, max_size - this.getEdgeBefore()) : max_size;
     }
-
-    if(this.isFirstOutput()){
-      return Math.max(0, max_size - first_edge_size);
-    }
-
-    return max_size;
   };
 
   // max extent size at the phase of adding actual element.
