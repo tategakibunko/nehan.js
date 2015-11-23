@@ -16,7 +16,6 @@ Nehan.Style = (function(){
   
   // to fetch first text part from content html.
   var __rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
-  var __body_font = Nehan.Display.getStdFont(); // just a cache
 
   var __is_managed_css_prop = function(prop){
     return Nehan.List.exists(Nehan.Config.managedCssProps, Nehan.Closure.eq(prop));
@@ -1257,8 +1256,9 @@ Nehan.Style = (function(){
   Style.prototype._computeUnitSize = function(val, unit_size, max_size){
     var str = String(val);
     if(str.indexOf("rem") > 0){
+      var root_font = this.getRootFont();
       var rem_scale = parseFloat(str.replace("rem",""));
-      return Math.round(__body_font.size * rem_scale); // use root font-size
+      return Math.round(root_font.size * rem_scale); // use root font-size
     }
     if(str.indexOf("em") > 0){
       var em_scale = parseFloat(str.replace("em",""));
@@ -1438,9 +1438,6 @@ Nehan.Style = (function(){
     }
     if(font_style !== "inherit"){
       font.style = font_style;
-    }
-    if(this.getMarkupName() === "body"){
-      __body_font = font;
     }
     return font;
   };
