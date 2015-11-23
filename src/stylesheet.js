@@ -321,9 +321,10 @@ Nehan.Stylesheet = (function(){
 	},
 	"hr":{
 	  "display":"block",
-	  //"box-sizing":"content-box",
+	  "box-sizing":"content-box",
 	  "border-color":"#b8b8b8",
 	  "border-style":"solid",
+	  "line-height":"1em",
 	  "margin":{
 	    "after":"1em"
 	  },

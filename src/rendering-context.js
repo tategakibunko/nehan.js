@@ -550,8 +550,7 @@ Nehan.RenderingContext = (function(){
       return total + (element.charCount || 0);
     }, 0);
     box.breakAfter = this.layoutContext.hasBreakAfter();
-    this.layoutContext.setBreakAfter(false); // clear flag
-    if(extent === 0 || elements.length === 0){
+    if(this.style.getMarkupName() !== "hr" && (extent === 0 || elements.length === 0)){
       console.warn("zero block? %o", box);
       box.breakAfter = true;
     }

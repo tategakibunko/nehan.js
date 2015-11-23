@@ -11353,9 +11353,10 @@ Nehan.Stylesheet = (function(){
 	},
 	"hr":{
 	  "display":"block",
-	  //"box-sizing":"content-box",
+	  "box-sizing":"content-box",
 	  "border-color":"#b8b8b8",
 	  "border-style":"solid",
+	  "line-height":"1em",
 	  "margin":{
 	    "after":"1em"
 	  },
@@ -14756,11 +14757,6 @@ Nehan.BlockGenerator = (function(){
 
     // if line-break, output empty line(extent = font-size).
     if(child_style.isLineBreak()){
-      /*
-      return this.context.style.createLine(this.context, {
-	maxExtent:this.context.style.getFontSize()
-      });
-       */
       return this.context.createLineBox({
 	maxExtent:this.context.style.getFontSize()
       });
@@ -17192,8 +17188,7 @@ Nehan.RenderingContext = (function(){
       return total + (element.charCount || 0);
     }, 0);
     box.breakAfter = this.layoutContext.hasBreakAfter();
-    this.layoutContext.setBreakAfter(false); // clear flag
-    if(extent === 0 || elements.length === 0){
+    if(this.style.getMarkupName() !== "hr" && (extent === 0 || elements.length === 0)){
       console.warn("zero block? %o", box);
       box.breakAfter = true;
     }
