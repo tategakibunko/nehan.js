@@ -10,7 +10,7 @@ Nehan.RenderingContext = (function(){
     this.style = opt.style || null;
     this.stream = opt.stream || null;
     this.layoutContext = opt.layoutContext || null;
-    this.selectors = opt.selectors || new Nehan.Selectors(Nehan.Stylesheet.create());
+    this.selectors = opt.selectors || new Nehan.Selectors(Nehan.DefaultStyle.create());
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
     this.pageEvaluator = opt.pageEvaluator || new Nehan.PageEvaluator(this);
   }

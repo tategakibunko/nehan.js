@@ -11031,7 +11031,7 @@ Nehan.RubyTokenStream = (function(){
 
 
 /**
- @namespace Nehan.Stylesheet
+ @namespace Nehan.DefaultStyle
  @description <pre>
 
  Important notices about style.js
@@ -11107,7 +11107,7 @@ Nehan.RubyTokenStream = (function(){
  flow:"flip" means Display["vert"], "tb-rl".
  </pre>
  */
-Nehan.Stylesheet = (function(){
+Nehan.DefaultStyle = (function(){
   /* TODO
   var __header_margin = function(ctx){
   }; */
@@ -16640,7 +16640,7 @@ Nehan.RenderingContext = (function(){
     this.style = opt.style || null;
     this.stream = opt.stream || null;
     this.layoutContext = opt.layoutContext || null;
-    this.selectors = opt.selectors || new Nehan.Selectors(Nehan.Stylesheet.create());
+    this.selectors = opt.selectors || new Nehan.Selectors(Nehan.DefaultStyle.create());
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
     this.pageEvaluator = opt.pageEvaluator || new Nehan.PageEvaluator(this);
   }

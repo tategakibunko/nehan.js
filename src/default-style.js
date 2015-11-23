@@ -1,5 +1,5 @@
 /**
- @namespace Nehan.Stylesheet
+ @namespace Nehan.DefaultStyle
  @description <pre>
 
  Important notices about style.js
@@ -75,7 +75,7 @@
  flow:"flip" means Display["vert"], "tb-rl".
  </pre>
  */
-Nehan.Stylesheet = (function(){
+Nehan.DefaultStyle = (function(){
   /* TODO
   var __header_margin = function(ctx){
   }; */

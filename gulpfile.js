@@ -121,7 +121,7 @@ var sources = [
   "src/text-lexer.js",
   "src/token-stream.js",
   "src/ruby-token-stream.js",
-  "src/stylesheet.js",
+  "src/default-style.js",
   "src/box.js",
   "src/document-context.js",
   "src/page-evaluator.js",
