@@ -482,13 +482,6 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {boolean}
    */
-  Style.prototype.isFirstLine = function(){
-    return this.markupName === "first-line";
-  };
-  /**
-   @memberof Nehan.Style
-   @return {boolean}
-   */
   Style.prototype.isFirstChild = function(){
     return this.markup.isFirstChild();
   };
@@ -1137,7 +1130,7 @@ Nehan.Style = (function(){
     if(this.isInlineRoot()){
       Nehan.Args.copy(css, this.flow.getCss());
     }
-    if(this.font && (!this.isInlineRoot() || this.isFirstLine())){
+    if(this.font){
       Nehan.Args.copy(css, this.font.getCss());
     }
     if(this.color){
