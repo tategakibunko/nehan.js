@@ -95,7 +95,7 @@ var TestStyles = {
     content:"this is inserted by after"
   },
   ".first-line-larger::first-line":{
-    "display":"block",
+    "display":"inline",
     "font-size":"1.6em"
   },
   ".my-callback":{

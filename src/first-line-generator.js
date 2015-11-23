@@ -1,38 +1,37 @@
 Nehan.FirstLineGenerator = (function(){
   /**
-   * style of first line generator is enabled until first line is yielded.<br>
-   * after yielding first line, parent style is inherited.
    @memberof Nehan
    @class FirstLineGenerator
-   @classdesc generator to yield first line block.
    @constructor
-   @extends {Nehan.BlockGenerator}
+   @extends {Nehan.InlineGenerator}
    @param context {Nehan.RenderingContext}
   */
   function FirstLineGenerator(context){
-    Nehan.BlockGenerator.call(this, context);
+    Nehan.InlineGenerator.call(this, context);
   }
-  Nehan.Class.extend(FirstLineGenerator, Nehan.BlockGenerator);
+  Nehan.Class.extend(FirstLineGenerator, Nehan.InlineGenerator);
 
-  // this is called after each element(line-block) is yielded.
-  /*
-  FirstLineGenerator.prototype._onAddElement = function(element){
-    if(this.context.getBlockLineNo() !== 1){
-      return;
-    }
-    // first-line yieled, so switch style to parent one.
-    this.context.style = this.context.parent.style;
-    var child_gen = this.context.childGenerator, parent_gen = this;
-    while(child_gen){
-      child_gen.context.style = parent_gen.context.style;
-      var cache = child_gen.context.peekLastCache();
-      if(cache && child_gen instanceof Nehan.TextGenerator && cache.setMetrics){
-	cache.setMetrics(child_gen.context.style.flow, child_gen.context.style.getFont());
+  FirstLineGenerator.prototype._onCreate = function(element){
+    // now first-line is yieled, switch new style
+    if(this.context.isFirstOutput()){
+      //console.log("first-line:", element);
+      var parent = this.context.parent;
+      var old_child = this.context.child;
+      var new_inline = parent.createChildInlineGenerator(parent.style, this.context.stream);
+      new_inline.context.child = old_child;
+      var child = new_inline.context.child, child_parent = new_inline.context;
+      while(child){
+	child.style = child_parent.style;
+	child.parent = child_parent;
+	var cache = child.peekLastCache();
+	if(cache && child.generator instanceof Nehan.TextGenerator && cache.setMetrics){
+	  cache.setMetrics(child.style.flow, child.style.getFont());
+	}
+	child_parent = child;
+	child = child.child;
       }
-      parent_gen = child_gen;
-      child_gen = child_gen.context.childGenerator;
     }
-  };*/
+  };
 
   return FirstLineGenerator;
 })();

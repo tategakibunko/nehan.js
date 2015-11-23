@@ -347,6 +347,9 @@ Nehan.Style = (function(){
    @return {boolean}
    */
   Style.prototype.isInline = function(){
+    if(this.getMarkupName() === "first-line"){
+      return true;
+    }
     return this.display === "inline";
   };
   /**
@@ -1314,6 +1317,7 @@ Nehan.Style = (function(){
   Style.prototype._loadDisplay = function(){
     switch(this.getMarkupName()){
     case "first-line":
+      return "inline";
     case "li-marker":
     case "li-body":
       return "block";

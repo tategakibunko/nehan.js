@@ -46,7 +46,7 @@ Nehan.LayoutGenerator = (function(){
 
     // to avoid infinite loop, raise error if too many yielding.
     if(this.context.yieldCount > Nehan.Config.maxYieldCount){
-      console.error("[%s]too many yield!:%o", this.context.getGeneratorName(), this);
+      console.error("[%s]too many yield!:%o", this.context._name, this);
       throw "too many yield";
     }
     console.groupEnd();

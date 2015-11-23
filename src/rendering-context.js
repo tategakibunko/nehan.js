@@ -396,9 +396,6 @@ Nehan.RenderingContext = (function(){
 
     // switch generator by markup name
     switch(child_style.getMarkupName()){
-    case "first-line":
-      return new Nehan.FirstLineGenerator(child_context);
-
     case "details":
     case "blockquote":
     case "figure":
@@ -450,6 +447,8 @@ Nehan.RenderingContext = (function(){
       return new Nehan.InlineBlockGenerator(child_context);
     }
     switch(style.getMarkupName()){
+    case "first-line":
+      return new Nehan.FirstLineGenerator(child_context);
     case "ruby":
       return new Nehan.TextGenerator(child_context);
     case "a":
@@ -572,10 +571,6 @@ Nehan.RenderingContext = (function(){
     if(this.style.staticMeasure && !is_inline_root){
       measure = this.style.contentMeasure;
     }
-    /*
-    if((this.style.parent && opt.measure && !is_inline_root) || (this.style.display === "inline-block")){
-      measure = this.staticMeasure || this.layoutContext.getInlineCurMeasure();
-    }*/
     var line_size = this.style.flow.getBoxSize(measure, max_extent);
     var classes = ["nehan-inline", "nehan-inline-" + this.style.flow.getName()].concat(this.style.markup.getClasses());
     var line = new Nehan.Box(line_size, this, "line-block");
@@ -1070,10 +1065,6 @@ Nehan.RenderingContext = (function(){
     var size = (element instanceof Nehan.Box)? element.getLayoutExtent(this.style.flow) : (element.bodySize || 0);
     console.log("push cache:%o(e = %d, text = %s)", element, size, this.stringOfElement(element));
     element.cacheCount = (element.cacheCount || 0) + 1;
-    /*
-    if(this.hasChildLayout()){
-      this.child.yieldCount--;
-    }*/
     if(element.cacheCount >= Nehan.Config.maxRollbackCount){
       console.error("too many rollback! context:%o, element:%o", this, element);
       throw "too many rollback";

@@ -13344,6 +13344,9 @@ Nehan.Style = (function(){
    @return {boolean}
    */
   Style.prototype.isInline = function(){
+    if(this.getMarkupName() === "first-line"){
+      return true;
+    }
     return this.display === "inline";
   };
   /**
@@ -14311,6 +14314,7 @@ Nehan.Style = (function(){
   Style.prototype._loadDisplay = function(){
     switch(this.getMarkupName()){
     case "first-line":
+      return "inline";
     case "li-marker":
     case "li-body":
       return "block";
@@ -14647,7 +14651,7 @@ Nehan.LayoutGenerator = (function(){
 
     // to avoid infinite loop, raise error if too many yielding.
     if(this.context.yieldCount > Nehan.Config.maxYieldCount){
-      console.error("[%s]too many yield!:%o", this.context.getGeneratorName(), this);
+      console.error("[%s]too many yield!:%o", this.context._name, this);
       throw "too many yield";
     }
     console.groupEnd();
@@ -15133,39 +15137,38 @@ Nehan.LinkGenerator = (function(){
 
 Nehan.FirstLineGenerator = (function(){
   /**
-   * style of first line generator is enabled until first line is yielded.<br>
-   * after yielding first line, parent style is inherited.
    @memberof Nehan
    @class FirstLineGenerator
-   @classdesc generator to yield first line block.
    @constructor
-   @extends {Nehan.BlockGenerator}
+   @extends {Nehan.InlineGenerator}
    @param context {Nehan.RenderingContext}
   */
   function FirstLineGenerator(context){
-    Nehan.BlockGenerator.call(this, context);
+    Nehan.InlineGenerator.call(this, context);
   }
-  Nehan.Class.extend(FirstLineGenerator, Nehan.BlockGenerator);
+  Nehan.Class.extend(FirstLineGenerator, Nehan.InlineGenerator);
 
-  // this is called after each element(line-block) is yielded.
-  /*
-  FirstLineGenerator.prototype._onAddElement = function(element){
-    if(this.context.getBlockLineNo() !== 1){
-      return;
-    }
-    // first-line yieled, so switch style to parent one.
-    this.context.style = this.context.parent.style;
-    var child_gen = this.context.childGenerator, parent_gen = this;
-    while(child_gen){
-      child_gen.context.style = parent_gen.context.style;
-      var cache = child_gen.context.peekLastCache();
-      if(cache && child_gen instanceof Nehan.TextGenerator && cache.setMetrics){
-	cache.setMetrics(child_gen.context.style.flow, child_gen.context.style.getFont());
+  FirstLineGenerator.prototype._onCreate = function(element){
+    // now first-line is yieled, switch new style
+    if(this.context.isFirstOutput()){
+      //console.log("first-line:", element);
+      var parent = this.context.parent;
+      var old_child = this.context.child;
+      var new_inline = parent.createChildInlineGenerator(parent.style, this.context.stream);
+      new_inline.context.child = old_child;
+      var child = new_inline.context.child, child_parent = new_inline.context;
+      while(child){
+	child.style = child_parent.style;
+	child.parent = child_parent;
+	var cache = child.peekLastCache();
+	if(cache && child.generator instanceof Nehan.TextGenerator && cache.setMetrics){
+	  cache.setMetrics(child.style.flow, child.style.getFont());
+	}
+	child_parent = child;
+	child = child.child;
       }
-      parent_gen = child_gen;
-      child_gen = child_gen.context.childGenerator;
     }
-  };*/
+  };
 
   return FirstLineGenerator;
 })();
@@ -17034,9 +17037,6 @@ Nehan.RenderingContext = (function(){
 
     // switch generator by markup name
     switch(child_style.getMarkupName()){
-    case "first-line":
-      return new Nehan.FirstLineGenerator(child_context);
-
     case "details":
     case "blockquote":
     case "figure":
@@ -17088,6 +17088,8 @@ Nehan.RenderingContext = (function(){
       return new Nehan.InlineBlockGenerator(child_context);
     }
     switch(style.getMarkupName()){
+    case "first-line":
+      return new Nehan.FirstLineGenerator(child_context);
     case "ruby":
       return new Nehan.TextGenerator(child_context);
     case "a":
@@ -17210,10 +17212,6 @@ Nehan.RenderingContext = (function(){
     if(this.style.staticMeasure && !is_inline_root){
       measure = this.style.contentMeasure;
     }
-    /*
-    if((this.style.parent && opt.measure && !is_inline_root) || (this.style.display === "inline-block")){
-      measure = this.staticMeasure || this.layoutContext.getInlineCurMeasure();
-    }*/
     var line_size = this.style.flow.getBoxSize(measure, max_extent);
     var classes = ["nehan-inline", "nehan-inline-" + this.style.flow.getName()].concat(this.style.markup.getClasses());
     var line = new Nehan.Box(line_size, this, "line-block");
@@ -17708,10 +17706,6 @@ Nehan.RenderingContext = (function(){
     var size = (element instanceof Nehan.Box)? element.getLayoutExtent(this.style.flow) : (element.bodySize || 0);
     console.log("push cache:%o(e = %d, text = %s)", element, size, this.stringOfElement(element));
     element.cacheCount = (element.cacheCount || 0) + 1;
-    /*
-    if(this.hasChildLayout()){
-      this.child.yieldCount--;
-    }*/
     if(element.cacheCount >= Nehan.Config.maxRollbackCount){
       console.error("too many rollback! context:%o, element:%o", this, element);
       throw "too many rollback";
