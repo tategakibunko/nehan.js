@@ -69,5 +69,16 @@ Nehan.BoxSize = (function(){
     return this[flow.getPropExtent()];
   };
 
+  /**
+   compare equality
+
+   @memberof Nehan.BoxSize
+   @param size {Nehan.BoxSize}
+   @return {bool}
+   */
+  BoxSize.prototype.isEqualTo = function(size){
+    return this.width === size.width && this.height === size.height;
+  };
+
   return BoxSize;
 })();

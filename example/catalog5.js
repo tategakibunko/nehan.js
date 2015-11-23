@@ -1,4 +1,6 @@
 var LayoutTest = (function(){
+  Nehan.Config.maxPageCount = 10;
+  
   var get_script = function(name){
     return Script[name] || Snipet[name] || Text[name] || "undefined script";
   };

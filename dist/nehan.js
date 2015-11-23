@@ -5702,6 +5702,17 @@ Nehan.BoxSize = (function(){
     return this[flow.getPropExtent()];
   };
 
+  /**
+   compare equality
+
+   @memberof Nehan.BoxSize
+   @param size {Nehan.BoxSize}
+   @return {bool}
+   */
+  BoxSize.prototype.isEqualTo = function(size){
+    return this.width === size.width && this.height === size.height;
+  };
+
   return BoxSize;
 })();
 
@@ -12026,23 +12037,6 @@ Nehan.Box = (function(){
 
   /**
    @memberof Nehan.Box
-   @param element {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
-   */
-  Box.prototype.addElement = function(element){
-    element.parent = this;
-    this.elements.push(element);
-  };
-  /**
-   @memberof Nehan.Box
-   @param element {Array.<Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy>}
-   */
-  Box.prototype.addElements = function(elements){
-    Nehan.List.iter(elements, function(element){
-      this.addElement(element);
-    }.bind(this));
-  };
-  /**
-   @memberof Nehan.Box
    @return {boolean}
    */
   Box.prototype.isVoid = function(){
@@ -13280,215 +13274,6 @@ Nehan.Style = (function(){
       return removed_child;
     }
     return null;
-  };
-  /**
-   @memberof Nehan.Style
-   @param opt {Object}
-   @param opt.extent {int}
-   @param opt.elements {Array.<Nehan.Box>}
-   @param opt.breakAfter {boolean}
-   @param opt.blockId {int}
-   @param opt.content {String}
-   @return {Nehan.Box}
-   */
-  /*
-  Style.prototype.createBlock = function(context, opt){
-    opt = opt || {};
-    var elements = opt.elements || [];
-    var measure = this.contentMeasure;
-    var extent = this.contentExtent;
-
-    // if elements under <body>, staticExtent or context extent(opt.extent) is available.
-    if(this.parent && opt.extent){
-      extent = this.staticExtent || opt.extent;
-    }
-
-    var edge = this.edge || null;
-    if(edge && (!opt.useBeforeEdge || !opt.useAfterEdge) && this.markupName !== "hr"){
-      edge = edge.clone();
-      if(!opt.useBeforeEdge){
-	console.log("clear before edge:%d", edge.getBefore(this.flow));
-	edge.clearBefore(this.flow);
-      }
-      if(!opt.useAfterEdge){
-	console.log("clear after edge:%d", edge.getAfter(this.flow));
-	edge.clearAfter(this.flow);
-      }
-    }
-
-    var classes = ["nehan-block", "nehan-" + this.getMarkupName()].concat(this.markup.getClasses());
-    var box_size = this.flow.getBoxSize(measure, extent);
-    var box = new Nehan.Box(box_size, context);
-    if(this.markup.isHeaderTag()){
-      classes.push("nehan-header");
-    }
-    box.blockId = opt.blockId;
-    box.display = (this.display === "inline-block")? this.display : "block";
-    box.edge = edge;
-    box.addElements(elements);
-    box.classes = classes;
-    box.charCount = elements.reduce(function(total, element){
-      return total + (element.charCount || 0);
-    }, 0);
-    // [FIXME] css break-after is used only when last output.
-    //box.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
-    box.breakAfter = opt.breakAfter || false;
-    box.content = opt.content || null;
-    box.isFirst = opt.isFirst || false;
-    box.isLast = opt.isLast || false;
-    box.restExtent = opt.restExtent || 0;
-    box.restMeasure = opt.restMeasure || 0;
-    if(this.isPushed()){
-      box.pushed = true;
-    } else if(this.isPulled()){
-      box.pulled = true;
-    }
-    //console.log("[%s]block(%o):%s:(%d,%d)", this.markupName, box, box.toString(), box.size.width, box.size.height);
-    return box;
-  };*/
-  /**
-   @memberof Nehan.Style
-   @param opt
-   @param opt.breakAfter {boolean}
-   @return {Nehan.Box}
-   */
-  Style.prototype.createImage = function(context, opt){
-    opt = opt || {};
-    // image size always considered as horizontal mode.
-    var width = this.getMarkupAttr("width")? parseInt(this.getMarkupAttr("width"), 10) : (this.staticMeasure || this.getFontSize());
-    var height = this.getMarkupAttr("height")? parseInt(this.getMarkupAttr("height"), 10) : (this.staticExtent || this.getFontSize());
-    var classes = ["nehan-block", "nehan-image"].concat(this.markup.getClasses());
-    var image_size = new Nehan.BoxSize(width, height);
-    var image = new Nehan.Box(image_size, context);
-    image.display = this.display; // inline, block, inline-block
-    image.edge = this.edge || null;
-    image.classes = classes;
-    image.charCount = 0;
-    if(this.isPushed()){
-      image.pushed = true;
-    } else if(this.isPulled()){
-      image.pulled = true;
-    }
-    image.breakAfter = this.isBreakAfter() || opt.breakAfter || false;
-    return image;
-  };
-  /**
-   @memberof Nehan.Style
-   @param opt
-   @param opt.measure {int}
-   @param opt.content {String}
-   @param opt.charCount {int}
-   @param opt.elements {Array.<Nehan.Box>}
-   @param opt.maxFontSize {int}
-   @param opt.maxExtent {int}
-   @param opt.hasLineBreak {boolean}
-   @param opt.breakAfter {boolean}
-   @return {Nehan.Box}
-   */
-  Style.prototype.createLine = function(context, opt){
-    opt = opt || {};
-    var is_inline_root = this.isInlineRoot();
-    var elements = opt.elements || [];
-    var max_font_size = opt.maxFontSize || this.getFontSize();
-    var max_extent = opt.maxExtent || this.staticExtent || 0;
-    var char_count = opt.charCount || 0;
-    var content = opt.content || null;
-    var measure = this.contentMeasure;
-    if((this.parent && opt.measure && !is_inline_root) || (this.display === "inline-block")){
-      measure = this.staticMeasure || opt.measure;
-    }
-    var line_size = this.flow.getBoxSize(measure, max_extent);
-    var classes = ["nehan-inline", "nehan-inline-" + this.flow.getName()].concat(this.markup.getClasses());
-    var line = new Nehan.Box(line_size, context, "line-block");
-    line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
-    line.addElements(elements);
-    line.classes = is_inline_root? classes : classes.concat("nehan-" + this.getMarkupName());
-    line.charCount = char_count;
-    line.maxFontSize = max_font_size;
-    line.maxExtent = max_extent;
-    line.content = content;
-    line.isInlineRoot = is_inline_root;
-    line.hasLineBreak = opt.hasLineBreak || false;
-    line.hangingPunctuation = opt.hangingPunctuation || null;
-
-    // edge of top level line is disabled.
-    // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
-    // anonymous line block('aaa' and 'ccc') is already edged by <p> in block level.
-    // so if line is anonymous, edge must be ignored.
-    line.edge = (this.edge && !is_inline_root)? this.edge : null;
-
-    // backup other line data. mainly required to restore inline-context.
-    if(is_inline_root){
-      line.lineNo = opt.lineNo;
-      line.breakAfter = opt.breakAfter || false;
-      line.hyphenated = opt.hyphenated || false;
-      line.inlineMeasure = opt.measure || this.contentMeasure;
-      line.classes.push("nehan-root-line");
-
-      // set baseline
-      Nehan.Baseline.set(line);
-
-      // set text-align
-      if(this.textAlign && (this.textAlign.isCenter() || this.textAlign.isEnd())){
-	this.textAlign.setAlign(line);
-      } else if(this.textAlign && this.textAlign.isJustify()){
-	this.textAlign.setJustify(line);
-      }
-      // set edge
-      var edge_size = Math.floor(line.maxFontSize * this.getLineHeight()) - line.maxExtent;
-      if(line.elements.length > 0 && edge_size > 0){
-	line.edge = new Nehan.BoxEdge();
-	line.edge.padding.setBefore(this.flow, edge_size);
-      }
-    }
-    //console.log("line(%o):%s:(%d,%d), is_root:%o", line, line.toString(), line.size.width, line.size.height, is_inline_root);
-    return line;
-  };
-  /**
-   @memberof Nehan.Style
-   @param opt
-   @param opt.measure {int}
-   @param opt.content {String}
-   @param opt.charCount {int}
-   @param opt.elements {Array.<Nehan.Char | Nehan.Word | Nehan.Tcy>}
-   @param opt.maxFontSize {int}
-   @param opt.maxExtent {int}
-   @param opt.hasLineBreak {boolean}
-   @param opt.breakAfter {boolean}
-   @return {Nehan.Box}
-   */
-  Style.prototype.createTextBlock = function(context, opt){
-    opt = opt || {};
-    var elements = opt.elements || [];
-    var font_size = this.getFontSize();
-    var extent = opt.maxExtent || font_size;
-    var measure = opt.measure;
-    var char_count = opt.charCount || 0;
-    var content = opt.content || null;
-
-    if(opt.isEmpty){
-      extent = 0;
-    } else if(this.isTextEmphaEnable()){
-      extent = this.getEmphaTextBlockExtent();
-    } else if(this.markup.name === "ruby"){
-      extent = this.getRubyTextBlockExtent();
-    }
-    var line_size = this.flow.getBoxSize(measure, extent);
-    var classes = ["nehan-text-block"].concat(this.markup.getClasses());
-    var line = new Nehan.Box(line_size, context, "text-block");
-    line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
-    line.addElements(elements);
-    line.classes = classes;
-    line.charCount = char_count;
-    line.maxFontSize = font_size;
-    line.maxExtent = extent;
-    line.content = content;
-    line.hasLineBreak = opt.hasLineBreak || false;
-    line.hyphenated = opt.hyphenated || false;
-    line.lineOver = opt.lineOver || false;
-    line.hangingPunctuation = opt.hangingPunctuation || null;
-    //console.log("text(%o):%s:(%d,%d)", line, line.toString(), line.size.width, line.size.height);
-    return line;
   };
   /**
    @memberof Nehan.Style
@@ -14971,7 +14756,12 @@ Nehan.BlockGenerator = (function(){
 
     // if line-break, output empty line(extent = font-size).
     if(child_style.isLineBreak()){
+      /*
       return this.context.style.createLine(this.context, {
+	maxExtent:this.context.style.getFontSize()
+      });
+       */
+      return this.context.createLineBox({
 	maxExtent:this.context.style.getFontSize()
       });
     }
@@ -15044,7 +14834,10 @@ Nehan.InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createOutput = function(){
-    var line = this.context.createLine();
+    if(this.context.layoutContext.isInlineEmpty()){
+      return null;
+    }
+    var line = this.context.createLineBox();
 
     // call _onCreate callback for 'each' output
     this._onCreate(line);
@@ -15185,7 +14978,13 @@ Nehan.TextGenerator = (function(){
   };
 
   TextGenerator.prototype._createOutput = function(){
-    var line = this.context.createTextBlock();
+    if(this.context.layoutContext.isInlineEmpty()){
+      return null;
+    }
+
+    this.context.applyHyphenate();
+
+    var line = this.context.createTextBox();
 
     // call _onCreate callback for 'each' output
     this._onCreate(line);
@@ -16402,7 +16201,8 @@ Nehan.VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalRb = function(line, ruby){
     var rb_style = line.context.createChildStyle(new Nehan.Tag("rb"));
-    var rb_line = rb_style.createLine(line.context, {
+    var rb_context = line.context.createChildContext(rb_style);
+    var rb_line = rb_context.createLineBox({
       elements:ruby.getRbs()
     });
     return this._evaluate(rb_line, {
@@ -16700,7 +16500,8 @@ Nehan.HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._evalRb = function(line, ruby){
     var rb_style = line.context.createChildStyle(new Nehan.Tag("rb"));
-    var rb_line = rb_style.createLine(line.context, {
+    var rb_context = line.context.createChildContext(rb_style);
+    var rb_line = rb_context.createLineBox({
       elements:ruby.getRbs()
     });
     return this._evaluate(rb_line, {
@@ -16992,6 +16793,16 @@ Nehan.RenderingContext = (function(){
       this.layoutContext.setLineOver(true);
       throw "overflow";
     }
+  };
+
+  // -----------------------------------------------
+  // [apply]
+  // -----------------------------------------------
+  RenderingContext.prototype.applyHyphenate = function(){
+    if(!this.isHyphenateEnable()){
+      return;
+    }
+    this._hyphenate();
   };
 
   // -----------------------------------------------
@@ -17395,24 +17206,63 @@ Nehan.RenderingContext = (function(){
     return box;
   };
 
-  RenderingContext.prototype.createLine = function(){
-    if(this.layoutContext.isInlineEmpty()){
-      return null;
+  RenderingContext.prototype.createLineBox = function(opt){
+    opt = opt || {};
+    var is_inline_root = this.isInlineRoot();
+    var elements = opt.elements || this.layoutContext.getInlineElements();
+    var measure = is_inline_root? this.getContextMaxMeasure() : this.layoutContext.getInlineCurMeasure();
+    var max_extent = opt.maxExtent || this.layoutContext.getInlineMaxExtent() || this.style.getFontSize() || this.staticExtent;
+    if(this.style.staticMeasure && !is_inline_root){
+      measure = this.style.contentMeasure;
     }
-    var line = this.style.createLine(this, {
-      lineNo:this.layoutContext.getBlockLineNo(),
-      hasLineBreak:this.layoutContext.hasLineBreak(), // is line break included in?
-      breakAfter:this.layoutContext.hasBreakAfter(), // is break after included in?
-      hyphenated:this.layoutContext.isHyphenated(), // is line hyphenated?
-      measure:this.layoutContext.getInlineCurMeasure(), // actual measure
-      elements:this.layoutContext.getInlineElements(), // all inline-child, not only text, but recursive child box.
-      charCount:this.layoutContext.getInlineCharCount(),
-      maxExtent:(this.layoutContext.getInlineMaxExtent() || this.style.getFontSize()),
-      maxFontSize:this.layoutContext.getInlineMaxFontSize(),
-      hangingPunctuation:this.layoutContext.getHangingPunctuation()
-    });
+    /*
+    if((this.style.parent && opt.measure && !is_inline_root) || (this.style.display === "inline-block")){
+      measure = this.staticMeasure || this.layoutContext.getInlineCurMeasure();
+    }*/
+    var line_size = this.style.flow.getBoxSize(measure, max_extent);
+    var classes = ["nehan-inline", "nehan-inline-" + this.style.flow.getName()].concat(this.style.markup.getClasses());
+    var line = new Nehan.Box(line_size, this, "line-block");
+    line.display = "inline"; // caution: display of anonymous line shares it's parent markup.
+    line.elements = elements;
+    line.classes = is_inline_root? classes : classes.concat("nehan-" + this.style.getMarkupName());
+    line.charCount = opt.charCount || this.layoutContext.getInlineCharCount();
+    line.maxFontSize = this.layoutContext.getInlineMaxFontSize();
+    line.maxExtent = this.layoutContext.getInlineMaxExtent();
+    line.content = opt.content || null;
+    line.isInlineRoot = is_inline_root;
+    line.hasLineBreak = this.layoutContext.hasLineBreak();
+    line.hangingPunctuation = this.layoutContext.getHangingPunctuation();
 
-    //console.log("%o create output(%s): conetxt max measure = %d, context:%o", this, line.toString(), context.inline.maxMeasure, context);
+    // edge of root line is disabled.
+    // for example, consider '<p>aaa<span>bbb</span>ccc</p>'.
+    // anonymous line block('aaa' and 'ccc') is already edged by <p> in block level.
+    // so if line is anonymous, edge must be ignored.
+    line.edge = (this.style.edge && !is_inline_root)? this.style.edge : null;
+
+    // backup other line data. mainly required to restore inline-context.
+    if(is_inline_root){
+      line.lineNo = opt.lineNo;
+      line.breakAfter = this.layoutContext.hasBreakAfter();
+      line.hyphenated = this.layoutContext.isHyphenated();
+      line.inlineMeasure = this.layoutContext.getInlineCurMeasure(); // actual measure
+      line.classes.push("nehan-root-line");
+
+      // set baseline
+      Nehan.Baseline.set(line);
+
+      // set text-align
+      if(this.style.textAlign && (this.style.textAlign.isCenter() || this.style.textAlign.isEnd())){
+	this.style.textAlign.setAlign(line);
+      } else if(this.style.textAlign && this.style.textAlign.isJustify()){
+	this.style.textAlign.setJustify(line);
+      }
+      // set edge for line-height
+      var edge_size = Math.floor(line.maxFontSize * this.style.getLineHeight()) - line.maxExtent;
+      if(line.elements.length > 0 && edge_size > 0){
+	line.edge = new Nehan.BoxEdge();
+	line.edge.padding.setBefore(this.style.flow, edge_size);
+      }
+    }
 
     // set position in parent stream.
     if(this.parent && this.parent.stream){
@@ -17424,29 +17274,36 @@ Nehan.RenderingContext = (function(){
     }
     return line;
   };
- 
-  RenderingContext.prototype.createTextBlock = function(){
+
+  RenderingContext.prototype.createTextBox = function(opt){
+    opt = opt || {};
+    var elements = opt.elements || this.layoutContext.getInlineElements();
+    var extent = this.layoutContext.getInlineMaxExtent() || this.style.getFontSize();
+    var measure = this.layoutContext.getInlineCurMeasure();
+
     if(this.layoutContext.isInlineEmpty()){
-      return null;
+      extent = 0;
+    } else if(this.style.isTextEmphaEnable()){
+      extent = this.style.getEmphaTextBlockExtent();
+    } else if(this.style.markup.name === "ruby"){
+      extent = this.style.getRubyTextBlockExtent();
     }
-    // hyphenate if this line is generated by overflow(not line-break).
-    if(this.style.isHyphenationEnable() && !this.layoutContext.isInlineEmpty() &&
-       !this.layoutContext.hasLineBreak() && this.layoutContext.getInlineRestMeasure() <= this.style.getFontSize()){
-      this._hyphenate();
-    }
-    var line = this.style.createTextBlock(this, {
-      hasLineBreak:this.layoutContext.hasLineBreak(), // is line break included in?
-      lineOver:this.layoutContext.isLineOver(), // is line full-filled?
-      breakAfter:this.layoutContext.hasBreakAfter(), // is break after included in?
-      hyphenated:this.layoutContext.isHyphenated(), // is line hyphenated?
-      measure:this.layoutContext.getInlineCurMeasure(), // actual measure
-      elements:this.layoutContext.getInlineElements(), // all inline-child, not only text, but recursive child box.
-      charCount:this.layoutContext.getInlineCharCount(),
-      maxExtent:this.layoutContext.getInlineMaxExtent(),
-      maxFontSize:this.layoutContext.getInlineMaxFontSize(),
-      hangingPunctuation:this.layoutContext.getHangingPunctuation(),
-      isEmpty:this.layoutContext.isInlineEmpty()
-    });
+    var line_size = this.style.flow.getBoxSize(measure, extent);
+    var classes = ["nehan-text-block"].concat(this.style.markup.getClasses());
+    var line = new Nehan.Box(line_size, this, "text-block");
+    line.display = "inline";
+    line.elements = elements;
+    line.classes = classes;
+    line.charCount = this.layoutContext.getInlineCharCount();
+    line.maxFontSize = this.layoutContext.getInlineMaxFontSize() || this.style.getFontSize();
+    line.maxExtent = extent;
+    line.content = opt.content || null;
+    line.hasLineBreak = this.layoutContext.hasLineBreak(); // is line-break is included?
+    line.hyphenated = this.layoutContext.isHyphenated();
+    line.lineOver = this.layoutContext.isLineOver(); // is line full-filled?
+    line.hangingPunctuation = this.layoutContext.getHangingPunctuation();
+    line.isEmpty = this.layoutContext.isInlineEmpty();
+    //line.breakAfter = this.layoutContext.hasBreakAfter();
 
     // set position in parent stream.
     if(this.parent && this.parent.stream){
@@ -17811,6 +17668,23 @@ Nehan.RenderingContext = (function(){
     return this.style.isTextVertical();
   };
 
+  RenderingContext.prototype.isHyphenateEnable = function(){
+    if(this.layoutContext.isInlineEmpty()){
+      return false;
+    }
+    if(this.layoutContext.hasLineBreak()){
+      return false;
+    }
+    if(!this.style.isHyphenationEnable()){
+      return false;
+    }
+    // if there is space more than 1em, restrict hyphenation.
+    if(this.layoutContext.getInlineRestMeasure() > this.style.getFontSize()){
+      return false;
+    }
+    return true;
+  };
+
   // -----------------------------------------------
   // [peek]
   // -----------------------------------------------
@@ -18018,8 +17892,8 @@ Nehan.RenderingContext = (function(){
       return this.yieldPastedBlock(child_context);
     }
     switch(child_context.style.getMarkupName()){
-    case "img": return this.yieldImage(child_context);
-    case "hr": return this.yieldHorizontalRule(child_context);
+    case "img": return child_context.yieldImage();
+    case "hr": return child_context.yieldHorizontalRule();
     }
     return null;
   };
@@ -18027,16 +17901,15 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.yieldInlineDirect = function(child_context){
     if(child_context.style.isPasted()){
       return this.yieldPastedLine(child_context);
-      return this.yieldPastedBlock(child_context);
     }
     switch(child_context.style.getMarkupName()){
-    case "img": return this.yieldImage(child_context);
+    case "img": return child_context.yieldImage(child_context);
     }
     return null;
   };
 
   RenderingContext.prototype.yieldPastedLine = function(child_context){
-    return child_context.style.createLine(child_context, {
+    return child_context.createLineBox({
       content:child_context.style.getContent()
     });
   };
@@ -18049,14 +17922,32 @@ Nehan.RenderingContext = (function(){
     });
   };
 
-  RenderingContext.prototype.yieldImage = function(child_context){
-    return child_context.style.createImage(child_context);
+  RenderingContext.prototype.yieldImage = function(opt){
+    opt = opt || {};
+
+    // image size always considered as horizontal mode.
+    var width = this.style.getMarkupAttr("width")? parseInt(this.style.getMarkupAttr("width"), 10) : (this.style.staticMeasure || this.style.getFontSize());
+    var height = this.style.getMarkupAttr("height")? parseInt(this.style.getMarkupAttr("height"), 10) : (this.style.staticExtent || this.style.getFontSize());
+    var classes = ["nehan-block", "nehan-image"].concat(this.style.markup.getClasses());
+    var image_size = new Nehan.BoxSize(width, height);
+    var image = new Nehan.Box(image_size, this);
+    image.display = this.style.display; // inline, block, inline-block
+    image.edge = this.style.edge || null;
+    image.classes = classes;
+    image.charCount = 0;
+    if(this.style.isPushed()){
+      image.pushed = true;
+    } else if(this.style.isPulled()){
+      image.pulled = true;
+    }
+    image.breakAfter = this.style.isBreakAfter() || opt.breakAfter || false;
+    return image;
   };
 
-  RenderingContext.prototype.yieldHorizontalRule = function(child_context){
-    return child_context.createBlockBox({
+  RenderingContext.prototype.yieldHorizontalRule = function(){
+    return this.createBlockBox({
       elements:[],
-      extent:1
+      extent:2
     });
   };
 

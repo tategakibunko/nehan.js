@@ -26,23 +26,6 @@ Nehan.Box = (function(){
 
   /**
    @memberof Nehan.Box
-   @param element {Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy}
-   */
-  Box.prototype.addElement = function(element){
-    element.parent = this;
-    this.elements.push(element);
-  };
-  /**
-   @memberof Nehan.Box
-   @param element {Array.<Nehan.Box | Nehan.Char | Nehan.Word | Nehan.Tcy>}
-   */
-  Box.prototype.addElements = function(elements){
-    Nehan.List.iter(elements, function(element){
-      this.addElement(element);
-    }.bind(this));
-  };
-  /**
-   @memberof Nehan.Box
    @return {boolean}
    */
   Box.prototype.isVoid = function(){

@@ -26,7 +26,13 @@ Nehan.TextGenerator = (function(){
   };
 
   TextGenerator.prototype._createOutput = function(){
-    var line = this.context.createTextBlock();
+    if(this.context.layoutContext.isInlineEmpty()){
+      return null;
+    }
+
+    this.context.applyHyphenate();
+
+    var line = this.context.createTextBox();
 
     // call _onCreate callback for 'each' output
     this._onCreate(line);

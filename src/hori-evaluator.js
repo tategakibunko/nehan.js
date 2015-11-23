@@ -39,7 +39,8 @@ Nehan.HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._evalRb = function(line, ruby){
     var rb_style = line.context.createChildStyle(new Nehan.Tag("rb"));
-    var rb_line = rb_style.createLine(line.context, {
+    var rb_context = line.context.createChildContext(rb_style);
+    var rb_line = rb_context.createLineBox({
       elements:ruby.getRbs()
     });
     return this._evaluate(rb_line, {

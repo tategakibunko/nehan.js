@@ -32,7 +32,10 @@ Nehan.InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createOutput = function(){
-    var line = this.context.createLine();
+    if(this.context.layoutContext.isInlineEmpty()){
+      return null;
+    }
+    var line = this.context.createLineBox();
 
     // call _onCreate callback for 'each' output
     this._onCreate(line);

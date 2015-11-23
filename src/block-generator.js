@@ -85,7 +85,12 @@ Nehan.BlockGenerator = (function(){
 
     // if line-break, output empty line(extent = font-size).
     if(child_style.isLineBreak()){
+      /*
       return this.context.style.createLine(this.context, {
+	maxExtent:this.context.style.getFontSize()
+      });
+       */
+      return this.context.createLineBox({
 	maxExtent:this.context.style.getFontSize()
       });
     }
