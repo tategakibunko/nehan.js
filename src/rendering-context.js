@@ -1202,6 +1202,10 @@ Nehan.RenderingContext = (function(){
     this.style = parent_context.style;
     this.parent = parent_context;
     parent_context.child = this;
+    var cache = this.peekLastCache();
+    if(cache && this.generator instanceof Nehan.TextGenerator && cache.setMetrics){
+      cache.setMetrics(this.style.flow, this.style.getFont());
+    }
     if(this.child){
       this.child.updateParent(this);
     }

@@ -15151,22 +15151,11 @@ Nehan.FirstLineGenerator = (function(){
   FirstLineGenerator.prototype._onCreate = function(element){
     // now first-line is yieled, switch new style
     if(this.context.isFirstOutput()){
-      //console.log("first-line:", element);
       var parent = this.context.parent;
       var old_child = this.context.child;
-      var new_inline = parent.createChildInlineGenerator(parent.style, this.context.stream);
-      new_inline.context.child = old_child;
-      var child = new_inline.context.child, child_parent = new_inline.context;
-      while(child){
-	child.style = child_parent.style;
-	child.parent = child_parent;
-	var cache = child.peekLastCache();
-	if(cache && child.generator instanceof Nehan.TextGenerator && cache.setMetrics){
-	  cache.setMetrics(child.style.flow, child.style.getFont());
-	}
-	child_parent = child;
-	child = child.child;
-      }
+      var new_inline_root = parent.createChildInlineGenerator(parent.style, this.context.stream).context;
+      new_inline_root.child = old_child;
+      old_child.updateInlineParent(new_inline_root);
     }
   };
 
@@ -17843,6 +17832,10 @@ Nehan.RenderingContext = (function(){
     this.style = parent_context.style;
     this.parent = parent_context;
     parent_context.child = this;
+    var cache = this.peekLastCache();
+    if(cache && this.generator instanceof Nehan.TextGenerator && cache.setMetrics){
+      cache.setMetrics(this.style.flow, this.style.getFont());
+    }
     if(this.child){
       this.child.updateParent(this);
     }
