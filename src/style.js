@@ -152,7 +152,7 @@ Nehan.Style = (function(){
     if(edge){
       this.edge = edge;
     }
-    // static size is defined in selector or tag attr, hightest priority
+    // static size is defined in selector or tag attr.
     this.staticMeasure = this._loadStaticMeasure();
     this.staticExtent = this._loadStaticExtent();
 
@@ -191,13 +191,16 @@ Nehan.Style = (function(){
    * 3. else if parent not exists(root), use layout size defined in display.js.
    
    * (b) content_size
-   * 1. if edge(margin/padding/border) is defined, content_size = outer_size - edge_size
-   *    1.1. if box-sizing is "margin-box", margin/padding/border are included in outer_size, so
-   *         content_size = outer_size - (margin + padding + border)
-   *    1.2  if box-siging is "border-box", padding/border are included in outer_size, so
-   *         content_size = outer_size - (padding + border)
-   *    1.3  if box-sizing is "content-box", edge_size is not included in outer_size, so
-   *         content_size = outer_size
+   * 1. if edge(margin/padding/border) is defined, content_size = parent_content_size - edge_size
+   *    1.1. if box-sizing is "margin-box", margin/padding/border are included in width/height, so
+   *         content_width  = width  - (margin + padding + border).width
+   *         content_height = height - (margin + padding + border).height
+   *    1.2  if box-sizing is "border-box", padding/border are included in width/height, so
+   *         content_width  = width  - (padding + border).width
+   *         content_height = height - (padding + border).height
+   *    1.3  if box-sizing is "content-box", edge_size is not included in width/height, so
+   *         content_width  = width
+   *         content_height = height
    * 2. else(no edge),  content_size = outer_size
    *</pre>
    */
