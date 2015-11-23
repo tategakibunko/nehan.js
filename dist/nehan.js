@@ -12065,13 +12065,6 @@ Nehan.Box = (function(){
    @memberof Nehan.Box
    @return {boolean}
    */
-  Box.prototype.isVoid = function(){
-    return this._type === "void";
-  };
-  /**
-   @memberof Nehan.Box
-   @return {boolean}
-   */
   Box.prototype.isLine = function(){
     return this._type === "line-block";
   };
@@ -13238,7 +13231,6 @@ Nehan.Style = (function(){
    @param measure {int}
    */
   Style.prototype.initContextMeasure = function(measure){
-    //this.measure = measure || (this.parent? this.parent.contentMeasure : Nehan.Display.getMeasure(this.flow));
     this.measure = measure || this.getParentContentMeasure();
     this.contentMeasure = this._computeContentMeasure(this.measure);
   };
@@ -13250,7 +13242,6 @@ Nehan.Style = (function(){
    @param extent {int}
    */
   Style.prototype.initContextExtent = function(extent){
-    //this.extent = extent || (this.parent? this.parent.contentExtent : Nehan.Display.getExtent(this.flow));
     this.extent = extent || this.getParentContentExtent();
     this.contentExtent = this._computeContentExtent(this.extent);
   };
@@ -13352,7 +13343,6 @@ Nehan.Style = (function(){
    @return {boolean}
    */
   Style.prototype.isRoot = function(){
-    //return this.parent === null;
     return this.getMarkupName() === "body";
   };
   /**
@@ -13818,7 +13808,13 @@ Nehan.Style = (function(){
    @return {Nehan.Font}
    */
   Style.prototype.getRootFont = function(){
-    return __body_font;
+    if(this.isRoot()){
+      return this.getFont();
+    }
+    if(this.parent){
+      return this.parent.getFont();
+    }
+    return this.getFont();
   };
   /**
    @memberof Nehan.Style
@@ -14649,14 +14645,20 @@ Nehan.Style = (function(){
     var prop = this.flow.getPropMeasure();
     var max_size = this.getParentContentMeasure();
     var static_size = this.getAttr(prop, null) || this.getAttr("measure", null) || this.getCssAttr(prop, null) || this.getCssAttr("measure", null);
-    return (static_size !== null)? this._computeUnitSize(static_size, this.getFontSize(), max_size) : null;
+    if(static_size === null){
+      return null;
+    }
+    return this._computeUnitSize(static_size, this.getFontSize(), max_size);
   };
 
   Style.prototype._loadStaticExtent = function(){
     var prop = this.flow.getPropExtent();
     var max_size = this.getParentContentExtent();
     var static_size = this.getAttr(prop, null) || this.getAttr("extent", null) || this.getCssAttr(prop, null) || this.getCssAttr("extent", null);
-    return static_size? this._computeUnitSize(static_size, this.getFontSize(), max_size) : null;
+    if(static_size === null){
+      return null;
+    }
+    return this._computeUnitSize(static_size, this.getFontSize(), max_size);
   };
 
   return Style;
@@ -16723,21 +16725,26 @@ Nehan.RenderingContext = (function(){
       console.log("[%s]:eof", this.getGeneratorName());
       throw "eof"; // no more output
     }
-    if(element.isVoid()){
-      return; // just skip
-    }
     var max_size = this.getContextMaxExtentForAdd();
     var max_measure = this.layoutContext.getInlineMaxMeasure();
     var element_size = element.getLayoutExtent(this.style.flow);
     var prev_extent = this.layoutContext.getBlockCurExtent();
     var next_extent = prev_extent + element_size;
 
-    // first output, but child layout over, try to cancel after edge.
-    if(this.layoutContext.block.elements.length === 0 && next_extent > max_size && element.edge){
-      var over_size = next_extent - max_size;
-      var cancel_size = element.edge.cancelAfter(this.style.flow, over_size);
-      next_extent -= cancel_size;
-      element_size -= cancel_size;
+    // first element, but child layout over
+    if(this.layoutContext.getBlockElements().length === 0 && next_extent > max_size){
+      // try to cancel after edge
+      if(element.edge){
+	var over_size = next_extent - max_size;
+	var cancel_size = element.edge.cancelAfter(this.style.flow, over_size);
+	next_extent -= cancel_size;
+	element_size -= cancel_size;
+      }
+      // still too large, this element is never included, so skip it without caching.
+      if(next_extent > max_size){
+	console.error("too large block element:%o(%d for %d)", element, element_size, max_size);
+	return;
+      }
     }
 
     this.debugBlockElement(element, element_size);
@@ -16782,6 +16789,10 @@ Nehan.RenderingContext = (function(){
 
     if(element_size === 0){
       throw "zero";
+    }
+    if(this.layoutContext.getInlineElements().length === 0 && next_measure > max_size){
+      console.error("too large inline element:%o(%d for %d)", element, element_size, max_size);
+      return; // just skip it.
     }
     if(next_measure <= max_size){
       this.layoutContext.addInlineBoxElement(element, element_size);

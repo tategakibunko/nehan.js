@@ -216,7 +216,6 @@ Nehan.Style = (function(){
    @param measure {int}
    */
   Style.prototype.initContextMeasure = function(measure){
-    //this.measure = measure || (this.parent? this.parent.contentMeasure : Nehan.Display.getMeasure(this.flow));
     this.measure = measure || this.getParentContentMeasure();
     this.contentMeasure = this._computeContentMeasure(this.measure);
   };
@@ -228,7 +227,6 @@ Nehan.Style = (function(){
    @param extent {int}
    */
   Style.prototype.initContextExtent = function(extent){
-    //this.extent = extent || (this.parent? this.parent.contentExtent : Nehan.Display.getExtent(this.flow));
     this.extent = extent || this.getParentContentExtent();
     this.contentExtent = this._computeContentExtent(this.extent);
   };
@@ -330,7 +328,6 @@ Nehan.Style = (function(){
    @return {boolean}
    */
   Style.prototype.isRoot = function(){
-    //return this.parent === null;
     return this.getMarkupName() === "body";
   };
   /**
@@ -796,7 +793,13 @@ Nehan.Style = (function(){
    @return {Nehan.Font}
    */
   Style.prototype.getRootFont = function(){
-    return __body_font;
+    if(this.isRoot()){
+      return this.getFont();
+    }
+    if(this.parent){
+      return this.parent.getFont();
+    }
+    return this.getFont();
   };
   /**
    @memberof Nehan.Style
@@ -1627,14 +1630,20 @@ Nehan.Style = (function(){
     var prop = this.flow.getPropMeasure();
     var max_size = this.getParentContentMeasure();
     var static_size = this.getAttr(prop, null) || this.getAttr("measure", null) || this.getCssAttr(prop, null) || this.getCssAttr("measure", null);
-    return (static_size !== null)? this._computeUnitSize(static_size, this.getFontSize(), max_size) : null;
+    if(static_size === null){
+      return null;
+    }
+    return this._computeUnitSize(static_size, this.getFontSize(), max_size);
   };
 
   Style.prototype._loadStaticExtent = function(){
     var prop = this.flow.getPropExtent();
     var max_size = this.getParentContentExtent();
     var static_size = this.getAttr(prop, null) || this.getAttr("extent", null) || this.getCssAttr(prop, null) || this.getCssAttr("extent", null);
-    return static_size? this._computeUnitSize(static_size, this.getFontSize(), max_size) : null;
+    if(static_size === null){
+      return null;
+    }
+    return this._computeUnitSize(static_size, this.getFontSize(), max_size);
   };
 
   return Style;
