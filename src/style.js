@@ -569,13 +569,6 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
-   @return {boolean}
-   */
-  Style.prototype.hasFlipFlow = function(){
-    return this.parent? (this.flow !== this.parent.flow) : false;
-  };
-  /**
-   @memberof Nehan.Style
    */
   Style.prototype.clearBreakBefore = function(){
     this.breakBefore = null;

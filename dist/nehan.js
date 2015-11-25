@@ -13585,13 +13585,6 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
-   @return {boolean}
-   */
-  Style.prototype.hasFlipFlow = function(){
-    return this.parent? (this.flow !== this.parent.flow) : false;
-  };
-  /**
-   @memberof Nehan.Style
    */
   Style.prototype.clearBreakBefore = function(){
     this.breakBefore = null;
@@ -15258,37 +15251,6 @@ Nehan.LazyGenerator = (function(){
   return LazyGenerator;
 })();
 
-Nehan.FlipGenerator = (function(){
-  /**
-   @memberof Nehan
-   @class FlipGenerator
-   @classdesc generate fliped layout of [style]
-   @constructor
-   @param context {Nehan.RenderingContext}
-  */
-  function FlipGenerator(context){
-    Nehan.BlockGenerator.call(this, context);
-  }
-  Nehan.Class.extend(FlipGenerator, Nehan.BlockGenerator);
-
-  /**
-     @memberof Nehan.FlipGenerator
-     @method yield
-     @param context {Nehan.LayoutContext}
-     @return {Nehan.Box}
-  */
-  FlipGenerator.prototype.yield = function(){
-    this.context.style.updateContextSize(
-      this.context.layoutContext.getBlockRestExtent(), // measure -> extent
-      this.context.layoutContext.getInlineMaxMeasure() // extent -> measure
-    );
-    return Nehan.BlockGenerator.prototype.yield.call(this);
-  };
-
-  return FlipGenerator;
-})();
-
-
 /*
  if <body>[float1][float2][other elements]</body>
  style of this generator is 'body.context.style'.
@@ -16882,6 +16844,15 @@ Nehan.RenderingContext = (function(){
     });
   };
 
+  RenderingContext.prototype.createFlipLayoutContext = function(){
+    var measure = this.getParentRestExtent();
+    var extent = this.getParentContentMeasure();
+    return new Nehan.LayoutContext(
+      new Nehan.BlockContext(extent),
+      new Nehan.InlineContext(measure)
+    );
+  };
+
   RenderingContext.prototype.createInlineLayoutContext = function(){
     return new Nehan.LayoutContext(
       new Nehan.BlockContext(this.getContextMaxExtent()),
@@ -16904,6 +16875,9 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createLayoutContext = function(){
+    if(this.hasFlipFlow()){
+      return this.createFlipLayoutContext();
+    }
     if(!this.style || this.style.getMarkupName() === "html"){
       return null;
     }
@@ -17066,10 +17040,6 @@ Nehan.RenderingContext = (function(){
     if(direct_block){
       child_context.lazyOutput = direct_block;
       return new Nehan.LazyGenerator(child_context);
-    }
-
-    if(child_style.hasFlipFlow()){
-      return new Nehan.FlipGenerator(child_context);
     }
 
     // switch generator by display
@@ -17572,7 +17542,14 @@ Nehan.RenderingContext = (function(){
     if(this.parent && this.parent.layoutContext){
       return this.parent.layoutContext.getBlockRestExtent();
     }
-    return this.style.extent;
+    return null;
+  };
+
+  RenderingContext.prototype.getParentContentMeasure = function(){
+    if(this.parent && this.parent.layoutContext){
+      return this.parent.layoutContext.getInlineMaxMeasure();
+    }
+    return null;
   };
 
   // Size of after edge is not removed from content size,
@@ -17580,7 +17557,7 @@ Nehan.RenderingContext = (function(){
   // In constrast, size of start/end edge is always included,
   // because size of measure direction is fixed in each pages.
   RenderingContext.prototype.getContextMaxExtent = function(){
-    var rest_size = this.getParentRestExtent();
+    var rest_size = this.getParentRestExtent() || this.style.extent;
     var max_size = this.style.staticExtent? Math.min(rest_size, this.style.staticExtent) : rest_size;
     switch(this.style.boxSizing){
     case "content-box":
@@ -17628,7 +17605,7 @@ Nehan.RenderingContext = (function(){
       return markup_name + "(inline)";
     }
     if(this.generator instanceof Nehan.BlockGenerator){
-      return markup_name + "(block)";
+      return markup_name + "(block)" + (this.hasFlipFlow()? ":flip" : "");
     }
     return markup_name + "(" + this.getDisplay() + ")";
   };
@@ -17710,11 +17687,21 @@ Nehan.RenderingContext = (function(){
     return (typeof this.style.staticMeasure !== "undefined");
   };
 
+  RenderingContext.prototype.hasFlipFlow = function(){
+    return (this.parent && this.parent.style && this.parent.style.flow !== this.style.flow);
+  };
+
   // -----------------------------------------------
   // [init]
   // -----------------------------------------------
   RenderingContext.prototype.initLayoutContext = function(){
     this.layoutContext = this.createLayoutContext();
+    if(this.hasFlipFlow()){
+      this.updateContextSize(
+	this.layoutContext.getInlineMaxMeasure(),
+	this.layoutContext.getBlockMaxExtent()
+      );
+    }
     if(this.resumeLine){
       this.layoutContext.resumeLine(this.resumeLine);
       this.resumeLine = null;

@@ -139,7 +139,6 @@ var sources = [
   "src/first-line-generator.js",
   "src/lazy-generator.js",
   "src/break-after-generator.js",
-  "src/flip-generator.js",
   "src/float-generator.js",
   "src/parallel-generator.js",
   "src/section-root-generator.js",
