@@ -1042,7 +1042,10 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.hasFlipFlow = function(){
-    return (this.parent && this.parent.style && this.parent.style.flow !== this.style.flow);
+    if(!this.parent || !this.parent.style || this.isBody()){
+      return false;
+    }
+    return (this.parent.style.flow !== this.style.flow);
   };
 
   // -----------------------------------------------

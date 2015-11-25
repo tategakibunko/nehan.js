@@ -36,7 +36,7 @@ var LayoutTest = (function(){
     });
   };
   
-  var $vert, $hori, $test_menu, $all_links;
+  var $vert, $hori, $test_menu, $all_links, $source;
   var append_test_item = function(test_name){
     var $link = $("<a />").attr("href", "#" + test_name).html(test_name);
     $link.click(function(){
