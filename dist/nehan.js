@@ -18249,10 +18249,12 @@ Nehan.Document = (function(){
   }
 
   Document.prototype.render = function(opt){
+    opt = opt || {};
+    this.text = opt.text || this.text;
     if(opt.onPage){
       var original_onprogress = opt.onProgress || function(){};
       opt.onProgress = function(tree, ctx){
-	original_onprogress(tree, ctx); // origical callback
+	original_onprogress(tree, ctx);
 	opt.onPage(this.getPage(tree.pageNo), ctx);
       }.bind(this);
     }
