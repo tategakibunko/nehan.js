@@ -110,6 +110,7 @@ var TestStyles = {
   },
   "circular":{
     "display":"block",
+    "box-sizing":"content-box",
     "background":"orange",
     "measure":"300px",
     "extent":"300px",

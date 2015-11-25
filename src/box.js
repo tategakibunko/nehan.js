@@ -2,7 +2,7 @@ Nehan.Box = (function(){
   /**
    @memberof Nehan
    @class Box
-   @classdesc box abstraction with size and style context
+   @classdesc Box abstraction. Note that 'size' is treated as 'box-sizing:content-box' in evaluation phase.
    @constrctor
    @param args {Nehan.Object}
    @param args.size {Nehan.BoxSize}

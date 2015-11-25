@@ -543,12 +543,17 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createBlockBox = function(opt){
     opt = opt || {};
-    var measure =(typeof opt.measure !== "undefined")? opt.measure : this.layoutContext.getInlineMaxMeasure();
-    var extent = (typeof opt.extent !== "undefined")? opt.extent : this.layoutContext.getBlockCurExtent();
     var elements = opt.elements || this.layoutContext.getBlockElements();
+    var measure = (typeof opt.measure !== "undefined")? opt.measure : this.layoutContext.getInlineMaxMeasure();
+    var extent = this.getBlockBoxExtent(opt.extent || null);
+    /*
+    var extent = (typeof opt.extent !== "undefined")? opt.extent : this.layoutContext.getBlockCurExtent();
     if(this.isBody()){
       extent = this.style.contentExtent;
     }
+    if(extent !== new_extent){
+      console.error("[%s:extent] old(%d) !== new(%d), context:%o", this._name, extent, new_extent, this);
+    }*/
     var box = new Nehan.Box({
       display:((this.style.display === "inline-block")? this.style.display : "block"),
       type:"block",
@@ -861,6 +866,32 @@ Nehan.RenderingContext = (function(){
     return this.style.getEdgeAfter();
   };
 
+  RenderingContext.prototype.getBlockBoxExtent = function(direct_extent){
+    var auto_extent = this.layoutContext.getBlockCurExtent();
+    var static_extent = this.style.staticExtent || null;
+    var content_extent = this.style.contentExtent;
+    var is_float_space = this.isFloatSpace();
+    var is_iblock = this.style.isInlineBlock();
+
+    console.log(
+      "[%s(is_float=%o, is_iblock=%o, box-sizing:%s)]\n auto:%d\n style.staticExtent:%d\n style.extent:%d\n style.contentExtent:%d\n direct:%d",
+      this._name, is_float_space, is_iblock, this.style.boxSizing, auto_extent, this.style.staticExtent, this.style.extent, this.style.contentExtent, direct_extent
+    );
+    if(auto_extent === 0){
+      return 0;
+    }
+    if(this.isBody()){
+      return content_extent;
+    }
+    if(is_float_space){
+      return Math.min(auto_extent, content_extent);
+    }
+    if(static_extent){
+      return content_extent;
+    }
+    return direct_extent || auto_extent;
+  };
+
   RenderingContext.prototype.getParentRestExtent = function(){
     if(this.parent && this.parent.layoutContext){
       return this.parent.layoutContext.getBlockRestExtent();
@@ -1064,6 +1095,10 @@ Nehan.RenderingContext = (function(){
     return this.style.isTextVertical();
   };
 
+  RenderingContext.prototype.isFloatSpace = function(){
+    return this.style.getMarkupName() === "space";
+  };
+
   RenderingContext.prototype.isHyphenateEnable = function(){
     if(this.layoutContext.isInlineEmpty()){
       return false;
@@ -1217,11 +1252,14 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   // [update]
   // -----------------------------------------------
+  RenderingContext.prototype.updateContextStaticSize = function(measure, extent){
+    this.style.staticMeasure = measure;
+    this.style.staticExtent = extent;
+    this.style.updateContextSize(measure, extent);
+  };
+
   RenderingContext.prototype.updateContextSize = function(measure, extent){
     this.style.updateContextSize(measure, extent);
-    if(this.child){
-      this.child.updateContextSize(measure, extent);
-    }
   };
 
   RenderingContext.prototype.updateParent = function(parent_context){
@@ -1235,7 +1273,7 @@ Nehan.RenderingContext = (function(){
     console.log("[update block parent] %s > %s", parent_context._name, this._name);
     this.parent = parent_context;
     parent_context.child = this;
-    this.style.updateContextSize(parent_context.style.contentMeasure, parent_context.style.contentExtent);
+    this.updateContextSize(parent_context.style.contentMeasure, parent_context.style.contentExtent);
     if(this.child){
       this.child.updateParent(this);
     }
@@ -1412,7 +1450,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.yieldFloatSpace = function(float_group, measure, extent){
     console.info("yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
-    this.child.updateContextSize(measure, extent);
+    this.child.updateContextStaticSize(measure, extent);
     this.child.floatGroup = float_group;
     return this.yieldChildLayout();
   };

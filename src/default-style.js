@@ -139,6 +139,7 @@ Nehan.DefaultStyle = (function(){
 	},
 	"body":{
 	  "display":"block",
+	  "box-sizing":"content-box",
 	  "section-root":true,
 	  "hanging-punctuation":"allow-end"
 	},

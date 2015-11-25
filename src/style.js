@@ -156,9 +156,9 @@ Nehan.Style = (function(){
     this.staticExtent = this._loadStaticExtent();
 
     // context size(outer size and content size) is defined by
-    // 1. current static size
-    // 2. parent size
-    // 3. current edge size.
+    // 1. parent content size
+    // 2. edge size
+    // 3. static size
     this.initContextSize(this.staticMeasure, this.staticExtent);
 
     // margin-cancel or edge-collapse after context size is calculated.
@@ -241,8 +241,6 @@ Nehan.Style = (function(){
     if(this.markupName === "marker" || this.display === "table"){
       return this;
     }
-    this.staticMeasure = measure;
-    this.staticExtent = extent;
     this.initContextSize(measure, extent);
 
     // force re-culculate context-size of children based on new context-size of parent.
