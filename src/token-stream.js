@@ -197,10 +197,6 @@ Nehan.TokenStream = (function(){
   TokenStream.prototype.skipUntil  = function(fn){
     while(this.hasNext()){
       var token = this.get();
-      /*
-      if(token === null){
-	break;
-      }*/
       if(fn(token) === false){
 	this.prev();
 	break;
