@@ -5,6 +5,13 @@ Nehan.Document = (function(){
   }
 
   Document.prototype.render = function(opt){
+    if(opt.onPage){
+      var original_onprogress = opt.onProgress || function(){};
+      opt.onProgress = function(tree, ctx){
+	original_onprogress(tree, ctx); // origical callback
+	opt.onPage(this.getPage(tree.pageNo), ctx);
+      }.bind(this);
+    }
     new Nehan.PageParser(this.text, this.context).parse(opt);
     return this;
   };
