@@ -10613,7 +10613,7 @@ Nehan.HtmlLexer = (function (){
     if(Nehan.Config.enableAutoCloseTag){
       var next_open_match = this.buff.match(open_tag_rex);
       if(next_open_match){
-	return {closed:false, content:this.buff.substring(0, nexd_open_match.index)};
+	return {closed:false, content:this.buff.substring(0, next_open_match.index)};
       }
     }
 
