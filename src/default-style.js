@@ -76,9 +76,14 @@
  </pre>
  */
 Nehan.DefaultStyle = (function(){
-  /* TODO
   var __header_margin = function(ctx){
-  }; */
+    var em = ctx.style.getFontSize();
+    var rem = ctx.style.getRootFont().size;
+    return {
+      before:Math.floor(2 * rem - 0.14285 * em),
+      after:rem
+    };
+  };
   return {
     create : function(){
       return {
@@ -270,48 +275,45 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-size":"2.4em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-	  "margin":{
-	    "after":"0.5em"
-	  }
+	  "line-height":"1em",
+	  "margin":__header_margin
 	},
 	"h2":{
 	  "display":"block",
 	  "font-size":"2.0em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-	  "margin":{
-	    "after":"0.75em"
-	  }
+	  "line-height":"1em",
+	  "margin":__header_margin
 	},
 	"h3":{
 	  "display":"block",
 	  "font-size":"1.6em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-	  "margin":{
-	    "after":"1em"
-	  }
+	  "line-height":"1em",
+	  "margin":__header_margin
 	},
 	"h4":{
 	  "display":"block",
 	  "font-size":"1.4em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-	  "margin":{
-	    "after":"1.25em"
-	  }
+	  "line-height":"1em",
+	  "margin":__header_margin
 	},
 	"h5":{
 	  "display":"block",
 	  "font-size":"1.0em",
 	  "font-weight":"bold",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-	  "margin":{
-	    "after":"1.5em"
-	  }
+	  "line-height":"1em",
+	  "margin":__header_margin
 	},
 	"h6":{
 	  "display":"block",
 	  "font-weight":"bold",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-	  "font-size":"1.0em"
+	  "font-size":"1.0em",
+	  "line-height":"1em",
+	  "margin":__header_margin
 	},
 	"head":{
 	  "display":"none"
