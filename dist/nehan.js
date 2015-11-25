@@ -17229,15 +17229,7 @@ Nehan.RenderingContext = (function(){
     opt = opt || {};
     var elements = opt.elements || this.layoutContext.getBlockElements();
     var measure = (typeof opt.measure !== "undefined")? opt.measure : this.layoutContext.getInlineMaxMeasure();
-    var extent = this.getBlockBoxExtent(opt.extent || null);
-    /*
-    var extent = (typeof opt.extent !== "undefined")? opt.extent : this.layoutContext.getBlockCurExtent();
-    if(this.isBody()){
-      extent = this.style.contentExtent;
-    }
-    if(extent !== new_extent){
-      console.error("[%s:extent] old(%d) !== new(%d), context:%o", this._name, extent, new_extent, this);
-    }*/
+    var extent = this.getBlockBoxOutputExtent(opt.extent || null);
     var box = new Nehan.Box({
       display:((this.style.display === "inline-block")? this.style.display : "block"),
       type:"block",
@@ -17550,7 +17542,7 @@ Nehan.RenderingContext = (function(){
     return this.style.getEdgeAfter();
   };
 
-  RenderingContext.prototype.getBlockBoxExtent = function(direct_extent){
+  RenderingContext.prototype.getBlockBoxOutputExtent = function(direct_extent){
     var auto_extent = this.layoutContext.getBlockCurExtent();
     var static_extent = this.style.staticExtent || null;
     var content_extent = this.style.contentExtent;
@@ -17561,7 +17553,7 @@ Nehan.RenderingContext = (function(){
       "[%s(is_float=%o, is_iblock=%o, box-sizing:%s)]\n auto:%d\n style.staticExtent:%d\n style.extent:%d\n style.contentExtent:%d\n direct:%d",
       this._name, is_float_space, is_iblock, this.style.boxSizing, auto_extent, this.style.staticExtent, this.style.extent, this.style.contentExtent, direct_extent
     );
-    if(auto_extent === 0){
+    if(auto_extent === 0 && !this.style.isPasted()){
       return 0;
     }
     if(this.isBody()){

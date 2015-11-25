@@ -465,7 +465,7 @@ var Script = {
   ].join("\n"),
 
   "pasted-test":[
-    "<pasted size='150x200'>",
+    "<pasted size='150x200' style='background-color:orange'>",
     "<p>this is pasted content!!!</p>",
     "</pasted>"
   ].join("\n"),
