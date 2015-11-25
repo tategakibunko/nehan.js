@@ -808,6 +808,10 @@ Nehan.RenderingContext = (function(){
     return page;
   };
 
+  RenderingContext.prototype.getPageCount = function(){
+    return this.documentContext.pages.length;
+  };
+
   RenderingContext.prototype.getChildContext = function(){
     return this.child || null;
   };
