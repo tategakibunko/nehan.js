@@ -74,6 +74,13 @@ Nehan.DocumentContext = (function(){
   };
   /**
    @memberof Nehan.DocumentContext
+   @return {int}
+   */
+  DocumentContext.prototype.getPageCount = function(){
+    return this.pages.length;
+  };
+  /**
+   @memberof Nehan.DocumentContext
    @param page {Nehan.Box | Nehan.Page}
    */
   DocumentContext.prototype.addPage = function(page){

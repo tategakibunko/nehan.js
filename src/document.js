@@ -23,7 +23,7 @@ Nehan.Document = (function(){
   };
 
   Document.prototype.getPageCount = function(index){
-    return this.context.yieldCount;
+    return this.context.getPageCount();
   };
 
   Document.prototype.setContent = function(text){

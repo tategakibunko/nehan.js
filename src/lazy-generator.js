@@ -28,7 +28,7 @@ Nehan.LazyGenerator = (function(){
      @override
      @return {Nehan.Box}
   */
-  LazyGenerator.prototype.yield = function(context){
+  LazyGenerator.prototype._yield = function(){
     if(this.context.terminate){
       return null;
     }
