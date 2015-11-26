@@ -114,6 +114,7 @@ Nehan.PagedElement = (function(){
   NehanPagedElement.prototype.setContent = function(content, opt){
     this.document.setContent(content);
     this.document.render(opt);
+    this.setPage(0);
     return this;
   };
   /**

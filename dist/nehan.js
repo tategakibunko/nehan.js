@@ -10997,7 +10997,7 @@ Nehan.RubyTokenStream = (function(){
  --------------------------------------------
 
  [examples]
- Assume that Nehan.Display.direction is "hori" and Display["hori"] is "lr-tb".
+ Assume that flow of body is "lr-tb".
 
  ex1. {margin:{before:"10px"}} // => {margin:{top:"10px"}}
  ex2. {float:"start"} // => {float:"left"}.
@@ -11044,23 +11044,20 @@ Nehan.RubyTokenStream = (function(){
  In box-sizing, 'margin-box' is special value in nehan.js, and is box-sizing default value.
  In margin-box, even if margin is included in box-size.
 
- Why? In normal html, outer size of box can be expanded,
- but in paged layout, outer size is strictly fixed.
- So if you represent margin/border/padding(called in edge in nehan.js),
+ Why? In normal html, outer measure size of box can be expanded,
+ but in paged layout, outer measure size is strictly fixed.
+ So if you represent margin/border/padding(called 'box-edge' in nehan.js),
  the only way is 'eliminating content space'.
 
  (3.2) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
 
- This property represent document-mode in nehan.js.
+ This property represents 'writing-mode' in nehan.js.
 
- 'lr-tb' means inline flows 'left to right', block flows 'top to bottom'.
+ 'lr-tb' means that inline flows 'left to right', block flows 'top to bottom'.
 
- 'tb-rl' means inline flows 'top to bottom', block flows 'right to left', and so on.
+ 'tb-rl' means that inline flows 'top to bottom', block flows 'right to left', and so on.
 
- 'flip' means toggle Display["hori"] and Display["vert"].
- for example, assume that Display["hori"] is "lr-tb", and Display["vert"] is "tb-rl",
- and current document direction(Nehan.Display.direction) is "hori",
- flow:"flip" means Display["vert"], "tb-rl".
+ 'flip' means that toggle 'Nehan.Config.boxFlowSet.hori' and 'Nehan.Config.boxFlowSet.vert'.
  </pre>
  */
 Nehan.DefaultStyle = (function(){
@@ -18334,6 +18331,7 @@ Nehan.PagedElement = (function(){
   NehanPagedElement.prototype.setContent = function(content, opt){
     this.document.setContent(content);
     this.document.render(opt);
+    this.setPage(0);
     return this;
   };
   /**
