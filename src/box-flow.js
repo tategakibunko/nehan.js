@@ -190,13 +190,13 @@ Nehan.BoxFlow = (function(){
     return this.isTextVertical()? "measure" : "extent";
   };
   /**
-   get flipped box flow, but result depends on setting of Nehan.Display.boxFlow.
+   get flipped box flow, but result depends on setting of Nehan.Config.boxFlowSet.
 
    @memberof Nehan.BoxFlow
    @return {Nehan.BoxFlow}
    @example
-   * // if  Nehan.Display.boxFlow.hori = "lr-tb"
-   * // and Nehan.Display.boxFlow.vert = "tb-rl"
+   * // if  Nehan.Config.boxFlowSet.hori = "lr-tb"
+   * // and Nehan.Config.boxFlowSet.vert = "tb-rl"
    * new BlockFlow("tb", "rl").getFlipFlow(); // BoxFlow("lr", "tb")
    * new BlockFlow("lr", "tb").getFlipFlow(); // BoxFlow("tb", "rl")
    */

@@ -144,6 +144,7 @@ Nehan.DefaultStyle = (function(){
 	},
 	"body":{
 	  "display":"block",
+	  "flow":"lr-tb",
 	  "box-sizing":"content-box",
 	  "section-root":true,
 	  "hanging-punctuation":"allow-end"
@@ -275,6 +276,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-size":"2.4em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-weight":"bold",
 	  "line-height":"1em",
 	  "margin":__header_margin
 	},
@@ -282,6 +284,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-size":"2.0em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-weight":"bold",
 	  "line-height":"1em",
 	  "margin":__header_margin
 	},
@@ -289,6 +292,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-size":"1.6em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-weight":"bold",
 	  "line-height":"1em",
 	  "margin":__header_margin
 	},
@@ -296,6 +300,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-size":"1.4em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-weight":"bold",
 	  "line-height":"1em",
 	  "margin":__header_margin
 	},
@@ -448,7 +453,7 @@ Nehan.DefaultStyle = (function(){
 	"p":{
 	  "display":"block",
 	  "margin":{
-	    "after":"1em"
+	    "after":"1rem"
 	  }
 	},
 	"param":{
@@ -683,31 +688,31 @@ Nehan.DefaultStyle = (function(){
 	// font-size classes
 	//-------------------------------------------------------
 	".xx-large":{
-	  "font-size": Nehan.Display.fontSizeNames["xx-large"]
+	  "font-size": Nehan.Config.absFontSizes["xx-large"]
 	},
 	".x-large":{
-	  "font-size": Nehan.Display.fontSizeNames["x-large"]
+	  "font-size": Nehan.Config.absFontSizes["x-large"]
 	},
 	".large":{
-	  "font-size": Nehan.Display.fontSizeNames.large
+	  "font-size": Nehan.Config.absFontSizes.large
 	},
 	".medium":{
-	  "font-size": Nehan.Display.fontSizeNames.medium
+	  "font-size": Nehan.Config.absFontSizes.medium
 	},
 	".small":{
-	  "font-size": Nehan.Display.fontSizeNames.small
+	  "font-size": Nehan.Config.absFontSizes.small
 	},
 	".x-small":{
-	  "font-size": Nehan.Display.fontSizeNames["x-small"]
+	  "font-size": Nehan.Config.absFontSizes["x-small"]
 	},
 	".xx-small":{
-	  "font-size": Nehan.Display.fontSizeNames["xx-small"]
+	  "font-size": Nehan.Config.absFontSizes["xx-small"]
 	},
 	".larger":{
-	  "font-size": Nehan.Display.fontSizeNames.larger
+	  "font-size": Nehan.Config.absFontSizes.larger
 	},
 	".smaller":{
-	  "font-size": Nehan.Display.fontSizeNames.smaller
+	  "font-size": Nehan.Config.absFontSizes.smaller
 	},
 	//-------------------------------------------------------
 	// box-sizing classes

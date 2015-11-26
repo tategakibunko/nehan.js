@@ -31,7 +31,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.addBlockElement = function(element){
     if(element === null){
-      console.log("[%s]:eof", this.getGeneratorName());
+      //console.log("[%s]:eof", this.getGeneratorName());
       throw "eof"; // no more output
     }
     var max_size = this.getContextMaxExtentForAdd();
@@ -74,11 +74,12 @@ Nehan.RenderingContext = (function(){
     }
     // if overflow, penetrate page-break to parent layout.
     if(element.breakAfter || next_extent >= max_size){
+      /*
       if(element.breakAfter){
 	console.info("inherit break after");
       } else {
 	console.info("size over");
-      }
+      }*/
       this.setBreakAfter(true);
       throw "break-after";
     }
@@ -86,7 +87,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.addInlineElement = function(element){
     if(element === null){
-      console.log("[%s]:eof", this.getGeneratorName());
+      //console.log("[%s]:eof", this.getGeneratorName());
       throw "eof";
     }
     var max_size = this.layoutContext.getInlineMaxMeasure();
@@ -272,11 +273,12 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createOutlineElement = function(callbacks){
-    return this.documentContext.createOutlineElementByName("body", callbacks);
+    return this.createOutlineElementByName("body", callbacks || {});
   };
 
   RenderingContext.prototype.createOutlineElementByName = function(outline_name, callbacks){
-    return this.documentContext.createOutlineElementByName(outline_name, callbacks);
+    var outlines = this.documentContext.createOutlineElementByName(outline_name, callbacks);
+    return (outlines.length > 0)? outlines[0] : null;
   };
 
   RenderingContext.prototype.createChildContext = function(child_style, opt){
@@ -353,7 +355,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createFloatGenerator = function(first_float_gen){
-    console.log("create float generator!");
+    //console.log("create float generator!");
     var floated_generators = [first_float_gen];
     this.stream.iterWhile(function(token){
       if(token instanceof Nehan.Text && token.isWhiteSpaceOnly()){
@@ -571,10 +573,10 @@ Nehan.RenderingContext = (function(){
       pulled:this.style.isPulled()
     });
     if(this.style.getMarkupName() !== "hr" && (extent === 0 || elements.length === 0)){
-      console.warn("zero block? %o", box);
+      //console.warn("zero block? %o", box);
       box.breakAfter = true;
     }
-    console.log("box(%s) break after:%o", box.toString(), box.breakAfter);
+    //console.log("box(%s) break after:%o", box.toString(), box.breakAfter);
     return box;
   };
 
@@ -881,10 +883,12 @@ Nehan.RenderingContext = (function(){
     var is_float_space = this.isFloatSpace();
     var is_iblock = this.style.isInlineBlock();
 
+    /*
     console.log(
       "[%s(is_float=%o, is_iblock=%o, box-sizing:%s)]\n auto:%d\n style.staticExtent:%d\n style.extent:%d\n style.contentExtent:%d\n direct:%d",
       this._name, is_float_space, is_iblock, this.style.boxSizing, auto_extent, this.style.staticExtent, this.style.extent, this.style.contentExtent, direct_extent
     );
+     */
     if(auto_extent === 0 && !this.style.isPasted()){
       return 0;
     }
@@ -1159,7 +1163,7 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   RenderingContext.prototype.popCache = function(){
     var cache = this.cachedElements.pop();
-    console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
+    //console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
     cache.breakAfter = false;
     return cache;
   };
@@ -1173,7 +1177,7 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   RenderingContext.prototype.pushCache = function(element){
     var size = (element instanceof Nehan.Box)? element.getLayoutExtent(this.style.flow) : (element.bodySize || 0);
-    console.log("push cache:%o(e = %d, text = %s)", element, size, this.stringOfElement(element));
+    //console.log("push cache:%o(e = %d, text = %s)", element, size, this.stringOfElement(element));
     element.cacheCount = (element.cacheCount || 0) + 1;
     if(element.cacheCount >= Nehan.Config.maxRollbackCount){
       console.error("too many rollback! context:%o, element:%o", this, element);
@@ -1196,17 +1200,16 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.setBreakAfter = function(status){
     this.layoutContext.setBreakAfter(status);
-    console.log("setBreakAfter");
   };
 
   RenderingContext.prototype.setOwnerGenerator = function(generator){
     this.generator = generator;
     this._name = this.getGeneratorName();
-    console.log("generator:%s", this.getGeneratorName());
+    //console.log("generator:%s", this.getGeneratorName());
   };
 
   RenderingContext.prototype.setResumeLine = function(line){
-    console.warn("setResumeLine:%o", line);
+    //console.warn("setResumeLine:%o", line);
     this.resumeLine = line;
   };
 
@@ -1301,7 +1304,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.updateBlockParent = function(parent_context){
-    console.log("[update block parent] %s > %s", parent_context._name, this._name);
+    //console.log("[update block parent] %s > %s", parent_context._name, this._name);
     this.parent = parent_context;
     parent_context.child = this;
     this.updateContextSize(parent_context.style.contentMeasure, parent_context.style.contentExtent);
@@ -1311,7 +1314,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.updateInlineParent = function(parent_context){
-    console.log("[update inline parent] %s > %s", parent_context._name, this._name);
+    //console.log("[update inline parent] %s > %s", parent_context._name, this._name);
     this.style = parent_context.style;
     this.parent = parent_context;
     parent_context.child = this;
@@ -1485,7 +1488,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.yieldFloatSpace = function(float_group, measure, extent){
-    console.info("yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
+    //console.info("yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
     this.child.updateContextStaticSize(measure, extent);
     this.child.floatGroup = float_group;
     return this.yieldChildLayout();

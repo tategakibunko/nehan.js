@@ -18,7 +18,7 @@ Nehan.InlineGenerator = (function(){
       try {
 	this.context.addInlineElement(element);
       } catch(e){
-	console.warn(e);
+	//console.warn(e);
 	break;
       }	
     }

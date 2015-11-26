@@ -850,7 +850,7 @@ Nehan.Style = (function(){
    @return {Nehan.Color}
    */
   Style.prototype.getColor = function(){
-    return this.color || (this.parent? this.parent.getColor() : new Nehan.Color(Nehan.Display.fontColor));
+    return this.color || (this.parent? this.parent.getColor() : new Nehan.Color(Nehan.Config.defaultFontColor));
   };
   /**
    @memberof Nehan.Style
@@ -940,21 +940,21 @@ Nehan.Style = (function(){
    @return {int}
    */
   Style.prototype.getParentFontSize = function(){
-    return this.parent? this.parent.getFontSize() : Nehan.Display.fontSize;
+    return this.parent? this.parent.getFontSize() : Nehan.Config.defaultFontSize;
   };
   /**
    @memberof Nehan.Style
    @return {int}
    */
   Style.prototype.getParentContentMeasure = function(){
-    return this.parent? this.parent.contentMeasure : Nehan.Display.getMeasure(this.flow);
+    return this.parent? this.parent.contentMeasure : screen[this.flow.getPropMeasure()];
   };
   /**
    @memberof Nehan.Style
    @return {int}
    */
   Style.prototype.getParentContentExtent = function(){
-    return this.parent? this.parent.contentExtent : Nehan.Display.getExtent(this.flow);
+    return this.parent? this.parent.contentExtent : screen[this.flow.getPropExtent()];
   };
   /**
    @memberof Nehan.Style
@@ -968,7 +968,7 @@ Nehan.Style = (function(){
    @return {float | int}
    */
   Style.prototype.getLineHeight = function(){
-    return this.lineHeight || Nehan.Display.lineHeight || 2;
+    return this.lineHeight || Nehan.Config.defaultLineHeight;
   };
   /**
    @memberof Nehan.Style
@@ -983,7 +983,7 @@ Nehan.Style = (function(){
    */
   Style.prototype.getRubyTextBlockExtent = function(){
     var base_font_size = this.getFontSize();
-    var extent = Math.floor(base_font_size * (1 + Nehan.Display.rubyRate));
+    var extent = Math.floor(base_font_size * (1 + Nehan.Config.defaultRtRate));
     return (base_font_size % 2 === 0)? extent : extent + 1;
   };
   /**
@@ -1231,10 +1231,10 @@ Nehan.Style = (function(){
 
   Style.prototype._computeFontSize = function(val, unit_size){
     var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
-    var size = Nehan.Display.fontSizeNames[str] || str;
+    var size = Nehan.Config.absFontSizes[str] || str;
     var max_size = this.getParentFontSize();
     var font_size = this._computeUnitSize(size, unit_size, max_size);
-    return Math.min(font_size, Nehan.Display.maxFontSize);
+    return Math.max(Nehan.Config.minFontSize, Math.min(font_size, Nehan.Config.maxFontSize));
   };
 
   Style.prototype._computeUnitSize = function(val, unit_size, max_size){
@@ -1505,9 +1505,9 @@ Nehan.Style = (function(){
   Style.prototype._loadLineHeight = function(){
     var value = this.getCssAttr("line-height", "inherit");
     if(value === "inherit"){
-      return (this.parent && this.parent.lineHeight)? this.parent.lineHeight : Nehan.Display.lineHeight;
+      return (this.parent && this.parent.lineHeight)? this.parent.lineHeight : Nehan.Config.defaultLineHeight;
     }
-    return parseFloat(value || Nehan.Display.lineHeight);
+    return parseFloat(value || Nehan.Config.defaultLineHeight);
   };
 
   Style.prototype._loadTextAlign = function(){

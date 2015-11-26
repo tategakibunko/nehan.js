@@ -13,7 +13,7 @@ Nehan.TextEmpha = (function(){
     opt = opt || {};
     this.style = opt.style || new Nehan.TextEmphaStyle();
     this.pos = opt.pos || new Nehan.TextEmphaPos();
-    this.color = opt.color || new Nehan.Color(Nehan.Display.fontColor);
+    this.color = opt.color || new Nehan.Color(Nehan.Config.defaultFontColor);
   }
 
   /**

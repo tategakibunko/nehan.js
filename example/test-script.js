@@ -42,6 +42,18 @@ var Script = {
     "</div>"
   ].join("\n"),
 
+  "abs-font-size":[
+    "<p style='font-size:larger'>larger</p>",
+    "<p style='font-size:smaller'>smaller</p>",
+    "<p style='font-size:xx-large'>xxlarge</p>",
+    "<p style='font-size:x-large'>xlarge</p>",
+    "<p style='font-size:large'>large</p>",
+    "<p style='font-size:medium'>medium</p>",
+    "<p style='font-size:small'>small</p>",
+    "<p style='font-size:x-small'>xsmall</p>",
+    "<p style='font-size:xx-small'>xxsmall</p>"
+  ].join("\n"),
+
   "functional":[
     "<ul class='test-stripe'>",
     "<li>even</li>",

@@ -349,13 +349,13 @@ Nehan.Char = (function(){
       this._setupNbsp();
       break;
     case "&thinsp;":
-      this.vscale = this.hscale = Nehan.Display.spaceSizeRate.thinsp;
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.thinsp;
       break;
     case "&ensp;":
-      this.vscale = this.hscale = Nehan.Display.spaceSizeRate.ensp;
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.ensp;
       break;
     case "&emsp;":
-      this.vscale = this.hscale = Nehan.Display.spaceSizeRate.emsp;
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.emsp;
       break;
     case "&#09;":
       this._setupTabSpace();
@@ -369,10 +369,10 @@ Nehan.Char = (function(){
     }
   },
   Char.prototype._setupNbsp = function(){
-    this.vscale = this.hscale = Nehan.Display.spaceSizeRate.nbsp;
+    this.vscale = this.hscale = Nehan.Config.spacingSizeRate.nbsp;
   },
   Char.prototype._setupTabSpace = function(){
-    this.vscale = this.hscale = Math.floor(Nehan.Display.tabCount / 2);
+    this.vscale = this.hscale = Math.floor(Nehan.Config.tabCount / 2);
   },
   Char.prototype._setupNormal = function(code){
     // for half-size char, rotate 90 and half-scale in horizontal by default.
@@ -644,7 +644,7 @@ Nehan.Char = (function(){
    @return {string}
    */
   Char.prototype.getImgSrc = function(color){
-    return [Nehan.Display.fontImgRoot, this.vertImg, color + ".png"].join("/");
+    return [Nehan.Config.fontImgRoot, this.vertImg, color + ".png"].join("/");
   },
   /**
    @memberof Nehan.Char

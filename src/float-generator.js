@@ -21,9 +21,9 @@ Nehan.FloatGenerator = (function(){
     if(this.context.hasNextFloat()){
       return;
     }
-    console.info("FloatGenerator::_updateChildParent");
+    //console.info("FloatGenerator::_updateChildParent");
     if(this.context.child.hasCache()){
-      console.log("inherit child cache:", this.context.child.peekLastCache());
+      //console.log("inherit child cache:", this.context.child.peekLastCache());
       this.context.parent.pushCache(this.context.child.popCache());
     }
     if(this.context.child.child){
@@ -39,16 +39,16 @@ Nehan.FloatGenerator = (function(){
     if(stack.isEmpty()){
       return null;
     }
-    console.log("float stack:%o", stack);
+    //console.log("float stack:%o", stack);
     var rest_measure = this.context.layoutContext.getInlineRestMeasure();
     var stack_extent = stack.getExtent();
     if(stack_extent > this.context.getContextMaxExtent()){
-      console.warn("float stack can't be included in parent layout!");
+      //console.warn("float stack can't be included in parent layout!");
       this.context.pushFloatStackCache(stack);
       return null;
     }
     if(stack_extent <= 0 || rest_measure <= 0){
-      console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
+      //console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
       this._updateChildParent();
       return null;
     }
@@ -57,18 +57,18 @@ Nehan.FloatGenerator = (function(){
   };
 
   FloatGenerator.prototype._yieldFloat = function(stack, rest_measure, stack_extent){
-    console.log("_yieldFloat(rest_m:%d, rest_e:%d)", rest_measure, stack_extent);
+    //console.log("_yieldFloat(rest_m:%d, rest_e:%d)", rest_measure, stack_extent);
 
     // no more rest space
     if(rest_measure <= 0 || stack_extent <= 0){
-      console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
+      //console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
       this._updateChildParent();
       return null;
     }
 
     // no more floated layout, just yield rest area.
     if(stack.isEmpty()){
-      console.info("no more floating elements");
+      //console.info("no more floating elements");
       return this.context.yieldFloatSpace(stack.getLastGroup(), rest_measure, stack_extent);
     }
     /*
@@ -103,12 +103,12 @@ Nehan.FloatGenerator = (function(){
     // if no more rest extent is left,
     // continuous layout is displayed in parent context.
     if(rest_extent_space <= 0){
-      console.info("no more rest extent, group set:%o", group_set);
+      //console.info("no more rest extent, group set:%o", group_set);
       this._updateChildParent();
       return group_set;
     }
 
-    console.log("rest extent space:%d", rest_extent_space);
+    //console.log("rest extent space:%d", rest_extent_space);
 
     /*
       <------ rest_measure ---->

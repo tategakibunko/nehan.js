@@ -178,12 +178,8 @@ Nehan.PagedElement = (function(){
    @namespace Nehan
    @memberof Nehan
    @method createPagedElement
-   @param engine_args {Object}
-   @param engine_args.config {Nehan.Config} - system config
-   @param engine_args.display {Nehan.Display} - standard page parameters
-   @param engine_args.style {Nehan.Style} - engine local style
    @return {Nehan.PagedElement}
 */
-Nehan.createPagedElement = function(engine_args){
-  return new Nehan.PagedElement(engine_args || {});
+Nehan.createPagedElement = function(){
+  return new Nehan.PagedElement();
 };

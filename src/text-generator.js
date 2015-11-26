@@ -18,7 +18,7 @@ Nehan.TextGenerator = (function(){
       try {
 	this.context.addTextElement(element);
       } catch(e){
-	console.warn(e);
+	//console.warn(e);
 	break;
       }
     }

@@ -20,8 +20,8 @@ Nehan.ListStyleImage = (function(){
    */
   ListStyleImage.prototype.getMarkerHtml = function(count){
     var url = this.image.url;
-    var width = this.image.width || Nehan.Display.fontSize;
-    var height = this.image.height || Nehan.Display.fontSize;
+    var width = this.image.width || Nehan.Config.defaultFontSize;
+    var height = this.image.height || Nehan.Config.defaultFontSize;
     return Nehan.Html.tagSingle("img", {
       "src":url,
       "class":"nehan-list-image",

@@ -63,82 +63,100 @@ Nehan.setStyles = function(values){
 };
 
 /**
-   system configuration
-   @namespace Nehan.Config
-*/
+ system configuration
+ @namespace Nehan.Config
+ */
 Nehan.Config = {
   /**
-     language setting
-     @memberof Nehan.Config
-     @type {string}
-     @default "ja-JP"
-  */
+   language setting
+
+   @memberof Nehan.Config
+   @type {string}
+   @default "ja-JP"
+   */
   lang:"ja-JP",
 
   /**
-     is debug mode?
-     @memberof Nehan.Config
-     @type {boolean}
-     @default false
-  */
+   is debug mode?
+
+   @memberof Nehan.Config
+   @type {boolean}
+   @default false
+   */
   debug:false,
 
   /**
-     is kerning enabled?
-     @memberof Nehan.Config
-     @type {boolean}
-     @default true
-  */
+   define root markup where rendering context starts from.
+   'body' or 'html' or 'document' are enabled.
+
+   @memberof Nehan.Config
+   @type {String}
+   @default "document"
+   */
+  root:"document",
+
+  /**
+   is kerning enabled?
+
+   @memberof Nehan.Config
+   @type {boolean}
+   @default true
+   */
   kerning:true,
 
   /**
-     max rety count when something troubles.
-     @memberof Nehan.Config
-     @type {int}
-     @default 20
-  */
-  maxRollbackCount:4,
+   max rety yield count
+
+   @memberof Nehan.Config
+   @type {int}
+   @default 10
+   */
+  maxRollbackCount:10,
 
   /**
-     max yield count to block infinite loop.
-     @memberof Nehan.Config
-     @type {int}
-     @default 20000
-  */
+   max yield count to block infinite loop.
+
+   @memberof Nehan.Config
+   @type {int}
+   @default 20000
+   */
   maxYieldCount:20000,
 
   /**
-     max available page count for each engine.
-     @memberof Nehan.Config
-     @type {int}
-     @default 5000
-  */
+   max available page count for each engine.
+
+   @memberof Nehan.Config
+   @type {int}
+   @default 5000
+   */
   maxPageCount:5000,
 
   /**
-     use vertical glyph if browser support 'writing-mode'.
-     @memberof Nehan.Config
-     @type {boolean}
-     @default true
-  */
+   use vertical glyph if browser support 'writing-mode'.
+
+   @memberof Nehan.Config
+   @type {boolean}
+   @default true
+   */
   useVerticalGlyphIfEnable:true,
 
   /**
-     enable ommiting element by start tag.
-     @memberof Nehan.Config
-     @type {boolean}
-     @default false
-  */
+   enable ommiting element by start tag.
+
+   @memberof Nehan.Config
+   @type {boolean}
+   @default false
+   */
   enableAutoCloseTag:false,
 
   /**
-     allowed inline style properties.
-     allow all properties if not defined or list is empty.
+   allowed inline style properties.
+   allow all properties if not defined or list is empty.
 
-     @memberof Nehan.Config
-     @type {Array.<string>}
-     @default []
-  */
+   @memberof Nehan.Config
+   @type {Array.<string>}
+   @default []
+   */
   allowedInlineStyleProps:[],
 
   /**
@@ -225,196 +243,134 @@ Nehan.Config = {
     "onblock",
     "online",
     "ontext"
-  ]
-};
-
-/**
-   standard page settings.
-   @namespace Nehan.Display
-*/
-Nehan.Display = {
-  /**
-     <pre>
-      define root where content text starts from.
-      'body' or 'html' or 'document' are enabled.
-
-      1. 'document'
-         &lt;!doctype xxx&gt; tag is included in content text.
-      2. 'html'
-         &lt;head&gt; and &lt;html&gt; are included in content text.
-      3. 'body'
-         &lt;body&gt; or content of body itself is included in content text.
-     </pre>
-     @memberof Nehan.Display
-     @type {String}
-     @default "document"
-  */
-  root:"document",
+  ],
 
   /**
-     standard flow, "tb-rl" or "tb-lr" or "lr-tb".
+   count of tab space
 
-     @memberof Nehan.Display
-     @type {String}
-     @default "tb-rl"
-  */
-  flow:"tb-rl",
-  /**
-     standard box flow for "vert" and "hori".
-
-     @memberof Nehan.Display
-     @type {Object}
-     @default {hori:"lr-tb", vert:"tb-rl"}
-  */
-  boxFlow:{
-    hori:"lr-tb", // used when direction is 'hori'. notice that rl-tb is not supported yet.
-    vert:"tb-rl"  // used when direction is 'vert'. "tb-lr" is also supported.
-  },
-  /**
-     standard page width, used when <body>.width is not defined.
-
-     @memberof Nehan.Display
-     @type {int}
-     @default screen.width
-  */
-  width: screen.width,
-  /**
-     standard page height, used when <body>.height is not defined.
-
-     @memberof Nehan.Display
-     @type {int}
-     @default screen.height
-  */
-  height: screen.height,
-  /**
-     standard font size, used when <body>.fontSize is not defined.
-
-     @memberof Nehan.Display
-     @type {int}
-     @default 16
-  */
-  fontSize:16,
-  /**
-     standard minimum font size.
-
-     @memberof Nehan.Display
-     @type {int}
-     @default 12
-  */
-  minFontSize:12,
-  /**
-     standard maximum font size.
-
-     @memberof Nehan.Display
-     @type {int}
-     @default 90
-  */
-  maxFontSize:90,
-  /**
-     standard minimum table cell size. if table-layout is set to 'auto', all sizes of cell are larger than this value.
-
-     @memberof Nehan.Display
-     @type {int}
-     @default 48
-  */
-  minTableCellSize:48,
-  /**
-     standard rate of ruby font size. used when Style.rt["font-size"] is not defined.
-
-     @memberof Nehan.Display
-     @type {Float}
-     @default 0.5
-  */
-  rubyRate:0.5,
-  /**
-     standard bold plus size rate, it's used to calculate sketchy bold metrics in the environment with no canvas element.
-
-     @memberof Nehan.Display
-  */
-  boldRate:0.12,
-  /**
-     standard line-height.
-
-     @memberof Nehan.Display
-     @type {Float}
-     @default 2.0
-  */
-  lineHeight: 2.0,
-  /**
-     various kind of spacing rate
-
-     @memberof Nehan.Display
-     @type {Array.<Float>}
-  */
-  spaceSizeRate:{
-    thinsp:0.2, // &thinsp;
-    nbsp:0.38,  // &nbsp;
-    ensp:0.5,   // &ensp;
-    emsp:1.0    // &emsp;
-  },
-  /**
-     count of tab space
-
-     @memberof Nehan.Display
-     @type {int}
-     @default 4
-  */
+   @memberof Nehan.Config
+   @type {int}
+   @default 4
+   */
   tabCount: 4,
-  /**
-     standard font color. this is required for browsers not supporting writing-mode to display vertical font-images.
 
-     @memberof Nehan.Display
-     @type {String}
-     @default "000000"
-  */
-  fontColor:"000000",
   /**
-     standard link color. this is required for browsers not supporting writing-mode to display vertical font-images.
+   minimum table cell size. if table-layout is set to 'auto', all sizes of cell are larger than this value.
 
-     @memberof Nehan.Display
-     @type {String}
-     @default "0000FF"
-  */
-  linkColor:"0000FF",
+   @memberof Nehan.Config
+   @type {int}
+   @default 48
+   */
+  minTableCellSize:48,
+
   /**
-     font image url. this is required for browsers not supporting writing-mode to display vertical font-images.
+   default rate of ruby text(rt) font size. used when no font-size for rt is specified.
 
-     @memberof Nehan.Display
-     @type {String}
-     @default "https://raw.githubusercontent.com/tategakibunko/nehan.js/master/char-img"
-  */
+   @memberof Nehan.Config
+   @type {Float}
+   @default 0.5
+   */
+  defaultRtRate:0.5,
+  
+  /**
+   box-flow set for "vert" and "hori".
+
+   @memberof Nehan.Config
+   @type {Object}
+   @default {hori:"lr-tb", vert:"tb-rl"}
+   */
+  boxFlowSet:{
+    vert:"tb-rl", // or "lr-tb"
+    hori:"lr-tb"
+  },
+
+  /**
+   default box-flow, "tb-rl" or "tb-lr" or "lr-tb".
+
+   @memberof Nehan.Config
+   @type {String}
+   @default "tb-rl"
+   */
+  defaultBoxFlow: "lr-tb",
+
+  /**
+   default line-height
+
+   @memberof Nehan.Config
+   @type {Float}
+   @default 2.0
+   */
+  defaultLineHeight: 2.0,
+
+  /**
+   default minimum font size
+
+   @memberof Nehan.Config
+   @type {int}
+   @default 8
+   */
+  minFontSize:8,
+
+  /**
+   default maximum font size
+
+   @memberof Nehan.Config
+   @type {int}
+   @default 90
+   */
+  maxFontSize:90,
+
+  /**
+   default font size, used when no font-size is specified for body.
+
+   @memberof Nehan.Config
+   @type {int}
+   @default 16
+   */
+  defaultFontSize:16,
+
+  /**
+   default font color, used when no color is specified for body.
+   @memberof Nehan.Config
+   @type {String}
+   @default "000000"
+   */
+  defaultFontColor: "000000",
+
+  /**
+   default font size, used when no font-size is specified for body.
+   @memberof Nehan.Config
+   @type {Int}
+   @default 16
+   */
+  defaultFontSize: 16,
+
+  /**
+   default font family, required to calculate proper text-metrics of alphabetical word.
+
+   @memberof Nehan.Config
+   @type {String}
+   @default "'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace"
+   */
+  defaultFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
+  //defaultFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+
+  /**
+   font image url, required for legacy browsers not supporting vertical writing-mode.
+
+   @memberof Nehan.Config
+   @type {String}
+   @default "https://raw.githubusercontent.com/tategakibunko/nehan.js/master/char-img"
+   */
   fontImgRoot:"https://raw.githubusercontent.com/tategakibunko/nehan.js/master/char-img",
 
   /**
-     standard font family. this is required to calculate proper text-metrics of alphabetical word.
+   pre defined font-size keywords
 
-     @memberof Nehan.Display
-     @type {String}
-     @default "'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace"
-  */
-  fontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
-  //fontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-
-  /**
-     font sizes defined by name
-
-     @memberof Nehan.Display
-     @type {Object}
-     @default <pre>
-     {
-      "xx-large":"33px",
-      "x-large":"24px",
-      "large":"18px",
-      "medium":"16px",
-      "small":"13px",
-      "x-small":"10px",
-      "xx-small":"8px",
-      "larger":"1.2em",
-      "smaller":"0.8em"
-    }
-     </pre>
-  */
-  fontSizeNames:{
+   @memberof Nehan.Config
+   @type {Object}
+   */
+  absFontSizes:{
     "xx-large":"33px",
     "x-large":"24px",
     "large":"18px",
@@ -425,80 +381,73 @@ Nehan.Display = {
     "larger":"1.2em",
     "smaller":"0.8em"
   },
+
   /**
-     @memberof Nehan.Display
-     @param flow {Nehan.BoxFlow}
-     @return {int}
-  */
-  getMeasure : function(flow){
-    return this[flow.getPropMeasure()];
-  },
+   various kind of spacing rate
+
+   @memberof Nehan.Config
+   @type {Array.<Float>}
+   */
+  spacingSizeRate:{
+    thinsp:0.2, // &thinsp;
+    nbsp:0.38,  // &nbsp;
+    ensp:0.5,   // &ensp;
+    emsp:1.0    // &emsp;
+  }
+};
+
+/**
+ standard page settings.
+ @namespace Nehan.Display
+ */
+Nehan.Display = {
   /**
-     @memberof Nehan.Display
-     @param flow {Nehan.BoxFlow}
-     @return {int}
-  */
-  getExtent : function(flow){
-    return this[flow.getPropExtent()];
-  },
-  /**
-     @memberof Nehan.Display
-     @return {string}
-  */
+   @memberof Nehan.Display
+   @return {string}
+   */
   getVertBlockDir: function(){
-    return this.boxFlow.vert.splice("-")[1];
+    return Nehan.Config.boxFlowSet.vert.splice("-")[1];
   },
   /**
-     @memberof Nehan.Display
-     @return {Nehan.BoxFlow}
-  */
+   @memberof Nehan.Display
+   @return {Nehan.BoxFlow}
+   */
   getStdFont : function(){
-    var font = new Nehan.Font(this.fontSize);
-    font.family = this.fontFamily;
+    var font = new Nehan.Font(Nehan.Config.defaultFontSize);
+    font.family = Nehan.Config.defaultFontFamily;
     font.weight = "normal";
     font.style = "normal";
     return font;
   },
   /**
-     @memberof Nehan.Display
-     @return {Nehan.BoxFlow}
-  */
+   @memberof Nehan.Display
+   @return {Nehan.BoxFlow}
+   */
   getStdBoxFlow : function(){
-    return Nehan.BoxFlows.getByName(this.flow);
+    return Nehan.BoxFlows.getByName(Nehan.Config.defaultBoxFlow);
   },
   /**
-     @memberof Nehan.Display
-     @return {Nehan.BoxFlow}
-  */
+   @memberof Nehan.Display
+   @return {Nehan.BoxFlow}
+   */
   getStdVertFlow : function(){
-    return Nehan.BoxFlows.getByName(this.boxFlow.vert);
+    return Nehan.BoxFlows.getByName(Nehan.Config.boxFlowSet.vert);
   },
   /**
-     @memberof Nehan.Display
-     @return {Nehan.BoxFlow}
-  */
+   @memberof Nehan.Display
+   @return {Nehan.BoxFlow}
+   */
   getStdHoriFlow : function(){
-    return Nehan.BoxFlows.getByName(this.boxFlow.hori);
+    return Nehan.BoxFlows.getByName(Nehan.Config.boxFlowSet.hori);
   },
   /**
-     @memberof Nehan.Display
-     @return {int}
-  */
+   @memberof Nehan.Display
+   @return {int}
+   */
   getRtFontSize : function(base_font_size){
-    return Math.round(this.rubyRate * base_font_size);
-  },
-  /**
-     @memberof Nehan.Display
-     @return {String}
-  */
-  getPaletteFontColor : function(color){
-    if(color.getValue().toLowerCase() !== this.fontColor.toLowerCase()){
-      return color.getPaletteValue();
-    }
-    return this.fontColor;
+    return Math.round(Nehan.Config.defaultRtRate * base_font_size);
   }
 };
-
 
 Nehan.Client = (function(){
   /**
@@ -5583,20 +5532,20 @@ Nehan.BoxEdge = (function (){
     cancel_size += this.margin.getAfter(flow);
     this.margin.clearAfter(flow);
     if(cancel_size >= required_size){
-      console.warn("cancel edge(margin):%d", cancel_size);
+      //console.warn("cancel edge(margin):%d", cancel_size);
       return cancel_size;
     }
     // second, try to clear padding
     cancel_size += this.padding.getAfter(flow);
     this.padding.clearAfter(flow);
     if(cancel_size >= required_size){
-      console.warn("cancel edge(margin/padding):%d", cancel_size);
+      //console.warn("cancel edge(margin/padding):%d", cancel_size);
       return cancel_size;
     }
     // finally, try to clear border
     cancel_size += this.border.getAfter(flow);
     this.border.clearAfter(flow);
-    console.warn("cancel edge(margin/padding/border):%d", cancel_size);
+    //console.warn("cancel edge(margin/padding/border):%d", cancel_size);
     return cancel_size;
   };
   /**
@@ -7559,13 +7508,13 @@ Nehan.BoxFlow = (function(){
     return this.isTextVertical()? "measure" : "extent";
   };
   /**
-   get flipped box flow, but result depends on setting of Nehan.Display.boxFlow.
+   get flipped box flow, but result depends on setting of Nehan.Config.boxFlowSet.
 
    @memberof Nehan.BoxFlow
    @return {Nehan.BoxFlow}
    @example
-   * // if  Nehan.Display.boxFlow.hori = "lr-tb"
-   * // and Nehan.Display.boxFlow.vert = "tb-rl"
+   * // if  Nehan.Config.boxFlowSet.hori = "lr-tb"
+   * // and Nehan.Config.boxFlowSet.vert = "tb-rl"
    * new BlockFlow("tb", "rl").getFlipFlow(); // BoxFlow("lr", "tb")
    * new BlockFlow("lr", "tb").getFlipFlow(); // BoxFlow("tb", "rl")
    */
@@ -8139,13 +8088,13 @@ Nehan.Char = (function(){
       this._setupNbsp();
       break;
     case "&thinsp;":
-      this.vscale = this.hscale = Nehan.Display.spaceSizeRate.thinsp;
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.thinsp;
       break;
     case "&ensp;":
-      this.vscale = this.hscale = Nehan.Display.spaceSizeRate.ensp;
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.ensp;
       break;
     case "&emsp;":
-      this.vscale = this.hscale = Nehan.Display.spaceSizeRate.emsp;
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.emsp;
       break;
     case "&#09;":
       this._setupTabSpace();
@@ -8159,10 +8108,10 @@ Nehan.Char = (function(){
     }
   },
   Char.prototype._setupNbsp = function(){
-    this.vscale = this.hscale = Nehan.Display.spaceSizeRate.nbsp;
+    this.vscale = this.hscale = Nehan.Config.spacingSizeRate.nbsp;
   },
   Char.prototype._setupTabSpace = function(){
-    this.vscale = this.hscale = Math.floor(Nehan.Display.tabCount / 2);
+    this.vscale = this.hscale = Math.floor(Nehan.Config.tabCount / 2);
   },
   Char.prototype._setupNormal = function(code){
     // for half-size char, rotate 90 and half-scale in horizontal by default.
@@ -8434,7 +8383,7 @@ Nehan.Char = (function(){
    @return {string}
    */
   Char.prototype.getImgSrc = function(color){
-    return [Nehan.Display.fontImgRoot, this.vertImg, color + ".png"].join("/");
+    return [Nehan.Config.fontImgRoot, this.vertImg, color + ".png"].join("/");
   },
   /**
    @memberof Nehan.Char
@@ -9262,8 +9211,8 @@ Nehan.ListStyleImage = (function(){
    */
   ListStyleImage.prototype.getMarkerHtml = function(count){
     var url = this.image.url;
-    var width = this.image.width || Nehan.Display.fontSize;
-    var height = this.image.height || Nehan.Display.fontSize;
+    var width = this.image.width || Nehan.Config.defaultFontSize;
+    var height = this.image.height || Nehan.Config.defaultFontSize;
     return Nehan.Html.tagSingle("img", {
       "src":url,
       "class":"nehan-list-image",
@@ -9458,7 +9407,7 @@ Nehan.TextEmpha = (function(){
     opt = opt || {};
     this.style = opt.style || new Nehan.TextEmphaStyle();
     this.pos = opt.pos || new Nehan.TextEmphaPos();
-    this.color = opt.color || new Nehan.Color(Nehan.Display.fontColor);
+    this.color = opt.color || new Nehan.Color(Nehan.Config.defaultFontColor);
   }
 
   /**
@@ -9757,7 +9706,7 @@ Nehan.Partition = (function(){
     var sizes =  this._punits.map(function(punit){
       return punit.getSize(measure, total_weight);
     });
-    return __levelize(sizes, Nehan.Display.minTableCellSize);
+    return __levelize(sizes, Nehan.Config.minTableCellSize);
   };
 
   return Partition;
@@ -11183,6 +11132,7 @@ Nehan.DefaultStyle = (function(){
 	},
 	"body":{
 	  "display":"block",
+	  "flow":"lr-tb",
 	  "box-sizing":"content-box",
 	  "section-root":true,
 	  "hanging-punctuation":"allow-end"
@@ -11314,6 +11264,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-size":"2.4em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-weight":"bold",
 	  "line-height":"1em",
 	  "margin":__header_margin
 	},
@@ -11321,6 +11272,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-size":"2.0em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-weight":"bold",
 	  "line-height":"1em",
 	  "margin":__header_margin
 	},
@@ -11328,6 +11280,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-size":"1.6em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-weight":"bold",
 	  "line-height":"1em",
 	  "margin":__header_margin
 	},
@@ -11335,6 +11288,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-size":"1.4em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-weight":"bold",
 	  "line-height":"1em",
 	  "margin":__header_margin
 	},
@@ -11487,7 +11441,7 @@ Nehan.DefaultStyle = (function(){
 	"p":{
 	  "display":"block",
 	  "margin":{
-	    "after":"1em"
+	    "after":"1rem"
 	  }
 	},
 	"param":{
@@ -11722,31 +11676,31 @@ Nehan.DefaultStyle = (function(){
 	// font-size classes
 	//-------------------------------------------------------
 	".xx-large":{
-	  "font-size": Nehan.Display.fontSizeNames["xx-large"]
+	  "font-size": Nehan.Config.absFontSizes["xx-large"]
 	},
 	".x-large":{
-	  "font-size": Nehan.Display.fontSizeNames["x-large"]
+	  "font-size": Nehan.Config.absFontSizes["x-large"]
 	},
 	".large":{
-	  "font-size": Nehan.Display.fontSizeNames.large
+	  "font-size": Nehan.Config.absFontSizes.large
 	},
 	".medium":{
-	  "font-size": Nehan.Display.fontSizeNames.medium
+	  "font-size": Nehan.Config.absFontSizes.medium
 	},
 	".small":{
-	  "font-size": Nehan.Display.fontSizeNames.small
+	  "font-size": Nehan.Config.absFontSizes.small
 	},
 	".x-small":{
-	  "font-size": Nehan.Display.fontSizeNames["x-small"]
+	  "font-size": Nehan.Config.absFontSizes["x-small"]
 	},
 	".xx-small":{
-	  "font-size": Nehan.Display.fontSizeNames["xx-small"]
+	  "font-size": Nehan.Config.absFontSizes["xx-small"]
 	},
 	".larger":{
-	  "font-size": Nehan.Display.fontSizeNames.larger
+	  "font-size": Nehan.Config.absFontSizes.larger
 	},
 	".smaller":{
-	  "font-size": Nehan.Display.fontSizeNames.smaller
+	  "font-size": Nehan.Config.absFontSizes.smaller
 	},
 	//-------------------------------------------------------
 	// box-sizing classes
@@ -12513,8 +12467,8 @@ Nehan.PageEvaluator = (function(){
   }
 
   PageEvaluator.prototype._getEvaluator = function(){
-    var body_selector = this.context.selectors.get("body") || new Nehan.Selector("body", {flow:Nehan.Display.flow});
-    var flow = body_selector.getValue().flow || Nehan.Display.flow;
+    var body_selector = this.context.selectors.get("body") || new Nehan.Selector("body", {flow:Nehan.Config.defaultBoxFlow});
+    var flow = body_selector.getValue().flow || Nehan.Config.defaultBoxFlow;
     return (flow === "tb-rl" || flow === "tb-lr")? new Nehan.VertEvaluator(this.context) : new Nehan.HoriEvaluator(this.context);
   };
 
@@ -13871,7 +13825,7 @@ Nehan.Style = (function(){
    @return {Nehan.Color}
    */
   Style.prototype.getColor = function(){
-    return this.color || (this.parent? this.parent.getColor() : new Nehan.Color(Nehan.Display.fontColor));
+    return this.color || (this.parent? this.parent.getColor() : new Nehan.Color(Nehan.Config.defaultFontColor));
   };
   /**
    @memberof Nehan.Style
@@ -13961,21 +13915,21 @@ Nehan.Style = (function(){
    @return {int}
    */
   Style.prototype.getParentFontSize = function(){
-    return this.parent? this.parent.getFontSize() : Nehan.Display.fontSize;
+    return this.parent? this.parent.getFontSize() : Nehan.Config.defaultFontSize;
   };
   /**
    @memberof Nehan.Style
    @return {int}
    */
   Style.prototype.getParentContentMeasure = function(){
-    return this.parent? this.parent.contentMeasure : Nehan.Display.getMeasure(this.flow);
+    return this.parent? this.parent.contentMeasure : screen[this.flow.getPropMeasure()];
   };
   /**
    @memberof Nehan.Style
    @return {int}
    */
   Style.prototype.getParentContentExtent = function(){
-    return this.parent? this.parent.contentExtent : Nehan.Display.getExtent(this.flow);
+    return this.parent? this.parent.contentExtent : screen[this.flow.getPropExtent()];
   };
   /**
    @memberof Nehan.Style
@@ -13989,7 +13943,7 @@ Nehan.Style = (function(){
    @return {float | int}
    */
   Style.prototype.getLineHeight = function(){
-    return this.lineHeight || Nehan.Display.lineHeight || 2;
+    return this.lineHeight || Nehan.Config.defaultLineHeight;
   };
   /**
    @memberof Nehan.Style
@@ -14004,7 +13958,7 @@ Nehan.Style = (function(){
    */
   Style.prototype.getRubyTextBlockExtent = function(){
     var base_font_size = this.getFontSize();
-    var extent = Math.floor(base_font_size * (1 + Nehan.Display.rubyRate));
+    var extent = Math.floor(base_font_size * (1 + Nehan.Config.defaultRtRate));
     return (base_font_size % 2 === 0)? extent : extent + 1;
   };
   /**
@@ -14252,10 +14206,10 @@ Nehan.Style = (function(){
 
   Style.prototype._computeFontSize = function(val, unit_size){
     var str = String(val).replace(/\/.+$/, ""); // remove line-height value like 'large/150%"'
-    var size = Nehan.Display.fontSizeNames[str] || str;
+    var size = Nehan.Config.absFontSizes[str] || str;
     var max_size = this.getParentFontSize();
     var font_size = this._computeUnitSize(size, unit_size, max_size);
-    return Math.min(font_size, Nehan.Display.maxFontSize);
+    return Math.max(Nehan.Config.minFontSize, Math.min(font_size, Nehan.Config.maxFontSize));
   };
 
   Style.prototype._computeUnitSize = function(val, unit_size, max_size){
@@ -14526,9 +14480,9 @@ Nehan.Style = (function(){
   Style.prototype._loadLineHeight = function(){
     var value = this.getCssAttr("line-height", "inherit");
     if(value === "inherit"){
-      return (this.parent && this.parent.lineHeight)? this.parent.lineHeight : Nehan.Display.lineHeight;
+      return (this.parent && this.parent.lineHeight)? this.parent.lineHeight : Nehan.Config.defaultLineHeight;
     }
-    return parseFloat(value || Nehan.Display.lineHeight);
+    return parseFloat(value || Nehan.Config.defaultLineHeight);
   };
 
   Style.prototype._loadTextAlign = function(){
@@ -14684,13 +14638,12 @@ Nehan.LayoutGenerator = (function(){
    @return {Nehan.Box}
    */
   LayoutGenerator.prototype.yield = function(){
-    console.group("%s _yield", this.context.getGeneratorName());
-    console.log("context:%o", this.context);
+    //console.group("%s _yield:%o", this.context.getGeneratorName(), this.context);
 
     this.context.initLayoutContext();
 
     if(this.context.layoutContext){
-      console.log("available space(m = %d, e = %d)", this.context.layoutContext.inline.maxMeasure, this.context.layoutContext.block.maxExtent);
+      //console.log("available space(m = %d, e = %d)", this.context.layoutContext.inline.maxMeasure, this.context.layoutContext.block.maxExtent);
       if(this.context.layoutContext.block.maxExtent <= 0){
 	return null;
       }
@@ -14706,7 +14659,7 @@ Nehan.LayoutGenerator = (function(){
       console.error("[%s]too many yield!:%o", this.context._name, this);
       throw "too many yield";
     }
-    console.groupEnd();
+    //console.groupEnd();
     return box;
   };
 
@@ -14745,7 +14698,7 @@ Nehan.BlockGenerator = (function(){
   BlockGenerator.prototype._yield = function(){
     var clearance = this.context.yieldClearance();
     if(clearance){
-      console.log("clearance:", clearance);
+      //console.log("clearance:", clearance);
       return clearance;
     }
     // if break-before available, page-break but only once.
@@ -14757,7 +14710,7 @@ Nehan.BlockGenerator = (function(){
       try {
 	this.context.addBlockElement(element);
       } catch (e){
-	console.warn(e);
+	//console.warn(e);
 	if(e === "too many rollback"){
 	  throw e; // fail again
 	}
@@ -14875,7 +14828,7 @@ Nehan.InlineGenerator = (function(){
       try {
 	this.context.addInlineElement(element);
       } catch(e){
-	console.warn(e);
+	//console.warn(e);
 	break;
       }	
     }
@@ -15025,7 +14978,7 @@ Nehan.TextGenerator = (function(){
       try {
 	this.context.addTextElement(element);
       } catch(e){
-	console.warn(e);
+	//console.warn(e);
 	break;
       }
     }
@@ -15288,9 +15241,9 @@ Nehan.FloatGenerator = (function(){
     if(this.context.hasNextFloat()){
       return;
     }
-    console.info("FloatGenerator::_updateChildParent");
+    //console.info("FloatGenerator::_updateChildParent");
     if(this.context.child.hasCache()){
-      console.log("inherit child cache:", this.context.child.peekLastCache());
+      //console.log("inherit child cache:", this.context.child.peekLastCache());
       this.context.parent.pushCache(this.context.child.popCache());
     }
     if(this.context.child.child){
@@ -15306,16 +15259,16 @@ Nehan.FloatGenerator = (function(){
     if(stack.isEmpty()){
       return null;
     }
-    console.log("float stack:%o", stack);
+    //console.log("float stack:%o", stack);
     var rest_measure = this.context.layoutContext.getInlineRestMeasure();
     var stack_extent = stack.getExtent();
     if(stack_extent > this.context.getContextMaxExtent()){
-      console.warn("float stack can't be included in parent layout!");
+      //console.warn("float stack can't be included in parent layout!");
       this.context.pushFloatStackCache(stack);
       return null;
     }
     if(stack_extent <= 0 || rest_measure <= 0){
-      console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
+      //console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
       this._updateChildParent();
       return null;
     }
@@ -15324,18 +15277,18 @@ Nehan.FloatGenerator = (function(){
   };
 
   FloatGenerator.prototype._yieldFloat = function(stack, rest_measure, stack_extent){
-    console.log("_yieldFloat(rest_m:%d, rest_e:%d)", rest_measure, stack_extent);
+    //console.log("_yieldFloat(rest_m:%d, rest_e:%d)", rest_measure, stack_extent);
 
     // no more rest space
     if(rest_measure <= 0 || stack_extent <= 0){
-      console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
+      //console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
       this._updateChildParent();
       return null;
     }
 
     // no more floated layout, just yield rest area.
     if(stack.isEmpty()){
-      console.info("no more floating elements");
+      //console.info("no more floating elements");
       return this.context.yieldFloatSpace(stack.getLastGroup(), rest_measure, stack_extent);
     }
     /*
@@ -15370,12 +15323,12 @@ Nehan.FloatGenerator = (function(){
     // if no more rest extent is left,
     // continuous layout is displayed in parent context.
     if(rest_extent_space <= 0){
-      console.info("no more rest extent, group set:%o", group_set);
+      //console.info("no more rest extent, group set:%o", group_set);
       this._updateChildParent();
       return group_set;
     }
 
-    console.log("rest extent space:%d", rest_extent_space);
+    //console.log("rest extent space:%d", rest_extent_space);
 
     /*
       <------ rest_measure ---->
@@ -16429,7 +16382,7 @@ Nehan.VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalImgChar = function(line, chr){
-    var color = line.color || new Nehan.Color(Nehan.Display.fontColor);
+    var color = line.color || Nehan.Config.defaultFontColor;
     var font_rgb = color.getRgb();
     var palette_color = Nehan.Palette.getColor(font_rgb).toUpperCase();
     return this._createElement("img", {
@@ -16691,7 +16644,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.addBlockElement = function(element){
     if(element === null){
-      console.log("[%s]:eof", this.getGeneratorName());
+      //console.log("[%s]:eof", this.getGeneratorName());
       throw "eof"; // no more output
     }
     var max_size = this.getContextMaxExtentForAdd();
@@ -16734,11 +16687,12 @@ Nehan.RenderingContext = (function(){
     }
     // if overflow, penetrate page-break to parent layout.
     if(element.breakAfter || next_extent >= max_size){
+      /*
       if(element.breakAfter){
 	console.info("inherit break after");
       } else {
 	console.info("size over");
-      }
+      }*/
       this.setBreakAfter(true);
       throw "break-after";
     }
@@ -16746,7 +16700,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.addInlineElement = function(element){
     if(element === null){
-      console.log("[%s]:eof", this.getGeneratorName());
+      //console.log("[%s]:eof", this.getGeneratorName());
       throw "eof";
     }
     var max_size = this.layoutContext.getInlineMaxMeasure();
@@ -16932,11 +16886,12 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createOutlineElement = function(callbacks){
-    return this.documentContext.createOutlineElementByName("body", callbacks);
+    return this.createOutlineElementByName("body", callbacks || {});
   };
 
   RenderingContext.prototype.createOutlineElementByName = function(outline_name, callbacks){
-    return this.documentContext.createOutlineElementByName(outline_name, callbacks);
+    var outlines = this.documentContext.createOutlineElementByName(outline_name, callbacks);
+    return (outlines.length > 0)? outlines[0] : null;
   };
 
   RenderingContext.prototype.createChildContext = function(child_style, opt){
@@ -17013,7 +16968,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createFloatGenerator = function(first_float_gen){
-    console.log("create float generator!");
+    //console.log("create float generator!");
     var floated_generators = [first_float_gen];
     this.stream.iterWhile(function(token){
       if(token instanceof Nehan.Text && token.isWhiteSpaceOnly()){
@@ -17231,10 +17186,10 @@ Nehan.RenderingContext = (function(){
       pulled:this.style.isPulled()
     });
     if(this.style.getMarkupName() !== "hr" && (extent === 0 || elements.length === 0)){
-      console.warn("zero block? %o", box);
+      //console.warn("zero block? %o", box);
       box.breakAfter = true;
     }
-    console.log("box(%s) break after:%o", box.toString(), box.breakAfter);
+    //console.log("box(%s) break after:%o", box.toString(), box.breakAfter);
     return box;
   };
 
@@ -17541,10 +17496,12 @@ Nehan.RenderingContext = (function(){
     var is_float_space = this.isFloatSpace();
     var is_iblock = this.style.isInlineBlock();
 
+    /*
     console.log(
       "[%s(is_float=%o, is_iblock=%o, box-sizing:%s)]\n auto:%d\n style.staticExtent:%d\n style.extent:%d\n style.contentExtent:%d\n direct:%d",
       this._name, is_float_space, is_iblock, this.style.boxSizing, auto_extent, this.style.staticExtent, this.style.extent, this.style.contentExtent, direct_extent
     );
+     */
     if(auto_extent === 0 && !this.style.isPasted()){
       return 0;
     }
@@ -17819,7 +17776,7 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   RenderingContext.prototype.popCache = function(){
     var cache = this.cachedElements.pop();
-    console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
+    //console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
     cache.breakAfter = false;
     return cache;
   };
@@ -17833,7 +17790,7 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   RenderingContext.prototype.pushCache = function(element){
     var size = (element instanceof Nehan.Box)? element.getLayoutExtent(this.style.flow) : (element.bodySize || 0);
-    console.log("push cache:%o(e = %d, text = %s)", element, size, this.stringOfElement(element));
+    //console.log("push cache:%o(e = %d, text = %s)", element, size, this.stringOfElement(element));
     element.cacheCount = (element.cacheCount || 0) + 1;
     if(element.cacheCount >= Nehan.Config.maxRollbackCount){
       console.error("too many rollback! context:%o, element:%o", this, element);
@@ -17856,17 +17813,16 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.setBreakAfter = function(status){
     this.layoutContext.setBreakAfter(status);
-    console.log("setBreakAfter");
   };
 
   RenderingContext.prototype.setOwnerGenerator = function(generator){
     this.generator = generator;
     this._name = this.getGeneratorName();
-    console.log("generator:%s", this.getGeneratorName());
+    //console.log("generator:%s", this.getGeneratorName());
   };
 
   RenderingContext.prototype.setResumeLine = function(line){
-    console.warn("setResumeLine:%o", line);
+    //console.warn("setResumeLine:%o", line);
     this.resumeLine = line;
   };
 
@@ -17961,7 +17917,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.updateBlockParent = function(parent_context){
-    console.log("[update block parent] %s > %s", parent_context._name, this._name);
+    //console.log("[update block parent] %s > %s", parent_context._name, this._name);
     this.parent = parent_context;
     parent_context.child = this;
     this.updateContextSize(parent_context.style.contentMeasure, parent_context.style.contentExtent);
@@ -17971,7 +17927,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.updateInlineParent = function(parent_context){
-    console.log("[update inline parent] %s > %s", parent_context._name, this._name);
+    //console.log("[update inline parent] %s > %s", parent_context._name, this._name);
     this.style = parent_context.style;
     this.parent = parent_context;
     parent_context.child = this;
@@ -18145,7 +18101,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.yieldFloatSpace = function(float_group, measure, extent){
-    console.info("yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
+    //console.info("yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
     this.child.updateContextStaticSize(measure, extent);
     this.child.floatGroup = float_group;
     return this.yieldChildLayout();
@@ -18442,14 +18398,10 @@ Nehan.PagedElement = (function(){
    @namespace Nehan
    @memberof Nehan
    @method createPagedElement
-   @param engine_args {Object}
-   @param engine_args.config {Nehan.Config} - system config
-   @param engine_args.display {Nehan.Display} - standard page parameters
-   @param engine_args.style {Nehan.Style} - engine local style
    @return {Nehan.PagedElement}
 */
-Nehan.createPagedElement = function(engine_args){
-  return new Nehan.PagedElement(engine_args || {});
+Nehan.createPagedElement = function(){
+  return new Nehan.PagedElement();
 };
 
 Nehan.Document = (function(){
