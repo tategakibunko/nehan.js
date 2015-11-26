@@ -18,8 +18,14 @@ Nehan.TextGenerator = (function(){
       try {
 	this.context.addTextElement(element);
       } catch(e){
-	//console.warn(e);
-	break;
+	if(e === Nehan.GeneratorExceptions.EOF ||
+	   e === Nehan.GeneratorExceptions.ZERO ||
+	   e === Nehan.GeneratorExceptions.OVERFLOW){
+	  break;
+	} else {
+	  console.error(e);
+	  throw e; // fail again
+	}
       }
     }
     return this._createOutput();

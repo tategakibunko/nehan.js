@@ -155,6 +155,7 @@ var sources = [
   "src/layout-evaluator.js",
   "src/vert-evaluator.js",
   "src/hori-evaluator.js",
+  "src/generator-exceptions.js",
   "src/rendering-context.js",
   "src/paged-element.js",
   "src/document.js"

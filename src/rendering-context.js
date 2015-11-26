@@ -33,7 +33,7 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.addBlockElement = function(element){
     if(element === null){
       //console.log("[%s]:eof", this.getGeneratorName());
-      throw "eof"; // no more output
+      throw Nehan.GeneratorExceptions.EOF;
     }
     var max_size = this.getContextMaxExtentForAdd();
     var max_measure = this.layoutContext.getInlineMaxMeasure();
@@ -82,14 +82,14 @@ Nehan.RenderingContext = (function(){
 	console.info("size over");
       }*/
       this.setBreakAfter(true);
-      throw "break-after";
+      throw Nehan.GeneratorExceptions.BREAK_AFTER;
     }
   };
 
   RenderingContext.prototype.addInlineElement = function(element){
     if(element === null){
       //console.log("[%s]:eof", this.getGeneratorName());
-      throw "eof";
+      throw Nehan.GeneratorExceptions.EOF;
     }
     var max_size = this.layoutContext.getInlineMaxMeasure();
     var element_size = this.getElementLayoutMeasure(element);
@@ -99,7 +99,7 @@ Nehan.RenderingContext = (function(){
     //this.debugInlineElement(element, element_size);
 
     if(element_size === 0){
-      throw "zero";
+      throw Nehan.GeneratorExceptions.ZERO;
     }
     if(this.layoutContext.getInlineElements().length === 0 && next_measure > max_size && element_size > this.getRootContentMeasure()){
       console.error("skip too large inline element:%o(%d", element, element_size);
@@ -117,20 +117,20 @@ Nehan.RenderingContext = (function(){
       }
       if(element.hasLineBreak){
 	this.layoutContext.setLineBreak(true);
-	throw "line-break";
+	throw Nehan.GeneratorExceptions.LINE_BREAK;
       }
     }
     if(next_measure > max_size){
       this.pushCache(element);
     }
     if(next_measure >= max_size){
-      throw "overflow";
+      throw Nehan.GeneratorExceptions.OVERFLOW;
     }
   };
 
   RenderingContext.prototype.addTextElement = function(element){
     if(element === null){
-      throw "eof";
+      throw Nehan.GeneratorExceptions.EOF;
     }
     var max_size = this.layoutContext.getInlineMaxMeasure();
     var element_size = this.getTextMeasure(element);
@@ -141,7 +141,7 @@ Nehan.RenderingContext = (function(){
     //this.debugTextElement(element, element_size);
 
     if(element_size === 0){
-      throw "zero";
+      throw Nehan.GeneratorExceptions.ZERO;
     }
     // skip head space for first word element if not 'white-space:pre'
     if(prev_measure === 0 &&
@@ -160,7 +160,7 @@ Nehan.RenderingContext = (function(){
     }
     if(next_measure >= max_size){
       this.layoutContext.setLineOver(true);
-      throw "overflow";
+      throw Nehan.GeneratorExceptions.OVERFLOW;
     }
   };
 
@@ -1213,7 +1213,7 @@ Nehan.RenderingContext = (function(){
     element.cacheCount = (element.cacheCount || 0) + 1;
     if(element.cacheCount >= Nehan.Config.maxRollbackCount){
       console.error("too many rollback! context:%o, element:%o", this, element);
-      throw "too many rollback";
+      throw Nehan.GeneratorExceptions.TOO_MANY_ROLLBACK;
     }
     this.cachedElements.push(element);
   };

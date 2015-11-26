@@ -18,9 +18,16 @@ Nehan.InlineGenerator = (function(){
       try {
 	this.context.addInlineElement(element);
       } catch(e){
-	//console.warn(e);
-	break;
-      }	
+	if(e === Nehan.GeneratorExceptions.EOF ||
+	   e === Nehan.GeneratorExceptions.ZERO ||
+	   e === Nehan.GeneratorExceptions.LINE_BREAK ||
+	   e === Nehan.GeneratorExceptions.OVERFLOW){
+	  break;
+	} else {
+	  console.error(e);
+	  throw e; // fail again
+	}
+      }
     }
     // skip continuous <br> if element is the last full-filled line.
     if(element && element.lineOver && this.context.child && !this.context.child.hasNext()){

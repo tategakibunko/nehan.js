@@ -29,8 +29,13 @@ Nehan.BlockGenerator = (function(){
       try {
 	this.context.addBlockElement(element);
       } catch (e){
-	//console.warn(e);
-	if(e === "too many rollback"){
+	if(e === Nehan.GeneratorExceptions.EOF ||
+	   e === Nehan.GeneratorExceptions.BREAK_AFTER ||
+	   e === Nehan.GeneratorExceptions.ZERO ||
+	   e === Nehan.GeneratorExceptions.OVERFLOW){
+	  break;
+	} else {
+	  console.error(e);
 	  throw e; // fail again
 	}
 	break;

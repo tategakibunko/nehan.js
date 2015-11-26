@@ -31,7 +31,7 @@ Nehan.ListItemGenerator = (function(){
 
   ListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
     var content = context.parent.style.getListMarkerHtml(list_index + 1);
-    console.log("marker html:%s", content);
+    //console.log("marker html:%s", content);
     var marker_markup = new Nehan.Tag("marker", content);
     var marker_style = context.createChildStyle(marker_markup, {
       float:"start",
@@ -52,7 +52,7 @@ Nehan.ListItemGenerator = (function(){
     var body_context =  context.createChildContext(body_style, {
       stream:context.stream // share li.stream for li-body.stream.
     });
-    console.log("li-body context:%o", body_context);
+    //console.log("li-body context:%o", body_context);
     return new Nehan.BlockGenerator(body_context);
   };
 
