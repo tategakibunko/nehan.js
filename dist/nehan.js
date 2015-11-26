@@ -14750,7 +14750,6 @@ Nehan.BlockGenerator = (function(){
     }
     // if break-before available, page-break but only once.
     if(this.context.isBreakBefore()){
-      this.context.clearBreakBefore();
       return null;
     }
     while(this.hasNext()){
@@ -14844,6 +14843,10 @@ Nehan.BlockGenerator = (function(){
     // call _onComplete callback for 'final' output
     if(!this.hasNext()){
       this._onComplete(block);
+    }
+
+    if(this.context.isBreakAfter()){
+      block.breakAfter = true;
     }
     return block;
   };
@@ -15249,7 +15252,13 @@ Nehan.LazyGenerator = (function(){
     if(this.context.terminate){
       return null;
     }
+    if(this.context.isBreakBefore()){
+      return null;
+    }
     this.context.setTerminate(true);
+    if(this.context.isBreakAfter()){
+      this.context.lazyOutput.breakAfter = true;
+    }
     return this.context.lazyOutput;
   };
 
@@ -16707,7 +16716,7 @@ Nehan.RenderingContext = (function(){
       }
     }
 
-    this.debugBlockElement(element, element_size);
+    //this.debugBlockElement(element, element_size);
 
     if(element.isResumableLine(max_measure) && this.hasChildLayout() && this.child.isInline()){
       this.child.setResumeLine(element);
@@ -16745,7 +16754,7 @@ Nehan.RenderingContext = (function(){
     var prev_measure = this.layoutContext.getInlineCurMeasure(this.style.flow);
     var next_measure = prev_measure + element_size;
 
-    this.debugInlineElement(element, element_size);
+    //this.debugInlineElement(element, element_size);
 
     if(element_size === 0){
       throw "zero";
@@ -16787,7 +16796,7 @@ Nehan.RenderingContext = (function(){
     var next_measure = prev_measure + element_size;
     var next_token = this.stream.peek();
 
-    this.debugTextElement(element, element_size);
+    //this.debugTextElement(element, element_size);
 
     if(element_size === 0){
       throw "zero";
@@ -16828,10 +16837,6 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   RenderingContext.prototype.clearCache = function(cache){
     this.cachedElements = [];
-  };
-
-  RenderingContext.prototype.clearBreakBefore = function(){
-    this.breakBefore = true; // set already break flag.
   };
 
   // -----------------------------------------------
@@ -17763,11 +17768,14 @@ Nehan.RenderingContext = (function(){
     }
     return (this.generator instanceof Nehan.InlineGenerator ||
 	    this.generator instanceof Nehan.InlineBlockGenerator);
-    //return this.generator instanceof Nehan.InlineGenerator && this.style.isInlineRoot();
   };
 
   RenderingContext.prototype.isBreakBefore = function(){
-    return this.style.isBreakBefore() && (typeof this.breakBefore === "undefined");
+    return this.isFirstOutput() && this.style.isBreakBefore();
+  };
+
+  RenderingContext.prototype.isBreakAfter = function(){
+    return !this.hasNext() && this.style.isBreakAfter();
   };
 
   RenderingContext.prototype.isFirstOutput = function(){
@@ -18064,6 +18072,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.yieldHorizontalRule = function(){
     return this.createBlockBox({
+      breakAfter:this.style.isBreakAfter(),
       elements:[],
       extent:2
     });

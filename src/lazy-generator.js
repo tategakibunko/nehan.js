@@ -32,7 +32,13 @@ Nehan.LazyGenerator = (function(){
     if(this.context.terminate){
       return null;
     }
+    if(this.context.isBreakBefore()){
+      return null;
+    }
     this.context.setTerminate(true);
+    if(this.context.isBreakAfter()){
+      this.context.lazyOutput.breakAfter = true;
+    }
     return this.context.lazyOutput;
   };
 

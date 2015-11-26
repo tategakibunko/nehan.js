@@ -22,7 +22,6 @@ Nehan.BlockGenerator = (function(){
     }
     // if break-before available, page-break but only once.
     if(this.context.isBreakBefore()){
-      this.context.clearBreakBefore();
       return null;
     }
     while(this.hasNext()){
@@ -116,6 +115,10 @@ Nehan.BlockGenerator = (function(){
     // call _onComplete callback for 'final' output
     if(!this.hasNext()){
       this._onComplete(block);
+    }
+
+    if(this.context.isBreakAfter()){
+      block.breakAfter = true;
     }
     return block;
   };
