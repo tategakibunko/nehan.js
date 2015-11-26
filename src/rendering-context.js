@@ -3,11 +3,12 @@ Nehan.RenderingContext = (function(){
     opt = opt || {};
     this.yieldCount = 0;
     this.terminate = false;
-    this.generator = null; // set by constructor of LayoutGenerator
     this.cachedElements = [];
+    this.generator = opt.generator || null;
     this.parent = opt.parent || null;
     this.child = opt.child || null;
     this.style = opt.style || null;
+    this.text = opt.text || "";
     this.stream = opt.stream || null;
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.DefaultStyle.create());
@@ -193,6 +194,37 @@ Nehan.RenderingContext = (function(){
       documentContext:this.documentContext, // always saame
       pageEvaluator:this.pageEvaluator // always same
     });
+  };
+
+  RenderingContext.prototype.createDocumentStream = function(text){
+    var stream = new Nehan.TokenStream(text, {
+      filter:Nehan.Closure.isTagName(["!doctype", "html"])
+    });
+    if(stream.isEmptyTokens()){
+      stream.tokens = [new Nehan.Tag("html", text)];
+    }
+    return stream;
+  };
+
+  RenderingContext.prototype.createHtmlStream = function(text){
+    var stream = new Nehan.TokenStream(text, {
+      filter:Nehan.Closure.isTagName(["head", "body"])
+    });
+    if(stream.isEmptyTokens()){
+      stream.tokens = [new Nehan.Tag("body", text)];
+    }
+    return stream;
+  };
+
+  RenderingContext.prototype.createRootGenerator = function(){
+    switch(Nehan.Config.root){
+    case "document":
+      return new Nehan.DocumentGenerator(this);
+    case "html":
+      return new Nehan.HtmlGenerator(this);
+    default:
+      return new Nehan.BodyGenerator(this);
+    }
   };
 
   RenderingContext.prototype.createFlipLayoutContext = function(){
@@ -462,7 +494,7 @@ Nehan.RenderingContext = (function(){
       return new Nehan.LazyGenerator(child_context);
     }
 
-    if(this.parent.style !== style && style.isInlineBlock()){
+    if(this.parent && this.parent.style !== style && style.isInlineBlock()){
       return new Nehan.InlineBlockGenerator(child_context);
     }
     switch(style.getMarkupName()){
@@ -1104,7 +1136,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.isInlineRoot = function(){
-    if(this.style !== this.parent.style){
+    if(this.parent && this.parent.style !== this.style){
       return false;
     }
     if(this.generator instanceof Nehan.TextGenerator){
@@ -1215,12 +1247,14 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.setStyle = function(key, value){
     this.selectors.setValue(key, value);
+    return this;
   };
 
   RenderingContext.prototype.setStyles = function(values){
     for(var key in values){
       this.selectors.setValue(key, values[key]);
     }
+    return this;
   };
 
   // -----------------------------------------------

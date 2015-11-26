@@ -8,21 +8,24 @@ Nehan.HtmlGenerator = (function(){
   */
   function HtmlGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
-    this.generator = this._createBodyGenerator(context);
+    this._initContext();
   }
   Nehan.Class.extend(HtmlGenerator, Nehan.LayoutGenerator);
 
   HtmlGenerator.prototype._yield = function(){
-    return this.generator.yield();
+    return this.context.yieldChildLayout();
   };
 
-  HtmlGenerator.prototype._createBodyGenerator = function(context){
+  HtmlGenerator.prototype._initContext = function(){
+    if(!this.context.stream){
+      this.context.stream = this.context.createHtmlStream(this.context.text);
+    }
     var body_tag = null;
-    while(context.stream.hasNext()){
-      var tag = context.stream.get();
+    while(this.context.stream.hasNext()){
+      var tag = this.context.stream.get();
       switch(tag.getName()){
       case "head":
-	this._parseDocumentHeader(context, new Nehan.TokenStream(tag.getContent(), {
+	this._parseDocumentHeader(new Nehan.TokenStream(tag.getContent(), {
 	  filter:Nehan.Closure.isTagName(["title", "meta", "link", "style", "script"])
 	}));
 	break;
@@ -31,12 +34,13 @@ Nehan.HtmlGenerator = (function(){
 	break;
       }
     }
-    body_tag = body_tag || new Nehan.Tag("body", context.stream.getSrc());
-    var body_style = context.createChildStyle(body_tag);
-    return new Nehan.BodyGenerator(context.createChildContext(body_style));
+    body_tag = body_tag || new Nehan.Tag("body", this.context.stream.getSrc());
+    var body_style = this.context.createChildStyle(body_tag);
+    var body_context = this.context.createChildContext(body_style);
+    new Nehan.BodyGenerator(body_context);
   };
 
-  HtmlGenerator.prototype._parseDocumentHeader = function(context, stream){
+  HtmlGenerator.prototype._parseDocumentHeader = function(stream){
     var document_header = new Nehan.DocumentHeader();
     while(stream.hasNext()){
       var tag = stream.get();
@@ -58,7 +62,7 @@ Nehan.HtmlGenerator = (function(){
 	break;
       }
     }
-    context.documentContext.setDocumentHeader(document_header);
+    this.context.documentContext.setDocumentHeader(document_header);
   };
 
   return HtmlGenerator;

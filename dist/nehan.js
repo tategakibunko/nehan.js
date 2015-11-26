@@ -12500,9 +12500,8 @@ Nehan.PageParser = (function(){
      @consturctor
      @param text {String} - html source text
   */
-  function PageParser(text, context){
-    this.context = context;
-    this.generator = new Nehan.DocumentGenerator(text, context);
+  function PageParser(generator){
+    this.generator = generator;
   }
 
   var reqAnimationFrame = (function(){
@@ -12549,8 +12548,8 @@ Nehan.PageParser = (function(){
   };
 
   PageParser.prototype._parse = function(opt){
-    if(!this.generator.hasNext() || (this.context.yieldCount >= opt.maxPageCount)){
-      opt.onComplete.call(this, this._getTimeElapsed(), this.context);
+    if(!this.generator.hasNext() || (this.generator.context.yieldCount >= opt.maxPageCount)){
+      opt.onComplete.call(this, this._getTimeElapsed(), this.generator.context);
       return;
     }
     var tree = this.generator.yield();
@@ -12558,7 +12557,7 @@ Nehan.PageParser = (function(){
       if(opt.capturePageText){
 	tree.text = tree.toString();
       }
-      opt.onProgress.call(this, tree, this.context);
+      opt.onProgress.call(this, tree, this.generator.context);
     }
     reqAnimationFrame(function(){
       this._parse(opt);
@@ -14635,7 +14634,7 @@ Nehan.LayoutGenerator = (function(){
    @return {Nehan.Box}
    */
   LayoutGenerator.prototype.yield = function(){
-    //console.group("%s _yield:%o", this.context.getGeneratorName(), this.context);
+    console.group("%s _yield:%o", this.context.getGeneratorName(), this.context);
 
     this.context.initLayoutContext();
 
@@ -14656,7 +14655,7 @@ Nehan.LayoutGenerator = (function(){
       console.error("[%s]too many yield!:%o", this.context._name, this);
       throw "too many yield";
     }
-    //console.groupEnd();
+    console.groupEnd();
     return box;
   };
 
@@ -14707,7 +14706,7 @@ Nehan.BlockGenerator = (function(){
       try {
 	this.context.addBlockElement(element);
       } catch (e){
-	//console.warn(e);
+	console.warn(e);
 	if(e === "too many rollback"){
 	  throw e; // fail again
 	}
@@ -15771,9 +15770,20 @@ Nehan.BodyGenerator = (function(){
    @param context {Nehan.RenderingContext}
    */
   function BodyGenerator(context){
+    this._initContext(context);
     Nehan.SectionRootGenerator.call(this, context);
   }
   Nehan.Class.extend(BodyGenerator, Nehan.SectionRootGenerator);
+
+  BodyGenerator.prototype._initContext = function(context){
+    var markup = new Nehan.Tag("body", context.text);
+    if(!context.style){
+      context.style = context.createStyle(markup, null);
+    }
+    if(!context.stream){
+      context.stream = new Nehan.TokenStream(context.text);
+    }
+  };
 
   BodyGenerator.prototype._onCreate = function(block){
     if(!block){
@@ -15792,6 +15802,9 @@ Nehan.BodyGenerator = (function(){
     if(this.context.documentContext.getPageNo() >= Nehan.Config.maxPageCount){
       this.context.setTerminate(true);
     }
+
+    // body output is treated as page box.
+    this.context.addPage(block);
   };
 
   return BodyGenerator;
@@ -15807,21 +15820,24 @@ Nehan.HtmlGenerator = (function(){
   */
   function HtmlGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
-    this.generator = this._createBodyGenerator(context);
+    this._initContext();
   }
   Nehan.Class.extend(HtmlGenerator, Nehan.LayoutGenerator);
 
   HtmlGenerator.prototype._yield = function(){
-    return this.generator.yield();
+    return this.context.yieldChildLayout();
   };
 
-  HtmlGenerator.prototype._createBodyGenerator = function(context){
+  HtmlGenerator.prototype._initContext = function(){
+    if(!this.context.stream){
+      this.context.stream = this.context.createHtmlStream(this.context.text);
+    }
     var body_tag = null;
-    while(context.stream.hasNext()){
-      var tag = context.stream.get();
+    while(this.context.stream.hasNext()){
+      var tag = this.context.stream.get();
       switch(tag.getName()){
       case "head":
-	this._parseDocumentHeader(context, new Nehan.TokenStream(tag.getContent(), {
+	this._parseDocumentHeader(new Nehan.TokenStream(tag.getContent(), {
 	  filter:Nehan.Closure.isTagName(["title", "meta", "link", "style", "script"])
 	}));
 	break;
@@ -15830,12 +15846,13 @@ Nehan.HtmlGenerator = (function(){
 	break;
       }
     }
-    body_tag = body_tag || new Nehan.Tag("body", context.stream.getSrc());
-    var body_style = context.createChildStyle(body_tag);
-    return new Nehan.BodyGenerator(context.createChildContext(body_style));
+    body_tag = body_tag || new Nehan.Tag("body", this.context.stream.getSrc());
+    var body_style = this.context.createChildStyle(body_tag);
+    var body_context = this.context.createChildContext(body_style);
+    new Nehan.BodyGenerator(body_context);
   };
 
-  HtmlGenerator.prototype._parseDocumentHeader = function(context, stream){
+  HtmlGenerator.prototype._parseDocumentHeader = function(stream){
     var document_header = new Nehan.DocumentHeader();
     while(stream.hasNext()){
       var tag = stream.get();
@@ -15857,7 +15874,7 @@ Nehan.HtmlGenerator = (function(){
 	break;
       }
     }
-    context.documentContext.setDocumentHeader(document_header);
+    this.context.documentContext.setDocumentHeader(document_header);
   };
 
   return HtmlGenerator;
@@ -15873,47 +15890,38 @@ Nehan.DocumentGenerator = (function(){
    @param text {String} - html source text
    @param context {Nehan.RenderingContext}
   */
-  function DocumentGenerator(text, context){
-    Nehan.LayoutGenerator.call(this, context.extend({
-      stream:this._createDocumentStream(Nehan.Html.normalize(text))
-    }));
-    this.generator = this._createHtmlGenerator(this.context);
+  function DocumentGenerator(context){
+    Nehan.LayoutGenerator.call(this, context);
+    this._initContext();
   }
   Nehan.Class.extend(DocumentGenerator, Nehan.LayoutGenerator);
 
   DocumentGenerator.prototype._yield = function(){
-    var page = this.generator.yield();
-    this.context.addPage(page);
-    return page;
+    return this.context.yieldChildLayout();
   };
 
-  DocumentGenerator.prototype._createDocumentStream = function(text){
-    var stream = new Nehan.TokenStream(text, {
-      filter:Nehan.Closure.isTagName(["!doctype", "html"])
-    });
-    if(stream.isEmptyTokens()){
-      stream.tokens = [new Nehan.Tag("html", text)];
-    }
-    return stream;
-  };
+  DocumentGenerator.prototype._initContext = function(){
+    this.context.stream = this.context.createDocumentStream(this.context.text);
 
-  DocumentGenerator.prototype._createHtmlGenerator = function(context){
     var html_tag = null;
-    while(context.stream.hasNext()){
-      var tag = context.stream.get();
+    while(this.context.stream.hasNext()){
+      var tag = this.context.stream.get();
       switch(tag.getName()){
       case "!doctype":
 	// var doc_type = tag.getSrc().split(/\s+/)[1];
-	context.documentContext.setDocumentType("html"); // TODO
+	this.context.documentThis.Context.setDocumentType("html"); // TODO
 	break;
       case "html":
 	html_tag = tag;
 	break;
       }
     }
-    html_tag = html_tag || new Nehan.Tag("html", context.stream.getSrc());
-    var html_style = context.createChildStyle(html_tag);
-    return new Nehan.HtmlGenerator(context.createChildContext(html_style));
+    html_tag = html_tag || new Nehan.Tag("html", this.context.stream.getSrc());
+    var html_style = this.context.createChildStyle(html_tag);
+    var html_context = this.context.createChildContext(html_style, {
+      stream:this.context.createHtmlStream(html_tag.getContent())
+    });
+    new Nehan.HtmlGenerator(html_context);
   };
 
   return DocumentGenerator;
@@ -16613,11 +16621,12 @@ Nehan.RenderingContext = (function(){
     opt = opt || {};
     this.yieldCount = 0;
     this.terminate = false;
-    this.generator = null; // set by constructor of LayoutGenerator
     this.cachedElements = [];
+    this.generator = opt.generator || null;
     this.parent = opt.parent || null;
     this.child = opt.child || null;
     this.style = opt.style || null;
+    this.text = opt.text || "";
     this.stream = opt.stream || null;
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.DefaultStyle.create());
@@ -16803,6 +16812,37 @@ Nehan.RenderingContext = (function(){
       documentContext:this.documentContext, // always saame
       pageEvaluator:this.pageEvaluator // always same
     });
+  };
+
+  RenderingContext.prototype.createDocumentStream = function(text){
+    var stream = new Nehan.TokenStream(text, {
+      filter:Nehan.Closure.isTagName(["!doctype", "html"])
+    });
+    if(stream.isEmptyTokens()){
+      stream.tokens = [new Nehan.Tag("html", text)];
+    }
+    return stream;
+  };
+
+  RenderingContext.prototype.createHtmlStream = function(text){
+    var stream = new Nehan.TokenStream(text, {
+      filter:Nehan.Closure.isTagName(["head", "body"])
+    });
+    if(stream.isEmptyTokens()){
+      stream.tokens = [new Nehan.Tag("body", text)];
+    }
+    return stream;
+  };
+
+  RenderingContext.prototype.createRootGenerator = function(){
+    switch(Nehan.Config.root){
+    case "document":
+      return new Nehan.DocumentGenerator(this);
+    case "html":
+      return new Nehan.HtmlGenerator(this);
+    default:
+      return new Nehan.BodyGenerator(this);
+    }
   };
 
   RenderingContext.prototype.createFlipLayoutContext = function(){
@@ -17072,7 +17112,7 @@ Nehan.RenderingContext = (function(){
       return new Nehan.LazyGenerator(child_context);
     }
 
-    if(this.parent.style !== style && style.isInlineBlock()){
+    if(this.parent && this.parent.style !== style && style.isInlineBlock()){
       return new Nehan.InlineBlockGenerator(child_context);
     }
     switch(style.getMarkupName()){
@@ -17714,7 +17754,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.isInlineRoot = function(){
-    if(this.style !== this.parent.style){
+    if(this.parent && this.parent.style !== this.style){
       return false;
     }
     if(this.generator instanceof Nehan.TextGenerator){
@@ -17825,12 +17865,14 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.setStyle = function(key, value){
     this.selectors.setValue(key, value);
+    return this;
   };
 
   RenderingContext.prototype.setStyles = function(values){
     for(var key in values){
       this.selectors.setValue(key, values[key]);
     }
+    return this;
   };
 
   // -----------------------------------------------
@@ -18403,14 +18445,20 @@ Nehan.createPagedElement = function(){
 };
 
 Nehan.Document = (function(){
-  function Document(text){
-    this.text = text || "no text";
-    this.context = new Nehan.RenderingContext();
+  function Document(opt){
+    opt = opt || {};
+    this.text = opt.text || "no text";
+    this.styles = opt.styles || {};
+    this.generator = null; // created when render
   }
 
   Document.prototype.render = function(opt){
     opt = opt || {};
+    var context = new Nehan.RenderingContext({
+      text:Nehan.Html.normalize(this.text)
+    }).setStyles(this.styles);
     this.text = opt.text || this.text;
+    this.generator = context.createRootGenerator();
     if(opt.onPage){
       var original_onprogress = opt.onProgress || function(){};
       opt.onProgress = function(tree, ctx){
@@ -18418,16 +18466,16 @@ Nehan.Document = (function(){
 	opt.onPage(this.getPage(tree.pageNo), ctx);
       }.bind(this);
     }
-    new Nehan.PageParser(this.text, this.context).parse(opt);
+    new Nehan.PageParser(this.generator).parse(opt);
     return this;
   };
   
   Document.prototype.getPage = function(index){
-    return this.context.getPage(index);
+    return this.generator.context? this.generator.context.getPage(index) : null;
   };
 
   Document.prototype.getPageCount = function(index){
-    return this.context.getPageCount();
+    return this.generator.context? this.generator.context.getPageCount() : 0;
   };
 
   Document.prototype.setContent = function(text){
@@ -18440,25 +18488,23 @@ Nehan.Document = (function(){
   };
 
   Document.prototype.setStyle = function(key, value){
-    this.context.setStyle(key, value);
+    this.styles[key] = value;
     return this;
   };
 
   Document.prototype.setStyles = function(values){
-    this.context.setStyles(values);
+    for(var key in values){
+      this.setStyle(key, values[key]);
+    }
     return this;
   };
 
-  Document.prototype.getContent = function(){
-    return this.context.getContent();
-  };
-
   Document.prototype.getAnchorPageNo = function(anchor_name){
-    return this.context.getAnchorPageNo(anchor_name);
+    return this.generator.context? this.generator.context.getAnchorPageNo(anchor_name) : -1;
   };
 
   Document.prototype.createOutlineElement = function(callbacks){
-    return this.context.createOutlineElementByName("body", callbacks);
+    return this.generator.context? this.generator.context.createOutlineElementByName("body", callbacks) : null;
   };
 
   return Document;

@@ -8,9 +8,20 @@ Nehan.BodyGenerator = (function(){
    @param context {Nehan.RenderingContext}
    */
   function BodyGenerator(context){
+    this._initContext(context);
     Nehan.SectionRootGenerator.call(this, context);
   }
   Nehan.Class.extend(BodyGenerator, Nehan.SectionRootGenerator);
+
+  BodyGenerator.prototype._initContext = function(context){
+    var markup = new Nehan.Tag("body", context.text);
+    if(!context.style){
+      context.style = context.createStyle(markup, null);
+    }
+    if(!context.stream){
+      context.stream = new Nehan.TokenStream(context.text);
+    }
+  };
 
   BodyGenerator.prototype._onCreate = function(block){
     if(!block){
@@ -29,6 +40,9 @@ Nehan.BodyGenerator = (function(){
     if(this.context.documentContext.getPageNo() >= Nehan.Config.maxPageCount){
       this.context.setTerminate(true);
     }
+
+    // body output is treated as page box.
+    this.context.addPage(block);
   };
 
   return BodyGenerator;

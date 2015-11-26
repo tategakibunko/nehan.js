@@ -5,9 +5,8 @@ Nehan.PageParser = (function(){
      @consturctor
      @param text {String} - html source text
   */
-  function PageParser(text, context){
-    this.context = context;
-    this.generator = new Nehan.DocumentGenerator(text, context);
+  function PageParser(generator){
+    this.generator = generator;
   }
 
   var reqAnimationFrame = (function(){
@@ -54,8 +53,8 @@ Nehan.PageParser = (function(){
   };
 
   PageParser.prototype._parse = function(opt){
-    if(!this.generator.hasNext() || (this.context.yieldCount >= opt.maxPageCount)){
-      opt.onComplete.call(this, this._getTimeElapsed(), this.context);
+    if(!this.generator.hasNext() || (this.generator.context.yieldCount >= opt.maxPageCount)){
+      opt.onComplete.call(this, this._getTimeElapsed(), this.generator.context);
       return;
     }
     var tree = this.generator.yield();
@@ -63,7 +62,7 @@ Nehan.PageParser = (function(){
       if(opt.capturePageText){
 	tree.text = tree.toString();
       }
-      opt.onProgress.call(this, tree, this.context);
+      opt.onProgress.call(this, tree, this.generator.context);
     }
     reqAnimationFrame(function(){
       this._parse(opt);

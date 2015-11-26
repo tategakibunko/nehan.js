@@ -7,47 +7,38 @@ Nehan.DocumentGenerator = (function(){
    @param text {String} - html source text
    @param context {Nehan.RenderingContext}
   */
-  function DocumentGenerator(text, context){
-    Nehan.LayoutGenerator.call(this, context.extend({
-      stream:this._createDocumentStream(Nehan.Html.normalize(text))
-    }));
-    this.generator = this._createHtmlGenerator(this.context);
+  function DocumentGenerator(context){
+    Nehan.LayoutGenerator.call(this, context);
+    this._initContext();
   }
   Nehan.Class.extend(DocumentGenerator, Nehan.LayoutGenerator);
 
   DocumentGenerator.prototype._yield = function(){
-    var page = this.generator.yield();
-    this.context.addPage(page);
-    return page;
+    return this.context.yieldChildLayout();
   };
 
-  DocumentGenerator.prototype._createDocumentStream = function(text){
-    var stream = new Nehan.TokenStream(text, {
-      filter:Nehan.Closure.isTagName(["!doctype", "html"])
-    });
-    if(stream.isEmptyTokens()){
-      stream.tokens = [new Nehan.Tag("html", text)];
-    }
-    return stream;
-  };
+  DocumentGenerator.prototype._initContext = function(){
+    this.context.stream = this.context.createDocumentStream(this.context.text);
 
-  DocumentGenerator.prototype._createHtmlGenerator = function(context){
     var html_tag = null;
-    while(context.stream.hasNext()){
-      var tag = context.stream.get();
+    while(this.context.stream.hasNext()){
+      var tag = this.context.stream.get();
       switch(tag.getName()){
       case "!doctype":
 	// var doc_type = tag.getSrc().split(/\s+/)[1];
-	context.documentContext.setDocumentType("html"); // TODO
+	this.context.documentThis.Context.setDocumentType("html"); // TODO
 	break;
       case "html":
 	html_tag = tag;
 	break;
       }
     }
-    html_tag = html_tag || new Nehan.Tag("html", context.stream.getSrc());
-    var html_style = context.createChildStyle(html_tag);
-    return new Nehan.HtmlGenerator(context.createChildContext(html_style));
+    html_tag = html_tag || new Nehan.Tag("html", this.context.stream.getSrc());
+    var html_style = this.context.createChildStyle(html_tag);
+    var html_context = this.context.createChildContext(html_style, {
+      stream:this.context.createHtmlStream(html_tag.getContent())
+    });
+    new Nehan.HtmlGenerator(html_context);
   };
 
   return DocumentGenerator;

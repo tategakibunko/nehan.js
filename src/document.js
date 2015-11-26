@@ -1,12 +1,18 @@
 Nehan.Document = (function(){
-  function Document(text){
-    this.text = text || "no text";
-    this.context = new Nehan.RenderingContext();
+  function Document(opt){
+    opt = opt || {};
+    this.text = opt.text || "no text";
+    this.styles = opt.styles || {};
+    this.generator = null; // created when render
   }
 
   Document.prototype.render = function(opt){
     opt = opt || {};
+    var context = new Nehan.RenderingContext({
+      text:Nehan.Html.normalize(this.text)
+    }).setStyles(this.styles);
     this.text = opt.text || this.text;
+    this.generator = context.createRootGenerator();
     if(opt.onPage){
       var original_onprogress = opt.onProgress || function(){};
       opt.onProgress = function(tree, ctx){
@@ -14,16 +20,16 @@ Nehan.Document = (function(){
 	opt.onPage(this.getPage(tree.pageNo), ctx);
       }.bind(this);
     }
-    new Nehan.PageParser(this.text, this.context).parse(opt);
+    new Nehan.PageParser(this.generator).parse(opt);
     return this;
   };
   
   Document.prototype.getPage = function(index){
-    return this.context.getPage(index);
+    return this.generator.context? this.generator.context.getPage(index) : null;
   };
 
   Document.prototype.getPageCount = function(index){
-    return this.context.getPageCount();
+    return this.generator.context? this.generator.context.getPageCount() : 0;
   };
 
   Document.prototype.setContent = function(text){
@@ -36,25 +42,23 @@ Nehan.Document = (function(){
   };
 
   Document.prototype.setStyle = function(key, value){
-    this.context.setStyle(key, value);
+    this.styles[key] = value;
     return this;
   };
 
   Document.prototype.setStyles = function(values){
-    this.context.setStyles(values);
+    for(var key in values){
+      this.setStyle(key, values[key]);
+    }
     return this;
   };
 
-  Document.prototype.getContent = function(){
-    return this.context.getContent();
-  };
-
   Document.prototype.getAnchorPageNo = function(anchor_name){
-    return this.context.getAnchorPageNo(anchor_name);
+    return this.generator.context? this.generator.context.getAnchorPageNo(anchor_name) : -1;
   };
 
   Document.prototype.createOutlineElement = function(callbacks){
-    return this.context.createOutlineElementByName("body", callbacks);
+    return this.generator.context? this.generator.context.createOutlineElementByName("body", callbacks) : null;
   };
 
   return Document;
