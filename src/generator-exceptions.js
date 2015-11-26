@@ -1,3 +1,8 @@
+/**
+ exception codes for internal generator operation.
+
+ @namespace Nehan.GeneratorExceptions
+*/
 Nehan.GeneratorExceptions = {
   EOF:"eof",
   BREAK_AFTER:"break-after",
