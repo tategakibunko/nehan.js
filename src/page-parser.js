@@ -25,8 +25,8 @@ Nehan.PageParser = (function(){
   /**
    @memberof Nehan.PageParser
    @param opt {Object}
-   @param opt.onProgress {Function} - fun {@link Nehan.Box} -> ()
-   @param opt.onComplete {Function} - fun time:{Float} -> ()
+   @param opt.onProgress {Function} - fun tree:{@link Nehan.Box} -> {@link Nehan.RenderingContext} -> ()
+   @param opt.onComplete {Function} - fun time:{Float} -> context:{@link Nehan.RenderingContext} -> ()
    @param opt.onError {Function} - fun error:{String} -> ()
    @param opt.capturePageText {bool} output text node or not for each page object.
    @param opt.maxPageCount {int} upper bound of page count
@@ -37,8 +37,8 @@ Nehan.PageParser = (function(){
       Nehan.Args.merge({}, {
 	capturePageText: false,
 	maxPageCount: Nehan.Config.maxPageCount,
-	onComplete: function(time){},
-	onProgress: function(tree){},
+	onComplete: function(time, ctx){},
+	onProgress: function(tree, ctx){},
 	onError: function(error){}
       }, opt || {})
     );

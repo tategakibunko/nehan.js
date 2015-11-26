@@ -156,6 +156,7 @@ var sources = [
   "src/vert-evaluator.js",
   "src/hori-evaluator.js",
   "src/rendering-context.js",
+  "src/paged-element.js",
   "src/document.js"
 ];
 

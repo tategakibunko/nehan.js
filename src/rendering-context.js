@@ -275,6 +275,10 @@ Nehan.RenderingContext = (function(){
     };
   };
 
+  RenderingContext.prototype.createOutlineElement = function(callbacks){
+    return this.documentContext.createOutlineElementByName("body", callbacks);
+  };
+
   RenderingContext.prototype.createOutlineElementByName = function(outline_name, callbacks){
     return this.documentContext.createOutlineElementByName(outline_name, callbacks);
   };

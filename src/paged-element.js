@@ -113,6 +113,7 @@ Nehan.PagedElement = (function(){
    */
   NehanPagedElement.prototype.setContent = function(content, opt){
     this.document.setContent(content);
+    this.document.render(opt);
     return this;
   };
   /**
