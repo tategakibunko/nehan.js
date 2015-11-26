@@ -266,7 +266,7 @@ Nehan.RenderingContext = (function(){
       indent_size = Math.max(indent_size, marker_measure);
     }.bind(this));
 
-    console.info("indent size:%d, body size:%d", indent_size, (this.style.contentMeasure - indent_size));
+    //console.info("indent size:%d, body size:%d", indent_size, (this.style.contentMeasure - indent_size));
 
     return {
       itemCount:item_count,
@@ -829,6 +829,10 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.getContextMaxMeasure = function(){
+    // rt is child style of ruby, but inline cursor starts from beginning of parent inline.
+    if(this.style.getMarkupName() === "rt"){
+      return this.parent.layoutContext.getInlineMaxMeasure();
+    }
     var max_size = (this.parent && this.parent.layoutContext)? this.parent.layoutContext.getInlineRestMeasure() : this.style.contentMeasure;
     return Math.min(max_size, this.style.contentMeasure);
   };

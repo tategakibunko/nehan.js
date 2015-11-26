@@ -40,10 +40,6 @@ Nehan.VertEvaluator = (function(){
     var rt_context = line.context.createChildContext(rt_style);
     var rt_generator = new Nehan.InlineGenerator(rt_context);
     var rt_line = rt_generator.yield();
-    if(!rt_line){
-      console.error("unable to yield rt:line = %o, ruby = %o", line, ruby);
-      return document.createTextNode("");
-    }
     Nehan.Args.copy(rt_line.css, ruby.getCssVertRt(line));
     return this._evaluate(rt_line);
   };
