@@ -37,16 +37,65 @@ These screenshots are layout result of [jekyll-nehan](https://github.com/tategak
 ### 2. vertical paged media
 <img src="https://raw.github.com/tategakibunko/jekyll-nehan/master/assets/sshot-vert.png" width="300" height="160" />
 
-## Quick Start 1 (for simple single page layout)
-
-Note that we can use functional value for styles!!
+## Gettting started
 
 ```javascript
-// NehanPagedElement is available for Nehan.version >= 5.0.3
-var pe = Nehan.createPagedElement();
+var document = new Nehan.Document();
+var target = document.querySelector("#target");
 
-// before calling setContent, set 'body' style of this paged-element.
-pe.setStyle("body", {
+// set document source html
+document.setContent("<h1>hello, nehan.js!!</h1>");
+
+// set document style
+document.setStyle("body", {
+  flow:"lr-tb",
+  //flow:"tb-rl", // Japanese vertical style
+  fontSize:"16px",
+  width:"640px",
+  height:"480px"
+});
+
+// set other style like this
+document.setStyle("p", {
+  margin:{
+    after:"1rem"
+  }
+});
+
+// start rendering.
+document.render({
+  onPage:function(page, ctx){
+    console.log("page %d complete:%o", page.pageNo, page.element);
+    page.element.style.marginBottom = "1em";
+    target.appendChild(page.element);
+  },
+  onComplete:function(time, ctx){
+    console.log("finish! %f msec", time);
+  }
+});
+
+// get page by getPage.
+var first_page = document.getPage(0);
+
+console.log("first page element:", first_page.element);
+
+// get page count by getPageCount
+var page_count = document.getPageCount();
+
+// move page by setPage
+$("button#back-to-first-page").click(function(){
+  document.setPage(0);
+});
+```
+
+## Styling
+
+You can set style by `Document::setStyle`.
+
+First argument is `selector key`, and second one is `selector value`.
+
+```javascript
+document.setStyle("body", {
   flow:"lr-tb",
   //"flow":"tb-rl", // for Japanese vertical
   fontSize:16,
@@ -59,7 +108,7 @@ pe.setStyle("body", {
     // console.log("nth-of-type:%d", prop_context.getChildIndexOfType());
     // console.log("is-last-child:%o", prop_context.isLastChild());
     // console.log("is-only-child:%o", prop_context.isOnlyChild());
-    return "white";
+    return "wheat";
   },
   // called after after all props in "body" selector are loaded.
   onload:function(selector_context){
@@ -72,133 +121,19 @@ pe.setStyle("body", {
       alert("body is clicked!");
     };
     // many various context data...
-    // console.log("abstract logical box:%o", context.box);
-    // console.log("abstract style info:%o", context.box.style);
-    // console.log("markup info:%o", context.box.markup);
-  }
-});
-
-// by setContent, paged-media is asynchronously generated.
-pe.setContent("<h1>hello, nehan.js</h1>", {
-  onProgress : function(tree){}, // tree.pageNo, tree.percent is available.
-  onComplete : function(time){}
-});
-
-// set paged-media element to some target dom.
-document.getElementById("result").appendChild(pe.getElement());
-
-// set next/prev callback to some clickable target.
-document.getElementById("next").onclick = function(){ pe.setNextPage() };
-document.getElementById("prev").onclick = function(){ pe.setPrevPage() };
-```
-
-## Quick Start 2 (more flexible way)
-
-```javascript
-// create layout engine.
-var engine = Nehan.createEngine();
-
-// set body size(= page size)
-engine.setStyle("body", {
-  flow:"lr-tb", // or "tb-rl"(vertical)
-  fontSize:16,
-  width:640,
-  height:480
-});
-
-// generate page stream from engine.
-var page_stream = engine.createPageStream("<h1>hello, nehan.js</h1>");
-
-// get target dom.
-var target_dom = document.getElementById("my-page-document");
-
-// start parsing
-page_stream.asyncGet({
-  // called when each abstract layout tree is generated.
-  onProgress: function(stream, tree){
-    var page = stream.getPage(tree.pageNo); // tree -> page object
-    target_dom.appendChild(page.element);
-  },
-  // called when all pages are generated.
-  onComplete: function(stream, time){
-    console.log("finished!! => %fmsec", time);
-  }
-});
-```
-
-### Styling(engine local style)
-
-Engine local style is only available for the single engine.
-
-```javascript
-// create layout engine.
-var engine = Nehan.createEngine();
-
-// set engine local style.
-engine.setStyles({
-  // note that 'body size' = 'page size'.
-  "body":{
-    flow:"lr-tb", // document mode horizontal
-    //flow:"tb-rl", // document mode vertical(Japanese)
-    width:"80%", // percent size from parent, 'screen.width' at this case.
-    // width:900, // direct size
-    height:"60%", // percent size from parent, 'screen.height' at this case.
-    fontSize:16, // note that camel-case(fontSize) is not allowed.
-    fontFamily:"Meiryo",
-    // functional property is supported.
-    // about prop_context, see src/selector-prop-context.js
-    backgroundColor:function(prop_context){
-      // you can use many pseudo-class in javascript!!
-      // console.log("nth-child:%d", prop_context.getChildIndex());
-      // console.log("nth-of-type:%d", prop_context.getChildIndexOfType());
-      // console.log("is-last-child:%o", prop_context.isLastChild());
-      // console.log("is-only-child:%o", prop_context.isOnlyChild());
-      return "white";
-    },
-    // onload callback is called after all the properties of this selector('body' at this case) are loaded.
-    onload:function(selector_context){
-      var markup = selector_context.getMarkup();
-      console.log(markup.getName()); // => "body"
-      console.log(markup.getAttr("foo")); // => 'aaa' if <body foo='aaa'>
-      console.log(markup.getData("fuga")); // => '10' if <body data-fuga='10'>
-      console.log(markup.getContent()); // => 'hello' if <body>hello</body>
-      console.log(markup.getCssAttr("font-family")); // => 'Meiryo'
-
-      // you can overwrite content dynamically like this.
-      markup.setContent(markup.getContent() + "!!");
-
-      // other context variables(see src/selector-prop-context.js or src/selector-context.js)
-      console.log("nth-child is %d", selector_context.getChildIndex());
-      console.log("nth-child-of-type is %d", selector_context.getChildIndexOfType());
-      console.log("rest extent size is %d", selector_context.getRestExtent());
-      console.log("rest measure size is %d", selector_context.getRestMeasure());
-    },
-    // oncreate callback is called when this element is actually generated by evaluator.
-    oncreate:function(context){
-      context.dom.onclick = function(){
-        alert("hello!");
-      };
-      console.log("abstract logical layout:%o", context.box);
-      console.log("style context:%o", context.box.style);
-      console.log("markup object:%o", context.box.markup);
-    }
-  },
-  // you can use regexp as element name like this.
-  "header /h[1-6]/":{
-    "font-weight":"bold",
-    // note that directions in nehan.js are defined as 'logical' like this.
-    "margin":{
-      "after":"1.5em" // 'after' is 'bottom' if body.flow = 'lr-tb'('left' if 'tb-rl').
-    }
+    // console.log("box object:", context.box);
+    // console.log("box context:", context.box.context);
+    // console.log("box style:", context.box.context.style);
+    // console.log("box markup:", context.box.context.style.markup);
   }
 });
 ```
 
 ## Styling(global style)
 
-Instead of <code>engine.setStyle</code> or <code>pe.setStyle</code>, <code>Nehan.setStyle</code> is used to set **global style**.
+You can define global stylel by using `Nehan.setStyle`.
 
-Global styles are shared by all engines created in same window.
+Global styles are shared by all document object created in same browser window.
 
 ```javascript
 Nehan.setStyle("body", {
