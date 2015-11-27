@@ -15,19 +15,18 @@ Nehan.InlineGenerator = (function(){
   InlineGenerator.prototype._yield = function(){
     while(this.hasNext()){
       var element = this._getNext();
-      try {
-	this.context.addInlineElement(element);
-      } catch(e){
-	if(e === Nehan.GeneratorExceptions.EOF ||
-	   e === Nehan.GeneratorExceptions.ZERO ||
-	   e === Nehan.GeneratorExceptions.LINE_BREAK ||
-	   e === Nehan.GeneratorExceptions.OVERFLOW){
-	  break;
-	} else {
-	  console.error(e);
-	  throw e; // fail again
-	}
+      var result = this.context.addInlineElement(element);
+      if(result === Nehan.Results.OK || result === Nehan.Results.SKIP){
+	continue;
       }
+      if(result === Nehan.Results.EOF ||
+	 result === Nehan.Results.ZERO ||
+	 result === Nehan.Results.LINE_BREAK ||
+	 result === Nehan.Results.OVERFLOW){
+	break;
+      }
+      console.error(result);
+      throw result;
     }
     // skip continuous <br> if element is the last full-filled line.
     if(element && element.lineOver && this.context.child && !this.context.child.hasNext()){

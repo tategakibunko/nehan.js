@@ -26,20 +26,18 @@ Nehan.BlockGenerator = (function(){
     }
     while(this.hasNext()){
       var element = this._getNext();
-      try {
-	this.context.addBlockElement(element);
-      } catch (e){
-	if(e === Nehan.GeneratorExceptions.EOF ||
-	   e === Nehan.GeneratorExceptions.BREAK_AFTER ||
-	   e === Nehan.GeneratorExceptions.ZERO ||
-	   e === Nehan.GeneratorExceptions.OVERFLOW){
-	  break;
-	} else {
-	  console.error(e);
-	  throw e; // fail again
-	}
+      var result = this.context.addBlockElement(element);
+      if(result === Nehan.Results.OK || result === Nehan.Results.SKIP){
+	continue;
+      }
+      if(result === Nehan.Results.EOF ||
+	 result === Nehan.Results.BREAK_AFTER ||
+	 result === Nehan.Results.ZERO ||
+	 result === Nehan.Results.OVERFLOW){
 	break;
       }
+      console.error(result);
+      throw result;
     }
     return this._createOutput();
   };

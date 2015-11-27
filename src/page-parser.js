@@ -25,22 +25,36 @@ Nehan.PageParser = (function(){
    @memberof Nehan.PageParser
    @param opt {Object}
    @param opt.onProgress {Function} - fun tree:{@link Nehan.Box} -> {@link Nehan.RenderingContext} -> ()
+   @param opt.onPage {Function} - fun page:{@link Nehan.Page} -> {@link Nehan.RenderingContext} -> ()
    @param opt.onComplete {Function} - fun time:{Float} -> context:{@link Nehan.RenderingContext} -> ()
    @param opt.onError {Function} - fun error:{String} -> ()
    @param opt.capturePageText {bool} output text node or not for each page object.
    @param opt.maxPageCount {int} upper bound of page count
    */
   PageParser.prototype.parse = function(opt){
+    // set defaults
+    opt = Nehan.Args.merge({}, {
+      capturePageText: false,
+      maxPageCount: Nehan.Config.maxPageCount,
+      onPage: null,
+      onComplete: function(time, ctx){},
+      onProgress: function(tree, ctx){
+	console.log("onProgress default:", tree);
+      },
+      onError: function(error){}
+    }, opt || {});
+
+    // if onPage is defined, rewrite onProgress callback.
+    if(opt.onPage){
+      var original_onprogress = opt.onProgress;
+      opt.onProgress = function(tree, ctx){
+	original_onprogress(tree, ctx);
+	opt.onPage(this.generator.context.getPage(tree.pageNo), ctx);
+      }.bind(this);
+    }
+
     this._setTimeStart();
-    this._parse(
-      Nehan.Args.merge({}, {
-	capturePageText: false,
-	maxPageCount: Nehan.Config.maxPageCount,
-	onComplete: function(time, ctx){},
-	onProgress: function(tree, ctx){},
-	onError: function(error){}
-      }, opt || {})
-    );
+    this._parse(opt);
   };
 
   PageParser.prototype._setTimeStart = function(){

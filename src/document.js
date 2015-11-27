@@ -7,20 +7,11 @@ Nehan.Document = (function(){
   }
 
   Document.prototype.render = function(opt){
-    opt = opt || {};
-    var context = new Nehan.RenderingContext({
-      text:Nehan.Html.normalize(this.text)
-    }).setStyles(this.styles);
     this.text = opt.text || this.text;
-    this.generator = context.createRootGenerator();
-    if(opt.onPage){
-      var original_onprogress = opt.onProgress || function(){};
-      opt.onProgress = function(tree, ctx){
-	original_onprogress(tree, ctx);
-	opt.onPage(this.getPage(tree.pageNo), ctx);
-      }.bind(this);
-    }
-    new Nehan.PageParser(this.generator).parse(opt);
+    this.generator = new Nehan.RenderingContext({
+      text:Nehan.Html.normalize(this.text)
+    }).setStyles(this.styles).createRootGenerator();
+    new Nehan.PageParser(this.generator).parse(opt || {});
     return this;
   };
   

@@ -15,18 +15,17 @@ Nehan.TextGenerator = (function(){
   TextGenerator.prototype._yield = function(){
     while(this.hasNext()){
       var element = this._getNext();
-      try {
-	this.context.addTextElement(element);
-      } catch(e){
-	if(e === Nehan.GeneratorExceptions.EOF ||
-	   e === Nehan.GeneratorExceptions.ZERO ||
-	   e === Nehan.GeneratorExceptions.OVERFLOW){
-	  break;
-	} else {
-	  console.error(e);
-	  throw e; // fail again
-	}
+      var result = this.context.addTextElement(element);
+      if(result === Nehan.Results.OK || result === Nehan.Results.SKIP){
+	continue;
       }
+      if(result === Nehan.Results.EOF ||
+	 result === Nehan.Results.ZERO ||
+	 result === Nehan.Results.OVERFLOW){
+	break;
+      }
+      console.error(result);
+      throw result;
     }
     return this._createOutput();
   };

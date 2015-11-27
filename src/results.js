@@ -1,9 +1,11 @@
 /**
- exception codes for internal generator operation.
+ result codes for internal operation
 
- @namespace Nehan.GeneratorExceptions
+ @namespace Nehan.Results
 */
-Nehan.GeneratorExceptions = {
+Nehan.Results = {
+  OK:"ok",
+  SKIP:"skip",
   EOF:"eof",
   BREAK_AFTER:"break-after",
   ZERO:"zero",
