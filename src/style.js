@@ -398,6 +398,13 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {boolean}
    */
+  Style.prototype.isTableCell = function(){
+    return this.display === "table-cell";
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
   Style.prototype.isPulled = function(){
     return this.getMarkupAttr("pulled") !== null;
   };
@@ -677,6 +684,13 @@ Nehan.Style = (function(){
    */
   Style.prototype.getMarkupName = function(){
     return this.markup.getName();
+  };
+  /**
+   @memberof Nehan.Style
+   @return {String}
+   */
+  Style.prototype.getMarkupPath = function(){
+    return this.markup.getPath();
   };
   /**
    @memberof Nehan.Style
@@ -1234,7 +1248,7 @@ Nehan.Style = (function(){
     var size = Nehan.Config.absFontSizes[str] || str;
     var max_size = this.getParentFontSize();
     var font_size = this._computeUnitSize(size, unit_size, max_size);
-    return Math.max(Nehan.Config.minFontSize, Math.min(font_size, Nehan.Config.maxFontSize));
+    return Math.max(1, Math.min(font_size, Nehan.Config.maxFontSize));
   };
 
   Style.prototype._computeUnitSize = function(val, unit_size, max_size){

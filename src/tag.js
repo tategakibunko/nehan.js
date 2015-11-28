@@ -160,6 +160,22 @@ Nehan.Tag = (function (){
   };
   /**
    @memberof Nehan.Tag
+   @return {String}
+   */
+  Tag.prototype.getPath = function(){
+    var path = this.getName();
+    var id = this.getId();
+    if(id){
+      path += "#" + id;
+    }
+    var classes = this.getClasses();
+    if(classes.length > 0){
+      path += "." + classes.join(".");
+    }
+    return path;
+  };
+  /**
+   @memberof Nehan.Tag
    @param name {String}
    @param def_value {default_value}
    @return {attribute_value}

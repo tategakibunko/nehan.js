@@ -76,6 +76,7 @@ Nehan.BlockGenerator = (function(){
 
     // if disabled style, just skip
     if(child_style.isDisabled()){
+      console.warn("disabled style:%o(%s):", child_style, child_style.getMarkupName());
       return this._getNext();
     }
 
@@ -95,6 +96,11 @@ Nehan.BlockGenerator = (function(){
     if(child_style.isFloated()){
       var first_float_gen = this.context.createChildBlockGenerator(child_style);
       return this.context.createFloatGenerator(first_float_gen).yield();
+    }
+
+    // if link tag appears in block context, treat it as inline-block.
+    if(child_style.getMarkupName() === "a"){
+      child_style.display = "inline-block";
     }
 
     // if child inline or child inline-block,
@@ -123,6 +129,7 @@ Nehan.BlockGenerator = (function(){
     if(this.context.isBreakAfter()){
       block.breakAfter = true;
     }
+
     return block;
   };
 

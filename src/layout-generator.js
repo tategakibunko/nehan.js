@@ -27,12 +27,12 @@ Nehan.LayoutGenerator = (function(){
    @return {Nehan.Box}
    */
   LayoutGenerator.prototype.yield = function(){
-    //console.group("%s _yield:%o", this.context.getGeneratorName(), this.context);
+    console.group("%s _yield:%o", this.context.getGeneratorName(), this.context);
 
     this.context.initLayoutContext();
 
     if(this.context.layoutContext){
-      //console.log("available space(m = %d, e = %d)", this.context.layoutContext.inline.maxMeasure, this.context.layoutContext.block.maxExtent);
+      console.log("available space(m = %d, e = %d)", this.context.layoutContext.inline.maxMeasure, this.context.layoutContext.block.maxExtent);
       if(this.context.layoutContext.block.maxExtent <= 0){
 	return null;
       }
@@ -48,7 +48,7 @@ Nehan.LayoutGenerator = (function(){
       console.error("[%s]too many yield!:%o", this.context._name, this);
       throw "too many yield";
     }
-    //console.groupEnd();
+    console.groupEnd();
     return box;
   };
 

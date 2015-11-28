@@ -32,17 +32,18 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.addBlockElement = function(element){
     if(element === null){
-      //console.log("[%s]:eof", this.getGeneratorName());
+      //console.log("[%s]:eof or null", this._name);
       return Nehan.Results.EOF;
     }
     var max_size = this.getContextMaxExtentForAdd();
     var max_measure = this.layoutContext.getInlineMaxMeasure();
     var element_size = element.getLayoutExtent(this.style.flow);
+    var prev_block_count = this.layoutContext.getBlockCount();
     var prev_extent = this.layoutContext.getBlockCurExtent();
     var next_extent = prev_extent + element_size;
 
     // first element, but child layout over
-    if(this.layoutContext.getBlockElements().length === 0 && next_extent > max_size){
+    if(prev_block_count === 0 && next_extent > max_size){
       // try to cancel after edge
       if(element.edge){
 	var over_size = next_extent - max_size;
@@ -50,14 +51,19 @@ Nehan.RenderingContext = (function(){
 	next_extent -= cancel_size;
 	element_size -= cancel_size;
       }
-      // if element size is large than root size, it's never included, so skip it without caching.
-      if(next_extent > max_size && element_size > this.getRootContentExtent()){
-	console.error("skip too large block element:%o(%d)", element, element_size);
-	return Nehan.Results.SKIP;
+      // still overflow
+      if(next_extent > max_size){
+	// if element size is larger than root extent, it's never included. so skip it without caching.
+	if(element_size > this.getRootContentExtent()){
+	  console.error("skip too large block element:%o(%d)", element, element_size);
+	  return Nehan.Results.SKIP;
+	}
+	// first atomic element must be yielded.
+	console.warn("first atomic element overflow:", element);
       }
     }
 
-    //this.debugBlockElement(element, element_size);
+    this.debugBlockElement(element, element_size);
 
     if(element.isResumableLine(max_measure) && this.hasChildLayout() && this.child.isInline()){
       this.child.setResumeLine(element);
@@ -78,12 +84,11 @@ Nehan.RenderingContext = (function(){
     }
     // if overflow, penetrate page-break to parent layout.
     if(element.breakAfter || next_extent >= max_size){
-      /*
       if(element.breakAfter){
 	console.info("inherit break after");
       } else {
 	console.info("size over");
-      }*/
+      }
       this.setBreakAfter(true);
       return Nehan.Results.BREAK_AFTER;
     }
@@ -617,10 +622,10 @@ Nehan.RenderingContext = (function(){
       pulled:this.style.isPulled()
     });
     if(this.style.getMarkupName() !== "hr" && (extent === 0 || elements.length === 0)){
-      //console.warn("zero block? %o", box);
+      console.warn("zero block? %o", box);
       box.breakAfter = true;
     }
-    //console.log("box(%s) break after:%o", box.toString(), box.breakAfter);
+    console.log("box(%s) break after:%o", box.toString(), box.breakAfter);
     return box;
   };
 
@@ -646,6 +651,10 @@ Nehan.RenderingContext = (function(){
       edge:((this.style.edge && !is_inline_root)? this.style.edge : null), // edge of root line is disabled because it's already included by parent block.,
       content:opt.content || null
     });
+
+    if(line.elements.length === 0 || line.isInvalidSize()){
+      console.warn("zero line box");
+    }
 
     line.maxFontSize = this.layoutContext.getInlineMaxFontSize();
     line.maxExtent = this.layoutContext.getInlineMaxExtent();
@@ -828,6 +837,10 @@ Nehan.RenderingContext = (function(){
     return this.style? this.style.getMarkupName() : "";
   };
 
+  RenderingContext.prototype.getMarkupPath = function(){
+    return this.style? this.style.getMarkupPath() : "";
+  };
+
   RenderingContext.prototype.getDisplay = function(){
     return this.style? this.style.display : "";
   };
@@ -1004,7 +1017,8 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.getGeneratorName = function(){
-    var markup_name = this.getMarkupName();
+    //var markup_name = this.getMarkupName();
+    var markup_name = this.getMarkupPath();
     if(this.generator instanceof Nehan.DocumentGenerator){
       return "(root)";
     }
@@ -1195,6 +1209,10 @@ Nehan.RenderingContext = (function(){
     return true;
   };
 
+  RenderingContext.prototype.isInsidePreBlock = function(){
+    return this.parent && this.parent.style.isPre();
+  };
+
   // -----------------------------------------------
   // [peek]
   // -----------------------------------------------
@@ -1207,7 +1225,7 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   RenderingContext.prototype.popCache = function(){
     var cache = this.cachedElements.pop();
-    //console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
+    console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
     cache.breakAfter = false;
     return cache;
   };
@@ -1224,7 +1242,7 @@ Nehan.RenderingContext = (function(){
     //console.log("push cache:%o(e = %d, text = %s)", element, size, this.stringOfElement(element));
     element.cacheCount = (element.cacheCount || 0) + 1;
     if(element.cacheCount >= Nehan.Config.maxRollbackCount){
-      console.error("too many rollback! context:%o, element:%o", this, element);
+      console.error("too many rollback! context:%o, element:%o(%s)", this, element, this.stringOfElement(element));
       return Nehan.Results.TOO_MANY_ROLLBACK;
     }
     this.cachedElements.push(element);
@@ -1538,7 +1556,9 @@ Nehan.RenderingContext = (function(){
     //console.info("yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
     this.child.updateContextStaticSize(measure, extent);
     this.child.floatGroup = float_group;
-    return this.yieldChildLayout();
+    var element = this.yieldChildLayout();
+    element.isSpace = true;
+    return element;
   };
 
   // -----------------------------------------------

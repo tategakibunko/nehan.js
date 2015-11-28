@@ -73,6 +73,13 @@ Nehan.Box = (function(){
   };
   /**
    @memberof Nehan.Box
+   @return {boolean}
+   */
+  Box.prototype.isInvalidSize = function(){
+    return (this.size.width <= 0 || this.size.height <= 0);
+  };
+  /**
+   @memberof Nehan.Box
    @return {int}
    */
   Box.prototype.getCacheCount = function(){

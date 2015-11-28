@@ -23,9 +23,11 @@ Nehan.BodyGenerator = (function(){
     }
   };
 
-  BodyGenerator.prototype._onCreate = function(block){
-    if(!block){
-      return;
+  BodyGenerator.prototype._createOutput = function(){
+    var block = Nehan.BlockGenerator.prototype._createOutput.call(this);
+
+    if(block.isInvalidSize()){
+      return null; // skip invalid block
     }
     block.seekPos = this.context.stream.getSeekPos();
     block.charPos = this.context.documentContext.getCharPos();
@@ -43,6 +45,7 @@ Nehan.BodyGenerator = (function(){
 
     // body output is treated as page box.
     this.context.addPage(block);
+    return block;
   };
 
   return BodyGenerator;

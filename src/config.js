@@ -239,15 +239,6 @@ Nehan.Config = {
   defaultLineHeight: 2.0,
 
   /**
-   default minimum font size
-
-   @memberof Nehan.Config
-   @type {int}
-   @default 8
-   */
-  minFontSize:8,
-
-  /**
    default maximum font size
 
    @memberof Nehan.Config

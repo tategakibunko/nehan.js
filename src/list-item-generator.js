@@ -12,6 +12,26 @@ Nehan.ListItemGenerator = (function(){
   }
   Nehan.Class.extend(ListItemGenerator, Nehan.ParallelGenerator);
 
+  ListItemGenerator.prototype._createOutput = function(){
+    var block = Nehan.BlockGenerator.prototype._createOutput.call(this);
+    var list = block.elements[0];
+    var items = list? list.elements : [];
+    //console.log("output list item:mark = %o, body = %o", items[0], items[1]);
+    if(!items[0] || !items[1]){
+      console.warn("invalid list item(undefined)");
+      return null;
+    }
+    if(items[1] && items[1].isInvalidSize()){
+      console.warn("invalid list item(zero size)");
+      return null;
+    }
+    if(items[1].elements.length === 0){
+      console.warn("invalid list item(empty body)");
+      return null;
+    }
+    return block;
+  };
+
   ListItemGenerator.prototype._createChildGenerators = function(context){
     var list_context = context.parent.listContext;
     var list_index = context.style.getChildIndex();

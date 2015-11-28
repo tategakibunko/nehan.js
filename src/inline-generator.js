@@ -38,9 +38,6 @@ Nehan.InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createOutput = function(){
-    if(this.context.layoutContext.isInlineEmpty()){
-      return null;
-    }
     var line = this.context.createLineBox();
 
     // call _onCreate callback for 'each' output
@@ -72,7 +69,18 @@ Nehan.InlineGenerator = (function(){
     //console.log("inline token:%o", token);
 
     // text block
-    if(token instanceof Nehan.Text || token instanceof Nehan.Tcy || token instanceof Nehan.Word){
+    if(token instanceof Nehan.Text){
+      if(token.getContent() === ""){
+	return this._getNext(); // skip
+      }
+      if(!this.context.isInsidePreBlock() && token.isWhiteSpaceOnly()){
+	return this._getNext();
+      }
+      return this.context.createChildTextGenerator(token).yield();
+    }
+
+    // tcy, word
+    if(token instanceof Nehan.Tcy || token instanceof Nehan.Word){
       return this.context.createChildTextGenerator(token).yield();
     }
 
@@ -103,6 +111,7 @@ Nehan.InlineGenerator = (function(){
     var child_style = this.context.createChildStyle(token);
 
     if(child_style.isDisabled()){
+      console.warn("disabled style:%o(%s)", child_style, child_style.getMarkupName());
       return this._getNext(); // just skip
     }
 

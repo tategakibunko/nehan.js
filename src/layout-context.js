@@ -47,6 +47,13 @@ Nehan.LayoutContext = (function(){
    @memberof Nehan.LayoutContext
    @return {int}
    */
+  LayoutContext.prototype.getBlockCount = function(){
+    return this.getBlockElements().length;
+  };
+  /**
+   @memberof Nehan.LayoutContext
+   @return {int}
+   */
   LayoutContext.prototype.getBlockCurExtent = function(){
     return this.block.getCurExtent();
   };

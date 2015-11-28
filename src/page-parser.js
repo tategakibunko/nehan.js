@@ -38,9 +38,7 @@ Nehan.PageParser = (function(){
       maxPageCount: Nehan.Config.maxPageCount,
       onPage: null,
       onComplete: function(time, ctx){},
-      onProgress: function(tree, ctx){
-	console.log("onProgress default:", tree);
-      },
+      onProgress: function(tree, ctx){},
       onError: function(error){}
     }, opt || {});
 
@@ -48,8 +46,13 @@ Nehan.PageParser = (function(){
     if(opt.onPage){
       var original_onprogress = opt.onProgress;
       opt.onProgress = function(tree, ctx){
+	console.log("tree:", tree);
 	original_onprogress(tree, ctx);
-	opt.onPage(this.generator.context.getPage(tree.pageNo), ctx);
+	var page = this.generator.context.getPage(tree.pageNo);
+	if(page){
+	  console.log("page:", page);
+	  opt.onPage(page, ctx);
+	}
       }.bind(this);
     }
 
