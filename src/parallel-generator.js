@@ -12,7 +12,7 @@ Nehan.ParallelGenerator = (function(){
     context.parallelGenerators = this._createChildGenerators(context);
     context.stream = null;
   }
-  Nehan.Class.extend(ParallelGenerator, Nehan.BlockGenerator);
+  Nehan.Class.extend(ParallelGenerator, Nehan.LayoutGenerator);
 
   ParallelGenerator.prototype._createChildGenerators = function(context){
     throw "ParallelGenerator::_createChildGenerators must be implemented in child class";
@@ -24,7 +24,7 @@ Nehan.ParallelGenerator = (function(){
     });
   };
 
-  ParallelGenerator.prototype._getNext = function(){
+  ParallelGenerator.prototype._yield = function(){
     if(this.context.hasCache()){
       return this.context.popCache();
     }

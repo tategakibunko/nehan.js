@@ -17,7 +17,7 @@ Nehan.BlockGenerator = (function(){
   BlockGenerator.prototype._yield = function(){
     var clearance = this.context.yieldClearance();
     if(clearance){
-      //console.log("clearance:", clearance);
+      console.log("clearance:", clearance);
       return clearance;
     }
     // if break-before available, page-break but only once.

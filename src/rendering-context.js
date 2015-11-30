@@ -109,7 +109,7 @@ Nehan.RenderingContext = (function(){
     var prev_measure = this.layoutContext.getInlineCurMeasure(this.style.flow);
     var next_measure = prev_measure + element_size;
 
-    this.debugInlineElement(element, element_size);
+    //this.debugInlineElement(element, element_size);
 
     if(element_size === 0){
       return Nehan.Results.ZERO;
@@ -406,7 +406,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createFloatGenerator = function(first_float_gen){
-    //console.log("create float generator!");
+    console.warn("create float generator!");
     var floated_generators = [first_float_gen];
     this.stream.iterWhile(function(token){
       if(token instanceof Nehan.Text && token.isWhiteSpaceOnly()){
@@ -612,11 +612,12 @@ Nehan.RenderingContext = (function(){
       pulled:this.style.isPulled()
     });
     if(this.getMarkupName() !== "hr" && (box.elements.length === 0 || box.isInvalidSize())){
-      console.warn("zero block? force break after");
-      box.breakAfter = true;
+      console.warn("zero block?");
+      //box.breakAfter = true;
     }
     console.warn(
-      "box(%s)\n box.breakAfter:%o, context.breakAfter:%o, box.isVoid:%o",
+      "[create box box]%o(%s)\n box.breakAfter:%o, context.breakAfter:%o, box.isVoid:%o",
+      box,
       box.toString(),
       box.breakAfter,
       this.layoutContext.isBreakAfter(),
@@ -1527,9 +1528,13 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.yieldWhiteSpace = function(){
-    return this.createBlockBox({
-      noEdge:true,
-      extent:this.layoutContext.getBlockMaxExtent(),
+    return new Nehan.Box({
+      display:"block",
+      context:this,
+      size:this.style.flow.getBoxSize(
+	this.layoutContext.getInlineMaxMeasure(),
+	this.layoutContext.getBlockMaxExtent()
+      ),
       elements:[]
     });
   };
@@ -1648,7 +1653,8 @@ Nehan.RenderingContext = (function(){
     });
 
     if(blocks.every(function(block){
-      return block === null || block.getContentExtent() <= 0;
+      //return block === null || block.getContentExtent() <= 0;
+      return block === null;
     })){
       return null;
     }
@@ -1684,11 +1690,8 @@ Nehan.RenderingContext = (function(){
     var start_blocks = [], end_blocks = [];
     Nehan.List.iter(this.floatedGenerators, function(gen){
       var block = gen.yield();
-      /*
+      //console.log("float box:%o(content extent:%d)", block, block.getContentExtent());
       if(!block || block.getContentExtent() <= 0){
-	return;
-       }*/
-      if(!block){
 	return;
       }
       if(gen.context.style.isFloatStart()){

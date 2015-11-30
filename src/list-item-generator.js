@@ -12,11 +12,12 @@ Nehan.ListItemGenerator = (function(){
   }
   Nehan.Class.extend(ListItemGenerator, Nehan.ParallelGenerator);
 
+  /*
   ListItemGenerator.prototype._createOutput = function(){
     var block = Nehan.BlockGenerator.prototype._createOutput.call(this);
     var list = block.elements[0];
     var items = list? list.elements : [];
-    //console.log("output list item:mark = %o, body = %o", items[0], items[1]);
+    console.log("output list item:mark = %o, body = %o", items[0], items[1]);
     if(!items[0] || !items[1]){
       console.warn("invalid list item(undefined)");
       return null;
@@ -31,6 +32,7 @@ Nehan.ListItemGenerator = (function(){
     }
     return block;
   };
+   */
 
   ListItemGenerator.prototype._createChildGenerators = function(context){
     var list_context = context.parent.listContext;
@@ -46,7 +48,9 @@ Nehan.ListItemGenerator = (function(){
 
   // inherit from ParallelGenerator::_isBreakAfter
   ListItemGenerator.prototype._isBreakAfter = function(blocks){
-    return blocks[1] && blocks[1].breakAfter;
+    var result = blocks[1] && blocks[1].breakAfter;
+    console.log("ListItemGenerator::_isBreakAfter(%o) = %o", blocks, result);
+    return result;
   };
 
   ListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){

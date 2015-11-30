@@ -38,20 +38,29 @@ Nehan.FloatGenerator = (function(){
       return this.context.popCache();
     }
     var stack = this.context.yieldFloatStack();
+    var stack_extent = stack.getExtent();
     if(stack.isBreakAfter()){
-      console.warn("float stack break after enabled!!");
+      console.warn("float stack break after enabled!![stack extent:%d]", stack_extent);
       //this.context.layoutContext.setBreakAfter(true);
     }
     if(stack.isEmpty()){
-      console.warn("float stack empty!", stack);
+      console.warn("float stack empty!");
+      //return null;
+      // still active float element exists, but empty.
+      // it's overflow(maybe).
+      if(this.context.hasNextFloat()){
+	console.warn("maybe float over, retry in next page");
+	return this.context.yieldPageBreak();
+      }
+      console.warn("float is already done! return null");
       return null;
     }
 
     var rest_measure = this.context.layoutContext.getInlineRestMeasure();
-    var stack_extent = stack.getExtent();
     if(stack_extent > this.context.getContextMaxExtent()){
-      console.warn("float stack can't be included in parent layout!");
+      console.warn("float stack can't be included in parent layout! -> break-after");
       this.context.pushFloatStackCache(stack);
+      this.context.layoutContext.setBreakAfter(true);
       return null;
     }
     if(stack_extent <= 0 || rest_measure <= 0){
@@ -150,9 +159,9 @@ Nehan.FloatGenerator = (function(){
     var elements = this._sortFloatRest(floated, rest || null);
     var extent = (elements.length > 0)? floated.getExtent(flow) : 0;
     var box = this.context.yieldWrapBlock(measure, extent, elements);
-    box.breakAfter = Nehan.List.exists(elements, function(element){
-      return element && element.breakAfter;
-    }) && this.context.hasNextFloat();
+    // break after is available only while floated targets are alive.
+    box.breakAfter = this.context.hasNextFloat();
+    console.warn("wrap inline set:", box);
     return box;
   };
 
@@ -168,14 +177,7 @@ Nehan.FloatGenerator = (function(){
     var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
     var extent = Nehan.List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
     var box = this.context.yieldWrapBlock(measure, extent, elements);
-    var tail_element = Nehan.List.last(elements);
-    box.breakAfter = tail_element && tail_element.breakAfter && this.context.hasNextFloat();
-    /*
-    box.breakAfter = Nehan.List.exists(elements, function(element){
-      return element && element.breakAfter;
-    }) && this.context.hasNextFloat();
-     */
-    console.log("wrap block set:%o", box);
+    console.warn("wrap block set:", box);
     return box;
   };
 
