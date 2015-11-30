@@ -38,17 +38,7 @@ Nehan.InlineGenerator = (function(){
   };
 
   InlineGenerator.prototype._createOutput = function(){
-    var line = this.context.createLineBox();
-
-    // call _onCreate callback for 'each' output
-    this._onCreate(line);
-
-    // call _onComplete callback for 'final' output
-    if(!this.hasNext()){
-      this._onComplete(line);
-    }
-    //console.log(">> line:%o, context = %o", line, context);
-    return line;
+    return this.context.createLineBox();
   };
 
   InlineGenerator.prototype._getNext = function(){
@@ -100,7 +90,7 @@ Nehan.InlineGenerator = (function(){
       return this._getNext();
 
     case "page-break": case "pbr": case "end-page":
-      this.context.setBreakAfter(true);
+      this.context.layoutContext.setBreakAfter(true);
       return null;
 
     default:

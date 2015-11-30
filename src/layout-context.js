@@ -10,7 +10,6 @@ Nehan.LayoutContext = (function(){
   function LayoutContext(block, inline){
     this.block = block;
     this.inline = inline;
-    this.breakAfter = false;
   }
 
   /**
@@ -19,14 +18,6 @@ Nehan.LayoutContext = (function(){
    */
   LayoutContext.prototype.hasBlockSpaceFor = function(extent, opt){
     return this.block.hasSpaceFor(extent, opt);
-  };
-  /**
-   @memberof Nehan.LayoutContext
-   @return {boolean}
-   */
-  LayoutContext.prototype.hasBreakAfter = function(){
-    //return this.block.hasBreakAfter() || this.inline.hasBreakAfter() || false;
-    return this.breakAfter;
   };
   /**
    @memberof Nehan.LayoutContext
@@ -145,7 +136,7 @@ Nehan.LayoutContext = (function(){
    @memberof Nehan.LayoutContext
    */
   LayoutContext.prototype.setBreakAfter = function(status){
-    this.breakAfter = true;
+    this.block.setBreakAfter(status);
   };
   /**
    @memberof Nehan.LayoutContext
@@ -288,6 +279,13 @@ Nehan.LayoutContext = (function(){
     return this.inline.popElement();
   };
 
+  /**
+   @memberof Nehan.LayoutContext
+   @return {boolean}
+   */
+  LayoutContext.prototype.isBreakAfter = function(){
+    return this.block.isBreakAfter();
+  };
   return LayoutContext;
 })();
 

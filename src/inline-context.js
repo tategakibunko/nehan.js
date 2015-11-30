@@ -23,7 +23,7 @@ Nehan.InlineContext = (function(){
    @return {boolean}
    */
   InlineContext.prototype.isEmpty = function(){
-    return !this.lineBreak && !this.breakAfter && this.elements.length === 0;
+    return !this.lineBreak && this.elements.length === 0;
   };
   /**
    @memberof Nehan.InlineContext
@@ -77,13 +77,6 @@ Nehan.InlineContext = (function(){
   };
   /**
    @memberof Nehan.InlineContext
-   @return {boolean}
-   */
-  InlineContext.prototype.hasBreakAfter = function(){
-    return this.breakAfter;
-  };
-  /**
-   @memberof Nehan.InlineContext
    @param measure {int}
    */
   InlineContext.prototype.addMeasure = function(measure){
@@ -117,9 +110,6 @@ Nehan.InlineContext = (function(){
     }
     if(element.maxFontSize){
       this.maxFontSize = Math.max(this.maxFontSize, element.maxFontSize);
-    }
-    if(element.breakAfter){
-      this.breakAfter = true;
     }
     if(element.hyphenated){
       this.hyphenated = true;

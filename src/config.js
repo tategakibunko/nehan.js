@@ -45,9 +45,9 @@ Nehan.Config = {
 
    @memberof Nehan.Config
    @type {int}
-   @default 10
+   @default 5
    */
-  maxRollbackCount:10,
+  maxRollbackCount:5,
 
   /**
    max yield count to block infinite loop.

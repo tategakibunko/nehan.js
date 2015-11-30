@@ -30,9 +30,30 @@ Nehan.RenderingContext = (function(){
     }
   };
 
+  RenderingContext.prototype.isEmptyStreamTokens = function(){
+    // null stream context like float-root, float-space has special role, so treat it not empty.
+    if(!this.stream || this.stream.tokens.length === 0){
+      console.warn("empty stream?:", this);
+      return false;
+    }
+    return Nehan.List.forall(this.stream.tokens, function(token){
+      if(token instanceof Nehan.Text){
+	var text = token.content.replace(/\s/g, "").replace(/\n/g, "");
+	//console.log("isEmptyStreamTokens(Text:[%s] -> [%s])", token.content, text);
+	return text === "";
+      }
+      if(token instanceof Nehan.Tag){
+	var disabled = Nehan.List.exists(Nehan.Config.disabledMarkups, Nehan.Closure.eq(token.getName()));
+	//console.log("isDisabled markup(Tag:%s -> disabled:%o)", token.getName(), disabled);
+	return disabled;
+      }
+      return false;
+    });
+  };
+
   RenderingContext.prototype.addBlockElement = function(element){
     if(element === null){
-      //console.log("[%s]:eof or null", this._name);
+      //console.log("[%s]:eof", this._name);
       return Nehan.Results.EOF;
     }
     var max_size = this.getContextMaxExtentForAdd();
@@ -59,7 +80,7 @@ Nehan.RenderingContext = (function(){
 	  return Nehan.Results.SKIP;
 	}
 	// first atomic element must be yielded.
-	console.warn("first atomic element overflow:", element);
+	console.warn("first atomic element overflow:%o(%s)", element, element.toString());
       }
     }
 
@@ -82,22 +103,26 @@ Nehan.RenderingContext = (function(){
 	return result;
       }
     }
-    // if overflow, penetrate page-break to parent layout.
-    if(element.breakAfter || next_extent >= max_size){
-      if(element.breakAfter){
-	console.info("inherit break after");
-      } else {
-	console.info("size over");
-      }
-      this.setBreakAfter(true);
+    if(next_extent >= max_size){
+      console.warn("break after(block over)");
+      this.layoutContext.setBreakAfter(true);
+    }
+    // inherit child block over
+    if(element.breakAfter){
+      console.warn("break after(inherit)");
+      this.layoutContext.setBreakAfter(true);
+    }
+    if(this.layoutContext.isBreakAfter()){
       return Nehan.Results.BREAK_AFTER;
     }
     return Nehan.Results.OK;
   };
 
+  // flag from child: lineOver, lineBreak
+  // flag to parent: lineBreak
   RenderingContext.prototype.addInlineElement = function(element){
     if(element === null){
-      //console.log("[%s]:eof", this.getGeneratorName());
+      console.log("[%s]:eof", this._name);
       return Nehan.Results.EOF;
     }
     var max_size = this.layoutContext.getInlineMaxMeasure();
@@ -105,7 +130,7 @@ Nehan.RenderingContext = (function(){
     var prev_measure = this.layoutContext.getInlineCurMeasure(this.style.flow);
     var next_measure = prev_measure + element_size;
 
-    //this.debugInlineElement(element, element_size);
+    this.debugInlineElement(element, element_size);
 
     if(element_size === 0){
       return Nehan.Results.ZERO;
@@ -127,6 +152,10 @@ Nehan.RenderingContext = (function(){
       if(element.hasLineBreak){
 	this.layoutContext.setLineBreak(true);
 	return Nehan.Results.LINE_BREAK;
+      }
+      if(element.lineOver){
+	this.layoutContext.setLineOver(true);
+	return Nehan.Results.OVERFLOW;
       }
     }
     if(next_measure > max_size){
@@ -179,16 +208,6 @@ Nehan.RenderingContext = (function(){
       return Nehan.Results.OVERFLOW;
     }
     return Nehan.Results.OK;
-  };
-
-  // -----------------------------------------------
-  // [apply]
-  // -----------------------------------------------
-  RenderingContext.prototype.applyHyphenate = function(){
-    if(!this.isHyphenateEnable()){
-      return;
-    }
-    this._hyphenate();
   };
 
   // -----------------------------------------------
@@ -548,10 +567,6 @@ Nehan.RenderingContext = (function(){
     );
   };
 
-  RenderingContext.prototype.createPageBreak = function(){
-    // TODO
-  };
-
   RenderingContext.prototype.createWhiteSpace = function(){
     return this.createBlockBox({
       noEdge:true,
@@ -575,6 +590,15 @@ Nehan.RenderingContext = (function(){
       classes.push("nehan-header");
     }
     classes = classes.concat(this.style.markup.getClasses());
+    return classes;
+  };
+
+  RenderingContext.prototype.createLineBoxClasses = function(){
+    var classes = ["nehan-inline", "nehan-inline-" + this.style.flow.getName()];
+    classes = classes.concat(this.style.markup.getClasses());
+    if(!this.isInlineRoot()){
+      classes.concat("nehan-" + this.getMarkupName());
+    }
     return classes;
   };
 
@@ -617,15 +641,20 @@ Nehan.RenderingContext = (function(){
       charCount:elements.reduce(function(total, element){
 	return total + (element.charCount || 0);
       }, 0),
-      breakAfter:this.layoutContext.hasBreakAfter(),
+      breakAfter:this.layoutContext.isBreakAfter(),
       pushed:this.style.isPushed(),
       pulled:this.style.isPulled()
     });
-    if(this.style.getMarkupName() !== "hr" && (extent === 0 || elements.length === 0)){
-      console.warn("zero block? %o", box);
+    if(this.getMarkupName() !== "hr" && (box.elements.length === 0 || box.isInvalidSize())){
       box.breakAfter = true;
     }
-    console.log("box(%s) break after:%o", box.toString(), box.breakAfter);
+    console.warn(
+      "box(%s)\n box.breakAfter:%o, context.breakAfter:%o, box.isVoid:%o",
+      box.toString(),
+      box.breakAfter,
+      this.layoutContext.isBreakAfter(),
+      box.isVoid()
+    );
     return box;
   };
 
@@ -639,33 +668,27 @@ Nehan.RenderingContext = (function(){
       measure = this.style.contentMeasure;
     }
     var line_size = this.style.flow.getBoxSize(measure, max_extent);
-    var classes = ["nehan-inline", "nehan-inline-" + this.style.flow.getName()].concat(this.style.markup.getClasses());
     var line = new Nehan.Box({
       type:"line-block",
       display:"inline",
       size:line_size,
       context:this,
       elements:elements,
-      classes:(is_inline_root? classes : classes.concat("nehan-" + this.style.getMarkupName())),
+      classes:this.createLineBoxClasses(),
       charCount:(opt.charCount || this.layoutContext.getInlineCharCount()),
       edge:((this.style.edge && !is_inline_root)? this.style.edge : null), // edge of root line is disabled because it's already included by parent block.,
       content:opt.content || null
     });
 
-    if(line.elements.length === 0 || line.isInvalidSize()){
-      console.warn("zero line box");
-    }
-
     line.maxFontSize = this.layoutContext.getInlineMaxFontSize();
     line.maxExtent = this.layoutContext.getInlineMaxExtent();
-    line.isInlineRoot = is_inline_root;
     line.hasLineBreak = this.layoutContext.hasLineBreak();
+    line.lineOver = this.layoutContext.isLineOver();
     line.hangingPunctuation = this.layoutContext.getHangingPunctuation();
 
     if(is_inline_root){
       // backup other line data. mainly required to restore inline-context.
       line.lineNo = opt.lineNo;
-      line.breakAfter = this.layoutContext.hasBreakAfter();
       line.hyphenated = this.layoutContext.isHyphenated();
       line.inlineMeasure = this.layoutContext.getInlineCurMeasure(); // actual measure
       line.classes.push("nehan-root-line");
@@ -697,6 +720,12 @@ Nehan.RenderingContext = (function(){
     if(this.style.isInlineRoot()){
       this.layoutContext.incBlockLineNo();
     }
+
+    if(line.isVoid()){
+      console.warn("zero line?");
+    }
+
+    console.info("[create line box] %o(isVoid=%o), yieldCount:%d", line, line.isVoid(), this.yieldCount);
     return line;
   };
 
@@ -713,7 +742,7 @@ Nehan.RenderingContext = (function(){
     } else if(this.style.markup.name === "ruby"){
       extent = this.style.getRubyTextBlockExtent();
     }
-    var line = new Nehan.Box({
+    var text_box = new Nehan.Box({
       size:this.style.flow.getBoxSize(measure, extent),
       context:this,
       type:"text-block",
@@ -723,58 +752,62 @@ Nehan.RenderingContext = (function(){
       charCount:this.layoutContext.getInlineCharCount(),
       content:(typeof opt.content !== "undefined")? opt.content : null
     });
-    line.maxFontSize = this.layoutContext.getInlineMaxFontSize() || this.style.getFontSize();
-    line.maxExtent = extent;
-    line.hasLineBreak = this.layoutContext.hasLineBreak(); // is line-break is included?
-    line.hyphenated = this.layoutContext.isHyphenated();
-    line.lineOver = this.layoutContext.isLineOver(); // is line full-filled?
-    line.hangingPunctuation = this.layoutContext.getHangingPunctuation();
-    line.isEmpty = this.layoutContext.isInlineEmpty();
-    //line.breakAfter = this.layoutContext.hasBreakAfter();
+    text_box.maxFontSize = this.layoutContext.getInlineMaxFontSize() || this.style.getFontSize();
+    text_box.maxExtent = extent;
+    text_box.hasLineBreak = this.layoutContext.hasLineBreak(); // is line-break is included?
+    text_box.hyphenated = this.layoutContext.isHyphenated();
+    text_box.lineOver = this.layoutContext.isLineOver(); // is line full-filled?
+    text_box.hangingPunctuation = this.layoutContext.getHangingPunctuation();
+    text_box.isEmpty = this.layoutContext.isInlineEmpty();
 
     // set position in parent stream.
     if(this.parent && this.parent.stream){
-      line.pos = Math.max(0, this.parent.stream.getPos() - 1);
+      text_box.pos = Math.max(0, this.parent.stream.getPos() - 1);
     }
-    return line;
+    if(text_box.isVoid()){
+      console.warn("zero text?");
+    }
+    console.info("[create text box] %o(isVoid=%o), yieldCount:%d", text_box, text_box.isVoid(), this.yieldCount);
+    return text_box;
   };
 
   // -----------------------------------------------
   // [debug]
   // -----------------------------------------------
   RenderingContext.prototype.debugBlockElement = function(element, extent){
-    var name = this.getGeneratorName();
+    var name = this.getName();
     var size = element.size;
     var bc = this.layoutContext.block;
     var str = element.toString();
-    var max = bc.maxExtent;
+    //var max = bc.maxExtent;
+    var max = this.getContextMaxExtentForAdd();
     var prev = bc.curExtent;
     var next = prev + extent;
     var parent_rest = this.parent && this.parent.layoutContext? this.parent.layoutContext.getBlockRestExtent() : this.layoutContext.getBlockRestExtent();
-    console.info("[add block] %s:%o(%d x %d), e(%d / %d) -> e(%d / %d), +%d(prest:%d)\n%s", name, element, size.width, size.height, prev, max, next, max, extent, parent_rest, str);
+    console.info("[add block] %s:%o(%dx%d), e(%d/%d) -> e(%d/%d), +%d(prest:%d)\n%s", name, element, size.width, size.height, prev, max, next, max, extent, parent_rest, str);
     if(next > max){
       console.log("over %c%d", "color:red", (next - max));
     }
   };
 
   RenderingContext.prototype.debugInlineElement = function(element, measure){
-    var name = this.getGeneratorName();
+    var name = this.getName();
     var ic = this.layoutContext.inline;
     var str = element.toString();
     var max = ic.maxMeasure;
     var prev = ic.curMeasure;
     var next = prev + measure;
-    console.log("[add inline] %s:%o(%s), m(%d / %d) -> m(%d / %d), +%d", name, element, str, prev, max, next, max, measure);
+    console.log("[add inline] %s:%o(%s), m(%d/%d) -> m(%d/%d), +%d", name, element, str, prev, max, next, max, measure);
   };
 
   RenderingContext.prototype.debugTextElement = function(element, measure){
-    var name = this.getGeneratorName();
+    var name = this.getName();
     var ic = this.layoutContext.inline;
     var str = element.data || "";
     var max = ic.maxMeasure;
     var prev = ic.curMeasure;
     var next = prev + measure;
-    console.log("[add text] %s:%o(%s), m(%d / %d) -> m(%d / %d), +%d", name, element, str, prev, max, next, max, measure);
+    console.log("[add text] %s:%o(%s), m(%d/%d) -> m(%d/%d), +%d", name, element, str, prev, max, next, max, measure);
   };
 
   // -----------------------------------------------
@@ -843,6 +876,10 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.getDisplay = function(){
     return this.style? this.style.display : "";
+  };
+
+  RenderingContext.prototype.getStreamTokens = function(){
+    return this.stream? this.stream.tokens : [];
   };
 
   RenderingContext.prototype.getRootContentExtent = function(){
@@ -1016,8 +1053,7 @@ Nehan.RenderingContext = (function(){
     return element.getAdvance(this.style.flow, this.style.letterSpacing || 0);
   };
 
-  RenderingContext.prototype.getGeneratorName = function(){
-    //var markup_name = this.getMarkupName();
+  RenderingContext.prototype.getName = function(){
     var markup_name = this.getMarkupPath();
     if(this.generator instanceof Nehan.DocumentGenerator){
       return "(root)";
@@ -1027,6 +1063,9 @@ Nehan.RenderingContext = (function(){
     }
     if(this.generator instanceof Nehan.InlineGenerator){
       return markup_name + "(inline)";
+    }
+    if(this.generator instanceof Nehan.InlineBlockGenerator){
+      return markup_name + "(iblock)";
     }
     if(this.generator instanceof Nehan.BlockGenerator){
       return markup_name + "(block)" + (this.hasFlipFlow()? ":flip" : "");
@@ -1055,6 +1094,27 @@ Nehan.RenderingContext = (function(){
    */
   RenderingContext.prototype.getOutlineContext = function(){
     return this.outlineContext || (this.parent? this.parent.getOutlineContext() : null);
+  };
+
+  RenderingContext.prototype.getSiblingContext = function(){
+    if(this.getMarkupName() === "rt"){
+      return null;
+    }
+    var root_line = this.parent;
+    while(root_line && root_line.style === this.style){
+      root_line = root_line.parent || null;
+    }
+    return root_line || this.parent || null;
+  };
+
+  RenderingContext.prototype.getSiblingStyle = function(){
+    var sibling = this.getSiblingContext();
+    return (sibling && sibling.style)? sibling.style : null;
+  };
+
+  RenderingContext.prototype.getSiblingStream = function(){
+    var sibling = this.getSiblingContext();
+    return (sibling && sibling.stream)? sibling.stream : null;
   };
 
   // -----------------------------------------------
@@ -1119,10 +1179,83 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
+  // [hyphenate]
+  // -----------------------------------------------
+  // hyphenate between two different inline generator.
+  RenderingContext.prototype.hyphenateSibling = function(generator){
+    var next_token = generator.stream.peek();
+    var tail = this.layoutContext.getInlineLastElement();
+    var head = (next_token instanceof Nehan.Text)? next_token.getHeadChar() : null;
+    if(this.style.isHangingPuncEnable() && head && head.isHeadNg()){
+      next_token.cutHeadChar();
+      this.layoutContext.setHangingPunctuation({
+	data:head,
+	style:this.getSiblingStyle()
+      });
+      return;
+    } else if(tail && tail instanceof Nehan.Char && tail.isTailNg() && this.layoutContext.getInlineElements().length > 1){
+      this.layoutContext.popInlineElement();
+      this.stream.setPos(tail.pos);
+      this.layoutContext.setLineBreak(true);
+      this.layoutContext.setHyphenated(true);
+      this.clearCache();
+    }
+  };
+
+  RenderingContext.prototype.hyphenate = function(){
+    // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
+    var orig_head = this.peekLastCache() || this.stream.peek(); // original head token at next line.
+    if(orig_head === null){
+      var sibling = this.getSiblingContext();
+      if(sibling && sibling.stream){
+	this.hyphenateSibling(sibling);
+      }
+      return;
+    }
+    // hyphenate by hanging punctuation.
+    var head_next = this.stream.peek();
+    head_next = (head_next && orig_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
+    var is_single_head_ng = function(head, head_next){
+      return (head instanceof Nehan.Char && head.isHeadNg()) &&
+	!(head_next instanceof Nehan.Char && head_next.isHeadNg());
+    };
+    if(this.style.isHangingPuncEnable() && is_single_head_ng(orig_head, head_next)){
+      this.layoutContext.addInlineTextElement(orig_head, 0);
+      if(head_next){
+	this.stream.setPos(head_next.pos);
+      } else {
+	this.stream.get();
+      }
+      this.layoutContext.setLineBreak(true);
+      this.layoutContext.setHyphenated(true);
+      this.clearCache();
+      return;
+    }
+    // hyphenate by sweep.
+    var new_head = this.layoutContext.hyphenateSweep(orig_head); // if fixed, new_head token is returned.
+    if(new_head){
+      //console.log("hyphenate by sweep:orig_head:%o, new_head:%o", orig_head, new_head);
+      var hyphenated_measure = new_head.bodySize || 0;
+      if(Math.abs(new_head.pos - orig_head.pos) > 1){
+	hyphenated_measure = Math.abs(new_head.pos - orig_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
+      }
+      this.layoutContext.addInlineMeasure(-1 * hyphenated_measure); // subtract sweeped measure.
+      //console.log("hyphenate and new head:%o", new_head);
+      this.stream.setPos(new_head.pos);
+      this.layoutContext.setLineBreak(true);
+      this.layoutContext.setHyphenated(true);
+      this.clearCache(); // stream position changed, so disable cache.
+    }
+  };
+
+  // -----------------------------------------------
   // [init]
   // -----------------------------------------------
   RenderingContext.prototype.initLayoutContext = function(){
     this.layoutContext = this.createLayoutContext();
+    if(this.layoutContext){
+      console.log("available space(m = %d, e = %d)", this.layoutContext.getInlineMaxMeasure(), this.layoutContext.getBlockMaxExtent());
+    }
     if(this.hasFlipFlow()){
       this.updateContextSize(
 	this.layoutContext.getInlineMaxMeasure(),
@@ -1173,6 +1306,10 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.isBreakBefore = function(){
+    // can't break before first page
+    if(this.documentContext.getPageNo() === 0){
+      return false;
+    }
     return this.isFirstOutput() && this.style.isBreakBefore();
   };
 
@@ -1220,6 +1357,23 @@ Nehan.RenderingContext = (function(){
     return Nehan.List.last(this.cachedElements);
   };
 
+  RenderingContext.prototype.peekSiblingNextToken = function(){
+    var sibling_stream = this.getSiblingStream();
+    return sibling_stream? sibling_stream.peek() : null;
+  };
+
+  RenderingContext.prototype.peekSiblingNextHeadChar = function(){
+    var head_c1;
+    var token = this.peekSiblingNextToken();
+    if(token instanceof Nehan.Text){
+      head_c1 = token.getContent().substring(0,1);
+      return new Nehan.Char(head_c1);
+    }
+    // if parent next token is not Nehan::Text,
+    // it's hard to find first character, so skip it.
+    return null;
+  };
+
   // -----------------------------------------------
   // [pop]
   // -----------------------------------------------
@@ -1261,14 +1415,10 @@ Nehan.RenderingContext = (function(){
     this.terminate = status;
   };
 
-  RenderingContext.prototype.setBreakAfter = function(status){
-    this.layoutContext.setBreakAfter(status);
-  };
-
   RenderingContext.prototype.setOwnerGenerator = function(generator){
     this.generator = generator;
-    this._name = this.getGeneratorName();
-    //console.log("generator:%s", this.getGeneratorName());
+    this._name = this.getName();
+    //console.log("generator:%s", this.getName());
   };
 
   RenderingContext.prototype.setResumeLine = function(line){
@@ -1333,14 +1483,6 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   // [stringOf]
   // -----------------------------------------------
-  RenderingContext.prototype.stringOfTree = function(){
-    var leaf = this.getGeneratorName();
-    if(this.parent){
-      return this.parent.stringOfTree() + ">" + leaf;
-    }
-    return leaf;
-  };
-
   RenderingContext.prototype.stringOfElement = function(element){
     if(element instanceof Nehan.Box){
       return element.toString();
@@ -1420,6 +1562,17 @@ Nehan.RenderingContext = (function(){
     return null;
   };
 
+  RenderingContext.prototype.yieldEmpty = function(opt){
+    var box = new Nehan.Box({
+      display:this.getDisplay(),
+      context:this,
+      size:new Nehan.BoxSize(0,0)
+    });
+    box.isEmpty = true;
+    Nehan.Args.copy(box, opt || {});
+    return box;
+  };
+
   RenderingContext.prototype.yieldBlockDirect = function(){
     if(this.style.isPasted()){
       return this.yieldPastedBlock();
@@ -1459,9 +1612,7 @@ Nehan.RenderingContext = (function(){
     });
   };
 
-  RenderingContext.prototype.yieldImage = function(opt){
-    opt = opt || {};
-
+  RenderingContext.prototype.yieldImage = function(){
     // image size always considered as horizontal mode.
     var width = this.style.getMarkupAttr("width")? parseInt(this.style.getMarkupAttr("width"), 10) : (this.style.staticMeasure || this.style.getFontSize());
     var height = this.style.getMarkupAttr("height")? parseInt(this.style.getMarkupAttr("height"), 10) : (this.style.staticExtent || this.style.getFontSize());
@@ -1473,14 +1624,13 @@ Nehan.RenderingContext = (function(){
       classes:["nehan-block", "nehan-image"].concat(this.style.markup.getClasses()),
       pushed:this.style.isPushed(),
       pulled:this.style.isPulled(),
-      breakAfter:this.style.isBreakAfter() || opt.breakAfter || false
+      breakAfter:this.style.isBreakAfter()
     });
     return image;
   };
 
   RenderingContext.prototype.yieldHorizontalRule = function(){
     return this.createBlockBox({
-      breakAfter:this.style.isBreakAfter(),
       elements:[],
       extent:2
     });
@@ -1507,7 +1657,6 @@ Nehan.RenderingContext = (function(){
     if(blocks.every(function(block){
       return block === null || block.getContentExtent() <= 0;
     })){
-      //this.setTerminate(true);
       return null;
     }
 
@@ -1534,7 +1683,9 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.yieldFloatStack = function(){
+    console.log("context::yieldFloatStack");
     if(this.hasFloatStackCache()){
+      console.log("context::use float stack cache");
       return this.popFloatStackCache();
     }
     var start_blocks = [], end_blocks = [];
@@ -1559,114 +1710,6 @@ Nehan.RenderingContext = (function(){
     var element = this.yieldChildLayout();
     element.isSpace = true;
     return element;
-  };
-
-  // -----------------------------------------------
-  // [private]
-  // -----------------------------------------------
-  // hyphenate between two different inline generator.
-  RenderingContext.prototype._hyphenateSibling = function(generator){
-    var next_token = generator.stream.peek();
-    var tail = this.layoutContext.getInlineLastElement();
-    var head = (next_token instanceof Nehan.Text)? next_token.getHeadChar() : null;
-    if(this.style.isHangingPuncEnable() && head && head.isHeadNg()){
-      next_token.cutHeadChar();
-      this.layoutContext.setHangingPunctuation({
-	data:head,
-	style:this._getSiblingStyle()
-      });
-      return;
-    } else if(tail && tail instanceof Nehan.Char && tail.isTailNg() && this.layoutContext.getInlineElements().length > 1){
-      this.layoutContext.popInlineElement();
-      this.stream.setPos(tail.pos);
-      this.layoutContext.setLineBreak(true);
-      this.layoutContext.setHyphenated(true);
-      this.clearCache();
-    }
-  };
-
-  RenderingContext.prototype._getSiblingContext = function(){
-    if(this.getMarkupName() === "rt"){
-      return null;
-    }
-    var root_line = this.parent;
-    while(root_line && root_line.style === this.style){
-      root_line = root_line.parent || null;
-    }
-    return root_line || this.parent || null;
-  };
-
-  RenderingContext.prototype._getSiblingStyle = function(){
-    var sibling = this._getSiblingContext();
-    return (sibling && sibling.style)? sibling.style : null;
-  };
-
-  RenderingContext.prototype._getSiblingStream = function(){
-    var sibling = this._getSiblingContext();
-    return (sibling && sibling.stream)? sibling.stream : null;
-  };
-
-  RenderingContext.prototype._peekSiblingNextToken = function(){
-    var sibling_stream = this._getSiblingStream();
-    return sibling_stream? sibling_stream.peek() : null;
-  };
-
-  RenderingContext.prototype._peekSiblingNextHeadChar = function(){
-    var head_c1;
-    var token = this._peekSiblingNextToken();
-    if(token instanceof Nehan.Text){
-      head_c1 = token.getContent().substring(0,1);
-      return new Nehan.Char(head_c1);
-    }
-    // if parent next token is not Nehan::Text,
-    // it's hard to find first character, so skip it.
-    return null;
-  };
-
-  RenderingContext.prototype._hyphenate = function(){
-    // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
-    var orig_head = this.peekLastCache() || this.stream.peek(); // original head token at next line.
-    if(orig_head === null){
-      var sibling = this._getSiblingContext();
-      if(sibling && sibling.stream){
-	this._hyphenateSibling(sibling);
-      }
-      return;
-    }
-    // hyphenate by hanging punctuation.
-    var head_next = this.stream.peek();
-    head_next = (head_next && orig_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
-    var is_single_head_ng = function(head, head_next){
-      return (head instanceof Nehan.Char && head.isHeadNg()) &&
-	!(head_next instanceof Nehan.Char && head_next.isHeadNg());
-    };
-    if(this.style.isHangingPuncEnable() && is_single_head_ng(orig_head, head_next)){
-      this.layoutContext.addInlineTextElement(orig_head, 0);
-      if(head_next){
-	this.stream.setPos(head_next.pos);
-      } else {
-	this.stream.get();
-      }
-      this.layoutContext.setLineBreak(true);
-      this.layoutContext.setHyphenated(true);
-      this.clearCache();
-      return;
-    }
-    // hyphenate by sweep.
-    var new_head = this.layoutContext.hyphenateSweep(orig_head); // if fixed, new_head token is returned.
-    if(new_head){
-      //console.log("hyphenate by sweep:orig_head:%o, new_head:%o", orig_head, new_head);
-      var hyphenated_measure = new_head.bodySize || 0;
-      if(Math.abs(new_head.pos - orig_head.pos) > 1){
-	hyphenated_measure = Math.abs(new_head.pos - orig_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
-      }
-      this.layoutContext.addInlineMeasure(-1 * hyphenated_measure); // subtract sweeped measure.
-      //console.log("hyphenate and new head:%o", new_head);
-      this.stream.setPos(new_head.pos);
-      this.layoutContext.setLineBreak(true);
-      this.layoutContext.setHyphenated(true);
-      this.clearCache(); // stream position changed, so disable cache.
-    }
   };
 
   return RenderingContext;

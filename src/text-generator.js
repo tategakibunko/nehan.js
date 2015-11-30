@@ -32,21 +32,13 @@ Nehan.TextGenerator = (function(){
 
   TextGenerator.prototype._createOutput = function(){
     if(this.context.layoutContext.isInlineEmpty()){
+      console.warn("empty text block");
       return null;
     }
-
-    this.context.applyHyphenate();
-
-    var line = this.context.createTextBox();
-
-    // call _onCreate callback for 'each' output
-    this._onCreate(line);
-
-    // call _onComplete callback for 'final' output
-    if(!this.hasNext()){
-      this._onComplete(line);
+    if(this.context.isHyphenateEnable()){
+      this.context.hyphenate();
     }
-    return line;
+    return this.context.createTextBox();
   };
 
   TextGenerator.prototype._getNext = function(){

@@ -14,7 +14,7 @@ Nehan.InlineBlockGenerator = (function (){
   // shurink measure by inline level.
   InlineBlockGenerator.prototype._onCreate = function(block){
     if(!block){
-      return null;
+      return;
     }
     var max_inline = Nehan.List.maxobj(block.elements, function(element){
       return element.getContentMeasure();
@@ -22,7 +22,6 @@ Nehan.InlineBlockGenerator = (function (){
     if(max_inline){
       block.size.setMeasure(this.context.style.flow, max_inline.getContentMeasure());
     }
-    return block;
   };
 
   return InlineBlockGenerator;

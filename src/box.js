@@ -68,6 +68,21 @@ Nehan.Box = (function(){
    @memberof Nehan.Box
    @return {boolean}
    */
+  Box.prototype.isVoid = function(){
+    if(this.elements.length === 0){
+      return true;
+    }
+    if(this.isInvalidSize()){
+      return true;
+    }
+    return Nehan.List.forall(this.elements, function(element){
+      return !element || (element instanceof Nehan.Box && element.isVoid());
+    });
+  };
+  /**
+   @memberof Nehan.Box
+   @return {boolean}
+   */
   Box.prototype.isTextBlock = function(){
     return this._type === "text-block";
   };
@@ -105,7 +120,7 @@ Nehan.Box = (function(){
     return texts.reduce(function(ret, text){
       var str = (text instanceof Nehan.Ruby)? text.getRbString() : (text.data || "");
       return ret + str;
-    }, "");
+    }, "") || "<<empty>>";
   };
   /**
    @memberof Nehan.Box

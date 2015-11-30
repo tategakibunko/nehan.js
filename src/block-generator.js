@@ -22,6 +22,7 @@ Nehan.BlockGenerator = (function(){
     }
     // if break-before available, page-break but only once.
     if(this.context.isBreakBefore()){
+      //consoe.log("break before");
       return null;
     }
     while(this.hasNext()){
@@ -82,7 +83,7 @@ Nehan.BlockGenerator = (function(){
 
     // if page-break, end page
     if(child_style.isPageBreak()){
-      this.context.setBreakAfter(true);
+      this.context.layoutContext.setBreakAfter(true);
       return null;
     }
 
@@ -115,22 +116,14 @@ Nehan.BlockGenerator = (function(){
     return child_gen.yield();
   };
 
-  BlockGenerator.prototype._createOutput = function(){
-    var block = this.context.createBlockBox();
-
-    // call _onCreate callback for 'each' output
-    this._onCreate(block);
-
-    // call _onComplete callback for 'final' output
-    if(!this.hasNext()){
-      this._onComplete(block);
-    }
-
+  BlockGenerator.prototype._onComplete = function(block){
     if(this.context.isBreakAfter()){
       block.breakAfter = true;
     }
+  };
 
-    return block;
+  BlockGenerator.prototype._createOutput = function(){
+    return this.context.createBlockBox();
   };
 
   return BlockGenerator;

@@ -70,7 +70,8 @@ Nehan.DocumentContext = (function(){
    @return {int}
    */
   DocumentContext.prototype.getPageNo = function(){
-    return this.pageNo;
+    //return this.pageNo;
+    return this.pages.length;
   };
   /**
    @memberof Nehan.DocumentContext

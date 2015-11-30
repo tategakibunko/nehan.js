@@ -2,7 +2,7 @@ Nehan.LayoutGenerator = (function(){
   /**
    @memberof Nehan
    @class LayoutGenerator
-   @classdesc root abstract class for all generator
+   @classdesc abstract super class for all generator
    @constructor
    @param context {Nehan.RenderingContext}
    */
@@ -27,18 +27,20 @@ Nehan.LayoutGenerator = (function(){
    @return {Nehan.Box}
    */
   LayoutGenerator.prototype.yield = function(){
-    console.group("%s _yield:%o", this.context.getGeneratorName(), this.context);
+    console.group("%s _yield:%o", this.context.getName(), this.context);
 
     this.context.initLayoutContext();
 
-    if(this.context.layoutContext){
-      console.log("available space(m = %d, e = %d)", this.context.layoutContext.inline.maxMeasure, this.context.layoutContext.block.maxExtent);
-      if(this.context.layoutContext.block.maxExtent <= 0){
-	return null;
-      }
-    }
-    // call _yield implemented in inherited class.
+    // call _yield implemented in subclass.
     var box = this._yield();
+
+    // called for each output
+    this._onCreate(box);
+
+    // called for final output
+    if(!this.hasNext()){
+      this._onComplete(box);
+    }
 
     // increment yield count
     this.context.yieldCount++;
@@ -56,11 +58,11 @@ Nehan.LayoutGenerator = (function(){
     throw "LayoutGenerator::_yield must be implemented in child class";
   };
 
-  // called 'after' output element is generated.
+  // called for each output
   LayoutGenerator.prototype._onCreate = function(output){
   };
 
-  // called 'after' final output element is generated.
+  // called for final output
   LayoutGenerator.prototype._onComplete = function(output){
   };
 

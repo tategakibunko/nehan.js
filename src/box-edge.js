@@ -194,20 +194,26 @@ Nehan.BoxEdge = (function (){
     cancel_size += this.margin.getAfter(flow);
     this.margin.clearAfter(flow);
     if(cancel_size >= required_size){
-      //console.warn("cancel edge(margin):%d", cancel_size);
+      if(cancel_size > 0){
+	console.warn("cancel edge(margin):%d", cancel_size);
+      }
       return cancel_size;
     }
     // second, try to clear padding
     cancel_size += this.padding.getAfter(flow);
     this.padding.clearAfter(flow);
     if(cancel_size >= required_size){
-      //console.warn("cancel edge(margin/padding):%d", cancel_size);
+      if(cancel_size > 0){
+	console.warn("cancel edge(margin/padding):%d", cancel_size);
+      }
       return cancel_size;
     }
     // finally, try to clear border
     cancel_size += this.border.getAfter(flow);
     this.border.clearAfter(flow);
-    //console.warn("cancel edge(margin/padding/border):%d", cancel_size);
+    if(cancel_size > 0){
+      console.warn("cancel edge(margin/padding/border):%d", cancel_size);
+    }
     return cancel_size;
   };
   /**

@@ -575,18 +575,6 @@ Nehan.Style = (function(){
     return this.boxSizing === "margin-box";
   };
   /**
-   @memberof Nehan.Style
-   */
-  Style.prototype.clearBreakBefore = function(){
-    this.breakBefore = null;
-  };
-  /**
-   @memberof Nehan.Style
-   */
-  Style.prototype.clearBreakAfter = function(){
-    this.breakAfter = null;
-  };
-  /**
    search property from markup attributes first, and css values second.
 
    @memberof Nehan.Style

@@ -14,6 +14,7 @@ Nehan.BlockContext = (function(){
     this.elements = [];
     this.pulledElements = [];
     this.lineNo = opt.lineNo || 0;
+    this.breakAfter = false;
   }
 
   /**
@@ -86,6 +87,20 @@ Nehan.BlockContext = (function(){
     return this.pulledElements
       .concat(this.elements)
       .concat(this.pushedElements);
+  };
+  /**
+   @memberof Nehan.BlockContext
+   @param status {bool}
+   */
+  BlockContext.prototype.setBreakAfter = function(status){
+    this.breakAfter = status;
+  };
+  /**
+   @memberof Nehan.BlockContext
+   @return {bool}
+   */
+  BlockContext.prototype.isBreakAfter = function(){
+    return this.breakAfter;
   };
 
   return BlockContext;

@@ -21,9 +21,9 @@ Nehan.FloatGenerator = (function(){
     if(this.context.hasNextFloat()){
       return;
     }
-    //console.info("FloatGenerator::_updateChildParent");
+    console.info("FloatGenerator::_updateChildParent");
     if(this.context.child.hasCache()){
-      //console.log("inherit child cache:", this.context.child.peekLastCache());
+      console.log("inherit child cache:", this.context.child.peekLastCache());
       this.context.parent.pushCache(this.context.child.popCache());
     }
     if(this.context.child.child){
@@ -32,24 +32,33 @@ Nehan.FloatGenerator = (function(){
   };
 
   FloatGenerator.prototype._getNext = function(){
+    console.log("FloatGen::_getNext");
     if(this.context.hasCache()){
+      console.log("FloatGen, use cache");
       return this.context.popCache();
     }
     var stack = this.context.yieldFloatStack();
     if(stack.isEmpty()){
+      console.log("FloatGen, float stack empty:", stack);
       return null;
     }
-    //console.log("float stack:%o", stack);
+    console.log("float stack:%o(breakAfter=%o)", stack, stack.isBreakAfter());
+
+    if(stack.isBreakAfter()){
+      console.warn("stack break after");
+      //this.context.layoutContext.setBreakAfter(true);
+    }
     var rest_measure = this.context.layoutContext.getInlineRestMeasure();
     var stack_extent = stack.getExtent();
     if(stack_extent > this.context.getContextMaxExtent()){
-      //console.warn("float stack can't be included in parent layout!");
+      console.warn("float stack can't be included in parent layout!");
       this.context.pushFloatStackCache(stack);
       return null;
     }
     if(stack_extent <= 0 || rest_measure <= 0){
-      //console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
+      console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
       this._updateChildParent();
+      console.warn("return null");
       return null;
     }
     
@@ -57,18 +66,19 @@ Nehan.FloatGenerator = (function(){
   };
 
   FloatGenerator.prototype._yieldFloat = function(stack, rest_measure, stack_extent){
-    //console.log("_yieldFloat(rest_m:%d, rest_e:%d)", rest_measure, stack_extent);
+    console.log("_yieldFloat(rest_m:%d, rest_e:%d)", rest_measure, stack_extent);
 
     // no more rest space
     if(rest_measure <= 0 || stack_extent <= 0){
-      //console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
+      console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
       this._updateChildParent();
+      console.warn("return null");
       return null;
     }
 
     // no more floated layout, just yield rest area.
     if(stack.isEmpty()){
-      //console.info("no more floating elements");
+      console.info("no more floating elements");
       return this.context.yieldFloatSpace(stack.getLastGroup(), rest_measure, stack_extent);
     }
     /*
@@ -103,12 +113,12 @@ Nehan.FloatGenerator = (function(){
     // if no more rest extent is left,
     // continuous layout is displayed in parent context.
     if(rest_extent_space <= 0){
-      //console.info("no more rest extent, group set:%o", group_set);
+      console.info("no more rest extent, group set:%o", group_set);
       this._updateChildParent();
       return group_set;
     }
 
-    //console.log("rest extent space:%d", rest_extent_space);
+    console.log("rest extent space:%d", rest_extent_space);
 
     /*
       <------ rest_measure ---->
@@ -144,6 +154,7 @@ Nehan.FloatGenerator = (function(){
     box.breakAfter = Nehan.List.exists(elements, function(element){
       return element && element.breakAfter;
     }) && this.context.hasNextFloat();
+    console.log("wrap inline set:", elements);
     return box;
   };
 
@@ -159,9 +170,12 @@ Nehan.FloatGenerator = (function(){
     var measure = elements[0].getLayoutMeasure(flow); // block1 and block2 has same measure
     var extent = Nehan.List.sum(elements, 0, function(element){ return element.getLayoutExtent(flow); });
     var box = this.context.createWrapBlock(measure, extent, elements);
+    var tail_element = Nehan.List.last(elements);
+    //box.breakAfter = tail_element && tail_element.breakAfter && this.context.hasNextFloat();
     box.breakAfter = Nehan.List.exists(elements, function(element){
       return element && element.breakAfter;
     }) && this.context.hasNextFloat();
+    console.log("wrap block set:%o", box);
     return box;
   };
 
