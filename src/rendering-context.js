@@ -30,27 +30,6 @@ Nehan.RenderingContext = (function(){
     }
   };
 
-  RenderingContext.prototype.isEmptyStreamTokens = function(){
-    // null stream context like float-root, float-space has special role, so treat it not empty.
-    if(!this.stream || this.stream.tokens.length === 0){
-      console.warn("empty stream?:", this);
-      return false;
-    }
-    return Nehan.List.forall(this.stream.tokens, function(token){
-      if(token instanceof Nehan.Text){
-	var text = token.content.replace(/\s/g, "").replace(/\n/g, "");
-	//console.log("isEmptyStreamTokens(Text:[%s] -> [%s])", token.content, text);
-	return text === "";
-      }
-      if(token instanceof Nehan.Tag){
-	var disabled = Nehan.List.exists(Nehan.Config.disabledMarkups, Nehan.Closure.eq(token.getName()));
-	//console.log("isDisabled markup(Tag:%s -> disabled:%o)", token.getName(), disabled);
-	return disabled;
-      }
-      return false;
-    });
-  };
-
   RenderingContext.prototype.addBlockElement = function(element){
     if(element === null){
       //console.log("[%s]:eof", this._name);
