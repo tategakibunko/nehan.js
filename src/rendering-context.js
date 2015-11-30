@@ -121,12 +121,7 @@ Nehan.RenderingContext = (function(){
     if(next_measure <= max_size){
       this.layoutContext.addInlineBoxElement(element, element_size);
       if(element.hangingPunctuation){
-	if(element.hangingPunctuation.style === this.style){
-	  var chr = this.yieldHangingChar(element.hangingPunctuation.data);
-	  this.layoutContext.addInlineBoxElement(chr, 0);
-	} else {
-	  this.layoutContext.setHangingPunctuation(element.hangingPunctuation); // inherit to parent generator
-	}
+	this.addHangingPunctuation(element);
       }
       if(element.hasLineBreak){
 	this.layoutContext.setLineBreak(true);
@@ -187,6 +182,15 @@ Nehan.RenderingContext = (function(){
       return Nehan.Results.OVERFLOW;
     }
     return Nehan.Results.OK;
+  };
+
+  RenderingContext.prototype.addHangingPunctuation = function(element){
+    if(element.hangingPunctuation.style === this.style){
+      var chr = this.yieldHangingChar(element.hangingPunctuation.data);
+      this.layoutContext.addInlineBoxElement(chr, 0);
+    } else {
+      this.layoutContext.setHangingPunctuation(element.hangingPunctuation); // inherit to parent generator
+    }
   };
 
   // -----------------------------------------------
@@ -546,23 +550,6 @@ Nehan.RenderingContext = (function(){
     );
   };
 
-  RenderingContext.prototype.createWhiteSpace = function(){
-    return this.createBlockBox({
-      noEdge:true,
-      extent:this.layoutContext.getBlockMaxExtent(),
-      elements:[]
-    });
-  };
-
-  RenderingContext.prototype.createWrapBlock = function(measure, extent, elements){
-    return new Nehan.Box({
-      size:this.style.flow.getBoxSize(measure, extent),
-      display:"block",
-      context:this,
-      elements:elements
-    });
-  };
-
   RenderingContext.prototype.createBlockBoxClasses = function(){
     var classes = ["nehan-block", "nehan-" + this.getMarkupName()];
     if(this.style.markup.isHeaderTag()){
@@ -625,6 +612,7 @@ Nehan.RenderingContext = (function(){
       pulled:this.style.isPulled()
     });
     if(this.getMarkupName() !== "hr" && (box.elements.length === 0 || box.isInvalidSize())){
+      console.warn("zero block? force break after");
       box.breakAfter = true;
     }
     console.warn(
@@ -1520,6 +1508,32 @@ Nehan.RenderingContext = (function(){
     return this.child.generator.yield();
   };
 
+  RenderingContext.prototype.yieldWrapBlock = function(measure, extent, elements){
+    return new Nehan.Box({
+      size:this.style.flow.getBoxSize(measure, extent),
+      display:"block",
+      context:this,
+      elements:elements
+    });
+  };
+
+  RenderingContext.prototype.yieldPageBreak = function(){
+    return new Nehan.Box({
+      display:"block",
+      context:this,
+      size:new Nehan.BoxSize(0,0),
+      breakAfter:true
+    });
+  };
+
+  RenderingContext.prototype.yieldWhiteSpace = function(){
+    return this.createBlockBox({
+      noEdge:true,
+      extent:this.layoutContext.getBlockMaxExtent(),
+      elements:[]
+    });
+  };
+
   RenderingContext.prototype.yieldClearance = function(){
     if(!this.clear || !this.parent || !this.parent.floatGroup){
       return null;
@@ -1532,11 +1546,11 @@ Nehan.RenderingContext = (function(){
     // yield white space but set done status to clear object.
     if(float_group.isLast() && !float_group.hasNext() && this.clear.hasDirection(direction_name)){
       this.clear.setDone(direction_name);
-      return this.createWhiteSpace();
+      return this.yieldWhiteSpace();
     }
     // if any other clear direction that is not cleared, continue yielding white space.
     if(!this.clear.isDoneAll()){
-      return this.createWhiteSpace();
+      return this.yieldWhiteSpace();
     }
     return null;
   };
@@ -1658,7 +1672,7 @@ Nehan.RenderingContext = (function(){
       return block.resizeExtent(flow, inner_extent);
     }.bind(this));
 
-    return this.createWrapBlock(wrap_measure, wrap_extent, uniformed_blocks);
+    return this.yieldWrapBlock(wrap_measure, wrap_extent, uniformed_blocks);
   };
 
   RenderingContext.prototype.yieldFloatStack = function(){
@@ -1670,7 +1684,11 @@ Nehan.RenderingContext = (function(){
     var start_blocks = [], end_blocks = [];
     Nehan.List.iter(this.floatedGenerators, function(gen){
       var block = gen.yield();
+      /*
       if(!block || block.getContentExtent() <= 0){
+	return;
+       }*/
+      if(!block){
 	return;
       }
       if(gen.context.style.isFloatStart()){
