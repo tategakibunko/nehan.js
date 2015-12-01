@@ -1663,10 +1663,7 @@ Nehan.RenderingContext = (function(){
       return gen.yield();
     });
 
-    if(blocks.every(function(block){
-      //return block === null || block.getContentExtent() <= 0;
-      return block === null;
-    })){
+    if(blocks.every(Nehan.Closure.eq(null))){
       return null;
     }
 
@@ -1693,9 +1690,9 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.yieldFloatStack = function(){
-    console.log("context::yieldFloatStack");
+    //console.log("context::yieldFloatStack");
     if(this.hasFloatStackCache()){
-      console.log("context::use float stack cache");
+      //console.log("context::use float stack cache");
       return this.popFloatStackCache();
     }
     var start_blocks = [], end_blocks = [];

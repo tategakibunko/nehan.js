@@ -72,15 +72,6 @@ Nehan.FloatGroupStack = (function(){
   };
   /**
    @memberof Nehan.FloatGroupStack
-   @return {boolean}
-   */
-  FloatGroupStack.prototype.isBreakAfter = function(){
-    return this.stack.length > 0 && Nehan.List.exists(this.stack, function(group){
-      return group.isBreakAfter();
-    });
-  };
-  /**
-   @memberof Nehan.FloatGroupStack
    @return {int}
    */
   FloatGroupStack.prototype.getExtent = function(){

@@ -26,15 +26,6 @@ Nehan.FloatGroup = (function(){
    @memberof Nehan.FloatGroup
    @return {bool}
    */
-  FloatGroup.prototype.isBreakAfter = function(){
-    return this.elements.length > 0 && Nehan.List.exists(this.elements, function(element){
-      return element && element.breakAfter;
-    });
-  };
-  /**
-   @memberof Nehan.FloatGroup
-   @return {bool}
-   */
   FloatGroup.prototype.isLast = function(){
     return this._last;
   };
