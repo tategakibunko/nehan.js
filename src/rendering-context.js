@@ -57,7 +57,7 @@ Nehan.RenderingContext = (function(){
       if(next_extent > max_size){
 	// if element size is larger than root extent, it's never included. so skip it without caching.
 	if(element_size > this.getRootContentExtent()){
-	  console.error("skip too large block element:%o(%d)", element, element_size);
+	  console.warn("skip too large block element:%o(%d)", element, element_size);
 	  return Nehan.Results.SKIP;
 	}
 	//console.warn("first atomic element overflow:%o(%s)", element, element.toString());
@@ -675,10 +675,12 @@ Nehan.RenderingContext = (function(){
       pushed:this.style.isPushed(),
       pulled:this.style.isPulled()
     });
+
+    /*
     if(this.getMarkupName() !== "hr" && (box.elements.length === 0 || box.isInvalidSize())){
       //console.warn("zero block?");
-    }
-    // debugBlockBox(box);
+    }*/
+    //this.debugBlockBox(box);
     return box;
   };
 

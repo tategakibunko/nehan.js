@@ -15620,9 +15620,16 @@ Nehan.ListItemGenerator = (function(){
   };
 
   ListItemGenerator.prototype._onElement = function(box){
+    Nehan.ParallelGenerator.prototype._onElement.call(this, box);
+    //console.log("ListItemGenerator::_onElement:%o(%s)", box, box.toString());
     var blocks = box.elements || [];
     var list_body = blocks[1];
-    box.breakAfter = list_body && list_body.breakAfter;
+    // if list body is empty, disable box.
+    if(list_body && list_body.isVoid()){
+      //console.warn("ListItemGenerator::_onElement, invalid list body disabled");
+      box.elements = [];
+      box.resizeExtent(this.context.style.flow, 0);
+    }
   };
 
   ListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
@@ -16727,7 +16734,7 @@ Nehan.RenderingContext = (function(){
       if(next_extent > max_size){
 	// if element size is larger than root extent, it's never included. so skip it without caching.
 	if(element_size > this.getRootContentExtent()){
-	  console.error("skip too large block element:%o(%d)", element, element_size);
+	  console.warn("skip too large block element:%o(%d)", element, element_size);
 	  return Nehan.Results.SKIP;
 	}
 	//console.warn("first atomic element overflow:%o(%s)", element, element.toString());
@@ -17345,10 +17352,12 @@ Nehan.RenderingContext = (function(){
       pushed:this.style.isPushed(),
       pulled:this.style.isPulled()
     });
+
+    /*
     if(this.getMarkupName() !== "hr" && (box.elements.length === 0 || box.isInvalidSize())){
       //console.warn("zero block?");
-    }
-    // debugBlockBox(box);
+    }*/
+    //this.debugBlockBox(box);
     return box;
   };
 

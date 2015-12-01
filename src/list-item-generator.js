@@ -24,9 +24,16 @@ Nehan.ListItemGenerator = (function(){
   };
 
   ListItemGenerator.prototype._onElement = function(box){
+    Nehan.ParallelGenerator.prototype._onElement.call(this, box);
+    //console.log("ListItemGenerator::_onElement:%o(%s)", box, box.toString());
     var blocks = box.elements || [];
     var list_body = blocks[1];
-    box.breakAfter = list_body && list_body.breakAfter;
+    // if list body is empty, disable box.
+    if(list_body && list_body.isVoid()){
+      //console.warn("ListItemGenerator::_onElement, invalid list body disabled");
+      box.elements = [];
+      box.resizeExtent(this.context.style.flow, 0);
+    }
   };
 
   ListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
