@@ -56,7 +56,7 @@ document.setStyle("body", {
 });
 
 // set other style like this
-document.setStyle("p", {
+document.setStyle("h1", {
   margin:{
     after:"1rem"
   }
@@ -65,7 +65,7 @@ document.setStyle("p", {
 // start rendering.
 document.render({
   onPage:function(page, ctx){
-    console.log("page %d complete:%o", page.pageNo, page.element);
+    console.log("onPage:%o", page);
     page.element.style.marginBottom = "1em";
     target.appendChild(page.element);
   },
@@ -74,12 +74,11 @@ document.render({
   }
 });
 
-// get page by getPage.
+// direct access by 'getPage'.
 var first_page = document.getPage(0);
+var second_page = document.getPage(1);
 
-console.log("first page element:", first_page.element);
-
-// get page count by getPageCount
+// get total page count by 'getPageCount'.
 var page_count = document.getPageCount();
 
 // move page by setPage
@@ -92,7 +91,7 @@ $("button#back-to-first-page").click(function(){
 
 You can set style by `Document::setStyle`.
 
-First argument is `selector key`, and second one is `selector value`.
+First argument is `selector-key`, and second one is `selector-value`.
 
 ```javascript
 document.setStyle("body", {
