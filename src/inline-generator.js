@@ -90,7 +90,7 @@ Nehan.InlineGenerator = (function(){
       return this._getNext();
 
     case "page-break": case "pbr": case "end-page":
-      this.context.layoutContext.setBreakAfter(true);
+      this.context.setPageBreak(true);
       return null;
 
     default:

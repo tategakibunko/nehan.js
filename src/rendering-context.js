@@ -1457,6 +1457,14 @@ Nehan.RenderingContext = (function(){
     this.resumeLine = line;
   };
 
+  RenderingContext.prototype.setPageBreak = function(status){
+    if(this.isInline() && this.parent){
+      this.parent.setPageBreak(status);
+    } else if(this.layoutContext){
+      this.layoutContext.setBreakAfter(status);
+    }
+  };
+
   RenderingContext.prototype.setStyle = function(key, value){
     this.selectors.setValue(key, value);
     return this;
