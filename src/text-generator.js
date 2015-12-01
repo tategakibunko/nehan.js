@@ -21,6 +21,7 @@ Nehan.TextGenerator = (function(){
       }
       if(result === Nehan.Results.EOF ||
 	 result === Nehan.Results.ZERO ||
+	 result === Nehan.Results.TOO_MANY_ROLLBACK ||
 	 result === Nehan.Results.OVERFLOW){
 	break;
       }

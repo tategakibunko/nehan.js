@@ -14788,6 +14788,7 @@ Nehan.BlockGenerator = (function(){
       if(result === Nehan.Results.EOF ||
 	 result === Nehan.Results.BREAK_AFTER ||
 	 result === Nehan.Results.ZERO ||
+	 result === Nehan.Results.TOO_MANY_ROLLBACK ||
 	 result === Nehan.Results.OVERFLOW){
 	break;
       }
@@ -14908,6 +14909,7 @@ Nehan.InlineGenerator = (function(){
       if(result === Nehan.Results.EOF ||
 	 result === Nehan.Results.ZERO ||
 	 result === Nehan.Results.LINE_BREAK ||
+	 result === Nehan.Results.TOO_MANY_ROLLBACK ||
 	 result === Nehan.Results.OVERFLOW){
 	break;
       }
@@ -15061,6 +15063,7 @@ Nehan.TextGenerator = (function(){
       }
       if(result === Nehan.Results.EOF ||
 	 result === Nehan.Results.ZERO ||
+	 result === Nehan.Results.TOO_MANY_ROLLBACK ||
 	 result === Nehan.Results.OVERFLOW){
 	break;
       }
@@ -18103,6 +18106,7 @@ Nehan.RenderingContext = (function(){
     element.cacheCount = (element.cacheCount || 0) + 1;
     if(element.cacheCount >= Nehan.Config.maxRollbackCount){
       console.error("too many rollback! context:%o, element:%o(%s)", this, element, this.stringOfElement(element));
+      this.setTerminate(true);
       return Nehan.Results.TOO_MANY_ROLLBACK;
     }
     this.cachedElements.push(element);
