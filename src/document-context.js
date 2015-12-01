@@ -8,7 +8,6 @@ Nehan.DocumentContext = (function(){
     this.documentType = "html";
     this.documentHeader = null;
     this.pages = [];
-    this.pageNo = 0;
     this.charPos = 0;
     this.anchors = {};
     this.outlineContexts = [];
@@ -61,16 +60,9 @@ Nehan.DocumentContext = (function(){
   };
   /**
    @memberof Nehan.DocumentContext
-   */
-  DocumentContext.prototype.stepPageNo = function(){
-    this.pageNo++;
-  };
-  /**
-   @memberof Nehan.DocumentContext
    @return {int}
    */
   DocumentContext.prototype.getPageNo = function(){
-    //return this.pageNo;
     return this.pages.length;
   };
   /**
@@ -99,7 +91,7 @@ Nehan.DocumentContext = (function(){
    @param name {String}
    */
   DocumentContext.prototype.addAnchor = function(name){
-    this.anchors[name] = this.pageNo;
+    this.anchors[name] = this.getPageNo();
   };
   /**
    @memberof Nehan.DocumentContext

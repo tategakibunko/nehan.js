@@ -32,11 +32,11 @@
    @namespace Nehan
 */
 var Nehan = Nehan || {};
-Nehan.version = "5.3.5";
+Nehan.version = "5.4.0";
 Nehan.globalStyle = Nehan.globalStyle || {};
 
 /**
-   set global style. see example at setStyle of {@link Nehan.Engine}.
+   set global style.
 
    @memberof Nehan
    @param selector_key {String}
@@ -51,7 +51,7 @@ Nehan.setStyle = function(selector_key, value){
 };
 
 /**
-   set global styles. see example at setStyles of {@link Nehan.Engine}.
+   set global styles.
 
    @memberof Nehan
    @param values {Object}
@@ -12334,7 +12334,6 @@ Nehan.DocumentContext = (function(){
     this.documentType = "html";
     this.documentHeader = null;
     this.pages = [];
-    this.pageNo = 0;
     this.charPos = 0;
     this.anchors = {};
     this.outlineContexts = [];
@@ -12387,16 +12386,9 @@ Nehan.DocumentContext = (function(){
   };
   /**
    @memberof Nehan.DocumentContext
-   */
-  DocumentContext.prototype.stepPageNo = function(){
-    this.pageNo++;
-  };
-  /**
-   @memberof Nehan.DocumentContext
    @return {int}
    */
   DocumentContext.prototype.getPageNo = function(){
-    //return this.pageNo;
     return this.pages.length;
   };
   /**
@@ -12425,7 +12417,7 @@ Nehan.DocumentContext = (function(){
    @param name {String}
    */
   DocumentContext.prototype.addAnchor = function(name){
-    this.anchors[name] = this.pageNo;
+    this.anchors[name] = this.getPageNo();
   };
   /**
    @memberof Nehan.DocumentContext
@@ -15837,7 +15829,6 @@ Nehan.BodyGenerator = (function(){
     block.pageNo = this.context.documentContext.getPageNo();
 
     this.context.documentContext.stepCharPos(block.charCount || 0);
-    //this.context.documentContext.stepPageNo();
 
     // sometimes layout engine causes inlinite loop,
     // so terminate generator by restricting page count.

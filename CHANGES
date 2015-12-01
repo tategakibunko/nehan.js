@@ -6,10 +6,10 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.3.5
+version 5.4.0 2015/12/?
 ========================
-o Set paragraph-id to each line-blocks.
-! Revert default styling of drop-caps.
+o Add Nehan::Document.
+o Refine whole structure.
 
 version 5.3.4 2015/10/26
 ========================

@@ -2,11 +2,11 @@
    @namespace Nehan
 */
 var Nehan = Nehan || {};
-Nehan.version = "5.3.5";
+Nehan.version = "5.4.0";
 Nehan.globalStyle = Nehan.globalStyle || {};
 
 /**
-   set global style. see example at setStyle of {@link Nehan.Engine}.
+   set global style.
 
    @memberof Nehan
    @param selector_key {String}
@@ -21,7 +21,7 @@ Nehan.setStyle = function(selector_key, value){
 };
 
 /**
-   set global styles. see example at setStyles of {@link Nehan.Engine}.
+   set global styles.
 
    @memberof Nehan
    @param values {Object}

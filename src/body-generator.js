@@ -34,7 +34,6 @@ Nehan.BodyGenerator = (function(){
     block.pageNo = this.context.documentContext.getPageNo();
 
     this.context.documentContext.stepCharPos(block.charCount || 0);
-    //this.context.documentContext.stepPageNo();
 
     // sometimes layout engine causes inlinite loop,
     // so terminate generator by restricting page count.
