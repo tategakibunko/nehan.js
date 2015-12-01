@@ -274,7 +274,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":"2.4em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
-	  "line-height":"1em",
+	  "line-height":"1.4em",
 	  "margin":__header_margin
 	},
 	"h2":{
@@ -282,7 +282,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":"2.0em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
-	  "line-height":"1em",
+	  "line-height":"1.4em",
 	  "margin":__header_margin
 	},
 	"h3":{
@@ -290,7 +290,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":"1.6em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
-	  "line-height":"1em",
+	  "line-height":"1.4em",
 	  "margin":__header_margin
 	},
 	"h4":{
@@ -298,7 +298,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":"1.4em",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
-	  "line-height":"1em",
+	  "line-height":"1.4em",
 	  "margin":__header_margin
 	},
 	"h5":{
@@ -306,7 +306,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":"1.0em",
 	  "font-weight":"bold",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-	  "line-height":"1em",
+	  "line-height":"1.4em",
 	  "margin":__header_margin
 	},
 	"h6":{
@@ -314,7 +314,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-weight":"bold",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-size":"1.0em",
-	  "line-height":"1em",
+	  "line-height":"1.4em",
 	  "margin":__header_margin
 	},
 	"head":{

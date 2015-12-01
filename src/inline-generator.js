@@ -101,7 +101,7 @@ Nehan.InlineGenerator = (function(){
     var child_style = this.context.createChildStyle(token);
 
     if(child_style.isDisabled()){
-      console.warn("disabled style:%o(%s)", child_style, child_style.getMarkupName());
+      //console.warn("disabled style:%o(%s)", child_style, child_style.getMarkupName());
       return this._getNext(); // just skip
     }
 

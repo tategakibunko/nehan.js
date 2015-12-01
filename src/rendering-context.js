@@ -745,7 +745,7 @@ Nehan.RenderingContext = (function(){
       this.layoutContext.incBlockLineNo();
     }
 
-    if(line.isVoid()){
+    if(line.elements.length === 0){
       //console.warn("zero line?", line);
       line.edge = null;
       line.resizeExtent(this.style.flow, 0);
