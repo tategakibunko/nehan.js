@@ -21,6 +21,16 @@ Nehan.ParallelGenerator = (function(){
     throw "_createChildGenerators is not defined.";
   };
 
+  ParallelGenerator.prototype._popCache = function(){
+    var cache = this.context.popCache();
+    if(cache && cache.elements){
+      cache.elements.forEach(function(element){
+	element.breakAfter = false;
+      });
+    }
+    return cache;
+  };
+
   ParallelGenerator.prototype._onElement = function(element){
     element.breakAfter = Nehan.List.exists(element.elements, function(block){
       return block && block.breakAfter;
@@ -29,7 +39,7 @@ Nehan.ParallelGenerator = (function(){
 
   ParallelGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
-      return this.context.popCache();
+      return this._popCache();
     }
     return this.context.yieldParallelBlocks() || null;
   };

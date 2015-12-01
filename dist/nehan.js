@@ -14730,6 +14730,10 @@ Nehan.LayoutGenerator = (function(){
     throw "_yield is not defined.";
   };
 
+  LayoutGenerator.prototype._popCache = function(){
+    return this.context.popCache();
+  };
+
   // called after new
   LayoutGenerator.prototype._onInitialize = function(context){
   };
@@ -14799,7 +14803,7 @@ Nehan.BlockGenerator = (function(){
 
   BlockGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
-      return this.context.popCache();
+      return this._popCache();
     }
 
     if(this.context.hasChildLayout()){
@@ -14929,7 +14933,7 @@ Nehan.InlineGenerator = (function(){
 
   InlineGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
-      return this.context.popCache();
+      return this._popCache();
     }
 
     if(this.context.hasChildLayout()){
@@ -15083,7 +15087,7 @@ Nehan.TextGenerator = (function(){
 
   TextGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
-      var cache = this.context.popCache();
+      var cache = this._popCache();
       return cache;
     }
 
@@ -15336,35 +15340,24 @@ Nehan.FloatGenerator = (function(){
     //console.log("FloatGen::_yield");
     if(this.context.hasCache()){
       //console.log("FloatGen, use cache");
-      return this.context.popCache();
+      return this._popCache();
     }
     var stack = this.context.yieldFloatStack();
-    var stack_extent = stack.getExtent();
-    if(stack.isEmpty()){
-      console.warn("float stack empty!");
-      // If stack is empty but there are still active float elements, it's overflow.
-      if(this.context.hasNextFloat()){
-	console.warn("float over, retry in next page");
-	return this.context.yieldPageBreak();
-      }
-      console.warn("float is already done! return null");
-      return null;
+
+    // If stack is empty but there are still active float elements, it's overflow.
+    if(stack.isEmpty() && this.context.hasNextFloat()){
+      //console.warn("float-target is empty, but has next, so retry in next page");
+      return this.context.yieldPageBreak();
     }
 
+    var stack_extent = stack.getExtent();
     var rest_measure = this.context.layoutContext.getInlineRestMeasure();
     if(stack_extent > this.context.getContextMaxExtent()){
-      console.warn("float stack can't be included in parent layout! -> break-after");
+      //console.warn("float stack can't be included in parent layout! -> break-after");
       this.context.pushFloatStackCache(stack);
-      this.context.layoutContext.setBreakAfter(true);
-      return null;
+      return this.context.yieldPageBreak();
     }
-    if(stack_extent <= 0 || rest_measure <= 0){
-      console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
-      this._updateChildParent();
-      console.warn("return null");
-      return null;
-    }
-    
+
     return this._yieldFloat(stack, rest_measure, stack_extent);
   };
 
@@ -15374,9 +15367,9 @@ Nehan.FloatGenerator = (function(){
 
     // no more rest space
     if(rest_measure <= 0 || stack_extent <= 0){
-      console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
+      //console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
       this._updateChildParent();
-      console.warn("return null");
+      //console.warn("return null");
       return null;
     }
 
@@ -15504,6 +15497,16 @@ Nehan.ParallelGenerator = (function(){
     throw "_createChildGenerators is not defined.";
   };
 
+  ParallelGenerator.prototype._popCache = function(){
+    var cache = this.context.popCache();
+    if(cache && cache.elements){
+      cache.elements.forEach(function(element){
+	element.breakAfter = false;
+      });
+    }
+    return cache;
+  };
+
   ParallelGenerator.prototype._onElement = function(element){
     element.breakAfter = Nehan.List.exists(element.elements, function(block){
       return block && block.breakAfter;
@@ -15512,7 +15515,7 @@ Nehan.ParallelGenerator = (function(){
 
   ParallelGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
-      return this.context.popCache();
+      return this._popCache();
     }
     return this.context.yieldParallelBlocks() || null;
   };
@@ -16789,7 +16792,6 @@ Nehan.RenderingContext = (function(){
 	  console.error("skip too large block element:%o(%d)", element, element_size);
 	  return Nehan.Results.SKIP;
 	}
-	// first atomic element must be yielded.
 	console.warn("first atomic element overflow:%o(%s)", element, element.toString());
       }
     }
@@ -17141,7 +17143,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createFloatGenerator = function(first_float_gen){
-    console.warn("create float generator!");
+    //console.warn("create float generator!");
     var floated_generators = [first_float_gen];
     this.stream.iterWhile(function(token){
       if(token instanceof Nehan.Text && token.isWhiteSpaceOnly()){
@@ -17425,10 +17427,11 @@ Nehan.RenderingContext = (function(){
     }
 
     if(line.isVoid()){
-      console.warn("zero line?");
+      console.warn("zero line?", line);
+      line.edge = null;
+      line.resizeExtent(this.style.flow, 0);
     }
-
-    console.info("[create line box] %o(isVoid=%o), yieldCount:%d", line, line.isVoid(), this.yieldCount);
+    //console.info("[create line box] %o(isVoid=%o), yieldCount:%d", line, line.isVoid(), this.yieldCount);
     return line;
   };
 
@@ -17467,10 +17470,7 @@ Nehan.RenderingContext = (function(){
     if(this.parent && this.parent.stream){
       text_box.pos = Math.max(0, this.parent.stream.getPos() - 1);
     }
-    if(text_box.isVoid()){
-      console.warn("zero text?");
-    }
-    console.info("[create text box] %o(isVoid=%o), yieldCount:%d", text_box, text_box.isVoid(), this.yieldCount);
+    //console.info("[create text box] %o(isVoid=%o), yieldCount:%d", text_box, text_box.isVoid(), this.yieldCount);
     return text_box;
   };
 
@@ -17482,7 +17482,6 @@ Nehan.RenderingContext = (function(){
     var size = element.size;
     var bc = this.layoutContext.block;
     var str = element.toString();
-    //var max = bc.maxExtent;
     var max = this.getContextMaxExtentForAdd();
     var prev = bc.curExtent;
     var next = prev + extent;
@@ -17680,12 +17679,6 @@ Nehan.RenderingContext = (function(){
     var is_float_space = this.isFloatSpace();
     var is_iblock = this.style.isInlineBlock();
 
-    /*
-    console.log(
-      "[%s(is_float=%o, is_iblock=%o, box-sizing:%s)]\n auto:%d\n style.staticExtent:%d\n style.extent:%d\n style.contentExtent:%d\n direct:%d",
-      this._name, is_float_space, is_iblock, this.style.boxSizing, auto_extent, this.style.staticExtent, this.style.extent, this.style.contentExtent, direct_extent
-    );
-     */
     if(auto_extent === 0 && !this.style.isPasted()){
       return 0;
     }
@@ -18086,8 +18079,10 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   RenderingContext.prototype.popCache = function(){
     var cache = this.cachedElements.pop();
-    console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
-    cache.breakAfter = false;
+    if(cache){
+      console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
+      cache.breakAfter = false;
+    }
     return cache;
   };
 

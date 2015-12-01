@@ -64,6 +64,10 @@ Nehan.LayoutGenerator = (function(){
     throw "_yield is not defined.";
   };
 
+  LayoutGenerator.prototype._popCache = function(){
+    return this.context.popCache();
+  };
+
   // called after new
   LayoutGenerator.prototype._onInitialize = function(context){
   };

@@ -39,35 +39,24 @@ Nehan.FloatGenerator = (function(){
     //console.log("FloatGen::_yield");
     if(this.context.hasCache()){
       //console.log("FloatGen, use cache");
-      return this.context.popCache();
+      return this._popCache();
     }
     var stack = this.context.yieldFloatStack();
-    var stack_extent = stack.getExtent();
-    if(stack.isEmpty()){
-      console.warn("float stack empty!");
-      // If stack is empty but there are still active float elements, it's overflow.
-      if(this.context.hasNextFloat()){
-	console.warn("float over, retry in next page");
-	return this.context.yieldPageBreak();
-      }
-      console.warn("float is already done! return null");
-      return null;
+
+    // If stack is empty but there are still active float elements, it's overflow.
+    if(stack.isEmpty() && this.context.hasNextFloat()){
+      //console.warn("float-target is empty, but has next, so retry in next page");
+      return this.context.yieldPageBreak();
     }
 
+    var stack_extent = stack.getExtent();
     var rest_measure = this.context.layoutContext.getInlineRestMeasure();
     if(stack_extent > this.context.getContextMaxExtent()){
-      console.warn("float stack can't be included in parent layout! -> break-after");
+      //console.warn("float stack can't be included in parent layout! -> break-after");
       this.context.pushFloatStackCache(stack);
-      this.context.layoutContext.setBreakAfter(true);
-      return null;
+      return this.context.yieldPageBreak();
     }
-    if(stack_extent <= 0 || rest_measure <= 0){
-      console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
-      this._updateChildParent();
-      console.warn("return null");
-      return null;
-    }
-    
+
     return this._yieldFloat(stack, rest_measure, stack_extent);
   };
 
@@ -77,9 +66,9 @@ Nehan.FloatGenerator = (function(){
 
     // no more rest space
     if(rest_measure <= 0 || stack_extent <= 0){
-      console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
+      //console.warn("no more rest space:(m=%d, e=%d)", rest_measure, stack_extent);
       this._updateChildParent();
-      console.warn("return null");
+      //console.warn("return null");
       return null;
     }
 

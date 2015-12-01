@@ -43,7 +43,7 @@ Nehan.TextGenerator = (function(){
 
   TextGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
-      var cache = this.context.popCache();
+      var cache = this._popCache();
       return cache;
     }
 

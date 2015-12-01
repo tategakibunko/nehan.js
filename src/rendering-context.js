@@ -58,7 +58,6 @@ Nehan.RenderingContext = (function(){
 	  console.error("skip too large block element:%o(%d)", element, element_size);
 	  return Nehan.Results.SKIP;
 	}
-	// first atomic element must be yielded.
 	console.warn("first atomic element overflow:%o(%s)", element, element.toString());
       }
     }
@@ -410,7 +409,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createFloatGenerator = function(first_float_gen){
-    console.warn("create float generator!");
+    //console.warn("create float generator!");
     var floated_generators = [first_float_gen];
     this.stream.iterWhile(function(token){
       if(token instanceof Nehan.Text && token.isWhiteSpaceOnly()){
@@ -694,10 +693,11 @@ Nehan.RenderingContext = (function(){
     }
 
     if(line.isVoid()){
-      console.warn("zero line?");
+      console.warn("zero line?", line);
+      line.edge = null;
+      line.resizeExtent(this.style.flow, 0);
     }
-
-    console.info("[create line box] %o(isVoid=%o), yieldCount:%d", line, line.isVoid(), this.yieldCount);
+    //console.info("[create line box] %o(isVoid=%o), yieldCount:%d", line, line.isVoid(), this.yieldCount);
     return line;
   };
 
@@ -736,10 +736,7 @@ Nehan.RenderingContext = (function(){
     if(this.parent && this.parent.stream){
       text_box.pos = Math.max(0, this.parent.stream.getPos() - 1);
     }
-    if(text_box.isVoid()){
-      console.warn("zero text?");
-    }
-    console.info("[create text box] %o(isVoid=%o), yieldCount:%d", text_box, text_box.isVoid(), this.yieldCount);
+    //console.info("[create text box] %o(isVoid=%o), yieldCount:%d", text_box, text_box.isVoid(), this.yieldCount);
     return text_box;
   };
 
@@ -751,7 +748,6 @@ Nehan.RenderingContext = (function(){
     var size = element.size;
     var bc = this.layoutContext.block;
     var str = element.toString();
-    //var max = bc.maxExtent;
     var max = this.getContextMaxExtentForAdd();
     var prev = bc.curExtent;
     var next = prev + extent;
@@ -949,12 +945,6 @@ Nehan.RenderingContext = (function(){
     var is_float_space = this.isFloatSpace();
     var is_iblock = this.style.isInlineBlock();
 
-    /*
-    console.log(
-      "[%s(is_float=%o, is_iblock=%o, box-sizing:%s)]\n auto:%d\n style.staticExtent:%d\n style.extent:%d\n style.contentExtent:%d\n direct:%d",
-      this._name, is_float_space, is_iblock, this.style.boxSizing, auto_extent, this.style.staticExtent, this.style.extent, this.style.contentExtent, direct_extent
-    );
-     */
     if(auto_extent === 0 && !this.style.isPasted()){
       return 0;
     }
@@ -1355,8 +1345,10 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   RenderingContext.prototype.popCache = function(){
     var cache = this.cachedElements.pop();
-    console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
-    cache.breakAfter = false;
+    if(cache){
+      console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
+      cache.breakAfter = false;
+    }
     return cache;
   };
 

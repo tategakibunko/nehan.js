@@ -51,7 +51,7 @@ Nehan.BlockGenerator = (function(){
 
   BlockGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
-      return this.context.popCache();
+      return this._popCache();
     }
 
     if(this.context.hasChildLayout()){
