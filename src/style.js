@@ -856,13 +856,6 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
-   @return {Nehan.Partition}
-   */
-  Style.prototype.getTablePartition = function(){
-    return this.tablePartition || (this.parent? this.parent.getTablePartition() : null);
-  };
-  /**
-   @memberof Nehan.Style
    @return {String}
    */
   Style.prototype.getBorderCollapse = function(){

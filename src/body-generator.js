@@ -25,7 +25,7 @@ Nehan.BodyGenerator = (function(){
 
   BodyGenerator.prototype._createOutput = function(){
     var block = Nehan.BlockGenerator.prototype._createOutput.call(this);
-    if(block.isInvalidSize()){
+    if(!block || block.isInvalidSize()){
       return null; // skip invalid block
     }
     block.seekPos = this.context.stream.getSeekPos();

@@ -9,6 +9,7 @@ Nehan.LayoutGenerator = (function(){
   function LayoutGenerator(context){
     this.context = context;
     this.context.setOwnerGenerator(this);
+    this._onInitialize(this.context);
   }
 
   /**
@@ -29,16 +30,19 @@ Nehan.LayoutGenerator = (function(){
   LayoutGenerator.prototype.yield = function(){
     console.group("%s _yield:%o", this.context.getName(), this.context);
 
+    // this.context.layoutContext is created.
     this.context.initLayoutContext();
 
     // call _yield implemented in subclass.
     var box = this._yield();
 
     // called for each output
-    this._onCreate(box);
+    if(box){
+      this._onCreate(box);
+    }
 
     // called for final output
-    if(!this.hasNext()){
+    if(box && !this.hasNext()){
       this._onComplete(box);
     }
 
@@ -50,12 +54,18 @@ Nehan.LayoutGenerator = (function(){
       console.error("[%s]too many yield!:%o", this.context._name, this);
       throw "too many yield";
     }
+
     console.groupEnd();
+
     return box;
   };
 
   LayoutGenerator.prototype._yield = function(){
-    throw "LayoutGenerator::_yield must be implemented in child class";
+    throw "_yield is not defined.";
+  };
+
+  // called after new
+  LayoutGenerator.prototype._onInitialize = function(context){
   };
 
   // called for each output

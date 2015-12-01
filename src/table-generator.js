@@ -21,13 +21,18 @@ Nehan.TableGenerator = (function(){
   */
   function TableGenerator(context){
     Nehan.BlockGenerator.call(this, context);
+  }
+  Nehan.Class.extend(TableGenerator, Nehan.BlockGenerator);
+
+  TableGenerator.prototype._onInitialize = function(context){
+    // TODO
+    //context.initTablePartition();
 
     // load partition set after context size is calculated.
     if(context.style.getCssAttr("table-layout") === "auto"){
-      context.style.tablePartition = this._createAutoPartition(context.stream);
+      context.tablePartition = this._createAutoPartition(context.stream);
     }
-  }
-  Nehan.Class.extend(TableGenerator, Nehan.BlockGenerator);
+  };
 
   TableGenerator.prototype._createAutoPartition = function(stream){
     var pset = new Nehan.PartitionHashSet();

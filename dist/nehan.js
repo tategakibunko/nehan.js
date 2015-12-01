@@ -13909,13 +13909,6 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
-   @return {Nehan.Partition}
-   */
-  Style.prototype.getTablePartition = function(){
-    return this.tablePartition || (this.parent? this.parent.getTablePartition() : null);
-  };
-  /**
-   @memberof Nehan.Style
    @return {String}
    */
   Style.prototype.getBorderCollapse = function(){
@@ -14700,6 +14693,7 @@ Nehan.LayoutGenerator = (function(){
   function LayoutGenerator(context){
     this.context = context;
     this.context.setOwnerGenerator(this);
+    this._onInitialize(this.context);
   }
 
   /**
@@ -14720,16 +14714,19 @@ Nehan.LayoutGenerator = (function(){
   LayoutGenerator.prototype.yield = function(){
     console.group("%s _yield:%o", this.context.getName(), this.context);
 
+    // this.context.layoutContext is created.
     this.context.initLayoutContext();
 
     // call _yield implemented in subclass.
     var box = this._yield();
 
     // called for each output
-    this._onCreate(box);
+    if(box){
+      this._onCreate(box);
+    }
 
     // called for final output
-    if(!this.hasNext()){
+    if(box && !this.hasNext()){
       this._onComplete(box);
     }
 
@@ -14741,12 +14738,18 @@ Nehan.LayoutGenerator = (function(){
       console.error("[%s]too many yield!:%o", this.context._name, this);
       throw "too many yield";
     }
+
     console.groupEnd();
+
     return box;
   };
 
   LayoutGenerator.prototype._yield = function(){
-    throw "LayoutGenerator::_yield must be implemented in child class";
+    throw "_yield is not defined.";
+  };
+
+  // called after new
+  LayoutGenerator.prototype._onInitialize = function(context){
   };
 
   // called for each output
@@ -14777,6 +14780,9 @@ Nehan.BlockGenerator = (function(){
   }
   Nehan.Class.extend(BlockGenerator, Nehan.LayoutGenerator);
 
+  BlockGenerator.prototype._onElement = function(element){
+  };
+
   BlockGenerator.prototype._yield = function(){
     var clearance = this.context.yieldClearance();
     if(clearance){
@@ -14790,6 +14796,9 @@ Nehan.BlockGenerator = (function(){
     }
     while(this.hasNext()){
       var element = this._getNext();
+      if(element){
+	this._onElement(element);
+      }
       var result = this.context.addBlockElement(element);
       if(result === Nehan.Results.OK || result === Nehan.Results.SKIP){
 	continue;
@@ -15502,31 +15511,29 @@ Nehan.ParallelGenerator = (function(){
   */
   function ParallelGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
-    context.parallelGenerators = this._createChildGenerators(context);
-    context.stream = null;
   }
-  Nehan.Class.extend(ParallelGenerator, Nehan.LayoutGenerator);
+  Nehan.Class.extend(ParallelGenerator, Nehan.BlockGenerator);
+
+  ParallelGenerator.prototype._onInitialize = function(context){
+    context.setParallelGenerators(this._createChildGenerators(context));
+    context.stream = null;
+  };
 
   ParallelGenerator.prototype._createChildGenerators = function(context){
-    throw "ParallelGenerator::_createChildGenerators must be implemented in child class";
+    throw "_createChildGenerators is not defined.";
   };
 
-  ParallelGenerator.prototype._isBreakAfter = function(blocks){
-    return Nehan.List.exists(blocks, function(block){
+  ParallelGenerator.prototype._onElement = function(element){
+    element.breakAfter = Nehan.List.exists(element.elements, function(block){
       return block && block.breakAfter;
-    });
+    }) && this.hasNext();
   };
 
-  ParallelGenerator.prototype._yield = function(){
+  ParallelGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
       return this.context.popCache();
     }
-    var box = this.context.yieldParallelBlocks();
-    if(!box){
-      return null;
-    }
-    box.breakAfter = this._isBreakAfter(box.elements);
-    return box;
+    return this.context.yieldParallelBlocks() || null;
   };
 
   return ParallelGenerator;
@@ -15590,9 +15597,12 @@ Nehan.ListGenerator = (function(){
   */
   function ListGenerator(context){
     Nehan.BlockGenerator.call(this, context);
-    context.initListContext();
   }
   Nehan.Class.extend(ListGenerator, Nehan.BlockGenerator);
+
+  ListGenerator.prototype._onInitialize = function(context){
+    context.initListContext(); // context.listContext is available.
+  };
 
   return ListGenerator;
 })();
@@ -15612,45 +15622,21 @@ Nehan.ListItemGenerator = (function(){
   }
   Nehan.Class.extend(ListItemGenerator, Nehan.ParallelGenerator);
 
-  /*
-  ListItemGenerator.prototype._createOutput = function(){
-    var block = Nehan.BlockGenerator.prototype._createOutput.call(this);
-    var list = block.elements[0];
-    var items = list? list.elements : [];
-    console.log("output list item:mark = %o, body = %o", items[0], items[1]);
-    if(!items[0] || !items[1]){
-      console.warn("invalid list item(undefined)");
-      return null;
-    }
-    if(items[1] && items[1].isInvalidSize()){
-      console.warn("invalid list item(zero size)");
-      return null;
-    }
-    if(items[1].elements.length === 0){
-      console.warn("invalid list item(empty body)");
-      return null;
-    }
-    return block;
-  };
-   */
-
   ListItemGenerator.prototype._createChildGenerators = function(context){
     var list_context = context.parent.listContext;
     var list_index = context.style.getChildIndex();
 
-    // [li]
-    //   [li-marker][li-body]
+    // <li><li-marker>..</li-marker><li-body>...</li-body>
     return [
       this._createListMarkerGenerator(context, list_context, list_index),
       this._createListBodyGenerator(context, list_context)
     ];
   };
 
-  // inherit from ParallelGenerator::_isBreakAfter
-  ListItemGenerator.prototype._isBreakAfter = function(blocks){
-    var result = blocks[1] && blocks[1].breakAfter;
-    console.log("ListItemGenerator::_isBreakAfter(%o) = %o", blocks, result);
-    return result;
+  ListItemGenerator.prototype._onElement = function(box){
+    var blocks = box.elements || [];
+    var list_body = blocks[1];
+    box.breakAfter = list_body && list_body.breakAfter;
   };
 
   ListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
@@ -15707,13 +15693,18 @@ Nehan.TableGenerator = (function(){
   */
   function TableGenerator(context){
     Nehan.BlockGenerator.call(this, context);
+  }
+  Nehan.Class.extend(TableGenerator, Nehan.BlockGenerator);
+
+  TableGenerator.prototype._onInitialize = function(context){
+    // TODO
+    //context.initTablePartition();
 
     // load partition set after context size is calculated.
     if(context.style.getCssAttr("table-layout") === "auto"){
-      context.style.tablePartition = this._createAutoPartition(context.stream);
+      context.tablePartition = this._createAutoPartition(context.stream);
     }
-  }
-  Nehan.Class.extend(TableGenerator, Nehan.BlockGenerator);
+  };
 
   TableGenerator.prototype._createAutoPartition = function(stream){
     var pset = new Nehan.PartitionHashSet();
@@ -15800,12 +15791,6 @@ Nehan.TableRowGenerator = (function(){
   }
   Nehan.Class.extend(TableRowGenerator, Nehan.ParallelGenerator);
 
-  TableRowGenerator.prototype._isBreakAfter = function(blocks){
-    return Nehan.List.exists(blocks, function(block){
-      return block && block.breakAfter;
-    }) && this.hasNext();
-  };
-
   TableRowGenerator.prototype._createChildGenerators = function(context){
     var child_styles = this._getChildStyles(context);
     return child_styles.map(function(child_style){
@@ -15815,17 +15800,16 @@ Nehan.TableRowGenerator = (function(){
 
   TableRowGenerator.prototype._getChildStyles = function(context){
     var self = this;
-    var style_tr = context.style;
+    var partition = context.parent.tablePartition;
     var stream = context.stream;
     var child_tags = stream.getTokens();
-    var rest_measure = style_tr.contentMeasure;
-    var partition = style_tr.getTablePartition();
+    var rest_measure = context.style.contentMeasure;
     var part_sizes = partition? partition.getSizes({
       partitionCount:child_tags.length,
-      measure:style_tr.contentMeasure
+      measure:context.style.contentMeasure
     }) : [];
     return child_tags.map(function(cell_tag, i){
-      var default_style = context.createStyle(cell_tag, style_tr);
+      var default_style = context.createChildStyle(cell_tag);
       var static_measure = default_style.staticMeasure;
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_tags.length - i));
       if(part_sizes.length > 0){
@@ -15917,7 +15901,7 @@ Nehan.BodyGenerator = (function(){
 
   BodyGenerator.prototype._createOutput = function(){
     var block = Nehan.BlockGenerator.prototype._createOutput.call(this);
-    if(block.isInvalidSize()){
+    if(!block || block.isInvalidSize()){
       return null; // skip invalid block
     }
     block.seekPos = this.context.stream.getSeekPos();
@@ -17089,6 +17073,10 @@ Nehan.RenderingContext = (function(){
     };
   };
 
+  RenderingContext.prototype.createTablePartition = function(){
+    throw "TODO";
+  };
+
   RenderingContext.prototype.createOutlineElement = function(callbacks){
     return this.createOutlineElementByName("body", callbacks || {});
   };
@@ -17382,7 +17370,7 @@ Nehan.RenderingContext = (function(){
       //box.breakAfter = true;
     }
     console.warn(
-      "[create box box]%o(%s)\n box.breakAfter:%o, context.breakAfter:%o, box.isVoid:%o",
+      "[create block box]%o(%s)\n box.breakAfter:%o, context.breakAfter:%o, box.isVoid:%o",
       box,
       box.toString(),
       box.breakAfter,
@@ -18013,6 +18001,10 @@ Nehan.RenderingContext = (function(){
     this.listContext = this.createListContext();
   };
 
+  RenderingContext.prototype.initTablePartition = function(){
+    this.tablePartition = this.createTablePartition();
+  };
+
   // -----------------------------------------------
   // [is]
   // -----------------------------------------------
@@ -18152,7 +18144,10 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.setOwnerGenerator = function(generator){
     this.generator = generator;
     this._name = this.getName();
-    //console.log("generator:%s", this.getName());
+  };
+
+  RenderingContext.prototype.setParallelGenerators = function(generators){
+    this.parallelGenerators = generators;
   };
 
   RenderingContext.prototype.setResumeLine = function(line){

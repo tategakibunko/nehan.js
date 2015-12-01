@@ -12,45 +12,21 @@ Nehan.ListItemGenerator = (function(){
   }
   Nehan.Class.extend(ListItemGenerator, Nehan.ParallelGenerator);
 
-  /*
-  ListItemGenerator.prototype._createOutput = function(){
-    var block = Nehan.BlockGenerator.prototype._createOutput.call(this);
-    var list = block.elements[0];
-    var items = list? list.elements : [];
-    console.log("output list item:mark = %o, body = %o", items[0], items[1]);
-    if(!items[0] || !items[1]){
-      console.warn("invalid list item(undefined)");
-      return null;
-    }
-    if(items[1] && items[1].isInvalidSize()){
-      console.warn("invalid list item(zero size)");
-      return null;
-    }
-    if(items[1].elements.length === 0){
-      console.warn("invalid list item(empty body)");
-      return null;
-    }
-    return block;
-  };
-   */
-
   ListItemGenerator.prototype._createChildGenerators = function(context){
     var list_context = context.parent.listContext;
     var list_index = context.style.getChildIndex();
 
-    // [li]
-    //   [li-marker][li-body]
+    // <li><li-marker>..</li-marker><li-body>...</li-body>
     return [
       this._createListMarkerGenerator(context, list_context, list_index),
       this._createListBodyGenerator(context, list_context)
     ];
   };
 
-  // inherit from ParallelGenerator::_isBreakAfter
-  ListItemGenerator.prototype._isBreakAfter = function(blocks){
-    var result = blocks[1] && blocks[1].breakAfter;
-    console.log("ListItemGenerator::_isBreakAfter(%o) = %o", blocks, result);
-    return result;
+  ListItemGenerator.prototype._onElement = function(box){
+    var blocks = box.elements || [];
+    var list_body = blocks[1];
+    box.breakAfter = list_body && list_body.breakAfter;
   };
 
   ListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){

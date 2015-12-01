@@ -14,6 +14,9 @@ Nehan.BlockGenerator = (function(){
   }
   Nehan.Class.extend(BlockGenerator, Nehan.LayoutGenerator);
 
+  BlockGenerator.prototype._onElement = function(element){
+  };
+
   BlockGenerator.prototype._yield = function(){
     var clearance = this.context.yieldClearance();
     if(clearance){
@@ -27,6 +30,9 @@ Nehan.BlockGenerator = (function(){
     }
     while(this.hasNext()){
       var element = this._getNext();
+      if(element){
+	this._onElement(element);
+      }
       var result = this.context.addBlockElement(element);
       if(result === Nehan.Results.OK || result === Nehan.Results.SKIP){
 	continue;

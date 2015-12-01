@@ -16,12 +16,6 @@ Nehan.TableRowGenerator = (function(){
   }
   Nehan.Class.extend(TableRowGenerator, Nehan.ParallelGenerator);
 
-  TableRowGenerator.prototype._isBreakAfter = function(blocks){
-    return Nehan.List.exists(blocks, function(block){
-      return block && block.breakAfter;
-    }) && this.hasNext();
-  };
-
   TableRowGenerator.prototype._createChildGenerators = function(context){
     var child_styles = this._getChildStyles(context);
     return child_styles.map(function(child_style){
@@ -31,17 +25,16 @@ Nehan.TableRowGenerator = (function(){
 
   TableRowGenerator.prototype._getChildStyles = function(context){
     var self = this;
-    var style_tr = context.style;
+    var partition = context.parent.tablePartition;
     var stream = context.stream;
     var child_tags = stream.getTokens();
-    var rest_measure = style_tr.contentMeasure;
-    var partition = style_tr.getTablePartition();
+    var rest_measure = context.style.contentMeasure;
     var part_sizes = partition? partition.getSizes({
       partitionCount:child_tags.length,
-      measure:style_tr.contentMeasure
+      measure:context.style.contentMeasure
     }) : [];
     return child_tags.map(function(cell_tag, i){
-      var default_style = context.createStyle(cell_tag, style_tr);
+      var default_style = context.createChildStyle(cell_tag);
       var static_measure = default_style.staticMeasure;
       var measure = (static_measure && rest_measure >= static_measure)? static_measure : Math.floor(rest_measure / (child_tags.length - i));
       if(part_sizes.length > 0){

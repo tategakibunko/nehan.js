@@ -9,31 +9,29 @@ Nehan.ParallelGenerator = (function(){
   */
   function ParallelGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
-    context.parallelGenerators = this._createChildGenerators(context);
-    context.stream = null;
   }
-  Nehan.Class.extend(ParallelGenerator, Nehan.LayoutGenerator);
+  Nehan.Class.extend(ParallelGenerator, Nehan.BlockGenerator);
+
+  ParallelGenerator.prototype._onInitialize = function(context){
+    context.setParallelGenerators(this._createChildGenerators(context));
+    context.stream = null;
+  };
 
   ParallelGenerator.prototype._createChildGenerators = function(context){
-    throw "ParallelGenerator::_createChildGenerators must be implemented in child class";
+    throw "_createChildGenerators is not defined.";
   };
 
-  ParallelGenerator.prototype._isBreakAfter = function(blocks){
-    return Nehan.List.exists(blocks, function(block){
+  ParallelGenerator.prototype._onElement = function(element){
+    element.breakAfter = Nehan.List.exists(element.elements, function(block){
       return block && block.breakAfter;
-    });
+    }) && this.hasNext();
   };
 
-  ParallelGenerator.prototype._yield = function(){
+  ParallelGenerator.prototype._getNext = function(){
     if(this.context.hasCache()){
       return this.context.popCache();
     }
-    var box = this.context.yieldParallelBlocks();
-    if(!box){
-      return null;
-    }
-    box.breakAfter = this._isBreakAfter(box.elements);
-    return box;
+    return this.context.yieldParallelBlocks() || null;
   };
 
   return ParallelGenerator;

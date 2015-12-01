@@ -323,6 +323,10 @@ Nehan.RenderingContext = (function(){
     };
   };
 
+  RenderingContext.prototype.createTablePartition = function(){
+    throw "TODO";
+  };
+
   RenderingContext.prototype.createOutlineElement = function(callbacks){
     return this.createOutlineElementByName("body", callbacks || {});
   };
@@ -616,7 +620,7 @@ Nehan.RenderingContext = (function(){
       //box.breakAfter = true;
     }
     console.warn(
-      "[create box box]%o(%s)\n box.breakAfter:%o, context.breakAfter:%o, box.isVoid:%o",
+      "[create block box]%o(%s)\n box.breakAfter:%o, context.breakAfter:%o, box.isVoid:%o",
       box,
       box.toString(),
       box.breakAfter,
@@ -1247,6 +1251,10 @@ Nehan.RenderingContext = (function(){
     this.listContext = this.createListContext();
   };
 
+  RenderingContext.prototype.initTablePartition = function(){
+    this.tablePartition = this.createTablePartition();
+  };
+
   // -----------------------------------------------
   // [is]
   // -----------------------------------------------
@@ -1386,7 +1394,10 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.setOwnerGenerator = function(generator){
     this.generator = generator;
     this._name = this.getName();
-    //console.log("generator:%s", this.getName());
+  };
+
+  RenderingContext.prototype.setParallelGenerators = function(generators){
+    this.parallelGenerators = generators;
   };
 
   RenderingContext.prototype.setResumeLine = function(line){

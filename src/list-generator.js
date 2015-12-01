@@ -9,9 +9,12 @@ Nehan.ListGenerator = (function(){
   */
   function ListGenerator(context){
     Nehan.BlockGenerator.call(this, context);
-    context.initListContext();
   }
   Nehan.Class.extend(ListGenerator, Nehan.BlockGenerator);
+
+  ListGenerator.prototype._onInitialize = function(context){
+    context.initListContext(); // context.listContext is available.
+  };
 
   return ListGenerator;
 })();
