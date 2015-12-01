@@ -15326,9 +15326,13 @@ Nehan.FloatGenerator = (function(){
      @param context {Nehan.RenderingContext}
   */
   function FloatGenerator(context){
-    Nehan.BlockGenerator.call(this, context);
+    Nehan.LayoutGenerator.call(this, context);
   }
-  Nehan.Class.extend(FloatGenerator, Nehan.BlockGenerator);
+
+  // float generator itself is only mediator for float-targets and float-spaces,
+  // and it has no original edge or box level.
+  // so we extends not block-geneartor but layout-generator.
+  Nehan.Class.extend(FloatGenerator, Nehan.LayoutGenerator);
 
   // before: [root] -> [space] -> [child]
   //  after: [root] -> [child]
@@ -15346,8 +15350,8 @@ Nehan.FloatGenerator = (function(){
     }
   };
 
-  FloatGenerator.prototype._getNext = function(){
-    console.log("FloatGen::_getNext");
+  FloatGenerator.prototype._yield = function(){
+    console.log("FloatGen::_yield");
     if(this.context.hasCache()){
       console.log("FloatGen, use cache");
       return this.context.popCache();
@@ -15388,6 +15392,7 @@ Nehan.FloatGenerator = (function(){
     return this._yieldFloat(stack, rest_measure, stack_extent);
   };
 
+  // note that final form of this function is always finished by iniline wrap set.
   FloatGenerator.prototype._yieldFloat = function(stack, rest_measure, stack_extent){
     console.log("_yieldFloat(rest_m:%d, rest_e:%d)", rest_measure, stack_extent);
 
@@ -15510,7 +15515,7 @@ Nehan.ParallelGenerator = (function(){
    @param context {Nehan.RenderingContext}
   */
   function ParallelGenerator(context){
-    Nehan.LayoutGenerator.call(this, context);
+    Nehan.BlockGenerator.call(this, context);
   }
   Nehan.Class.extend(ParallelGenerator, Nehan.BlockGenerator);
 

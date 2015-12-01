@@ -8,7 +8,7 @@ Nehan.ParallelGenerator = (function(){
    @param context {Nehan.RenderingContext}
   */
   function ParallelGenerator(context){
-    Nehan.LayoutGenerator.call(this, context);
+    Nehan.BlockGenerator.call(this, context);
   }
   Nehan.Class.extend(ParallelGenerator, Nehan.BlockGenerator);
 
