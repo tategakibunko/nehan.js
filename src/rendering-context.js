@@ -1,3 +1,5 @@
+// system internal context
+// undocumented rendering context class
 Nehan.RenderingContext = (function(){
   function RenderingContext(opt){
     opt = opt || {};
@@ -58,11 +60,11 @@ Nehan.RenderingContext = (function(){
 	  console.error("skip too large block element:%o(%d)", element, element_size);
 	  return Nehan.Results.SKIP;
 	}
-	console.warn("first atomic element overflow:%o(%s)", element, element.toString());
+	//console.warn("first atomic element overflow:%o(%s)", element, element.toString());
       }
     }
 
-    this.debugBlockElement(element, element_size);
+    //this.debugBlockPush(element, element_size);
 
     if(element.isResumableLine(max_measure) && this.hasChildLayout() && this.child.isInline()){
       this.child.setResumeLine(element);
@@ -82,12 +84,12 @@ Nehan.RenderingContext = (function(){
       }
     }
     if(next_extent >= max_size){
-      console.warn("break after(block over)");
+      //console.warn("break after(block over)");
       this.layoutContext.setBreakAfter(true);
     }
     // inherit child block over
     if(element.breakAfter){
-      console.warn("break after(inherit)");
+      //console.warn("break after(inherit)");
       this.layoutContext.setBreakAfter(true);
     }
     if(this.layoutContext.isBreakAfter()){
@@ -100,7 +102,7 @@ Nehan.RenderingContext = (function(){
   // flag to parent: lineBreak
   RenderingContext.prototype.addInlineElement = function(element){
     if(element === null){
-      console.log("[%s]:eof", this._name);
+      //console.log("[%s]:eof", this._name);
       return Nehan.Results.EOF;
     }
     var max_size = this.layoutContext.getInlineMaxMeasure();
@@ -108,13 +110,13 @@ Nehan.RenderingContext = (function(){
     var prev_measure = this.layoutContext.getInlineCurMeasure(this.style.flow);
     var next_measure = prev_measure + element_size;
 
-    //this.debugInlineElement(element, element_size);
+    //this.debugInlinePush(element, element_size);
 
     if(element_size === 0){
       return Nehan.Results.ZERO;
     }
     if(this.layoutContext.getInlineElements().length === 0 && next_measure > max_size && element_size > this.getRootContentMeasure()){
-      console.error("skip too large inline element:%o(%d", element, element_size);
+      console.warn("skip too large inline element:%o(%d", element, element_size);
       return Nehan.Results.SKIP; // just skip it.
     }
     if(next_measure <= max_size){
@@ -153,7 +155,7 @@ Nehan.RenderingContext = (function(){
     var next_measure = prev_measure + element_size;
     var next_token = this.stream.peek();
 
-    //this.debugTextElement(element, element_size);
+    //this.debugTextPush(element, element_size);
 
     if(element_size === 0){
       return Nehan.Results.ZERO;
@@ -347,13 +349,42 @@ Nehan.RenderingContext = (function(){
 	  filter:Nehan.Closure.isTagName(["td", "th"])
 	}).getTokens();
 	var cell_count = cell_tags.length;
-	var partition = this.getPartition(cell_tags);
+	var partition = this.createCellPartition(cell_tags);
 	pset.add(cell_count, partition);
 	break;
       }
     }
     stream.rewind();
     return pset;
+  };
+
+  RenderingContext.prototype.createCellPartition = function(cell_tags){
+    var partition_count = cell_tags.length;
+    var partition_units = cell_tags.map(function(cell_tag){
+      return this.createCellPartitionUnit(cell_tag, partition_count);
+    }.bind(this));
+    return new Nehan.Partition(partition_units);
+  };
+
+  RenderingContext.prototype.createCellPartitionUnit = function(cell_tag, partition_count){
+    var measure = cell_tag.getAttr("measure") || cell_tag.getAttr("width") || null;
+    if(measure){
+      return new Nehan.PartitionUnit({weight:measure, isStatic:true});
+    }
+    var content = cell_tag.getContent();
+    var lines = cell_tag.getContent().replace(/<br \/>/g, "\n").replace(/<br>/g, "\n").split("\n");
+    // this sizing algorithem is not strict, but still effective,
+    // especially for text only table.
+    var max_line = Nehan.List.maxobj(lines, function(line){ return line.length; });
+    var max_weight = Math.floor(this.style.contentMeasure / 2);
+    var min_weight = Math.floor(this.style.contentMeasure / (partition_count * 2));
+    var weight = max_line.length * this.style.getFontSize();
+    // less than 50% of parent size, but more than 50% of average partition size.
+    weight = Math.max(min_weight, Math.min(weight, max_weight));
+
+    // but confirm that weight is more than single font size of parent style.
+    weight = Math.max(this.style.getFontSize(), weight);
+    return new Nehan.PartitionUnit({weight:weight, isStatic:false});
   };
 
   RenderingContext.prototype.createOutlineElement = function(callbacks){
@@ -645,17 +676,9 @@ Nehan.RenderingContext = (function(){
       pulled:this.style.isPulled()
     });
     if(this.getMarkupName() !== "hr" && (box.elements.length === 0 || box.isInvalidSize())){
-      console.warn("zero block?");
-      //box.breakAfter = true;
+      //console.warn("zero block?");
     }
-    console.warn(
-      "[create block box]%o(%s)\n box.breakAfter:%o, context.breakAfter:%o, box.isVoid:%o",
-      box,
-      box.toString(),
-      box.breakAfter,
-      this.layoutContext.isBreakAfter(),
-      box.isVoid()
-    );
+    // debugBlockBox(box);
     return box;
   };
 
@@ -723,7 +746,7 @@ Nehan.RenderingContext = (function(){
     }
 
     if(line.isVoid()){
-      console.warn("zero line?", line);
+      //console.warn("zero line?", line);
       line.edge = null;
       line.resizeExtent(this.style.flow, 0);
     }
@@ -773,7 +796,18 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   // [debug]
   // -----------------------------------------------
-  RenderingContext.prototype.debugBlockElement = function(element, extent){
+  RenderingContext.prototype.debugBlockBox = function(box){
+    console.info(
+      "[create block box]%o(%s)\n box.breakAfter:%o, context.breakAfter:%o, box.isVoid:%o",
+      box,
+      box.toString(),
+      box.breakAfter,
+      this.layoutContext.isBreakAfter(),
+      box.isVoid()
+    );
+  };
+
+  RenderingContext.prototype.debugBlockPush = function(element, extent){
     var name = this.getName();
     var size = element.size;
     var bc = this.layoutContext.block;
@@ -782,13 +816,13 @@ Nehan.RenderingContext = (function(){
     var prev = bc.curExtent;
     var next = prev + extent;
     var parent_rest = this.parent && this.parent.layoutContext? this.parent.layoutContext.getBlockRestExtent() : this.layoutContext.getBlockRestExtent();
-    console.info("[add block] %s:%o(%dx%d), e(%d/%d) -> e(%d/%d), +%d(prest:%d)\n%s", name, element, size.width, size.height, prev, max, next, max, extent, parent_rest, str);
+    console.log("[add block] %s:%o(%dx%d), e(%d/%d) -> e(%d/%d), +%d(prest:%d)\n%s", name, element, size.width, size.height, prev, max, next, max, extent, parent_rest, str);
     if(next > max){
-      console.log("over %c%d", "color:red", (next - max));
+      console.warn("over %c%d", "color:red", (next - max));
     }
   };
 
-  RenderingContext.prototype.debugInlineElement = function(element, measure){
+  RenderingContext.prototype.debugInlinePush = function(element, measure){
     var name = this.getName();
     var ic = this.layoutContext.inline;
     var str = element.toString();
@@ -798,7 +832,7 @@ Nehan.RenderingContext = (function(){
     console.log("[add inline] %s:%o(%s), m(%d/%d) -> m(%d/%d), +%d", name, element, str, prev, max, next, max, measure);
   };
 
-  RenderingContext.prototype.debugTextElement = function(element, measure){
+  RenderingContext.prototype.debugTextPush = function(element, measure){
     var name = this.getName();
     var ic = this.layoutContext.inline;
     var str = element.data || "";
@@ -811,23 +845,13 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   // [end]
   // -----------------------------------------------
-  /**
-   called when section root(body, blockquote, fieldset, figure, td) ends.
-
-   @memberof Nehan.RenderingContext
-   @method endOutlineContext
-   */
   RenderingContext.prototype.endOutlineContext = function(){
+    // called when section root(body, blockquote, fieldset, figure, td) ends.
     this.documentContext.addOutlineContext(this.getOutlineContext());
   };
 
-  /**
-   called when section content(article, aside, nav, section) ends.
-
-   @memberof Nehan.RenderingContext
-   @method startSectionContext
-   */
   RenderingContext.prototype.endSectionContext = function(){
+    // called when section content(article, aside, nav, section) ends.
     this.getOutlineContext().endSection(this.getMarkupName());
   };
 
@@ -1080,10 +1104,16 @@ Nehan.RenderingContext = (function(){
     return 0;
   };
 
-  /**
-   @memberof Nehan.RenderingContext
-   @return {Nehan.OutlinContext}
-   */
+  RenderingContext.prototype.getTablePartition = function(){
+    if(this.tablePartition){
+      return this.tablePartition;
+    }
+    if(this.parent){
+      return this.parent.getTablePartition();
+    }
+    return null;
+  };
+
   RenderingContext.prototype.getOutlineContext = function(){
     return this.outlineContext || (this.parent? this.parent.getOutlineContext() : null);
   };
@@ -1107,35 +1137,6 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.getSiblingStream = function(){
     var sibling = this.getSiblingContext();
     return (sibling && sibling.stream)? sibling.stream : null;
-  };
-
-  RenderingContext.prototype.getPartition = function(cell_tags){
-    var partition_count = cell_tags.length;
-    var partition_units = cell_tags.map(function(cell_tag){
-      return this.getPartitionUnit(cell_tag, partition_count);
-    }.bind(this));
-    return new Nehan.Partition(partition_units);
-  };
-
-  RenderingContext.prototype.getPartitionUnit = function(cell_tag, partition_count){
-    var measure = cell_tag.getAttr("measure") || cell_tag.getAttr("width") || null;
-    if(measure){
-      return new Nehan.PartitionUnit({weight:measure, isStatic:true});
-    }
-    var content = cell_tag.getContent();
-    var lines = cell_tag.getContent().replace(/<br \/>/g, "\n").replace(/<br>/g, "\n").split("\n");
-    // this sizing algorithem is not strict, but still effective,
-    // especially for text only table.
-    var max_line = Nehan.List.maxobj(lines, function(line){ return line.length; });
-    var max_weight = Math.floor(this.style.contentMeasure / 2);
-    var min_weight = Math.floor(this.style.contentMeasure / (partition_count * 2));
-    var weight = max_line.length * this.style.getFontSize();
-    // less than 50% of parent size, but more than 50% of average partition size.
-    weight = Math.max(min_weight, Math.min(weight, max_weight));
-
-    // but confirm that weight is more than single font size of parent style.
-    weight = Math.max(this.style.getFontSize(), weight);
-    return new Nehan.PartitionUnit({weight:weight, isStatic:false});
   };
 
   // -----------------------------------------------
@@ -1275,7 +1276,7 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.initLayoutContext = function(){
     this.layoutContext = this.createLayoutContext();
     if(this.layoutContext){
-      console.log("available space(m = %d, e = %d)", this.layoutContext.getInlineMaxMeasure(), this.layoutContext.getBlockMaxExtent());
+      //console.log("available space(m = %d, e = %d)", this.layoutContext.getInlineMaxMeasure(), this.layoutContext.getBlockMaxExtent());
     }
     if(this.hasFlipFlow()){
       this.updateContextSize(
@@ -1405,7 +1406,7 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.popCache = function(){
     var cache = this.cachedElements.pop();
     if(cache){
-      console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
+      //console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
       cache.breakAfter = false;
     }
     return cache;
@@ -1471,36 +1472,21 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   // [start]
   // -----------------------------------------------
-  /**
-   called when section root(body, blockquote, fieldset, figure, td) starts.
-
-   @memberof Nehan.RenderingContext
-   */
   RenderingContext.prototype.startOutlineContext = function(){
+    // called when section root(body, blockquote, fieldset, figure, td) starts.
     this.outlineContext = new Nehan.OutlineContext(this.getMarkupName());
   };
 
-  /**
-   called when section content(article, aside, nav, section) starts.
-
-   @memberof Nehan.RenderingContext
-   @method startSectionContext
-   */
   RenderingContext.prototype.startSectionContext = function(){
+    // called when section content(article, aside, nav, section) starts.
     this.getOutlineContext().startSection({
       type:this.getMarkupName(),
       pageNo:this.documentContext.getPageNo()
     });
   };
 
-  /**
-   called when heading content(h1-h6) starts.
-
-   @memberof Nehan.RenderingContext
-   @method startHeaderContext
-   @return {string} header id
-   */
   RenderingContext.prototype.startHeaderContext = function(opt){
+    // called when heading content(h1-h6) starts.
     return this.getOutlineContext().addHeader({
       headerId:this.documentContext.genHeaderId(),
       pageNo:this.documentContext.getPageNo(),

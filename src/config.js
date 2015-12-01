@@ -56,8 +56,7 @@ Nehan.Config = {
    @type {int}
    @default 20000
    */
-  //maxYieldCount:20000,
-  maxYieldCount:100,
+  maxYieldCount:20000,
 
   /**
    max available page count for each engine.
@@ -66,7 +65,7 @@ Nehan.Config = {
    @type {int}
    @default 5000
    */
-  maxPageCount:20,
+  maxPageCount:5000,
 
   /**
    use vertical glyph if browser support 'writing-mode'.

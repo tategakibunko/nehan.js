@@ -32,7 +32,7 @@ Nehan.TextGenerator = (function(){
 
   TextGenerator.prototype._createOutput = function(){
     if(this.context.layoutContext.isInlineEmpty()){
-      console.warn("empty text block");
+      //console.warn("empty text block");
       return null;
     }
     if(this.context.isHyphenateEnable()){

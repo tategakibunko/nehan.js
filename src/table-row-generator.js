@@ -25,7 +25,7 @@ Nehan.TableRowGenerator = (function(){
 
   TableRowGenerator.prototype._getChildStyles = function(context){
     var self = this;
-    var partition = context.parent.tablePartition;
+    var partition = context.getTablePartition();
     var stream = context.stream;
     var child_tags = stream.getTokens();
     var rest_measure = context.style.contentMeasure;

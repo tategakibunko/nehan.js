@@ -125,16 +125,6 @@ Nehan.PagedElement = (function(){
    @param opt.onComplete {Function} - fun time:{Float} -> {@link Nehan.PagedElement} -> ()
    @param opt.capturePageText {bool} output text node or not for each page object.
    @param opt.maxPageCount {int} - upper bound of page count
-   @example
-   * paged_element.render({
-   *   onProgress:function(tree, ctx){
-   *     console.log("page no:%d", tree.pageNo);
-   *     console.log("progress:%d", tree.percent);
-   *   },
-   *   onComplete:function(time){
-   *     console.log("complete:%fmsec", time);
-   *   }
-   * });
    */
   NehanPagedElement.prototype.render = function(opt){
     this.document.render(opt);

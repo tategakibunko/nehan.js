@@ -28,7 +28,7 @@ Nehan.LayoutGenerator = (function(){
    @return {Nehan.Box}
    */
   LayoutGenerator.prototype.yield = function(){
-    console.group("%s _yield:%o", this.context.getName(), this.context);
+    //console.group("%s _yield:%o", this.context.getName(), this.context);
 
     // this.context.layoutContext is created.
     this.context.initLayoutContext();
@@ -55,7 +55,7 @@ Nehan.LayoutGenerator = (function(){
       throw "too many yield";
     }
 
-    console.groupEnd();
+    //console.groupEnd();
 
     return box;
   };

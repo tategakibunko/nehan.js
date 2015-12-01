@@ -20,7 +20,7 @@ Nehan.BlockGenerator = (function(){
   BlockGenerator.prototype._yield = function(){
     var clearance = this.context.yieldClearance();
     if(clearance){
-      console.log("clearance:", clearance);
+      //console.log("clearance:", clearance);
       return clearance;
     }
     // if break-before available, page-break but only once.
@@ -83,7 +83,7 @@ Nehan.BlockGenerator = (function(){
 
     // if disabled style, just skip
     if(child_style.isDisabled()){
-      console.warn("disabled style:%o(%s):", child_style, child_style.getMarkupName());
+      //console.warn("disabled style:%o(%s):", child_style, child_style.getMarkupName());
       return this._getNext();
     }
 

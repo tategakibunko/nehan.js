@@ -46,11 +46,11 @@ Nehan.PageParser = (function(){
     if(opt.onPage){
       var original_onprogress = opt.onProgress;
       opt.onProgress = function(tree, ctx){
-	console.log("tree:", tree);
+	//console.log("tree:", tree);
 	original_onprogress(tree, ctx);
 	var page = this.generator.context.getPage(tree.pageNo);
 	if(page){
-	  console.log("page:", page);
+	  //console.log("page:", page);
 	  opt.onPage(page, ctx);
 	}
       }.bind(this);
