@@ -14755,10 +14755,12 @@ Nehan.BlockGenerator = (function(){
    */
   function BlockGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
-    this.blockId = context.genBlockId();
-    this.context.initBlockClear();
   }
   Nehan.Class.extend(BlockGenerator, Nehan.LayoutGenerator);
+
+  BlockGenerator.prototype._onInitialize = function(context){
+    context.initBlockClear();
+  };
 
   BlockGenerator.prototype._onElement = function(element){
   };
@@ -15483,6 +15485,7 @@ Nehan.ParallelGenerator = (function(){
   Nehan.Class.extend(ParallelGenerator, Nehan.BlockGenerator);
 
   ParallelGenerator.prototype._onInitialize = function(context){
+    Nehan.BlockGenerator.prototype._onInitialize.call(this, context);
     context.setParallelGenerators(this._createChildGenerators(context));
     context.stream = null;
   };
@@ -15530,9 +15533,13 @@ Nehan.SectionRootGenerator = (function(){
   */
   function SectionRootGenerator(context){
     Nehan.BlockGenerator.call(this, context);
-    context.startOutlineContext(); // create new section root
   }
   Nehan.Class.extend(SectionRootGenerator, Nehan.BlockGenerator);
+
+  SectionRootGenerator.prototype._onInitialize = function(context){
+    Nehan.BlockGenerator.prototype._onInitialize.call(this, context);
+    context.startOutlineContext(); // create new section root
+  };
 
   SectionRootGenerator.prototype._onComplete = function(block){
     this.context.endOutlineContext();
@@ -15579,6 +15586,7 @@ Nehan.ListGenerator = (function(){
   Nehan.Class.extend(ListGenerator, Nehan.BlockGenerator);
 
   ListGenerator.prototype._onInitialize = function(context){
+    Nehan.BlockGenerator.prototype._onInitialize.call(this, context);
     context.initListContext(); // context.listContext is available.
   };
 
@@ -15682,6 +15690,8 @@ Nehan.TableGenerator = (function(){
   Nehan.Class.extend(TableGenerator, Nehan.BlockGenerator);
 
   TableGenerator.prototype._onInitialize = function(context){
+    Nehan.BlockGenerator.prototype._onInitialize.call(this, context);
+
     // if table-layout is auto, need to calc partition before parsing.
     if(context.style.getCssAttr("table-layout") === "auto"){
       context.initTablePartition(context.stream); // context.tablePartition is generated.
@@ -15803,12 +15813,11 @@ Nehan.BodyGenerator = (function(){
    @param context {Nehan.RenderingContext}
    */
   function BodyGenerator(context){
-    this._initContext(context);
     Nehan.SectionRootGenerator.call(this, context);
   }
   Nehan.Class.extend(BodyGenerator, Nehan.SectionRootGenerator);
 
-  BodyGenerator.prototype._initContext = function(context){
+  BodyGenerator.prototype._onInitialize = function(context){
     var markup = new Nehan.Tag("body", context.text);
     if(!context.style){
       context.style = context.createStyle(markup, null);
@@ -15816,6 +15825,7 @@ Nehan.BodyGenerator = (function(){
     if(!context.stream){
       context.stream = new Nehan.TokenStream(context.text);
     }
+    Nehan.SectionRootGenerator.prototype._onInitialize.call(this, context);
   };
 
   BodyGenerator.prototype._createOutput = function(){
@@ -15854,7 +15864,6 @@ Nehan.HtmlGenerator = (function(){
   */
   function HtmlGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
-    this._initContext();
   }
   Nehan.Class.extend(HtmlGenerator, Nehan.LayoutGenerator);
 
@@ -15862,16 +15871,16 @@ Nehan.HtmlGenerator = (function(){
     return this.context.yieldChildLayout();
   };
 
-  HtmlGenerator.prototype._initContext = function(){
-    if(!this.context.stream){
-      this.context.stream = this.context.createHtmlStream(this.context.text);
+  HtmlGenerator.prototype._onInitialize = function(context){
+    if(!context.stream){
+      context.stream = context.createHtmlStream(context.text);
     }
     var body_tag = null;
-    while(this.context.stream.hasNext()){
-      var tag = this.context.stream.get();
+    while(context.stream.hasNext()){
+      var tag = context.stream.get();
       switch(tag.getName()){
       case "head":
-	this._parseDocumentHeader(new Nehan.TokenStream(tag.getContent(), {
+	this._parseDocumentHeader(context, new Nehan.TokenStream(tag.getContent(), {
 	  filter:Nehan.Closure.isTagName(["title", "meta", "link", "style", "script"])
 	}));
 	break;
@@ -15880,13 +15889,13 @@ Nehan.HtmlGenerator = (function(){
 	break;
       }
     }
-    body_tag = body_tag || new Nehan.Tag("body", this.context.stream.getSrc());
-    var body_style = this.context.createChildStyle(body_tag);
-    var body_context = this.context.createChildContext(body_style);
+    body_tag = body_tag || new Nehan.Tag("body", context.stream.getSrc());
+    var body_style = context.createChildStyle(body_tag);
+    var body_context = context.createChildContext(body_style);
     new Nehan.BodyGenerator(body_context);
   };
 
-  HtmlGenerator.prototype._parseDocumentHeader = function(stream){
+  HtmlGenerator.prototype._parseDocumentHeader = function(context, stream){
     var document_header = new Nehan.DocumentHeader();
     while(stream.hasNext()){
       var tag = stream.get();
@@ -15908,7 +15917,7 @@ Nehan.HtmlGenerator = (function(){
 	break;
       }
     }
-    this.context.documentContext.setDocumentHeader(document_header);
+    context.documentContext.setDocumentHeader(document_header);
   };
 
   return HtmlGenerator;
@@ -15926,7 +15935,6 @@ Nehan.DocumentGenerator = (function(){
   */
   function DocumentGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
-    this._initContext();
   }
   Nehan.Class.extend(DocumentGenerator, Nehan.LayoutGenerator);
 
@@ -15934,26 +15942,26 @@ Nehan.DocumentGenerator = (function(){
     return this.context.yieldChildLayout();
   };
 
-  DocumentGenerator.prototype._initContext = function(){
-    this.context.stream = this.context.createDocumentStream(this.context.text);
+  DocumentGenerator.prototype._onInitialize = function(context){
+    context.stream = context.createDocumentStream(context.text);
 
     var html_tag = null;
-    while(this.context.stream.hasNext()){
-      var tag = this.context.stream.get();
+    while(context.stream.hasNext()){
+      var tag = context.stream.get();
       switch(tag.getName()){
       case "!doctype":
 	// var doc_type = tag.getSrc().split(/\s+/)[1];
-	this.context.documentThis.Context.setDocumentType("html"); // TODO
+	context.documentContext.setDocumentType("html"); // TODO
 	break;
       case "html":
 	html_tag = tag;
 	break;
       }
     }
-    html_tag = html_tag || new Nehan.Tag("html", this.context.stream.getSrc());
-    var html_style = this.context.createChildStyle(html_tag);
-    var html_context = this.context.createChildContext(html_style, {
-      stream:this.context.createHtmlStream(html_tag.getContent())
+    html_tag = html_tag || new Nehan.Tag("html", context.stream.getSrc());
+    var html_style = context.createChildStyle(html_tag);
+    var html_context = context.createChildContext(html_style, {
+      stream:context.createHtmlStream(html_tag.getContent())
     });
     new Nehan.HtmlGenerator(html_context);
   };

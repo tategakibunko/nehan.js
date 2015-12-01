@@ -9,9 +9,13 @@ Nehan.SectionRootGenerator = (function(){
   */
   function SectionRootGenerator(context){
     Nehan.BlockGenerator.call(this, context);
-    context.startOutlineContext(); // create new section root
   }
   Nehan.Class.extend(SectionRootGenerator, Nehan.BlockGenerator);
+
+  SectionRootGenerator.prototype._onInitialize = function(context){
+    Nehan.BlockGenerator.prototype._onInitialize.call(this, context);
+    context.startOutlineContext(); // create new section root
+  };
 
   SectionRootGenerator.prototype._onComplete = function(block){
     this.context.endOutlineContext();

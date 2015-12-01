@@ -8,12 +8,11 @@ Nehan.BodyGenerator = (function(){
    @param context {Nehan.RenderingContext}
    */
   function BodyGenerator(context){
-    this._initContext(context);
     Nehan.SectionRootGenerator.call(this, context);
   }
   Nehan.Class.extend(BodyGenerator, Nehan.SectionRootGenerator);
 
-  BodyGenerator.prototype._initContext = function(context){
+  BodyGenerator.prototype._onInitialize = function(context){
     var markup = new Nehan.Tag("body", context.text);
     if(!context.style){
       context.style = context.createStyle(markup, null);
@@ -21,6 +20,7 @@ Nehan.BodyGenerator = (function(){
     if(!context.stream){
       context.stream = new Nehan.TokenStream(context.text);
     }
+    Nehan.SectionRootGenerator.prototype._onInitialize.call(this, context);
   };
 
   BodyGenerator.prototype._createOutput = function(){

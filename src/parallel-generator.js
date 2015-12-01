@@ -13,6 +13,7 @@ Nehan.ParallelGenerator = (function(){
   Nehan.Class.extend(ParallelGenerator, Nehan.BlockGenerator);
 
   ParallelGenerator.prototype._onInitialize = function(context){
+    Nehan.BlockGenerator.prototype._onInitialize.call(this, context);
     context.setParallelGenerators(this._createChildGenerators(context));
     context.stream = null;
   };

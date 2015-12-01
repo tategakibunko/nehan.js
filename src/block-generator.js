@@ -9,10 +9,12 @@ Nehan.BlockGenerator = (function(){
    */
   function BlockGenerator(context){
     Nehan.LayoutGenerator.call(this, context);
-    this.blockId = context.genBlockId();
-    this.context.initBlockClear();
   }
   Nehan.Class.extend(BlockGenerator, Nehan.LayoutGenerator);
+
+  BlockGenerator.prototype._onInitialize = function(context){
+    context.initBlockClear();
+  };
 
   BlockGenerator.prototype._onElement = function(element){
   };

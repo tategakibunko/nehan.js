@@ -13,6 +13,7 @@ Nehan.ListGenerator = (function(){
   Nehan.Class.extend(ListGenerator, Nehan.BlockGenerator);
 
   ListGenerator.prototype._onInitialize = function(context){
+    Nehan.BlockGenerator.prototype._onInitialize.call(this, context);
     context.initListContext(); // context.listContext is available.
   };
 

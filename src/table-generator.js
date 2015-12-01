@@ -25,6 +25,8 @@ Nehan.TableGenerator = (function(){
   Nehan.Class.extend(TableGenerator, Nehan.BlockGenerator);
 
   TableGenerator.prototype._onInitialize = function(context){
+    Nehan.BlockGenerator.prototype._onInitialize.call(this, context);
+
     // if table-layout is auto, need to calc partition before parsing.
     if(context.style.getCssAttr("table-layout") === "auto"){
       context.initTablePartition(context.stream); // context.tablePartition is generated.
