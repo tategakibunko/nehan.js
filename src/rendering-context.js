@@ -322,8 +322,38 @@ Nehan.RenderingContext = (function(){
     };
   };
 
-  RenderingContext.prototype.createTablePartition = function(){
-    throw "TODO";
+  RenderingContext.prototype.createTablePartition = function(stream){
+    var pset = new Nehan.PartitionHashSet();
+    while(stream.hasNext()){
+      var token = stream.get();
+      if(token === null){
+	break;
+      }
+      if(!Nehan.Token.isTag(token)){
+	continue;
+      }
+      switch(token.getName()){
+      case "tbody": case "thead": case "tfoot":
+	var pset2 = this.createTablePartition(new Nehan.TokenStream(token.getContent(), {
+	  flow:this.style.flow,
+	  filter:Nehan.Closure.isTagName(["tr"])
+	}));
+	pset = pset.union(pset2);
+	break;
+
+      case "tr":
+	var cell_tags = new Nehan.TokenStream(token.getContent(), {
+	  flow:this.style.flow,
+	  filter:Nehan.Closure.isTagName(["td", "th"])
+	}).getTokens();
+	var cell_count = cell_tags.length;
+	var partition = this.getPartition(cell_tags);
+	pset.add(cell_count, partition);
+	break;
+      }
+    }
+    stream.rewind();
+    return pset;
   };
 
   RenderingContext.prototype.createOutlineElement = function(callbacks){
@@ -1079,6 +1109,35 @@ Nehan.RenderingContext = (function(){
     return (sibling && sibling.stream)? sibling.stream : null;
   };
 
+  RenderingContext.prototype.getPartition = function(cell_tags){
+    var partition_count = cell_tags.length;
+    var partition_units = cell_tags.map(function(cell_tag){
+      return this.getPartitionUnit(cell_tag, partition_count);
+    }.bind(this));
+    return new Nehan.Partition(partition_units);
+  };
+
+  RenderingContext.prototype.getPartitionUnit = function(cell_tag, partition_count){
+    var measure = cell_tag.getAttr("measure") || cell_tag.getAttr("width") || null;
+    if(measure){
+      return new Nehan.PartitionUnit({weight:measure, isStatic:true});
+    }
+    var content = cell_tag.getContent();
+    var lines = cell_tag.getContent().replace(/<br \/>/g, "\n").replace(/<br>/g, "\n").split("\n");
+    // this sizing algorithem is not strict, but still effective,
+    // especially for text only table.
+    var max_line = Nehan.List.maxobj(lines, function(line){ return line.length; });
+    var max_weight = Math.floor(this.style.contentMeasure / 2);
+    var min_weight = Math.floor(this.style.contentMeasure / (partition_count * 2));
+    var weight = max_line.length * this.style.getFontSize();
+    // less than 50% of parent size, but more than 50% of average partition size.
+    weight = Math.max(min_weight, Math.min(weight, max_weight));
+
+    // but confirm that weight is more than single font size of parent style.
+    weight = Math.max(this.style.getFontSize(), weight);
+    return new Nehan.PartitionUnit({weight:weight, isStatic:false});
+  };
+
   // -----------------------------------------------
   // [has]
   // -----------------------------------------------
@@ -1241,8 +1300,8 @@ Nehan.RenderingContext = (function(){
     this.listContext = this.createListContext();
   };
 
-  RenderingContext.prototype.initTablePartition = function(){
-    this.tablePartition = this.createTablePartition();
+  RenderingContext.prototype.initTablePartition = function(stream){
+    this.tablePartition = this.createTablePartition(stream);
   };
 
   // -----------------------------------------------
