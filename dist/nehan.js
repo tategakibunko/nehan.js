@@ -18553,7 +18553,7 @@ Nehan.PagedElement = (function(){
    */
   NehanPagedElement.prototype.setContent = function(content, opt){
     this.document.setContent(content);
-    this.document.render(opt);
+    this.document.render(opt || {});
     this.setPage(0);
     return this;
   };
@@ -18624,6 +18624,7 @@ Nehan.Document = (function(){
   }
 
   Document.prototype.render = function(opt){
+    opt = opt || {};
     this.text = opt.text || this.text;
     this.generator = new Nehan.RenderingContext({
       text:Nehan.Html.normalize(this.text)

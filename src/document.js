@@ -7,6 +7,7 @@ Nehan.Document = (function(){
   }
 
   Document.prototype.render = function(opt){
+    opt = opt || {};
     this.text = opt.text || this.text;
     this.generator = new Nehan.RenderingContext({
       text:Nehan.Html.normalize(this.text)
