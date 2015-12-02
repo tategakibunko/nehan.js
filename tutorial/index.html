@@ -62,19 +62,19 @@
 
 <h2>Getting Started</h2>
 
-<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript"><span class="keyword">var</span> document = <span class="keyword">new</span> Nehan.Document();
+<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript"><span class="keyword">var</span> doc = <span class="keyword">new</span> Nehan.Document();
 
 <span class="comment">// setStyle(selector, value)</span>
-document.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">body</span><span class="delimiter">"</span></span>, {
+doc.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">body</span><span class="delimiter">"</span></span>, {
   <span class="key">flow</span>:<span class="string"><span class="delimiter">"</span><span class="content">lr-tb</span><span class="delimiter">"</span></span>, <span class="comment">// or "tb-rl"</span>
   <span class="key">fontSize</span>:<span class="integer">16</span>, <span class="comment">// camel-case is supported(version &gt;= 5.1.1)</span>
   <span class="key">width</span>:<span class="integer">640</span>, <span class="comment">// page width</span>
   <span class="key">height</span>:<span class="integer">480</span> <span class="comment">// page height</span>
 });
   
-document.setContent(<span class="string"><span class="delimiter">"</span><span class="content">&lt;p&gt;hello, nehan.js!!&lt;/p&gt;</span><span class="delimiter">"</span></span>);
+doc.setContent(<span class="string"><span class="delimiter">"</span><span class="content">&lt;p&gt;hello, nehan.js!!&lt;/p&gt;</span><span class="delimiter">"</span></span>);
 
-document.render({
+doc.render({
   <span class="function">onPage</span>: <span class="keyword">function</span>(page, ctx){
     console.log(<span class="string"><span class="delimiter">"</span><span class="content">page object:%o, pageNo:%d, dom element:%o</span><span class="delimiter">"</span></span>, page, page.pageNo, page.element);
   },
@@ -90,12 +90,12 @@ document.render({
 <div class="ui hidden divider"></div>
 
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript"><span class="comment">// you can get page directly by page index.</span>
-<span class="keyword">var</span> first_page = document.getPage(<span class="integer">0</span>);
-<span class="keyword">var</span> second_page = document.getPage(<span class="integer">1</span>);
+<span class="keyword">var</span> first_page = doc.getPage(<span class="integer">0</span>);
+<span class="keyword">var</span> second_page = doc.getPage(<span class="integer">1</span>);
 
 <span class="comment">// total page count is obtained by 'getPageCount',</span>
 <span class="comment">// but it's incorrect if 'onComplete' is not called.</span>
-<span class="keyword">var</span> total_page_count = document.getPageCount();</code></pre></div></div></div>
+<span class="keyword">var</span> total_page_count = doc.getPageCount();</code></pre></div></div></div>
 
 <h2>About Styling</h2>
 
@@ -124,7 +124,7 @@ document.render({
 <p>For example, lets define some simple style like bellow.</p>
 
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript"><span class="comment">// all class name of nehan is required "nehan-" prefix.</span>
-document.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">.example1</span><span class="delimiter">"</span></span>, {
+doc.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">.example1</span><span class="delimiter">"</span></span>, {
   <span class="key">margin</span>:{<span class="key">after</span>:<span class="string"><span class="delimiter">"</span><span class="content">20px</span><span class="delimiter">"</span></span>}
 });</code></pre></div></div></div>
 
@@ -155,7 +155,7 @@ document.setStyle(<span class="string"><span class="delimiter">"</span><span cla
 
 <p>Set <code>backgrond-color</code> to <code>blue</code> if nth-child is even, otherwise <code>red</code>.</p>
 
-<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">pages.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">.example2</span><span class="delimiter">"</span></span>, {
+<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">doc.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">.example2</span><span class="delimiter">"</span></span>, {
   <span class="key"><span class="delimiter">"</span><span class="content">background-color</span><span class="delimiter">"</span></span>:<span class="keyword">function</span>(ctx){
      <span class="keyword">if</span>(ctx.getChildIndex() % <span class="integer">2</span> === <span class="integer">0</span>){
        <span class="keyword">return</span> <span class="string"><span class="delimiter">"</span><span class="content">blue</span><span class="delimiter">"</span></span>;
@@ -174,7 +174,7 @@ document.setStyle(<span class="string"><span class="delimiter">"</span><span cla
 <p>You can set global style by <code>Nehan.setStyle</code>.</p>
 
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript"><span class="comment">// this is 'local' style for paged-element.</span>
-document.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">p</span><span class="delimiter">"</span></span>, {
+doc.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">p</span><span class="delimiter">"</span></span>, {
   <span class="key">margin</span>:{<span class="key">after</span>:<span class="string"><span class="delimiter">"</span><span class="content">1em</span><span class="delimiter">"</span></span>}
 });
 
@@ -194,7 +194,7 @@ Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class=
 
 <p>Using <code>onload</code> property, you can change markup dynamically before parsing.</p>
 
-<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">document.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">.time</span><span class="delimiter">"</span></span>, {
+<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">doc.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">.time</span><span class="delimiter">"</span></span>, {
   <span class="function">onload</span>:<span class="keyword">function</span>(context){
      <span class="keyword">var</span> markup = context.getMarkup();
      <span class="keyword">var</span> now = <span class="keyword">new</span> Date().toDateString();
@@ -215,7 +215,7 @@ Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class=
 
 <p>By using <code>oncreate</code> property, you can hook just after the target selector is converted into DOM.</p>
 
-<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">document.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">p</span><span class="delimiter">"</span></span>, {
+<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">doc.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">p</span><span class="delimiter">"</span></span>, {
   <span class="function">oncreate</span>:<span class="keyword">function</span>(context){
     <span class="comment">// console.log("abstract logical tree:%o", context.box);</span>
     <span class="predefined">$</span>(context.dom).click(<span class="keyword">function</span>(){
