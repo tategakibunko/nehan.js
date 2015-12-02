@@ -62,6 +62,9 @@ Nehan.Box = (function(){
     if(this.getCacheCount() === 0){
       return false;
     }
+    if(this.context.layoutContext && this.context.layoutContext.getInlineMaxMeasure() === max_measure){
+      return false;
+    }
     return this.inlineMeasure < max_measure;
   };
   /**

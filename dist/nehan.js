@@ -12062,6 +12062,9 @@ Nehan.Box = (function(){
     if(this.getCacheCount() === 0){
       return false;
     }
+    if(this.context.layoutContext && this.context.layoutContext.getInlineMaxMeasure() === max_measure){
+      return false;
+    }
     return this.inlineMeasure < max_measure;
   };
   /**
@@ -18182,7 +18185,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.setResumeLine = function(line){
-    //console.warn("setResumeLine:%o", line);
+    //console.warn("setResumeLine:%o(%s)", line, line.toString());
     this.resumeLine = line;
   };
 

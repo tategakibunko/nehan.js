@@ -1464,7 +1464,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.setResumeLine = function(line){
-    //console.warn("setResumeLine:%o", line);
+    //console.warn("setResumeLine:%o(%s)", line, line.toString());
     this.resumeLine = line;
   };
 
