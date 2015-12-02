@@ -40,14 +40,14 @@ These screenshots are layout result of [jekyll-nehan](https://github.com/tategak
 ## Gettting started
 
 ```javascript
-var document = new Nehan.Document();
-var target = document.querySelector("#target");
+var doc = new Nehan.Document();
+var target = doc.querySelector("#target");
 
 // set document source html
-document.setContent("<h1>hello, nehan.js!!</h1>");
+doc.setContent("<h1>hello, nehan.js!!</h1>");
 
 // set document style
-document.setStyle("body", {
+doc.setStyle("body", {
   flow:"lr-tb",
   //flow:"tb-rl", // Japanese vertical style
   fontSize:"16px",
@@ -56,14 +56,14 @@ document.setStyle("body", {
 });
 
 // set other style like this
-document.setStyle("h1", {
+doc.setStyle("h1", {
   margin:{
     after:"1rem"
   }
 });
 
 // start rendering.
-document.render({
+doc.render({
   onPage:function(page, ctx){
     console.log("onPage:%o", page);
     page.element.style.marginBottom = "1em";
@@ -75,15 +75,15 @@ document.render({
 });
 
 // direct access by 'getPage'.
-var first_page = document.getPage(0);
-var second_page = document.getPage(1);
+var first_page = doc.getPage(0);
+var second_page = doc.getPage(1);
 
 // get total page count by 'getPageCount'.
-var page_count = document.getPageCount();
+var page_count = doc.getPageCount();
 
 // move page by setPage
 $("button#back-to-first-page").click(function(){
-  document.setPage(0);
+  doc.setPage(0);
 });
 ```
 
@@ -94,7 +94,7 @@ You can set style by `Document::setStyle`.
 First argument is `selector-key`, and second one is `selector-value`.
 
 ```javascript
-document.setStyle("body", {
+doc.setStyle("body", {
   flow:"lr-tb",
   //"flow":"tb-rl", // for Japanese vertical
   fontSize:16,
