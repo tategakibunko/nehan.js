@@ -9253,6 +9253,7 @@ Nehan.ListStyle = (function(){
      @param opt.image {Nehan.ListStyleImage}
   */
   function ListStyle(opt){
+    opt = opt || {};
     this.type = new Nehan.ListStyleType(opt.type || "none");
     this.position = new Nehan.ListStylePos(opt.position || "outside");
     this.image = (opt.image !== "none")? new Nehan.ListStyleImage(opt.image) : null;
@@ -9262,7 +9263,7 @@ Nehan.ListStyle = (function(){
    @memberof Nehan.ListStyle
    @return {boolean}
    */
-  ListStyle.prototype.isMultiCol = function(){
+  ListStyle.prototype.isOutside = function(){
     return this.position.isOutside();
   };
   /**
@@ -13033,7 +13034,6 @@ Nehan.Style = (function(){
    @class Style
    @classdesc abstraction of document tree hierarchy with selector values, associated markup, cursor_context.
    @constructor
-
    @param context {Nehan.RenderingContext}
    @param markup {Nehan.Tag} - markup of style
    @param paernt {Nehan.Style} - parent style
@@ -13042,7 +13042,7 @@ Nehan.Style = (function(){
   function Style(context, markup, parent, force_css){
     this._initialize(context, markup, parent, force_css || {});
   }
-  
+
   // to fetch first text part from content html.
   var __rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
 
@@ -13853,6 +13853,19 @@ Nehan.Style = (function(){
    */
   Style.prototype.getLetterSpacing = function(){
     return this.letterSpacing || 0;
+  };
+  /**
+   @memberof Nehan.Style
+   @return {Nehan.ListStyle}
+   */
+  Style.prototype.getListStyle = function(){
+    if(this.listStyle){
+      return this.listStyle;
+    }
+    if(this.display === "list-item" && this.parent){
+      return this.parent.getListStyle() || new Nehan.ListStyle(); // default list style
+    }
+    return null;
   };
   /**
    @memberof Nehan.Style
@@ -15597,21 +15610,21 @@ Nehan.ListGenerator = (function(){
 })();
 
 
-Nehan.ListItemGenerator = (function(){
+Nehan.OutsideListItemGenerator = (function(){
   /**
    @memberof Nehan
-   @class ListItemGenerator
-   @classdesc generator of &lt;li&gt; tag, consists parallel generator of list-item and list-body.
+   @class OutsideListItemGenerator
+   @classdesc list-item with list-style-position:outside.
    @constructor
    @extends {Nehan.ParallelGenerator}
    @param context {Nehan.RenderingContext}
   */
-  function ListItemGenerator(context){
+  function OutsideListItemGenerator(context){
     Nehan.ParallelGenerator.call(this, context);
   }
-  Nehan.Class.extend(ListItemGenerator, Nehan.ParallelGenerator);
+  Nehan.Class.extend(OutsideListItemGenerator, Nehan.ParallelGenerator);
 
-  ListItemGenerator.prototype._createChildGenerators = function(context){
+  OutsideListItemGenerator.prototype._createChildGenerators = function(context){
     var list_context = context.parent.listContext;
     var list_index = context.style.getChildIndex();
 
@@ -15622,20 +15635,20 @@ Nehan.ListItemGenerator = (function(){
     ];
   };
 
-  ListItemGenerator.prototype._onElement = function(box){
+  OutsideListItemGenerator.prototype._onElement = function(box){
     Nehan.ParallelGenerator.prototype._onElement.call(this, box);
-    //console.log("ListItemGenerator::_onElement:%o(%s)", box, box.toString());
+    //console.log("OutsideListItemGenerator::_onElement:%o(%s)", box, box.toString());
     var blocks = box.elements || [];
     var list_body = blocks[1];
     // if list body is empty, disable box.
     if(list_body && list_body.isVoid()){
-      //console.warn("ListItemGenerator::_onElement, invalid list body disabled");
+      //console.warn("OutsideListItemGenerator::_onElement, invalid list body disabled");
       box.elements = [];
       box.resizeExtent(this.context.style.flow, 0);
     }
   };
 
-  ListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
+  OutsideListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
     var content = context.parent.style.getListMarkerHtml(list_index + 1);
     //console.log("marker html:%s", content);
     var marker_markup = new Nehan.Tag("marker", content);
@@ -15644,11 +15657,11 @@ Nehan.ListItemGenerator = (function(){
       measure:list_context.indentSize
     });
     var marker_context = context.createChildContext(marker_style);
-    //console.log("ListItemGenerator::marker context:%o", marker_context);
+    //console.log("OutsideListItemGenerator::marker context:%o", marker_context);
     return new Nehan.BlockGenerator(marker_context);
   };
 
-  ListItemGenerator.prototype._createListBodyGenerator = function(context, list_context){
+  OutsideListItemGenerator.prototype._createListBodyGenerator = function(context, list_context){
     var body_markup = new Nehan.Tag("li-body");
     var body_style = context.createChildStyle(body_markup, {
       display:"block",
@@ -15662,7 +15675,33 @@ Nehan.ListItemGenerator = (function(){
     return new Nehan.BlockGenerator(body_context);
   };
 
-  return ListItemGenerator;
+  return OutsideListItemGenerator;
+})();
+
+Nehan.InsideListItemGenerator = (function(){
+  /**
+   @memberof Nehan
+   @class InsideListItemGenerator
+   @classdesc list-item with list-style-position:inside.
+   @constructor
+   @extends {Nehan.ParallelGenerator}
+   @param context {Nehan.RenderingContext}
+  */
+  function InsideListItemGenerator(context){
+    Nehan.BlockGenerator.call(this, context);
+  }
+  Nehan.Class.extend(InsideListItemGenerator, Nehan.BlockGenerator);
+
+  InsideListItemGenerator.prototype._onInitialize = function(context){
+    Nehan.BlockGenerator.prototype._onInitialize.call(this, context);
+
+    var child_index = context.style.getChildIndex();
+    var marker_html = context.style.getListMarkerHtml(child_index + 1) + "&nbsp;";
+    var marker_stream = new Nehan.TokenStream(marker_html);
+    context.stream.tokens = marker_stream.getTokens().concat(context.stream.getTokens());
+  };
+
+  return InsideListItemGenerator;
 })();
   
 
@@ -17148,6 +17187,14 @@ Nehan.RenderingContext = (function(){
     }
   };
 
+  RenderingContext.prototype.createListItemGenerator = function(item_context){
+    var list_style = item_context.style.getListStyle();
+    if(list_style.isOutside()){
+      return new Nehan.OutsideListItemGenerator(item_context);
+    }
+    return new Nehan.InsideListItemGenerator(item_context);
+  };
+
   RenderingContext.prototype.createFloatGenerator = function(first_float_gen){
     //console.warn("create float generator!");
     var floated_generators = [first_float_gen];
@@ -17195,7 +17242,7 @@ Nehan.RenderingContext = (function(){
     // switch generator by display
     switch(child_style.display){
     case "list-item":
-      return new Nehan.ListItemGenerator(child_context);
+      return this.createListItemGenerator(child_context);
 
     case "table":
       return new Nehan.TableGenerator(child_context);

@@ -6,7 +6,11 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.4.0 2015/12/?
+version 5.4.1
+========================
+o Support list-style-position:inside.
+
+version 5.4.0 2015/12/2
 ========================
 o Add Nehan::Document.
 o Add new callback 'onPage'.

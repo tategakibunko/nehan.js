@@ -1,4 +1,10 @@
 var TestStyles = {
+  ".lst-inside ul":{
+    "list-style-position":"inside"
+  },
+  ".lst-inside ol":{
+    "list-style-position":"inside"
+  },
   ".test-pseudo li:first-child":{
     "color":"green"
   },

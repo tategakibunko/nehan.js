@@ -223,10 +223,17 @@ var Script = {
     "</table>"
   ].join("\n"),
 
-  "list":[
+  "ouside-list":[
     Snipet["ul"],
     Snipet["ol"],
     Snipet["dl"]
+  ].join("\n"),
+
+  "inside-list":[
+    "<div class='lst-inside'>",
+    Snipet["ul"],
+    Snipet["ol"],
+    "</div>"
   ].join("\n"),
 
   "flip-flow":[

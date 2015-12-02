@@ -469,6 +469,14 @@ Nehan.RenderingContext = (function(){
     }
   };
 
+  RenderingContext.prototype.createListItemGenerator = function(item_context){
+    var list_style = item_context.style.getListStyle();
+    if(list_style.isOutside()){
+      return new Nehan.OutsideListItemGenerator(item_context);
+    }
+    return new Nehan.InsideListItemGenerator(item_context);
+  };
+
   RenderingContext.prototype.createFloatGenerator = function(first_float_gen){
     //console.warn("create float generator!");
     var floated_generators = [first_float_gen];
@@ -516,7 +524,7 @@ Nehan.RenderingContext = (function(){
     // switch generator by display
     switch(child_style.display){
     case "list-item":
-      return new Nehan.ListItemGenerator(child_context);
+      return this.createListItemGenerator(child_context);
 
     case "table":
       return new Nehan.TableGenerator(child_context);

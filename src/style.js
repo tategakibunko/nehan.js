@@ -4,7 +4,6 @@ Nehan.Style = (function(){
    @class Style
    @classdesc abstraction of document tree hierarchy with selector values, associated markup, cursor_context.
    @constructor
-
    @param context {Nehan.RenderingContext}
    @param markup {Nehan.Tag} - markup of style
    @param paernt {Nehan.Style} - parent style
@@ -13,7 +12,7 @@ Nehan.Style = (function(){
   function Style(context, markup, parent, force_css){
     this._initialize(context, markup, parent, force_css || {});
   }
-  
+
   // to fetch first text part from content html.
   var __rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
 
@@ -824,6 +823,19 @@ Nehan.Style = (function(){
    */
   Style.prototype.getLetterSpacing = function(){
     return this.letterSpacing || 0;
+  };
+  /**
+   @memberof Nehan.Style
+   @return {Nehan.ListStyle}
+   */
+  Style.prototype.getListStyle = function(){
+    if(this.listStyle){
+      return this.listStyle;
+    }
+    if(this.display === "list-item" && this.parent){
+      return this.parent.getListStyle() || new Nehan.ListStyle(); // default list style
+    }
+    return null;
   };
   /**
    @memberof Nehan.Style
