@@ -7,7 +7,7 @@ Nehan.OutlineContextParser = (function(){
   var _parse = function(context, parent, ptr){
     var log = context.get(ptr++);
     if(log === null){
-      return;
+      return null;
     }
     switch(log.name){
     case "start-section":
