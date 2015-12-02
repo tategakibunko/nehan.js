@@ -25,7 +25,6 @@ Nehan.PageParser = (function(){
    @memberof Nehan.PageParser
    @param opt {Object}
    @param opt.onProgress {Function} - fun tree:{@link Nehan.Box} -> {@link Nehan.RenderingContext} -> ()
-   @param opt.onTree {Function} - fun page:{@link Nehan.Box} -> {@link Nehan.RenderingContext} -> ()
    @param opt.onPage {Function} - fun page:{@link Nehan.Page} -> {@link Nehan.RenderingContext} -> ()
    @param opt.onComplete {Function} - fun time:{Float} -> context:{@link Nehan.RenderingContext} -> ()
    @param opt.onError {Function} - fun error:{String} -> ()
@@ -38,16 +37,10 @@ Nehan.PageParser = (function(){
       capturePageText: false,
       maxPageCount: Nehan.Config.maxPageCount,
       onPage: null,
-      onTree: null,
       onComplete: function(time, ctx){},
       onProgress: function(tree, ctx){},
       onError: function(error){}
     }, opt || {});
-
-    // 'onTree' is new callback name for 'onProgress'.
-    if(opt.onTree){
-      opt.onProgress = opt.onTree;
-    }
 
     // if onPage is defined, rewrite onProgress callback.
     if(opt.onPage){
