@@ -37,7 +37,7 @@ Nehan.FloatGroup = (function(){
     this._last = is_last;
   };
   /**
-   element is popped from float-stack, but unshifted to elements in float-group to keep original stack order.
+   element is popped from float-stack, but unshifted to elements of float-group to keep original stack order.
    *<pre>
    * float-stack  | float-group
    *     [f1,f2]  |  []

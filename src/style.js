@@ -292,6 +292,10 @@ Nehan.Style = (function(){
     if(this.contentMeasure <= 0 || this.contentExtent <= 0){
       return true;
     }
+    if(this.parent && this.contentMeasure > this.getRootStyle().contentMeasure){
+      console.warn("too large content %o skipped:(measure = %d)", this, this.contentMeasure);
+      return true;
+    }
     if(this.markup.isCloseTag()){
       return true;
     }

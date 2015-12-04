@@ -479,7 +479,15 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createFloatGenerator = function(first_float_gen){
     //console.warn("create float generator!");
+    var max_measure = this.layoutContext.getInlineMaxMeasure();
+    var float_measure = first_float_gen.context.style.contentMeasure;
     var floated_generators = [first_float_gen];
+    if(float_measure > max_measure){
+      //console.log("can't create float:(%d > %d)", float_measure, max_measure);
+      this.stream.prev();
+      first_float_gen.context.lazyOutput = this.yieldWhiteSpace();
+      return new Nehan.LazyGenerator(first_float_gen.context);
+    }
     this.stream.iterWhile(function(token){
       if(token instanceof Nehan.Text && token.isWhiteSpaceOnly()){
 	return true; // skip and continue
@@ -489,6 +497,12 @@ Nehan.RenderingContext = (function(){
       }
       var child_style = this.createChildStyle(token);
       if(!child_style.isFloated()){
+	this.style.removeChild(child_style);
+	return false; // break
+      }
+      float_measure += child_style.contentMeasure;
+      if(float_measure > max_measure){
+	//console.log("skip to next block level:%o", child_style);
 	this.style.removeChild(child_style);
 	return false; // break
       }
