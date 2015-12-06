@@ -8,7 +8,7 @@ Nehan.Display = {
    @return {string}
    */
   getVertBlockDir: function(){
-    return Nehan.Config.boxFlowSet.vert.splice("-")[1];
+    return Nehan.Config.boxFlowSet.vert.split("-")[1];
   },
   /**
    @memberof Nehan.Display
