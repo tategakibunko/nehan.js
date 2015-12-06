@@ -7414,20 +7414,6 @@ Nehan.BoxFlow = (function(){
     return [this.inflow.dir, this.blockflow.dir].join("-");
   };
   /**
-   @memberof Nehan.BoxFlow
-   @return {String}
-   @example
-   * new BlockFlow("tb", "rl").getTextHorizontalDir(); // "rl"
-   * new BlockFlow("tb", "lr").getTextHorizontalDir(); // "lr"
-   * new BlockFlow("lr", "tb").getTextHorizontalDir(); // "" (empty)
-   */
-  BoxFlow.prototype.getTextHorizontalDir = function(){
-    if(this.isTextHorizontal()){
-      return this.inflow.dir;
-    }
-    return "";
-  };
-  /**
    get physical property name from logical property.
    @memberof Nehan.BoxFlow
    @param prop {string} - logical direction name
