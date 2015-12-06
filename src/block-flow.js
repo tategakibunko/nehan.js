@@ -29,7 +29,7 @@ Nehan.BlockFlow = (function(){
   BlockFlow.prototype.flip = function(){
     switch(this.dir){
     case "lr": case "rl": return "tb";
-    case "tb": return Nehan.Display.getVertBlockdir();
+    case "tb": return Nehan.Display.getVertBlockDir();
     default: return "";
     }
   };
