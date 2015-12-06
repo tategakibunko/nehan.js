@@ -9,49 +9,49 @@ describe("Nehan.BoxFlow", function(){
     expect(tb_lr.isTextLineFirst()).toBe(true);
   });
 
-  it("BoxFlow::isBlockflowVertical()", function(){
+  it("BoxFlow::isBlockflowVertical", function(){
     expect(lr_tb.isBlockflowVertical()).toBe(true);
     expect(tb_rl.isBlockflowVertical()).toBe(false);
     expect(tb_lr.isBlockflowVertical()).toBe(false);
   });
 
-  it("BoxFlow::isTextVertical()", function(){
+  it("BoxFlow::isTextVertical", function(){
     expect(lr_tb.isTextVertical()).toBe(false);
     expect(tb_rl.isTextVertical()).toBe(true);
     expect(tb_lr.isTextVertical()).toBe(true);
   });
 
-  it("BoxFlow::isTextLeftToRightl()", function(){
+  it("BoxFlow::isTextLeftToRight", function(){
     expect(lr_tb.isTextLeftToRight()).toBe(true);
     expect(tb_rl.isTextLeftToRight()).toBe(false);
     expect(tb_lr.isTextLeftToRight()).toBe(false);
   });
 
-  it("BoxFlow::isTextRightToLeft()", function(){
+  it("BoxFlow::isTextRightToLeft", function(){
     expect(lr_tb.isTextRightToLeft()).toBe(false);
     expect(tb_rl.isTextRightToLeft()).toBe(false);
     expect(tb_lr.isTextRightToLeft()).toBe(false);
   });
 
-  it("BoxFlow::isBlockLeftToRight()", function(){
+  it("BoxFlow::isBlockLeftToRight", function(){
     expect(lr_tb.isBlockLeftToRight()).toBe(false);
     expect(tb_rl.isBlockLeftToRight()).toBe(false);
     expect(tb_lr.isBlockLeftToRight()).toBe(true);
   });
 
-  it("BoxFlow::isBlockRightToLeft()", function(){
+  it("BoxFlow::isBlockRightToLeft", function(){
     expect(lr_tb.isBlockRightToLeft()).toBe(false);
     expect(tb_rl.isBlockRightToLeft()).toBe(true);
     expect(tb_lr.isBlockRightToLeft()).toBe(false);
   });
 
-  it("BoxFlow::getCss()", function(){
+  it("BoxFlow::getCss", function(){
     expect(lr_tb.getCss()["css-float"]).toBe("left");
     expect(tb_rl.getCss()["css-float"]).toBe("right");
     expect(tb_lr.getCss()["css-float"]).toBe("left");
   });
 
-  it("BoxFlow::getName()", function(){
+  it("BoxFlow::getName", function(){
     expect(lr_tb.getName()).toBe("lr-tb");
     expect(tb_rl.getName()).toBe("tb-rl");
     expect(tb_lr.getName()).toBe("tb-lr");
@@ -81,19 +81,19 @@ describe("Nehan.BoxFlow", function(){
     expect(tb_lr.getProp("after")).toBe("right");
   });
 
-  it("BoxFlow::getPropWidth()", function(){
+  it("BoxFlow::getPropWidth", function(){
     expect(lr_tb.getPropWidth()).toBe("measure");
     expect(tb_rl.getPropWidth()).toBe("extent");
     expect(tb_lr.getPropWidth()).toBe("extent");
   });
 
-  it("BoxFlow::getPropHeight()", function(){
+  it("BoxFlow::getPropHeight", function(){
     expect(lr_tb.getPropHeight()).toBe("extent");
     expect(tb_rl.getPropHeight()).toBe("measure");
     expect(tb_lr.getPropHeight()).toBe("measure");
   });
 
-  it("BoxFlow::getFlipFlow()", function(){
+  it("BoxFlow::getFlipFlow", function(){
     expect(lr_tb.getFlipFlow().inflow.dir).toBe("tb");
     expect(lr_tb.getFlipFlow().blockflow.dir).toBe("rl");
     expect(tb_rl.getFlipFlow().inflow.dir).toBe("lr");
@@ -102,7 +102,7 @@ describe("Nehan.BoxFlow", function(){
     expect(tb_lr.getFlipFlow().blockflow.dir).toBe("tb");
   });
 
-  it("BoxFlow::getBoxSize()", function(){
+  it("BoxFlow::getBoxSize", function(){
     expect(lr_tb.getBoxSize(100, 200).width).toBe(100);
     expect(lr_tb.getBoxSize(100, 200).height).toBe(200);
     expect(tb_rl.getBoxSize(100, 200).width).toBe(200);
