@@ -4321,7 +4321,7 @@ Nehan.Edge = (function(){
   /**
    @memberof Nehan.Edge
    @param flow {Nehan.BoxFlow}
-   @param required size
+   @param required_size {int}
    @return {int} - canceled size
    */
   Edge.prototype.cancelAfter = function(flow, required_size){
