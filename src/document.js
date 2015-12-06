@@ -23,9 +23,13 @@ Nehan.Document = (function(){
    */
   Document.prototype.render = function(opt){
     opt = opt || {};
-    this.generator = new Nehan.RenderingContext({
-      text:Nehan.Html.normalize(this.text)
-    }).setStyles(this.styles).createRootGenerator();
+    this.generator =
+      new Nehan.RenderingContext({
+	text:Nehan.Html.normalize(this.text)
+      })
+      .setStyles(Nehan.globalStyle || {})
+      .setStyles(this.styles)
+      .createRootGenerator();
     new Nehan.PageParser(this.generator).parse(opt);
     return this;
   };

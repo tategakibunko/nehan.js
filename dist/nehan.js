@@ -3545,14 +3545,13 @@ Nehan.Selectors = (function(){
     this.selectorsPe = []; // selectors with pseudo-element.
     this.selectorsPc = []; // selectors with pseudo-class.
     this.selectorsCache = {}; // cache for static selectors
-    this._initialize();
+    this._initialize(this.stylesheet);
   }
 
-  Selectors.prototype._initialize = function(){
-    Nehan.Obj.iter(this.stylesheet, function(key, value){
+  Selectors.prototype._initialize = function(stylesheet){
+    Nehan.Obj.iter(stylesheet, function(key, value){
       this._insertValue(key, value);
     }.bind(this));
-    this.setValues(Nehan.globalStyle || {}); // set global style.
   };
 
   // sort __selectors by specificity asc.
@@ -5444,11 +5443,11 @@ Nehan.BoxEdge = (function (){
     return ret;
   },
   /**
-   get start size amount in px.
+   get amount size along logical start direction.
    @memberof Nehan.BoxEdge
    @param flow {Nehan.BoxFlow}
    */
-  BoxEdge.prototype.getStart= function(flow){
+  BoxEdge.prototype.getStart = function(flow){
     var ret = 0;
     ret += this.padding.getStart(flow);
     ret += this.border.getStart(flow);
@@ -5456,7 +5455,19 @@ Nehan.BoxEdge = (function (){
     return ret;
   },
   /**
-   get before size amount in px.
+   get amount size along logical end direction.
+   @memberof Nehan.BoxEdge
+   @param flow {Nehan.BoxFlow}
+   */
+  BoxEdge.prototype.getEnd = function(flow){
+    var ret = 0;
+    ret += this.padding.getEnd(flow);
+    ret += this.border.getEnd(flow);
+    ret += this.margin.getEnd(flow);
+    return ret;
+  },
+  /**
+   get amount size along logical before direction.
    @memberof Nehan.BoxEdge
    @param flow {Nehan.BoxFlow}
    */
@@ -5468,18 +5479,7 @@ Nehan.BoxEdge = (function (){
     return ret;
   },
   /**
-   get before size amount in px.
-   @memberof Nehan.BoxEdge
-   @param flow {Nehan.BoxFlow}
-   */
-  BoxEdge.prototype.getInnerBefore = function(flow){
-    var ret = 0;
-    ret += this.padding.getBefore(flow);
-    ret += this.border.getBefore(flow);
-    return ret;
-  },
-  /**
-   get after size amount in px.
+   get amount size along logical after direction.
    @memberof Nehan.BoxEdge
    @param flow {Nehan.BoxFlow}
    */
@@ -5488,6 +5488,17 @@ Nehan.BoxEdge = (function (){
     ret += this.padding.getAfter(flow);
     ret += this.border.getAfter(flow);
     ret += this.margin.getAfter(flow);
+    return ret;
+  },
+  /**
+   get before size amount in px.
+   @memberof Nehan.BoxEdge
+   @param flow {Nehan.BoxFlow}
+   */
+  BoxEdge.prototype.getInnerBefore = function(flow){
+    var ret = 0;
+    ret += this.padding.getBefore(flow);
+    ret += this.border.getBefore(flow);
     return ret;
   },
   /**
@@ -18654,9 +18665,13 @@ Nehan.Document = (function(){
    */
   Document.prototype.render = function(opt){
     opt = opt || {};
-    this.generator = new Nehan.RenderingContext({
-      text:Nehan.Html.normalize(this.text)
-    }).setStyles(this.styles).createRootGenerator();
+    this.generator =
+      new Nehan.RenderingContext({
+	text:Nehan.Html.normalize(this.text)
+      })
+      .setStyles(Nehan.globalStyle || {})
+      .setStyles(this.styles)
+      .createRootGenerator();
     new Nehan.PageParser(this.generator).parse(opt);
     return this;
   };

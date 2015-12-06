@@ -116,11 +116,11 @@ Nehan.BoxEdge = (function (){
     return ret;
   },
   /**
-   get start size amount in px.
+   get amount size along logical start direction.
    @memberof Nehan.BoxEdge
    @param flow {Nehan.BoxFlow}
    */
-  BoxEdge.prototype.getStart= function(flow){
+  BoxEdge.prototype.getStart = function(flow){
     var ret = 0;
     ret += this.padding.getStart(flow);
     ret += this.border.getStart(flow);
@@ -128,7 +128,19 @@ Nehan.BoxEdge = (function (){
     return ret;
   },
   /**
-   get before size amount in px.
+   get amount size along logical end direction.
+   @memberof Nehan.BoxEdge
+   @param flow {Nehan.BoxFlow}
+   */
+  BoxEdge.prototype.getEnd = function(flow){
+    var ret = 0;
+    ret += this.padding.getEnd(flow);
+    ret += this.border.getEnd(flow);
+    ret += this.margin.getEnd(flow);
+    return ret;
+  },
+  /**
+   get amount size along logical before direction.
    @memberof Nehan.BoxEdge
    @param flow {Nehan.BoxFlow}
    */
@@ -140,18 +152,7 @@ Nehan.BoxEdge = (function (){
     return ret;
   },
   /**
-   get before size amount in px.
-   @memberof Nehan.BoxEdge
-   @param flow {Nehan.BoxFlow}
-   */
-  BoxEdge.prototype.getInnerBefore = function(flow){
-    var ret = 0;
-    ret += this.padding.getBefore(flow);
-    ret += this.border.getBefore(flow);
-    return ret;
-  },
-  /**
-   get after size amount in px.
+   get amount size along logical after direction.
    @memberof Nehan.BoxEdge
    @param flow {Nehan.BoxFlow}
    */
@@ -160,6 +161,17 @@ Nehan.BoxEdge = (function (){
     ret += this.padding.getAfter(flow);
     ret += this.border.getAfter(flow);
     ret += this.margin.getAfter(flow);
+    return ret;
+  },
+  /**
+   get before size amount in px.
+   @memberof Nehan.BoxEdge
+   @param flow {Nehan.BoxFlow}
+   */
+  BoxEdge.prototype.getInnerBefore = function(flow){
+    var ret = 0;
+    ret += this.padding.getBefore(flow);
+    ret += this.border.getBefore(flow);
     return ret;
   },
   /**

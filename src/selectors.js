@@ -11,14 +11,13 @@ Nehan.Selectors = (function(){
     this.selectorsPe = []; // selectors with pseudo-element.
     this.selectorsPc = []; // selectors with pseudo-class.
     this.selectorsCache = {}; // cache for static selectors
-    this._initialize();
+    this._initialize(this.stylesheet);
   }
 
-  Selectors.prototype._initialize = function(){
-    Nehan.Obj.iter(this.stylesheet, function(key, value){
+  Selectors.prototype._initialize = function(stylesheet){
+    Nehan.Obj.iter(stylesheet, function(key, value){
       this._insertValue(key, value);
     }.bind(this));
-    this.setValues(Nehan.globalStyle || {}); // set global style.
   };
 
   // sort __selectors by specificity asc.
