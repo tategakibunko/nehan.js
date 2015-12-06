@@ -18653,6 +18653,7 @@ Nehan.Document = (function(){
    @param opt.onError {Function} - fun error:{String} -> ()
    @param opt.capturePageText {bool} output text node or not for each page object.
    @param opt.maxPageCount {int} upper bound of page count
+   @return {Nehan.Document}
    */
   Document.prototype.render = function(opt){
     opt = opt || {};
@@ -18688,6 +18689,7 @@ Nehan.Document = (function(){
   /**
    @memberof Nehan.Document
    @param text {String} - content html text.
+   @return {Nehan.Document}
    */
   Document.prototype.setContent = function(text){
     this.text = text;
@@ -18706,6 +18708,7 @@ Nehan.Document = (function(){
    @memberof Nehan.Document
    @param key {String} - selector key
    @param value {Object} - selector value
+   @return {Nehan.Document}
    @example
    * var doc = new Nehan.Document();
    * doc.setStyle("body", {fontSize:"16px"});
@@ -18718,6 +18721,7 @@ Nehan.Document = (function(){
   /**
    @memberof Nehan.Document
    @param values {Object} - (selector, value) set
+   @return {Nehan.Document}
    @example
    * var doc = new Nehan.Document();
    * doc.setStyles({
