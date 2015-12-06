@@ -7200,25 +7200,6 @@ Nehan.BlockFlow = (function(){
   Nehan.Class.extend(BlockFlow, Nehan.Flow);
 
   /**
-     get flipped block direction. If direction is "tb", nothing happend.
-
-     @memberof Nehan.BlockFlow
-     @method flip
-     @return {string} fliped block direction
-     @example
-     * new BlockFlow("tb").flip(); // => "lr" or "rl"(nothing happened)
-     * new BlockFlow("lr").flip(); // => "tb"
-     * new BlockFlow("rl").flip(); // => "tb"
-  */
-  BlockFlow.prototype.flip = function(){
-    switch(this.dir){
-    case "lr": case "rl": return "tb";
-    case "tb": return Nehan.Display.getVertBlockDir();
-    default: return "";
-    }
-  };
-
-  /**
      get physical directional property of logical before.
 
      @memberof Nehan.BlockFlow
