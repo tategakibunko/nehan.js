@@ -4508,9 +4508,10 @@ Nehan.Radius2d = (function(){
      @classdesc abstraction of radius with 2 direction vert and hori.
      @constructor
   */
-  function Radius2d(){
-    this.hori = 0;
-    this.vert = 0;
+  function Radius2d(opt){
+    opt = opt || {};
+    this.hori = (typeof opt.hori !== "undefined")? opt.hori : 0;
+    this.vert = (typeof opt.vert !== "undefined")? opt.vert : 0;
   }
 
   Radius2d.prototype.clone = function(){
