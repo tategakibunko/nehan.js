@@ -102,9 +102,8 @@ Nehan.Utils = {
      * Nehan.Utils.camelize("font-size"); // "fontSize"
   */
   camelize : function(name){
-    var self = this;
     return (name.indexOf("-") < 0)? name : name.split("-").map(function(part, i){
-      return (i === 0)? part : self.capitalize(part);
-    }).join("");
+      return (i === 0)? part : this.capitalize(part);
+    }.bind(this)).join("");
   }
 };

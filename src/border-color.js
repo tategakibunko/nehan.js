@@ -33,15 +33,13 @@ Nehan.BorderColor = (function(){
    @param value.start {Nehan.Color}
    */
   BorderColor.prototype.setColor = function(flow, value){
-    var self = this;
-
     // first, set as it is(obj, array, string).
     Nehan.BoxRect.setValue(this, flow, value);
 
     // second, map as color class.
     Nehan.BoxRect.iter(this, function(dir, val){
-      self[dir] = new Nehan.Color(val);
-    });
+      this[dir] = new Nehan.Color(val);
+    }.bind(this));
   };
   /**
    get css object of border color

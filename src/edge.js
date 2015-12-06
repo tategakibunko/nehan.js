@@ -41,10 +41,9 @@ Nehan.Edge = (function(){
    @return {Nehan.Edge}
    */
   Edge.prototype.copyTo = function(dst){
-    var self = this;
     Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
-      dst[dir] = self[dir];
-    });
+      dst[dir] = this[dir];
+    }.bind(this));
     return dst;
   };
   /**
@@ -60,15 +59,13 @@ Nehan.Edge = (function(){
    @return {Object}
    */
   Edge.prototype.getCss = function(){
-    var css = {};
-    var self = this;
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
-      var value = self[dir];
+    return Nehan.List.fold(Nehan.Const.cssBoxDirs, {}, function(css, dir){
+      var value = this[dir];
       if(value > 0){
-	css[self.getDirProp(dir)] = self[dir] + "px";
+	css[this.getDirProp(dir)] = value + "px";
       }
-    });
-    return css;
+      return css;
+    }.bind(this));
   };
   /**
    @memberof Nehan.Edge

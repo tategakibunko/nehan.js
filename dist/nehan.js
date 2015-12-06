@@ -1299,10 +1299,9 @@ Nehan.Utils = {
      * Nehan.Utils.camelize("font-size"); // "fontSize"
   */
   camelize : function(name){
-    var self = this;
     return (name.indexOf("-") < 0)? name : name.split("-").map(function(part, i){
-      return (i === 0)? part : self.capitalize(part);
-    }).join("");
+      return (i === 0)? part : this.capitalize(part);
+    }.bind(this)).join("");
   }
 };
 
@@ -4317,10 +4316,9 @@ Nehan.Edge = (function(){
    @return {Nehan.Edge}
    */
   Edge.prototype.copyTo = function(dst){
-    var self = this;
     Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
-      dst[dir] = self[dir];
-    });
+      dst[dir] = this[dir];
+    }.bind(this));
     return dst;
   };
   /**
@@ -4336,15 +4334,13 @@ Nehan.Edge = (function(){
    @return {Object}
    */
   Edge.prototype.getCss = function(){
-    var css = {};
-    var self = this;
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
-      var value = self[dir];
+    return Nehan.List.fold(Nehan.Const.cssBoxDirs, {}, function(css, dir){
+      var value = this[dir];
       if(value > 0){
-	css[self.getDirProp(dir)] = self[dir] + "px";
+	css[this.getDirProp(dir)] = value + "px";
       }
-    });
-    return css;
+      return css;
+    }.bind(this));
   };
   /**
    @memberof Nehan.Edge
@@ -4776,15 +4772,13 @@ Nehan.BorderColor = (function(){
    @param value.start {Nehan.Color}
    */
   BorderColor.prototype.setColor = function(flow, value){
-    var self = this;
-
     // first, set as it is(obj, array, string).
     Nehan.BoxRect.setValue(this, flow, value);
 
     // second, map as color class.
     Nehan.BoxRect.iter(this, function(dir, val){
-      self[dir] = new Nehan.Color(val);
-    });
+      this[dir] = new Nehan.Color(val);
+    }.bind(this));
   };
   /**
    get css object of border color
@@ -13870,20 +13864,18 @@ Nehan.Style = (function(){
    @return {int}
    */
   Style.prototype.getChildIndex = function(){
-    var self = this;
     return Math.max(0, Nehan.List.indexOf(this.getParentChilds(), function(child){
-      return child === self;
-    }));
+      return child === this;
+    }.bind(this)));
   };
   /**
    @memberof Nehan.Style
    @return {int}
    */
   Style.prototype.getChildIndexOfType = function(){
-    var self = this;
     return Math.max(0, Nehan.List.indexOf(this.getParentChildsOfType(this.getMarkupName()), function(child){
-      return child === self;
-    }));
+      return child === this;
+    }.bind(this)));
   };
   /**
    @memberof Nehan.Style
@@ -15722,7 +15714,6 @@ Nehan.TableRowGenerator = (function(){
   };
 
   TableRowGenerator.prototype._getChildStyles = function(context){
-    var self = this;
     var partition = context.getTablePartition();
     var stream = context.stream;
     var child_tags = stream.getTokens();

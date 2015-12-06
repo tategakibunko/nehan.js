@@ -892,20 +892,18 @@ Nehan.Style = (function(){
    @return {int}
    */
   Style.prototype.getChildIndex = function(){
-    var self = this;
     return Math.max(0, Nehan.List.indexOf(this.getParentChilds(), function(child){
-      return child === self;
-    }));
+      return child === this;
+    }.bind(this)));
   };
   /**
    @memberof Nehan.Style
    @return {int}
    */
   Style.prototype.getChildIndexOfType = function(){
-    var self = this;
     return Math.max(0, Nehan.List.indexOf(this.getParentChildsOfType(this.getMarkupName()), function(child){
-      return child === self;
-    }));
+      return child === this;
+    }.bind(this)));
   };
   /**
    @memberof Nehan.Style
