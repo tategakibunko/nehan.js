@@ -39,10 +39,9 @@ Nehan.BoxSize = (function(){
   };
   /**
    @memberof Nehan.BoxSize
-   @param flow {Nehan.BoxFlow}
    @return {Object}
    */
-  BoxSize.prototype.getCss = function(flow){
+  BoxSize.prototype.getCss = function(){
     var css = {};
     css.width = this.width + "px";
     css.height = this.height + "px";

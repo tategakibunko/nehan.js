@@ -5650,10 +5650,9 @@ Nehan.BoxSize = (function(){
   };
   /**
    @memberof Nehan.BoxSize
-   @param flow {Nehan.BoxFlow}
    @return {Object}
    */
-  BoxSize.prototype.getCss = function(flow){
+  BoxSize.prototype.getCss = function(){
     var css = {};
     css.width = this.width + "px";
     css.height = this.height + "px";
@@ -14079,7 +14078,7 @@ Nehan.Style = (function(){
       css["z-index"] = this.zIndex;
     }
     this.unmanagedCss.copyValuesTo(css);
-    Nehan.Args.copy(css, block.size.getCss(this.flow)); // content size
+    Nehan.Args.copy(css, block.size.getCss()); // content size
     if(block.edge){
       Nehan.Args.copy(css, block.edge.getCss());
     }
@@ -14095,7 +14094,7 @@ Nehan.Style = (function(){
     // notice that line-size, line-edge is box local variable,
     // so style of line-size(content-size) and edge-size are generated at Box::getBoxCss
     var css = {};
-    Nehan.Args.copy(css, line.size.getCss(this.flow));
+    Nehan.Args.copy(css, line.size.getCss());
     if(line.edge){
       Nehan.Args.copy(css, line.edge.getCss());
     }
@@ -14128,7 +14127,7 @@ Nehan.Style = (function(){
     // notice that line-size, line-edge is box local variable,
     // so style of line-size(content-size) and edge-size are generated at Box::getCssInline
     var css = {};
-    Nehan.Args.copy(css, line.size.getCss(this.flow));
+    Nehan.Args.copy(css, line.size.getCss());
     if(line.edge){
       Nehan.Args.copy(css, line.edge.getCss());
     }
