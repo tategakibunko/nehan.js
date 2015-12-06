@@ -9,6 +9,7 @@ Mark "!": change that can break compatibility with older version
 version 5.4.1
 ========================
 o Support list-style-position:inside.
+* More strict edge cancel for block level.
 
 version 5.4.0 2015/12/2
 ========================
