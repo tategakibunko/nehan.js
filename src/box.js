@@ -14,7 +14,7 @@ Nehan.Box = (function(){
   function Box(args){
     args = args || {};
     this._type = args.type || "block";
-    this.size = args.size;
+    this.size = args.size || new Nehan.BoxSize(0, 0);
     this.display = args.display || "block";
     this.context = args.context;
     this.css = args.css || {};
