@@ -201,35 +201,38 @@ Nehan.BoxEdge = (function (){
    @param required_size {Nehan.BoxFlow}
    */
   BoxEdge.prototype.cancelAfter = function(flow, required_size){
-    var cancel_size = 0;
+    var cancel_size = 0, total_cancel = 0;
     // first, try to clear margin
-    cancel_size += this.margin.getAfter(flow);
-    this.margin.clearAfter(flow);
-    if(cancel_size >= required_size){
-      /*
-      if(cancel_size > 0){
-	//console.warn("cancel edge(margin):%d", cancel_size);
-      }*/
-      return cancel_size;
+    var margin = this.margin.getAfter(flow);
+    cancel_size = (margin >= required_size)? required_size : margin;
+    total_cancel += cancel_size;
+    required_size -= cancel_size;
+    this.margin.subtractAfter(flow, cancel_size);
+    if(total_cancel >= required_size){
+      console.warn("cancel edge(margin):%d", cancel_size);
+      return total_cancel;
     }
     // second, try to clear padding
-    cancel_size += this.padding.getAfter(flow);
-    this.padding.clearAfter(flow);
-    if(cancel_size >= required_size){
-      /*
-      if(cancel_size > 0){
-	//console.warn("cancel edge(margin/padding):%d", cancel_size);
-      }*/
-      return cancel_size;
+    var padding = this.padding.getAfter(flow);
+    cancel_size = (padding >= required_size)? required_size : padding;
+    total_cancel += cancel_size;
+    required_size -= cancel_size;
+    this.padding.subtractAfter(flow, cancel_size);
+    if(total_cancel >= required_size){
+      console.warn("cancel edge(padding):%d", cancel_size);
+      return total_cancel;
     }
     // finally, try to clear border
-    cancel_size += this.border.getAfter(flow);
-    this.border.clearAfter(flow);
-    /*
-    if(cancel_size > 0){
-      //console.warn("cancel edge(margin/padding/border):%d", cancel_size);
-    }*/
-    return cancel_size;
+    var border = this.border.getAfter(flow);
+    cancel_size = (border >= required_size)? required_size : border;
+    total_cancel += cancel_size;
+    required_size -= cancel_size;
+    this.border.subtractAfter(flow, cancel_size);
+    if(total_cancel >= required_size){
+      console.warn("cancel edge(border):%d", cancel_size);
+      return total_cancel;
+    }
+    return total_cancel;
   };
   /**
    @memberof Nehan.BoxEdge

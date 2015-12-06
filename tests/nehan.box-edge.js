@@ -68,9 +68,10 @@ describe("Nehan.BoxEdge", function(){
     expect(edge.getInnerExtentSize(flow)).toBe(7+8+11+12);
   });
 
-  /*
   it("BoxEdge::clearAfter", function(){
     var tmp = edge.clone();
-    tmp.clearAfter(flow, 4);
-  });*/
+    expect(tmp.getAfter(flow)).toBe(4+8+12);
+    tmp.clearAfter(flow);
+    expect(tmp.getAfter(flow)).toBe(0);
+  });
 });

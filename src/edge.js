@@ -37,6 +37,14 @@ Nehan.Edge = (function(){
   };
   /**
    @memberof Nehan.Edge
+   @param size {int}
+   */
+  Edge.prototype.subtractAfter = function(flow, size){
+    var prop = flow.getPropAfter();
+    this[prop] = Math.max(0, this[prop] - size);
+  };
+  /**
+   @memberof Nehan.Edge
    @param dst {Nehan.Edge}
    @return {Nehan.Edge}
    */
