@@ -14,13 +14,6 @@ Nehan.LayoutContext = (function(){
 
   /**
    @memberof Nehan.LayoutContext
-   @return {boolean}
-   */
-  LayoutContext.prototype.hasBlockSpaceFor = function(extent, opt){
-    return this.block.hasSpaceFor(extent, opt);
-  };
-  /**
-   @memberof Nehan.LayoutContext
    @param element {Nehan.Box}
    @param extent {int}
    */
@@ -96,13 +89,6 @@ Nehan.LayoutContext = (function(){
    */
   LayoutContext.prototype.isLineOver = function(){
     return this.inline.isLineOver();
-  };
-  /**
-   @memberof Nehan.LayoutContext
-   @return {boolean}
-   */
-  LayoutContext.prototype.hasInlineSpaceFor = function(measure){
-    return this.inline.hasSpaceFor(measure);
   };
   /**
    @memberof Nehan.LayoutContext

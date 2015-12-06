@@ -41,14 +41,6 @@ Nehan.InlineContext = (function(){
   };
   /**
    @memberof Nehan.InlineContext
-   @param measure {int}
-   @return {boolean}
-   */
-  InlineContext.prototype.hasSpaceFor = function(measure){
-    return this.getRestMeasure() >= measure;
-  };
-  /**
-   @memberof Nehan.InlineContext
    @return {boolean}
    */
   InlineContext.prototype.hasLineBreak = function(){

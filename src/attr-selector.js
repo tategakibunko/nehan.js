@@ -2,9 +2,9 @@ Nehan.AttrSelector = (function(){
   /**
      @memberof Nehan
      @class AttrSelector
-     @classdesc css attribute selector
+     @classdesc css single attribute selector
      @constructor
-     @param {string} expr - attribute selector string
+     @param {string} expr - single attribute selector string
      @example
      * var as = new AttrSelector("[name='taro']");
   */

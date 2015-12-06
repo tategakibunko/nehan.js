@@ -2755,9 +2755,9 @@ Nehan.AttrSelector = (function(){
   /**
      @memberof Nehan
      @class AttrSelector
-     @classdesc css attribute selector
+     @classdesc css single attribute selector
      @constructor
-     @param {string} expr - attribute selector string
+     @param {string} expr - single attribute selector string
      @example
      * var as = new AttrSelector("[name='taro']");
   */
@@ -9770,13 +9770,6 @@ Nehan.LayoutContext = (function(){
 
   /**
    @memberof Nehan.LayoutContext
-   @return {boolean}
-   */
-  LayoutContext.prototype.hasBlockSpaceFor = function(extent, opt){
-    return this.block.hasSpaceFor(extent, opt);
-  };
-  /**
-   @memberof Nehan.LayoutContext
    @param element {Nehan.Box}
    @param extent {int}
    */
@@ -9852,13 +9845,6 @@ Nehan.LayoutContext = (function(){
    */
   LayoutContext.prototype.isLineOver = function(){
     return this.inline.isLineOver();
-  };
-  /**
-   @memberof Nehan.LayoutContext
-   @return {boolean}
-   */
-  LayoutContext.prototype.hasInlineSpaceFor = function(measure){
-    return this.inline.hasSpaceFor(measure);
   };
   /**
    @memberof Nehan.LayoutContext
@@ -10066,16 +10052,6 @@ Nehan.BlockContext = (function(){
   }
 
   /**
-   check if this block context has enough size of [extent]
-   @memberof Nehan.BlockContext
-   @method hasSpaceFor
-   @param extent {int} - size of extent in px
-   @return {boolean}
-   */
-  BlockContext.prototype.hasSpaceFor = function(extent){
-    return this.getRestExtent() >= extent;
-  };
-  /**
    add box element to this block context
    @memberof Nehan.BlockContext
    @method addElement
@@ -10195,14 +10171,6 @@ Nehan.InlineContext = (function(){
    */
   InlineContext.prototype.isLineOver= function(){
     return this.lineOver;
-  };
-  /**
-   @memberof Nehan.InlineContext
-   @param measure {int}
-   @return {boolean}
-   */
-  InlineContext.prototype.hasSpaceFor = function(measure){
-    return this.getRestMeasure() >= measure;
   };
   /**
    @memberof Nehan.InlineContext

@@ -18,16 +18,6 @@ Nehan.BlockContext = (function(){
   }
 
   /**
-   check if this block context has enough size of [extent]
-   @memberof Nehan.BlockContext
-   @method hasSpaceFor
-   @param extent {int} - size of extent in px
-   @return {boolean}
-   */
-  BlockContext.prototype.hasSpaceFor = function(extent){
-    return this.getRestExtent() >= extent;
-  };
-  /**
    add box element to this block context
    @memberof Nehan.BlockContext
    @method addElement
