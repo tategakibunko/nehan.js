@@ -45,6 +45,22 @@ Nehan.Edge = (function(){
   };
   /**
    @memberof Nehan.Edge
+   @param flow {Nehan.BoxFlow}
+   @param required size
+   @return {int} - canceled size
+   */
+  Edge.prototype.cancelAfter = function(flow, required_size){
+    var after_size = this.getAfter(flow);
+    if(after_size <= 0){
+      return 0;
+    }
+    var cancel_size = (after_size >= required_size)? required_size : after_size;
+    this.subtractAfter(flow, cancel_size);
+    //console.warn("cancel after(%s):(after size = %d, required = %d, cancel = %d)", this._type, after_size, required_size, cancel_size);
+    return cancel_size;
+  };
+  /**
+   @memberof Nehan.Edge
    @param dst {Nehan.Edge}
    @return {Nehan.Edge}
    */
