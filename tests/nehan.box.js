@@ -15,4 +15,7 @@ describe("Nehan.Box", function(){
     expect(void_box3.isVoid()).toBe(true);
   });
 
+  it("Box::isTextBlock", function(){
+    expect(new Nehan.Box({type:"text-block"}).isTextBlock()).toBe(true);
+  });
 });
