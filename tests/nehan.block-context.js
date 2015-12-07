@@ -1,8 +1,6 @@
 describe("Nehan.BlockContext", function(){
-  Nehan.Config.root = "body";
-  var root = new Nehan.RenderingContext().createRootGenerator();
-  var cont = root.context;
-  cont.setStyle("body", {flow:"lr-tb"});
+  var root = new Nehan.RenderingContext().setStyle("body", {flow:"lr-tb"}).createRootGenerator().context;
+  var cont = root.createChildContext(root.createChildStyle(new Nehan.Tag("body")));
 
   var e1 = new Nehan.Box({
     context:cont,

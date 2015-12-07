@@ -132,6 +132,7 @@ Nehan.Edge = (function(){
    */
   Edge.prototype.setSize = function(flow, size){
     Nehan.BoxRect.setValue(this, flow, size);
+    return this;
   };
   /**
    @memberof Nehan.Edge

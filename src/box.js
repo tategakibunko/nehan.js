@@ -303,24 +303,29 @@ Nehan.Box = (function(){
   };
   /**
    @memberof Nehan.Box
+   @return {Nehan.Box}
    */
   Box.prototype.clearBorderBefore = function(){
     if(this.edge){
       this.edge.clearBorderBefore(this.context.style.flow);
     }
+    return this;
   };
   /**
    @memberof Nehan.Box
+   @return {Nehan.Box}
    */
   Box.prototype.clearBorderAfter = function(){
     if(this.edge){
       this.edge.clearBorderAfter(this.context.style.flow);
     }
+    return this;
   };
   /**
    @memberof Nehan.Box
    @param flow {Nehan.BoxFlow}
    @param extent {int}
+   @return {Nehan.Box}
    */
   Box.prototype.resizeExtent = function(flow, extent){
     this.size.setExtent(flow, extent);
