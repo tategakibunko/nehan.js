@@ -15,7 +15,7 @@ Nehan.BorderStyle = (function(){
    */
   BorderStyle.prototype.clone = function(){
     var style = new BorderStyle();
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
+    Nehan.List.iter(Nehan.Const.cssPhysicalBoxDirs, function(dir){
       if(this[dir]){
 	style[dir] = this[dir];
       }
@@ -26,14 +26,14 @@ Nehan.BorderStyle = (function(){
    @memberof Nehan.BorderStyle
    @method setStyle
    @param flow {Nehan.BoxFlow}
-   @param value {Object} - logical style values for each logical direction
-   @param value.before {string}
-   @param value.end {string}
-   @param value.after {string}
-   @param value.start {string}
+   @param values {Object} - logical style values for each logical direction
+   @param values.before {string}
+   @param values.end {string}
+   @param values.after {string}
+   @param values.start {string}
    */
-  BorderStyle.prototype.setStyle = function(flow, value){
-    Nehan.BoxRect.setValue(this, flow, value);
+  BorderStyle.prototype.setStyle = function(flow, values){
+    Nehan.BoxRect.setLogicalValues(this, flow, values);
   };
   /**
    get css object of logical border style
@@ -42,10 +42,14 @@ Nehan.BorderStyle = (function(){
    */
   BorderStyle.prototype.getCss = function(){
     var css = {};
-    Nehan.BoxRect.iter(this, function(dir, style){
-      var prop = ["border", dir, "style"].join("-");
-      css[prop] = style;
-    });
+    // set border-[top|right|bottom|left]-style
+    Nehan.List.iter(Nehan.Const.cssPhysicalBoxDirs, function(dir){
+      if(this[dir]){
+	var prop = ["border", dir, "style"].join("-");
+	var style = this[dir];
+	css[prop] = style;
+      }
+    }.bind(this));
     return css;
   };
 

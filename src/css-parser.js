@@ -106,7 +106,7 @@ Nehan.CssParser = (function(){
   };
 
   var __make_edge_4d = function(values){
-    var props = Nehan.Const.cssBoxDirsLogical; // len = 4
+    var props = Nehan.Const.cssLogicalBoxDirs; // len = 4
     var values_4d = __make_values_4d(values); // len = 4
     return Nehan.List.zipObj(props, values_4d);
   };

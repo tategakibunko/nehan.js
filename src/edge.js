@@ -65,7 +65,7 @@ Nehan.Edge = (function(){
    @return {Nehan.Edge}
    */
   Edge.prototype.copyTo = function(dst){
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
+    Nehan.List.iter(Nehan.Const.cssPhysicalBoxDirs, function(dir){
       dst[dir] = this[dir];
     }.bind(this));
     return dst;
@@ -83,7 +83,7 @@ Nehan.Edge = (function(){
    @return {Object}
    */
   Edge.prototype.getCss = function(){
-    return Nehan.List.fold(Nehan.Const.cssBoxDirs, {}, function(css, dir){
+    return Nehan.List.fold(Nehan.Const.cssPhysicalBoxDirs, {}, function(css, dir){
       var value = this[dir];
       if(value > 0){
 	css[this.getDirProp(dir)] = value + "px";
@@ -124,14 +124,14 @@ Nehan.Edge = (function(){
   /**
    @memberof Nehan.Edge
    @param flow {Nehan.BoxFlow}
-   @param size {Object}
-   @param size.top {int}
-   @param size.right {int}
-   @param size.bottom {int}
-   @param size.left {int}
+   @param values {Object}
+   @param values.before {int}
+   @param values.end {int}
+   @param values.after {int}
+   @param values.start {int}
    */
-  Edge.prototype.setSize = function(flow, size){
-    Nehan.BoxRect.setValue(this, flow, size);
+  Edge.prototype.setLogicalValues = function(flow, values){
+    Nehan.BoxRect.setLogicalValues(this, flow, values);
     return this;
   };
   /**

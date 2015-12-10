@@ -1,75 +1,58 @@
 /**
-   utility module for box physical direction(top, right, bottom, left).
+   utility module for abstract box model.
 
    @namespace Nehan.BoxRect
 */
 Nehan.BoxRect = {
   /**
-     iterate all direction of [obj] by [fn]
-     @memberof Nehan.BoxRect
-     @param obj {Object}
-     @param fn {Function}
+   @memberof Nehan.BoxRect
+   @param dst {Object}
+   @param flow {Nehan.BoxFlow}
+   @param values {Object}
+   @param values.before - before value
+   @param values.end - end value
+   @param values.after - after value
+   @param values.start - start value
    */
-  iter : function(obj, fn){
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
-      if(obj[dir]){
-	fn(dir, obj[dir]);
-      }
-    });
-  },
-  /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value {Object}
-   */
-  setValue : function(dst, flow, value){
-    if(typeof value.start != "undefined"){
-      this.setStart(dst, flow, value.start);
-    }
-    if(typeof value.end != "undefined"){
-      this.setEnd(dst, flow, value.end);
-    }
-    if(typeof value.before != "undefined"){
-      this.setBefore(dst, flow, value.before);
-    }
-    if(typeof value.after != "undefined"){
-      this.setAfter(dst, flow, value.after);
+  setLogicalValues : function(dst, flow, values){
+    // set before, end, after, start value
+    for(var prop in values){
+      dst[flow.getProp(prop)] = values[prop];
     }
     return dst;
   },
   /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value
+   @memberof Nehan.BoxRect
+   @param dst {Object}
+   @param flow {Nehan.BoxFlow}
+   @param value
    */
   setBefore : function(dst, flow, value){
     dst[flow.getPropBefore()] = value;
   },
   /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value
+   @memberof Nehan.BoxRect
+   @param dst {Object}
+   @param flow {Nehan.BoxFlow}
+   @param value
    */
   setAfter : function(dst, flow, value){
     dst[flow.getPropAfter()] = value;
   },
   /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value
+   @memberof Nehan.BoxRect
+   @param dst {Object}
+   @param flow {Nehan.BoxFlow}
+   @param value
    */
   setStart : function(dst, flow, value){
     dst[flow.getPropStart()] = value;
   },
   /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value
+   @memberof Nehan.BoxRect
+   @param dst {Object}
+   @param flow {Nehan.BoxFlow}
+   @param value
    */
   setEnd : function(dst, flow, value){
     dst[flow.getPropEnd()] = value;

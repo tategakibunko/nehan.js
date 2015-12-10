@@ -1344,7 +1344,7 @@ Nehan.Const = {
      @memberof Nehan.Const
      @type {Array.<string>}
   */
-  cssBoxDirs:[
+  cssPhysicalBoxDirs:[
     "top",
     "right",
     "bottom",
@@ -1354,7 +1354,7 @@ Nehan.Const = {
      @memberof Nehan.Const
      @type {Array.<string>}
   */
-  cssBoxDirsLogical:[
+  cssLogicalBoxDirs:[
     "before",
     "end",
     "after",
@@ -2605,7 +2605,7 @@ Nehan.CssParser = (function(){
   };
 
   var __make_edge_4d = function(values){
-    var props = Nehan.Const.cssBoxDirsLogical; // len = 4
+    var props = Nehan.Const.cssLogicalBoxDirs; // len = 4
     var values_4d = __make_values_4d(values); // len = 4
     return Nehan.List.zipObj(props, values_4d);
   };
@@ -4112,77 +4112,60 @@ Nehan.Cardinal = (function(){
 
 
 /**
-   utility module for box physical direction(top, right, bottom, left).
+   utility module for abstract box model.
 
    @namespace Nehan.BoxRect
 */
 Nehan.BoxRect = {
   /**
-     iterate all direction of [obj] by [fn]
-     @memberof Nehan.BoxRect
-     @param obj {Object}
-     @param fn {Function}
+   @memberof Nehan.BoxRect
+   @param dst {Object}
+   @param flow {Nehan.BoxFlow}
+   @param values {Object}
+   @param values.before - before value
+   @param values.end - end value
+   @param values.after - after value
+   @param values.start - start value
    */
-  iter : function(obj, fn){
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
-      if(obj[dir]){
-	fn(dir, obj[dir]);
-      }
-    });
-  },
-  /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value {Object}
-   */
-  setValue : function(dst, flow, value){
-    if(typeof value.start != "undefined"){
-      this.setStart(dst, flow, value.start);
-    }
-    if(typeof value.end != "undefined"){
-      this.setEnd(dst, flow, value.end);
-    }
-    if(typeof value.before != "undefined"){
-      this.setBefore(dst, flow, value.before);
-    }
-    if(typeof value.after != "undefined"){
-      this.setAfter(dst, flow, value.after);
+  setLogicalValues : function(dst, flow, values){
+    // set before, end, after, start value
+    for(var prop in values){
+      dst[flow.getProp(prop)] = values[prop];
     }
     return dst;
   },
   /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value
+   @memberof Nehan.BoxRect
+   @param dst {Object}
+   @param flow {Nehan.BoxFlow}
+   @param value
    */
   setBefore : function(dst, flow, value){
     dst[flow.getPropBefore()] = value;
   },
   /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value
+   @memberof Nehan.BoxRect
+   @param dst {Object}
+   @param flow {Nehan.BoxFlow}
+   @param value
    */
   setAfter : function(dst, flow, value){
     dst[flow.getPropAfter()] = value;
   },
   /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value
+   @memberof Nehan.BoxRect
+   @param dst {Object}
+   @param flow {Nehan.BoxFlow}
+   @param value
    */
   setStart : function(dst, flow, value){
     dst[flow.getPropStart()] = value;
   },
   /**
-     @memberof Nehan.BoxRect
-     @param dst {Object}
-     @param flow {Nehan.BoxFlow}
-     @param value
+   @memberof Nehan.BoxRect
+   @param dst {Object}
+   @param flow {Nehan.BoxFlow}
+   @param value
    */
   setEnd : function(dst, flow, value){
     dst[flow.getPropEnd()] = value;
@@ -4340,7 +4323,7 @@ Nehan.Edge = (function(){
    @return {Nehan.Edge}
    */
   Edge.prototype.copyTo = function(dst){
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
+    Nehan.List.iter(Nehan.Const.cssPhysicalBoxDirs, function(dir){
       dst[dir] = this[dir];
     }.bind(this));
     return dst;
@@ -4358,7 +4341,7 @@ Nehan.Edge = (function(){
    @return {Object}
    */
   Edge.prototype.getCss = function(){
-    return Nehan.List.fold(Nehan.Const.cssBoxDirs, {}, function(css, dir){
+    return Nehan.List.fold(Nehan.Const.cssPhysicalBoxDirs, {}, function(css, dir){
       var value = this[dir];
       if(value > 0){
 	css[this.getDirProp(dir)] = value + "px";
@@ -4399,14 +4382,14 @@ Nehan.Edge = (function(){
   /**
    @memberof Nehan.Edge
    @param flow {Nehan.BoxFlow}
-   @param size {Object}
-   @param size.top {int}
-   @param size.right {int}
-   @param size.bottom {int}
-   @param size.left {int}
+   @param values {Object}
+   @param values.before {int}
+   @param values.end {int}
+   @param values.after {int}
+   @param values.start {int}
    */
-  Edge.prototype.setSize = function(flow, size){
-    Nehan.BoxRect.setValue(this, flow, size);
+  Edge.prototype.setLogicalValues = function(flow, values){
+    Nehan.BoxRect.setLogicalValues(this, flow, values);
     return this;
   };
   /**
@@ -4779,7 +4762,7 @@ Nehan.BorderColor = (function(){
    */
   BorderColor.prototype.clone = function(){
     var border_color = new BorderColor();
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
+    Nehan.List.iter(Nehan.Const.cssPhysicalBoxDirs, function(dir){
       if(this[dir]){
 	border_color[dir] = this[dir];
       }
@@ -4790,20 +4773,16 @@ Nehan.BorderColor = (function(){
    @memberof Nehan.BorderColor
    @method setColor
    @param flow {Nehan.BoxFlow}
-   @param value {Object} - color values, object or array or string available.
-   @param value.before {Nehan.Color}
-   @param value.end {Nehan.Color}
-   @param value.after {Nehan.Color}
-   @param value.start {Nehan.Color}
+   @param values {Object} - color values, object or array or string available.
+   @param values.before {Nehan.Color}
+   @param values.end {Nehan.Color}
+   @param values.after {Nehan.Color}
+   @param values.start {Nehan.Color}
    */
-  BorderColor.prototype.setColor = function(flow, value){
-    // first, set as it is(obj, array, string).
-    Nehan.BoxRect.setValue(this, flow, value);
-
-    // second, map as color class.
-    Nehan.BoxRect.iter(this, function(dir, val){
-      this[dir] = new Nehan.Color(val);
-    }.bind(this));
+  BorderColor.prototype.setColor = function(flow, values){
+    for(var logical_prop in values){
+      this[flow.getProp(logical_prop)] = new Nehan.Color(values[logical_prop]);
+    }
   };
   /**
    get css object of border color
@@ -4813,10 +4792,14 @@ Nehan.BorderColor = (function(){
    */
   BorderColor.prototype.getCss = function(){
     var css = {};
-    Nehan.BoxRect.iter(this, function(dir, color){
-      var prop = ["border", dir, "color"].join("-");
-      css[prop] = color.getCssValue();
-    });
+    // set border-[top|right|bottom|left]-color
+    Nehan.List.iter(Nehan.Const.cssPhysicalBoxDirs, function(dir){
+      if(this[dir]){
+	var prop = ["border", dir, "color"].join("-");
+	var color = this[dir];
+	css[prop] = color.getCssValue();
+      }
+    }.bind(this));
     return css;
   };
 
@@ -4840,7 +4823,7 @@ Nehan.BorderStyle = (function(){
    */
   BorderStyle.prototype.clone = function(){
     var style = new BorderStyle();
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
+    Nehan.List.iter(Nehan.Const.cssPhysicalBoxDirs, function(dir){
       if(this[dir]){
 	style[dir] = this[dir];
       }
@@ -4851,14 +4834,14 @@ Nehan.BorderStyle = (function(){
    @memberof Nehan.BorderStyle
    @method setStyle
    @param flow {Nehan.BoxFlow}
-   @param value {Object} - logical style values for each logical direction
-   @param value.before {string}
-   @param value.end {string}
-   @param value.after {string}
-   @param value.start {string}
+   @param values {Object} - logical style values for each logical direction
+   @param values.before {string}
+   @param values.end {string}
+   @param values.after {string}
+   @param values.start {string}
    */
-  BorderStyle.prototype.setStyle = function(flow, value){
-    Nehan.BoxRect.setValue(this, flow, value);
+  BorderStyle.prototype.setStyle = function(flow, values){
+    Nehan.BoxRect.setLogicalValues(this, flow, values);
   };
   /**
    get css object of logical border style
@@ -4867,10 +4850,14 @@ Nehan.BorderStyle = (function(){
    */
   BorderStyle.prototype.getCss = function(){
     var css = {};
-    Nehan.BoxRect.iter(this, function(dir, style){
-      var prop = ["border", dir, "style"].join("-");
-      css[prop] = style;
-    });
+    // set border-[top|right|bottom|left]-style
+    Nehan.List.iter(Nehan.Const.cssPhysicalBoxDirs, function(dir){
+      if(this[dir]){
+	var prop = ["border", dir, "style"].join("-");
+	var style = this[dir];
+	css[prop] = style;
+      }
+    }.bind(this));
     return css;
   };
 
@@ -14356,7 +14343,7 @@ Nehan.Style = (function(){
     }
     var box_pos = new Nehan.BoxPosition(pos_value);
     var font_size = this.getFontSize();
-    Nehan.List.iter(Nehan.Const.cssBoxDirsLogical, function(dir){
+    Nehan.List.iter(Nehan.Const.cssLogicalBoxDirs, function(dir){
       var value = this.getCssAttr(dir);
       if(value){
 	box_pos[value] = this._computeUnitSize(value, font_size);
@@ -14444,7 +14431,7 @@ Nehan.Style = (function(){
       return null;
     }
     var padding = new Nehan.Padding();
-    padding.setSize(flow, edge_size);
+    padding.setLogicalValues(flow, edge_size);
     return padding;
   };
 
@@ -14454,7 +14441,7 @@ Nehan.Style = (function(){
       return null;
     }
     var margin = new Nehan.Margin();
-    margin.setSize(flow, edge_size);
+    margin.setLogicalValues(flow, edge_size);
 
     // if inline, disable margin-before and margin-after.
     if(this.isInline()){
@@ -14472,7 +14459,7 @@ Nehan.Style = (function(){
     }
     var border = new Nehan.Border();
     if(edge_size){
-      border.setSize(flow, edge_size);
+      border.setLogicalValues(flow, edge_size);
     }
     if(border_radius){
       border.setRadius(flow, this._computeCornerSize(border_radius, font_size));

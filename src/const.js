@@ -37,7 +37,7 @@ Nehan.Const = {
      @memberof Nehan.Const
      @type {Array.<string>}
   */
-  cssBoxDirs:[
+  cssPhysicalBoxDirs:[
     "top",
     "right",
     "bottom",
@@ -47,7 +47,7 @@ Nehan.Const = {
      @memberof Nehan.Const
      @type {Array.<string>}
   */
-  cssBoxDirsLogical:[
+  cssLogicalBoxDirs:[
     "before",
     "end",
     "after",

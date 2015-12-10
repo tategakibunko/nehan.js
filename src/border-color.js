@@ -15,7 +15,7 @@ Nehan.BorderColor = (function(){
    */
   BorderColor.prototype.clone = function(){
     var border_color = new BorderColor();
-    Nehan.List.iter(Nehan.Const.cssBoxDirs, function(dir){
+    Nehan.List.iter(Nehan.Const.cssPhysicalBoxDirs, function(dir){
       if(this[dir]){
 	border_color[dir] = this[dir];
       }
@@ -26,20 +26,16 @@ Nehan.BorderColor = (function(){
    @memberof Nehan.BorderColor
    @method setColor
    @param flow {Nehan.BoxFlow}
-   @param value {Object} - color values, object or array or string available.
-   @param value.before {Nehan.Color}
-   @param value.end {Nehan.Color}
-   @param value.after {Nehan.Color}
-   @param value.start {Nehan.Color}
+   @param values {Object} - color values, object or array or string available.
+   @param values.before {Nehan.Color}
+   @param values.end {Nehan.Color}
+   @param values.after {Nehan.Color}
+   @param values.start {Nehan.Color}
    */
-  BorderColor.prototype.setColor = function(flow, value){
-    // first, set as it is(obj, array, string).
-    Nehan.BoxRect.setValue(this, flow, value);
-
-    // second, map as color class.
-    Nehan.BoxRect.iter(this, function(dir, val){
-      this[dir] = new Nehan.Color(val);
-    }.bind(this));
+  BorderColor.prototype.setColor = function(flow, values){
+    for(var logical_prop in values){
+      this[flow.getProp(logical_prop)] = new Nehan.Color(values[logical_prop]);
+    }
   };
   /**
    get css object of border color
@@ -49,10 +45,14 @@ Nehan.BorderColor = (function(){
    */
   BorderColor.prototype.getCss = function(){
     var css = {};
-    Nehan.BoxRect.iter(this, function(dir, color){
-      var prop = ["border", dir, "color"].join("-");
-      css[prop] = color.getCssValue();
-    });
+    // set border-[top|right|bottom|left]-color
+    Nehan.List.iter(Nehan.Const.cssPhysicalBoxDirs, function(dir){
+      if(this[dir]){
+	var prop = ["border", dir, "color"].join("-");
+	var color = this[dir];
+	css[prop] = color.getCssValue();
+      }
+    }.bind(this));
     return css;
   };
 

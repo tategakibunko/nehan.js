@@ -9,9 +9,9 @@ describe("Nehan.Box", function(){
     context:body_cont,
     size:new Nehan.BoxSize(1,2),
     edge:new Nehan.BoxEdge({
-      padding:new Nehan.Padding().setSize(lr_tb, {start:1, end:2, before:3, after:4}),
-      margin:new Nehan.Margin().setSize(lr_tb, {start:5, end:6, before:7, after:8}),
-      border:new Nehan.Border().setSize(lr_tb, {start:9, end:10, before:11, after:12})
+      padding:new Nehan.Padding().setLogicalValues(lr_tb, {start:1, end:2, before:3, after:4}),
+      margin:new Nehan.Margin().setLogicalValues(lr_tb, {start:5, end:6, before:7, after:8}),
+      border:new Nehan.Border().setLogicalValues(lr_tb, {start:9, end:10, before:11, after:12})
     })
   });
 
@@ -131,7 +131,7 @@ describe("Nehan.Box", function(){
     var box = new Nehan.Box({
       context:body_cont,
       edge:new Nehan.BoxEdge({
-	border:new Nehan.Border().setSize(lr_tb, {before:1, after:2})
+	border:new Nehan.Border().setLogicalValues(lr_tb, {before:1, after:2})
       })
     });
     expect(box.edge.border.top).toBe(1);
@@ -142,7 +142,7 @@ describe("Nehan.Box", function(){
     var box = new Nehan.Box({
       context:body_cont,
       edge:new Nehan.BoxEdge({
-	border:new Nehan.Border().setSize(lr_tb, {before:1, after:2})
+	border:new Nehan.Border().setLogicalValues(lr_tb, {before:1, after:2})
       })
     });
     expect(box.edge.border.bottom).toBe(2);

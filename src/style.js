@@ -1379,7 +1379,7 @@ Nehan.Style = (function(){
     }
     var box_pos = new Nehan.BoxPosition(pos_value);
     var font_size = this.getFontSize();
-    Nehan.List.iter(Nehan.Const.cssBoxDirsLogical, function(dir){
+    Nehan.List.iter(Nehan.Const.cssLogicalBoxDirs, function(dir){
       var value = this.getCssAttr(dir);
       if(value){
 	box_pos[value] = this._computeUnitSize(value, font_size);
@@ -1467,7 +1467,7 @@ Nehan.Style = (function(){
       return null;
     }
     var padding = new Nehan.Padding();
-    padding.setSize(flow, edge_size);
+    padding.setLogicalValues(flow, edge_size);
     return padding;
   };
 
@@ -1477,7 +1477,7 @@ Nehan.Style = (function(){
       return null;
     }
     var margin = new Nehan.Margin();
-    margin.setSize(flow, edge_size);
+    margin.setLogicalValues(flow, edge_size);
 
     // if inline, disable margin-before and margin-after.
     if(this.isInline()){
@@ -1495,7 +1495,7 @@ Nehan.Style = (function(){
     }
     var border = new Nehan.Border();
     if(edge_size){
-      border.setSize(flow, edge_size);
+      border.setLogicalValues(flow, edge_size);
     }
     if(border_radius){
       border.setRadius(flow, this._computeCornerSize(border_radius, font_size));
