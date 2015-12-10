@@ -41,7 +41,7 @@ Nehan.Text = (function(){
    @return {Nehan.Char}
    */
   Text.prototype.getHeadChar = function(){
-    return new Nehan.Char(this.content.substring(0,1));
+    return new Nehan.Char({data:this.content.substring(0,1)});
   };
 
   /**

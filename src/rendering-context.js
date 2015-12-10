@@ -1428,7 +1428,7 @@ Nehan.RenderingContext = (function(){
     var token = this.peekSiblingNextToken();
     if(token instanceof Nehan.Text){
       head_c1 = token.getContent().substring(0,1);
-      return new Nehan.Char(head_c1);
+      return new Nehan.Char({data:head_c1});
     }
     // if parent next token is not Nehan::Text,
     // it's hard to find first character, so skip it.
