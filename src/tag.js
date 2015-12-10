@@ -11,7 +11,6 @@ Nehan.Tag = (function (){
      @param content {String} - content text of markup
   */
   function Tag(src, content){
-    this._type = "tag";
     this.src = src;
     this.content = content || "";
     this.name = this._parseName(this.src);

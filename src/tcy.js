@@ -8,7 +8,6 @@ Nehan.Tcy = (function(){
   */
   function Tcy(tcy){
     this.data = tcy;
-    this._type = "tcy";
   }
 
   /**

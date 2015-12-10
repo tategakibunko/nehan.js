@@ -9,7 +9,6 @@ Nehan.Char = (function(){
   function Char(c1, opt){
     opt = opt || {};
     this.data = c1;
-    this._type = "char";
     this.isRef = opt.isRef || false;
     if(this.isRef){
       this._setupRef(c1);
@@ -289,9 +288,13 @@ Nehan.Char = (function(){
    @return {Int}
    */
   Char.prototype.getCharCount = function(){
-    if(this.data === " " || this.data === "\t" || this.data === "\u3000"){
+    if(this.isSpace() || this.isIdeographicSpace()){
       return 0;
     }
+    /*
+    if(this.data === " " || this.data === "\t" || this.data === "\u3000"){
+      return 0;
+    }*/
     return 1;
   },
   /**

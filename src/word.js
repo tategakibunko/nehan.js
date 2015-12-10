@@ -24,7 +24,6 @@ Nehan.Word = (function(){
   */
   function Word(word, divided){
     this.data = word;
-    this._type = "word";
     this._divided = divided || false;
   }
 

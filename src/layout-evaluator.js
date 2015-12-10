@@ -200,19 +200,20 @@ Nehan.LayoutEvaluator = (function(){
   };
 
   LayoutEvaluator.prototype._evalTextElement = function(line, text){
-    switch(text._type){
-    case "word":
-      return this._evalWord(line, text);
-    case "char":
+    if(text instanceof Nehan.Char){
       return this._evalChar(line, text);
-    case "tcy":
-      return this._evalTcy(line, text);
-    case "ruby":
-      return this._evalRuby(line, text);
-    default:
-      console.error("invalid text element:%o", text);
-      throw "invalid text element"; 
     }
+    if(text instanceof Nehan.Word){
+      return this._evalWord(line, text);
+    }
+    if(text instanceof Nehan.Tcy){
+      return this._evalTcy(line, text);
+    }
+    if(text instanceof Nehan.Ruby){
+      return this._evalRuby(line, text);
+    }
+    console.error("invalid text element:%o", text);
+    throw "invalid text element"; 
   };
 
   return LayoutEvaluator;

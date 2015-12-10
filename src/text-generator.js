@@ -89,12 +89,10 @@ Nehan.TextGenerator = (function(){
     if(!token.hasMetrics()){
       this._setTextMetrics(token);
     }
-    switch(token._type){
-    case "char":
-    case "tcy":
-    case "ruby":
+    if(token instanceof Nehan.Char || token instanceof Nehan.Tcy || token instanceof Nehan.Ruby){
       return token;
-    case "word":
+    }
+    if(token instanceof Nehan.Word){
       return this._getWord(token);
     }
     console.error("Nehan::TextGenerator, undefined token:", token);

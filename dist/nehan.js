@@ -1934,7 +1934,6 @@ Nehan.Tag = (function (){
      @param content {String} - content text of markup
   */
   function Tag(src, content){
-    this._type = "tag";
     this.src = src;
     this.content = content || "";
     this.name = this._parseName(this.src);
@@ -7723,7 +7722,6 @@ Nehan.Char = (function(){
   function Char(c1, opt){
     opt = opt || {};
     this.data = c1;
-    this._type = "char";
     this.isRef = opt.isRef || false;
     if(this.isRef){
       this._setupRef(c1);
@@ -8003,9 +8001,13 @@ Nehan.Char = (function(){
    @return {Int}
    */
   Char.prototype.getCharCount = function(){
-    if(this.data === " " || this.data === "\t" || this.data === "\u3000"){
+    if(this.isSpace() || this.isIdeographicSpace()){
       return 0;
     }
+    /*
+    if(this.data === " " || this.data === "\t" || this.data === "\u3000"){
+      return 0;
+    }*/
     return 1;
   },
   /**
@@ -8516,7 +8518,6 @@ Nehan.Word = (function(){
   */
   function Word(word, divided){
     this.data = word;
-    this._type = "word";
     this._divided = divided || false;
   }
 
@@ -8715,7 +8716,6 @@ Nehan.Tcy = (function(){
   */
   function Tcy(tcy){
     this.data = tcy;
-    this._type = "tcy";
   }
 
   /**
@@ -8811,7 +8811,6 @@ Nehan.Ruby = (function(){
      @param rt {Nehan.Tag}
   */
   function Ruby(rbs, rt){
-    this._type = "ruby";
     this.rbs = rbs;
     this.rt = rt;
   }
@@ -15085,12 +15084,10 @@ Nehan.TextGenerator = (function(){
     if(!token.hasMetrics()){
       this._setTextMetrics(token);
     }
-    switch(token._type){
-    case "char":
-    case "tcy":
-    case "ruby":
+    if(token instanceof Nehan.Char || token instanceof Nehan.Tcy || token instanceof Nehan.Ruby){
       return token;
-    case "word":
+    }
+    if(token instanceof Nehan.Word){
       return this._getWord(token);
     }
     console.error("Nehan::TextGenerator, undefined token:", token);
@@ -16158,19 +16155,20 @@ Nehan.LayoutEvaluator = (function(){
   };
 
   LayoutEvaluator.prototype._evalTextElement = function(line, text){
-    switch(text._type){
-    case "word":
-      return this._evalWord(line, text);
-    case "char":
+    if(text instanceof Nehan.Char){
       return this._evalChar(line, text);
-    case "tcy":
-      return this._evalTcy(line, text);
-    case "ruby":
-      return this._evalRuby(line, text);
-    default:
-      console.error("invalid text element:%o", text);
-      throw "invalid text element"; 
     }
+    if(text instanceof Nehan.Word){
+      return this._evalWord(line, text);
+    }
+    if(text instanceof Nehan.Tcy){
+      return this._evalTcy(line, text);
+    }
+    if(text instanceof Nehan.Ruby){
+      return this._evalRuby(line, text);
+    }
+    console.error("invalid text element:%o", text);
+    throw "invalid text element"; 
   };
 
   return LayoutEvaluator;

@@ -8,7 +8,6 @@ Nehan.Ruby = (function(){
      @param rt {Nehan.Tag}
   */
   function Ruby(rbs, rt){
-    this._type = "ruby";
     this.rbs = rbs;
     this.rt = rt;
   }
