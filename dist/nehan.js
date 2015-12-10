@@ -7036,7 +7036,10 @@ Nehan.Break = (function(){
    @return {boolean}
    */
   Break.prototype.isFirst = function(flow){
-    return flow.isLeftToRight()? (this.value === "left") : (this.value === "right");
+    if(flow.isTextVertical()){
+      return flow.isBlockLeftToRight()? (this.value === "left") : (this.value === "right");
+    }
+    return flow.isTextLeftToRight()? (this.value === "left") : (this.value === "right");
   };
   /**
    true if breaking at second page of 2-page spread.
@@ -7044,7 +7047,7 @@ Nehan.Break = (function(){
    @return {boolean}
    */
   Break.prototype.isSecond = function(flow){
-    return flow.isLeftToRight()? (this.value === "right") : (this.value === "left");
+    return this.isFirst(flow) === false;
   };
   /**
    (TODO)
