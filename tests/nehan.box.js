@@ -40,16 +40,16 @@ describe("Nehan.Box", function(){
 
   it("Box::getTextElements", function(){
     var box1 = new Nehan.Box({
-      elements:[new Nehan.Char("a"), new Nehan.Char("b")]
+      elements:[new Nehan.Char({data:"a"}), new Nehan.Char({data:"b"})]
     });
     var box1_texts = box1.getTextElements();
     expect(box1_texts[0].data).toBe("a");
     expect(box1_texts[1].data).toBe("b");
     var box2 = new Nehan.Box({
       elements:[
-	new Nehan.Char("a"),
+	new Nehan.Char({data:"a"}),
 	new Nehan.Box({
-	  elements:[new Nehan.Char("b")]
+	  elements:[new Nehan.Char({data:"b"})]
 	})
       ]
     });
@@ -60,13 +60,13 @@ describe("Nehan.Box", function(){
 
   it("Box::toString", function(){
     var box1 = new Nehan.Box({
-      elements:[new Nehan.Char("a"), new Nehan.Char("b")]
+      elements:[new Nehan.Char({data:"a"}), new Nehan.Char({data:"b"})]
     });
     var box2 = new Nehan.Box({
       elements:[
-	new Nehan.Char("a"),
+	new Nehan.Char({data:"a"}),
 	new Nehan.Box({
-	  elements:[new Nehan.Char("b")]
+	  elements:[new Nehan.Char({data:"b"})]
 	})
       ]
     });
