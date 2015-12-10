@@ -13,7 +13,11 @@ Nehan.OutsideListItemGenerator = (function(){
   Nehan.Class.extend(OutsideListItemGenerator, Nehan.ParallelGenerator);
 
   OutsideListItemGenerator.prototype._createChildGenerators = function(context){
-    var list_context = context.parent.listContext;
+    var list_context = context.getListContext() || {
+      itemCount:0,
+      indentSize:context.style.getFontSize(),
+      bodySize:context.layoutContext.getInlineMaxMeasure() - context.style.getFontSize()
+    };
     var list_index = context.style.getChildIndex();
 
     // <li><li-marker>..</li-marker><li-body>...</li-body>

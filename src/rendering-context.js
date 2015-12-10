@@ -962,6 +962,16 @@ Nehan.RenderingContext = (function(){
     return this.stream? this.stream.getSrc() : "";
   };
 
+  RenderingContext.prototype.getListContext = function(){
+    if(this.listContext){
+      return this.listContext;
+    }
+    if(this.parent){
+      return this.parent.getListContext();
+    }
+    return null;
+  };
+
   RenderingContext.prototype.getBlockRestExtent = function(){
     return this.layoutContext.getBlockRestExtent();
   };
@@ -1323,6 +1333,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.initListContext = function(){
     this.listContext = this.createListContext();
+    return this.listContext;
   };
 
   RenderingContext.prototype.initTablePartition = function(stream){

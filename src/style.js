@@ -1620,6 +1620,7 @@ Nehan.Style = (function(){
     return null;
   };
 
+  // [TODO] not all element allows direct size via attribute, so check tag name before calling getAttr
   Style.prototype._loadStaticMeasure = function(){
     var prop = this.flow.getPropMeasure();
     var max_size = this.getParentContentMeasure();
@@ -1630,6 +1631,7 @@ Nehan.Style = (function(){
     return this._computeUnitSize(static_size, this.getFontSize(), max_size);
   };
 
+  // [TODO] not all element allows direct size via attribute, so check tag name before calling getAttr
   Style.prototype._loadStaticExtent = function(){
     var prop = this.flow.getPropExtent();
     var max_size = this.getParentContentExtent();

@@ -14597,6 +14597,7 @@ Nehan.Style = (function(){
     return null;
   };
 
+  // [TODO] not all element allows direct size via attribute, so check tag name before calling getAttr
   Style.prototype._loadStaticMeasure = function(){
     var prop = this.flow.getPropMeasure();
     var max_size = this.getParentContentMeasure();
@@ -14607,6 +14608,7 @@ Nehan.Style = (function(){
     return this._computeUnitSize(static_size, this.getFontSize(), max_size);
   };
 
+  // [TODO] not all element allows direct size via attribute, so check tag name before calling getAttr
   Style.prototype._loadStaticExtent = function(){
     var prop = this.flow.getPropExtent();
     var max_size = this.getParentContentExtent();
@@ -15574,7 +15576,11 @@ Nehan.OutsideListItemGenerator = (function(){
   Nehan.Class.extend(OutsideListItemGenerator, Nehan.ParallelGenerator);
 
   OutsideListItemGenerator.prototype._createChildGenerators = function(context){
-    var list_context = context.parent.listContext;
+    var list_context = context.getListContext() || {
+      itemCount:0,
+      indentSize:context.style.getFontSize(),
+      bodySize:context.layoutContext.getInlineMaxMeasure() - context.style.getFontSize()
+    };
     var list_index = context.style.getChildIndex();
 
     // <li><li-marker>..</li-marker><li-body>...</li-body>
@@ -17628,6 +17634,16 @@ Nehan.RenderingContext = (function(){
     return this.stream? this.stream.getSrc() : "";
   };
 
+  RenderingContext.prototype.getListContext = function(){
+    if(this.listContext){
+      return this.listContext;
+    }
+    if(this.parent){
+      return this.parent.getListContext();
+    }
+    return null;
+  };
+
   RenderingContext.prototype.getBlockRestExtent = function(){
     return this.layoutContext.getBlockRestExtent();
   };
@@ -17989,6 +18005,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.initListContext = function(){
     this.listContext = this.createListContext();
+    return this.listContext;
   };
 
   RenderingContext.prototype.initTablePartition = function(stream){
