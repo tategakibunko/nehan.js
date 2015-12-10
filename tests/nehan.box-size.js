@@ -42,4 +42,8 @@ describe("Nehan.BoxSize", function(){
     expect(css.width).toBe("100px");
     expect(css.height).toBe("200px");
   });
+
+  it("BoxSize::isEqualTo", function(){
+    expect(new Nehan.BoxSize(1,2).isEqualTo(new Nehan.BoxSize(1,2))).toBe(true);
+  });
 });
