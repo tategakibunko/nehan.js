@@ -8004,10 +8004,6 @@ Nehan.Char = (function(){
     if(this.isSpace() || this.isIdeographicSpace()){
       return 0;
     }
-    /*
-    if(this.data === " " || this.data === "\t" || this.data === "\u3000"){
-      return 0;
-    }*/
     return 1;
   },
   /**
