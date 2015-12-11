@@ -83,13 +83,13 @@ Nehan.Edge = (function(){
    @return {Object}
    */
   Edge.prototype.getCss = function(){
-    return Nehan.List.fold(Nehan.Const.cssPhysicalBoxDirs, {}, function(css, dir){
+    return Nehan.Const.cssPhysicalBoxDirs.reduce(function(css, dir){
       var value = this[dir];
       if(value > 0){
 	css[this.getDirProp(dir)] = value + "px";
       }
       return css;
-    }.bind(this));
+    }.bind(this), {});
   };
   /**
    @memberof Nehan.Edge

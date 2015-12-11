@@ -2477,9 +2477,8 @@ Nehan.CssHashSet = (function(){
    @param new_value
   */
   CssHashSet.prototype.merge = function(old_value, new_value){
-    if(typeof old_value === "object"){
-      Nehan.Args.copy(old_value, new_value);
-      return old_value;
+    if(typeof old_value === "object" && typeof new_value === "object"){
+      return Nehan.Args.copy(old_value, new_value);
     }
     return new_value;
   };
@@ -2496,48 +2495,157 @@ Nehan.CssHashSet = (function(){
   return CssHashSet;
 })();
 
+Nehan.EdgeParser = (function(){
+
+  var __parse_edge_array = function(ary){
+    switch(ary.length){
+    case 0:  return {};
+    case 1:  return {before:ary[0], end:ary[0], after:ary[0], start:ary[0]};
+    case 2:  return {before:ary[0], end:ary[1], after:ary[0], start:ary[1]};
+    case 3:  return {before:ary[0], end:ary[1], after:ary[2], start:ary[1]};
+    default: return {before:ary[0], end:ary[1], after:ary[2], start:ary[3]};
+    }
+  };
+
+  // margin-start => margin
+  var __get_normal_prop = function(prop){
+    return Nehan.Const.cssLogicalBoxDirs.reduce(function(result, dir){
+      return result.replace("-" + dir, "");
+    }, prop);
+  };
+
+  // margin-start => start
+  var __get_direct_dir = function(prop){
+    return Nehan.List.find(Nehan.Const.cssLogicalBoxDirs, function(dir){
+      return prop.indexOf(dir) > 0;
+    }) || "";
+  };
+
+  // ("start", "1em") => {start:"1em"}
+  var __init_direct_dir = function(dir, value){
+    var ret = {};
+    ret[dir] = value;
+    return ret;
+  };
+
+  return {
+    // "margin-start" => "margin"
+    // "margin" => "margin"
+    formatProp : function(prop){
+      return __get_normal_prop(prop);
+    },
+    // ("margin-start", "1em") => {start:"1em"}
+    // ("margin", "1em") => {before:"1em", end:"1em", after:"1em", start:"1em"}
+    formatValue : function(prop, value){
+      var direct_dir = __get_direct_dir(prop);
+      if(direct_dir){
+	return __init_direct_dir(direct_dir, this.parseUnit(value));
+      }
+      return this.parseSet(value);
+    },
+    parseUnit: function(value){
+      if(typeof value === "number"){
+	return String(value);
+      }
+      if(typeof value === "string"){
+	return value;
+      }
+      console.error("Edge::parseUnit, invalid value:%o", value);
+      throw "EdgeParser::parseUnit(invalid format)";
+    },
+    parseSet: function(value){
+      if(value instanceof Array){
+	return __parse_edge_array(value);
+      }
+      if(typeof value === "object"){
+	return value;
+      }
+      if(typeof value === "string"){
+	value = String(value).replace(/^\s+/, "").replace(/\s+$/, "").replace(/\s+/g, " ");
+	if(value === ""){
+	  return {};
+	}
+	if(value.indexOf(" ") < 0){
+	  return __parse_edge_array([value]);
+	}
+	return __parse_edge_array(value.split(" "));
+      }
+      console.error("Edge::parseSet, invalid value:%o", value);
+      throw "EdgeParser::parseSet(invalid format)";
+    }
+  };
+})();
+
+Nehan.RadiusParser = (function(){
+  return {
+    parseValue: function(value){
+    },
+    parseSet: function(value){
+    }
+  };
+})();
+
+/*
+ 1. basic reduction
+ 
+ margin:"0" ->
+   (margin, {}, Edge.parseAsSet("0")) ->
+   (margin, {}, {before:0, end:0, after:0, start:0}) ->
+   (margin, {before:0, end:0, after:0, start:0})
+
+ margin:"0 1" ->
+   (margin, {}, Edge.parseAsSet("0 1")) ->
+   (margin, {}, {before:0, end:1, after:0, start:1}) ->
+   (margin, {before:0, end:1, after:0, start:1})
+
+ margin-after:"0" ->
+   (margin, {}, {after:Edge.parseAsValue("0")}) ->
+   (margin, {}, {after:0}) ->
+   (margin, {after:0})
+
+ border-before-start-radius:1 ->
+   (border-radius, {}, {before-start:Radius2d.parseAsValue(1)}) ->
+   (border-radius, {}, {before-start:[1,1]}) ->
+   (border-radius, {before-start:[1,1]})
+
+ border-before-start-radius:[1,2] ->
+   (border-radius, {}, {before-start:Radius2d.parseAsValue([1,2])}) ->
+   (border-radius, {}, {before-start:[1, 2]}) ->
+   (border-radius, {before-start:[1, 2]})
+
+ border-before-start-radius:"1/2" ->
+   (border-radius, {}, {before-start:Radius2d.parseAsValue("1/2")}) ->
+   (border-radius, {before-start:[1,2]})
+
+ border-radius:1 ->
+   (border-radius, {}, Radius2d.parseAsSet(1)) ->
+   (border-radius, {}, {before-start:[1,1], before-end:[1,1], after-end:[1,1], after-start:[1,1]}) ->
+   (border-radius, {before-start:[1,1], before-end:[1,1], after-end:[1,1], after-start:[1,1]})
+
+ border-radius:"1/2" ->
+   (border-radius, {}, Radius2d.parseAsSet("1/2")) ->
+   (border-radius, {before-start:[1,2], before-end:[1,2], after-end:[1,2], after-start:[1,2]})
+
+ border-radius:"1/2 3/4" ->
+   border-radius:["1/2", "3/4"] ->
+   border-radius:{before-start:[1,2], before-end:[3,4], after-end:[1,2], after-start:[3,4]}
+
+
+ 2. grammer
+
+ type selector = (key, value)
+ type value = atom | values
+ type atom = int | string | float
+ type values = (prop, value) list | value list
+ type prop = normal_prop | part_prop
+
+ 3. func
+
+ 1. (prop, value) -> (normal_prop, value)
+ 2. (prop, value list) -> (prop, (prop, value) list)
+*/
+
 /**
-<pre>
-  there are css properties that are required to calculate accurate paged-layout,
-  and we call them 'managed css properties'.
-
-  managed css properties
-  ======================
-  after(nehan.js local property, same as 'bottom' if lr-tb)
-  before(nehan.js local property, same as 'top' if lr-tb)
-  border
-  border-width
-  border-radius(rounded corner after/before is cleared if page is divided into multiple pages)
-  box-sizing
-  break-after
-  break-before
-  color(required to switch charactor image src for some client)
-  display
-  end(nehan.js local property, same as 'right' if lr-tb)
-  extent(nehan.js local property)
-  float
-  flow(nehan.js local property)
-  font
-  font-size
-  font-family(required to get accurate text-metrics especially latin words)
-  height
-  letter-spacing
-  line-height
-  list-style
-  list-style-image
-  list-style-position
-  list-style-type
-  margin
-  measure(nehan.js local property)
-  padding
-  position
-  start(nehan.js local property, same as 'left' if lr-tb)
-  text-align
-  text-combine
-  text-emphasis-style
-  white-space
-  width</pre>
-
   @namespace Nehan.CssParser
 */
 Nehan.CssParser = (function(){
@@ -2728,9 +2836,9 @@ Nehan.CssParser = (function(){
        @param prop {String} - css property name
        @return {String} normalized property name
        @example
-       * CssParser.normalizeProp("margin-start"); // => "margin"
+       * CssParser.formatProp("margin-start"); // => "margin"
     */
-    normalizeProp : function(prop){
+    formatProp : function(prop){
       return __normalize_prop(prop);
     },
     /**
@@ -3446,12 +3554,12 @@ Nehan.Selector = (function(){
   Selector.prototype.updateValue = function(value){
     for(var prop in value){
       var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
-      var norm_prop = (typeof fmt_value !== "function")? Nehan.CssParser.normalizeProp(prop) : Nehan.Utils.camelToChain(prop);
-      var old_value = this.value[norm_prop] || null;
+      var fmt_prop = (typeof fmt_value !== "function")? Nehan.CssParser.formatProp(prop) : Nehan.Utils.camelToChain(prop);
+      var old_value = this.value[fmt_prop] || null;
       if(old_value !== null && typeof old_value === "object" && typeof fmt_value === "object"){
 	Nehan.Args.copy(old_value, fmt_value);
       } else {
-	this.value[norm_prop] = fmt_value; // direct value or function
+	this.value[fmt_prop] = fmt_value; // direct value or function
       }
     }
   };
@@ -3519,9 +3627,9 @@ Nehan.Selector = (function(){
   Selector.prototype._formatValue = function(value){
     var ret = {};
     for(var prop in value){
-      var norm_prop = Nehan.CssParser.normalizeProp(prop);
+      var fmt_prop = Nehan.CssParser.formatProp(prop);
       var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
-      ret[norm_prop] = fmt_value;
+      ret[fmt_prop] = fmt_value;
     }
     return ret;
   };
@@ -4340,13 +4448,13 @@ Nehan.Edge = (function(){
    @return {Object}
    */
   Edge.prototype.getCss = function(){
-    return Nehan.List.fold(Nehan.Const.cssPhysicalBoxDirs, {}, function(css, dir){
+    return Nehan.Const.cssPhysicalBoxDirs.reduce(function(css, dir){
       var value = this[dir];
       if(value > 0){
 	css[this.getDirProp(dir)] = value + "px";
       }
       return css;
-    }.bind(this));
+    }.bind(this), {});
   };
   /**
    @memberof Nehan.Edge
@@ -14274,10 +14382,10 @@ Nehan.Style = (function(){
       if(nv.length >= 2){
 	var prop = Nehan.Utils.trim(nv[0]).toLowerCase();
 	var value = Nehan.Utils.trim(nv[1]);
-	var norm_prop = Nehan.CssParser.normalizeProp(prop);
+	var fmt_prop = Nehan.CssParser.formatProp(prop);
 	var fmt_value = Nehan.CssParser.formatValue(prop, value);
-	if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Nehan.Closure.eq(norm_prop))){
-	  ret[norm_prop] = fmt_value;
+	if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Nehan.Closure.eq(fmt_prop))){
+	  ret[fmt_prop] = fmt_value;
 	}
       }
       return ret;
@@ -14295,13 +14403,13 @@ Nehan.Style = (function(){
 
   Style.prototype._registerCssValues = function(values){
     Nehan.Obj.iter(values, function(prop, value){
-      var norm_prop = Nehan.CssParser.normalizeProp(prop);
-      if(__is_callback_css_prop(norm_prop)){
-	this.callbackCss.add(norm_prop, value);
-      } else if(__is_managed_css_prop(norm_prop)){
-	this.managedCss.add(norm_prop, this._evalCssAttr(prop, value));
+      var fmt_prop = Nehan.CssParser.formatProp(prop);
+      if(__is_callback_css_prop(fmt_prop)){
+	this.callbackCss.add(fmt_prop, value);
+      } else if(__is_managed_css_prop(fmt_prop)){
+	this.managedCss.add(fmt_prop, this._evalCssAttr(prop, value));
       } else {
-	this.unmanagedCss.add(norm_prop, this._evalCssAttr(prop, value));
+	this.unmanagedCss.add(fmt_prop, this._evalCssAttr(prop, value));
       }
     }.bind(this));
   };

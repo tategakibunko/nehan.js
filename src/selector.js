@@ -42,12 +42,12 @@ Nehan.Selector = (function(){
   Selector.prototype.updateValue = function(value){
     for(var prop in value){
       var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
-      var norm_prop = (typeof fmt_value !== "function")? Nehan.CssParser.normalizeProp(prop) : Nehan.Utils.camelToChain(prop);
-      var old_value = this.value[norm_prop] || null;
+      var fmt_prop = (typeof fmt_value !== "function")? Nehan.CssParser.formatProp(prop) : Nehan.Utils.camelToChain(prop);
+      var old_value = this.value[fmt_prop] || null;
       if(old_value !== null && typeof old_value === "object" && typeof fmt_value === "object"){
 	Nehan.Args.copy(old_value, fmt_value);
       } else {
-	this.value[norm_prop] = fmt_value; // direct value or function
+	this.value[fmt_prop] = fmt_value; // direct value or function
       }
     }
   };
@@ -115,9 +115,9 @@ Nehan.Selector = (function(){
   Selector.prototype._formatValue = function(value){
     var ret = {};
     for(var prop in value){
-      var norm_prop = Nehan.CssParser.normalizeProp(prop);
+      var fmt_prop = Nehan.CssParser.formatProp(prop);
       var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
-      ret[norm_prop] = fmt_value;
+      ret[fmt_prop] = fmt_value;
     }
     return ret;
   };

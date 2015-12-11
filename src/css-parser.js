@@ -1,45 +1,64 @@
+/*
+ 1. basic reduction
+ 
+ margin:"0" ->
+   (margin, {}, Edge.parseAsSet("0")) ->
+   (margin, {}, {before:0, end:0, after:0, start:0}) ->
+   (margin, {before:0, end:0, after:0, start:0})
+
+ margin:"0 1" ->
+   (margin, {}, Edge.parseAsSet("0 1")) ->
+   (margin, {}, {before:0, end:1, after:0, start:1}) ->
+   (margin, {before:0, end:1, after:0, start:1})
+
+ margin-after:"0" ->
+   (margin, {}, {after:Edge.parseAsValue("0")}) ->
+   (margin, {}, {after:0}) ->
+   (margin, {after:0})
+
+ border-before-start-radius:1 ->
+   (border-radius, {}, {before-start:Radius2d.parseAsValue(1)}) ->
+   (border-radius, {}, {before-start:[1,1]}) ->
+   (border-radius, {before-start:[1,1]})
+
+ border-before-start-radius:[1,2] ->
+   (border-radius, {}, {before-start:Radius2d.parseAsValue([1,2])}) ->
+   (border-radius, {}, {before-start:[1, 2]}) ->
+   (border-radius, {before-start:[1, 2]})
+
+ border-before-start-radius:"1/2" ->
+   (border-radius, {}, {before-start:Radius2d.parseAsValue("1/2")}) ->
+   (border-radius, {before-start:[1,2]})
+
+ border-radius:1 ->
+   (border-radius, {}, Radius2d.parseAsSet(1)) ->
+   (border-radius, {}, {before-start:[1,1], before-end:[1,1], after-end:[1,1], after-start:[1,1]}) ->
+   (border-radius, {before-start:[1,1], before-end:[1,1], after-end:[1,1], after-start:[1,1]})
+
+ border-radius:"1/2" ->
+   (border-radius, {}, Radius2d.parseAsSet("1/2")) ->
+   (border-radius, {before-start:[1,2], before-end:[1,2], after-end:[1,2], after-start:[1,2]})
+
+ border-radius:"1/2 3/4" ->
+   border-radius:["1/2", "3/4"] ->
+   border-radius:{before-start:[1,2], before-end:[3,4], after-end:[1,2], after-start:[3,4]}
+
+
+ 2. grammer
+
+ type selector = (key, value)
+ type value = atom | values
+ type atom = int | string | float
+ type values = (prop, value) list | value list
+ type prop = normal_prop | part_prop
+
+ 3. func
+
+ 1. (prop, value) -> (normal_prop, value)
+ 2. (prop, value list) -> (prop, (prop, value) list)
+*/
+
 /**
-<pre>
-  there are css properties that are required to calculate accurate paged-layout,
-  and we call them 'managed css properties'.
-
-  managed css properties
-  ======================
-  after(nehan.js local property, same as 'bottom' if lr-tb)
-  before(nehan.js local property, same as 'top' if lr-tb)
-  border
-  border-width
-  border-radius(rounded corner after/before is cleared if page is divided into multiple pages)
-  box-sizing
-  break-after
-  break-before
-  color(required to switch charactor image src for some client)
-  display
-  end(nehan.js local property, same as 'right' if lr-tb)
-  extent(nehan.js local property)
-  float
-  flow(nehan.js local property)
-  font
-  font-size
-  font-family(required to get accurate text-metrics especially latin words)
-  height
-  letter-spacing
-  line-height
-  list-style
-  list-style-image
-  list-style-position
-  list-style-type
-  margin
-  measure(nehan.js local property)
-  padding
-  position
-  start(nehan.js local property, same as 'left' if lr-tb)
-  text-align
-  text-combine
-  text-emphasis-style
-  white-space
-  width</pre>
-
   @namespace Nehan.CssParser
 */
 Nehan.CssParser = (function(){
@@ -230,9 +249,9 @@ Nehan.CssParser = (function(){
        @param prop {String} - css property name
        @return {String} normalized property name
        @example
-       * CssParser.normalizeProp("margin-start"); // => "margin"
+       * CssParser.formatProp("margin-start"); // => "margin"
     */
-    normalizeProp : function(prop){
+    formatProp : function(prop){
       return __normalize_prop(prop);
     },
     /**

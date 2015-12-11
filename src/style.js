@@ -1316,10 +1316,10 @@ Nehan.Style = (function(){
       if(nv.length >= 2){
 	var prop = Nehan.Utils.trim(nv[0]).toLowerCase();
 	var value = Nehan.Utils.trim(nv[1]);
-	var norm_prop = Nehan.CssParser.normalizeProp(prop);
+	var fmt_prop = Nehan.CssParser.formatProp(prop);
 	var fmt_value = Nehan.CssParser.formatValue(prop, value);
-	if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Nehan.Closure.eq(norm_prop))){
-	  ret[norm_prop] = fmt_value;
+	if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Nehan.Closure.eq(fmt_prop))){
+	  ret[fmt_prop] = fmt_value;
 	}
       }
       return ret;
@@ -1337,13 +1337,13 @@ Nehan.Style = (function(){
 
   Style.prototype._registerCssValues = function(values){
     Nehan.Obj.iter(values, function(prop, value){
-      var norm_prop = Nehan.CssParser.normalizeProp(prop);
-      if(__is_callback_css_prop(norm_prop)){
-	this.callbackCss.add(norm_prop, value);
-      } else if(__is_managed_css_prop(norm_prop)){
-	this.managedCss.add(norm_prop, this._evalCssAttr(prop, value));
+      var fmt_prop = Nehan.CssParser.formatProp(prop);
+      if(__is_callback_css_prop(fmt_prop)){
+	this.callbackCss.add(fmt_prop, value);
+      } else if(__is_managed_css_prop(fmt_prop)){
+	this.managedCss.add(fmt_prop, this._evalCssAttr(prop, value));
       } else {
-	this.unmanagedCss.add(norm_prop, this._evalCssAttr(prop, value));
+	this.unmanagedCss.add(fmt_prop, this._evalCssAttr(prop, value));
       }
     }.bind(this));
   };

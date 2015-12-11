@@ -33,9 +33,8 @@ Nehan.CssHashSet = (function(){
    @param new_value
   */
   CssHashSet.prototype.merge = function(old_value, new_value){
-    if(typeof old_value === "object"){
-      Nehan.Args.copy(old_value, new_value);
-      return old_value;
+    if(typeof old_value === "object" && typeof new_value === "object"){
+      return Nehan.Args.copy(old_value, new_value);
     }
     return new_value;
   };

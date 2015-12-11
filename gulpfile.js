@@ -42,6 +42,8 @@ var sources = [
   "src/closure.js",
   "src/hash-set.js",
   "src/css-hash-set.js",
+  "src/edge-parser.js",
+  "src/radius-parser.js",
   "src/css-parser.js",
   "src/attr-selector.js",
   "src/pseudo-selector.js",
