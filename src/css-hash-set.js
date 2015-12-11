@@ -18,8 +18,9 @@ Nehan.CssHashSet = (function(){
      @param value
   */
   CssHashSet.prototype.add = function(name, value){
-    name = Nehan.Utils.camelToChain(name);
-    Nehan.HashSet.prototype.add.call(this, name, value);
+    var fmt_prop = Nehan.CssParser.formatProp(name);
+    var fmt_value = Nehan.CssParser.formatValue(name, value);
+    Nehan.HashSet.prototype.add.call(this, fmt_prop, fmt_value);
   };
 
   /**
