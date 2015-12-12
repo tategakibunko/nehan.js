@@ -2576,38 +2576,10 @@ Nehan.CssEdgeParser = (function(){
   };
 })();
 
-/*
- border-before-start-radius:1 ->
-   (border-radius, {}, {before-start:Radius2d.parseAsValue(1)}) ->
-   (border-radius, {}, {before-start:[1,1]}) ->
-   (border-radius, {before-start:[1,1]})
-
- border-before-start-radius:[1,2] ->
-   (border-radius, {}, {before-start:Radius2d.parseAsValue([1,2])}) ->
-   (border-radius, {}, {before-start:[1, 2]}) ->
-   (border-radius, {before-start:[1, 2]})
-
- border-before-start-radius:"1/2" ->
-   (border-radius, {}, {before-start:Radius2d.parseAsValue("1/2")}) ->
-   (border-radius, {before-start:[1,2]})
-
- border-radius:1 ->
-   (border-radius, {}, Radius2d.parseAsSet(1)) ->
-   (border-radius, {}, {before-start:[1,1], before-end:[1,1], after-end:[1,1], after-start:[1,1]}) ->
-   (border-radius, {before-start:[1,1], before-end:[1,1], after-end:[1,1], after-start:[1,1]})
-
- border-radius:"1/2" ->
-   (border-radius, {}, Radius2d.parseAsSet("1/2")) ->
-   (border-radius, {before-start:[1,2], before-end:[1,2], after-end:[1,2], after-start:[1,2]})
-
- border-radius:"1/2 3/4" ->
-   border-radius:["1/2", "3/4"] ->
-   border-radius:{before-start:[1,2], before-end:[3,4], after-end:[1,2], after-start:[3,4]}
-*/
 /**
- @namespace Nehan.CssRadiusParser
+ @namespace Nehan.CssCornerParser
  */
-Nehan.CssRadiusParser = (function(){
+Nehan.CssCornerParser = (function(){
   var __split_slash = function(value){
     return (value.indexOf("/") < 0)? [value] : value.split("/");
   };
@@ -2851,7 +2823,7 @@ Nehan.CssParser = (function(){
       case "border-color":
 	return new Nehan.CssEntry(fmt_prop, Nehan.CssEdgeParser.formatValue(fmt_prop, value));
       case "border-radius":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssRadiusParser.formatValue(fmt_prop, value));
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssCornerParser.formatValue(fmt_prop, value));
       default:
 	return new Nehan.CssEntry(fmt_prop, __normalize_value(value));
       }
