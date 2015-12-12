@@ -83,7 +83,7 @@ Nehan.CssRadiusParser = (function(){
   };
 
   var __make_corner_4d = function(values){
-    var props = Nehan.Const.cssBoxCornersLogical; // len = 4
+    var props = Nehan.Const.cssLogicalBoxCorners; // len = 4
     var values_4d = __make_values_4d(values); // len = 4
     return __zip_obj(props, values_4d);
   };
@@ -99,7 +99,17 @@ Nehan.CssRadiusParser = (function(){
 
   return {
     formatValue : function(css_prop, value){
-      return {}; // todo
+      var direct_corner = css_prop.getAttr();
+      if(direct_corner){
+	return Nehan.Obj.createOne(direct_corner, this.parseUnit(value));
+      }
+      return this.parseSet(value);
+    },
+    parseUnit: function(value){
+      return __make_values_2d(__split_slash(value));
+    },
+    parseSet: function(value){
+      return __parse_corner_4d(value);
     }
   };
 })();

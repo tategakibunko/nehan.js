@@ -1339,26 +1339,6 @@ Nehan.Const = {
      @memberof Nehan.Const
      @type {Array.<string>}
   */
-  cssCorders:[
-    "top-left",
-    "top-right",
-    "bottom-left",
-    "bottom-right"
-  ],
-  /**
-     @memberof Nehan.Const
-     @type {Array.<string>}
-  */
-  cssBorderRadius:[
-    "border-top-left-radius",
-    "border-top-right-radius",
-    "border-bottom-left-radius",
-    "border-bottom-right-radius"
-  ],
-  /**
-     @memberof Nehan.Const
-     @type {Array.<string>}
-  */
   cssPhysicalBoxDirs:[
     "top",
     "right",
@@ -1379,11 +1359,21 @@ Nehan.Const = {
      @memberof Nehan.Const
      @type {Array.<string>}
   */
-  cssBoxCornersLogical:[
-    "start-before",
-    "end-before",
-    "end-after",
-    "start-after"
+  cssPhysicalBoxCorders:[
+    "top-left",
+    "top-right",
+    "bottom-left",
+    "bottom-right"
+  ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
+  cssLogicalBoxCorners:[
+    "before-start",
+    "before-end",
+    "after-end",
+    "after-start"
   ],
   /**
      @memberof Nehan.Const
@@ -2671,7 +2661,7 @@ Nehan.CssRadiusParser = (function(){
   };
 
   var __make_corner_4d = function(values){
-    var props = Nehan.Const.cssBoxCornersLogical; // len = 4
+    var props = Nehan.Const.cssLogicalBoxCorners; // len = 4
     var values_4d = __make_values_4d(values); // len = 4
     return __zip_obj(props, values_4d);
   };
@@ -2687,7 +2677,17 @@ Nehan.CssRadiusParser = (function(){
 
   return {
     formatValue : function(css_prop, value){
-      return {}; // todo
+      var direct_corner = css_prop.getAttr();
+      if(direct_corner){
+	return Nehan.Obj.createOne(direct_corner, this.parseUnit(value));
+      }
+      return this.parseSet(value);
+    },
+    parseUnit: function(value){
+      return __make_values_2d(__split_slash(value));
+    },
+    parseSet: function(value){
+      return __parse_corner_4d(value);
     }
   };
 })();
@@ -2723,7 +2723,13 @@ Nehan.CssProp = (function(){
     "border-color-before":{name:"border-color", attr:"before"},
     "border-color-end":{name:"border-color", attr:"end"},
     "border-color-after":{name:"border-color", attr:"after"},
-    "border-color-start":{name:"border-color", attr:"start"}
+    "border-color-start":{name:"border-color", attr:"start"},
+
+    // border-radius
+    "border-before-start-radius":{name:"border-radius", attr:"before-start"},
+    "border-before-end-radius":{name:"border-radius", attr:"before-end"},
+    "border-after-end-radius":{name:"border-radius", attr:"after-end"},
+    "border-after-start-radius":{name:"border-radius", attr:"after-start"}
   };
 
   /**
@@ -2743,10 +2749,18 @@ Nehan.CssProp = (function(){
     this.attr = attr_prop? attr_prop.attr : null;
   }
 
+  /**
+   @memberof Nehan.CssProp
+   @return {String}
+   */
   CssProp.prototype.getName = function(){
     return this.name;
   };
 
+  /**
+   @memberof Nehan.CssProp
+   @return {String}
+   */
   CssProp.prototype.getAttr = function(){
     return this.attr;
   };

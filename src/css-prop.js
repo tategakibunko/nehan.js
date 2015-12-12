@@ -29,7 +29,13 @@ Nehan.CssProp = (function(){
     "border-color-before":{name:"border-color", attr:"before"},
     "border-color-end":{name:"border-color", attr:"end"},
     "border-color-after":{name:"border-color", attr:"after"},
-    "border-color-start":{name:"border-color", attr:"start"}
+    "border-color-start":{name:"border-color", attr:"start"},
+
+    // border-radius
+    "border-before-start-radius":{name:"border-radius", attr:"before-start"},
+    "border-before-end-radius":{name:"border-radius", attr:"before-end"},
+    "border-after-end-radius":{name:"border-radius", attr:"after-end"},
+    "border-after-start-radius":{name:"border-radius", attr:"after-start"}
   };
 
   /**
@@ -49,10 +55,18 @@ Nehan.CssProp = (function(){
     this.attr = attr_prop? attr_prop.attr : null;
   }
 
+  /**
+   @memberof Nehan.CssProp
+   @return {String}
+   */
   CssProp.prototype.getName = function(){
     return this.name;
   };
 
+  /**
+   @memberof Nehan.CssProp
+   @return {String}
+   */
   CssProp.prototype.getAttr = function(){
     return this.attr;
   };

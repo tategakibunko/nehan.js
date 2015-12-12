@@ -17,26 +17,6 @@ Nehan.Const = {
      @memberof Nehan.Const
      @type {Array.<string>}
   */
-  cssCorders:[
-    "top-left",
-    "top-right",
-    "bottom-left",
-    "bottom-right"
-  ],
-  /**
-     @memberof Nehan.Const
-     @type {Array.<string>}
-  */
-  cssBorderRadius:[
-    "border-top-left-radius",
-    "border-top-right-radius",
-    "border-bottom-left-radius",
-    "border-bottom-right-radius"
-  ],
-  /**
-     @memberof Nehan.Const
-     @type {Array.<string>}
-  */
   cssPhysicalBoxDirs:[
     "top",
     "right",
@@ -57,11 +37,21 @@ Nehan.Const = {
      @memberof Nehan.Const
      @type {Array.<string>}
   */
-  cssBoxCornersLogical:[
-    "start-before",
-    "end-before",
-    "end-after",
-    "start-after"
+  cssPhysicalBoxCorders:[
+    "top-left",
+    "top-right",
+    "bottom-left",
+    "bottom-right"
+  ],
+  /**
+     @memberof Nehan.Const
+     @type {Array.<string>}
+  */
+  cssLogicalBoxCorners:[
+    "before-start",
+    "before-end",
+    "after-end",
+    "after-start"
   ],
   /**
      @memberof Nehan.Const
