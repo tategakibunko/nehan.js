@@ -105,5 +105,15 @@ Nehan.Utils = {
     return (name.indexOf("-") < 0)? name : name.split("-").map(function(part, i){
       return (i === 0)? part : this.capitalize(part);
     }.bind(this)).join("");
+  },
+  /**
+     @memberof Nehan.Utils
+     @param str {String}
+  */
+  splitSpace : function(str){
+    if(str.indexOf(" ") < 0){
+      return [str];
+    }
+    return str.split(/\s+/);
   }
 };

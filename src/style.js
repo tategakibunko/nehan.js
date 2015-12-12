@@ -610,12 +610,13 @@ Nehan.Style = (function(){
     }
     return this.markup.getAttr(name, def_value);
   };
-  Style.prototype._evalCssAttr = function(name, value){
+  Style.prototype._evalCssAttr = function(prop, value){
     // if value is function, call with selector context, and format the returned value.
     if(typeof value === "function"){
-      return Nehan.CssParser.formatValue(name, value(this.selectorPropContext));
+      var entry = Nehan.CssParser.formatEntry(prop, value(this.selectorPropContext));
+      return entry.value;
     }
-    return Nehan.CssParser.formatValue(name, value);
+    return value;
   };
   /**
    @memberof Nehan.Style
@@ -623,11 +624,9 @@ Nehan.Style = (function(){
    @param value {css_value}
    */
   Style.prototype.setCssAttr = function(name, value){
-    if(__is_managed_css_prop(name)){
-      this.managedCss.add(name, value);
-    } else {
-      this.unmanagedCss.add(name, value);
-    }
+    var entry = Nehan.CssParser.formatEntry(name, value);
+    var target_css = __is_managed_css_prop(entry.getPropName())? this.managedCss : this.unmanagedCss;
+    target_css.add(entry.getPropName(), entry.getValue());
   };
   /**
    @memberof Nehan.Style
@@ -1316,8 +1315,9 @@ Nehan.Style = (function(){
       if(nv.length >= 2){
 	var prop = Nehan.Utils.trim(nv[0]).toLowerCase();
 	var value = Nehan.Utils.trim(nv[1]);
-	var fmt_prop = Nehan.CssParser.formatProp(prop);
-	var fmt_value = Nehan.CssParser.formatValue(prop, value);
+	var entry = Nehan.CssParser.formatEntry(prop, value);
+	var fmt_prop = entry.getPropName();
+	var fmt_value = entry.getValue();
 	if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Nehan.Closure.eq(fmt_prop))){
 	  ret[fmt_prop] = fmt_value;
 	}
@@ -1336,14 +1336,13 @@ Nehan.Style = (function(){
   };
 
   Style.prototype._registerCssValues = function(values){
-    Nehan.Obj.iter(values, function(prop, value){
-      var fmt_prop = Nehan.CssParser.formatProp(prop);
+    Nehan.Obj.iter(values, function(fmt_prop, value){
       if(__is_callback_css_prop(fmt_prop)){
 	this.callbackCss.add(fmt_prop, value);
       } else if(__is_managed_css_prop(fmt_prop)){
-	this.managedCss.add(fmt_prop, this._evalCssAttr(prop, value));
+	this.managedCss.add(fmt_prop, this._evalCssAttr(fmt_prop, value));
       } else {
-	this.unmanagedCss.add(fmt_prop, this._evalCssAttr(prop, value));
+	this.unmanagedCss.add(fmt_prop, this._evalCssAttr(fmt_prop, value));
       }
     }.bind(this));
   };

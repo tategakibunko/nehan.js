@@ -34,7 +34,8 @@ Nehan.Selectors = (function(){
     return selector_key.indexOf("::") >= 0;
   };
 
-  Selectors.prototype._findSelector = function(selectors, selector_key){
+  Selectors.prototype._findSelector = function(selector_key){
+    var selectors = this._getTargetSelectors(selector_key);
     return Nehan.List.find(selectors, function(selector){
       return selector.getKey() === selector_key;
     });
@@ -50,16 +51,13 @@ Nehan.Selectors = (function(){
     return this.selectors;
   };
 
-  Selectors.prototype._updateValue = function(selector_key, value){
-    var style_value = new Nehan.CssHashSet(this.stylesheet[selector_key]); // old style value, must be found
-    style_value = style_value.union(new Nehan.CssHashSet(value)); // merge new value to old
-    var target_selectors = this._getTargetSelectors(selector_key);
-    var selector = this._findSelector(target_selectors, selector_key); // selector object for selector_key, must be found
-    selector.updateValue(style_value.getValues());
+  Selectors.prototype._updateValue = function(selector_key, raw_entries){
+    var selector = this._findSelector(selector_key); // selector object for selector_key, must be found
+    selector.updateValue(raw_entries);
   };
 
-  Selectors.prototype._insertValue = function(selector_key, value){
-    var selector = new Nehan.Selector(selector_key, value);
+  Selectors.prototype._insertValue = function(selector_key, raw_entries){
+    var selector = new Nehan.Selector(selector_key, raw_entries);
     var target_selectors = this._getTargetSelectors(selector_key);
     target_selectors.push(selector);
     return selector;
@@ -71,23 +69,22 @@ Nehan.Selectors = (function(){
    @return {Nehan.Selector}
    */
   Selectors.prototype.get = function(selector_key){
-    return this._findSelector(this.selectors, selector_key);
+    return this._findSelector(selector_key);
   };
 
   /**
    @memberof Nehan.Selectors
    @param selector_key {String}
-   @param value {css_value}
+   @param raw_entries {Object} - unformatted css entries
    @example
    * Selectors.setValue("li.foo", {"font-size":19});
    */
-  Selectors.prototype.setValue = function(selector_key, value){
+  Selectors.prototype.setValue = function(selector_key, raw_entries){
     if(this.stylesheet[selector_key]){
-      this._updateValue(selector_key, value);
-      return;
+      this._updateValue(selector_key, raw_entries);
+    } else {
+      this._insertValue(selector_key, raw_entries);
     }
-    var selector = this._insertValue(selector_key, value);
-    this.stylesheet[selector_key] = selector.getValue();
   };
 
   /**
@@ -103,6 +100,16 @@ Nehan.Selectors = (function(){
     for(var selector_key in values){
       this.setValue(selector_key, values[selector_key]);
     }
+  };
+
+  /**
+   @memberof Nehan.Selectors
+   @param key {string}
+   @param raw_entries {Object} - unformatted css entries
+   @return {Nehan.Selector}
+   */
+  Selectors.prototype.create = function(key, raw_entries){
+    return new Nehan.Selector(key, raw_entries);
   };
 
   /**
@@ -126,7 +133,7 @@ Nehan.Selectors = (function(){
     });
     var matched_selectors = matched_static_selectors.concat(matched_pc_selectors);
     return (matched_selectors.length === 0)? {} : this._sortSelectors(matched_selectors).reduce(function(ret, selector){
-      return ret.union(new Nehan.CssHashSet(selector.getValue()));
+      return ret.union(new Nehan.CssHashSet(selector.getEntries()));
     }, new Nehan.CssHashSet()).getValues();
   };
 
@@ -138,7 +145,7 @@ Nehan.Selectors = (function(){
    @memberof Nehan.Selectors
    @param style {Nehan.Style} - 'parent' style context of pseudo-element
    @param pseudo_element_name {String} - "first-letter", "first-line", "before", "after"
-   @return {css_value}
+   @return {Object} - formatted css values
    */
   Selectors.prototype.getValuePe = function(style, pseudo_element_name){
     var cache_key = style.getSelectorCacheKeyPe(pseudo_element_name);
@@ -150,7 +157,7 @@ Nehan.Selectors = (function(){
       this.selectorsCache[cache_key] = matched_selectors;
     }
     return (matched_selectors.length === 0)? {} : this._sortSelectors(matched_selectors).reduce(function(ret, selector){
-      return ret.union(new Nehan.CssHashSet(selector.getValue()));
+      return ret.union(new Nehan.CssHashSet(selector.getEntries()));
     }, new Nehan.CssHashSet()).getValues();
   };
 

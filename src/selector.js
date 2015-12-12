@@ -1,16 +1,16 @@
 // Selector = [TypeSelector | TypeSelector + combinator + Selector]
 Nehan.Selector = (function(){
   /**
-     @memberof Nehan
-     @class Selector
-     @classdesc abstraction of css selector.
-     @constructor
-     @param key {String}
-     @param value {css_value}
+   @memberof Nehan
+   @class Selector
+   @classdesc abstraction of css selector.
+   @constructor
+   @param key {String}
+   @param raw_entries {Object} - unformatted css entries
   */
-  function Selector(key, value){
+  function Selector(key, raw_entries){
     this.key = this._normalizeKey(key); // selector source like 'h1 > p'
-    this.value = this._formatValue(value); // associated css value object like {font-size:16px}
+    this.value = new Nehan.SelectorValue(raw_entries);
     this.elements = this._getSelectorElements(this.key); // [type-selector | combinator]
     this.spec = this._countSpec(this.elements); // count specificity
   }
@@ -37,19 +37,11 @@ Nehan.Selector = (function(){
   };
   /**
    @memberof Nehan.Selector
-   @param value {css_value}
+   @param raw_entries {Object} - unformatted css entries
    */
-  Selector.prototype.updateValue = function(value){
-    for(var prop in value){
-      var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
-      var fmt_prop = (typeof fmt_value !== "function")? Nehan.CssParser.formatProp(prop) : Nehan.Utils.camelToChain(prop);
-      var old_value = this.value[fmt_prop] || null;
-      if(old_value !== null && typeof old_value === "object" && typeof fmt_value === "object"){
-	Nehan.Args.copy(old_value, fmt_value);
-      } else {
-	this.value[fmt_prop] = fmt_value; // direct value or function
-      }
-    }
+  Selector.prototype.updateValue = function(raw_entries){
+    var fmt_value = new Nehan.SelectorValue(raw_entries);
+    this.value.merge(fmt_value);
   };
   /**
    @memberof Nehan.Selector
@@ -60,10 +52,10 @@ Nehan.Selector = (function(){
   };
   /**
    @memberof Nehan.Selector
-   @return {css_value}
+   @return {Object} - formatted css value object
    */
-  Selector.prototype.getValue = function(){
-    return this.value;
+  Selector.prototype.getEntries = function(){
+    return this.value.getEntries();
   };
   /**
    @memberof Nehan.Selector
@@ -110,16 +102,6 @@ Nehan.Selector = (function(){
   Selector.prototype._normalizeKey = function(key){
     key = (key instanceof RegExp)? "/" + key.source + "/" : key;
     return Nehan.Utils.trim(key).toLowerCase().replace(/\s+/g, " ");
-  };
-
-  Selector.prototype._formatValue = function(value){
-    var ret = {};
-    for(var prop in value){
-      var fmt_prop = Nehan.CssParser.formatProp(prop);
-      var fmt_value = Nehan.CssParser.formatValue(prop, value[prop]);
-      ret[fmt_prop] = fmt_value;
-    }
-    return ret;
   };
 
   return Selector;

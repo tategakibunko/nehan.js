@@ -94,19 +94,19 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"address":{
+	  //"section":true,
 	  "display":"inline",
-	  "font-style":"italic",
-	  "section":true
+	  "font-style":"italic"
 	},
 	"area":{
 	},
 	"article":{
-	  "display":"block",
-	  "section":true
+	  //"section":true,
+	  "display":"block"
 	},
 	"aside":{
-	  "display":"block",
-	  "section":true
+	  //"section":true,
+	  "display":"block"
 	},
 	"audio":{
 	},
@@ -128,7 +128,7 @@ Nehan.DefaultStyle = (function(){
 	"blockquote":{
 	  "color":"#666666",
 	  "display":"block",
-	  "section-root":true,
+	  //"section-root":true,
 	  "padding":{
 	    "start":"1em",
 	    "end":"1em",
@@ -143,22 +143,22 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "flow":"lr-tb",
 	  "box-sizing":"content-box",
-	  "section-root":true,
+	  //"section-root":true,
 	  "hanging-punctuation":"allow-end"
 	},
 	"br":{
 	  "display":"inline"
 	},
 	"button":{
-	  "display":"inline",
-	  "interactive":true
+	  //"interactive":true,
+	  "display":"inline"
 	},
 	//-------------------------------------------------------
 	// tag / c
 	//-------------------------------------------------------
 	"canvas":{
-	  "display":"inline",
-	  "embeddable":true
+	  //"embeddable":true,
+	  "display":"inline"
 	},
 	"caption":{
 	  "display":"table-caption",
@@ -200,8 +200,8 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"details":{
-	  "display":"block",
-	  "section-root":true
+	  //"section-root":true,
+	  "display":"block"
 	},
 	"dfn":{
 	  "display":"inline",
@@ -234,7 +234,7 @@ Nehan.DefaultStyle = (function(){
 	//-------------------------------------------------------
 	"fieldset":{
 	  "display":"block",
-	  "section-root":true,
+	  //"section-root":true,
 	  "padding":{
 	    "start":"1em",
 	    "end":"0.2em",
@@ -247,8 +247,8 @@ Nehan.DefaultStyle = (function(){
 	  "border-width":"1px"
 	},
 	"figure":{
-	  "display":"block",
-	  "section-root":true
+	  //"section-root":true,
+	  "display":"block"
 	},
 	"figcaption":{
 	  "display":"block",
@@ -256,8 +256,8 @@ Nehan.DefaultStyle = (function(){
 	  "font-size": "0.8em"
 	},
 	"footer":{
-	  "display":"block",
-	  "section":true
+	  //"section":true,
+	  "display":"block"
 	},
 	// need to define to keep compatibility.
 	"font":{
@@ -321,8 +321,8 @@ Nehan.DefaultStyle = (function(){
 	  "display":"none"
 	},
 	"header":{
-	  "display":"block",
-	  "section":true
+	  //"section":true,
+	  "display":"block"
 	},
 	"hr":{
 	  "display":"block",
@@ -351,8 +351,8 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"iframe":{
-	  "display":"block",
-	  "embeddable":true
+	  //"embeddable":true,
+	  "display":"block"
 	},
 	"ins":{
 	},
@@ -361,8 +361,8 @@ Nehan.DefaultStyle = (function(){
 	  //"box-sizing":"content-box"
 	},
 	"input":{
-	  "display":"inline",
-	  "interactive":true
+	  //"interactive":true,
+	  "display":"inline"
 	},
 	//-------------------------------------------------------
 	// tag / k
@@ -390,7 +390,7 @@ Nehan.DefaultStyle = (function(){
 	  }
 	},
 	"link":{
-	  "meta":true
+	  //"meta":true
 	},
 	//-------------------------------------------------------
 	// tag / m
@@ -407,7 +407,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block"
 	},
 	"meta":{
-	  "meta":true
+	  //"meta":true
 	},
 	"meter":{
 	  "display":"inline"
@@ -416,18 +416,18 @@ Nehan.DefaultStyle = (function(){
 	// tag / n
 	//-------------------------------------------------------
 	"nav":{
-	  "display":"block",
-	  "section":true
+	  //"section":true,
+	  "display":"block"
 	},
 	"noscript":{
-	  "meta":true
+	  //"meta":true
 	},
 	//-------------------------------------------------------
 	// tag / o
 	//-------------------------------------------------------
 	"object":{
-	  "display":"inline",
-	  "embeddable":true
+	  //"embeddable":true,
+	  "display":"inline"
 	},
 	"ol":{
 	  "display":"block",
@@ -495,12 +495,12 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"script":{
-	  "display":"inline",
-	  "meta":true
+	  //"meta":true,
+	  "display":"inline"
 	},
 	"section":{
-	  "display":"block",
-	  "section":true
+	  //"section":true,
+	  "display":"block"
 	},
 	"select":{
 	},
@@ -518,8 +518,8 @@ Nehan.DefaultStyle = (function(){
 	  "font-weight":"bold"
 	},
 	"style":{
-	  "display":"inline",
-	  "meta":true
+	  //"meta":true,
+	  "display":"inline"
 	},
 	"sub":{
 	  "display":"inine"
@@ -535,7 +535,7 @@ Nehan.DefaultStyle = (function(){
 	//-------------------------------------------------------
 	"table":{
 	  "display":"table",
-	  "embeddable":true,
+	  //"embeddable":true,
 	  "table-layout":"fixed",
 	  //"table-layout":"auto",
 	  "background-color":"white",
@@ -556,7 +556,7 @@ Nehan.DefaultStyle = (function(){
 	},
 	"td":{
 	  "display":"table-cell",
-	  "section-root":true,
+	  //"section-root":true,
 	  "border-width":"1px",
 	  "border-color":"#a8a8a8",
 	  "border-collapse":"inherit",
@@ -569,9 +569,9 @@ Nehan.DefaultStyle = (function(){
 	  }
 	},
 	"textarea":{
-	  "display":"inline",
-	  "embeddable":true,
-	  "interactive":true
+	  //"embeddable":true,
+	  //"interactive":true,
+	  "display":"inline"
 	},
 	"tfoot":{
 	  "display":"table-footer-group",
@@ -608,7 +608,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"title":{
-	  "meta":true
+	  //"meta":true
 	},
 	"tr":{
 	  "display":"table-row",
@@ -641,8 +641,8 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"video":{
-	  "display":"inline",
-	  "embeddable":true
+	  //"embeddable":true,
+	  "display":"inline"
 	},
 	//-------------------------------------------------------
 	// tag / w

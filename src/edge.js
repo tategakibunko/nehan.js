@@ -1,11 +1,11 @@
 Nehan.Edge = (function(){
   /**
-     @memberof Nehan
-     @class Edge
-     @classdesc abstraction of physical edge size for each css directions(top, right, bottom, left).
-     @constructor
-     @param type {String} - "margin" or "padding" or "border"
-  */
+   @memberof Nehan
+   @class Edge
+   @classdesc abstraction of physical edge size for each css directions(top, right, bottom, left).
+   @constructor
+   @param type {String} - "margin" or "padding" or "border"
+   */
   function Edge(type){
     this._type = type;
     this.top = 0;

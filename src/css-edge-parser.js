@@ -1,5 +1,7 @@
-Nehan.EdgeParser = (function(){
-
+/**
+ @namespace Nehan.CssEdgeParser
+ */
+Nehan.CssEdgeParser = (function(){
   var __parse_edge_array = function(ary){
     switch(ary.length){
     case 0:  return {};
@@ -10,42 +12,25 @@ Nehan.EdgeParser = (function(){
     }
   };
 
-  // margin-start => margin
-  var __get_normal_prop = function(prop){
-    return Nehan.Const.cssLogicalBoxDirs.reduce(function(result, dir){
-      return result.replace("-" + dir, "");
-    }, prop);
-  };
-
-  // margin-start => start
-  var __get_direct_dir = function(prop){
-    return Nehan.List.find(Nehan.Const.cssLogicalBoxDirs, function(dir){
-      return prop.indexOf(dir) > 0;
-    }) || "";
-  };
-
-  // ("start", "1em") => {start:"1em"}
-  var __init_direct_dir = function(dir, value){
-    var ret = {};
-    ret[dir] = value;
-    return ret;
-  };
-
   return {
-    // "margin-start" => "margin"
-    // "margin" => "margin"
-    formatProp : function(prop){
-      return __get_normal_prop(prop);
-    },
-    // ("margin-start", "1em") => {start:"1em"}
-    // ("margin", "1em") => {before:"1em", end:"1em", after:"1em", start:"1em"}
-    formatValue : function(prop, value){
-      var direct_dir = __get_direct_dir(prop);
+    /**
+     @memberof Nehan.CssEdgeParser
+     @param css_prop {Nehan.CssProp}
+     @return {Object} - css value
+     */
+    formatValue : function(css_prop, value){
+      var direct_dir = css_prop.getAttr();
+      // ("margin-start", "1em") => {start:"1em"}
       if(direct_dir){
-	return __init_direct_dir(direct_dir, this.parseUnit(value));
+	return Nehan.Obj.createOne(direct_dir, this.parseUnit(value));
       }
       return this.parseSet(value);
     },
+    /**
+     @memberof Nehan.CssEdgeParser
+     @param value {Object|String|Number|Array|Function}
+     @return {Object|String|Function|Number} - css value
+     */
     parseUnit: function(value){
       if(typeof value === "number"){
 	return String(value);
@@ -53,14 +38,25 @@ Nehan.EdgeParser = (function(){
       if(typeof value === "string"){
 	return value;
       }
+      if(typeof value === "function"){
+	return value;
+      }
       console.error("Edge::parseUnit, invalid value:%o", value);
-      throw "EdgeParser::parseUnit(invalid format)";
+      throw "CssEdgeParser::parseUnit(invalid format)";
     },
+    /**
+     @memberof Nehan.CssEdgeParser
+     @param value {Object|String|Number|Array|Function}
+     @return {Object} - css values
+     */
     parseSet: function(value){
       if(value instanceof Array){
 	return __parse_edge_array(value);
       }
       if(typeof value === "object"){
+	return value;
+      }
+      if(typeof value === "function"){
 	return value;
       }
       if(typeof value === "string"){
@@ -74,7 +70,7 @@ Nehan.EdgeParser = (function(){
 	return __parse_edge_array(value.split(" "));
       }
       console.error("Edge::parseSet, invalid value:%o", value);
-      throw "EdgeParser::parseSet(invalid format)";
+      throw "CssEdgeParser::parseSet(invalid format)";
     }
   };
 })();
