@@ -2520,10 +2520,9 @@ Nehan.CssEdgeParser = (function(){
      @return {Object} - css value
      */
     formatValue : function(css_prop, value){
-      var direct_dir = css_prop.getAttr();
       // ("margin-start", "1em") => {start:"1em"}
-      if(direct_dir){
-	return Nehan.Obj.createOne(direct_dir, this.parseUnit(value));
+      if(css_prop.hasAttr()){
+	return Nehan.Obj.createOne(css_prop.getAttr(), this.parseUnit(value));
       }
       return this.parseSet(value);
     },
@@ -2577,9 +2576,9 @@ Nehan.CssEdgeParser = (function(){
 })();
 
 /**
- @namespace Nehan.CssCornerParser
+ @namespace Nehan.CssBorderRadiusParser
  */
-Nehan.CssCornerParser = (function(){
+Nehan.CssBorderRadiusParser = (function(){
   var __split_slash = function(value){
     return (value.indexOf("/") < 0)? [value] : value.split("/");
   };
@@ -2649,9 +2648,8 @@ Nehan.CssCornerParser = (function(){
 
   return {
     formatValue : function(css_prop, value){
-      var direct_corner = css_prop.getAttr();
-      if(direct_corner){
-	return Nehan.Obj.createOne(direct_corner, this.parseUnit(value));
+      if(css_prop.hasAttr()){
+	return Nehan.Obj.createOne(css_prop.getAttr(), this.parseUnit(value));
       }
       return this.parseSet(value);
     },
@@ -2664,8 +2662,47 @@ Nehan.CssCornerParser = (function(){
   };
 })();
 
-Nehan.CssProp = (function(){
+Nehan.CssListStyleParser = (function(){
+  return {
+    /**
+     @memberof Nehan.CssListStyleParser
+     @param css_prop {Nehan.CssProp}
+     @return {Object} - css value
+     */
+    formatValue: function(css_prop, value){
+      if(css_prop.hasAttr()){
+	return Nehan.Obj.createOne(css_prop.getAttr(), this.parseUnit(value));
+      }
+      return this.parseSet(value);
+    },
+    parseUnit : function(value){
+      return value;
+    },
+    parseSet: function(value){
+      if(typeof value === "object"){
+	return value;
+      }
+      return this.parseSetString(value);
+    },
+    parseSetString: function(value){
+      var list_style = {};
+      var values = Nehan.Utils.splitSpace(value);
+      var arg_len = values.length;
+      if(arg_len >= 1){
+	list_style.type = values[0];
+      }
+      if(arg_len >= 2){
+	list_style.image = values[1];
+      }
+      if(arg_len >= 3){
+	list_style.position = values[2];
+      }
+      return list_style;
+    }
+  };
+})();
 
+Nehan.CssProp = (function(){
   var __attr_props = {
     // margin
     "margin-before":{name:"margin", attr:"before"},
@@ -2701,7 +2738,12 @@ Nehan.CssProp = (function(){
     "border-before-start-radius":{name:"border-radius", attr:"before-start"},
     "border-before-end-radius":{name:"border-radius", attr:"before-end"},
     "border-after-end-radius":{name:"border-radius", attr:"after-end"},
-    "border-after-start-radius":{name:"border-radius", attr:"after-start"}
+    "border-after-start-radius":{name:"border-radius", attr:"after-start"},
+
+    // list-style
+    "list-style-position":{name:"list-style", attr:"position"},
+    "list-style-type":{name:"list-style", attr:"type"},
+    "list-style-image":{name:"list-style", attr:"image"}
   };
 
   /**
@@ -2735,6 +2777,14 @@ Nehan.CssProp = (function(){
    */
   CssProp.prototype.getAttr = function(){
     return this.attr;
+  };
+
+  /**
+   @memberof Nehan.CssProp
+   @return {bool}
+   */
+  CssProp.prototype.hasAttr = function(){
+    return this.attr !== null;
   };
 
   return CssProp;
@@ -2823,7 +2873,9 @@ Nehan.CssParser = (function(){
       case "border-color":
 	return new Nehan.CssEntry(fmt_prop, Nehan.CssEdgeParser.formatValue(fmt_prop, value));
       case "border-radius":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssCornerParser.formatValue(fmt_prop, value));
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssBorderRadiusParser.formatValue(fmt_prop, value));
+      case "list-style":
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssListStyleParser.formatValue(fmt_prop, value));
       default:
 	return new Nehan.CssEntry(fmt_prop, __normalize_value(value));
       }

@@ -40,7 +40,9 @@ Nehan.CssParser = (function(){
       case "border-color":
 	return new Nehan.CssEntry(fmt_prop, Nehan.CssEdgeParser.formatValue(fmt_prop, value));
       case "border-radius":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssCornerParser.formatValue(fmt_prop, value));
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssBorderRadiusParser.formatValue(fmt_prop, value));
+      case "list-style":
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssListStyleParser.formatValue(fmt_prop, value));
       default:
 	return new Nehan.CssEntry(fmt_prop, __normalize_value(value));
       }

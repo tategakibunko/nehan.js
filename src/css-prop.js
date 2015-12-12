@@ -1,5 +1,4 @@
 Nehan.CssProp = (function(){
-
   var __attr_props = {
     // margin
     "margin-before":{name:"margin", attr:"before"},
@@ -35,7 +34,12 @@ Nehan.CssProp = (function(){
     "border-before-start-radius":{name:"border-radius", attr:"before-start"},
     "border-before-end-radius":{name:"border-radius", attr:"before-end"},
     "border-after-end-radius":{name:"border-radius", attr:"after-end"},
-    "border-after-start-radius":{name:"border-radius", attr:"after-start"}
+    "border-after-start-radius":{name:"border-radius", attr:"after-start"},
+
+    // list-style
+    "list-style-position":{name:"list-style", attr:"position"},
+    "list-style-type":{name:"list-style", attr:"type"},
+    "list-style-image":{name:"list-style", attr:"image"}
   };
 
   /**
@@ -69,6 +73,14 @@ Nehan.CssProp = (function(){
    */
   CssProp.prototype.getAttr = function(){
     return this.attr;
+  };
+
+  /**
+   @memberof Nehan.CssProp
+   @return {bool}
+   */
+  CssProp.prototype.hasAttr = function(){
+    return this.attr !== null;
   };
 
   return CssProp;

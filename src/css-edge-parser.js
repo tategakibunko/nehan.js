@@ -19,10 +19,9 @@ Nehan.CssEdgeParser = (function(){
      @return {Object} - css value
      */
     formatValue : function(css_prop, value){
-      var direct_dir = css_prop.getAttr();
       // ("margin-start", "1em") => {start:"1em"}
-      if(direct_dir){
-	return Nehan.Obj.createOne(direct_dir, this.parseUnit(value));
+      if(css_prop.hasAttr()){
+	return Nehan.Obj.createOne(css_prop.getAttr(), this.parseUnit(value));
       }
       return this.parseSet(value);
     },

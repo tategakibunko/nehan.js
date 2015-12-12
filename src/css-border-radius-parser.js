@@ -1,7 +1,7 @@
 /**
- @namespace Nehan.CssCornerParser
+ @namespace Nehan.CssBorderRadiusParser
  */
-Nehan.CssCornerParser = (function(){
+Nehan.CssBorderRadiusParser = (function(){
   var __split_slash = function(value){
     return (value.indexOf("/") < 0)? [value] : value.split("/");
   };
@@ -71,9 +71,8 @@ Nehan.CssCornerParser = (function(){
 
   return {
     formatValue : function(css_prop, value){
-      var direct_corner = css_prop.getAttr();
-      if(direct_corner){
-	return Nehan.Obj.createOne(direct_corner, this.parseUnit(value));
+      if(css_prop.hasAttr()){
+	return Nehan.Obj.createOne(css_prop.getAttr(), this.parseUnit(value));
       }
       return this.parseSet(value);
     },

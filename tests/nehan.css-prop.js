@@ -7,5 +7,14 @@ describe("Nehan::CssProp", function(){
   it("CssProp.getAttr", function(){
     expect(new Nehan.CssProp("margin").getAttr()).toBe(null);
     expect(new Nehan.CssProp("margin-start").getAttr()).toBe("start");
+    expect(new Nehan.CssProp("list-style-type").getAttr()).toBe("type");
+    expect(new Nehan.CssProp("list-style-image").getAttr()).toBe("image");
+    expect(new Nehan.CssProp("list-style-position").getAttr()).toBe("position");
+    expect(new Nehan.CssProp("border-before-start-radius").getAttr()).toBe("before-start");
+  });
+
+  it("CssProp.hasAttr", function(){
+    expect(new Nehan.CssProp("margin").hasAttr()).toBe(false);
+    expect(new Nehan.CssProp("margin-start").hasAttr()).toBe(true);
   });
 });
