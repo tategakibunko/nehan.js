@@ -1600,15 +1600,11 @@ Nehan.Style = (function(){
   };
 
   Style.prototype._loadListStyle = function(){
-    var list_style_type = this.getCssAttr("list-style-type", "none");
-    if(list_style_type === "none"){
+    var list_style = this.getCssAttr("list-style", null);
+    if(list_style === null){
       return null;
     }
-    return new Nehan.ListStyle({
-      type:list_style_type,
-      position:this.getCssAttr("list-style-position", "outside"),
-      image:this.getCssAttr("list-style-image", "none")
-    });
+    return new Nehan.ListStyle(list_style);
   };
 
   Style.prototype._loadLetterSpacing = function(font_size){

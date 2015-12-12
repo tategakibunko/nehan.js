@@ -13,7 +13,7 @@ Nehan.ListStyle = (function(){
     opt = opt || {};
     this.type = new Nehan.ListStyleType(opt.type || "none");
     this.position = new Nehan.ListStylePos(opt.position || "outside");
-    this.image = (opt.image !== "none")? new Nehan.ListStyleImage(opt.image) : null;
+    this.image = (!opt.image || opt.image === "none")? null : new Nehan.ListStyleImage(opt.image);
   }
 
   /**

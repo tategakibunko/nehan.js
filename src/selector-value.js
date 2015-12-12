@@ -13,7 +13,14 @@ Nehan.SelectorValue = (function(){
     var fmt_entries = {};
     for(var prop in entries){
       var entry = Nehan.CssParser.formatEntry(prop, entries[prop]);
-      fmt_entries[entry.getPropName()] = entry.getValue();
+      var fmt_prop = entry.getPropName();
+      var fmt_value = entry.getValue();
+      var old_value = fmt_entries[fmt_prop];
+      if(old_value && typeof old_value === "object" && typeof fmt_value === "object"){
+	Nehan.Args.copy(old_value, fmt_value);
+      } else {
+	fmt_entries[fmt_prop] = fmt_value;
+      }
     }
     return fmt_entries;
   };

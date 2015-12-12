@@ -3552,7 +3552,14 @@ Nehan.SelectorValue = (function(){
     var fmt_entries = {};
     for(var prop in entries){
       var entry = Nehan.CssParser.formatEntry(prop, entries[prop]);
-      fmt_entries[entry.getPropName()] = entry.getValue();
+      var fmt_prop = entry.getPropName();
+      var fmt_value = entry.getValue();
+      var old_value = fmt_entries[fmt_prop];
+      if(old_value && typeof old_value === "object" && typeof fmt_value === "object"){
+	Nehan.Args.copy(old_value, fmt_value);
+      } else {
+	fmt_entries[fmt_prop] = fmt_value;
+      }
     }
     return fmt_entries;
   };
@@ -9380,7 +9387,7 @@ Nehan.ListStyle = (function(){
     opt = opt || {};
     this.type = new Nehan.ListStyleType(opt.type || "none");
     this.position = new Nehan.ListStylePos(opt.position || "outside");
-    this.image = (opt.image !== "none")? new Nehan.ListStyleImage(opt.image) : null;
+    this.image = (!opt.image || opt.image === "none")? null : new Nehan.ListStyleImage(opt.image);
   }
 
   /**
@@ -14732,15 +14739,11 @@ Nehan.Style = (function(){
   };
 
   Style.prototype._loadListStyle = function(){
-    var list_style_type = this.getCssAttr("list-style-type", "none");
-    if(list_style_type === "none"){
+    var list_style = this.getCssAttr("list-style", null);
+    if(list_style === null){
       return null;
     }
-    return new Nehan.ListStyle({
-      type:list_style_type,
-      position:this.getCssAttr("list-style-position", "outside"),
-      image:this.getCssAttr("list-style-image", "none")
-    });
+    return new Nehan.ListStyle(list_style);
   };
 
   Style.prototype._loadLetterSpacing = function(font_size){
