@@ -15,11 +15,12 @@ Nehan.Display = {
    @return {Nehan.BoxFlow}
    */
   getStdFont : function(){
-    var font = new Nehan.Font(Nehan.Config.defaultFontSize);
-    font.family = Nehan.Config.defaultFontFamily;
-    font.weight = "normal";
-    font.style = "normal";
-    return font;
+    return new Nehan.Font({
+      size:Nehan.Config.defaultFontSize,
+      family:Nehan.Config.defaultFontFamily,
+      weight:"normal",
+      style:"normal"
+    });
   },
   /**
    @memberof Nehan.Display

@@ -404,11 +404,12 @@ Nehan.Display = {
    @return {Nehan.BoxFlow}
    */
   getStdFont : function(){
-    var font = new Nehan.Font(Nehan.Config.defaultFontSize);
-    font.family = Nehan.Config.defaultFontFamily;
-    font.weight = "normal";
-    font.style = "normal";
-    return font;
+    return new Nehan.Font({
+      size:Nehan.Config.defaultFontSize,
+      family:Nehan.Config.defaultFontFamily,
+      weight:"normal",
+      style:"normal"
+    });
   },
   /**
    @memberof Nehan.Display
@@ -14592,7 +14593,7 @@ Nehan.Style = (function(){
       font.size = this._computeFontSize(font.size, parent_font.size);
     }
     // if all inherited, not required to create new one.
-    if(font.isEqual(parent_font)){
+    if(!this.isRoot() && font.isEqual(parent_font)){
       return null;
     }
     //console.log("size:%d, family:%s, weight:%s, style:%s", font.size, font.family, font.weight, font.style);

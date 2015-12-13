@@ -1407,7 +1407,7 @@ Nehan.Style = (function(){
       font.size = this._computeFontSize(font.size, parent_font.size);
     }
     // if all inherited, not required to create new one.
-    if(font.isEqual(parent_font)){
+    if(!this.isRoot() && font.isEqual(parent_font)){
       return null;
     }
     //console.log("size:%d, family:%s, weight:%s, style:%s", font.size, font.family, font.weight, font.style);
