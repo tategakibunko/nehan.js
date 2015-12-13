@@ -1,4 +1,21 @@
 Nehan.CssListStyleParser = (function(){
+  var __parse_string = function(str){
+    str = Nehan.Utils.trim(str).replace(/\s+/g, " ").replace(/;/g, "");
+    var list_style = {};
+    var values = Nehan.Utils.splitBySpace(str);
+    var arg_len = values.length;
+    if(arg_len >= 1){
+      list_style.type = values[0];
+    }
+    if(arg_len >= 2){
+      list_style.image = values[1];
+    }
+    if(arg_len >= 3){
+      list_style.position = values[2];
+    }
+    return list_style;
+  };
+
   return {
     /**
      @memberof Nehan.CssListStyleParser
@@ -18,22 +35,7 @@ Nehan.CssListStyleParser = (function(){
       if(typeof value === "object"){
 	return value;
       }
-      return this.parseSetString(value);
-    },
-    parseSetString: function(value){
-      var list_style = {};
-      var values = Nehan.Utils.splitSpace(value);
-      var arg_len = values.length;
-      if(arg_len >= 1){
-	list_style.type = values[0];
-      }
-      if(arg_len >= 2){
-	list_style.image = values[1];
-      }
-      if(arg_len >= 3){
-	list_style.position = values[2];
-      }
-      return list_style;
+      return __parse_string(value);
     }
   };
 })();

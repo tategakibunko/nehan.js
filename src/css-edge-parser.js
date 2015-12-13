@@ -59,14 +59,11 @@ Nehan.CssEdgeParser = (function(){
 	return value;
       }
       if(typeof value === "string"){
-	value = String(value).replace(/^\s+/, "").replace(/\s+$/, "").replace(/\s+/g, " ");
+	value = Nehan.Utils.normalizeCssValueStr(value);
 	if(value === ""){
 	  return {};
 	}
-	if(value.indexOf(" ") < 0){
-	  return __parse_edge_array([value]);
-	}
-	return __parse_edge_array(value.split(" "));
+	return __parse_edge_array(Nehan.Utils.splitBySpace(value));
       }
       console.error("Edge::parseSet, invalid value:%o", value);
       throw "CssEdgeParser::parseSet(invalid format)";

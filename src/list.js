@@ -307,6 +307,22 @@ Nehan.List = {
       ret.push(obj);
     });
     return ret;
+  },
+  /**
+   @memberof Nehan.List
+   @param props {Array}
+   @param values {Array}
+   @return {Object}
+  */
+  object : function(props, values){
+    var obj = {};
+    if(props.length !== values.length){
+      throw "invalid args:Nehan.Obj.zipArray";
+    }
+    for(var i = 0; i < props.length; i++){
+      obj[props[i]] = values[i];
+    }
+    return obj;
   }
 };
 

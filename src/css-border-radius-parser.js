@@ -2,73 +2,75 @@
  @namespace Nehan.CssBorderRadiusParser
  */
 Nehan.CssBorderRadiusParser = (function(){
-  var __split_slash = function(value){
-    return (value.indexOf("/") < 0)? [value] : value.split("/");
-  };
-
-  var __get_map_2d = function(len){
-    return Nehan.Const.css2dIndex[Math.min(len, 2)] || [];
-  };
-
-  var __get_map_4d = function(len){
-    return Nehan.Const.css4dIndex[Math.min(len, 4)] || [];
-  };
-
-  // props: [a,b,c]
-  // values:[1,2,3]
-  // => {a:1, b:2, c:3}
-  var __zip_obj = function(props, values){
-    var ret = {};
-    if(props.length !== values.length){
-      throw "invalid args:__zip_obj";
-    }
-    Nehan.List.iter(props, function(prop, i){
-      ret[prop] = values[i];
-    });
-    return ret;
-  };
-
   // values:[a,b]
-  // map: [0,1,0,1]
+  // indecies: [0,1,0,1]
   // => [values[0], values[1], values[0], values[1]]
   // => [a, b, a, b]
-  var __make_values_by_map = function(values, map){
-    return map.map(function(index){
+  var __map_index = function(values, indecies){
+    return indecies.map(function(index){
       return values[index];
     });
   };
 
   // values:[0] => [0,0]
   // values:[0,1] => [0,1]
-  var __make_values_2d = function(values){
-    var map = __get_map_2d(values.length);
-    return __make_values_by_map(values, map);
+  var __extend2 = function(values){
+    var indecies = Nehan.Const.css2dIndex[Math.min(values.length, 2)] || [];
+    return __map_index(values, indecies);
   };
 
   // values:[0] => [0,0,0,0],
   // values:[0,1] => [0,1,0,1]
   // values:[0,1,2] => [0,1,2,1]
   // values:[0,1,2,3] => [0,1,2,3]
-  var __make_values_4d = function(values){
-    var map = __get_map_4d(values.length);
-    return __make_values_by_map(values, map);
+  var __extend4 = function(values){
+    var indecies = Nehan.Const.css4dIndex[Math.min(values.length, 4)] || [];
+    return __map_index(values, indecies);
   };
 
-  var __make_corner_4d = function(values){
-    var props = Nehan.Const.cssLogicalBoxCorners; // len = 4
-    var values_4d = __make_values_4d(values); // len = 4
-    return __zip_obj(props, values_4d);
+  var __obj_of_array = function(ary){
+    return Nehan.List.object(Nehan.Const.cssLogicalBoxCorners, ary);
   };
 
-  var __parse_corner_4d = function(value){
-    var values_2d = __make_values_2d(__split_slash(value));
-    var values_4d_2d = values_2d.map(function(val){
-      return __make_values_4d(Nehan.Utils.splitSpace(val));
+  var __parse_str = function(str){
+    if(str === ""){
+      return {};
+    }
+    var xy = Nehan.Utils.splitBy(str, "/");
+    var values_2d = __extend2(xy);
+    var values_2x4d = values_2d.map(function(x_or_y_str){
+      var x_or_y = Nehan.Utils.splitBySpace(x_or_y_str);
+      return __extend4(x_or_y);
     });
-    var values = Nehan.List.zip(values_4d_2d[0], values_4d_2d[1]);
-    return __make_corner_4d(values);
+    var values = Nehan.List.zip(values_2x4d[0], values_2x4d[1]);
+    return __obj_of_array(values);
   };
 
+  // [1]           -> [[1,1], [1,1], [1,1], [1,1]]
+  // [1,2]         -> [[1,1], [2,2], [1,1], [2,2]]
+  // [[1],[2]]     -> [[1,2], [1,2], [1,2], [1,2]]
+  // [[1,2],[3,4]] -> [[1,3], [2,4], [1,3], [2,4]]
+  var __parse_array = function(ary){
+    if(ary.length === 0){
+      return {};
+    }
+    // array of array
+    if(ary[0] instanceof Array){
+      ary = ary.map(function(a){ return a.map(function(ax){ return ax.toString(); }); });
+      var v2x4d = __extend2(ary.map(__extend4));
+      return __obj_of_array(Nehan.List.zip(v2x4d[0], v2x4d[1]));
+    }
+    ary = ary.map(function(a){ return a.toString(); });
+    return __obj_of_array(__extend4(ary.map(__extend2)));
+  };
+
+  var __normalize_value = function(value){
+    if(typeof value === "string"){
+      return Nehan.Utils.normalizeCssValueStr(value);
+    }
+    return value;
+  };
+  
   return {
     formatValue : function(css_prop, value){
       if(css_prop.hasAttr()){
@@ -77,10 +79,22 @@ Nehan.CssBorderRadiusParser = (function(){
       return this.parseSet(value);
     },
     parseUnit: function(value){
-      return __make_values_2d(__split_slash(value));
+      value = __normalize_value(value);
+      return __extend2(Nehan.Utils.splitBy(value, "/"));
     },
     parseSet: function(value){
-      return __parse_corner_4d(value);
+      value = __normalize_value(value);
+      if(value instanceof Array){
+	return __parse_array(value);
+      }
+      if(typeof value === "object"){
+	return value;
+      }
+      if(typeof value === "string"){
+	return __parse_str(value);
+      }
+      console.error("invalid border-radius:%o", value);
+      return {};
     }
   };
 })();

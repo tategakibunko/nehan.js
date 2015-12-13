@@ -1041,6 +1041,22 @@ Nehan.List = {
       ret.push(obj);
     });
     return ret;
+  },
+  /**
+   @memberof Nehan.List
+   @param props {Array}
+   @param values {Array}
+   @return {Object}
+  */
+  object : function(props, values){
+    var obj = {};
+    if(props.length !== values.length){
+      throw "invalid args:Nehan.Obj.zipArray";
+    }
+    for(var i = 0; i < props.length; i++){
+      obj[props[i]] = values[i];
+    }
+    return obj;
   }
 };
 
@@ -1201,21 +1217,21 @@ Nehan.Obj = (function(){
 })();
 
 /**
-   misc utility module.
+ misc utility module.
 
-   @namespace Nehan.Utils
-*/
+ @namespace Nehan.Utils
+ */
 Nehan.Utils = {
   /**
-     convert [decial] number by [base]
+   convert [decial] number by [base]
 
-     @memberof Nehan.Utils
-     @param deciaml {int}
-     @param base {int}
-     @return {int}
-  */
+   @memberof Nehan.Utils
+   @param deciaml {int}
+   @param base {int}
+   @return {int}
+   */
   convBase : function(decimal, base){
-   if(decimal === 0){
+    if(decimal === 0){
       return [0];
     }
     var ret = [];
@@ -1227,46 +1243,46 @@ Nehan.Utils = {
     return ret;
   },
   /**
-     @memberof Nehan.Utils
-     @param str {String}
-  */
+   @memberof Nehan.Utils
+   @param str {String}
+   */
   trimHeadCRLF : function(str){
     return str.replace(/^\n+/, "");
   },
   /**
-     @memberof Nehan.Utils
-     @param str {String}
-  */
+   @memberof Nehan.Utils
+   @param str {String}
+   */
   trimFootCRLF : function(str){
     return str.replace(/\n+$/, "");
   },
   /**
-     @memberof Nehan.Utils
-     @param str {String}
-  */
+   @memberof Nehan.Utils
+   @param str {String}
+   */
   trimCRLF : function(str){
     return this.trimFootCRLF(this.trimHeadCRLF(str));
   },
   /**
-     @memberof Nehan.Utils
-     @param str {String}
-  */
+   @memberof Nehan.Utils
+   @param str {String}
+   */
   trim : function(str){
     return str.replace(/^\s+/, "").replace(/\s+$/, "");
   },
   /**
-     @memberof Nehan.Utils
-     @param str {String}
-  */
+   @memberof Nehan.Utils
+   @param str {String}
+   */
   cutQuote : function(str){
     return str.replace(/['\"]/g, "");
   },
   /**
-     @memberof Nehan.Utils
-     @param str {String}
-     @example
-     * Nehan.Utils.capitalize("japan"); // "Japan"
-  */
+   @memberof Nehan.Utils
+   @param str {String}
+   @example
+   * Nehan.Utils.capitalize("japan"); // "Japan"
+   */
   capitalize : function(str){
     if(str === ""){
       return "";
@@ -1274,45 +1290,73 @@ Nehan.Utils = {
     return str.charAt(0).toUpperCase() + str.slice(1);
   },
   /**
-     @memberof Nehan.Utils
-     @param p1 {String}
-     @param p2 {String}
-     @example
-     * Nehan.Utils.filenameConcat("/path/to", "foo"); // "/path/to/foo"
-     * Nehan.Utils.filenameConcat("/path/to/", "foo"); // "/path/to/foo"
-  */
+   @memberof Nehan.Utils
+   @param p1 {String}
+   @param p2 {String}
+   @example
+   * Nehan.Utils.filenameConcat("/path/to", "foo"); // "/path/to/foo"
+   * Nehan.Utils.filenameConcat("/path/to/", "foo"); // "/path/to/foo"
+   */
   filenameConcat : function(p1, p2){
     p1 = (p1==="")? "" : (p1.slice(-1) === "/")? p1 : p1 + "/";
     p2 = (p2==="")? "" : (p2[0] === "/")? p2.substring(1, p2.length) : p2;
     return p1 + p2;
   },
   /**
-     @memberof Nehan.Utils
-     @param name {String}
-     @example
-     * Nehan.Utils.camelToChain("fontSize"); // "font-size"
-  */
+   @memberof Nehan.Utils
+   @param name {String}
+   @example
+   * Nehan.Utils.camelToChain("fontSize"); // "font-size"
+   */
   camelToChain : function(name){
     return name.replace(/([A-Z])/g, function(match, p1){
       return "-" + p1.toLowerCase();
     });
   },
   /**
-     @memberof Nehan.Utils
-     @param name {String}
-     @example
-     * Nehan.Utils.camelize("font-size"); // "fontSize"
-  */
+   @memberof Nehan.Utils
+   @param name {String}
+   @example
+   * Nehan.Utils.camelize("font-size"); // "fontSize"
+   */
   camelize : function(name){
     return (name.indexOf("-") < 0)? name : name.split("-").map(function(part, i){
       return (i === 0)? part : this.capitalize(part);
     }.bind(this)).join("");
   },
   /**
-     @memberof Nehan.Utils
-     @param str {String}
-  */
-  splitSpace : function(str){
+   @memberof Nehan.Utils
+   @param str {String}
+   @return {String}
+   */
+  normalizeCssValueStr : function(str){
+    return str
+      .replace(/;/g, "") // disable terminater
+      .replace(/^\s+/, "") // cut head space
+      .replace(/\s+$/, "") // cut tail space
+      .replace(/\s+/g, " ") // many space -> single space
+      .replace(/\s+\//g, "/") // cut space around slash before
+      .replace(/\/\s+/g, "/") // cut space around slash after
+    ;
+  },
+  /**
+   @memberof Nehan.Utils
+   @param str {String}
+   @param splitter {String}
+   @return {Array<String>}
+   */
+  splitBy : function(str, splitter){
+    if(str.indexOf(splitter) < 0){
+      return [str];
+    }
+    return str.split(splitter);
+  },
+  /**
+   @memberof Nehan.Utils
+   @param str {String}
+   @return {Array<String>}
+   */
+  splitBySpace : function(str){
     if(str.indexOf(" ") < 0){
       return [str];
     }
@@ -2560,14 +2604,11 @@ Nehan.CssEdgeParser = (function(){
 	return value;
       }
       if(typeof value === "string"){
-	value = String(value).replace(/^\s+/, "").replace(/\s+$/, "").replace(/\s+/g, " ");
+	value = Nehan.Utils.normalizeCssValueStr(value);
 	if(value === ""){
 	  return {};
 	}
-	if(value.indexOf(" ") < 0){
-	  return __parse_edge_array([value]);
-	}
-	return __parse_edge_array(value.split(" "));
+	return __parse_edge_array(Nehan.Utils.splitBySpace(value));
       }
       console.error("Edge::parseSet, invalid value:%o", value);
       throw "CssEdgeParser::parseSet(invalid format)";
@@ -2579,73 +2620,75 @@ Nehan.CssEdgeParser = (function(){
  @namespace Nehan.CssBorderRadiusParser
  */
 Nehan.CssBorderRadiusParser = (function(){
-  var __split_slash = function(value){
-    return (value.indexOf("/") < 0)? [value] : value.split("/");
-  };
-
-  var __get_map_2d = function(len){
-    return Nehan.Const.css2dIndex[Math.min(len, 2)] || [];
-  };
-
-  var __get_map_4d = function(len){
-    return Nehan.Const.css4dIndex[Math.min(len, 4)] || [];
-  };
-
-  // props: [a,b,c]
-  // values:[1,2,3]
-  // => {a:1, b:2, c:3}
-  var __zip_obj = function(props, values){
-    var ret = {};
-    if(props.length !== values.length){
-      throw "invalid args:__zip_obj";
-    }
-    Nehan.List.iter(props, function(prop, i){
-      ret[prop] = values[i];
-    });
-    return ret;
-  };
-
   // values:[a,b]
-  // map: [0,1,0,1]
+  // indecies: [0,1,0,1]
   // => [values[0], values[1], values[0], values[1]]
   // => [a, b, a, b]
-  var __make_values_by_map = function(values, map){
-    return map.map(function(index){
+  var __map_index = function(values, indecies){
+    return indecies.map(function(index){
       return values[index];
     });
   };
 
   // values:[0] => [0,0]
   // values:[0,1] => [0,1]
-  var __make_values_2d = function(values){
-    var map = __get_map_2d(values.length);
-    return __make_values_by_map(values, map);
+  var __extend2 = function(values){
+    var indecies = Nehan.Const.css2dIndex[Math.min(values.length, 2)] || [];
+    return __map_index(values, indecies);
   };
 
   // values:[0] => [0,0,0,0],
   // values:[0,1] => [0,1,0,1]
   // values:[0,1,2] => [0,1,2,1]
   // values:[0,1,2,3] => [0,1,2,3]
-  var __make_values_4d = function(values){
-    var map = __get_map_4d(values.length);
-    return __make_values_by_map(values, map);
+  var __extend4 = function(values){
+    var indecies = Nehan.Const.css4dIndex[Math.min(values.length, 4)] || [];
+    return __map_index(values, indecies);
   };
 
-  var __make_corner_4d = function(values){
-    var props = Nehan.Const.cssLogicalBoxCorners; // len = 4
-    var values_4d = __make_values_4d(values); // len = 4
-    return __zip_obj(props, values_4d);
+  var __obj_of_array = function(ary){
+    return Nehan.List.object(Nehan.Const.cssLogicalBoxCorners, ary);
   };
 
-  var __parse_corner_4d = function(value){
-    var values_2d = __make_values_2d(__split_slash(value));
-    var values_4d_2d = values_2d.map(function(val){
-      return __make_values_4d(Nehan.Utils.splitSpace(val));
+  var __parse_str = function(str){
+    if(str === ""){
+      return {};
+    }
+    var xy = Nehan.Utils.splitBy(str, "/");
+    var values_2d = __extend2(xy);
+    var values_2x4d = values_2d.map(function(x_or_y_str){
+      var x_or_y = Nehan.Utils.splitBySpace(x_or_y_str);
+      return __extend4(x_or_y);
     });
-    var values = Nehan.List.zip(values_4d_2d[0], values_4d_2d[1]);
-    return __make_corner_4d(values);
+    var values = Nehan.List.zip(values_2x4d[0], values_2x4d[1]);
+    return __obj_of_array(values);
   };
 
+  // [1]           -> [[1,1], [1,1], [1,1], [1,1]]
+  // [1,2]         -> [[1,1], [2,2], [1,1], [2,2]]
+  // [[1],[2]]     -> [[1,2], [1,2], [1,2], [1,2]]
+  // [[1,2],[3,4]] -> [[1,3], [2,4], [1,3], [2,4]]
+  var __parse_array = function(ary){
+    if(ary.length === 0){
+      return {};
+    }
+    // array of array
+    if(ary[0] instanceof Array){
+      ary = ary.map(function(a){ return a.map(function(ax){ return ax.toString(); }); });
+      var v2x4d = __extend2(ary.map(__extend4));
+      return __obj_of_array(Nehan.List.zip(v2x4d[0], v2x4d[1]));
+    }
+    ary = ary.map(function(a){ return a.toString(); });
+    return __obj_of_array(__extend4(ary.map(__extend2)));
+  };
+
+  var __normalize_value = function(value){
+    if(typeof value === "string"){
+      return Nehan.Utils.normalizeCssValueStr(value);
+    }
+    return value;
+  };
+  
   return {
     formatValue : function(css_prop, value){
       if(css_prop.hasAttr()){
@@ -2654,15 +2697,44 @@ Nehan.CssBorderRadiusParser = (function(){
       return this.parseSet(value);
     },
     parseUnit: function(value){
-      return __make_values_2d(__split_slash(value));
+      value = __normalize_value(value);
+      return __extend2(Nehan.Utils.splitBy(value, "/"));
     },
     parseSet: function(value){
-      return __parse_corner_4d(value);
+      value = __normalize_value(value);
+      if(value instanceof Array){
+	return __parse_array(value);
+      }
+      if(typeof value === "object"){
+	return value;
+      }
+      if(typeof value === "string"){
+	return __parse_str(value);
+      }
+      console.error("invalid border-radius:%o", value);
+      return {};
     }
   };
 })();
 
 Nehan.CssListStyleParser = (function(){
+  var __parse_string = function(str){
+    str = Nehan.Utils.trim(str).replace(/\s+/g, " ").replace(/;/g, "");
+    var list_style = {};
+    var values = Nehan.Utils.splitBySpace(str);
+    var arg_len = values.length;
+    if(arg_len >= 1){
+      list_style.type = values[0];
+    }
+    if(arg_len >= 2){
+      list_style.image = values[1];
+    }
+    if(arg_len >= 3){
+      list_style.position = values[2];
+    }
+    return list_style;
+  };
+
   return {
     /**
      @memberof Nehan.CssListStyleParser
@@ -2682,22 +2754,7 @@ Nehan.CssListStyleParser = (function(){
       if(typeof value === "object"){
 	return value;
       }
-      return this.parseSetString(value);
-    },
-    parseSetString: function(value){
-      var list_style = {};
-      var values = Nehan.Utils.splitSpace(value);
-      var arg_len = values.length;
-      if(arg_len >= 1){
-	list_style.type = values[0];
-      }
-      if(arg_len >= 2){
-	list_style.image = values[1];
-      }
-      if(arg_len >= 3){
-	list_style.position = values[2];
-      }
-      return list_style;
+      return __parse_string(value);
     }
   };
 })();
