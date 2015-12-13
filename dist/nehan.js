@@ -2557,6 +2557,43 @@ Nehan.CssEdgeParser = (function(){
     }
   };
 
+  var __parse_unit = function(value){
+    if(typeof value === "number"){
+      return String(value);
+    }
+    if(typeof value === "string"){
+      return value;
+    }
+    if(typeof value === "function"){
+      return value;
+    }
+    console.error("Edge::parseUnit, invalid value:%o", value);
+    throw "CssEdgeParser::parseUnit(invalid format)";
+  };
+
+  var __parse_set = function(value){
+    if(value instanceof Array){
+      return __parse_edge_array(value);
+    }
+    if(typeof value === "object"){
+      return value;
+    }
+    if(typeof value === "function"){
+      return value;
+    }
+    if(typeof value === "number"){
+      return __parse_set(value.toString());
+    }
+    if(typeof value === "string"){
+      if(value === "" || value === " "){
+	return {};
+      }
+      return __parse_edge_array(Nehan.Utils.splitBySpace(value));
+    }
+    console.error("Edge::parseSet, invalid value:%o", value);
+    throw "CssEdgeParser::parseSet(invalid format)";
+  };
+
   return {
     /**
      @memberof Nehan.CssEdgeParser
@@ -2566,52 +2603,9 @@ Nehan.CssEdgeParser = (function(){
     formatValue : function(css_prop, value){
       // ("margin-start", "1em") => {start:"1em"}
       if(css_prop.hasAttr()){
-	return Nehan.Obj.createOne(css_prop.getAttr(), this.parseUnit(value));
+	return Nehan.Obj.createOne(css_prop.getAttr(), __parse_unit(value));
       }
-      return this.parseSet(value);
-    },
-    /**
-     @memberof Nehan.CssEdgeParser
-     @param value {Object|String|Number|Array|Function}
-     @return {Object|String|Function|Number} - css value
-     */
-    parseUnit: function(value){
-      if(typeof value === "number"){
-	return String(value);
-      }
-      if(typeof value === "string"){
-	return value;
-      }
-      if(typeof value === "function"){
-	return value;
-      }
-      console.error("Edge::parseUnit, invalid value:%o", value);
-      throw "CssEdgeParser::parseUnit(invalid format)";
-    },
-    /**
-     @memberof Nehan.CssEdgeParser
-     @param value {Object|String|Number|Array|Function}
-     @return {Object} - css values
-     */
-    parseSet: function(value){
-      if(value instanceof Array){
-	return __parse_edge_array(value);
-      }
-      if(typeof value === "object"){
-	return value;
-      }
-      if(typeof value === "function"){
-	return value;
-      }
-      if(typeof value === "string"){
-	value = Nehan.Utils.normalizeCssValueStr(value);
-	if(value === ""){
-	  return {};
-	}
-	return __parse_edge_array(Nehan.Utils.splitBySpace(value));
-      }
-      console.error("Edge::parseSet, invalid value:%o", value);
-      throw "CssEdgeParser::parseSet(invalid format)";
+      return __parse_set(value);
     }
   };
 })();
@@ -2674,45 +2668,42 @@ Nehan.CssBorderRadiusParser = (function(){
     }
     // array of array
     if(ary[0] instanceof Array){
-      ary = ary.map(function(a){ return a.map(function(ax){ return ax.toString(); }); });
       var v2x4d = __extend2(ary.map(__extend4));
       return __obj_of_array(Nehan.List.zip(v2x4d[0], v2x4d[1]));
     }
-    ary = ary.map(function(a){ return a.toString(); });
     return __obj_of_array(__extend4(ary.map(__extend2)));
   };
 
-  var __normalize_value = function(value){
-    if(typeof value === "string"){
-      return Nehan.Utils.normalizeCssValueStr(value);
-    }
-    return value;
+  var __parse_unit = function(value){
+    return __extend2(Nehan.Utils.splitBy(value, "/"));
   };
-  
+
+  var __parse_set = function(value){
+    if(value instanceof Array){
+      return __parse_array(value);
+    }
+    if(typeof value === "object"){
+      return value;
+    }
+    if(typeof value === "string"){
+      return __parse_str(value);
+    }
+    console.error("invalid border-radius:%o", value);
+    return {};
+  };
+
   return {
+    /**
+     @memberof Nehan.CssBorderRadiusParser
+     @param css_prop {Nehan.CssProp}
+     @param value {Object} - unformatted css value object
+     @return {Object} - formatted css value object
+     */
     formatValue : function(css_prop, value){
       if(css_prop.hasAttr()){
-	return Nehan.Obj.createOne(css_prop.getAttr(), this.parseUnit(value));
+	return Nehan.Obj.createOne(css_prop.getAttr(), __parse_unit(value));
       }
-      return this.parseSet(value);
-    },
-    parseUnit: function(value){
-      value = __normalize_value(value);
-      return __extend2(Nehan.Utils.splitBy(value, "/"));
-    },
-    parseSet: function(value){
-      value = __normalize_value(value);
-      if(value instanceof Array){
-	return __parse_array(value);
-      }
-      if(typeof value === "object"){
-	return value;
-      }
-      if(typeof value === "string"){
-	return __parse_str(value);
-      }
-      console.error("invalid border-radius:%o", value);
-      return {};
+      return __parse_set(value);
     }
   };
 })();
@@ -2893,16 +2884,22 @@ Nehan.CssEntry = (function(){
 */
 Nehan.CssParser = (function(){
   var __normalize_value = function(value){
+    if(value instanceof Array){
+      return value.map(__normalize_value);
+    }
     if(typeof value === "function" || typeof value === "object"){
       return value;
     }
-    return Nehan.Utils.trim(String(value))
-      .replace(/\s+/, " ")
-      .replace(/;/g, "")
-      .replace(/\n/g, "");
+    if(typeof value === "number"){
+      return value.toString();
+    }
+    return Nehan.Utils.normalizeCssValueStr(value);
   };
 
   return {
+    normalizeValue : function(value){
+      return __normalize_value(value);
+    },
     /**
      @memberof Nehan.CssParser
      @param prop {String} - unformatted raw css property name
@@ -2916,25 +2913,26 @@ Nehan.CssParser = (function(){
     */
     formatEntry : function(prop, value){
       var fmt_prop = new Nehan.CssProp(prop);
+      var norm_value = __normalize_value(value);
       switch(fmt_prop.getName()){
       case "oncreate":
       case "onload":
       case "onblock":
       case "ontext":
       case "online":
-	return new Nehan.CssEntry(fmt_prop, value);
+	return new Nehan.CssEntry(fmt_prop, norm_value);
       case "margin":
       case "padding":
       case "border-width":
       case "border-style":
       case "border-color":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssEdgeParser.formatValue(fmt_prop, value));
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssEdgeParser.formatValue(fmt_prop, norm_value));
       case "border-radius":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssBorderRadiusParser.formatValue(fmt_prop, value));
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssBorderRadiusParser.formatValue(fmt_prop, norm_value));
       case "list-style":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssListStyleParser.formatValue(fmt_prop, value));
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssListStyleParser.formatValue(fmt_prop, norm_value));
       default:
-	return new Nehan.CssEntry(fmt_prop, __normalize_value(value));
+	return new Nehan.CssEntry(fmt_prop, norm_value);
       }
     }
   };

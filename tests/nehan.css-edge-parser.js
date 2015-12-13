@@ -1,52 +1,56 @@
+// note that string value are already formatted(cut space, cut space around slash ... etc).
 describe("Nehan::CssEdgeParser", function(){
-  it("CssEdgeParser.parseUnit", function(){
-    expect(Nehan.CssEdgeParser.parseUnit("0")).toBe("0");
-    expect(Nehan.CssEdgeParser.parseUnit(0)).toBe("0");
+  var prop = new Nehan.CssProp("margin");
+  var zero_edge = {before:"0", end:"0", after:"0", start:"0"};
+
+  it("CssEdgeParser.formatValue(prop, '0')", function(){
+    expect(Nehan.CssEdgeParser.formatValue(prop, "0")).toEqual(zero_edge);
+    expect(Nehan.CssEdgeParser.formatValue(prop, 0)).toEqual(zero_edge);
   });
 
-  it("CssEdgeParser.parseUnit(exception)", function(){
-    var fn1 = function(){
-      Nehan.CssEdgeParser.parseUnit({});
-    };
-    expect(fn1).toThrow();
-    var fn2 = function(){
-      Nehan.CssEdgeParser.parseUnit([]);
-    };
-    expect(fn2).toThrow();
+  it("CssEdgeParser.formatValue(prop, object)", function(){
+    expect(Nehan.CssEdgeParser.formatValue(prop, {})).toEqual({});
+    expect(Nehan.CssEdgeParser.formatValue(prop, {before:1})).toEqual({before:1});
+    expect(Nehan.CssEdgeParser.formatValue(prop, {before:1, end:2})).toEqual({before:1, end:2});
+  });
+  
+  it("CssEdgeParser.formatValue(prop, '')", function(){
+    expect(Nehan.CssEdgeParser.formatValue(prop, "")).toEqual({});
   });
 
-  it("CssEdgeParser.parseSet(object)", function(){
-    expect(Nehan.CssEdgeParser.parseSet({before:1})).toEqual({before:1});
+  it("CssEdgeParser.formatValue(prop, ' ')", function(){
+    expect(Nehan.CssEdgeParser.formatValue(prop, " ")).toEqual({});
   });
 
-  it("CssEdgeParser.parseSet(string)", function(){
-    expect(Nehan.CssEdgeParser.parseSet("")).toEqual({});
-    expect(Nehan.CssEdgeParser.parseSet(" ")).toEqual({});
-    expect(Nehan.CssEdgeParser.parseSet("0")).toEqual({
+  it("CssEdgeParser.formatValue(prop, '0')", function(){
+    expect(Nehan.CssEdgeParser.formatValue(prop, "0")).toEqual({
       before:"0",
       end:"0",
       after:"0",
       start:"0"
     });
-    expect(Nehan.CssEdgeParser.parseSet(" 0   ")).toEqual({
-      before:"0",
-      end:"0",
-      after:"0",
-      start:"0"
-    });
-    expect(Nehan.CssEdgeParser.parseSet("0 1")).toEqual({
+  });
+
+  it("CssEdgeParser.formatValue(prop, '0 1')", function(){
+    expect(Nehan.CssEdgeParser.formatValue(prop, "0 1")).toEqual({
       before:"0",
       end:"1",
       after:"0",
       start:"1"
     });
-    expect(Nehan.CssEdgeParser.parseSet("0 1 2")).toEqual({
+  });
+
+  it("CssEdgeParser.formatValue(prop, '0 1 2')", function(){
+    expect(Nehan.CssEdgeParser.formatValue(prop, "0 1 2")).toEqual({
       before:"0",
       end:"1",
       after:"2",
       start:"1"
     });
-    expect(Nehan.CssEdgeParser.parseSet("0 1 2 3")).toEqual({
+  });
+
+  it("CssEdgeParser.formatValue(prop, '0 1 2 3')", function(){
+    expect(Nehan.CssEdgeParser.formatValue(prop, "0 1 2 3")).toEqual({
       before:"0",
       end:"1",
       after:"2",
@@ -54,26 +58,35 @@ describe("Nehan::CssEdgeParser", function(){
     });
   });
 
-  it("CssEdgeParser.parseSet(Array)", function(){
-    expect(Nehan.CssEdgeParser.parseSet(["0"])).toEqual({
+  it("CssEdgeParser.formatValue(prop, ['0'])", function(){
+    expect(Nehan.CssEdgeParser.formatValue(prop, ["0"])).toEqual({
       before:"0",
       end:"0",
       after:"0",
       start:"0"
     });
-    expect(Nehan.CssEdgeParser.parseSet(["0","1"])).toEqual({
+  });
+
+  it("CssEdgeParser.formatValue(prop, ['0', '1'])", function(){
+    expect(Nehan.CssEdgeParser.formatValue(prop, ["0","1"])).toEqual({
       before:"0",
       end:"1",
       after:"0",
       start:"1"
     });
-    expect(Nehan.CssEdgeParser.parseSet(["0","1","2"])).toEqual({
+  });
+
+  it("CssEdgeParser.formatValue(prop, ['0', '1', '2'])", function(){
+    expect(Nehan.CssEdgeParser.formatValue(prop, ["0","1","2"])).toEqual({
       before:"0",
       end:"1",
       after:"2",
       start:"1"
     });
-    expect(Nehan.CssEdgeParser.parseSet(["0","1","2","3"])).toEqual({
+  });
+
+  it("CssEdgeParser.formatValue(prop, ['0', '1', '2', '3'])", function(){
+    expect(Nehan.CssEdgeParser.formatValue(prop, ["0","1","2","3"])).toEqual({
       before:"0",
       end:"1",
       after:"2",

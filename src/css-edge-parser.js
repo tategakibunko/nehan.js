@@ -12,6 +12,43 @@ Nehan.CssEdgeParser = (function(){
     }
   };
 
+  var __parse_unit = function(value){
+    if(typeof value === "number"){
+      return String(value);
+    }
+    if(typeof value === "string"){
+      return value;
+    }
+    if(typeof value === "function"){
+      return value;
+    }
+    console.error("Edge::parseUnit, invalid value:%o", value);
+    throw "CssEdgeParser::parseUnit(invalid format)";
+  };
+
+  var __parse_set = function(value){
+    if(value instanceof Array){
+      return __parse_edge_array(value);
+    }
+    if(typeof value === "object"){
+      return value;
+    }
+    if(typeof value === "function"){
+      return value;
+    }
+    if(typeof value === "number"){
+      return __parse_set(value.toString());
+    }
+    if(typeof value === "string"){
+      if(value === "" || value === " "){
+	return {};
+      }
+      return __parse_edge_array(Nehan.Utils.splitBySpace(value));
+    }
+    console.error("Edge::parseSet, invalid value:%o", value);
+    throw "CssEdgeParser::parseSet(invalid format)";
+  };
+
   return {
     /**
      @memberof Nehan.CssEdgeParser
@@ -21,52 +58,9 @@ Nehan.CssEdgeParser = (function(){
     formatValue : function(css_prop, value){
       // ("margin-start", "1em") => {start:"1em"}
       if(css_prop.hasAttr()){
-	return Nehan.Obj.createOne(css_prop.getAttr(), this.parseUnit(value));
+	return Nehan.Obj.createOne(css_prop.getAttr(), __parse_unit(value));
       }
-      return this.parseSet(value);
-    },
-    /**
-     @memberof Nehan.CssEdgeParser
-     @param value {Object|String|Number|Array|Function}
-     @return {Object|String|Function|Number} - css value
-     */
-    parseUnit: function(value){
-      if(typeof value === "number"){
-	return String(value);
-      }
-      if(typeof value === "string"){
-	return value;
-      }
-      if(typeof value === "function"){
-	return value;
-      }
-      console.error("Edge::parseUnit, invalid value:%o", value);
-      throw "CssEdgeParser::parseUnit(invalid format)";
-    },
-    /**
-     @memberof Nehan.CssEdgeParser
-     @param value {Object|String|Number|Array|Function}
-     @return {Object} - css values
-     */
-    parseSet: function(value){
-      if(value instanceof Array){
-	return __parse_edge_array(value);
-      }
-      if(typeof value === "object"){
-	return value;
-      }
-      if(typeof value === "function"){
-	return value;
-      }
-      if(typeof value === "string"){
-	value = Nehan.Utils.normalizeCssValueStr(value);
-	if(value === ""){
-	  return {};
-	}
-	return __parse_edge_array(Nehan.Utils.splitBySpace(value));
-      }
-      console.error("Edge::parseSet, invalid value:%o", value);
-      throw "CssEdgeParser::parseSet(invalid format)";
+      return __parse_set(value);
     }
   };
 })();

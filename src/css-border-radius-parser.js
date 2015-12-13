@@ -56,45 +56,42 @@ Nehan.CssBorderRadiusParser = (function(){
     }
     // array of array
     if(ary[0] instanceof Array){
-      ary = ary.map(function(a){ return a.map(function(ax){ return ax.toString(); }); });
       var v2x4d = __extend2(ary.map(__extend4));
       return __obj_of_array(Nehan.List.zip(v2x4d[0], v2x4d[1]));
     }
-    ary = ary.map(function(a){ return a.toString(); });
     return __obj_of_array(__extend4(ary.map(__extend2)));
   };
 
-  var __normalize_value = function(value){
-    if(typeof value === "string"){
-      return Nehan.Utils.normalizeCssValueStr(value);
-    }
-    return value;
+  var __parse_unit = function(value){
+    return __extend2(Nehan.Utils.splitBy(value, "/"));
   };
-  
+
+  var __parse_set = function(value){
+    if(value instanceof Array){
+      return __parse_array(value);
+    }
+    if(typeof value === "object"){
+      return value;
+    }
+    if(typeof value === "string"){
+      return __parse_str(value);
+    }
+    console.error("invalid border-radius:%o", value);
+    return {};
+  };
+
   return {
+    /**
+     @memberof Nehan.CssBorderRadiusParser
+     @param css_prop {Nehan.CssProp}
+     @param value {Object} - unformatted css value object
+     @return {Object} - formatted css value object
+     */
     formatValue : function(css_prop, value){
       if(css_prop.hasAttr()){
-	return Nehan.Obj.createOne(css_prop.getAttr(), this.parseUnit(value));
+	return Nehan.Obj.createOne(css_prop.getAttr(), __parse_unit(value));
       }
-      return this.parseSet(value);
-    },
-    parseUnit: function(value){
-      value = __normalize_value(value);
-      return __extend2(Nehan.Utils.splitBy(value, "/"));
-    },
-    parseSet: function(value){
-      value = __normalize_value(value);
-      if(value instanceof Array){
-	return __parse_array(value);
-      }
-      if(typeof value === "object"){
-	return value;
-      }
-      if(typeof value === "string"){
-	return __parse_str(value);
-      }
-      console.error("invalid border-radius:%o", value);
-      return {};
+      return __parse_set(value);
     }
   };
 })();

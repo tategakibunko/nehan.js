@@ -3,16 +3,22 @@
 */
 Nehan.CssParser = (function(){
   var __normalize_value = function(value){
+    if(value instanceof Array){
+      return value.map(__normalize_value);
+    }
     if(typeof value === "function" || typeof value === "object"){
       return value;
     }
-    return Nehan.Utils.trim(String(value))
-      .replace(/\s+/, " ")
-      .replace(/;/g, "")
-      .replace(/\n/g, "");
+    if(typeof value === "number"){
+      return value.toString();
+    }
+    return Nehan.Utils.normalizeCssValueStr(value);
   };
 
   return {
+    normalizeValue : function(value){
+      return __normalize_value(value);
+    },
     /**
      @memberof Nehan.CssParser
      @param prop {String} - unformatted raw css property name
@@ -26,25 +32,26 @@ Nehan.CssParser = (function(){
     */
     formatEntry : function(prop, value){
       var fmt_prop = new Nehan.CssProp(prop);
+      var norm_value = __normalize_value(value);
       switch(fmt_prop.getName()){
       case "oncreate":
       case "onload":
       case "onblock":
       case "ontext":
       case "online":
-	return new Nehan.CssEntry(fmt_prop, value);
+	return new Nehan.CssEntry(fmt_prop, norm_value);
       case "margin":
       case "padding":
       case "border-width":
       case "border-style":
       case "border-color":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssEdgeParser.formatValue(fmt_prop, value));
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssEdgeParser.formatValue(fmt_prop, norm_value));
       case "border-radius":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssBorderRadiusParser.formatValue(fmt_prop, value));
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssBorderRadiusParser.formatValue(fmt_prop, norm_value));
       case "list-style":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssListStyleParser.formatValue(fmt_prop, value));
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssListStyleParser.formatValue(fmt_prop, norm_value));
       default:
-	return new Nehan.CssEntry(fmt_prop, __normalize_value(value));
+	return new Nehan.CssEntry(fmt_prop, norm_value);
       }
     }
   };
