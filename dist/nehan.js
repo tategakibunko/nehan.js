@@ -11169,85 +11169,18 @@ Nehan.RubyTokenStream = (function(){
 
 /**
  @namespace Nehan.DefaultStyle
- @description <pre>
-
- Important notices about style.js
- ================================
-
- 1. some properties uses 'logical' properties
- --------------------------------------------
-
- [examples]
- Assume that flow of body is "lr-tb".
-
- ex1. {margin:{before:"10px"}} // => {margin:{top:"10px"}}
- ex2. {float:"start"} // => {float:"left"}.
- ex3. {measure:"100px", extent:"50px"} // => {width:"100px", height:"50px"}
-
- 2. about functional css value
- ------------------------------
-
- you can use functional css value in each css property.
-
- (2.1) callback argument 'context' in functional css value is 'SelectorPropContext'
-
- // [example]
- // change backgroiund-color by child index.
- ".stripe-list li":{
-   "background-color":function(context){
-     return (context.getChildIndex() % 2 === 0)? "pink" : "white";
-   }
- }
-
- (2.2) callback argument 'context' in 'onload' is 'SelectorContext'
-
- this context is 'extended class' of 'SelectorPropContext', with some extra interfaces
- that can touch css object, because 'onload' is called after all css of matched elements are loaded.
-
- // [example]
- // force image metrics to square sizing if width and height is not same.
- ".must-be-squares img":{
-   "onload":function(context){
-     var width = context.getCssAttr("width", 100);
-     var height = context.getCssAttr("height", 100);
-     if(width !== height){
-       var larger = Math.max(width, height);
-       return {width:larger, height:larger};
-     }
-   }
- }
-
- 3. special properties in nehan.js
- ----------------------------------
-
- (3.1) box-sizing:[content-box | border-box | margin-box(default)]
-
- In box-sizing, 'margin-box' is special value in nehan.js, and is box-sizing default value.
- In margin-box, even if margin is included in box-size.
-
- Why? In normal html, outer measure size of box can be expanded,
- but in paged layout, outer measure size is strictly fixed.
- So if you represent margin/border/padding(called 'box-edge' in nehan.js),
- the only way is 'eliminating content space'.
-
- (3.2) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
-
- This property represents 'writing-mode' in nehan.js.
-
- 'lr-tb' means that inline flows 'left to right', block flows 'top to bottom'.
-
- 'tb-rl' means that inline flows 'top to bottom', block flows 'right to left', and so on.
-
- 'flip' means that toggle 'Nehan.Config.boxFlowSet.hori' and 'Nehan.Config.boxFlowSet.vert'.
- </pre>
  */
 Nehan.DefaultStyle = (function(){
   var __header_margin = function(ctx){
+    var lc = ctx.layoutContext || null;
+    var cur_extent = lc? lc.getBlockCurExtent() : 1;
     var em = ctx.style.getFontSize();
     var rem = ctx.style.getRootFont().size;
+    var before = (cur_extent > 0)? Math.floor(2 * rem - 0.14285 * em) : 0;
+    var after = rem;
     return {
-      before:Math.floor(2 * rem - 0.14285 * em),
-      after:rem
+      before:before,
+      after:after
     };
   };
   return {
@@ -11440,7 +11373,8 @@ Nehan.DefaultStyle = (function(){
 	//-------------------------------------------------------
 	"h1":{
 	  "display":"block",
-	  "font-size":"2.4em",
+	  //"font-size":"2.4em",
+	  "font-size":"2rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
 	  "line-height":"1.4em",
@@ -11448,7 +11382,8 @@ Nehan.DefaultStyle = (function(){
 	},
 	"h2":{
 	  "display":"block",
-	  "font-size":"2.0em",
+	  //"font-size":"2.0em",
+	  "font-size":"1.714rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
 	  "line-height":"1.4em",
@@ -11456,7 +11391,8 @@ Nehan.DefaultStyle = (function(){
 	},
 	"h3":{
 	  "display":"block",
-	  "font-size":"1.6em",
+	  //"font-size":"1.6em",
+	  "font-size":"1.28rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
 	  "line-height":"1.4em",
@@ -11464,7 +11400,8 @@ Nehan.DefaultStyle = (function(){
 	},
 	"h4":{
 	  "display":"block",
-	  "font-size":"1.4em",
+	  //"font-size":"1.4em",
+	  "font-size":"1.071rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
 	  "line-height":"1.4em",
@@ -11472,7 +11409,8 @@ Nehan.DefaultStyle = (function(){
 	},
 	"h5":{
 	  "display":"block",
-	  "font-size":"1.0em",
+	  //"font-size":"1.0em",
+	  "font-size":"1rem",
 	  "font-weight":"bold",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "line-height":"1.4em",
@@ -11482,7 +11420,8 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-weight":"bold",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-	  "font-size":"1.0em",
+	  //"font-size":"1.0em",
+	  "font-size":"1rem",
 	  "line-height":"1.4em",
 	  "margin":__header_margin
 	},
@@ -12791,178 +12730,143 @@ Nehan.PageParser = (function(){
 })();
 
 
-Nehan.SelectorPropContext = (function(){
+Nehan.SelectorContext = (function(){
   /**
-     @memberof Nehan
-     @class SelectorPropContext
-     @classdesc selector context for functional value of style. see example.
-     @constructor
-     @param style {Nehan.Style}
-     @param layout_context {Nehan.LayoutContext}
-     @example
-     * Nehan.setStyle("body", {
-     *   width:function(context){
-     *     return 500;
-     *   }
-     * });
-  */
-  function SelectorPropContext(style, layout_context){
+   @memberof Nehan
+   @class SelectorContext
+   @param style {Nehan.Style}
+   @param context {Nehan.RenderingContext}
+   */
+  function SelectorContext(style, context){
     this.style = style;
-    this.layoutContext = layout_context;
+    this.layoutContext = context.layoutContext;
   }
 
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {Nehan.Style}
    */
-  SelectorPropContext.prototype.getParentStyle = function(){
+  SelectorContext.prototype.getParentStyle = function(){
     return this.style.parent;
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {Nehan.BoxFlow}
    */
-  SelectorPropContext.prototype.getParentFlow = function(){
+  SelectorContext.prototype.getParentFlow = function(){
     var parent = this.getParentStyle();
     return parent? parent.flow : Nehan.Display.getStdBoxFlow();
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {Nehan.Tag}
    */
-  SelectorPropContext.prototype.getMarkup = function(){
+  SelectorContext.prototype.getMarkup = function(){
     return this.style.markup;
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @method getMarkupContent
    @return {String}
    */
-  SelectorPropContext.prototype.getMarkupContent = function(){
+  SelectorContext.prototype.getMarkupContent = function(){
     return this.getMarkup().getContent();
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @method setMarkupContent
    @param content {String}
    */
-  SelectorPropContext.prototype.setMarkupContent = function(content){
+  SelectorContext.prototype.setMarkupContent = function(content){
     this.getMarkup().setContent(content);
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {int}
    */
-  SelectorPropContext.prototype.getRestMeasure = function(){
+  SelectorContext.prototype.getRestMeasure = function(){
     return this.layoutContext? this.layoutContext.getInlineRestMeasure() : null;
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {int}
    */
-  SelectorPropContext.prototype.getRestExtent = function(){
+  SelectorContext.prototype.getRestExtent = function(){
     return this.layoutContext? this.layoutContext.getBlockRestExtent() : null;
   };
   /**
    index number of nth-child
 
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {int}
    */
-  SelectorPropContext.prototype.getChildIndex = function(){
+  SelectorContext.prototype.getChildIndex = function(){
     return this.style.getChildIndex();
   };
   /**
    index number of nth-child-of-type
 
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {int}
    */
-  SelectorPropContext.prototype.getChildIndexOfType = function(){
+  SelectorContext.prototype.getChildIndexOfType = function(){
     return this.style.getChildIndexOfType;
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {bool}
    */
-  SelectorPropContext.prototype.isFirstChild = function(){
+  SelectorContext.prototype.isFirstChild = function(){
     return this.style.isFirstChild();
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {bool}
    */
-  SelectorPropContext.prototype.isFirstOfType = function(){
+  SelectorContext.prototype.isFirstOfType = function(){
     return this.style.isFirstOfType();
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {bool}
    */
-  SelectorPropContext.prototype.isLastChild = function(){
+  SelectorContext.prototype.isLastChild = function(){
     return this.style.isLastChild();
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {bool}
    */
-  SelectorPropContext.prototype.isLastOfType = function(){
+  SelectorContext.prototype.isLastOfType = function(){
     return this.style.isLastOfType();
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {bool}
    */
-  SelectorPropContext.prototype.isOnlyChild = function(){
+  SelectorContext.prototype.isOnlyChild = function(){
     return this.style.isOnlyChild();
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {bool}
    */
-  SelectorPropContext.prototype.isOnlyOfType = function(){
+  SelectorContext.prototype.isOnlyOfType = function(){
     return this.style.isOnlyOfType();
   };
   /**
-   @memberof Nehan.SelectorPropContext
+   @memberof Nehan.SelectorContext
    @return {bool}
    */
-  SelectorPropContext.prototype.isMarkupEmpty = function(){
+  SelectorContext.prototype.isMarkupEmpty = function(){
     return this.style.isMarkupEmpty();
   };
 
-  return SelectorPropContext;
-})();
-
-
-Nehan.SelectorContext = (function(){
   /**
-     @memberof Nehan
-     @class SelectorContext
-     @classdesc context object that is passed to "onload" callback in constructor of {Nehan.Style}.<br>
-     * "onload" value is set by style definition(see example).<br>
-     * unlike {@link Nehan.SelectorPropContext}, this context has all reference to css values associated with the selector key of "onload" argument in style.
-     @constructor
-     @extends {Nehan.SelectorPropContext}
-     @param style {Nehan.Style}
-     @param layout_context {Nehan.LayoutContext}
-     @example
-     * Nehan.setStyle("body", {
-     *   onload:function(context){
-     *      // do something
-     *   }
-     * });
-  */
-  function SelectorContext(style, layout_context){
-    Nehan.SelectorPropContext.call(this, style, layout_context);
-  }
-  Nehan.Class.extend(SelectorContext, Nehan.SelectorPropContext);
-
-  /**
-     @memberof Nehan.SelectorContext
-     @method isTextVertical
-     @return {boolean}
-  */
+   @memberof Nehan.SelectorContext
+   @method isTextVertical
+   @return {boolean}
+   */
   SelectorContext.prototype.isTextVertical = function(){
     // this function called before initializing style objects in this.style.
     // so this.style.flow is not ready at this time, that is, we need to get the box-flow in manual.
@@ -12973,30 +12877,30 @@ Nehan.SelectorContext = (function(){
   };
 
   /**
-     @memberof Nehan.SelectorContext
-     @method isTextHorizontal
-     @return {boolean}
-  */
+   @memberof Nehan.SelectorContext
+   @method isTextHorizontal
+   @return {boolean}
+   */
   SelectorContext.prototype.isTextHorizontal = function(){
     return this.isTextVertical() === false;
   };
 
   /**
-     @memberof Nehan.SelectorContext
-     @method getCssAttr
-     @param name {String}
-     @param def_value {default_value} - [def_value] is returned if [name] not found.
-  */
+   @memberof Nehan.SelectorContext
+   @method getCssAttr
+   @param name {String}
+   @param def_value {default_value} - [def_value] is returned if [name] not found.
+   */
   SelectorContext.prototype.getCssAttr = function(name, def_value){
     return this.style.getCssAttr(name, def_value);
   };
 
   /**
-     @memberof Nehan.SelectorContext
-     @method setCssAttr
-     @param name {String}
-     @param value {css_value}
-  */
+   @memberof Nehan.SelectorContext
+   @method setCssAttr
+   @param name {String}
+   @param value {css_value}
+   */
   SelectorContext.prototype.setCssAttr = function(name, value){
     this.style.setCssAttr(name, value);
   };
@@ -13246,15 +13150,7 @@ Nehan.Style = (function(){
     this.selectorCacheKey = this._computeSelectorCacheKey();
 
     // create context for each functional css property.
-    this.selectorPropContext = new Nehan.SelectorPropContext(this, this.context.layoutContext || null);
-
-    // create selector callback context,
-    // this context is passed to "onload" callback.
-    // unlike selector-context, this context has reference to all css values associated with this style.
-    // because 'onload' callback is called after loading selector css.
-    // notice that at this phase, css values are not converted into internal style object.
-    // so by updating css value, you can update calculation of internal style object.
-    this.selectorContext = new Nehan.SelectorContext(this, this.context.layoutContext || null);
+    this.selectorContext = new Nehan.SelectorContext(this, this.context);
 
     this.managedCss = new Nehan.CssHashSet();
     this.unmanagedCss = new Nehan.CssHashSet();
@@ -13807,7 +13703,7 @@ Nehan.Style = (function(){
   Style.prototype._evalCssAttr = function(prop, value){
     // if value is function, call with selector context, and format the returned value.
     if(typeof value === "function"){
-      var entry = Nehan.CssParser.formatEntry(prop, value(this.selectorPropContext));
+      var entry = Nehan.CssParser.formatEntry(prop, value(this.selectorContext));
       return entry.value;
     }
     return value;

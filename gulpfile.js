@@ -132,7 +132,6 @@ var sources = [
   "src/document-context.js",
   "src/page-evaluator.js",
   "src/page-parser.js",
-  "src/selector-prop-context.js",
   "src/selector-context.js",
   "src/dom-create-context.js",
   "src/style.js",

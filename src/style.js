@@ -52,15 +52,7 @@ Nehan.Style = (function(){
     this.selectorCacheKey = this._computeSelectorCacheKey();
 
     // create context for each functional css property.
-    this.selectorPropContext = new Nehan.SelectorPropContext(this, this.context.layoutContext || null);
-
-    // create selector callback context,
-    // this context is passed to "onload" callback.
-    // unlike selector-context, this context has reference to all css values associated with this style.
-    // because 'onload' callback is called after loading selector css.
-    // notice that at this phase, css values are not converted into internal style object.
-    // so by updating css value, you can update calculation of internal style object.
-    this.selectorContext = new Nehan.SelectorContext(this, this.context.layoutContext || null);
+    this.selectorContext = new Nehan.SelectorContext(this, this.context);
 
     this.managedCss = new Nehan.CssHashSet();
     this.unmanagedCss = new Nehan.CssHashSet();
@@ -613,7 +605,7 @@ Nehan.Style = (function(){
   Style.prototype._evalCssAttr = function(prop, value){
     // if value is function, call with selector context, and format the returned value.
     if(typeof value === "function"){
-      var entry = Nehan.CssParser.formatEntry(prop, value(this.selectorPropContext));
+      var entry = Nehan.CssParser.formatEntry(prop, value(this.selectorContext));
       return entry.value;
     }
     return value;

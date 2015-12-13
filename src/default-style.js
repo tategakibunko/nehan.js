@@ -1,84 +1,17 @@
 /**
  @namespace Nehan.DefaultStyle
- @description <pre>
-
- Important notices about style.js
- ================================
-
- 1. some properties uses 'logical' properties
- --------------------------------------------
-
- [examples]
- Assume that flow of body is "lr-tb".
-
- ex1. {margin:{before:"10px"}} // => {margin:{top:"10px"}}
- ex2. {float:"start"} // => {float:"left"}.
- ex3. {measure:"100px", extent:"50px"} // => {width:"100px", height:"50px"}
-
- 2. about functional css value
- ------------------------------
-
- you can use functional css value in each css property.
-
- (2.1) callback argument 'context' in functional css value is 'SelectorPropContext'
-
- // [example]
- // change backgroiund-color by child index.
- ".stripe-list li":{
-   "background-color":function(context){
-     return (context.getChildIndex() % 2 === 0)? "pink" : "white";
-   }
- }
-
- (2.2) callback argument 'context' in 'onload' is 'SelectorContext'
-
- this context is 'extended class' of 'SelectorPropContext', with some extra interfaces
- that can touch css object, because 'onload' is called after all css of matched elements are loaded.
-
- // [example]
- // force image metrics to square sizing if width and height is not same.
- ".must-be-squares img":{
-   "onload":function(context){
-     var width = context.getCssAttr("width", 100);
-     var height = context.getCssAttr("height", 100);
-     if(width !== height){
-       var larger = Math.max(width, height);
-       return {width:larger, height:larger};
-     }
-   }
- }
-
- 3. special properties in nehan.js
- ----------------------------------
-
- (3.1) box-sizing:[content-box | border-box | margin-box(default)]
-
- In box-sizing, 'margin-box' is special value in nehan.js, and is box-sizing default value.
- In margin-box, even if margin is included in box-size.
-
- Why? In normal html, outer measure size of box can be expanded,
- but in paged layout, outer measure size is strictly fixed.
- So if you represent margin/border/padding(called 'box-edge' in nehan.js),
- the only way is 'eliminating content space'.
-
- (3.2) flow:[lr-tb | rl-tb | tb-rl | tb-lr | flip]
-
- This property represents 'writing-mode' in nehan.js.
-
- 'lr-tb' means that inline flows 'left to right', block flows 'top to bottom'.
-
- 'tb-rl' means that inline flows 'top to bottom', block flows 'right to left', and so on.
-
- 'flip' means that toggle 'Nehan.Config.boxFlowSet.hori' and 'Nehan.Config.boxFlowSet.vert'.
- </pre>
  */
 Nehan.DefaultStyle = (function(){
   var __header_margin = function(ctx){
+    var lc = ctx.layoutContext || null;
+    var cur_extent = lc? lc.getBlockCurExtent() : 1;
     var em = ctx.style.getFontSize();
     var rem = ctx.style.getRootFont().size;
+    var before = (cur_extent > 0)? Math.floor(2 * rem - 0.14285 * em) : 0;
+    var after = rem;
     return {
-      before:Math.floor(2 * rem - 0.14285 * em),
-      after:rem
+      before:before,
+      after:after
     };
   };
   return {
@@ -271,7 +204,8 @@ Nehan.DefaultStyle = (function(){
 	//-------------------------------------------------------
 	"h1":{
 	  "display":"block",
-	  "font-size":"2.4em",
+	  //"font-size":"2.4em",
+	  "font-size":"2rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
 	  "line-height":"1.4em",
@@ -279,7 +213,8 @@ Nehan.DefaultStyle = (function(){
 	},
 	"h2":{
 	  "display":"block",
-	  "font-size":"2.0em",
+	  //"font-size":"2.0em",
+	  "font-size":"1.714rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
 	  "line-height":"1.4em",
@@ -287,7 +222,8 @@ Nehan.DefaultStyle = (function(){
 	},
 	"h3":{
 	  "display":"block",
-	  "font-size":"1.6em",
+	  //"font-size":"1.6em",
+	  "font-size":"1.28rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
 	  "line-height":"1.4em",
@@ -295,7 +231,8 @@ Nehan.DefaultStyle = (function(){
 	},
 	"h4":{
 	  "display":"block",
-	  "font-size":"1.4em",
+	  //"font-size":"1.4em",
+	  "font-size":"1.071rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
 	  "line-height":"1.4em",
@@ -303,7 +240,8 @@ Nehan.DefaultStyle = (function(){
 	},
 	"h5":{
 	  "display":"block",
-	  "font-size":"1.0em",
+	  //"font-size":"1.0em",
+	  "font-size":"1rem",
 	  "font-weight":"bold",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "line-height":"1.4em",
@@ -313,7 +251,8 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-weight":"bold",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-	  "font-size":"1.0em",
+	  //"font-size":"1.0em",
+	  "font-size":"1rem",
 	  "line-height":"1.4em",
 	  "margin":__header_margin
 	},
