@@ -44,6 +44,7 @@ var sources = [
   "src/css-hash-set.js",
   "src/css-edge-parser.js",
   "src/css-border-radius-parser.js",
+  "src/css-font-parser.js",
   "src/css-list-style-parser.js",
   "src/css-prop.js",
   "src/css-entry.js",

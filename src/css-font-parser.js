@@ -1,19 +1,12 @@
-Nehan.CssListStyleParser = (function(){
+Nehan.CssFontParser = (function(){
+  var __create_font = function(str){
+    throw "sorry, shorthand of css font is not supported yet, but in my opinion, it's too wired and sucks!";
+  };
+
   var __parse_string = function(str){
-    str = Nehan.Utils.trim(str).replace(/\s+/g, " ").replace(/;/g, "");
-    var list_style = {};
+    var font = {};
     var values = Nehan.Utils.splitBySpace(str);
-    var arg_len = values.length;
-    if(arg_len >= 1){
-      list_style.type = values[0];
-    }
-    if(arg_len >= 2){
-      list_style.image = values[1];
-    }
-    if(arg_len >= 3){
-      list_style.position = values[2];
-    }
-    return list_style;
+    return __create_font(values);
   };
 
   var __parse_unit = function(value){
@@ -27,13 +20,13 @@ Nehan.CssListStyleParser = (function(){
     if(typeof value === "string"){
       return __parse_string(value);
     }
-    console.error("invalid list-style value:%o", value);
-    throw "invalid list-style value";
+    console.error("invalid font value:%o", value);
+    throw "invalid font value";
   };
 
   return {
     /**
-     @memberof Nehan.CssListStyleParser
+     @memberof Nehan.CssFontParser
      @param css_prop {Nehan.CssProp}
      @return {Object} - css value
      */

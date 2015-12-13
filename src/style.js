@@ -1393,36 +1393,24 @@ Nehan.Style = (function(){
 
   Style.prototype._loadFont = function(){
     var parent_font = this.getFont();
-    var font_size = this.getCssAttr("font-size", "inherit");
-    var font_family = this.getCssAttr("font-family", "inherit");
-    var font_weight = this.getCssAttr("font-weight", "inherit");
-    var font_style = this.getCssAttr("font-style", "inherit");
-
-    // if no special settings, font-style is already defined in parent block.
-    // but if parent is inline like <span style='font-size:small'><p>foo</p></span>,
-    // then <span>(linline) is terminated when it meets <p>(block), and any box is created by span,
-    // so in this case, parent style(span) must be defined by <p>.
-    if(this.parent && this.parent.isBlock() && font_size === "inherit" && font_family === "inherit" && font_weight === "inherit" && font_style === "inherit"){
+    var css = this.getCssAttr("font", {
+      size:"inherit",
+      family:"inherit",
+      weight:"inherit",
+      style:"inherit"
+    });
+    var font = new Nehan.Font(css);
+    if(parent_font){
+      font.inherit(parent_font);
+    }
+    if(font.size !== parent_font.size){
+      font.size = this._computeFontSize(font.size, parent_font.size);
+    }
+    // if all inherited, not required to create new one.
+    if(font.isEqual(parent_font)){
       return null;
     }
-    var font = new Nehan.Font(parent_font.size);
-
-    font.family = parent_font.family;
-    font.style = parent_font.style;
-    font.weight = parent_font.weight;
-
-    if(font_size !== "inherit"){
-      font.size = this._computeFontSize(font_size, parent_font.size);
-    }
-    if(font_family !== "inherit"){
-      font.family = font_family;
-    }
-    if(font_weight !== "inherit"){
-      font.weight = font_weight;
-    }
-    if(font_style !== "inherit"){
-      font.style = font_style;
-    }
+    //console.log("size:%d, family:%s, weight:%s, style:%s", font.size, font.family, font.weight, font.style);
     return font;
   };
 

@@ -1,30 +1,33 @@
 describe("Nehan::CssListStyleParser", function(){
-  it("Nehan.parseSet", function(){
-    expect(Nehan.CssListStyleParser.parseSet({
+  var prop = new Nehan.CssProp("list-style");
+
+  it("Nehan.formatValue", function(){
+    expect(Nehan.CssListStyleParser.formatValue(prop, {
       type:"decimal"
     })).toEqual({
       type:"decimal"
     });
-    expect(Nehan.CssListStyleParser.parseSet({
+    expect(Nehan.CssListStyleParser.formatValue(prop, {
       type:"decimal",
       position:"inside"
     })).toEqual({
       type:"decimal",
       position:"inside"
     });
-    expect(Nehan.CssListStyleParser.parseSet("square")).toEqual({
+    expect(Nehan.CssListStyleParser.formatValue(prop, "square")).toEqual({
       type:"square"
     });
-    expect(Nehan.CssListStyleParser.parseSet("decimal url('hoge.img')")).toEqual({
+    expect(Nehan.CssListStyleParser.formatValue(prop, "decimal url('hoge.img')")).toEqual({
       type:"decimal",
       image:"url('hoge.img')"
     });
-    expect(Nehan.CssListStyleParser.parseSet("square url('hoge.img') outside")).toEqual({
+    expect(Nehan.CssListStyleParser.formatValue(prop, "square url('hoge.img') outside")).toEqual({
       type:"square",
       image:"url('hoge.img')",
       position:"outside"
     });
   });
+
   it("Nehan.formatValue", function(){
     expect(Nehan.CssListStyleParser.formatValue(new Nehan.CssProp("list-style-type"), "square")).toEqual({
       type:"square"

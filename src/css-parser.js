@@ -50,6 +50,8 @@ Nehan.CssParser = (function(){
 	return new Nehan.CssEntry(fmt_prop, Nehan.CssBorderRadiusParser.formatValue(fmt_prop, norm_value));
       case "list-style":
 	return new Nehan.CssEntry(fmt_prop, Nehan.CssListStyleParser.formatValue(fmt_prop, norm_value));
+      case "font":
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssFontParser.formatValue(fmt_prop, norm_value));
       default:
 	return new Nehan.CssEntry(fmt_prop, norm_value);
       }

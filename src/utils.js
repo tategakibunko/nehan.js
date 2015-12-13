@@ -119,6 +119,8 @@ Nehan.Utils = {
       .replace(/\s+/g, " ") // many space -> single space
       .replace(/\s+\//g, "/") // cut space around slash before
       .replace(/\/\s+/g, "/") // cut space around slash after
+      .replace(/\s+\(/g, "/") // cut space around left paren before
+      .replace(/\)\s+/g, "/") // cut space around right paren after
     ;
   },
   /**

@@ -1,13 +1,17 @@
 Nehan.Font = (function(){
   /**
-     @memberof Nehan
-     @class Font
-     @classdesc css 'font' abstraction
-     @constructor
-     @param size {int} - font size in px
+   @memberof Nehan
+   @class Font
+   @classdesc css 'font' abstraction
+   @constructor
+   @param opt {Object}
   */
-  function Font(size){
-    this.size = size;
+  function Font(opt){
+    opt = opt || {};
+    this.size = opt.size || "inherit";
+    this.family = opt.family || "inherit";
+    this.weight = opt.weight || "inherit";
+    this.style = opt.style || "inherit";
   }
 
   /**
@@ -16,6 +20,31 @@ Nehan.Font = (function(){
    */
   Font.prototype.isBold = function(){
     return this.weight && this.weight !== "normal" && this.weight !== "lighter";
+  };
+  Font.prototype.inherit = function(font){
+    if(this.size === "inherit" && font.size){
+      this.size = font.size;
+    }
+    if(this.family === "inherit" && font.family){
+      this.family = font.family;
+    }
+    if(this.weight === "inherit" && font.weight){
+      this.weight = font.weight;
+    }
+    if(this.style === "inherit" && font.style){
+      this.style = font.style;
+    }
+  };
+  /**
+   @memberof Nehan.Font
+   @param {Nehan.Font}
+   @return {boolean}
+   */
+  Font.prototype.isEqual = function(font){
+    return (this.size === font.size &&
+	    this.family === font.family &&
+	    this.weight === font.weight &&
+	    this.style === font.style);
   };
   /**
    @memberof Nehan.Font

@@ -39,7 +39,14 @@ Nehan.CssProp = (function(){
     // list-style
     "list-style-position":{name:"list-style", attr:"position"},
     "list-style-type":{name:"list-style", attr:"type"},
-    "list-style-image":{name:"list-style", attr:"image"}
+    "list-style-image":{name:"list-style", attr:"image"},
+
+    // font
+    "font-size":{name:"font", attr:"size"},
+    "font-family":{name:"font", attr:"family"},
+    "font-style":{name:"font", attr:"style"},
+    "font-weight":{name:"font", attr:"weight"},
+    "font-variant":{name:"font", attr:"variant"}
   };
 
   /**

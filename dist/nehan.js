@@ -1337,6 +1337,8 @@ Nehan.Utils = {
       .replace(/\s+/g, " ") // many space -> single space
       .replace(/\s+\//g, "/") // cut space around slash before
       .replace(/\/\s+/g, "/") // cut space around slash after
+      .replace(/\s+\(/g, "/") // cut space around left paren before
+      .replace(/\)\s+/g, "/") // cut space around right paren after
     ;
   },
   /**
@@ -2708,6 +2710,47 @@ Nehan.CssBorderRadiusParser = (function(){
   };
 })();
 
+Nehan.CssFontParser = (function(){
+  var __create_font = function(str){
+    throw "sorry, shorthand of css font is not supported yet, but in my opinion, it's too wired and sucks!";
+  };
+
+  var __parse_string = function(str){
+    var font = {};
+    var values = Nehan.Utils.splitBySpace(str);
+    return __create_font(values);
+  };
+
+  var __parse_unit = function(value){
+    return value;
+  };
+
+  var __parse_set = function(value){
+    if(typeof value === "object" || typeof value === "function"){
+      return value;
+    }
+    if(typeof value === "string"){
+      return __parse_string(value);
+    }
+    console.error("invalid font value:%o", value);
+    throw "invalid font value";
+  };
+
+  return {
+    /**
+     @memberof Nehan.CssFontParser
+     @param css_prop {Nehan.CssProp}
+     @return {Object} - css value
+     */
+    formatValue: function(css_prop, value){
+      if(css_prop.hasAttr()){
+	return Nehan.Obj.createOne(css_prop.getAttr(), __parse_unit(value));
+      }
+      return __parse_set(value);
+    }
+  };
+})();
+
 Nehan.CssListStyleParser = (function(){
   var __parse_string = function(str){
     str = Nehan.Utils.trim(str).replace(/\s+/g, " ").replace(/;/g, "");
@@ -2726,6 +2769,21 @@ Nehan.CssListStyleParser = (function(){
     return list_style;
   };
 
+  var __parse_unit = function(value){
+    return value;
+  };
+
+  var __parse_set = function(value){
+    if(typeof value === "object" || typeof value === "function"){
+      return value;
+    }
+    if(typeof value === "string"){
+      return __parse_string(value);
+    }
+    console.error("invalid list-style value:%o", value);
+    throw "invalid list-style value";
+  };
+
   return {
     /**
      @memberof Nehan.CssListStyleParser
@@ -2734,18 +2792,9 @@ Nehan.CssListStyleParser = (function(){
      */
     formatValue: function(css_prop, value){
       if(css_prop.hasAttr()){
-	return Nehan.Obj.createOne(css_prop.getAttr(), this.parseUnit(value));
+	return Nehan.Obj.createOne(css_prop.getAttr(), __parse_unit(value));
       }
-      return this.parseSet(value);
-    },
-    parseUnit : function(value){
-      return value;
-    },
-    parseSet: function(value){
-      if(typeof value === "object"){
-	return value;
-      }
-      return __parse_string(value);
+      return __parse_set(value);
     }
   };
 })();
@@ -2791,7 +2840,14 @@ Nehan.CssProp = (function(){
     // list-style
     "list-style-position":{name:"list-style", attr:"position"},
     "list-style-type":{name:"list-style", attr:"type"},
-    "list-style-image":{name:"list-style", attr:"image"}
+    "list-style-image":{name:"list-style", attr:"image"},
+
+    // font
+    "font-size":{name:"font", attr:"size"},
+    "font-family":{name:"font", attr:"family"},
+    "font-style":{name:"font", attr:"style"},
+    "font-weight":{name:"font", attr:"weight"},
+    "font-variant":{name:"font", attr:"variant"}
   };
 
   /**
@@ -2931,6 +2987,8 @@ Nehan.CssParser = (function(){
 	return new Nehan.CssEntry(fmt_prop, Nehan.CssBorderRadiusParser.formatValue(fmt_prop, norm_value));
       case "list-style":
 	return new Nehan.CssEntry(fmt_prop, Nehan.CssListStyleParser.formatValue(fmt_prop, norm_value));
+      case "font":
+	return new Nehan.CssEntry(fmt_prop, Nehan.CssFontParser.formatValue(fmt_prop, norm_value));
       default:
 	return new Nehan.CssEntry(fmt_prop, norm_value);
       }
@@ -4437,14 +4495,18 @@ Nehan.BoxCorner = (function(){
 
 Nehan.Font = (function(){
   /**
-     @memberof Nehan
-     @class Font
-     @classdesc css 'font' abstraction
-     @constructor
-     @param size {int} - font size in px
+   @memberof Nehan
+   @class Font
+   @classdesc css 'font' abstraction
+   @constructor
+   @param opt {Object}
   */
-  function Font(size){
-    this.size = size;
+  function Font(opt){
+    opt = opt || {};
+    this.size = opt.size || "inherit";
+    this.family = opt.family || "inherit";
+    this.weight = opt.weight || "inherit";
+    this.style = opt.style || "inherit";
   }
 
   /**
@@ -4453,6 +4515,31 @@ Nehan.Font = (function(){
    */
   Font.prototype.isBold = function(){
     return this.weight && this.weight !== "normal" && this.weight !== "lighter";
+  };
+  Font.prototype.inherit = function(font){
+    if(this.size === "inherit" && font.size){
+      this.size = font.size;
+    }
+    if(this.family === "inherit" && font.family){
+      this.family = font.family;
+    }
+    if(this.weight === "inherit" && font.weight){
+      this.weight = font.weight;
+    }
+    if(this.style === "inherit" && font.style){
+      this.style = font.style;
+    }
+  };
+  /**
+   @memberof Nehan.Font
+   @param {Nehan.Font}
+   @return {boolean}
+   */
+  Font.prototype.isEqual = function(font){
+    return (this.size === font.size &&
+	    this.family === font.family &&
+	    this.weight === font.weight &&
+	    this.style === font.style);
   };
   /**
    @memberof Nehan.Font
@@ -14491,36 +14578,24 @@ Nehan.Style = (function(){
 
   Style.prototype._loadFont = function(){
     var parent_font = this.getFont();
-    var font_size = this.getCssAttr("font-size", "inherit");
-    var font_family = this.getCssAttr("font-family", "inherit");
-    var font_weight = this.getCssAttr("font-weight", "inherit");
-    var font_style = this.getCssAttr("font-style", "inherit");
-
-    // if no special settings, font-style is already defined in parent block.
-    // but if parent is inline like <span style='font-size:small'><p>foo</p></span>,
-    // then <span>(linline) is terminated when it meets <p>(block), and any box is created by span,
-    // so in this case, parent style(span) must be defined by <p>.
-    if(this.parent && this.parent.isBlock() && font_size === "inherit" && font_family === "inherit" && font_weight === "inherit" && font_style === "inherit"){
+    var css = this.getCssAttr("font", {
+      size:"inherit",
+      family:"inherit",
+      weight:"inherit",
+      style:"inherit"
+    });
+    var font = new Nehan.Font(css);
+    if(parent_font){
+      font.inherit(parent_font);
+    }
+    if(font.size !== parent_font.size){
+      font.size = this._computeFontSize(font.size, parent_font.size);
+    }
+    // if all inherited, not required to create new one.
+    if(font.isEqual(parent_font)){
       return null;
     }
-    var font = new Nehan.Font(parent_font.size);
-
-    font.family = parent_font.family;
-    font.style = parent_font.style;
-    font.weight = parent_font.weight;
-
-    if(font_size !== "inherit"){
-      font.size = this._computeFontSize(font_size, parent_font.size);
-    }
-    if(font_family !== "inherit"){
-      font.family = font_family;
-    }
-    if(font_weight !== "inherit"){
-      font.weight = font_weight;
-    }
-    if(font_style !== "inherit"){
-      font.style = font_style;
-    }
+    //console.log("size:%d, family:%s, weight:%s, style:%s", font.size, font.family, font.weight, font.style);
     return font;
   };
 
