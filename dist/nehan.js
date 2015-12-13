@@ -11284,18 +11284,15 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"address":{
-	  //"section":true,
 	  "display":"inline",
 	  "font-style":"italic"
 	},
 	"area":{
 	},
 	"article":{
-	  //"section":true,
 	  "display":"block"
 	},
 	"aside":{
-	  //"section":true,
 	  "display":"block"
 	},
 	"audio":{
@@ -11318,7 +11315,6 @@ Nehan.DefaultStyle = (function(){
 	"blockquote":{
 	  "color":"#666666",
 	  "display":"block",
-	  //"section-root":true,
 	  "padding":{
 	    "start":"1em",
 	    "end":"1em",
@@ -11333,21 +11329,18 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "flow":"lr-tb",
 	  "box-sizing":"content-box",
-	  //"section-root":true,
 	  "hanging-punctuation":"allow-end"
 	},
 	"br":{
 	  "display":"inline"
 	},
 	"button":{
-	  //"interactive":true,
 	  "display":"inline"
 	},
 	//-------------------------------------------------------
 	// tag / c
 	//-------------------------------------------------------
 	"canvas":{
-	  //"embeddable":true,
 	  "display":"inline"
 	},
 	"caption":{
@@ -11390,7 +11383,6 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"details":{
-	  //"section-root":true,
 	  "display":"block"
 	},
 	"dfn":{
@@ -11424,7 +11416,6 @@ Nehan.DefaultStyle = (function(){
 	//-------------------------------------------------------
 	"fieldset":{
 	  "display":"block",
-	  //"section-root":true,
 	  "padding":{
 	    "start":"1em",
 	    "end":"0.2em",
@@ -11437,7 +11428,6 @@ Nehan.DefaultStyle = (function(){
 	  "border-width":"1px"
 	},
 	"figure":{
-	  //"section-root":true,
 	  "display":"block"
 	},
 	"figcaption":{
@@ -11446,7 +11436,6 @@ Nehan.DefaultStyle = (function(){
 	  "font-size": "0.8em"
 	},
 	"footer":{
-	  //"section":true,
 	  "display":"block"
 	},
 	// need to define to keep compatibility.
@@ -11461,7 +11450,6 @@ Nehan.DefaultStyle = (function(){
 	//-------------------------------------------------------
 	"h1":{
 	  "display":"block",
-	  //"font-size":"2.4em",
 	  "font-size":"2rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
@@ -11470,7 +11458,6 @@ Nehan.DefaultStyle = (function(){
 	},
 	"h2":{
 	  "display":"block",
-	  //"font-size":"2.0em",
 	  "font-size":"1.714rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
@@ -11479,7 +11466,6 @@ Nehan.DefaultStyle = (function(){
 	},
 	"h3":{
 	  "display":"block",
-	  //"font-size":"1.6em",
 	  "font-size":"1.28rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
@@ -11488,7 +11474,6 @@ Nehan.DefaultStyle = (function(){
 	},
 	"h4":{
 	  "display":"block",
-	  //"font-size":"1.4em",
 	  "font-size":"1.071rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
@@ -11497,7 +11482,6 @@ Nehan.DefaultStyle = (function(){
 	},
 	"h5":{
 	  "display":"block",
-	  //"font-size":"1.0em",
 	  "font-size":"1rem",
 	  "font-weight":"bold",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
@@ -11508,7 +11492,6 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-weight":"bold",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-	  //"font-size":"1.0em",
 	  "font-size":"1rem",
 	  "line-height":"1.4em",
 	  "margin":__header_margin
@@ -11517,7 +11500,6 @@ Nehan.DefaultStyle = (function(){
 	  "display":"none"
 	},
 	"header":{
-	  //"section":true,
 	  "display":"block"
 	},
 	"hr":{
@@ -11547,7 +11529,6 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"iframe":{
-	  //"embeddable":true,
 	  "display":"block"
 	},
 	"ins":{
@@ -11557,7 +11538,6 @@ Nehan.DefaultStyle = (function(){
 	  //"box-sizing":"content-box"
 	},
 	"input":{
-	  //"interactive":true,
 	  "display":"inline"
 	},
 	//-------------------------------------------------------
@@ -11586,7 +11566,6 @@ Nehan.DefaultStyle = (function(){
 	  }
 	},
 	"link":{
-	  //"meta":true
 	},
 	//-------------------------------------------------------
 	// tag / m
@@ -11603,7 +11582,6 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block"
 	},
 	"meta":{
-	  //"meta":true
 	},
 	"meter":{
 	  "display":"inline"
@@ -11612,17 +11590,14 @@ Nehan.DefaultStyle = (function(){
 	// tag / n
 	//-------------------------------------------------------
 	"nav":{
-	  //"section":true,
 	  "display":"block"
 	},
 	"noscript":{
-	  //"meta":true
 	},
 	//-------------------------------------------------------
 	// tag / o
 	//-------------------------------------------------------
 	"object":{
-	  //"embeddable":true,
 	  "display":"inline"
 	},
 	"ol":{
@@ -11691,11 +11666,9 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"script":{
-	  //"meta":true,
 	  "display":"inline"
 	},
 	"section":{
-	  //"section":true,
 	  "display":"block"
 	},
 	"select":{
@@ -11714,7 +11687,6 @@ Nehan.DefaultStyle = (function(){
 	  "font-weight":"bold"
 	},
 	"style":{
-	  //"meta":true,
 	  "display":"inline"
 	},
 	"sub":{
@@ -11731,7 +11703,6 @@ Nehan.DefaultStyle = (function(){
 	//-------------------------------------------------------
 	"table":{
 	  "display":"table",
-	  //"embeddable":true,
 	  "table-layout":"fixed",
 	  //"table-layout":"auto",
 	  "background-color":"white",
@@ -11752,7 +11723,6 @@ Nehan.DefaultStyle = (function(){
 	},
 	"td":{
 	  "display":"table-cell",
-	  //"section-root":true,
 	  "border-width":"1px",
 	  "border-color":"#a8a8a8",
 	  "border-collapse":"inherit",
@@ -11765,8 +11735,6 @@ Nehan.DefaultStyle = (function(){
 	  }
 	},
 	"textarea":{
-	  //"embeddable":true,
-	  //"interactive":true,
 	  "display":"inline"
 	},
 	"tfoot":{
@@ -11804,7 +11772,6 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"title":{
-	  //"meta":true
 	},
 	"tr":{
 	  "display":"table-row",
@@ -11837,7 +11804,6 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"video":{
-	  //"embeddable":true,
 	  "display":"inline"
 	},
 	//-------------------------------------------------------
