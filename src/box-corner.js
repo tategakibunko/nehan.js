@@ -9,18 +9,11 @@ Nehan.BoxCorner = (function(){
     });
   };
   return {
-    /**
-       get normalized(and camel-cased) corner property name
-       @memberof Nehan.BoxCorner
-       @param dir1 {string}
-       @param dir2 {string}
-       @return {string}
-       @example
-       * BoxCorner.getCornerName("right", "top"); // => "topRight"
-    */
-    getCornerName : function(dir1, dir2){
-      var dirs = __sort(dir1, dir2);
-      return [dirs[0], Nehan.Utils.capitalize(dirs[1])].join("");
+    getPhysicalCornerName : function(flow, logical_name){
+      var dirs = logical_name.split("-");
+      var dir1 = flow.getProp(dirs[0]);
+      var dir2 = flow.getProp(dirs[1]);
+      return __sort(dir1, dir2).join("-");
     }
   };
 })();

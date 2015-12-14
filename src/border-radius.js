@@ -89,13 +89,13 @@ Nehan.BorderRadius = (function(){
    get corner value
    @memberof Nehan.BorderRadius
    @method getCorner
-   @param dir1 {string} - physical direction of logical before or after
-   @param dir2 {string} - physical direction of logical start or end
+   @param flow {Nehan.BoxFlow}
+   @param corner_name {String} - logical corner name ['before-start' | 'before-end' | 'after-end' | 'after-start']
    @return {Nehan.Radius2d}
    */
-  BorderRadius.prototype.getCorner = function(dir1, dir2){
-    var name = Nehan.BoxCorner.getCornerName(dir1, dir2);
-    return this[name];
+  BorderRadius.prototype.getCorner = function(flow, corner_name){
+    var physical_corner_name = Nehan.BoxCorner.getPhysicalCornerName(flow, corner_name);
+    return this[Nehan.Utils.camelize(physical_corner_name)];
   };
   /**
    set corner size
@@ -109,18 +109,11 @@ Nehan.BorderRadius = (function(){
    @param size.end-after {int}
    */
   BorderRadius.prototype.setSize = function(flow, size){
-    if(typeof size["before-start"] != "undefined"){
-      this.setBeforeStart(flow, size["before-start"]);
-    }
-    if(typeof size["before-end"] != "undefined"){
-      this.setBeforeEnd(flow, size["before-end"]);
-    }
-    if(typeof size["after-end"] != "undefined"){
-      this.setAfterEnd(flow, size["after-end"]);
-    }
-    if(typeof size["after-start"] != "undefined"){
-      this.setAfterStart(flow, size["after-start"]);
-    }
+    Nehan.Const.cssLogicalBoxCorners.forEach(function(corner){
+      if(typeof size[corner] !== "undefined"){
+	this.getCorner(flow, corner).setSize(size[corner]);
+      }
+    }.bind(this));
   };
   /**
    set corner of logical "start-before"
@@ -132,7 +125,7 @@ Nehan.BorderRadius = (function(){
    * new BorderRadius().setBeforeStart(BoxFlows.getByName("lr-tb"), [5, 10]); // horizontal 5px, vertical 10px
    */
   BorderRadius.prototype.setBeforeStart = function(flow, value){
-    var radius = this.getCorner(flow.getPropBefore(), flow.getPropStart());
+    var radius = this.getCorner(flow, "before-start");
     radius.setSize(value);
   };
   /**
@@ -143,7 +136,7 @@ Nehan.BorderRadius = (function(){
    @param value {Array<int>} - 2d radius value
    */
   BorderRadius.prototype.setAfterStart = function(flow, value){
-    var radius = this.getCorner(flow.getPropAfter(), flow.getPropStart());
+    var radius = this.getCorner(flow, "after-start");
     radius.setSize(value);
   };
   /**
@@ -154,7 +147,7 @@ Nehan.BorderRadius = (function(){
    @param value {Array<int>} - 2d radius value
    */
   BorderRadius.prototype.setBeforeEnd = function(flow, value){
-    var radius = this.getCorner(flow.getPropBefore(), flow.getPropEnd());
+    var radius = this.getCorner(flow, "before-end");
     radius.setSize(value);
   };
   /**
@@ -165,7 +158,7 @@ Nehan.BorderRadius = (function(){
    @param value {Array<int>} - 2d radius value
    */
   BorderRadius.prototype.setAfterEnd = function(flow, value){
-    var radius = this.getCorner(flow.getPropAfter(), flow.getPropEnd());
+    var radius = this.getCorner(flow, "after-end");
     radius.setSize(value);
   };
   /**

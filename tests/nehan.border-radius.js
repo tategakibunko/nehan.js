@@ -3,10 +3,10 @@ describe("Nehan.BorderRadius", function(){
   var radius = new Nehan.BorderRadius();
 
   radius.setSize(flow, {
-    "start-before":[1, 2], // top-left
-    "start-after":[3, 4], // bottom-left
-    "end-before":[5, 6], // top-right
-    "end-after":[7, 8] // bottom-right
+    "before-start":[1, 2], // top-left
+    "after-start":[3, 4], // bottom-left
+    "before-end":[5, 6], // top-right
+    "after-end":[7, 8] // bottom-right
   });
 
   it("BorderRadius::setSize", function(){
@@ -20,30 +20,30 @@ describe("Nehan.BorderRadius", function(){
     expect(radius.bottomRight.vert).toBe(8);
   });
 
-  it("BorderRadius::setStartBefore", function(){
+  it("BorderRadius::setBeforeStart", function(){
     var tmp = radius.clone();
-    tmp.setStartBefore(flow, [100, 200]); // top-left
+    tmp.setBeforeStart(flow, [100, 200]); // top-left
     expect(tmp.topLeft.hori).toBe(100);
     expect(tmp.topLeft.vert).toBe(200);
   });
 
-  it("BorderRadius::setStartAfter", function(){
+  it("BorderRadius::setAfterStart", function(){
     var tmp = radius.clone();
-    tmp.setStartAfter(flow, [100, 200]); // bottom-left
+    tmp.setAfterStart(flow, [100, 200]); // bottom-left
     expect(tmp.bottomLeft.hori).toBe(100);
     expect(tmp.bottomLeft.vert).toBe(200);
   });
 
-  it("BorderRadius::setEndBefore", function(){
+  it("BorderRadius::setBeforeEnd", function(){
     var tmp = radius.clone();
-    tmp.setEndBefore(flow, [100, 200]); // top-right
+    tmp.setBeforeEnd(flow, [100, 200]); // top-right
     expect(tmp.topRight.hori).toBe(100);
     expect(tmp.topRight.vert).toBe(200);
   });
 
-  it("BorderRadius::setEndAfter", function(){
+  it("BorderRadius::setAfterEnd", function(){
     var tmp = radius.clone();
-    tmp.setEndAfter(flow, [100, 200]); // bottom-right
+    tmp.setAfterEnd(flow, [100, 200]); // bottom-right
     expect(tmp.bottomRight.hori).toBe(100);
     expect(tmp.bottomRight.vert).toBe(200);
   });
@@ -73,19 +73,21 @@ describe("Nehan.BorderRadius", function(){
   });
 
   it("BorderRadius::getCorner", function(){
-    var left_top = radius.getCorner("left", "top");
+    var lr_tb = Nehan.BoxFlows.getByName("lr-tb");
+    var tb_rl = Nehan.BoxFlows.getByName("tb-rl");
+    var left_top = radius.getCorner(lr_tb, "before-start");
     expect(left_top.hori).toBe(1);
     expect(left_top.vert).toBe(2);
 
-    var left_bottom = radius.getCorner("left", "bottom");
+    var left_bottom = radius.getCorner(lr_tb, "after-start");
     expect(left_bottom.hori).toBe(3);
     expect(left_bottom.vert).toBe(4);
 
-    var right_top = radius.getCorner("right", "top");
+    var right_top = radius.getCorner(lr_tb, "before-end");
     expect(right_top.hori).toBe(5);
     expect(right_top.vert).toBe(6);
 
-    var right_bottom = radius.getCorner("right", "bottom");
+    var right_bottom = radius.getCorner(lr_tb, "after-end");
     expect(right_bottom.hori).toBe(7);
     expect(right_bottom.vert).toBe(8);
   });
