@@ -207,10 +207,6 @@ Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class=
   }
 });</code></pre></div></div></div>
 
-<p>Note that type of argument <code>ctx</code> at <code>onload</code> is NOT <a href="http://tb.antiscroll.com/static/nehan-api/Nehan.SelectorPropContext.html">SelectorPropContext</a> but <a href="http://tb.antiscroll.com/static/nehan-api/Nehan.SelectorContext.html">SelectorContext</a>.</p>
-
-<p><code>SelectorContext</code> extends <code>SelectorPropContext</code> and <code>onload</code> is called after all css properties of the target selector are loaded, so <code>SelectorContext</code> has more infomation than <code>SelectorPropContext</code>.</p>
-
 <h3>DOM creation callback</h3>
 
 <p>By using <code>oncreate</code> property, you can hook just after the target selector is converted into DOM.</p>
