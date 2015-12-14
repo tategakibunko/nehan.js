@@ -117,6 +117,8 @@ Nehan.Utils = {
       .replace(/^\s+/, "") // cut head space
       .replace(/\s+$/, "") // cut tail space
       .replace(/\s+/g, " ") // many space -> single space
+      .replace(/\s+,/g, ",") // cut space around comma before
+      .replace(/,\s+/g, ",") // cut space around comma after
       .replace(/\s+\//g, "/") // cut space around slash before
       .replace(/\/\s+/g, "/") // cut space around slash after
       .replace(/\s+\(/g, "/") // cut space around left paren before
@@ -145,5 +147,16 @@ Nehan.Utils = {
       return [str];
     }
     return str.split(/\s+/);
+  },
+  /**
+   @memberof Nehan.Utils
+   @param value {Any}
+   @return {bool}
+   */
+  isNumber : function(value){
+    if(typeof(value) != "number" && typeof(value) != "string"){
+      return false;
+    }
+    return (value == parseFloat(value) && isFinite(value));
   }
 };
