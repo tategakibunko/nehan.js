@@ -3,7 +3,7 @@ Nehan.CssFontParser = (function(){
     throw "sorry, shorthand of css font is not supported yet, but in my opinion, it's too wired and sucks!";
   };
 
-  var __parse_string = function(str){
+  var __parse_shorthand = function(str){
     var font = {};
     var values = Nehan.Utils.splitBySpace(str);
     return __create_font(values);
@@ -18,7 +18,7 @@ Nehan.CssFontParser = (function(){
       return value;
     }
     if(typeof value === "string"){
-      return __parse_string(value);
+      return __parse_shorthand(value);
     }
     console.error("invalid font value:%o", value);
     throw "invalid font value";

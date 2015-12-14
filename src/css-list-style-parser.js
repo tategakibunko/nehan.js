@@ -1,5 +1,5 @@
 Nehan.CssListStyleParser = (function(){
-  var __parse_string = function(str){
+  var __parse_shorthand = function(str){
     str = Nehan.Utils.trim(str).replace(/\s+/g, " ").replace(/;/g, "");
     var list_style = {};
     var values = Nehan.Utils.splitBySpace(str);
@@ -25,7 +25,7 @@ Nehan.CssListStyleParser = (function(){
       return value;
     }
     if(typeof value === "string"){
-      return __parse_string(value);
+      return __parse_shorthand(value);
     }
     console.error("invalid list-style value:%o", value);
     throw "invalid list-style value";

@@ -32,7 +32,7 @@ Nehan.CssBorderRadiusParser = (function(){
     return Nehan.List.object(Nehan.Const.cssLogicalBoxCorners, ary);
   };
 
-  var __parse_str = function(str){
+  var __parse_shorthand = function(str){
     if(str === ""){
       return {};
     }
@@ -74,7 +74,7 @@ Nehan.CssBorderRadiusParser = (function(){
       return value;
     }
     if(typeof value === "string"){
-      return __parse_str(value);
+      return __parse_shorthand(value);
     }
     console.error("invalid border-radius:%o", value);
     return {};

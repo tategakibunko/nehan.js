@@ -41,6 +41,11 @@ Nehan.CssProp = (function(){
     "list-style-type":{name:"list-style", attr:"type"},
     "list-style-image":{name:"list-style", attr:"image"},
 
+    // text-emphasis
+    "text-emphasis-position":{name:"text-emphasis", attr:"position"},
+    "text-emphasis-style":{name:"text-emphasis", attr:"style"},
+    "text-emphasis-color":{name:"text-emphasis", attr:"color"},
+
     // font
     "font-size":{name:"font", attr:"size"},
     "font-family":{name:"font", attr:"family"},

@@ -2564,8 +2564,8 @@ Nehan.CssEdgeParser = (function(){
     if(typeof value === "function"){
       return value;
     }
-    console.error("Edge::parseUnit, invalid value:%o", value);
-    throw "CssEdgeParser::parseUnit(invalid format)";
+    console.error("invalid edge value unit:%o", value);
+    throw "invalid edge format";
   };
 
   var __parse_set = function(value){
@@ -2587,14 +2587,15 @@ Nehan.CssEdgeParser = (function(){
       }
       return __parse_edge_array(Nehan.Utils.splitBySpace(value));
     }
-    console.error("Edge::parseSet, invalid value:%o", value);
-    throw "CssEdgeParser::parseSet(invalid format)";
+    console.error("invalid edge value shorthand:%o", value);
+    throw "invalid edge format";
   };
 
   return {
     /**
      @memberof Nehan.CssEdgeParser
      @param css_prop {Nehan.CssProp}
+     @param css_value {Object} - normalized but unformatted css value
      @return {Object} - css value
      */
     formatValue : function(css_prop, value){
@@ -2641,7 +2642,7 @@ Nehan.CssBorderRadiusParser = (function(){
     return Nehan.List.object(Nehan.Const.cssLogicalBoxCorners, ary);
   };
 
-  var __parse_str = function(str){
+  var __parse_shorthand = function(str){
     if(str === ""){
       return {};
     }
@@ -2683,7 +2684,7 @@ Nehan.CssBorderRadiusParser = (function(){
       return value;
     }
     if(typeof value === "string"){
-      return __parse_str(value);
+      return __parse_shorthand(value);
     }
     console.error("invalid border-radius:%o", value);
     return {};
@@ -2710,7 +2711,7 @@ Nehan.CssFontParser = (function(){
     throw "sorry, shorthand of css font is not supported yet, but in my opinion, it's too wired and sucks!";
   };
 
-  var __parse_string = function(str){
+  var __parse_shorthand = function(str){
     var font = {};
     var values = Nehan.Utils.splitBySpace(str);
     return __create_font(values);
@@ -2725,7 +2726,7 @@ Nehan.CssFontParser = (function(){
       return value;
     }
     if(typeof value === "string"){
-      return __parse_string(value);
+      return __parse_shorthand(value);
     }
     console.error("invalid font value:%o", value);
     throw "invalid font value";
@@ -2746,8 +2747,48 @@ Nehan.CssFontParser = (function(){
   };
 })();
 
+Nehan.CssTextEmphaParser = (function(){
+  var __parse_shorthand = function(value){
+    console.warn("sorry, shorthand of text-emphasis is not supported yet!");
+    return {
+      style:value
+    };
+  };
+
+  var __parse_unit = function(css_prop, value){
+    switch(css_prop.getName()){
+    case "position": return __parse_position(value);
+    default: return value; // style, color
+    }
+  };
+
+  var __parse_position = function(value){
+    var parts = Nehan.Utils.splitBySpace(value);
+    switch(parts.length){
+    case 0: return {hori:"over", vert:"right"};
+    case 1: return {hori:parts[0], vert:"right"};
+    default: return {hori:parts[0], vert:parts[1]};
+    }
+  };
+
+  return {
+    /**
+     @memberof Nehan.CssTextEmphaParser
+     @param css_prop {Nehan.CssProp}
+     @param css_value {Object} - normalized but unformatted css value
+     @return {Object} - css value
+     */
+    formatValue : function(css_prop, value){
+      if(css_prop.hasAttr()){
+	return Nehan.Obj.createOne(css_prop.getAttr(), __parse_unit(css_prop, value));
+      }
+      return __parse_shorthand(value);
+    }
+  };
+})();
+
 Nehan.CssListStyleParser = (function(){
-  var __parse_string = function(str){
+  var __parse_shorthand = function(str){
     str = Nehan.Utils.trim(str).replace(/\s+/g, " ").replace(/;/g, "");
     var list_style = {};
     var values = Nehan.Utils.splitBySpace(str);
@@ -2773,7 +2814,7 @@ Nehan.CssListStyleParser = (function(){
       return value;
     }
     if(typeof value === "string"){
-      return __parse_string(value);
+      return __parse_shorthand(value);
     }
     console.error("invalid list-style value:%o", value);
     throw "invalid list-style value";
@@ -2836,6 +2877,11 @@ Nehan.CssProp = (function(){
     "list-style-position":{name:"list-style", attr:"position"},
     "list-style-type":{name:"list-style", attr:"type"},
     "list-style-image":{name:"list-style", attr:"image"},
+
+    // text-emphasis
+    "text-emphasis-position":{name:"text-emphasis", attr:"position"},
+    "text-emphasis-style":{name:"text-emphasis", attr:"style"},
+    "text-emphasis-color":{name:"text-emphasis", attr:"color"},
 
     // font
     "font-size":{name:"font", attr:"size"},
@@ -2962,6 +3008,8 @@ Nehan.CssParser = (function(){
       return Nehan.CssListStyleParser.formatValue(fmt_prop, norm_value);
     case "font":
       return Nehan.CssFontParser.formatValue(fmt_prop, norm_value);
+    case "text-emphasis":
+      return Nehan.CssTextEmphaParser.formatValue(fmt_prop, norm_value);
     default:
       return norm_value;
     }
@@ -9681,13 +9729,13 @@ Nehan.TextEmpha = (function(){
      @constructor
      @param opt {Object}
      @param opt.style {Nehan.TextEmphaStyle}
-     @param opt.pos {Nehan.TextEmphaPos}
+     @param opt.position {Nehan.TextEmphaPos}
      @param opt.color {Nehan.Color}
   */
   function TextEmpha(opt){
     opt = opt || {};
     this.style = opt.style || new Nehan.TextEmphaStyle();
-    this.pos = opt.pos || new Nehan.TextEmphaPos();
+    this.position = opt.position || new Nehan.TextEmphaPos();
     this.color = opt.color || new Nehan.Color(Nehan.Config.defaultFontColor);
   }
 
@@ -13144,14 +13192,6 @@ Nehan.Style = (function(){
   // to fetch first text part from content html.
   var __rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
 
-  var __is_managed_css_prop = function(prop){
-    return Nehan.List.exists(Nehan.Config.managedCssProps, Nehan.Closure.eq(prop));
-  };
-
-  var __is_callback_css_prop = function(prop){
-    return Nehan.List.exists(Nehan.Config.callbackCssProps, Nehan.Closure.eq(prop));
-  };
-
   Style.prototype._initialize = function(context, markup, parent, force_css){
     this.context = context;
     this.markup = markup;
@@ -13165,7 +13205,6 @@ Nehan.Style = (function(){
     //
     // at this case, global chilren of <body> is <div1> and <div2>.
     // but for '<body> of page1', <div1> is the only child, and <div2> is for '<body> of page2' also.
-    // so we may create 'contextChilds' to distinguish these difference.
     this.childs = [];
 
     this.next = null; // next sibling
@@ -13493,6 +13532,20 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {boolean}
    */
+  Style.prototype.isManagedCssProp = function(prop){
+    return Nehan.List.exists(Nehan.Config.managedCssProps, Nehan.Closure.eq(prop));
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
+  Style.prototype.isCallbackCssProp = function(prop){
+    return Nehan.List.exists(Nehan.Config.callbackCssProps, Nehan.Closure.eq(prop));
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
   Style.prototype.isFloatStart = function(){
     return this.floatDirection? this.floatDirection.isStart() : false;
   };
@@ -13745,7 +13798,7 @@ Nehan.Style = (function(){
    */
   Style.prototype.setCssAttr = function(name, value){
     var entry = Nehan.CssParser.formatEntry(name, value);
-    var target_css = __is_managed_css_prop(entry.getPropName())? this.managedCss : this.unmanagedCss;
+    var target_css = this.isManagedCssProp(entry.getPropName())? this.managedCss : this.unmanagedCss;
     target_css.add(entry.getPropName(), entry.getValue());
   };
   /**
@@ -14457,9 +14510,9 @@ Nehan.Style = (function(){
 
   Style.prototype._registerCssValues = function(values){
     Nehan.Obj.iter(values, function(fmt_prop, value){
-      if(__is_callback_css_prop(fmt_prop)){
+      if(this.isCallbackCssProp(fmt_prop)){
 	this.callbackCss.add(fmt_prop, value);
-      } else if(__is_managed_css_prop(fmt_prop)){
+      } else if(this.isManagedCssProp(fmt_prop)){
 	this.managedCss.add(fmt_prop, this._evalCssAttr(fmt_prop, value));
       } else {
 	this.unmanagedCss.add(fmt_prop, this._evalCssAttr(fmt_prop, value));
@@ -14635,16 +14688,14 @@ Nehan.Style = (function(){
   };
 
   Style.prototype._loadTextEmpha = function(){
-    var empha_style = this.getCssAttr("text-emphasis-style", "none");
-    if(empha_style === "none" || empha_style === "inherit"){
+    var css = this.getCssAttr("text-emphasis", null);
+    if(css === null || !css.style || css.style === "none"){
       return null;
     }
-    var empha_pos = this.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
-    var empha_color = this.getCssAttr("text-emphasis-color");
     return new Nehan.TextEmpha({
-      style:new Nehan.TextEmphaStyle(empha_style),
-      pos:new Nehan.TextEmphaPos(empha_pos),
-      color:(empha_color? new Nehan.Color(empha_color) : this.getColor())
+      style:new Nehan.TextEmphaStyle(css.style),
+      position:new Nehan.TextEmphaPos(css.position || {hori:"over", vert:"right"}),
+      color:(css.color? new Nehan.Color(css.color) : this.getColor())
     });
   };
 

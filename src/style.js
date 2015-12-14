@@ -16,14 +16,6 @@ Nehan.Style = (function(){
   // to fetch first text part from content html.
   var __rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
 
-  var __is_managed_css_prop = function(prop){
-    return Nehan.List.exists(Nehan.Config.managedCssProps, Nehan.Closure.eq(prop));
-  };
-
-  var __is_callback_css_prop = function(prop){
-    return Nehan.List.exists(Nehan.Config.callbackCssProps, Nehan.Closure.eq(prop));
-  };
-
   Style.prototype._initialize = function(context, markup, parent, force_css){
     this.context = context;
     this.markup = markup;
@@ -37,7 +29,6 @@ Nehan.Style = (function(){
     //
     // at this case, global chilren of <body> is <div1> and <div2>.
     // but for '<body> of page1', <div1> is the only child, and <div2> is for '<body> of page2' also.
-    // so we may create 'contextChilds' to distinguish these difference.
     this.childs = [];
 
     this.next = null; // next sibling
@@ -365,6 +356,20 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {boolean}
    */
+  Style.prototype.isManagedCssProp = function(prop){
+    return Nehan.List.exists(Nehan.Config.managedCssProps, Nehan.Closure.eq(prop));
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
+  Style.prototype.isCallbackCssProp = function(prop){
+    return Nehan.List.exists(Nehan.Config.callbackCssProps, Nehan.Closure.eq(prop));
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
   Style.prototype.isFloatStart = function(){
     return this.floatDirection? this.floatDirection.isStart() : false;
   };
@@ -617,7 +622,7 @@ Nehan.Style = (function(){
    */
   Style.prototype.setCssAttr = function(name, value){
     var entry = Nehan.CssParser.formatEntry(name, value);
-    var target_css = __is_managed_css_prop(entry.getPropName())? this.managedCss : this.unmanagedCss;
+    var target_css = this.isManagedCssProp(entry.getPropName())? this.managedCss : this.unmanagedCss;
     target_css.add(entry.getPropName(), entry.getValue());
   };
   /**
@@ -1329,9 +1334,9 @@ Nehan.Style = (function(){
 
   Style.prototype._registerCssValues = function(values){
     Nehan.Obj.iter(values, function(fmt_prop, value){
-      if(__is_callback_css_prop(fmt_prop)){
+      if(this.isCallbackCssProp(fmt_prop)){
 	this.callbackCss.add(fmt_prop, value);
-      } else if(__is_managed_css_prop(fmt_prop)){
+      } else if(this.isManagedCssProp(fmt_prop)){
 	this.managedCss.add(fmt_prop, this._evalCssAttr(fmt_prop, value));
       } else {
 	this.unmanagedCss.add(fmt_prop, this._evalCssAttr(fmt_prop, value));
@@ -1507,16 +1512,14 @@ Nehan.Style = (function(){
   };
 
   Style.prototype._loadTextEmpha = function(){
-    var empha_style = this.getCssAttr("text-emphasis-style", "none");
-    if(empha_style === "none" || empha_style === "inherit"){
+    var css = this.getCssAttr("text-emphasis", null);
+    if(css === null || !css.style || css.style === "none"){
       return null;
     }
-    var empha_pos = this.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
-    var empha_color = this.getCssAttr("text-emphasis-color");
     return new Nehan.TextEmpha({
-      style:new Nehan.TextEmphaStyle(empha_style),
-      pos:new Nehan.TextEmphaPos(empha_pos),
-      color:(empha_color? new Nehan.Color(empha_color) : this.getColor())
+      style:new Nehan.TextEmphaStyle(css.style),
+      position:new Nehan.TextEmphaPos(css.position || {hori:"over", vert:"right"}),
+      color:(css.color? new Nehan.Color(css.color) : this.getColor())
     });
   };
 

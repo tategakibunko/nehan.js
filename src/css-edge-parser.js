@@ -22,8 +22,8 @@ Nehan.CssEdgeParser = (function(){
     if(typeof value === "function"){
       return value;
     }
-    console.error("Edge::parseUnit, invalid value:%o", value);
-    throw "CssEdgeParser::parseUnit(invalid format)";
+    console.error("invalid edge value unit:%o", value);
+    throw "invalid edge format";
   };
 
   var __parse_set = function(value){
@@ -45,14 +45,15 @@ Nehan.CssEdgeParser = (function(){
       }
       return __parse_edge_array(Nehan.Utils.splitBySpace(value));
     }
-    console.error("Edge::parseSet, invalid value:%o", value);
-    throw "CssEdgeParser::parseSet(invalid format)";
+    console.error("invalid edge value shorthand:%o", value);
+    throw "invalid edge format";
   };
 
   return {
     /**
      @memberof Nehan.CssEdgeParser
      @param css_prop {Nehan.CssProp}
+     @param css_value {Object} - normalized but unformatted css value
      @return {Object} - css value
      */
     formatValue : function(css_prop, value){

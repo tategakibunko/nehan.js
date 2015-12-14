@@ -30,6 +30,8 @@ Nehan.CssParser = (function(){
       return Nehan.CssListStyleParser.formatValue(fmt_prop, norm_value);
     case "font":
       return Nehan.CssFontParser.formatValue(fmt_prop, norm_value);
+    case "text-emphasis":
+      return Nehan.CssTextEmphaParser.formatValue(fmt_prop, norm_value);
     default:
       return norm_value;
     }

@@ -6,13 +6,13 @@ Nehan.TextEmpha = (function(){
      @constructor
      @param opt {Object}
      @param opt.style {Nehan.TextEmphaStyle}
-     @param opt.pos {Nehan.TextEmphaPos}
+     @param opt.position {Nehan.TextEmphaPos}
      @param opt.color {Nehan.Color}
   */
   function TextEmpha(opt){
     opt = opt || {};
     this.style = opt.style || new Nehan.TextEmphaStyle();
-    this.pos = opt.pos || new Nehan.TextEmphaPos();
+    this.position = opt.position || new Nehan.TextEmphaPos();
     this.color = opt.color || new Nehan.Color(Nehan.Config.defaultFontColor);
   }
 
