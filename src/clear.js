@@ -34,14 +34,6 @@ Nehan.Clear = (function(){
    @param direction {String}
    @return {bool}
    */
-  Clear.prototype.isDone = function(direction){
-    return this.status[direction];
-  };
-  /**
-   @memberof Nehan.Clear
-   @param direction {String}
-   @return {bool}
-   */
   Clear.prototype.isDoneAll = function(){
     return Nehan.Obj.forall(this.status, function(prop, state){
       return state === true;
