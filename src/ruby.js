@@ -95,7 +95,7 @@ Nehan.Ruby = (function(){
     var css = {};
     css["css-float"] = "left";
     if(this.padding){
-      Nehan.Args.copy(css, this.padding.getCss());
+      Nehan.Obj.copy(css, this.padding.getCss());
     }
     return css;
   };
@@ -107,7 +107,7 @@ Nehan.Ruby = (function(){
   Ruby.prototype.getCssHoriRb = function(line){
     var css = {};
     if(this.padding){
-      Nehan.Args.copy(css, this.padding.getCss());
+      Nehan.Obj.copy(css, this.padding.getCss());
     }
     css["text-align"] = "center";
     css["line-height"] = "1em";

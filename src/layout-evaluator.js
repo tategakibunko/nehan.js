@@ -78,7 +78,7 @@ Nehan.LayoutEvaluator = (function(){
     });
 
     // dataset attributes(defined in TagAttrs::dataset)
-    Nehan.Args.copy(dom.dataset, dataset);
+    Nehan.Obj.copy(dom.dataset, dataset);
     return dom;
   };
 

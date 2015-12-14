@@ -28,7 +28,6 @@ var sources = [
   "src/lexing-rule.js",
   "src/class.js",
   "src/list.js",
-  "src/args.js",
   "src/obj.js",
   "src/utils.js",
   "src/const.js",

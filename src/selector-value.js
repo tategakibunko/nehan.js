@@ -17,7 +17,7 @@ Nehan.SelectorValue = (function(){
       var fmt_value = entry.getValue();
       var old_value = fmt_entries[fmt_prop];
       if(old_value && typeof old_value === "object" && typeof fmt_value === "object"){
-	Nehan.Args.copy(old_value, fmt_value);
+	Nehan.Obj.copy(old_value, fmt_value);
       } else {
 	fmt_entries[fmt_prop] = fmt_value;
       }
@@ -36,7 +36,7 @@ Nehan.SelectorValue = (function(){
       var fmt_value = fmt_values[fmt_prop];
       var old_value = this.entries[fmt_prop] || null;
       if(old_value && typeof old_value === "object" && typeof fmt_value === "object"){
-	Nehan.Args.copy(old_value, fmt_value);
+	Nehan.Obj.copy(old_value, fmt_value);
       } else {
 	this.entries[fmt_prop] = fmt_value;
       }

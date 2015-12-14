@@ -14,7 +14,7 @@ Nehan.Page = (function(){
      @param opt.percent {int}
   */
   function Page(opt){
-    Nehan.Args.merge(this, {
+    Nehan.Obj.merge(this, {
       tree:null,
       element:null,
       text:"",

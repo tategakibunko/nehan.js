@@ -1659,7 +1659,7 @@ Nehan.RenderingContext = (function(){
       size:new Nehan.BoxSize(0,0)
     });
     box.isEmpty = true;
-    Nehan.Args.copy(box, opt || {});
+    Nehan.Obj.copy(box, opt || {});
     return box;
   };
 

@@ -9,7 +9,7 @@ Nehan.TextEmphaPos = (function(){
      @param opt.vert {String} - vertical empha pos, default "right"
   */
   function TextEmphaPos(opt){
-    Nehan.Args.merge(this, {
+    Nehan.Obj.merge(this, {
       hori:"over",
       vert:"right"
     }, opt || {});

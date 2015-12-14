@@ -13,7 +13,7 @@ Nehan.Baseline = (function(){
 	element.size.width = (root_line.maxExtent - from_after);
 	
 	// set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
-	Nehan.Args.copy(element.css, edge.getCss(flow));
+	Nehan.Obj.copy(element.css, edge.getCss(flow));
       }
     });
   };
@@ -29,7 +29,7 @@ Nehan.Baseline = (function(){
 	//element.size.width = (root_line.maxExtent - from_after);
 	
 	// set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
-	Nehan.Args.copy(element.css, edge.getCss(flow));
+	Nehan.Obj.copy(element.css, edge.getCss(flow));
       }
     });
   };

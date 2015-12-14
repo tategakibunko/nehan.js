@@ -101,18 +101,18 @@ doc.setStyle("body", {
   width:640,
   height:480,
   // you can use functional css property!
-  backgroundColor:function(prop_context){
+  backgroundColor:function(context){
     // you can get many pseudo-class in javascript.
-    // console.log("nth-child:%d", prop_context.getChildIndex());
-    // console.log("nth-of-type:%d", prop_context.getChildIndexOfType());
-    // console.log("is-last-child:%o", prop_context.isLastChild());
-    // console.log("is-only-child:%o", prop_context.isOnlyChild());
+    // console.log("nth-child:%d", context.getChildIndex());
+    // console.log("nth-of-type:%d", context.getChildIndexOfType());
+    // console.log("is-last-child:%o", context.isLastChild());
+    // console.log("is-only-child:%o", context.isOnlyChild());
     return "wheat";
   },
   // called after after all props in "body" selector are loaded.
-  onload:function(selector_context){
-    // console.log("nth-child:%d", selector_context.getChildIndex());
-    // console.log("markup:%o", selector_context.getMarkup());
+  onload:function(context){
+    // console.log("nth-child:%d", context.getChildIndex());
+    // console.log("markup:%o", context.getMarkup());
   },
   // called after "body" is converted into DOM Element.
   oncreate:function(context){
@@ -120,10 +120,9 @@ doc.setStyle("body", {
       alert("body is clicked!");
     };
     // many various context data...
-    // console.log("box object:", context.box);
-    // console.log("box context:", context.box.context);
-    // console.log("box style:", context.box.context.style);
-    // console.log("box markup:", context.box.context.style.markup);
+    // console.log("logical box:", context.getBox());
+    // console.log("style:", context.getStyle());
+    // console.log("markup:", context.getMarkup());
   }
 });
 ```

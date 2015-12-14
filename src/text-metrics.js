@@ -6,7 +6,7 @@
 Nehan.TextMetrics = (function(){
   var __span = (function(){
     var span = document.createElement("span");
-    Nehan.Args.copy(span.style, {
+    Nehan.Obj.copy(span.style, {
       margin:0,
       padding:0,
       border:0,

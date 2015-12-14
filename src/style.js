@@ -1077,32 +1077,32 @@ Nehan.Style = (function(){
     var is_vert = this.isTextVertical();
     css.display = "block";
     if(this.font){
-      Nehan.Args.copy(css, this.font.getCss());
+      Nehan.Obj.copy(css, this.font.getCss());
     }
     if(this.parent && this.getMarkupName() !== "body"){
-      Nehan.Args.copy(css, this.parent.flow.getCss());
+      Nehan.Obj.copy(css, this.parent.flow.getCss());
     }
     if(this.color){
-      Nehan.Args.copy(css, this.color.getCss());
+      Nehan.Obj.copy(css, this.color.getCss());
     }
     if(this.letterSpacing && !is_vert){
       css["letter-spacing"] = this.letterSpacing + "px";
     }
     if(this.floatDirection){
-      Nehan.Args.copy(css, this.floatDirection.getCss(is_vert));
+      Nehan.Obj.copy(css, this.floatDirection.getCss(is_vert));
     }
     if(this.boxPosition){
-      Nehan.Args.copy(css, this.boxPosition.getCss());
+      Nehan.Obj.copy(css, this.boxPosition.getCss());
     }
     if(this.zIndex){
       css["z-index"] = this.zIndex;
     }
     this.unmanagedCss.copyValuesTo(css);
-    Nehan.Args.copy(css, block.size.getCss()); // content size
+    Nehan.Obj.copy(css, block.size.getCss()); // content size
     if(block.edge){
-      Nehan.Args.copy(css, block.edge.getCss());
+      Nehan.Obj.copy(css, block.edge.getCss());
     }
-    Nehan.Args.copy(css, block.css); // some dynamic values
+    Nehan.Obj.copy(css, block.css); // some dynamic values
     return css;
   };
   /**
@@ -1114,18 +1114,18 @@ Nehan.Style = (function(){
     // notice that line-size, line-edge is box local variable,
     // so style of line-size(content-size) and edge-size are generated at Box::getBoxCss
     var css = {};
-    Nehan.Args.copy(css, line.size.getCss());
+    Nehan.Obj.copy(css, line.size.getCss());
     if(line.edge){
-      Nehan.Args.copy(css, line.edge.getCss());
+      Nehan.Obj.copy(css, line.edge.getCss());
     }
     if(this.isInlineRoot()){
-      Nehan.Args.copy(css, this.flow.getCss());
+      Nehan.Obj.copy(css, this.flow.getCss());
     }
     if(this.font){
-      Nehan.Args.copy(css, this.font.getCss());
+      Nehan.Obj.copy(css, this.font.getCss());
     }
     if(this.color){
-      Nehan.Args.copy(css, this.color.getCss());
+      Nehan.Obj.copy(css, this.color.getCss());
     }
     if(this.isInlineRoot()){
       css["line-height"] = this.getFontSize() + "px";
@@ -1134,7 +1134,7 @@ Nehan.Style = (function(){
       css["display"] = "block";
     }
     this.unmanagedCss.copyValuesTo(css);
-    Nehan.Args.copy(css, line.css);
+    Nehan.Obj.copy(css, line.css);
     css["background-color"] = this.getCssAttr("background-color", "transparent");
     return css;
   };
@@ -1147,9 +1147,9 @@ Nehan.Style = (function(){
     // notice that line-size, line-edge is box local variable,
     // so style of line-size(content-size) and edge-size are generated at Box::getCssInline
     var css = {};
-    Nehan.Args.copy(css, line.size.getCss());
+    Nehan.Obj.copy(css, line.size.getCss());
     if(line.edge){
-      Nehan.Args.copy(css, line.edge.getCss());
+      Nehan.Obj.copy(css, line.edge.getCss());
     }
     if(this.isTextVertical()){
       css["display"] = "block";
@@ -1158,7 +1158,7 @@ Nehan.Style = (function(){
 	css["letter-spacing"] = "-0.001em";
       }
     } else {
-      Nehan.Args.copy(css, this.flow.getCss());
+      Nehan.Obj.copy(css, this.flow.getCss());
       css["line-height"] = line.maxFontSize + "px";
 
       // enable line-height only when horizontal mode.
@@ -1173,7 +1173,7 @@ Nehan.Style = (function(){
       }
     }
     this.unmanagedCss.copyValuesTo(css);
-    Nehan.Args.copy(css, line.css);
+    Nehan.Obj.copy(css, line.css);
     css["background-color"] = this.getCssAttr("background-color", "transparent");
     return css;
   };
@@ -1189,7 +1189,7 @@ Nehan.Style = (function(){
 	delete css["css-float"];
       }
     } else {
-      Nehan.Args.copy(css, this.flow.getCss());
+      Nehan.Obj.copy(css, this.flow.getCss());
     }
     css.display = "inline-block";
     return css;

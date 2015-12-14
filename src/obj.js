@@ -1,8 +1,8 @@
 /**
-   object utility module
+ object utility module
 
-   @namespace Nehan.Obj
-*/
+ @namespace Nehan.Obj
+ */
 Nehan.Obj = (function(){
   var __clone = function(obj){
     var copy;
@@ -29,10 +29,39 @@ Nehan.Obj = (function(){
   };
   return {
     /**
-       @memberof Nehan.Obj
-       @param obj {Object}
-       @return {bool}
-    */
+     copy all value in [args] to [dst]
+     @memberof Nehan.Args
+     @param {Object} dst
+     @param {Object} args
+     @return {Object} copied dst
+     */
+    copy : function(dst, args){
+      dst = dst || {};
+      for(var prop in args){
+	dst[prop] = args[prop];
+      }
+      return dst;
+    },
+    /**
+     merge all value in [args] to [dst] with default value by [defaults]
+     @memberof Nehan.Args
+     @param {Object} dst
+     @param {Object} defaults
+     @param {Object} args
+     @return {Object} merged dst
+     */
+    merge : function(dst, defaults, args){
+      dst = dst || {};
+      for(var prop in defaults){
+	dst[prop] = (typeof args[prop] === "undefined")? defaults[prop] : args[prop];
+      }
+      return dst;
+    },
+    /**
+     @memberof Nehan.Obj
+     @param obj {Object}
+     @return {bool}
+     */
     isEmpty: function(obj){
       for(var name in obj){
 	return false;
@@ -45,18 +74,18 @@ Nehan.Obj = (function(){
       return obj;
     },
     /**
-       @memberof Nehan.Obj
-       @param obj {Object}
-       @return {Object}
-    */
+     @memberof Nehan.Obj
+     @param obj {Object}
+     @return {Object}
+     */
     clone: function(obj){
       return __clone(obj);
     },
     /**
-       @memberof Nehan.Obj
-       @param obj {Object}
-       @param fn {Function} - fun prop -> value -> obj
-    */
+     @memberof Nehan.Obj
+     @param obj {Object}
+     @param fn {Function} - fun prop -> value -> obj
+     */
     map : function(obj, fn){
       var ret = {};
       this.iter(obj, function(prop, value){
@@ -65,11 +94,11 @@ Nehan.Obj = (function(){
       return ret;
     },
     /**
-       @memberof Nehan.Obj
-       @param obj {Object}
-       @param fn {Function} - fun prop -> value -> {bool}
-       @return {bool}
-    */
+     @memberof Nehan.Obj
+     @param obj {Object}
+     @param fn {Function} - fun prop -> value -> {bool}
+     @return {bool}
+     */
     exists : function(obj, fn){
       for(var prop in obj){
 	if(fn(prop, obj[prop])){
@@ -79,10 +108,10 @@ Nehan.Obj = (function(){
       return false;
     },
     /**
-       @memberof Nehan.Obj
-       @param obj {Object}
-       @param fn {Function} - fun prop -> value -> {bool}
-    */
+     @memberof Nehan.Obj
+     @param obj {Object}
+     @param fn {Function} - fun prop -> value -> {bool}
+     */
     filter : function(obj, fn){
       var ret = {};
       this.iter(obj, function(prop, value){
@@ -93,20 +122,20 @@ Nehan.Obj = (function(){
       return ret;
     },
     /**
-       @memberof Nehan.Obj
-       @param obj {Object}
-       @param fn {Function} - fun prop -> value -> ()
-    */
+     @memberof Nehan.Obj
+     @param obj {Object}
+     @param fn {Function} - fun prop -> value -> ()
+     */
     iter : function(obj, fn){
       for(var prop in obj){
 	fn(prop, obj[prop]);
       }
     },
     /**
-       @memberof Nehan.Obj
-       @param obj {Object}
-       @param fn {Function} - fun prop -> value -> {bool}
-    */
+     @memberof Nehan.Obj
+     @param obj {Object}
+     @param fn {Function} - fun prop -> value -> {bool}
+     */
     forall : function(obj, fn){
       for(var prop in obj){
 	if(!fn(prop, obj[prop])){

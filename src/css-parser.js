@@ -15,10 +15,27 @@ Nehan.CssParser = (function(){
     return Nehan.Utils.normalizeCssValueStr(value);
   };
 
+  var __format_value = function(fmt_prop, value){
+    var norm_value = __normalize_value(value);
+    switch(fmt_prop.getName()){
+    case "margin":
+    case "padding":
+    case "border-width":
+    case "border-style":
+    case "border-color":
+      return Nehan.CssEdgeParser.formatValue(fmt_prop, norm_value);
+    case "border-radius":
+      return Nehan.CssBorderRadiusParser.formatValue(fmt_prop, norm_value);
+    case "list-style":
+      return Nehan.CssListStyleParser.formatValue(fmt_prop, norm_value);
+    case "font":
+      return Nehan.CssFontParser.formatValue(fmt_prop, norm_value);
+    default:
+      return norm_value;
+    }
+  };
+
   return {
-    normalizeValue : function(value){
-      return __normalize_value(value);
-    },
     /**
      @memberof Nehan.CssParser
      @param prop {String} - unformatted raw css property name
@@ -32,29 +49,8 @@ Nehan.CssParser = (function(){
     */
     formatEntry : function(prop, value){
       var fmt_prop = new Nehan.CssProp(prop);
-      var norm_value = __normalize_value(value);
-      switch(fmt_prop.getName()){
-      case "oncreate":
-      case "onload":
-      case "onblock":
-      case "ontext":
-      case "online":
-	return new Nehan.CssEntry(fmt_prop, norm_value);
-      case "margin":
-      case "padding":
-      case "border-width":
-      case "border-style":
-      case "border-color":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssEdgeParser.formatValue(fmt_prop, norm_value));
-      case "border-radius":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssBorderRadiusParser.formatValue(fmt_prop, norm_value));
-      case "list-style":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssListStyleParser.formatValue(fmt_prop, norm_value));
-      case "font":
-	return new Nehan.CssEntry(fmt_prop, Nehan.CssFontParser.formatValue(fmt_prop, norm_value));
-      default:
-	return new Nehan.CssEntry(fmt_prop, norm_value);
-      }
+      var fmt_value = __format_value(fmt_prop, value);
+      return new Nehan.CssEntry(fmt_prop, fmt_value);
     }
   };
 })();

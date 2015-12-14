@@ -56,11 +56,11 @@ Nehan.TextAlign = (function(){
       var start_offset = Math.floor(space_measure / 2);
       line.size.setMeasure(flow, content_measure - start_offset);
       padding.setStart(flow, start_offset);
-      Nehan.Args.copy(line.css, padding.getCss());
+      Nehan.Obj.copy(line.css, padding.getCss());
     } else if(this.isEnd()){
       line.size.setMeasure(flow, line.inlineMeasure);
       padding.setStart(flow, space_measure);
-      Nehan.Args.copy(line.css, padding.getCss());
+      Nehan.Obj.copy(line.css, padding.getCss());
     }
   };
 

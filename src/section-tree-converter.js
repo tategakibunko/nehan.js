@@ -112,7 +112,7 @@ Nehan.SectionTreeConverter = (function(){
        @param callbacks.createPageNoItem {Function} - called when create page no item node in link object, create nothing by default.
     */
     convert : function(outline_tree, callbacks){
-      callbacks = Nehan.Args.merge({}, default_callbacks, callbacks || {});
+      callbacks = Nehan.Obj.merge({}, default_callbacks, callbacks || {});
       var toc_context = new Nehan.TocContext();
       var root_node = callbacks.createRoot();
       return parse(toc_context, root_node, outline_tree, callbacks); // section tree -> dom node

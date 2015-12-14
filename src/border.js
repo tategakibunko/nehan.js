@@ -113,13 +113,13 @@ Nehan.Border = (function(){
   Border.prototype.getCss = function(){
     var css = Nehan.Edge.prototype.getCss.call(this);
     if(this.radius){
-      Nehan.Args.copy(css, this.radius.getCss());
+      Nehan.Obj.copy(css, this.radius.getCss());
     }
     if(this.color){
-      Nehan.Args.copy(css, this.color.getCss());
+      Nehan.Obj.copy(css, this.color.getCss());
     }
     if(this.style){
-      Nehan.Args.copy(css, this.style.getCss());
+      Nehan.Obj.copy(css, this.style.getCss());
     }
     return css;
   };

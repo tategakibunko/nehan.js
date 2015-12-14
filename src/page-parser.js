@@ -33,7 +33,7 @@ Nehan.PageParser = (function(){
    */
   PageParser.prototype.parse = function(opt){
     // set defaults
-    opt = Nehan.Args.merge({}, {
+    opt = Nehan.Obj.merge({}, {
       capturePageText: false,
       maxPageCount: Nehan.Config.maxPageCount,
       onPage: null,

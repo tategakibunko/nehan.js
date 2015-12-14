@@ -42,9 +42,9 @@ Nehan.BoxEdge = (function (){
    */
   BoxEdge.prototype.getCss = function(){
     var css = {};
-    Nehan.Args.copy(css, this.padding.getCss());
-    Nehan.Args.copy(css, this.border.getCss());
-    Nehan.Args.copy(css, this.margin.getCss());
+    Nehan.Obj.copy(css, this.padding.getCss());
+    Nehan.Obj.copy(css, this.border.getCss());
+    Nehan.Obj.copy(css, this.margin.getCss());
     return css;
   },
   /**
