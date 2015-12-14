@@ -1322,25 +1322,6 @@ Nehan.Utils = {
   /**
    @memberof Nehan.Utils
    @param str {String}
-   @return {String}
-   */
-  normalizeCssValueStr : function(str){
-    return str
-      .replace(/;/g, "") // disable terminater
-      .replace(/^\s+/, "") // cut head space
-      .replace(/\s+$/, "") // cut tail space
-      .replace(/\s+/g, " ") // many space -> single space
-      .replace(/\s+,/g, ",") // cut space around comma before
-      .replace(/,\s+/g, ",") // cut space around comma after
-      .replace(/\s+\//g, "/") // cut space around slash before
-      .replace(/\/\s+/g, "/") // cut space around slash after
-      .replace(/\s+\(/g, "/") // cut space around left paren before
-      .replace(/\)\s+/g, "/") // cut space around right paren after
-    ;
-  },
-  /**
-   @memberof Nehan.Utils
-   @param str {String}
    @param splitter {String}
    @return {Array<String>}
    */
@@ -1477,6 +1458,25 @@ Nehan.Css = {
       tmp.push(prop + ":" + args[prop]);
     }
     return tmp.join(";");
+  },
+  /**
+   @memberof Nehan.Css
+   @param str {String}
+   @return {String}
+   */
+  normalizeValue : function(str){
+    return str
+      .replace(/;/g, "") // disable terminater
+      .replace(/^\s+/, "") // cut head space
+      .replace(/\s+$/, "") // cut tail space
+      .replace(/\s+/g, " ") // many space -> single space
+      .replace(/\s+,/g, ",") // cut space around comma before
+      .replace(/,\s+/g, ",") // cut space around comma after
+      .replace(/\s+\//g, "/") // cut space around slash before
+      .replace(/\/\s+/g, "/") // cut space around slash after
+      .replace(/\s+\(/g, "/") // cut space around left paren before
+      .replace(/\)\s+/g, "/") // cut space around right paren after
+    ;
   },
   /**
      @memberof Nehan.Css
@@ -3089,7 +3089,7 @@ Nehan.CssParser = (function(){
     if(typeof value === "number"){
       return value.toString();
     }
-    return Nehan.Utils.normalizeCssValueStr(value);
+    return Nehan.Css.normalizeValue(value);
   };
 
   var __format_value = function(fmt_prop, value){

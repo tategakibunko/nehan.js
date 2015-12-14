@@ -18,6 +18,25 @@ Nehan.Css = {
     return tmp.join(";");
   },
   /**
+   @memberof Nehan.Css
+   @param str {String}
+   @return {String}
+   */
+  normalizeValue : function(str){
+    return str
+      .replace(/;/g, "") // disable terminater
+      .replace(/^\s+/, "") // cut head space
+      .replace(/\s+$/, "") // cut tail space
+      .replace(/\s+/g, " ") // many space -> single space
+      .replace(/\s+,/g, ",") // cut space around comma before
+      .replace(/,\s+/g, ",") // cut space around comma after
+      .replace(/\s+\//g, "/") // cut space around slash before
+      .replace(/\/\s+/g, "/") // cut space around slash after
+      .replace(/\s+\(/g, "/") // cut space around left paren before
+      .replace(/\)\s+/g, "/") // cut space around right paren after
+    ;
+  },
+  /**
      @memberof Nehan.Css
      @param name {String}
      @return {String}

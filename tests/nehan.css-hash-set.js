@@ -15,5 +15,8 @@ describe("Nehan::CssHashSet", function(){
     expect(set.get("foo")).toEqual({a:10});
     set.add("foo", {a:10, b:20});
     expect(set.get("foo")).toEqual({a:10, b:20});
+
+    set.add("foo", {b:{c:1, d:2}});
+    expect(set.get("foo")).toEqual({a:10, b:{c:1, d:2}});
   });
 });

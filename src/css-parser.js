@@ -12,7 +12,7 @@ Nehan.CssParser = (function(){
     if(typeof value === "number"){
       return value.toString();
     }
-    return Nehan.Utils.normalizeCssValueStr(value);
+    return Nehan.Css.normalizeValue(value);
   };
 
   var __format_value = function(fmt_prop, value){
