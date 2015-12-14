@@ -1,5 +1,5 @@
-describe("Nehan.Cardinal", function(){
-  it("Cardinal::getStringByName(lower-alpha)", function(){
+describe("Cardinal", function(){
+  it("Cardinal.getStringByName(lower-alpha)", function(){
     expect(Nehan.Cardinal.getStringByName("lower-alpha", 0)).toBe("a");
     expect(Nehan.Cardinal.getStringByName("lower-alpha", 1)).toBe("a");
     expect(Nehan.Cardinal.getStringByName("lower-alpha", 2)).toBe("b");
@@ -9,7 +9,7 @@ describe("Nehan.Cardinal", function(){
     expect(Nehan.Cardinal.getStringByName("lower-alpha", 28)).toBe("ab");
   });
 
-  it("Cardinal::getStringByName(hiragana)", function(){
+  it("Cardinal.getStringByName(hiragana)", function(){
     expect(Nehan.Cardinal.getStringByName("hiragana", 0)).toBe("あ");
     expect(Nehan.Cardinal.getStringByName("hiragana", 1)).toBe("あ");
     expect(Nehan.Cardinal.getStringByName("hiragana", 2)).toBe("い");

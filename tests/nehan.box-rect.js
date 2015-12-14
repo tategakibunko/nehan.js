@@ -1,5 +1,5 @@
-describe("Nehan.BoxRect", function(){
-  it("BoxRect::setLogicalValues(lr-tb)", function(){
+describe("BoxRect", function(){
+  it("BoxRect.setLogicalValues(lr-tb)", function(){
     var flow = Nehan.BoxFlows.getByName("lr-tb");
     var value = Nehan.BoxRect.setLogicalValues({}, flow, {
       start:1,
@@ -13,7 +13,7 @@ describe("Nehan.BoxRect", function(){
     expect(value.bottom).toBe(4);
   });
 
-  it("BoxRect::setLogicalValues(tb-rl)", function(){
+  it("BoxRect.setLogicalValues(tb-rl)", function(){
     var flow = Nehan.BoxFlows.getByName("tb-rl");
     var value = Nehan.BoxRect.setLogicalValues({}, flow, {
       start:1,

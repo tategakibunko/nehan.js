@@ -1,4 +1,4 @@
-describe("Nehan.Char", function(){
+describe("Char", function(){
   it("Char.getCharCount", function(){
     expect(new Nehan.Char({data:"\t"}).getCharCount()).toBe(0);
     expect(new Nehan.Char({data:" "}).getCharCount()).toBe(0);

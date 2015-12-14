@@ -1,6 +1,6 @@
-describe("Nehan.AttrSelector", function(){
+describe("AttrSelector", function(){
   var context = new Nehan.RenderingContext();
-  it("AttrSelector::test", function(){
+  it("AttrSelector.test", function(){
     var tag = new Nehan.Tag("<a href='#' target='_blank'>");
     var style = context.createChildStyle(tag);
     var selector = new Nehan.AttrSelector("[href='#']");

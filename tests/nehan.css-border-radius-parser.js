@@ -1,5 +1,5 @@
 // note that string value are already formatted(cut space, cut space around slash ... etc).
-describe("Nehan.CssBorderRadiusParser", function(){
+describe("CssBorderRadiusParser", function(){
   var prop = new Nehan.CssProp("border-radius");
 
   it("CssBorderRadiusParser.formatValue(prop, '1')", function(){

@@ -1,5 +1,5 @@
 // note that string value are already formatted(cut space, cut space around slash ... etc).
-describe("Nehan::CssEdgeParser", function(){
+describe("CssEdgeParser", function(){
   var prop = new Nehan.CssProp("margin");
   var zero_edge = {before:"0", end:"0", after:"0", start:"0"};
 

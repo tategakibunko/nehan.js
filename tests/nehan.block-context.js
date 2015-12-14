@@ -1,4 +1,4 @@
-describe("Nehan.BlockContext", function(){
+describe("BlockContext", function(){
   var root = new Nehan.RenderingContext().setStyle("body", {flow:"lr-tb"}).createRootGenerator().context;
   var cont = root.createChildContext(root.createChildStyle(new Nehan.Tag("body")));
 
@@ -21,7 +21,7 @@ describe("Nehan.BlockContext", function(){
     pulled:true
   });
 
-  it("BlockContext::addElement", function(){
+  it("BlockContext.addElement", function(){
     var bc = new Nehan.BlockContext(1000);
     expect(bc.getMaxExtent()).toBe(1000);
 

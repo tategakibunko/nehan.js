@@ -1,4 +1,4 @@
-describe("Nehan::CssParser", function(){
+describe("CssParser", function(){
   it("CssParser.formatEntry(margin)", function(){
     var entry = Nehan.CssParser.formatEntry("margin", {start:"1em"});
     expect(entry.getValue()).toEqual({start:"1em"});

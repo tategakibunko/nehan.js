@@ -1,13 +1,13 @@
-describe("Nehan.Break", function(){
-  it("Break::isAlways", function(){
+describe("Break", function(){
+  it("Break.isAlways", function(){
     expect(new Nehan.Break("always").isAlways()).toBe(true);
   });
 
-  it("Break::isAvoid", function(){
+  it("Break.isAvoid", function(){
     expect(new Nehan.Break("avoid").isAvoid()).toBe(true);
   });
 
-  it("Break::isFirst", function(){
+  it("Break.isFirst", function(){
     var lr_tb = Nehan.BoxFlows.getByName("lr-tb");
     var tb_rl = Nehan.BoxFlows.getByName("tb-rl");
     var tb_lr = Nehan.BoxFlows.getByName("tb-lr");
@@ -21,7 +21,7 @@ describe("Nehan.Break", function(){
     expect(break_right.isFirst(tb_rl)).toBe(true);
   });
 
-  it("Break::isSecond", function(){
+  it("Break.isSecond", function(){
     var lr_tb = Nehan.BoxFlows.getByName("lr-tb");
     var tb_rl = Nehan.BoxFlows.getByName("tb-rl");
     var tb_lr = Nehan.BoxFlows.getByName("tb-lr");

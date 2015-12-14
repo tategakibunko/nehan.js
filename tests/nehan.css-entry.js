@@ -1,4 +1,4 @@
-describe("Nehan::CssEntry", function(){
+describe("CssEntry", function(){
   it("CssEntry.getPropName", function(){
     var entry = Nehan.CssParser.formatEntry("margin-after", "1em");
     expect(entry.getPropName()).toBe("margin");

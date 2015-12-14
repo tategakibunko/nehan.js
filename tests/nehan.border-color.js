@@ -1,5 +1,5 @@
-describe("Nehan.BorderColor", function(){
-  it("BorderColor::setColor(lr-tb)", function(){
+describe("BorderColor", function(){
+  it("BorderColor.setColor(lr-tb)", function(){
     var flow = Nehan.BoxFlows.getByName("lr-tb");
     var border = new Nehan.BorderColor();
     border.setColor(flow, {
@@ -14,7 +14,7 @@ describe("Nehan.BorderColor", function(){
     expect(border.right.value).toEqual(new Nehan.Color("FFFF00").value);
   });
 
-  it("BorderColor::setColor(tb-rl)", function(){
+  it("BorderColor.setColor(tb-rl)", function(){
     var flow = Nehan.BoxFlows.getByName("tb-rl");
     var border = new Nehan.BorderColor();
     border.setColor(flow, {
@@ -29,7 +29,7 @@ describe("Nehan.BorderColor", function(){
     expect(border.bottom.value).toEqual(new Nehan.Color("FFFF00").value);
   });
 
-  it("BorderColor::getCss", function(){
+  it("BorderColor.getCss", function(){
     var flow = Nehan.BoxFlows.getByName("lr-tb");
     var border = new Nehan.BorderColor();
     border.setColor(flow, {

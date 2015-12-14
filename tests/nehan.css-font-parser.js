@@ -1,4 +1,4 @@
-describe("Nehan::CssFontParser", function(){
+describe("CssFontParser", function(){
   it("CssFontParser.formatValue(attr prop)", function(){
     expect(Nehan.CssFontParser.formatValue(new Nehan.CssProp("font-family"), "monospace")).toEqual({
       family:"monospace"

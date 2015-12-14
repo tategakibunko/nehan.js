@@ -1,5 +1,5 @@
-describe("Nehan.BlockFlow", function(){
-  it("BlockFlow::getProp", function(){
+describe("BlockFlow", function(){
+  it("BlockFlow.getProp", function(){
     var tb = new Nehan.BlockFlow("tb");
     expect(tb.getPropBefore()).toBe("top");
     expect(tb.getPropAfter()).toBe("bottom");

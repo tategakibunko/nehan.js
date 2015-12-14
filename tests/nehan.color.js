@@ -1,4 +1,4 @@
-describe("Nehan::Color", function(){
+describe("Color", function(){
   it("Color.setValue, Color.getValue", function(){
     expect(new Nehan.Color("red").getValue()).toBe("ff0000");
     expect(new Nehan.Color("ff0000").getValue()).toBe("ff0000");

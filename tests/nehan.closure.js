@@ -1,4 +1,4 @@
-describe("Nehan::Closure", function(){
+describe("Closure", function(){
   it("Closure.id", function(){
     expect(Nehan.Closure.id()(1)).toBe(1);
   });

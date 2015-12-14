@@ -1,4 +1,4 @@
-describe("Nehan::Colors", function(){
+describe("Colors", function(){
   it("Colors.get(color name)", function(){
     expect(Nehan.Colors.get("red")).toBe("ff0000");
     expect(Nehan.Colors.get("blue")).toBe("0000ff");

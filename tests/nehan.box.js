@@ -1,4 +1,4 @@
-describe("Nehan.Box", function(){
+describe("Box", function(){
   var lr_tb = Nehan.BoxFlows.getByName("lr-tb");
   var void_box1 = new Nehan.Box({elements:[]});
   var void_box2 = new Nehan.Box({size:new Nehan.BoxSize(0,0)});
@@ -15,30 +15,30 @@ describe("Nehan.Box", function(){
     })
   });
 
-  it("Box::isVoid(elements empty)", function(){
+  it("Box.isVoid(elements empty)", function(){
     expect(void_box1.isVoid()).toBe(true);
   });
 
-  it("Box::isVoid(size invalid)", function(){
+  it("Box.isVoid(size invalid)", function(){
     expect(void_box2.isVoid()).toBe(true);
   });
 
-  it("Box::isVoid(elements void only)", function(){
+  it("Box.isVoid(elements void only)", function(){
     expect(void_box3.isVoid()).toBe(true);
   });
 
-  it("Box::isTextBlock", function(){
+  it("Box.isTextBlock", function(){
     expect(new Nehan.Box({type:"text-block"}).isTextBlock()).toBe(true);
   });
 
-  it("Box::isInvalidSize", function(){
+  it("Box.isInvalidSize", function(){
     expect(new Nehan.Box({size:new Nehan.BoxSize(0,0)}).isInvalidSize()).toBe(true);
     expect(new Nehan.Box({size:new Nehan.BoxSize(1,0)}).isInvalidSize()).toBe(true);
     expect(new Nehan.Box({size:new Nehan.BoxSize(0,1)}).isInvalidSize()).toBe(true);
     expect(new Nehan.Box({size:new Nehan.BoxSize(1,1)}).isInvalidSize()).toBe(false);
   });
 
-  it("Box::getTextElements", function(){
+  it("Box.getTextElements", function(){
     var box1 = new Nehan.Box({
       elements:[new Nehan.Char({data:"a"}), new Nehan.Char({data:"b"})]
     });
@@ -58,7 +58,7 @@ describe("Nehan.Box", function(){
     expect(box2_texts[1].data).toBe("b");
   });
 
-  it("Box::toString", function(){
+  it("Box.toString", function(){
     var box1 = new Nehan.Box({
       elements:[new Nehan.Char({data:"a"}), new Nehan.Char({data:"b"})]
     });
@@ -74,21 +74,21 @@ describe("Nehan.Box", function(){
     expect(box2.toString()).toBe("ab");
   });
 
-  it("Box::getContentWidth", function(){
+  it("Box.getContentWidth", function(){
     var box = new Nehan.Box({
       size:new Nehan.BoxSize(1,2)
     });
     expect(box.getContentWidth()).toBe(1);
   });
 
-  it("Box::getContentHeight", function(){
+  it("Box.getContentHeight", function(){
     var box = new Nehan.Box({
       size:new Nehan.BoxSize(1,2)
     });
     expect(box.getContentHeight()).toBe(2);
   });
 
-  it("Box::getContentMeasure", function(){
+  it("Box.getContentMeasure", function(){
     var box = new Nehan.Box({
       size:new Nehan.BoxSize(1,2)
     });
@@ -96,7 +96,7 @@ describe("Nehan.Box", function(){
     expect(box.getContentMeasure(Nehan.BoxFlows.getByName("tb-rl"))).toBe(2);
   });
 
-  it("Box::getContentExtent", function(){
+  it("Box.getContentExtent", function(){
     var box = new Nehan.Box({
       size:new Nehan.BoxSize(1,2)
     });
@@ -104,7 +104,7 @@ describe("Nehan.Box", function(){
     expect(box.getContentExtent(Nehan.BoxFlows.getByName("tb-rl"))).toBe(1);
   });
 
-  it("Box::getContentExtent", function(){
+  it("Box.getContentExtent", function(){
     var box = new Nehan.Box({
       size:new Nehan.BoxSize(1,2)
     });
@@ -112,22 +112,22 @@ describe("Nehan.Box", function(){
     expect(box.getContentExtent(Nehan.BoxFlows.getByName("tb-rl"))).toBe(1);
   });
 
-  it("Box::getLayoutExtent", function(){
+  it("Box.getLayoutExtent", function(){
     expect(edged_box.getLayoutExtent(lr_tb)).toBe(2+3+4+7+8+11+12);
   });
 
-  it("Box::getLayoutMeasure", function(){
+  it("Box.getLayoutMeasure", function(){
     expect(edged_box.getLayoutMeasure(lr_tb)).toBe(1+1+2+5+6+9+10);
   });
 
-  it("Box::resizeExtent", function(){
+  it("Box.resizeExtent", function(){
     var box = new Nehan.Box({
       size:new Nehan.BoxSize(1,2)
     });
     expect(box.resizeExtent(lr_tb, 0).size.height).toBe(0);
   });
 
-  it("Box::clearBorderBefore", function(){
+  it("Box.clearBorderBefore", function(){
     var box = new Nehan.Box({
       context:body_cont,
       edge:new Nehan.BoxEdge({
@@ -138,7 +138,7 @@ describe("Nehan.Box", function(){
     expect(box.clearBorderBefore(lr_tb).edge.border.top).toBe(0);
   });
 
-  it("Box::clearBorderAfter", function(){
+  it("Box.clearBorderAfter", function(){
     var box = new Nehan.Box({
       context:body_cont,
       edge:new Nehan.BoxEdge({

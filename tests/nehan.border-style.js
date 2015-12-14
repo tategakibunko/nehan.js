@@ -1,4 +1,4 @@
-describe("Nehan.BorderStyle", function(){
+describe("BorderStyle", function(){
   var bs = new Nehan.BorderStyle();
   var flow = Nehan.BoxFlows.getByName("lr-tb");
   bs.setStyle(flow, {
@@ -8,14 +8,14 @@ describe("Nehan.BorderStyle", function(){
     after:"dashed"
   });
 
-  it("BorderStyle::setStyle", function(){
+  it("BorderStyle.setStyle", function(){
     expect(bs.left).toBe("solid");
     expect(bs.right).toBe("underline");
     expect(bs.top).toBe("dotted");
     expect(bs.bottom).toBe("dashed");
   });
 
-  it("BorderStyle::getCss", function(){
+  it("BorderStyle.getCss", function(){
     var css = bs.getCss();
     expect(css["border-left-style"]).toBe("solid");
     expect(css["border-right-style"]).toBe("underline");

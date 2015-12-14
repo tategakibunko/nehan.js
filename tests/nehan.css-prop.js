@@ -1,4 +1,4 @@
-describe("Nehan::CssProp", function(){
+describe("CssProp", function(){
   it("CssProp.getName", function(){
     expect(new Nehan.CssProp("margin").getName()).toBe("margin");
     expect(new Nehan.CssProp("margin-start").getName()).toBe("margin");

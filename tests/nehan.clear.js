@@ -1,4 +1,4 @@
-describe("Nehan::Clear", function(){
+describe("Clear", function(){
   it("Clear.hasDirection", function(){
     expect(new Nehan.Clear("start").hasDirection("start")).toBe(true);
     expect(new Nehan.Clear("start").hasDirection("end")).toBe(false);

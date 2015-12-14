@@ -1,4 +1,4 @@
-describe("Nehan::CssHashSet", function(){
+describe("CssHashSet", function(){
   it("CssHashSet.add(atom)", function(){
     var set = new Nehan.CssHashSet();
     set.add("foo", 10);

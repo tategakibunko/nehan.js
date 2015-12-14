@@ -1,4 +1,4 @@
-describe("Nehan::CssListStyleParser", function(){
+describe("CssListStyleParser", function(){
   var prop = new Nehan.CssProp("list-style");
 
   it("Nehan.formatValue", function(){
