@@ -2747,6 +2747,9 @@ Nehan.CssFontParser = (function(){
   };
 })();
 
+/**
+ @namespace Nehan.CssTextEmphaParser
+ */
 Nehan.CssTextEmphaParser = (function(){
   var __parse_shorthand = function(value){
     console.warn("sorry, shorthand of text-emphasis is not supported yet!");
