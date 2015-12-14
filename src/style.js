@@ -1102,7 +1102,7 @@ Nehan.Style = (function(){
     if(this.zIndex){
       css["z-index"] = this.zIndex;
     }
-    this.unmanagedCss.copyValuesTo(css);
+    Nehan.Obj.copy(css, this.unmanagedCss.getValues());
     Nehan.Obj.copy(css, block.size.getCss()); // content size
     if(block.edge){
       Nehan.Obj.copy(css, block.edge.getCss());
@@ -1138,7 +1138,7 @@ Nehan.Style = (function(){
     if(this.isTextVertical()){
       css["display"] = "block";
     }
-    this.unmanagedCss.copyValuesTo(css);
+    Nehan.Obj.copy(css, this.unmanagedCss.getValues());
     Nehan.Obj.copy(css, line.css);
     css["background-color"] = this.getCssAttr("background-color", "transparent");
     return css;
@@ -1177,7 +1177,7 @@ Nehan.Style = (function(){
 	css["display"] = "inline-block";
       }
     }
-    this.unmanagedCss.copyValuesTo(css);
+    Nehan.Obj.copy(css, this.unmanagedCss.getValues());
     Nehan.Obj.copy(css, line.css);
     css["background-color"] = this.getCssAttr("background-color", "transparent");
     return css;

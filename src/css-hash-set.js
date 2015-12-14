@@ -38,14 +38,5 @@ Nehan.CssHashSet = (function(){
     return new_value;
   };
 
-  /**
-     @memberof Nehan.CssHashSet
-     @method copyValuesTo
-     @param dst {Object}
-  */
-  CssHashSet.prototype.copyValuesTo = function(dst){
-    return Nehan.Obj.copy(dst, this._values);
-  };
-
   return CssHashSet;
 })();
