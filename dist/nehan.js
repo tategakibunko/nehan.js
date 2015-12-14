@@ -12977,22 +12977,6 @@ Nehan.DomCreateContext = (function(){
   };
   /**
    @memberof Nehan.DomCreateContext
-   @return {int}
-   */
-  /*
-  DomCreateContext.prototype.getRestMeasure = function(){
-    return this.box.restMeasure || 0;
-  };*/
-  /**
-   @memberof Nehan.DomCreateContext
-   @return {int}
-   */
-  /*
-  DomCreateContext.prototype.getRestExtent = function(){
-    return this.box.resteExtent || 0;
-  };*/
-  /**
-   @memberof Nehan.DomCreateContext
    @return {Nehan.Box}
    */
   DomCreateContext.prototype.getBox = function(){
