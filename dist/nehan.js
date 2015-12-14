@@ -2773,16 +2773,12 @@ Nehan.CssFontParser = (function(){
       case "status-bar":
 	break; // ignore
       default: // <font-family> or <number:font-weight>
-	console.log("other case:%o", value);
 	// weight is already define, or [px, pt, em, rem, %] are included.
 	if(!font.size && (value.indexOf("px") >= 0 || value.indexOf("pt") >= 0 || value.indexOf("em") >= 0 || value.indexOf("%") >= 0)){
-	  console.log("size!");
 	  font.size = value;
 	} else if(Nehan.Utils.isNumber(value)){
-	  console.log("weight!");
 	  font.weight = value;
 	} else {
-	  console.log("family!");
 	  font.family = value;
 	}
 	break;
