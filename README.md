@@ -74,14 +74,14 @@ doc.render({
   }
 });
 
-// direct access by 'getPage'.
+// you can obtain page directly by 'getPage'.
 var first_page = doc.getPage(0);
 var second_page = doc.getPage(1);
 
-// get total page count by 'getPageCount'.
+// you can get total page-count by 'getPageCount'.
 var page_count = doc.getPageCount();
 
-// move page by setPage
+// you can move page by 'setPage'
 $("button#back-to-first-page").click(function(){
   doc.setPage(0);
 });
