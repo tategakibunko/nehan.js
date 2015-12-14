@@ -14702,19 +14702,6 @@ Nehan.Style = (function(){
     });
   };
 
-  Style.prototype._loadTextEmphaStyle = function(){
-    var value = this.getCssAttr("text-emphasis-style", "inherit");
-    return (value !== "inherit")? new TextEmphaStyle(value) : null;
-  };
-
-  Style.prototype._loadTextEmphaPos = function(){
-    return this.getCssAttr("text-emphasis-position", {hori:"over", vert:"right"});
-  };
-
-  Style.prototype._loadTextEmphaColor = function(color){
-    return this.getCssAttr("text-emphasis-color", color.getValue());
-  };
-
   Style.prototype._loadTextCombine = function(){
     return this.getCssAttr("text-combine");
   };
