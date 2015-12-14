@@ -159,5 +159,33 @@ var TestStyles = {
       style["-ms-transform"] = transform;
       style["transform"] = transform;
     }
+  },
+  ".bordered":{
+    "line-height":"1em",
+    "border-width":"10px",
+    "border-style":"solid",
+    "border-color":"red",
+    "padding":"10px",
+    "margin-after":"10px"
+  },
+  ".radius1":{
+    "border-radius":"0px 50px 50px 0px",
+    "background-color":"wheat"
+  },
+  ".radius2":{
+    "border-radius":"2em",
+    "background-color":"white"
+  },
+  ".radius3":{
+    "border-radius":"8em/3em",
+    "background-color":"yellow"
+  },
+  ".radius4":{
+    "border-radius":"40px 10px",
+    "background-color":"pink"
+  },
+  ".radius5":{
+    "border-radius":"50%",
+    "background-color":"skyblue"
   }
 };

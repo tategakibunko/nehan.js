@@ -527,6 +527,14 @@ var Script = {
     "<h3>tab space</h3>",
     "<pre>a&#09;b</pre>",
     "<div>a&#09;b</div>"
+  ].join("\n"),
+
+  "border-radius":[
+    "<div class='bordered radius1'>hoge</div>",
+    "<div class='bordered radius2'>hige</div>",
+    "<div class='bordered radius3'>hage</div>",
+    "<div class='bordered radius4'>hoge</div>",
+    "<div class='bordered radius5'>hige</div>"
   ].join("\n")
 };
 

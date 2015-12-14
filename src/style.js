@@ -1265,10 +1265,12 @@ Nehan.Style = (function(){
 
   Style.prototype._computeCornerSize = function(val, unit_size){
     var ret = {};
+    var max_measure = this.parent? this.parent.contentMeasure : 0;
+    var max_extent = this.parent? this.parent.contentExtent: 0;
     for(var prop in val){
       ret[prop] = [0, 0];
-      ret[prop][0] = this._computeUnitSize(val[prop][0], unit_size);
-      ret[prop][1] = this._computeUnitSize(val[prop][1], unit_size);
+      ret[prop][0] = this._computeUnitSize(val[prop][0], unit_size, max_measure);
+      ret[prop][1] = this._computeUnitSize(val[prop][1], unit_size, max_extent);
     }
     return ret;
   };
