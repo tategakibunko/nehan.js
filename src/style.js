@@ -1316,11 +1316,11 @@ Nehan.Style = (function(){
 	var fmt_prop = entry.getPropName();
 	var fmt_value = entry.getValue();
 	if(allowed_props.length === 0 || Nehan.List.exists(allowed_props, Nehan.Closure.eq(fmt_prop))){
-	  ret[fmt_prop] = fmt_value;
+	  ret.add(fmt_prop, fmt_value);
 	}
       }
       return ret;
-    }, {});
+    }, new Nehan.CssHashSet()).getValues();
     //console.log("[%s] load inline css:%o", this.markup.name, values);
     return values;
   };
