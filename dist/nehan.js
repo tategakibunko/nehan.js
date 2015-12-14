@@ -1446,20 +1446,6 @@ Nehan.Const = {
 */
 Nehan.Css = {
   /**
-     @memberof Nehan.Css
-     @param args {Object}
-     @return {String}
-     @example
-     * Nehan.Css.toString({"color":"red", "font-size":16}); // "color:'red'; 'font-size':16"
-  */
-  toString : function(args){
-    var tmp = [];
-    for(var prop in args){
-      tmp.push(prop + ":" + args[prop]);
-    }
-    return tmp.join(";");
-  },
-  /**
    @memberof Nehan.Css
    @param str {String}
    @return {String}
