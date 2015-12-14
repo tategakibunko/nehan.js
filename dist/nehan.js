@@ -1474,8 +1474,10 @@ Nehan.Css = {
       .replace(/,\s+/g, ",") // cut space around comma after
       .replace(/\s+\//g, "/") // cut space around slash before
       .replace(/\/\s+/g, "/") // cut space around slash after
-      .replace(/\s+\(/g, "/") // cut space around left paren before
-      .replace(/\)\s+/g, "/") // cut space around right paren after
+      .replace(/\s+\(/g, "(") // cut space around left paren before
+      .replace(/\(\s+/g, "(") // cut space around left paren after
+      .replace(/\s+\)/g, ")") // cut space around right paren before
+      .replace(/\)\s+/g, ")") // cut space around right paren after
     ;
   },
   /**
