@@ -2359,7 +2359,7 @@ Nehan.Closure = {
   */
   eq : function(x){
     return function(y){
-      return x == y;
+      return x === y;
     };
   },
   /**
@@ -2372,7 +2372,7 @@ Nehan.Closure = {
   */
   neq : function(x){
     return function(y){
-      return x != y;
+      return x !== y;
     };
   },
   isTagName : function(names){
