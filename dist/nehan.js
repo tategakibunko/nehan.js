@@ -11608,7 +11608,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":"2rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
-	  "line-height":"1.4em",
+	  "line-height":"1.4",
 	  "margin":__header_margin
 	},
 	"h2":{
@@ -11616,7 +11616,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":"1.714rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
-	  "line-height":"1.4em",
+	  "line-height":"1.4",
 	  "margin":__header_margin
 	},
 	"h3":{
@@ -11624,7 +11624,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":"1.28rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
-	  "line-height":"1.4em",
+	  "line-height":"1.4",
 	  "margin":__header_margin
 	},
 	"h4":{
@@ -11632,7 +11632,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":"1.071rem",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-weight":"bold",
-	  "line-height":"1.4em",
+	  "line-height":"1.4",
 	  "margin":__header_margin
 	},
 	"h5":{
@@ -11640,7 +11640,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":"1rem",
 	  "font-weight":"bold",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-	  "line-height":"1.4em",
+	  "line-height":"1.4",
 	  "margin":__header_margin
 	},
 	"h6":{
@@ -11648,7 +11648,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-weight":"bold",
 	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 	  "font-size":"1rem",
-	  "line-height":"1.4em",
+	  "line-height":"1.4",
 	  "margin":__header_margin
 	},
 	"head":{
@@ -11662,7 +11662,7 @@ Nehan.DefaultStyle = (function(){
 	  "box-sizing":"content-box",
 	  "border-color":"#b8b8b8",
 	  "border-style":"solid",
-	  "line-height":"1em",
+	  "line-height":"1",
 	  "margin":{
 	    "after":"1em"
 	  },
@@ -11712,7 +11712,7 @@ Nehan.DefaultStyle = (function(){
 	"legend":{
 	  "display":"block",
 	  "font-weight":"bold",
-	  "line-height":"1.5em"
+	  "line-height":"1.5"
 	},
 	"li":{
 	  "display":"list-item",
@@ -11808,7 +11808,7 @@ Nehan.DefaultStyle = (function(){
 	},
 	"rt":{
 	  "font-size":"0.5em",
-	  "line-height":"1.0em",
+	  "line-height":"1.0",
 	  "display":"inline"
 	},
 	//-------------------------------------------------------
@@ -11902,7 +11902,7 @@ Nehan.DefaultStyle = (function(){
 	},
 	"th":{
 	  "display":"table-cell",
-	  "line-height":"1.4em",
+	  "line-height":"1.4",
 	  "border-width":"1px",
 	  "border-color":"#a8a8a8",
 	  "border-collapse":"inherit",
@@ -12273,7 +12273,7 @@ Nehan.DefaultStyle = (function(){
 	  "measure":"1em",
 	  "extent":"1em",
 	  "padding":{before:"0.1em"},
-	  "line-height":"1em"
+	  "line-height":"1"
 	},
 	".gap-start":{
 	  "margin":{
