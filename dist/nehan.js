@@ -4643,6 +4643,7 @@ Nehan.Font = (function(){
     this.weight = opt.weight || "inherit";
     this.style = opt.style || "inherit";
     this.variant = opt.variant || "inherit";
+    this.lineHeight = opt["line-height"] || "inherit";
   }
 
   /**
@@ -4671,6 +4672,9 @@ Nehan.Font = (function(){
     if(this.variant === "inherit" && font.variant){
       this.variant = font.variant;
     }
+    if(this.lineHeight === "inherit" && font.lineHeight){
+      this.lineHeight = font.lineHeight;
+    }
   };
   /**
    @memberof Nehan.Font
@@ -4688,6 +4692,8 @@ Nehan.Font = (function(){
    @return {string}
    */
   Font.prototype.toString = function(){
+    // [TODO]
+    // variant, line-height are not applied yet.
     return [
       this.weight || "normal",
       this.style || "normal",
