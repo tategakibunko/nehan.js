@@ -63,6 +63,13 @@ describe("Tag", function(){
     tmp.removeClass("hoge");
     expect(tmp.getClasses()).not.toContain("hoge");
   });
+
+  it("Tag.isHeaderTag", function(){
+    expect(new Nehan.Tag("h1").isHeaderTag()).toBe(true);
+    expect(new Nehan.Tag("h6").isHeaderTag()).toBe(true);
+    expect(new Nehan.Tag("h7").isHeaderTag()).toBe(false);
+    expect(new Nehan.Tag("hi").isHeaderTag()).toBe(false);
+  });
 });
 
 

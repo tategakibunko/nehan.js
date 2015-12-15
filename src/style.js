@@ -745,8 +745,8 @@ Nehan.Style = (function(){
    @return {int}
    */
   Style.prototype.getHeaderRank = function(){
-    if(this.getMarkupName().match(/h([1-6])/)){
-      return parseInt(RegExp.$1, 10);
+    if(this.markup.isHeaderTag()){
+      return parseInt(this.markup.getName().substring(1), 10);
     }
     return 0;
   };
@@ -1207,7 +1207,6 @@ Nehan.Style = (function(){
    */
   Style.prototype.getCssHoriInlineImage = function(line, image){
     return this.flow.getCss();
-
   };
 
   Style.prototype._computeSelectorCacheKey = function(){
@@ -1404,8 +1403,14 @@ Nehan.Style = (function(){
       size:"inherit",
       family:"inherit",
       weight:"inherit",
-      style:"inherit"
+      style:"inherit",
+      variant:"inherit"
     });
+    // sometimes line-height is included in font shorthand.
+    var line_height = css["line-height"];
+    if(line_height){
+      this.setCssAttr("line-height", line_height);
+    }
     var font = new Nehan.Font(css);
     if(parent_font){
       font.inherit(parent_font);
