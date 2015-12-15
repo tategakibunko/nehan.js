@@ -28,7 +28,7 @@ Nehan.TextMetrics = (function(){
       var body = document.body;
       var style = __span.style;
       body.style.display = "block"; // must be visible
-      style.font = font.toString();
+      style.font = font.getCssShorthand();
       __span.innerHTML = text;
       body.appendChild(__span);
       var rect = __span.getBoundingClientRect();

@@ -13,7 +13,7 @@ Nehan.Font = (function(){
     this.weight = opt.weight || "inherit";
     this.style = opt.style || "inherit";
     this.variant = opt.variant || "inherit";
-    this.lineHeight = opt["line-height"] || "inherit";
+    this.lineHeight = opt.lineHeight || "inherit";
   }
 
   /**
@@ -25,25 +25,26 @@ Nehan.Font = (function(){
   };
   /**
    @memberof Nehan.Font
+   @param parent {Nehan.Font} - parent font
    */
-  Font.prototype.inherit = function(font){
-    if(this.size === "inherit" && font.size){
-      this.size = font.size;
+  Font.prototype.inherit = function(parent){
+    if(this.size === "inherit" && parent.size){
+      this.size = parent.size;
     }
-    if(this.family === "inherit" && font.family){
-      this.family = font.family;
+    if(this.family === "inherit" && parent.family){
+      this.family = parent.family;
     }
-    if(this.weight === "inherit" && font.weight){
-      this.weight = font.weight;
+    if(this.weight === "inherit" && parent.weight){
+      this.weight = parent.weight;
     }
-    if(this.style === "inherit" && font.style){
-      this.style = font.style;
+    if(this.style === "inherit" && parent.style){
+      this.style = parent.style;
     }
-    if(this.variant === "inherit" && font.variant){
-      this.variant = font.variant;
+    if(this.variant === "inherit" && parent.variant){
+      this.variant = parent.variant;
     }
-    if(this.lineHeight === "inherit" && font.lineHeight){
-      this.lineHeight = font.lineHeight;
+    if(this.lineHeight === "inherit" && parent.lineHeight){
+      this.lineHeight = parent.lineHeight;
     }
   };
   /**
@@ -55,21 +56,27 @@ Nehan.Font = (function(){
     return (this.size === font.size &&
 	    this.family === font.family &&
 	    this.weight === font.weight &&
+	    this.variant === font.variant &&
+	    this.lineHeight === font.lineHeight &&
 	    this.style === font.style);
   };
   /**
    @memberof Nehan.Font
    @return {string}
    */
-  Font.prototype.toString = function(){
-    // [TODO]
-    // variant, line-height are not applied yet.
+  Font.prototype.getCssShorthand = function(){
+    var size = this.size + "px";
+    var variant = (this.variant === "inherit")? "" : this.variant;
+    if(this.lineHeight !== "inherit"){
+      size = [size, this.lineHeight].join("/");
+    }
     return [
       this.weight || "normal",
       this.style || "normal",
-      this.size + "px",
-      this.family || "monospace"
-    ].join(" ");
+      variant,
+      size,
+      this.family || Nehan.Config.defaultFontFamily
+    ].filter(Nehan.Closure.neq("")).join(" ");
   };
   /**
    @memberof Nehan.Font
@@ -88,6 +95,9 @@ Nehan.Font = (function(){
     }
     if(this.family){
       css["font-family"] = this.family;
+    }
+    if(this.variant){
+      css["font-variant"] = this.variant;
     }
     return css;
   };

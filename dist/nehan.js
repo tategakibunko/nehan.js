@@ -437,6 +437,7 @@ Nehan.Display = {
     return new Nehan.Font({
       size:Nehan.Config.defaultFontSize,
       family:Nehan.Config.defaultFontFamily,
+      lineHeight:Nehan.Config.defaultLineHeight,
       weight:"normal",
       style:"normal"
     });
@@ -4643,7 +4644,7 @@ Nehan.Font = (function(){
     this.weight = opt.weight || "inherit";
     this.style = opt.style || "inherit";
     this.variant = opt.variant || "inherit";
-    this.lineHeight = opt["line-height"] || "inherit";
+    this.lineHeight = opt.lineHeight || "inherit";
   }
 
   /**
@@ -4655,25 +4656,26 @@ Nehan.Font = (function(){
   };
   /**
    @memberof Nehan.Font
+   @param parent {Nehan.Font} - parent font
    */
-  Font.prototype.inherit = function(font){
-    if(this.size === "inherit" && font.size){
-      this.size = font.size;
+  Font.prototype.inherit = function(parent){
+    if(this.size === "inherit" && parent.size){
+      this.size = parent.size;
     }
-    if(this.family === "inherit" && font.family){
-      this.family = font.family;
+    if(this.family === "inherit" && parent.family){
+      this.family = parent.family;
     }
-    if(this.weight === "inherit" && font.weight){
-      this.weight = font.weight;
+    if(this.weight === "inherit" && parent.weight){
+      this.weight = parent.weight;
     }
-    if(this.style === "inherit" && font.style){
-      this.style = font.style;
+    if(this.style === "inherit" && parent.style){
+      this.style = parent.style;
     }
-    if(this.variant === "inherit" && font.variant){
-      this.variant = font.variant;
+    if(this.variant === "inherit" && parent.variant){
+      this.variant = parent.variant;
     }
-    if(this.lineHeight === "inherit" && font.lineHeight){
-      this.lineHeight = font.lineHeight;
+    if(this.lineHeight === "inherit" && parent.lineHeight){
+      this.lineHeight = parent.lineHeight;
     }
   };
   /**
@@ -4685,21 +4687,27 @@ Nehan.Font = (function(){
     return (this.size === font.size &&
 	    this.family === font.family &&
 	    this.weight === font.weight &&
+	    this.variant === font.variant &&
+	    this.lineHeight === font.lineHeight &&
 	    this.style === font.style);
   };
   /**
    @memberof Nehan.Font
    @return {string}
    */
-  Font.prototype.toString = function(){
-    // [TODO]
-    // variant, line-height are not applied yet.
+  Font.prototype.getCssShorthand = function(){
+    var size = this.size + "px";
+    var variant = (this.variant === "inherit")? "" : this.variant;
+    if(this.lineHeight !== "inherit"){
+      size = [size, this.lineHeight].join("/");
+    }
     return [
       this.weight || "normal",
       this.style || "normal",
-      this.size + "px",
-      this.family || "monospace"
-    ].join(" ");
+      variant,
+      size,
+      this.family || Nehan.Config.defaultFontFamily
+    ].filter(Nehan.Closure.neq("")).join(" ");
   };
   /**
    @memberof Nehan.Font
@@ -4718,6 +4726,9 @@ Nehan.Font = (function(){
     }
     if(this.family){
       css["font-family"] = this.family;
+    }
+    if(this.variant){
+      css["font-variant"] = this.variant;
     }
     return css;
   };
@@ -8095,7 +8106,7 @@ Nehan.TextMetrics = (function(){
       var body = document.body;
       var style = __span.style;
       body.style.display = "block"; // must be visible
-      style.font = font.toString();
+      style.font = font.getCssShorthand();
       __span.innerHTML = text;
       body.appendChild(__span);
       var rect = __span.getBoundingClientRect();
@@ -13366,10 +13377,6 @@ Nehan.Style = (function(){
     if(border_collapse){
       this.borderCollapse = border_collapse;
     }
-    var line_height = this._loadLineHeight();
-    if(line_height){
-      this.lineHeight = line_height;
-    }
     var text_align = this._loadTextAlign();
     if(text_align){
       this.textAlign = text_align;
@@ -14255,7 +14262,8 @@ Nehan.Style = (function(){
    @return {float | int}
    */
   Style.prototype.getLineHeight = function(){
-    return this.lineHeight || Nehan.Config.defaultLineHeight;
+    var font = this.getFont();
+    return font.lineHeight || Nehan.Config.defaultLineHeight;
   };
   /**
    @memberof Nehan.Style
@@ -14523,6 +14531,14 @@ Nehan.Style = (function(){
     return Math.max(1, Math.min(font_size, Nehan.Config.maxFontSize));
   };
 
+  Style.prototype._computeLineHeight = function(val){
+    var str = String(val);
+    if(str.indexOf("%") > 0){
+      return parseInt(str, 10) / 100; // 150% -> 1.5
+    }
+    return parseFloat(val);
+  };
+
   Style.prototype._computeUnitSize = function(val, unit_size, max_size){
     var str = String(val);
     if(str.indexOf("rem") > 0){
@@ -14681,17 +14697,17 @@ Nehan.Style = (function(){
 
   Style.prototype._loadFont = function(){
     var parent_font = this.getFont();
+    var line_height = this.getCssAttr("line-height", "inherit");
     var css = this.getCssAttr("font", {
       size:"inherit",
       family:"inherit",
       weight:"inherit",
       style:"inherit",
-      variant:"inherit"
+      variant:"inherit",
+      lineHeight:"inherit"
     });
-    // sometimes line-height is included in font shorthand.
-    var line_height = css["line-height"];
-    if(line_height){
-      this.setCssAttr("line-height", line_height);
+    if(line_height !== "inherit"){
+      css.lineHeight = line_height;
     }
     var font = new Nehan.Font(css);
     if(parent_font){
@@ -14699,6 +14715,9 @@ Nehan.Style = (function(){
     }
     if(font.size !== parent_font.size){
       font.size = this._computeFontSize(font.size, parent_font.size);
+    }
+    if(font.lineHeight !== parent_font.lineHeight){
+      font.lineHeight = this._computeLineHeight(font.lineHeight);
     }
     // if all inherited, not required to create new one.
     if(!this.isRoot() && font.isEqual(parent_font)){
@@ -14782,14 +14801,6 @@ Nehan.Style = (function(){
       border.setStyle(flow, border_style);
     }
     return border;
-  };
-
-  Style.prototype._loadLineHeight = function(){
-    var value = this.getCssAttr("line-height", "inherit");
-    if(value === "inherit"){
-      return (this.parent && this.parent.lineHeight)? this.parent.lineHeight : Nehan.Config.defaultLineHeight;
-    }
-    return parseFloat(value || Nehan.Config.defaultLineHeight);
   };
 
   Style.prototype._loadTextAlign = function(){

@@ -84,10 +84,6 @@ Nehan.Style = (function(){
     if(border_collapse){
       this.borderCollapse = border_collapse;
     }
-    var line_height = this._loadLineHeight();
-    if(line_height){
-      this.lineHeight = line_height;
-    }
     var text_align = this._loadTextAlign();
     if(text_align){
       this.textAlign = text_align;
@@ -973,7 +969,8 @@ Nehan.Style = (function(){
    @return {float | int}
    */
   Style.prototype.getLineHeight = function(){
-    return this.lineHeight || Nehan.Config.defaultLineHeight;
+    var font = this.getFont();
+    return font.lineHeight || Nehan.Config.defaultLineHeight;
   };
   /**
    @memberof Nehan.Style
@@ -1241,6 +1238,14 @@ Nehan.Style = (function(){
     return Math.max(1, Math.min(font_size, Nehan.Config.maxFontSize));
   };
 
+  Style.prototype._computeLineHeight = function(val){
+    var str = String(val);
+    if(str.indexOf("%") > 0){
+      return parseInt(str, 10) / 100; // 150% -> 1.5
+    }
+    return parseFloat(val);
+  };
+
   Style.prototype._computeUnitSize = function(val, unit_size, max_size){
     var str = String(val);
     if(str.indexOf("rem") > 0){
@@ -1399,17 +1404,17 @@ Nehan.Style = (function(){
 
   Style.prototype._loadFont = function(){
     var parent_font = this.getFont();
+    var line_height = this.getCssAttr("line-height", "inherit");
     var css = this.getCssAttr("font", {
       size:"inherit",
       family:"inherit",
       weight:"inherit",
       style:"inherit",
-      variant:"inherit"
+      variant:"inherit",
+      lineHeight:"inherit"
     });
-    // sometimes line-height is included in font shorthand.
-    var line_height = css["line-height"];
-    if(line_height){
-      this.setCssAttr("line-height", line_height);
+    if(line_height !== "inherit"){
+      css.lineHeight = line_height;
     }
     var font = new Nehan.Font(css);
     if(parent_font){
@@ -1417,6 +1422,9 @@ Nehan.Style = (function(){
     }
     if(font.size !== parent_font.size){
       font.size = this._computeFontSize(font.size, parent_font.size);
+    }
+    if(font.lineHeight !== parent_font.lineHeight){
+      font.lineHeight = this._computeLineHeight(font.lineHeight);
     }
     // if all inherited, not required to create new one.
     if(!this.isRoot() && font.isEqual(parent_font)){
@@ -1500,14 +1508,6 @@ Nehan.Style = (function(){
       border.setStyle(flow, border_style);
     }
     return border;
-  };
-
-  Style.prototype._loadLineHeight = function(){
-    var value = this.getCssAttr("line-height", "inherit");
-    if(value === "inherit"){
-      return (this.parent && this.parent.lineHeight)? this.parent.lineHeight : Nehan.Config.defaultLineHeight;
-    }
-    return parseFloat(value || Nehan.Config.defaultLineHeight);
   };
 
   Style.prototype._loadTextAlign = function(){

@@ -18,6 +18,7 @@ Nehan.Display = {
     return new Nehan.Font({
       size:Nehan.Config.defaultFontSize,
       family:Nehan.Config.defaultFontFamily,
+      lineHeight:Nehan.Config.defaultLineHeight,
       weight:"normal",
       style:"normal"
     });
