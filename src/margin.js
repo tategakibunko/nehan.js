@@ -7,9 +7,17 @@ Nehan.Margin = (function(){
      @extends {Nehan.Edge}
   */
   function Margin(){
-    Nehan.Edge.call(this, "margin");
+    Nehan.Edge.call(this);
   }
   Nehan.Class.extend(Margin, Nehan.Edge);
+
+  /**
+   @memberof Nehan.Margin
+   @return {String}
+   */
+  Margin.prototype.getType = function(){
+    return "margin";
+  };
 
   /**
      @memberof Nehan.Margin

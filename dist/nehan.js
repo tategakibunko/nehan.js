@@ -4689,15 +4689,21 @@ Nehan.Edge = (function(){
    @class Edge
    @classdesc abstraction of physical edge size for each css directions(top, right, bottom, left).
    @constructor
-   @param type {String} - "margin" or "padding" or "border"
    */
-  function Edge(type){
-    this._type = type;
+  function Edge(){
     this.top = 0;
     this.right = 0;
     this.bottom = 0;
     this.left = 0;
   }
+
+  /**
+   @memberof Nehan.Edge
+   @return {String}
+   */
+  Edge.prototype.getType = function(){
+    throw "Edge::getType must be implemented in subclass";
+  };
 
   /**
    @memberof Nehan.Edge
@@ -4741,7 +4747,7 @@ Nehan.Edge = (function(){
     }
     var cancel_size = (after_size >= required_size)? required_size : after_size;
     this.subtractAfter(flow, cancel_size);
-    //console.warn("cancel after(%s):(after size = %d, required = %d, cancel = %d)", this._type, after_size, required_size, cancel_size);
+    //console.warn("cancel after(%s):(after size = %d, required = %d, cancel = %d)", this.getType(), after_size, required_size, cancel_size);
     return cancel_size;
   };
   /**
@@ -4761,7 +4767,7 @@ Nehan.Edge = (function(){
    @return {String}
    */
   Edge.prototype.getDirProp = function(dir){
-    return [this._type, dir].join("-");
+    return [this.getType(), dir].join("-");
   };
   /**
    @memberof Nehan.Edge
@@ -5291,9 +5297,17 @@ Nehan.Padding = (function(){
      @extends {Nehan.Edge}
   */
   function Padding(){
-    Nehan.Edge.call(this, "padding");
+    Nehan.Edge.call(this);
   }
   Nehan.Class.extend(Padding, Nehan.Edge);
+
+  /**
+   @memberof Nehan.Padding
+   @return {String}
+   */
+  Padding.prototype.getType = function(){
+    return "padding";
+  };
 
   /**
      @memberof Nehan.Padding
@@ -5317,9 +5331,17 @@ Nehan.Margin = (function(){
      @extends {Nehan.Edge}
   */
   function Margin(){
-    Nehan.Edge.call(this, "margin");
+    Nehan.Edge.call(this);
   }
   Nehan.Class.extend(Margin, Nehan.Edge);
+
+  /**
+   @memberof Nehan.Margin
+   @return {String}
+   */
+  Margin.prototype.getType = function(){
+    return "margin";
+  };
 
   /**
      @memberof Nehan.Margin
@@ -5344,9 +5366,17 @@ Nehan.Border = (function(){
      @extends {Nehan.Edge}
   */
   function Border(){
-    Nehan.Edge.call(this, "border");
+    Nehan.Edge.call(this);
   }
   Nehan.Class.extend(Border, Nehan.Edge);
+
+  /**
+   @memberof Nehan.Border
+   @return {String}
+   */
+  Border.prototype.getType = function(){
+    return "border";
+  };
 
   /**
      return cloned border object

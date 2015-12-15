@@ -7,9 +7,17 @@ Nehan.Border = (function(){
      @extends {Nehan.Edge}
   */
   function Border(){
-    Nehan.Edge.call(this, "border");
+    Nehan.Edge.call(this);
   }
   Nehan.Class.extend(Border, Nehan.Edge);
+
+  /**
+   @memberof Nehan.Border
+   @return {String}
+   */
+  Border.prototype.getType = function(){
+    return "border";
+  };
 
   /**
      return cloned border object
