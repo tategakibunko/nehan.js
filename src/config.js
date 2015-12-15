@@ -22,14 +22,14 @@ Nehan.Config = {
   debug:false,
 
   /**
-   define root markup where rendering context starts from.
+   define default root markup where rendering context starts from.
    'body' or 'html' or 'document' are enabled.
 
    @memberof Nehan.Config
    @type {String}
    @default "document"
    */
-  root:"document",
+  defaultRoot:"document",
 
   /**
    is kerning enabled?

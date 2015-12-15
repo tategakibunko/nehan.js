@@ -236,8 +236,8 @@ Nehan.RenderingContext = (function(){
     return stream;
   };
 
-  RenderingContext.prototype.createRootGenerator = function(){
-    switch(Nehan.Config.root){
+  RenderingContext.prototype.createRootGenerator = function(root){
+    switch(root){
     case "document":
       return new Nehan.DocumentGenerator(this);
     case "html":

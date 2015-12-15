@@ -8,12 +8,13 @@ Nehan.Document = (function(){
   function Document(){
     this.text = "no text";
     this.styles = {};
-    this.generator = null; // created when render
+    this.generator = null; // disabled until 'render' is called.
   }
 
   /**
    @memberof Nehan.Document
    @param opt {Object}
+   @param opt.root {String} - html root context ['document' | 'html' | 'body']. Default value is defined in {@link Nehan.Config}.defaultRoot.
    @param opt.onProgress {Function} - fun tree:{@link Nehan.Box} -> {@link Nehan.RenderingContext} -> ()
    @param opt.onPage {Function} - fun page:{@link Nehan.Page} -> {@link Nehan.RenderingContext} -> ()
    @param opt.onComplete {Function} - fun time:{Float} -> context:{@link Nehan.RenderingContext} -> ()
@@ -24,13 +25,11 @@ Nehan.Document = (function(){
    */
   Document.prototype.render = function(opt){
     opt = opt || {};
-    this.generator =
-      new Nehan.RenderingContext({
-	text:Nehan.Html.normalize(this.text)
-      })
-      .setStyles(Nehan.globalStyle || {})
-      .setStyles(this.styles)
-      .createRootGenerator();
+    this.generator = Nehan.createRootGenerator({
+      root:opt.root || Nehan.Config.defaultRoot,
+      text:this.text,
+      styles:this.styles
+    });
     new Nehan.PageParser(this.generator).parse(opt);
     return this;
   };
