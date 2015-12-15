@@ -14531,6 +14531,8 @@ Nehan.Style = (function(){
     return Math.max(1, Math.min(font_size, Nehan.Config.maxFontSize));
   };
 
+  // [TODO]
+  // if em unitted, need to compute strict size.
   Style.prototype._computeLineHeight = function(val){
     var str = String(val);
     if(str.indexOf("%") > 0){
