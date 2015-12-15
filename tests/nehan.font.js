@@ -18,4 +18,16 @@ describe("Font", function(){
     expect(font.style).toBe("italic");
     expect(font.variant).toBe("small-caps");
   });
+
+  it("Font.getCssShorthand", function(){
+    var font = new Nehan.Font({
+      size:14,
+      weight:"bold",
+      family:"Meiryo",
+      style:"italic",
+      variant:"small-caps",
+      lineHeight:"1.4"
+    });
+    expect(font.getCssShorthand()).toBe("bold italic small-caps 14px/1.4 Meiryo");
+  });
 });
