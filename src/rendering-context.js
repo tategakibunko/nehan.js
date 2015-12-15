@@ -1386,6 +1386,14 @@ Nehan.RenderingContext = (function(){
     return this.style.isTextVertical();
   };
 
+  RenderingContext.prototype.isFloatStart = function(){
+    return this.style? this.style.isFloatStart() : false;
+  };
+
+  RenderingContext.prototype.isFloatEnd = function(){
+    return this.style? this.style.isFloatEnd() : false;
+  };
+
   RenderingContext.prototype.isFloatSpace = function(){
     return this.style.getMarkupName() === "space";
   };
@@ -1641,7 +1649,7 @@ Nehan.RenderingContext = (function(){
 
     // if meet the final output of the last float stack with same clear direction,
     // yield white space but set done status to clear object.
-    if(float_group.isLast() && !float_group.hasNext() && this.clear.hasDirection(direction_name)){
+    if(float_group.isLast() && this.clear.hasDirection(direction_name)){
       this.clear.setDone(direction_name);
       return this.yieldWhiteSpace();
     }
@@ -1783,9 +1791,9 @@ Nehan.RenderingContext = (function(){
       if(!block || block.getContentExtent() <= 0){
 	return;
       }
-      if(gen.context.style.isFloatStart()){
+      if(gen.context.isFloatStart()){
 	start_blocks.push(block);
-      } else if(gen.context.style.isFloatEnd()){
+      } else if(gen.context.isFloatEnd()){
 	end_blocks.push(block);
       }
     });

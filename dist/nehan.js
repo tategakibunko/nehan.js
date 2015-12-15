@@ -63,27 +63,6 @@ Nehan.setStyles = function(values){
 };
 
 /**
- create root context.
-
- @param opt {Object}
- @param opt.root {String} - context root
- @param opt.text {String} - html string
- @param opt.styles {Object} - context local styles
- @return {Nehan.RenderingContext}
- */
-Nehan.createRootContext = function(opt){
-  opt = opt || {};
-  var context = new Nehan.RenderingContext({
-    text:Nehan.Html.normalize(opt.text || "no text")
-  });
-  return context
-    .setStyles(Nehan.globalStyles || {})
-    .setStyles(opt.styles || {});
-};
-
-/**
- create root generator.
-
  @param opt {Object}
  @param opt.root {String} - context root
  @param opt.text {String} - html string
@@ -92,8 +71,24 @@ Nehan.createRootContext = function(opt){
  */
 Nehan.createRootGenerator = function(opt){
   opt = opt || {};
-  var context = Nehan.createRootContext(opt);
-  return context.createRootGenerator(opt.root || Nehan.Config.defaultRoot);
+  var context = new Nehan.RenderingContext({
+    text:Nehan.Html.normalize(opt.text || "no text")
+  });
+  return context
+    .setStyles(Nehan.globalStyles || {})
+    .setStyles(opt.styles || {})
+    .createRootGenerator();
+};
+
+/**
+ @param opt {Object}
+ @param opt.root {String} - context root
+ @param opt.text {String} - html string
+ @param opt.styles {Object} - context local styles
+ @return {Nehan.RenderingContext}
+ */
+Nehan.createRootContext = function(opt){
+  return Nehan.createRootGenerator(opt || {}).context;
 };
 
 
@@ -7027,15 +7022,6 @@ Nehan.FloatGroup = (function(){
    @memberof Nehan.FloatGroup
    @return {bool}
    */
-  FloatGroup.prototype.hasNext = function(){
-    return Nehan.List.exists(this.elements, function(element){
-      return element.hasNext === true;
-    });
-  };
-  /**
-   @memberof Nehan.FloatGroup
-   @return {bool}
-   */
   FloatGroup.prototype.isLast = function(){
     return this._last;
   };
@@ -7050,8 +7036,8 @@ Nehan.FloatGroup = (function(){
    element is popped from float-stack, but unshifted to elements of float-group to keep original stack order.
    *<pre>
    * float-stack  | float-group
-   *     [f1,f2]  |  []
-   *  => [f1]     |  [f2] (pop f2 from float-stack, unshift f2 to float-group)
+   *     [f1,f2]  |        []
+   *  => [f1]     |      [f2] (pop f2 from float-stack, unshift f2 to float-group)
    *  => []       |  [f1, f2] (pop f1 from float-stack, unshift f1 to float-group)
    *</pre>
 
@@ -7110,6 +7096,14 @@ Nehan.FloatGroup = (function(){
     return this.floatDirection;
   };
 
+  /**
+   @memberof Nehan.FloatGroup
+   @return {int}
+   */
+  FloatGroup.prototype.getLength = function(){
+    return this.elements.length;
+  };
+
   return FloatGroup;
 })();
 
@@ -7138,19 +7132,18 @@ Nehan.FloatGroupStack = (function(){
     return group;
   };
 
-  // [float block] -> [FloatGroup]
+  // [floated element] -> [FloatGroup]
   var __make_float_groups = function(flow, float_direction, blocks){
     var ret = [], group;
     do{
       group = __pop_float_group(flow, float_direction, blocks);
       if(group){
-	//console.log("add group:%o(extent=%d)", group, group.getExtent(flow));
-	ret.unshift(group);
+	ret.push(group);
       }
     } while(group !== null);
+
     if(ret.length > 0){
-      ret[0].setLast(true); // first in last out
-      //console.log("last group:%o(extent=%d)", ret[0], ret[0].getExtent(flow));
+      ret[0].setLast(true);
     }
     return ret;
   };
@@ -7165,8 +7158,8 @@ Nehan.FloatGroupStack = (function(){
      @param end_blocks {Array.<Nehan.Box>}
   */
   function FloatGroupStack(flow, start_blocks, end_blocks){
-    var start_groups = __make_float_groups(flow, Nehan.FloatDirections.get("start"), start_blocks);
-    var end_groups = __make_float_groups(flow, Nehan.FloatDirections.get("end"), end_blocks);
+    var start_groups = __make_float_groups(flow, Nehan.FloatDirections.start, start_blocks);
+    var end_groups = __make_float_groups(flow, Nehan.FloatDirections.end, end_blocks);
     this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
       return g1.getExtent(flow) - g2.getExtent(flow);
     });
@@ -18323,6 +18316,14 @@ Nehan.RenderingContext = (function(){
     return this.style.isTextVertical();
   };
 
+  RenderingContext.prototype.isFloatStart = function(){
+    return this.style? this.style.isFloatStart() : false;
+  };
+
+  RenderingContext.prototype.isFloatEnd = function(){
+    return this.style? this.style.isFloatEnd() : false;
+  };
+
   RenderingContext.prototype.isFloatSpace = function(){
     return this.style.getMarkupName() === "space";
   };
@@ -18578,7 +18579,7 @@ Nehan.RenderingContext = (function(){
 
     // if meet the final output of the last float stack with same clear direction,
     // yield white space but set done status to clear object.
-    if(float_group.isLast() && !float_group.hasNext() && this.clear.hasDirection(direction_name)){
+    if(float_group.isLast() && this.clear.hasDirection(direction_name)){
       this.clear.setDone(direction_name);
       return this.yieldWhiteSpace();
     }
@@ -18720,9 +18721,9 @@ Nehan.RenderingContext = (function(){
       if(!block || block.getContentExtent() <= 0){
 	return;
       }
-      if(gen.context.style.isFloatStart()){
+      if(gen.context.isFloatStart()){
 	start_blocks.push(block);
-      } else if(gen.context.style.isFloatEnd()){
+      } else if(gen.context.isFloatEnd()){
 	end_blocks.push(block);
       }
     });

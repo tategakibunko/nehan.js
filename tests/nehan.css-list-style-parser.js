@@ -1,7 +1,7 @@
 describe("CssListStyleParser", function(){
   var prop = new Nehan.CssProp("list-style");
 
-  it("Nehan.formatValue", function(){
+  it("CssListStyleParser.formatValue", function(){
     expect(Nehan.CssListStyleParser.formatValue(prop, {
       type:"decimal"
     })).toEqual({
@@ -28,7 +28,7 @@ describe("CssListStyleParser", function(){
     });
   });
 
-  it("Nehan.formatValue", function(){
+  it("CssListStyleParser.formatValue", function(){
     expect(Nehan.CssListStyleParser.formatValue(new Nehan.CssProp("list-style-type"), "square")).toEqual({
       type:"square"
     });

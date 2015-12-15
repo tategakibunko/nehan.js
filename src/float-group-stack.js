@@ -22,19 +22,18 @@ Nehan.FloatGroupStack = (function(){
     return group;
   };
 
-  // [float block] -> [FloatGroup]
+  // [floated element] -> [FloatGroup]
   var __make_float_groups = function(flow, float_direction, blocks){
     var ret = [], group;
     do{
       group = __pop_float_group(flow, float_direction, blocks);
       if(group){
-	//console.log("add group:%o(extent=%d)", group, group.getExtent(flow));
-	ret.unshift(group);
+	ret.push(group);
       }
     } while(group !== null);
+
     if(ret.length > 0){
-      ret[0].setLast(true); // first in last out
-      //console.log("last group:%o(extent=%d)", ret[0], ret[0].getExtent(flow));
+      ret[0].setLast(true);
     }
     return ret;
   };
@@ -49,8 +48,8 @@ Nehan.FloatGroupStack = (function(){
      @param end_blocks {Array.<Nehan.Box>}
   */
   function FloatGroupStack(flow, start_blocks, end_blocks){
-    var start_groups = __make_float_groups(flow, Nehan.FloatDirections.get("start"), start_blocks);
-    var end_groups = __make_float_groups(flow, Nehan.FloatDirections.get("end"), end_blocks);
+    var start_groups = __make_float_groups(flow, Nehan.FloatDirections.start, start_blocks);
+    var end_groups = __make_float_groups(flow, Nehan.FloatDirections.end, end_blocks);
     this.stack = start_groups.concat(end_groups).sort(function(g1, g2){
       return g1.getExtent(flow) - g2.getExtent(flow);
     });

@@ -17,15 +17,6 @@ Nehan.FloatGroup = (function(){
    @memberof Nehan.FloatGroup
    @return {bool}
    */
-  FloatGroup.prototype.hasNext = function(){
-    return Nehan.List.exists(this.elements, function(element){
-      return element.hasNext === true;
-    });
-  };
-  /**
-   @memberof Nehan.FloatGroup
-   @return {bool}
-   */
   FloatGroup.prototype.isLast = function(){
     return this._last;
   };
@@ -40,8 +31,8 @@ Nehan.FloatGroup = (function(){
    element is popped from float-stack, but unshifted to elements of float-group to keep original stack order.
    *<pre>
    * float-stack  | float-group
-   *     [f1,f2]  |  []
-   *  => [f1]     |  [f2] (pop f2 from float-stack, unshift f2 to float-group)
+   *     [f1,f2]  |        []
+   *  => [f1]     |      [f2] (pop f2 from float-stack, unshift f2 to float-group)
    *  => []       |  [f1, f2] (pop f1 from float-stack, unshift f1 to float-group)
    *</pre>
 
@@ -98,6 +89,14 @@ Nehan.FloatGroup = (function(){
    */
   FloatGroup.prototype.getFloatDirection = function(){
     return this.floatDirection;
+  };
+
+  /**
+   @memberof Nehan.FloatGroup
+   @return {int}
+   */
+  FloatGroup.prototype.getLength = function(){
+    return this.elements.length;
   };
 
   return FloatGroup;
