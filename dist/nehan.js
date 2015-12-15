@@ -4815,7 +4815,7 @@ Nehan.Edge = (function(){
    @param values.after {int}
    @param values.start {int}
    */
-  Edge.prototype.setLogicalValues = function(flow, values){
+  Edge.prototype.setSize = function(flow, values){
     Nehan.BoxRect.setLogicalValues(this, flow, values);
     return this;
   };
@@ -5191,7 +5191,6 @@ Nehan.BorderColor = (function(){
   };
   /**
    @memberof Nehan.BorderColor
-   @method setColor
    @param flow {Nehan.BoxFlow}
    @param values {Object} - color values, object or array or string available.
    @param values.before {Nehan.Color}
@@ -5200,9 +5199,9 @@ Nehan.BorderColor = (function(){
    @param values.start {Nehan.Color}
    */
   BorderColor.prototype.setColor = function(flow, values){
-    for(var logical_prop in values){
-      this[flow.getProp(logical_prop)] = new Nehan.Color(values[logical_prop]);
-    }
+    Nehan.BoxRect.setLogicalValues(this, flow, Nehan.Obj.map(values, function(prop, value){
+      return new Nehan.Color(value);
+    }));
   };
   /**
    get css object of border color
@@ -14680,7 +14679,7 @@ Nehan.Style = (function(){
       return null;
     }
     var padding = new Nehan.Padding();
-    padding.setLogicalValues(flow, edge_size);
+    padding.setSize(flow, edge_size);
     return padding;
   };
 
@@ -14690,7 +14689,7 @@ Nehan.Style = (function(){
       return null;
     }
     var margin = new Nehan.Margin();
-    margin.setLogicalValues(flow, edge_size);
+    margin.setSize(flow, edge_size);
 
     // if inline, disable margin-before and margin-after.
     if(this.isInline()){
@@ -14708,7 +14707,7 @@ Nehan.Style = (function(){
     }
     var border = new Nehan.Border();
     if(edge_size){
-      border.setLogicalValues(flow, edge_size);
+      border.setSize(flow, edge_size);
     }
     if(border_radius){
       border.setRadius(flow, this._computeCornerSize(border_radius, font_size));

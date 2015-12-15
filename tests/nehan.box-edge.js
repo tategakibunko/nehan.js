@@ -1,21 +1,21 @@
 describe("BoxEdge", function(){
   var flow = Nehan.BoxFlows.getByName("lr-tb");
   var margin = new Nehan.Margin();
-  margin.setLogicalValues(flow, {
+  margin.setSize(flow, {
     start:1,
     end:2,
     before:3,
     after:4
   });
   var padding = new Nehan.Padding();
-  padding.setLogicalValues(flow, {
+  padding.setSize(flow, {
     start:5,
     end:6,
     before:7,
     after:8
   });
   var border = new Nehan.Border();
-  border.setLogicalValues(flow, {
+  border.setSize(flow, {
     start:9,
     end:10,
     before:11,

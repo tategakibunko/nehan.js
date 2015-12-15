@@ -130,7 +130,7 @@ Nehan.Edge = (function(){
    @param values.after {int}
    @param values.start {int}
    */
-  Edge.prototype.setLogicalValues = function(flow, values){
+  Edge.prototype.setSize = function(flow, values){
     Nehan.BoxRect.setLogicalValues(this, flow, values);
     return this;
   };

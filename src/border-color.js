@@ -24,7 +24,6 @@ Nehan.BorderColor = (function(){
   };
   /**
    @memberof Nehan.BorderColor
-   @method setColor
    @param flow {Nehan.BoxFlow}
    @param values {Object} - color values, object or array or string available.
    @param values.before {Nehan.Color}
@@ -33,9 +32,9 @@ Nehan.BorderColor = (function(){
    @param values.start {Nehan.Color}
    */
   BorderColor.prototype.setColor = function(flow, values){
-    for(var logical_prop in values){
-      this[flow.getProp(logical_prop)] = new Nehan.Color(values[logical_prop]);
-    }
+    Nehan.BoxRect.setLogicalValues(this, flow, Nehan.Obj.map(values, function(prop, value){
+      return new Nehan.Color(value);
+    }));
   };
   /**
    get css object of border color

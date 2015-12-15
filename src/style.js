@@ -1453,7 +1453,7 @@ Nehan.Style = (function(){
       return null;
     }
     var padding = new Nehan.Padding();
-    padding.setLogicalValues(flow, edge_size);
+    padding.setSize(flow, edge_size);
     return padding;
   };
 
@@ -1463,7 +1463,7 @@ Nehan.Style = (function(){
       return null;
     }
     var margin = new Nehan.Margin();
-    margin.setLogicalValues(flow, edge_size);
+    margin.setSize(flow, edge_size);
 
     // if inline, disable margin-before and margin-after.
     if(this.isInline()){
@@ -1481,7 +1481,7 @@ Nehan.Style = (function(){
     }
     var border = new Nehan.Border();
     if(edge_size){
-      border.setLogicalValues(flow, edge_size);
+      border.setSize(flow, edge_size);
     }
     if(border_radius){
       border.setRadius(flow, this._computeCornerSize(border_radius, font_size));
