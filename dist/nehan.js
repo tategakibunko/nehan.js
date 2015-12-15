@@ -4717,6 +4717,18 @@ Nehan.Edge = (function(){
   /**
    @memberof Nehan.Edge
    */
+  Edge.prototype.clearStart = function(flow){
+    this[flow.getPropStart()] = 0;
+  };
+  /**
+   @memberof Nehan.Edge
+   */
+  Edge.prototype.clearEnd = function(flow){
+    this[flow.getPropEnd()] = 0;
+  };
+  /**
+   @memberof Nehan.Edge
+   */
   Edge.prototype.clearBefore = function(flow){
     this[flow.getPropBefore()] = 0;
   };
@@ -4895,22 +4907,7 @@ Nehan.Edge = (function(){
    @param name {String} - before, end, after, start
    */
   Edge.prototype.setByName = function(flow, name, value){
-    switch(name){
-    case "before":
-      this.setBefore(flow, value);
-      break;
-    case "end":
-      this.setEnd(flow, value);
-      break;
-    case "after":
-      this.setAfter(flow, value);
-      break;
-    case "start":
-      this.setStart(flow, value);
-      break;
-    default:
-      console.error("Edge::setByName, undefined direction:", name);
-    }
+    this[flow.getProp(name)] = value;
   };
   /**
    @memberof Nehan.Edge
@@ -4919,19 +4916,7 @@ Nehan.Edge = (function(){
    @return {int}
    */
   Edge.prototype.getByName = function(flow, name){
-    switch(name){
-    case "before":
-      return this.getBefore(flow);
-    case "end":
-      return this.getEnd(flow);
-    case "after":
-      return this.getAfter(flow);
-    case "start":
-      return this.getStart(flow);
-    default:
-      consolo.error("Edge::getByName, undefined direction:", name);
-      return 0;
-    }
+    return this[flow.getProp(name)] || 0;
   };
 
   return Edge;
