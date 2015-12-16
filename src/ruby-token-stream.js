@@ -1,14 +1,14 @@
 Nehan.RubyTokenStream = (function(){
   /**
-     token stream of &lt;ruby&gt; tag content.
+   token stream of &lt;ruby&gt; tag content.
 
-     @memberof Nehan
-     @class RubyTokenStream
-     @classdesc
-     @constructor
-     @extends {Nehan.TokenStream}
-     @param str {String}
-  */
+   @memberof Nehan
+   @class RubyTokenStream
+   @classdesc
+   @constructor
+   @extends {Nehan.TokenStream}
+   @param str {String}
+   */
   function RubyTokenStream(str){
     this.tokens = this._parse(new Nehan.TokenStream({
       lexer:new Nehan.HtmlLexer(str)

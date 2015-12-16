@@ -46,6 +46,13 @@ Nehan.LexingRule = (function(){
     /**
      @memberof Nehan.LexingRule
      @param tag_name {String}
+     */
+    removeSingleTagByName : function(tag_name){
+      __single_tag_names__ = __single_tag_names__.filter(Nehan.Closure.neq(tag_name));
+    },
+    /**
+     @memberof Nehan.LexingRule
+     @param tag_name {String}
      @example
      * Nehan.LexingRule.addSingleTagByName("my-custom-single-tag");
      * Nehan.LexingRule.isSingleTag("my-custom-single-tag"); // true

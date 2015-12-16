@@ -1,15 +1,15 @@
 Nehan.TokenStream = (function(){
   /**
-     @memberof Nehan
-     @class TokenStream
-     @classdesc abstraction of token stream
-     @constructor
-     @param src {String}
-     @param opt {Object}
-     @param opt.lexer {Lexer} - lexer class(optional)
-     @param opt.flow {Nehan.BoxFlow} - document flow(optional)
-     @param opt.filter {Function} - token filter function(optional)
-  */
+   @memberof Nehan
+   @class TokenStream
+   @classdesc abstraction of token stream
+   @constructor
+   @param src {String}
+   @param opt {Object}
+   @param opt.lexer {Lexer} - lexer class(optional)
+   @param opt.flow {Nehan.BoxFlow} - document flow(optional)
+   @param opt.filter {Function} - token filter function(optional)
+   */
   function TokenStream(opt){
     opt = opt || {};
     this.lexer = opt.lexer || null;

@@ -730,6 +730,13 @@ Nehan.LexingRule = (function(){
     /**
      @memberof Nehan.LexingRule
      @param tag_name {String}
+     */
+    removeSingleTagByName : function(tag_name){
+      __single_tag_names__ = __single_tag_names__.filter(Nehan.Closure.neq(tag_name));
+    },
+    /**
+     @memberof Nehan.LexingRule
+     @param tag_name {String}
      @example
      * Nehan.LexingRule.addSingleTagByName("my-custom-single-tag");
      * Nehan.LexingRule.isSingleTag("my-custom-single-tag"); // true
@@ -11152,16 +11159,16 @@ Nehan.TextLexer = (function (){
 
 Nehan.TokenStream = (function(){
   /**
-     @memberof Nehan
-     @class TokenStream
-     @classdesc abstraction of token stream
-     @constructor
-     @param src {String}
-     @param opt {Object}
-     @param opt.lexer {Lexer} - lexer class(optional)
-     @param opt.flow {Nehan.BoxFlow} - document flow(optional)
-     @param opt.filter {Function} - token filter function(optional)
-  */
+   @memberof Nehan
+   @class TokenStream
+   @classdesc abstraction of token stream
+   @constructor
+   @param src {String}
+   @param opt {Object}
+   @param opt.lexer {Lexer} - lexer class(optional)
+   @param opt.flow {Nehan.BoxFlow} - document flow(optional)
+   @param opt.filter {Function} - token filter function(optional)
+   */
   function TokenStream(opt){
     opt = opt || {};
     this.lexer = opt.lexer || null;
@@ -11417,15 +11424,15 @@ Nehan.TokenStream = (function(){
 
 Nehan.RubyTokenStream = (function(){
   /**
-     token stream of &lt;ruby&gt; tag content.
+   token stream of &lt;ruby&gt; tag content.
 
-     @memberof Nehan
-     @class RubyTokenStream
-     @classdesc
-     @constructor
-     @extends {Nehan.TokenStream}
-     @param str {String}
-  */
+   @memberof Nehan
+   @class RubyTokenStream
+   @classdesc
+   @constructor
+   @extends {Nehan.TokenStream}
+   @param str {String}
+   */
   function RubyTokenStream(str){
     this.tokens = this._parse(new Nehan.TokenStream({
       lexer:new Nehan.HtmlLexer(str)
