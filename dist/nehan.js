@@ -2467,11 +2467,13 @@ Nehan.HashSet = (function(){
    @memberof Nehan.HashSet
    @param name {String}
    @param value
+   @return {Nehan.HashSet}
    */
   HashSet.prototype.add = function(name, value){
     var old_value = this._values[name] || null;
     var new_value = old_value? this.merge(old_value, value) : value;
     this._values[name] = new_value;
+    return this;
   };
   /**
    * this function is used when performance matters,<br>
@@ -2479,20 +2481,25 @@ Nehan.HashSet = (function(){
 
    @memberof Nehan.HashSet
    @param values {Array}
+   @return {Nehan.HashSet}
    */
   HashSet.prototype.addValues = function(values){
     for(var prop in values){
       this.add(prop, values[prop]);
     }
+    return this;
   };
   /**
    remove value associated with [name].
 
    @memberof Nehan.HashSet
    @param name {String}
+   @return {Nehan.HashSet}
    */
   HashSet.prototype.remove = function(name){
+    this._values[name] = null;
     delete this._values[name];
+    return this;
   };
 
   return HashSet;
