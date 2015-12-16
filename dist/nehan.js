@@ -1652,6 +1652,7 @@ Nehan.Html = {
    */
   normalize : function(text){
     return text
+      .replace(/\r/g, "") // discard CR
       .replace(/<!--[\s\S]*?-->/g, "") // discard comment
       .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
       .replace(/<rb>/gi, "") // discard rb
@@ -10977,7 +10978,6 @@ Nehan.HtmlLexer = (function (){
       return p1.toLowerCase();
     }); // convert close tag to lower case(for innerHTML of IE)
     src = __replace_single_close_tags(src);
-    src = src.replace(/\r/g, ""); // discard CR
     src = src.replace(/’/g, "'"); // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
     if(flow && flow.isTextVertical()){
       src = src
@@ -15454,7 +15454,7 @@ Nehan.TextGenerator = (function(){
 
     // first new-line and tab are treated as single half space.
     if(token.isNewLine() || token.isTabSpace()){
-      Nehan.Char.call(token, " "); // update by half-space
+      Nehan.Char.call(token, {data:"\u0020"}); // update by space
     }
     // if white-space is not new-line, use first one.
     return this._getText(token);

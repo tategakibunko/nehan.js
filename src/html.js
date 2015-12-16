@@ -121,6 +121,7 @@ Nehan.Html = {
    */
   normalize : function(text){
     return text
+      .replace(/\r/g, "") // discard CR
       .replace(/<!--[\s\S]*?-->/g, "") // discard comment
       .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
       .replace(/<rb>/gi, "") // discard rb

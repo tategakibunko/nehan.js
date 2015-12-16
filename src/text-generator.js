@@ -71,7 +71,7 @@ Nehan.TextGenerator = (function(){
 
     // first new-line and tab are treated as single half space.
     if(token.isNewLine() || token.isTabSpace()){
-      Nehan.Char.call(token, " "); // update by half-space
+      Nehan.Char.call(token, {data:"\u0020"}); // update by space
     }
     // if white-space is not new-line, use first one.
     return this._getText(token);
