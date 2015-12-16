@@ -229,7 +229,6 @@ Nehan.Char = (function(){
     var css = {};
     css.height = this.bodySize + "px";
     css["line-height"] = this.bodySize + "px";
-    console.log("space(%o) height:%d", this, this.bodySize);
     return css;
   };
 
