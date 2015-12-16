@@ -1,8 +1,8 @@
 /**
-   module of html lexing rule
+ module of html lexing rule
 
-   @namespace Nehan.LexingRule
-*/
+ @namespace Nehan.LexingRule
+ */
 Nehan.LexingRule = (function(){
   var __single_tag_names__ = [
     "br",
@@ -25,31 +25,31 @@ Nehan.LexingRule = (function(){
 
   return {
     /**
-       @memberof Nehan.LexingRule
-       @return {Array.<String>}
-    */
+     @memberof Nehan.LexingRule
+     @return {Array.<String>}
+     */
     getSingleTagNames : function(){
       return __single_tag_names__;
     },
     /**
-       @memberof Nehan.LexingRule
-       @param tag_name {String}
-       @return {boolean}
-       @example
-       * Nehan.LexingRule.isSingleTag("img"); // true
-       * Nehan.LexingRule.isSingleTag("br"); // true
-       * Nehan.LexingRule.isSingleTag("div"); // false
-    */
+     @memberof Nehan.LexingRule
+     @param tag_name {String}
+     @return {boolean}
+     @example
+     * Nehan.LexingRule.isSingleTag("img"); // true
+     * Nehan.LexingRule.isSingleTag("br"); // true
+     * Nehan.LexingRule.isSingleTag("div"); // false
+     */
     isSingleTag : function(tag_name){
       return __is_single_tag(tag_name) || false;
     },
     /**
-       @memberof Nehan.LexingRule
-       @param tag_name {String}
-       @example
-       * Nehan.LexingRule.addSingleTagByName("my-custom-single-tag");
-       * Nehan.LexingRule.isSingleTag("my-custom-single-tag"); // true
-    */
+     @memberof Nehan.LexingRule
+     @param tag_name {String}
+     @example
+     * Nehan.LexingRule.addSingleTagByName("my-custom-single-tag");
+     * Nehan.LexingRule.isSingleTag("my-custom-single-tag"); // true
+     */
     addSingleTagByName : function(tag_name){
       tag_name = tag_name.toLowerCase();
       if(!__is_single_tag(tag_name)){

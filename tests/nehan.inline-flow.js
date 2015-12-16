@@ -8,4 +8,10 @@ describe("InlineFlow", function(){
     expect(rl.getPropStart()).toBe("right");
     expect(tb.getPropStart()).toBe("top");
   });
+
+  it("InlineFlow.getPropEnd", function(){
+    expect(lr.getPropEnd()).toBe("right");
+    expect(rl.getPropEnd()).toBe("left");
+    expect(tb.getPropEnd()).toBe("bottom");
+  });
 });
