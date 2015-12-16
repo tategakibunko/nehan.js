@@ -18,7 +18,9 @@ Nehan.BodyGenerator = (function(){
       context.style = context.createStyle(markup, null);
     }
     if(!context.stream){
-      context.stream = new Nehan.TokenStream(context.text);
+      context.stream = new Nehan.TokenStream({
+	lexer:new Nehan.HtmlLexer(context.text)
+      });
     }
     Nehan.SectionRootGenerator.prototype._onInitialize.call(this, context);
   };

@@ -2,21 +2,21 @@ Nehan.HtmlLexer = (function (){
   var __rex_tag = /<[a-zA-Z][^>]*>/;
 
   /*
-  var __close_abbr_tags = [
-    "li",
-    "dt",
-    "dd",
-    "p",
-    "tr",
-    "td",
-    "th",
-    "rt",
-    "rp",
-    "optgroup",
-    "option",
-    "thread",
-    "tfoot"
-  ];*/
+   var __close_abbr_tags = [
+   "li",
+   "dt",
+   "dd",
+   "p",
+   "tr",
+   "td",
+   "th",
+   "rt",
+   "rp",
+   "optgroup",
+   "option",
+   "thread",
+   "tfoot"
+   ];*/
 
   var __find_close_pos = function(buff, tag_name, open_tag_rex, close_tag){
     var close_pos = buff.indexOf(close_tag);
@@ -45,37 +45,26 @@ Nehan.HtmlLexer = (function (){
   };
 
   /**
-     @memberof Nehan
-     @class HtmlLexer
-     @classdesc lexer of html tag elements.
-     @constructor
-     @param src {String}
-     @param opt {Object}
-     @param opt.flow {Nehan.BoxFlow} - document flow(optional)
-  */
-  function HtmlLexer(src, opt){
-    opt = opt || {};
+   @memberof Nehan
+   @class HtmlLexer
+   @classdesc lexer of html tag elements.
+   @constructor
+   @param src {String}
+   @param opt {Object}
+   @param opt.flow {Nehan.BoxFlow} - document flow(optional)
+   */
+  function HtmlLexer(src){
     this.pos = 0;
-    this.flow = opt.flow || null;
-    this.buff = this._normalize(src, this.flow);
+    this.buff = this._normalize(src);
     this.src = this.buff;
   }
 
-  HtmlLexer.prototype._normalize = function(src, flow){
+  HtmlLexer.prototype._normalize = function(src){
     src = src.replace(/(<\/[^>]+>)/gm, function(str, p1){
       return p1.toLowerCase();
     }); // convert close tag to lower case(for innerHTML of IE)
     src = __replace_single_close_tags(src);
     src = src.replace(/’/g, "'"); // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
-    if(flow && flow.isTextVertical()){
-      src = src
-	.replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
-	.replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
-	.replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
-	.replace(/｡/g, "。") // half size ideographic full stop -> full size
-      ;
-    }
-    //console.log("HtmlLexer::normalized to:", src);
     return src;
   };
   /**
@@ -193,5 +182,3 @@ Nehan.HtmlLexer = (function (){
 
   return HtmlLexer;
 })();
-
-

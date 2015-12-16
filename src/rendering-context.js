@@ -217,8 +217,9 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createDocumentStream = function(text){
-    var stream = new Nehan.TokenStream(text, {
-      filter:Nehan.Closure.isTagName(["!doctype", "html"])
+    var stream = new Nehan.TokenStream({
+      filter:Nehan.Closure.isTagName(["!doctype", "html"]),
+      lexer:new Nehan.HtmlLexer(text)
     });
     if(stream.isEmptyTokens()){
       stream.tokens = [new Nehan.Tag("html", text)];
@@ -227,8 +228,9 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createHtmlStream = function(text){
-    var stream = new Nehan.TokenStream(text, {
-      filter:Nehan.Closure.isTagName(["head", "body"])
+    var stream = new Nehan.TokenStream({
+      filter:Nehan.Closure.isTagName(["head", "body"]),
+      lexer:new Nehan.HtmlLexer(text)
     });
     if(stream.isEmptyTokens()){
       stream.tokens = [new Nehan.Tag("body", text)];
@@ -325,7 +327,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createTablePartition = function(stream){
-    var pset = new Nehan.PartitionHashSet();
+    var pset = new Nehan.PartitionHashSet(), content;
     while(stream.hasNext()){
       var token = stream.get();
       if(token === null){
@@ -336,17 +338,19 @@ Nehan.RenderingContext = (function(){
       }
       switch(token.getName()){
       case "tbody": case "thead": case "tfoot":
-	var pset2 = this.createTablePartition(new Nehan.TokenStream(token.getContent(), {
-	  flow:this.style.flow,
-	  filter:Nehan.Closure.isTagName(["tr"])
+	content = token.getContent();
+	var pset2 = this.createTablePartition(new Nehan.TokenStream({
+	  filter:Nehan.Closure.isTagName(["tr"]),
+	  lexer:new Nehan.HtmlLexer(content)
 	}));
 	pset = pset.union(pset2);
 	break;
 
       case "tr":
-	var cell_tags = new Nehan.TokenStream(token.getContent(), {
-	  flow:this.style.flow,
-	  filter:Nehan.Closure.isTagName(["td", "th"])
+	content = token.getContent();
+	var cell_tags = new Nehan.TokenStream({
+	  filter:Nehan.Closure.isTagName(["td", "th"]),
+	  lexer:new Nehan.HtmlLexer(content)
 	}).getTokens();
 	var cell_count = cell_tags.length;
 	var partition = this.createCellPartition(cell_tags);
@@ -425,46 +429,45 @@ Nehan.RenderingContext = (function(){
     var markup_name = style.getMarkupName();
     var markup_content = style.getContent();
     if(style.getTextCombine() === "horizontal" || markup_name === "tcy"){
-      return new Nehan.TokenStream(markup_content, {
-	flow:style.flow,
+      return new Nehan.TokenStream({
 	tokens:[new Nehan.Tcy(markup_content)]
       });
     }
     switch(markup_name){
     case "html":
-      var html_stream = new Nehan.TokenStream(markup_content, {
-	filter:Nehan.Closure.isTagName(["head", "body"])
+      var html_stream = new Nehan.TokenStream({
+	filter:Nehan.Closure.isTagName(["head", "body"]),
+	lexer:new Nehan.HtmlLexer(markup_content)
       });
       if(html_stream.isEmptyTokens()){
-	html_stream.tags = [new Nehan.Tag("body", markup_content)];
+	html_stream.tokens = [new Nehan.Tag("body", markup_content)];
       }
       return html_stream;
 
     case "tbody": case "thead": case "tfoot":
-      return new Nehan.TokenStream(markup_content, {
-	flow:style.flow,
-	filter:Nehan.Closure.isTagName(["tr"])
+      return new Nehan.TokenStream({
+	filter:Nehan.Closure.isTagName(["tr"]),
+	lexer:new Nehan.HtmlLexer(markup_content)
       });
     case "tr":
-      return new Nehan.TokenStream(markup_content, {
-	flow:style.flow,
-	filter:Nehan.Closure.isTagName(["td", "th"])
+      return new Nehan.TokenStream({
+	filter:Nehan.Closure.isTagName(["td", "th"]),
+	lexer:new Nehan.HtmlLexer(markup_content)
       });
     case "ul": case "ol":
-      return new Nehan.TokenStream(markup_content, {
-	flow:style.flow,
-	filter:Nehan.Closure.isTagName(["li"])
+      return new Nehan.TokenStream({
+	filter:Nehan.Closure.isTagName(["li"]),
+	lexer:new Nehan.HtmlLexer(markup_content)
       });
     case "word":
-      return new Nehan.TokenStream(markup_content, {
-	flow:style.flow,
+      return new Nehan.TokenStream({
 	tokens:[new Nehan.Word(markup_content)]
       });
     case "ruby":
       return new Nehan.RubyTokenStream(markup_content);
     default:
-      return new Nehan.TokenStream(markup_content, {
-	flow:style.flow
+      return new Nehan.TokenStream({
+	lexer:new Nehan.HtmlLexer(markup_content)
       });
     }
   };
@@ -616,15 +619,12 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createTextStream = function(text){
     if(text instanceof Nehan.Tcy || text instanceof Nehan.Word){
-      return new Nehan.TokenStream(text.getData(), {
-	flow:this.style.flow,
+      return new Nehan.TokenStream({
 	tokens:[text]
       });
     }
-    var content = text.getContent();
-    return new Nehan.TokenStream(content, {
-      flow:this.style.flow,
-      lexer:new Nehan.TextLexer(content)
+    return new Nehan.TokenStream({
+      lexer:new Nehan.TextLexer(text.getContent())
     });
   };
 

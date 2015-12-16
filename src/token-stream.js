@@ -10,15 +10,13 @@ Nehan.TokenStream = (function(){
      @param opt.flow {Nehan.BoxFlow} - document flow(optional)
      @param opt.filter {Function} - token filter function(optional)
   */
-  function TokenStream(src, opt){
+  function TokenStream(opt){
     opt = opt || {};
-    this.flow = opt.flow || null;
-    this.lexer = opt.lexer || this._createLexer(src, this.flow);
+    this.lexer = opt.lexer || null;
     this.tokens = opt.tokens || [];
     this.pos = 0;
-    this._filter = opt.filter || null;
-    if(this.tokens.length === 0){
-      this._loadTokens(this._filter);
+    if(this.lexer && this.tokens.length === 0){
+      this._loadTokens(opt.filter || null);
     }
   }
 
@@ -40,13 +38,6 @@ Nehan.TokenStream = (function(){
    */
   TokenStream.prototype.hasNext  = function(){
     return (this.pos < this.tokens.length);
-  };
-  /**
-   @memberof Nehan.TokenStream
-   @return {boolean}
-   */
-  TokenStream.prototype.isEmptyLexer  = function(){
-    return this.lexer.isEmpty();
   };
   /**
    @memberof Nehan.TokenStream
@@ -123,7 +114,7 @@ Nehan.TokenStream = (function(){
    @return {String}
    */
   TokenStream.prototype.getSrc  = function(){
-    return this.lexer.getSrc();
+    return this.lexer? this.lexer.getSrc() : "";
   };
   /**
    get current stream position.
@@ -169,8 +160,10 @@ Nehan.TokenStream = (function(){
    @return {int}
    */
   TokenStream.prototype.getSeekPercent  = function(){
-    var seek_pos = this.getSeekPos();
-    return this.lexer.getSeekPercent(seek_pos);
+    if(this.lexer){
+      return this.lexer.getSeekPercent(this.getSeekPos());
+    }
+    return Math.round(100 * this.pos / this.tokens.length);
   };
   /**
    iterate tokens by [fn].
@@ -236,7 +229,7 @@ Nehan.TokenStream = (function(){
       }
       if(filter === null){
 	this.tokens.push(token);
-      } else if(filter && filter(token)){
+      } else if(filter(token)){
 	token.order = filter_order++;
 	this.tokens.push(token);
       }
@@ -264,10 +257,6 @@ Nehan.TokenStream = (function(){
     for(var tag_name in type_of_tags){
       __set_pseudo_of_type(type_of_tags[tag_name]);
     }
-  };
-
-  TokenStream.prototype._createLexer  = function(src, flow){
-    return new Nehan.HtmlLexer(src, {flow:flow});
   };
 
   return TokenStream;

@@ -734,6 +734,14 @@ Nehan.Style = (function(){
     if(!Nehan.Obj.isEmpty(first_line)){
       content = Nehan.Html.tagWrap("first-line", content);
     }
+    if(this.isTextVertical()){
+      content = content
+	.replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
+	.replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
+	.replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
+	.replace(/｡/g, "。") // half size ideographic full stop -> full size
+      ;
+    }
     return content;
   };
   /**

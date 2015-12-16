@@ -683,10 +683,10 @@ Nehan.Env = (function(){
 })();
 
 /**
-   module of html lexing rule
+ module of html lexing rule
 
-   @namespace Nehan.LexingRule
-*/
+ @namespace Nehan.LexingRule
+ */
 Nehan.LexingRule = (function(){
   var __single_tag_names__ = [
     "br",
@@ -709,31 +709,31 @@ Nehan.LexingRule = (function(){
 
   return {
     /**
-       @memberof Nehan.LexingRule
-       @return {Array.<String>}
-    */
+     @memberof Nehan.LexingRule
+     @return {Array.<String>}
+     */
     getSingleTagNames : function(){
       return __single_tag_names__;
     },
     /**
-       @memberof Nehan.LexingRule
-       @param tag_name {String}
-       @return {boolean}
-       @example
-       * Nehan.LexingRule.isSingleTag("img"); // true
-       * Nehan.LexingRule.isSingleTag("br"); // true
-       * Nehan.LexingRule.isSingleTag("div"); // false
-    */
+     @memberof Nehan.LexingRule
+     @param tag_name {String}
+     @return {boolean}
+     @example
+     * Nehan.LexingRule.isSingleTag("img"); // true
+     * Nehan.LexingRule.isSingleTag("br"); // true
+     * Nehan.LexingRule.isSingleTag("div"); // false
+     */
     isSingleTag : function(tag_name){
       return __is_single_tag(tag_name) || false;
     },
     /**
-       @memberof Nehan.LexingRule
-       @param tag_name {String}
-       @example
-       * Nehan.LexingRule.addSingleTagByName("my-custom-single-tag");
-       * Nehan.LexingRule.isSingleTag("my-custom-single-tag"); // true
-    */
+     @memberof Nehan.LexingRule
+     @param tag_name {String}
+     @example
+     * Nehan.LexingRule.addSingleTagByName("my-custom-single-tag");
+     * Nehan.LexingRule.isSingleTag("my-custom-single-tag"); // true
+     */
     addSingleTagByName : function(tag_name){
       tag_name = tag_name.toLowerCase();
       if(!__is_single_tag(tag_name)){
@@ -7741,12 +7741,12 @@ Nehan.BlockFlow = (function(){
 
 Nehan.InlineFlow = (function(){
   /**
-     @memberof Nehan
-     @class InlineFlow
-     @classdesc flow abstraction at inline level.
-     @constructor
-     @extends {Nehan.Flow}
-     @param dir {String} - "lr" or "rl"(but not supported) or "tb"
+   @memberof Nehan
+   @class InlineFlow
+   @classdesc flow abstraction at inline level.
+   @constructor
+   @extends {Nehan.Flow}
+   @param dir {String} - "lr" or "rl"(but not supported) or "tb"
    */
   function InlineFlow(dir){
     Nehan.Flow.call(this, dir);
@@ -7754,13 +7754,13 @@ Nehan.InlineFlow = (function(){
   Nehan.Class.extend(InlineFlow, Nehan.Flow);
 
   /**
-     @memberof Nehan.InlineFlow
-     @return {String}
-     @example
-     * new InlineFlow("lr").getPropStart(); // "left"
-     * new InlineFlow("rl").getPropStart(); // "right"
-     * new InlineFlow("tb").getPropStart(); // "top"
-  */
+   @memberof Nehan.InlineFlow
+   @return {String}
+   @example
+   * new InlineFlow("lr").getPropStart(); // "left"
+   * new InlineFlow("rl").getPropStart(); // "right"
+   * new InlineFlow("tb").getPropStart(); // "top"
+   */
   InlineFlow.prototype.getPropStart = function(){
     switch(this.dir){
     case "lr": return "left";
@@ -7771,13 +7771,13 @@ Nehan.InlineFlow = (function(){
   };
 
   /**
-     @memberof Nehan.InlineFlow
-     @return {String}
-     @example
-     * new InlineFlow("lr").getPropEnd(); // "right"
-     * new InlineFlow("rl").getPropEnd(); // "left"
-     * new InlineFlow("tb").getPropEnd(); // "bottom"
-  */
+   @memberof Nehan.InlineFlow
+   @return {String}
+   @example
+   * new InlineFlow("lr").getPropEnd(); // "right"
+   * new InlineFlow("rl").getPropEnd(); // "left"
+   * new InlineFlow("tb").getPropEnd(); // "bottom"
+   */
   InlineFlow.prototype.getPropEnd = function(){
     switch(this.dir){
     case "lr": return "right";
@@ -10913,21 +10913,21 @@ Nehan.HtmlLexer = (function (){
   var __rex_tag = /<[a-zA-Z][^>]*>/;
 
   /*
-  var __close_abbr_tags = [
-    "li",
-    "dt",
-    "dd",
-    "p",
-    "tr",
-    "td",
-    "th",
-    "rt",
-    "rp",
-    "optgroup",
-    "option",
-    "thread",
-    "tfoot"
-  ];*/
+   var __close_abbr_tags = [
+   "li",
+   "dt",
+   "dd",
+   "p",
+   "tr",
+   "td",
+   "th",
+   "rt",
+   "rp",
+   "optgroup",
+   "option",
+   "thread",
+   "tfoot"
+   ];*/
 
   var __find_close_pos = function(buff, tag_name, open_tag_rex, close_tag){
     var close_pos = buff.indexOf(close_tag);
@@ -10956,37 +10956,26 @@ Nehan.HtmlLexer = (function (){
   };
 
   /**
-     @memberof Nehan
-     @class HtmlLexer
-     @classdesc lexer of html tag elements.
-     @constructor
-     @param src {String}
-     @param opt {Object}
-     @param opt.flow {Nehan.BoxFlow} - document flow(optional)
-  */
-  function HtmlLexer(src, opt){
-    opt = opt || {};
+   @memberof Nehan
+   @class HtmlLexer
+   @classdesc lexer of html tag elements.
+   @constructor
+   @param src {String}
+   @param opt {Object}
+   @param opt.flow {Nehan.BoxFlow} - document flow(optional)
+   */
+  function HtmlLexer(src){
     this.pos = 0;
-    this.flow = opt.flow || null;
-    this.buff = this._normalize(src, this.flow);
+    this.buff = this._normalize(src);
     this.src = this.buff;
   }
 
-  HtmlLexer.prototype._normalize = function(src, flow){
+  HtmlLexer.prototype._normalize = function(src){
     src = src.replace(/(<\/[^>]+>)/gm, function(str, p1){
       return p1.toLowerCase();
     }); // convert close tag to lower case(for innerHTML of IE)
     src = __replace_single_close_tags(src);
     src = src.replace(/’/g, "'"); // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
-    if(flow && flow.isTextVertical()){
-      src = src
-	.replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
-	.replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
-	.replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
-	.replace(/｡/g, "。") // half size ideographic full stop -> full size
-      ;
-    }
-    //console.log("HtmlLexer::normalized to:", src);
     return src;
   };
   /**
@@ -11105,8 +11094,6 @@ Nehan.HtmlLexer = (function (){
   return HtmlLexer;
 })();
 
-
-
 Nehan.TextLexer = (function (){
   var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
   var __rex_word = /^[a-zA-Z0-9.!?\/:$#;"',_%]+/;
@@ -11175,15 +11162,13 @@ Nehan.TokenStream = (function(){
      @param opt.flow {Nehan.BoxFlow} - document flow(optional)
      @param opt.filter {Function} - token filter function(optional)
   */
-  function TokenStream(src, opt){
+  function TokenStream(opt){
     opt = opt || {};
-    this.flow = opt.flow || null;
-    this.lexer = opt.lexer || this._createLexer(src, this.flow);
+    this.lexer = opt.lexer || null;
     this.tokens = opt.tokens || [];
     this.pos = 0;
-    this._filter = opt.filter || null;
-    if(this.tokens.length === 0){
-      this._loadTokens(this._filter);
+    if(this.lexer && this.tokens.length === 0){
+      this._loadTokens(opt.filter || null);
     }
   }
 
@@ -11205,13 +11190,6 @@ Nehan.TokenStream = (function(){
    */
   TokenStream.prototype.hasNext  = function(){
     return (this.pos < this.tokens.length);
-  };
-  /**
-   @memberof Nehan.TokenStream
-   @return {boolean}
-   */
-  TokenStream.prototype.isEmptyLexer  = function(){
-    return this.lexer.isEmpty();
   };
   /**
    @memberof Nehan.TokenStream
@@ -11288,7 +11266,7 @@ Nehan.TokenStream = (function(){
    @return {String}
    */
   TokenStream.prototype.getSrc  = function(){
-    return this.lexer.getSrc();
+    return this.lexer? this.lexer.getSrc() : "";
   };
   /**
    get current stream position.
@@ -11334,8 +11312,10 @@ Nehan.TokenStream = (function(){
    @return {int}
    */
   TokenStream.prototype.getSeekPercent  = function(){
-    var seek_pos = this.getSeekPos();
-    return this.lexer.getSeekPercent(seek_pos);
+    if(this.lexer){
+      return this.lexer.getSeekPercent(this.getSeekPos());
+    }
+    return Math.round(100 * this.pos / this.tokens.length);
   };
   /**
    iterate tokens by [fn].
@@ -11401,7 +11381,7 @@ Nehan.TokenStream = (function(){
       }
       if(filter === null){
 	this.tokens.push(token);
-      } else if(filter && filter(token)){
+      } else if(filter(token)){
 	token.order = filter_order++;
 	this.tokens.push(token);
       }
@@ -11431,10 +11411,6 @@ Nehan.TokenStream = (function(){
     }
   };
 
-  TokenStream.prototype._createLexer  = function(src, flow){
-    return new Nehan.HtmlLexer(src, {flow:flow});
-  };
-
   return TokenStream;
 })();
 
@@ -11451,7 +11427,9 @@ Nehan.RubyTokenStream = (function(){
      @param str {String}
   */
   function RubyTokenStream(str){
-    this.tokens = this._parse(new Nehan.TokenStream(str));
+    this.tokens = this._parse(new Nehan.TokenStream({
+      lexer:new Nehan.HtmlLexer(str)
+    }));
     this.pos = 0;
   }
   Nehan.Class.extend(RubyTokenStream, Nehan.TokenStream);
@@ -11487,7 +11465,7 @@ Nehan.RubyTokenStream = (function(){
   };
 
   RubyTokenStream.prototype._parseRb = function(content){
-    return new Nehan.TokenStream(content, {
+    return new Nehan.TokenStream({
       lexer:new Nehan.TextLexer(content)
     }).getTokens();
   };
@@ -14113,6 +14091,14 @@ Nehan.Style = (function(){
     if(!Nehan.Obj.isEmpty(first_line)){
       content = Nehan.Html.tagWrap("first-line", content);
     }
+    if(this.isTextVertical()){
+      content = content
+	.replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
+	.replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
+	.replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
+	.replace(/｡/g, "。") // half size ideographic full stop -> full size
+      ;
+    }
     return content;
   };
   /**
@@ -16026,7 +16012,9 @@ Nehan.InsideListItemGenerator = (function(){
 
     var child_index = context.style.getChildIndex();
     var marker_html = context.style.getListMarkerHtml(child_index + 1) + "&nbsp;";
-    var marker_stream = new Nehan.TokenStream(marker_html);
+    var marker_stream = new Nehan.TokenStream({
+      lexer:new Nehan.HtmlLexer(marker_html)
+    });
     context.stream.tokens = marker_stream.getTokens().concat(context.stream.getTokens());
   };
 
@@ -16193,7 +16181,9 @@ Nehan.BodyGenerator = (function(){
       context.style = context.createStyle(markup, null);
     }
     if(!context.stream){
-      context.stream = new Nehan.TokenStream(context.text);
+      context.stream = new Nehan.TokenStream({
+	lexer:new Nehan.HtmlLexer(context.text)
+      });
     }
     Nehan.SectionRootGenerator.prototype._onInitialize.call(this, context);
   };
@@ -16250,8 +16240,9 @@ Nehan.HtmlGenerator = (function(){
       var tag = context.stream.get();
       switch(tag.getName()){
       case "head":
-	this._parseDocumentHeader(context, new Nehan.TokenStream(tag.getContent(), {
-	  filter:Nehan.Closure.isTagName(["title", "meta", "link", "style", "script"])
+	this._parseDocumentHeader(context, new Nehan.TokenStream({
+	  filter:Nehan.Closure.isTagName(["title", "meta", "link", "style", "script"]),
+	  lexer:new Nehan.HtmlLexer(tag.getContent())
 	}));
 	break;
       case "body":
@@ -17264,8 +17255,9 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createDocumentStream = function(text){
-    var stream = new Nehan.TokenStream(text, {
-      filter:Nehan.Closure.isTagName(["!doctype", "html"])
+    var stream = new Nehan.TokenStream({
+      filter:Nehan.Closure.isTagName(["!doctype", "html"]),
+      lexer:new Nehan.HtmlLexer(text)
     });
     if(stream.isEmptyTokens()){
       stream.tokens = [new Nehan.Tag("html", text)];
@@ -17274,8 +17266,9 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createHtmlStream = function(text){
-    var stream = new Nehan.TokenStream(text, {
-      filter:Nehan.Closure.isTagName(["head", "body"])
+    var stream = new Nehan.TokenStream({
+      filter:Nehan.Closure.isTagName(["head", "body"]),
+      lexer:new Nehan.HtmlLexer(text)
     });
     if(stream.isEmptyTokens()){
       stream.tokens = [new Nehan.Tag("body", text)];
@@ -17372,7 +17365,7 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.createTablePartition = function(stream){
-    var pset = new Nehan.PartitionHashSet();
+    var pset = new Nehan.PartitionHashSet(), content;
     while(stream.hasNext()){
       var token = stream.get();
       if(token === null){
@@ -17383,17 +17376,19 @@ Nehan.RenderingContext = (function(){
       }
       switch(token.getName()){
       case "tbody": case "thead": case "tfoot":
-	var pset2 = this.createTablePartition(new Nehan.TokenStream(token.getContent(), {
-	  flow:this.style.flow,
-	  filter:Nehan.Closure.isTagName(["tr"])
+	content = token.getContent();
+	var pset2 = this.createTablePartition(new Nehan.TokenStream({
+	  filter:Nehan.Closure.isTagName(["tr"]),
+	  lexer:new Nehan.HtmlLexer(content)
 	}));
 	pset = pset.union(pset2);
 	break;
 
       case "tr":
-	var cell_tags = new Nehan.TokenStream(token.getContent(), {
-	  flow:this.style.flow,
-	  filter:Nehan.Closure.isTagName(["td", "th"])
+	content = token.getContent();
+	var cell_tags = new Nehan.TokenStream({
+	  filter:Nehan.Closure.isTagName(["td", "th"]),
+	  lexer:new Nehan.HtmlLexer(content)
 	}).getTokens();
 	var cell_count = cell_tags.length;
 	var partition = this.createCellPartition(cell_tags);
@@ -17472,46 +17467,45 @@ Nehan.RenderingContext = (function(){
     var markup_name = style.getMarkupName();
     var markup_content = style.getContent();
     if(style.getTextCombine() === "horizontal" || markup_name === "tcy"){
-      return new Nehan.TokenStream(markup_content, {
-	flow:style.flow,
+      return new Nehan.TokenStream({
 	tokens:[new Nehan.Tcy(markup_content)]
       });
     }
     switch(markup_name){
     case "html":
-      var html_stream = new Nehan.TokenStream(markup_content, {
-	filter:Nehan.Closure.isTagName(["head", "body"])
+      var html_stream = new Nehan.TokenStream({
+	filter:Nehan.Closure.isTagName(["head", "body"]),
+	lexer:new Nehan.HtmlLexer(markup_content)
       });
       if(html_stream.isEmptyTokens()){
-	html_stream.tags = [new Nehan.Tag("body", markup_content)];
+	html_stream.tokens = [new Nehan.Tag("body", markup_content)];
       }
       return html_stream;
 
     case "tbody": case "thead": case "tfoot":
-      return new Nehan.TokenStream(markup_content, {
-	flow:style.flow,
-	filter:Nehan.Closure.isTagName(["tr"])
+      return new Nehan.TokenStream({
+	filter:Nehan.Closure.isTagName(["tr"]),
+	lexer:new Nehan.HtmlLexer(markup_content)
       });
     case "tr":
-      return new Nehan.TokenStream(markup_content, {
-	flow:style.flow,
-	filter:Nehan.Closure.isTagName(["td", "th"])
+      return new Nehan.TokenStream({
+	filter:Nehan.Closure.isTagName(["td", "th"]),
+	lexer:new Nehan.HtmlLexer(markup_content)
       });
     case "ul": case "ol":
-      return new Nehan.TokenStream(markup_content, {
-	flow:style.flow,
-	filter:Nehan.Closure.isTagName(["li"])
+      return new Nehan.TokenStream({
+	filter:Nehan.Closure.isTagName(["li"]),
+	lexer:new Nehan.HtmlLexer(markup_content)
       });
     case "word":
-      return new Nehan.TokenStream(markup_content, {
-	flow:style.flow,
+      return new Nehan.TokenStream({
 	tokens:[new Nehan.Word(markup_content)]
       });
     case "ruby":
       return new Nehan.RubyTokenStream(markup_content);
     default:
-      return new Nehan.TokenStream(markup_content, {
-	flow:style.flow
+      return new Nehan.TokenStream({
+	lexer:new Nehan.HtmlLexer(markup_content)
       });
     }
   };
@@ -17663,15 +17657,12 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createTextStream = function(text){
     if(text instanceof Nehan.Tcy || text instanceof Nehan.Word){
-      return new Nehan.TokenStream(text.getData(), {
-	flow:this.style.flow,
+      return new Nehan.TokenStream({
 	tokens:[text]
       });
     }
-    var content = text.getContent();
-    return new Nehan.TokenStream(content, {
-      flow:this.style.flow,
-      lexer:new Nehan.TextLexer(content)
+    return new Nehan.TokenStream({
+      lexer:new Nehan.TextLexer(text.getContent())
     });
   };
 
