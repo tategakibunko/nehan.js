@@ -9,11 +9,9 @@ describe("Html", function(){
   it("Html.unescape", function(){
     expect(Nehan.Html.unescape(Nehan.Html.escape("<script>foo</script>"))).toBe("<script>foo</script>");
     expect(Nehan.Html.unescape("&amp;")).toBe("&");
-    
-    console.log("unescape &nbsp; = [%s]", Nehan.Html.unescape("&nbsp;"));
     var c1 = Nehan.Html.unescape("&nbsp;").charCodeAt(0); // &#160; U+00A0 (NO-BREAK SPACE)
     var c2 = " ".charCodeAt(0); // &#32; U+0020 (SPACE)
-    console.log("space code(%d, %d)", c1, c2);
+    //console.log("space code(%d, %d)", c1, c2);
     expect(Nehan.Html.unescape("&nbsp;")).toEqual("\u00a0");
     expect(Nehan.Html.unescape(" ")).toEqual("\u00a0");
   });

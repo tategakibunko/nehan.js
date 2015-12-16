@@ -134,7 +134,7 @@ Nehan.VertEvaluator = (function(){
       }
       return this._evalImgChar(line, chr);
     }
-    if(chr.isSpace()){
+    if(chr.isSpaceGroup()){
       return this._evalSpace(line, chr);
     }
     if(chr.isTabSpace()){

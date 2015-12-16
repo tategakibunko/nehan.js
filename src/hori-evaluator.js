@@ -71,7 +71,7 @@ Nehan.HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalChar = function(line, chr){
-    if(chr.isSpace()){
+    if(chr.isSpaceGroup()){
       return this._evalSpace(line, chr);
     }
     if(chr.isTabSpace()){

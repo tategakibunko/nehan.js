@@ -8240,7 +8240,8 @@ Nehan.Char = (function(){
   Char.prototype.getData = function(flow){
     var data = flow.isTextVertical()? (this.vertCnv || this.data) : this.data;
     return data + (this.ligature || "");
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8254,7 +8255,8 @@ Nehan.Char = (function(){
       padding.setEnd(line.context.style.flow, this.paddingEnd);
     }
     return padding.getCss();
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8280,7 +8282,8 @@ Nehan.Char = (function(){
       Nehan.Obj.copy(css, this.getCssPadding(line));
     }
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8294,7 +8297,8 @@ Nehan.Char = (function(){
       Nehan.Obj.copy(css, this.getCssPadding(line));
     }
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8307,7 +8311,8 @@ Nehan.Char = (function(){
       css["text-align"] = "center"; // normal text line(all text with same font-size)
     }
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8322,7 +8327,8 @@ Nehan.Char = (function(){
       css["margin-top"] = "-0.25em";
     }
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8334,7 +8340,8 @@ Nehan.Char = (function(){
     css["padding-left"] = Math.round(font_size / 2) + "px";
     css["line-height"] = font_size + "px";
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8343,7 +8350,8 @@ Nehan.Char = (function(){
     var css = {};
     css["height"] = "0.84em"; // eliminate space between dash for IE.
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8356,7 +8364,8 @@ Nehan.Char = (function(){
     css.height = font_size + "px";
     css["position"] = "absolute";
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8365,7 +8374,8 @@ Nehan.Char = (function(){
     var css = {};
     css["line-height"] = "1em";
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8379,7 +8389,8 @@ Nehan.Char = (function(){
     css["line-height"] = "1em";
     css["font-size"] = "0.5em";
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8388,7 +8399,8 @@ Nehan.Char = (function(){
     var css = {};
     css["margin-bottom"] = line.letterSpacing + "px";
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8398,7 +8410,8 @@ Nehan.Char = (function(){
     css.display = "inline-block";
     css.width = this.bodySize + "px";
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8408,7 +8421,8 @@ Nehan.Char = (function(){
     css.display = "inline-block";
     css.width = this.bodySize + "px";
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8418,7 +8432,8 @@ Nehan.Char = (function(){
     css.height = this.bodySize + "px";
     css["line-height"] = this.bodySize + "px";
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8428,7 +8443,8 @@ Nehan.Char = (function(){
     css.height = this.bodySize + "px";
     css["line-height"] = this.bodySize + "px";
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Object}
@@ -8442,21 +8458,24 @@ Nehan.Char = (function(){
     css["line-height"] = this.bodySize + "px";
     css.clear = "both";
     return css;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Float | Int}
    */
   Char.prototype.getHoriScale = function(){
     return this.hscale || 1;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Float | Int}
    */
   Char.prototype.getVertScale = function(){
     return this.vscale || 1;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Float | Int}
@@ -8464,38 +8483,43 @@ Nehan.Char = (function(){
   Char.prototype.getVertHeight = function(font_size){
     var vscale = this.getVertScale();
     return (vscale === 1)? font_size : Math.round(font_size * vscale);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.hasMetrics = function(){
     return (typeof this.bodySize != "undefined");
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Int}
    */
   Char.prototype.getAdvance = function(flow, letter_spacing){
     return this.bodySize + this.getPaddingSize() + (letter_spacing || 0);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Int}
    */
   Char.prototype.getPaddingSize = function(){
     return (this.paddingStart || 0) + (this.paddingEnd || 0);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {Int}
    */
   Char.prototype.getCharCount = function(){
-    if(this.isSpace() || this.isIdeographicSpace()){
+    if(this.isSpaceGroup() || this.isIdeographicSpace()){
       return 0;
     }
     return 1;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @param flow {Nehan.BoxFlow}
@@ -8520,21 +8544,25 @@ Nehan.Char = (function(){
     if(this.isSmallKana()){
       this.bodySize -= Math.floor(font.size * 0.1);
     }
-  },
+  };
+
   Char.prototype._setVertImg = function(vert_img, vscale, hscale){
     this.vertImg = vert_img;
     this.vscale = vscale;
     this.hscale = hscale;
-  },
+  };
+
   Char.prototype._setVertCnv = function(cnv, vscale, hscale){
     this.vertCnv = cnv;
     this.isRef = true;
     this.vscale = vscale;
     this.hscale = hscale;
-  },
+  };
+
   Char.prototype._setRotate = function(angle){
     this.rotate = angle;
-  },
+  };
+
   Char.prototype._setRotateOrVertImg = function(angle, img, vscale, hscale){
     if(Nehan.Env.isTransformEnable){
       this._setRotate(angle);
@@ -8543,7 +8571,8 @@ Nehan.Char = (function(){
       return;
     }
     this._setVertImg(img, vscale, hscale);
-  },
+  };
+
   Char.prototype._setupRef = function(str){
     switch(str){
     case "&nbsp;":
@@ -8568,13 +8597,16 @@ Nehan.Char = (function(){
       this._setRotateOrVertImg(90, "kakko8", 0.5, 0.5);
       break;
     }
-  },
+  };
+
   Char.prototype._setupNbsp = function(){
     this.vscale = this.hscale = Nehan.Config.spacingSizeRate.nbsp;
-  },
+  };
+
   Char.prototype._setupTabSpace = function(){
     this.vscale = this.hscale = Math.floor(Nehan.Config.tabCount / 2);
-  },
+  };
+
   Char.prototype._setupNormal = function(code){
     // for half-size char, rotate 90 and half-scale in horizontal by default.
     if(this.isHankaku()){
@@ -8724,105 +8756,136 @@ Nehan.Char = (function(){
     case 8592: // left
       this._setVertCnv("&#8593;", 1, 1); break;
     }
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @param ligature {String}
    */
   Char.prototype.setLigature = function(ligature){
     this.ligature = ligature;
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isNewLine = function(){
     return this.data === "\n";
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isNbsp = function(){
     return (this.data === " " || this.ref === "&nbsp;");
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isThinsp = function(){
     return this.ref === "&thinsp;";
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isEnsp = function(){
     return this.ref === "&ensp;";
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isEmsp = function(){
     return this.ref === "&emsp;";
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isTabSpace = function(){
     return (this.data === "\t" || this.ref === "&#09;");
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isSpace = function(){
-    return this.isNbsp() || this.isTabSpace() || this.isThinsp() || this.isEnsp() || this.isEmsp();
-  },
+    return this.data === "\u0020";
+  };
+
+  /**
+   @memberof Nehan.Char
+   @return {boolean}
+   */
+  Char.prototype.isNoBreakSpace = function(){
+    throw "TODO";
+  };
+
+  /**
+   @memberof Nehan.Char
+   @return {boolean}
+   */
+  Char.prototype.isSpaceGroup = function(){
+    return this.isSpace() || this.isNbsp() || this.isTabSpace() || this.isThinsp() || this.isEnsp() || this.isEmsp();
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isIdeographicSpace= function(){
     return this.data === "\u3000";
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isWhiteSpace = function(){
-    return this.isNewLine() || this.isSpace();
-  },
+    return this.isNewLine() || this.isSpaceGroup();
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isVertChar = function(){
     return (typeof this.vertImg != "undefined");
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isRotateChar = function(){
     return (typeof this.rotate != "undefined");
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isCharRef = function(){
     return this.ref !== "";
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isKerningChar = function(){
     return this.isZenkaku() && (this.isKutenTouten() || this.isKakko());
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
@@ -8831,7 +8894,8 @@ Nehan.Char = (function(){
     var data = this.data.charCodeAt(0);
     return (data === 8212 || // em dash
 	    data === 8213);  // horizontal bar
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @param color {Nehan.Color}
@@ -8839,126 +8903,144 @@ Nehan.Char = (function(){
    */
   Char.prototype.getImgSrc = function(color){
     return [Nehan.Config.fontImgRoot, this.vertImg, color + ".png"].join("/");
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isPaddingEnable = function(){
     return (typeof this.paddingStart != "undefined" || typeof this.paddingEnd != "undefined");
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isTenten = function(){
     return this.vertImg && this.vertImg === "tenten";
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isHeadNg = function(){
     return Nehan.List.mem(__head_ng, this.data);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isTailNg = function(){
     return Nehan.List.mem(__tail_ng, this.data);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isSmallKana = function(){
     return Nehan.List.mem(__small_kana, this.data);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isSingleHalfChar = function(){
     return this.data.length === 1 && __rex_half_char.test(this.data);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isKakkoStart = function(){
     return Nehan.List.mem(__kakko_start, this.data);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isKakkoEnd = function(){
     return Nehan.List.mem(__kakko_end, this.data);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isKakko = function(){
     return this.isKakkoStart() || this.isKakkoEnd();
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isKuten = function(){
     return Nehan.List.mem(__kuten, this.data);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isTouten = function(){
     return Nehan.List.mem(__touten, this.data);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isKutenTouten = function(){
     return this.isKuten() || this.isTouten();
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isZenkaku = function(){
     return escape(this.data).charAt(1) === "u";
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isHankaku = function(){
     return !this.isZenkaku(this.data);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isHalfKana = function(){
     return __rex_half_kana.test(this.data);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isHalfKanaSmall = function(){
     return __rex_half_kana_small.test(this.data);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
    */
   Char.prototype.isLigature = function(){
     return Nehan.List.mem(__voiced_mark, this.data);
-  },
+  };
+
   /**
    @memberof Nehan.Char
    @return {boolean}
@@ -9952,10 +10034,10 @@ Nehan.Spacing = {
     }
   },
   _addWordSpacing : function(cur_word, prev_text, next_text){
-    if(prev_text && prev_text instanceof Nehan.Char && !prev_text.isSpace() && (typeof prev_text.spaceRateEnd === "undefined")){
+    if(prev_text && prev_text instanceof Nehan.Char && !prev_text.isSpaceGroup() && (typeof prev_text.spaceRateEnd === "undefined")){
       cur_word.spaceRateStart = 0.25;
     }
-    if(next_text && next_text instanceof Nehan.Char && !next_text.isSpace() && !next_text.isKakkoStart() && !(next_text.isKutenTouten() && next_text.isZenkaku())){
+    if(next_text && next_text instanceof Nehan.Char && !next_text.isSpaceGroup() && !next_text.isKakkoStart() && !(next_text.isKutenTouten() && next_text.isZenkaku())){
       cur_word.spaceRateEnd = 0.25;
     }
   },
@@ -16619,7 +16701,7 @@ Nehan.VertEvaluator = (function(){
       }
       return this._evalImgChar(line, chr);
     }
-    if(chr.isSpace()){
+    if(chr.isSpaceGroup()){
       return this._evalSpace(line, chr);
     }
     if(chr.isTabSpace()){
@@ -16842,7 +16924,7 @@ Nehan.HoriEvaluator = (function(){
   };
 
   HoriEvaluator.prototype._evalChar = function(line, chr){
-    if(chr.isSpace()){
+    if(chr.isSpaceGroup()){
       return this._evalSpace(line, chr);
     }
     if(chr.isTabSpace()){
