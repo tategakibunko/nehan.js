@@ -1548,7 +1548,7 @@ Nehan.Html = {
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
-      .replace(/'/g, "&#039;")
+      .replace(/'/g, "&#39;")
       .replace(/"/g, "&quot;");
   },
   /**
@@ -18772,9 +18772,7 @@ Nehan.RenderingContext = (function(){
     //console.info("yieldFloatSpace(float_group = %o, m = %d, e = %d)", float_group, measure, extent);
     this.child.updateContextStaticSize(measure, extent);
     this.child.floatGroup = float_group;
-    var element = this.yieldChildLayout();
-    element.isSpace = true;
-    return element;
+    return this.yieldChildLayout();
   };
 
   return RenderingContext;

@@ -5,4 +5,8 @@ describe("Char", function(){
     expect(new Nehan.Char({data:"\u3000"}).getCharCount()).toBe(0);
     expect(new Nehan.Char({ref:"&nbsp;"}).getCharCount()).toBe(0);
   });
+
+  it("Char.isNbsp", function(){
+    expect(new Nehan.Char({ref:"&nbsp;"})).isNgSp();
+  });
 });
