@@ -8226,11 +8226,7 @@ Nehan.Char = (function(){
   Char.prototype._initialize = function(opt){
     this.data = opt.data || "";
     this.ref = opt.ref || "";
-    if(this.ref){
-      this._setupRef(this.ref);
-    } else {
-      this._setupNormal(this.data.charCodeAt(0));
-    }
+    this._setup();
   };
 
   /**
@@ -8239,7 +8235,7 @@ Nehan.Char = (function(){
    @return {string}
    */
   Char.prototype.getData = function(flow){
-    var data = flow.isTextVertical()? (this.vertCnv || this.data) : this.data;
+    var data = flow.isTextVertical()? (this.vertCnv || this.data || this.ref) : (this.data || this.ref);
     return data + (this.ligature || "");
   };
 
@@ -8432,6 +8428,7 @@ Nehan.Char = (function(){
     var css = {};
     css.height = this.bodySize + "px";
     css["line-height"] = this.bodySize + "px";
+    console.log("space(%o) height:%d", this, this.bodySize);
     return css;
   };
 
@@ -8574,52 +8571,36 @@ Nehan.Char = (function(){
     this._setVertImg(img, vscale, hscale);
   };
 
-  Char.prototype._setupRef = function(str){
-    switch(str){
-    case "&nbsp;":
-      this._setupNbsp();
-      break;
-    case "&thinsp;":
-      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.thinsp;
-      break;
-    case "&ensp;":
-      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.ensp;
-      break;
-    case "&emsp;":
-      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.emsp;
-      break;
-    case "&#09;":
-      this._setupTabSpace();
-      break;
-    case "&lt;":
-      this._setRotateOrVertImg(90, "kakko7", 0.5, 0.5);
-      break;
-    case "&gt;":
-      this._setRotateOrVertImg(90, "kakko8", 0.5, 0.5);
-      break;
-    }
-  };
-
-  Char.prototype._setupNbsp = function(){
-    this.vscale = this.hscale = Nehan.Config.spacingSizeRate.nbsp;
-  };
-
-  Char.prototype._setupTabSpace = function(){
-    this.vscale = this.hscale = Math.floor(Nehan.Config.tabCount / 2);
-  };
-
-  Char.prototype._setupNormal = function(code){
+  Char.prototype._setup = function(){
     // for half-size char, rotate 90 and half-scale in horizontal by default.
     if(this.isHankaku()){
       this.hscale = 0.5;
       this._setRotate(90);
     }
+    if(this.data){
+      this._setupByCharCode(this.data.charCodeAt(0));
+    }
+    if(this.isSpace()){
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.nbsp;
+    } else if(this.isNbsp()){
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.nbsp;
+    } else if(this.isEnsp()){
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.ensp;
+    } else if(this.isEmsp()){
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.emsp;
+    } else if(this.isThinsp()){
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.thinsp;
+    } else if(this.isTabSpace()){
+      this.vscale = this.hscale = Math.floor(Nehan.Config.tabCount / 2);
+    } else if(this.isLessThanSign()){
+      this._setRotateOrVertImg(90, "kakko7", 0.5, 0.5);
+    } else if(this.isGreaterThanSign()){
+      this._setRotateOrVertImg(90, "kakko8", 0.5, 0.5);
+    }
+  };
+
+  Char.prototype._setupByCharCode = function(code){
     switch(code){
-    case 9: // tab space char
-      this._setupTabSpace(); break;
-      break;
-    case 32: // half scape char
-      this._setupNbsp(); break;
     case 12300:
       this._setVertImg("kakko1", 0.5, 0.5); break;
     case 65378:
@@ -8779,8 +8760,24 @@ Nehan.Char = (function(){
    @memberof Nehan.Char
    @return {boolean}
    */
+  Char.prototype.isLessThanSign = function(){
+    return this.ref == "&lt;" || this.data === "\u003c";
+  };
+
+  /**
+   @memberof Nehan.Char
+   @return {boolean}
+   */
+  Char.prototype.isGreaterThanSign = function(){
+    return this.ref == "&gt;" || this.data === "\u003e";
+  };
+
+  /**
+   @memberof Nehan.Char
+   @return {boolean}
+   */
   Char.prototype.isNbsp = function(){
-    return this.data === "\u00a0" || this.ref === "&nbsp;";
+    return this.ref === "&nbsp;" || this.data === "\u00a0";
   };
 
   /**
@@ -8788,7 +8785,7 @@ Nehan.Char = (function(){
    @return {boolean}
    */
   Char.prototype.isThinsp = function(){
-    return this.data === "\u2009" || this.ref === "&thinsp;";
+    return this.ref === "&thinsp;" || this.data === "\u2009";
   };
 
   /**
@@ -8796,7 +8793,7 @@ Nehan.Char = (function(){
    @return {boolean}
    */
   Char.prototype.isEnsp = function(){
-    return this.data === "\u2002" || this.ref === "&ensp;";
+    return this.ref === "&ensp;" || this.data === "\u2002";
   };
 
   /**
@@ -8804,7 +8801,7 @@ Nehan.Char = (function(){
    @return {boolean}
    */
   Char.prototype.isEmsp = function(){
-    return this.data === "\u2003" || this.ref === "&emsp;";
+    return this.ref === "&emsp;" || this.data === "\u2003";
   };
 
   /**
@@ -8843,7 +8840,7 @@ Nehan.Char = (function(){
    @memberof Nehan.Char
    @return {boolean}
    */
-  Char.prototype.isIdeographicSpace= function(){
+  Char.prototype.isIdeographicSpace = function(){
     return this.data === "\u3000"; // zenkaku space
   };
 
