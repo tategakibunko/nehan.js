@@ -16,7 +16,7 @@
    example:
      <gravatar email='someone@example.com' size='64'>
 */
-Nehan.LexingRule.addSingleTagByName("gravatar");
+Nehan.addSingleTagName("gravatar");
 Nehan.setStyle("gravatar", {
   "onload":function(selector_context){
     var markup = selector_context.getMarkup();

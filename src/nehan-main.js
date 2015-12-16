@@ -1,6 +1,6 @@
 Nehan.version = "5.4.1";
 Nehan.globalStyles = Nehan.globalStyles || {};
-Nehan.globalSingleTagNames = new Nehan.Set();
+Nehan.globalSingleTagNames = new Nehan.SingleTagSet();
 
 /**
  set global style.
@@ -36,7 +36,7 @@ Nehan.setStyles = function(values){
  @param name {String} - single tag name
 */
 Nehan.addSingleTagName = function(name){
-  Nehan.singleTagNames.add(name);
+  Nehan.globalSingleTagNames.add(name);
 };
 
 /**
@@ -46,7 +46,7 @@ Nehan.addSingleTagName = function(name){
  @param names {Array} - single tag name list
 */
 Nehan.addSingleTagNames = function(names){
-  Nehan.singleTagNames.addValues(names);
+  Nehan.globalSingleTagNames.addValues(names);
 };
 
 /**
@@ -61,7 +61,7 @@ Nehan.createRootGenerator = function(opt){
   var context = new Nehan.RenderingContext({
     text:Nehan.Html.normalize(opt.text || "no text"),
     singleTagNames:(
-      new Nehan.Set()
+      new Nehan.SingleTagSet()
 	.addValues(Nehan.Config.defaultSingleTagNames)
 	.addValues(Nehan.globalSingleTagNames.getValues())
     )

@@ -2411,6 +2411,29 @@ Nehan.Set = (function(){
 })();
 
 
+Nehan.SingleTagSet = (function(){
+  /**
+   @memberof Nehan
+   @class SingleTagSet
+   @constructor
+   */
+  function SingleTagSet(){
+    Nehan.Set.call(this);
+  }
+  Nehan.Class.extend(SingleTagSet, Nehan.Set);
+
+  /**
+   @memberof Nehan.SingleTagSet
+   @param value {String}
+   @return {Nehan.SingleTagSet}
+   */
+  SingleTagSet.prototype.add = function(name){
+    return Nehan.Set.prototype.add.call(this, name.toLowerCase());
+  };
+
+  return SingleTagSet;
+})();
+
 Nehan.HashSet = (function(){
   /**
    @memberof Nehan
@@ -10978,7 +11001,7 @@ Nehan.HtmlLexer = (function (){
     this.pos = 0;
     this.buff = this._normalize(src);
     this.src = this.buff;
-    this.singleTagNames = opt.singleTagNames || null;
+    this.singleTagNames = opt.singleTagNames || [];
   }
 
   HtmlLexer.prototype._normalize = function(src){
@@ -10986,7 +11009,7 @@ Nehan.HtmlLexer = (function (){
       return p1.toLowerCase();
     }); // convert close tag to lower case(for innerHTML of IE)
     if(this.singleTagNames){
-      src = __replace_single_close_tags(src, this.singleTagNames.getValues());
+      src = __replace_single_close_tags(src, this.singleTagNames);
     }
     src = src.replace(/’/g, "'"); // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
     return src;
@@ -11086,7 +11109,7 @@ Nehan.HtmlLexer = (function (){
     var tag = new Nehan.Tag(tagstr);
     this._stepBuff(tagstr.length);
     var tag_name = tag.getName();
-    if(this.singleTagNames && this.singleTagNames.exists(tag_name)){
+    if(Nehan.List.exists(this.singleTagNames, Nehan.Closure.eq(tag_name))){
       tag._single = true;
       return tag;
     }
@@ -17057,7 +17080,7 @@ Nehan.RenderingContext = (function(){
     this.stream = opt.stream || null;
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.DefaultStyle.create());
-    this.singleTagNames = opt.singleTagNames || new Nehan.Set();
+    this.singleTagNames = opt.singleTagNames || new Nehan.SingleTagSet();
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
     this.pageEvaluator = opt.pageEvaluator || new Nehan.PageEvaluator(this);
   }
@@ -17271,7 +17294,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createHtmlLexer = function(content){
     return new Nehan.HtmlLexer(content, {
-      singleTagNames:this.singleTagNames
+      singleTagNames:this.singleTagNames.getValues()
     });
   };
 
@@ -19178,7 +19201,7 @@ Nehan.Document = (function(){
 
 Nehan.version = "5.4.1";
 Nehan.globalStyles = Nehan.globalStyles || {};
-Nehan.globalSingleTagNames = new Nehan.Set();
+Nehan.globalSingleTagNames = new Nehan.SingleTagSet();
 
 /**
  set global style.
@@ -19214,7 +19237,7 @@ Nehan.setStyles = function(values){
  @param name {String} - single tag name
 */
 Nehan.addSingleTagName = function(name){
-  Nehan.singleTagNames.add(name);
+  Nehan.globalSingleTagNames.add(name);
 };
 
 /**
@@ -19224,7 +19247,7 @@ Nehan.addSingleTagName = function(name){
  @param names {Array} - single tag name list
 */
 Nehan.addSingleTagNames = function(names){
-  Nehan.singleTagNames.addValues(names);
+  Nehan.globalSingleTagNames.addValues(names);
 };
 
 /**
@@ -19239,7 +19262,7 @@ Nehan.createRootGenerator = function(opt){
   var context = new Nehan.RenderingContext({
     text:Nehan.Html.normalize(opt.text || "no text"),
     singleTagNames:(
-      new Nehan.Set()
+      new Nehan.SingleTagSet()
 	.addValues(Nehan.Config.defaultSingleTagNames)
 	.addValues(Nehan.globalSingleTagNames.getValues())
     )

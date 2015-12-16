@@ -14,7 +14,7 @@ Nehan.RenderingContext = (function(){
     this.stream = opt.stream || null;
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.DefaultStyle.create());
-    this.singleTagNames = opt.singleTagNames || new Nehan.Set();
+    this.singleTagNames = opt.singleTagNames || new Nehan.SingleTagSet();
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
     this.pageEvaluator = opt.pageEvaluator || new Nehan.PageEvaluator(this);
   }
@@ -228,7 +228,7 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.createHtmlLexer = function(content){
     return new Nehan.HtmlLexer(content, {
-      singleTagNames:this.singleTagNames
+      singleTagNames:this.singleTagNames.getValues()
     });
   };
 

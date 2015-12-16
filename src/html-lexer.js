@@ -58,7 +58,7 @@ Nehan.HtmlLexer = (function (){
     this.pos = 0;
     this.buff = this._normalize(src);
     this.src = this.buff;
-    this.singleTagNames = opt.singleTagNames || null;
+    this.singleTagNames = opt.singleTagNames || [];
   }
 
   HtmlLexer.prototype._normalize = function(src){
@@ -66,7 +66,7 @@ Nehan.HtmlLexer = (function (){
       return p1.toLowerCase();
     }); // convert close tag to lower case(for innerHTML of IE)
     if(this.singleTagNames){
-      src = __replace_single_close_tags(src, this.singleTagNames.getValues());
+      src = __replace_single_close_tags(src, this.singleTagNames);
     }
     src = src.replace(/’/g, "'"); // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
     return src;
@@ -166,7 +166,7 @@ Nehan.HtmlLexer = (function (){
     var tag = new Nehan.Tag(tagstr);
     this._stepBuff(tagstr.length);
     var tag_name = tag.getName();
-    if(this.singleTagNames && this.singleTagNames.exists(tag_name)){
+    if(Nehan.List.exists(this.singleTagNames, Nehan.Closure.eq(tag_name))){
       tag._single = true;
       return tag;
     }
