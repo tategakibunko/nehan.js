@@ -12,6 +12,7 @@ o Support list-style-position:inside.
 o Support shorthanded font setting.
 o Add Nehan.createRootContext, Nehan.createRootGenerator.
 * More strict edge cancel for block level.
+! Disable Nehan.LexingRule, use Nehan.setSingleTagName instead.
 
 version 5.4.0 2015/12/2
 ========================

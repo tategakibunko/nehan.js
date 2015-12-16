@@ -18,7 +18,7 @@ Nehan.InsideListItemGenerator = (function(){
     var child_index = context.style.getChildIndex();
     var marker_html = context.style.getListMarkerHtml(child_index + 1) + "&nbsp;";
     var marker_stream = new Nehan.TokenStream({
-      lexer:new Nehan.HtmlLexer(marker_html)
+      lexer:context.createHtmlLexer(marker_html)
     });
     context.stream.tokens = marker_stream.getTokens().concat(context.stream.getTokens());
   };

@@ -263,7 +263,7 @@ Nehan.Tag = (function (){
    @return {boolean}
    */
   Tag.prototype.isPageBreakTag = function(){
-    return this.name === "page-break" || this.name === "end-page" || this.name === "pbr";
+    return this.name === "page-break";
   };
   /**
    @memberof Nehan.Tag

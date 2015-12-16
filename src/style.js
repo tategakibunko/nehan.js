@@ -459,7 +459,7 @@ Nehan.Style = (function(){
    */
   Style.prototype.isPageBreak = function(){
     switch(this.getMarkupName()){
-    case "page-break": case "end-page": case "pbr":
+    case "page-break": case "end-page":
       return true;
     default:
       return false;

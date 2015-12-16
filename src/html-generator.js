@@ -26,7 +26,7 @@ Nehan.HtmlGenerator = (function(){
       case "head":
 	this._parseDocumentHeader(context, new Nehan.TokenStream({
 	  filter:Nehan.Closure.isTagName(["title", "meta", "link", "style", "script"]),
-	  lexer:new Nehan.HtmlLexer(tag.getContent())
+	  lexer:context.createHtmlLexer(tag.getContent())
 	}));
 	break;
       case "body":

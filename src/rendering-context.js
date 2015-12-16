@@ -14,6 +14,7 @@ Nehan.RenderingContext = (function(){
     this.stream = opt.stream || null;
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.DefaultStyle.create());
+    this.singleTagNames = opt.singleTagNames || new Nehan.Set();
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
     this.pageEvaluator = opt.pageEvaluator || new Nehan.PageEvaluator(this);
   }
@@ -23,6 +24,14 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   RenderingContext.prototype.addPage = function(page){
     this.documentContext.addPage(page);
+  };
+
+  RenderingContext.prototype.addSingleTagName = function(name){
+    this.singleTagNames.add(name);
+  };
+
+  RenderingContext.prototype.addSingleTagNames = function(names){
+    this.singleTagNames.addValues(names);
   };
 
   RenderingContext.prototype.addAnchor = function(){
@@ -211,15 +220,22 @@ Nehan.RenderingContext = (function(){
       stream:opt.stream || null,
       layoutContext:this.layoutContext || null,
       selectors:this.selectors, // always same
-      documentContext:this.documentContext, // always saame
+      singleTagNames:this.singleTagNames, // always same
+      documentContext:this.documentContext, // always same
       pageEvaluator:this.pageEvaluator // always same
+    });
+  };
+
+  RenderingContext.prototype.createHtmlLexer = function(content){
+    return new Nehan.HtmlLexer(content, {
+      singleTagNames:this.singleTagNames
     });
   };
 
   RenderingContext.prototype.createDocumentStream = function(text){
     var stream = new Nehan.TokenStream({
       filter:Nehan.Closure.isTagName(["!doctype", "html"]),
-      lexer:new Nehan.HtmlLexer(text)
+      lexer:this.createHtmlLexer(text)
     });
     if(stream.isEmptyTokens()){
       stream.tokens = [new Nehan.Tag("html", text)];
@@ -230,7 +246,7 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.createHtmlStream = function(text){
     var stream = new Nehan.TokenStream({
       filter:Nehan.Closure.isTagName(["head", "body"]),
-      lexer:new Nehan.HtmlLexer(text)
+      lexer:this.createHtmlLexer(text)
     });
     if(stream.isEmptyTokens()){
       stream.tokens = [new Nehan.Tag("body", text)];
@@ -341,7 +357,7 @@ Nehan.RenderingContext = (function(){
 	content = token.getContent();
 	var pset2 = this.createTablePartition(new Nehan.TokenStream({
 	  filter:Nehan.Closure.isTagName(["tr"]),
-	  lexer:new Nehan.HtmlLexer(content)
+	  lexer:this.createHtmlLexer(content)
 	}));
 	pset = pset.union(pset2);
 	break;
@@ -350,7 +366,7 @@ Nehan.RenderingContext = (function(){
 	content = token.getContent();
 	var cell_tags = new Nehan.TokenStream({
 	  filter:Nehan.Closure.isTagName(["td", "th"]),
-	  lexer:new Nehan.HtmlLexer(content)
+	  lexer:this.createHtmlLexer(content)
 	}).getTokens();
 	var cell_count = cell_tags.length;
 	var partition = this.createCellPartition(cell_tags);
@@ -437,7 +453,7 @@ Nehan.RenderingContext = (function(){
     case "html":
       var html_stream = new Nehan.TokenStream({
 	filter:Nehan.Closure.isTagName(["head", "body"]),
-	lexer:new Nehan.HtmlLexer(markup_content)
+	lexer:this.createHtmlLexer(markup_content)
       });
       if(html_stream.isEmptyTokens()){
 	html_stream.tokens = [new Nehan.Tag("body", markup_content)];
@@ -447,17 +463,17 @@ Nehan.RenderingContext = (function(){
     case "tbody": case "thead": case "tfoot":
       return new Nehan.TokenStream({
 	filter:Nehan.Closure.isTagName(["tr"]),
-	lexer:new Nehan.HtmlLexer(markup_content)
+	lexer:this.createHtmlLexer(markup_content)
       });
     case "tr":
       return new Nehan.TokenStream({
 	filter:Nehan.Closure.isTagName(["td", "th"]),
-	lexer:new Nehan.HtmlLexer(markup_content)
+	lexer:this.createHtmlLexer(markup_content)
       });
     case "ul": case "ol":
       return new Nehan.TokenStream({
 	filter:Nehan.Closure.isTagName(["li"]),
-	lexer:new Nehan.HtmlLexer(markup_content)
+	lexer:this.createHtmlLexer(markup_content)
       });
     case "word":
       return new Nehan.TokenStream({
@@ -467,7 +483,7 @@ Nehan.RenderingContext = (function(){
       return new Nehan.RubyTokenStream(markup_content);
     default:
       return new Nehan.TokenStream({
-	lexer:new Nehan.HtmlLexer(markup_content)
+	lexer:this.createHtmlLexer(markup_content)
       });
     }
   };
@@ -889,6 +905,7 @@ Nehan.RenderingContext = (function(){
       stream:opt.stream || this.stream,
       layoutContext:this.layoutContext || this.layoutContext,
       selectors:this.selectors, // always same
+      singleTagNames:this.singleTagNames, // always same
       documentContext:this.documentContext, // always same
       pageEvaluator:this.pageEvaluator // always same
     });

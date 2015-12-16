@@ -90,7 +90,7 @@ Nehan.InlineGenerator = (function(){
       // this.context.layoutContext.setInlineWordBreakable(true); // TODO
       return this._getNext();
 
-    case "page-break": case "pbr": case "end-page":
+    case "page-break": case "end-page":
       this.context.setPageBreak(true);
       return null;
 

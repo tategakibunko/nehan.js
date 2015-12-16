@@ -25,7 +25,7 @@ var sources = [
   "src/display.js",
   "src/client.js",
   "src/env.js",
-  "src/lexing-rule.js",
+  //"src/lexing-rule.js",
   "src/class.js",
   "src/list.js",
   "src/obj.js",
@@ -166,7 +166,8 @@ var sources = [
   "src/results.js",
   "src/rendering-context.js",
   "src/paged-element.js",
-  "src/document.js"
+  "src/document.js",
+  "src/nehan-main.js"
 ];
 
 gulp.task("nehan.js", function(){

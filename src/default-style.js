@@ -562,16 +562,8 @@ Nehan.DefaultStyle = (function(){
 	},
 	"!doctype":{
 	},
-	// <page-break>, <pbr>, <end-page> are all same and nehan.js original tag,
-	// defined to keep compatibility of older nehan.js document,
-	// and must be defined as logical-break-before, logical-break-after props in the future.
+	// <page-break> is nehan.js original tag.
 	"page-break":{
-	  "display":"inline"
-	},
-	"pbr":{
-	  "display":"inline"
-	},
-	"end-page":{
 	  "display":"inline"
 	},
 	//-------------------------------------------------------

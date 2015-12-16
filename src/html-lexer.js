@@ -38,8 +38,8 @@ Nehan.HtmlLexer = (function (){
   };
 
   // discard close tags defined as single tag in LexingRule.
-  var __replace_single_close_tags = function(str){
-    return Nehan.LexingRule.getSingleTagNames().reduce(function(ret, name){
+  var __replace_single_close_tags = function(str, single_tag_names){
+    return single_tag_names.reduce(function(ret, name){
       return ret.replace(new RegExp("</" + name + ">", "g"), "");
     }, str);
   };
@@ -53,17 +53,21 @@ Nehan.HtmlLexer = (function (){
    @param opt {Object}
    @param opt.flow {Nehan.BoxFlow} - document flow(optional)
    */
-  function HtmlLexer(src){
+  function HtmlLexer(src, opt){
+    opt = opt || {};
     this.pos = 0;
     this.buff = this._normalize(src);
     this.src = this.buff;
+    this.singleTagNames = opt.singleTagNames || null;
   }
 
   HtmlLexer.prototype._normalize = function(src){
     src = src.replace(/(<\/[^>]+>)/gm, function(str, p1){
       return p1.toLowerCase();
     }); // convert close tag to lower case(for innerHTML of IE)
-    src = __replace_single_close_tags(src);
+    if(this.singleTagNames){
+      src = __replace_single_close_tags(src, this.singleTagNames.getValues());
+    }
     src = src.replace(/’/g, "'"); // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
     return src;
   };
@@ -162,7 +166,7 @@ Nehan.HtmlLexer = (function (){
     var tag = new Nehan.Tag(tagstr);
     this._stepBuff(tagstr.length);
     var tag_name = tag.getName();
-    if(Nehan.LexingRule.isSingleTag(tag_name)){
+    if(this.singleTagNames && this.singleTagNames.exists(tag_name)){
       tag._single = true;
       return tag;
     }

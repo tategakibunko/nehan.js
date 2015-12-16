@@ -32,65 +32,6 @@
  @namespace Nehan
  */
 var Nehan = Nehan || {};
-Nehan.version = "5.4.1";
-Nehan.globalStyles = Nehan.globalStyles || {};
-
-/**
- set global style.
-
- @memberof Nehan
- @param selector_key {String}
- @param value {selector_value}
- */
-Nehan.setStyle = function(selector_key, value){
-  var entry = Nehan.globalStyles[selector_key] || {};
-  for(var prop in value){
-    entry[prop] = value[prop];
-  }
-  Nehan.globalStyles[selector_key] = entry;
-};
-
-/**
- set global styles.
-
- @memberof Nehan
- @param values {Object}
- */
-Nehan.setStyles = function(values){
-  for(var selector_key in values){
-    Nehan.setStyle(selector_key, values[selector_key]);
-  }
-};
-
-/**
- @param opt {Object}
- @param opt.root {String} - context root
- @param opt.text {String} - html string
- @param opt.styles {Object} - context local styles
- @return {Nehan.DocumentGenerator | Nehan.HtmlGenerator | Nehan.BodyGenerator}
- */
-Nehan.createRootGenerator = function(opt){
-  opt = opt || {};
-  var context = new Nehan.RenderingContext({
-    text:Nehan.Html.normalize(opt.text || "no text")
-  });
-  return context
-    .setStyles(Nehan.globalStyles || {})
-    .setStyles(opt.styles || {})
-    .createRootGenerator();
-};
-
-/**
- @param opt {Object}
- @param opt.root {String} - context root
- @param opt.text {String} - html string
- @param opt.styles {Object} - context local styles
- @return {Nehan.RenderingContext}
- */
-Nehan.createRootContext = function(opt){
-  return Nehan.createRootGenerator(opt || {}).context;
-};
-
 
 /**
  system configuration
@@ -375,6 +316,27 @@ Nehan.Config = {
    */
   defaultFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
   //defaultFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+
+  /**
+   default single tag(like img, br, hr etc) list.
+
+   @memberof Nehan.Config
+   @type {Array.<String>}
+   */
+  defaultSingleTagNames:[
+    "br",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "wbr",
+    "?xml",
+    "!doctype",
+
+    // nehan special tag for page-break
+    "page-break"
+  ],
 
   /**
    font image url, required for legacy browsers not supporting vertical writing-mode.
@@ -681,75 +643,6 @@ Nehan.Env = (function(){
     isVerticalGlyphEnable : __is_vertical_glyph_enable
   };
 })();
-
-/**
- module of html lexing rule
-
- @namespace Nehan.LexingRule
- */
-Nehan.LexingRule = (function(){
-  var __single_tag_names__ = [
-    "br",
-    "hr",
-    "img",
-    "input",
-    "link",
-    "meta",
-    "wbr",
-    "?xml",
-    "!doctype",
-    "page-break",
-    "end-page",
-    "pbr"
-  ];
-
-  var __is_single_tag = function(tag_name){
-    return Nehan.List.exists(__single_tag_names__, Nehan.Closure.eq(tag_name));
-  };
-
-  return {
-    /**
-     @memberof Nehan.LexingRule
-     @return {Array.<String>}
-     */
-    getSingleTagNames : function(){
-      return __single_tag_names__;
-    },
-    /**
-     @memberof Nehan.LexingRule
-     @param tag_name {String}
-     @return {boolean}
-     @example
-     * Nehan.LexingRule.isSingleTag("img"); // true
-     * Nehan.LexingRule.isSingleTag("br"); // true
-     * Nehan.LexingRule.isSingleTag("div"); // false
-     */
-    isSingleTag : function(tag_name){
-      return __is_single_tag(tag_name) || false;
-    },
-    /**
-     @memberof Nehan.LexingRule
-     @param tag_name {String}
-     */
-    removeSingleTagByName : function(tag_name){
-      __single_tag_names__ = __single_tag_names__.filter(Nehan.Closure.neq(tag_name));
-    },
-    /**
-     @memberof Nehan.LexingRule
-     @param tag_name {String}
-     @example
-     * Nehan.LexingRule.addSingleTagByName("my-custom-single-tag");
-     * Nehan.LexingRule.isSingleTag("my-custom-single-tag"); // true
-     */
-    addSingleTagByName : function(tag_name){
-      tag_name = tag_name.toLowerCase();
-      if(!__is_single_tag(tag_name)){
-	__single_tag_names__.push(tag_name);
-      }
-    }
-  };
-})();
-
 
 /**
    @namespace Nehan.Class
@@ -2253,7 +2146,7 @@ Nehan.Tag = (function (){
    @return {boolean}
    */
   Tag.prototype.isPageBreakTag = function(){
-    return this.name === "page-break" || this.name === "end-page" || this.name === "pbr";
+    return this.name === "page-break";
   };
   /**
    @memberof Nehan.Tag
@@ -2486,6 +2379,7 @@ Nehan.Set = (function(){
     values.forEach(function(value){
       this.add(value);
     }.bind(this));
+    return this;
   };
 
   /**
@@ -2515,6 +2409,7 @@ Nehan.Set = (function(){
 
   return Set;
 })();
+
 
 Nehan.HashSet = (function(){
   /**
@@ -11063,8 +10958,8 @@ Nehan.HtmlLexer = (function (){
   };
 
   // discard close tags defined as single tag in LexingRule.
-  var __replace_single_close_tags = function(str){
-    return Nehan.LexingRule.getSingleTagNames().reduce(function(ret, name){
+  var __replace_single_close_tags = function(str, single_tag_names){
+    return single_tag_names.reduce(function(ret, name){
       return ret.replace(new RegExp("</" + name + ">", "g"), "");
     }, str);
   };
@@ -11078,17 +10973,21 @@ Nehan.HtmlLexer = (function (){
    @param opt {Object}
    @param opt.flow {Nehan.BoxFlow} - document flow(optional)
    */
-  function HtmlLexer(src){
+  function HtmlLexer(src, opt){
+    opt = opt || {};
     this.pos = 0;
     this.buff = this._normalize(src);
     this.src = this.buff;
+    this.singleTagNames = opt.singleTagNames || null;
   }
 
   HtmlLexer.prototype._normalize = function(src){
     src = src.replace(/(<\/[^>]+>)/gm, function(str, p1){
       return p1.toLowerCase();
     }); // convert close tag to lower case(for innerHTML of IE)
-    src = __replace_single_close_tags(src);
+    if(this.singleTagNames){
+      src = __replace_single_close_tags(src, this.singleTagNames.getValues());
+    }
     src = src.replace(/’/g, "'"); // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
     return src;
   };
@@ -11187,7 +11086,7 @@ Nehan.HtmlLexer = (function (){
     var tag = new Nehan.Tag(tagstr);
     this._stepBuff(tagstr.length);
     var tag_name = tag.getName();
-    if(Nehan.LexingRule.isSingleTag(tag_name)){
+    if(this.singleTagNames && this.singleTagNames.exists(tag_name)){
       tag._single = true;
       return tag;
     }
@@ -12152,16 +12051,8 @@ Nehan.DefaultStyle = (function(){
 	},
 	"!doctype":{
 	},
-	// <page-break>, <pbr>, <end-page> are all same and nehan.js original tag,
-	// defined to keep compatibility of older nehan.js document,
-	// and must be defined as logical-break-before, logical-break-after props in the future.
+	// <page-break> is nehan.js original tag.
 	"page-break":{
-	  "display":"inline"
-	},
-	"pbr":{
-	  "display":"inline"
-	},
-	"end-page":{
 	  "display":"inline"
 	},
 	//-------------------------------------------------------
@@ -13930,7 +13821,7 @@ Nehan.Style = (function(){
    */
   Style.prototype.isPageBreak = function(){
     switch(this.getMarkupName()){
-    case "page-break": case "end-page": case "pbr":
+    case "page-break": case "end-page":
       return true;
     default:
       return false;
@@ -15417,7 +15308,7 @@ Nehan.InlineGenerator = (function(){
       // this.context.layoutContext.setInlineWordBreakable(true); // TODO
       return this._getNext();
 
-    case "page-break": case "pbr": case "end-page":
+    case "page-break": case "end-page":
       this.context.setPageBreak(true);
       return null;
 
@@ -16127,7 +16018,7 @@ Nehan.InsideListItemGenerator = (function(){
     var child_index = context.style.getChildIndex();
     var marker_html = context.style.getListMarkerHtml(child_index + 1) + "&nbsp;";
     var marker_stream = new Nehan.TokenStream({
-      lexer:new Nehan.HtmlLexer(marker_html)
+      lexer:context.createHtmlLexer(marker_html)
     });
     context.stream.tokens = marker_stream.getTokens().concat(context.stream.getTokens());
   };
@@ -16296,7 +16187,7 @@ Nehan.BodyGenerator = (function(){
     }
     if(!context.stream){
       context.stream = new Nehan.TokenStream({
-	lexer:new Nehan.HtmlLexer(context.text)
+	lexer:context.createHtmlLexer(context.text)
       });
     }
     Nehan.SectionRootGenerator.prototype._onInitialize.call(this, context);
@@ -16356,7 +16247,7 @@ Nehan.HtmlGenerator = (function(){
       case "head":
 	this._parseDocumentHeader(context, new Nehan.TokenStream({
 	  filter:Nehan.Closure.isTagName(["title", "meta", "link", "style", "script"]),
-	  lexer:new Nehan.HtmlLexer(tag.getContent())
+	  lexer:context.createHtmlLexer(tag.getContent())
 	}));
 	break;
       case "body":
@@ -17166,6 +17057,7 @@ Nehan.RenderingContext = (function(){
     this.stream = opt.stream || null;
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.DefaultStyle.create());
+    this.singleTagNames = opt.singleTagNames || new Nehan.Set();
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
     this.pageEvaluator = opt.pageEvaluator || new Nehan.PageEvaluator(this);
   }
@@ -17175,6 +17067,14 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   RenderingContext.prototype.addPage = function(page){
     this.documentContext.addPage(page);
+  };
+
+  RenderingContext.prototype.addSingleTagName = function(name){
+    this.singleTagNames.add(name);
+  };
+
+  RenderingContext.prototype.addSingleTagNames = function(names){
+    this.singleTagNames.addValues(names);
   };
 
   RenderingContext.prototype.addAnchor = function(){
@@ -17363,15 +17263,22 @@ Nehan.RenderingContext = (function(){
       stream:opt.stream || null,
       layoutContext:this.layoutContext || null,
       selectors:this.selectors, // always same
-      documentContext:this.documentContext, // always saame
+      singleTagNames:this.singleTagNames, // always same
+      documentContext:this.documentContext, // always same
       pageEvaluator:this.pageEvaluator // always same
+    });
+  };
+
+  RenderingContext.prototype.createHtmlLexer = function(content){
+    return new Nehan.HtmlLexer(content, {
+      singleTagNames:this.singleTagNames
     });
   };
 
   RenderingContext.prototype.createDocumentStream = function(text){
     var stream = new Nehan.TokenStream({
       filter:Nehan.Closure.isTagName(["!doctype", "html"]),
-      lexer:new Nehan.HtmlLexer(text)
+      lexer:this.createHtmlLexer(text)
     });
     if(stream.isEmptyTokens()){
       stream.tokens = [new Nehan.Tag("html", text)];
@@ -17382,7 +17289,7 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.createHtmlStream = function(text){
     var stream = new Nehan.TokenStream({
       filter:Nehan.Closure.isTagName(["head", "body"]),
-      lexer:new Nehan.HtmlLexer(text)
+      lexer:this.createHtmlLexer(text)
     });
     if(stream.isEmptyTokens()){
       stream.tokens = [new Nehan.Tag("body", text)];
@@ -17493,7 +17400,7 @@ Nehan.RenderingContext = (function(){
 	content = token.getContent();
 	var pset2 = this.createTablePartition(new Nehan.TokenStream({
 	  filter:Nehan.Closure.isTagName(["tr"]),
-	  lexer:new Nehan.HtmlLexer(content)
+	  lexer:this.createHtmlLexer(content)
 	}));
 	pset = pset.union(pset2);
 	break;
@@ -17502,7 +17409,7 @@ Nehan.RenderingContext = (function(){
 	content = token.getContent();
 	var cell_tags = new Nehan.TokenStream({
 	  filter:Nehan.Closure.isTagName(["td", "th"]),
-	  lexer:new Nehan.HtmlLexer(content)
+	  lexer:this.createHtmlLexer(content)
 	}).getTokens();
 	var cell_count = cell_tags.length;
 	var partition = this.createCellPartition(cell_tags);
@@ -17589,7 +17496,7 @@ Nehan.RenderingContext = (function(){
     case "html":
       var html_stream = new Nehan.TokenStream({
 	filter:Nehan.Closure.isTagName(["head", "body"]),
-	lexer:new Nehan.HtmlLexer(markup_content)
+	lexer:this.createHtmlLexer(markup_content)
       });
       if(html_stream.isEmptyTokens()){
 	html_stream.tokens = [new Nehan.Tag("body", markup_content)];
@@ -17599,17 +17506,17 @@ Nehan.RenderingContext = (function(){
     case "tbody": case "thead": case "tfoot":
       return new Nehan.TokenStream({
 	filter:Nehan.Closure.isTagName(["tr"]),
-	lexer:new Nehan.HtmlLexer(markup_content)
+	lexer:this.createHtmlLexer(markup_content)
       });
     case "tr":
       return new Nehan.TokenStream({
 	filter:Nehan.Closure.isTagName(["td", "th"]),
-	lexer:new Nehan.HtmlLexer(markup_content)
+	lexer:this.createHtmlLexer(markup_content)
       });
     case "ul": case "ol":
       return new Nehan.TokenStream({
 	filter:Nehan.Closure.isTagName(["li"]),
-	lexer:new Nehan.HtmlLexer(markup_content)
+	lexer:this.createHtmlLexer(markup_content)
       });
     case "word":
       return new Nehan.TokenStream({
@@ -17619,7 +17526,7 @@ Nehan.RenderingContext = (function(){
       return new Nehan.RubyTokenStream(markup_content);
     default:
       return new Nehan.TokenStream({
-	lexer:new Nehan.HtmlLexer(markup_content)
+	lexer:this.createHtmlLexer(markup_content)
       });
     }
   };
@@ -18041,6 +17948,7 @@ Nehan.RenderingContext = (function(){
       stream:opt.stream || this.stream,
       layoutContext:this.layoutContext || this.layoutContext,
       selectors:this.selectors, // always same
+      singleTagNames:this.singleTagNames, // always same
       documentContext:this.documentContext, // always same
       pageEvaluator:this.pageEvaluator // always same
     });
@@ -19267,3 +19175,89 @@ Nehan.Document = (function(){
 
   return Document;
 })();
+
+Nehan.version = "5.4.1";
+Nehan.globalStyles = Nehan.globalStyles || {};
+Nehan.globalSingleTagNames = new Nehan.Set();
+
+/**
+ set global style.
+
+ @memberof Nehan
+ @param selector_key {String}
+ @param value {selector_value}
+ */
+Nehan.setStyle = function(selector_key, value){
+  var entry = Nehan.globalStyles[selector_key] || {};
+  for(var prop in value){
+    entry[prop] = value[prop];
+  }
+  Nehan.globalStyles[selector_key] = entry;
+};
+
+/**
+ set global styles.
+
+ @memberof Nehan
+ @param values {Object}
+ */
+Nehan.setStyles = function(values){
+  for(var selector_key in values){
+    Nehan.setStyle(selector_key, values[selector_key]);
+  }
+};
+
+/**
+ set global single tag name
+
+ @memberof Nehan
+ @param name {String} - single tag name
+*/
+Nehan.addSingleTagName = function(name){
+  Nehan.singleTagNames.add(name);
+};
+
+/**
+ set global single tag names
+
+ @memberof Nehan
+ @param names {Array} - single tag name list
+*/
+Nehan.addSingleTagNames = function(names){
+  Nehan.singleTagNames.addValues(names);
+};
+
+/**
+ @param opt {Object}
+ @param opt.root {String} - context root
+ @param opt.text {String} - html string
+ @param opt.styles {Object} - context local styles
+ @return {Nehan.DocumentGenerator | Nehan.HtmlGenerator | Nehan.BodyGenerator}
+ */
+Nehan.createRootGenerator = function(opt){
+  opt = opt || {};
+  var context = new Nehan.RenderingContext({
+    text:Nehan.Html.normalize(opt.text || "no text"),
+    singleTagNames:(
+      new Nehan.Set()
+	.addValues(Nehan.Config.defaultSingleTagNames)
+	.addValues(Nehan.globalSingleTagNames.getValues())
+    )
+  });
+  return context
+    .setStyles(Nehan.globalStyles)
+    .setStyles(opt.styles || {})
+    .createRootGenerator();
+};
+
+/**
+ @param opt {Object}
+ @param opt.root {String} - context root
+ @param opt.text {String} - html string
+ @param opt.styles {Object} - context local styles
+ @return {Nehan.RenderingContext}
+ */
+Nehan.createRootContext = function(opt){
+  return Nehan.createRootGenerator(opt || {}).context;
+};
+

@@ -283,6 +283,27 @@ Nehan.Config = {
   //defaultFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
 
   /**
+   default single tag(like img, br, hr etc) list.
+
+   @memberof Nehan.Config
+   @type {Array.<String>}
+   */
+  defaultSingleTagNames:[
+    "br",
+    "hr",
+    "img",
+    "input",
+    "link",
+    "meta",
+    "wbr",
+    "?xml",
+    "!doctype",
+
+    // nehan special tag for page-break
+    "page-break"
+  ],
+
+  /**
    font image url, required for legacy browsers not supporting vertical writing-mode.
 
    @memberof Nehan.Config

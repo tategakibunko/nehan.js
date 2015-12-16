@@ -75,6 +75,7 @@ Nehan.Set = (function(){
     values.forEach(function(value){
       this.add(value);
     }.bind(this));
+    return this;
   };
 
   /**
@@ -104,3 +105,4 @@ Nehan.Set = (function(){
 
   return Set;
 })();
+
