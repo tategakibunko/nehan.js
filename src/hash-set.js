@@ -1,9 +1,9 @@
 Nehan.HashSet = (function(){
   /**
-     @memberof Nehan
-     @class HashSet
-     @classdesc abstraction of (key, value) set.
-     @constructor
+   @memberof Nehan
+   @class HashSet
+   @classdesc abstraction of (key, value) set.
+   @constructor
    */
   function HashSet(values){
     this._values = Nehan.Obj.clone(values || {});

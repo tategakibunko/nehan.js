@@ -39,6 +39,7 @@ var sources = [
   "src/tag-attrs.js",
   "src/tag.js",
   "src/closure.js",
+  "src/set.js",
   "src/hash-set.js",
   "src/css-hash-set.js",
   "src/css-edge-parser.js",

@@ -1,14 +1,14 @@
 Nehan.ListStyleImage = (function(){
   /**
-     @memberof Nehan
-     @class ListStyleImage
-     @classdesc abstraction of list-style-image.
-     @constructor
-     @param image {Object}
-     @param image.width {Int} - if undefined, use {@link Nehan.Display}.fontSize
-     @param image.height {Int} - if undefined, use {@link Nehan.Display}.fontSize
-     @param image.url {String}
-  */
+   @memberof Nehan
+   @class ListStyleImage
+   @classdesc abstraction of list-style-image.
+   @constructor
+   @param image {Object}
+   @param image.width {Int} - if undefined, use {@link Nehan.Display}.fontSize
+   @param image.height {Int} - if undefined, use {@link Nehan.Display}.fontSize
+   @param image.url {String}
+   */
   function ListStyleImage(image){
     this.image = image;
   }
