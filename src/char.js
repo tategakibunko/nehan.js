@@ -18,6 +18,7 @@ Nehan.Char = (function(){
   var __head_ng = ["\uff09","\x5c","\x29","\u300d","\u3011","\u3015","\uff3d","\x5c","\x5d","\u3002","\u300f","\uff1e","\u3009","\u300b","\u3001","\uff0e","\x5c","\x2e","\x2c","\u201d","\u301f"];
   var __tail_ng = ["\uff08","\x5c","\x28","\u300c","\u3010","\uff3b","\u3014","\x5c","\x5b","\u300e","\uff1c","\u3008","\u300a","\u201c","\u301d"];
   var __voiced_mark = ["\u3099", "\u309a", "\u309b", "\u309c", "\uff9e", "\uff9f"];
+  var __no_break_space = ["\u00a0", "\u202f", "\ufeff"];
   var __rex_half_char = /[\w!\.\?\/:#;"',]/;
   var __rex_half_kana = /[\uff65-\uff9f]/;
   var __rex_half_kana_small = /[\uff67-\uff6f]/;
@@ -580,7 +581,7 @@ Nehan.Char = (function(){
    @return {boolean}
    */
   Char.prototype.isNbsp = function(){
-    return (this.data === " " || this.ref === "&nbsp;");
+    return this.data === "\u00a0" || this.ref === "&nbsp;";
   };
 
   /**
@@ -588,7 +589,7 @@ Nehan.Char = (function(){
    @return {boolean}
    */
   Char.prototype.isThinsp = function(){
-    return this.ref === "&thinsp;";
+    return this.data === "\u2009" || this.ref === "&thinsp;";
   };
 
   /**
@@ -596,7 +597,7 @@ Nehan.Char = (function(){
    @return {boolean}
    */
   Char.prototype.isEnsp = function(){
-    return this.ref === "&ensp;";
+    return this.data === "\u2002" || this.ref === "&ensp;";
   };
 
   /**
@@ -604,7 +605,7 @@ Nehan.Char = (function(){
    @return {boolean}
    */
   Char.prototype.isEmsp = function(){
-    return this.ref === "&emsp;";
+    return this.data === "\u2003" || this.ref === "&emsp;";
   };
 
   /**
@@ -620,7 +621,7 @@ Nehan.Char = (function(){
    @return {boolean}
    */
   Char.prototype.isSpace = function(){
-    return this.data === "\u0020";
+    return this.data === "\u0020"; // normal space
   };
 
   /**
@@ -628,7 +629,7 @@ Nehan.Char = (function(){
    @return {boolean}
    */
   Char.prototype.isNoBreakSpace = function(){
-    throw "TODO";
+    return this.isNbsp() || Nehan.List.exists(__no_break_space, Nehan.Closure.eq(this.data));
   };
 
   /**
@@ -644,7 +645,7 @@ Nehan.Char = (function(){
    @return {boolean}
    */
   Char.prototype.isIdeographicSpace= function(){
-    return this.data === "\u3000";
+    return this.data === "\u3000"; // zenkaku space
   };
 
   /**

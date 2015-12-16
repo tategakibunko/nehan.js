@@ -7,6 +7,12 @@ describe("Char", function(){
   });
 
   it("Char.isNbsp", function(){
-    expect(new Nehan.Char({ref:"&nbsp;"})).isNgSp();
+    expect(new Nehan.Char({ref:"&nbsp;"}).isNbsp()).toBe(true);
+    expect(new Nehan.Char({data:"\u00a0"}).isNbsp()).toBe(true);
+  });
+
+  it("Char.isThinsp", function(){
+    expect(new Nehan.Char({ref:"&thinsp;"}).isThinsp()).toBe(true);
+    expect(new Nehan.Char({data:"\u2009"}).isThinsp()).toBe(true);
   });
 });
