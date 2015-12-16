@@ -1,4 +1,3 @@
-Nehan.version = "5.4.1";
 Nehan.globalStyles = Nehan.globalStyles || {};
 Nehan.globalSingleTagNames = new Nehan.SingleTagSet();
 
@@ -8,6 +7,7 @@ Nehan.globalSingleTagNames = new Nehan.SingleTagSet();
  @memberof Nehan
  @param selector_key {String}
  @param value {selector_value}
+ @return {Nehan}
  */
 Nehan.setStyle = function(selector_key, value){
   var entry = Nehan.globalStyles[selector_key] || {};
@@ -15,6 +15,7 @@ Nehan.setStyle = function(selector_key, value){
     entry[prop] = value[prop];
   }
   Nehan.globalStyles[selector_key] = entry;
+  return this;
 };
 
 /**
@@ -22,11 +23,13 @@ Nehan.setStyle = function(selector_key, value){
 
  @memberof Nehan
  @param values {Object}
+ @return {Nehan}
  */
 Nehan.setStyles = function(values){
   for(var selector_key in values){
     Nehan.setStyle(selector_key, values[selector_key]);
   }
+  return this;
 };
 
 /**
@@ -34,9 +37,11 @@ Nehan.setStyles = function(values){
 
  @memberof Nehan
  @param name {String} - single tag name
+ @return {Nehan}
 */
 Nehan.addSingleTagName = function(name){
   Nehan.globalSingleTagNames.add(name);
+  return this;
 };
 
 /**
@@ -44,9 +49,11 @@ Nehan.addSingleTagName = function(name){
 
  @memberof Nehan
  @param names {Array} - single tag name list
+ @return {Nehan}
 */
 Nehan.addSingleTagNames = function(names){
   Nehan.globalSingleTagNames.addValues(names);
+  return this;
 };
 
 /**
