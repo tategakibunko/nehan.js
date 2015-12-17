@@ -74,8 +74,41 @@ describe("List", function(){
   });
 
   it("List.last", function(){
+    expect(Nehan.List.last([1])).toBe(1);
     expect(Nehan.List.last([1,2,3])).toBe(3);
-    expect(Nehan.List.last([])).toBe(false);
+    expect(Nehan.List.last([])).toBe(null);
+  });
+
+  it("List.zipArray", function(){
+    expect(Nehan.List.zipArray([1,2,3], [4,5,6])).toEqual([[1,4],[2,5],[3,6]]);
+  });
+
+  it("should throw if length of each list is no same when List.zipArray", function(){
+    var to_fail = function(){
+      return Nehan.List.zipArray([1,2,3], [4,5]);
+    };
+    expect(to_fail).toThrow();
+  });
+
+  it("List.zipObject", function(){
+    expect(Nehan.List.zipObject(["a","b","c"], [1,2,3])).toEqual({a:1, b:2, c:3});
+  });
+
+  it("should throw if length of each list is not same when List.zipObj", function(){
+    var to_fail = function(){
+      return Nehan.List.zipObj(["a","b","c"], [1,2]);
+    };
+    expect(to_fail).toThrow();
+  });
+
+  it("List.reverse", function(){
+    expect(Nehan.List.reverse([1,2,3])).toEqual([3,2,1]);
+  });
+
+  it("List.reverse is immutable", function(){
+    var orig = [1,2,3];
+    var rev = Nehan.List.reverse(orig);
+    expect(orig === rev).toBe(false);
   });
 });
 

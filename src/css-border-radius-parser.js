@@ -29,7 +29,7 @@ Nehan.CssBorderRadiusParser = (function(){
   };
 
   var __obj_of_array = function(ary){
-    return Nehan.List.object(Nehan.Const.cssLogicalBoxCorners, ary);
+    return Nehan.List.zipObject(Nehan.Const.cssLogicalBoxCorners, ary);
   };
 
   var __parse_shorthand = function(str){
@@ -42,7 +42,7 @@ Nehan.CssBorderRadiusParser = (function(){
       var x_or_y = Nehan.Utils.splitBySpace(x_or_y_str);
       return __extend4(x_or_y);
     });
-    var values = Nehan.List.zip(values_2x4d[0], values_2x4d[1]);
+    var values = Nehan.List.zipArray(values_2x4d[0], values_2x4d[1]);
     return __obj_of_array(values);
   };
 
@@ -57,7 +57,7 @@ Nehan.CssBorderRadiusParser = (function(){
     // array of array
     if(ary[0] instanceof Array){
       var v2x4d = __extend2(ary.map(__extend4));
-      return __obj_of_array(Nehan.List.zip(v2x4d[0], v2x4d[1]));
+      return __obj_of_array(Nehan.List.zipArray(v2x4d[0], v2x4d[1]));
     }
     return __obj_of_array(__extend4(ary.map(__extend2)));
   };

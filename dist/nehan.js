@@ -888,54 +888,6 @@ Nehan.List = {
   /**
    @memberof Nehan.List
    @param lst {Array}
-   @return {Array}
-   */
-  refcopy : function(lst){
-    var ret = [];
-    for(var i = 0, len = lst.length; i < len; i++){
-      ret[i] = lst[i];
-    }
-    return ret;
-  },
-  /**
-   @memberof Nehan.List
-   @param lst {Array}
-   @param fn {Function} - fun obj -> {boolean}
-   @return {int}
-   */
-  count : function(lst, fn){
-    var ret = 0;
-    for(var i = 0, len = lst.length; i < len; i++){
-      if(fn(lst[i], i)){
-	ret++;
-      }
-    }
-    return ret;
-  },
-  /**
-   @memberof Nehan.List
-   @param count {int} - array length
-   @param init_val - initialized value filled in new array
-   @return {Array}
-   */
-  create : function(count, init_val){
-    var ret = [];
-    for(var i = 0; i < count; i++){
-      ret.push((typeof init_val !== "undefined")? init_val : i);
-    }
-    return ret;
-  },
-  /**
-   @memberof Nehan.List
-   @param lst {Array}
-   @return {first_object | null}
-   */
-  first : function(lst){
-    return lst[0] || null;
-  },
-  /**
-   @memberof Nehan.List
-   @param lst {Array}
    @return {last_object | null}
    */
   last : function(lst){
@@ -951,9 +903,12 @@ Nehan.List = {
    @param lst2 {Array}
    @return {Array.<Array>}
    */
-  zip : function(lst1, lst2){
+  zipArray : function(lst1, lst2){
     var ret = [];
-    for(var i = 0, len = Math.min(lst1.length, lst2.length); i < len; i++){
+    if(lst1.length !== lst2.length){
+      throw "length not same:List.zipArray";
+    }
+    for(var i = 0; i < lst1.length; i++){
       ret[i] = [lst1[i], lst2[i]];
     }
     return ret;
@@ -966,12 +921,12 @@ Nehan.List = {
    @example
    * Nehan.List.zipObj(["a", "b", "c"], [1, 2, 3]); // {a:1, b:2, c:3}
    */
-  zipObj : function(props, values){
+  zipObject : function(props, values){
     var ret = {};
     if(props.length !== values.length){
-      throw "invalid args:List.zipObj";
+      throw "length not same:List.zipObject";
     }
-    for(var i = 0, len = props.length; i < len; i++){
+    for(var i = 0; i < props.length; i++){
       ret[props[i]] = values[i];
     }
     return ret;
@@ -989,22 +944,6 @@ Nehan.List = {
       ret.push(obj);
     });
     return ret;
-  },
-  /**
-   @memberof Nehan.List
-   @param props {Array}
-   @param values {Array}
-   @return {Object}
-   */
-  object : function(props, values){
-    var obj = {};
-    if(props.length !== values.length){
-      throw "invalid args:Nehan.Obj.zipArray";
-    }
-    for(var i = 0; i < props.length; i++){
-      obj[props[i]] = values[i];
-    }
-    return obj;
   }
 };
 
@@ -2714,7 +2653,7 @@ Nehan.CssBorderRadiusParser = (function(){
   };
 
   var __obj_of_array = function(ary){
-    return Nehan.List.object(Nehan.Const.cssLogicalBoxCorners, ary);
+    return Nehan.List.zipObject(Nehan.Const.cssLogicalBoxCorners, ary);
   };
 
   var __parse_shorthand = function(str){
@@ -2727,7 +2666,7 @@ Nehan.CssBorderRadiusParser = (function(){
       var x_or_y = Nehan.Utils.splitBySpace(x_or_y_str);
       return __extend4(x_or_y);
     });
-    var values = Nehan.List.zip(values_2x4d[0], values_2x4d[1]);
+    var values = Nehan.List.zipArray(values_2x4d[0], values_2x4d[1]);
     return __obj_of_array(values);
   };
 
@@ -2742,7 +2681,7 @@ Nehan.CssBorderRadiusParser = (function(){
     // array of array
     if(ary[0] instanceof Array){
       var v2x4d = __extend2(ary.map(__extend4));
-      return __obj_of_array(Nehan.List.zip(v2x4d[0], v2x4d[1]));
+      return __obj_of_array(Nehan.List.zipArray(v2x4d[0], v2x4d[1]));
     }
     return __obj_of_array(__extend4(ary.map(__extend2)));
   };
@@ -5608,7 +5547,7 @@ Nehan.Border = (function(){
  @namespace Nehan.MarginCancel
 */
 Nehan.MarginCancel = (function(){
-  // precondition: style.edge.margin is available
+  // prerequisite: style.edge.margin is available
   var __cancel_margin = function(style){
     if(style.parent && style.parent.edge && style.parent.edge.margin){
       __cancel_margin_parent(style);

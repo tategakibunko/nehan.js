@@ -221,9 +221,12 @@ Nehan.List = {
    @param lst2 {Array}
    @return {Array.<Array>}
    */
-  zip : function(lst1, lst2){
+  zipArray : function(lst1, lst2){
     var ret = [];
-    for(var i = 0, len = Math.min(lst1.length, lst2.length); i < len; i++){
+    if(lst1.length !== lst2.length){
+      throw "length not same:List.zipArray";
+    }
+    for(var i = 0; i < lst1.length; i++){
       ret[i] = [lst1[i], lst2[i]];
     }
     return ret;
@@ -236,12 +239,12 @@ Nehan.List = {
    @example
    * Nehan.List.zipObj(["a", "b", "c"], [1, 2, 3]); // {a:1, b:2, c:3}
    */
-  zipObj : function(props, values){
+  zipObject : function(props, values){
     var ret = {};
     if(props.length !== values.length){
-      throw "invalid args:List.zipObj";
+      throw "length not same:List.zipObject";
     }
-    for(var i = 0, len = props.length; i < len; i++){
+    for(var i = 0; i < props.length; i++){
       ret[props[i]] = values[i];
     }
     return ret;
@@ -259,22 +262,6 @@ Nehan.List = {
       ret.push(obj);
     });
     return ret;
-  },
-  /**
-   @memberof Nehan.List
-   @param props {Array}
-   @param values {Array}
-   @return {Object}
-   */
-  object : function(props, values){
-    var obj = {};
-    if(props.length !== values.length){
-      throw "invalid args:Nehan.Obj.zipArray";
-    }
-    for(var i = 0; i < props.length; i++){
-      obj[props[i]] = values[i];
-    }
-    return obj;
   }
 };
 

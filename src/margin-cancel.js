@@ -2,7 +2,7 @@
  @namespace Nehan.MarginCancel
 */
 Nehan.MarginCancel = (function(){
-  // precondition: style.edge.margin is available
+  // prerequisite: style.edge.margin is available
   var __cancel_margin = function(style){
     if(style.parent && style.parent.edge && style.parent.edge.margin){
       __cancel_margin_parent(style);
