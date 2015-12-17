@@ -6410,7 +6410,7 @@ Nehan.Section = (function(){
    @return {String}
    */
   Section.prototype.getTitle = function(){
-    return this._header? this._header.title : "untitled-section";
+    return this._header? this._header.title : "";
   };
   /**
    @memberof Nehan.Section

@@ -35,7 +35,6 @@ describe("OutlineContextParser", function(){
     var header1 = section1.getHeader();
     
     // section
-    expect(section1.getType()).toBe("body");
     expect(section1.getHeaderId()).toBe(1);
     expect(section1.getTitle()).toBe("foo");
     expect(section1.getRank()).toBe(1);
