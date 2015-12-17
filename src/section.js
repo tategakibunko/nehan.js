@@ -12,7 +12,6 @@ Nehan.Section = (function(){
     this._parent = opt.parent || null;
     this._pageNo = opt.pageNo || 0;
     this._header = null;
-    this._auto = false;
     this._next = null;
     this._child = null;
   }
@@ -103,12 +102,6 @@ Nehan.Section = (function(){
    */
   Section.prototype.setHeader = function(header){
     this._header = header;
-  };
-  /**
-   @memberof Nehan.Section
-   */
-  Section.prototype.setAuto = function(){
-    this._auto = true;
   };
   /**
    @memberof Nehan.Section
