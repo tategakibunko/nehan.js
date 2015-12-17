@@ -6329,13 +6329,6 @@ Nehan.Section = (function(){
    @memberof Nehan.Section
    @return {boolean}
    */
-  Section.prototype.isAuto = function(){
-    return this._auto;
-  };
-  /**
-   @memberof Nehan.Section
-   @return {boolean}
-   */
   Section.prototype.hasHeader = function(){
     return this._header !== null;
   };
