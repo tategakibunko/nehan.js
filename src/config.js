@@ -341,5 +341,20 @@ Nehan.Config = {
     nbsp:0.38,  // &nbsp;
     ensp:0.5,   // &ensp;
     emsp:1.0    // &emsp;
+  },
+
+  /**
+   format content by vertical text manner.
+
+   @memberof Nehan.Config
+   @type {Array.<Float>}
+   */
+  formatVerticalContent : function(content){
+    return content
+      .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
+      .replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
+      .replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
+      .replace(/｡/g, "。") // half size ideographic full stop -> full size
+    ;
   }
 };

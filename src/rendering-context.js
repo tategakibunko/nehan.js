@@ -311,6 +311,17 @@ Nehan.RenderingContext = (function(){
     return this.createBlockLayoutContext();
   };
 
+  RenderingContext.prototype.createListMarkerOption = function(item_style){
+    var list_style = item_style.getListStyle();
+    if(!list_style.isImageList()){
+      return {};
+    }
+    return {
+      width:item_style.getFontSize(),
+      height:item_style.getFontSize()
+    };
+  };
+
   RenderingContext.prototype.createListContext = function(){
     var item_tags = this.stream.getTokens();
     var item_count = item_tags.length;
@@ -322,7 +333,8 @@ Nehan.RenderingContext = (function(){
       var item_style = this.createTmpChildStyle(item_tag);
       var item_context = this.createChildContext(item_style);
       var marker_tag = new Nehan.Tag("marker");
-      var marker_html = this.style.getListMarkerHtml(index + 1);
+      var marker_option = this.createListMarkerOption(item_style);
+      var marker_html = this.style.getListMarkerHtml(index + 1, marker_option);
       marker_tag.setContent(marker_html);
       var marker_style = item_context.createTmpChildStyle(marker_tag);
       //console.log("marker style:%o", marker_style);

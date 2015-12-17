@@ -86,6 +86,7 @@ Nehan.ListStyleType = (function(){
     if(this.isMark()){
       return __marker_text[this.type] || "";
     }
+    count = Math.max(1, count);
     var digit = this._getMarkerDigitString(count);
     return digit + "."; // add period as postfix.
   };

@@ -1,11 +1,11 @@
 Nehan.ListStylePos = (function(){
   /**
-     @memberof Nehan
-     @class ListStylePos
-     @classdesc abstraction of list-style-pos.
-     @constructor
-     @param pos {String} - "outside" or "inside"
-  */
+   @memberof Nehan
+   @class ListStylePos
+   @classdesc abstraction of list-style-pos.
+   @constructor
+   @param pos {String} - "outside" or "inside"
+   */
   function ListStylePos(pos){
     this.pos = pos;
   }

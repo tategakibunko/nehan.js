@@ -377,6 +377,21 @@ Nehan.Config = {
     nbsp:0.38,  // &nbsp;
     ensp:0.5,   // &ensp;
     emsp:1.0    // &emsp;
+  },
+
+  /**
+   format content by vertical text manner.
+
+   @memberof Nehan.Config
+   @type {Array.<Float>}
+   */
+  formatVerticalContent : function(content){
+    return content
+      .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
+      .replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
+      .replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
+      .replace(/｡/g, "。") // half size ideographic full stop -> full size
+    ;
   }
 };
 
@@ -666,16 +681,16 @@ Nehan.Class.extend = function(childCtor, parentCtor) {
 
 
 /**
-   list utility module
+ list utility module
 
-   @namespace Nehan.List
-*/
+ @namespace Nehan.List
+ */
 Nehan.List = {
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> ()
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> ()
+   */
   iter : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       if(fn(lst[i], i) === false){
@@ -684,10 +699,10 @@ Nehan.List = {
     }
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> ()
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> ()
+   */
   reviter : function(lst, fn){
     for(var i = lst.length - 1; i >= 0; i--){
       if(fn(lst[i], i) === false){
@@ -696,11 +711,11 @@ Nehan.List = {
     }
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {boolean}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> {boolean}
+   @return {boolean}
+   */
   forall : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       if(fn(lst[i], i) === false){
@@ -710,11 +725,11 @@ Nehan.List = {
     return true;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> obj
-     @return {Array}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> obj
+   @return {Array}
+   */
   map : function(lst, fn){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
@@ -723,12 +738,12 @@ Nehan.List = {
     return ret;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param acm {foldable_value} - accumulator
-     @param fn {Function} - fun acm -> obj -> acm
-     @return {folded_value}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param acm {foldable_value} - accumulator
+   @param fn {Function} - fun acm -> obj -> acm
+   @return {folded_value}
+   */
   fold : function(lst, acm, fn){
     var ret = acm;
     for(var i = 0, len = lst.length; i < len; i++){
@@ -737,11 +752,11 @@ Nehan.List = {
     return ret;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {Array}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> {boolean}
+   @return {Array}
+   */
   filter : function(lst, fn){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
@@ -752,11 +767,11 @@ Nehan.List = {
     return ret;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {first_founded_object}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> {boolean}
+   @return {first_founded_object}
+   */
   find : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       var obj = lst[i];
@@ -767,11 +782,11 @@ Nehan.List = {
     return null;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {first_founded_object}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> {boolean}
+   @return {first_founded_object}
+   */
   revfind : function(lst, fn){
     for(var i = lst.length - 1; i >= 0; i--){
       var obj = lst[i];
@@ -782,11 +797,11 @@ Nehan.List = {
     return null;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {int}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> {boolean}
+   @return {int}
+   */
   indexOf : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       var obj = lst[i];
@@ -797,11 +812,11 @@ Nehan.List = {
     return -1;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {boolean}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> {boolean}
+   @return {boolean}
+   */
   exists : function(lst, fn){
     for(var i = 0, len = lst.length; i < len; i++){
       if(fn(lst[i], i)){
@@ -811,11 +826,11 @@ Nehan.List = {
     return false;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {boolean}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> {boolean}
+   @return {boolean}
+   */
   mem : function(lst, val){
     for(var i = 0, len = lst.length; i < len; i++){
       if(lst[i] == val){
@@ -825,23 +840,23 @@ Nehan.List = {
     return false;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param start {Number}
-     @param fn {Function}
-     @return {Number}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param start {Number}
+   @param fn {Function}
+   @return {Number}
+   */
   sum : function(lst, start, fn){
     return this.fold(lst, start, function(ret, obj){
       return ret + fn(obj);
     });
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {Number}
-     @return {min_obj}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> {Number}
+   @return {min_obj}
+   */
   minobj : function(lst, fn){
     var min_obj = null, min_val = null;
     this.iter(lst, function(obj, i){
@@ -854,11 +869,11 @@ Nehan.List = {
     return min_obj;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {Number}
-     @return {max_obj}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> {Number}
+   @return {max_obj}
+   */
   maxobj : function(lst, fn){
     var max_obj = null, max_val = null;
     this.iter(lst, function(obj, i){
@@ -871,10 +886,10 @@ Nehan.List = {
     return max_obj;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @return {Array}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @return {Array}
+   */
   refcopy : function(lst){
     var ret = [];
     for(var i = 0, len = lst.length; i < len; i++){
@@ -883,11 +898,11 @@ Nehan.List = {
     return ret;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @param fn {Function} - fun obj -> {boolean}
-     @return {int}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @param fn {Function} - fun obj -> {boolean}
+   @return {int}
+   */
   count : function(lst, fn){
     var ret = 0;
     for(var i = 0, len = lst.length; i < len; i++){
@@ -898,11 +913,11 @@ Nehan.List = {
     return ret;
   },
   /**
-     @memberof Nehan.List
-     @param count {int} - array length
-     @param init_val - initialized value filled in new array
-     @return {Array}
-  */
+   @memberof Nehan.List
+   @param count {int} - array length
+   @param init_val - initialized value filled in new array
+   @return {Array}
+   */
   create : function(count, init_val){
     var ret = [];
     for(var i = 0; i < count; i++){
@@ -911,18 +926,18 @@ Nehan.List = {
     return ret;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @return {first_object | null}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @return {first_object | null}
+   */
   first : function(lst){
     return lst[0] || null;
   },
   /**
-     @memberof Nehan.List
-     @param lst {Array}
-     @return {last_object | null}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @return {last_object | null}
+   */
   last : function(lst){
     var len = lst.length;
     if(len === 0){
@@ -931,11 +946,11 @@ Nehan.List = {
     return lst[len - 1];
   },
   /**
-     @memberof Nehan.List
-     @param lst1 {Array}
-     @param lst2 {Array}
-     @return {Array.<Array>}
-  */
+   @memberof Nehan.List
+   @param lst1 {Array}
+   @param lst2 {Array}
+   @return {Array.<Array>}
+   */
   zip : function(lst1, lst2){
     var ret = [];
     for(var i = 0, len = Math.min(lst1.length, lst2.length); i < len; i++){
@@ -944,13 +959,13 @@ Nehan.List = {
     return ret;
   },
   /**
-     @memberof Nehan.List
-     @param props {Array}
-     @param values {Array}
-     @return {Object}
-     @example
-     * Nehan.List.zipObj(["a", "b", "c"], [1, 2, 3]); // {a:1, b:2, c:3}
-  */
+   @memberof Nehan.List
+   @param props {Array}
+   @param values {Array}
+   @return {Object}
+   @example
+   * Nehan.List.zipObj(["a", "b", "c"], [1, 2, 3]); // {a:1, b:2, c:3}
+   */
   zipObj : function(props, values){
     var ret = {};
     if(props.length !== values.length){
@@ -962,12 +977,12 @@ Nehan.List = {
     return ret;
   },
   /**
-     non destructive reverse
+   non destructive reverse
 
-     @memberof Nehan.List
-     @param lst {Array}
-     @return {Array}
-  */
+   @memberof Nehan.List
+   @param lst {Array}
+   @return {Array}
+   */
   reverse : function(lst){
     var ret = [];
     this.reviter(lst, function(obj){
@@ -980,7 +995,7 @@ Nehan.List = {
    @param props {Array}
    @param values {Array}
    @return {Object}
-  */
+   */
   object : function(props, values){
     var obj = {};
     if(props.length !== values.length){
@@ -1396,6 +1411,23 @@ Nehan.Css = {
       .replace(/\(\s+/g, "(") // cut space around left paren after
       .replace(/\s+\)/g, ")") // cut space around right paren before
       .replace(/\)\s+/g, ")") // cut space around right paren after
+    ;
+  },
+  /**
+   @memberof Nehan.Css
+   @param css_image_url{String}
+   @return {String}
+   @example
+   * Nehan.Css.getImageURL("url('foo.png')"); // => 'foo.png'
+   */
+  getImageURL : function(css_image_url){
+    return css_image_url
+      .replace(/url/gi, "")
+      .replace(/'/g, "")
+      .replace(/"/g, "")
+      .replace(/\(/g, "")
+      .replace(/\)/g, "")
+      .replace(/\s/g, "")
     ;
   },
   /**
@@ -2247,44 +2279,42 @@ Nehan.Tag = (function (){
 
 
 /**
-   closure factory
-   @namespace Nehan.Closure
-*/
+ closure factory
+ @namespace Nehan.Closure
+ */
 Nehan.Closure = {
   /**
-     @memberof Nehan.Closure
-     @return {Function}
-     @example
-     * var echo = Nehan.Closure.id();
-     * echo(1); // 1
-     * echo("yo"); // "yo"
-  */
-  id : function(){
-    return function(x){
-      return x;
-    };
+   @memberof Nehan.Closure
+   @return {Function}
+   @example
+   * var echo = Nehan.Closure.id;
+   * echo(1); // 1
+   * echo("yo"); // "yo"
+   */
+  id : function(x){
+    return x;
   },
   /**
-     @memberof Nehan.Closure
-     @return {Function}
-     @example
-     * var is_one = Nehan.Closure.eq(1);
-     * is_one(1); // true
-     * is_one(2); // false
-  */
+   @memberof Nehan.Closure
+   @return {Function}
+   @example
+   * var is_one = Nehan.Closure.eq(1);
+   * is_one(1); // true
+   * is_one(2); // false
+   */
   eq : function(x){
     return function(y){
       return x === y;
     };
   },
   /**
-     @memberof Nehan.Closure
-     @return {Function}
-     @example
-     * var is_not_one = Nehan.Closure.neq(1);
-     * is_not_one(1); // false
-     * is_not_one(2); // true
-  */
+   @memberof Nehan.Closure
+   @return {Function}
+   @example
+   * var is_not_one = Nehan.Closure.neq(1);
+   * is_not_one(1); // false
+   * is_not_one(2); // true
+   */
   neq : function(x){
     return function(y){
       return x !== y;
@@ -9703,6 +9733,7 @@ Nehan.ListStyleType = (function(){
     if(this.isMark()){
       return __marker_text[this.type] || "";
     }
+    count = Math.max(1, count);
     var digit = this._getMarkerDigitString(count);
     return digit + "."; // add period as postfix.
   };
@@ -9726,12 +9757,12 @@ Nehan.ListStyleType = (function(){
 
 Nehan.ListStylePos = (function(){
   /**
-     @memberof Nehan
-     @class ListStylePos
-     @classdesc abstraction of list-style-pos.
-     @constructor
-     @param pos {String} - "outside" or "inside"
-  */
+   @memberof Nehan
+   @class ListStylePos
+   @classdesc abstraction of list-style-pos.
+   @constructor
+   @param pos {String} - "outside" or "inside"
+   */
   function ListStylePos(pos){
     this.pos = pos;
   }
@@ -9761,10 +9792,7 @@ Nehan.ListStyleImage = (function(){
    @class ListStyleImage
    @classdesc abstraction of list-style-image.
    @constructor
-   @param image {Object}
-   @param image.width {Int} - if undefined, use {@link Nehan.Display}.fontSize
-   @param image.height {Int} - if undefined, use {@link Nehan.Display}.fontSize
-   @param image.url {String}
+   @param image {String}
    */
   function ListStyleImage(image){
     this.image = image;
@@ -9775,13 +9803,15 @@ Nehan.ListStyleImage = (function(){
    @param count {int}
    @return {string}
    */
-  ListStyleImage.prototype.getMarkerHtml = function(count){
-    var url = this.image.url;
-    var width = this.image.width || Nehan.Config.defaultFontSize;
-    var height = this.image.height || Nehan.Config.defaultFontSize;
+  ListStyleImage.prototype.getMarkerHtml = function(count, opt){
+    opt = opt || {};
+    var url = Nehan.Css.getImageURL(this.image); // url('xxx.png') -> 'xxx.png'
+    var width = opt.width || Nehan.Config.defaultFontSize;
+    var height = opt.height || Nehan.Config.defaultFontSize;
+    var classes = ["nehan-list-image"].concat(opt.classes || []);
     return Nehan.Html.tagSingle("img", {
       "src":url,
-      "class":"nehan-list-image",
+      "class":classes.join(" "),
       "width":width,
       "height":height
     });
@@ -9835,9 +9865,9 @@ Nehan.ListStyle = (function(){
    @param count {int}
    @return {String}
    */
-  ListStyle.prototype.getMarkerHtml = function(count){
+  ListStyle.prototype.getMarkerHtml = function(count, opt){
     if(this.image !== null){
-      return this.image.getMarkerHtml(count);
+      return this.image.getMarkerHtml(count, opt || {});
     }
     var html = this.type.getMarkerHtml(count);
     if(html === "" && this.isOutside()){
@@ -14122,12 +14152,7 @@ Nehan.Style = (function(){
       content = Nehan.Html.tagWrap("first-line", content);
     }
     if(this.isTextVertical()){
-      content = content
-	.replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
-	.replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
-	.replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
-	.replace(/｡/g, "。") // half size ideographic full stop -> full size
-      ;
+      content = Nehan.Config.formatVerticalContent(content) || content;
     }
     return content;
   };
@@ -14233,22 +14258,9 @@ Nehan.Style = (function(){
    @param order {int}
    @return {String}
    */
-  Style.prototype.getListMarkerHtml = function(order){
-    return this.listStyle? this.listStyle.getMarkerHtml(order) : (this.parent? this.parent.getListMarkerHtml(order) : "&nbsp;");
-  };
-  /**
-   @memberof Nehan.Style
-   @return {int}
-   */
-  Style.prototype.getListMarkerSize = function(){
-    if(this.listMarkerSize){
-      return this.listMarkerSize;
-    }
-    if(this.parent){
-      return this.parent.getListMarkerSize();
-    }
-    var font_size = this.getFontSize();
-    return new Nehan.BoxSize(font_size, font_size);
+  Style.prototype.getListMarkerHtml = function(order, opt){
+    opt = opt || {};
+    return this.listStyle? this.listStyle.getMarkerHtml(order, opt) : (this.parent? this.parent.getListMarkerHtml(order, opt) : "&nbsp;");
   };
   /**
    @memberof Nehan.Style
@@ -17379,6 +17391,17 @@ Nehan.RenderingContext = (function(){
     return this.createBlockLayoutContext();
   };
 
+  RenderingContext.prototype.createListMarkerOption = function(item_style){
+    var list_style = item_style.getListStyle();
+    if(!list_style.isImageList()){
+      return {};
+    }
+    return {
+      width:item_style.getFontSize(),
+      height:item_style.getFontSize()
+    };
+  };
+
   RenderingContext.prototype.createListContext = function(){
     var item_tags = this.stream.getTokens();
     var item_count = item_tags.length;
@@ -17390,7 +17413,8 @@ Nehan.RenderingContext = (function(){
       var item_style = this.createTmpChildStyle(item_tag);
       var item_context = this.createChildContext(item_style);
       var marker_tag = new Nehan.Tag("marker");
-      var marker_html = this.style.getListMarkerHtml(index + 1);
+      var marker_option = this.createListMarkerOption(item_style);
+      var marker_html = this.style.getListMarkerHtml(index + 1, marker_option);
       marker_tag.setContent(marker_html);
       var marker_style = item_context.createTmpChildStyle(marker_tag);
       //console.log("marker style:%o", marker_style);

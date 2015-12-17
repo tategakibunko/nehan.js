@@ -4,10 +4,7 @@ Nehan.ListStyleImage = (function(){
    @class ListStyleImage
    @classdesc abstraction of list-style-image.
    @constructor
-   @param image {Object}
-   @param image.width {Int} - if undefined, use {@link Nehan.Display}.fontSize
-   @param image.height {Int} - if undefined, use {@link Nehan.Display}.fontSize
-   @param image.url {String}
+   @param image {String}
    */
   function ListStyleImage(image){
     this.image = image;
@@ -18,13 +15,15 @@ Nehan.ListStyleImage = (function(){
    @param count {int}
    @return {string}
    */
-  ListStyleImage.prototype.getMarkerHtml = function(count){
-    var url = this.image.url;
-    var width = this.image.width || Nehan.Config.defaultFontSize;
-    var height = this.image.height || Nehan.Config.defaultFontSize;
+  ListStyleImage.prototype.getMarkerHtml = function(count, opt){
+    opt = opt || {};
+    var url = Nehan.Css.getImageURL(this.image); // url('xxx.png') -> 'xxx.png'
+    var width = opt.width || Nehan.Config.defaultFontSize;
+    var height = opt.height || Nehan.Config.defaultFontSize;
+    var classes = ["nehan-list-image"].concat(opt.classes || []);
     return Nehan.Html.tagSingle("img", {
       "src":url,
-      "class":"nehan-list-image",
+      "class":classes.join(" "),
       "width":width,
       "height":height
     });

@@ -1,6 +1,6 @@
 describe("Closure", function(){
   it("Closure.id", function(){
-    expect(Nehan.Closure.id()(1)).toBe(1);
+    expect(Nehan.Closure.id(1)).toBe(1);
   });
 
   it("Closure.eq", function(){

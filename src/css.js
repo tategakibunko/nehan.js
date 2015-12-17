@@ -25,6 +25,23 @@ Nehan.Css = {
     ;
   },
   /**
+   @memberof Nehan.Css
+   @param css_image_url{String}
+   @return {String}
+   @example
+   * Nehan.Css.getImageURL("url('foo.png')"); // => 'foo.png'
+   */
+  getImageURL : function(css_image_url){
+    return css_image_url
+      .replace(/url/gi, "")
+      .replace(/'/g, "")
+      .replace(/"/g, "")
+      .replace(/\(/g, "")
+      .replace(/\)/g, "")
+      .replace(/\s/g, "")
+    ;
+  },
+  /**
      @memberof Nehan.Css
      @param name {String}
      @return {String}

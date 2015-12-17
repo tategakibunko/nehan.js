@@ -735,12 +735,7 @@ Nehan.Style = (function(){
       content = Nehan.Html.tagWrap("first-line", content);
     }
     if(this.isTextVertical()){
-      content = content
-	.replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
-	.replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
-	.replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
-	.replace(/｡/g, "。") // half size ideographic full stop -> full size
-      ;
+      content = Nehan.Config.formatVerticalContent(content) || content;
     }
     return content;
   };
@@ -846,22 +841,9 @@ Nehan.Style = (function(){
    @param order {int}
    @return {String}
    */
-  Style.prototype.getListMarkerHtml = function(order){
-    return this.listStyle? this.listStyle.getMarkerHtml(order) : (this.parent? this.parent.getListMarkerHtml(order) : "&nbsp;");
-  };
-  /**
-   @memberof Nehan.Style
-   @return {int}
-   */
-  Style.prototype.getListMarkerSize = function(){
-    if(this.listMarkerSize){
-      return this.listMarkerSize;
-    }
-    if(this.parent){
-      return this.parent.getListMarkerSize();
-    }
-    var font_size = this.getFontSize();
-    return new Nehan.BoxSize(font_size, font_size);
+  Style.prototype.getListMarkerHtml = function(order, opt){
+    opt = opt || {};
+    return this.listStyle? this.listStyle.getMarkerHtml(order, opt) : (this.parent? this.parent.getListMarkerHtml(order, opt) : "&nbsp;");
   };
   /**
    @memberof Nehan.Style

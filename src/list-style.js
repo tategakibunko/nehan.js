@@ -42,9 +42,9 @@ Nehan.ListStyle = (function(){
    @param count {int}
    @return {String}
    */
-  ListStyle.prototype.getMarkerHtml = function(count){
+  ListStyle.prototype.getMarkerHtml = function(count, opt){
     if(this.image !== null){
-      return this.image.getMarkerHtml(count);
+      return this.image.getMarkerHtml(count, opt || {});
     }
     var html = this.type.getMarkerHtml(count);
     if(html === "" && this.isOutside()){

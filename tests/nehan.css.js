@@ -6,4 +6,11 @@ describe("Css", function(){
     expect(Nehan.Css.normalizeValue("url   ( 'hoge' )")).toBe("url('hoge')");
     expect(Nehan.Css.normalizeValue("Meiryo   ,   monospace")).toBe("Meiryo,monospace");
   });
+
+  it("Css.getImageURL", function(){
+    expect(Nehan.Css.getImageURL("hoge.png")).toBe("hoge.png");
+    expect(Nehan.Css.getImageURL("url(hoge.png)")).toBe("hoge.png");
+    expect(Nehan.Css.getImageURL("url('hoge.png')")).toBe("hoge.png");
+    expect(Nehan.Css.getImageURL("  url('  hoge.png  ')")).toBe("hoge.png");
+  });
 });
