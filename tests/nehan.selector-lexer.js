@@ -39,7 +39,7 @@ describe("SelectorLexer", function(){
 
   it("E ~ F(following-sibling combinator)", function(){
     var tokens = new Nehan.SelectorLexer("body ~ p.foo").getTokens();
-    console.log("following-sibling combinator:%o", tokens);
+    //console.log("following-sibling combinator:%o", tokens);
     expect(tokens.length).toBe(3);
     expect(tokens[0].name).toBe("body");
     expect(tokens[1]).toBe("~");
