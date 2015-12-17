@@ -1,10 +1,21 @@
 describe("SelectorLexer", function(){
-  it("E(single selector)", function(){
+  it("E(simple selector)", function(){
     var tokens = new Nehan.SelectorLexer("body").getTokens();
     expect(tokens.length).toBe(1);
     expect(tokens[0].name).toBe("body");
   });
 
+  it("E.foo.bar(compound selector)", function(){
+    var tokens = new Nehan.SelectorLexer("p.foo.bar").getTokens();
+    //console.log("compound selector:%o", tokens);
+    expect(tokens.length).toBe(1);
+    expect(tokens[0].name).toBe("p");
+    expect(tokens[0].classes.length).toBe(2);
+    expect(tokens[0].classes[0]).toBe("bar"); // classes are sorted
+    expect(tokens[0].classes[1]).toBe("foo");
+  });
+
+  // note that space is a combinator, so this is not compound selector.
   it("E F(descendant combinator)", function(){
     var tokens = new Nehan.SelectorLexer("body p.foo").getTokens();
     //console.log("descendant combinator:%o", tokens);
@@ -48,10 +59,11 @@ describe("SelectorLexer", function(){
     expect(tokens[2].classes[0]).toBe("foo");
   });
 
-  it("with attr selector", function(){
+  it("attr selector", function(){
     var tokens = new Nehan.SelectorLexer("a[target='_blank'][href='#']").getTokens();
-    //console.log("with attr:%o", tokens);
+    //console.log("attr selector:%o", tokens);
     expect(tokens.length).toBe(1);
+    expect(tokens[0].name).toBe("a");
     expect(tokens[0].attrs.length).toBe(2);
     expect(tokens[0].attrs[0].left).toBe("target");
     expect(tokens[0].attrs[0].op).toBe("=");
@@ -59,5 +71,26 @@ describe("SelectorLexer", function(){
     expect(tokens[0].attrs[1].left).toBe("href");
     expect(tokens[0].attrs[1].op).toBe("=");
     expect(tokens[0].attrs[1].right).toBe("#");
+  });
+
+  it("pseudo-class", function(){
+    var tokens = new Nehan.SelectorLexer("a:first-child").getTokens();
+    //console.log("pseudo-class:%o", tokens);
+    expect(tokens.length).toBe(1);
+    expect(tokens[0].name).toBe("a");
+    expect(tokens[0].pseudo.name).toBe("first-child");
+    expect(tokens[0].pseudo.args.length).toBe(0);
+  });
+
+  it("pseudo-class with args", function(){
+    var tokens = new Nehan.SelectorLexer("a:not(.foo, .bar, .baz)").getTokens();
+    //console.log("pseudo-class with args:%o", tokens);
+    expect(tokens.length).toBe(1);
+    expect(tokens[0].name).toBe("a");
+    expect(tokens[0].pseudo.name).toBe("not");
+    expect(tokens[0].pseudo.args.length).toBe(3);
+    expect(tokens[0].pseudo.args[0]).toBe(".foo");
+    expect(tokens[0].pseudo.args[1]).toBe(".bar");
+    expect(tokens[0].pseudo.args[2]).toBe(".baz");
   });
 });

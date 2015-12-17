@@ -53,7 +53,7 @@ var sources = [
   "src/css-parser.js",
   "src/attr-selector.js",
   "src/pseudo-selector.js",
-  "src/type-selector.js",
+  "src/compound-selector.js",
   "src/selector-lexer.js",
   "src/selector-state-machine.js",
   "src/selector-value.js",

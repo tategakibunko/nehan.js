@@ -14,11 +14,12 @@ Nehan.SelectorLexer = (function(){
   var __rex_id = /^#[\w-_]+/;
   var __rex_class = /^\.[\w-_]+/;
   var __rex_attr = /^\[[^\]]+\]/;
-  var __rex_pseudo = /^:{1,2}[\w-_]+/;
+  var __rex_pseudo_ident = /^:{1,2}[\w-_]+/;
+  var __rex_pseudo_args = /\(.*?\)/;
 
   /**
    @memberof Nehan.SelectorLexer
-   @return {Array.<Nehan.TypeSelector>}
+   @return {Array.<Nehan.CompoundSelector>}
    */
   SelectorLexer.prototype.getTokens = function(){
     var tokens = [];
@@ -43,7 +44,7 @@ Nehan.SelectorLexer = (function(){
       this._stepBuff(1);
       return c1;
     default: // type-selecor
-      return this._getTypeSelector();
+      return this._getCompoundSelector();
     }
     throw "invalid selector:[" + this.buff + "]";
   };
@@ -66,7 +67,7 @@ Nehan.SelectorLexer = (function(){
     return ret;
   };
 
-  SelectorLexer.prototype._getTypeSelector = function(){
+  SelectorLexer.prototype._getCompoundSelector = function(){
     var buff_len_before = this.buff.length;
     var name = this._getName();
     var name_rex = (name === null)? this._getNameRex() : null;
@@ -79,7 +80,7 @@ Nehan.SelectorLexer = (function(){
     if(this.buff.length === buff_len_before){
       throw "invalid selector:[" + this.buff + "]";
     }
-    return new Nehan.TypeSelector({
+    return new Nehan.CompoundSelector({
       name:name,
       nameRex:name_rex,
       id:id,
@@ -139,8 +140,17 @@ Nehan.SelectorLexer = (function(){
   };
 
   SelectorLexer.prototype._getPseudo = function(){
-    var pseudo = this._getByRex(__rex_pseudo);
-    return pseudo? new Nehan.PseudoSelector(pseudo) : null;
+    var pseudo_ident = this._getByRex(__rex_pseudo_ident);
+    if(!pseudo_ident){
+      return null;
+    }
+    var pseudo_args_str = this._getByRex(__rex_pseudo_args);
+    if(!pseudo_args_str){
+      return new Nehan.PseudoSelector(pseudo_ident);
+    }
+    pseudo_args_str = pseudo_args_str.replace(/\s/g, "").replace("(", "").replace(")", "");
+    var pseudo_args = Nehan.Utils.splitBy(pseudo_args_str, ",");
+    return new Nehan.PseudoSelector(pseudo_ident, pseudo_args);
   };
 
   return SelectorLexer;

@@ -8,8 +8,9 @@ Nehan.PseudoSelector = (function(){
    @example
    * var ps = new PseudoSelector("::first-letter").hasPseudoElement(); // true
    */
-  function PseudoSelector(expr){
+  function PseudoSelector(expr, args){
     this.name = this._normalize(expr);
+    this.args = args || [];
   }
 
   /**

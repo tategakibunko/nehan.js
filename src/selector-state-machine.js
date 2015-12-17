@@ -1,8 +1,8 @@
 /**
-   state machine module to check if some selector is matched to destination style context.
+ state machine module to check if some selector is matched to destination style context.
 
-   @namespace Nehan.SelectorStateMachine
-*/
+ @namespace Nehan.SelectorStateMachine
+ */
 Nehan.SelectorStateMachine = (function(){
   var __find_parent = function(style, parent_type){
     var ptr = style.parent;
@@ -44,16 +44,17 @@ Nehan.SelectorStateMachine = (function(){
 
   return {
     /**
-       return true if all the selector-tokens({@link Nehan.TypeSelector} or combinator) matches the style-context.
+     return true if all the selector-tokens({@link Nehan.CompoundSelector} or combinator) matches the style-context.
 
-       @memberof Nehan.SelectorStateMachine
-       @param style {Nehan.Style}
-       @param tokens {Array.<Nehan.TypeSelector> | combinator_string}
-       @return {boolean}
-    */
+     @memberof Nehan.SelectorStateMachine
+     @param style {Nehan.Style}
+     @param tokens {Array.<Nehan.CompoundSelector> | combinator_string}
+     @return {boolean}
+     */
     accept : function(style, tokens){
       if(tokens.length === 0){
-	throw "selector syntax error:" + src;
+	console.error("syntax error:%o", tokens);
+	throw "selector syntax error";
       }
       var pos = tokens.length - 1;
       var pop = function(){
@@ -65,8 +66,9 @@ Nehan.SelectorStateMachine = (function(){
       var f2, tmp, f1, combinator;
       while(pos >= 0){
 	f2 = pop();
-	if(f2 instanceof Nehan.TypeSelector === false){
-	  throw "selector syntax error:" + src;
+	if(f2 instanceof Nehan.CompoundSelector === false){
+	  console.error("syntax error:%o", tokens);
+	  throw "selector syntax error";
 	}
 	if(!f2.test(style)){
 	  return false;
@@ -75,14 +77,15 @@ Nehan.SelectorStateMachine = (function(){
 	if(tmp === null){
 	  return true;
 	}
-	if(tmp instanceof Nehan.TypeSelector){
+	if(tmp instanceof Nehan.CompoundSelector){
 	  f1 = tmp;
 	  combinator = " "; // descendant combinator
 	} else if(typeof tmp === "string"){
 	  combinator = tmp;
 	  f1 = pop();
-	  if(f1 === null || f1 instanceof Nehan.TypeSelector === false){
-	    throw "selector syntax error:" + src;
+	  if(f1 === null || f1 instanceof Nehan.CompoundSelector === false){
+	    console.error("syntax error:%o", tokens);
+	    throw "selector syntax error";
 	  }
 	}
 	// test [f1 combinator f2]

@@ -3279,8 +3279,9 @@ Nehan.PseudoSelector = (function(){
    @example
    * var ps = new PseudoSelector("::first-letter").hasPseudoElement(); // true
    */
-  function PseudoSelector(expr){
+  function PseudoSelector(expr, args){
     this.name = this._normalize(expr);
+    this.args = args || [];
   }
 
   /**
@@ -3355,10 +3356,10 @@ Nehan.PseudoSelector = (function(){
    6. pseudo-element selector
      div::first-line{font-size:xxx}
 */
-Nehan.TypeSelector = (function(){
+Nehan.CompoundSelector = (function(){
   /**
      @memberof Nehan
-     @class TypeSelector
+     @class CompoundSelector
      @classdesc selector abstraction(name, class, id, attribute, pseudo).
      @constructor
      @param opt {Object}
@@ -3392,7 +3393,7 @@ Nehan.TypeSelector = (function(){
        div::first-line{font-size:xxx}
      </pre>
   */
-  function TypeSelector(opt){
+  function CompoundSelector(opt){
     this.name = opt.name || null;
     this.nameRex = opt.nameRex || null;
     this.id = opt.id || null;
@@ -3405,11 +3406,11 @@ Nehan.TypeSelector = (function(){
   /**
    check if [style] is matched to this selector
 
-   @memberof Nehan.TypeSelector
+   @memberof Nehan.CompoundSelector
    @param style {Nehan.Style}
    @return {boolean}
    */
-  TypeSelector.prototype.test = function(style){
+  CompoundSelector.prototype.test = function(style){
     if(style === null){
       return false;
     }
@@ -3442,11 +3443,11 @@ Nehan.TypeSelector = (function(){
   /**
    check if [markup_name] is matched to this selector
 
-   @memberof Nehan.TypeSelector
+   @memberof Nehan.CompoundSelector
    @param markup_name {String}
    @return {boolean}
    */
-  TypeSelector.prototype.testName = function(markup_name){
+  CompoundSelector.prototype.testName = function(markup_name){
     if(this.name === null){
       return false;
     }
@@ -3458,11 +3459,11 @@ Nehan.TypeSelector = (function(){
   /**
    check if [markup_name] is matched to this selector
 
-   @memberof Nehan.TypeSelector
+   @memberof Nehan.CompoundSelector
    @param markup_name {String}
    @return {boolean}
    */
-  TypeSelector.prototype.testNameRex = function(markup_name){
+  CompoundSelector.prototype.testNameRex = function(markup_name){
     if(this.nameRex === null){
       return false;
     }
@@ -3471,11 +3472,11 @@ Nehan.TypeSelector = (function(){
   /**
    check if [markup_classes] is matched to this selector
 
-   @memberof Nehan.TypeSelector
+   @memberof Nehan.CompoundSelector
    @param markup_classes {Array.<String>}
    @return {boolean}
    */
-  TypeSelector.prototype.testClassNames = function(markup_classes){
+  CompoundSelector.prototype.testClassNames = function(markup_classes){
     return this.classes.every(function(klass){
       return Nehan.List.exists(markup_classes, Nehan.Closure.eq(klass));
     });
@@ -3483,10 +3484,10 @@ Nehan.TypeSelector = (function(){
   /**
    get name specificity of this selector
 
-   @memberof Nehan.TypeSelector
+   @memberof Nehan.CompoundSelector
    @return {int}
    */
-  TypeSelector.prototype.getNameSpec = function(){
+  CompoundSelector.prototype.getNameSpec = function(){
     if(this.nameRex){
       return 1;
     }
@@ -3498,50 +3499,50 @@ Nehan.TypeSelector = (function(){
   /**
    get id specificity of this selector
 
-   @memberof Nehan.TypeSelector
+   @memberof Nehan.CompoundSelector
    @return {int}
    */
-  TypeSelector.prototype.getIdSpec = function(){
+  CompoundSelector.prototype.getIdSpec = function(){
     return this.id? 1 : 0;
   };
   /**
    get class specificity of this selector
 
-   @memberof Nehan.TypeSelector
+   @memberof Nehan.CompoundSelector
    @return {int}
    */
-  TypeSelector.prototype.getClassSpec = function(){
+  CompoundSelector.prototype.getClassSpec = function(){
     return this.classes.length;
   };
   /**
    get attribute specificity of this selector
 
-   @memberof Nehan.TypeSelector
+   @memberof Nehan.CompoundSelector
    @return {int}
    */
-  TypeSelector.prototype.getAttrSpec = function(){
+  CompoundSelector.prototype.getAttrSpec = function(){
     return this.attrs.length;
   };
   /**
    get pseudo-class specificity of this selector
 
-   @memberof Nehan.TypeSelector
+   @memberof Nehan.CompoundSelector
    @return {int}
    */
-  TypeSelector.prototype.getPseudoClassSpec = function(){
+  CompoundSelector.prototype.getPseudoClassSpec = function(){
     if(this.pseudo){
       return this.pseudo.hasPseudoElement()? 0 : 1;
     }
     return 0;
   };
 
-  TypeSelector.prototype._testAttrs = function(style){
+  CompoundSelector.prototype._testAttrs = function(style){
     return this.attrs.every(function(attr){
       return attr.test(style);
     });
   };
 
-  return TypeSelector;
+  return CompoundSelector;
 })();
 
 
@@ -3561,11 +3562,12 @@ Nehan.SelectorLexer = (function(){
   var __rex_id = /^#[\w-_]+/;
   var __rex_class = /^\.[\w-_]+/;
   var __rex_attr = /^\[[^\]]+\]/;
-  var __rex_pseudo = /^:{1,2}[\w-_]+/;
+  var __rex_pseudo_ident = /^:{1,2}[\w-_]+/;
+  var __rex_pseudo_args = /\(.*?\)/;
 
   /**
    @memberof Nehan.SelectorLexer
-   @return {Array.<Nehan.TypeSelector>}
+   @return {Array.<Nehan.CompoundSelector>}
    */
   SelectorLexer.prototype.getTokens = function(){
     var tokens = [];
@@ -3590,7 +3592,7 @@ Nehan.SelectorLexer = (function(){
       this._stepBuff(1);
       return c1;
     default: // type-selecor
-      return this._getTypeSelector();
+      return this._getCompoundSelector();
     }
     throw "invalid selector:[" + this.buff + "]";
   };
@@ -3613,7 +3615,7 @@ Nehan.SelectorLexer = (function(){
     return ret;
   };
 
-  SelectorLexer.prototype._getTypeSelector = function(){
+  SelectorLexer.prototype._getCompoundSelector = function(){
     var buff_len_before = this.buff.length;
     var name = this._getName();
     var name_rex = (name === null)? this._getNameRex() : null;
@@ -3626,7 +3628,7 @@ Nehan.SelectorLexer = (function(){
     if(this.buff.length === buff_len_before){
       throw "invalid selector:[" + this.buff + "]";
     }
-    return new Nehan.TypeSelector({
+    return new Nehan.CompoundSelector({
       name:name,
       nameRex:name_rex,
       id:id,
@@ -3686,8 +3688,17 @@ Nehan.SelectorLexer = (function(){
   };
 
   SelectorLexer.prototype._getPseudo = function(){
-    var pseudo = this._getByRex(__rex_pseudo);
-    return pseudo? new Nehan.PseudoSelector(pseudo) : null;
+    var pseudo_ident = this._getByRex(__rex_pseudo_ident);
+    if(!pseudo_ident){
+      return null;
+    }
+    var pseudo_args_str = this._getByRex(__rex_pseudo_args);
+    if(!pseudo_args_str){
+      return new Nehan.PseudoSelector(pseudo_ident);
+    }
+    pseudo_args_str = pseudo_args_str.replace(/\s/g, "").replace("(", "").replace(")", "");
+    var pseudo_args = Nehan.Utils.splitBy(pseudo_args_str, ",");
+    return new Nehan.PseudoSelector(pseudo_ident, pseudo_args);
   };
 
   return SelectorLexer;
@@ -3695,10 +3706,10 @@ Nehan.SelectorLexer = (function(){
 
 
 /**
-   state machine module to check if some selector is matched to destination style context.
+ state machine module to check if some selector is matched to destination style context.
 
-   @namespace Nehan.SelectorStateMachine
-*/
+ @namespace Nehan.SelectorStateMachine
+ */
 Nehan.SelectorStateMachine = (function(){
   var __find_parent = function(style, parent_type){
     var ptr = style.parent;
@@ -3740,16 +3751,17 @@ Nehan.SelectorStateMachine = (function(){
 
   return {
     /**
-       return true if all the selector-tokens({@link Nehan.TypeSelector} or combinator) matches the style-context.
+     return true if all the selector-tokens({@link Nehan.CompoundSelector} or combinator) matches the style-context.
 
-       @memberof Nehan.SelectorStateMachine
-       @param style {Nehan.Style}
-       @param tokens {Array.<Nehan.TypeSelector> | combinator_string}
-       @return {boolean}
-    */
+     @memberof Nehan.SelectorStateMachine
+     @param style {Nehan.Style}
+     @param tokens {Array.<Nehan.CompoundSelector> | combinator_string}
+     @return {boolean}
+     */
     accept : function(style, tokens){
       if(tokens.length === 0){
-	throw "selector syntax error:" + src;
+	console.error("syntax error:%o", tokens);
+	throw "selector syntax error";
       }
       var pos = tokens.length - 1;
       var pop = function(){
@@ -3761,8 +3773,9 @@ Nehan.SelectorStateMachine = (function(){
       var f2, tmp, f1, combinator;
       while(pos >= 0){
 	f2 = pop();
-	if(f2 instanceof Nehan.TypeSelector === false){
-	  throw "selector syntax error:" + src;
+	if(f2 instanceof Nehan.CompoundSelector === false){
+	  console.error("syntax error:%o", tokens);
+	  throw "selector syntax error";
 	}
 	if(!f2.test(style)){
 	  return false;
@@ -3771,14 +3784,15 @@ Nehan.SelectorStateMachine = (function(){
 	if(tmp === null){
 	  return true;
 	}
-	if(tmp instanceof Nehan.TypeSelector){
+	if(tmp instanceof Nehan.CompoundSelector){
 	  f1 = tmp;
 	  combinator = " "; // descendant combinator
 	} else if(typeof tmp === "string"){
 	  combinator = tmp;
 	  f1 = pop();
-	  if(f1 === null || f1 instanceof Nehan.TypeSelector === false){
-	    throw "selector syntax error:" + src;
+	  if(f1 === null || f1 instanceof Nehan.CompoundSelector === false){
+	    console.error("syntax error:%o", tokens);
+	    throw "selector syntax error";
 	  }
 	}
 	// test [f1 combinator f2]
@@ -3861,7 +3875,7 @@ Nehan.SelectorValue = (function(){
   return SelectorValue;
 })();
 
-// Selector = [TypeSelector | TypeSelector + combinator + Selector]
+// Selector = [CompoundSelector | CompoundSelector + combinator + Selector]
 Nehan.Selector = (function(){
   /**
    @memberof Nehan
@@ -3948,7 +3962,7 @@ Nehan.Selector = (function(){
   Selector.prototype._countSpec = function(elements){
     var a = 0, b = 0, c = 0;
     Nehan.List.iter(elements, function(token){
-      if(token instanceof Nehan.TypeSelector){
+      if(token instanceof Nehan.CompoundSelector){
 	a += token.getIdSpec();
 	b += token.getClassSpec() + token.getPseudoClassSpec() + token.getAttrSpec();
 	c += token.getNameSpec();
