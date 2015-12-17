@@ -19,5 +19,21 @@ Nehan.SectionHeader = (function(){
     return this._id;
   };
 
+  /**
+   @memberof Nehan.SectionHeader
+   @return {String}
+   */
+  SectionHeader.prototype.getTitle = function(){
+    return this.title;
+  };
+
+  /**
+   @memberof Nehan.SectionHeader
+   @return {int}
+   */
+  SectionHeader.prototype.getRank = function(){
+    return this.rank;
+  };
+
   return SectionHeader;
 })();

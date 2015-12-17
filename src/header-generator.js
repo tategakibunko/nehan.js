@@ -13,11 +13,7 @@ Nehan.HeaderGenerator = (function(){
   Nehan.Class.extend(HeaderGenerator, Nehan.BlockGenerator);
 
   HeaderGenerator.prototype._onComplete = function(block){
-    var header_id = this.context.startHeaderContext({
-      type:this.context.style.getMarkupName(),
-      rank:this.context.style.getHeaderRank(),
-      title:this.context.style.getContent()
-    });
+    var header_id = this.context.startHeaderContext();
     block.id = Nehan.Css.addNehanHeaderPrefix(header_id);
   };
   

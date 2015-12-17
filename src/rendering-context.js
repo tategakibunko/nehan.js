@@ -904,7 +904,10 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.endSectionContext = function(){
     // called when section content(article, aside, nav, section) ends.
-    this.getOutlineContext().endSection(this.getMarkupName());
+    this.getOutlineContext().add({
+      name:"end-section",
+      type:this.getMarkupName()
+    });
   };
 
   // -----------------------------------------------
@@ -1560,20 +1563,22 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.startSectionContext = function(){
     // called when section content(article, aside, nav, section) starts.
-    this.getOutlineContext().startSection({
+    this.getOutlineContext().add({
+      name:"start-section",
       type:this.getMarkupName(),
       pageNo:this.documentContext.getPageNo()
     });
   };
 
-  RenderingContext.prototype.startHeaderContext = function(opt){
+  RenderingContext.prototype.startHeaderContext = function(){
     // called when heading content(h1-h6) starts.
-    return this.getOutlineContext().addHeader({
+    return this.getOutlineContext().add({
+      name:"set-header",
       headerId:this.documentContext.genHeaderId(),
       pageNo:this.documentContext.getPageNo(),
-      type:opt.type,
-      rank:opt.rank,
-      title:opt.title
+      type:this.getMarkupName(),
+      rank:this.style.getHeaderRank(),
+      title:this.style.getContent()
     });
   };
 

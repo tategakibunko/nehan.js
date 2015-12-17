@@ -18,6 +18,7 @@ Nehan.OutlineContext = (function(){
   OutlineContext.prototype.isEmpty = function(){
     return this.logs.length === 0;
   };
+
   /**
    @memberof Nehan.OutlineContext
    @return {Object} log object
@@ -25,6 +26,7 @@ Nehan.OutlineContext = (function(){
   OutlineContext.prototype.get = function(index){
     return this.logs[index] || null;
   };
+
   /**
    @memberof Nehan.OutlineContext
    @return {String}
@@ -32,53 +34,15 @@ Nehan.OutlineContext = (function(){
   OutlineContext.prototype.getMarkupName = function(){
     return this.markupName;
   };
+
   /**
    @memberof Nehan.OutlineContext
-   @param opt {Object}
-   @param opt.type {String} - markup name
-   @param opt.pageNo {int} - page no of section
+   @param value {Object}
    @return {Nehan.OutlineContext}
    */
-  OutlineContext.prototype.startSection = function(opt){
-    this.logs.push({
-      name:"start-section",
-      type:opt.type,
-      pageNo:opt.pageNo
-    });
+  OutlineContext.prototype.add = function(value){
+    this.logs.push(value);
     return this;
-  };
-  /**
-   @memberof Nehan.OutlineContext
-   @param type {String} - markup name
-   @return {Nehan.OutlineContext}
-   */
-  OutlineContext.prototype.endSection = function(type){
-    this.logs.push({
-      name:"end-section",
-      type:type
-    });
-    return this;
-  };
-  /**
-   @memberof Nehan.OutlineContext
-   @param opt {Object}
-   @param opt.type {String} - markup name
-   @param opt.headerId {String} - unique header id(associate header box object with outline)
-   @pramm opt.pageNo {int} - page no of this header
-   @param opt.rank {int} - header rank(1 - 6)
-   @param opt.title {String} - header title
-   @return {String} header id
-   */
-  OutlineContext.prototype.addHeader = function(opt){
-    this.logs.push({
-      name:"set-header",
-      headerId:opt.headerId,
-      pageNo:opt.pageNo,
-      type:opt.type,
-      rank:opt.rank,
-      title:opt.title
-    });
-    return opt.headerId;
   };
 
   return OutlineContext;

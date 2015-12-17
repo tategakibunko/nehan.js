@@ -6255,6 +6255,22 @@ Nehan.SectionHeader = (function(){
     return this._id;
   };
 
+  /**
+   @memberof Nehan.SectionHeader
+   @return {String}
+   */
+  SectionHeader.prototype.getTitle = function(){
+    return this.title;
+  };
+
+  /**
+   @memberof Nehan.SectionHeader
+   @return {int}
+   */
+  SectionHeader.prototype.getRank = function(){
+    return this.rank;
+  };
+
   return SectionHeader;
 })();
 
@@ -6525,6 +6541,7 @@ Nehan.OutlineContext = (function(){
   OutlineContext.prototype.isEmpty = function(){
     return this.logs.length === 0;
   };
+
   /**
    @memberof Nehan.OutlineContext
    @return {Object} log object
@@ -6532,6 +6549,7 @@ Nehan.OutlineContext = (function(){
   OutlineContext.prototype.get = function(index){
     return this.logs[index] || null;
   };
+
   /**
    @memberof Nehan.OutlineContext
    @return {String}
@@ -6539,53 +6557,15 @@ Nehan.OutlineContext = (function(){
   OutlineContext.prototype.getMarkupName = function(){
     return this.markupName;
   };
+
   /**
    @memberof Nehan.OutlineContext
-   @param opt {Object}
-   @param opt.type {String} - markup name
-   @param opt.pageNo {int} - page no of section
+   @param value {Object}
    @return {Nehan.OutlineContext}
    */
-  OutlineContext.prototype.startSection = function(opt){
-    this.logs.push({
-      name:"start-section",
-      type:opt.type,
-      pageNo:opt.pageNo
-    });
+  OutlineContext.prototype.add = function(value){
+    this.logs.push(value);
     return this;
-  };
-  /**
-   @memberof Nehan.OutlineContext
-   @param type {String} - markup name
-   @return {Nehan.OutlineContext}
-   */
-  OutlineContext.prototype.endSection = function(type){
-    this.logs.push({
-      name:"end-section",
-      type:type
-    });
-    return this;
-  };
-  /**
-   @memberof Nehan.OutlineContext
-   @param opt {Object}
-   @param opt.type {String} - markup name
-   @param opt.headerId {String} - unique header id(associate header box object with outline)
-   @pramm opt.pageNo {int} - page no of this header
-   @param opt.rank {int} - header rank(1 - 6)
-   @param opt.title {String} - header title
-   @return {String} header id
-   */
-  OutlineContext.prototype.addHeader = function(opt){
-    this.logs.push({
-      name:"set-header",
-      headerId:opt.headerId,
-      pageNo:opt.pageNo,
-      type:opt.type,
-      rank:opt.rank,
-      title:opt.title
-    });
-    return opt.headerId;
   };
 
   return OutlineContext;
@@ -16136,11 +16116,7 @@ Nehan.HeaderGenerator = (function(){
   Nehan.Class.extend(HeaderGenerator, Nehan.BlockGenerator);
 
   HeaderGenerator.prototype._onComplete = function(block){
-    var header_id = this.context.startHeaderContext({
-      type:this.context.style.getMarkupName(),
-      rank:this.context.style.getHeaderRank(),
-      title:this.context.style.getContent()
-    });
+    var header_id = this.context.startHeaderContext();
     block.id = Nehan.Css.addNehanHeaderPrefix(header_id);
   };
   
@@ -17929,7 +17905,10 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.endSectionContext = function(){
     // called when section content(article, aside, nav, section) ends.
-    this.getOutlineContext().endSection(this.getMarkupName());
+    this.getOutlineContext().add({
+      name:"end-section",
+      type:this.getMarkupName()
+    });
   };
 
   // -----------------------------------------------
@@ -18585,20 +18564,22 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.startSectionContext = function(){
     // called when section content(article, aside, nav, section) starts.
-    this.getOutlineContext().startSection({
+    this.getOutlineContext().add({
+      name:"start-section",
       type:this.getMarkupName(),
       pageNo:this.documentContext.getPageNo()
     });
   };
 
-  RenderingContext.prototype.startHeaderContext = function(opt){
+  RenderingContext.prototype.startHeaderContext = function(){
     // called when heading content(h1-h6) starts.
-    return this.getOutlineContext().addHeader({
+    return this.getOutlineContext().add({
+      name:"set-header",
       headerId:this.documentContext.genHeaderId(),
       pageNo:this.documentContext.getPageNo(),
-      type:opt.type,
-      rank:opt.rank,
-      title:opt.title
+      type:this.getMarkupName(),
+      rank:this.style.getHeaderRank(),
+      title:this.style.getContent()
     });
   };
 
