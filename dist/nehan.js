@@ -1018,6 +1018,12 @@ Nehan.Obj = (function(){
       }
       return true;
     },
+    /**
+     @memberof Nehan.Obj
+     @param prop {String}
+     @param value {Any}
+     @return {Object}
+     */
     createOne : function(prop, value){
       var obj = {};
       obj[prop] = value;
@@ -6509,7 +6515,7 @@ Nehan.OutlineContext = (function(){
   */
   function OutlineContext(markup_name){
     this.logs = [];
-    this.markupName = markup_name;
+    this.markupName = markup_name || "body";
   }
 
   /**
@@ -6586,10 +6592,10 @@ Nehan.OutlineContext = (function(){
 })();
 
 /**
-   parser module to convert from context to section tree object.
+ parser module to convert from context to section tree object.
 
-   @namespace Nehan.OutlineContextParser
-*/
+ @namespace Nehan.OutlineContextParser
+ */
 Nehan.OutlineContextParser = (function(){
   var _parse = function(context, parent, ptr){
     var log = context.get(ptr++);
@@ -6643,10 +6649,10 @@ Nehan.OutlineContextParser = (function(){
 
   return {
     /**
-       @memberof Nehan.OutlineContextParser
-       @param context {Nehan.OutlineContext}
-       @return {Nehan.Section} section tree root
-    */
+     @memberof Nehan.OutlineContextParser
+     @param context {Nehan.OutlineContext}
+     @return {Nehan.Section} section tree root
+     */
     parse : function(context){
       var ptr = 0;
       var root = new Nehan.Section("section", null, 0);

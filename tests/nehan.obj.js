@@ -22,4 +22,18 @@ describe("Obj", function(){
 
     expect(original).toBe(original); // original is not modified
   });
+
+  it("Obj.createOne", function(){
+    expect(Nehan.Obj.createOne("foo", 10)).toEqual({foo:10});
+  });
+
+  it("Obj.forall", function(){
+    expect(Nehan.Obj.forall({a:10, b:20, c:11}, function(prop, val){
+      return val % 2 === 0;
+    })).toBe(false);
+
+    expect(Nehan.Obj.forall({a:10, b:20, c:11}, function(prop, val){
+      return val > 0;
+    })).toBe(true);
+  });
 });

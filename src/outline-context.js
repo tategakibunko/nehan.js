@@ -8,7 +8,7 @@ Nehan.OutlineContext = (function(){
   */
   function OutlineContext(markup_name){
     this.logs = [];
-    this.markupName = markup_name;
+    this.markupName = markup_name || "body";
   }
 
   /**

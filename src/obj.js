@@ -68,6 +68,12 @@ Nehan.Obj = (function(){
       }
       return true;
     },
+    /**
+     @memberof Nehan.Obj
+     @param prop {String}
+     @param value {Any}
+     @return {Object}
+     */
     createOne : function(prop, value){
       var obj = {};
       obj[prop] = value;

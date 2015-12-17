@@ -94,9 +94,9 @@ describe("List", function(){
     expect(Nehan.List.zipObject(["a","b","c"], [1,2,3])).toEqual({a:1, b:2, c:3});
   });
 
-  it("should throw if length of each list is not same when List.zipObj", function(){
+  it("should throw if length of each list is not same when List.zipObject", function(){
     var to_fail = function(){
-      return Nehan.List.zipObj(["a","b","c"], [1,2]);
+      return Nehan.List.zipObject(["a","b","c"], [1,2]);
     };
     expect(to_fail).toThrow();
   });

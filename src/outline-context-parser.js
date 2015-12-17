@@ -1,8 +1,8 @@
 /**
-   parser module to convert from context to section tree object.
+ parser module to convert from context to section tree object.
 
-   @namespace Nehan.OutlineContextParser
-*/
+ @namespace Nehan.OutlineContextParser
+ */
 Nehan.OutlineContextParser = (function(){
   var _parse = function(context, parent, ptr){
     var log = context.get(ptr++);
@@ -56,10 +56,10 @@ Nehan.OutlineContextParser = (function(){
 
   return {
     /**
-       @memberof Nehan.OutlineContextParser
-       @param context {Nehan.OutlineContext}
-       @return {Nehan.Section} section tree root
-    */
+     @memberof Nehan.OutlineContextParser
+     @param context {Nehan.OutlineContext}
+     @return {Nehan.Section} section tree root
+     */
     parse : function(context){
       var ptr = 0;
       var root = new Nehan.Section("section", null, 0);
