@@ -45,9 +45,9 @@ Nehan.Ruby = (function(){
    @return {String}
    */
   Ruby.prototype.getRbString = function(){
-    return this.rbs.map(function(rb){
-      return rb.data || "";
-    }).join("");
+    return this.rbs.reduce(function(ret, rb){
+      return ret + (rb.data || "");
+    }, "");
   };
   /**
    @memberof Nehan.Ruby

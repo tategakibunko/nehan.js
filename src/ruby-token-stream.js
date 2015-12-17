@@ -7,7 +7,7 @@ Nehan.RubyTokenStream = (function(){
    @classdesc
    @constructor
    @extends {Nehan.TokenStream}
-   @param str {String}
+   @param str {String} - content string of <ruby> tag.
    */
   function RubyTokenStream(str){
     this.tokens = this._parse(new Nehan.TokenStream({

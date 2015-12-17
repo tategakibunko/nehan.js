@@ -23,7 +23,11 @@ Nehan.OutlineContextParser = (function(){
       break;
 
     case "set-header":
-      var header = new Nehan.SectionHeader(log.rank, log.title, log.headerId);
+      var header = new Nehan.SectionHeader({
+	id:log.headerId,
+	rank:log.rank,
+	title:log.title
+      });
       if(parent === null){
 	var auto_section = new Nehan.Section("section", null, log.pageNo);
 	auto_section.setHeader(header);

@@ -1,9 +1,9 @@
 Nehan.Section = (function(){
   /**
-     @memberof Nehan
-     @class Section
-     @classdesc section tree node with parent, next, child pointer.
-     @constructor
+   @memberof Nehan
+   @class Section
+   @classdesc section tree node with parent, next, child pointer.
+   @constructor
   */
   function Section(type, parent, page_no){
     this._type = type;
