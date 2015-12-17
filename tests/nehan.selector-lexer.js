@@ -47,4 +47,17 @@ describe("SelectorLexer", function(){
     expect(tokens[2].classes.length).toBe(1);
     expect(tokens[2].classes[0]).toBe("foo");
   });
+
+  it("with attr selector", function(){
+    var tokens = new Nehan.SelectorLexer("a[target='_blank'][href='#']").getTokens();
+    //console.log("with attr:%o", tokens);
+    expect(tokens.length).toBe(1);
+    expect(tokens[0].attrs.length).toBe(2);
+    expect(tokens[0].attrs[0].left).toBe("target");
+    expect(tokens[0].attrs[0].op).toBe("=");
+    expect(tokens[0].attrs[0].right).toBe("_blank");
+    expect(tokens[0].attrs[1].left).toBe("href");
+    expect(tokens[0].attrs[1].op).toBe("=");
+    expect(tokens[0].attrs[1].right).toBe("#");
+  });
 });
