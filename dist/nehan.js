@@ -6305,16 +6305,18 @@ Nehan.Section = (function(){
    @memberof Nehan
    @class Section
    @classdesc section tree node with parent, next, child pointer.
+   @param opt {Object}
+   @param opt.parent {Nehan.Section}
+   @param opt.pageNo {int}
    @constructor
   */
-  function Section(type, parent, page_no){
-    this._type = type;
+  function Section(opt){
+    this._parent = opt.parent || null;
+    this._pageNo = opt.pageNo || 0;
     this._header = null;
     this._auto = false;
     this._next = null;
     this._child = null;
-    this._parent = parent || null;
-    this._pageNo = page_no || 0;
   }
 
   /**
@@ -6422,14 +6424,7 @@ Nehan.Section = (function(){
    @return {String}
    */
   Section.prototype.getTitle = function(){
-    return this._header? this._header.title : ["untitled", this._type].join(" ");
-  };
-  /**
-   @memberof Nehan.Section
-   @return {String}
-   */
-  Section.prototype.getType = function(){
-    return this._type;
+    return this._header? this._header.title : "untitled-section";
   };
   /**
    @memberof Nehan.Section
@@ -6610,7 +6605,10 @@ Nehan.OutlineContextParser = (function(){
     }
     switch(log.name){
     case "start-section":
-      var section = new Nehan.Section(log.type, parent, log.pageNo);
+      var section = new Nehan.Section({
+	parent:parent,
+	pageNo:log.pageNo
+      });
       if(parent){
 	parent.addChild(section);
       }
@@ -6628,7 +6626,10 @@ Nehan.OutlineContextParser = (function(){
 	title:log.title
       });
       if(parent === null){
-	var auto_section = new Nehan.Section("section", null, log.pageNo);
+	var auto_section = new Nehan.Section({
+	  parent:null,
+	  pageNo:log.pageNo
+	});
 	auto_section.setHeader(header);
 	_parse(context, auto_section, ptr);
       } else if(!parent.hasHeader()){
@@ -6641,12 +6642,18 @@ Nehan.OutlineContextParser = (function(){
 	  ptr = Math.max(0, ptr - 1);
 	  _parse(context, parent.getParent(), ptr);
 	} else if(log.rank == parent_rank){ // same rank
-	  var next_section = new Nehan.Section("section", parent, log.pageNo);
+	  var next_section = new Nehan.Section({
+	    parent:parent,
+	    pageNo:log.pageNo
+	  });
 	  next_section.setHeader(header);
 	  parent.addNext(next_section);
 	  _parse(context, next_section, ptr);
 	} else { // lower rank
-	  var child_section = new Nehan.Section("section", parent, log.pageNo);
+	  var child_section = new Nehan.Section({
+	    parent:parent,
+	    pageNo:log.pageNo
+	  });
 	  child_section.setHeader(header);
 	  parent.addChild(child_section);
 	  _parse(context, child_section, ptr);
@@ -6665,7 +6672,10 @@ Nehan.OutlineContextParser = (function(){
      */
     parse : function(context){
       var ptr = 0;
-      var root = new Nehan.Section("section", null, 0);
+      var root = new Nehan.Section({
+	parent:null,
+	pageNo:0
+      });
       return _parse(context, root, ptr);
     }
   };

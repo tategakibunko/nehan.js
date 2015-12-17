@@ -3,16 +3,18 @@ Nehan.Section = (function(){
    @memberof Nehan
    @class Section
    @classdesc section tree node with parent, next, child pointer.
+   @param opt {Object}
+   @param opt.parent {Nehan.Section}
+   @param opt.pageNo {int}
    @constructor
   */
-  function Section(type, parent, page_no){
-    this._type = type;
+  function Section(opt){
+    this._parent = opt.parent || null;
+    this._pageNo = opt.pageNo || 0;
     this._header = null;
     this._auto = false;
     this._next = null;
     this._child = null;
-    this._parent = parent || null;
-    this._pageNo = page_no || 0;
   }
 
   /**
@@ -120,14 +122,7 @@ Nehan.Section = (function(){
    @return {String}
    */
   Section.prototype.getTitle = function(){
-    return this._header? this._header.title : ["untitled", this._type].join(" ");
-  };
-  /**
-   @memberof Nehan.Section
-   @return {String}
-   */
-  Section.prototype.getType = function(){
-    return this._type;
+    return this._header? this._header.title : "untitled-section";
   };
   /**
    @memberof Nehan.Section
