@@ -22,10 +22,12 @@ Nehan.Radius2d = (function(){
    @param value {Array<int>} - 2 length array, value[0] as horizontal radius, value[1] as vertical radius.
    @param value.0 {int} - horizontal radius
    @param value.1 {int} - vertical radius
+   @return {Nehan.Radius2d}
    */
   Radius2d.prototype.setSize = function(value){
     this.hori = value[0];
     this.vert = value[1];
+    return this;
   };
   /**
    @memberof Nehan.Radius2d
