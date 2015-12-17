@@ -1,13 +1,13 @@
 Nehan.PseudoSelector = (function(){
   /**
-     @memberof Nehan
-     @class PseudoSelector
-     @classdesc abstraction of css pseudo element or pseudo class selector
-     @constructor
-     @param expr {String}
-     @example
-     * var ps = new PseudoSelector("::first-letter").hasPseudoElement(); // true
-  */
+   @memberof Nehan
+   @class PseudoSelector
+   @classdesc abstraction of css pseudo element or pseudo class selector
+   @constructor
+   @param expr {String}
+   @example
+   * var ps = new PseudoSelector("::first-letter").hasPseudoElement(); // true
+   */
   function PseudoSelector(expr){
     this.name = this._normalize(expr);
   }

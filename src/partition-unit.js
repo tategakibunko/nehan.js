@@ -1,13 +1,13 @@
 Nehan.PartitionUnit = (function(){
   /**
-     @memberof Nehan
-     @class PartitionUnit
-     @classdesc abstraction for unit size of partition.
-     @constructor
-     @param opt {Object}
-     @param opt.weight {int} - partition weight, larger one gets more measure.
-     @param opt.isStatic {boolean} - if true, size is fixed.
-  */
+   @memberof Nehan
+   @class PartitionUnit
+   @classdesc abstraction for unit size of partition.
+   @constructor
+   @param opt {Object}
+   @param opt.weight {int} - partition weight, larger one gets more measure.
+   @param opt.isStatic {boolean} - if true, size is fixed.
+   */
   function PartitionUnit(opt){
     this.weight = opt.weight || 0;
     this.isStatic = opt.isStatic || false;

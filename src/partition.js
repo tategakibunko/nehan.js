@@ -1,11 +1,11 @@
 Nehan.Partition = (function(){
   /**
-     @memberof Nehan
-     @class Partition
-     @classdesc abstraction for partition of measure size.
-     @constructor
-     @param punits {Array.<PartitionUnit>}
-  */
+   @memberof Nehan
+   @class Partition
+   @classdesc abstraction for partition of measure size.
+   @constructor
+   @param punits {Array.<PartitionUnit>}
+   */
   function Partition(punits){
     this._punits = punits || []; // partition units
   }

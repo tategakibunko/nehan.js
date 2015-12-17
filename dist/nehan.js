@@ -3271,14 +3271,14 @@ Nehan.AttrSelector = (function(){
 
 Nehan.PseudoSelector = (function(){
   /**
-     @memberof Nehan
-     @class PseudoSelector
-     @classdesc abstraction of css pseudo element or pseudo class selector
-     @constructor
-     @param expr {String}
-     @example
-     * var ps = new PseudoSelector("::first-letter").hasPseudoElement(); // true
-  */
+   @memberof Nehan
+   @class PseudoSelector
+   @classdesc abstraction of css pseudo element or pseudo class selector
+   @constructor
+   @param expr {String}
+   @example
+   * var ps = new PseudoSelector("::first-letter").hasPseudoElement(); // true
+   */
   function PseudoSelector(expr){
     this.name = this._normalize(expr);
   }
@@ -10089,14 +10089,14 @@ Nehan.Spacing = {
 
 Nehan.PartitionUnit = (function(){
   /**
-     @memberof Nehan
-     @class PartitionUnit
-     @classdesc abstraction for unit size of partition.
-     @constructor
-     @param opt {Object}
-     @param opt.weight {int} - partition weight, larger one gets more measure.
-     @param opt.isStatic {boolean} - if true, size is fixed.
-  */
+   @memberof Nehan
+   @class PartitionUnit
+   @classdesc abstraction for unit size of partition.
+   @constructor
+   @param opt {Object}
+   @param opt.weight {int} - partition weight, larger one gets more measure.
+   @param opt.isStatic {boolean} - if true, size is fixed.
+   */
   function PartitionUnit(opt){
     this.weight = opt.weight || 0;
     this.isStatic = opt.isStatic || false;
@@ -10134,12 +10134,12 @@ Nehan.PartitionUnit = (function(){
 
 Nehan.Partition = (function(){
   /**
-     @memberof Nehan
-     @class Partition
-     @classdesc abstraction for partition of measure size.
-     @constructor
-     @param punits {Array.<PartitionUnit>}
-  */
+   @memberof Nehan
+   @class Partition
+   @classdesc abstraction for partition of measure size.
+   @constructor
+   @param punits {Array.<PartitionUnit>}
+   */
   function Partition(punits){
     this._punits = punits || []; // partition units
   }
