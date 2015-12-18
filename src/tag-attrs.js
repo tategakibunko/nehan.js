@@ -26,7 +26,7 @@ Nehan.TagAttrs = (function(){
     if(name === "class"){
       return this.classes.length > 0;
     }
-    return (typeof this.attrs.name !== "undefined");
+    return (typeof this.attrs[name] !== "undefined");
   };
   /**
    @memberof Nehan.TagAttrs
