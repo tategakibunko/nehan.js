@@ -1690,15 +1690,15 @@ Nehan.TagAttrParser = {
       token = lexer.get();
       if(token === null){
 	if(left){
-	  attrs[left] = "true";
+	  attrs[left] = true;
 	  left = null;
 	}
       } else if(token === "=" && left){
-	attrs[left] = lexer.get() || "true";
+	attrs[left] = lexer.get() || true;
 	left = null;
       } else if(left){
 	// value without right value like 'checked', 'selected' etc.
-	attrs[left] = "true";
+	attrs[left] = true;
 	left = token;
       } else if(token && token !== "="){
 	left = token;
