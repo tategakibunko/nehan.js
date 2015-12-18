@@ -1337,6 +1337,16 @@ Nehan.Const = {
    @namespace Nehan.Css
 */
 Nehan.Css = {
+  normalizeKey : function(key){
+    return Nehan.Utils.trim(key)
+      .toLowerCase()
+      .replace(/\s+/g, " ") // many space -> single space
+      .replace(/\s+,/g, ",") // cut space around comma before
+      .replace(/,\s+/g, ",") // cut space around comma after
+      .replace(/\s+\(/g, "(") // cut space around left paren before
+      .replace(/\(\s+/g, "(") // cut space around left paren after
+    ;
+  },
   /**
    @memberof Nehan.Css
    @param str {String}
@@ -3276,6 +3286,7 @@ Nehan.PseudoSelector = (function(){
    @classdesc abstraction of css pseudo element or pseudo class selector
    @constructor
    @param expr {String}
+   @param args {Array.<Nehan.CompoundSelector>}
    @example
    * var ps = new PseudoSelector("::first-letter").hasPseudoElement(); // true
    */
@@ -3318,6 +3329,8 @@ Nehan.PseudoSelector = (function(){
     case "only-of-type": return style.isOnlyOfType();
     case "empty": return style.isMarkupEmpty();
     case "root": return style.isRoot();
+    case "not": return style.isNot(this.args);
+    case "matches": return style.isMaches(this.args);
     }
     return false;
   };
@@ -3331,11 +3344,11 @@ Nehan.PseudoSelector = (function(){
 
 
 /* 
-   single element type selector
+ single element type selector
 
-   example:
+ example:
 
-   1. name selector
+   1. type selector
      div {font-size:xxx}
      /h[1-6]/ {font-weight:xxx}
 
@@ -3696,9 +3709,17 @@ Nehan.SelectorLexer = (function(){
     if(!pseudo_args_str){
       return new Nehan.PseudoSelector(pseudo_ident);
     }
-    pseudo_args_str = pseudo_args_str.replace(/\s/g, "").replace("(", "").replace(")", "");
-    var pseudo_args = Nehan.Utils.splitBy(pseudo_args_str, ",");
+    var pseudo_args = this._getPseudoArgs(pseudo_args_str);
     return new Nehan.PseudoSelector(pseudo_ident, pseudo_args);
+  };
+
+  SelectorLexer.prototype._getPseudoArgs = function(args_str){
+    args_str = args_str.replace(/\s/g, "").replace("(", "").replace(")", "");
+    var pseudo_args = Nehan.Utils.splitBy(args_str, ",");
+    return pseudo_args.map(function(str){
+      var tokens = new SelectorLexer(str).getTokens();
+      return tokens[0];
+    });
   };
 
   return SelectorLexer;
@@ -3864,10 +3885,20 @@ Nehan.SelectorValue = (function(){
     return this;
   };
 
+  /**
+   @memberof Nehan.SelectorValue
+   @param key {String}
+   @return selector_value
+   */
   SelectorValue.prototype.getEntry = function(key){
     return this.entries[key] || null;
   };
 
+  /**
+   @memberof Nehan.SelectorValue
+   @param key {String}
+   @return {Object}
+   */
   SelectorValue.prototype.getEntries = function(key){
     return this.entries;
   };
@@ -3875,91 +3906,73 @@ Nehan.SelectorValue = (function(){
   return SelectorValue;
 })();
 
-// Selector = [CompoundSelector | CompoundSelector + combinator + Selector]
-Nehan.Selector = (function(){
+// ComplexSelector = [CompoundSelector | combinator]
+Nehan.ComplexSelector = (function(){
   /**
    @memberof Nehan
-   @class Selector
-   @classdesc abstraction of css selector.
+   @class ComplexSelector
+   @classdesc abstraction of css complex selector.
    @constructor
    @param key {String}
-   @param raw_entries {Object} - unformatted css entries
   */
-  function Selector(key, raw_entries){
-    this.key = this._normalizeKey(key); // selector source like 'h1 > p'
-    this.value = new Nehan.SelectorValue(raw_entries);
-    this.elements = this._getSelectorElements(this.key); // [type-selector | combinator]
+  function ComplexSelector(key){
+    this.key = this._normalizeKey(key);
+    this.elements = this._getSelectorElements(this.key); // [compound-selector | combinator]
     this.spec = this._countSpec(this.elements); // count specificity
   }
 
   /**
-   @memberof Nehan.Selector
+   @memberof Nehan.ComplexSelector
    @param style {Nehan.Style}
    @return {boolean}
    */
-  Selector.prototype.test = function(style){
+  ComplexSelector.prototype.test = function(style){
     return Nehan.SelectorStateMachine.accept(style, this.elements);
   };
   /**
-   @memberof Nehan.Selector
+   @memberof Nehan.ComplexSelector
    @param style {Nehan.Style}
    @param element_name {String} - "before", "after", "first-line", "first-letter"
    @return {boolean}
    */
-  Selector.prototype.testPseudoElement = function(style, element_name){
+  ComplexSelector.prototype.testPseudoElement = function(style, element_name){
     var has_pseudo_name = this.hasPseudoElementName(element_name);
     var test_result = this.test(style);
     return has_pseudo_name && test_result;
-    //return this.hasPseudoElementName(element_name) && this.test(style);
   };
   /**
-   @memberof Nehan.Selector
-   @param raw_entries {Object} - unformatted css entries
-   */
-  Selector.prototype.updateValue = function(raw_entries){
-    var fmt_value = new Nehan.SelectorValue(raw_entries);
-    this.value.merge(fmt_value);
-  };
-  /**
-   @memberof Nehan.Selector
+   @memberof Nehan.ComplexSelector
    @return {String}
    */
-  Selector.prototype.getKey = function(){
+  ComplexSelector.prototype.getKey = function(){
     return this.key;
   };
   /**
-   @memberof Nehan.Selector
-   @return {Object} - formatted css value object
-   */
-  Selector.prototype.getEntries = function(){
-    return this.value.getEntries();
-  };
-  /**
-   @memberof Nehan.Selector
+   @memberof Nehan.ComplexSelector
    @return {int} selector specificity
    */
-  Selector.prototype.getSpec = function(){
+  ComplexSelector.prototype.getSpec = function(){
     return this.spec;
   };
   /**
-   @memberof Nehan.Selector
+   @memberof Nehan.ComplexSelector
    @return {boolean}
    */
-  Selector.prototype.hasPseudoElement = function(){
+  ComplexSelector.prototype.hasPseudoElement = function(){
     return this.key.indexOf("::") >= 0;
   };
   /**
-   @memberof Nehan.Selector
+   @memberof Nehan.ComplexSelector
    @param element_name {String} - "first-letter", "first-line"
    @return {boolean}
    */
-  Selector.prototype.hasPseudoElementName = function(element_name){
+  ComplexSelector.prototype.hasPseudoElementName = function(element_name){
     return this.key.indexOf("::" + element_name) >= 0;
   };
 
   // count selector 'specificity'
   // see http://www.w3.org/TR/css3-selectors/#specificity
-  Selector.prototype._countSpec = function(elements){
+  ComplexSelector.prototype._countSpec = function(elements){
     var a = 0, b = 0, c = 0;
     Nehan.List.iter(elements, function(token){
       if(token instanceof Nehan.CompoundSelector){
@@ -3971,17 +3984,103 @@ Nehan.Selector = (function(){
     return parseInt([a,b,c].join(""), 10); // maybe ok in most case.
   };
 
-  Selector.prototype._getSelectorElements = function(key){
+  ComplexSelector.prototype._getSelectorElements = function(key){
     var lexer = new Nehan.SelectorLexer(key);
     return lexer.getTokens();
   };
 
-  Selector.prototype._normalizeKey = function(key){
+  ComplexSelector.prototype._normalizeKey = function(key){
     key = (key instanceof RegExp)? "/" + key.source + "/" : key;
     return Nehan.Utils.trim(key).toLowerCase().replace(/\s+/g, " ");
   };
 
-  return Selector;
+  return ComplexSelector;
+})();
+
+
+/**
+ @memberof Nehan
+ @class SelectorEntry
+ @param key {String}
+ @param raw_value {Object} - unformatted css entry value
+ */
+Nehan.SelectorEntry = (function(){
+  function SelectorEntry(key, raw_value){
+    this.complexSelector = new Nehan.ComplexSelector(key);
+    this.value = new Nehan.SelectorValue(raw_value);
+  }
+
+  /**
+   @memberof Nehan.SelectorEntry
+   @return {String}
+   */
+  SelectorEntry.prototype.getKey = function(){
+    return this.complexSelector.getKey();
+  };
+
+  /**
+   @memberof Nehan.SelectorEntry
+   @return {int}
+   */
+  SelectorEntry.prototype.getSpec = function(){
+    return this.complexSelector.getSpec();
+  };
+
+  /**
+   @memberof Nehan.SelectorEntry
+   @return {Object} - formatted css value entries
+   */
+  SelectorEntry.prototype.getEntries = function(){
+    return this.value.getEntries();
+  };
+
+  /**
+   @memberof Nehan.SelectorEntry
+   @param style {Nehan.Style}
+   @return {boolean}
+   */
+  SelectorEntry.prototype.test = function(style){
+    return this.complexSelector.test(style);
+  };
+  
+  /**
+   @memberof Nehan.SelectorEntry
+   @param style {Nehan.Style}
+   @param element_name {String} - "before", "after", "first-line", "first-letter"
+   @return {boolean}
+   */
+  SelectorEntry.prototype.testPseudoElement = function(style, element_name){
+    return this.complexSelector.testPseudoElement(style, element_name);
+  };
+
+  /**
+   @memberof Nehan.ComplexSelector
+   @return {boolean}
+   */
+  SelectorEntry.prototype.hasPseudoElement = function(){
+    return this.complexSelector.hasPseudoElement();
+  };
+
+  /**
+   @memberof Nehan.SelectorEntry
+   @param element_name {String} - "first-letter", "first-line"
+   @return {boolean}
+   */
+  SelectorEntry.prototype.hasPseudoElementName = function(element_name){
+    return this.complexSelector.hasPseudoElementName(element_name);
+  };
+
+  /**
+   @memberof Nehan.SelectorEntry
+   @return {Nehan.SelectorEntry}
+   */
+  SelectorEntry.prototype.updateValue = function(raw_entries){
+    var fmt_value = new Nehan.SelectorValue(raw_entries);
+    this.value.merge(fmt_value);
+    return this;
+  };
+
+  return SelectorEntry;
 })();
 
 
@@ -4044,7 +4143,7 @@ Nehan.Selectors = (function(){
   };
 
   Selectors.prototype._insertValue = function(selector_key, raw_entries){
-    var selector = new Nehan.Selector(selector_key, raw_entries);
+    var selector = new Nehan.SelectorEntry(selector_key, raw_entries);
     var target_selectors = this._getTargetSelectors(selector_key);
     target_selectors.push(selector);
     return selector;
@@ -4096,7 +4195,7 @@ Nehan.Selectors = (function(){
    @return {Nehan.Selector}
    */
   Selectors.prototype.create = function(key, raw_entries){
-    return new Nehan.Selector(key, raw_entries);
+    return new Nehan.SelectorEntry(key, raw_entries);
   };
 
   /**
@@ -12907,7 +13006,7 @@ Nehan.PageEvaluator = (function(){
   }
 
   PageEvaluator.prototype._getEvaluator = function(){
-    var body_selector = this.context.selectors.get("body") || new Nehan.Selector("body", {flow:Nehan.Config.defaultBoxFlow});
+    var body_selector = this.context.selectors.get("body") || new Nehan.SelectorEntry("body", {flow:Nehan.Config.defaultBoxFlow});
     var flow = body_selector.getEntries().flow || Nehan.Config.defaultBoxFlow;
     return (flow === "tb-rl" || flow === "tb-lr")? new Nehan.VertEvaluator(this.context) : new Nehan.HoriEvaluator(this.context);
   };
@@ -13902,6 +14001,26 @@ Nehan.Style = (function(){
    */
   Style.prototype.isOnlyOfType = function(){
     return this.markup.isOnlyOfType();
+  };
+  /**
+   @memberof Nehan.Style
+   @param args {Array.<Nehan.CompoundSelector>}
+   @return {boolean}
+   */
+  Style.prototype.isNot = function(args){
+    return Nehan.List.forall(args, function(arg){
+      return !arg.test(this);
+    }.bind(this));
+  };
+  /**
+   @memberof Nehan.Style
+   @param args {Array.<Nehan.CompoundSelector>}
+   @return {boolean}
+   */
+  Style.prototype.isMatches = function(args){
+    return Nehan.List.forall(args, function(arg){
+      return arg.test(this);
+    }.bind(this));
   };
   /**
    @memberof Nehan.Style

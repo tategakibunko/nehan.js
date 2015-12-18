@@ -57,7 +57,7 @@ Nehan.Selectors = (function(){
   };
 
   Selectors.prototype._insertValue = function(selector_key, raw_entries){
-    var selector = new Nehan.Selector(selector_key, raw_entries);
+    var selector = new Nehan.SelectorEntry(selector_key, raw_entries);
     var target_selectors = this._getTargetSelectors(selector_key);
     target_selectors.push(selector);
     return selector;
@@ -109,7 +109,7 @@ Nehan.Selectors = (function(){
    @return {Nehan.Selector}
    */
   Selectors.prototype.create = function(key, raw_entries){
-    return new Nehan.Selector(key, raw_entries);
+    return new Nehan.SelectorEntry(key, raw_entries);
   };
 
   /**

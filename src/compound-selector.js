@@ -1,9 +1,9 @@
 /* 
-   single element type selector
+ single element type selector
 
-   example:
+ example:
 
-   1. name selector
+   1. type selector
      div {font-size:xxx}
      /h[1-6]/ {font-weight:xxx}
 

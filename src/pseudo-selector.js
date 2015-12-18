@@ -5,6 +5,7 @@ Nehan.PseudoSelector = (function(){
    @classdesc abstraction of css pseudo element or pseudo class selector
    @constructor
    @param expr {String}
+   @param args {Array.<Nehan.CompoundSelector>}
    @example
    * var ps = new PseudoSelector("::first-letter").hasPseudoElement(); // true
    */
@@ -47,6 +48,8 @@ Nehan.PseudoSelector = (function(){
     case "only-of-type": return style.isOnlyOfType();
     case "empty": return style.isMarkupEmpty();
     case "root": return style.isRoot();
+    case "not": return style.isNot(this.args);
+    case "matches": return style.isMaches(this.args);
     }
     return false;
   };

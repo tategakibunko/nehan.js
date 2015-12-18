@@ -148,9 +148,17 @@ Nehan.SelectorLexer = (function(){
     if(!pseudo_args_str){
       return new Nehan.PseudoSelector(pseudo_ident);
     }
-    pseudo_args_str = pseudo_args_str.replace(/\s/g, "").replace("(", "").replace(")", "");
-    var pseudo_args = Nehan.Utils.splitBy(pseudo_args_str, ",");
+    var pseudo_args = this._getPseudoArgs(pseudo_args_str);
     return new Nehan.PseudoSelector(pseudo_ident, pseudo_args);
+  };
+
+  SelectorLexer.prototype._getPseudoArgs = function(args_str){
+    args_str = args_str.replace(/\s/g, "").replace("(", "").replace(")", "");
+    var pseudo_args = Nehan.Utils.splitBy(args_str, ",");
+    return pseudo_args.map(function(str){
+      var tokens = new SelectorLexer(str).getTokens();
+      return tokens[0];
+    });
   };
 
   return SelectorLexer;

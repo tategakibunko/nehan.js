@@ -44,10 +44,20 @@ Nehan.SelectorValue = (function(){
     return this;
   };
 
+  /**
+   @memberof Nehan.SelectorValue
+   @param key {String}
+   @return selector_value
+   */
   SelectorValue.prototype.getEntry = function(key){
     return this.entries[key] || null;
   };
 
+  /**
+   @memberof Nehan.SelectorValue
+   @param key {String}
+   @return {Object}
+   */
   SelectorValue.prototype.getEntries = function(key){
     return this.entries;
   };

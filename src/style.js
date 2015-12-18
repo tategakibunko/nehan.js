@@ -523,6 +523,26 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
+   @param args {Array.<Nehan.CompoundSelector>}
+   @return {boolean}
+   */
+  Style.prototype.isNot = function(args){
+    return Nehan.List.forall(args, function(arg){
+      return !arg.test(this);
+    }.bind(this));
+  };
+  /**
+   @memberof Nehan.Style
+   @param args {Array.<Nehan.CompoundSelector>}
+   @return {boolean}
+   */
+  Style.prototype.isMatches = function(args){
+    return Nehan.List.forall(args, function(arg){
+      return arg.test(this);
+    }.bind(this));
+  };
+  /**
+   @memberof Nehan.Style
    @return {boolean}
    */
   Style.prototype.isMarkupEmpty = function(){

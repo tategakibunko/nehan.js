@@ -3,6 +3,16 @@
    @namespace Nehan.Css
 */
 Nehan.Css = {
+  normalizeKey : function(key){
+    return Nehan.Utils.trim(key)
+      .toLowerCase()
+      .replace(/\s+/g, " ") // many space -> single space
+      .replace(/\s+,/g, ",") // cut space around comma before
+      .replace(/,\s+/g, ",") // cut space around comma after
+      .replace(/\s+\(/g, "(") // cut space around left paren before
+      .replace(/\(\s+/g, "(") // cut space around left paren after
+    ;
+  },
   /**
    @memberof Nehan.Css
    @param str {String}
