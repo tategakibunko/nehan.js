@@ -987,7 +987,7 @@ Nehan.Style = (function(){
    @return {int}
    */
   Style.prototype.getEmphaTextBlockExtent = function(){
-    return this.getFontSize() * 2;
+    return this.textEmpha.getExtent(this.getFontSize());
   };
   /**
    @memberof Nehan.Style

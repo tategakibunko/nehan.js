@@ -23,17 +23,17 @@ Nehan.TextEmphaStyle = (function(){
   };
 
   /**
-     @memberof Nehan
-     @class TextEmphaStyle
-     @classdesc abstraction of text-empha-position.
-     @constructor
-     @param value {String} - style name. default "none".
-     @example
-     * new TextEmphaStyle().getText(); // ""
-     * new TextEmphaStyle().getText("none"); // ""
-     * new TextEmphaStyle("filled dot").getText(); // "&#x2022";
-     * new TextEmphaStyle("foo").getText(); // "foo";
-  */
+   @memberof Nehan
+   @class TextEmphaStyle
+   @classdesc abstraction of text-empha-position.
+   @constructor
+   @param value {String} - style name. default "none".
+   @example
+   * new TextEmphaStyle().getText(); // ""
+   * new TextEmphaStyle().getText("none"); // ""
+   * new TextEmphaStyle("filled dot").getText(); // "&#x2022;";
+   * new TextEmphaStyle("foo").getText(); // "foo";
+   */
   function TextEmphaStyle(value){
     this.value = value || "none";
   }

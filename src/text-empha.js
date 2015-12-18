@@ -1,14 +1,14 @@
 Nehan.TextEmpha = (function(){
   /**
-     @memberof Nehan
-     @class TextEmpha
-     @classdesc abstraction of text emphasis.
-     @constructor
-     @param opt {Object}
-     @param opt.style {Nehan.TextEmphaStyle}
-     @param opt.position {Nehan.TextEmphaPos}
-     @param opt.color {Nehan.Color}
-  */
+   @memberof Nehan
+   @class TextEmpha
+   @classdesc abstraction of text emphasis.
+   @constructor
+   @param opt {Object}
+   @param opt.style {Nehan.TextEmphaStyle}
+   @param opt.position {Nehan.TextEmphaPos}
+   @param opt.color {Nehan.Color}
+   */
   function TextEmpha(opt){
     opt = opt || {};
     this.style = opt.style || new Nehan.TextEmphaStyle();
@@ -37,7 +37,7 @@ Nehan.TextEmpha = (function(){
    @return {int}
    */
   TextEmpha.prototype.getExtent = function(font_size){
-    return font_size * 3;
+    return this.isEnable()? font_size * 2 : font_size;
   };
   /**
    @memberof Nehan.TextEmpha
