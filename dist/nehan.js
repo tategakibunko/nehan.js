@@ -1685,23 +1685,26 @@ Nehan.TagAttrParser = {
   */
   parse : function(src){
     var lexer = new Nehan.TagAttrLexer(src);
-    var token = null, left = null, attrs = {};
-    while(left !== null || !lexer.isEnd()){
+    var token = null, prop = null, attrs = {};
+    var assign = function(prop, value){
+      attrs[prop] = String(value); // right value is always string
+    };
+    while(prop !== null || !lexer.isEnd()){
       token = lexer.get();
       if(token === null){
-	if(left){
-	  attrs[left] = true;
-	  left = null;
+	if(prop){
+	  assign(prop, true);
+	  prop = null;
 	}
-      } else if(token === "=" && left){
-	attrs[left] = lexer.get() || true;
-	left = null;
-      } else if(left){
+      } else if(token === "=" && prop){
+	assign(prop, lexer.get() || true);
+	prop = null;
+      } else if(prop){
 	// value without right value like 'checked', 'selected' etc.
-	attrs[left] = true;
-	left = token;
+	assign(prop, true);
+	prop = token;
       } else if(token && token !== "="){
-	left = token;
+	prop = token;
       }
     }
     return attrs;
@@ -1710,22 +1713,18 @@ Nehan.TagAttrParser = {
 
 Nehan.TagAttrs = (function(){
   /**
-     @memberof Nehan
-     @class TagAttrs
-     @classdesc tag attribute set wrapper
-     @constructor
-     @param src {String}
-  */
+   @memberof Nehan
+   @class TagAttrs
+   @classdesc tag attribute set wrapper
+   @constructor
+   @param src {String}
+   */
   function TagAttrs(src){
     var attrs_raw = src? Nehan.TagAttrParser.parse(src) : {};
     this.classes = this._parseClasses(attrs_raw);
     this.attrs = this._parseAttrs(attrs_raw);
     this.dataset = this._parseDataset(attrs_raw);
   }
-
-  var __data_name_of = function(name){
-    return Nehan.Utils.camelize(name.slice(5));
-  };
 
   /**
    @memberof Nehan.TagAttrs
@@ -1776,6 +1775,9 @@ Nehan.TagAttrs = (function(){
    @return {attribute_value}
    */
   TagAttrs.prototype.getAttr = function(name, def_value){
+    if(name === "class"){
+      return this.classes;
+    }
     def_value = (typeof def_value === "undefined")? null : def_value;
     return (typeof this.attrs[name] === "undefined")? def_value : this.attrs[name];
   };
@@ -1807,11 +1809,12 @@ Nehan.TagAttrs = (function(){
   /**
    @memberof Nehan.TagAttrs
    @param name {String}
-   @param value {attribute_value}
+   @param value {Any}
    */
   TagAttrs.prototype.setAttr = function(name, value){
+    value = (typeof value === "string")? value : value.toString();
     if(name.indexOf("data-") === 0){
-      this.setData(__data_name_of(name), value);
+      this.setData(this._parseDatasetName(name), value);
     } else {
       this.attrs[name] = value;
     }
@@ -1850,22 +1853,18 @@ Nehan.TagAttrs = (function(){
     return attrs;
   };
 
-  TagAttrs.prototype._parseDatasetValue = function(value){
-    switch(value){
-    case "true": return true;
-    case "false": return false;
-    default: return isNaN(value)? value : Number(value);
-    }
-  };
-
   TagAttrs.prototype._parseDataset = function(attrs_raw){
     var dataset = {};
     for(var name in attrs_raw){
       if(name.indexOf("data-") === 0){
-	dataset[__data_name_of(name)] = this._parseDatasetValue(attrs_raw[name]);
+	dataset[this._parseDatasetName(name)] = attrs_raw[name];
       }
     }
     return dataset;
+  };
+
+  TagAttrs.prototype._parseDatasetName = function(name_raw){
+    return Nehan.Utils.camelize(name_raw.slice(5));
   };
 
   return TagAttrs;

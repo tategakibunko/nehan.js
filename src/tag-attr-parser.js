@@ -10,23 +10,26 @@ Nehan.TagAttrParser = {
   */
   parse : function(src){
     var lexer = new Nehan.TagAttrLexer(src);
-    var token = null, left = null, attrs = {};
-    while(left !== null || !lexer.isEnd()){
+    var token = null, prop = null, attrs = {};
+    var assign = function(prop, value){
+      attrs[prop] = String(value); // right value is always string
+    };
+    while(prop !== null || !lexer.isEnd()){
       token = lexer.get();
       if(token === null){
-	if(left){
-	  attrs[left] = true;
-	  left = null;
+	if(prop){
+	  assign(prop, true);
+	  prop = null;
 	}
-      } else if(token === "=" && left){
-	attrs[left] = lexer.get() || true;
-	left = null;
-      } else if(left){
+      } else if(token === "=" && prop){
+	assign(prop, lexer.get() || true);
+	prop = null;
+      } else if(prop){
 	// value without right value like 'checked', 'selected' etc.
-	attrs[left] = true;
-	left = token;
+	assign(prop, true);
+	prop = token;
       } else if(token && token !== "="){
-	left = token;
+	prop = token;
       }
     }
     return attrs;

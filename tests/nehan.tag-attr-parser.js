@@ -10,7 +10,7 @@ describe("TagAttrParser", function(){
     expect(Nehan.TagAttrParser.parse("class='foo' id='hoge' checked")).toEqual({
       class:"foo",
       id:"hoge",
-      checked:true
+      checked:"true"
     });
   });
 });

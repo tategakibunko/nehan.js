@@ -31,7 +31,7 @@ describe("Tag", function(){
   
   it("Tag.getData", function(){
     expect(tag.getData("name")).toEqual("taro");
-    expect(tag.getData("age")).toBe(10);
+    expect(tag.getData("age")).toBe("10");
   });
 
   it("Tag.setAttr", function(){
@@ -39,7 +39,7 @@ describe("Tag", function(){
     tmp.setAttr("width", "200");
     expect(tmp.getAttr("width")).toBe("200");
     tmp.setAttr("height", 100); // as integer
-    expect(tmp.getAttr("height")).toBe(100);
+    expect(tmp.getAttr("height")).toBe("100"); // result is string
   });
 
   it("Tag.setAttrs", function(){
@@ -48,8 +48,8 @@ describe("Tag", function(){
       width:100,
       height:200
     });
-    expect(tmp.getAttr("width")).toBe(100);
-    expect(tmp.getAttr("height")).toBe(200);
+    expect(tmp.getAttr("width")).toBe("100");
+    expect(tmp.getAttr("height")).toBe("200");
   });
 
   it("Tag.addClass", function(){
