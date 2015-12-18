@@ -78,16 +78,16 @@ describe("SelectorLexer", function(){
     //console.log("pseudo-class:%o", tokens);
     expect(tokens.length).toBe(1);
     expect(tokens[0].name).toBe("a");
-    expect(tokens[0].pseudo.name).toBe("first-child");
+    expect(tokens[0].pseudo.name).toBe(":first-child");
     expect(tokens[0].pseudo.args.length).toBe(0);
   });
 
   it("pseudo-class with args", function(){
     var tokens = new Nehan.SelectorLexer("a:not(.foo, .bar, .baz)").getTokens();
-    console.log("pseudo-class with args:%o", tokens);
+    //console.log("pseudo-class with args:%o", tokens);
     expect(tokens.length).toBe(1);
     expect(tokens[0].name).toBe("a");
-    expect(tokens[0].pseudo.name).toBe("not");
+    expect(tokens[0].pseudo.name).toBe(":not");
     expect(tokens[0].pseudo.args.length).toBe(3);
     expect(tokens[0].pseudo.args[0] instanceof Nehan.CompoundSelector).toBe(true);
     expect(tokens[0].pseudo.args[1] instanceof Nehan.CompoundSelector).toBe(true);

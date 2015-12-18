@@ -10,7 +10,7 @@ Nehan.PseudoSelector = (function(){
    * var ps = new PseudoSelector("::first-letter").hasPseudoElement(); // true
    */
   function PseudoSelector(expr, args){
-    this.name = this._normalize(expr);
+    this.name = expr;
     this.args = args || [];
   }
 
@@ -19,11 +19,11 @@ Nehan.PseudoSelector = (function(){
    @return {boolean}
    */
   PseudoSelector.prototype.hasPseudoElement = function(){
-    return (this.name === "before" ||
-	    this.name === "after" ||
-	    this.name === "first-letter" ||
-	    this.name === "first-line" ||
-	    this.name === "marker");
+    return (this.name === "::before" ||
+	    this.name === "::after" ||
+	    this.name === "::first-letter" ||
+	    this.name === "::first-line" ||
+	    this.name === "::marker");
   };
   /**
    @memberof Nehan.PseudoSelector
@@ -33,29 +33,25 @@ Nehan.PseudoSelector = (function(){
   PseudoSelector.prototype.test = function(style){
     switch(this.name){
       // pseudo-element
-    case "before": return true;
-    case "after": return true;
-    case "first-letter": return !style.isMarkupEmpty();
-    case "first-line": return !style.isMarkupEmpty();
-    case "marker": return !style.isMarkupEmpty();
+    case "::before": return true;
+    case "::after": return true;
+    case "::first-letter": return !style.isMarkupEmpty();
+    case "::first-line": return !style.isMarkupEmpty();
+    case "::marker": return !style.isMarkupEmpty();
 
       // pseudo-class
-    case "first-child": return style.isFirstChild();
-    case "last-child": return style.isLastChild();
-    case "first-of-type": return style.isFirstOfType();
-    case "last-of-type": return style.isLastOfType();
-    case "only-child": return style.isOnlyChild();
-    case "only-of-type": return style.isOnlyOfType();
-    case "empty": return style.isMarkupEmpty();
-    case "root": return style.isRoot();
-    case "not": return style.isNot(this.args);
-    case "matches": return style.isMaches(this.args);
+    case ":first-child": return style.isFirstChild();
+    case ":last-child": return style.isLastChild();
+    case ":first-of-type": return style.isFirstOfType();
+    case ":last-of-type": return style.isLastOfType();
+    case ":only-child": return style.isOnlyChild();
+    case ":only-of-type": return style.isOnlyOfType();
+    case ":empty": return style.isMarkupEmpty();
+    case ":root": return style.isRoot();
+    case ":not": return style.not(this.args);
+    case ":matches": return style.maches(this.args);
     }
     return false;
-  };
-
-  PseudoSelector.prototype._normalize = function(expr){
-    return expr.replace(/:+/g, "");
   };
 
   return PseudoSelector;

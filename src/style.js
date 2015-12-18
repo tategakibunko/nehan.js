@@ -526,7 +526,7 @@ Nehan.Style = (function(){
    @param args {Array.<Nehan.CompoundSelector>}
    @return {boolean}
    */
-  Style.prototype.isNot = function(args){
+  Style.prototype.not = function(args){
     return Nehan.List.forall(args, function(arg){
       return !arg.test(this);
     }.bind(this));
@@ -536,7 +536,7 @@ Nehan.Style = (function(){
    @param args {Array.<Nehan.CompoundSelector>}
    @return {boolean}
    */
-  Style.prototype.isMatches = function(args){
+  Style.prototype.matches = function(args){
     return Nehan.List.forall(args, function(arg){
       return arg.test(this);
     }.bind(this));
