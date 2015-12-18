@@ -110,5 +110,10 @@ describe("List", function(){
     var rev = Nehan.List.reverse(orig);
     expect(orig === rev).toBe(false);
   });
+
+  it("List.create", function(){
+    expect(Nehan.List.create(5, 0)).toEqual([0,0,0,0,0]);
+    expect(Nehan.List.create(5, 1)).toEqual([1,1,1,1,1]);
+  });
 });
 

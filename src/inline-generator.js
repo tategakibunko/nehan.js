@@ -80,7 +80,7 @@ Nehan.InlineGenerator = (function(){
     case "br":
       this.context.layoutContext.setLineBreak(true);
       if(!this.context.style.isPre()){
-	this.context.stream.skipUntil(function(token){
+	this.context.stream.iterWhile(function(token){
 	  return (token instanceof Nehan.Text && token.isWhiteSpaceOnly());
 	});
       }

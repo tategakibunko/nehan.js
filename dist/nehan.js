@@ -899,6 +899,19 @@ Nehan.List = {
   },
   /**
    @memberof Nehan.List
+   @param count {int} - array length
+   @param init_val - initialized value filled in new array
+   @return {Array}
+   */
+  create : function(count, init_val){
+    var ret = [];
+    for(var i = 0; i < count; i++){
+      ret.push((typeof init_val !== "undefined")? init_val : i);
+    }
+    return ret;
+  },
+  /**
+   @memberof Nehan.List
    @param lst1 {Array}
    @param lst2 {Array}
    @return {Array.<Array>}
@@ -11466,21 +11479,6 @@ Nehan.TokenStream = (function(){
     }
   };
   /**
-   step stream position while [fn(token)] is true.
-
-   @memberof Nehan.TokenStream
-   @param fn {Function}
-   */
-  TokenStream.prototype.skipUntil  = function(fn){
-    while(this.hasNext()){
-      var token = this.get();
-      if(fn(token) === false){
-	this.prev();
-	break;
-      }
-    }
-  };
-  /**
    step stream position once if [fn(token)] is true.
 
    @memberof Nehan.TokenStream
@@ -15419,7 +15417,7 @@ Nehan.InlineGenerator = (function(){
     case "br":
       this.context.layoutContext.setLineBreak(true);
       if(!this.context.style.isPre()){
-	this.context.stream.skipUntil(function(token){
+	this.context.stream.iterWhile(function(token){
 	  return (token instanceof Nehan.Text && token.isWhiteSpaceOnly());
 	});
       }
@@ -15561,7 +15559,7 @@ Nehan.TextGenerator = (function(){
       return this._getWhiteSpacePre(token);
     }
     // skip continuous white-spaces.
-    this.context.stream.skipUntil(Nehan.Token.isWhiteSpace);
+    this.context.stream.iterWhile(Nehan.Token.isWhiteSpace);
 
     // first new-line and tab are treated as single half space.
     if(token.isNewLine() || token.isTabSpace()){

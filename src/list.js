@@ -217,6 +217,19 @@ Nehan.List = {
   },
   /**
    @memberof Nehan.List
+   @param count {int} - array length
+   @param init_val - initialized value filled in new array
+   @return {Array}
+   */
+  create : function(count, init_val){
+    var ret = [];
+    for(var i = 0; i < count; i++){
+      ret.push((typeof init_val !== "undefined")? init_val : i);
+    }
+    return ret;
+  },
+  /**
+   @memberof Nehan.List
    @param lst1 {Array}
    @param lst2 {Array}
    @return {Array.<Array>}

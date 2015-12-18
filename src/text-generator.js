@@ -67,7 +67,7 @@ Nehan.TextGenerator = (function(){
       return this._getWhiteSpacePre(token);
     }
     // skip continuous white-spaces.
-    this.context.stream.skipUntil(Nehan.Token.isWhiteSpace);
+    this.context.stream.iterWhile(Nehan.Token.isWhiteSpace);
 
     // first new-line and tab are treated as single half space.
     if(token.isNewLine() || token.isTabSpace()){

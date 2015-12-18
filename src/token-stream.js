@@ -182,21 +182,6 @@ Nehan.TokenStream = (function(){
     }
   };
   /**
-   step stream position while [fn(token)] is true.
-
-   @memberof Nehan.TokenStream
-   @param fn {Function}
-   */
-  TokenStream.prototype.skipUntil  = function(fn){
-    while(this.hasNext()){
-      var token = this.get();
-      if(fn(token) === false){
-	this.prev();
-	break;
-      }
-    }
-  };
-  /**
    step stream position once if [fn(token)] is true.
 
    @memberof Nehan.TokenStream
