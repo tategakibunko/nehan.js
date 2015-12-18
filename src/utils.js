@@ -10,7 +10,7 @@ Nehan.Utils = {
    @memberof Nehan.Utils
    @param deciaml {int}
    @param base {int}
-   @return {int}
+   @return {Array.<int>}
    */
   convBase : function(decimal, base){
     if(decimal === 0){
@@ -29,21 +29,21 @@ Nehan.Utils = {
    @param str {String}
    */
   trimHeadCRLF : function(str){
-    return str.replace(/^\n+/, "");
+    return str.replace(/^[\r|\n]+/, "");
   },
   /**
    @memberof Nehan.Utils
    @param str {String}
    */
-  trimFootCRLF : function(str){
-    return str.replace(/\n+$/, "");
+  trimTailCRLF : function(str){
+    return str.replace(/[\r|\n]+$/, "");
   },
   /**
    @memberof Nehan.Utils
    @param str {String}
    */
   trimCRLF : function(str){
-    return this.trimFootCRLF(this.trimHeadCRLF(str));
+    return this.trimTailCRLF(this.trimHeadCRLF(str));
   },
   /**
    @memberof Nehan.Utils
@@ -135,6 +135,9 @@ Nehan.Utils = {
    @return {bool}
    */
   isNumber : function(value){
+    if(value === Infinity){
+      return true;
+    }
     if(typeof(value) != "number" && typeof(value) != "string"){
       return false;
     }

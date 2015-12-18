@@ -361,7 +361,7 @@ Nehan.RenderingContext = (function(){
       if(token === null){
 	break;
       }
-      if(!Nehan.Token.isTag(token)){
+      if(token instanceof Nehan.Tag === false){
 	continue;
       }
       switch(token.getName()){
@@ -523,7 +523,7 @@ Nehan.RenderingContext = (function(){
       if(token instanceof Nehan.Text && token.isWhiteSpaceOnly()){
 	return true; // skip and continue
       }
-      if(!Nehan.Token.isTag(token)){
+      if(token instanceof Nehan.Tag === false){
 	return false; // break
       }
       var child_style = this.createChildStyle(token);

@@ -1128,7 +1128,7 @@ Nehan.Utils = {
    @memberof Nehan.Utils
    @param deciaml {int}
    @param base {int}
-   @return {int}
+   @return {Array.<int>}
    */
   convBase : function(decimal, base){
     if(decimal === 0){
@@ -1147,21 +1147,21 @@ Nehan.Utils = {
    @param str {String}
    */
   trimHeadCRLF : function(str){
-    return str.replace(/^\n+/, "");
+    return str.replace(/^[\r|\n]+/, "");
   },
   /**
    @memberof Nehan.Utils
    @param str {String}
    */
-  trimFootCRLF : function(str){
-    return str.replace(/\n+$/, "");
+  trimTailCRLF : function(str){
+    return str.replace(/[\r|\n]+$/, "");
   },
   /**
    @memberof Nehan.Utils
    @param str {String}
    */
   trimCRLF : function(str){
-    return this.trimFootCRLF(this.trimHeadCRLF(str));
+    return this.trimTailCRLF(this.trimHeadCRLF(str));
   },
   /**
    @memberof Nehan.Utils
@@ -1253,6 +1253,9 @@ Nehan.Utils = {
    @return {bool}
    */
   isNumber : function(value){
+    if(value === Infinity){
+      return true;
+    }
     if(typeof(value) != "number" && typeof(value) != "string"){
       return false;
     }
@@ -1564,12 +1567,12 @@ Nehan.Html = {
 
 Nehan.Uri = (function(){
   /**
-     @memberof Nehan
-     @class Uri
-     @classdesc abstraction of URI. 
-     @constructor
-     @param address {String}
-  */
+   @memberof Nehan
+   @class Uri
+   @classdesc abstraction of URI. 
+   @constructor
+   @param address {String}
+   */
   function Uri(address){
     this.address = this._normalize(address || "");
   }
@@ -1580,6 +1583,8 @@ Nehan.Uri = (function(){
   /**
    @memberof Nehan.Uri
    @return {String}
+   @example
+   * new Uri("http://example.com/top#foo").getAddress(); // "http://example.com/top#foo"
    */
   Uri.prototype.getAddress = function(){
     return this.address;
@@ -9644,78 +9649,44 @@ Nehan.Ruby = (function(){
 
 
 /**
-   utility module to check token type.
+ utility module to check token type.
 
-   @namespace Nehan.Token
-*/
+ @namespace Nehan.Token
+ */
 Nehan.Token = {
   /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
-  isTag : function(token){
-    return token instanceof Nehan.Tag;
-  },
-  /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
+   @memberof Nehan.Token
+   @param {token}
+   @return {boolean}
+   */
   isText : function(token){
-    return (
-      token instanceof Nehan.Text ||
-      token instanceof Nehan.Char ||
-      token instanceof Nehan.Word ||
-      token instanceof Nehan.Tcy ||
-      token instanceof Nehan.Ruby
-    );
+    return (token instanceof Nehan.Text ||
+	    token instanceof Nehan.Char ||
+	    token instanceof Nehan.Word ||
+	    token instanceof Nehan.Tcy ||
+	    token instanceof Nehan.Ruby);
   },
   /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
-  isChar : function(token){
-    return token instanceof Nehan.Char;
-  },
-  /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
-  isWord : function(token){
-    return token instanceof Nehan.Word;
-  },
-  /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
-  isTcy : function(token){
-    return token instanceof Nehan.Tcy;
-  },
-  /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
+   @memberof Nehan.Token
+   @param {token}
+   @return {boolean}
+   */
   isEmphaTargetable : function(token){
     return token instanceof Nehan.Char || token instanceof Nehan.Tcy;
   },
   /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
+   @memberof Nehan.Token
+   @param {token}
+   @return {boolean}
+   */
   isNewLine : function(token){
     return token instanceof Nehan.Char && token.isNewLine();
   },
   /**
-     @memberof Nehan.Token
-     @param {token}
-     @return {boolean}
-  */
+   @memberof Nehan.Token
+   @param {token}
+   @return {boolean}
+   */
   isWhiteSpace : function(token){
     return token instanceof Nehan.Char && token.isWhiteSpace();
   }
@@ -11580,11 +11551,11 @@ Nehan.RubyTokenStream = (function(){
       if(token === null){
 	break;
       }
-      if(Nehan.Token.isTag(token) && token.getName() === "rt"){
+      if(token instanceof Nehan.Tag && token.getName() === "rt"){
 	rt = token;
 	break;
       }
-      if(Nehan.Token.isTag(token) && token.getName() === "rb"){
+      if(token instanceof Nehan.Tag && token.getName() === "rb"){
 	rbs = this._parseRb(token.getContent());
       }
       if(token instanceof Nehan.Text){
@@ -17521,7 +17492,7 @@ Nehan.RenderingContext = (function(){
       if(token === null){
 	break;
       }
-      if(!Nehan.Token.isTag(token)){
+      if(token instanceof Nehan.Tag === false){
 	continue;
       }
       switch(token.getName()){
@@ -17683,7 +17654,7 @@ Nehan.RenderingContext = (function(){
       if(token instanceof Nehan.Text && token.isWhiteSpaceOnly()){
 	return true; // skip and continue
       }
-      if(!Nehan.Token.isTag(token)){
+      if(token instanceof Nehan.Tag === false){
 	return false; // break
       }
       var child_style = this.createChildStyle(token);

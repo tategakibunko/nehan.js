@@ -1,11 +1,11 @@
 Nehan.Uri = (function(){
   /**
-     @memberof Nehan
-     @class Uri
-     @classdesc abstraction of URI. 
-     @constructor
-     @param address {String}
-  */
+   @memberof Nehan
+   @class Uri
+   @classdesc abstraction of URI. 
+   @constructor
+   @param address {String}
+   */
   function Uri(address){
     this.address = this._normalize(address || "");
   }
@@ -16,6 +16,8 @@ Nehan.Uri = (function(){
   /**
    @memberof Nehan.Uri
    @return {String}
+   @example
+   * new Uri("http://example.com/top#foo").getAddress(); // "http://example.com/top#foo"
    */
   Uri.prototype.getAddress = function(){
     return this.address;

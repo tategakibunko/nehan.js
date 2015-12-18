@@ -38,5 +38,15 @@ describe("TokenStream", function(){
     expect(token.getName()).toBe("p");
     expect(token.getContent()).toBe("bar");
   });
+
+  it("TokenStream.skipIf", function(){
+    var stream = create_stream();
+    stream.skipIf(function(token){
+      return token.getName() === "div";
+    });
+    var token = stream.get();
+    expect(token.getName()).toBe("p");
+    expect(token.getContent()).toBe("bar");
+  });
 });
 
