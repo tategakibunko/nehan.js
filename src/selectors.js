@@ -22,7 +22,7 @@ Nehan.Selectors = (function(){
 
   // sort __selectors by specificity asc.
   Selectors.prototype._sortSelectors = function(selectors){
-    selectors.sort(function(s1,s2){ return s1.spec - s2.spec; });
+    selectors.sort(function(s1,s2){ return s1.getSpec() - s2.getSpec(); });
     return selectors;
   };
 
