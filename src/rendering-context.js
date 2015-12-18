@@ -34,8 +34,8 @@ Nehan.RenderingContext = (function(){
     this.singleTagNames.addValues(names);
   };
 
-  RenderingContext.prototype.addAnchor = function(){
-    var anchor_name = this.style.getMarkupAttr("name");
+  RenderingContext.prototype.addAnchor = function(anchor_name){
+    anchor_name = anchor_name || this.getAnchorName();
     if(anchor_name){
       this.documentContext.addAnchor(anchor_name);
     }
@@ -954,6 +954,10 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.getDisplay = function(){
     return this.style? this.style.display : "";
+  };
+
+  RenderingContext.prototype.getAnchorName = function(){
+    return this.style.getAnchorName();
   };
 
   RenderingContext.prototype.getStreamTokens = function(){

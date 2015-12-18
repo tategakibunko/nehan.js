@@ -773,6 +773,14 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {String}
    */
+  Style.prototype.getAnchorName = function(){
+    var href = this.markup.getAttr("href") || "";
+    return new Nehan.Uri(href).getAnchorName();
+  };
+  /**
+   @memberof Nehan.Style
+   @return {String}
+   */
   Style.prototype.getSelectorCacheKey = function(){
     return this.selectorCacheKey;
   };
