@@ -46,9 +46,11 @@ Nehan.Text = (function(){
 
   /**
    @memberof Nehan.Text
+   @return {Nehan.Text}
    */
   Text.prototype.cutHeadChar = function(){
     this.content = this.content.substring(1);
+    return this;
   };
 
   return Text;
