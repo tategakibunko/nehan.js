@@ -75,4 +75,18 @@ describe("ComplexSelector", function(){
     expect(selector.test(third_item_style)).toBe(false);
     expect(selector.test(blockquote_style)).toBe(true);
   });
+
+  it("ComplexSelector.test(ul>li:not(.second))", function(){
+    var selector = new Nehan.ComplexSelector("ul>li:not(.second)");
+    expect(selector.test(first_item_style)).toBe(true);
+    expect(selector.test(second_item_style)).toBe(false);
+    expect(selector.test(third_item_style)).toBe(true);
+  });
+
+  it("ComplexSelector.test(ul>li:matches(.second))", function(){
+    var selector = new Nehan.ComplexSelector("ul>li:matches(.second)");
+    expect(selector.test(first_item_style)).toBe(false);
+    expect(selector.test(second_item_style)).toBe(true);
+    expect(selector.test(third_item_style)).toBe(false);
+  });
 });

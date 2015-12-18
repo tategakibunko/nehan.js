@@ -49,7 +49,7 @@ Nehan.PseudoSelector = (function(){
     case ":empty": return style.isMarkupEmpty();
     case ":root": return style.isRoot();
     case ":not": return style.not(this.args);
-    case ":matches": return style.maches(this.args);
+    case ":matches": return style.matches(this.args);
     }
     return false;
   };
