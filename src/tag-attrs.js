@@ -99,7 +99,7 @@ Nehan.TagAttrs = (function(){
    @param value {Any}
    */
   TagAttrs.prototype.setAttr = function(name, value){
-    value = (typeof value === "string")? value : value.toString();
+    value = (typeof value === "string")? value : String(value);
     if(name.indexOf("data-") === 0){
       this.setData(this._parseDatasetName(name), value);
     } else {
