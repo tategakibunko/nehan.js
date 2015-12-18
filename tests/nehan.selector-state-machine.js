@@ -1,7 +1,3 @@
 describe("SelectorStateMachine", function(){
-  it("SelectorStateMachine.accept(E F G) for G", function(){
-  });
-
-  it("SelectorStateMachine.accept(E>F>G) for G", function(){
-  });
+  // test fo SelectorStateMachine is already done by tests for ComplexSelector.
 });
