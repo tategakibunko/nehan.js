@@ -13987,7 +13987,7 @@ Nehan.Style = (function(){
    @return {boolean}
    */
   Style.prototype.matches = function(args){
-    return Nehan.List.forall(args, function(arg){
+    return Nehan.List.exists(args, function(arg){
       return arg.test(this);
     }.bind(this));
   };

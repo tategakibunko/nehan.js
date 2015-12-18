@@ -76,6 +76,7 @@ describe("ComplexSelector", function(){
     expect(selector.test(blockquote_style)).toBe(true);
   });
 
+  // :not A
   it("ComplexSelector.test(ul>li:not(.second))", function(){
     var selector = new Nehan.ComplexSelector("ul>li:not(.second)");
     expect(selector.test(first_item_style)).toBe(true);
@@ -83,10 +84,27 @@ describe("ComplexSelector", function(){
     expect(selector.test(third_item_style)).toBe(true);
   });
 
+  // :not A & B
+  it("ComplexSelector.test(ul>li:not(.second, .third))", function(){
+    var selector = new Nehan.ComplexSelector("ul>li:not(.second,.third)");
+    expect(selector.test(first_item_style)).toBe(true);
+    expect(selector.test(second_item_style)).toBe(false);
+    expect(selector.test(third_item_style)).toBe(false);
+  });
+
+  // :matches A
   it("ComplexSelector.test(ul>li:matches(.second))", function(){
     var selector = new Nehan.ComplexSelector("ul>li:matches(.second)");
     expect(selector.test(first_item_style)).toBe(false);
     expect(selector.test(second_item_style)).toBe(true);
     expect(selector.test(third_item_style)).toBe(false);
+  });
+
+  // :matches A or B
+  it("ComplexSelector.test(ul>li:matches(.second,.third))", function(){
+    var selector = new Nehan.ComplexSelector("ul>li:matches(.second,.third)");
+    expect(selector.test(first_item_style)).toBe(false);
+    expect(selector.test(second_item_style)).toBe(true);
+    expect(selector.test(third_item_style)).toBe(true);
   });
 });
