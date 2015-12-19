@@ -13476,14 +13476,14 @@ Nehan.Style = (function(){
     this.markupName = markup.getName();
     this.parent = parent || null;
 
-    // notice that 'this.childs' is not children of each page.
+    // notice that 'this.children' is not children of each page.
     // for example, assume that <body> consists 2 page(<div1>, <div2>).
     //
     // <body><div1>page1</div1><div2>page2</div2></body>
     //
     // at this case, global chilren of <body> is <div1> and <div2>.
     // but for '<body> of page1', <div1> is the only child, and <div2> is for '<body> of page2' also.
-    this.childs = [];
+    this.children = [];
 
     this.next = null; // next sibling
     this.prev = null; // prev sibling
@@ -13676,7 +13676,7 @@ Nehan.Style = (function(){
     this.initContextSize(measure, extent);
 
     // force re-culculate context-size of children based on new context-size of parent.
-    Nehan.List.iter(this.childs, function(child){
+    Nehan.List.iter(this.children, function(child){
       child.updateContextSize(null, null);
     });
 
@@ -13689,12 +13689,12 @@ Nehan.Style = (function(){
    @param child_style {Nehan.Style}
    */
   Style.prototype.appendChild = function(child_style){
-    if(this.childs.length > 0){
-      var last_child = Nehan.List.last(this.childs);
+    if(this.children.length > 0){
+      var last_child = Nehan.List.last(this.children);
       last_child.next = child_style;
       child_style.prev = last_child;
     }
-    this.childs.push(child_style);
+    this.children.push(child_style);
   };
   /**
    @memberof Nehan.Style
@@ -13702,11 +13702,11 @@ Nehan.Style = (function(){
    @return {Nehan.Style | null} removed child or null if nothing removed.
    */
   Style.prototype.removeChild = function(child_style){
-    var index = Nehan.List.indexOf(this.childs, function(child){
+    var index = Nehan.List.indexOf(this.children, function(child){
       return child === child_style;
     });
     if(index >= 0){
-      var removed_child = this.childs.splice(index, 1);
+      var removed_child = this.children.splice(index, 1);
       return removed_child;
     }
     return null;
@@ -14349,14 +14349,14 @@ Nehan.Style = (function(){
    @return {int}
    */
   Style.prototype.getChildCount = function(){
-    return this.childs.length;
+    return this.children.length;
   };
   /**
    @memberof Nehan.Style
    @return {int}
    */
   Style.prototype.getChildIndex = function(){
-    return Math.max(0, Nehan.List.indexOf(this.getParentChilds(), function(child){
+    return Math.max(0, Nehan.List.indexOf(this.getParentChildren(), function(child){
       return child === this;
     }.bind(this)));
   };
@@ -14365,7 +14365,7 @@ Nehan.Style = (function(){
    @return {int}
    */
   Style.prototype.getChildIndexOfType = function(){
-    return Math.max(0, Nehan.List.indexOf(this.getParentChildsOfType(this.getMarkupName()), function(child){
+    return Math.max(0, Nehan.List.indexOf(this.getParentChildrenOfType(this.getMarkupName()), function(child){
       return child === this;
     }.bind(this)));
   };
@@ -14374,14 +14374,14 @@ Nehan.Style = (function(){
    @return {Nehan.Style}
    */
   Style.prototype.getNthChild = function(nth){
-    return this.childs[nth] || null;
+    return this.children[nth] || null;
   };
   /**
    @memberof Nehan.Style
    @return {Array.<Nehan.Style>}
    */
-  Style.prototype.getParentChilds = function(){
-    return this.parent? this.parent.childs : [];
+  Style.prototype.getParentChildren = function(){
+    return this.parent? this.parent.children : [];
   };
   /**
    @memberof Nehan.Style
@@ -14396,8 +14396,8 @@ Nehan.Style = (function(){
    @param markup_name {String}
    @return {Nehan.Style}
    */
-  Style.prototype.getParentChildsOfType = function(markup_name){
-    return this.getParentChilds().filter(function(child){
+  Style.prototype.getParentChildrenOfType = function(markup_name){
+    return this.getParentChildren().filter(function(child){
       return child.getMarkupName() === markup_name;
     });
   };
@@ -18636,6 +18636,16 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.popFloatStackCache = function(){
     return this.floatStackCaches.pop();
+  };
+
+  // -----------------------------------------------
+  // [prefetch]
+  // -----------------------------------------------
+  RenderingContext.prototype.prefetchContext = function(markups){
+    return markups.reduce(function(ctx, markup){
+      var style = ctx.createChildStyle(markup);
+      return ctx.createChildContext(style);
+    }.bind(this), this);
   };
 
   // -----------------------------------------------

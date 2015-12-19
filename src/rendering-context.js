@@ -1496,6 +1496,16 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
+  // [prefetch]
+  // -----------------------------------------------
+  RenderingContext.prototype.prefetchContext = function(markups){
+    return markups.reduce(function(ctx, markup){
+      var style = ctx.createChildStyle(markup);
+      return ctx.createChildContext(style);
+    }.bind(this), this);
+  };
+
+  // -----------------------------------------------
   // [push]
   // -----------------------------------------------
   RenderingContext.prototype.pushCache = function(element){
