@@ -1891,28 +1891,31 @@ Nehan.TagAttrs = (function(){
 
 // Important Notice:
 // to avoid name-conflicts about existing name space of stylesheet,
-// all class names and id in nehan.js are forced to be prefixed by "nehan-".
+// all class names and id in nehan.js are forced to be prefixed by "nehan-" when evaluated.
 Nehan.Tag = (function (){
   /**
-     @memberof Nehan
-     @class Tag
-     @classdesc abstraction of html tag markup.
-     @constructor
-     @param src {String} - string of markup part like "&lt;div class='foo'&gt;"
-     @param content {String} - content text of markup
+   @memberof Nehan
+   @class Tag
+   @classdesc abstraction of html tag markup.
+   @constructor
+   @param src {String} - string of markup part like "&lt;div class='foo'&gt;"
+   @param content {String} - content text of markup
+   @param pseudo_class {Object} - use this to force setting pseudo class
   */
-  function Tag(src, content){
+  function Tag(src, content, pseudo_class){
     this.src = src;
     this.content = content || "";
     this.name = this._parseName(this.src);
     this.attrs = this._parseTagAttrs(this.name, this.src);
     this._key = this._createKey();
-    this._firstChild = false;
-    this._firstOfType = false;
-    this._lastChild = false;
-    this._lastOfType = false;
-    this._onlyChild = false;
-    this._onlyOfType = false;
+    Nehan.Obj.merge(this, {
+      firstChild:false,
+      firstOfType:false,
+      lastChild:false,
+      lastOfType:false,
+      onlyChild:false,
+      onlyOfType:false
+    }, pseudo_class || {});
   }
 
   /**
@@ -1976,42 +1979,42 @@ Nehan.Tag = (function (){
    @param status {Bool}
    */
   Tag.prototype.setFirstChild = function(status){
-    this._firstChild = status;
+    this.firstChild = status;
   };
   /**
    @memberof Nehan.Tag
    @param status {Bool}
    */
   Tag.prototype.setOnlyChild = function(status){
-    this._onlyChild = status;
+    this.onlyChild = status;
   };
   /**
    @memberof Nehan.Tag
    @param status {Bool}
    */
   Tag.prototype.setOnlyOfType = function(status){
-    this._onlyOfType = status;
+    this.onlyOfType = status;
   };
   /**
    @memberof Nehan.Tag
    @param status {Bool}
    */
   Tag.prototype.setFirstOfType = function(status){
-    this._firstOfType = status;
+    this.firstOfType = status;
   };
   /**
    @memberof Nehan.Tag
    @param status {Bool}
    */
   Tag.prototype.setLastChild = function(status){
-    this._lastChild = status;
+    this.lastChild = status;
   };
   /**
    @memberof Nehan.Tag
    @param status {Bool}
    */
   Tag.prototype.setLastOfType = function(status){
-    this._lastOfType = status;
+    this.lastOfType = status;
   };
   /**
    @memberof Nehan.Tag
@@ -2182,42 +2185,42 @@ Nehan.Tag = (function (){
    @return {boolean}
    */
   Tag.prototype.isFirstChild = function(){
-    return this._firstChild;
+    return this.firstChild;
   };
   /**
    @memberof Nehan.Tag
    @return {boolean}
    */
   Tag.prototype.isOnlyChild = function(){
-    return this._onlyChild;
+    return this.onlyChild;
   };
   /**
    @memberof Nehan.Tag
    @return {boolean}
    */
   Tag.prototype.isOnlyOfType = function(){
-    return this._onlyOfType;
+    return this.onlyOfType;
   };
   /**
    @memberof Nehan.Tag
    @return {boolean}
    */
   Tag.prototype.isFirstOfType = function(){
-    return this._firstOfType;
+    return this.firstOfType;
   };
   /**
    @memberof Nehan.Tag
    @return {boolean}
    */
   Tag.prototype.isLastChild = function(){
-    return this._lastChild;
+    return this.lastChild;
   };
   /**
    @memberof Nehan.Tag
    @return {boolean}
    */
   Tag.prototype.isLastOfType = function(){
-    return this._lastOfType;
+    return this.lastOfType;
   };
 
   Tag.prototype._getTagAttrSrc = function(src){
