@@ -4,6 +4,14 @@ describe("Tag", function(){
     expect(tag.getName()).toBe("div");
   });
 
+  it("Tag.getContent", function(){
+    expect(new Nehan.Tag("p", "content").getContent()).toBe("content");
+  });
+
+  it("can set pseudo-class via constructor", function(){
+    expect(new Nehan.Tag("p", "", {firstChild:true}).isFirstChild()).toBe(true);
+  });
+
   it("Tag.getAlias", function(){
     var tmp = tag.clone();
     tmp.setAlias("foo");
