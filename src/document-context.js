@@ -1,4 +1,7 @@
 Nehan.DocumentContext = (function(){
+  // unique document id
+  var __document_id = 0;
+
   /**
    @memberof Nehan
    @class Nehan.DocumentContext
@@ -11,6 +14,7 @@ Nehan.DocumentContext = (function(){
     this.charPos = 0;
     this.anchors = {};
     this.outlineContexts = [];
+    this.documentId = __document_id++;
     this.headerId = 0; // unique header-id
     this.blockId = 0; // unique block-id
     this.lineBreakCount = 0; // count of <BR> tag, used to generate paragraph-id(<block_id>-<br_count>).
@@ -106,7 +110,7 @@ Nehan.DocumentContext = (function(){
    @return {String}
    */
   DocumentContext.prototype.genHeaderId = function(){
-    return [Nehan.engineId, this.headerId++].join("-");
+    return [__document_id, this.headerId++].join("-");
   };
   /**
    @memberof Nehan.DocumentContext

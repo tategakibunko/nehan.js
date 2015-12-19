@@ -1402,32 +1402,32 @@ Nehan.Css = {
     ;
   },
   /**
-     @memberof Nehan.Css
-     @param name {String}
-     @return {String}
-     @example
-     * Nehan.Css.addNehanPrefix("foo"); // "nehan-foo"
-  */
+   @memberof Nehan.Css
+   @param name {String}
+   @return {String}
+   @example
+   * Nehan.Css.addNehanPrefix("foo"); // "nehan-foo"
+   */
   addNehanPrefix : function(name){
     return (name.indexOf("nehan-") === 0)? name : "nehan-" + name;
   },
   /**
-     @memberof Nehan.Css
-     @param name {String}
-     @return {String}
-     @example
-     * Nehan.Css.addNehanHeaderPrefix("foo"); // "nehan-header-foo"
-  */
+   @memberof Nehan.Css
+   @param name {String}
+   @return {String}
+   @example
+   * Nehan.Css.addNehanHeaderPrefix("foo"); // "nehan-header-foo"
+   */
   addNehanHeaderPrefix : function(name){
     return "nehan-header-" + name;
   },
   /**
-     @memberof Nehan.Css
-     @param name {String}
-     @return {String}
-     @example
-     * Nehan.Css.addNehanTocLinkPrefix("foo"); // "nehan-toc-link-foo"
-  */
+   @memberof Nehan.Css
+   @param name {String}
+   @return {String}
+   @example
+   * Nehan.Css.addNehanTocLinkPrefix("foo"); // "nehan-toc-link-foo"
+   */
   addNehanTocLinkPrefix : function(name){
     return "nehan-toc-link-" + name;
   }
@@ -6850,7 +6850,7 @@ Nehan.SectionTreeConverter = (function(){
       link.href = "#" + toc.pageNo;
       link.innerHTML = title;
       link.className = "nehan-toc-link";
-      link.id = Nehan.Css.addNehanTocLinkPrefix(toc.tocId);
+      link.id = Nehan.Css.addNehanTocLinkPrefix(toc.headerId);
       return link;
     },
     createPageNoItem : function(toc){
@@ -12795,6 +12795,9 @@ Nehan.Box = (function(){
 })();
 
 Nehan.DocumentContext = (function(){
+  // unique document id
+  var __document_id = 0;
+
   /**
    @memberof Nehan
    @class Nehan.DocumentContext
@@ -12807,6 +12810,7 @@ Nehan.DocumentContext = (function(){
     this.charPos = 0;
     this.anchors = {};
     this.outlineContexts = [];
+    this.documentId = __document_id++;
     this.headerId = 0; // unique header-id
     this.blockId = 0; // unique block-id
     this.lineBreakCount = 0; // count of <BR> tag, used to generate paragraph-id(<block_id>-<br_count>).
@@ -12902,7 +12906,7 @@ Nehan.DocumentContext = (function(){
    @return {String}
    */
   DocumentContext.prototype.genHeaderId = function(){
-    return [Nehan.engineId, this.headerId++].join("-");
+    return [__document_id, this.headerId++].join("-");
   };
   /**
    @memberof Nehan.DocumentContext

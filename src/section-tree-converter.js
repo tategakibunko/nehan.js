@@ -52,7 +52,7 @@ Nehan.SectionTreeConverter = (function(){
       link.href = "#" + toc.pageNo;
       link.innerHTML = title;
       link.className = "nehan-toc-link";
-      link.id = Nehan.Css.addNehanTocLinkPrefix(toc.tocId);
+      link.id = Nehan.Css.addNehanTocLinkPrefix(toc.headerId);
       return link;
     },
     createPageNoItem : function(toc){

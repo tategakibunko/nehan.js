@@ -52,32 +52,32 @@ Nehan.Css = {
     ;
   },
   /**
-     @memberof Nehan.Css
-     @param name {String}
-     @return {String}
-     @example
-     * Nehan.Css.addNehanPrefix("foo"); // "nehan-foo"
-  */
+   @memberof Nehan.Css
+   @param name {String}
+   @return {String}
+   @example
+   * Nehan.Css.addNehanPrefix("foo"); // "nehan-foo"
+   */
   addNehanPrefix : function(name){
     return (name.indexOf("nehan-") === 0)? name : "nehan-" + name;
   },
   /**
-     @memberof Nehan.Css
-     @param name {String}
-     @return {String}
-     @example
-     * Nehan.Css.addNehanHeaderPrefix("foo"); // "nehan-header-foo"
-  */
+   @memberof Nehan.Css
+   @param name {String}
+   @return {String}
+   @example
+   * Nehan.Css.addNehanHeaderPrefix("foo"); // "nehan-header-foo"
+   */
   addNehanHeaderPrefix : function(name){
     return "nehan-header-" + name;
   },
   /**
-     @memberof Nehan.Css
-     @param name {String}
-     @return {String}
-     @example
-     * Nehan.Css.addNehanTocLinkPrefix("foo"); // "nehan-toc-link-foo"
-  */
+   @memberof Nehan.Css
+   @param name {String}
+   @return {String}
+   @example
+   * Nehan.Css.addNehanTocLinkPrefix("foo"); // "nehan-toc-link-foo"
+   */
   addNehanTocLinkPrefix : function(name){
     return "nehan-toc-link-" + name;
   }
