@@ -337,7 +337,7 @@ Nehan.Config = {
    @type {Array.<Float>}
    */
   spacingSizeRate:{
-    space:0.2, // U+0020
+    space:0.25, // U+0020
     thinsp:0.2, // &thinsp;
     nbsp:0.38,  // &nbsp;
     ensp:0.5,   // &ensp;
