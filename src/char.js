@@ -342,7 +342,6 @@ Nehan.Char = (function(){
     if(this.isSmallKana()){
       this.bodySize -= Math.floor(font.size * 0.1);
     }
-    console.log("[%o]:%d", this, this.bodySize);
   };
 
   Char.prototype._setVertImg = function(vert_img, vscale, hscale){
