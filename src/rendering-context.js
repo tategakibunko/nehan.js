@@ -770,7 +770,7 @@ Nehan.RenderingContext = (function(){
       line.classes.push("nehan-root-line");
 
       // set baseline
-      Nehan.Baseline.set(line);
+      Nehan.Baseline.set(this.style.flow, line);
 
       // set text-align
       if(this.style.textAlign && (this.style.textAlign.isCenter() || this.style.textAlign.isEnd())){

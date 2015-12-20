@@ -45,8 +45,7 @@ Nehan.Baseline = (function(){
      @param line {Nehan.Box} - target line object.
      @param baseline {String} - 'central' or 'alphabetic'.
      */
-    set : function(line, baseline){
-      var flow = line.context.getFlow();
+    set : function(flow, line, baseline){
       if(line.context.isTextVertical()){
 	__set_vert_baseline(flow, line, baseline);
       } else {
