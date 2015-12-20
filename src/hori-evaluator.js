@@ -161,7 +161,7 @@ Nehan.HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._evalSpace = function(line, chr){
     return this._createElement("span", {
-      content:"&nbsp;",
+      content:chr.getData(line.getFlow()),
       className:"nehan-space",
       css:chr.getCssHoriSpaceChar(line)
     });

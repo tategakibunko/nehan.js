@@ -8691,6 +8691,7 @@ Nehan.Char = (function(){
     if(this.isSmallKana()){
       this.bodySize -= Math.floor(font.size * 0.1);
     }
+    console.log("[%o]:%d", this, this.bodySize);
   };
 
   Char.prototype._setVertImg = function(vert_img, vscale, hscale){
@@ -9479,7 +9480,8 @@ Nehan.Tcy = (function(){
     var css = {};
     if(this.data.length === 1){
       css.display = "inline-block";
-      css.width = "1em";
+      //css.width = "1em";
+      css.width = this.bodySize + "px";
       css["text-align"] = "center";
     }
     return css;
@@ -16955,7 +16957,7 @@ Nehan.VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalSpace = function(line, chr){
     return this._createElement("div", {
-      content:"&nbsp;",
+      content:chr.getData(line.getFlow()),
       className:"nehan-space",
       css:chr.getCssVertSpaceChar(line)
     });
@@ -17136,7 +17138,7 @@ Nehan.HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._evalSpace = function(line, chr){
     return this._createElement("span", {
-      content:"&nbsp;",
+      content:chr.getData(line.getFlow()),
       className:"nehan-space",
       css:chr.getCssHoriSpaceChar(line)
     });

@@ -64,7 +64,8 @@ Nehan.Tcy = (function(){
     var css = {};
     if(this.data.length === 1){
       css.display = "inline-block";
-      css.width = "1em";
+      //css.width = "1em";
+      css.width = this.bodySize + "px";
       css["text-align"] = "center";
     }
     return css;

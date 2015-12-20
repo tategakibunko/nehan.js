@@ -266,7 +266,7 @@ Nehan.VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalSpace = function(line, chr){
     return this._createElement("div", {
-      content:"&nbsp;",
+      content:chr.getData(line.getFlow()),
       className:"nehan-space",
       css:chr.getCssVertSpaceChar(line)
     });
