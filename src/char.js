@@ -381,7 +381,7 @@ Nehan.Char = (function(){
       this._setupByCharCode(this.data.charCodeAt(0));
     }
     if(this.isSpace()){
-      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.nbsp;
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.space;
     } else if(this.isNbsp()){
       this.vscale = this.hscale = Nehan.Config.spacingSizeRate.nbsp;
     } else if(this.isEnsp()){

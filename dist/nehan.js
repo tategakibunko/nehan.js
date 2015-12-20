@@ -373,6 +373,7 @@ Nehan.Config = {
    @type {Array.<Float>}
    */
   spacingSizeRate:{
+    space:0.2, // U+0020
     thinsp:0.2, // &thinsp;
     nbsp:0.38,  // &nbsp;
     ensp:0.5,   // &ensp;
@@ -8729,7 +8730,7 @@ Nehan.Char = (function(){
       this._setupByCharCode(this.data.charCodeAt(0));
     }
     if(this.isSpace()){
-      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.nbsp;
+      this.vscale = this.hscale = Nehan.Config.spacingSizeRate.space;
     } else if(this.isNbsp()){
       this.vscale = this.hscale = Nehan.Config.spacingSizeRate.nbsp;
     } else if(this.isEnsp()){
@@ -13113,6 +13114,7 @@ Nehan.SelectorContext = (function(){
   function SelectorContext(style, context){
     this.style = style;
     this.layoutContext = context.layoutContext;
+    this.documentContext = context.documentContext;
   }
 
   /**
@@ -13122,6 +13124,7 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.getParentStyle = function(){
     return this.style.parent;
   };
+
   /**
    @memberof Nehan.SelectorContext
    @return {Nehan.BoxFlow}
@@ -13130,6 +13133,7 @@ Nehan.SelectorContext = (function(){
     var parent = this.getParentStyle();
     return parent? parent.flow : Nehan.Display.getStdBoxFlow();
   };
+
   /**
    @memberof Nehan.SelectorContext
    @return {Nehan.Tag}
@@ -13137,6 +13141,7 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.getMarkup = function(){
     return this.style.markup;
   };
+
   /**
    @memberof Nehan.SelectorContext
    @method getMarkupContent
@@ -13145,14 +13150,16 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.getMarkupContent = function(){
     return this.getMarkup().getContent();
   };
+
   /**
    @memberof Nehan.SelectorContext
-   @method setMarkupContent
-   @param content {String}
+   @method getDocumentHeader
+   @return {Nehan.DocumentHeader}
    */
-  SelectorContext.prototype.setMarkupContent = function(content){
-    this.getMarkup().setContent(content);
+  SelectorContext.prototype.getMarkupContent = function(){
+    return this.getMarkup().getContent();
   };
+
   /**
    @memberof Nehan.SelectorContext
    @return {int}
@@ -13160,6 +13167,7 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.getRestMeasure = function(){
     return this.layoutContext? this.layoutContext.getInlineRestMeasure() : null;
   };
+
   /**
    @memberof Nehan.SelectorContext
    @return {int}
@@ -13167,6 +13175,7 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.getRestExtent = function(){
     return this.layoutContext? this.layoutContext.getBlockRestExtent() : null;
   };
+
   /**
    index number of nth-child
 
@@ -13176,6 +13185,7 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.getChildIndex = function(){
     return this.style.getChildIndex();
   };
+
   /**
    index number of nth-child-of-type
 
@@ -13185,6 +13195,17 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.getChildIndexOfType = function(){
     return this.style.getChildIndexOfType;
   };
+
+  /**
+   @memberof Nehan.SelectorContext
+   @method getCssAttr
+   @param name {String}
+   @param def_value {default_value} - [def_value] is returned if [name] not found.
+   */
+  SelectorContext.prototype.getCssAttr = function(name, def_value){
+    return this.style.getCssAttr(name, def_value);
+  };
+
   /**
    @memberof Nehan.SelectorContext
    @return {bool}
@@ -13192,6 +13213,7 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.isFirstChild = function(){
     return this.style.isFirstChild();
   };
+
   /**
    @memberof Nehan.SelectorContext
    @return {bool}
@@ -13199,6 +13221,7 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.isFirstOfType = function(){
     return this.style.isFirstOfType();
   };
+
   /**
    @memberof Nehan.SelectorContext
    @return {bool}
@@ -13206,6 +13229,7 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.isLastChild = function(){
     return this.style.isLastChild();
   };
+
   /**
    @memberof Nehan.SelectorContext
    @return {bool}
@@ -13213,6 +13237,7 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.isLastOfType = function(){
     return this.style.isLastOfType();
   };
+
   /**
    @memberof Nehan.SelectorContext
    @return {bool}
@@ -13220,6 +13245,7 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.isOnlyChild = function(){
     return this.style.isOnlyChild();
   };
+
   /**
    @memberof Nehan.SelectorContext
    @return {bool}
@@ -13227,6 +13253,7 @@ Nehan.SelectorContext = (function(){
   SelectorContext.prototype.isOnlyOfType = function(){
     return this.style.isOnlyOfType();
   };
+
   /**
    @memberof Nehan.SelectorContext
    @return {bool}
@@ -13260,12 +13287,11 @@ Nehan.SelectorContext = (function(){
 
   /**
    @memberof Nehan.SelectorContext
-   @method getCssAttr
-   @param name {String}
-   @param def_value {default_value} - [def_value] is returned if [name] not found.
+   @method setMarkupContent
+   @param content {String}
    */
-  SelectorContext.prototype.getCssAttr = function(name, def_value){
-    return this.style.getCssAttr(name, def_value);
+  SelectorContext.prototype.setMarkupContent = function(content){
+    this.getMarkup().setContent(content);
   };
 
   /**
