@@ -38,6 +38,71 @@ Nehan.VerticalAlign = (function(){
      @param flow {Nehan.BoxFlow}
      @param line {Nehan.Box} - target line(root line)
      */
+    setMiddle : function(flow, line){
+    },
+    /**
+     @memberof Nehan.VerticalAlign
+     @param flow {Nehan.BoxFlow}
+     @param line {Nehan.Box} - target line(root line)
+     */
+    setBefore : function(flow, line){
+    },
+    /**
+     @memberof Nehan.VerticalAlign
+     @param flow {Nehan.BoxFlow}
+     @param line {Nehan.Box} - target line(root line)
+     */
+    setTextBefore : function(flow, line){
+    },
+    /**
+     @memberof Nehan.VerticalAlign
+     @param flow {Nehan.BoxFlow}
+     @param line {Nehan.Box} - target line(root line)
+     */
+    setAfter : function(flow, line){
+    },
+    /**
+     @memberof Nehan.VerticalAlign
+     @param flow {Nehan.BoxFlow}
+     @param line {Nehan.Box} - target line(root line)
+     */
+    setTextAfter : function(flow, line){
+    },
+    /**
+     @memberof Nehan.VerticalAlign
+     @param flow {Nehan.BoxFlow}
+     @param line {Nehan.Box} - target line(root line)
+     */
+    setSub : function(flow, line){
+    },
+    /**
+     @memberof Nehan.VerticalAlign
+     @param flow {Nehan.BoxFlow}
+     @param line {Nehan.Box} - target line(root line)
+     */
+    setSuper : function(flow, line){
+    },
+    /**
+     @memberof Nehan.VerticalAlign
+     @param flow {Nehan.BoxFlow}
+     @param line {Nehan.Box} - target line(root line)
+     @param percent {int} - percent of line-height
+     */
+    setPercent : function(flow, line, percent){
+    },
+    /**
+     @memberof Nehan.VerticalAlign
+     @param flow {Nehan.BoxFlow}
+     @param line {Nehan.Box} - target line(root line)
+     @param px {int}
+     */
+    setLength : function(flow, line, px){
+    },
+    /**
+     @memberof Nehan.VerticalAlign
+     @param flow {Nehan.BoxFlow}
+     @param line {Nehan.Box} - target line(root line)
+     */
     setBaseline : function(flow, line){
       if(flow.isTextVertical()){
 	__set_vert_baseline(flow, line);
