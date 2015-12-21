@@ -769,23 +769,20 @@ Nehan.RenderingContext = (function(){
       line.inlineMeasure = this.layoutContext.getInlineCurMeasure(); // actual measure
       line.classes.push("nehan-root-line");
 
-      // set baseline
-      Nehan.Baseline.set(this.style.flow, line);
-
       // set text-align
       if(this.style.textAlign && (this.style.textAlign.isCenter() || this.style.textAlign.isEnd())){
 	this.style.textAlign.setAlign(line);
       } else if(this.style.textAlign && this.style.textAlign.isJustify()){
 	this.style.textAlign.setJustify(line);
       }
-      // set edge for line-height
-      var line_fix_size = Math.floor(line.maxFontSize * this.style.getLineHeight()) - line.maxExtent;
-      if(line.elements.length > 0 && line_fix_size > 0){
-	// notice that edge of line-root is already included in parent block,
-	// so this edge is set to create proper line-height.
-	line.edge = new Nehan.BoxEdge(); 
-	line.edge.padding.setBefore(this.style.flow, line_fix_size);
-      }
+
+      var line_height = this.style.getLineHeight();
+
+      // set line-height
+      Nehan.LineHeight.set(this.style.flow, line, line_height);
+
+      // set vertical-align(currently 'baseline' only)
+      Nehan.VerticalAlign.setBaseline(this.style.flow, line);
     }
 
     // set position in parent stream.
@@ -1586,14 +1583,16 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.startHeaderContext = function(){
     // called when heading content(h1-h6) starts.
-    return this.getOutlineContext().add({
+    var header_id = this.documentContext.genHeaderId();
+    this.getOutlineContext().add({
       name:"set-header",
-      headerId:this.documentContext.genHeaderId(),
+      headerId:header_id,
       pageNo:this.documentContext.getPageNo(),
       type:this.getMarkupName(),
       rank:this.style.getHeaderRank(),
       title:this.style.getContent()
     });
+    return header_id;
   };
 
   // -----------------------------------------------

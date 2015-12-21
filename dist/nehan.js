@@ -177,12 +177,7 @@ Nehan.Config = {
     "height",
     "interactive", // flag
     "letter-spacing",
-
-    // In style-context, we load 'line-height' prop and stored the value to this.lineHeight, so why this prop is unmanaged?
-    // Because in vertical mode, native 'line-height' is used in special purpose to make vertical line.
-    // So we avoid this prop stored as managed css prop.
-    //"line-height",
-
+    "line-height",
     "list-style-type",
     "list-style-position",
     "list-style-image",
@@ -7388,18 +7383,42 @@ Nehan.FloatGroupStack = (function(){
 
 
 /**
+ @namespace Nehan.LineHeight
+ */
+Nehan.LineHeight = (function(){
+  return {
+    /**
+     @memberof Nehan.Baseline
+     @param flow {Nehan.BoxFlow}
+     @param line {Nehan.Box} - target line object
+     @param line_height {Number} - target line height(not px, rate only)
+     */
+    set : function(flow, line, line_height){
+      var line_fix_size = (line.maxFontSize * line_height) - line.maxExtent;
+      var half_leading = Math.round(line_fix_size / 2);
+      if(line.elements.length > 0 && half_leading > 0){
+	// notice that edge of line-root is already included in 'parent' block(with same markup).
+	// so this edge is set to create proper line-height.
+	line.edge = new Nehan.BoxEdge();
+	line.edge.padding.setBefore(flow, half_leading);
+	line.edge.padding.setAfter(flow, half_leading);
+      }
+    }
+  };
+})();
+
+/**
  @namespace Nehan.Baseline
  */
-Nehan.Baseline = (function(){
-  var __set_vert_baseline = function(flow, root_line, baseline){
-    Nehan.List.iter(root_line.elements, function(element){
+Nehan.VerticalAlign = (function(){
+  var __set_vert_baseline = function(flow, line){
+    Nehan.List.iter(line.elements, function(element){
       var font_size = element.maxFontSize;
-      var from_after = Math.floor((root_line.maxFontSize - font_size) / 2);
+      var from_after = Math.floor((line.maxFontSize - font_size) / 2);
       if (from_after > 0){
-	var edge = element.edge || null;
-	edge = edge? edge.clone() : new Nehan.BoxEdge();
+	var edge = element.edge? element.edge.clone() : new Nehan.BoxEdge();
 	edge.padding.setAfter(flow, from_after); // set offset to padding
-	element.size.width = (root_line.maxExtent - from_after);
+	element.size.width = (line.maxExtent - from_after);
 	
 	// set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
 	Nehan.Obj.copy(element.css, edge.getCss(flow));
@@ -7407,16 +7426,15 @@ Nehan.Baseline = (function(){
     });
   };
 
-  var __set_hori_baseline = function(flow, root_line, baseline){
-    Nehan.List.iter(root_line.elements, function(element){
+  var __set_hori_baseline = function(flow, line){
+    Nehan.List.iter(line.elements, function(element){
       var font_size = element.maxFontSize;
-      var from_after = root_line.maxExtent - element.maxExtent;
-      if (from_after > 0){
-	var edge = element.edge || null;
-	edge = edge? edge.clone() : new Nehan.BoxEdge();
-	edge.padding.setBefore(flow, from_after); // set offset to padding
-	//element.size.width = (root_line.maxExtent - from_after);
-	
+      var from_before = line.maxExtent - element.maxExtent;
+      //console.log("line.maxExtent:%d, line.maxFontSize:%d, element.extent:%d", line.maxExtent, line.maxFontSize, element.maxExtent);
+      if (from_before > 0){
+	var edge = element.edge? element.edge.clone() : new Nehan.BoxEdge();
+	edge.padding.setBefore(flow, from_before); // set offset to padding
+
 	// set edge to dynamic css, it has higher priority over static css(given by element.style.getCssInline)
 	Nehan.Obj.copy(element.css, edge.getCss(flow));
       }
@@ -7424,25 +7442,21 @@ Nehan.Baseline = (function(){
   };
 
   return {
-    // argument 'baseline' is not used yet.
-    // baseline: central | alphabetic
-    // ----------------------------------------------------------------
-    // In nehan.js, 'central' is used when vertical writing mode.
-    // see http://dev.w3.org/csswg/css-writing-modes-3/#text-baselines
     /**
-     @memberof Nehan.Baseline
-     @param line {Nehan.Box} - target line object.
-     @param baseline {String} - 'central' or 'alphabetic'.
+     @memberof Nehan.VerticalAlign
+     @param flow {Nehan.BoxFlow}
+     @param line {Nehan.Box} - target line(root line)
      */
-    set : function(flow, line, baseline){
-      if(line.context.isTextVertical()){
-	__set_vert_baseline(flow, line, baseline);
+    setBaseline : function(flow, line){
+      if(flow.isTextVertical()){
+	__set_vert_baseline(flow, line);
       } else {
-	__set_hori_baseline(flow, line, baseline);
+	__set_hori_baseline(flow, line);
       }
     }
   };
 })();
+
 
 Nehan.TextAlign = (function(){
   /**
@@ -14475,6 +14489,13 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
+   @return {float | int}
+   */
+  Style.prototype.getVerticalAlign = function(){
+    return this.getCssAttr("vertical-align", "baseline");
+  };
+  /**
+   @memberof Nehan.Style
    @return {int}
    */
   Style.prototype.getEmphaTextBlockExtent = function(){
@@ -14663,14 +14684,6 @@ Nehan.Style = (function(){
     } else {
       Nehan.Obj.copy(css, this.flow.getCss());
       css["line-height"] = line.maxFontSize + "px";
-
-      // enable line-height only when horizontal mode.
-      // this logic is required for drop-caps of horizontal mode.
-      // TODO: more simple solution.
-      var line_height = this.getCssAttr("line-height");
-      if(line_height){
-	css["line-height"] = this._computeUnitSize(line_height, this.getFontSize()) + "px";
-      }
       if(this.getMarkupName() === "ruby" || this.isTextEmphaEnable()){
 	css["display"] = "inline-block";
       }
@@ -17941,23 +17954,20 @@ Nehan.RenderingContext = (function(){
       line.inlineMeasure = this.layoutContext.getInlineCurMeasure(); // actual measure
       line.classes.push("nehan-root-line");
 
-      // set baseline
-      Nehan.Baseline.set(this.style.flow, line);
-
       // set text-align
       if(this.style.textAlign && (this.style.textAlign.isCenter() || this.style.textAlign.isEnd())){
 	this.style.textAlign.setAlign(line);
       } else if(this.style.textAlign && this.style.textAlign.isJustify()){
 	this.style.textAlign.setJustify(line);
       }
-      // set edge for line-height
-      var line_fix_size = Math.floor(line.maxFontSize * this.style.getLineHeight()) - line.maxExtent;
-      if(line.elements.length > 0 && line_fix_size > 0){
-	// notice that edge of line-root is already included in parent block,
-	// so this edge is set to create proper line-height.
-	line.edge = new Nehan.BoxEdge(); 
-	line.edge.padding.setBefore(this.style.flow, line_fix_size);
-      }
+
+      var line_height = this.style.getLineHeight();
+
+      // set line-height
+      Nehan.LineHeight.set(this.style.flow, line, line_height);
+
+      // set vertical-align(currently 'baseline' only)
+      Nehan.VerticalAlign.setBaseline(this.style.flow, line);
     }
 
     // set position in parent stream.
@@ -18758,14 +18768,16 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.startHeaderContext = function(){
     // called when heading content(h1-h6) starts.
-    return this.getOutlineContext().add({
+    var header_id = this.documentContext.genHeaderId();
+    this.getOutlineContext().add({
       name:"set-header",
-      headerId:this.documentContext.genHeaderId(),
+      headerId:header_id,
       pageNo:this.documentContext.getPageNo(),
       type:this.getMarkupName(),
       rank:this.style.getHeaderRank(),
       title:this.style.getContent()
     });
+    return header_id;
   };
 
   // -----------------------------------------------

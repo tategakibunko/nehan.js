@@ -141,12 +141,7 @@ Nehan.Config = {
     "height",
     "interactive", // flag
     "letter-spacing",
-
-    // In style-context, we load 'line-height' prop and stored the value to this.lineHeight, so why this prop is unmanaged?
-    // Because in vertical mode, native 'line-height' is used in special purpose to make vertical line.
-    // So we avoid this prop stored as managed css prop.
-    //"line-height",
-
+    "line-height",
     "list-style-type",
     "list-style-position",
     "list-style-image",

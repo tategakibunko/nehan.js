@@ -992,6 +992,13 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
+   @return {float | int}
+   */
+  Style.prototype.getVerticalAlign = function(){
+    return this.getCssAttr("vertical-align", "baseline");
+  };
+  /**
+   @memberof Nehan.Style
    @return {int}
    */
   Style.prototype.getEmphaTextBlockExtent = function(){
@@ -1180,14 +1187,6 @@ Nehan.Style = (function(){
     } else {
       Nehan.Obj.copy(css, this.flow.getCss());
       css["line-height"] = line.maxFontSize + "px";
-
-      // enable line-height only when horizontal mode.
-      // this logic is required for drop-caps of horizontal mode.
-      // TODO: more simple solution.
-      var line_height = this.getCssAttr("line-height");
-      if(line_height){
-	css["line-height"] = this._computeUnitSize(line_height, this.getFontSize()) + "px";
-      }
       if(this.getMarkupName() === "ruby" || this.isTextEmphaEnable()){
 	css["display"] = "inline-block";
       }
