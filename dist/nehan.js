@@ -2416,27 +2416,27 @@ Nehan.Set = (function(){
 })();
 
 
-Nehan.SingleTagSet = (function(){
+Nehan.LowerNameSet = (function(){
   /**
    @memberof Nehan
-   @class SingleTagSet
+   @class LowerNameSet
    @constructor
    */
-  function SingleTagSet(){
+  function LowerNameSet(){
     Nehan.Set.call(this);
   }
-  Nehan.Class.extend(SingleTagSet, Nehan.Set);
+  Nehan.Class.extend(LowerNameSet, Nehan.Set);
 
   /**
-   @memberof Nehan.SingleTagSet
+   @memberof Nehan.LowerNameSet
    @param value {String}
-   @return {Nehan.SingleTagSet}
+   @return {Nehan.LowerNameSet}
    */
-  SingleTagSet.prototype.add = function(name){
+  LowerNameSet.prototype.add = function(name){
     return Nehan.Set.prototype.add.call(this, name.toLowerCase());
   };
 
-  return SingleTagSet;
+  return LowerNameSet;
 })();
 
 Nehan.HashSet = (function(){
@@ -17314,7 +17314,7 @@ Nehan.RenderingContext = (function(){
     this.stream = opt.stream || null;
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.DefaultStyle.create());
-    this.singleTagNames = opt.singleTagNames || new Nehan.SingleTagSet();
+    this.singleTagNames = opt.singleTagNames || new Nehan.LowerNameSet();
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
     this.pageEvaluator = opt.pageEvaluator || new Nehan.PageEvaluator(this);
   }
@@ -19471,7 +19471,7 @@ Nehan.Document = (function(){
 })();
 
 Nehan.globalStyles = Nehan.globalStyles || {};
-Nehan.globalSingleTagNames = new Nehan.SingleTagSet();
+Nehan.globalSingleTagNames = new Nehan.LowerNameSet();
 
 /**
  set global style.
@@ -19540,7 +19540,7 @@ Nehan.createRootGenerator = function(opt){
   var context = new Nehan.RenderingContext({
     text:Nehan.Html.normalize(opt.text || "no text"),
     singleTagNames:(
-      new Nehan.SingleTagSet()
+      new Nehan.LowerNameSet()
 	.addValues(Nehan.Config.defaultSingleTagNames)
 	.addValues(Nehan.globalSingleTagNames.getValues())
     )

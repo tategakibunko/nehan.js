@@ -1,5 +1,5 @@
 Nehan.globalStyles = Nehan.globalStyles || {};
-Nehan.globalSingleTagNames = new Nehan.SingleTagSet();
+Nehan.globalSingleTagNames = new Nehan.LowerNameSet();
 
 /**
  set global style.
@@ -68,7 +68,7 @@ Nehan.createRootGenerator = function(opt){
   var context = new Nehan.RenderingContext({
     text:Nehan.Html.normalize(opt.text || "no text"),
     singleTagNames:(
-      new Nehan.SingleTagSet()
+      new Nehan.LowerNameSet()
 	.addValues(Nehan.Config.defaultSingleTagNames)
 	.addValues(Nehan.globalSingleTagNames.getValues())
     )

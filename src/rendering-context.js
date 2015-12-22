@@ -14,7 +14,7 @@ Nehan.RenderingContext = (function(){
     this.stream = opt.stream || null;
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.DefaultStyle.create());
-    this.singleTagNames = opt.singleTagNames || new Nehan.SingleTagSet();
+    this.singleTagNames = opt.singleTagNames || new Nehan.LowerNameSet();
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
     this.pageEvaluator = opt.pageEvaluator || new Nehan.PageEvaluator(this);
   }

@@ -40,7 +40,7 @@ var sources = [
   "src/tag.js",
   "src/closure.js",
   "src/set.js",
-  "src/single-tag-set.js",
+  "src/lower-name-set.js",
   "src/hash-set.js",
   "src/css-hash-set.js",
   "src/css-edge-parser.js",
