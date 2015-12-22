@@ -238,6 +238,15 @@ Nehan.Config = {
    @default 0.5
    */
   defaultRtRate:0.5,
+
+  /**
+   default rate of text-emphasis font size.
+
+   @memberof Nehan.Config
+   @type {Float}
+   @default 0.5
+   */
+  defaultEmphaTextRate:0.5,
   
   /**
    box-flow set for "vert" and "hori".
@@ -10180,7 +10189,11 @@ Nehan.TextEmpha = (function(){
    @return {int}
    */
   TextEmpha.prototype.getExtent = function(font_size){
-    return this.isEnable()? Math.round(font_size * 1.5) : font_size;
+    if(!this.isEnable()){
+      return font_size;
+    }
+    var extent = Math.floor(font_size * (1 + Nehan.Config.defaultEmphaTextRate));
+    return (font_size % 2 === 0)? extent : extent + 1;
   };
   /**
    @memberof Nehan.TextEmpha
