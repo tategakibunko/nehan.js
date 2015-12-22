@@ -37,7 +37,7 @@ Nehan.TextEmpha = (function(){
    @return {int}
    */
   TextEmpha.prototype.getExtent = function(font_size){
-    return this.isEnable()? font_size * 2 : font_size;
+    return this.isEnable()? Math.round(font_size * 1.5) : font_size;
   };
   /**
    @memberof Nehan.TextEmpha
@@ -60,7 +60,7 @@ Nehan.TextEmpha = (function(){
    @return {Object}
    */
   TextEmpha.prototype.getCssHoriEmphaWrap = function(line, chr){
-    var css = {}, font_size = line.context.style.getFontSize();
+    var css = {}, font_size = line.getFontSize();
     css.display = "inline-block";
     css.width = chr.getAdvance(line.context.style.flow, line.context.style.letterSpacing) + "px";
     css.height = this.getExtent(font_size) + "px";

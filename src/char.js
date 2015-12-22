@@ -170,7 +170,10 @@ Nehan.Char = (function(){
    */
   Char.prototype.getCssHoriEmphaSrc = function(line){
     var css = {};
+    css.display = "block";
+    css["float"] = "left";
     css["line-height"] = "1em";
+    css.height = "1em";
     return css;
   };
 
@@ -180,12 +183,16 @@ Nehan.Char = (function(){
    */
   Char.prototype.getCssHoriEmphaText = function(line){
     var css = {};
-    css.display = "inline-block";
-    css.width = "1em";
-    css.height = "1em";
-    css["padding-left"] = "0.5em";
-    css["line-height"] = "1em";
-    css["font-size"] = "0.5em";
+    var font_size = line.getFontSize();
+    var half_font_size = Math.floor(line.getFontSize() / 2);
+    css.display = "block";
+    css.width = font_size + "px";
+    css.height = half_font_size + "px";
+    css["padding-left"] = "0.25em";
+    css["line-height"] = half_font_size + "px";
+    css["font-size"] = half_font_size + "px";
+    css["float"] = "left";
+    
     return css;
   };
 

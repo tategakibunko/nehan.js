@@ -364,7 +364,7 @@ Nehan.DefaultStyle = (function(){
 	"p":{
 	  "display":"block",
 	  "margin":{
-	    "after":"1rem"
+	    "after":"0.5rem"
 	  }
 	},
 	"param":{

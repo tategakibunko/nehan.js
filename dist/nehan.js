@@ -7394,12 +7394,26 @@ Nehan.LineHeight = (function(){
      @param line_height {Number} - target line height(not px, rate only)
      */
     set : function(flow, line, line_height){
+      if(line.elements.length === 0){
+	return;
+      }
       var line_fix_size = (line.maxFontSize * line_height) - line.maxExtent;
+      if(line_fix_size <= 0){
+	return;
+      }
+      // notice that edge of line-root is already included in 'parent' block(with same markup).
+      // so this edge is set to create proper line-height.
+      line.edge = new Nehan.BoxEdge();
+
+      // if line is decorated by ruby or empha, extra size is already added to before line.
+      // so padding is added to after only.
+      if(line.isDecorated){
+	line.edge.padding.setAfter(flow, Math.round(line_fix_size));
+	return;
+      }
+
       var half_leading = Math.round(line_fix_size / 2);
-      if(line.elements.length > 0 && half_leading > 0){
-	// notice that edge of line-root is already included in 'parent' block(with same markup).
-	// so this edge is set to create proper line-height.
-	line.edge = new Nehan.BoxEdge();
+      if(half_leading > 0){
 	line.edge.padding.setBefore(flow, half_leading);
 	line.edge.padding.setAfter(flow, half_leading);
       }
@@ -8597,7 +8611,10 @@ Nehan.Char = (function(){
    */
   Char.prototype.getCssHoriEmphaSrc = function(line){
     var css = {};
+    css.display = "block";
+    css["float"] = "left";
     css["line-height"] = "1em";
+    css.height = "1em";
     return css;
   };
 
@@ -8607,12 +8624,16 @@ Nehan.Char = (function(){
    */
   Char.prototype.getCssHoriEmphaText = function(line){
     var css = {};
-    css.display = "inline-block";
-    css.width = "1em";
-    css.height = "1em";
-    css["padding-left"] = "0.5em";
-    css["line-height"] = "1em";
-    css["font-size"] = "0.5em";
+    var font_size = line.getFontSize();
+    var half_font_size = Math.floor(line.getFontSize() / 2);
+    css.display = "block";
+    css.width = font_size + "px";
+    css.height = half_font_size + "px";
+    css["padding-left"] = "0.25em";
+    css["line-height"] = half_font_size + "px";
+    css["font-size"] = half_font_size + "px";
+    css["float"] = "left";
+    
     return css;
   };
 
@@ -10159,7 +10180,7 @@ Nehan.TextEmpha = (function(){
    @return {int}
    */
   TextEmpha.prototype.getExtent = function(font_size){
-    return this.isEnable()? font_size * 2 : font_size;
+    return this.isEnable()? Math.round(font_size * 1.5) : font_size;
   };
   /**
    @memberof Nehan.TextEmpha
@@ -10182,7 +10203,7 @@ Nehan.TextEmpha = (function(){
    @return {Object}
    */
   TextEmpha.prototype.getCssHoriEmphaWrap = function(line, chr){
-    var css = {}, font_size = line.context.style.getFontSize();
+    var css = {}, font_size = line.getFontSize();
     css.display = "inline-block";
     css.width = chr.getAdvance(line.context.style.flow, line.context.style.letterSpacing) + "px";
     css.height = this.getExtent(font_size) + "px";
@@ -12024,7 +12045,7 @@ Nehan.DefaultStyle = (function(){
 	"p":{
 	  "display":"block",
 	  "margin":{
-	    "after":"1rem"
+	    "after":"0.5rem"
 	  }
 	},
 	"param":{
@@ -12637,8 +12658,36 @@ Nehan.Box = (function(){
    @memberof Nehan.Box
    @return {boolean}
    */
+  Box.prototype.isRubyText = function(){
+    return this._type === "text-block" && this.context.getMarkupName() === "ruby";
+  };
+  /**
+   @memberof Nehan.Box
+   @return {boolean}
+   */
+  Box.prototype.isEmphaText = function(){
+    return this._type === "line-block" && this.context.style.isTextEmphaEnable();
+  };
+  /**
+   @memberof Nehan.Box
+   @return {boolean}
+   */
+  Box.prototype.isDecoratedText = function(){
+    return this.isRubyText() || this.isEmphaText();
+  };
+  /**
+   @memberof Nehan.Box
+   @return {boolean}
+   */
   Box.prototype.isInvalidSize = function(){
     return (this.size.width <= 0 || this.size.height <= 0);
+  };
+  /**
+   @memberof Nehan.Box
+   @return {int}
+   */
+  Box.prototype.getFontSize = function(){
+    return this.context.getFontSize();
   };
   /**
    @memberof Nehan.Box
@@ -12728,7 +12777,8 @@ Nehan.Box = (function(){
     case "inline-block": return this.getCssInlineBlock();
     }
     console.error("undefined display:", this.display);
-    throw "Box::getBoxCss, undefined display";
+    //throw "Box::getBoxCss, undefined display";
+    return {width:0, height:0, display:"none"};
   };
   /**
    @memberof Nehan.Box
@@ -18011,6 +18061,9 @@ Nehan.RenderingContext = (function(){
     line.hasLineBreak = this.layoutContext.hasLineBreak();
     line.lineOver = this.layoutContext.isLineOver();
     line.hangingPunctuation = this.layoutContext.getHangingPunctuation();
+    line.isDecorated = Nehan.List.exists(elements, function(element){
+      return element instanceof Nehan.Box && element.isDecoratedText();
+    });
 
     if(is_inline_root){
       // backup other line data. mainly required to restore inline-context.
@@ -18201,6 +18254,10 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.getDisplay = function(){
     return this.style? this.style.display : "";
+  };
+
+  RenderingContext.prototype.getFontSize = function(){
+    return this.style? this.style.getFontSize() : Nehan.Config.defaultFontSize;
   };
 
   RenderingContext.prototype.getAnchorName = function(){

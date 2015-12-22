@@ -95,8 +95,36 @@ Nehan.Box = (function(){
    @memberof Nehan.Box
    @return {boolean}
    */
+  Box.prototype.isRubyText = function(){
+    return this._type === "text-block" && this.context.getMarkupName() === "ruby";
+  };
+  /**
+   @memberof Nehan.Box
+   @return {boolean}
+   */
+  Box.prototype.isEmphaText = function(){
+    return this._type === "line-block" && this.context.style.isTextEmphaEnable();
+  };
+  /**
+   @memberof Nehan.Box
+   @return {boolean}
+   */
+  Box.prototype.isDecoratedText = function(){
+    return this.isRubyText() || this.isEmphaText();
+  };
+  /**
+   @memberof Nehan.Box
+   @return {boolean}
+   */
   Box.prototype.isInvalidSize = function(){
     return (this.size.width <= 0 || this.size.height <= 0);
+  };
+  /**
+   @memberof Nehan.Box
+   @return {int}
+   */
+  Box.prototype.getFontSize = function(){
+    return this.context.getFontSize();
   };
   /**
    @memberof Nehan.Box
@@ -186,7 +214,8 @@ Nehan.Box = (function(){
     case "inline-block": return this.getCssInlineBlock();
     }
     console.error("undefined display:", this.display);
-    throw "Box::getBoxCss, undefined display";
+    //throw "Box::getBoxCss, undefined display";
+    return {width:0, height:0, display:"none"};
   };
   /**
    @memberof Nehan.Box

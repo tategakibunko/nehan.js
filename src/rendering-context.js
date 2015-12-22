@@ -761,6 +761,9 @@ Nehan.RenderingContext = (function(){
     line.hasLineBreak = this.layoutContext.hasLineBreak();
     line.lineOver = this.layoutContext.isLineOver();
     line.hangingPunctuation = this.layoutContext.getHangingPunctuation();
+    line.isDecorated = Nehan.List.exists(elements, function(element){
+      return element instanceof Nehan.Box && element.isDecoratedText();
+    });
 
     if(is_inline_root){
       // backup other line data. mainly required to restore inline-context.
@@ -951,6 +954,10 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.getDisplay = function(){
     return this.style? this.style.display : "";
+  };
+
+  RenderingContext.prototype.getFontSize = function(){
+    return this.style? this.style.getFontSize() : Nehan.Config.defaultFontSize;
   };
 
   RenderingContext.prototype.getAnchorName = function(){
