@@ -157,16 +157,9 @@ Nehan.Box = (function(){
   };
   /**
    @memberof Nehan.Box
-   @return {string}
-   */
-  Box.prototype.getId = function(){
-    return this.id || null;
-  };
-  /**
-   @memberof Nehan.Box
    @return {Array.<string>}
    */
-  Box.prototype.getClassName = function(){
+  Box.prototype.getDomClassName = function(){
     return this.classes? this.classes.map(Nehan.Css.addNehanPrefix).join(" ") : "";
   };
   /**

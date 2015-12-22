@@ -37,9 +37,6 @@ Nehan.LayoutEvaluator = (function(){
     var attrs = opt.attrs? ((opt.attrs instanceof Nehan.TagAttrs)? opt.attrs.attrs : opt.attrs) : {};
     var dataset = opt.attrs? opt.attrs.dataset : {};
     var dom = document.createElement(name);
-    if(opt.id){
-      dom.id = opt.id;
-    }
     if(opt.className){
       dom.className = opt.className;
     }
@@ -68,7 +65,9 @@ Nehan.LayoutEvaluator = (function(){
     // 2. sometimes we add some special class name like "nehan-div", "nehan-body", "nehan-p"... etc.
     Nehan.Obj.iter(attrs, function(attr_name, value){ // pure attributes(without dataset defined in TagAttrs::attrs)
       // "style" is readonly and "class" is already set by opt.className.
-      if(attr_name !== "style" && attr_name !== "class"){
+      if(attr_name === "id"){
+	dom[attr_name] = Nehan.Css.addNehanPrefix(value);
+      } else if(attr_name !== "style" && attr_name !== "class"){
 	try {
 	  dom[attr_name] = value;
 	} catch(e){
@@ -123,8 +122,7 @@ Nehan.LayoutEvaluator = (function(){
   LayoutEvaluator.prototype._evalElementRoot = function(tree, opt){
     opt = opt || {};
     return this._createElement(opt.name || "div", {
-      id:tree.getId(),
-      className:tree.getClassName(),
+      className:tree.getDomClassName(),
       attrs:tree.getAttrs(),
       content:(opt.content || tree.getContent()),
       blockId:tree.blockId,
