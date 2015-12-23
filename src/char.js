@@ -504,6 +504,7 @@ Nehan.Char = (function(){
       this._setVertImg("dmn2", 1, 1); break;
     case 61: // EQUALS SIGN
     case 8786: // APPROXIMATELY EQUAL TO OR THE IMAGE OF
+    case 8800: // NOT EQUAL TO
     case 65309: // FULLWIDTH EQUALS SIGN
       this._setVertImg("equal", 1, 1); break;
     case 8212: // Em dash

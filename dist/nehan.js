@@ -8954,6 +8954,7 @@ Nehan.Char = (function(){
       this._setVertImg("dmn2", 1, 1); break;
     case 61: // EQUALS SIGN
     case 8786: // APPROXIMATELY EQUAL TO OR THE IMAGE OF
+    case 8800: // NOT EQUAL TO
     case 65309: // FULLWIDTH EQUALS SIGN
       this._setVertImg("equal", 1, 1); break;
     case 8212: // Em dash
@@ -12058,7 +12059,7 @@ Nehan.DefaultStyle = (function(){
 	"p":{
 	  "display":"block",
 	  "margin":{
-	    "after":"0.5rem"
+	    "after":"1rem"
 	  }
 	},
 	"param":{
@@ -19387,6 +19388,9 @@ Nehan.Document = (function(){
    @return {Nehan.Page}
    */
   Document.prototype.getPage = function(index){
+    if(!this.generator){
+      return null;
+    }
     return this.generator.context? this.generator.context.getPage(index) : null;
   };
 
@@ -19396,6 +19400,9 @@ Nehan.Document = (function(){
    @return {Nehan.Page}
    */
   Document.prototype.getPageCount = function(index){
+    if(!this.generator){
+      return 0;
+    }
     return this.generator.context? this.generator.context.getPageCount() : 0;
   };
 
@@ -19459,6 +19466,9 @@ Nehan.Document = (function(){
    @return {int}
    */
   Document.prototype.getAnchorPageNo = function(anchor_name){
+    if(!this.generator){
+      return -1;
+    }
     return this.generator.context? this.generator.context.getAnchorPageNo(anchor_name) : -1;
   };
 
@@ -19468,6 +19478,9 @@ Nehan.Document = (function(){
    @return {DOMElement}
    */
   Document.prototype.createOutlineElement = function(callbacks){
+    if(!this.generator){
+      return null;
+    }
     return this.generator.context? this.generator.context.createOutlineElementByName("body", callbacks) : null;
   };
 

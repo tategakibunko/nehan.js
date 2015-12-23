@@ -40,6 +40,9 @@ Nehan.Document = (function(){
    @return {Nehan.Page}
    */
   Document.prototype.getPage = function(index){
+    if(!this.generator){
+      return null;
+    }
     return this.generator.context? this.generator.context.getPage(index) : null;
   };
 
@@ -49,6 +52,9 @@ Nehan.Document = (function(){
    @return {Nehan.Page}
    */
   Document.prototype.getPageCount = function(index){
+    if(!this.generator){
+      return 0;
+    }
     return this.generator.context? this.generator.context.getPageCount() : 0;
   };
 
@@ -112,6 +118,9 @@ Nehan.Document = (function(){
    @return {int}
    */
   Document.prototype.getAnchorPageNo = function(anchor_name){
+    if(!this.generator){
+      return -1;
+    }
     return this.generator.context? this.generator.context.getAnchorPageNo(anchor_name) : -1;
   };
 
@@ -121,6 +130,9 @@ Nehan.Document = (function(){
    @return {DOMElement}
    */
   Document.prototype.createOutlineElement = function(callbacks){
+    if(!this.generator){
+      return null;
+    }
     return this.generator.context? this.generator.context.createOutlineElementByName("body", callbacks) : null;
   };
 
