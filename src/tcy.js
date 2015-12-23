@@ -52,8 +52,8 @@ Nehan.Tcy = (function(){
   Tcy.prototype.getCssVert = function(line){
     var css = {};
     css["text-align"] = "center";
-    //css["font-family"] = "monospace";
     css["font-weight"] = "normal";
+    css["word-break"] = "normal";
     return css;
   };
   /**
