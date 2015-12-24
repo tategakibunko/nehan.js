@@ -14,12 +14,21 @@ Nehan.LineHeight = (function(){
 	return;
       }
       var line_fix_size = (line.maxFontSize * line_height) - line.maxExtent;
-      if(line_fix_size <= 0){
+      if(line_fix_size === 0){
 	return;
       }
+
       // notice that edge of line-root is already included in 'parent' block(with same markup).
       // so this edge is set to create proper line-height.
       line.edge = new Nehan.BoxEdge();
+
+      // if there is some inline element that is larger than max-line-height,
+      // set half-leading to after only.
+      if(line_fix_size <= 0){
+	line_fix_size = (line.maxFontSize * line_height) - line.getFontSize();
+	line.edge.padding.setAfter(flow, Math.round(line_fix_size / 2));
+	return;
+      }
 
       // if line is decorated by ruby or empha, extra size is already added to before line.
       // so padding is added to after only.
