@@ -17414,11 +17414,10 @@ Nehan.RenderingContext = (function(){
     var prev_extent = this.layoutContext.getBlockCurExtent();
     var next_extent = prev_extent + element_size;
 
-    // first element, but child layout over
-    if(prev_block_count === 0 && next_extent > max_size){
-      // try to cancel after edge
+    // if layout over, try to cancel after edge.
+    if(next_extent > max_size){
+      var over_size = next_extent - max_size;
       if(element.edge && (element.edge.getAfter(flow) >= over_size || element_size > this.getRootContentExtent())){
-	var over_size = next_extent - max_size;
 	var cancel_size = element.edge.cancelAfter(flow, over_size);
 	next_extent -= cancel_size;
 	element_size -= cancel_size;
