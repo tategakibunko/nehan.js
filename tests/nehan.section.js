@@ -8,7 +8,7 @@ describe("Section", function(){
     var root = new Nehan.Section({parent:null, pageNo:0});
     expect(root.getHeader()).toBe(null);
     expect(root.getRank()).toBe(0);
-    expect(root.getTitle()).toBe("");
+    expect(root.getTitle()).toBe("no title");
     var h1 = new Nehan.SectionHeader({id:0, rank:1, title:"foo"});
     root.setHeader(h1);
     expect(root.getHeader()).toBe(h1);
