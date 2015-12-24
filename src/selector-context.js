@@ -2,6 +2,7 @@ Nehan.SelectorContext = (function(){
   /**
    @memberof Nehan
    @class SelectorContext
+   @param prop {String} - callee property name
    @param style {Nehan.Style}
    @param context {Nehan.RenderingContext}
    */
