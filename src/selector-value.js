@@ -6,6 +6,9 @@ Nehan.SelectorValue = (function(){
    @constructor
    */
   function SelectorValue(raw_entries){
+    if(typeof raw_entries === "function"){
+      raw_entries = raw_entries();
+    }
     this.entries = this._initialize(raw_entries);
   }
 

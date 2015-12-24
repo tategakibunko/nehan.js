@@ -2,7 +2,7 @@
  @memberof Nehan
  @class SelectorEntry
  @param key {String}
- @param raw_value {Object} - unformatted css entry value
+ @param raw_value {Object|Function} - unformatted css entry value
  */
 Nehan.SelectorEntry = (function(){
   function SelectorEntry(key, raw_value){
