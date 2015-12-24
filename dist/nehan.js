@@ -7407,13 +7407,13 @@ Nehan.LineHeight = (function(){
 	return;
       }
       var base_font_size = line.getFontSize();
-      var max_line_height = line.maxFontSize * line_height;
+      var max_line_height = Math.floor(line.maxFontSize * line_height);
       var inline_fix_size = max_line_height - line.maxExtent;
       if(inline_fix_size === 0){
 	return;
       }
       var line_fix_size = max_line_height - base_font_size;
-      var half_leading = Math.round(line_fix_size / 2);
+      var half_leading = Math.floor(line_fix_size / 2);
 
       // notice that edge of line-root is already included in 'parent' block(with same markup).
       // so this edge is set to create proper line-height.
