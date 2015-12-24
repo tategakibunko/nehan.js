@@ -46,10 +46,9 @@ Nehan.SelectorValue = (function(){
 
   /**
    @memberof Nehan.SelectorValue
-   @param {Style} - context style
    @return {Object}
    */
-  SelectorValue.prototype.getEntries = function(style){
+  SelectorValue.prototype.getEntries = function(){
     return this.entries;
   };
 

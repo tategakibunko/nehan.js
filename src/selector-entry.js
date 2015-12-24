@@ -28,11 +28,10 @@ Nehan.SelectorEntry = (function(){
 
   /**
    @memberof Nehan.SelectorEntry
-   @param {Style} - context style
    @return {Object} - formatted css value entries
    */
-  SelectorEntry.prototype.getEntries = function(style){
-    return this.value.getEntries(style);
+  SelectorEntry.prototype.getEntries = function(){
+    return this.value.getEntries();
   };
 
   /**
