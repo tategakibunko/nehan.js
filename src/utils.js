@@ -142,5 +142,41 @@ Nehan.Utils = {
       return false;
     }
     return (value == parseFloat(value) && isFinite(value));
+  },
+  /**
+   @memberof Nehan.Utils
+   @param em {float}
+   @return {int}
+   */
+  getEmSize: function(em, base_size){
+    return Math.round(base_size * em);
+  },
+  /**
+   @memberof Nehan.Utils
+   @param pt {float}
+   @return {int}
+   */
+  getPxFromPt: function(pt){
+    return Math.round(pt * 4 / 3);
+  },
+  /**
+   @memberof Nehan.Utils
+   @param pt {float}
+   @parma max_value {int}
+   @return {int}
+   */
+  getPercentValue : function(percent, max_value){
+    return Math.round(max_value * percent / 100);
+  },
+  /**
+   @memberof Nehan.Utils
+   @param text {String}
+   @param letter_modifier {Function} first_letter:string -> string
+   @return {String}
+   */
+  replaceFirstLetter : function(text, letter_modifier){
+    return text.replace(/(^(<[^>]+>|[\s\n])*)(\S)/mi, function(match, p1, p2, p3){
+      return p1 + letter_modifier(p3);
+    });
   }
 };

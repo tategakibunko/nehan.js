@@ -66,4 +66,49 @@ describe("Utils", function(){
     expect(Nehan.Utils.isNumber("10e-2")).toBe(true);
     expect(Nehan.Utils.isNumber(Infinity)).toBe(true);
   });
+
+  it("Utils.getPercentValue", function(){
+    expect(Nehan.Utils.getPercentValue(10, 100)).toBe(10);
+    expect(Nehan.Utils.getPercentValue(10.1, 100)).toBe(10);
+    expect(Nehan.Utils.getPercentValue(10.5, 100)).toBe(11); // floating point is rounded.
+    expect(Nehan.Utils.getPercentValue(55, 100)).toBe(55);
+    expect(Nehan.Utils.getPercentValue(110, 100)).toBe(110);
+  });
+
+  it("Utils.getEmSize", function(){
+    expect(Nehan.Utils.getEmSize(0.5, 16)).toBe(8);
+    expect(Nehan.Utils.getEmSize(0.6, 16)).toBe(10); // Math.round(9.6) -> 10
+    expect(Nehan.Utils.getEmSize(1, 16)).toBe(16);
+    expect(Nehan.Utils.getEmSize(2, 16)).toBe(32);
+  });
+
+  // 1pt = 4/3px
+  it("Utils.getPxFromPt", function(){
+    expect(Nehan.Utils.getPxFromPt(1)).toBe(1);
+    expect(Nehan.Utils.getPxFromPt(1.5)).toBe(2);
+    expect(Nehan.Utils.getPxFromPt(2)).toBe(3);
+    expect(Nehan.Utils.getPxFromPt(3)).toBe(4);
+  });
+
+  it("Utils.replaceFirstLetter", function(){
+    expect(Nehan.Utils.replaceFirstLetter("foo", function(letter){
+      return "<letter>" + letter + "</letter>";
+    })).toBe("<letter>f</letter>oo");
+
+    expect(Nehan.Utils.replaceFirstLetter("\n\t  foo", function(letter){
+      return "<letter>" + letter + "</letter>";
+    })).toBe("\n\t  <letter>f</letter>oo");
+
+    expect(Nehan.Utils.replaceFirstLetter("<p>foo</p>", function(letter){
+      return "<letter>" + letter + "</letter>";
+    })).toBe("<p><letter>f</letter>oo</p>");
+
+    expect(Nehan.Utils.replaceFirstLetter("<p>\nfoo</p>", function(letter){
+      return "<letter>" + letter + "</letter>";
+    })).toBe("<p>\n<letter>f</letter>oo</p>");
+
+    expect(Nehan.Utils.replaceFirstLetter("<p>\n\t  foo</p>", function(letter){
+      return "<letter>" + letter + "</letter>";
+    })).toBe("<p>\n\t  <letter>f</letter>oo</p>");
+  });
 });

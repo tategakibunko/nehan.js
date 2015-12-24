@@ -1265,6 +1265,42 @@ Nehan.Utils = {
       return false;
     }
     return (value == parseFloat(value) && isFinite(value));
+  },
+  /**
+   @memberof Nehan.Utils
+   @param em {float}
+   @return {int}
+   */
+  getEmSize: function(em, base_size){
+    return Math.round(base_size * em);
+  },
+  /**
+   @memberof Nehan.Utils
+   @param pt {float}
+   @return {int}
+   */
+  getPxFromPt: function(pt){
+    return Math.round(pt * 4 / 3);
+  },
+  /**
+   @memberof Nehan.Utils
+   @param pt {float}
+   @parma max_value {int}
+   @return {int}
+   */
+  getPercentValue : function(percent, max_value){
+    return Math.round(max_value * percent / 100);
+  },
+  /**
+   @memberof Nehan.Utils
+   @param text {String}
+   @param letter_modifier {Function} first_letter:string -> string
+   @return {String}
+   */
+  replaceFirstLetter : function(text, letter_modifier){
+    return text.replace(/(^(<[^>]+>|[\s\n])*)(\S)/mi, function(match, p1, p2, p3){
+      return p1 + letter_modifier(p3);
+    });
   }
 };
 
@@ -13653,9 +13689,6 @@ Nehan.Style = (function(){
     this._initialize(context, markup, parent, force_css || {});
   }
 
-  // to fetch first text part from content html.
-  var __rex_first_letter = /(^(<[^>]+>|[\s\n])*)(\S)/mi;
-
   Style.prototype._initialize = function(context, markup, parent, force_css){
     this.context = context;
     this.markup = markup;
@@ -14386,8 +14419,8 @@ Nehan.Style = (function(){
     }
     var first_letter = this.context.selectors.getValuePe(this, "first-letter");
     if(!Nehan.Obj.isEmpty(first_letter)){
-      content = content.replace(__rex_first_letter, function(match, p1, p2, p3){
-	return p1 + Nehan.Html.tagWrap("first-letter", p3);
+      content = Nehan.Utils.replaceFirstLetter(content, function(letter){
+	return Nehan.Html.tagWrap("first-letter", letter);
       });
     }
     var first_line = this.context.selectors.getValuePe(this, "first-line");
@@ -14437,7 +14470,14 @@ Nehan.Style = (function(){
    @return {Nehan.Font}
    */
   Style.prototype.getFont = function(){
-    return this.font || (this.parent? this.parent.getFont() : Nehan.Display.getStdFont());
+    return this.font || this.getParentFont();
+  };
+  /**
+   @memberof Nehan.Style
+   @return {Nehan.Font}
+   */
+  Style.prototype.getParentFont = function(){
+    return this.parent? this.parent.getFont() : Nehan.Display.getStdFont();
   };
   /**
    @memberof Nehan.Style
@@ -14911,19 +14951,16 @@ Nehan.Style = (function(){
   Style.prototype._computeUnitSize = function(val, unit_size, max_size){
     var str = String(val);
     if(str.indexOf("rem") > 0){
-      var root_font = this.getRootFont();
-      var rem_scale = parseFloat(str.replace("rem",""));
-      return Math.round(root_font.size * rem_scale); // use root font-size
+      return Nehan.Utils.getEmSize(parseFloat(str), this.getRootFont().size);
     }
     if(str.indexOf("em") > 0){
-      var em_scale = parseFloat(str.replace("em",""));
-      return Math.round(unit_size * em_scale);
+      return Nehan.Utils.getEmSize(parseFloat(str), unit_size);
     }
     if(str.indexOf("pt") > 0){
-      return Math.round(parseInt(str, 10) * 4 / 3);
+      return Nehan.Utils.getPxFromPt(parseFloat(str, 10));
     }
     if(str.indexOf("%") > 0){
-      return Math.round(max_size * parseInt(str, 10) / 100);
+      return Nehan.Utils.getPercentValue(parseFloat(str, 10), max_size);
     }
     var px = parseInt(str, 10);
     return isNaN(px)? 0 : px;
@@ -15065,7 +15102,7 @@ Nehan.Style = (function(){
   };
 
   Style.prototype._loadFont = function(){
-    var parent_font = this.getFont();
+    var parent_font = this.getParentFont();
     var line_height = this.getCssAttr("line-height", "inherit");
     var css = this.getCssAttr("font", {
       size:"inherit",
