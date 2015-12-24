@@ -763,7 +763,7 @@ Nehan.RenderingContext = (function(){
     line.lineOver = this.layoutContext.isLineOver();
     line.hangingPunctuation = this.layoutContext.getHangingPunctuation();
     line.isDecorated = Nehan.List.exists(elements, function(element){
-      return element instanceof Nehan.Box && element.isDecoratedText();
+      return element instanceof Nehan.Box && (element.isDecorated || element.isDecoratedText());
     });
 
     if(is_inline_root){
