@@ -46,9 +46,10 @@ Nehan.RenderingContext = (function(){
       //console.log("[%s]:eof", this._name);
       return Nehan.Results.EOF;
     }
+    var flow = this.style.flow;
     var max_size = this.getContextMaxExtentForAdd();
     var max_measure = this.layoutContext.getInlineMaxMeasure();
-    var element_size = element.getLayoutExtent(this.style.flow);
+    var element_size = element.getLayoutExtent(flow);
     var prev_block_count = this.layoutContext.getBlockCount();
     var prev_extent = this.layoutContext.getBlockCurExtent();
     var next_extent = prev_extent + element_size;
@@ -56,9 +57,9 @@ Nehan.RenderingContext = (function(){
     // first element, but child layout over
     if(prev_block_count === 0 && next_extent > max_size){
       // try to cancel after edge
-      if(element.edge){
+      if((element.edge && element.edge.getAfter(flow) >= over_size) || element_size > this.getRootContentExtent()){
 	var over_size = next_extent - max_size;
-	var cancel_size = element.edge.cancelAfter(this.style.flow, over_size);
+	var cancel_size = element.edge.cancelAfter(flow, over_size);
 	next_extent -= cancel_size;
 	element_size -= cancel_size;
       }
