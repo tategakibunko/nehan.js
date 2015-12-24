@@ -17400,7 +17400,7 @@ Nehan.RenderingContext = (function(){
       }
     }
 
-    this.debugBlockPush(element, element_size);
+    //this.debugBlockPush(element, element_size);
 
     if(element.isResumableLine(max_measure) && this.hasChildLayout() && this.child.isInline()){
       this.child.setResumeLine(element);
@@ -17446,7 +17446,7 @@ Nehan.RenderingContext = (function(){
     var prev_measure = this.layoutContext.getInlineCurMeasure(this.style.flow);
     var next_measure = prev_measure + element_size;
 
-    this.debugInlinePush(element, element_size);
+    //this.debugInlinePush(element, element_size);
 
     if(element_size === 0){
       return Nehan.Results.ZERO;
