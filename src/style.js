@@ -1190,6 +1190,9 @@ Nehan.Style = (function(){
       if(this.getMarkupName() === "ruby" || this.isTextEmphaEnable()){
 	css["display"] = "inline-block";
       }
+      if(line.hangingChar){
+	delete css["css-float"];
+      }
     }
     Nehan.Obj.copy(css, this.unmanagedCss.getValues());
     Nehan.Obj.copy(css, line.css);

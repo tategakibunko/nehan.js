@@ -159,14 +159,14 @@ Nehan.LayoutContext = (function(){
    @param hanging_punctuation.style {Nehan.Style}
    */
   LayoutContext.prototype.setHangingPunctuation = function(hunging_punctuation){
-    this._hangingPunctuation = hunging_punctuation;
+    this.hangingPunctuation = hunging_punctuation;
   };
   /**
    @memberof Nehan.LayoutContext
    @return hanging_punctuation {Object}
    */
   LayoutContext.prototype.getHangingPunctuation = function(){
-    return this._hangingPunctuation || null;
+    return this.hangingPunctuation || null;
   };
   /**
    @memberof Nehan.LayoutContext

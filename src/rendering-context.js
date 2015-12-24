@@ -802,15 +802,16 @@ Nehan.RenderingContext = (function(){
       line.edge = null;
       line.resizeExtent(this.style.flow, 0);
     }
-    //console.info("[create line box] %o(isVoid=%o), yieldCount:%d", line, line.isVoid(), this.yieldCount);
+    //console.info("[create line box] %o, yieldCount:%d", line, this.yieldCount);
     return line;
   };
 
   RenderingContext.prototype.createTextBox = function(opt){
     opt = opt || {};
+    //console.log("text box: opt.measure:%d, curMeasure:%d", opt.measure, this.layoutContext.getInlineCurMeasure());
     var elements = opt.elements || this.layoutContext.getInlineElements();
     var extent = this.layoutContext.getInlineMaxExtent() || this.style.getFontSize();
-    var measure = this.layoutContext.getInlineCurMeasure();
+    var measure = opt.measure || this.layoutContext.getInlineCurMeasure();
 
     if(this.layoutContext.isInlineEmpty()){
       extent = 0;
@@ -1791,7 +1792,7 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.yieldHangingChar = function(chr){
     chr.setMetrics(this.style.flow, this.style.getFont());
     var font_size = this.style.getFontSize();
-    return this.createTextBox({
+    var chr_text = this.createTextBox({
       elements:[chr],
       measure:chr.bodySize,
       extent:font_size,
@@ -1799,6 +1800,8 @@ Nehan.RenderingContext = (function(){
       maxExtent:font_size,
       maxFontSize:font_size
     });
+    chr_text.hangingChar = true;
+    return chr_text;
   };
 
   RenderingContext.prototype.yieldParallelBlocks = function(chr){
