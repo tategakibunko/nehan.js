@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <title>nehan5 page-element test</title>
+    <meta content="ja" name="content-language">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <meta http-equiv="Content-Script-Type" content="text/javascript">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- styles -->
+    <link href="../css/nehan.css" rel="stylesheet">
+  </head>
+  <body>
+    <h1>simple example for Nehan.Document</h1>
+    <div>
+      <button id="prev">prev</button>
+      <button id="next">next</button>
+    </div>
+    <hr>
+    <div id="target"></div>
+
+    <!-- scripts -->
+    <script type="text/javascript" src="../dist/nehan.js"></script>
+    <script type="text/javascript">
+    var $target = document.getElementById("target");
+    var $prev_button = document.getElementById("prev");
+    var $next_button = document.getElementById("next");
+    var page_pos = 0;
+    var doc = new Nehan.Document()
+      .setContent([
+	"<h1>hello, nehan.js</h1>",
+	"<p>this is it, this is it, this is it</p>",
+	"<h2>wow, this is h2</h2>",
+	"<p>this is it, this is it, this is it</p>",
+	"<h3>hey, h3 is coming</h3>",
+	"<p>this is it, this is it, this is it</p>",
+	"<h3>another h3 is comming</h3>",
+	"<p>this is it, this is it, this is it</p>",
+	"<h2>block quote</h2>",
+	"<blockquote>this is blockquote</blockquote>",
+	"<h2>table</h2>",
+	"<table>",
+	"<thead><tr><th>header1</th><th>header2</th></tr></thead>",
+	"<tbody>",
+	"<tr><td>this is cell1</td><td>this is content of cell2!</td></tr>",
+	"<tr><td>cell3</td><td>cell4!</td></tr>",
+	"<tr><td>cell5</td><td>cell6!</td></tr>",
+	"</tbody>",
+	"</table>",
+	"<h2>listing</h2>",
+	"<ul>",
+	"<li>list item1</li>",
+	"<li><ul>",
+	"<li>item1 &gt; item1</li>",
+	"<li>item1 &gt; item2</li>",
+	"</ul></li>",
+	"<li>list item2</li>",
+	"</ul>",
+	"<ol>",
+	"<li>list item1</li>",
+	"<li><ol>",
+	"<li>item1 &gt; item1</li>",
+	"<li>item1 &gt; item2</li>",
+	"</ol></li>",
+	"<li>list item2</li>",
+	"</ol>",
+      ].join("\n"))
+      .setStyles({
+	body:{
+	  flow:"lr-tb", // or "tb-rl"
+	  color:"#444",
+	  backgroundColor:"#eee",
+	  fontSize:20,
+	  width:640,
+	  height:480
+	}
+      });
+
+    doc.render({
+      onComplete:function(time){
+	console.log("finish! %fmsec", time);
+	console.log("page count = %d", doc.getPageCount());
+      }
+    });
+    
+    $target.appendChild(doc.getPage(0).element);
+
+    var set_page = function(page_no){
+      var page = doc.getPage(page_pos);
+      $target.innerHTML = "";
+      $target.appendChild(page.element);
+    };
+
+    $next_button.onclick = function(){
+      page_pos = Math.min(doc.getPageCount() - 1, page_pos + 1);
+      set_page(page_pos);
+    };
+
+    $prev_button.onclick = function(){
+      page_pos = Math.max(0, page_pos - 1);
+      set_page(page_pos);
+    };
+    </script>
+  </body>
+</html>
