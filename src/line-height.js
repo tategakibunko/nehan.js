@@ -13,10 +13,14 @@ Nehan.LineHeight = (function(){
       if(line.elements.length === 0){
 	return;
       }
-      var line_fix_size = (line.maxFontSize * line_height) - line.maxExtent;
-      if(line_fix_size === 0){
+      var base_font_size = line.getFontSize();
+      var max_line_height = line.maxFontSize * line_height;
+      var inline_fix_size = max_line_height - line.maxExtent;
+      if(inline_fix_size === 0){
 	return;
       }
+      var line_fix_size = max_line_height - base_font_size;
+      var half_leading = Math.round(line_fix_size / 2);
 
       // notice that edge of line-root is already included in 'parent' block(with same markup).
       // so this edge is set to create proper line-height.
@@ -24,20 +28,19 @@ Nehan.LineHeight = (function(){
 
       // if there is some inline element that is larger than max-line-height,
       // set half-leading to after only.
-      if(line_fix_size <= 0){
-	line_fix_size = (line.maxFontSize * line_height) - line.getFontSize();
-	line.edge.padding.setAfter(flow, Math.round(line_fix_size / 2));
+      if(inline_fix_size < 0 && Math.abs(inline_fix_size) >= base_font_size){
+	line.edge.padding.setAfter(flow, half_leading);
 	return;
       }
 
       // if line is decorated by ruby or empha, extra size is already added to before line.
       // so padding is added to after only.
       if(line.isDecorated){
-	line.edge.padding.setAfter(flow, Math.round(line_fix_size));
+	line.edge.padding.setAfter(flow, inline_fix_size);
 	return;
       }
 
-      var half_leading = Math.round(line_fix_size / 2);
+      //var half_leading = Math.round(inline_fix_size / 2);
       if(half_leading > 0){
 	line.edge.padding.setBefore(flow, half_leading);
 	line.edge.padding.setAfter(flow, half_leading);
