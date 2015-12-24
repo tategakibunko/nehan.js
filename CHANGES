@@ -12,6 +12,7 @@ o Support list-style-position:inside.
 o Support shorthanded font setting.
 o Add Nehan.createRootContext, Nehan.createRootGenerator.
 o Support pseudo-class :matches, :not.
+o Support functional value for selector entry.
 * More strict edge cancel for block level.
 ! Disable Nehan.LexingRule, use Nehan.setSingleTagName instead.
 
