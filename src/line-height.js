@@ -28,9 +28,15 @@ Nehan.LineHeight = (function(){
 
       // if there is some inline element that is larger than max-line-height,
       // set half-leading to after only.
-      if(inline_fix_size < 0 && Math.abs(inline_fix_size) >= base_font_size){
-	line.edge.padding.setAfter(flow, half_leading);
-	return;
+      if(inline_fix_size < 0){
+	// only one element(like img only line)
+	if(line.elements.length <= 1){
+	  return; // do nothing
+	}
+	if(Math.abs(inline_fix_size) >= base_font_size){
+	  line.edge.padding.setAfter(flow, half_leading);
+	  return;
+	}
       }
 
       // if line is decorated by ruby or empha, extra size is already added to before line.

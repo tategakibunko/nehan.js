@@ -57,7 +57,7 @@ Nehan.RenderingContext = (function(){
     // first element, but child layout over
     if(prev_block_count === 0 && next_extent > max_size){
       // try to cancel after edge
-      if((element.edge && element.edge.getAfter(flow) >= over_size) || element_size > this.getRootContentExtent()){
+      if(element.edge && (element.edge.getAfter(flow) >= over_size || element_size > this.getRootContentExtent())){
 	var over_size = next_extent - max_size;
 	var cancel_size = element.edge.cancelAfter(flow, over_size);
 	next_extent -= cancel_size;
@@ -74,7 +74,7 @@ Nehan.RenderingContext = (function(){
       }
     }
 
-    //this.debugBlockPush(element, element_size);
+    this.debugBlockPush(element, element_size);
 
     if(element.isResumableLine(max_measure) && this.hasChildLayout() && this.child.isInline()){
       this.child.setResumeLine(element);
@@ -120,7 +120,7 @@ Nehan.RenderingContext = (function(){
     var prev_measure = this.layoutContext.getInlineCurMeasure(this.style.flow);
     var next_measure = prev_measure + element_size;
 
-    //this.debugInlinePush(element, element_size);
+    this.debugInlinePush(element, element_size);
 
     if(element_size === 0){
       return Nehan.Results.ZERO;
