@@ -39,9 +39,6 @@ Nehan.Style = (function(){
     // create selector cache key
     this.selectorCacheKey = this._computeSelectorCacheKey();
 
-    // create context for each functional css property.
-    this.selectorContext = new Nehan.SelectorContext(this, this.context);
-
     this.managedCss = new Nehan.CssHashSet();
     this.unmanagedCss = new Nehan.CssHashSet();
     this.callbackCss = new Nehan.CssHashSet();
@@ -55,7 +52,7 @@ Nehan.Style = (function(){
     this._registerCssValues(this._loadInlineCss(markup));
     var onload = this.callbackCss.get("onload");
     if(onload){
-      this._registerCssValues(onload(this.selectorContext) || {});
+      this._registerCssValues(onload(this._createSelectorContext("onload")) || {});
     }
     this._registerCssValues(force_css);
 
@@ -623,7 +620,8 @@ Nehan.Style = (function(){
   Style.prototype._evalCssAttr = function(prop, value){
     // if value is function, call with selector context, and format the returned value.
     if(typeof value === "function"){
-      var entry = Nehan.CssParser.formatEntry(prop, value(this.selectorContext));
+      var context = this._createSelectorContext(prop);
+      var entry = Nehan.CssParser.formatEntry(prop, value(context));
       return entry.value;
     }
     return value;
@@ -1371,6 +1369,10 @@ Nehan.Style = (function(){
 	this.unmanagedCss.add(fmt_prop, this._evalCssAttr(fmt_prop, value));
       }
     }.bind(this));
+  };
+
+  Style.prototype._createSelectorContext = function(prop){
+    return new Nehan.SelectorContext(prop, this, this.context);
   };
 
   Style.prototype._loadDisplay = function(){

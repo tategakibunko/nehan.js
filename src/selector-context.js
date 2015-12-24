@@ -5,7 +5,8 @@ Nehan.SelectorContext = (function(){
    @param style {Nehan.Style}
    @param context {Nehan.RenderingContext}
    */
-  function SelectorContext(style, context){
+  function SelectorContext(prop, style, context){
+    this.prop = prop;
     this.style = style;
     this.layoutContext = context.layoutContext;
     this.documentContext = context.documentContext;
