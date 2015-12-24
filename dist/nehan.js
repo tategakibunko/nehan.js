@@ -3907,9 +3907,6 @@ Nehan.SelectorValue = (function(){
    @constructor
    */
   function SelectorValue(raw_entries){
-    if(typeof raw_entries === "function"){
-      raw_entries = raw_entries();
-    }
     this.entries = this._initialize(raw_entries);
   }
 
@@ -3950,19 +3947,10 @@ Nehan.SelectorValue = (function(){
 
   /**
    @memberof Nehan.SelectorValue
-   @param key {String}
-   @return selector_value
-   */
-  SelectorValue.prototype.getEntry = function(key){
-    return this.entries[key] || null;
-  };
-
-  /**
-   @memberof Nehan.SelectorValue
-   @param key {String}
+   @param {Style} - context style
    @return {Object}
    */
-  SelectorValue.prototype.getEntries = function(key){
+  SelectorValue.prototype.getEntries = function(style){
     return this.entries;
   };
 
@@ -4091,10 +4079,11 @@ Nehan.SelectorEntry = (function(){
 
   /**
    @memberof Nehan.SelectorEntry
+   @param {Style} - context style
    @return {Object} - formatted css value entries
    */
-  SelectorEntry.prototype.getEntries = function(){
-    return this.value.getEntries();
+  SelectorEntry.prototype.getEntries = function(style){
+    return this.value.getEntries(style);
   };
 
   /**
@@ -18931,13 +18920,17 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.setStyle = function(key, value){
+    // if selecte value itself is function, treat it as 'onload' callback.
+    if(typeof value === "function"){
+      value = {onload:value};
+    }
     this.selectors.setValue(key, value);
     return this;
   };
 
   RenderingContext.prototype.setStyles = function(values){
     for(var key in values){
-      this.selectors.setValue(key, values[key]);
+      this.setStyle(key, values[key]);
     }
     return this;
   };

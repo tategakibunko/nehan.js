@@ -6,9 +6,6 @@ Nehan.SelectorValue = (function(){
    @constructor
    */
   function SelectorValue(raw_entries){
-    if(typeof raw_entries === "function"){
-      raw_entries = raw_entries();
-    }
     this.entries = this._initialize(raw_entries);
   }
 
@@ -49,19 +46,10 @@ Nehan.SelectorValue = (function(){
 
   /**
    @memberof Nehan.SelectorValue
-   @param key {String}
-   @return selector_value
-   */
-  SelectorValue.prototype.getEntry = function(key){
-    return this.entries[key] || null;
-  };
-
-  /**
-   @memberof Nehan.SelectorValue
-   @param key {String}
+   @param {Style} - context style
    @return {Object}
    */
-  SelectorValue.prototype.getEntries = function(key){
+  SelectorValue.prototype.getEntries = function(style){
     return this.entries;
   };
 
