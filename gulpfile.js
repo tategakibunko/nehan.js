@@ -25,7 +25,6 @@ var sources = [
   "src/display.js",
   "src/client.js",
   "src/env.js",
-  //"src/lexing-rule.js",
   "src/class.js",
   "src/list.js",
   "src/obj.js",
