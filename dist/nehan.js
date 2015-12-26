@@ -119,7 +119,7 @@ Nehan.Config = {
    @type {boolean}
    @default false
    */
-  enableAutoCloseTag:false,
+  enableAutoCloseTag:true,
 
   /**
    allowed inline style properties.
@@ -392,6 +392,7 @@ Nehan.Config = {
    */
   formatVerticalContent : function(content){
     return content
+      .replace(/’/g, "'")  // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
       .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
       .replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
       .replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma
@@ -11230,7 +11231,15 @@ Nehan.HtmlLexer = (function (){
       return -1;
     }
     var restart_pos2 = restart_pos + close_pos2 + tag_name.length + 3; // 3 = "</>".length
-    return restart_pos2 + __find_close_pos(buff.substring(restart_pos2), tag_name, open_tag_rex, close_tag);
+    var restart_buff = buff.substring(restart_pos2);
+    if(restart_buff.length < close_tag.length){
+      return -1;
+    }
+    var final_pos = __find_close_pos(restart_buff, tag_name, open_tag_rex, close_tag);
+    if(final_pos < 0){
+      return -1;
+    }
+    return restart_pos2 + final_pos;
   };
 
   // discard close tags defined as single tag in LexingRule.
@@ -11264,7 +11273,6 @@ Nehan.HtmlLexer = (function (){
     if(this.singleTagNames){
       src = __replace_single_close_tags(src, this.singleTagNames);
     }
-    src = src.replace(/’/g, "'"); // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
     return src;
   };
   /**
@@ -11331,10 +11339,11 @@ Nehan.HtmlLexer = (function (){
     return new Nehan.Text(content);
   };
 
-  HtmlLexer.prototype._getTagContent = function(tag_name){
+  HtmlLexer.prototype._getTagContent = function(tag){
     // why we added [\\s|>] for open_tag_rex?
     // if tag_name is "p", 
     // both "<p>" and "<p class='foo'" also must be matched.
+    var tag_name = tag.name;
     var open_tag_rex = new RegExp("<" + tag_name + "[\\s|>]");
     var close_tag = "</" + tag_name + ">"; // tag name is already lower-cased by preprocessor.
     var close_pos = __find_close_pos(this.buff, tag_name, open_tag_rex, close_tag);
@@ -11343,19 +11352,59 @@ Nehan.HtmlLexer = (function (){
       return {closed:true, content:this.buff.substring(0, close_pos)};
     }
 
-    // if close pos not found and Nehan.Config.enableAutoClose is true,
-    // 1. return the text until next same start tag.
-    // 2. or else, return whole rest buff.
-    // (TODO): this is not strict lexing, especially when dt, dd, td, etc.
-    if(Nehan.Config.enableAutoCloseTag){
-      var next_open_match = this.buff.match(open_tag_rex);
-      if(next_open_match){
-	return {closed:false, content:this.buff.substring(0, next_open_match.index)};
+    // try to ommit tag close if
+    // 1. close pos not found
+    // 2. Nehan.Config.enableAutoClose is true
+    // 3. tag has no attributes
+    // reference: http://www.w3.org/TR/html5/syntax.html#optional-tags
+    if(!tag.hasAttr() && Nehan.Config.enableAutoCloseTag){
+      var auto_close_pos = this._findAutoClosePos(tag_name);
+      if(auto_close_pos > 0){
+	return {closed:false, content:this.buff.substring(0, auto_close_pos)};
       }
     }
 
+    console.warn("invalid syntax:%s is not closed properly, use rest content", tag_name);
+
     // all other case, return whole rest buffer.
     return {closed:false, content:this.buff};
+  };
+
+  HtmlLexer.prototype._findAutoClosePos = function(tag_name){
+    switch(tag_name){
+    case "p": return this._selectClosePos([
+      "address", "article", "aside", "blockquote", "div", "dl", "fieldset", "footer", "form",
+      "h1", "h2", "h3", "h4", "h5", "h6",
+      "header", "hgroup", "hr", "main", "nav", "ol", "p", "pre", "section", "table", "ul"
+    ]);
+    case "dt":
+    case "dd":
+      return this._selectClosePos(["dd", "dt"]);
+    case "li":
+      return this._selectClosePos(["li"]);
+    case "thead":
+    case "tbody":
+    case "tfoot":
+      return this._selectClosePos(["thead", "tbody", "tfoo"]);
+    case "tr":
+      return this._selectClosePos(["tr"]);
+    case "td":
+    case "th":
+      return this._selectClosePos(["td", "th"]);
+    default:
+      return -1;
+    }
+  };
+
+  HtmlLexer.prototype._selectClosePos = function(close_names){
+    var matches = close_names.map(function(name){
+      return this.buff.indexOf("<" + name);
+    }.bind(this)).filter(function(pos){
+      return pos > 0;
+    }).sort(function(p1, p2){
+      return p1 - p2;
+    });
+    return (matches.length === 0)? -1 : matches[0];
   };
 
   HtmlLexer.prototype._parseTag = function(tagstr){
@@ -11370,7 +11419,7 @@ Nehan.HtmlLexer = (function (){
   };
 
   HtmlLexer.prototype._parseChildContentTag = function(tag){
-    var result = this._getTagContent(tag.name);
+    var result = this._getTagContent(tag);
     tag.setContent(result.content);
     if(result.closed){
       this._stepBuff(result.content.length + tag.name.length + 3); // 3 = "</>".length
@@ -19739,7 +19788,7 @@ Nehan.createRootGenerator = function(opt){
   return context
     .setStyles(Nehan.globalStyles)
     .setStyles(opt.styles || {})
-    .createRootGenerator();
+    .createRootGenerator(opt.root || Nehan.Config.defaultRoot);
 };
 
 /**

@@ -83,7 +83,7 @@ Nehan.Config = {
    @type {boolean}
    @default false
    */
-  enableAutoCloseTag:false,
+  enableAutoCloseTag:true,
 
   /**
    allowed inline style properties.
@@ -356,6 +356,7 @@ Nehan.Config = {
    */
   formatVerticalContent : function(content){
     return content
+      .replace(/’/g, "'")  // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
       .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
       .replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
       .replace(/､/g, "、") // half size ideographic comma -> full size ideographic comma

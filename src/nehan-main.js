@@ -76,7 +76,7 @@ Nehan.createRootGenerator = function(opt){
   return context
     .setStyles(Nehan.globalStyles)
     .setStyles(opt.styles || {})
-    .createRootGenerator();
+    .createRootGenerator(opt.root || Nehan.Config.defaultRoot);
 };
 
 /**
