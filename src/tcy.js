@@ -54,6 +54,7 @@ Nehan.Tcy = (function(){
     css["text-align"] = "center";
     css["font-weight"] = "normal";
     css["word-break"] = "normal";
+    css["height"] = "1em"; // for IE
     return css;
   };
   /**

@@ -643,7 +643,7 @@ Nehan.Env = (function(){
   );
   var __is_text_combine_enable = (
     (__client.isChrome() && __version >= 47) ||
-    (__client.isIE() && __version >= 11) ||
+    //(__client.isIE() && __version >= 11) ||
     (__client.isSafari() && __version >= 9)
   );
 
@@ -9648,6 +9648,7 @@ Nehan.Tcy = (function(){
     css["text-align"] = "center";
     css["font-weight"] = "normal";
     css["word-break"] = "normal";
+    css["height"] = "1em"; // for IE
     return css;
   };
   /**
@@ -11448,6 +11449,8 @@ Nehan.HtmlLexer = (function (){
 
 Nehan.TextLexer = (function (){
   var __rex_tcy = /\d\d|!\?|!!|\?!|\?\?/;
+  var __rex_float = /^\d+\.\d+/;
+  var __rex_digit = /^\d+/;
   var __rex_word = /^[a-zA-Z0-9.!?\/:$#;"',_%]+/;
   var __rex_char_ref = /^&[^;\s]+;/;
   var __rex_half_single_tcy = /[a-zA-Z0-9!?]/;
@@ -11470,26 +11473,37 @@ Nehan.TextLexer = (function (){
     if(this.buff === ""){
       return null;
     }
-    var str = this._getByRex(__rex_word);
-    if(str){
-      if(str.length === 1){
-	if(__rex_half_single_tcy.test(str)){
+    var pat, pat2;
+    pat = this._getByRex(__rex_word); // logest word pattern first
+    if(pat){
+      if(pat.length === 1){
+	if(__rex_half_single_tcy.test(pat)){
 	  return new Nehan.Tcy(this._stepBuff(1));
 	}
 	return new Nehan.Char({data:this._stepBuff(1)});
-      } else if(str.length === 2 && str.match(__rex_tcy)){
-	return new Nehan.Tcy(this._stepBuff(str.length));
-      } else if(str.match(/[^0-9]\d\d/)){
-	return new Nehan.Word(this._stepBuff(1));
       }
-      return new Nehan.Word(this._stepBuff(str.length));
+      pat2 = this._getByRex(__rex_float);
+      if(pat2){
+	return new Nehan.Word(this._stepBuff(pat2.length));
+      }
+      pat2 = this._getByRex(__rex_digit);
+      if(pat2){
+	if(pat2.length <= 2){
+	  return new Nehan.Tcy(this._stepBuff(pat2.length));
+	}
+	return new Nehan.Word(this._stepBuff(pat2.length));
+      }
+      if(pat.length === 2 && pat.match(__rex_tcy)){
+	return new Nehan.Tcy(this._stepBuff(pat.length));
+      }
+      return new Nehan.Word(this._stepBuff(pat.length));
     }
-    str = this._getByRex(__rex_char_ref);
-    if(str){
-      return new Nehan.Char({ref:this._stepBuff(str.length)});
+    pat = this._getByRex(__rex_char_ref);
+    if(pat){
+      return new Nehan.Char({ref:this._stepBuff(pat.length)});
     }
-    str = this.buff.substring(0, 1);
-    if(__rex_typographic_ligature.test(str)){
+    pat = this.buff.subpating(0, 1);
+    if(__rex_typographic_ligature.test(pat)){
       return new Nehan.Word(this._stepBuff(1));
     }
     return new Nehan.Char({data:this._stepBuff(1)});
