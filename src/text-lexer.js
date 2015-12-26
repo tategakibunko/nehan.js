@@ -53,7 +53,7 @@ Nehan.TextLexer = (function (){
     if(pat){
       return new Nehan.Char({ref:this._stepBuff(pat.length)});
     }
-    pat = this.buff.subpating(0, 1);
+    pat = this.buff.substring(0, 1);
     if(__rex_typographic_ligature.test(pat)){
       return new Nehan.Word(this._stepBuff(1));
     }
