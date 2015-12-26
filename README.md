@@ -100,19 +100,16 @@ doc.setStyle("body", {
   fontSize:16,
   width:640,
   height:480,
-  // you can use functional css property!
+  // you can use functional css value!
   backgroundColor:function(context){
-    // you can get many pseudo-class in javascript.
-    // console.log("nth-child:%d", context.getChildIndex());
-    // console.log("nth-of-type:%d", context.getChildIndexOfType());
-    // console.log("is-last-child:%o", context.isLastChild());
-    // console.log("is-only-child:%o", context.isOnlyChild());
+    context.debug();
     return "wheat";
   },
   // called after after all props in "body" selector are loaded.
   onload:function(context){
-    // console.log("nth-child:%d", context.getChildIndex());
-    // console.log("markup:%o", context.getMarkup());
+    if(screen.width < 600){
+      return {fontSize:"0.9em"};
+    }
   },
   // called after "body" is converted into DOM Element.
   oncreate:function(context){

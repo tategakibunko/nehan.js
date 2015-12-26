@@ -208,6 +208,14 @@ Nehan.BoxFlow = (function(){
     return size;
   };
 
+  /**
+   @memberof Nehan.BoxFlow
+   @return {String}
+   */
+  BoxFlow.prototype.toString = function(){
+    return this.getName();
+  };
+
   return BoxFlow;
 })();
 

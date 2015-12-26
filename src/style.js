@@ -1427,7 +1427,8 @@ Nehan.Style = (function(){
     return null;
   };
 
-  Style.prototype._loadFont = function(){
+  Style.prototype._loadFont = function(opt){
+    opt = opt || {};
     var parent_font = this.getParentFont();
     var line_height = this.getCssAttr("line-height", "inherit");
     var css = this.getCssAttr("font", {
@@ -1452,7 +1453,7 @@ Nehan.Style = (function(){
       font.lineHeight = this._computeLineHeight(font.lineHeight);
     }
     // if all inherited, not required to create new one.
-    if(!this.isRoot() && font.isEqual(parent_font)){
+    if(!opt.forceLoad && !this.isRoot() && font.isEqual(parent_font)){
       return null;
     }
     //console.log("size:%d, family:%s, weight:%s, style:%s", font.size, font.family, font.weight, font.style);

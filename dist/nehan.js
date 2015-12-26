@@ -8296,6 +8296,14 @@ Nehan.BoxFlow = (function(){
     return size;
   };
 
+  /**
+   @memberof Nehan.BoxFlow
+   @return {String}
+   */
+  BoxFlow.prototype.toString = function(){
+    return this.getName();
+  };
+
   return BoxFlow;
 })();
 
@@ -11745,11 +11753,9 @@ Nehan.RubyTokenStream = (function(){
  */
 Nehan.DefaultStyle = (function(){
   var __header_margin = function(ctx){
-    var lc = ctx.layoutContext || null;
-    var cur_extent = lc? lc.getBlockCurExtent() : 1;
-    var em = ctx.style.getFontSize();
-    var rem = ctx.style.getRootFont().size;
-    var before = (cur_extent > 0)? Math.floor(2 * rem - 0.14285 * em) : 0;
+    var em = ctx.getParentFont().size;
+    var rem = ctx.getRootFont().size;
+    var before = (ctx.getCurExtent() > 0)? Math.floor(2 * rem - 0.14285 * em) : 0;
     var after = rem;
     return {
       before:before,
@@ -13296,11 +13302,117 @@ Nehan.SelectorContext = (function(){
    @param context {Nehan.RenderingContext}
    */
   function SelectorContext(prop, style, context){
-    this.prop = prop;
+    this.prop = new Nehan.CssProp(prop);
     this.style = style;
     this.layoutContext = context.layoutContext;
     this.documentContext = context.documentContext;
   }
+
+  /**
+   @memberof Nehan.SelectorContext
+   @return {int}
+   */
+  SelectorContext.prototype.computeRemSize = function(em){
+    var base_size = this.style.getRootFont().size;
+    return Math.floor(base_size * em);
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
+   @return {int}
+   */
+  SelectorContext.prototype.computeEmSize = function(em){
+    var base_size = this.getParentStyle().getFont().size;
+    return Math.floor(base_size * em);
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
+   @return {int}
+   */
+  SelectorContext.prototype.computePercentMeasure = function(percent){
+    var max_size = this.getParentStyle().contentMeasure;
+    return Math.floor(max_size * percent / 100);
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
+   @return {int}
+   */
+  SelectorContext.prototype.computePercentExtent = function(percent){
+    var max_size = this.getParentStyle().contentExtent;
+    return Math.floor(max_size * percent / 100);
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
+   */
+  SelectorContext.prototype.debug = function(){
+    console.log("[markup]:%s(content:%s)", this.getMarkup().getSrc(), this.getMarkupContent().substring(0,10));
+    console.log("[property]:%s", this.prop.getName());
+    console.log("[box-flow]:%s", this.getFlow().toString());
+    console.log("[cursor]:(cur extent = %d, rest extent = %d)", this.getCurExtent(), this.getRestExtent());
+    console.log("[font]:%o(parent:%o, root:%o)", this.getFont(), this.getParentFont(), this.getRootFont());
+    console.log("[font size]:%d(em size:%d)", this.getFont().size, this.getParentFont().size);
+    console.log("[pseudo]:child index:%d(last = %o), type index:%d(last = %o)", this.getChildIndex(), this.isLastChild(), this.getChildIndexOfType(), this.isLastOfType());
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
+   @return {int}
+   */
+  SelectorContext.prototype.getCurExtent = function(){
+    return this.layoutContext.getBlockCurExtent();
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
+   @return {int}
+   */
+  SelectorContext.prototype.getRestExtent = function(){
+    return this.layoutContext.getBlockRestExtent();
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
+   @return {Nehan.BoxFlow}
+   */
+  SelectorContext.prototype.getFlow = function(){
+    // avoid infinite recursion!
+    if(this.prop.getName() === "flow"){
+      return this.style.parent.getFlow();
+    }
+    return this.style.flow || this.style._loadFlow();
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
+   @return {Nehan.Font}
+   */
+  SelectorContext.prototype.getFont = function(){
+    // avoid infinite recursion!
+    if(this.prop.getName() === "font"){
+      console.warn("can't load font from font property itself.");
+      return this.style.parent.getFont(); // use parent font
+    }
+    return this.style.font || this.style._loadFont({forceLoad:true});
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
+   @return {Nehan.Font}
+   */
+  SelectorContext.prototype.getParentFont = function(){
+    return this.style.getParentFont();
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
+   @return {Nehan.Font}
+   */
+  SelectorContext.prototype.getRootFont = function(){
+    return this.style.getRootFont();
+  };
 
   /**
    @memberof Nehan.SelectorContext
@@ -13378,7 +13490,7 @@ Nehan.SelectorContext = (function(){
    @return {int}
    */
   SelectorContext.prototype.getChildIndexOfType = function(){
-    return this.style.getChildIndexOfType;
+    return this.style.getChildIndexOfType();
   };
 
   /**
@@ -13453,12 +13565,7 @@ Nehan.SelectorContext = (function(){
    @return {boolean}
    */
   SelectorContext.prototype.isTextVertical = function(){
-    // this function called before initializing style objects in this.style.
-    // so this.style.flow is not ready at this time, that is, we need to get the box-flow in manual.
-    var parent_flow = this.getParentFlow();
-    var flow_name = this.getCssAttr("flow", parent_flow.getName());
-    var flow = Nehan.BoxFlows.getByName(flow_name);
-    return (flow && flow.isTextVertical())? true : false;
+    return this.getFlow().isTextVertical();
   };
 
   /**
@@ -13474,9 +13581,11 @@ Nehan.SelectorContext = (function(){
    @memberof Nehan.SelectorContext
    @method setMarkupContent
    @param content {String}
+   @return {Nehan.SelectorContext}
    */
   SelectorContext.prototype.setMarkupContent = function(content){
     this.getMarkup().setContent(content);
+    return this;
   };
 
   /**
@@ -13484,9 +13593,11 @@ Nehan.SelectorContext = (function(){
    @method setCssAttr
    @param name {String}
    @param value {css_value}
+   @return {Nehan.SelectorContext}
    */
   SelectorContext.prototype.setCssAttr = function(name, value){
     this.style.setCssAttr(name, value);
+    return this;
   };
 
   return SelectorContext;
@@ -15095,7 +15206,8 @@ Nehan.Style = (function(){
     return null;
   };
 
-  Style.prototype._loadFont = function(){
+  Style.prototype._loadFont = function(opt){
+    opt = opt || {};
     var parent_font = this.getParentFont();
     var line_height = this.getCssAttr("line-height", "inherit");
     var css = this.getCssAttr("font", {
@@ -15120,7 +15232,7 @@ Nehan.Style = (function(){
       font.lineHeight = this._computeLineHeight(font.lineHeight);
     }
     // if all inherited, not required to create new one.
-    if(!this.isRoot() && font.isEqual(parent_font)){
+    if(!opt.forceLoad && !this.isRoot() && font.isEqual(parent_font)){
       return null;
     }
     //console.log("size:%d, family:%s, weight:%s, style:%s", font.size, font.family, font.weight, font.style);

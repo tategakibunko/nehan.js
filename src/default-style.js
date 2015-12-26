@@ -3,11 +3,9 @@
  */
 Nehan.DefaultStyle = (function(){
   var __header_margin = function(ctx){
-    var lc = ctx.layoutContext || null;
-    var cur_extent = lc? lc.getBlockCurExtent() : 1;
-    var em = ctx.style.getFontSize();
-    var rem = ctx.style.getRootFont().size;
-    var before = (cur_extent > 0)? Math.floor(2 * rem - 0.14285 * em) : 0;
+    var em = ctx.getParentFont().size;
+    var rem = ctx.getRootFont().size;
+    var before = (ctx.getCurExtent() > 0)? Math.floor(2 * rem - 0.14285 * em) : 0;
     var after = rem;
     return {
       before:before,
