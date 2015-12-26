@@ -31,6 +31,8 @@ Nehan.TextLexer = (function (){
 	return new Nehan.Char({data:this._stepBuff(1)});
       } else if(str.length === 2 && str.match(__rex_tcy)){
 	return new Nehan.Tcy(this._stepBuff(str.length));
+      } else if(str.match(/[^0-9]\d\d/)){
+	return new Nehan.Word(this._stepBuff(1));
       }
       return new Nehan.Word(this._stepBuff(str.length));
     }

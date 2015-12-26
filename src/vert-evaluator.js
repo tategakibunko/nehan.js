@@ -119,9 +119,10 @@ Nehan.VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalTcy = function(line, tcy){
+    var classes = Nehan.Env.isTextCombineEnable? ["nehan-tcy", "nehan-text-combine-upright"] : ["nehan-tcy"];
     return this._createElement("div", {
       content:tcy.data,
-      className:"nehan-tcy",
+      className:classes.join(" "),
       css:tcy.getCssVert(line)
     });
   };

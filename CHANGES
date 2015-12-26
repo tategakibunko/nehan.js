@@ -13,6 +13,7 @@ o Support shorthanded font setting.
 o Add Nehan.createRootContext, Nehan.createRootGenerator.
 o Support pseudo-class :matches, :not.
 o Support functional value for selector entry.
+o Use native text-combine if supported.
 * More strict edge cancel for block level.
 ! Disable Nehan.LexingRule, use Nehan.setSingleTagName instead.
 
