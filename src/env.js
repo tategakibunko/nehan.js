@@ -20,7 +20,7 @@ Nehan.Env = (function(){
   var __is_text_combine_enable = (
     (__client.isChrome() && __version >= 47) ||
     (__client.isIE() && __version >= 11) ||
-    (__client.isSafari() && __version >= 5)
+    (__client.isSafari() && __version >= 9)
   );
 
   return {
