@@ -1,5 +1,6 @@
 describe("FloatGroup", function(){
   var ctx = Nehan.createRootContext({
+    root:"body",
     styles:{body:{flow:"lr-tb"}}
   });
   var lr_tb = ctx.getFlow();

@@ -81,7 +81,7 @@ Nehan.Config = {
 
    @memberof Nehan.Config
    @type {boolean}
-   @default false
+   @default true
    */
   enableAutoCloseTag:true,
 

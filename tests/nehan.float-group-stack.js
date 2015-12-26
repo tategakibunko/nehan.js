@@ -1,5 +1,8 @@
 describe("FloatGroupStack", function(){
-  var ctx = Nehan.createRootContext({styles:{body:{flow:"lr-tb"}}});
+  var ctx = Nehan.createRootContext({
+    root:"body",
+    styles:{body:{flow:"lr-tb"}}
+  });
   var start1 = ctx.yieldWrapBlock(10, 20, []);
   var start2 = ctx.yieldWrapBlock(20, 30, []);
   var start3 = ctx.yieldWrapBlock(30 , 5, []);
