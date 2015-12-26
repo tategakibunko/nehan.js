@@ -16818,11 +16818,11 @@ Nehan.LayoutEvaluator = (function(){
     }
 
     // store css value to dom.style[<camelized-css-property>]
-    Nehan.Obj.iter(css, function(style_name, value){
+    Nehan.Obj.iter(css, function(prop, value){
       try {
-	dom.style[Nehan.Utils.camelize(style_name)] = value;
+	dom.style[Nehan.Utils.camelize(prop)] = value;
       } catch(error){
-	//console.warn(error);
+	console.warn("try to set %s:%o, but failed:%o", prop, value, error);
       }
     });
 
