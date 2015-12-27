@@ -123,7 +123,7 @@ Nehan.TextLexer = (function (){
 	//console.log("date(md):%o", pat2);
 	return new Nehan.Word(this._stepBuff(pat2.length));
       }
-      pat2 = this._getByRex(__rex_digit);
+      pat2 = this._getByRex(__rex_digit); // 1234
       if(pat2){
 	if(pat2.length <= 2){
 	  //console.log("tcy(digit2):%o", pat2);
@@ -132,16 +132,14 @@ Nehan.TextLexer = (function (){
 	//console.log("digit:%o", pat2);
 	return new Nehan.Word(this._stepBuff(pat2.length));
       }
-      //console.log("word:%o", pat);
-      
-      // if tail is tcy, divide word
-      // hoge!? -> Word("hoge"), Tcy("!?")
-      /*
-      pat2 = this._getByRex(__rex_tail_tcy, pat);
+      // if word + tcy(digit), divide it.
+      //pat2 = this._getByRex(/(?<!\d)\d\d$/, pat);
+      pat2 = this._getByRex(/^[^\d]\d{1,2}/, pat);
       if(pat2){
-	return new Nehan.Word(this._stepBuff(pat.length - 2));
+	//console.log("divided single word:%o", pat2.charAt(0));
+	return new Nehan.Word(this._stepBuff(1));
       }
-       */
+      //console.log("word:%o", pat);
       return new Nehan.Word(this._stepBuff(pat.length));
     }
     return null;
