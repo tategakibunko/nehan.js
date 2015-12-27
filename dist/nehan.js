@@ -11466,6 +11466,7 @@ Nehan.TextLexer = (function (){
   var __rex_time_hm = /^\d{1,2}:\d{1,2}/;
   var __rex_date_ymd = /^\d{1,4}\/\d{1,2}\/\d{1,2}/;
   var __rex_date_md = /^\d{1,2}\/\d{1,2}/;
+  var __rex_money = /^(?:\d+,)+\d+/;
   var __rex_word = /^[a-zA-Z0-9.!?\/:$#"',’_%“”]+/;
   var __rex_char_ref = /^&.+?;/;
   var __rex_half_single_tcy = /^[a-zA-Z0-9!?]/;
@@ -11556,6 +11557,11 @@ Nehan.TextLexer = (function (){
       if(pat.length === 2 && __rex_tcy.test(pat)){
 	//console.log("tcy(2):%o", pat);
 	return new Nehan.Tcy(this._stepBuff(2));
+      }
+      pat2 = this._getByRex(__rex_money); // 1,000
+      if(pat2){
+	//console.log("money?:%o", pat2);
+	return new Nehan.Word(this._stepBuff(pat2.length));
       }
       pat2 = this._getByRex(__rex_float); // 1.23
       if(pat2){
