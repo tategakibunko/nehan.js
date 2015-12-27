@@ -8,9 +8,9 @@ In nehan.js, you can write styles in javascript context, so `functional css prop
 
 Almost all html5 tags are supported, and further more, vertical layout(lr-tb, rl-tb) supported.
 
-Available on IE8+, Firefox3.5+, Google Chrome4+, Safari3+, Opera10+ etc.
+Available on IE11+, Firefox3.5+, Google Chrome4+, Safari3+, Opera10+ etc.
 
-See [DEMO](http://tb.antiscroll.com/static/nehan-demo/).
+See [demo](http://tb.antiscroll.com/static/nehan-demo/).
 
 ## Install
 
