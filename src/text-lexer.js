@@ -9,7 +9,16 @@ Nehan.TextLexer = (function (){
   var __rex_word = /^[a-zA-Z0-9.!?\/:$#"',_%]+/;
   var __rex_char_ref = /^&.+?;/;
   var __rex_half_single_tcy = /^[a-zA-Z0-9!?]/;
-  var __rex_typographic_ligature = /^[\ufb00-\ufb06]/; // ff,fi,fl,ffi,ffl,ft
+  var __rex_typographic_ligature = /^[\ufb00-\ufb06]/; // ff,fi,fl,ffi,ffl,ft,st
+  var __typographic_ligature_refs = [
+    "&#64256;", // ff
+    "&#64257;", // fi
+    "&#64258;", // fl
+    "&#64259;", // ffi
+    "&#64260;", // ffl
+    "&#64261;", // ft
+    "&#64262;"  // st
+  ];
 
   /**
      @memberof Nehan
@@ -33,9 +42,42 @@ Nehan.TextLexer = (function (){
     // character reference
     pat = this._getByRex(__rex_char_ref);
     if(pat){
+      var chr = new Nehan.Char({ref:this._stepBuff(pat.length)});
+      // if typographic_ligature + word, pack as single word.
+      if(Nehan.List.exists(__typographic_ligature_refs, Nehan.Closure.eq(pat))){
+	var next = this._parseAsWord();
+	if(next){
+	  if(next instanceof Nehan.Word){
+	    next.data = pat + next.data;
+	    //console.log("(ligature + word):%o", next.data);
+	    return next;
+	  }
+	  this.buff = next.data + this.buff; // push back
+	}
+      }
       //console.log("character reference:%o", pat);
-      return new Nehan.Char({ref:this._stepBuff(pat.length)});
+      return chr;
     }
+
+    // fetch as word -> token
+    var token = this._parseAsWord();
+    if(token){
+      return token;
+    }
+
+    // typographic ligature
+    pat = this.buff.substring(0, 1);
+    if(__rex_typographic_ligature.test(pat)){
+      //console.log("typographic ligature:%o", pat);
+      return new Nehan.Word(this._stepBuff(1));
+    }
+
+    // simple character
+    return new Nehan.Char({data:this._stepBuff(1)});
+  };
+
+  TextLexer.prototype._parseAsWord = function(rex, buff){
+    var pat, pat2;
 
     // logest word pattern
     pat = this._getByRex(__rex_word);
@@ -96,16 +138,7 @@ Nehan.TextLexer = (function (){
        */
       return new Nehan.Word(this._stepBuff(pat.length));
     }
-
-    // typographic ligature
-    pat = this.buff.substring(0, 1);
-    if(__rex_typographic_ligature.test(pat)){
-      //console.log("typographic ligature:%o", pat);
-      return new Nehan.Word(this._stepBuff(1));
-    }
-
-    // simple character
-    return new Nehan.Char({data:this._stepBuff(1)});
+    return null;
   };
 
   TextLexer.prototype._getByRex = function(rex, buff){
