@@ -10,7 +10,7 @@ Almost all html5 tags are supported, and further more, vertical layout(lr-tb, rl
 
 Available on IE8+, Firefox3.5+, Google Chrome4+, Safari3+, Opera10+ etc.
 
-See [demo](http://tb.antiscroll.com/static/nehan-demo/) or [playground(Japanese)](http://tb.antiscroll.com/static/editor).
+See [DEMO](http://tb.antiscroll.com/static/nehan-demo/).
 
 ## Install
 
@@ -24,7 +24,6 @@ Include css, js in the ``<head>``
 ## Application sample
 
 - [Nehan Reader/Paged-media reader for google chrome](https://chrome.google.com/webstore/detail/nehan-reader/bebbekgiffjpgjlgkkhmlgheckolmdcf)
-- [nehan.js playground!!](http://tb.antiscroll.com/static/editor/)
 - [Responsivook](http://tb.antiscroll.com/static/responsivook/)
 
 ## Screenshot
