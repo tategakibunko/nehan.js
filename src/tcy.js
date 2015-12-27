@@ -91,7 +91,7 @@ Nehan.Tcy = (function(){
     if(flow.isTextVertical()){
       this.bodySize = font.size;
     } else {
-      this.bodySize = (this.data.length <= 1)? font.size : Math.floor(1.2 * font.size);
+      this.bodySize = Nehan.TextMetrics.getMeasure(font, this.data);
     }
   };
 
