@@ -545,6 +545,13 @@ Nehan.Char = (function(){
       this._setVertCnv("&#8592;", 1, 1); break;
     case 8592: // left
       this._setVertCnv("&#8593;", 1, 1); break;
+    case 45: // half size minus
+      this._setRotate(90);
+      this.hscale = this.vscale = 0.5;
+      break;
+    case 8722: // unicode minus sign(U+2212)
+      this._setRotate(90);
+      break;
     }
   };
 
