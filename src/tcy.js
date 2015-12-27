@@ -52,7 +52,11 @@ Nehan.Tcy = (function(){
   Tcy.prototype.getCssVert = function(line){
     var css = {};
     css["text-align"] = "center";
-    css["font-weight"] = "normal";
+    // if native text-combine-upright is not supported,
+    // use normal font-weight.
+    if(!Nehan.Env.isTextCombineEnable){
+      css["font-weight"] = "normal";
+    }
     css["word-break"] = "normal";
     css["height"] = "1em"; // for IE
     return css;
