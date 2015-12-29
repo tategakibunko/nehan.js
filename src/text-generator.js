@@ -13,8 +13,9 @@ Nehan.TextGenerator = (function(){
   Nehan.Class.extend(TextGenerator, Nehan.LayoutGenerator);
 
   TextGenerator.prototype._yield = function(){
+    var element;
     while(this.hasNext()){
-      var element = this._getNext();
+      element = this._getNext();
       var result = this.context.addTextElement(element);
       if(result === Nehan.Results.OK || result === Nehan.Results.SKIP){
 	continue;
@@ -28,15 +29,15 @@ Nehan.TextGenerator = (function(){
       console.error(result);
       throw result;
     }
-    return this._createOutput();
+    return this._createOutput(element);
   };
 
-  TextGenerator.prototype._createOutput = function(){
+  TextGenerator.prototype._createOutput = function(last_element){
     if(this.context.layoutContext.isInlineEmpty()){
       //console.warn("empty text block");
       return null;
     }
-    if(this.context.isHyphenateEnable()){
+    if(this.context.isHyphenateEnable(last_element)){
       this.context.hyphenate();
     }
     return this.context.createTextBox();

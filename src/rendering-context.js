@@ -1439,7 +1439,7 @@ Nehan.RenderingContext = (function(){
     return this.style.getMarkupName() === "space";
   };
 
-  RenderingContext.prototype.isHyphenateEnable = function(){
+  RenderingContext.prototype.isHyphenateEnable = function(last_element){
     if(this.layoutContext.isInlineEmpty()){
       return false;
     }
@@ -1448,6 +1448,10 @@ Nehan.RenderingContext = (function(){
     }
     if(!this.style.isHyphenationEnable()){
       return false;
+    }
+    // [tail-ng-char:1em][word:3em(over)] -> hyphenate at [tail-ng-char:1em]
+    if(last_element && last_element.getAdvance && last_element.getAdvance() > this.style.getFontSize()){
+      return true;
     }
     // if there is space more than 1em, restrict hyphenation.
     if(this.layoutContext.getInlineRestMeasure() > this.style.getFontSize()){
