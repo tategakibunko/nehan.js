@@ -8872,7 +8872,14 @@ Nehan.Char = (function(){
    @param font {Nehan.Font}
    */
   Char.prototype.setMetrics = function(flow, font){
-    var is_vert = flow.isTextVertical();
+    if(flow.isTextVertical()){
+      this._setMetricsVert(flow, font);
+    } else {
+      this._setMetricsHori(flow, font);
+    }
+  };
+
+  Char.prototype._setMetricsVert = function(flow, font){
     var advance_scale = this.getAdvanceScale(flow);
     this.bodySize = (advance_scale != 1)? Math.round(font.size * advance_scale) : font.size;
     if(this.spaceRateStart){
@@ -8881,15 +8888,26 @@ Nehan.Char = (function(){
     if(this.spaceRateEnd){
       this.paddingEnd = Math.round(this.spaceRateEnd * font.size);
     }
-    // horizontal hankaku text except char-ref, white-space
-    /* if(!is_vert && !this.isCharRef() && this.isHankaku() && !this.isWhiteSpace()){
-      this.bodySize = Math.round(font.size / 2);
-    }*/
-    if(!is_vert && this.isHalfKana()){
-      this.bodySize = Math.round(font.size / 2);
-    }
     if(this.isSmallKana()){
       this.bodySize -= Math.floor(font.size * 0.1);
+    }
+  };
+
+  Char.prototype._setMetricsHori = function(flow, font){
+    var advance_scale = this.getAdvanceScale(flow);
+    if(this.spaceRateStart){
+      this.paddingStart = Math.round(this.spaceRateStart * font.size);
+    }
+    if(this.spaceRateEnd){
+      this.paddingEnd = Math.round(this.spaceRateEnd * font.size);
+    }
+    // if hankaku or small-kana except char-ref or white-space, get strict size
+    if((this.isHankaku() || this.isSmallKana()) && !this.isCharRef() && !this.isWhiteSpace()){
+      this.bodySize = Nehan.TextMetrics.getMeasure(font, this.getData(flow));
+    } else if(this.isHalfKana()){
+      this.bodySize = Math.round(font.size / 2);
+    } else {
+      this.bodySize = (advance_scale != 1)? Math.round(font.size * advance_scale) : font.size;
     }
   };
 
@@ -11499,7 +11517,7 @@ Nehan.TextLexer = (function (){
   var __rex_digit = /^\d+/;
   var __rex_digit_group = /^(?:\d+[.:/])+\d+(?!\d)/;
   var __rex_money = /^(?:\d+,)+\d+/;
-  var __rex_word = /^[a-zA-Z0-9.!?\/:$#"',’_%“”@]+/;
+  var __rex_word = /^[a-zA-Z0-9.!?\/:$#"',‘’_%“”@]+/;
   var __rex_char_ref = /^&.+?;/;
   var __rex_half_single_tcy = /^[a-zA-Z0-9!?]/;
   var __rex_typographic_ligature = /^[\ufb00-\ufb06]/; // ff,fi,fl,ffi,ffl,ft,st
