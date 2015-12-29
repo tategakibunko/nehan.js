@@ -8954,151 +8954,156 @@ Nehan.Char = (function(){
 
   Char.prototype._setupByCharCode = function(code){
     switch(code){
-    case 12300:
+    case 12300: // LEFT CORNER BRACKET(U+300C)
       this._setVertImg("kakko1", 0.5, 0.5); break;
-    case 65378:
+    case 65378: // HALFWIDTH LEFT CORNER BRACKET(U+FF62)
       this._setVertImg("kakko1", 0.5, 0.5); break;
-    case 12301:
+    case 12301: // RIGHT CORNER BRACKET(U+300D)
       this._setVertImg("kakko2", 0.5, 0.5); break;
-    case 65379:
+    case 65379: // HALFWIDTH RIGHT CORNER BRACKET(U+FF63)
       this._setVertImg("kakko2", 0.5, 0.5); break;
-    case 12302:
+    case 12302: // LEFT WHITE CORNER BRACKET(U+300E)
       this._setVertImg("kakko3", 0.5, 0.5); break;
-    case 12303:
+    case 12303: // RIGHT WHITE CORNER BRACKET(U+300F)
       this._setVertImg("kakko4", 0.5, 0.5); break;
-    case 65288:
+    case 65288: // FULLWIDTH LEFT PARENTHESIS(U+FF08)
       this._setVertImg("kakko5", 0.5, 0.5); break;
-    case 40:
+    case 40: // LEFT PARENTHESIS(U+0028)
       this._setVertImg("kakko5", 0.5, 0.5); break;
-    case 65371:
+    case 65371: // FULLWIDTH LEFT CURLY BRACKET(U+FF5B)
       this._setVertImg("kakko5", 0.5, 0.5); break;
-    case 123:
+    case 123: // LEFT CURLY BRACKET(U+007B)
       this._setVertImg("kakko5", 0.5, 0.5); break;
-    case 65289:
+    case 65289: // FULLWIDTH RIGHT PARENTHESIS(U+FF09)
       this._setVertImg("kakko6", 0.5, 0.5); break;
-    case 41:
+    case 41: // RIGHT PARENTHESIS(U+0029)
       this._setVertImg("kakko6", 0.5, 0.5); break;
-    case 65373:
+    case 65373: // FULLWIDTH RIGHT CURLY BRACKET(U+FF5D)
       this._setVertImg("kakko6", 0.5, 0.5); break;
-    case 125:
+    case 125: // RIGHT CURLY BRACKET(U+007D)
       this._setVertImg("kakko6", 0.5, 0.5); break;
-    case 65308:
+    case 65308: // FULLWIDTH LESS-THAN SIGN(U+FF1C)
       this._setVertImg("kakko7", 0.5, 0.5); break;
-    case 12296:
+    case 12296: // LEFT ANGLE BRACKET(U+3008)
       this._setVertImg("kakko7", 0.5, 0.5); break;
-    case 65310:
+    case 65310: // FULLWIDTH GREATER-THAN SIGN(U+FF1E)
       this._setVertImg("kakko8", 0.5, 0.5); break;
-    case 12297:
+    case 12297: // RIGHT ANGLE BRACKET(U+3009)
       this._setVertImg("kakko8", 0.5, 0.5); break;
-    case 12298:
+    case 12298: // LEFT DOUBLE ANGLE BRACKET(U+300A)
       this._setVertImg("kakko9", 0.5, 0.5); break;
-    case 8810:
+    case 8810: // MUCH LESS-THAN(U+226A)
       this._setVertImg("kakko9", 0.5, 0.5); break;
-    case 12299:
+    case 12299: // RIGHT DOUBLE ANGLE BRACKET(U+300B)
       this._setVertImg("kakko10", 0.5, 0.5); break;
-    case 8811:
+    case 8811: // MUCH GREATER-THAN(U+226B)
       this._setVertImg("kakko10", 0.5, 0.5); break;
-    case 65339:
+    case 65339: // FULLWIDTH LEFT SQUARE BRACKET(U+FF3B)
       this._setVertImg("kakko11", 0.5, 0.5); break;
-    case 12308:
+    case 12308: // LEFT TORTOISE SHELL BRACKET(U+3014)
       this._setVertImg("kakko11", 0.5, 0.5); break;
-    case 91:
+    case 91: // LEFT SQUARE BRACKET(U+005B)
       this._setVertImg("kakko11", 0.5, 0.5); break;
-    case 65341:
+    case 65341: // FULLWIDTH RIGHT SQUARE BRACKET(U+FF3D)
       this._setVertImg("kakko12", 0.5, 0.5); break;
-    case 12309:
+    case 12309: // RIGHT TORTOISE SHELL BRACKET(U+3015)
       this._setVertImg("kakko12", 0.5, 0.5); break;
-    case 93:
+    case 93: // RIGHT SQUARE BRACKET(U+005D)
       this._setVertImg("kakko12", 0.5, 0.5); break;
-    case 12304: // U+3010(LEFT BLACK LENTICULAR BRACKET)
-    case 12310: // U+3016(LEFT WHITE LENTICULAR BRACKET)
+    case 12304: // LEFT BLACK LENTICULAR BRACKET(U+3010)
+    case 12310: // LEFT WHITE LENTICULAR BRACKET(U+3016)
       this._setVertImg("kakko17", 0.5, 0.5); break;
-    case 12305: // U+3011(RIGHT BLACK LENTICULAR BRACKET)
-    case 12311: // U+3017(RIGHT WHITE LENTICULAR BRACKET)
+    case 12305: // RIGHT BLACK LENTICULAR BRACKET(U+3011)
+    case 12311: // RIGHT WHITE LENTICULAR BRACKET(U+3017)
       this._setVertImg("kakko18", 0.5, 0.5); break;
-    case 65306:
+    case 65306: // FULLWIDTH COLON(U+FF1A)
       this._setVertImg("tenten", 1, 1); break;
-    case 58:
+    case 58: // COLON(U+003A)
       this._setVertImg("tenten", 0.5, 0.5); break;
-    case 12290:
+    case 12290: // IDEOGRAPHIC FULL STOP(U+3002)
       this._setVertImg("kuten", 0.5, 0.5); break;
-    case 65377:
+    case 65377: // HALFWIDTH IDEOGRAPHIC FULL STOP(U+FF61)
       this._setVertImg("kuten", 0.5, 0.5); break;
-    case 65294:
+    case 65294: // FULLWIDTH FULL STOP(U+FF0E)
       this._setVertImg("period", 1, 1); break;
-    case 46:
+    case 46: // FULL STOP(U+002E)
       this._setVertImg("period", 1, 1); break;
-    case 12289:
+    case 12289: // IDEOGRAPHIC COMMA(U+3001)
       this._setVertImg("touten", 0.5, 0.5); break;
-    case 65380:
+    case 65380: // HALFWIDTH IDEOGRAPHIC COMMA(U+FF64)
       this._setVertImg("touten", 0.5, 0.5); break;
-    case 44:
+    case 44: // COMMA(U+002C)
       this._setVertImg("touten", 0.5, 0.5); break;
-    case 65292:
+    case 65292: // FULLWIDTH COMMA(U+FF0C)
       this._setVertImg("touten", 0.5, 0.5); break;
-    case 65374:
+    case 65374: // FULLWIDTH TILDE(U+FF5E)
       this._setVertImg("kara", 1, 1); break;
-    case 12316:
+    case 12316: // WAVE DASH(U+301C)
       this._setVertImg("kara", 1, 1); break;
-    case 8230:
+    case 8230: // HORIZONTAL ELLIPSIS(U+2026)
       this._setVertImg("mmm", 1, 1); break;
-    case 8229:
+    case 8229: // TWO DOT LEADER(U+2025)
       this._setVertImg("mm", 1, 1); break;
-    case 12317: // REVERSED DOUBLE PRIME QUOTATION MARK
+    case 12317: // REVERSED DOUBLE PRIME QUOTATION MARK(U+301D)
       this._setVertImg("dmn1", 1, 1); break;
-    case 12318: // DOUBLE PRIME QUOTATION MARK
+    case 12318: // DOUBLE PRIME QUOTATION MARK(U+301E)
       this._setRotate(90); break;
-    case 12319: // LOW DOUBLE PRIME QUOTATION MARK
+    case 12319: // LOW DOUBLE PRIME QUOTATION MARK(U+301F)
       this._setVertImg("dmn2", 1, 1); break;
-    case 61: // EQUALS SIGN
-    case 8786: // APPROXIMATELY EQUAL TO OR THE IMAGE OF
-    case 8800: // NOT EQUAL TO
-    case 65309: // FULLWIDTH EQUALS SIGN
+    case 61: // EQUALS SIGN(U+003D)
+    case 8786: // APPROXIMATELY EQUAL TO OR THE IMAGE OF(U+2252)
+    case 8800: // NOT EQUAL TO(U+2260)
+    case 65309: // FULLWIDTH EQUALS SIGN(U+FF1D)
       this._setVertImg("equal", 1, 1); break;
-    case 8212: // Em dash
+    case 8212: // EM DASH(U+2014)
       if(__is_ie){
-	this._setVertCnv("&#65372", 1, 1); // FULLWIDTH VERTICAL LINE
+	this._setVertCnv("&#65372", 1, 1); // FULLWIDTH VERTICAL LINE(U+FF5C)
       } else {
 	this._setRotate(90);
       }
       break;
-    case 8213: // Horizontal bar(General Punctuation)
+    case 8213: // HORIZONTAL BAR(U+2015)
       this._setRotate(90);
       if(!__is_ie){
-	this._setVertCnv("&#8212;", 1, 1); // Hbar -> Em dash
+	this._setVertCnv("&#8212;", 1, 1); // HORIZONTAL BAR(U+2015) -> EM DASH(U+2014)
       }
       break;
-    case 8220: // Left Double Quotation Mark
+    case 8220: // LEFT DOUBLE QUOTATION MARK(U+201C)
       this._setRotate(90);
       this.hscale = this.vscale = 0.5;
       break;
-    case 8221: // Right Double Quotation Mark
+    case 8221: // RIGHT DOUBLE QUOTATION MARK(U+201D)
       this._setRotate(90);
       this.hscale = this.vscale = 0.5;
       break;
-    case 12540:
+    case 12540: // KATAKANA-HIRAGANA PROLONGED SOUND MARK(U+30FC)
       this._setVertImg("onbiki", 1, 1); break;
-    case 65293: // Halfwidth and Fullwidth Forms
-    case 9472: // Box drawings light horizontal(Box Drawing)
-      this._setVertCnv("&#8212;", 1, 1);
+    case 65293: // FULLWIDTH HYPHEN-MINUS(U+FF0D)
+    case 9472: // BOX DRAWINGS LIGHT HORIZONTAL(U+2500)
+      this._setVertCnv("&#8212;", 1, 1); // EM DASH(U+2014)
       this._setRotate(90);
       break;
-    case 8593: // up
-      this._setVertCnv("&#8594;", 1, 1); break;
-    case 8594: // right
-      this._setVertCnv("&#8595;", 1, 1); break;
-    case 8658: // right2
-      this._setVertCnv("&#8595;", 1, 1); break;
-    case 8595: // down
-      this._setVertCnv("&#8592;", 1, 1); break;
-    case 8592: // left
-      this._setVertCnv("&#8593;", 1, 1); break;
-    case 45: // half size minus
+    case 8593: // UPWARDS ARROW(U+2191)
+      this._setVertCnv("&#8594;", 1, 1); // RIGHTWARDS ARROW(U+2192)
+      break;
+    case 8594: // RIGHTWARDS ARROW(U+2192)
+      this._setVertCnv("&#8595;", 1, 1); // DOWNWARDS ARROW(U+2193)
+      break;
+    case 8658: // RIGHTWARDS DOUBLE ARROW(U+21D2)
+      this._setVertCnv("&#8659;", 1, 1); // DOWNWARDS DOUBLE ARROW(U+21D3)
+      break;
+    case 8595: // DOWNWARDS ARROW(U+2193)
+      this._setVertCnv("&#8592;", 1, 1); // LEFTWARDS ARROW(U+2190)
+      break;
+    case 8592: // LEFTWARDS ARROW(U+2190)
+      this._setVertCnv("&#8593;", 1, 1); // UPWARDS ARROW(U+2191)
+      break; 
+    case 45: // HYPHEN-MINUS(U+002D)
       this._setRotate(90);
-      this.hscale = 0.4;
+      this.hscale = 0.4; // generally, narrower than half in horizontal
       this.vscale = 0.5;
       break;
-    case 8722: // unicode minus sign(U+2212)
+    case 8722: // MINUS SIGN(U+2212)
       this._setRotate(90);
       break;
     }
