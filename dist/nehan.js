@@ -9084,7 +9084,7 @@ Nehan.Char = (function(){
       this._setVertImg("equal", 1, 1); break;
     case 8212: // EM DASH(U+2014)
       if(__is_ie){
-	this._setVertCnv("&#65372", 1, 1); // FULLWIDTH VERTICAL LINE(U+FF5C)
+	this._setVertCnv("&#xFF5C;", 1, 1); // FULLWIDTH VERTICAL LINE(U+FF5C)
       } else {
 	this._setRotate(90);
       }
@@ -9092,7 +9092,7 @@ Nehan.Char = (function(){
     case 8213: // HORIZONTAL BAR(U+2015)
       this._setRotate(90);
       if(!__is_ie){
-	this._setVertCnv("&#8212;", 1, 1); // HORIZONTAL BAR(U+2015) -> EM DASH(U+2014)
+	this._setVertCnv("&#x2014;", 1, 1); // HORIZONTAL BAR(U+2015) -> EM DASH(U+2014)
       }
       break;
     case 8220: // LEFT DOUBLE QUOTATION MARK(U+201C)
@@ -9107,23 +9107,23 @@ Nehan.Char = (function(){
       this._setVertImg("onbiki", 1, 1); break;
     case 65293: // FULLWIDTH HYPHEN-MINUS(U+FF0D)
     case 9472: // BOX DRAWINGS LIGHT HORIZONTAL(U+2500)
-      this._setVertCnv("&#8212;", 1, 1); // EM DASH(U+2014)
+      this._setVertCnv("&#x2014;", 1, 1); // EM DASH(U+2014)
       this._setRotate(90);
       break;
     case 8593: // UPWARDS ARROW(U+2191)
-      this._setVertCnv("&#8594;", 1, 1); // RIGHTWARDS ARROW(U+2192)
+      this._setVertCnv("&#x2192;", 1, 1); // RIGHTWARDS ARROW(U+2192)
       break;
     case 8594: // RIGHTWARDS ARROW(U+2192)
-      this._setVertCnv("&#8595;", 1, 1); // DOWNWARDS ARROW(U+2193)
+      this._setVertCnv("&#x2193;", 1, 1); // DOWNWARDS ARROW(U+2193)
       break;
     case 8658: // RIGHTWARDS DOUBLE ARROW(U+21D2)
-      this._setVertCnv("&#8659;", 1, 1); // DOWNWARDS DOUBLE ARROW(U+21D3)
+      this._setVertCnv("&#x21D3;", 1, 1); // DOWNWARDS DOUBLE ARROW(U+21D3)
       break;
     case 8595: // DOWNWARDS ARROW(U+2193)
-      this._setVertCnv("&#8592;", 1, 1); // LEFTWARDS ARROW(U+2190)
+      this._setVertCnv("&#x2190;", 1, 1); // LEFTWARDS ARROW(U+2190)
       break;
     case 8592: // LEFTWARDS ARROW(U+2190)
-      this._setVertCnv("&#8593;", 1, 1); // UPWARDS ARROW(U+2191)
+      this._setVertCnv("&#x2191;", 1, 1); // UPWARDS ARROW(U+2191)
       break; 
     case 45: // HYPHEN-MINUS(U+002D)
       this._setRotate(90);
