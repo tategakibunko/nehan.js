@@ -4882,6 +4882,13 @@ Nehan.Font = (function(){
   };
   /**
    @memberof Nehan.Font
+   @return {boolean}
+   */
+  Font.prototype.isItalic = function(){
+    return this.style === "italic";
+  };
+  /**
+   @memberof Nehan.Font
    @param parent {Nehan.Font} - parent font
    */
   Font.prototype.inherit = function(parent){
