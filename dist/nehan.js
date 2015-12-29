@@ -8917,14 +8917,23 @@ Nehan.Char = (function(){
     if(this.spaceRateEnd){
       this.paddingEnd = Math.round(this.spaceRateEnd * font.size);
     }
+    /*
+    // if italic in horizontal, font-size !== advance size, so strict size is required.
+    if(font.isItalic()){
+      this.bodySize = Nehan.TextMetrics.getMeasure(font, this.getData(flow));
+      console.log("[%s]normal advance:%d, strict advance:%d", this.data, font.size, this.bodySize);
+      return;
+    }*/
     // if hankaku or small-kana except char-ref or white-space, get strict size
     if((this.isHankaku() || this.isSmallKana()) && !this.isCharRef() && !this.isWhiteSpace()){
       this.bodySize = Nehan.TextMetrics.getMeasure(font, this.getData(flow));
-    } else if(this.isHalfKana()){
-      this.bodySize = Math.round(font.size / 2);
-    } else {
-      this.bodySize = (advance_scale != 1)? Math.round(font.size * advance_scale) : font.size;
+      return;
     }
+    if(this.isHalfKana()){
+      this.bodySize = Math.round(font.size / 2);
+      return;
+    }
+    this.bodySize = (advance_scale != 1)? Math.round(font.size * advance_scale) : font.size;
   };
 
   Char.prototype._setVertImg = function(vert_img, vscale, hscale){
