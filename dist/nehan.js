@@ -392,6 +392,7 @@ Nehan.Config = {
    */
   formatVerticalContent : function(content){
     return content
+      .replace(/\u2010/g, "-") // convert unicode-hyphen(u+2010) to hyphen-minus(u+002d)
       .replace(/’/g, "'")  // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
       .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
       .replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
