@@ -8564,11 +8564,20 @@ Nehan.Char = (function(){
 
   /**
    @memberof Nehan.Char
-   @param is_vert {bool}
+   @param flow {Nehan.BoxFlow}
    @return {string}
    */
   Char.prototype.getData = function(flow){
-    var data = flow.isTextVertical()? (this.vertCnv || this.data || this.ref) : (this.data || this.ref);
+    return flow.isTextVertical()? this._getDataVert() : this._getDataHori();
+  };
+
+  Char.prototype._getDataVert = function(){
+    var data = this.vertCnv || this.data || this.ref;
+    return data + (this.ligature || "");
+  };
+
+  Char.prototype._getDataHori = function(){
+    var data = this.horiCnv || this.data || this.ref;
     return data + (this.ligature || "");
   };
 
