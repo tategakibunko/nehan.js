@@ -134,7 +134,7 @@ Nehan.TextLexer = (function (){
       }
       // if word + tcy(digit), divide it.
       //pat2 = this._getByRex(/(?<!\d)\d\d$/, pat);
-      pat2 = this._getByRex(/^[^\d]\d{1,2}/, pat);
+      pat2 = this._getByRex(/^[^\d]\d{1,2}$/, pat); // :12 => word(:) + tcy(12)
       if(pat2){
 	//console.log("divided single word:%o", pat2.charAt(0));
 	return new Nehan.Word(this._stepBuff(1));

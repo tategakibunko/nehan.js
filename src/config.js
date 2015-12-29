@@ -347,16 +347,27 @@ Nehan.Config = {
     ensp:0.5,   // &ensp;
     emsp:1.0    // &emsp;
   },
-
   /**
-   format content by vertical text manner.
+   format tag content(common)
 
    @memberof Nehan.Config
-   @type {Array.<Float>}
+   @param content {String}
+   @return {String}
    */
-  formatVerticalContent : function(content){
+  formatTagContent : function(content){
     return content
       .replace(/\u2010/g, "-") // convert unicode-hyphen(u+2010) to hyphen-minus(u+002d)
+    ;
+  },
+  /**
+   format tag content(vertical only)
+
+   @memberof Nehan.Config
+   @param content {String}
+   @return {String}
+   */
+  formatTagContentVertical : function(content){
+    return content
       .replace(/’/g, "'")  // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
       .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
       .replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket

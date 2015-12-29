@@ -383,16 +383,27 @@ Nehan.Config = {
     ensp:0.5,   // &ensp;
     emsp:1.0    // &emsp;
   },
-
   /**
-   format content by vertical text manner.
+   format tag content(common)
 
    @memberof Nehan.Config
-   @type {Array.<Float>}
+   @param content {String}
+   @return {String}
    */
-  formatVerticalContent : function(content){
+  formatTagContent : function(content){
     return content
       .replace(/\u2010/g, "-") // convert unicode-hyphen(u+2010) to hyphen-minus(u+002d)
+    ;
+  },
+  /**
+   format tag content(vertical only)
+
+   @memberof Nehan.Config
+   @param content {String}
+   @return {String}
+   */
+  formatTagContentVertical : function(content){
+    return content
       .replace(/’/g, "'")  // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
       .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
       .replace(/｣/g, "」") // half size right corner bracket -> full size right corner bracket
@@ -8788,6 +8799,15 @@ Nehan.Char = (function(){
 
   /**
    @memberof Nehan.Char
+   @param flow {Nehan.BoxFlow}
+   @return {Float | Int}
+   */
+  Char.prototype.getAdvanceScale = function(flow){
+    return flow.isTextVertical()? this.getVertScale() : this.getHoriScale();
+  };
+
+  /**
+   @memberof Nehan.Char
    @return {Float | Int}
    */
   Char.prototype.getHoriScale = function(){
@@ -8853,17 +8873,18 @@ Nehan.Char = (function(){
    */
   Char.prototype.setMetrics = function(flow, font){
     var is_vert = flow.isTextVertical();
-    var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
-    this.bodySize = (step_scale != 1)? Math.round(font.size * step_scale) : font.size;
+    var advance_scale = this.getAdvanceScale(flow);
+    this.bodySize = (advance_scale != 1)? Math.round(font.size * advance_scale) : font.size;
     if(this.spaceRateStart){
       this.paddingStart = Math.round(this.spaceRateStart * font.size);
     }
     if(this.spaceRateEnd){
       this.paddingEnd = Math.round(this.spaceRateEnd * font.size);
     }
-    if(!is_vert && !this.isCharRef() && this.isHankaku() && !this.isWhiteSpace()){
+    // horizontal hankaku text except char-ref, white-space
+    /* if(!is_vert && !this.isCharRef() && this.isHankaku() && !this.isWhiteSpace()){
       this.bodySize = Math.round(font.size / 2);
-    }
+    }*/
     if(!is_vert && this.isHalfKana()){
       this.bodySize = Math.round(font.size / 2);
     }
@@ -8902,7 +8923,7 @@ Nehan.Char = (function(){
   Char.prototype._setup = function(){
     // for half-size char, rotate 90 and half-scale in horizontal by default.
     if(this.isHankaku()){
-      this.hscale = 0.5;
+      this.hscale = 0.5; // 0.5 as default size
       this._setRotate(90);
     }
     if(this.data){
@@ -9074,7 +9095,8 @@ Nehan.Char = (function(){
       this._setVertCnv("&#8593;", 1, 1); break;
     case 45: // half size minus
       this._setRotate(90);
-      this.hscale = this.vscale = 0.5;
+      this.hscale = 0.4;
+      this.vscale = 0.5;
       break;
     case 8722: // unicode minus sign(U+2212)
       this._setRotate(90);
@@ -11601,7 +11623,7 @@ Nehan.TextLexer = (function (){
       }
       // if word + tcy(digit), divide it.
       //pat2 = this._getByRex(/(?<!\d)\d\d$/, pat);
-      pat2 = this._getByRex(/^[^\d]\d{1,2}/, pat);
+      pat2 = this._getByRex(/^[^\d]\d{1,2}$/, pat); // :12 => word(:) + tcy(12)
       if(pat2){
 	//console.log("divided single word:%o", pat2.charAt(0));
 	return new Nehan.Word(this._stepBuff(1));
@@ -14711,8 +14733,9 @@ Nehan.Style = (function(){
     if(!Nehan.Obj.isEmpty(first_line)){
       content = Nehan.Html.tagWrap("first-line", content);
     }
+    content = Nehan.Config.formatTagContent(content) || content;
     if(this.isTextVertical()){
-      content = Nehan.Config.formatVerticalContent(content) || content;
+      content = Nehan.Config.formatTagContentVertical(content) || content;
     }
     return content;
   };

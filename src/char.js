@@ -267,6 +267,15 @@ Nehan.Char = (function(){
 
   /**
    @memberof Nehan.Char
+   @param flow {Nehan.BoxFlow}
+   @return {Float | Int}
+   */
+  Char.prototype.getAdvanceScale = function(flow){
+    return flow.isTextVertical()? this.getVertScale() : this.getHoriScale();
+  };
+
+  /**
+   @memberof Nehan.Char
    @return {Float | Int}
    */
   Char.prototype.getHoriScale = function(){
@@ -332,17 +341,18 @@ Nehan.Char = (function(){
    */
   Char.prototype.setMetrics = function(flow, font){
     var is_vert = flow.isTextVertical();
-    var step_scale = is_vert? this.getVertScale() : this.getHoriScale();
-    this.bodySize = (step_scale != 1)? Math.round(font.size * step_scale) : font.size;
+    var advance_scale = this.getAdvanceScale(flow);
+    this.bodySize = (advance_scale != 1)? Math.round(font.size * advance_scale) : font.size;
     if(this.spaceRateStart){
       this.paddingStart = Math.round(this.spaceRateStart * font.size);
     }
     if(this.spaceRateEnd){
       this.paddingEnd = Math.round(this.spaceRateEnd * font.size);
     }
-    if(!is_vert && !this.isCharRef() && this.isHankaku() && !this.isWhiteSpace()){
+    // horizontal hankaku text except char-ref, white-space
+    /* if(!is_vert && !this.isCharRef() && this.isHankaku() && !this.isWhiteSpace()){
       this.bodySize = Math.round(font.size / 2);
-    }
+    }*/
     if(!is_vert && this.isHalfKana()){
       this.bodySize = Math.round(font.size / 2);
     }
@@ -381,7 +391,7 @@ Nehan.Char = (function(){
   Char.prototype._setup = function(){
     // for half-size char, rotate 90 and half-scale in horizontal by default.
     if(this.isHankaku()){
-      this.hscale = 0.5;
+      this.hscale = 0.5; // 0.5 as default size
       this._setRotate(90);
     }
     if(this.data){
@@ -553,7 +563,8 @@ Nehan.Char = (function(){
       this._setVertCnv("&#8593;", 1, 1); break;
     case 45: // half size minus
       this._setRotate(90);
-      this.hscale = this.vscale = 0.5;
+      this.hscale = 0.4;
+      this.vscale = 0.5;
       break;
     case 8722: // unicode minus sign(U+2212)
       this._setRotate(90);
