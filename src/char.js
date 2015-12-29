@@ -396,9 +396,12 @@ Nehan.Char = (function(){
 
   Char.prototype._setVertCnv = function(cnv, vscale, hscale){
     this.vertCnv = cnv;
-    this.isRef = true;
     this.vscale = vscale;
     this.hscale = hscale;
+  };
+
+  Char.prototype._setHoriCnv = function(cnv){
+    this.horiCnv = cnv;
   };
 
   Char.prototype._setRotate = function(angle){
