@@ -86,6 +86,10 @@ Nehan.HoriEvaluator = (function(){
     if(chr.isPaddingEnable()){
       return this._evalCharWithSpacing(line, chr);
     }
+    var data = chr.getData(line.getFlow());
+    if(data.charAt(0) === "&"){
+      return document.createTextNode(Nehan.Html.unescape(data));
+    }
     return document.createTextNode(chr.getData(line.getFlow()));
   };
 

@@ -565,6 +565,7 @@ Nehan.Char = (function(){
       if(!__is_ie){
 	this._setVertCnv("&#x2014;", 1, 1); // HORIZONTAL BAR(U+2015) -> EM DASH(U+2014)
       }
+      this._setHoriCnv("&#x2014;"); // use EM DASH(U+2014) if horizontal
       break;
     case 8220: // LEFT DOUBLE QUOTATION MARK(U+201C)
       this._setRotate(90);
@@ -757,8 +758,8 @@ Nehan.Char = (function(){
    */
   Char.prototype.isDash = function(){
     var data = this.data.charCodeAt(0);
-    return (data === 8212 || // em dash
-	    data === 8213);  // horizontal bar
+    return (data === 8212 || // EM DASH(U+2014)
+	    data === 8213);  // HORIZONTAL BAR(U+2015)
   };
 
   /**
