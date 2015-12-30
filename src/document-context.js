@@ -8,6 +8,7 @@ Nehan.DocumentContext = (function(){
    @constructor
   */
   function DocumentContext(){
+    this.documentLang = Nehan.Config.defaultLang;
     this.documentType = "html";
     this.documentHeader = null;
     this.pages = [];

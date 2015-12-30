@@ -46,16 +46,7 @@ Nehan.Config = {
    @type {string}
    @default "ja-JP"
    */
-  lang:"ja-JP",
-
-  /**
-   is debug mode?
-
-   @memberof Nehan.Config
-   @type {boolean}
-   @default false
-   */
-  debug:false,
+  defaultLang:"ja-JP",
 
   /**
    define default root markup where rendering context starts from.
@@ -13262,6 +13253,7 @@ Nehan.DocumentContext = (function(){
    @constructor
   */
   function DocumentContext(){
+    this.documentLang = Nehan.Config.defaultLang;
     this.documentType = "html";
     this.documentHeader = null;
     this.pages = [];
@@ -16935,6 +16927,7 @@ Nehan.HtmlGenerator = (function(){
     if(!context.stream){
       context.stream = context.createHtmlStream(context.text);
     }
+    context.documentContext.documentLang = context.getLang();
     var body_tag = null;
     while(context.stream.hasNext()){
       var tag = context.stream.get();
@@ -18684,6 +18677,13 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   // [get]
   // -----------------------------------------------
+  RenderingContext.prototype.getLang = function(){
+    if(!this.style){
+      return this.documentContext.documentLang;
+    }
+    return this.style.getMarkupAttr("lang") || this.documentContext.documentLang;
+  };
+
   RenderingContext.prototype.getFlow = function(){
     return this.style.flow;
   };

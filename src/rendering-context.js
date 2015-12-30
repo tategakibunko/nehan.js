@@ -941,6 +941,13 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   // [get]
   // -----------------------------------------------
+  RenderingContext.prototype.getLang = function(){
+    if(!this.style){
+      return this.documentContext.documentLang;
+    }
+    return this.style.getMarkupAttr("lang") || this.documentContext.documentLang;
+  };
+
   RenderingContext.prototype.getFlow = function(){
     return this.style.flow;
   };

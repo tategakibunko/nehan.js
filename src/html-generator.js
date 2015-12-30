@@ -19,6 +19,7 @@ Nehan.HtmlGenerator = (function(){
     if(!context.stream){
       context.stream = context.createHtmlStream(context.text);
     }
+    context.documentContext.documentLang = context.getLang();
     var body_tag = null;
     while(context.stream.hasNext()){
       var tag = context.stream.get();

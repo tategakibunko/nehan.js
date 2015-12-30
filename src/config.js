@@ -10,16 +10,7 @@ Nehan.Config = {
    @type {string}
    @default "ja-JP"
    */
-  lang:"ja-JP",
-
-  /**
-   is debug mode?
-
-   @memberof Nehan.Config
-   @type {boolean}
-   @default false
-   */
-  debug:false,
+  defaultLang:"ja-JP",
 
   /**
    define default root markup where rendering context starts from.
