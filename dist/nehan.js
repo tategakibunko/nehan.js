@@ -10023,10 +10023,13 @@ Nehan.ListStyleType = (function(){
   };
   /**
    @memberof Nehan.ListStyleType
+   @param flow {Nehan.BoxFlow}
+   @param count {int}
    @return {String}
    */
-  ListStyleType.prototype.getMarkerHtml = function(count){
+  ListStyleType.prototype.getMarkerHtml = function(flow, count){
     var text = this.getMarkerText(count);
+    //if(flow.isTextVertical() && this.isIncremental() || this.isZenkaku()){
     if(this.isZenkaku()){
       return Nehan.Html.tagWrap("span", text, {
 	"class":"tcy"
@@ -10112,10 +10115,11 @@ Nehan.ListStyleImage = (function(){
 
   /**
    @memberof Nehan.ListStyleImage
+   @param flow {Nehan.BoxFlow}
    @param count {int}
    @return {string}
    */
-  ListStyleImage.prototype.getMarkerHtml = function(count, opt){
+  ListStyleImage.prototype.getMarkerHtml = function(flow, count, opt){
     opt = opt || {};
     var url = Nehan.Css.getImageURL(this.image); // url('xxx.png') -> 'xxx.png'
     var width = opt.width || Nehan.Config.defaultFontSize;
@@ -10174,14 +10178,15 @@ Nehan.ListStyle = (function(){
   };
   /**
    @memberof Nehan.ListStyle
+   @param flow {Nehan.BoxFlow}
    @param count {int}
    @return {String}
    */
-  ListStyle.prototype.getMarkerHtml = function(count, opt){
+  ListStyle.prototype.getMarkerHtml = function(flow, count, opt){
     if(this.image !== null){
-      return this.image.getMarkerHtml(count, opt || {});
+      return this.image.getMarkerHtml(flow, count, opt || {});
     }
-    var html = this.type.getMarkerHtml(count);
+    var html = this.type.getMarkerHtml(flow, count);
     if(html === "" && this.isOutside()){
       return "&nbsp;";
     }
@@ -14902,7 +14907,13 @@ Nehan.Style = (function(){
    */
   Style.prototype.getListMarkerHtml = function(order, opt){
     opt = opt || {};
-    return this.listStyle? this.listStyle.getMarkerHtml(order, opt) : (this.parent? this.parent.getListMarkerHtml(order, opt) : "&nbsp;");
+    if(this.listStyle){
+      return this.listStyle.getMarkerHtml(this.flow, order, opt);
+    }
+    if(this.parent){
+      return this.parent.getListMarkerHtml(order, opt);
+    }
+    return "&nbsp";
   };
   /**
    @memberof Nehan.Style

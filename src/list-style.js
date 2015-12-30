@@ -39,14 +39,15 @@ Nehan.ListStyle = (function(){
   };
   /**
    @memberof Nehan.ListStyle
+   @param flow {Nehan.BoxFlow}
    @param count {int}
    @return {String}
    */
-  ListStyle.prototype.getMarkerHtml = function(count, opt){
+  ListStyle.prototype.getMarkerHtml = function(flow, count, opt){
     if(this.image !== null){
-      return this.image.getMarkerHtml(count, opt || {});
+      return this.image.getMarkerHtml(flow, count, opt || {});
     }
-    var html = this.type.getMarkerHtml(count);
+    var html = this.type.getMarkerHtml(flow, count);
     if(html === "" && this.isOutside()){
       return "&nbsp;";
     }

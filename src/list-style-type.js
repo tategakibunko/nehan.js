@@ -64,10 +64,13 @@ Nehan.ListStyleType = (function(){
   };
   /**
    @memberof Nehan.ListStyleType
+   @param flow {Nehan.BoxFlow}
+   @param count {int}
    @return {String}
    */
-  ListStyleType.prototype.getMarkerHtml = function(count){
+  ListStyleType.prototype.getMarkerHtml = function(flow, count){
     var text = this.getMarkerText(count);
+    //if(flow.isTextVertical() && this.isIncremental() || this.isZenkaku()){
     if(this.isZenkaku()){
       return Nehan.Html.tagWrap("span", text, {
 	"class":"tcy"

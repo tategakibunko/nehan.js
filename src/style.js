@@ -883,7 +883,13 @@ Nehan.Style = (function(){
    */
   Style.prototype.getListMarkerHtml = function(order, opt){
     opt = opt || {};
-    return this.listStyle? this.listStyle.getMarkerHtml(order, opt) : (this.parent? this.parent.getListMarkerHtml(order, opt) : "&nbsp;");
+    if(this.listStyle){
+      return this.listStyle.getMarkerHtml(this.flow, order, opt);
+    }
+    if(this.parent){
+      return this.parent.getListMarkerHtml(order, opt);
+    }
+    return "&nbsp";
   };
   /**
    @memberof Nehan.Style

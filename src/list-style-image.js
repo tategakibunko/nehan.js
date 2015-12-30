@@ -12,10 +12,11 @@ Nehan.ListStyleImage = (function(){
 
   /**
    @memberof Nehan.ListStyleImage
+   @param flow {Nehan.BoxFlow}
    @param count {int}
    @return {string}
    */
-  ListStyleImage.prototype.getMarkerHtml = function(count, opt){
+  ListStyleImage.prototype.getMarkerHtml = function(flow, count, opt){
     opt = opt || {};
     var url = Nehan.Css.getImageURL(this.image); // url('xxx.png') -> 'xxx.png'
     var width = opt.width || Nehan.Config.defaultFontSize;
