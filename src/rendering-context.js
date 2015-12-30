@@ -332,7 +332,7 @@ Nehan.RenderingContext = (function(){
       // wee neeed [li][li::marker] context.
       var item_style = this.createTmpChildStyle(item_tag);
       var item_context = this.createChildContext(item_style);
-      var marker_tag = new Nehan.Tag("marker");
+      var marker_tag = new Nehan.Tag("::marker");
       var marker_option = this.createListMarkerOption(item_style);
       var marker_html = this.style.getListMarkerHtml(index + 1, marker_option);
       marker_tag.setContent(marker_html);
@@ -637,7 +637,7 @@ Nehan.RenderingContext = (function(){
       return new Nehan.InlineBlockGenerator(child_context);
     }
     switch(style.getMarkupName()){
-    case "first-line":
+    case "::first-line":
       return new Nehan.FirstLineGenerator(child_context);
     case "ruby":
       return new Nehan.TextGenerator(child_context);

@@ -743,21 +743,21 @@ Nehan.Style = (function(){
     var content = this.getCssAttr("content") || this.markup.getContent();
     var before = this.context.selectors.getValuePe(this, "before");
     if(!Nehan.Obj.isEmpty(before)){
-      content = Nehan.Html.tagWrap("before", before.content || "") + content;
+      content = Nehan.Html.tagWrap("::before", before.content || "") + content;
     }
     var after = this.context.selectors.getValuePe(this, "after");
     if(!Nehan.Obj.isEmpty(after)){
-      content = content + Nehan.Html.tagWrap("after", after.content || "");
+      content = content + Nehan.Html.tagWrap("::after", after.content || "");
     }
     var first_letter = this.context.selectors.getValuePe(this, "first-letter");
     if(!Nehan.Obj.isEmpty(first_letter)){
       content = Nehan.Utils.replaceFirstLetter(content, function(letter){
-	return Nehan.Html.tagWrap("first-letter", letter);
+	return Nehan.Html.tagWrap("::first-letter", letter);
       });
     }
     var first_line = this.context.selectors.getValuePe(this, "first-line");
     if(!Nehan.Obj.isEmpty(first_line)){
-      content = Nehan.Html.tagWrap("first-line", content);
+      content = Nehan.Html.tagWrap("::first-line", content);
     }
     if(this.isTextVertical()){
       content = Nehan.Config.formatTagContentVertical(content) || content;
@@ -1326,13 +1326,13 @@ Nehan.Style = (function(){
 
   Style.prototype._loadSelectorCss = function(markup, parent){
     switch(markup.getName()){
-    case "marker":
-    case "before":
-    case "after":
-    case "first-letter":
-    case "first-line":
+    case "::marker":
+    case "::before":
+    case "::after":
+    case "::first-letter":
+    case "::first-line":
       // notice that style of pseudo-element is defined with parent context.
-      var pe_values = this.context.selectors.getValuePe(parent, markup.getName());
+      var pe_values = this.context.selectors.getValuePe(parent, markup.getPseudoElementName());
       //console.log("[%s::%s] pseudo values:%o", parent.markupName, this.markup.name, pe_values);
       return pe_values;
 

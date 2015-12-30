@@ -3,23 +3,23 @@ Nehan.TextEmphaStyle = (function(){
   var __empha_marks = {
     // dot
     "filled dot":"&#x2022;",
-    "open dot":"&#x25e6;",
+    "open dot":"&#x25E6;",
 
     // circle
-    "filled circle":"&#x25cf;",
-    "open circle":"&#x25cb;",
+    "filled circle":"&#x25CF;",
+    "open circle":"&#x25CB;",
 
     // double-circle
-    "filled double-circle":"&#x25c9;",
-    "open double-circle":"&#x25ce;",
+    "filled double-circle":"&#x25C9;",
+    "open double-circle":"&#x25CE;",
 
     // triangle
-    "filled triangle":"&#x25b2;",
-    "open triangle":"&#x25b3;",
+    "filled triangle":"&#x25B2;",
+    "open triangle":"&#x25B3;",
 
     // sesame
-    "filled sesame":"&#xfe45;",
-    "open sesame":"&#xfe46;"
+    "filled sesame":"&#xFE45;",
+    "open sesame":"&#xFE46;"
   };
 
   /**

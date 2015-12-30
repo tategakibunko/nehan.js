@@ -1,5 +1,5 @@
 Nehan.HtmlLexer = (function (){
-  var __rex_tag = /<[a-zA-Z][^>]*>/;
+  var __rex_tag = /<:{0,2}[a-zA-Z][^>]*>/;
 
   /*
    var __close_abbr_tags = [

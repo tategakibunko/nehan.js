@@ -43,7 +43,7 @@ Nehan.OutsideListItemGenerator = (function(){
   OutsideListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
     var content = context.parent.style.getListMarkerHtml(list_index + 1);
     //console.log("marker html:%s", content);
-    var marker_markup = new Nehan.Tag("marker", content);
+    var marker_markup = new Nehan.Tag("::marker", content);
     var marker_style = context.createChildStyle(marker_markup, {
       float:"start",
       measure:list_context.indentSize

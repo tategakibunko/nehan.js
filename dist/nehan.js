@@ -2083,6 +2083,17 @@ Nehan.Tag = (function (){
    @memberof Nehan.Tag
    @return {String}
    */
+  Tag.prototype.getPseudoElementName = function(){
+    var name = this.getName();
+    if(name.indexOf("::") < 0){
+      return "";
+    }
+    return name.replace("::", "");
+  };
+  /**
+   @memberof Nehan.Tag
+   @return {String}
+   */
   Tag.prototype.getPath = function(){
     var path = this.getName();
     var id = this.getId();
@@ -4261,12 +4272,12 @@ Nehan.Selectors = (function(){
   };
 
   /**<pre>
-   * get selector css that matches to the pseudo element of some style context.
+   * get selector css that matches to the pseudo element of some style.
    * if selector_key is "p::first-letter",
-   * [pseudo_element_name] is "first-letter" and [style] is style-context of "p".
+   * [pseudo_element_name] is "first-letter" and [style] is the style of "p".
    *</pre>
    @memberof Nehan.Selectors
-   @param style {Nehan.Style} - 'parent' style context of pseudo-element
+   @param style {Nehan.Style} - 'parent' style of pseudo-element
    @param pseudo_element_name {String} - "first-letter", "first-line", "before", "after"
    @return {Object} - formatted css values
    */
@@ -9970,9 +9981,10 @@ Nehan.ListStyleType = (function(){
   }
 
   var __marker_text = {
-    "disc": "&#x2022;",
-    "circle":"&#x25CB;",
-    "square":"&#x25A0;"
+    "disc": "&#x2022;", // BULLET
+    "circle":"&#x25E6;", // WHITE BULLET
+    //"square":"&#x25A0;" // BLACK SQUARE
+    "square":"&#x25FC;" // BLACK MEDIUM SQUARE
   };
 
   /**
@@ -10029,11 +10041,13 @@ Nehan.ListStyleType = (function(){
    */
   ListStyleType.prototype.getMarkerHtml = function(flow, count){
     var text = this.getMarkerText(count);
-    //if(flow.isTextVertical() && this.isIncremental() || this.isZenkaku()){
     if(this.isZenkaku()){
       return Nehan.Html.tagWrap("span", text, {
 	"class":"tcy"
       });
+    }
+    if(flow.isTextVertical() && this.isIncremental()){
+      return Nehan.Html.tagWrap("::marker", "<word>" + text + "</word>");
     }
     return text;
   };
@@ -10201,23 +10215,23 @@ Nehan.TextEmphaStyle = (function(){
   var __empha_marks = {
     // dot
     "filled dot":"&#x2022;",
-    "open dot":"&#x25e6;",
+    "open dot":"&#x25E6;",
 
     // circle
-    "filled circle":"&#x25cf;",
-    "open circle":"&#x25cb;",
+    "filled circle":"&#x25CF;",
+    "open circle":"&#x25CB;",
 
     // double-circle
-    "filled double-circle":"&#x25c9;",
-    "open double-circle":"&#x25ce;",
+    "filled double-circle":"&#x25C9;",
+    "open double-circle":"&#x25CE;",
 
     // triangle
-    "filled triangle":"&#x25b2;",
-    "open triangle":"&#x25b3;",
+    "filled triangle":"&#x25B2;",
+    "open triangle":"&#x25B3;",
 
     // sesame
-    "filled sesame":"&#xfe45;",
-    "open sesame":"&#xfe46;"
+    "filled sesame":"&#xFE45;",
+    "open sesame":"&#xFE46;"
   };
 
   /**
@@ -11295,7 +11309,7 @@ Nehan.InlineContext = (function(){
 
 
 Nehan.HtmlLexer = (function (){
-  var __rex_tag = /<[a-zA-Z][^>]*>/;
+  var __rex_tag = /<:{0,2}[a-zA-Z][^>]*>/;
 
   /*
    var __close_abbr_tags = [
@@ -14767,21 +14781,21 @@ Nehan.Style = (function(){
     var content = this.getCssAttr("content") || this.markup.getContent();
     var before = this.context.selectors.getValuePe(this, "before");
     if(!Nehan.Obj.isEmpty(before)){
-      content = Nehan.Html.tagWrap("before", before.content || "") + content;
+      content = Nehan.Html.tagWrap("::before", before.content || "") + content;
     }
     var after = this.context.selectors.getValuePe(this, "after");
     if(!Nehan.Obj.isEmpty(after)){
-      content = content + Nehan.Html.tagWrap("after", after.content || "");
+      content = content + Nehan.Html.tagWrap("::after", after.content || "");
     }
     var first_letter = this.context.selectors.getValuePe(this, "first-letter");
     if(!Nehan.Obj.isEmpty(first_letter)){
       content = Nehan.Utils.replaceFirstLetter(content, function(letter){
-	return Nehan.Html.tagWrap("first-letter", letter);
+	return Nehan.Html.tagWrap("::first-letter", letter);
       });
     }
     var first_line = this.context.selectors.getValuePe(this, "first-line");
     if(!Nehan.Obj.isEmpty(first_line)){
-      content = Nehan.Html.tagWrap("first-line", content);
+      content = Nehan.Html.tagWrap("::first-line", content);
     }
     if(this.isTextVertical()){
       content = Nehan.Config.formatTagContentVertical(content) || content;
@@ -15350,13 +15364,13 @@ Nehan.Style = (function(){
 
   Style.prototype._loadSelectorCss = function(markup, parent){
     switch(markup.getName()){
-    case "marker":
-    case "before":
-    case "after":
-    case "first-letter":
-    case "first-line":
+    case "::marker":
+    case "::before":
+    case "::after":
+    case "::first-letter":
+    case "::first-line":
       // notice that style of pseudo-element is defined with parent context.
-      var pe_values = this.context.selectors.getValuePe(parent, markup.getName());
+      var pe_values = this.context.selectors.getValuePe(parent, markup.getPseudoElementName());
       //console.log("[%s::%s] pseudo values:%o", parent.markupName, this.markup.name, pe_values);
       return pe_values;
 
@@ -16686,7 +16700,7 @@ Nehan.OutsideListItemGenerator = (function(){
   OutsideListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
     var content = context.parent.style.getListMarkerHtml(list_index + 1);
     //console.log("marker html:%s", content);
-    var marker_markup = new Nehan.Tag("marker", content);
+    var marker_markup = new Nehan.Tag("::marker", content);
     var marker_style = context.createChildStyle(marker_markup, {
       float:"start",
       measure:list_context.indentSize
@@ -18092,7 +18106,7 @@ Nehan.RenderingContext = (function(){
       // wee neeed [li][li::marker] context.
       var item_style = this.createTmpChildStyle(item_tag);
       var item_context = this.createChildContext(item_style);
-      var marker_tag = new Nehan.Tag("marker");
+      var marker_tag = new Nehan.Tag("::marker");
       var marker_option = this.createListMarkerOption(item_style);
       var marker_html = this.style.getListMarkerHtml(index + 1, marker_option);
       marker_tag.setContent(marker_html);
@@ -18397,7 +18411,7 @@ Nehan.RenderingContext = (function(){
       return new Nehan.InlineBlockGenerator(child_context);
     }
     switch(style.getMarkupName()){
-    case "first-line":
+    case "::first-line":
       return new Nehan.FirstLineGenerator(child_context);
     case "ruby":
       return new Nehan.TextGenerator(child_context);

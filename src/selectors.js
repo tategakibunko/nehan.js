@@ -138,12 +138,12 @@ Nehan.Selectors = (function(){
   };
 
   /**<pre>
-   * get selector css that matches to the pseudo element of some style context.
+   * get selector css that matches to the pseudo element of some style.
    * if selector_key is "p::first-letter",
-   * [pseudo_element_name] is "first-letter" and [style] is style-context of "p".
+   * [pseudo_element_name] is "first-letter" and [style] is the style of "p".
    *</pre>
    @memberof Nehan.Selectors
-   @param style {Nehan.Style} - 'parent' style context of pseudo-element
+   @param style {Nehan.Style} - 'parent' style of pseudo-element
    @param pseudo_element_name {String} - "first-letter", "first-line", "before", "after"
    @return {Object} - formatted css values
    */

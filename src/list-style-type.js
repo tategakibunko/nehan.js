@@ -11,9 +11,10 @@ Nehan.ListStyleType = (function(){
   }
 
   var __marker_text = {
-    "disc": "&#x2022;",
-    "circle":"&#x25CB;",
-    "square":"&#x25A0;"
+    "disc": "&#x2022;", // BULLET
+    "circle":"&#x25E6;", // WHITE BULLET
+    //"square":"&#x25A0;" // BLACK SQUARE
+    "square":"&#x25FC;" // BLACK MEDIUM SQUARE
   };
 
   /**
@@ -70,11 +71,13 @@ Nehan.ListStyleType = (function(){
    */
   ListStyleType.prototype.getMarkerHtml = function(flow, count){
     var text = this.getMarkerText(count);
-    //if(flow.isTextVertical() && this.isIncremental() || this.isZenkaku()){
     if(this.isZenkaku()){
       return Nehan.Html.tagWrap("span", text, {
 	"class":"tcy"
       });
+    }
+    if(flow.isTextVertical() && this.isIncremental()){
+      return Nehan.Html.tagWrap("::marker", "<word>" + text + "</word>");
     }
     return text;
   };

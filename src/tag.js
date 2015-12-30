@@ -156,6 +156,17 @@ Nehan.Tag = (function (){
    @memberof Nehan.Tag
    @return {String}
    */
+  Tag.prototype.getPseudoElementName = function(){
+    var name = this.getName();
+    if(name.indexOf("::") < 0){
+      return "";
+    }
+    return name.replace("::", "");
+  };
+  /**
+   @memberof Nehan.Tag
+   @return {String}
+   */
   Tag.prototype.getPath = function(){
     var path = this.getName();
     var id = this.getId();
