@@ -19046,6 +19046,9 @@ Nehan.RenderingContext = (function(){
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var orig_head = this.peekLastCache() || this.stream.peek(); // original head token at next line.
     //console.log("orig_head:%o, last_element:%o", orig_head, last_element);
+    if(orig_head === null){
+      return;
+    }
     /*
     if(orig_head === null){
       var sibling = this.getSiblingContext();
