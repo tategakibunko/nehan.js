@@ -12111,7 +12111,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"code":{
-	  "font-family":"'andale mono', 'lucida console', monospace",
+	  "font-family":"monospace",
 	  "display":"inline"
 	},
 	"col":{
