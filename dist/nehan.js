@@ -16110,7 +16110,7 @@ Nehan.TextGenerator = (function(){
       return null;
     }
     if(this.context.isHyphenateEnable(last_element)){
-      this.context.hyphenate();
+      this.context.hyphenate(last_element);
     }
     return this.context.createTextBox();
   };
@@ -19023,7 +19023,7 @@ Nehan.RenderingContext = (function(){
   // [hyphenate]
   // -----------------------------------------------
   // hyphenate between two different inline generator.
-  RenderingContext.prototype.hyphenateSibling = function(generator){
+  RenderingContext.prototype.hyphenateSibling = function(last_element, generator){
     var next_token = generator.stream.peek();
     var tail = this.layoutContext.getInlineLastElement();
     var head = (next_token instanceof Nehan.Text)? next_token.getHeadChar() : null;
@@ -19043,16 +19043,18 @@ Nehan.RenderingContext = (function(){
     }
   };
 
-  RenderingContext.prototype.hyphenate = function(){
+  RenderingContext.prototype.hyphenate = function(last_element){
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
     var orig_head = this.peekLastCache() || this.stream.peek(); // original head token at next line.
+    //console.log("orig_head:%o, last_element:%o", orig_head, last_element);
+    /*
     if(orig_head === null){
       var sibling = this.getSiblingContext();
       if(sibling && sibling.stream){
-	this.hyphenateSibling(sibling);
+	this.hyphenateSibling(last_element, sibling);
       }
       return;
-    }
+    }*/
     // hyphenate by hanging punctuation.
     var head_next = this.stream.peek();
     head_next = (head_next && orig_head.pos === head_next.pos)? this.stream.peek(1) : head_next;

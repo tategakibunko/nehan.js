@@ -38,7 +38,7 @@ Nehan.TextGenerator = (function(){
       return null;
     }
     if(this.context.isHyphenateEnable(last_element)){
-      this.context.hyphenate();
+      this.context.hyphenate(last_element);
     }
     return this.context.createTextBox();
   };
