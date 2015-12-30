@@ -607,6 +607,9 @@ Nehan.RenderingContext = (function(){
     case "ol":
       return new Nehan.ListGenerator(child_context);
 
+    case "p":
+      return new Nehan.ParagraphGenerator(child_context);
+
     default:
       return new Nehan.BlockGenerator(child_context);
     }
@@ -1387,6 +1390,10 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.initListContext = function(){
     this.listContext = this.createListContext();
     return this.listContext;
+  };
+
+  RenderingContext.prototype.initParagraphContext = function(){
+    this.style.setMarkupAttr("data-paragraph-id", this.documentContext.paragraphId++);
   };
 
   RenderingContext.prototype.initTablePartition = function(stream){

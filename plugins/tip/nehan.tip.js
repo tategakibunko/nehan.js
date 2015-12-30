@@ -27,12 +27,12 @@ Nehan.setStyle("tip", {
     var tip_content = markup.getContent();
     markup.setAlias("a");
     markup.setAttr("href", "#" + tip_title);
-    markup.setData("title", tip_title);
-    markup.setData("content", tip_content);
+    markup.setAttr("data-title", tip_title);
+    markup.setAttr("data-content", tip_content);
     markup.setContent(tip_title);
   },
   "oncreate":function(context){
-    var tip_content = context.box.style.getMarkupData("content");
+    var tip_content = context.box.context.style.getMarkupData("content");
     context.dom.onclick = function(){
       alert(tip_content);
       return false;

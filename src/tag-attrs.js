@@ -101,20 +101,10 @@ Nehan.TagAttrs = (function(){
   TagAttrs.prototype.setAttr = function(name, value){
     value = (typeof value === "string")? value : String(value);
     if(name.indexOf("data-") === 0){
-      this.setData(this._parseDatasetName(name), value);
+      this.dataset[this._parseDatasetName(name)] = value;
     } else {
       this.attrs[name] = value;
     }
-  };
-  /**
-   set dataset value
-
-   @memberof Nehan.TagAttrs
-   @param name {String}
-   @param value {dataset_value}
-   */
-  TagAttrs.prototype.setData = function(name, value){
-    this.dataset[name] = value;
   };
 
   // <p class='hi hey'>

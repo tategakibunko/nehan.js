@@ -19,4 +19,3 @@ Nehan.ListGenerator = (function(){
 
   return ListGenerator;
 })();
-

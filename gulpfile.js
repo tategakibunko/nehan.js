@@ -152,6 +152,7 @@ var sources = [
   "src/parallel-generator.js",
   "src/section-root-generator.js",
   "src/section-content-generator.js",
+  "src/paragraph-generator.js",
   "src/list-generator.js",
   "src/outside-list-item-generator.js",
   "src/inside-list-item-generator.js",

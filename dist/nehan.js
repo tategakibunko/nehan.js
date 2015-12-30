@@ -1878,20 +1878,10 @@ Nehan.TagAttrs = (function(){
   TagAttrs.prototype.setAttr = function(name, value){
     value = (typeof value === "string")? value : String(value);
     if(name.indexOf("data-") === 0){
-      this.setData(this._parseDatasetName(name), value);
+      this.dataset[this._parseDatasetName(name)] = value;
     } else {
       this.attrs[name] = value;
     }
-  };
-  /**
-   set dataset value
-
-   @memberof Nehan.TagAttrs
-   @param name {String}
-   @param value {dataset_value}
-   */
-  TagAttrs.prototype.setData = function(name, value){
-    this.dataset[name] = value;
   };
 
   // <p class='hi hey'>
@@ -2011,14 +2001,6 @@ Nehan.Tag = (function (){
     for(var name in attrs){
       this.setAttr(name, attrs[name]);
     }
-  };
-  /**
-   @memberof Nehan.Tag
-   @param name {String}
-   @param value {dataset_value}
-   */
-  Tag.prototype.setData = function(name, value){
-    this.attrs.setData(name, value);
   };
   /**
    @memberof Nehan.Tag
@@ -13263,6 +13245,7 @@ Nehan.DocumentContext = (function(){
     this.documentId = __document_id++;
     this.headerId = 0; // unique header-id
     this.blockId = 0; // unique block-id
+    this.paragraphId = 0; // unique paragraph-id
     this.lineBreakCount = 0; // count of <BR> tag, used to generate paragraph-id(<block_id>-<br_count>).
   }
 
@@ -14756,10 +14739,20 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
+   @param name {String}
    @return {String}
    */
   Style.prototype.getMarkupData = function(name){
     return this.markup.getData(name);
+  };
+  /**
+   @memberof Nehan.Style
+   @param name {String}
+   @param value {String}
+   @return {String}
+   */
+  Style.prototype.setMarkupAttr = function(name, value){
+    return this.markup.setAttr(name, value);
   };
   /**
    @memberof Nehan.Style
@@ -16594,6 +16587,27 @@ Nehan.SectionContentGenerator = (function(){
 })();
 
 
+Nehan.ParagraphGenerator = (function(){
+  /**
+   @memberof Nehan
+   @class ParagraphGenerator
+   @constructor
+   @extends {Nehan.BlockGenerator}
+   @param context {Nehan.RenderingContext}
+  */
+  function ParagraphGenerator(context){
+    Nehan.BlockGenerator.call(this, context);
+  }
+  Nehan.Class.extend(ParagraphGenerator, Nehan.BlockGenerator);
+
+  ParagraphGenerator.prototype._onInitialize = function(context){
+    Nehan.BlockGenerator.prototype._onInitialize.call(this, context);
+    context.initParagraphContext();
+  };
+
+  return ParagraphGenerator;
+})();
+
 Nehan.ListGenerator = (function(){
   /**
    @memberof Nehan
@@ -16615,7 +16629,6 @@ Nehan.ListGenerator = (function(){
 
   return ListGenerator;
 })();
-
 
 Nehan.OutsideListItemGenerator = (function(){
   /**
@@ -18343,6 +18356,9 @@ Nehan.RenderingContext = (function(){
     case "ol":
       return new Nehan.ListGenerator(child_context);
 
+    case "p":
+      return new Nehan.ParagraphGenerator(child_context);
+
     default:
       return new Nehan.BlockGenerator(child_context);
     }
@@ -19123,6 +19139,10 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.initListContext = function(){
     this.listContext = this.createListContext();
     return this.listContext;
+  };
+
+  RenderingContext.prototype.initParagraphContext = function(){
+    this.style.setMarkupAttr("data-paragraph-id", this.documentContext.paragraphId++);
   };
 
   RenderingContext.prototype.initTablePartition = function(stream){

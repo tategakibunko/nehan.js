@@ -4,7 +4,7 @@
 
 
 /**
-   plugin name: nehan-tip
+   plugin name: tip
    description: create link that shows popup message when clicked.
    tag_name: tip
    close_tag: required
@@ -27,8 +27,8 @@ Nehan.setStyle("tip", {
     var tip_content = markup.getContent();
     markup.setAlias("a");
     markup.setAttr("href", "#" + tip_title);
-    markup.setData("title", tip_title);
-    markup.setData("content", tip_content);
+    markup.setAttr("data-title", tip_title);
+    markup.setAttr("data-content", tip_content);
     markup.setContent(tip_title);
   },
   "oncreate":function(context){

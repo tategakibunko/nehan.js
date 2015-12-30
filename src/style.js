@@ -720,10 +720,20 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
+   @param name {String}
    @return {String}
    */
   Style.prototype.getMarkupData = function(name){
     return this.markup.getData(name);
+  };
+  /**
+   @memberof Nehan.Style
+   @param name {String}
+   @param value {String}
+   @return {String}
+   */
+  Style.prototype.setMarkupAttr = function(name, value){
+    return this.markup.setAttr(name, value);
   };
   /**
    @memberof Nehan.Style

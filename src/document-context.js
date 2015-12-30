@@ -18,6 +18,7 @@ Nehan.DocumentContext = (function(){
     this.documentId = __document_id++;
     this.headerId = 0; // unique header-id
     this.blockId = 0; // unique block-id
+    this.paragraphId = 0; // unique paragraph-id
     this.lineBreakCount = 0; // count of <BR> tag, used to generate paragraph-id(<block_id>-<br_count>).
   }
 

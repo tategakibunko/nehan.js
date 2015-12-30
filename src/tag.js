@@ -77,14 +77,6 @@ Nehan.Tag = (function (){
   };
   /**
    @memberof Nehan.Tag
-   @param name {String}
-   @param value {dataset_value}
-   */
-  Tag.prototype.setData = function(name, value){
-    this.attrs.setData(name, value);
-  };
-  /**
-   @memberof Nehan.Tag
    @param status {Bool}
    */
   Tag.prototype.setFirstChild = function(status){
