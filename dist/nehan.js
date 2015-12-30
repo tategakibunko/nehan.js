@@ -9983,8 +9983,8 @@ Nehan.ListStyleType = (function(){
   var __marker_text = {
     "disc": "&#x2022;", // BULLET
     "circle":"&#x25E6;", // WHITE BULLET
-    //"square":"&#x25A0;" // BLACK SQUARE
-    "square":"&#x25FC;" // BLACK MEDIUM SQUARE
+    "square":"&#x25AA;" // BLACK SMALL SQUARE
+    //"square":"&#x25AB;" // WHITE SMALL SQUARE
   };
 
   /**
