@@ -317,10 +317,9 @@ Nehan.Config = {
 
    @memberof Nehan.Config
    @type {String}
-   @default "'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace"
+   @default "'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','Meiryo','メイリオ','IPA明朝','IPA Mincho','ＭＳ 明朝','MS Mincho', monospace"
    */
-  defaultFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','IPA明朝','IPA Mincho', 'Meiryo','メイリオ','ＭＳ 明朝','MS Mincho', monospace",
-  //defaultFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+  defaultFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','Meiryo','メイリオ','IPA明朝','IPA Mincho','ＭＳ 明朝','MS Mincho',monospace",
 
   /**
    default single tag(like img, br, hr etc) list.
