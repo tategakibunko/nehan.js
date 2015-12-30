@@ -348,18 +348,6 @@ Nehan.Config = {
     emsp:1.0    // &emsp;
   },
   /**
-   format tag content(common)
-
-   @memberof Nehan.Config
-   @param content {String}
-   @return {String}
-   */
-  formatTagContent : function(content){
-    return content
-      .replace(/\u2010/g, "-") // convert unicode-hyphen(u+2010) to hyphen-minus(u+002d)
-    ;
-  },
-  /**
    format tag content(vertical only)
 
    @memberof Nehan.Config

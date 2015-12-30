@@ -62,7 +62,7 @@ Nehan.VertEvaluator = (function(){
       css:word.getCssVertTrans(line)
     });
     var div_word = this._createElement("div", {
-      content:word.data,
+      content:word.getData(line.getFlow()),
       className:"nehan-rotate-90",
       css:word.getCssVertTransBody(line)
     });
@@ -75,7 +75,7 @@ Nehan.VertEvaluator = (function(){
       css:word.getCssVertTrans(line)
     });
     var div_word = this._createElement("div", {
-      content:word.data,
+      content:word.getData(line.getFlow()),
       //className:"nehan-rotate-90",
       css:word.getCssVertTransBodyTrident(line)
     });
@@ -85,7 +85,7 @@ Nehan.VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalWordIE = function(line, word){
     return this._createElement("div", {
-      content:word.data,
+      content:word.getData(line.getFlow()),
       className:"nehan-vert-ie",
       css:word.getCssVertTransIE(line)
     }); // NOTE(or TODO):clearfix in older version after this code

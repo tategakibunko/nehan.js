@@ -384,18 +384,6 @@ Nehan.Config = {
     emsp:1.0    // &emsp;
   },
   /**
-   format tag content(common)
-
-   @memberof Nehan.Config
-   @param content {String}
-   @return {String}
-   */
-  formatTagContent : function(content){
-    return content
-      .replace(/\u2010/g, "-") // convert unicode-hyphen(u+2010) to hyphen-minus(u+002d)
-    ;
-  },
-  /**
    format tag content(vertical only)
 
    @memberof Nehan.Config
@@ -9511,11 +9499,38 @@ Nehan.Word = (function(){
   };
   /**
    @memberof Nehan.Word
+   @param {Nehan.BoxFlow}
    @return {string}
    */
-  Word.prototype.getData = function(){
+  Word.prototype.getData = function(flow){
+    return flow.isTextVertical()? this._getDataVert() : this._getDataHori();
+  };
+
+  Word.prototype._getDataVert = function(){
+    // Convert HYPHEN MINUS(U+002D), HYPHEN(U+2010) to NON-BREAKING HYPHEN(U+2011), but why?
+    // Because HYPHEN-MINUS(\u002D) contains line-break.
+    // For example, if you set word text including hyphen(like 'foo-hoo') into (200, 16) box,
+    // and if you rotate this box for vertical writing, line-break by hyphenation will be executed,
+    // because hyphenation is calculated by not 'measure' of (16, 200) = 200, but 'width' of (16, 200) = 16.
+    // So line-break is occured(for most case).
+    // To block this, property 'hyphens' is prepared in CSS, but it's not implemented in all browser(especially webkit).
+    // So we convert \u002D to \u2011, because \u2011 is declared as 'non-breaking-hyphens'.
+    this.data = this.data.replace(/[\u002D\u2010]/g, "\u2011");
+
+    // fix dash element
+    if(Nehan.Env.client.isIE()){
+      this.data = this.data.replace(/\u2014/g, "\uFF5C"); // EM DASH -> FULLWIDTH VERTICAL LINE
+    } else {
+      this.data = this.data.replace(/\u2015/g, "\u2014"); // HORIZONTAL BAR -> EM DASH
+    }
     return this.data;
   };
+
+  Word.prototype._getDataHori = function(){
+    this.data = this.data.replace(/\u2015/g, "\u2014"); // HORIZONTAL BAR -> EM DASH
+    return this.data;
+  };
+
   /**
    @memberof Nehan.Word
    @param line {Nehan.Box}
@@ -11546,7 +11561,13 @@ Nehan.TextLexer = (function (){
   var __rex_digit = /^\d+/;
   var __rex_digit_group = /^(?:\d+[.:/])+\d+(?!\d)/;
   var __rex_money = /^(?:\d+,)+\d+/;
-  var __rex_word = /^[a-zA-Z0-9.!?\/:$#"',‘’_%“”@]+/;
+  //var __rex_word = /^[a-zA-Z0-9.!?\/:$#"',‘’_%“”@]+/;
+
+  // latin word range
+  // \u0021-\u007E, block = Basic Latin(without \u0026, \u003B)
+  // \u00C0-\u02A8, block = IPA Extensions
+  // \u2000-\u206F, block = General Punctuation
+  var __rex_word = /^[\u0021-\u0025\u0027-\u003A\u003C-\u007E\u00C0-\u02A8\u2000-\u206F]+/;
   var __rex_char_ref = /^&.+?;/;
   var __rex_half_single_tcy = /^[a-zA-Z0-9!?]/;
   var __rex_typographic_ligature = /^[\ufb00-\ufb06]/; // ff,fi,fl,ffi,ffl,ft,st
@@ -11561,11 +11582,11 @@ Nehan.TextLexer = (function (){
   ];
 
   /**
-     @memberof Nehan
-     @class TextLexer
-     @classdesc lexer of html text elements.
-     @constructor
-     @param src {String}
+   @memberof Nehan
+   @class TextLexer
+   @classdesc lexer of html text elements.
+   @constructor
+   @param src {String}
   */
   function TextLexer(src){
     Nehan.HtmlLexer.call(this, src);
@@ -14773,7 +14794,6 @@ Nehan.Style = (function(){
     if(!Nehan.Obj.isEmpty(first_line)){
       content = Nehan.Html.tagWrap("first-line", content);
     }
-    content = Nehan.Config.formatTagContent(content) || content;
     if(this.isTextVertical()){
       content = Nehan.Config.formatTagContentVertical(content) || content;
     }
@@ -17298,7 +17318,7 @@ Nehan.VertEvaluator = (function(){
       css:word.getCssVertTrans(line)
     });
     var div_word = this._createElement("div", {
-      content:word.data,
+      content:word.getData(line.getFlow()),
       className:"nehan-rotate-90",
       css:word.getCssVertTransBody(line)
     });
@@ -17311,7 +17331,7 @@ Nehan.VertEvaluator = (function(){
       css:word.getCssVertTrans(line)
     });
     var div_word = this._createElement("div", {
-      content:word.data,
+      content:word.getData(line.getFlow()),
       //className:"nehan-rotate-90",
       css:word.getCssVertTransBodyTrident(line)
     });
@@ -17321,7 +17341,7 @@ Nehan.VertEvaluator = (function(){
 
   VertEvaluator.prototype._evalWordIE = function(line, word){
     return this._createElement("div", {
-      content:word.data,
+      content:word.getData(line.getFlow()),
       className:"nehan-vert-ie",
       css:word.getCssVertTransIE(line)
     }); // NOTE(or TODO):clearfix in older version after this code
@@ -17581,7 +17601,7 @@ Nehan.HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._evalWord = function(line, word){
     return this._createElement("span", {
-      content:word.data,
+      content:word.getData(line.getFlow()),
       css:word.getCssHori(line)
     });
   };

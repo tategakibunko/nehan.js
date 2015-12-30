@@ -58,7 +58,7 @@ Nehan.HoriEvaluator = (function(){
 
   HoriEvaluator.prototype._evalWord = function(line, word){
     return this._createElement("span", {
-      content:word.data,
+      content:word.getData(line.getFlow()),
       css:word.getCssHori(line)
     });
   };

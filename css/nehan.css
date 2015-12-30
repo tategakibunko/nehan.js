@@ -71,6 +71,10 @@
   -ms-transform-origin : 50% 50%;
   transform : rotate(90deg);
   transform-origin : 50% 50%;
+  -webkit-hyphens: none; // not line-break
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
 }
 .nehan-vert-ie{
   writing-mode:tb-rl;

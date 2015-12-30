@@ -1,4 +1,5 @@
 describe("Word", function(){
+  var flow = Nehan.BoxFlows.getByName("lr-tb");
   it("Word.isHeadNg", function(){
     expect(new Nehan.Word("foo").isHeadNg()).toBe(false);
   });
@@ -8,7 +9,7 @@ describe("Word", function(){
   });
 
   it("Word.getData", function(){
-    expect(new Nehan.Word("foo").getData()).toBe("foo");
+    expect(new Nehan.Word("foo").getData(flow)).toBe("foo");
   });
 
   it("Word.countUpper", function(){

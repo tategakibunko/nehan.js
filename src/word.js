@@ -43,11 +43,38 @@ Nehan.Word = (function(){
   };
   /**
    @memberof Nehan.Word
+   @param {Nehan.BoxFlow}
    @return {string}
    */
-  Word.prototype.getData = function(){
+  Word.prototype.getData = function(flow){
+    return flow.isTextVertical()? this._getDataVert() : this._getDataHori();
+  };
+
+  Word.prototype._getDataVert = function(){
+    // Convert HYPHEN MINUS(U+002D), HYPHEN(U+2010) to NON-BREAKING HYPHEN(U+2011), but why?
+    // Because HYPHEN-MINUS(\u002D) contains line-break.
+    // For example, if you set word text including hyphen(like 'foo-hoo') into (200, 16) box,
+    // and if you rotate this box for vertical writing, line-break by hyphenation will be executed,
+    // because hyphenation is calculated by not 'measure' of (16, 200) = 200, but 'width' of (16, 200) = 16.
+    // So line-break is occured(for most case).
+    // To block this, property 'hyphens' is prepared in CSS, but it's not implemented in all browser(especially webkit).
+    // So we convert \u002D to \u2011, because \u2011 is declared as 'non-breaking-hyphens'.
+    this.data = this.data.replace(/[\u002D\u2010]/g, "\u2011");
+
+    // fix dash element
+    if(Nehan.Env.client.isIE()){
+      this.data = this.data.replace(/\u2014/g, "\uFF5C"); // EM DASH -> FULLWIDTH VERTICAL LINE
+    } else {
+      this.data = this.data.replace(/\u2015/g, "\u2014"); // HORIZONTAL BAR -> EM DASH
+    }
     return this.data;
   };
+
+  Word.prototype._getDataHori = function(){
+    this.data = this.data.replace(/\u2015/g, "\u2014"); // HORIZONTAL BAR -> EM DASH
+    return this.data;
+  };
+
   /**
    @memberof Nehan.Word
    @param line {Nehan.Box}

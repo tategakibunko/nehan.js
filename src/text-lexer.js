@@ -5,7 +5,13 @@ Nehan.TextLexer = (function (){
   var __rex_digit = /^\d+/;
   var __rex_digit_group = /^(?:\d+[.:/])+\d+(?!\d)/;
   var __rex_money = /^(?:\d+,)+\d+/;
-  var __rex_word = /^[a-zA-Z0-9.!?\/:$#"',‘’_%“”@]+/;
+  //var __rex_word = /^[a-zA-Z0-9.!?\/:$#"',‘’_%“”@]+/;
+
+  // latin word range
+  // \u0021-\u007E, block = Basic Latin(without \u0026, \u003B)
+  // \u00C0-\u02A8, block = IPA Extensions
+  // \u2000-\u206F, block = General Punctuation
+  var __rex_word = /^[\u0021-\u0025\u0027-\u003A\u003C-\u007E\u00C0-\u02A8\u2000-\u206F]+/;
   var __rex_char_ref = /^&.+?;/;
   var __rex_half_single_tcy = /^[a-zA-Z0-9!?]/;
   var __rex_typographic_ligature = /^[\ufb00-\ufb06]/; // ff,fi,fl,ffi,ffl,ft,st
@@ -20,11 +26,11 @@ Nehan.TextLexer = (function (){
   ];
 
   /**
-     @memberof Nehan
-     @class TextLexer
-     @classdesc lexer of html text elements.
-     @constructor
-     @param src {String}
+   @memberof Nehan
+   @class TextLexer
+   @classdesc lexer of html text elements.
+   @constructor
+   @param src {String}
   */
   function TextLexer(src){
     Nehan.HtmlLexer.call(this, src);
