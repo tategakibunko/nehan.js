@@ -8,9 +8,9 @@ Nehan.Config = {
 
    @memberof Nehan.Config
    @type {string}
-   @default "ja-JP"
+   @default ""
    */
-  defaultLang:"ja-JP",
+  defaultLang:"",
 
   /**
    define default root markup where rendering context starts from.

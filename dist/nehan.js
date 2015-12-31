@@ -44,9 +44,9 @@ Nehan.Config = {
 
    @memberof Nehan.Config
    @type {string}
-   @default "ja-JP"
+   @default ""
    */
-  defaultLang:"ja-JP",
+  defaultLang:"",
 
   /**
    define default root markup where rendering context starts from.
@@ -12909,7 +12909,6 @@ Nehan.Box = (function(){
     this.content = (typeof args.content !== "undefined")? args.content : null;
     this.edge = args.edge || null;
     this.classes = args.classes || [];
-    this.lang = args.lang || "";
     this.charCount = args.charCount || 0;
     this.breakAfter = args.breakAfter || false;
     this.elements = args.elements || [];
@@ -18732,11 +18731,12 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   // [get]
   // -----------------------------------------------
+  RenderingContext.prototype.getDocumentLang = function(){
+    return this.documentContext.documentLang;
+  };
+
   RenderingContext.prototype.getLang = function(){
-    if(!this.style){
-      return this.documentContext.documentLang;
-    }
-    return this.style.getMarkupAttr("lang") || this.documentContext.documentLang;
+    return this.style.getMarkupAttr("lang") || "";
   };
 
   RenderingContext.prototype.getFlow = function(){

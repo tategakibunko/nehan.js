@@ -21,7 +21,6 @@ Nehan.Box = (function(){
     this.content = (typeof args.content !== "undefined")? args.content : null;
     this.edge = args.edge || null;
     this.classes = args.classes || [];
-    this.lang = args.lang || "";
     this.charCount = args.charCount || 0;
     this.breakAfter = args.breakAfter || false;
     this.elements = args.elements || [];
