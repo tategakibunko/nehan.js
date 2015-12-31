@@ -3393,6 +3393,7 @@ Nehan.PseudoSelector = (function(){
     case ":root": return style.isRoot();
     case ":not": return style.not(this.args);
     case ":matches": return style.matches(this.args);
+    case ":lang": return style.lang(this.args.map(function(arg){ return arg.name; }));
     }
     return false;
   };
@@ -12908,6 +12909,7 @@ Nehan.Box = (function(){
     this.content = (typeof args.content !== "undefined")? args.content : null;
     this.edge = args.edge || null;
     this.classes = args.classes || [];
+    this.lang = args.lang || "";
     this.charCount = args.charCount || 0;
     this.breakAfter = args.breakAfter || false;
     this.elements = args.elements || [];
@@ -14572,6 +14574,18 @@ Nehan.Style = (function(){
     return Nehan.List.exists(args, function(arg){
       return arg.test(this);
     }.bind(this));
+  };
+  /**
+   @memberof Nehan.Style
+   @param args {Array.<String>} - lang name list
+   @return {boolean}
+   */
+  Style.prototype.lang = function(args){
+    var lang = this.getMarkupAttr("lang");
+    if(!lang){
+      return false;
+    }
+    return Nehan.List.exists(args, Nehan.Closure.eq(lang));
   };
   /**
    @memberof Nehan.Style

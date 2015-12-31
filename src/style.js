@@ -537,6 +537,18 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
+   @param args {Array.<String>} - lang name list
+   @return {boolean}
+   */
+  Style.prototype.lang = function(args){
+    var lang = this.getMarkupAttr("lang");
+    if(!lang){
+      return false;
+    }
+    return Nehan.List.exists(args, Nehan.Closure.eq(lang));
+  };
+  /**
+   @memberof Nehan.Style
    @return {boolean}
    */
   Style.prototype.isMarkupEmpty = function(){
