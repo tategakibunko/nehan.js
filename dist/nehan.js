@@ -19097,9 +19097,11 @@ Nehan.RenderingContext = (function(){
     var next_token = sib_context.stream.peek();
     var tail = this.layoutContext.getInlineLastElement();
     var head = (next_token instanceof Nehan.Text)? next_token.getHeadChar() : null;
-    //console.log("sib_context inline.cur = %d, inline.rest = %d", sib_context.layoutContext.inline.curMeasure, sib_context.layoutContext.inline.maxMeasure);
-    //console.log("hyphenate sib:next = %s, tail = %o, head = %o, icont:%o", next_token.content, tail, head, this.layoutContext.inline);
-    if(sib_context.layoutContext.getInlineRestMeasure() > sib_context.getFontSize()){
+    //console.log("hyphenate sib:last = %o, tail = %o, head = %o", last_element, tail, head);
+    //console.log("cur_context inline.cur = %d, inline.rest = %d", this.layoutContext.inline.curMeasure, this.layoutContext.inline.getRestMeasure());
+    //console.log("sib_context inline.cur = %d, inline.rest = %d", sib_context.layoutContext.inline.curMeasure, sib_context.layoutContext.inline.getRestMeasure());
+
+    if(this.layoutContext.getInlineRestMeasure() > sib_context.getFontSize()){
       //console.log("not required!");
       return;
     }
