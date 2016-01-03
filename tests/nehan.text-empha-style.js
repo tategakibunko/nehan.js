@@ -18,38 +18,38 @@ describe("TextEmphaStyle", function(){
   });
 
   it("TextEmphaStyle.getText(open dot)", function(){
-    expect(new Nehan.TextEmphaStyle("open dot").getText()).toBe("&#x25e6;");
+    expect(new Nehan.TextEmphaStyle("open dot").getText()).toBe("&#x25E6;");
   });
 
   it("TextEmphaStyle.getText(filled circle)", function(){
-    expect(new Nehan.TextEmphaStyle("filled circle").getText()).toBe("&#x25cf;");
+    expect(new Nehan.TextEmphaStyle("filled circle").getText()).toBe("&#x25CF;");
   });
 
   it("TextEmphaStyle.getText(open circle)", function(){
-    expect(new Nehan.TextEmphaStyle("open circle").getText()).toBe("&#x25cb;");
+    expect(new Nehan.TextEmphaStyle("open circle").getText()).toBe("&#x25CB;");
   });
 
   it("TextEmphaStyle.getText(filled double-circle)", function(){
-    expect(new Nehan.TextEmphaStyle("filled double-circle").getText()).toBe("&#x25c9;");
+    expect(new Nehan.TextEmphaStyle("filled double-circle").getText()).toBe("&#x25C9;");
   });
 
   it("TextEmphaStyle.getText(open double-circle)", function(){
-    expect(new Nehan.TextEmphaStyle("open double-circle").getText()).toBe("&#x25ce;");
+    expect(new Nehan.TextEmphaStyle("open double-circle").getText()).toBe("&#x25CE;");
   });
 
   it("TextEmphaStyle.getText(filled triangle)", function(){
-    expect(new Nehan.TextEmphaStyle("filled triangle").getText()).toBe("&#x25b2;");
+    expect(new Nehan.TextEmphaStyle("filled triangle").getText()).toBe("&#x25B2;");
   });
 
   it("TextEmphaStyle.getText(open triangle)", function(){
-    expect(new Nehan.TextEmphaStyle("open triangle").getText()).toBe("&#x25b3;");
+    expect(new Nehan.TextEmphaStyle("open triangle").getText()).toBe("&#x25B3;");
   });
 
   it("TextEmphaStyle.getText(filled sesame)", function(){
-    expect(new Nehan.TextEmphaStyle("filled sesame").getText()).toBe("&#xfe45;");
+    expect(new Nehan.TextEmphaStyle("filled sesame").getText()).toBe("&#xFE45;");
   });
 
   it("TextEmphaStyle.getText(open sesame)", function(){
-    expect(new Nehan.TextEmphaStyle("open sesame").getText()).toBe("&#xfe46;");
+    expect(new Nehan.TextEmphaStyle("open sesame").getText()).toBe("&#xFE46;");
   });
 });
