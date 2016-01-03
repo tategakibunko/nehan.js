@@ -110,6 +110,7 @@ Nehan.RenderingContext = (function(){
   // flag from child: lineOver, lineBreak
   // flag to parent: lineBreak
   RenderingContext.prototype.addInlineElement = function(element){
+    //console.log("add inline element:%s", (element? element.toString() : "?"));
     if(element === null){
       //console.log("[%s]:eof", this._name);
       return Nehan.Results.EOF;
@@ -1290,11 +1291,25 @@ Nehan.RenderingContext = (function(){
   // [hyphenate]
   // -----------------------------------------------
   // hyphenate between two different inline generator.
-  RenderingContext.prototype.hyphenateSibling = function(last_element, generator){
-    var next_token = generator.stream.peek();
+  // [example]
+  // <p>hoge<ruby>hige<rt>xx</rt></ruby>,hage</p>
+  // => line1:hogehige
+  // => line2:,hage (head NG!)
+  //
+  // => line1:hogehige, (hanging punctuation)
+  // => line2:hage
+  RenderingContext.prototype.hyphenateSibling = function(last_element, sib_context){
+    var next_token = sib_context.stream.peek();
     var tail = this.layoutContext.getInlineLastElement();
     var head = (next_token instanceof Nehan.Text)? next_token.getHeadChar() : null;
+    //console.log("sib_context inline.cur = %d, inline.rest = %d", sib_context.layoutContext.inline.curMeasure, sib_context.layoutContext.inline.maxMeasure);
+    //console.log("hyphenate sib:next = %s, tail = %o, head = %o, icont:%o", next_token.content, tail, head, this.layoutContext.inline);
+    if(sib_context.layoutContext.getInlineRestMeasure() > sib_context.getFontSize()){
+      //console.log("not required!");
+      return;
+    }
     if(this.style.isHangingPuncEnable() && head && head.isHeadNg()){
+      //console.log("hanging punc!");
       next_token.cutHeadChar();
       this.layoutContext.setHangingPunctuation({
 	data:head,
@@ -1302,6 +1317,7 @@ Nehan.RenderingContext = (function(){
       });
       return;
     } else if(tail && tail instanceof Nehan.Char && tail.isTailNg() && this.layoutContext.getInlineElements().length > 1){
+      //console.log("sweep!");
       this.layoutContext.popInlineElement();
       this.stream.setPos(tail.pos);
       this.layoutContext.setLineBreak(true);
@@ -1312,30 +1328,29 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.hyphenate = function(last_element){
     // by stream.getToken(), stream pos has been moved to next pos already, so cur pos is the next head.
-    var orig_head = this.peekLastCache() || this.stream.peek(); // original head token at next line.
-    //console.log("orig_head:%o, last_element:%o", orig_head, last_element);
-    if(orig_head === null){
-      return;
-    }
-    /*
-    if(orig_head === null){
+    var line_head_orig = this.peekLastCache() || this.stream.peek(); // original head token of next line.
+    //console.log("line_head_orig:%o, last_element:%o", line_head_orig, last_element);
+    if(line_head_orig === null){
+      //console.log("line_head_orig:%o, last_element:%o", line_head_orig, last_element);
       var sibling = this.getSiblingContext();
-      if(sibling && sibling.stream){
+      if(sibling && sibling.stream && sibling.layoutContext){
+	//console.log("hyphenate sibling sibling:%o", sibling);
 	this.hyphenateSibling(last_element, sibling);
       }
       return;
-    }*/
+    }
     // hyphenate by hanging punctuation.
-    var head_next = this.stream.peek();
-    head_next = (head_next && orig_head.pos === head_next.pos)? this.stream.peek(1) : head_next;
-    var is_single_head_ng = function(head, head_next){
+    var line_head_next = this.stream.peek();
+    line_head_next = (line_head_next && line_head_orig.pos === line_head_next.pos)? this.stream.peek(1) : line_head_next;
+    var is_single_head_ng = function(head, line_head_next){
       return (head instanceof Nehan.Char && head.isHeadNg()) &&
-	!(head_next instanceof Nehan.Char && head_next.isHeadNg());
+	!(line_head_next instanceof Nehan.Char && line_head_next.isHeadNg());
     };
-    if(this.style.isHangingPuncEnable() && is_single_head_ng(orig_head, head_next)){
-      this.layoutContext.addInlineTextElement(orig_head, 0);
-      if(head_next){
-	this.stream.setPos(head_next.pos);
+    if(this.style.isHangingPuncEnable() && is_single_head_ng(line_head_orig, line_head_next)){
+      console.log("hanging punc");
+      this.layoutContext.addInlineTextElement(line_head_orig, 0);
+      if(line_head_next){
+	this.stream.setPos(line_head_next.pos);
       } else {
 	this.stream.get();
       }
@@ -1345,16 +1360,16 @@ Nehan.RenderingContext = (function(){
       return;
     }
     // hyphenate by sweep.
-    var new_head = this.layoutContext.hyphenateSweep(orig_head); // if fixed, new_head token is returned.
-    if(new_head){
-      //console.log("hyphenate by sweep:orig_head:%o, new_head:%o", orig_head, new_head);
-      var hyphenated_measure = new_head.bodySize || 0;
-      if(Math.abs(new_head.pos - orig_head.pos) > 1){
-	hyphenated_measure = Math.abs(new_head.pos - orig_head.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
+    var line_head_new = this.layoutContext.hyphenateSweep(line_head_orig); // if fixed, new_head token is returned.
+    if(line_head_new){
+      //console.log("hyphenate by sweep:line_head_orig:%o, line_head_new:%o", line_head_orig, line_head_new);
+      var hyphenated_measure = line_head_new.bodySize || 0;
+      if(Math.abs(line_head_new.pos - line_head_orig.pos) > 1){
+	hyphenated_measure = Math.abs(line_head_new.pos - line_head_orig.pos) * this.style.getFontSize(); // [FIXME] this is not accurate size.
       }
       this.layoutContext.addInlineMeasure(-1 * hyphenated_measure); // subtract sweeped measure.
-      //console.log("hyphenate and new head:%o", new_head);
-      this.stream.setPos(new_head.pos);
+      //console.log("hyphenate and new head:%o", line_head_new);
+      this.stream.setPos(line_head_new.pos);
       this.layoutContext.setLineBreak(true);
       this.layoutContext.setHyphenated(true);
       this.clearCache(); // stream position changed, so disable cache.
@@ -1516,6 +1531,10 @@ Nehan.RenderingContext = (function(){
     if(cache){
       //console.info("use cache:%o(%s)", cache, this.stringOfElement(cache));
       cache.breakAfter = false;
+      if(cache.lineOver){
+	cache.lineOver = false;
+	cache.edge.clearEnd(this.getFlow());
+      }
     }
     return cache;
   };

@@ -243,6 +243,15 @@ Nehan.BoxEdge = (function (){
    @memberof Nehan.BoxEdge
    @param flow {Nehan.BoxFlow}
    */
+  BoxEdge.prototype.clearEnd = function(flow){
+    this.padding.clearEnd(flow);
+    this.border.clearEnd(flow);
+    this.margin.clearEnd(flow);
+  },
+  /**
+   @memberof Nehan.BoxEdge
+   @param flow {Nehan.BoxFlow}
+   */
   BoxEdge.prototype.clearBorderStart = function(flow){
     this.border.clearStart(flow);
   },

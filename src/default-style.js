@@ -95,7 +95,6 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"code":{
-	  "font-family":"monospace",
 	  "display":"inline"
 	},
 	"col":{
