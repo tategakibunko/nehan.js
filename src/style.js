@@ -771,9 +771,7 @@ Nehan.Style = (function(){
     if(!Nehan.Obj.isEmpty(first_line)){
       content = Nehan.Html.tagWrap("::first-line", content);
     }
-    if(this.isTextVertical()){
-      content = Nehan.Config.formatTagContentVertical(content) || content;
-    }
+    content = Nehan.Config.formatTagContent(this.flow, content) || content;
     return content;
   };
   /**

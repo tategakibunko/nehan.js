@@ -377,10 +377,14 @@ Nehan.Config = {
    format tag content(vertical only)
 
    @memberof Nehan.Config
+   @param flow {Nehan.BoxFlow}
    @param content {String}
    @return {String}
    */
-  formatTagContentVertical : function(content){
+  formatTagContent : function(flow, content){
+    if(!flow.isTextVertical()){
+      return content;
+    }
     return content
       .replace(/’/g, "'")  // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
       .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
@@ -14818,9 +14822,7 @@ Nehan.Style = (function(){
     if(!Nehan.Obj.isEmpty(first_line)){
       content = Nehan.Html.tagWrap("::first-line", content);
     }
-    if(this.isTextVertical()){
-      content = Nehan.Config.formatTagContentVertical(content) || content;
-    }
+    content = Nehan.Config.formatTagContent(this.flow, content) || content;
     return content;
   };
   /**

@@ -341,10 +341,14 @@ Nehan.Config = {
    format tag content(vertical only)
 
    @memberof Nehan.Config
+   @param flow {Nehan.BoxFlow}
    @param content {String}
    @return {String}
    */
-  formatTagContentVertical : function(content){
+  formatTagContent : function(flow, content){
+    if(!flow.isTextVertical()){
+      return content;
+    }
     return content
       .replace(/’/g, "'")  // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
       .replace(/｢/g, "「") // half size left corner bracket -> full size left corner bracket
