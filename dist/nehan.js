@@ -11572,18 +11572,19 @@ Nehan.TextLexer = (function (){
   // \u0021-\u007E, block = Basic Latin(without \u0026, \u003B)
   // \u00C0-\u02A8, block = IPA Extensions
   // \u2000-\u206F, block = General Punctuation
-  var __rex_word = /^[\u0021-\u0025\u0027-\u003A\u003C-\u007E\u00C0-\u02A8\u2000-\u206F]+/;
+  // \uFB00-\uFB06, block = Alphabetic Presentation Forms(but latin only)
+  var __rex_word = /^[\u0021-\u0025\u0027-\u003A\u003C-\u007E\u00C0-\u02A8\u2000-\u206F\uFB00-\uFB06]+/;
   var __rex_char_ref = /^&.+?;/;
   var __rex_half_single_tcy = /^[a-zA-Z0-9!?]/;
-  var __rex_typographic_ligature = /^[\ufb00-\ufb06]/; // ff,fi,fl,ffi,ffl,ft,st
+  var __rex_typographic_ligature = /^[\uFB00-\uFB06]/; // ff,fi,fl,ffi,ffl,ft,st
   var __typographic_ligature_refs = [
-    "&#64256;", // ff
-    "&#64257;", // fi
-    "&#64258;", // fl
-    "&#64259;", // ffi
-    "&#64260;", // ffl
-    "&#64261;", // ft
-    "&#64262;"  // st
+    "&#xFB00;", // ff
+    "&#xFB01;", // fi
+    "&#xFB02;", // fl
+    "&#xFB03;", // ffi
+    "&#xFB04;", // ffl
+    "&#xFB05;", // ft
+    "&#xFB06;"  // st
   ];
 
   /**
@@ -11615,7 +11616,7 @@ Nehan.TextLexer = (function (){
 	if(next){
 	  if(next instanceof Nehan.Word){
 	    next.data = pat + next.data;
-	    //console.log("(ligature + word):%o", next.data);
+	    //console.log("(typographic_ligature + word):%o", next.data);
 	    return next;
 	  }
 	  this.buff = next.data + this.buff; // push back
@@ -11629,13 +11630,6 @@ Nehan.TextLexer = (function (){
     var token = this._parseAsWord();
     if(token){
       return token;
-    }
-
-    // typographic ligature
-    pat = this.buff.substring(0, 1);
-    if(__rex_typographic_ligature.test(pat)){
-      //console.log("typographic ligature:%o", pat);
-      return new Nehan.Word(this._stepBuff(1));
     }
 
     // simple character
