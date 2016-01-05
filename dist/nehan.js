@@ -185,7 +185,8 @@ Nehan.Config = {
     "text-emphasis-style",
     "text-emphasis-position",
     "text-emphasis-color",
-    "text-combine",
+    "text-orientation",
+    "text-combine-upright",
     "width",
     "word-break"
   ],
@@ -666,7 +667,7 @@ Nehan.Env = (function(){
     isVerticalGlyphEnable : __is_vertical_glyph_enable,
 
     /**
-     true if client browser supports text-combine
+     true if client browser supports text-combine-upright
 
      @memberof Nehan.Env
      @type {boolean}
@@ -12803,13 +12804,10 @@ Nehan.DefaultStyle = (function(){
 	  "list-style-type":"katakana-iroha"
 	},
 	//-------------------------------------------------------
-	// text-combine
+	// text-combine-upright
 	//-------------------------------------------------------
 	".tcy":{
-	  "text-combine":"horizontal"
-	},
-	".text-combine":{
-	  "text-combine":"horizontal"
+	  "text-combine-upright":"horizontal"
 	},
 	//-------------------------------------------------------
 	// text emphasis

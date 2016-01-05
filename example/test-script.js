@@ -305,8 +305,9 @@ var Script = {
   ].join(""),
 
   "tcy":[
-    "平成<span class='tcy'>25</span>年<span class='tcy'>1</span>月<span class='tcy'>10</span>日<span class='tcy'>!!</span>"
-  ].join(""),
+    "平成<span class='tcy'>25</span>年<span class='tcy'>1</span>月<span class='tcy'>10</span>日<span class='tcy'>!!</span>",
+    "<span class='tcy'>AB</span>テスト"
+  ].join("<br>"),
 
   "link":[
     "あああ<a data-id='10' href='#' name='anchor1'>いいいい</a>",

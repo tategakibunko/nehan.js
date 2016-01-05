@@ -149,7 +149,8 @@ Nehan.Config = {
     "text-emphasis-style",
     "text-emphasis-position",
     "text-emphasis-color",
-    "text-combine",
+    "text-orientation",
+    "text-combine-upright",
     "width",
     "word-break"
   ],

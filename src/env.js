@@ -47,7 +47,7 @@ Nehan.Env = (function(){
     isVerticalGlyphEnable : __is_vertical_glyph_enable,
 
     /**
-     true if client browser supports text-combine
+     true if client browser supports text-combine-upright
 
      @memberof Nehan.Env
      @type {boolean}

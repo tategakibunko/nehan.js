@@ -756,13 +756,10 @@ Nehan.DefaultStyle = (function(){
 	  "list-style-type":"katakana-iroha"
 	},
 	//-------------------------------------------------------
-	// text-combine
+	// text-combine-upright
 	//-------------------------------------------------------
 	".tcy":{
-	  "text-combine":"horizontal"
-	},
-	".text-combine":{
-	  "text-combine":"horizontal"
+	  "text-combine-upright":"horizontal"
 	},
 	//-------------------------------------------------------
 	// text emphasis
