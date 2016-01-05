@@ -86,10 +86,6 @@ Nehan.Style = (function(){
     if(text_empha){
       this.textEmpha = text_empha;
     }
-    var text_combine = this._loadTextCombine();
-    if(text_combine){
-      this.textCombine = text_combine;
-    }
     var list_style = this._loadListStyle();
     if(list_style){
       this.listStyle = list_style;
@@ -863,8 +859,15 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {String}
    */
-  Style.prototype.getTextCombine = function(){
-    return this.textCombine || null;
+  Style.prototype.getTextCombineUpright = function(){
+    return this.getCssAttr("text-combine-upright", null);
+  };
+  /**
+   @memberof Nehan.Style
+   @return {String}
+   */
+  Style.prototype.getTextOrientation = function(){
+    return this.getCssAttr("text-orientation", "mixed");
   };
   /**
    @memberof Nehan.Style
@@ -1580,10 +1583,6 @@ Nehan.Style = (function(){
       position:new Nehan.TextEmphaPos(css.position || {hori:"over", vert:"right"}),
       color:(css.color? new Nehan.Color(css.color) : this.getColor())
     });
-  };
-
-  Style.prototype._loadTextCombine = function(){
-    return this.getCssAttr("text-combine");
   };
 
   Style.prototype._loadFloatDirection = function(){

@@ -72,7 +72,9 @@ Nehan.InlineGenerator = (function(){
 
     // tcy, word
     if(token instanceof Nehan.Tcy || token instanceof Nehan.Word){
-      return this.context.createChildTextGenerator(token).yield();
+      return this.context.createChildTextGeneratorFromStream(
+	new Nehan.TokenStream({tokens:[token]})
+      ).yield();
     }
 
     // child inline without stream.

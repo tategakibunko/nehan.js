@@ -457,7 +457,7 @@ Nehan.RenderingContext = (function(){
   RenderingContext.prototype.createStream = function(style){
     var markup_name = style.getMarkupName();
     var markup_content = style.getContent();
-    if(style.getTextCombine() === "horizontal" || markup_name === "tcy"){
+    if(style.getTextCombineUpright() === "horizontal" || markup_name === "tcy"){
       return new Nehan.TokenStream({
 	tokens:[new Nehan.Tcy(markup_content)]
       });
@@ -649,21 +649,40 @@ Nehan.RenderingContext = (function(){
     }
   };
 
+  // @param text {Nehan.Text}
   RenderingContext.prototype.createTextStream = function(text){
-    if(text instanceof Nehan.Tcy || text instanceof Nehan.Word){
+    switch(this.style.getTextOrientation()){
+    case "sideways":
       return new Nehan.TokenStream({
-	tokens:[text]
+	tokens:[new Nehan.Word(text.getContent())]
+      });
+    case "upright":
+      // [TODO]
+      // map all tokens
+      // 1. tcy -> tcy
+      // 2. char -> char
+      // 3. word -> [tcy], example: word("yo") -> [tcy("y"), tcy("o")]
+      // 4. ruby -> ruby(rbs=[tcy|char])
+    case "mixed":
+    default:
+      return new Nehan.TokenStream({
+	lexer:new Nehan.TextLexer(text.getContent())
       });
     }
-    return new Nehan.TokenStream({
-      lexer:new Nehan.TextLexer(text.getContent())
-    });
   };
 
   RenderingContext.prototype.createChildTextGenerator = function(text){
     return new Nehan.TextGenerator(
       this.createChildContext(this.style, {
 	stream:this.createTextStream(text)
+      })
+    );
+  };
+
+  RenderingContext.prototype.createChildTextGeneratorFromStream = function(stream){
+    return new Nehan.TextGenerator(
+      this.createChildContext(this.style, {
+	stream:stream
       })
     );
   };
