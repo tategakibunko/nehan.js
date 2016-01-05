@@ -19171,7 +19171,6 @@ Nehan.RenderingContext = (function(){
 	!(line_head_next instanceof Nehan.Char && line_head_next.isHeadNg());
     };
     if(this.style.isHangingPuncEnable() && is_single_head_ng(line_head_orig, line_head_next)){
-      console.log("hanging punc");
       this.layoutContext.addInlineTextElement(line_head_orig, 0);
       if(line_head_next){
 	this.stream.setPos(line_head_next.pos);
