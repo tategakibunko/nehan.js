@@ -5,7 +5,6 @@ Nehan.TextLexer = (function (){
   var __rex_digit = /^\d+/;
   var __rex_digit_group = /^(?:\d+[.:/])+\d+(?!\d)/;
   var __rex_money = /^(?:\d+,)+\d+/;
-  //var __rex_word = /^[a-zA-Z0-9.!?\/:$#"',‘’_%“”@]+/;
 
   // latin word range
   // \u0021-\u007E, block = Basic Latin(without \u0026, \u003B)
@@ -15,7 +14,6 @@ Nehan.TextLexer = (function (){
   var __rex_word = /^[\u0021-\u0025\u0027-\u003A\u003C-\u007E\u00C0-\u02A8\u2000-\u206F\uFB00-\uFB06]+/;
   var __rex_char_ref = /^&.+?;/;
   var __rex_half_single_tcy = /^[a-zA-Z0-9!?]/;
-  var __rex_typographic_ligature = /^[\uFB00-\uFB06]/; // ff,fi,fl,ffi,ffl,ft,st
   var __typographic_ligature_refs = [
     "&#xFB00;", // ff
     "&#xFB01;", // fi

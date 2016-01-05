@@ -178,5 +178,38 @@ Nehan.Utils = {
     return text.replace(/(^(<[^>]+>|[\s\n])*)(\S)/mi, function(match, p1, p2, p3){
       return p1 + letter_modifier(p3);
     });
+  },
+  /**
+   @memberof Nehan.Utils
+   @param char_ref {String}
+   @return {int}
+   @example
+   * Nehan.Utils.charCodeOfCharRef("&#xFB00;"); // => 64256
+   * Nehan.Utils.charCodeOfCharRef("&#64256;"); // => 64256
+   */
+  charCodeOfCharRef : function(char_ref){
+    if(char_ref.indexOf("&#x") === 0){
+      return parseInt(char_ref.replace("&#x", "").replace(";", ""), 16);
+    }
+    return parseInt(char_ref.replace("&#", "").replace(";", ""), 10);
+  },
+  /**
+   @memberof Nehan.Utils
+   @param char_ref {String}
+   @return {bool}
+   */
+  isNumCharRef : function(char_ref){
+    return /&#x?[0-9a-f]{4,};/i.test(char_ref);
+  },
+  /**
+   @memberof Nehan.Utils
+   @param char_ref {String}
+   @return {String}
+   */
+  charRefToUni : function(char_ref){
+    if(!this.isNumCharRef(char_ref)){
+      return char_ref;
+    }
+    return String.fromCharCode(this.charCodeOfCharRef(char_ref));
   }
 };

@@ -111,4 +111,15 @@ describe("Utils", function(){
       return "<letter>" + letter + "</letter>";
     })).toBe("<p>\n\t  <letter>f</letter>oo</p>");
   });
+
+  it("Utils.charCodeOfCharRef", function(){
+    expect(Nehan.Utils.charCodeOfCharRef("&#xFB00;")).toEqual(64256);
+    expect(Nehan.Utils.charCodeOfCharRef("&#64256;")).toEqual(64256);
+  });
+
+  it("Utils.charRefToUni", function(){
+    expect(Nehan.Utils.charRefToUni("&#xFB00;")).toBe("\uFB00");
+    expect(Nehan.Utils.charRefToUni("&#xfb00;")).toBe("\uFB00");
+    expect(Nehan.Utils.charRefToUni("&#64256;")).toBe("\uFB00");
+  });
 });
