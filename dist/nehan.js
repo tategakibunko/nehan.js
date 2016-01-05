@@ -137,7 +137,8 @@ Nehan.Config = {
     "input",
     "select",
     "button",
-    "textarea"
+    "textarea",
+    "canvas"
   ],
 
   /**
