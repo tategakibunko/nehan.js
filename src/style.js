@@ -513,6 +513,21 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
+   @description Looks through styles from current to parent, returning the first one that passes a truth test 'fn'.
+   @param fn {Function} - matcher function, {Nehan.Style} -> {bool}
+   @return {boolean}
+   */
+  Style.prototype.find = function(fn){
+    if(fn(this)){
+      return true;
+    }
+    if(this.parent){
+      return this.parent.find(fn);
+    }
+    return false;
+  };
+  /**
+   @memberof Nehan.Style
    @param args {Array.<Nehan.CompoundSelector>}
    @return {boolean}
    */
