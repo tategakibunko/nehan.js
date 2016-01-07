@@ -306,7 +306,7 @@ var Script = {
 
   "text-combine-upright":[
     "平成<span class='tcy'>25</span>年<span class='tcy'>1</span>月<span class='tcy'>10</span>日<span class='tcy'>!!</span>",
-    "<span class='tcy'>AB</span>テスト"
+    "<span style='text-combine-upright:horizontal'>AB</span>テスト"
   ].join("<br>"),
 
   "text-orientation":[
