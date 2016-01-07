@@ -145,7 +145,9 @@ Nehan.HtmlLexer = (function (){
   HtmlLexer.prototype._getTagContent = function(tag){
     // why we added [\\s|>] for open_tag_rex?
     // if tag_name is "p", 
-    // both "<p>" and "<p class='foo'" also must be matched.
+    // both "<p>" and "<p class='foo'" also must be matched,
+    // or if tag_name is "a"
+    // "<a>" must be matched but "<address" is not.
     var tag_name = tag.name;
     var open_tag_rex = new RegExp("<" + tag_name + "[\\s|>]");
     var close_tag = "</" + tag_name + ">"; // tag name is already lower-cased by preprocessor.

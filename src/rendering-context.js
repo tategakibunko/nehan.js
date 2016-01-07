@@ -657,12 +657,9 @@ Nehan.RenderingContext = (function(){
 	tokens:[new Nehan.Word(text.getContent())]
       });
     case "upright":
-      // [TODO]
-      // map all tokens
-      // 1. tcy -> tcy
-      // 2. char -> char
-      // 3. word -> [tcy], example: word("yo") -> [tcy("y"), tcy("o")]
-      // 4. ruby -> ruby(rbs=[tcy|char])
+      return new Nehan.TokenStream({
+	lexer:new Nehan.UprightTextLexer(text.getContent())
+      });
     case "mixed":
     default:
       return new Nehan.TokenStream({

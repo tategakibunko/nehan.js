@@ -129,6 +129,7 @@ var sources = [
   "src/inline-context.js",
   "src/html-lexer.js",
   "src/text-lexer.js",
+  "src/upright-text-lexer.js",
   "src/token-stream.js",
   "src/ruby-token-stream.js",
   "src/default-style.js",

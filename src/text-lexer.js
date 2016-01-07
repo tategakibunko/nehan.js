@@ -29,6 +29,7 @@ Nehan.TextLexer = (function (){
    @class TextLexer
    @classdesc lexer of html text elements.
    @constructor
+   @extends {Nehan.HtmlLexer}
    @param src {String}
   */
   function TextLexer(src){
@@ -37,6 +38,7 @@ Nehan.TextLexer = (function (){
 
   Nehan.Class.extend(TextLexer, Nehan.HtmlLexer);
 
+  // @return {Nehan.Char | Nehan.Tcy | Nehan.Word}
   TextLexer.prototype._getToken = function(){
     if(this.buff === ""){
       return null;
@@ -44,13 +46,13 @@ Nehan.TextLexer = (function (){
     var pat;
 
     // character reference
-    pat = this._getByRex(__rex_char_ref);
+    pat = this._matchCharRef();
     if(pat){
       return this._parseAsCharRef(pat);
     }
 
     // word
-    pat = this._getByRex(__rex_word); // longuest word pattern
+    pat = this._matchWord(); // longuest word pattern
     if(pat){
       return this._parseAsWord(pat);
     }
@@ -59,6 +61,7 @@ Nehan.TextLexer = (function (){
     return new Nehan.Char({data:this._stepBuff(1)});
   };
 
+  // @return {Nehan.Char | Nehan.Word}
   TextLexer.prototype._parseAsCharRef = function(pat){
     var chr = new Nehan.Char({ref:this._stepBuff(pat.length)});
     // if typographic_ligature + word, pack as single word.
@@ -78,6 +81,7 @@ Nehan.TextLexer = (function (){
     return chr;
   };
 
+  // @return {Nehan.Char | Nehan.Tcy | Nehan.Word}
   TextLexer.prototype._parseAsWord = function(pat){
     var pat2;
 
@@ -96,22 +100,22 @@ Nehan.TextLexer = (function (){
       //console.log("tcy(2):%o", pat);
       return new Nehan.Tcy(this._stepBuff(2));
     }
-    pat2 = this._getByRex(__rex_money); // 1,000
+    pat2 = this._match(__rex_money); // 1,000
     if(pat2){
       //console.log("money?:%o", pat2);
       return new Nehan.Word(this._stepBuff(pat2.length));
     }
-    pat2 = this._getByRex(__rex_digit_group); // 2000.01.01, 12:34, 2001/12/12 ... etc
+    pat2 = this._match(__rex_digit_group); // 2000.01.01, 12:34, 2001/12/12 ... etc
     if(pat2){
       //console.log("digit group?:%o", pat2);
       return new Nehan.Word(this._stepBuff(pat2.length));
     }
-    pat2 = this._getByRex(__rex_float); // 1.23
+    pat2 = this._match(__rex_float); // 1.23
     if(pat2){
       //console.log("float:%o", pat2);
       return new Nehan.Word(this._stepBuff(pat2.length));
     }
-    pat2 = this._getByRex(__rex_digit); // 1234
+    pat2 = this._match(__rex_digit); // 1234
     if(pat2){
       if(pat2.length <= 2){
 	//console.log("tcy(digit2):%o", pat2);
@@ -121,8 +125,8 @@ Nehan.TextLexer = (function (){
       return new Nehan.Word(this._stepBuff(pat2.length));
     }
     // if word + tcy(digit), divide it.
-    //pat2 = this._getByRex(/(?<!\d)\d\d$/, pat);
-    pat2 = this._getByRex(/^[^\d]\d{1,2}$/, pat); // :12 => word(:) + tcy(12)
+    //pat2 = this._match(/(?<!\d)\d\d$/, pat);
+    pat2 = this._match(/^[^\d]\d{1,2}$/, pat); // :12 => word(:) + tcy(12)
     if(pat2){
       //console.log("divided single word:%o", pat2.charAt(0));
       return new Nehan.Word(this._stepBuff(1));
@@ -131,10 +135,18 @@ Nehan.TextLexer = (function (){
     return new Nehan.Word(this._stepBuff(pat.length));
   };
 
-  TextLexer.prototype._getByRex = function(rex, buff){
+  TextLexer.prototype._match = function(rex, buff){
     buff = buff || this.buff;
     var rex_result = buff.match(rex);
     return rex_result? rex_result[0] : null;
+  };
+
+  TextLexer.prototype._matchWord = function(){
+    return this._match(__rex_word);
+  };
+
+  TextLexer.prototype._matchCharRef = function(){
+    return this._match(__rex_char_ref);
   };
 
   return TextLexer;
