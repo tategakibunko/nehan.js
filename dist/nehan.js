@@ -9012,10 +9012,6 @@ Nehan.Char = (function(){
     } else if(this.isGreaterThanSign()){
       this._setRotateOrVertImg(90, "kakko8", 0.5, 0.5);
     }
-    if(!this.isVertChar() && this.isKakko()){
-      console.warn("img not prepared, but use vert glyph if exists");
-      this.vertImg = "vert"; // treat as vert char(but no img is prepared)
-    }
   };
 
   Char.prototype._setupByCharCode = function(code){
