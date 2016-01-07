@@ -11739,12 +11739,12 @@ Nehan.TextLexer = (function (){
     return rex_result? rex_result[0] : null;
   };
 
-  TextLexer.prototype._matchWord = function(){
-    return this._match(__rex_word);
+  TextLexer.prototype._matchWord = function(buff){
+    return this._match(__rex_word, buff || null);
   };
 
-  TextLexer.prototype._matchCharRef = function(){
-    return this._match(__rex_char_ref);
+  TextLexer.prototype._matchCharRef = function(buff){
+    return this._match(__rex_char_ref, buff || null);
   };
 
   return TextLexer;
@@ -11765,21 +11765,29 @@ Nehan.UprightTextLexer = (function(){
 
   Nehan.Class.extend(UprightTextLexer, Nehan.TextLexer);
 
-  // @return {Nehan.Char(ref)}
-  UprightTextLexer._getToken = function(){
+  // @return {Nehan.Char(ref)|Nehan.Tcy}
+  UprightTextLexer.prototype._getToken = function(){
     if(this.buff === ""){
       return null;
     }
-    var pat;
+    var pat, data;
 
     // character reference
     pat = this._matchCharRef();
     if(pat){
-      return new Nehan.Char({ref:this._stepBuff(pat.length)});
+      //console.log("single char ref:%o", pat);
+      data = this._stepBuff(pat.length);
+      return new Nehan.Char({ref:data});
     }
 
     // single character
-    return new Nehan.Char({data:this._stepBuff(1)});
+    data = this._stepBuff(1);
+    if(this._matchWord(data)){
+      //console.log("single tcy:%s", data);
+      return new Nehan.Tcy(data);
+    }
+    //console.log("single char:%s", data);
+    return new Nehan.Char({data:data});
   };
 
   return UprightTextLexer;

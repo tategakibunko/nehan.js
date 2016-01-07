@@ -141,12 +141,12 @@ Nehan.TextLexer = (function (){
     return rex_result? rex_result[0] : null;
   };
 
-  TextLexer.prototype._matchWord = function(){
-    return this._match(__rex_word);
+  TextLexer.prototype._matchWord = function(buff){
+    return this._match(__rex_word, buff || null);
   };
 
-  TextLexer.prototype._matchCharRef = function(){
-    return this._match(__rex_char_ref);
+  TextLexer.prototype._matchCharRef = function(buff){
+    return this._match(__rex_char_ref, buff || null);
   };
 
   return TextLexer;

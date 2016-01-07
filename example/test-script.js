@@ -304,9 +304,15 @@ var Script = {
     "「「あああ。」」「ははは」あああ、、"
   ].join(""),
 
-  "tcy":[
+  "text-combine-upright":[
     "平成<span class='tcy'>25</span>年<span class='tcy'>1</span>月<span class='tcy'>10</span>日<span class='tcy'>!!</span>",
     "<span class='tcy'>AB</span>テスト"
+  ].join("<br>"),
+
+  "text-orientation":[
+    "これは<span style='text-orientation:sideways'>sideways</span>",
+    "これは<span style='text-orientation:upright'>upright</span>",
+    "これも<span style='text-orientation:upright'>アップライト</span>"
   ].join("<br>"),
 
   "link":[
