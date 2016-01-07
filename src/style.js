@@ -513,18 +513,18 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
-   @description Looks through styles from current to parent, returning the first one that passes a truth test 'fn'.
-   @param fn {Function} - matcher function, {Nehan.Style} -> {bool}
-   @return {boolean}
+   @description Looks through styles from current to parent, returning the first style that passes a truth test 'predicate', return null if not found.
+   @param predicate {Function} - predicate test function, {Nehan.Style} -> {bool}
+   @return {Nehan.Style}
    */
-  Style.prototype.find = function(fn){
-    if(fn(this)){
-      return true;
+  Style.prototype.find = function(predicate){
+    if(predicate(this)){
+      return this;
     }
     if(this.parent){
-      return this.parent.find(fn);
+      return this.parent.find(predicate);
     }
-    return false;
+    return null;
   };
   /**
    @memberof Nehan.Style
@@ -646,6 +646,11 @@ Nehan.Style = (function(){
       var context = this._createSelectorContext(prop);
       var entry = Nehan.CssParser.formatEntry(prop, value(context));
       return entry.value;
+    }
+    if(typeof value === "object"){
+      return Nehan.Obj.map(value, function(prop, value){
+	return this._evalCssAttr(prop, value);
+      }.bind(this));
     }
     return value;
   };

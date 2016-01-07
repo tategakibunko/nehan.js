@@ -64,6 +64,16 @@ Nehan.SelectorContext = (function(){
 
   /**
    @memberof Nehan.SelectorContext
+   @description see {@link Nehan.Style}::find
+   @param predicate {Function} - predicate test function, {Nehan.Style} -> {bool}
+   @return {Nehan.Style}
+   */
+  SelectorContext.prototype.find = function(predicate){
+    return this.style.find(predicate);
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
    @return {int}
    */
   SelectorContext.prototype.getCurExtent = function(){
