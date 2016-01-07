@@ -312,7 +312,7 @@ var Script = {
   "text-orientation":[
     "これは<span style='text-orientation:sideways'>sideways</span>",
     "これは<span style='text-orientation:upright'>upright</span>",
-    "これも<span style='text-orientation:upright'>アップライト</span>"
+    "これも<span style='text-orientation:upright'>&copy;アップライト&#x1F601;</span>"
   ].join("<br>"),
 
   "link":[

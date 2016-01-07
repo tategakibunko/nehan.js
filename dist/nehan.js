@@ -11777,7 +11777,7 @@ Nehan.UprightTextLexer = (function(){
     if(pat){
       //console.log("single char ref:%o", pat);
       data = this._stepBuff(pat.length);
-      return new Nehan.Char({ref:data});
+      return new Nehan.Tcy(data);
     }
 
     // single character

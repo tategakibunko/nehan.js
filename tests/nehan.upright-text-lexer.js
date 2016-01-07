@@ -1,11 +1,22 @@
 describe("UprightTextLexer", function(){
   it("UprightTextLexer.get", function(){
     var lexer = new Nehan.UprightTextLexer("あabc&copy;");
-    expect(lexer.get().data).toBe("あ"); // char
-    expect(lexer.get().data).toBe("a"); // char
-    expect(lexer.get().data).toBe("b"); // char
-    expect(lexer.get().data).toBe("c"); // char
-    expect(lexer.get().ref).toBe("&copy;"); // char
+    var token;
+    token = lexer.get();
+    expect(token.data).toBe("あ");
+    expect(token instanceof Nehan.Char).toBe(true);
+    token = lexer.get();
+    expect(token.data).toBe("a");
+    expect(token instanceof Nehan.Tcy).toBe(true);
+    token = lexer.get();
+    expect(token.data).toBe("b");
+    expect(token instanceof Nehan.Tcy).toBe(true);
+    token = lexer.get();
+    expect(token.data).toBe("c");
+    expect(token instanceof Nehan.Tcy).toBe(true);
+    token = lexer.get();
+    expect(token.data).toBe("&copy;");
+    expect(token instanceof Nehan.Tcy).toBe(true);
     expect(lexer.get()).toBe(null);
   });
 });
