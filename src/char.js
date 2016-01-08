@@ -10,18 +10,133 @@ Nehan.Char = (function(){
   function Char(opt){
     this._initialize(opt || {});
   }
-  var __kuten = ["\u3002","."];
-  var __touten = ["\u3001", ","];
-  var __kakko_start = ["\uff62","\u300c","\u300e","\u3010","\u3016","\uff3b","\uff08","\u300a","\u3008","\u226a","\uff1c","\uff5b","\x7b","\x5b","\x28", "\u2772", "\u3014"];
-  var __kakko_end = ["\u300d","\uff63","\u300f","\u3011","\u3017","\uff3d","\uff09","\u300b","\u3009","\u226b","\uff1e","\uff5d","\x7d","\x5d","\x29", "\u2773", "\u3015"];
-  var __small_kana = ["\u3041","\u3043","\u3045","\u3047","\u3049","\u3063","\u3083","\u3085","\u3087","\u308e","\u30a1","\u30a3","\u30a5","\u30a7","\u30a9","\u30f5","\u30f6","\u30c3","\u30e3","\u30e5","\u30e7","\u30ee"];
-  var __head_ng = ["\uff09","\uff0c", "\x5c","\x29","\u300d","\u3011","\u3015","\uff3d","\x5c","\x5d","\u3002","\u300f","\uff1e","\u3009","\u300b","\u3001","\uff0e","\x5c","\x2e","\x2c","\u201d","\u301f"];
-  var __tail_ng = ["\uff08","\x5c","\x28","\u300c","\u3010","\uff3b","\u3014","\x5c","\x5b","\u300e","\uff1c","\u3008","\u300a","\u201c","\u301d"];
-  var __voiced_mark = ["\u3099", "\u309a", "\u309b", "\u309c", "\uff9e", "\uff9f"];
-  var __no_break_space = ["\u00a0", "\u202f", "\ufeff"];
+  var __kuten = [
+    "\u002E",
+    "\u3002"
+  ];
+  var __touten = [
+    "\u002C",
+    "\u3001"
+  ];
+  var __kakko_start = [
+    "\u0028",
+    "\u005B",
+    "\u007B",
+    "\u226A",
+    "\u2772",
+    "\u3008",
+    "\u300A",
+    "\u300C",
+    "\u300E",
+    "\u3010",
+    "\u3014",
+    "\u3016",
+    "\uFF08",
+    "\uFF1C",
+    "\uFF3B",
+    "\uFF5B",
+    "\uFF62"
+  ];
+  var __kakko_end = [
+    "\u0029",
+    "\u005D",
+    "\u007D",
+    "\u226B",
+    "\u2773",
+    "\u3009",
+    "\u300B",
+    "\u300D",
+    "\u300F",
+    "\u3011",
+    "\u3015",
+    "\u3017",
+    "\uFF09",
+    "\uFF1E",
+    "\uFF3D",
+    "\uFF5D",
+    "\uFF63"
+  ];
+  var __small_kana = [
+    "\u3041",
+    "\u3043",
+    "\u3045",
+    "\u3047",
+    "\u3049",
+    "\u3063",
+    "\u3083",
+    "\u3085",
+    "\u3087",
+    "\u308E",
+    "\u30A1",
+    "\u30A3",
+    "\u30A5",
+    "\u30A7",
+    "\u30A9",
+    "\u30F5",
+    "\u30F6",
+    "\u30C3",
+    "\u30E3",
+    "\u30E5",
+    "\u30E7",
+    "\u30EE"
+  ];
+  var __head_ng = [
+    "\u005C",
+    "\u005D",
+    "\u201D",
+    "\u0029",
+    "\u002C",
+    "\u002E",
+    "\u005C",
+    "\u3001",
+    "\u3002",
+    "\u3009",
+    "\u300B",
+    "\u300D",
+    "\u300F",
+    "\u3011",
+    "\u3015",
+    "\u301F",
+    "\uFF09",
+    "\uFF0C",
+    "\uFF0E",
+    "\uFF1E",
+    "\uFF3D",
+    "\uFF63"
+  ];
+  var __tail_ng = [
+    "\u0028",
+    "\u005B",
+    "\u005C",
+    "\u201C",
+    "\u3008",
+    "\u300A",
+    "\u300C",
+    "\u300E",
+    "\u3010",
+    "\u3014",
+    "\u301D",
+    "\uFF08",
+    "\uFF1C",
+    "\uFF3B",
+    "\uFF62"
+  ];
+  var __voiced_mark = [
+    "\u3099",
+    "\u309A",
+    "\u309B",
+    "\u309C",
+    "\uFF9E",
+    "\uFF9F"
+  ];
+  var __no_break_space = [
+    "\u00A0",
+    "\u202F",
+    "\uFEFF"
+  ];
   var __rex_half_char = /[\w!\.\?\/:#;"',]/;
-  var __rex_half_kana = /[\uff65-\uff9f]/;
-  var __rex_half_kana_small = /[\uff67-\uff6f]/;
+  var __rex_half_kana = /[\uFF65-\uFF9f]/;
+  var __rex_half_kana_small = /[\uFF67-\uFF6f]/;
   var __is_ie = Nehan.Env.client.isIE();
 
   Char.prototype._initialize = function(opt){
