@@ -70,8 +70,8 @@ describe("Box", function(){
 	})
       ]
     });
-    expect(box1.toString()).toBe("ab");
-    expect(box2.toString()).toBe("ab");
+    expect(box1.toString(lr_tb)).toBe("ab");
+    expect(box2.toString(lr_tb)).toBe("ab");
   });
 
   it("Box.getContentWidth", function(){
