@@ -8,7 +8,7 @@ Nehan.DomCreateContext = (function(){
      @param dom {HTMLElement}
      @param box {Nehan.Box}
   */
-  function DomCreateContext(dom, box){
+  function DomCreateContext(dom, box, callee){
     this.dom = dom;
     this.box = box;
   }

@@ -112,9 +112,9 @@ Nehan.LayoutEvaluator = (function(){
       }
       return root;
     }.bind(this), root);
-    var oncreate = tree.getOnCreate();
-    if(oncreate){
-      oncreate(new Nehan.DomCreateContext(dom, tree));
+    var hook = tree.getDomHook();
+    if(hook){
+      hook(new Nehan.DomCreateContext(dom, tree));
     }
     return dom;
   };

@@ -173,10 +173,11 @@ Nehan.Box = (function(){
    @memberof Nehan.Box
    @return {Function}
    */
-  Box.prototype.getOnCreate = function(){
+  Box.prototype.getDomHook = function(){
+    // default hook
     var oncreate = this.context.style.getCssAttr("oncreate") || null;
 
-    // on create of text-block is already captured by parent line
+    // oncreate of text-block is already captured by parent line
     if(this.isTextBlock()){
       return this.context.style.getCssAttr("ontext") || null;
     }
