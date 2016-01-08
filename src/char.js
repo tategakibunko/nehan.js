@@ -33,10 +33,19 @@ Nehan.Char = (function(){
   /**
    @memberof Nehan.Char
    @param flow {Nehan.BoxFlow}
-   @return {string}
+   @return {String}
    */
   Char.prototype.getData = function(flow){
     return flow.isTextVertical()? this._getDataVert() : this._getDataHori();
+  };
+
+  /**
+   @memberof Nehan.Char
+   @param flow {Nehan.BoxFlow}
+   @return {String}
+   */
+  Char.prototype.toString = function(flow){
+    return this.getData(flow);
   };
 
   Char.prototype._getDataVert = function(){

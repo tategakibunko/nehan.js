@@ -138,6 +138,14 @@ Nehan.Ruby = (function(){
     }
   };
 
+  /**
+   @memberof Nehan.Ruby
+   @return {String}
+   */
+  Ruby.prototype.toString = function(){
+    return this.getRbString();
+  };
+
   return Ruby;
 })();
 

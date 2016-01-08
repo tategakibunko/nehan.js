@@ -235,6 +235,15 @@ Nehan.Word = (function(){
     return head_word;
   };
   
+  /**
+   @memberof Nehan.Word
+   @param {Nehan.BoxFlow}
+   @return {String}
+   */
+  Word.prototype.toString = function(flow){
+    return this.getData(flow);
+  };
+
   return Word;
 })();
 

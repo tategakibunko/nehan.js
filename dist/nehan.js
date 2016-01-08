@@ -8554,6 +8554,15 @@ Nehan.Text = (function(){
     return this;
   };
 
+  /**
+   @memberof Nehan.Text
+   @param flow {Nehan.BoxFlow}
+   @return {String}
+   */
+  Text.prototype.toString = function(flow){
+    return this.getContent();
+  };
+
   return Text;
 })();
 
@@ -8592,10 +8601,19 @@ Nehan.Char = (function(){
   /**
    @memberof Nehan.Char
    @param flow {Nehan.BoxFlow}
-   @return {string}
+   @return {String}
    */
   Char.prototype.getData = function(flow){
     return flow.isTextVertical()? this._getDataVert() : this._getDataHori();
+  };
+
+  /**
+   @memberof Nehan.Char
+   @param flow {Nehan.BoxFlow}
+   @return {String}
+   */
+  Char.prototype.toString = function(flow){
+    return this.getData(flow);
   };
 
   Char.prototype._getDataVert = function(){
@@ -9719,6 +9737,15 @@ Nehan.Word = (function(){
     return head_word;
   };
   
+  /**
+   @memberof Nehan.Word
+   @param {Nehan.BoxFlow}
+   @return {String}
+   */
+  Word.prototype.toString = function(flow){
+    return this.getData(flow);
+  };
+
   return Word;
 })();
 
@@ -9818,6 +9845,15 @@ Nehan.Tcy = (function(){
     } else {
       this.bodySize = Nehan.TextMetrics.getMeasure(font, this.data);
     }
+  };
+
+  /**
+   @memberof Nehan.Tcy
+   @param flow {Nehan.BoxFlow}
+   @return {String}
+   */
+  Tcy.prototype.toString = function(flow){
+    return this.getData();
   };
 
   return Tcy;
@@ -9962,6 +9998,14 @@ Nehan.Ruby = (function(){
       }
       this.advanceSize += ctx_space + ctx_space;
     }
+  };
+
+  /**
+   @memberof Nehan.Ruby
+   @return {String}
+   */
+  Ruby.prototype.toString = function(){
+    return this.getRbString();
   };
 
   return Ruby;
@@ -13122,13 +13166,14 @@ Nehan.Box = (function(){
    filter text object and concat it as string, mainly used for debugging.
 
    @memberof Nehan.Box
-   @return {string}
+   @param flow {Nehan.BoxFlow}
+   @return {String}
    */
-  Box.prototype.toString = function(){
+  Box.prototype.toString = function(flow){
     var texts = __filter_text(this.elements || []);
+    flow = flow || this.getFlow();
     return texts.reduce(function(ret, text){
-      var str = (text instanceof Nehan.Ruby)? text.getRbString() : (text.data || "");
-      return ret + str;
+      return ret + text.toString(flow);
     }, "") || "<<empty>>";
   };
   /**

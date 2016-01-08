@@ -146,13 +146,14 @@ Nehan.Box = (function(){
    filter text object and concat it as string, mainly used for debugging.
 
    @memberof Nehan.Box
-   @return {string}
+   @param flow {Nehan.BoxFlow}
+   @return {String}
    */
-  Box.prototype.toString = function(){
+  Box.prototype.toString = function(flow){
     var texts = __filter_text(this.elements || []);
+    flow = flow || this.getFlow();
     return texts.reduce(function(ret, text){
-      var str = (text instanceof Nehan.Ruby)? text.getRbString() : (text.data || "");
-      return ret + str;
+      return ret + text.toString(flow);
     }, "") || "<<empty>>";
   };
   /**

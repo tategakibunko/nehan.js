@@ -53,5 +53,14 @@ Nehan.Text = (function(){
     return this;
   };
 
+  /**
+   @memberof Nehan.Text
+   @param flow {Nehan.BoxFlow}
+   @return {String}
+   */
+  Text.prototype.toString = function(flow){
+    return this.getContent();
+  };
+
   return Text;
 })();

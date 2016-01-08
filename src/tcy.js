@@ -95,6 +95,15 @@ Nehan.Tcy = (function(){
     }
   };
 
+  /**
+   @memberof Nehan.Tcy
+   @param flow {Nehan.BoxFlow}
+   @return {String}
+   */
+  Tcy.prototype.toString = function(flow){
+    return this.getData();
+  };
+
   return Tcy;
 })();
 
