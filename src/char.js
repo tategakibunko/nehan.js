@@ -532,7 +532,7 @@ Nehan.Char = (function(){
       this._setVertImg("tenten", 1, 1); break;
     case 58: // COLON(U+003A)
       this._setVertImg("tenten", 0.5, 0.5); break;
-    case 12290: // IDEOGRAPHIC FULL STOP(U+3002)
+   case 12290: // IDEOGRAPHIC FULL STOP(U+3002)
       this._setVertImg("kuten", 0.5, 0.5); break;
     case 65377: // HALFWIDTH IDEOGRAPHIC FULL STOP(U+FF61)
       this._setVertImg("kuten", 0.5, 0.5); break;
@@ -546,8 +546,8 @@ Nehan.Char = (function(){
       this._setVertImg("touten", 0.5, 0.5); break;
     case 44: // COMMA(U+002C)
       this._setVertImg("touten", 0.5, 0.5); break;
-    case 65292: // FULLWIDTH COMMA(U+FF0C)
-      this._setVertImg("touten", 0.5, 0.5); break;
+    case 65292: // FULL WIDTH COMMA(U+FF0C)
+      this._setVertImg("touten", 0.5, 1); break;
     case 65374: // FULLWIDTH TILDE(U+FF5E)
       this._setVertImg("kara", 1, 1); break;
     case 12316: // WAVE DASH(U+301C)
