@@ -10002,9 +10002,10 @@ Nehan.Ruby = (function(){
 
   /**
    @memberof Nehan.Ruby
+   @param {Nehan.BoxFlow}
    @return {String}
    */
-  Ruby.prototype.toString = function(){
+  Ruby.prototype.toString = function(flow){
     return this.getRbString();
   };
 
