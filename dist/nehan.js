@@ -388,12 +388,12 @@ Nehan.Config = {
       return content;
     }
     return content
-      .replace(/’/g, "'")   // convert unicode 'RIGHT SINGLE' to APOSTROPHE.
-      .replace(/｢/g, "「")  // half size left corner bracket -> full size left corner bracket
-      .replace(/｣/g, "」")  // half size right corner bracket -> full size right corner bracket
-      .replace(/､/g, "、")  // half size ideographic comma -> full size ideographic comma
-      .replace(/，/g, "、") // full width comma -> full size ideographic comma
-      .replace(/｡/g, "。")  // half size ideographic full stop -> full size
+      .replace(/\u2019/g, "\u0027")  // RIGHT SINGLE QUOTATION MARK(U+2019) -> APOSTROPHE(U+0027)
+      .replace(/\uFF62/g, "\u300C")  // HALFWIDTH LEFT CORNER BRACKET(U+FF62) -> LEFT CORNER BRACKET(U+300C)
+      .replace(/\uFF63/g, "\u300D")  // HALFWIDTH RIGHT CORNER BRACKET(U+FF63) -> RIGHT CORNER BRACKET(U+300D)
+      .replace(/\uFF0C/g, "\u3001")  // FULLWIDTH COMMA(U+FF0C) -> IDEOGRAPHIC COMMA(U+3001)
+      .replace(/\uFF64/g, "\u3001")  // HALF SIZE IDEOGRAPHIC COMMA(U+FF64) -> IDEOGRAPHIC COMMA(U+3001)
+      .replace(/\uFF61/g, "\u3002")  // HALFWIDTH IDEOGRAPHIC FULL STOP(U+FF61) -> IDEOGRAPHIC FULL STOP(U+3002)
     ;
   }
 };
