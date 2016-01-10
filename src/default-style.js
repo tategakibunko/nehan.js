@@ -2,6 +2,9 @@
  @namespace Nehan.DefaultStyle
  */
 Nehan.DefaultStyle = (function(){
+  var __table_head_bg_color = "#f9fafb";
+  var __table_border_color = "rgba(34,36,38,.15)";
+  var __hr_border_color = "rgba(255,255,255,.1)";
   var __header_margin = function(ctx){
     var em = ctx.getParentFont().size;
     var rem = ctx.getRootFont().size;
@@ -245,7 +248,7 @@ Nehan.DefaultStyle = (function(){
 	"hr":{
 	  "display":"block",
 	  "box-sizing":"content-box",
-	  "border-color":"#b8b8b8",
+	  "border-color":__hr_border_color,
 	  "border-style":"solid",
 	  "line-height":"1",
 	  "margin":{
@@ -275,7 +278,6 @@ Nehan.DefaultStyle = (function(){
 	},
 	"img":{
 	  "display":"inline"
-	  //"box-sizing":"content-box"
 	},
 	"input":{
 	  "display":"inline"
@@ -447,7 +449,7 @@ Nehan.DefaultStyle = (function(){
 	  //"table-layout":"auto",
 	  "background-color":"white",
 	  "border-collapse":"collapse", // 'separate' is not supported yet.
-	  "border-color":"#a8a8a8",
+	  "border-color":__table_border_color,
 	  "border-style":"solid",
 	  //"border-spacing":"5px", // TODO: support batch style like "5px 10px".
 	  "border-width":"1px",
@@ -464,7 +466,7 @@ Nehan.DefaultStyle = (function(){
 	"td":{
 	  "display":"table-cell",
 	  "border-width":"1px",
-	  "border-color":"#a8a8a8",
+	  "border-color":__table_border_color,
 	  "border-collapse":"inherit",
 	  "border-style":"solid",
 	  "padding":{
@@ -480,7 +482,7 @@ Nehan.DefaultStyle = (function(){
 	"tfoot":{
 	  "display":"table-footer-group",
 	  "border-width":"1px",
-	  "border-color":"#a8a8a8",
+	  "border-color":__table_border_color,
 	  "border-collapse":"inherit",
 	  "border-style":"solid",
 	  "font-style":"italic"
@@ -489,7 +491,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"table-cell",
 	  "line-height":"1.4",
 	  "border-width":"1px",
-	  "border-color":"#a8a8a8",
+	  "border-color":__table_border_color,
 	  "border-collapse":"inherit",
 	  "border-style":"solid",
 	  "padding":{
@@ -502,9 +504,9 @@ Nehan.DefaultStyle = (function(){
 	"thead":{
 	  "display":"table-header-group",
 	  "font-weight":"bold",
-	  "background-color":"#c3d9ff",
+	  "background-color":__table_head_bg_color,
 	  "border-width":"1px",
-	  "border-color":"#a8a8a8",
+	  "border-color":__table_border_color,
 	  "border-collapse":"inherit",
 	  "border-style":"solid"
 	},
@@ -516,7 +518,7 @@ Nehan.DefaultStyle = (function(){
 	"tr":{
 	  "display":"table-row",
 	  "border-collapse":"inherit",
-	  "border-color":"#a8a8a8",
+	  "border-color":__table_border_color,
 	  "border-width":"1px",
 	  "border-style":"solid"
 	},
