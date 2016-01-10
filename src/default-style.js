@@ -4,7 +4,7 @@
 Nehan.DefaultStyle = (function(){
   var __table_head_bg_color = "#f9fafb";
   var __table_border_color = "rgba(34,36,38,.15)";
-  var __hr_border_color = "rgba(255,255,255,.1)";
+  var __hr_border_color = "rgba(34,36,38,.15)";
   var __header_margin = function(ctx){
     var em = ctx.getParentFont().size;
     var rem = ctx.getRootFont().size;
