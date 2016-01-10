@@ -808,10 +808,11 @@ Nehan.RenderingContext = (function(){
       line.classes.push("nehan-root-line");
 
       // set text-align
-      if(this.style.textAlign && (this.style.textAlign.isCenter() || this.style.textAlign.isEnd())){
-	this.style.textAlign.setAlign(line);
-      } else if(this.style.textAlign && this.style.textAlign.isJustify()){
-	this.style.textAlign.setJustify(line);
+      var text_align = this.style.getTextAlign();
+      if(text_align.isCenter() || text_align.isEnd()){
+	text_align.setAlign(line);
+      } else if(text_align.isJustify()){
+	text_align.setJustify(line);
       }
 
       var line_height = this.style.getLineHeight();

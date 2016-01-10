@@ -76,8 +76,7 @@ Nehan.TextAlign = (function(){
     var quat_font_size = Math.floor(half_font_size / 2);
     var cont_measure = line.getContentMeasure(flow);
     var real_measure = line.inlineMeasure;
-    var ideal_measure = font_size * Math.floor(cont_measure / font_size);
-    var rest_space = ideal_measure - real_measure;
+    var rest_space = cont_measure - real_measure;
     var max_thres = style.getFontSize() * 2;
     var extend_parent = function(parent, add_size){
       if(parent){

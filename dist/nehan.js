@@ -7423,8 +7423,7 @@ Nehan.TextAlign = (function(){
     var quat_font_size = Math.floor(half_font_size / 2);
     var cont_measure = line.getContentMeasure(flow);
     var real_measure = line.inlineMeasure;
-    var ideal_measure = font_size * Math.floor(cont_measure / font_size);
-    var rest_space = ideal_measure - real_measure;
+    var rest_space = cont_measure - real_measure;
     var max_thres = style.getFontSize() * 2;
     var extend_parent = function(parent, add_size){
       if(parent){
@@ -14870,7 +14869,13 @@ Nehan.Style = (function(){
    @return {Nehan.TextAlign}
    */
   Style.prototype.getTextAlign = function(){
-    return this.textAlign || Nehan.TextAligns.get("start");
+    if(this.textAlign){
+      return this.textAlign;
+    }
+    if(this.parent){
+      return this.parent.getTextAlign();
+    }
+    return Nehan.TextAligns.get("start");
   };
   /**
    @memberof Nehan.Style
@@ -18572,10 +18577,11 @@ Nehan.RenderingContext = (function(){
       line.classes.push("nehan-root-line");
 
       // set text-align
-      if(this.style.textAlign && (this.style.textAlign.isCenter() || this.style.textAlign.isEnd())){
-	this.style.textAlign.setAlign(line);
-      } else if(this.style.textAlign && this.style.textAlign.isJustify()){
-	this.style.textAlign.setJustify(line);
+      var text_align = this.style.getTextAlign();
+      if(text_align.isCenter() || text_align.isEnd()){
+	text_align.setAlign(line);
+      } else if(text_align.isJustify()){
+	text_align.setJustify(line);
       }
 
       var line_height = this.style.getLineHeight();

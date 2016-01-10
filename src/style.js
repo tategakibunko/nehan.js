@@ -873,7 +873,13 @@ Nehan.Style = (function(){
    @return {Nehan.TextAlign}
    */
   Style.prototype.getTextAlign = function(){
-    return this.textAlign || Nehan.TextAligns.get("start");
+    if(this.textAlign){
+      return this.textAlign;
+    }
+    if(this.parent){
+      return this.parent.getTextAlign();
+    }
+    return Nehan.TextAligns.get("start");
   };
   /**
    @memberof Nehan.Style
