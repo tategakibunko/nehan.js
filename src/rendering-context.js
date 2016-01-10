@@ -948,6 +948,19 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
+  // [find]
+  // -----------------------------------------------
+  RenderingContext.prototype.find = function(fn){
+    if(fn(this)){
+      return this;
+    }
+    if(this.parent){
+      return this.parent.find(fn);
+    }
+    return null;
+  };
+
+  // -----------------------------------------------
   // [gen]
   // -----------------------------------------------
   RenderingContext.prototype.genBlockId = function(){
