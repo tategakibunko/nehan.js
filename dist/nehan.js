@@ -19471,16 +19471,6 @@ Nehan.RenderingContext = (function(){
     this.updateBlockParent(parent_context);
   };
 
-  RenderingContext.prototype.updateBlockParent = function(parent_context){
-    //console.log("[update block parent] %s > %s", parent_context._name, this._name);
-    this.parent = parent_context;
-    parent_context.child = this;
-    this.updateContextSize(parent_context.style.contentMeasure, parent_context.style.contentExtent);
-    if(this.child){
-      this.child.updateParent(this);
-    }
-  };
-
   RenderingContext.prototype.updateInlineParent = function(parent_context){
     //console.log("[update inline parent] %s > %s", parent_context._name, this._name);
     this.style = parent_context.style;
