@@ -212,6 +212,21 @@ Nehan.RenderingContext = (function(){
   };
 
   // -----------------------------------------------
+  // [convert]
+  // -----------------------------------------------
+  RenderingContext.prototype.convertInlineToBlock = function(){
+    //console.log("[%s]convert inline to block", this.getName());
+    if(this.parent && this.parent.isInline()){
+      this.parent.convertInlineToBlock();
+    }
+    if(this.style.isBlock() && this.child && this.child.isInline()){
+      //console.log("[%s]convert child(%s) to block gen", this.getName(), this.child.getName());
+      this.child.generator = this.createChildBlockGenerator(this.child.style, this.child.stream);
+      this.child.generator.context = this.child;
+    }
+  };
+  
+  // -----------------------------------------------
   // [create]
   // -----------------------------------------------
   RenderingContext.prototype.create = function(opt){

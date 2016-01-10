@@ -115,6 +115,9 @@ Nehan.InlineGenerator = (function(){
       this.context.stream.prev();
       this.context.setTerminate(true);
       this.context.layoutContext.setLineBreak(true);
+      if(this.context.parent){
+	this.context.convertInlineToBlock();
+      }
       return null;
     }
 
