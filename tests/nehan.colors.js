@@ -1,5 +1,5 @@
-describe("Colors", function(){
-  it("Colors.get(color name)", function(){
+describe("ColorParser", function(){
+  it("ColorParser.parse(color name)", function(){
     expect(Nehan.Colors.get("red")).toBe("ff0000");
     expect(Nehan.Colors.get("blue")).toBe("0000ff");
     expect(Nehan.Colors.get("green")).toBe("008000");

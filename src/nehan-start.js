@@ -2,4 +2,4 @@
  @namespace Nehan
  */
 var Nehan = Nehan || {};
-Nehan.version = "5.4.1";
+Nehan.version = "5.5.0";

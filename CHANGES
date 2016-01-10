@@ -6,7 +6,7 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.4.1
+version 5.5.0
 ========================
 o Support list-style-position:inside.
 o Support shorthanded font setting.
@@ -16,7 +16,8 @@ o Support functional value for selector entry.
 o Experimental support text-orientation:sideways, upright, mixed.
 o Use native text-combine(-upright) if supported.
 * More strict edge cancel for block level.
-! Disable Nehan.LexingRule, use Nehan.setSingleTagName instead.
+! [deprecated] Nehan.LexingRule, use Nehan.setSingleTagName instead.
+! [deprecated] Nehan.Rgb, Nehan.Palette, Nehan.Colors.
 
 version 5.4.0 2015/12/2
 ========================

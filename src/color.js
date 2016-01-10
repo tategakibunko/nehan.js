@@ -1,10 +1,10 @@
 Nehan.Color = (function(){
   /**
-     @memberof Nehan
-     @class Color
-     @classdesc abstraction for css 'color'.
-     @param value {String}
-  */
+   @memberof Nehan
+   @class Color
+   @classdesc abstraction for css 'color'.
+   @param value {String}
+   */
   function Color(value){
     this.setValue(value);
   }
@@ -14,7 +14,7 @@ Nehan.Color = (function(){
    @param value {String}
    */
   Color.prototype.setValue = function(value){
-    this.value = Nehan.Colors.get(value);
+    this.value = value;
   };
   /**
    @memberof Nehan.Color
@@ -26,20 +26,9 @@ Nehan.Color = (function(){
   /**
    @memberof Nehan.Color
    @return {String}
-   @example
-   * new Color("transparent").getCssValue(); // "transparent"
-   * new Color("ff0022").getCssValue(); // "#ff0022"
-   * new Color("red").getCssValue(); // "#ff0000"
    */
   Color.prototype.getCssValue = function(){
-    return (this.value === "transparent")? this.value : "#" + this.value;
-  };
-  /**
-   @memberof Nehan.Color
-   @return {Nehan.Rgb}
-   */
-  Color.prototype.getRgb = function(){
-    return new Nehan.Rgb(this.value);
+    return this.value;
   };
   /**
    @memberof Nehan.Color

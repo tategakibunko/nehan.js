@@ -32,7 +32,7 @@
  @namespace Nehan
  */
 var Nehan = Nehan || {};
-Nehan.version = "5.4.1";
+Nehan.version = "5.5.0";
 
 /**
  system configuration
@@ -4339,254 +4339,13 @@ Nehan.Selectors = (function(){
   return Selectors;
 })();
 
-Nehan.Rgb = (function(){
-  /**
-     @memberof Nehan
-     @class Rgb
-     @classdesc abstraction of RGB color value.
-     @constructor
-     @param value {String}
-  */
-  function Rgb(value){
-    this.value = String(value);
-    this._setup(this.value);
-  }
-
-  Rgb.prototype._setup = function(value){
-    switch(value.length){
-    case 3:
-      var r = this.value.substring(0,1);
-      var g = this.value.substring(1,2);
-      var b = this.value.substring(2,3);
-      this.red = parseInt(r + r, 16);
-      this.green = parseInt(g + g, 16);
-      this.blue = parseInt(b + b, 16);
-      this.value = r + r + g + g + b + b;
-      break;
-    case 6:
-      this.red = parseInt(this.value.substring(0,2), 16);
-      this.green = parseInt(this.value.substring(2,4), 16);
-      this.blue = parseInt(this.value.substring(4,6), 16);
-      break;
-    default:
-      console.error("Nehan.Rgb invalid color value:%o", value);
-      throw "Nehan.Rgb: inlivad color value";
-    }
-  };
-  
-  /**
-   @memberof Nehan.Rgb
-   @return {String}
-   */
-  Rgb.prototype.getRed = function(){
-    return this.red;
-  };
-  /**
-   @memberof Nehan.Rgb
-   @return {String}
-   */
-  Rgb.prototype.getGreen = function(){
-    return this.green;
-  };
-  /**
-   @memberof Nehan.Rgb
-   @return {String}
-   */
-  Rgb.prototype.getBlue = function(){
-    return this.blue;
-  };
-  /**
-   @memberof Nehan.Rgb
-   @return {String}
-   */
-  Rgb.prototype.getColorValue = function(){
-    return this.value;
-  };
-
-  return Rgb;
-})();
-
-/**
-   color collection manager
-   @namespace Nehan.Colors
-*/
-Nehan.Colors = (function(){
-  var __color_names = {
-    "aliceblue":"f0f8ff",
-    "antiquewhite":"faebd7",
-    "aqua":"00ffff",
-    "aquamarine":"7fffd4",
-    "azure":"f0ffff",
-    "beige":"f5f5dc",
-    "bisque":"ffe4c4",
-    "black":"000000",
-    "blanchedalmond":"ffebcd",
-    "blue":"0000ff",
-    "blueviolet":"8a2be2",
-    "brown":"a52a2a",
-    "burlywood":"deb887",
-    "cadetblue":"5f9ea0",
-    "chartreuse":"7fff00",
-    "chocolate":"d2691e",
-    "coral":"ff7f50",
-    "cornflowerblue":"6495ed",
-    "cornsilk":"fff8dc",
-    "crimson":"dc143c",
-    "cyan":"00ffff",
-    "darkblue":"00008b",
-    "darkcyan":"008b8b",
-    "darkgoldenrod":"b8860b",
-    "darkgray":"a9a9a9",
-    "darkgreen":"006400",
-    "darkkhaki":"bdb76b",
-    "darkmagenta":"8b008b",
-    "darkolivegreen":"556b2f",
-    "darkorange":"ff8c00",
-    "darkorchid":"9932cc",
-    "darkred":"8b0000",
-    "darksalmon":"e9967a",
-    "darkseagreen":"8fbc8f",
-    "darkslateblue":"483d8b",
-    "darkslategray":"2f4f4f",
-    "darkturquoise":"00ced1",
-    "darkviolet":"9400d3",
-    "deeppink":"ff1493",
-    "deepskyblue":"00bfff",
-    "dimgray":"696969",
-    "dodgerblue":"1e90ff",
-    "firebrick":"b22222",
-    "floralwhite":"fffaf0",
-    "forestgreen":"228b22",
-    "fuchsia":"ff00ff",
-    "gainsboro":"dcdcdc",
-    "ghostwhite":"f8f8ff",
-    "gold":"ffd700",
-    "goldenrod":"daa520",
-    "gray":"808080",
-    "green":"008000",
-    "greenyellow":"adff2f",
-    "honeydew":"f0fff0",
-    "hotpink":"ff69b4",
-    "indianred ":"cd5c5c",
-    "indigo ":"4b0082",
-    "ivory":"fffff0","khaki":"f0e68c",
-    "lavender":"e6e6fa",
-    "lavenderblush":"fff0f5",
-    "lawngreen":"7cfc00",
-    "lemonchiffon":"fffacd",
-    "lightblue":"add8e6",
-    "lightcoral":"f08080",
-    "lightcyan":"e0ffff",
-    "lightgoldenrodyellow":"fafad2",
-    "lightgrey":"d3d3d3",
-    "lightgreen":"90ee90",
-    "lightpink":"ffb6c1",
-    "lightsalmon":"ffa07a",
-    "lightseagreen":"20b2aa",
-    "lightskyblue":"87cefa",
-    "lightslategray":"778899",
-    "lightsteelblue":"b0c4de",
-    "lightyellow":"ffffe0",
-    "lime":"00ff00",
-    "limegreen":"32cd32",
-    "linen":"faf0e6",
-    "magenta":"ff00ff",
-    "maroon":"800000",
-    "mediumaquamarine":"66cdaa",
-    "mediumblue":"0000cd",
-    "mediumorchid":"ba55d3",
-    "mediumpurple":"9370d8",
-    "mediumseagreen":"3cb371",
-    "mediumslateblue":"7b68ee",
-    "mediumspringgreen":"00fa9a",
-    "mediumturquoise":"48d1cc",
-    "mediumvioletred":"c71585",
-    "midnightblue":"191970",
-    "mintcream":"f5fffa",
-    "mistyrose":"ffe4e1",
-    "moccasin":"ffe4b5",
-    "navajowhite":"ffdead",
-    "navy":"000080",
-    "oldlace":"fdf5e6",
-    "olive":"808000",
-    "olivedrab":"6b8e23",
-    "orange":"ffa500",
-    "orangered":"ff4500",
-    "orchid":"da70d6",
-    "palegoldenrod":"eee8aa",
-    "palegreen":"98fb98",
-    "paleturquoise":"afeeee",
-    "palevioletred":"d87093",
-    "papayawhip":"ffefd5",
-    "peachpuff":"ffdab9",
-    "peru":"cd853f",
-    "pink":"ffc0cb",
-    "plum":"dda0dd",
-    "powderblue":"b0e0e6",
-    "purple":"800080",
-    "red":"ff0000",
-    "rosybrown":"bc8f8f",
-    "royalblue":"4169e1",
-    "saddlebrown":"8b4513",
-    "salmon":"fa8072",
-    "sandybrown":"f4a460",
-    "seagreen":"2e8b57",
-    "seashell":"fff5ee",
-    "sienna":"a0522d",
-    "silver":"c0c0c0",
-    "skyblue":"87ceeb",
-    "slateblue":"6a5acd",
-    "slategray":"708090",
-    "snow":"fffafa",
-    "springgreen":"00ff7f",
-    "steelblue":"4682b4",
-    "tan":"d2b48c",
-    "teal":"008080",
-    "thistle":"d8bfd8",
-    "tomato":"ff6347",
-    "turquoise":"40e0d0",
-    "violet":"ee82ee",
-    "wheat":"f5deb3",
-    "white":"ffffff",
-    "whitesmoke":"f5f5f5",
-    "yellow":"ffff00",
-    "yellowgreen":"9acd32",
-    "transparent":"transparent"
-  };
-
-  var rex_hex_color = /^(?:[0-9a-f]{3}){1,2}$/;
-
-  return {
-    /**
-       @memberof Nehan.Colors
-       @param value {String}
-       @return {String}
-       @example
-       * Colors.get("white"); // "ffffff" (pre defined color)
-       * Colors.get("f00"); // "ff0000" (always length 6)
-       * Colors.get("0000FF"); // "0000ff" (always lowercased)
-    */
-    get : function(value){
-      value = value.replace(/#/g, "").toLowerCase();
-      if(!rex_hex_color.test(value)){
-	return __color_names[value] || value;
-      }
-      if(value.length === 3){
-	return value[0] + value[0] + value[1] + value[1] + value[2] + value[2];
-      }
-      return value;
-    }
-  };
-})();
-
-
 Nehan.Color = (function(){
   /**
-     @memberof Nehan
-     @class Color
-     @classdesc abstraction for css 'color'.
-     @param value {String}
-  */
+   @memberof Nehan
+   @class Color
+   @classdesc abstraction for css 'color'.
+   @param value {String}
+   */
   function Color(value){
     this.setValue(value);
   }
@@ -4596,7 +4355,7 @@ Nehan.Color = (function(){
    @param value {String}
    */
   Color.prototype.setValue = function(value){
-    this.value = Nehan.Colors.get(value);
+    this.value = value;
   };
   /**
    @memberof Nehan.Color
@@ -4608,20 +4367,9 @@ Nehan.Color = (function(){
   /**
    @memberof Nehan.Color
    @return {String}
-   @example
-   * new Color("transparent").getCssValue(); // "transparent"
-   * new Color("ff0022").getCssValue(); // "#ff0022"
-   * new Color("red").getCssValue(); // "#ff0000"
    */
   Color.prototype.getCssValue = function(){
-    return (this.value === "transparent")? this.value : "#" + this.value;
-  };
-  /**
-   @memberof Nehan.Color
-   @return {Nehan.Rgb}
-   */
-  Color.prototype.getRgb = function(){
-    return new Nehan.Rgb(this.value);
+    return this.value;
   };
   /**
    @memberof Nehan.Color
@@ -4635,57 +4383,6 @@ Nehan.Color = (function(){
 
   return Color;
 })();
-
-/**
-   palette color utility module
-
-   @namespace Nehan.Palette
-*/
-Nehan.Palette = (function(){
-  // 256(8 * 8 * 4) color palette scales.
-  var __rg_palette = [0, 36, 73, 109, 146, 182, 219, 255];
-  var __b_palette = [0, 85, 170, 255];
-
-  var __make_hex_str = function(ival){
-    var str = ival.toString(16);
-    if(str.length <= 1){
-      return "0" + str;
-    }
-    return str;
-  };
-
-  var __find_palette = function(ival, palette){
-    if(Nehan.List.exists(palette, Nehan.Closure.eq(ival))){
-      return ival;
-    }
-    return Nehan.List.minobj(palette, function(pval){
-      return Math.abs(pval - ival);
-    });
-  };
-
-  return {
-    /**
-     * search nearest color value defined in nehan palette.<br>
-     * we use this value for img characters.
-
-       @memberof Nehan.Palette
-       @param rgb {Nehan.Rbg}
-       @return {String}
-    */
-    getColor : function(rgb){
-      var palette_red = __find_palette(rgb.getRed(), __rg_palette);
-      var palette_green = __find_palette(rgb.getGreen(), __rg_palette);
-      var palette_blue = __find_palette(rgb.getBlue(), __b_palette);
-
-      return [
-	__make_hex_str(palette_red),
-	__make_hex_str(palette_green),
-	__make_hex_str(palette_blue)
-      ].join("");
-    }
-  };
-})();
-
 
 /**
    @namespace Nehan.Cardinal
@@ -17816,13 +17513,10 @@ Nehan.VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalImgChar = function(line, chr){
-    var color = line.color || new Nehan.Color(Nehan.Config.defaultFontColor);
-    var font_rgb = color.getRgb();
-    var palette_color = Nehan.Palette.getColor(font_rgb).toUpperCase();
     return this._createElement("img", {
       className:"nehan-img-char",
       attrs:{
-	src:chr.getImgSrc(palette_color)
+	src:chr.getImgSrc("000000")
       },
       css:chr.getCssVertImgChar(line)
     });

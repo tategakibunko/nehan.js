@@ -237,13 +237,10 @@ Nehan.VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalImgChar = function(line, chr){
-    var color = line.color || new Nehan.Color(Nehan.Config.defaultFontColor);
-    var font_rgb = color.getRgb();
-    var palette_color = Nehan.Palette.getColor(font_rgb).toUpperCase();
     return this._createElement("img", {
       className:"nehan-img-char",
       attrs:{
-	src:chr.getImgSrc(palette_color)
+	src:chr.getImgSrc("000000")
       },
       css:chr.getCssVertImgChar(line)
     });
