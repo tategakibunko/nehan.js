@@ -61,6 +61,7 @@
   word-break:normal;
   word-wrap:normal;
   overflow:visible;
+  white-space:pre; /* avoid line break */
   -webkit-transform : rotate(90deg);
   -webkit-transform-origin : 50% 50%;
   -moz-transform : rotate(90deg);
