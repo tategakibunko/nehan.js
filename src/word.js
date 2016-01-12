@@ -4,7 +4,7 @@ Nehan.Word = (function(){
     for(var i = word.data.length - 1; i >= 1; i--){
       var head_part = word.data.substring(0, i);
       var part_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, head_part));
-      //console.log("head_part:%s(%d) for %d", head_part, part_measure, measure);
+      //console.log("original:%s, head_part:%s(%d) for %d", word.data, head_part, part_measure, measure);
       if(part_measure <= measure){
 	var head_word = new Nehan.Word(head_part, true);
 	head_word.bodySize = measure;

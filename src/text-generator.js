@@ -129,10 +129,12 @@ Nehan.TextGenerator = (function(){
       token.setDivided(false);
       return token;
     }
+    var max_measure = this.context.getInlineRootMaxMeasure(); // get max measure of inline root(inline just under the block level)
+
     // at this point, this word is larger than rest space.
     // but if this word size is less than max_measure and 'word-berak' is not 'break-all',
     // just break line and show it at the head of next line.
-    if(advance <= this.context.layoutContext.getInlineMaxMeasure() && !this.context.style.isWordBreakAll()){
+    if(advance <= max_measure && !this.context.style.isWordBreakAll()){
       return token; // overflow and cached
     }
     // at this point, situations are

@@ -1083,6 +1083,14 @@ Nehan.RenderingContext = (function(){
     return Math.min(max_size, this.style.contentMeasure);
   };
 
+  RenderingContext.prototype.getInlineRootMaxMeasure = function(){
+    var inline_root = this.find(function(context){
+      return context.isInlineRoot();
+    });
+    var layout_context = inline_root? inline_root.layoutContext : this.layoutContext;
+    return layout_context.getInlineMaxMeasure();
+  };
+
   RenderingContext.prototype.getEdgeExtent = function(){
     if(this.generator instanceof Nehan.TextGenerator){
       return 0;
