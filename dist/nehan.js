@@ -11509,6 +11509,19 @@ Nehan.TextLexer = (function (){
     }
 
     // single character
+    return this._parseAsChar();
+  };
+
+  // @return {Nehan.Char}
+  TextLexer.prototype._parseAsChar = function(){
+    var lead = this.buff.charCodeAt(0);
+    // check surrogate pair
+    if(0xd800 <= lead && lead <= 0xdbff){
+      var trail = this.buff.charCodeAt(1);
+      if(trail && 0xdc00 <= trail && trail <= 0xdfff){
+	return new Nehan.Char({data:this._stepBuff(2)});
+      }
+    }
     return new Nehan.Char({data:this._stepBuff(1)});
   };
 
