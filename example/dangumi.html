@@ -11,22 +11,24 @@
     <!-- styles -->
     <link href="../css/nehan.css" rel="stylesheet">
     <style type="text/css">
-      body{ margin:2em 3em }
-      hr{ border-style:dotted; border-width:1px 0 0 0; margin:16px 0; }
+    body{ margin:2em 3em }
+    hr{ border-style:none; border-color:#dedede; border-width:1px 0 0 0; margin:16px 0; }
     </style>
   </head>
   <body>
     <div id="result"></div>
+
     <div id="text" style="display:none">
       <p class="drop-caps">日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす<ruby>恵沢<rt>けいたく</rt></ruby>を確保し、政府の行為によって再び<span style="color:red">戦争</span>の惨禍が起ることのないやうにすることを決意し、ここに主権が<span class="xx-large"><ruby>国民<rt>こくみん</rt></ruby></span>に<span class="empha-circle-open">存する</span>ことを<ruby>宣言<rt>せんげん</rt></ruby>し、この憲法を確定する。</p>
+
       <p class="drop-caps">日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに<span class="empha-sesame-filled">主権が国民に存する</span>ことを宣言し、この憲法を確定する。</p>
-      <p>日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。</p>
-      <p>日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。</p>
+
       <table>
 	<thead><tr><th>head1</th><th>head2</th></thead>
 	<tr><td>ほげほげ</td><td>日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。</td></tr>
 	<tr><td>ほげほげ</td><td>日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。</td></tr>
       </table>
+
       <ol>
 	<li>あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん</li>
 	<li>あいうえおかきくけこ</li>
@@ -62,30 +64,36 @@
 	<li>かきくけこ</li>
 	<li>さしすせそ</li>
       </ol>
-      <blockquote>縦書き文庫は縦書きで作品が投稿できるウェブサービスです。縦書き文庫は縦書きで作品が投稿できるウェブサービスです。縦書き文庫は縦書きで作品が投稿できるウェブサービスです。</blockquote>
-    </div>
+
+      <blockquote>
+	縦書き文庫は縦書きで作品が投稿できるウェブサービスです。縦書き文庫は縦書きで作品が投稿できるウェブサービスです。縦書き文庫は縦書きで作品が投稿できるウェブサービスです。
+      </blockquote>
+    </div><!-- text -->
 
     <!-- scripts -->
+    <script type="text/javascript" src="/static/js/jquery.min.js"></script>
     <script type="text/javascript" src="../dist/nehan.js"></script>
     <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(event) {
       var text = document.querySelector("#text").innerHTML;
-      var $result = document.querySelector("#result");
-      var pe = Nehan.createPagedElement().setStyle("body", {
-        flow:"tb-rl",
-        color:"#505050",
-        width:500,
-        height:350,
-        fontSize:16
-      }).setContent(text, {
-        onProgress: function(tree, ctx){
-          var page = ctx.getPage(tree.pageNo);
-          var wrap = document.createElement("div");
-          wrap.style.width = "500px";
-          wrap.appendChild(page.element);
-          wrap.appendChild(document.createElement("hr"));
-          $result.appendChild(wrap);
-        }
-      });
+      var result = document.querySelector("#result");
+      var page_document = new Nehan.Document();
+      page_document
+	.setContent(text)
+	.setStyle("body", {
+	  flow:"tb-rl",
+	  color:"#505050",
+	  width:500,
+	  height:350,
+	  fontSize:16
+	})
+	.render({
+	  onPage: function(page, ctx){
+	    result.appendChild(page.element);
+	    result.appendChild(document.createElement("hr"));
+	  }
+	});
+    });
     </script>
   </body>
 </html>
