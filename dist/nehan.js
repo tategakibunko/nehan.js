@@ -1923,6 +1923,44 @@ Nehan.TagAttrs = (function(){
       this.attrs[name] = value;
     }
   };
+  /**
+   @memberof Nehan.TagAttrs
+   @returnvalue {String}
+   */
+  TagAttrs.prototype.toString = function(){
+    return [
+      this.toAttrString(),
+      this.toDatasetString()
+    ].join(" ");
+  };
+
+  /**
+   @memberof Nehan.TagAttrs
+   @returnvalue {String}
+   */
+  TagAttrs.prototype.toAttrString = function(){
+    var attrs = [];
+    for(var prop in this.attrs){
+      attrs.push(
+	prop + "=" + "'" + this.attrs[prop] + "'"
+      );
+    }
+    return attrs.join(" ");
+  };
+
+  /**
+   @memberof Nehan.TagAttrs
+   @returnvalue {String}
+   */
+  TagAttrs.prototype.toDatasetString = function(){
+    var datum = [];
+    for(var dataname in this.dataset){
+      datum.push(
+	"data-" + Nehan.Utils.camelToChain(dataname) + "=" + "'" + this.getData(dataname) + "'"
+      );
+    }
+    return datum.join(" ");
+  };
 
   // <p class='hi hey'>
   // => ["nehan-hi", "nehan-hey"]
@@ -2004,99 +2042,125 @@ Nehan.Tag = (function (){
   /**
    @memberof Nehan.Tag
    @param content {String}
+   @return {Nehan.Tag}
    */
   Tag.prototype.setContent = function(content){
     if(this._fixed){
-      return;
+      return this;
     }
     this.content = content;
+    return this;
   };
   /**
    @memberof Nehan.Tag
    @param status {boolean}
+   @return {Nehan.Tag}
    */
   Tag.prototype.setContentImmutable = function(status){
     this._fixed = status;
+    return this;
   };
   /**
    @memberof Nehan.Tag
    @param name {String} - alias markup name
+   @return {Nehan.Tag}
    */
   Tag.prototype.setAlias = function(name){
     this.alias = name;
+    return this;
   };
   /**
    @memberof Nehan.Tag
    @param name {String}
    @param value {attribute_value}
+   @return {Nehan.Tag}
    */
   Tag.prototype.setAttr = function(name, value){
     this.attrs.setAttr(name, value);
+    return this;
   };
   /**
    @memberof Nehan.Tag
    @param attrs {Object}
+   @return {Nehan.Tag}
    */
   Tag.prototype.setAttrs = function(attrs){
     for(var name in attrs){
       this.setAttr(name, attrs[name]);
     }
+    return this;
   };
   /**
    @memberof Nehan.Tag
    @param status {Bool}
+   @return {Nehan.Tag}
    */
   Tag.prototype.setFirstChild = function(status){
     this.firstChild = status;
+    return this;
   };
   /**
    @memberof Nehan.Tag
    @param status {Bool}
+   @return {Nehan.Tag}
    */
   Tag.prototype.setOnlyChild = function(status){
     this.onlyChild = status;
+    return this;
   };
   /**
    @memberof Nehan.Tag
    @param status {Bool}
+   @return {Nehan.Tag}
    */
   Tag.prototype.setOnlyOfType = function(status){
     this.onlyOfType = status;
+    return this;
   };
   /**
    @memberof Nehan.Tag
    @param status {Bool}
+   @return {Nehan.Tag}
    */
   Tag.prototype.setFirstOfType = function(status){
     this.firstOfType = status;
+    return this;
   };
   /**
    @memberof Nehan.Tag
    @param status {Bool}
+   @return {Nehan.Tag}
    */
   Tag.prototype.setLastChild = function(status){
     this.lastChild = status;
+    return this;
   };
   /**
    @memberof Nehan.Tag
    @param status {Bool}
+   @return {Nehan.Tag}
    */
   Tag.prototype.setLastOfType = function(status){
     this.lastOfType = status;
+    return this;
   };
   /**
    @memberof Nehan.Tag
    @param klass {String}
+   @return {Nehan.Tag}
    */
   Tag.prototype.addClass = function(klass){
     this.attrs.addClass(klass);
+    return this;
   };
   /**
    @memberof Nehan.Tag
    @param klass {String}
+   @return {Nehan.Tag}
    */
   Tag.prototype.removeClass = function(klass){
     this.attrs.removeClass(klass);
+    return this;
   };
   /**
    @memberof Nehan.Tag
@@ -2300,6 +2364,17 @@ Nehan.Tag = (function (){
    */
   Tag.prototype.isLastOfType = function(){
     return this.lastOfType;
+  };
+  /**
+   @memberof Nehan.Tag
+   @return {String}
+   */
+  Tag.prototype.toString = function(){
+    return ("<" + this.getName() + " " + this.attrs.toString() + ">")
+      .replace(/\s+/g, " ")
+      .replace(/\s>$/, ">")
+      .replace(/\s\/>$/, "/>")
+    ;
   };
 
   Tag.prototype._getTagAttrSrc = function(src){

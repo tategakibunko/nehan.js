@@ -106,6 +106,44 @@ Nehan.TagAttrs = (function(){
       this.attrs[name] = value;
     }
   };
+  /**
+   @memberof Nehan.TagAttrs
+   @returnvalue {String}
+   */
+  TagAttrs.prototype.toString = function(){
+    return [
+      this.toAttrString(),
+      this.toDatasetString()
+    ].join(" ");
+  };
+
+  /**
+   @memberof Nehan.TagAttrs
+   @returnvalue {String}
+   */
+  TagAttrs.prototype.toAttrString = function(){
+    var attrs = [];
+    for(var prop in this.attrs){
+      attrs.push(
+	prop + "=" + "'" + this.attrs[prop] + "'"
+      );
+    }
+    return attrs.join(" ");
+  };
+
+  /**
+   @memberof Nehan.TagAttrs
+   @returnvalue {String}
+   */
+  TagAttrs.prototype.toDatasetString = function(){
+    var datum = [];
+    for(var dataname in this.dataset){
+      datum.push(
+	"data-" + Nehan.Utils.camelToChain(dataname) + "=" + "'" + this.getData(dataname) + "'"
+      );
+    }
+    return datum.join(" ");
+  };
 
   // <p class='hi hey'>
   // => ["nehan-hi", "nehan-hey"]
