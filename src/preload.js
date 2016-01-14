@@ -5,8 +5,8 @@ Nehan.Preload = (function(){
     return tag;
   };
 
-  var __search_img = function(target){
-    target.html = target.html.replace(/(<img[^>]*>)/g, function(match, p1){
+  var __search_img = function(context){
+    context.html = context.html.replace(/(<img[^>]*>)/g, function(match, p1){
       var tag = new Nehan.Tag(p1);
       if(tag.hasAttr("width") && tag.hasAttr("height")){
 	return match;
@@ -14,25 +14,25 @@ Nehan.Preload = (function(){
       if(!tag.hasAttr("src")){
 	return match;
       }
-      return __regist_resource(target.resources, tag).toString();
+      return __regist_resource(context.resources, tag).toString();
     });
   };
 
-  var __search_math = function(target){
-    target.html = target.html.replace(/(<math[^>]*>)([\s|\S]*?)<\/math>/g, function(match, p1, p2){
+  var __search_math = function(context){
+    context.html = context.html.replace(/(<math[^>]*>)([\s|\S]*?)<\/math>/g, function(match, p1, p2){
       var tag = new Nehan.Tag(p1, p2);
-      return __regist_resource(target.resources, tag).toString() + p2 + "</math>";
+      return __regist_resource(context.resources, tag).toString() + p2 + "</math>";
     });
   };
 
-  var __create_signal = function(target){
+  var __create_signal = function(context){
     var cur_count = 0;
-    var max_count = target.resources.length;
+    var max_count = context.resources.length;
     return function(){
       cur_count++;
-      target.onProgress({max:max_count, cur:cur_count});
+      context.onProgress({max:max_count, cur:cur_count});
       if(cur_count >= max_count){
-	target.onComplete(target);
+	context.onComplete(context);
       }
     };
   };
@@ -66,31 +66,38 @@ Nehan.Preload = (function(){
     });
   };
 
-  var __load_res = function(target){
-    var signal = __create_signal(target);
-    target.resources.forEach(function(res){
-      switch(res.getName()){
-      case "img":
-	__load_img(res, signal);
-	break;
-      case "math":
-	__load_math(res, signal);
-	break;
-      default:
-	break;
-      }
+  var __req_animation_frame = Nehan.Closure.animationFrame();
+
+  var __load_res = function(context, signal){
+    if(context.loadingIndex >= context.resources.length){
+      return;
+    }
+    var res = context.resources[context.loadingIndex];
+    switch(res.getName()){
+    case "img":
+      __load_img(res, signal);
+      break;
+    case "math":
+      __load_math(res, signal);
+      break;
+    default:
+      break;
+    }
+    context.loadingIndex++;
+    __req_animation_frame(function(){
+      __load_res(context, signal);
     });
   };
 
-  var __setup_html = function(target){
-    target.tagNames.forEach(function(tag_name){
+  var __setup_html = function(context){
+    context.tagNames.forEach(function(tag_name){
       switch(tag_name){
       case "img":
-	__search_img(target);
+	__search_img(context);
 	break;
       case "math":
 	if(typeof MathJax !== "undefined"){
-	  __search_math(target);
+	  __search_math(context);
 	}
 	break;
       default:
@@ -100,21 +107,36 @@ Nehan.Preload = (function(){
   };
 
   return {
-    start : function(opt){
+    // parse html and add 'preload-id' to markups with no size attribute,
+    // resource data is given by onComplete callback.
+    //
+    // [example]
+    // <img> => <img data-preload-id='0'>
+    // <math> => <img data-preload-id='1'>
+    // <!-- if size is defined, nothing changes. -->
+    // <img width='100' height='100'> => <img width='100' height='100'>
+    start : function(html, opt){
       opt = opt || {};
-      var target = {
-	html:opt.html || "",
+      var context = {
+	html:Nehan.Html.normalize(html),
 	tagNames:opt.tagNames || [],
 	resources:[],
-	onProgress:opt.onProgress || function(){},
-	onComplete:opt.onComplete || function(){}
+	loadingIndex:0,
+	onProgress:opt.onProgress || function(status){
+	  // console.log("%d/%d", status.cur, status.max);
+	},
+	onComplete:opt.onComplete || function(result){
+	  // console.log("html:%s", result.html);
+	  // console.log("resources:%o", result.resources);
+	}
       };
-      __setup_html(target);
-      if(target.resources.length === 0){
-	target.onComplete(target);
+      __setup_html(context);
+      if(context.resources.length === 0){
+	context.onComplete(context);
 	return;
       }
-      __load_res(target);
+      var signal = __create_signal(context);
+      __load_res(context, signal);
     }
   };
 })();

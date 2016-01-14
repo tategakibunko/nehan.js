@@ -3,17 +3,6 @@
  @namespace Nehan.Closure
  */
 Nehan.Closure = {
-  anim : function(){
-    var default_wait = 1000 / 60;
-    return window.requestAnimationFrame  ||
-      window.webkitRequestAnimationFrame ||
-      window.mozRequestAnimationFrame    ||
-      window.msRequestAnimationFrame     ||
-      function(callback, wait){
-	var _wait = (typeof wait === "undefined")? default_wait : wait;
-	window.setTimeout(callback, _wait);
-      };
-  },
   /**
    @memberof Nehan.Closure
    @return {Function}
@@ -51,6 +40,10 @@ Nehan.Closure = {
       return x !== y;
     };
   },
+  /**
+   @memberof Nehan.Closure
+   @return {Function}
+   */
   isTagName : function(names){
     return function(token){
       if(token instanceof Nehan.Tag === false){
@@ -61,5 +54,20 @@ Nehan.Closure = {
 	return name === tag_name;
       });
     };
-  }
+  },
+  /**
+   @memberof Nehan.Closure
+   @return {Function}
+   */
+  animationFrame : function(){
+    var default_wait = 1000 / 60;
+    return window.requestAnimationFrame  ||
+      window.webkitRequestAnimationFrame ||
+      window.mozRequestAnimationFrame    ||
+      window.msRequestAnimationFrame     ||
+      function(callback, wait){
+	var _wait = (typeof wait === "undefined")? default_wait : wait;
+	window.setTimeout(callback, _wait);
+      };
+  },
 };

@@ -66,7 +66,7 @@ Nehan.addSingleTagNames = function(names){
 Nehan.createRootGenerator = function(opt){
   opt = opt || {};
   var context = new Nehan.RenderingContext({
-    text:Nehan.Html.normalize(opt.text || "no text"),
+    text:opt.text || "no text",
     preloads:opt.preloads || [],
     singleTagNames:(
       new Nehan.LowerNameSet()

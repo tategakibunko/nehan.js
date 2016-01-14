@@ -19,8 +19,9 @@ o Add Nehan.Preloads, module for loading statically sized resources before parsi
 o Support MathJax feature(experimental).
 * Treat surrogate pair as single character.
 * More strict edge cancel for block level.
-! [deprecated] Nehan.LexingRule, use Nehan.setSingleTagName instead.
+! [deprecated] Nehan.LexingRule(use Nehan.setSingleTagName instead).
 ! [deprecated] Nehan.Rgb, Nehan.Palette, Nehan.Colors.
+! [deprecated] Nehan.PagedElement(use Nehan.Document instead).
 
 version 5.4.0 2015/12/2
 ========================

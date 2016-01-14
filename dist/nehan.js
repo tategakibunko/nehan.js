@@ -142,6 +142,16 @@ Nehan.Config = {
   ],
 
   /**
+   markups that may require pre loading process.
+
+   @memberof Nehan.Config
+   @type {Array.<string>}
+   */
+  preloadMarkups:[
+    "img", "math"
+  ],
+
+  /**
    all properties under control of layout engine.
 
    @memberof Nehan.Config
@@ -2415,17 +2425,6 @@ Nehan.Tag = (function (){
  @namespace Nehan.Closure
  */
 Nehan.Closure = {
-  anim : function(){
-    var default_wait = 1000 / 60;
-    return window.requestAnimationFrame  ||
-      window.webkitRequestAnimationFrame ||
-      window.mozRequestAnimationFrame    ||
-      window.msRequestAnimationFrame     ||
-      function(callback, wait){
-	var _wait = (typeof wait === "undefined")? default_wait : wait;
-	window.setTimeout(callback, _wait);
-      };
-  },
   /**
    @memberof Nehan.Closure
    @return {Function}
@@ -2463,6 +2462,10 @@ Nehan.Closure = {
       return x !== y;
     };
   },
+  /**
+   @memberof Nehan.Closure
+   @return {Function}
+   */
   isTagName : function(names){
     return function(token){
       if(token instanceof Nehan.Tag === false){
@@ -2473,7 +2476,22 @@ Nehan.Closure = {
 	return name === tag_name;
       });
     };
-  }
+  },
+  /**
+   @memberof Nehan.Closure
+   @return {Function}
+   */
+  animationFrame : function(){
+    var default_wait = 1000 / 60;
+    return window.requestAnimationFrame  ||
+      window.webkitRequestAnimationFrame ||
+      window.mozRequestAnimationFrame    ||
+      window.msRequestAnimationFrame     ||
+      function(callback, wait){
+	var _wait = (typeof wait === "undefined")? default_wait : wait;
+	window.setTimeout(callback, _wait);
+      };
+  },
 };
 
 Nehan.Set = (function(){
@@ -13520,7 +13538,7 @@ Nehan.PageParser = (function(){
     this.generator = generator;
   }
 
-  var __req_animation_frame = Nehan.Closure.anim();
+  var __req_animation_frame = Nehan.Closure.animationFrame();
 
   /**
    @memberof Nehan.PageParser
@@ -19881,8 +19899,8 @@ Nehan.Preload = (function(){
     return tag;
   };
 
-  var __search_img = function(target){
-    target.html = target.html.replace(/(<img[^>]*>)/g, function(match, p1){
+  var __search_img = function(context){
+    context.html = context.html.replace(/(<img[^>]*>)/g, function(match, p1){
       var tag = new Nehan.Tag(p1);
       if(tag.hasAttr("width") && tag.hasAttr("height")){
 	return match;
@@ -19890,25 +19908,25 @@ Nehan.Preload = (function(){
       if(!tag.hasAttr("src")){
 	return match;
       }
-      return __regist_resource(target.resources, tag).toString();
+      return __regist_resource(context.resources, tag).toString();
     });
   };
 
-  var __search_math = function(target){
-    target.html = target.html.replace(/(<math[^>]*>)([\s|\S]*?)<\/math>/g, function(match, p1, p2){
+  var __search_math = function(context){
+    context.html = context.html.replace(/(<math[^>]*>)([\s|\S]*?)<\/math>/g, function(match, p1, p2){
       var tag = new Nehan.Tag(p1, p2);
-      return __regist_resource(target.resources, tag).toString() + p2 + "</math>";
+      return __regist_resource(context.resources, tag).toString() + p2 + "</math>";
     });
   };
 
-  var __create_signal = function(target){
+  var __create_signal = function(context){
     var cur_count = 0;
-    var max_count = target.resources.length;
+    var max_count = context.resources.length;
     return function(){
       cur_count++;
-      target.onProgress({max:max_count, cur:cur_count});
+      context.onProgress({max:max_count, cur:cur_count});
       if(cur_count >= max_count){
-	target.onComplete(target);
+	context.onComplete(context);
       }
     };
   };
@@ -19942,31 +19960,38 @@ Nehan.Preload = (function(){
     });
   };
 
-  var __load_res = function(target){
-    var signal = __create_signal(target);
-    target.resources.forEach(function(res){
-      switch(res.getName()){
-      case "img":
-	__load_img(res, signal);
-	break;
-      case "math":
-	__load_math(res, signal);
-	break;
-      default:
-	break;
-      }
+  var __req_animation_frame = Nehan.Closure.animationFrame();
+
+  var __load_res = function(context, signal){
+    if(context.loadingIndex >= context.resources.length){
+      return;
+    }
+    var res = context.resources[context.loadingIndex];
+    switch(res.getName()){
+    case "img":
+      __load_img(res, signal);
+      break;
+    case "math":
+      __load_math(res, signal);
+      break;
+    default:
+      break;
+    }
+    context.loadingIndex++;
+    __req_animation_frame(function(){
+      __load_res(context, signal);
     });
   };
 
-  var __setup_html = function(target){
-    target.tagNames.forEach(function(tag_name){
+  var __setup_html = function(context){
+    context.tagNames.forEach(function(tag_name){
       switch(tag_name){
       case "img":
-	__search_img(target);
+	__search_img(context);
 	break;
       case "math":
 	if(typeof MathJax !== "undefined"){
-	  __search_math(target);
+	  __search_math(context);
 	}
 	break;
       default:
@@ -19976,202 +20001,40 @@ Nehan.Preload = (function(){
   };
 
   return {
-    start : function(opt){
+    // parse html and add 'preload-id' to markups with no size attribute,
+    // resource data is given by onComplete callback.
+    //
+    // [example]
+    // <img> => <img data-preload-id='0'>
+    // <math> => <img data-preload-id='1'>
+    // <!-- if size is defined, nothing changes. -->
+    // <img width='100' height='100'> => <img width='100' height='100'>
+    start : function(html, opt){
       opt = opt || {};
-      var target = {
-	html:opt.html || "",
+      var context = {
+	html:Nehan.Html.normalize(html),
 	tagNames:opt.tagNames || [],
 	resources:[],
-	onProgress:opt.onProgress || function(){},
-	onComplete:opt.onComplete || function(){}
+	loadingIndex:0,
+	onProgress:opt.onProgress || function(status){
+	  // console.log("%d/%d", status.cur, status.max);
+	},
+	onComplete:opt.onComplete || function(result){
+	  // console.log("html:%s", result.html);
+	  // console.log("resources:%o", result.resources);
+	}
       };
-      __setup_html(target);
-      if(target.resources.length === 0){
-	target.onComplete(target);
+      __setup_html(context);
+      if(context.resources.length === 0){
+	context.onComplete(context);
 	return;
       }
-      __load_res(target);
+      var signal = __create_signal(context);
+      __load_res(context, signal);
     }
   };
 })();
 
-
-Nehan.PagedElement = (function(){
-  /**
-     @memberof Nehan
-     @class PagedElement
-     @classdesc DOM element with {@link Nehan.Document}
-  */
-  function NehanPagedElement(){
-    this.pageNo = 0;
-    this.document = new Nehan.Document();
-    this.element = document.createElement("div");
-  }
-
-  /**
-   check if current page position is at last.
-
-   @memberof Nehan.PagedElement
-   @return {boolean}
-   */
-  NehanPagedElement.prototype.isLastPage = function(){
-    return this.getPageNo() + 1 >= this.getPageCount();
-  };
-  /**
-   get inner DOMElement containning current page element.
-
-   @memberof Nehan.PagedElement
-   */
-  NehanPagedElement.prototype.getElement = function(){
-    return this.element;
-  };
-  /**
-   get content text
-
-   @memberof Nehan.PagedElement
-   @return {String}
-   */
-  NehanPagedElement.prototype.getContent = function(){
-    return this.document.getContent();
-  };
-  /**
-   @memberof Nehan.PagedElement
-   @return {int}
-   */
-  NehanPagedElement.prototype.getPageCount = function(){
-    return this.document.getPageCount();
-  };
-  /**
-   @memberof Nehan.PagedElement
-   @param index {int}
-   @return {Nehan.Page}
-   */
-  NehanPagedElement.prototype.getPage = function(index){
-    return this.document.getPage(index);
-  };
-  /**
-   get current page index
-
-   @memberof Nehan.PagedElement
-   @return {int}
-   */
-  NehanPagedElement.prototype.getPageNo = function(){
-    return this.pageNo;
-  };
-  /**
-   set inner page position to next page and return next page if exists, else null.
-
-   @memberof Nehan.PagedElement
-   @return {Nehan.Page | null}
-   */
-  NehanPagedElement.prototype.setNextPage = function(){
-    if(this.pageNo + 1 < this.getPageCount()){
-      return this.setPage(this.pageNo + 1);
-    }
-    return null;
-  };
-  /**
-   set inner page posision to previous page and return previous page if exists, else null.
-
-   @memberof Nehan.PagedElement
-   @return {Nehan.Page | null}
-   */
-  NehanPagedElement.prototype.setPrevPage = function(){
-    if(this.pageNo > 0){
-      return this.setPage(this.pageNo - 1);
-    }
-    return null;
-  };
-  /**
-   * set selector value. [name] is selector key, value is selector value.<br>
-   * see example at setStyle of {@link Nehan.Engine}.
-
-   @memberof Nehan.PagedElement
-   @param name {String} - selector string
-   @param value {selector_value}
-   */
-  NehanPagedElement.prototype.setStyle = function(name, value){
-    this.document.setStyle(name, value);
-    return this;
-  };
-  /**
-   set selector key and values. see example at setStyles of {@link Nehan.Engine}.
-
-   @memberof Nehan.PagedElement
-   @param value {Object}
-   */
-  NehanPagedElement.prototype.setStyles = function(values){
-    this.document.setStyles(values);
-    return this;
-  };
-  /**
-   set content string.
-   @memberof Nehan.PagedElement
-   @param content {String} - html text.
-   */
-  NehanPagedElement.prototype.setContent = function(content, opt){
-    this.document.setContent(content);
-    this.document.render(opt || {});
-    this.setPage(0);
-    return this;
-  };
-  /**
-   start parsing.
-   @memberof Nehan.PagedElement
-   @param opt {Object} - optinal argument
-   @param opt.onProgress {Function} - fun {@link Nehan.Box} -> {@link Nehan.PagedElement} -> ()
-   @param opt.onComplete {Function} - fun time:{Float} -> {@link Nehan.PagedElement} -> ()
-   @param opt.capturePageText {bool} output text node or not for each page object.
-   @param opt.maxPageCount {int} - upper bound of page count
-   */
-  NehanPagedElement.prototype.render = function(opt){
-    this.document.render(opt);
-    return this;
-  };
-  /**
-   set current page index to [page_no]
-
-   @memberof Nehan.PagedElement
-   @param page_no {int}
-   @return {Nehan.Page | null}
-   */
-  NehanPagedElement.prototype.setPage = function(page_no){
-    var page = this.getPage(page_no);
-    if(page === null || page.element === null){
-      //console.error("page_no(%d) is not found", page_no);
-      return null;
-    }
-    this.pageNo = page_no;
-    while(this.element.firstChild){
-      this.element.removeChild(this.element.firstChild);
-    }
-    this.element.appendChild(page.element);
-    return page;
-  };
-  /**<pre>
-   * create outline element of "<body>",
-   * if multiple body exists, only first one is returned.
-   * about callback argument, see {@link Nehan.SectionTreeConverter}.
-   *</pre>
-   @memberof Nehan.PagedElement
-   @param callbacks {Object} - see {@link Nehan.SectionTreeConverter}
-   */
-  NehanPagedElement.prototype.createOutlineElement = function(callbacks){
-    return this.document.createOutlineElement(callbacks);
-  };
-
-  return NehanPagedElement;
-})();
-
-/**
-   @namespace Nehan
-   @memberof Nehan
-   @method createPagedElement
-   @return {Nehan.PagedElement}
-*/
-Nehan.createPagedElement = function(){
-  return new Nehan.PagedElement();
-};
 
 Nehan.Document = (function(){
   /**
@@ -20191,6 +20054,7 @@ Nehan.Document = (function(){
    @memberof Nehan.Document
    @param opt {Object}
    @param opt.root {String} - html root context ['document' | 'html' | 'body']. Default value is defined in {@link Nehan.Config}.defaultRoot.
+   @param opt.onPreloadProgress {Function} - fun status -> ()
    @param opt.onProgress {Function} - fun tree:{@link Nehan.Box} -> {@link Nehan.RenderingContext} -> ()
    @param opt.onPage {Function} - fun page:{@link Nehan.Page} -> {@link Nehan.RenderingContext} -> ()
    @param opt.onComplete {Function} - fun time:{Float} -> context:{@link Nehan.RenderingContext} -> ()
@@ -20201,6 +20065,22 @@ Nehan.Document = (function(){
    */
   Document.prototype.render = function(opt){
     opt = opt || {};
+    Nehan.Preload.start(this.text, {
+      tagNames:Nehan.Config.preloadMarkups,
+      onProgress:opt.onPreloadProgress || function(){},
+      onComplete:function(result){
+	var html = result.html;
+	var resources = result.resources;
+	this.generator = Nehan.createRootGenerator({
+	  root:opt.root || Nehan.Config.defaultRoot,
+	  text:html,
+	  styles:this.styles,
+	  preloads:resources
+	});
+	new Nehan.PageParser(this.generator).parse(opt);
+      }.bind(this)
+    });
+    /*
     this.generator = Nehan.createRootGenerator({
       root:opt.root || Nehan.Config.defaultRoot,
       text:this.text,
@@ -20208,6 +20088,7 @@ Nehan.Document = (function(){
       preloads:this.preloads
     });
     new Nehan.PageParser(this.generator).parse(opt);
+     */
     return this;
   };
   
@@ -20286,16 +20167,6 @@ Nehan.Document = (function(){
     for(var key in values){
       this.setStyle(key, values[key]);
     }
-    return this;
-  };
-
-  /**
-   @memberof Nehan.Document
-   @param preloads {Array.<Nehan.Tag>}
-   @return {Nehan.Document}
-   */
-  Document.prototype.setPreloads = function(preloads){
-    this.preloads = preloads;
     return this;
   };
 
@@ -20394,7 +20265,7 @@ Nehan.addSingleTagNames = function(names){
 Nehan.createRootGenerator = function(opt){
   opt = opt || {};
   var context = new Nehan.RenderingContext({
-    text:Nehan.Html.normalize(opt.text || "no text"),
+    text:opt.text || "no text",
     preloads:opt.preloads || [],
     singleTagNames:(
       new Nehan.LowerNameSet()

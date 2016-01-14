@@ -9,7 +9,7 @@ Nehan.PageParser = (function(){
     this.generator = generator;
   }
 
-  var __req_animation_frame = Nehan.Closure.anim();
+  var __req_animation_frame = Nehan.Closure.animationFrame();
 
   /**
    @memberof Nehan.PageParser

@@ -167,7 +167,6 @@ var sources = [
   "src/results.js",
   "src/rendering-context.js",
   "src/preload.js",
-  "src/paged-element.js",
   "src/document.js",
   "src/nehan-main.js"
 ];

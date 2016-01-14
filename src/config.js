@@ -106,6 +106,16 @@ Nehan.Config = {
   ],
 
   /**
+   markups that may require pre loading process.
+
+   @memberof Nehan.Config
+   @type {Array.<string>}
+   */
+  preloadMarkups:[
+    "img", "math"
+  ],
+
+  /**
    all properties under control of layout engine.
 
    @memberof Nehan.Config

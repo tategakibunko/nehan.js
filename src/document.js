@@ -16,6 +16,7 @@ Nehan.Document = (function(){
    @memberof Nehan.Document
    @param opt {Object}
    @param opt.root {String} - html root context ['document' | 'html' | 'body']. Default value is defined in {@link Nehan.Config}.defaultRoot.
+   @param opt.onPreloadProgress {Function} - fun status -> ()
    @param opt.onProgress {Function} - fun tree:{@link Nehan.Box} -> {@link Nehan.RenderingContext} -> ()
    @param opt.onPage {Function} - fun page:{@link Nehan.Page} -> {@link Nehan.RenderingContext} -> ()
    @param opt.onComplete {Function} - fun time:{Float} -> context:{@link Nehan.RenderingContext} -> ()
@@ -26,6 +27,22 @@ Nehan.Document = (function(){
    */
   Document.prototype.render = function(opt){
     opt = opt || {};
+    Nehan.Preload.start(this.text, {
+      tagNames:Nehan.Config.preloadMarkups,
+      onProgress:opt.onPreloadProgress || function(){},
+      onComplete:function(result){
+	var html = result.html;
+	var resources = result.resources;
+	this.generator = Nehan.createRootGenerator({
+	  root:opt.root || Nehan.Config.defaultRoot,
+	  text:html,
+	  styles:this.styles,
+	  preloads:resources
+	});
+	new Nehan.PageParser(this.generator).parse(opt);
+      }.bind(this)
+    });
+    /*
     this.generator = Nehan.createRootGenerator({
       root:opt.root || Nehan.Config.defaultRoot,
       text:this.text,
@@ -33,6 +50,7 @@ Nehan.Document = (function(){
       preloads:this.preloads
     });
     new Nehan.PageParser(this.generator).parse(opt);
+     */
     return this;
   };
   
@@ -111,16 +129,6 @@ Nehan.Document = (function(){
     for(var key in values){
       this.setStyle(key, values[key]);
     }
-    return this;
-  };
-
-  /**
-   @memberof Nehan.Document
-   @param preloads {Array.<Nehan.Tag>}
-   @return {Nehan.Document}
-   */
-  Document.prototype.setPreloads = function(preloads){
-    this.preloads = preloads;
     return this;
   };
 
