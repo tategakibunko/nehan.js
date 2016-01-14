@@ -2,15 +2,18 @@ Nehan.SelectorContext = (function(){
   /**
    @memberof Nehan
    @class SelectorContext
+   @desc context object given to functional value of style.
+   note that this object is created BEFORE target style is created.
    @param prop {String} - callee property name
    @param style {Nehan.Style}
    @param context {Nehan.RenderingContext}
    */
-  function SelectorContext(prop, style, context){
+  function SelectorContext(prop, style, parent_context){
     this.prop = new Nehan.CssProp(prop);
     this.style = style;
-    this.layoutContext = context.layoutContext;
-    this.documentContext = context.documentContext;
+    this.preloads = parent_context.preloads;
+    this.layoutContext = parent_context.layoutContext;
+    this.documentContext = parent_context.documentContext;
   }
 
   /**
@@ -210,12 +213,21 @@ Nehan.SelectorContext = (function(){
 
   /**
    @memberof Nehan.SelectorContext
-   @method getCssAttr
    @param name {String}
    @param def_value {default_value} - [def_value] is returned if [name] not found.
    */
   SelectorContext.prototype.getCssAttr = function(name, def_value){
     return this.style.getCssAttr(name, def_value);
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
+   @return {Nehan.Tag}
+   */
+  SelectorContext.prototype.getPreloadResource = function(){
+    var markup = this.getMarkup();
+    var res_id = markup.getData("preloadId");
+    return this.preloads[res_id] || null;
   };
 
   /**

@@ -8,6 +8,7 @@ Nehan.Document = (function(){
   function Document(){
     this.text = "no text";
     this.styles = {};
+    this.preloads = [];
     this.generator = null; // disabled until 'render' is called.
   }
 
@@ -28,7 +29,8 @@ Nehan.Document = (function(){
     this.generator = Nehan.createRootGenerator({
       root:opt.root || Nehan.Config.defaultRoot,
       text:this.text,
-      styles:this.styles
+      styles:this.styles,
+      preloads:this.preloads
     });
     new Nehan.PageParser(this.generator).parse(opt);
     return this;
@@ -109,6 +111,16 @@ Nehan.Document = (function(){
     for(var key in values){
       this.setStyle(key, values[key]);
     }
+    return this;
+  };
+
+  /**
+   @memberof Nehan.Document
+   @param preloads {Array.<Nehan.Tag>}
+   @return {Nehan.Document}
+   */
+  Document.prototype.setPreloads = function(preloads){
+    this.preloads = preloads;
     return this;
   };
 

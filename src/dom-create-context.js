@@ -43,6 +43,13 @@ Nehan.DomCreateContext = (function(){
   };
   /**
    @memberof Nehan.DomCreateContext
+   @return {Nehan.RenderingContext}
+   */
+  DomCreateContext.prototype.getBoxContext = function(){
+    return this.box.context;
+  };
+  /**
+   @memberof Nehan.DomCreateContext
    @return {Nehan.BoxSize}
    */
   DomCreateContext.prototype.getParentBoxSize = function(){
@@ -103,6 +110,14 @@ Nehan.DomCreateContext = (function(){
    */
   DomCreateContext.prototype.getChildIndexOfType = function(){
     return this.getStyle().getChildIndexOfType();
+  };
+  /**
+   @memberof Nehan.DomCreateContext
+   @return {Nehan.Tag}
+   */
+  DomCreateContext.prototype.getPreloadResource = function(){
+    var res_id = this.getMarkup().getData("preloadId");
+    return this.box.context.getPreloadResource(res_id);
   };
   /**
    @memberof Nehan.DomCreateContext

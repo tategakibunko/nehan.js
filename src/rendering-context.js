@@ -15,6 +15,7 @@ Nehan.RenderingContext = (function(){
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.DefaultStyle.create());
     this.singleTagNames = opt.singleTagNames || new Nehan.LowerNameSet();
+    this.preloads = opt.preloads || [];
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
     this.pageEvaluator = opt.pageEvaluator || new Nehan.PageEvaluator(this);
   }
@@ -236,6 +237,7 @@ Nehan.RenderingContext = (function(){
       stream:opt.stream || null,
       layoutContext:this.layoutContext || null,
       selectors:this.selectors, // always same
+      preloads:this.preloads, // always same
       singleTagNames:this.singleTagNames, // always same
       documentContext:this.documentContext, // always same
       pageEvaluator:this.pageEvaluator // always same
@@ -957,6 +959,7 @@ Nehan.RenderingContext = (function(){
       stream:opt.stream || this.stream,
       layoutContext:this.layoutContext || this.layoutContext,
       selectors:this.selectors, // always same
+      preloads:this.preloads, // always same
       singleTagNames:this.singleTagNames, // always same
       documentContext:this.documentContext, // always same
       pageEvaluator:this.pageEvaluator // always same
@@ -1054,6 +1057,10 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.getChildContext = function(){
     return this.child || null;
+  };
+
+  RenderingContext.prototype.getPreloadResource = function(res_id){
+    return this.preloads[res_id] || null;
   };
 
   RenderingContext.prototype.getContent = function(){

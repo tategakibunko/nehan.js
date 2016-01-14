@@ -13594,15 +13594,18 @@ Nehan.SelectorContext = (function(){
   /**
    @memberof Nehan
    @class SelectorContext
+   @desc context object given to functional value of style.
+   note that this object is created BEFORE target style is created.
    @param prop {String} - callee property name
    @param style {Nehan.Style}
    @param context {Nehan.RenderingContext}
    */
-  function SelectorContext(prop, style, context){
+  function SelectorContext(prop, style, parent_context){
     this.prop = new Nehan.CssProp(prop);
     this.style = style;
-    this.layoutContext = context.layoutContext;
-    this.documentContext = context.documentContext;
+    this.preloads = parent_context.preloads;
+    this.layoutContext = parent_context.layoutContext;
+    this.documentContext = parent_context.documentContext;
   }
 
   /**
@@ -13802,12 +13805,21 @@ Nehan.SelectorContext = (function(){
 
   /**
    @memberof Nehan.SelectorContext
-   @method getCssAttr
    @param name {String}
    @param def_value {default_value} - [def_value] is returned if [name] not found.
    */
   SelectorContext.prototype.getCssAttr = function(name, def_value){
     return this.style.getCssAttr(name, def_value);
+  };
+
+  /**
+   @memberof Nehan.SelectorContext
+   @return {Nehan.Tag}
+   */
+  SelectorContext.prototype.getPreloadResource = function(){
+    var markup = this.getMarkup();
+    var res_id = markup.getData("preloadId");
+    return this.preloads[res_id] || null;
   };
 
   /**
@@ -13956,6 +13968,13 @@ Nehan.DomCreateContext = (function(){
   };
   /**
    @memberof Nehan.DomCreateContext
+   @return {Nehan.RenderingContext}
+   */
+  DomCreateContext.prototype.getBoxContext = function(){
+    return this.box.context;
+  };
+  /**
+   @memberof Nehan.DomCreateContext
    @return {Nehan.BoxSize}
    */
   DomCreateContext.prototype.getParentBoxSize = function(){
@@ -14016,6 +14035,14 @@ Nehan.DomCreateContext = (function(){
    */
   DomCreateContext.prototype.getChildIndexOfType = function(){
     return this.getStyle().getChildIndexOfType();
+  };
+  /**
+   @memberof Nehan.DomCreateContext
+   @return {Nehan.Tag}
+   */
+  DomCreateContext.prototype.getPreloadResource = function(){
+    var res_id = this.getMarkup().getData("preloadId");
+    return this.box.context.getPreloadResource(res_id);
   };
   /**
    @memberof Nehan.DomCreateContext
@@ -17876,6 +17903,7 @@ Nehan.RenderingContext = (function(){
     this.layoutContext = opt.layoutContext || null;
     this.selectors = opt.selectors || new Nehan.Selectors(Nehan.DefaultStyle.create());
     this.singleTagNames = opt.singleTagNames || new Nehan.LowerNameSet();
+    this.preloads = opt.preloads || [];
     this.documentContext = opt.documentContext || new Nehan.DocumentContext();
     this.pageEvaluator = opt.pageEvaluator || new Nehan.PageEvaluator(this);
   }
@@ -18097,6 +18125,7 @@ Nehan.RenderingContext = (function(){
       stream:opt.stream || null,
       layoutContext:this.layoutContext || null,
       selectors:this.selectors, // always same
+      preloads:this.preloads, // always same
       singleTagNames:this.singleTagNames, // always same
       documentContext:this.documentContext, // always same
       pageEvaluator:this.pageEvaluator // always same
@@ -18818,6 +18847,7 @@ Nehan.RenderingContext = (function(){
       stream:opt.stream || this.stream,
       layoutContext:this.layoutContext || this.layoutContext,
       selectors:this.selectors, // always same
+      preloads:this.preloads, // always same
       singleTagNames:this.singleTagNames, // always same
       documentContext:this.documentContext, // always same
       pageEvaluator:this.pageEvaluator // always same
@@ -18915,6 +18945,10 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.getChildContext = function(){
     return this.child || null;
+  };
+
+  RenderingContext.prototype.getPreloadResource = function(res_id){
+    return this.preloads[res_id] || null;
   };
 
   RenderingContext.prototype.getContent = function(){
@@ -19829,6 +19863,127 @@ Nehan.RenderingContext = (function(){
   return RenderingContext;
 })();
 
+Nehan.Preload = (function(){
+  var __regist_resource = function(resources, tag){
+    var resource_id = resources.length;
+    resources[resource_id] = tag.setAttr("data-preload-id", resource_id);
+    return tag;
+  };
+
+  var __search_img = function(target){
+    target.html = target.html.replace(/(<img[^>]*>)/g, function(match, p1){
+      var tag = new Nehan.Tag(p1);
+      if(tag.hasAttr("width") && tag.hasAttr("height")){
+	return match;
+      }
+      if(!tag.hasAttr("src")){
+	return match;
+      }
+      return __regist_resource(target.resources, tag).toString();
+    });
+  };
+
+  var __search_math = function(target){
+    target.html = target.html.replace(/(<math[^>]*>)([\s|\S]*?)<\/math>/g, function(match, p1, p2){
+      var tag = new Nehan.Tag(p1, p2);
+      return __regist_resource(target.resources, tag).toString() + p2 + "</math>";
+    });
+  };
+
+  var __create_signal = function(target){
+    var cur_count = 0;
+    var max_count = target.resources.length;
+    return function(){
+      cur_count++;
+      target.onProgress({max:max_count, cur:cur_count});
+      if(cur_count >= max_count){
+	target.onComplete(target);
+      }
+    };
+  };
+
+  var __load_img = function(res, signal){
+    var img = new Image();
+    img.onload = function(){
+      res.setAttr("width", img.width);
+      res.setAttr("height", img.height);
+      signal();
+    };
+    img.src = res.getAttr("src");
+  };
+
+  var __debug_size = function(path, dom){
+    console.log("%s height:(offset:%d, client:%d, scroll:%d)", path, dom.offsetHeight, dom.clientHeight, dom.scrollHeight);
+  };
+
+  var __load_math = function(res, signal){
+    var div = document.createElement("div");
+    div.innerHTML = res.getContent();
+    div.style.fontSize = Nehan.Config.defaultFontSize + "px";
+    div.style.opacity = 0;
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(function(){
+      // __debug_size("math>div", div);
+      res.setAttr("extent", div.scrollHeight);
+      res.element = document.body.removeChild(div);
+      signal();
+    });
+  };
+
+  var __load_res = function(target){
+    var signal = __create_signal(target);
+    target.resources.forEach(function(res){
+      switch(res.getName()){
+      case "img":
+	__load_img(res, signal);
+	break;
+      case "math":
+	__load_math(res, signal);
+	break;
+      default:
+	break;
+      }
+    });
+  };
+
+  var __setup_html = function(target){
+    target.tagNames.forEach(function(tag_name){
+      switch(tag_name){
+      case "img":
+	__search_img(target);
+	break;
+      case "math":
+	if(MathJax){
+	  __search_math(target);
+	}
+	break;
+      default:
+	break;
+      }
+    });
+  };
+
+  return {
+    start : function(opt){
+      opt = opt || {};
+      var target = {
+	html:opt.html || "",
+	tagNames:opt.tagNames || [],
+	resources:[],
+	onProgress:opt.onProgress || function(){},
+	onComplete:opt.onComplete || function(){}
+      };
+      __setup_html(target);
+      if(target.resources.length === 0){
+	target.onComplete(target);
+	return;
+      }
+      __load_res(target);
+    }
+  };
+})();
+
+
 Nehan.PagedElement = (function(){
   /**
      @memberof Nehan
@@ -20016,6 +20171,7 @@ Nehan.Document = (function(){
   function Document(){
     this.text = "no text";
     this.styles = {};
+    this.preloads = [];
     this.generator = null; // disabled until 'render' is called.
   }
 
@@ -20036,7 +20192,8 @@ Nehan.Document = (function(){
     this.generator = Nehan.createRootGenerator({
       root:opt.root || Nehan.Config.defaultRoot,
       text:this.text,
-      styles:this.styles
+      styles:this.styles,
+      preloads:this.preloads
     });
     new Nehan.PageParser(this.generator).parse(opt);
     return this;
@@ -20117,6 +20274,16 @@ Nehan.Document = (function(){
     for(var key in values){
       this.setStyle(key, values[key]);
     }
+    return this;
+  };
+
+  /**
+   @memberof Nehan.Document
+   @param preloads {Array.<Nehan.Tag>}
+   @return {Nehan.Document}
+   */
+  Document.prototype.setPreloads = function(preloads){
+    this.preloads = preloads;
     return this;
   };
 
@@ -20216,6 +20383,7 @@ Nehan.createRootGenerator = function(opt){
   opt = opt || {};
   var context = new Nehan.RenderingContext({
     text:Nehan.Html.normalize(opt.text || "no text"),
+    preloads:opt.preloads || [],
     singleTagNames:(
       new Nehan.LowerNameSet()
 	.addValues(Nehan.Config.defaultSingleTagNames)
