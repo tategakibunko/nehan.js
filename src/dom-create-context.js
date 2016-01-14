@@ -116,8 +116,7 @@ Nehan.DomCreateContext = (function(){
    @return {Nehan.Tag}
    */
   DomCreateContext.prototype.getPreloadResource = function(){
-    var res_id = this.getMarkup().getData("preloadId");
-    return this.box.context.getPreloadResource(res_id);
+    return this.box.context.style.getPreloadResource();
   };
   /**
    @memberof Nehan.DomCreateContext

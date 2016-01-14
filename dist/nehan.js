@@ -13817,9 +13817,7 @@ Nehan.SelectorContext = (function(){
    @return {Nehan.Tag}
    */
   SelectorContext.prototype.getPreloadResource = function(){
-    var markup = this.getMarkup();
-    var res_id = markup.getData("preloadId");
-    return this.preloads[res_id] || null;
+    return this.style.getPreloadResource();
   };
 
   /**
@@ -14041,8 +14039,7 @@ Nehan.DomCreateContext = (function(){
    @return {Nehan.Tag}
    */
   DomCreateContext.prototype.getPreloadResource = function(){
-    var res_id = this.getMarkup().getData("preloadId");
-    return this.box.context.getPreloadResource(res_id);
+    return this.box.context.style.getPreloadResource();
   };
   /**
    @memberof Nehan.DomCreateContext
@@ -15060,6 +15057,19 @@ Nehan.Style = (function(){
     }
     return null;
   };
+
+  /**
+   @memberof Nehan.Style
+   @return {Nehan.Tag}
+   */
+  Style.prototype.getPreloadResource = function(){
+    var preload_id = this.markup.getData("preloadId");
+    if(!preload_id){
+      return null;
+    }
+    return this.context.getPreloadResource(preload_id);
+  };
+
   /**
    @memberof Nehan.Style
    @return {int}
@@ -19926,6 +19936,7 @@ Nehan.Preload = (function(){
       // __debug_size("math>div", div);
       res.setAttr("extent", div.scrollHeight);
       res.element = document.body.removeChild(div);
+      res.element.style.opacity = 1;
       signal();
     });
   };
@@ -19953,7 +19964,7 @@ Nehan.Preload = (function(){
 	__search_img(target);
 	break;
       case "math":
-	if(MathJax){
+	if(typeof MathJax !== "undefined"){
 	  __search_math(target);
 	}
 	break;

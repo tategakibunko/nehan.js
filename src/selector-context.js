@@ -225,9 +225,7 @@ Nehan.SelectorContext = (function(){
    @return {Nehan.Tag}
    */
   SelectorContext.prototype.getPreloadResource = function(){
-    var markup = this.getMarkup();
-    var res_id = markup.getData("preloadId");
-    return this.preloads[res_id] || null;
+    return this.style.getPreloadResource();
   };
 
   /**

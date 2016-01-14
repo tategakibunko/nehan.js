@@ -947,6 +947,19 @@ Nehan.Style = (function(){
     }
     return null;
   };
+
+  /**
+   @memberof Nehan.Style
+   @return {Nehan.Tag}
+   */
+  Style.prototype.getPreloadResource = function(){
+    var preload_id = this.markup.getData("preloadId");
+    if(!preload_id){
+      return null;
+    }
+    return this.context.getPreloadResource(preload_id);
+  };
+
   /**
    @memberof Nehan.Style
    @return {int}

@@ -61,6 +61,7 @@ Nehan.Preload = (function(){
       // __debug_size("math>div", div);
       res.setAttr("extent", div.scrollHeight);
       res.element = document.body.removeChild(div);
+      res.element.style.opacity = 1;
       signal();
     });
   };
@@ -88,7 +89,7 @@ Nehan.Preload = (function(){
 	__search_img(target);
 	break;
       case "math":
-	if(MathJax){
+	if(typeof MathJax !== "undefined"){
 	  __search_math(target);
 	}
 	break;
