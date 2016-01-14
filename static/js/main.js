@@ -100,27 +100,47 @@ Ndoc.Reader = Vue.extend({
     mountReader: function(){
       this.pageIndex = 0;
       this.pageCount = 0;
-      this.pages = Ndoc.Utils.createPagedElement().setStyle("body", {
-	"flow":this.flow,
-	"width":this.width,
-	"height":this.height,
-	"font-size":this.fontSize,
-	"word-break":((this.flow === "tb-rl")? "break-all" : "normal")
-      }).setContent(this.text, {
-	onProgress: function(){
-	  this.pageCount++;
-	}.bind(this),
-	onComplete: function(time){
-	  //console.log("finish %fmsec", time);
-	}
-      });
+      this.element = document.createElement("div");
+      this.pages = new Nehan.Document()
+	.setStyle("body", {
+	  "flow":this.flow,
+	  "width":this.width,
+	  "height":this.height,
+	  "font-size":this.fontSize,
+	  "word-break":((this.flow === "tb-rl")? "break-all" : "normal")
+	})
+	.setContent(this.text)
+	.render({
+	  onProgress: function(tree, ctx){
+	    this.pageCount++;
+	  }.bind(this),
+	  onComplete: function(time){
+	    //console.log("finish %fmsec", time);
+	  }
+	});
+
+      this.element.appendChild(this.pages.getPage(0).element);
+
       $(this.$$.screen).empty().css({
 	width:(this.width + 20),
 	height:(this.height + 25)
-      }).append(this.pages.getElement());
+      }).append(this.element);
     },
     isVert: function(){
       return this.flow === "tb-rl";
+    },
+    setPage : function(index){
+      var page = this.pages.getPage(index);
+      this.element.innerHTML = "";
+      this.element.appendChild(page.element);
+    },
+    setNextPage : function(){
+      this.pageIndex = Math.min(this.pageIndex + 1, this.pageCount - 1);
+      this.setPage(this.pageIndex);
+    },
+    setPrevPage : function(){
+      this.pageIndex = Math.max(0, this.pageIndex - 1);
+      this.setPage(this.pageIndex);
     },
     onClickHori: function(){
       this.flow = "lr-tb";
@@ -130,30 +150,17 @@ Ndoc.Reader = Vue.extend({
     },
     onClickLeft: function(){
       if(this.isVert()){
-	this.pages.setNextPage();
+	this.setNextPage();
       } else {
-	this.pages.setPrevPage();
+	this.setPrevPage();
       }
-      this.pageIndex = this.pages.getPageNo();
     },
     onClickRight: function(){
       if(this.isVert()){
-	this.pages.setPrevPage();
+	this.setPrevPage();
       } else {
-	this.pages.setNextPage();
+	this.setNextPage();
       }
-      this.pageIndex = this.pages.getPageNo();
     }
   }
 });
-
-Ndoc.Utils = {
-  createPagedElement: function(){
-    return Nehan.createPagedElement({
-      display:{
-	fontImgRoot:"http://static.antiscroll.com/image/char-img"
-      }
-    });
-  }
-};
-
