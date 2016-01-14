@@ -2415,6 +2415,17 @@ Nehan.Tag = (function (){
  @namespace Nehan.Closure
  */
 Nehan.Closure = {
+  anim : function(){
+    var default_wait = 1000 / 60;
+    return window.requestAnimationFrame  ||
+      window.webkitRequestAnimationFrame ||
+      window.mozRequestAnimationFrame    ||
+      window.msRequestAnimationFrame     ||
+      function(callback, wait){
+	var _wait = (typeof wait === "undefined")? default_wait : wait;
+	window.setTimeout(callback, _wait);
+      };
+  },
   /**
    @memberof Nehan.Closure
    @return {Function}
@@ -13509,17 +13520,7 @@ Nehan.PageParser = (function(){
     this.generator = generator;
   }
 
-  var reqAnimationFrame = (function(){
-    var default_wait = 1000 / 60;
-    return window.requestAnimationFrame  ||
-      window.webkitRequestAnimationFrame ||
-      window.mozRequestAnimationFrame    ||
-      window.msRequestAnimationFrame     ||
-      function(callback, wait){
-	var _wait = (typeof wait === "undefined")? default_wait : wait;
-	window.setTimeout(callback, _wait);
-      };
-  })();
+  var __req_animation_frame = Nehan.Closure.anim();
 
   /**
    @memberof Nehan.PageParser
@@ -13581,7 +13582,7 @@ Nehan.PageParser = (function(){
       }
       opt.onProgress.call(this, tree, this.generator.context);
     }
-    reqAnimationFrame(function(){
+    __req_animation_frame(function(){
       this._parse(opt);
     }.bind(this));
   };
