@@ -42,15 +42,6 @@ Nehan.Document = (function(){
 	new Nehan.PageParser(this.generator).parse(opt);
       }.bind(this)
     });
-    /*
-    this.generator = Nehan.createRootGenerator({
-      root:opt.root || Nehan.Config.defaultRoot,
-      text:this.text,
-      styles:this.styles,
-      preloads:this.preloads
-    });
-    new Nehan.PageParser(this.generator).parse(opt);
-     */
     return this;
   };
   

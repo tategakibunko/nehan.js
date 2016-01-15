@@ -28,9 +28,9 @@ Nehan.Preload = (function(){
   var __create_signal = function(context){
     var cur_count = 0;
     var max_count = context.resources.length;
-    return function(){
+    return function(res){
       cur_count++;
-      context.onProgress({max:max_count, cur:cur_count});
+      context.onProgress({max:max_count, cur:cur_count, res:res});
       if(cur_count >= max_count){
 	context.onComplete(context);
       }
@@ -42,7 +42,7 @@ Nehan.Preload = (function(){
     img.onload = function(){
       res.setAttr("width", img.width);
       res.setAttr("height", img.height);
-      signal();
+      signal(res);
     };
     img.src = res.getAttr("src");
   };
@@ -62,7 +62,7 @@ Nehan.Preload = (function(){
       res.setAttr("extent", div.scrollHeight);
       res.element = document.body.removeChild(div);
       res.element.style.opacity = 1;
-      signal();
+      signal(res);
     });
   };
 
