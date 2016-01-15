@@ -19954,6 +19954,17 @@ Nehan.Preload = (function(){
     div.style.fontSize = Nehan.Config.defaultFontSize + "px";
     div.style.opacity = 0;
     document.body.appendChild(div);
+
+    // set typeset direct.
+    MathJax.Hub.Typeset(div, function() {
+      // __debug_size("math>div", div);
+      res.setAttr("extent", div.scrollHeight);
+      res.element = document.body.removeChild(div);
+      res.element.style.opacity = 1;
+      signal(res);
+    });
+
+    // if typeset failed, this is called(maybe).
     MathJax.Hub.Queue(function(){
       // __debug_size("math>div", div);
       res.setAttr("extent", div.scrollHeight);

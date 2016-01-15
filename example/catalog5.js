@@ -74,10 +74,6 @@ var LayoutTest = (function(){
       $test_menu = $("#test-menu");
       $source = $("#source");
 
-      MathJax.Hub.Config({
-	tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
-      });
-
       var test_name;
       for(test_name in Script){
 	append_test_item(test_name);

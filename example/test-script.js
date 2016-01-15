@@ -536,7 +536,7 @@ var Script = {
     "<div>a&#09;b</div>"
   ].join("\n"),
 
-  /* still not work via ajax load.
+  /* still not work via ajax load. */
   "mathjax":[
     "<h1>オイラー</h1>",
     "<p><math>",
@@ -549,7 +549,6 @@ var Script = {
     "$$x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}$$",
     "</math></p>"
   ].join("\n"),
-   */
 
   "border-radius":[
     "<div class='bordered radius1'>hoge</div>",
