@@ -12,34 +12,57 @@
     <link href="../css/nehan.css" rel="stylesheet">
   </head>
   <body>
-    <h1>simple reader using PagedElement</h1>
-    <div>
+    <h1>simple reader</h1>
+    <p>
       <button id="next">next</button>
       <button id="prev">prev</button>
-    </div>
+    </p>
     <div id="result"></div>
 
     <!-- scripts -->
     <script type="text/javascript" src="../dist/nehan.js"></script>
     <script type="text/javascript">
-      var pe = Nehan.createPagedElement().setStyle("body", {
-        "flow":"tb-rl",
-        "color":"#505050",
-        "background-color":"#f0f0f0",
-        "width":640,
-        "height":480,
-        "font-size":20
-      }).setContent("<h1>hello, nehan.js</h1>");
+    var page_document = new Nehan.Document();
+    var target = document.getElementById("result");
+    var cursor = {pageIndex:0, pageCount:0};
+    page_document.setStyle("body", {
+      "flow":"tb-rl",
+      "color":"#505050",
+      "background-color":"#f0f0f0",
+      "width":640,
+      "height":480,
+      "font-size":20
+    });
+    var long_text = "<p>日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。</p>";
+    page_document.setContent([
+      "<h1>hello1</h1>",
+      long_text,
+      "<h2>hello2</h2>",
+      long_text
+    ].join("\n"));
+    page_document.render({
+      onProgress:function(tree, ctx){
+	cursor.pageCount++;
+      }
+    });
 
-      document.getElementById("next").onclick = function(){
-        pe.setNextPage();
-      };
+    var setPage = function(index){
+      var page = page_document.getPage(index);
+      target.innerHTML = "";
+      target.appendChild(page.element);
+    };
 
-      document.getElementById("prev").onclick = function(){
-        pe.setPrevPage();
-      };
+    setPage(0);
 
-      document.getElementById("result").appendChild(pe.getElement());
+    document.getElementById("next").onclick = function(){
+      cursor.pageIndex = Math.min(cursor.pageIndex + 1, cursor.pageCount - 1);
+      setPage(cursor.pageIndex);
+    };
+
+    document.getElementById("prev").onclick = function(){
+      cursor.pageIndex = Math.max(0, cursor.pageIndex - 1);
+      setPage(cursor.pageIndex);
+    };
     </script>
   </body>
 </html>
