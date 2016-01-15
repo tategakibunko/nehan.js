@@ -19942,28 +19942,23 @@ Nehan.Preload = (function(){
   };
 
   var __debug_size = function(path, dom){
-    console.log("%s height:(offset:%d, client:%d, scroll:%d)", path, dom.offsetHeight, dom.clientHeight, dom.scrollHeight);
+    console.log("%s:offset:(%dx%d), client:(%dx%d), scroll:(%dx%d)", path,
+		dom.offsetWidth, dom.offsetHeight,
+		dom.clientWidth, dom.clientHeight,
+		dom.scrollWidth, dom.scrollHeight);
   };
 
   var __load_math = function(res, signal){
     var div = document.createElement("div");
     div.innerHTML = res.getContent();
-    div.style.fontSize = Nehan.Config.defaultFontSize + "px";
+    div.style.display = "inline-block";
     div.style.opacity = 0;
+    div.style.fontSize = Nehan.Config.defaultFontSize + "px";
     document.body.appendChild(div);
 
-    // set typeset direct.
-    MathJax.Hub.Typeset(div, function() {
-      // __debug_size("math>div", div);
-      res.setAttr("extent", div.scrollHeight);
-      res.element = document.body.removeChild(div);
-      res.element.style.opacity = 1;
-      signal(res);
-    });
-
-    // if typeset failed, this is called(maybe).
+    MathJax.Hub.Typeset(div);
     MathJax.Hub.Queue(function(){
-      // __debug_size("math>div", div);
+      //__debug_size("[queue] math>div", div);
       res.setAttr("extent", div.scrollHeight);
       res.element = document.body.removeChild(div);
       res.element.style.opacity = 1;

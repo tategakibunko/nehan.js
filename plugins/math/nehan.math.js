@@ -13,7 +13,7 @@
      <math>$$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$</math>
 */
 Nehan.setStyle("math", {
-  display:"block",
+  display:"inline",
   onload:function(ctx){
     var res = ctx.getPreloadResource();
     var markup = ctx.getMarkup();
