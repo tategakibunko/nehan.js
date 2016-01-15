@@ -16,11 +16,12 @@ Nehan.setStyle("math", {
   display:"block",
   onload:function(ctx){
     var res = ctx.getPreloadResource();
+    var markup = ctx.getMarkup();
     if(!res){
-      ctx.getMarkup().setContent("[error: MathJax.js is not loaded!]");
+      markup.setContent("[error: MathJax.js is not loaded!]");
       return;
     }
-    ctx.getMarkup()
+    markup
       .setAttr("extent", res.getAttr("extent", "2.5em"))
       .setAttr("pasted", true)
     ;
@@ -29,6 +30,10 @@ Nehan.setStyle("math", {
     var res = ctx.getPreloadResource();
     if(!res){
       return;
+    }
+    if(ctx.isTextVertical()){
+      ctx.dom.classList.add("nehan-rotate-90");
+      ctx.dom.style.height = "auto";
     }
     ctx.dom.innerHTML = "";
     ctx.dom.appendChild(res.element);
