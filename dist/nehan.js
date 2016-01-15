@@ -19938,6 +19938,9 @@ Nehan.Preload = (function(){
       res.setAttr("height", img.height);
       signal(res);
     };
+    img.onerror = function(){
+      signal(res);
+    };
     img.src = res.getAttr("src");
   };
 
