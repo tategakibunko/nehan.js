@@ -68,6 +68,7 @@ Nehan.Preload = (function(){
     MathJax.Hub.Typeset(div);
     MathJax.Hub.Queue(function(){
       //__debug_size("[queue] math>div", div);
+      res.setAttr("measure", div.scrollWidth);
       res.setAttr("extent", div.scrollHeight);
       res.element = document.body.removeChild(div);
       res.element.style.opacity = 1;
