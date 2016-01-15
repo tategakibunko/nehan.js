@@ -5,23 +5,26 @@ var LayoutTest = (function(){
     return Script[name] || Snipet[name] || Text[name] || "undefined script";
   };
 
-  var create_engine = function(opt){
-    var document = new Nehan.Document();
+  var create_page_document = function(opt){
+    var doc = new Nehan.Document();
     var dir = opt.direction || "vert";
-    document.setStyle("body", {
+    doc.setStyle("body", {
       flow:((dir === "vert")? "tb-rl" : "lr-tb"),
       fontSize:(opt.fontSize || 16),
       width:(opt.width || 500),
       height:400
     });
-    document.setStyles(TestStyles);
-    return document;
+    doc.setStyles(TestStyles);
+    return doc;
   };
 
   var run_test = function($dom, opt){
     var script = opt.script || get_script(opt.name || "plain");
-    var engine = create_engine(opt);
-    engine.setContent(script).render({
+    var page_document = create_page_document(opt);
+    page_document.setContent(script).render({
+      onPreloadProgress : function(status){
+	//console.log("preload res:%o", status.res);
+      },
       onProgress : function(tree, ctx){
 	var page = ctx.getPage(tree.pageNo); // tree -> page
 	$dom.append(page.element);
@@ -29,7 +32,7 @@ var LayoutTest = (function(){
       onComplete : function(time, ctx){
 	$dom.append($("<p />").html(time + "msec"));
 	$dom.append($("<h2 />").html("outline"));
-	$dom.append(engine.createOutlineElement());
+	$dom.append(page_document.createOutlineElement());
 	//prettyPrint();
 	//console.log("finished(%f msec)", time);
       }
@@ -71,14 +74,19 @@ var LayoutTest = (function(){
       $test_menu = $("#test-menu");
       $source = $("#source");
 
-      for(var test_name in Script){
+      MathJax.Hub.Config({
+	tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+      });
+
+      var test_name;
+      for(test_name in Script){
 	append_test_item(test_name);
       }
 
       if(location.href.indexOf("#") < 0){
 	$test_menu.find("a").first().click();
       } else {
-	var test_name = location.href.split("#")[1];
+	test_name = location.href.split("#")[1];
 	$test_menu.find("a[href=#" + test_name + "]").click();
       }
     } // start
