@@ -17310,9 +17310,6 @@ Nehan.LayoutEvaluator = (function(){
   LayoutEvaluator.prototype._evaluate = function(tree, opt){
     var root = this._evalElementRoot(tree, opt || {});
     var dom = root.innerHTML? root : tree.elements.reduce(function(root, child){
-      if(child._type === "void"){
-	return root; // do nothing
-      }
       this._appendChild(root, this._evalElementChild(tree, child));
       if(child.withBr){ // annotated to add extra br element
 	this._appendChild(root, document.createElement("br"));
