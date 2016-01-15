@@ -1296,6 +1296,9 @@ Nehan.RenderingContext = (function(){
     if(this.hasCache()){
       return true;
     }
+    if(this.isPasted()){
+      return false;
+    }
     if(this.child && this.hasChildLayout()){
       return true;
     }
@@ -1533,6 +1536,10 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.isFloatSpace = function(){
     return this.style.getMarkupName() === "space";
+  };
+
+  RenderingContext.prototype.isPasted = function(){
+    return this.style && this.style.isPasted();
   };
 
   RenderingContext.prototype.isHyphenateEnable = function(last_element){
