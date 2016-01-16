@@ -22,6 +22,7 @@ o Support MathJax feature(experimental).
 ! [deprecated] Nehan.LexingRule(use Nehan.setSingleTagName instead).
 ! [deprecated] Nehan.Rgb, Nehan.Palette, Nehan.Colors.
 ! [deprecated] Nehan.PagedElement(use Nehan.Document instead).
+! [rename] attribute 'pasted' is renamed to 'lazy'.
 
 version 5.4.0 2015/12/2
 ========================

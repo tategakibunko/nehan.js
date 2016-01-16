@@ -398,8 +398,8 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {boolean}
    */
-  Style.prototype.isPasted = function(){
-    return this.getMarkupAttr("pasted") !== null;
+  Style.prototype.isLazy = function(){
+    return this.getMarkupAttr("lazy") !== null;
   };
   /**
    @memberof Nehan.Style
@@ -1529,6 +1529,10 @@ Nehan.Style = (function(){
   };
 
   Style.prototype._loadBoxSizing = function(){
+    // content size of lazy element is always fixed.
+    if(this.isLazy()){
+      return "content-box";
+    }
     return this.getCssAttr("box-sizing", "margin-box");
   };
 

@@ -23,7 +23,7 @@ Nehan.setStyle("math", {
     }
     markup
       .setAttr("extent", res.getAttr("extent", "2.5em"))
-      .setAttr("pasted", true)
+      .setAttr("lazy", true)
     ;
   },
   oncreate:function(ctx){

@@ -447,10 +447,10 @@ var Script = {
     "<div class='test-after'>test for after</div>"
   ].join(""),
 
-  "pasted-attribute":[
+  "lazy-attribute":[
     "<p>this is normal1</p>",
-    "<div class='content-box gap-after' style='width:200px; height:200px; background-color:gold' pasted>",
-    "this is pasted content",
+    "<div class='content-box gap-after' style='width:200px; height:200px; background-color:gold' lazy>",
+    "this is lazy content",
     "</div>",
     "<p>this is normal2</p>"
   ].join("\n"),
@@ -490,10 +490,10 @@ var Script = {
     "<div>" + Text["middle"] + "</div>"
   ].join("\n"),
 
-  "pasted-test":[
-    "<pasted size='150x200' style='background-color:orange'>",
-    "<p>this is pasted content!!!</p>",
-    "</pasted>"
+  "lazy-test":[
+    "<lazy size='150x200' style='background-color:orange'>",
+    "<p>this is lazy content!!!</p>",
+    "</lazy>"
   ].join("\n"),
 
   "circular":[
@@ -539,15 +539,15 @@ var Script = {
   /* still not work via ajax load. */
   "mathjax":[
     "<h1>オイラー</h1>",
-    "<p><math>",
+    "<math>",
     "\\[",
     "e^{i\\theta} = \\cos\\theta + i\\sin\\theta",
     "\\]",
-    "</math></p>",
+    "</math>",
     "<h1>解の公式（二次）</h1>",
-    "<p><math>",
+    "<math>",
     "$$x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}$$",
-    "</math></p>"
+    "</math>"
   ].join("\n"),
 
   "border-radius":[

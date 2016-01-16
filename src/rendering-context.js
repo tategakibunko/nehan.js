@@ -1146,7 +1146,7 @@ Nehan.RenderingContext = (function(){
     var is_float_space = this.isFloatSpace();
     var is_iblock = this.style.isInlineBlock();
 
-    if(auto_extent === 0 && !this.style.isPasted()){
+    if(auto_extent === 0 && !this.style.isLazy()){
       return 0;
     }
     if(this.isBody()){
@@ -1296,7 +1296,7 @@ Nehan.RenderingContext = (function(){
     if(this.hasCache()){
       return true;
     }
-    if(this.isPasted()){
+    if(this.isLazy()){
       return false;
     }
     if(this.child && this.hasChildLayout()){
@@ -1538,8 +1538,8 @@ Nehan.RenderingContext = (function(){
     return this.style.getMarkupName() === "space";
   };
 
-  RenderingContext.prototype.isPasted = function(){
-    return this.style && this.style.isPasted();
+  RenderingContext.prototype.isLazy = function(){
+    return this.style && this.style.isLazy();
   };
 
   RenderingContext.prototype.isHyphenateEnable = function(last_element){
@@ -1842,8 +1842,8 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.yieldBlockDirect = function(){
-    if(this.style.isPasted()){
-      return this.yieldPastedBlock();
+    if(this.style.isLazy()){
+      return this.yieldLazyBlock();
     }
     switch(this.style.getMarkupName()){
     case "img": return this.yieldImage();
@@ -1853,8 +1853,8 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.yieldInlineDirect = function(){
-    if(this.style.isPasted()){
-      return this.yieldPastedLine();
+    if(this.style.isLazy()){
+      return this.yieldLazyLine();
     }
     switch(this.style.getMarkupName()){
     case "img": return this.yieldImage();
@@ -1862,7 +1862,7 @@ Nehan.RenderingContext = (function(){
     return null;
   };
 
-  RenderingContext.prototype.yieldPastedLine = function(){
+  RenderingContext.prototype.yieldLazyLine = function(){
     return new Nehan.Box({
       type:"line-block",
       display:"inline",
@@ -1872,7 +1872,7 @@ Nehan.RenderingContext = (function(){
     });
   };
 
-  RenderingContext.prototype.yieldPastedBlock = function(){
+  RenderingContext.prototype.yieldLazyBlock = function(){
     return this.createBlockBox({
       measure:this.style.contentMeasure,
       extent:this.style.contentExtent,

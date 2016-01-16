@@ -35,6 +35,6 @@ Nehan.setStyle("fa", {
     }
   },
   onload:function(ctx){
-    ctx.getMarkup().setAttr("pasted", true);
+    ctx.getMarkup().setAttr("lazy", true);
   }
 });
