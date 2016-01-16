@@ -23,10 +23,10 @@ Display mathematical expression by [MathJax](https://mathjax.org/).
 ## Example
 
 ```html
-<p><math>
+<math>
   \[
   e^{i\theta} = \cos\theta + i\sin\theta
   \]
-</math></p>
+</math>
 ```
 
