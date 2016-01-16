@@ -35,7 +35,6 @@ Nehan.setStyle("math", {
       ctx.dom.classList.add("nehan-rotate-90");
       ctx.dom.style.height = "auto";
     }
-    ctx.dom.innerHTML = "";
-    ctx.dom.appendChild(res.element);
+    ctx.dom.replaceChild(res.element, ctx.dom.firstChild);
   }
 });
