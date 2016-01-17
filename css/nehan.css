@@ -29,6 +29,10 @@
   -moz-box-sizing:content-box !important;
   -webkit-box-sizing:content-box !important;
   box-sizing:content-box !important;
+  white-space:nowrap;
+}
+.nehan-inline span{
+  white-space:nowrap;
 }
 .nehan-vert-glyph {
   max-height:1em; /* for MS Edge browser */
