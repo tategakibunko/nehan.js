@@ -138,7 +138,16 @@ span.token.lf::before {
   background: #efefef;
   padding: 10px 10px 15px; }
 
-*, :after, :before {
+.nehan-body div,
+.nehan-body div::before,
+.nehan-body div::after,
+.nehan-body span::before,
+.nehan-body span::after {
   box-sizing: content-box !important; }
+
+/*
+*, :after, :before {
+  box-sizing:content-box !important;
+}*/
 
 /*# sourceMappingURL=main.css.map */
