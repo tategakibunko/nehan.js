@@ -1889,7 +1889,7 @@ Nehan.RenderingContext = (function(){
       size:new Nehan.BoxSize(width, height),
       context:this,
       edge:this.style.edge || null,
-      classes:["nehan-block", "nehan-image"].concat(this.style.markup.getClasses()),
+      classes:["nehan-image"].concat(this.style.markup.getClasses()),
       pushed:this.style.isPushed(),
       pulled:this.style.isPulled(),
       breakAfter:this.style.isBreakAfter()

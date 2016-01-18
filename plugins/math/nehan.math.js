@@ -13,7 +13,7 @@
      <math>$$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$</math>
 */
 Nehan.setStyle("math", {
-  display:"inline",
+  display:"inline-block",
   onload:function(ctx){
     var res = ctx.getPreloadResource();
     var markup = ctx.getMarkup();
@@ -22,7 +22,8 @@ Nehan.setStyle("math", {
       return;
     }
     markup
-      .setAttr("extent", res.getAttr("extent", "2.5em"))
+      .setAttr("extent", res.getAttr("extent"))
+      .setAttr("measure", res.getAttr("measure"))
       .setAttr("lazy", true)
     ;
   },
@@ -33,7 +34,6 @@ Nehan.setStyle("math", {
     }
     if(ctx.isTextVertical()){
       ctx.dom.classList.add("nehan-rotate-90");
-      ctx.dom.style.height = "auto";
     }
     ctx.dom.replaceChild(res.element, ctx.dom.firstChild);
   }
