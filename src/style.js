@@ -1193,7 +1193,7 @@ Nehan.Style = (function(){
     if(line.edge){
       Nehan.Obj.copy(css, line.edge.getCss());
     }
-    if(line.inlineRoot){
+    if(line.isInlineRoot){
       Nehan.Obj.copy(css, this.flow.getCss());
       css["line-height"] = this.getFontSize() + "px";
     }

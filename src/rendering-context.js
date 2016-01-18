@@ -801,7 +801,7 @@ Nehan.RenderingContext = (function(){
     line.isDecorated = Nehan.List.exists(elements, function(element){
       return element instanceof Nehan.Box && (element.isDecorated || element.isDecoratedText());
     });
-    line.inlineRoot = is_inline_root;
+    line.isInlineRoot = is_inline_root;
 
     if(is_inline_root){
       // backup other line data. mainly required to restore inline-context.

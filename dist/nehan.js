@@ -15322,7 +15322,7 @@ Nehan.Style = (function(){
     if(line.edge){
       Nehan.Obj.copy(css, line.edge.getCss());
     }
-    if(line.inlineRoot){
+    if(line.isInlineRoot){
       Nehan.Obj.copy(css, this.flow.getCss());
       css["line-height"] = this.getFontSize() + "px";
     }
@@ -18695,7 +18695,7 @@ Nehan.RenderingContext = (function(){
     line.isDecorated = Nehan.List.exists(elements, function(element){
       return element instanceof Nehan.Box && (element.isDecorated || element.isDecoratedText());
     });
-    line.inlineRoot = is_inline_root;
+    line.isInlineRoot = is_inline_root;
 
     if(is_inline_root){
       // backup other line data. mainly required to restore inline-context.
