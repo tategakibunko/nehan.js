@@ -1,5 +1,5 @@
 /**
- @namespace Nehan.Baseline
+ @namespace Nehan.VerticalAlign
  */
 Nehan.VerticalAlign = (function(){
   var __set_vert_baseline = function(flow, line){

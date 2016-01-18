@@ -7334,7 +7334,7 @@ Nehan.LineHeight = (function(){
 })();
 
 /**
- @namespace Nehan.Baseline
+ @namespace Nehan.VerticalAlign
  */
 Nehan.VerticalAlign = (function(){
   var __set_vert_baseline = function(flow, line){
@@ -19781,6 +19781,8 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.yieldLazyLine = function(){
+    // TODO
+    // need to yield by lazy.root -> lazy.content
     return new Nehan.Box({
       type:"line-block",
       display:"inline",

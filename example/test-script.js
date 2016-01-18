@@ -539,15 +539,15 @@ var Script = {
   /* still not work via ajax load. */
   "mathjax":[
     "<h1>オイラー</h1>",
-    "<math>",
+    "<p><math>",
     "\\[",
     "e^{i\\theta} = \\cos\\theta + i\\sin\\theta",
     "\\]",
-    "</math>",
+    "</math></p>",
     "<h1>解の公式（二次）</h1>",
-    "<math>",
+    "<p><math>",
     "$$x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}$$",
-    "</math>"
+    "</math></p>"
   ].join("\n"),
 
   "border-radius":[
