@@ -138,4 +138,7 @@ span.token.lf::before {
   background: #efefef;
   padding: 10px 10px 15px; }
 
+*, :after, :before {
+  box-sizing: content-box !important; }
+
 /*# sourceMappingURL=main.css.map */
