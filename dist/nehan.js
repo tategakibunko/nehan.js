@@ -14432,13 +14432,6 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {boolean}
    */
-  Style.prototype.isChildBlock = function(){
-    return this.isBlock() && !this.isRoot();
-  };
-  /**
-   @memberof Nehan.Style
-   @return {boolean}
-   */
   Style.prototype.isInlineBlock = function(){
     return this.display === "inline-block";
   };
@@ -14451,21 +14444,6 @@ Nehan.Style = (function(){
       return true;
     }
     return this.display === "inline";
-  };
-  /**
-   @memberof Nehan.Style
-   @return {boolean}
-   */
-  Style.prototype.isInlineRoot = function(){
-    // Check if current inline is anonymous line block.
-    // Note that inline-generators of root line share the style-context with parent block element,
-    // So we use 'this.isBlock() || tis.isInlineBlock()' for checking method.
-    // 1. line-object is just under the block element,
-    //  <body>this text is included in anonymous line block</body>
-    //
-    // 2. line-object is just under the inline-block element.
-    //  <div style='display:inline-block'>this text is included in anonymous line block</div>
-    return this.isBlock() || this.isInlineBlock() || this.isFloated();
   };
   /**
    @memberof Nehan.Style
@@ -15344,17 +15322,15 @@ Nehan.Style = (function(){
     if(line.edge){
       Nehan.Obj.copy(css, line.edge.getCss());
     }
-    if(this.isInlineRoot()){
+    if(line.inlineRoot){
       Nehan.Obj.copy(css, this.flow.getCss());
+      css["line-height"] = this.getFontSize() + "px";
     }
     if(this.font){
       Nehan.Obj.copy(css, this.font.getCss());
     }
     if(this.color){
       Nehan.Obj.copy(css, this.color.getCss());
-    }
-    if(this.isInlineRoot()){
-      css["line-height"] = this.getFontSize() + "px";
     }
     if(this.isTextVertical()){
       css["display"] = "block";
@@ -18719,6 +18695,7 @@ Nehan.RenderingContext = (function(){
     line.isDecorated = Nehan.List.exists(elements, function(element){
       return element instanceof Nehan.Box && (element.isDecorated || element.isDecoratedText());
     });
+    line.inlineRoot = is_inline_root;
 
     if(is_inline_root){
       // backup other line data. mainly required to restore inline-context.
@@ -18749,7 +18726,7 @@ Nehan.RenderingContext = (function(){
       line.pos = Math.max(0, this.parent.stream.getPos() - 1);
     }
 
-    if(this.style.isInlineRoot()){
+    if(this.isInlineRoot()){
       this.layoutContext.incBlockLineNo();
     }
 
@@ -19414,6 +19391,9 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.isInlineRoot = function(){
+    if(this.isBody()){
+      return true;
+    }
     if(this.parent && this.parent.style !== this.style){
       return false;
     }

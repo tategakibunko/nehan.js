@@ -801,6 +801,7 @@ Nehan.RenderingContext = (function(){
     line.isDecorated = Nehan.List.exists(elements, function(element){
       return element instanceof Nehan.Box && (element.isDecorated || element.isDecoratedText());
     });
+    line.inlineRoot = is_inline_root;
 
     if(is_inline_root){
       // backup other line data. mainly required to restore inline-context.
@@ -831,7 +832,7 @@ Nehan.RenderingContext = (function(){
       line.pos = Math.max(0, this.parent.stream.getPos() - 1);
     }
 
-    if(this.style.isInlineRoot()){
+    if(this.isInlineRoot()){
       this.layoutContext.incBlockLineNo();
     }
 
@@ -1496,6 +1497,9 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.isInlineRoot = function(){
+    if(this.isBody()){
+      return true;
+    }
     if(this.parent && this.parent.style !== this.style){
       return false;
     }
