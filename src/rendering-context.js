@@ -645,7 +645,7 @@ Nehan.RenderingContext = (function(){
       stream:(stream || this.createStream(style))
     });
 
-    var direct_block = child_context.yieldInlineDirect();
+    var direct_block = child_context.yieldInlineDirect(child_context);
     if(direct_block){
       child_context.lazyOutput = direct_block;
       return new Nehan.LazyGenerator(child_context);
@@ -1852,9 +1852,9 @@ Nehan.RenderingContext = (function(){
     return null;
   };
 
-  RenderingContext.prototype.yieldInlineDirect = function(){
+  RenderingContext.prototype.yieldInlineDirect = function(child_context){
     if(this.style.isLazy()){
-      return this.yieldLazyLine();
+      return this.yieldLazyInline(child_context);
     }
     switch(this.style.getMarkupName()){
     case "img": return this.yieldImage();
@@ -1862,11 +1862,9 @@ Nehan.RenderingContext = (function(){
     return null;
   };
 
-  RenderingContext.prototype.yieldLazyLine = function(){
-    // TODO
-    // need to yield by lazy.root -> lazy.content
+  RenderingContext.prototype.yieldLazyInline = function(child_context){
     return new Nehan.Box({
-      type:"line-block",
+      type:"text-block",
       display:"inline",
       context:this,
       size:this.style.flow.getBoxSize(this.style.contentMeasure, this.style.contentExtent),
