@@ -6,7 +6,7 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.5.0
+version 5.5.0 2015/1/16
 ========================
 o Support list-style-position:inside.
 o Support shorthanded font setting.
