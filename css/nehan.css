@@ -19,6 +19,15 @@
   border:none;
 }
 /* box-sizing */
+.nehan-body div,
+.nehan-body div::before,
+.nehan-body div::after,
+.nehan-body span,
+.nehan-body span::before,
+.nehan-body span::after,
+.nehan-body a,
+.nehan-body a::before,
+.nehan-body a::after,
 .nehan-block,
 .nehan-inline,
 .nehan-text-block,
