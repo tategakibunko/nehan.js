@@ -19762,8 +19762,8 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.yieldLazyInline = function(child_context){
     return new Nehan.Box({
-      type:"text-block",
-      display:"inline",
+      type:"line-block",
+      display:"inline-block",
       context:this,
       size:this.style.flow.getBoxSize(this.style.contentMeasure, this.style.contentExtent),
       content:this.style.getContent()
@@ -19949,12 +19949,13 @@ Nehan.Preload = (function(){
 
     MathJax.Hub.Typeset(div);
     MathJax.Hub.Queue(function(){
-      //__debug_size("[queue] math>div", div);
-      res.setAttr("measure", div.scrollWidth);
-      res.setAttr("extent", div.scrollHeight);
-      res.element = document.body.removeChild(div);
-      res.element.style.opacity = 1;
+      //__debug_size("math>div", div);
+      res.element = div.getElementsByTagName("span")[1];
+      //__debug_size("math>div>span[1]", res.element);
+      res.setAttr("measure", res.element.scrollWidth);
+      res.setAttr("extent", res.element.scrollHeight);
       signal(res);
+      document.body.removeChild(div);
     });
   };
 

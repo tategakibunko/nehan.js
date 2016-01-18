@@ -1868,8 +1868,8 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.yieldLazyInline = function(child_context){
     return new Nehan.Box({
-      type:"text-block",
-      display:"inline",
+      type:"line-block",
+      display:"inline-block",
       context:this,
       size:this.style.flow.getBoxSize(this.style.contentMeasure, this.style.contentExtent),
       content:this.style.getContent()

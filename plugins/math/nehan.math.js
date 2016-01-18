@@ -32,9 +32,11 @@ Nehan.setStyle("math", {
     if(!res){
       return;
     }
+    var markup = ctx.getMarkup();
     if(ctx.isTextVertical()){
-      ctx.dom.classList.add("nehan-rotate-90");
+      res.element.classList.add("nehan-rotate-90");
     }
+    ctx.dom.style.display = "inline-block";
     ctx.dom.replaceChild(res.element, ctx.dom.firstChild);
   }
 });
