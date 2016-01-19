@@ -1561,7 +1561,7 @@ Nehan.RenderingContext = (function(){
       return true;
     }
     // if there is space more than 1em, restrict hyphenation.
-    if(this.layoutContext.getInlineRestMeasure() > this.style.getFontSize()){
+    if(this.layoutContext.getInlineRestMeasure() >= this.style.getFontSize()){
       return false;
     }
     return true;
