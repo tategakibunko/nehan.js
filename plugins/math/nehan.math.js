@@ -22,8 +22,8 @@ Nehan.setStyle("math", {
       return;
     }
     markup
-      .setAttr("extent", res.getAttr("extent"))
-      .setAttr("measure", res.getAttr("measure"))
+      .setAttr("extent", res.element.scrollHeight || res.getAttr("extent"))
+      .setAttr("measure", res.element.scrollWidth || res.getAttr("measure"))
       .setAttr("lazy", true)
     ;
   },
@@ -37,6 +37,7 @@ Nehan.setStyle("math", {
       res.element.classList.add("nehan-rotate-90");
     }
     ctx.dom.style.display = "inline-block";
+    ctx.dom.style.fontSize = Nehan.Config.defaultFontSize + "px";
     ctx.dom.replaceChild(res.element, ctx.dom.firstChild);
   }
 });

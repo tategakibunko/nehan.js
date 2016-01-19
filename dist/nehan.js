@@ -19951,9 +19951,11 @@ Nehan.Preload = (function(){
     MathJax.Hub.Queue(function(){
       //__debug_size("math>div", div);
       res.element = div.getElementsByTagName("span")[1];
-      //__debug_size("math>div>span[1]", res.element);
+      // sometimes res.element.scrollXXX is not available at callback phase(math.onload),
+      // so we store metrics in markup attribute at this phase.
       res.setAttr("measure", res.element.scrollWidth);
       res.setAttr("extent", res.element.scrollHeight);
+      //__debug_size("math>div>span[1]", res.element);
       signal(res);
       document.body.removeChild(div);
     });
