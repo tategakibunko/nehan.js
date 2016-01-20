@@ -340,7 +340,7 @@ Nehan.Config = {
    various kind of spacing rate
 
    @memberof Nehan.Config
-   @type {Array.<Float>}
+   @type {Object}
    */
   spacingSizeRate:{
     space:0.25, // U+0020
@@ -348,6 +348,14 @@ Nehan.Config = {
     nbsp:0.38,  // &nbsp;
     ensp:0.5,   // &ensp;
     emsp:1.0    // &emsp;
+  },
+  /**
+   @memberof Nehan.Config
+   @type {Object}
+   */
+  mathjax:{
+    maxRetryCount:3,
+    retryWait:300
   },
   /**
    format tag content(vertical only)

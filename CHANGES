@@ -6,8 +6,9 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.5.1 2015/1/16
+version 5.5.1
 ========================
+o Add Nehan.Config.mathjax for configuration of MathJax typesetting.
 * Fix hyphenation bug in some case.
 
 version 5.5.0 2015/1/16

@@ -166,6 +166,7 @@ var sources = [
   "src/hori-evaluator.js",
   "src/results.js",
   "src/rendering-context.js",
+  "src/mathjax.js",
   "src/preload.js",
   "src/document.js",
   "src/nehan-main.js"

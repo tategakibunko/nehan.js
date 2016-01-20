@@ -376,7 +376,7 @@ Nehan.Config = {
    various kind of spacing rate
 
    @memberof Nehan.Config
-   @type {Array.<Float>}
+   @type {Object}
    */
   spacingSizeRate:{
     space:0.25, // U+0020
@@ -384,6 +384,14 @@ Nehan.Config = {
     nbsp:0.38,  // &nbsp;
     ensp:0.5,   // &ensp;
     emsp:1.0    // &emsp;
+  },
+  /**
+   @memberof Nehan.Config
+   @type {Object}
+   */
+  mathjax:{
+    maxRetryCount:3,
+    retryWait:300
   },
   /**
    format tag content(vertical only)
@@ -1345,6 +1353,17 @@ Nehan.Utils = {
    */
   isNumCharRef : function(char_ref){
     return /&#x?[0-9a-f]{4,};/i.test(char_ref);
+  },
+  /**
+   @memberof Nehan.Utils
+   */
+  debugDomSize : function(title, dom){
+    console.log(
+      "%s:offset:(%dx%d), client:(%dx%d), scroll:(%dx%d)", title,
+      dom.offsetWidth, dom.offsetHeight,
+      dom.clientWidth, dom.clientHeight,
+      dom.scrollWidth, dom.scrollHeight
+    );
   },
   /**
    @memberof Nehan.Utils
@@ -19880,6 +19899,67 @@ Nehan.RenderingContext = (function(){
   return RenderingContext;
 })();
 
+/**
+ MathJax typesetting
+
+ @namespace Nehan.MathJax
+ */
+Nehan.MathJax = (function(){
+  var __typeset = function(element, opt){
+    // hook typeset finish
+    MathJax.Hub.Queue(function(){
+      var math_element = element.getElementsByTagName("span")[1];
+      if(!math_element){
+	if(opt.retry >= opt.maxRetry){
+	  console.warn("Nehan.MathJax::typeset failed");
+	  if(opt.onError){
+	    opt.onError(element);
+	  }
+	  return;
+	}
+	//console.warn("retry typeset! %d", retry);
+	setTimeout(function(){
+	  opt.retry++;
+	  __typeset(element, opt);
+	}, opt.retryWait);
+	return;
+      }
+      //console.log("typeset success!!");
+      opt.onComplete(math_element);
+    });
+
+    // start typeset
+    MathJax.Hub.Typeset(element);
+  };
+
+  return {
+    /**
+     @memberof Nehan.MathJax
+     @param element {HTMLDOMElement}
+     @param opt {Object}
+     @param opt.maxRetry {int}
+     @param opt.retryWait {int} milliseconds
+     @param opt.onComplete {Function} HHTMLDOMElement -> ()
+     @param opt.onError {Function}
+     */
+    typeset: function(element, opt){
+      opt = opt || {};
+      opt.retry = 0;
+      opt.maxRetry = opt.maxRetry || Nehan.Config.mathjax.maxRetryCount;
+      opt.retryWait = opt.retryWait || Nehan.Config.mathjax.retryWait;
+      opt.onComplete = opt.onComplete || function(){};
+      opt.onError = opt.onError || function(){};
+
+      __typeset(element, opt);
+    }
+  };
+})();
+
+/**
+ Preload un-sized element before parsing.
+
+ @namespace Nehan.Preload
+ */
 Nehan.Preload = (function(){
   var __regist_resource = function(resources, tag){
     var resource_id = resources.length;
@@ -19932,32 +20012,30 @@ Nehan.Preload = (function(){
     img.src = res.getAttr("src");
   };
 
-  var __debug_size = function(path, dom){
-    console.log("%s:offset:(%dx%d), client:(%dx%d), scroll:(%dx%d)", path,
-		dom.offsetWidth, dom.offsetHeight,
-		dom.clientWidth, dom.clientHeight,
-		dom.scrollWidth, dom.scrollHeight);
-  };
-
   var __load_math = function(res, signal){
-    var div = document.createElement("div");
-    div.innerHTML = res.getContent();
-    div.style.display = "inline-block";
-    div.style.opacity = 0;
-    div.style.fontSize = Nehan.Config.defaultFontSize + "px";
-    document.body.appendChild(div);
+    var element = document.createElement("div");
+    element.innerHTML = res.getContent();
+    element.style.display = "inline-block";
+    element.style.opacity = 0;
+    element.style.fontSize = Nehan.Config.defaultFontSize + "px";
+    document.body.appendChild(element);
 
-    MathJax.Hub.Typeset(div);
-    MathJax.Hub.Queue(function(){
-      //__debug_size("math>div", div);
-      res.element = div.getElementsByTagName("span")[1];
-      // sometimes res.element.scrollXXX is not available at callback phase(math.onload),
-      // so we store metrics in markup attribute at this phase.
-      res.setAttr("measure", res.element.scrollWidth);
-      res.setAttr("extent", res.element.scrollHeight);
-      //__debug_size("math>div>span[1]", res.element);
-      signal(res);
-      document.body.removeChild(div);
+    Nehan.MathJax.typeset(element, {
+      onComplete:function(math_element){
+	res.element = math_element;
+	res.setAttr("measure", math_element.scrollWidth);
+	res.setAttr("extent", math_element.scrollHeight);
+	signal(res);
+	document.body.removeChild(element);
+      },
+      onError:function(){
+	console.warn("Nehan.MathJax.typeset failed for %o", res);
+	res.element = element;
+	res.setAttr("measure", 0);
+	res.setAttr("extent", 0);
+	signal(res);
+	document.body.removeChild(element);
+      }
     });
   };
 
@@ -20010,6 +20088,14 @@ Nehan.Preload = (function(){
     // <math> => <img data-preload-id='1'>
     // <!-- if size is defined, nothing changes. -->
     // <img width='100' height='100'> => <img width='100' height='100'>
+    /**
+     @memberof Nehan.Preload
+     @param html {String}
+     @param opt {Object}
+     @param opt.tagNames {Array.<String>}
+     @param opt.onProgress {Function} status -> ()
+     @param opt.onComplete {Function} result -> ()
+     */
     start : function(html, opt){
       opt = opt || {};
       var context = {

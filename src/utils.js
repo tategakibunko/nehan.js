@@ -203,6 +203,17 @@ Nehan.Utils = {
   },
   /**
    @memberof Nehan.Utils
+   */
+  debugDomSize : function(title, dom){
+    console.log(
+      "%s:offset:(%dx%d), client:(%dx%d), scroll:(%dx%d)", title,
+      dom.offsetWidth, dom.offsetHeight,
+      dom.clientWidth, dom.clientHeight,
+      dom.scrollWidth, dom.scrollHeight
+    );
+  },
+  /**
+   @memberof Nehan.Utils
    @param char_ref {String}
    @return {String}
    */
