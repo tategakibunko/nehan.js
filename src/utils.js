@@ -204,9 +204,10 @@ Nehan.Utils = {
   /**
    @memberof Nehan.Utils
    */
-  debugDomSize : function(title, dom){
+  debugDomSize : function(dom, title){
     console.log(
-      "%s:offset:(%dx%d), client:(%dx%d), scroll:(%dx%d)", title,
+      "%s offset:(%dx%d), client:(%dx%d), scroll:(%dx%d)",
+      (title || ""),
       dom.offsetWidth, dom.offsetHeight,
       dom.clientWidth, dom.clientHeight,
       dom.scrollWidth, dom.scrollHeight
