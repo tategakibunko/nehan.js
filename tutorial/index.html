@@ -227,14 +227,14 @@ Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class=
     <script type="text/x-template" id="tmpl-reader">
   <div class="pager">
     <button class="ui {{leftButtonColor}} left icon button"
-	    v-on="click:onClickLeft">{{{ leftButtonLabel }}}</button>
+	    v-on="click:onClickLeft">&larr; {{{ leftButtonLabel }}}</button>
     <div class="progress"><span class="page-no" v-text="pageNo"></span> of <span class="page-count" v-text="pageCount"></span></div>
     <button class="ui {{rightButtonColor}} right icon button"
-	    v-on="click:onClickRight">{{{ rightButtonLabel }}}</button>
+	    v-on="click:onClickRight">{{{ rightButtonLabel }}} &rarr;</button>
     <div class="ui icon buttons">
-      <button v-class="green:!isVert()" class="ui popup-enabled button" v-on="click:onClickHori" data-content="horizontal"><i class="align left icon"></i></button>
+      <button v-class="green:!isVert()" class="ui popup-enabled button" v-on="click:onClickHori" data-content="horizontal"><i class="align left icon"></i> Horizontal</button>
       <div class="or"></div>
-      <button v-class="green:isVert()" class="ui popup-enabled button" v-on="click:onClickVert" data-content="vertical"><i class="rotated align left icon"></i></button>
+      <button v-class="green:isVert()" class="ui popup-enabled button" v-on="click:onClickVert" data-content="vertical"><i class="rotated align left icon"></i> Vertical</button>
     </div>
   </div>
   <div class="screen" v-el="screen"></div>

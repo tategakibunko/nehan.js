@@ -90,6 +90,13 @@
 </tbody>
 </table>
 
+<h2>Floated Layout</h2>
+
+<img style="display:block; float:start; margin-end:0.5em;" src="./static/image/tb.png.png" width="100" height="100">
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<img style="display:block; float:end;" src="./static/image/tb.png.png" width="100" height="100">
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
 <h2>Bullet Listing</h2>
 <ul>
  <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
@@ -121,6 +128,10 @@
 <h3>Quadratic Formula</h3>
 <p>[math]$$x = {-b \pm \sqrt{b^2-4ac} \over 2a}$$[/math]</p>
 
+<hr class="space" style="page-break:after">
+
+<h3>Japanese text with ruby and emphasis</h3>
+<div style="flow:tb-rl;">日本国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された国会における<span class="nehan-empha-dot-filled">代表者</span>を通じて行動し、われらとわれらの子孫のために諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。</div>
 </div>
 
       </div>
@@ -128,14 +139,14 @@
     <script type="text/x-template" id="tmpl-reader">
   <div class="pager">
     <button class="ui {{leftButtonColor}} left icon button"
-	    v-on="click:onClickLeft">{{{ leftButtonLabel }}}</button>
+	    v-on="click:onClickLeft">&larr; {{{ leftButtonLabel }}}</button>
     <div class="progress"><span class="page-no" v-text="pageNo"></span> of <span class="page-count" v-text="pageCount"></span></div>
     <button class="ui {{rightButtonColor}} right icon button"
-	    v-on="click:onClickRight">{{{ rightButtonLabel }}}</button>
+	    v-on="click:onClickRight">{{{ rightButtonLabel }}} &rarr;</button>
     <div class="ui icon buttons">
-      <button v-class="green:!isVert()" class="ui popup-enabled button" v-on="click:onClickHori" data-content="horizontal"><i class="align left icon"></i></button>
+      <button v-class="green:!isVert()" class="ui popup-enabled button" v-on="click:onClickHori" data-content="horizontal"><i class="align left icon"></i> Horizontal</button>
       <div class="or"></div>
-      <button v-class="green:isVert()" class="ui popup-enabled button" v-on="click:onClickVert" data-content="vertical"><i class="rotated align left icon"></i></button>
+      <button v-class="green:isVert()" class="ui popup-enabled button" v-on="click:onClickVert" data-content="vertical"><i class="rotated align left icon"></i> Vertical</button>
     </div>
   </div>
   <div class="screen" v-el="screen"></div>

@@ -75,14 +75,10 @@ Ndoc.Reader = Vue.extend({
       return this.isVert()? "backward page" : "forward page";
     },
     leftButtonLabel: function(){
-      return this.isVert()?
-	"<i class='flipped play icon'></i>":
-	"<i class='backward icon'></i>";
+      return this.isVert()? "NEXT" : "PREV";
     },
     rightButtonLabel: function(){
-      return this.isVert()?
-	"<i class='flipped backward icon'></i>":
-	"<i class='play icon'></i>";
+      return this.isVert()? "PREV" : "NEXT";
     },
     leftButtonColor:function(){
       return this.isVert()? "blue" : "red";
