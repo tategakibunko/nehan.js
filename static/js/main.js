@@ -59,9 +59,9 @@ Ndoc.Reader = Vue.extend({
       text:"text is not defined.",
       pageIndex:0,
       pageCount:0,
-      width:400,
-      height:300,
-      fontSize:12
+      width:700,
+      height:500,
+      fontSize:16
     }
   },
   computed:{
@@ -97,6 +97,11 @@ Ndoc.Reader = Vue.extend({
     $(this.$el).find(".popup-enabled").popup();
   },
   methods:{
+    createText : function(raw_text){
+      return raw_text.replace(/\[math\]([\s|\S]+?)\[\/math\]/g, function(match, p1){
+	return "<math>" + p1 + "</math>";
+      });
+    },
     mountReader: function(){
       this.pageIndex = 0;
       this.pageCount = 0;
@@ -109,17 +114,23 @@ Ndoc.Reader = Vue.extend({
 	  "font-size":this.fontSize,
 	  "word-break":((this.flow === "tb-rl")? "break-all" : "normal")
 	})
-	.setContent(this.text)
+	.setContent(this.createText(this.text))
 	.render({
+	  onPreloadProgress :function(res){
+	    //console.log(res);
+	  },
 	  onProgress: function(tree, ctx){
 	    this.pageCount++;
+	    if(tree.pageNo === 0){
+	      this.setPage(0);
+	    }
 	  }.bind(this),
 	  onComplete: function(time){
 	    //console.log("finish %fmsec", time);
 	  }
 	});
 
-      this.element.appendChild(this.pages.getPage(0).element);
+      //this.element.appendChild(this.pages.getPage(0).element);
 
       $(this.$$.screen).empty().css({
 	width:(this.width + 20),
@@ -131,8 +142,11 @@ Ndoc.Reader = Vue.extend({
     },
     setPage : function(index){
       var page = this.pages.getPage(index);
-      this.element.innerHTML = "";
-      this.element.appendChild(page.element);
+      if(this.element.firstChild){
+	this.element.replaceChild(page.element, this.element.firstChild);
+      } else {
+	this.element.appendChild(page.element);
+      }
     },
     setNextPage : function(){
       this.pageIndex = Math.min(this.pageIndex + 1, this.pageCount - 1);

@@ -59,45 +59,68 @@
 
 <div class="ui hidden divider"></div>
 
-<h3 class="ui header">English example</h3>
+<h3 class="ui header">Example</h3>
 
 <div class="nehan-reader" data-flow="lr-tb">
-<h2>What is nehan.js?</h2>
+<h2>Drop caps</h2>
 
-<p class="drop-caps">Nehan.js is dynamic and logical layout engine written in javascript, generates logical paged media asyncronously.</p>
+<p class="drop-caps">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-<p>In other words, it's a virtual browser engine over native browser engine.</p>
+<h2>Table Layout</h2>
 
-<h2>Why logical layout?</h2>
+<table>
+<thead>
+<tr>
+<th>this is heaer1</th>
+<th>heaer2</th>
+<th>heaer3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
+<td>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</td>
+<td>quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</td>
+</tr>
+<tr>
+<td>quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</td>
+<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
+<td>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</td>
+</tr>
+</tbody>
+</table>
 
-<p>Generally english or latin document flows left to right at inline level, and top to bottom at block level, but there are more format in the world, especially Asian people uses vertical document that flows top to bottom at inline level, and left to right or right to left at block level.</p>
-<p>So we should treat document as logical format, to generate both vertical and horizontal layout from one source.</p>
+<h2>Bullet Listing</h2>
+<ul>
+ <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
+ <li>sed do eiusmod tempor incididunt</li>
+ <li>ut labore et dolore magna aliqua.</li>
+ <li><ul>
+ <li>Ut enim ad minim veniam, quis nostrud exercitation ullamco</li>
+ <li>laboris nisi ut aliquip ex ea commodo consequat.</li>
+ <li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</li>
+ </ul></li>
+</ul>
 
-<h2>So why nehan.js?</h2>
+<h2>Ordered Listing</h2>
+<ol>
+ <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
+ <li>sed do eiusmod tempor incididunt</li>
+ <li>ut labore et dolore magna aliqua.</li>
+ <li><ol>
+ <li>Ut enim ad minim veniam, quis nostrud exercitation ullamco</li>
+ <li>laboris nisi ut aliquip ex ea commodo consequat.</li>
+ <li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</li>
+ </ol></li>
+</ol>
 
-<p>nehan.js generates abstract logical layout tree from html string, so both horizontal and vertical layout can be generated from one same tree.</p>
+<h2>MathJax Support</h2>
+<h3>Euler's formula</h3>
+<p>[math]\[ e^{i\theta} = \cos\theta + i\sin\theta \][/math]</p>
 
-<p>Furthermore, unlike pdf or word document, each pages are generated asyncronously, so client window is not blocked unless all pages are generated.</p>
+<h3>Quadratic Formula</h3>
+<p>[math]$$x = {-b \pm \sqrt{b^2-4ac} \over 2a}$$[/math]</p>
 
-<p>As soon as first page is generated, ui event is surely ready with lightning speed, and it's a huge UX advantage!</p>
-</div>
-
-<h3 class="ui header">Japanese example</h3>
-
-<div class="nehan-reader" data-flow="tb-rl">
-<h2>nehan.jsとは？</h2>
-
-<p class="drop-caps">涅槃は動的で論理的なページメディアをノンブロッキングで出力できる javascriptの組版エンジンです。言い方を変えれば、ネイティブなブラウザ上にjavascript 製のブラウザを作っているようなものです。</p>
-
-<h2>どうして論理的なレイアウトなの？</h2>
-<p>世の中には横書きだけではなく、縦書きの文章もあります。特にアジアでは上から下にインラインテキストが流れる縦書きがよく使われます。</p>
-<p>なのでドキュメントを横書きを前提にした通常の方式ではなく、縦にも横にも統一的に記述できる論理的なレイアウトで記述することが重要です。</p>
-<p>そうすれば、一つのソースから縦書きも横書きも出力できるからです。</p>
-
-<h2>組版エンジンがjsだと何が嬉しいの？</h2>
-<p>涅槃は HTML の<b>テキスト</b>から、縦書き横書きに依存しない論理的で抽象的なレイアウトツリーを作成します。</p>
-<p>そのツリーは縦にも横にも出力でき、しかも表示されるまでにユーザーの画面をブロックしません。</p>
-<p>先頭のページが表示された時点でユーザーに処理が返されるので、これは UX として非常に大きなアドバンテージです。</p>
 </div>
 
       </div>
@@ -129,6 +152,13 @@
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/prism/0.0.1/prism.min.js"></script>
 <script type="text/javascript" src="./static/semantic/semantic.min.js"></script>
 <script type="text/javascript" src="./static/js/nehan.min.js"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+  });
+</script>
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<script type="text/javascript" src="./static/js/nehan.math.js"></script>
 <script type="text/javascript" src="./static/js/main.min.js"></script>
 
   </body>
