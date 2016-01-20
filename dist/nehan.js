@@ -19913,9 +19913,7 @@ Nehan.MathJax = (function(){
       if(!math_element){
 	if(opt.retry >= opt.maxRetry){
 	  console.warn("Nehan.MathJax::typeset failed");
-	  if(opt.onError){
-	    opt.onError(element);
-	  }
+	  opt.onError("exceeds retry max");
 	  return;
 	}
 	//console.warn("retry typeset! %d", retry);
@@ -19941,7 +19939,7 @@ Nehan.MathJax = (function(){
      @param opt.maxRetry {int}
      @param opt.retryWait {int} milliseconds
      @param opt.onComplete {Function} HHTMLDOMElement -> ()
-     @param opt.onError {Function}
+     @param opt.onError {Function} String -> ()
      */
     typeset: function(element, opt){
       opt = opt || {};
@@ -20029,8 +20027,8 @@ Nehan.Preload = (function(){
 	signal(res);
 	document.body.removeChild(element);
       },
-      onError:function(){
-	console.warn("Nehan.MathJax.typeset failed for %o", res);
+      onError:function(reason){
+	console.warn("Nehan.MathJax.typeset failed for %o(%s)", res, reason);
 	res.element = element;
 	res.setAttr("measure", 0);
 	res.setAttr("extent", 0);

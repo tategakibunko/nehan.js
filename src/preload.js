@@ -71,8 +71,8 @@ Nehan.Preload = (function(){
 	signal(res);
 	document.body.removeChild(element);
       },
-      onError:function(){
-	console.warn("Nehan.MathJax.typeset failed for %o", res);
+      onError:function(reason){
+	console.warn("Nehan.MathJax.typeset failed for %o(%s)", res, reason);
 	res.element = element;
 	res.setAttr("measure", 0);
 	res.setAttr("extent", 0);
