@@ -12943,7 +12943,17 @@ Nehan.DefaultStyle = (function(){
 	  "measure":"1em",
 	  "extent":"1em",
 	  "padding":{before:"0.1em"},
-	  "line-height":"1"
+	  "line-height":"1",
+	  "onload":function(ctx){
+	    if(ctx.isTextVertical()){
+	      return null;
+	    }
+	    var markup = ctx.getMarkup();
+	    var font = ctx.getFont();
+	    var spacing = Math.floor(font.size * 0.1);
+	    var measure = Nehan.TextMetrics.getMeasure(font, markup.getContent());
+	    return {measure:(measure + spacing) + "px"};
+	  }
 	},
 	".gap-start":{
 	  "margin":{
