@@ -19519,7 +19519,9 @@ Nehan.RenderingContext = (function(){
       cache.breakAfter = false;
       if(cache.lineOver){
 	cache.lineOver = false;
-	cache.edge.clearEnd(this.getFlow());
+	if(cache.edge){
+	  cache.edge.clearEnd(this.getFlow());
+	}
       }
     }
     return cache;
