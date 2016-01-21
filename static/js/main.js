@@ -42,6 +42,20 @@ Ndoc.Settings = {
 
 
 Nehan.setStyles({
+  ".drop-caps::first-letter":{
+    onload:function(ctx){
+      var markup = ctx.getMarkup();
+      var content = markup.getContent();
+      if(!ctx.isTextVertical() && content.length === 1 && content.match(/[a-zA-Z]/)){
+	var font = ctx.getFont();
+	var measure = Nehan.TextMetrics.getMeasure(font, content);
+	var spacing = Math.floor(font.size * 0.1);
+	console.log(content);
+	console.log("strict metrics for [%s] is %d, spacing:%d", content, measure, spacing);
+	return {measure:(measure + spacing) + "px"};
+      }
+    }
+  },
   body:{
     textAlign:"justify",
     width:"90%",
