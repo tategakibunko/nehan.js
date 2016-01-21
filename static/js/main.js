@@ -50,8 +50,8 @@ Nehan.setStyles({
 	var font = ctx.getFont();
 	var measure = Nehan.TextMetrics.getMeasure(font, content);
 	var spacing = Math.floor(font.size * 0.1);
-	console.log(content);
-	console.log("strict metrics for [%s] is %d, spacing:%d", content, measure, spacing);
+	//console.log(content);
+	//console.log("strict metrics for [%s] is %d, spacing:%d", content, measure, spacing);
 	return {measure:(measure + spacing) + "px"};
       }
     }
