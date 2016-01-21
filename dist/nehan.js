@@ -18728,7 +18728,7 @@ Nehan.RenderingContext = (function(){
       var text_align = this.style.getTextAlign();
       if(text_align.isCenter() || text_align.isEnd()){
 	text_align.setAlign(line);
-      } else if(text_align.isJustify()){
+      } else if(text_align.isJustify() && !this.isFloatSpace()){
 	text_align.setJustify(line);
       }
 
