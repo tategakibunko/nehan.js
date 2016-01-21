@@ -14463,7 +14463,7 @@ Nehan.Style = (function(){
    @return {boolean}
    */
   Style.prototype.isInlineBlock = function(){
-    return this.display === "inline-block";
+    return this.display === "inline-block" && this.isFloated() === false;
   };
   /**
    @memberof Nehan.Style
