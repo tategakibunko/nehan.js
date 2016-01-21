@@ -78,7 +78,13 @@ doc.render({
   <span class="function">onPage</span>: <span class="keyword">function</span>(page, ctx){
     console.log(<span class="string"><span class="delimiter">"</span><span class="content">page object:%o, pageNo:%d, dom element:%o</span><span class="delimiter">"</span></span>, page, page.pageNo, page.element);
   },
-  <span class="function">onComplete</span>: <span class="keyword">function</span>(time){
+  <span class="function">onComplete</span>: <span class="keyword">function</span>(time, ctx){
+    <span class="comment">// parsing complete, now you can get outline(toc) element.</span>
+    <span class="keyword">var</span> outline = ctx.createOutlineElement({
+      <span class="function">onClickLink</span>:<span class="keyword">function</span>(toc){
+        <span class="comment">// console.log("click %o", toc);</span>
+      }
+    })
     console.log(<span class="string"><span class="delimiter">"</span><span class="content">finished! %fmsec</span><span class="delimiter">"</span></span>, time);
   }
 });</code></pre></div></div></div>
