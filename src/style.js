@@ -1269,7 +1269,12 @@ Nehan.Style = (function(){
    @return {Object}
    */
   Style.prototype.getCssHoriInlineImage = function(line, image){
-    return this.flow.getCss();
+    var css = {};
+    Nehan.Obj.copy(css, this.flow.getCss());
+    if(image.edge){
+      Nehan.Obj.copy(css, image.edge.getCss());
+    }
+    return css;
   };
 
   Style.prototype._computeSelectorCacheKey = function(){
