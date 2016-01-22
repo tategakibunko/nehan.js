@@ -12371,6 +12371,7 @@ Nehan.DefaultStyle = (function(){
 	"ins":{
 	},
 	"img":{
+	  "box-sizing":"content-box",
 	  "display":"inline"
 	},
 	"input":{
@@ -14202,6 +14203,12 @@ Nehan.Style = (function(){
     this.unmanagedCss = new Nehan.CssHashSet();
     this.callbackCss = new Nehan.CssHashSet();
 
+    // set preloaded data if exists.
+    var res = this.getPreloadResource();
+    if(res){
+      this._registerPreloadResource(res);
+    }
+
     // load managed css from
     // 1. load selector css.
     // 2. load inline css from 'style' property of markup.
@@ -15090,11 +15097,8 @@ Nehan.Style = (function(){
    @return {Nehan.Tag}
    */
   Style.prototype.getPreloadResource = function(){
-    var preload_id = this.markup.getData("preloadId");
-    if(!preload_id){
-      return null;
-    }
-    return this.context.getPreloadResource(preload_id);
+    var preload_id = this.markup.getData("preloadId", null);
+    return (preload_id !== null)? this.context.getPreloadResource(preload_id) : null;
   };
 
   /**
@@ -15577,6 +15581,20 @@ Nehan.Style = (function(){
 	this.unmanagedCss.add(fmt_prop, this._evalCssAttr(fmt_prop, value));
       }
     }.bind(this));
+  };
+
+  Style.prototype._registerPreloadResource = function(res){
+    //console.info("set preload resource:%o, this.markup:%o", res, this.markup);
+    switch(this.getMarkupName()){
+    case "img":
+      this.markup.setAttr("width", res.getAttr("width"));
+      this.markup.setAttr("height", res.getAttr("height"));
+      break;
+    case "math":
+      // math is still experimental feature.
+      // so registration process is defined in plugin(see 'plugins/math/nehan.math.js').
+      break;
+    }
   };
 
   Style.prototype._createSelectorContext = function(prop){
@@ -18564,7 +18582,9 @@ Nehan.RenderingContext = (function(){
 
   // create inline root, and parse again.
   // example:
-  // [p(block)][text][/p(block)] ->[p(block)][p(inline)][text][/p(inline)][/p(block)]
+  // <p>foo</p>
+  //  => <p(block)><p(inline)><p(text)>foo</p(text)></p(inline)></p(block)>
+  // then '<p(inline)'> is inline-root for '<p(block)>'.
   RenderingContext.prototype.createInlineRootGenerator = function(){
     return this.createChildInlineGenerator(this.style, this.stream);
   };

@@ -277,6 +277,7 @@ Nehan.DefaultStyle = (function(){
 	"ins":{
 	},
 	"img":{
+	  "box-sizing":"content-box",
 	  "display":"inline"
 	},
 	"input":{
