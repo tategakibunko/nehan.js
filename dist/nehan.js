@@ -11629,7 +11629,18 @@ Nehan.TextLexer = (function (){
     // word
     pat = this._matchWord(); // longuest word pattern
     if(pat){
-      return this._parseAsWord(pat);
+      var word = this._parseAsWord(pat);
+      // check if connected by software hyphen(&shy;)
+      if(this.buff.indexOf("&shy;") === 0){
+	word.data += "&shy;";
+	this._stepBuff(5); // "&shy;".length
+	var next = this._getToken();
+	if(next){
+	  word.data += next.data;
+	  //console.log("&shy; connected word:%o", word);
+	}
+      }
+      return word;
     }
 
     // single character
