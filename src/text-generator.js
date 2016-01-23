@@ -142,7 +142,12 @@ Nehan.TextGenerator = (function(){
     // 2. or word itself is larger than max_measure.
     // in these case, we must cut this word into some parts.
     var part = token.cutMeasure(this.context.style.flow, this.context.style.getFont(), rest_measure); // get sliced word
-    if(!token.isDivided()){
+    if(!token.isDivided()){ // if fail to devide
+      if(token.bodySize >= max_measure){ // is there no chance to include this word into parent layout?
+	console.warn("too large word, skipped:[%s]", token.data);
+	token.data = "";
+	token.bodySize = 0;
+      }
       return token;
     }
     if(token.data !== "" && token.bodySize > 0){

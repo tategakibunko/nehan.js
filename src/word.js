@@ -1,6 +1,6 @@
 Nehan.Word = (function(){
 
-  var __cut_word = function(word, font, measure){
+  var __cut_word_by_size = function(word, font, measure){
     for(var i = word.data.length - 1; i >= 1; i--){
       var head_part = word.data.substring(0, i);
       var part_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, head_part));
@@ -12,6 +12,18 @@ Nehan.Word = (function(){
       }
     }
     return word;
+  };
+
+  var __cut_word_by_hyphen = function(word, font, measure){
+    var head_part = word.data.split("&shy;")[0] + "&shy;";
+    var part_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, head_part + "-"));
+    //console.log("[%s-]%d for %d", head_part, part_measure, measure);
+    if(part_measure > measure){
+      return word;
+    }
+    var head_word = new Nehan.Word(head_part, true);
+    head_word.bodySize = measure;
+    return head_word;
   };
 
   /**
@@ -59,20 +71,28 @@ Nehan.Word = (function(){
     // So line-break is occured(for most case).
     // To block this, property 'hyphens' is prepared in CSS, but it's not implemented in all browser(especially webkit).
     // So we convert them to \u2011, because \u2011 is declared as 'non-breaking-hyphens'.
-    this.data = this.data.replace(/[\u002D\u2010\u2012\u2013]/g, "\u2011");
+    var data = this.data;
+    data = data.replace(/[\u002D\u2010\u2012\u2013]/g, "\u2011");
 
     // fix dash element
     if(Nehan.Env.client.isIE()){
-      this.data = this.data.replace(/\u2014/g, "\uFF5C"); // EM DASH -> FULLWIDTH VERTICAL LINE
+      data = data.replace(/\u2014/g, "\uFF5C"); // EM DASH -> FULLWIDTH VERTICAL LINE
     } else {
-      this.data = this.data.replace(/\u2015/g, "\u2014"); // HORIZONTAL BAR -> EM DASH
+      data = data.replace(/\u2015/g, "\u2014"); // HORIZONTAL BAR -> EM DASH
     }
-    return this.data;
+    return data;
   };
 
   Word.prototype._getDataHori = function(){
-    this.data = this.data.replace(/\u2015/g, "\u2014"); // HORIZONTAL BAR -> EM DASH
-    return this.data;
+    var data = this.data;
+    data = data.replace(/\u2015/g, "\u2014"); // HORIZONTAL BAR -> EM DASH
+    // software hyphen -> hyphen-minus
+    var shy_pos = data.indexOf("&shy;");
+    if(shy_pos >= 0 && shy_pos === data.length - 5){ // "&shy;".length = 5
+      //console.log("end by software-hyphen:%s", this.data);
+      data = data.replace(/&shy;/g, "-");
+    }
+    return data;
   };
 
   /**
@@ -224,7 +244,18 @@ Nehan.Word = (function(){
    @return {Nehan.Word}
    */
   Word.prototype.cutMeasure = function(flow, font, measure){
-    var head_word = __cut_word(this, font, measure);
+    var head_word = this;
+    //console.log("start devide from [%s]", this.data);
+    if(this.data.indexOf("&shy;") >= 0){
+      //console.log("try to cut by 'hyphen'");
+      head_word = __cut_word_by_hyphen(this, font, measure);
+      //console.log("result:[%s]", head_word.getData(flow));
+    }
+    if(head_word === this){
+      //console.log("try to cut by 'size'");
+      head_word = __cut_word_by_size(this, font, measure);
+      //console.log("result:[%s]", head_word.getData(flow));
+    }
     var rest_str = this.data.slice(head_word.data.length);
     if(rest_str === ""){
       return this;

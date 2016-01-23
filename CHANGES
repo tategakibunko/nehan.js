@@ -9,9 +9,11 @@ Mark "!": change that can break compatibility with older version
 version 5.5.1
 ========================
 o Add Nehan.Config.mathjax for configuration of MathJax typesetting.
+o Support word-break for software hyphen(&shy;).
 * Fix hyphenation bug in some case.
+* Skip too large word element.
 
-version 5.5.0 2015/1/16
+version 5.5.0 2016/1/16
 ========================
 o Support list-style-position:inside.
 o Support shorthanded font setting.
