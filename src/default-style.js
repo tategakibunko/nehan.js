@@ -262,6 +262,12 @@ Nehan.DefaultStyle = (function(){
 	"hr.space":{
 	  "border-width":"0px"
 	},
+	"hr.break-before":{
+	  "border-width":"0px"
+	},
+	"hr.break-after":{
+	  "border-width":"0px"
+	},
 	"html":{
 	  "display":"block"
 	},
