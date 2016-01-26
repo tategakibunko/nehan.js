@@ -58,7 +58,7 @@ Ndoc.Reader = Vue.extend({
       flow:"lr-tb",
       text:"text is not defined.",
       pageIndex:0,
-      pageCount:0,
+      pageCount:1,
       width:700,
       height:500,
       fontSize:16
@@ -99,10 +99,13 @@ Ndoc.Reader = Vue.extend({
       });
     },
     mountReader: function(){
+      var content = this.createText(this.text);
+      console.log(content);
       this.pageIndex = 0;
-      this.pageCount = 0;
+      this.pageCount = 1;
       this.element = document.createElement("div");
-      this.pages = new Nehan.Document()
+      this.pages = new Nehan.Document();
+      this.pages
 	.setStyle("body", {
 	  "flow":this.flow,
 	  "width":this.width,
@@ -110,23 +113,31 @@ Ndoc.Reader = Vue.extend({
 	  "font-size":this.fontSize,
 	  "word-break":((this.flow === "tb-rl")? "break-all" : "normal")
 	})
-	.setContent(this.createText(this.text))
+	.setContent(content)
 	.render({
 	  onPreloadProgress :function(res){
 	    //console.log(res);
 	  },
 	  onProgress: function(tree, ctx){
-	    this.pageCount++;
+	    this.pageCount = tree.pageNo + 1;
 	    if(tree.pageNo === 0){
 	      this.setPage(0);
 	    }
 	  }.bind(this),
-	  onComplete: function(time){
+	  onComplete: function(time, ctx){
 	    //console.log("finish %fmsec", time);
-	  }
+	    var outline = this.pages.createOutlineElement({
+	      onClickLink : function(toc){
+		this.setPage(toc.pageNo);
+		location.href = "#reader";
+	      }.bind(this)
+	    });
+	    //console.log("outline:%o", outline);
+	    if(outline){
+	      this.setOutline(outline);
+	    }
+	  }.bind(this)
 	});
-
-      //this.element.appendChild(this.pages.getPage(0).element);
 
       $(this.$$.screen).empty().css({
 	width:(this.width + 20),
@@ -135,6 +146,13 @@ Ndoc.Reader = Vue.extend({
     },
     isVert: function(){
       return this.flow === "tb-rl";
+    },
+    setOutline : function(element){
+      if(this.$$.outline.firstChild){
+	this.$$.outline.replaceChild(element, thi.$$.toc.firstChild);
+      } else {
+	this.$$.outline.appendChild(element);
+      }
     },
     setPage : function(index){
       var page = this.pages.getPage(index);
