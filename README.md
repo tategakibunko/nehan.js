@@ -10,7 +10,7 @@ Almost all html5 tags are supported, and further more, vertical layout(lr-tb, rl
 
 Available on IE9+, Firefox3.5+, Google Chrome4+, Safari3+, Opera10+ etc.
 
-See [demo](http://tb.antiscroll.com/static/nehan-demo/).
+See [demo](http://tategakibunko.github.io/nehan.js/).
 
 ## Install
 
