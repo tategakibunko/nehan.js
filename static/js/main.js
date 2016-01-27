@@ -100,7 +100,7 @@ Ndoc.Reader = Vue.extend({
     },
     mountReader: function(){
       var content = this.createText(this.text);
-      console.log(content);
+      //console.log(content);
       this.pageIndex = 0;
       this.pageCount = 1;
       this.element = document.createElement("div");
