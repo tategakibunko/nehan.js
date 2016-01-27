@@ -20123,7 +20123,11 @@ Nehan.Preload = (function(){
 	res.setAttr("measure", 0);
 	res.setAttr("extent", 0);
 	signal(res);
-	document.body.removeChild(element);
+	try {
+	  document.body.removeChild(element);
+	} catch(err){
+	  // ignore
+	}
       }
     });
   };
