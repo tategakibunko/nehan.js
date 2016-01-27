@@ -18783,11 +18783,6 @@ Nehan.RenderingContext = (function(){
       pulled:this.style.isPulled()
     });
 
-    /*
-    if(this.getMarkupName() !== "hr" && (box.elements.length === 0 || box.isInvalidSize())){
-      //console.warn("zero block?");
-    }*/
-    //this.debugBlockBox(box);
     return box;
   };
 
@@ -18799,6 +18794,15 @@ Nehan.RenderingContext = (function(){
     var max_extent = opt.maxExtent || this.layoutContext.getInlineMaxExtent() || this.style.getFontSize() || this.staticExtent;
     if(this.style.staticMeasure && !is_inline_root){
       measure = this.style.contentMeasure;
+    }
+    // if child elements are all zero box, yield page-break to avoid (sized) empty line.
+    if(elements.length > 0 && Nehan.List.forall(elements, function(element){
+      if(element instanceof Nehan.Box === false){
+	return false;
+      }
+      return element.getLayoutExtent() === 0;
+    })){
+      return this.yieldPageBreak();
     }
     var line_size = this.style.flow.getBoxSize(measure, max_extent);
     var line = new Nehan.Box({
