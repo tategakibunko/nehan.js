@@ -554,14 +554,16 @@ Nehan.Style = (function(){
    @return {boolean}
    */
   Style.prototype.isWordBreakAll = function(){
-    return this.wordBreak? this.wordBreak.isWordBreakAll() : false;
+    var word_break = this.getWordBreak();
+    return word_break.isWordBreakAll();
   };
   /**
    @memberof Nehan.Style
    @return {boolean}
    */
   Style.prototype.isHyphenationEnable = function(){
-    return this.wordBreak? this.wordBreak.isHyphenationEnable() : false;
+    var word_break = this.getWordBreak();
+    return word_break.isHyphenationEnable();
   };
   /**
    @memberof Nehan.Style
@@ -913,6 +915,19 @@ Nehan.Style = (function(){
       return this.parent.getListMarkerHtml(order, opt);
     }
     return "&nbsp";
+  };
+  /**
+   @memberof Nehan.Style
+   @return {Nehan.WordBreak}
+   */
+  Style.prototype.getWordBreak = function(){
+    if(this.wordBreak){
+      return this.wordBreak;
+    }
+    if(this.parent){
+      return this.parent.getWordBreak();
+    }
+    return Nehan.WordBreaks.getInitialValue();
   };
   /**
    @memberof Nehan.Style
@@ -1645,9 +1660,9 @@ Nehan.Style = (function(){
   };
 
   Style.prototype._loadWordBreak = function(){
-    var inherit = this.parent? this.parent.wordBreak : Nehan.WordBreaks.getByName("normal");
-    var value = this.getCssAttr("word-break");
-    return value? Nehan.WordBreaks.getByName(value) : inherit;
+    var initial = Nehan.WordBreaks.getInitialValue();
+    var value = this.getCssAttr("word-break", "inherit");
+    return value? Nehan.WordBreaks.getByName(value) : null;
   };
 
   // same as 'word-wrap' in IE.

@@ -7,6 +7,9 @@ Nehan.WordBreaks = {
   "break-all":(new Nehan.WordBreak("break-all")),
   "loose":(new Nehan.WordBreak("loose")),
   "break-strict":(new Nehan.WordBreak("break-strict")),
+  getInitialValue : function(){
+    return this["normal"];
+  },
   getByName : function(name){
     return this[name] || null;
   }
