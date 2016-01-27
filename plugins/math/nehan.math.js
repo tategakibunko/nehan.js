@@ -38,6 +38,7 @@ Nehan.setStyle("math", {
     }
     ctx.dom.style.display = "inline-block";
     ctx.dom.style.fontSize = Nehan.Config.defaultFontSize + "px";
+    ctx.dom.style.lineHeight = 1;
     ctx.dom.replaceChild(res.element, ctx.dom.firstChild);
   }
 });
