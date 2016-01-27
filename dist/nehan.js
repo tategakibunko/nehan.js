@@ -20107,7 +20107,6 @@ Nehan.Preload = (function(){
     element.style.display = "inline-block";
     element.style.opacity = 0;
     element.style.fontSize = Nehan.Config.defaultFontSize + "px";
-    element.style.lineHeight = 1;
     document.body.appendChild(element);
 
     Nehan.MathJax.typeset(element, {
