@@ -18828,6 +18828,8 @@ Nehan.RenderingContext = (function(){
     });
     line.isInlineRoot = is_inline_root;
 
+    var text_align = this.style.getTextAlign();
+
     if(is_inline_root){
       // backup other line data. mainly required to restore inline-context.
       line.lineNo = opt.lineNo;
@@ -18836,7 +18838,6 @@ Nehan.RenderingContext = (function(){
       line.classes.push("nehan-root-line");
 
       // set text-align
-      var text_align = this.style.getTextAlign();
       if(text_align.isCenter() || text_align.isEnd()){
 	text_align.setAlign(line);
       } else if(text_align.isJustify() && !this.isFloatSpace()){
@@ -18853,6 +18854,18 @@ Nehan.RenderingContext = (function(){
 
       // increment line no from block level.
       this.layoutContext.incBlockLineNo();
+    }
+
+    if(text_align.isJustify() &&
+       this.layoutContext.isLineOver() &&
+       this.style.isOnlyChild() &&
+       this.isFloatSpace() === false &&
+       this.parent &&
+       (this.parent.isInlineRoot() && this.parent.layoutContext.getInlineMaxMeasure() === this.layoutContext.getInlineMaxMeasure())){
+      line.size.setMeasure(this.getFlow(), this.layoutContext.getInlineMaxMeasure());
+      line.inlineMeasure = this.layoutContext.getInlineCurMeasure(); // actual measure
+      //console.warn("justify only child:%o", line);
+      text_align.setJustify(line);
     }
 
     // set position in parent stream.
