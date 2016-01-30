@@ -306,6 +306,7 @@ Nehan.Config = {
     "!doctype",
 
     // nehan special tag for page-break
+    "end-page", // deprecated tag, for backward compatibility
     "page-break"
   ],
 
