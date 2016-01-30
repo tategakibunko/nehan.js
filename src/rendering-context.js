@@ -837,7 +837,10 @@ Nehan.RenderingContext = (function(){
       this.layoutContext.incBlockLineNo();
     }
 
-    if(text_align.isJustify() &&
+    // if <div><span>[long text]</span></div>,
+    // 'span' is only-child of 'div', and responsible for text-justify of [long text].
+    if(!is_inline_root &&
+       text_align.isJustify() &&
        this.layoutContext.isLineOver() &&
        this.style.isOnlyChild() &&
        this.isFloatSpace() === false &&
