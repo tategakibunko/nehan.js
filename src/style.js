@@ -1623,10 +1623,10 @@ Nehan.Style = (function(){
 
   Style.prototype._loadTextAlign = function(){
     var value = this.getCssAttr("text-align", "inherit");
-    if(value === "inherit" && this.parent && this.parent.textAlign){
-      return this.parent.textAlign;
+    if(value !== "inherit"){
+      return Nehan.TextAligns.get(value);
     }
-    return Nehan.TextAligns.get(value || "start");
+    return this.getTextAlign();
   };
 
   Style.prototype._loadTextEmpha = function(){
