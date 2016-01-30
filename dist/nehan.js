@@ -18850,15 +18850,14 @@ Nehan.RenderingContext = (function(){
 
       // set vertical-align(currently 'baseline' only)
       Nehan.VerticalAlign.setBaseline(this.style.flow, line);
+
+      // increment line no from block level.
+      this.layoutContext.incBlockLineNo();
     }
 
     // set position in parent stream.
     if(this.parent && this.parent.stream){
       line.pos = Math.max(0, this.parent.stream.getPos() - 1);
-    }
-
-    if(this.isInlineRoot()){
-      this.layoutContext.incBlockLineNo();
     }
 
     if(line.elements.length === 0 && !line.hasLineBreak){
