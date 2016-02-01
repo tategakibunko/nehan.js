@@ -302,6 +302,7 @@ Nehan.Config = {
     "link",
     "meta",
     "wbr",
+    "source",
     "?xml",
     "!doctype",
 

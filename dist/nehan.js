@@ -338,6 +338,7 @@ Nehan.Config = {
     "link",
     "meta",
     "wbr",
+    "source",
     "?xml",
     "!doctype",
 
@@ -12567,6 +12568,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":"0.8em"
 	},
 	"source":{
+	  "display":"none"
 	},
 	"span":{
 	  "display":"inline"
