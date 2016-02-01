@@ -28,6 +28,6 @@ describe("Font", function(){
       variant:"small-caps",
       lineHeight:"1.4"
     });
-    expect(font.getCssShorthand()).toBe("bold italic small-caps 14px/1.4 Meiryo");
+    expect(font.getCssShorthand()).toBe("italic small-caps bold 14px/1.4 Meiryo");
   });
 });
