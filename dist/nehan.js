@@ -331,14 +331,20 @@ Nehan.Config = {
    @type {Array.<String>}
    */
   defaultSingleTagNames:[
+    "area",
+    "base",
     "br",
+    "embed",
+    "col",
     "hr",
     "img",
     "input",
+    "keygen",
     "link",
     "meta",
-    "wbr",
+    "param",
     "source",
+    "wbr",
     "?xml",
     "!doctype",
 
@@ -12190,6 +12196,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-weight":"bold"
 	},
 	"base":{
+	  "display":"none"
 	},
 	"bdi":{
 	  "display":"inline"
@@ -12437,6 +12444,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"keygen":{
+	  "display":"none"
 	},
 	//-------------------------------------------------------
 	// tag / l
@@ -12515,6 +12523,7 @@ Nehan.DefaultStyle = (function(){
 	  }
 	},
 	"param":{
+	  "display":"none"
 	},
 	"pre":{
 	  "display":"block",

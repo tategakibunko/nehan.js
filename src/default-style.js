@@ -49,6 +49,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-weight":"bold"
 	},
 	"base":{
+	  "display":"none"
 	},
 	"bdi":{
 	  "display":"inline"
@@ -296,6 +297,7 @@ Nehan.DefaultStyle = (function(){
 	  "display":"inline"
 	},
 	"keygen":{
+	  "display":"none"
 	},
 	//-------------------------------------------------------
 	// tag / l
@@ -374,6 +376,7 @@ Nehan.DefaultStyle = (function(){
 	  }
 	},
 	"param":{
+	  "display":"none"
 	},
 	"pre":{
 	  "display":"block",

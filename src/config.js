@@ -295,14 +295,20 @@ Nehan.Config = {
    @type {Array.<String>}
    */
   defaultSingleTagNames:[
+    "area",
+    "base",
     "br",
+    "embed",
+    "col",
     "hr",
     "img",
     "input",
+    "keygen",
     "link",
     "meta",
-    "wbr",
+    "param",
     "source",
+    "wbr",
     "?xml",
     "!doctype",
 
