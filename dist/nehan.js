@@ -4776,9 +4776,9 @@ Nehan.Font = (function(){
       size = [size, this.lineHeight].join("/");
     }
     return [
-      this.weight || "normal",
       this.style || "normal",
       variant,
+      this.weight || "normal",
       size,
       this.family || Nehan.Config.defaultFontFamily
     ].filter(Nehan.Closure.neq("")).join(" ");
