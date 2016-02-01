@@ -12155,7 +12155,7 @@ Nehan.DefaultStyle = (function(){
   var __header_margin = function(ctx){
     var em = ctx.getParentFont().size;
     var rem = ctx.getRootFont().size;
-    var before = (ctx.getCurExtent() > 0)? Math.floor(2 * rem - 0.14285 * em) : 0;
+    var before = (ctx.getCurExtent() === 0)? 0 : Math.floor(2 * rem - 0.14285 * em);
     var after = rem;
     return {
       before:before,
