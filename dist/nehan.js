@@ -14849,6 +14849,26 @@ Nehan.Style = (function(){
     }
     return this.markup.getAttr(name, def_value);
   };
+  /**
+   @memberof Nehan.Style
+   @return {String}
+   */
+  Style.prototype.getPropStaticMeasure = function(){
+    switch(this.getMarkupName()){
+    case "img": return "width";
+    default: return this.flow.getPropMeasure();
+    }
+  };
+  /**
+   @memberof Nehan.Style
+   @return {String}
+   */
+  Style.prototype.getPropStaticExtent = function(){
+    switch(this.getMarkupName()){
+    case "img": return "height";
+    default: return this.flow.getPropExtent();
+    }
+  };
   Style.prototype._evalCssAttr = function(prop, value){
     // if value is function, call with selector context, and format the returned value.
     if(typeof value === "function"){
@@ -15924,7 +15944,7 @@ Nehan.Style = (function(){
 
   // [TODO] not all element allows direct size via attribute, so check tag name before calling getAttr
   Style.prototype._loadStaticMeasure = function(){
-    var prop = this.flow.getPropMeasure();
+    var prop = this.getPropStaticMeasure();
     var max_size = this.getParentContentMeasure();
     var static_size = this.getAttr(prop, null) || this.getAttr("measure", null) || this.getCssAttr(prop, null) || this.getCssAttr("measure", null);
     if(static_size === null){
@@ -15935,7 +15955,7 @@ Nehan.Style = (function(){
 
   // [TODO] not all element allows direct size via attribute, so check tag name before calling getAttr
   Style.prototype._loadStaticExtent = function(){
-    var prop = this.flow.getPropExtent();
+    var prop = this.getPropStaticExtent();
     var max_size = this.getParentContentExtent();
     var static_size = this.getAttr(prop, null) || this.getAttr("extent", null) || this.getCssAttr(prop, null) || this.getCssAttr("extent", null);
     if(static_size === null){
@@ -19939,8 +19959,8 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.yieldImage = function(){
     // image size always considered as horizontal mode.
-    var width = this.style.getMarkupAttr("width")? parseInt(this.style.getMarkupAttr("width"), 10) : (this.style.staticMeasure || this.style.getFontSize());
-    var height = this.style.getMarkupAttr("height")? parseInt(this.style.getMarkupAttr("height"), 10) : (this.style.staticExtent || this.style.getFontSize());
+    var width = this.style.contentMeasure || this.style.getFontSize();
+    var height = this.style.contentExtent || this.style.getFontSize();
     var image = new Nehan.Box({
       display:this.style.display, // inline, block, inline-block
       size:new Nehan.BoxSize(width, height),

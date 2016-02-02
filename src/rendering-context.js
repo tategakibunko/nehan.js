@@ -1909,8 +1909,8 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.yieldImage = function(){
     // image size always considered as horizontal mode.
-    var width = this.style.getMarkupAttr("width")? parseInt(this.style.getMarkupAttr("width"), 10) : (this.style.staticMeasure || this.style.getFontSize());
-    var height = this.style.getMarkupAttr("height")? parseInt(this.style.getMarkupAttr("height"), 10) : (this.style.staticExtent || this.style.getFontSize());
+    var width = this.style.contentMeasure || this.style.getFontSize();
+    var height = this.style.contentExtent || this.style.getFontSize();
     var image = new Nehan.Box({
       display:this.style.display, // inline, block, inline-block
       size:new Nehan.BoxSize(width, height),
