@@ -1310,7 +1310,7 @@ Nehan.Style = (function(){
     var css = {};
     Nehan.Obj.copy(css, image.size.getCss());
     css.display = this.display;
-    if(!this.isTextVertical()){
+    if(!this.isTextVertical() || this.isPulled() || this.isPushed()){
       Nehan.Obj.copy(css, this.flow.getCss());
     }
     if(image.edge){
