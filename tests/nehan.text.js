@@ -2,6 +2,7 @@ describe("Text", function(){
   it("Text.isWhiteSpaceOnly", function(){
     expect(new Nehan.Text(" \t\n").isWhiteSpaceOnly()).toBe(true);
     expect(new Nehan.Text("a \t\n").isWhiteSpaceOnly()).toBe(false);
+    expect(new Nehan.Text("\u3000\t\n").isWhiteSpaceOnly()).toBe(false);
   });
 
   it("Text.getContent", function(){

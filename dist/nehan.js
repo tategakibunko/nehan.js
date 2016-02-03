@@ -8352,13 +8352,11 @@ Nehan.Text = (function(){
    @return {boolean}
    */
   Text.prototype.isWhiteSpaceOnly = function(){
-    // \s contain multi character space,
-    // but we want to replace half one only.
-    var replaced = this.content
-	  .replace(/ /g, "") // half space
-	  .replace(/\n/g, "")
-	  .replace(/\t/g, "");
-    return replaced === "";
+    // avoid recognizing 'IDEOGRAPHIC SPACE' as white-space.
+    if(this.content.indexOf("\u3000") >= 0){
+      return false;
+    }
+    return this.content.match(/[\S]/)? false : true;
   };
 
   /**
