@@ -248,8 +248,8 @@ Nehan.Box = (function(){
    @param line {Nehan.Box}
    @return {Object}
    */
-  Box.prototype.getCssHoriInlineImage = function(line){
-    return this.context.style.getCssHoriInlineImage(line, this);
+  Box.prototype.getCssImage = function(line){
+    return this.context.style.getCssImage(line, this);
   };
   /**
    @memberof Nehan.Box

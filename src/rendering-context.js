@@ -1035,6 +1035,10 @@ Nehan.RenderingContext = (function(){
     return this.style? this.style.getMarkupPath() : "";
   };
 
+  RenderingContext.prototype.getMarkupAttr = function(name){
+    return this.style? this.style.getMarkupAttr(name) : "";
+  };
+
   RenderingContext.prototype.getDisplay = function(){
     return this.style? this.style.display : "";
   };

@@ -23,13 +23,6 @@ Nehan.HoriEvaluator = (function(){
     });
   };
 
-  HoriEvaluator.prototype._evalInlineImage = function(line, image){
-    return this._evaluate(image, {
-      name:"img",
-      css:image.getCssHoriInlineImage(line)
-    });
-  };
-
   HoriEvaluator.prototype._evalRuby = function(line, ruby){
     return [
       this._evalRt(line, ruby),

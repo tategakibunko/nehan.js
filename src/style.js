@@ -1302,13 +1302,17 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
-   @param line {Nehan.Box}
+   @param parent {Nehan.Box}
    @param image {Nehan.Box}
    @return {Object}
    */
-  Style.prototype.getCssHoriInlineImage = function(line, image){
+  Style.prototype.getCssImage = function(parent, image){
     var css = {};
-    Nehan.Obj.copy(css, this.flow.getCss());
+    Nehan.Obj.copy(css, image.size.getCss());
+    css.display = this.display;
+    if(!this.isTextVertical()){
+      Nehan.Obj.copy(css, this.flow.getCss());
+    }
     if(image.edge){
       Nehan.Obj.copy(css, image.edge.getCss());
     }

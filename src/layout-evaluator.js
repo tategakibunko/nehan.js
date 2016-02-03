@@ -143,7 +143,7 @@ Nehan.LayoutEvaluator = (function(){
   LayoutEvaluator.prototype._evalBlockChildElement = function(parent, element){
     switch(element.context.style.getMarkupName()){
     case "img":
-      return this._evalImage(element);
+      return this._evalImage(parent, element);
     case "a":
       return this._evalLink(parent, element);
     default:
@@ -154,7 +154,7 @@ Nehan.LayoutEvaluator = (function(){
   LayoutEvaluator.prototype._evalInlineChildElement = function(parent, element){
     switch(element.context.style.getMarkupName()){
     case "img":
-      return this._evalInlineImage(parent, element);
+      return this._evalImage(parent, element);
     case "a":
       return this._evalLink(parent, element);
     default:
@@ -174,12 +174,11 @@ Nehan.LayoutEvaluator = (function(){
     return this._evalTextElement(parent, element);
   };
 
-  LayoutEvaluator.prototype._evalImage = function(image){
-    return this._evaluate(image, {name:"img"});
-  };
-
-  LayoutEvaluator.prototype._evalInlineImage = function(line, image){
-    return this._evalImage(image);
+  LayoutEvaluator.prototype._evalImage = function(parent, image){
+    return this._evaluate(image, {
+      name:"img",
+      css:image.getCssImage(parent)
+    });
   };
 
   // if link uri has anchor address, add page-no to dataset where the anchor is defined.

@@ -13294,8 +13294,8 @@ Nehan.Box = (function(){
    @param line {Nehan.Box}
    @return {Object}
    */
-  Box.prototype.getCssHoriInlineImage = function(line){
-    return this.context.style.getCssHoriInlineImage(line, this);
+  Box.prototype.getCssImage = function(line){
+    return this.context.style.getCssImage(line, this);
   };
   /**
    @memberof Nehan.Box
@@ -15525,13 +15525,17 @@ Nehan.Style = (function(){
   };
   /**
    @memberof Nehan.Style
-   @param line {Nehan.Box}
+   @param parent {Nehan.Box}
    @param image {Nehan.Box}
    @return {Object}
    */
-  Style.prototype.getCssHoriInlineImage = function(line, image){
+  Style.prototype.getCssImage = function(parent, image){
     var css = {};
-    Nehan.Obj.copy(css, this.flow.getCss());
+    Nehan.Obj.copy(css, image.size.getCss());
+    css.display = this.display;
+    if(!this.isTextVertical()){
+      Nehan.Obj.copy(css, this.flow.getCss());
+    }
     if(image.edge){
       Nehan.Obj.copy(css, image.edge.getCss());
     }
@@ -17489,7 +17493,7 @@ Nehan.LayoutEvaluator = (function(){
   LayoutEvaluator.prototype._evalBlockChildElement = function(parent, element){
     switch(element.context.style.getMarkupName()){
     case "img":
-      return this._evalImage(element);
+      return this._evalImage(parent, element);
     case "a":
       return this._evalLink(parent, element);
     default:
@@ -17500,7 +17504,7 @@ Nehan.LayoutEvaluator = (function(){
   LayoutEvaluator.prototype._evalInlineChildElement = function(parent, element){
     switch(element.context.style.getMarkupName()){
     case "img":
-      return this._evalInlineImage(parent, element);
+      return this._evalImage(parent, element);
     case "a":
       return this._evalLink(parent, element);
     default:
@@ -17520,12 +17524,11 @@ Nehan.LayoutEvaluator = (function(){
     return this._evalTextElement(parent, element);
   };
 
-  LayoutEvaluator.prototype._evalImage = function(image){
-    return this._evaluate(image, {name:"img"});
-  };
-
-  LayoutEvaluator.prototype._evalInlineImage = function(line, image){
-    return this._evalImage(image);
+  LayoutEvaluator.prototype._evalImage = function(parent, image){
+    return this._evaluate(image, {
+      name:"img",
+      css:image.getCssImage(parent)
+    });
   };
 
   // if link uri has anchor address, add page-no to dataset where the anchor is defined.
@@ -17869,13 +17872,6 @@ Nehan.HoriEvaluator = (function(){
   HoriEvaluator.prototype._evalLinkElement = function(line, link){
     return this._evaluate(link, {
       name:(link.isTextBlock()? "span" : "a")
-    });
-  };
-
-  HoriEvaluator.prototype._evalInlineImage = function(line, image){
-    return this._evaluate(image, {
-      name:"img",
-      css:image.getCssHoriInlineImage(line)
     });
   };
 
@@ -19083,6 +19079,10 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.getMarkupPath = function(){
     return this.style? this.style.getMarkupPath() : "";
+  };
+
+  RenderingContext.prototype.getMarkupAttr = function(name){
+    return this.style? this.style.getMarkupAttr(name) : "";
   };
 
   RenderingContext.prototype.getDisplay = function(){
