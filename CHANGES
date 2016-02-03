@@ -12,6 +12,7 @@ o Add Nehan.Config.mathjax for configuration of MathJax typesetting.
 o Support word-break for software hyphen(&shy;).
 * Fix hyphenation bug in some case.
 * Fix syntax error of shorthand css for font.
+* Fix nth-child order for some cases.
 * Skip too large word element.
 ! Now 'onload' callback for selector is treated as 'SelectorContext -> unit'(not return Object as css values).
 

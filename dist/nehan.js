@@ -11858,10 +11858,16 @@ Nehan.TokenStream = (function(){
     }
   }
 
-  var __set_pseudo = function(tags){
-    tags[0].setFirstChild(true);
-    tags[0].setOnlyChild(tags.length === 1);
-    tags[tags.length - 1].setLastChild(true);
+  var __set_pseudo = function(tokens){
+    var first = tokens[0];
+    var last = tokens[tokens.length - 1];
+    if(first && first instanceof Nehan.Tag){
+      first.setFirstChild(true);
+      first.setOnlyChild(tokens.length === 1);
+    }
+    if(last && last instanceof Nehan.Tag){
+      last.setLastChild(true);
+    }
   };
 
   var __set_pseudo_of_type = function(tags){
@@ -12060,23 +12066,26 @@ Nehan.TokenStream = (function(){
     this._setPseudoAttribute(this.tokens);
   };
 
+  /*
+   <div>
+     some text here...<!-- this text-node is 'first' child!! -->
+     <h1>foo header</h1><!-- note that this is 'second' child!! -->
+   </div>
+   */
   TokenStream.prototype._setPseudoAttribute  = function(tokens){
-    var tags = tokens.filter(function(token){
-      return (token instanceof Nehan.Tag);
-    });
-    if(tags.length === 0){
-      return;
-    }
     var type_of_tags = {};
-    Nehan.List.iter(tags, function(tag){
-      var tag_name = tag.getName();
+    Nehan.List.iter(tokens, function(token){
+      if(token instanceof Nehan.Tag === false){
+	return;
+      }
+      var tag_name = token.getName();
       if(type_of_tags[tag_name]){
-	type_of_tags[tag_name].push(tag);
+	type_of_tags[tag_name].push(token);
       } else {
-	type_of_tags[tag_name] = [tag];
+	type_of_tags[tag_name] = [token];
       }
     });
-    __set_pseudo(tags);
+    __set_pseudo(tokens);
     for(var tag_name in type_of_tags){
       __set_pseudo_of_type(type_of_tags[tag_name]);
     }
