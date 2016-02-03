@@ -236,6 +236,10 @@ Nehan.TokenStream = (function(){
    */
   TokenStream.prototype._setPseudoAttribute  = function(tokens){
     var type_of_tags = {};
+    // if first token is just a white-spaces, not treat it as 'first-child'.
+    if(tokens.length > 0 && tokens[0] instanceof Nehan.Text && tokens[0].isWhiteSpaceOnly()){
+      tokens = tokens.slice(1);
+    }
     Nehan.List.iter(tokens, function(token){
       if(token instanceof Nehan.Tag === false){
 	return;
