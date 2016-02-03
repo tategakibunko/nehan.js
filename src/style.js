@@ -52,15 +52,15 @@ Nehan.Style = (function(){
     // load managed css from
     // 1. load selector css.
     // 2. load inline css from 'style' property of markup.
-    // 3. load callback css 'onload'.
+    // 3. call 'onload' callback if exists.
     // 4. load system required css(force_css).
     this._registerCssValues(this._loadSelectorCss(markup, parent));
     this._registerCssValues(this._loadInlineCss(markup));
     var onload = this.callbackCss.get("onload");
     if(onload){
-      this._registerCssValues(onload(this._createSelectorContext("onload")) || {});
+      onload(this._createSelectorContext("onload"));
     }
-    this._registerCssValues(force_css);
+    this._registerCssValues(force_css); // overwrite css with highest priority.
 
     // always required properties
     this.display = this._loadDisplay(); // required

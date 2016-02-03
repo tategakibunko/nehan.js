@@ -13,6 +13,7 @@ o Support word-break for software hyphen(&shy;).
 * Fix hyphenation bug in some case.
 * Fix syntax error of shorthand css for font.
 * Skip too large word element.
+! Now 'onload' callback for selector is treated as 'SelectorContext -> unit'(not return Object as css values).
 
 version 5.5.0 2016/1/16
 ========================

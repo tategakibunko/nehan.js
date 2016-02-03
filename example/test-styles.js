@@ -33,10 +33,8 @@ var TestStyles = {
 	markup.setContent("this is only of type!");
 
 	// you can return multiple values
-	return {
-	  "color":"white",
-	  "background":"red"
-	};
+	ctx.setCssAttr("color", "white");
+	ctx.setCssAttr("background", "red");
       } else {
 	markup.setContent("this is not only of type..");
 
@@ -44,7 +42,6 @@ var TestStyles = {
 	ctx.setCssAttr("color", "yellow");
 	ctx.setCssAttr("background", "blue");
       }
-      return null;
     }
   },
   ".gen-adj-test a~b":{
@@ -75,13 +72,13 @@ var TestStyles = {
     "background-color":"#CCCCCC"
   },
   ".test-stripe li":{
-    "color":function(pcontext){
-      var nth = pcontext.getChildIndex();
+    "color":function(ctx){
+      var nth = ctx.getChildIndex();
       return (nth % 2 === 0)? "white" : "orange";
     },
-    onload:function(scontext){
-      var nth = scontext.getChildIndex();
-      return (nth % 2 === 0)? {"background-color":"red"} : {"background-color":"blue"};
+    onload:function(ctx){
+      var nth = ctx.getChildIndex();
+      ctx.setCssAttr("background-color", (nth % 2 === 0)? "red" : "blue");
     }
   },
   ".test-before::before":{
