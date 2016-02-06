@@ -1,6 +1,6 @@
 /*!
  nehan.js
- Copyright (C) 2010 - 2015 Watanabe Masaki<lambda.watanabe[at]gmail.com>
+ Copyright (C) 2010 - 2016 Watanabe Masaki<lambda.watanabe[at]gmail.com>
  repository: https://github.com/tategakibunko/nehan.js
  url: http://tb.antiscroll.com/
 
