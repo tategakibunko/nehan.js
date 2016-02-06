@@ -1,3 +1,0 @@
-Nehan.BorderParser = (function(){
-})();
-
