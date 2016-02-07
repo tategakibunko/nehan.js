@@ -14659,7 +14659,7 @@ Nehan.Style = (function(){
    @return {boolean}
    */
   Style.prototype.isPre = function(){
-    return this.whiteSpace === "pre";
+    return this.whiteSpace === "pre" || this.whiteSpace === "pre-wrap" || this.whiteSpace === "pre-line";
   };
   /**
    @memberof Nehan.Style
