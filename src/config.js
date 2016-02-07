@@ -162,7 +162,8 @@ Nehan.Config = {
     "text-orientation",
     "text-combine-upright",
     "width",
-    "word-break"
+    "word-break",
+    "white-space"
   ],
 
   /**
