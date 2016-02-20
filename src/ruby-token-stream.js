@@ -44,6 +44,15 @@ Nehan.RubyTokenStream = (function(){
 	rbs = this._parseRb(token.getContent());
       }
     }
+    // rb is empty, but rt is defined, use rt as rb.
+    if(rbs.length === 0 && rt !== null){
+      rbs = this._parseRb(rt.getContent());
+      rt = new Nehan.Tag("rt", "&nbsp;");
+    }
+    // rb is available, but rt is not defined, define empty rt.
+    if(rbs.length > 0 && rt === null){
+      rt = new Nehan.Tag("rt", "&nbsp;");
+    }
     return new Nehan.Ruby(rbs, rt);
   };
 

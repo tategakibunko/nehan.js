@@ -118,6 +118,20 @@ Nehan.Ruby = (function(){
    @param flow {Nehan.BoxFlow}
    @param font {Nehan.Font}
    @param letter_spacing {int}
+   @return {int}
+   */
+  Ruby.prototype.getRtAdvance = function(flow, font, letter_spacing){
+    var str = this.getRtString();
+    if(!str || str === "&nbsp;"){
+      return 0;
+    }
+    return this.rtFontSize * str.length;
+  };
+  /**
+   @memberof Nehan.Ruby
+   @param flow {Nehan.BoxFlow}
+   @param font {Nehan.Font}
+   @param letter_spacing {int}
    */
   Ruby.prototype.setMetrics = function(flow, font, letter_spacing){
     this.rtFontSize = Nehan.Display.getRtFontSize(font.size);
@@ -125,7 +139,7 @@ Nehan.Ruby = (function(){
       rb.setMetrics(flow, font);
       return ret + rb.getAdvance(flow, letter_spacing);
     }, 0);
-    var advance_rt = this.rtFontSize * this.getRtString().length;
+    var advance_rt = this.getRtAdvance();
     this.advanceSize = advance_rbs;
     if(advance_rt > advance_rbs){
       var ctx_space = Math.ceil((advance_rt - advance_rbs) / 2);
