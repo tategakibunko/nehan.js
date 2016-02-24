@@ -711,6 +711,9 @@ Nehan.Char = (function(){
       this._setVertCnv("&#x2014;", 1, 1); // EM DASH(U+2014)
       this._setRotate(90);
       break;
+    case 65343: // FULLWIDTH LOW LINE(U+FF3F)
+      this._setRotate(90);
+      break;
     case 8593: // UPWARDS ARROW(U+2191)
       this._setVertCnv("&#x2192;", 1, 1); // RIGHTWARDS ARROW(U+2192)
       break;
