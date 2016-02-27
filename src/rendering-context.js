@@ -1513,6 +1513,10 @@ Nehan.RenderingContext = (function(){
     return this.getMarkupName() === "body";
   };
 
+  RenderingContext.prototype.isListBody = function(){
+    return this.getMarkupName() === "li-body";
+  };
+
   RenderingContext.prototype.isInline = function(){
     return (
       this.style.isInline() ||
@@ -1523,6 +1527,9 @@ Nehan.RenderingContext = (function(){
 
   RenderingContext.prototype.isInlineRoot = function(){
     if(this.isBody()){
+      return true;
+    }
+    if(this.isListBody()){
       return true;
     }
     if(this.parent && this.parent.style !== this.style){
