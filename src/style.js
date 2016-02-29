@@ -666,6 +666,9 @@ Nehan.Style = (function(){
    @param value {css_value}
    */
   Style.prototype.setCssAttr = function(name, value){
+    if(!value){
+      console.warn("Style::setCssAttr, invalid value %o for %s", value, name);
+    }
     var entry = Nehan.CssParser.formatEntry(name, value);
     var target_css = this.isManagedCssProp(entry.getPropName())? this.managedCss : this.unmanagedCss;
     target_css.add(entry.getPropName(), entry.getValue());
