@@ -1193,7 +1193,7 @@ Nehan.Style = (function(){
     var is_vert = this.isTextVertical();
     css.display = "block";
     if(this.font){
-      Nehan.Obj.copy(css, this.font.getCss());
+      Nehan.Obj.copy(css, this.font.getCss(this.isRoot()? null : this.getParentFont()));
     }
     if(this.parent && this.getMarkupName() !== "body"){
       Nehan.Obj.copy(css, this.parent.flow.getCss());
@@ -1238,8 +1238,8 @@ Nehan.Style = (function(){
       Nehan.Obj.copy(css, this.flow.getCss());
       css["line-height"] = this.getFontSize() + "px";
     }
-    if(this.font){
-      Nehan.Obj.copy(css, this.font.getCss());
+    if(!line.isInlineRoot && this.font){
+      Nehan.Obj.copy(css, this.font.getCss(this.getParentFont()));
     }
     if(this.color){
       Nehan.Obj.copy(css, this.color.getCss());

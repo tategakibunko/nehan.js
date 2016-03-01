@@ -4715,6 +4715,8 @@ Nehan.Font = (function(){
     this.lineHeight = opt.lineHeight || "inherit";
   }
 
+  var __cascading_props = ["size", "family", "weight", "style", "variant"];
+
   /**
    @memberof Nehan.Font
    @return {boolean}
@@ -4786,25 +4788,29 @@ Nehan.Font = (function(){
   };
   /**
    @memberof Nehan.Font
+   @param {Nehan.Font} - parent font
    @return {Object}
    */
-  Font.prototype.getCss = function(){
+  Font.prototype.getCss = function(parent_font){
     var css = {};
-    if(this.size){
-      css["font-size"] = this.size + "px";
-    }
-    if(this.weight){
-      css["font-weight"] = this.weight;
-    }
-    if(this.style){
-      css["font-style"] = this.style;
-    }
-    if(this.family){
-      css["font-family"] = this.family;
-    }
-    if(this.variant){
-      css["font-variant"] = this.variant;
-    }
+    __cascading_props.forEach(function(prop){
+      var css_prop = "font-" + prop;
+      var value = this[prop] || null;
+      if(!value){
+	return;
+      }
+      switch(prop){
+      case "size":
+	css[css_prop] = value + "px"; break;
+      default:
+	css[css_prop] = value; break;
+      }
+      var parent_value = parent_font? (parent_font[prop] || null) : null;
+      if(value === parent_value){
+	delete css[css_prop]; // use parent value
+      }
+    }.bind(this));
+    //console.log("Font::getCss(parent:%o) = %o", parent_font, css);
     return css;
   };
 
@@ -15454,7 +15460,7 @@ Nehan.Style = (function(){
     var is_vert = this.isTextVertical();
     css.display = "block";
     if(this.font){
-      Nehan.Obj.copy(css, this.font.getCss());
+      Nehan.Obj.copy(css, this.font.getCss(this.isRoot()? null : this.getParentFont()));
     }
     if(this.parent && this.getMarkupName() !== "body"){
       Nehan.Obj.copy(css, this.parent.flow.getCss());
@@ -15499,8 +15505,8 @@ Nehan.Style = (function(){
       Nehan.Obj.copy(css, this.flow.getCss());
       css["line-height"] = this.getFontSize() + "px";
     }
-    if(this.font){
-      Nehan.Obj.copy(css, this.font.getCss());
+    if(!line.isInlineRoot && this.font){
+      Nehan.Obj.copy(css, this.font.getCss(this.getParentFont()));
     }
     if(this.color){
       Nehan.Obj.copy(css, this.color.getCss());
