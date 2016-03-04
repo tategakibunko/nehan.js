@@ -4213,7 +4213,7 @@ Nehan.ComplexSelector = (function(){
 
   ComplexSelector.prototype._normalizeKey = function(key){
     key = (key instanceof RegExp)? "/" + key.source + "/" : key;
-    return Nehan.Utils.trim(key).toLowerCase().replace(/\s+/g, " ");
+    return Nehan.Utils.trim(key).replace(/\s+/g, " ");
   };
 
   return ComplexSelector;
@@ -18970,7 +18970,7 @@ Nehan.RenderingContext = (function(){
       extent = 0;
     } else if(this.style.isTextEmphaEnable()){
       extent = this.style.getEmphaTextBlockExtent();
-    } else if(this.style.markup.name === "ruby"){
+    } else if(this.style.getMarkupName() === "ruby"){
       extent = this.style.getRubyTextBlockExtent();
     }
     var text_box = new Nehan.Box({

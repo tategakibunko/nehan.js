@@ -877,7 +877,7 @@ Nehan.RenderingContext = (function(){
       extent = 0;
     } else if(this.style.isTextEmphaEnable()){
       extent = this.style.getEmphaTextBlockExtent();
-    } else if(this.style.markup.name === "ruby"){
+    } else if(this.style.getMarkupName() === "ruby"){
       extent = this.style.getRubyTextBlockExtent();
     }
     var text_box = new Nehan.Box({

@@ -83,7 +83,7 @@ Nehan.ComplexSelector = (function(){
 
   ComplexSelector.prototype._normalizeKey = function(key){
     key = (key instanceof RegExp)? "/" + key.source + "/" : key;
-    return Nehan.Utils.trim(key).toLowerCase().replace(/\s+/g, " ");
+    return Nehan.Utils.trim(key).replace(/\s+/g, " ");
   };
 
   return ComplexSelector;
