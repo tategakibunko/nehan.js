@@ -339,7 +339,7 @@ Nehan.Config = {
 
   /**
    default header font size table
-   @type {Array.<String>}
+   @type {Object}
    */
   headerFontSizes:{
     h1:"2rem",
@@ -349,6 +349,12 @@ Nehan.Config = {
     h5:"1rem",
     h6:"1rem"
   },
+
+  /**
+   default header line height
+   @type {Float}
+   */
+  headerLineHeight:1.4,
 
   /**
    default single tag(like img, br, hr etc) list.
@@ -12232,8 +12238,14 @@ Nehan.DefaultStyle = (function(){
     };
   };
   return {
-    getHeaderMargin : function(ctx){
-      return __header_margin(ctx);
+    setHeaderStyle : function(ctx, header_rank){
+      var header_name = "h" + header_rank;
+      ctx.getMarkup().setAlias(header_name);
+      ctx.setCssAttr("font-size", Nehan.Config.headerFontSizes[header_name]);
+      ctx.setCssAttr("font-family", Nehan.Config.gothicFontFamily);
+      ctx.setCssAttr("font-weight", "bold");
+      ctx.setCssAttr("line-height", Nehan.Config.headerLineHeight);
+      ctx.setCssAttr("margin", __header_margin(ctx));
     },
     create : function(){
       return {
@@ -12416,7 +12428,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":Nehan.Config.headerFontSizes.h1,
 	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-weight":"bold",
-	  "line-height":"1.4",
+	  "line-height":Nehan.Config.headerLineHeight,
 	  "margin":__header_margin
 	},
 	"h2":{
@@ -12424,7 +12436,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":Nehan.Config.headerFontSizes.h2,
 	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-weight":"bold",
-	  "line-height":"1.4",
+	  "line-height":Nehan.Config.headerLineHeight,
 	  "margin":__header_margin
 	},
 	"h3":{
@@ -12432,7 +12444,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":Nehan.Config.headerFontSizes.h3,
 	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-weight":"bold",
-	  "line-height":"1.4",
+	  "line-height":Nehan.Config.headerLineHeight,
 	  "margin":__header_margin
 	},
 	"h4":{
@@ -12440,7 +12452,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":Nehan.Config.headerFontSizes.h4,
 	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-weight":"bold",
-	  "line-height":"1.4",
+	  "line-height":Nehan.Config.headerLineHeight,
 	  "margin":__header_margin
 	},
 	"h5":{
@@ -12448,7 +12460,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-size":Nehan.Config.headerFontSizes.h5,
 	  "font-weight":"bold",
 	  "font-family":Nehan.Config.gothicFontFamily,
-	  "line-height":"1.4",
+	  "line-height":Nehan.Config.headerLineHeight,
 	  "margin":__header_margin
 	},
 	"h6":{
@@ -12456,7 +12468,7 @@ Nehan.DefaultStyle = (function(){
 	  "font-weight":"bold",
 	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-size":Nehan.Config.headerFontSizes.h6,
-	  "line-height":"1.4",
+	  "line-height":Nehan.Config.headerLineHeight,
 	  "margin":__header_margin
 	},
 	"head":{
@@ -12719,7 +12731,7 @@ Nehan.DefaultStyle = (function(){
 	},
 	"th":{
 	  "display":"table-cell",
-	  "line-height":"1.4",
+	  "line-height":Nehan.Config.headerLineHeight,
 	  "border-width":"1px",
 	  "border-color":__table_border_color,
 	  "border-collapse":"inherit",

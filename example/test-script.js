@@ -358,7 +358,7 @@ var Script = {
   ].join("<br>"),
 
   "header":[
-    "<h1>h1h1h1</h1>",
+    "<h1>header level1 header level1 header level1</h1>",
     "<h2>h2h2h2</h2>",
     "<h2>h2h2h2.2</h2>",
     "<h3>h3h3h3</h3>",

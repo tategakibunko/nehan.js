@@ -303,7 +303,7 @@ Nehan.Config = {
 
   /**
    default header font size table
-   @type {Array.<String>}
+   @type {Object}
    */
   headerFontSizes:{
     h1:"2rem",
@@ -313,6 +313,12 @@ Nehan.Config = {
     h5:"1rem",
     h6:"1rem"
   },
+
+  /**
+   default header line height
+   @type {Float}
+   */
+  headerLineHeight:1.4,
 
   /**
    default single tag(like img, br, hr etc) list.
