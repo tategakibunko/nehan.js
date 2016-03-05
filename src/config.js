@@ -290,6 +290,31 @@ Nehan.Config = {
   defaultFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','Meiryo','メイリオ','IPA明朝','IPA Mincho','ＭＳ 明朝','MS Mincho',monospace",
 
   /**
+   default mincho font family
+   @default "'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','Meiryo','メイリオ','IPA明朝','IPA Mincho','ＭＳ 明朝','MS Mincho', monospace"
+   */
+  minchoFontFamily:"'ヒラギノ明朝 Pro W3','Hiragino Mincho Pro','HiraMinProN-W3','Meiryo','メイリオ','IPA明朝','IPA Mincho','ＭＳ 明朝','MS Mincho',monospace",
+
+  /**
+   default gothic font family
+   @default "'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace"
+   */
+  gothicFontFamily:"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+
+  /**
+   default header font size table
+   @type {Array.<String>}
+   */
+  headerFontSizes:{
+    h1:"2rem",
+    h2:"1.714rem",
+    h3:"1.28rem",
+    h4:"1.071rem",
+    h5:"1rem",
+    h6:"1rem"
+  },
+
+  /**
    default single tag(like img, br, hr etc) list.
 
    @memberof Nehan.Config

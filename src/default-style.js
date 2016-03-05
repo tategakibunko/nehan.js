@@ -16,6 +16,9 @@ Nehan.DefaultStyle = (function(){
     };
   };
   return {
+    getHeaderMargin : function(ctx){
+      return __header_margin(ctx);
+    },
     create : function(){
       return {
 	//-------------------------------------------------------
@@ -194,49 +197,49 @@ Nehan.DefaultStyle = (function(){
 	//-------------------------------------------------------
 	"h1":{
 	  "display":"block",
-	  "font-size":"2rem",
-	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-size":Nehan.Config.headerFontSizes.h1,
+	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-weight":"bold",
 	  "line-height":"1.4",
 	  "margin":__header_margin
 	},
 	"h2":{
 	  "display":"block",
-	  "font-size":"1.714rem",
-	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-size":Nehan.Config.headerFontSizes.h2,
+	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-weight":"bold",
 	  "line-height":"1.4",
 	  "margin":__header_margin
 	},
 	"h3":{
 	  "display":"block",
-	  "font-size":"1.28rem",
-	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-size":Nehan.Config.headerFontSizes.h3,
+	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-weight":"bold",
 	  "line-height":"1.4",
 	  "margin":__header_margin
 	},
 	"h4":{
 	  "display":"block",
-	  "font-size":"1.071rem",
-	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-size":Nehan.Config.headerFontSizes.h4,
+	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-weight":"bold",
 	  "line-height":"1.4",
 	  "margin":__header_margin
 	},
 	"h5":{
 	  "display":"block",
-	  "font-size":"1rem",
+	  "font-size":Nehan.Config.headerFontSizes.h5,
 	  "font-weight":"bold",
-	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
+	  "font-family":Nehan.Config.gothicFontFamily,
 	  "line-height":"1.4",
 	  "margin":__header_margin
 	},
 	"h6":{
 	  "display":"block",
 	  "font-weight":"bold",
-	  "font-family":"'Meiryo','メイリオ','Hiragino Kaku Gothic Pro','ヒラギノ角ゴ Pro W3','Osaka','ＭＳ Ｐゴシック', monospace",
-	  "font-size":"1rem",
+	  "font-family":Nehan.Config.gothicFontFamily,
+	  "font-size":Nehan.Config.headerFontSizes.h6,
 	  "line-height":"1.4",
 	  "margin":__header_margin
 	},
