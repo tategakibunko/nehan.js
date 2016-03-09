@@ -6785,7 +6785,7 @@ Nehan.SectionTreeConverter = (function(){
     createToc : function(toc_ctx, tree){
       return {
 	tocPos:toc_ctx.toString(),
-	title:tree.getTitle(),
+	title:Nehan.Utils.trim(tree.getTitle()),
 	pageNo:tree.getPageNo(),
 	headerId:tree.getHeaderId()
       };
