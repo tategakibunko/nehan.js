@@ -185,9 +185,9 @@ var TestStyles = {
     "border-radius":"50%",
     "background-color":"skyblue"
   },
-  ".lst-circled-digit li":{
+  ".lst-circled-digit > li":{
     "list-style-type":function(ctx){
-      var index = ctx.style.getChildIndex();
+      var index = ctx.getChildIndex();
       return String.fromCharCode(0x2460 + index);
     }
   },
