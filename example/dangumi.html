@@ -12,7 +12,7 @@
     <link href="../css/nehan.css" rel="stylesheet">
     <style type="text/css">
     body{ margin:2em 3em }
-    hr{ border-style:none; border-color:#dedede; border-width:1px 0 0 0; margin:16px 0; }
+    hr{ border-style:solid; border-color:#dedede; border-width:1px 0 0 0; margin:16px 0; }
     </style>
   </head>
   <body>
@@ -78,12 +78,13 @@
       var text = document.querySelector("#text").innerHTML;
       var result = document.querySelector("#result");
       var page_document = new Nehan.Document();
+      var width = $("#result").width();
       page_document
 	.setContent(text)
 	.setStyle("body", {
 	  flow:"tb-rl",
 	  color:"#505050",
-	  width:500,
+	  width:width,
 	  height:350,
 	  fontSize:16
 	})
