@@ -10191,7 +10191,7 @@ Nehan.ListStyleType = (function(){
    @param count {int}
    @return {String}
    */
-  ListStyleType.prototype.getMarkerHtml = function(flow, count){
+  ListStyleType.prototype.getMarkerHtml = function(flow, count, opt){
     var text = this.getMarkerText(count);
     if(this.isZenkaku()){
       return Nehan.Html.tagWrap("span", text, {
@@ -10349,10 +10349,11 @@ Nehan.ListStyle = (function(){
    @return {String}
    */
   ListStyle.prototype.getMarkerHtml = function(flow, count, opt){
+    opt = opt || {};
     if(this.image !== null){
-      return this.image.getMarkerHtml(flow, count, opt || {});
+      return this.image.getMarkerHtml(flow, count, opt);
     }
-    var html = this.type.getMarkerHtml(flow, count);
+    var html = this.type.getMarkerHtml(flow, count, opt);
     if(html === "" && this.isOutside()){
       return "&nbsp;";
     }

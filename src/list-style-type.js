@@ -69,7 +69,7 @@ Nehan.ListStyleType = (function(){
    @param count {int}
    @return {String}
    */
-  ListStyleType.prototype.getMarkerHtml = function(flow, count){
+  ListStyleType.prototype.getMarkerHtml = function(flow, count, opt){
     var text = this.getMarkerText(count);
     if(this.isZenkaku()){
       return Nehan.Html.tagWrap("span", text, {
