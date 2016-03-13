@@ -257,9 +257,9 @@ Nehan.Config = {
 
    @memberof Nehan.Config
    @type {Float}
-   @default 0.35
+   @default 0.3
    */
-  defaultListSpacingRate:0.35,
+  defaultListSpacingRate:0.3,
   
   /**
    box-flow set for "vert" and "hori".
