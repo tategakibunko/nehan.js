@@ -10167,7 +10167,13 @@ Nehan.ListStyleType = (function(){
    @return {boolean}
    */
   ListStyleType.prototype.isIncremental = function(){
-    return (!this.isNone() && !this.isMark());
+    if(this.isDecimal()){
+      return true;
+    }
+    if(Nehan.Cardinal.getTableByName(this.type)){
+      return true;
+    }
+    return false;
   };
   /**
    @memberof Nehan.ListStyleType
@@ -10214,12 +10220,15 @@ Nehan.ListStyleType = (function(){
     if(this.isMark()){
       return __marker_text[this.type] || "";
     }
-    count = Math.max(1, count);
-    var digit = this._getMarkerDigitString(count);
-    return digit + "."; // add period as postfix.
+    if(this.isIncremental()){
+      count = Math.max(1, count);
+      var digit = this._getMarkerCounterString(count);
+      return digit + "."; // add period as postfix.
+    }
+    return this.type;
   };
 
-  ListStyleType.prototype._getMarkerDigitString = function(decimal){
+  ListStyleType.prototype._getMarkerCounterString = function(decimal){
     if(this.type === "decimal"){
       return decimal.toString(10);
     }
@@ -17118,7 +17127,7 @@ Nehan.OutsideListItemGenerator = (function(){
   };
 
   OutsideListItemGenerator.prototype._createListMarkerGenerator = function(context, list_context, list_index){
-    var content = context.parent.style.getListMarkerHtml(list_index + 1);
+    var content = context.style.getListMarkerHtml(list_index + 1);
     //console.log("marker html:%s", content);
     var marker_markup = new Nehan.Tag("::marker", content);
     var marker_style = context.createChildStyle(marker_markup, {
