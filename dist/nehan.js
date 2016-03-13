@@ -251,6 +251,15 @@ Nehan.Config = {
    @default 0.5
    */
   defaultEmphaTextRate:0.5,
+
+  /**
+   default rate of text-emphasis font size.
+
+   @memberof Nehan.Config
+   @type {Float}
+   @default 0.35
+   */
+  defaultListSpacingRate:0.35,
   
   /**
    box-flow set for "vert" and "hori".
@@ -10199,13 +10208,15 @@ Nehan.ListStyleType = (function(){
    */
   ListStyleType.prototype.getMarkerHtml = function(flow, count, opt){
     var text = this.getMarkerText(count);
-    if(this.isZenkaku()){
-      return Nehan.Html.tagWrap("span", text, {
-	"class":"tcy"
-      });
-    }
-    if(flow.isTextVertical() && this.isIncremental()){
-      return Nehan.Html.tagWrap("::marker", "<word>" + text + "</word>");
+    if(this.isIncremental()){
+      if(this.isZenkaku()){
+	return Nehan.Html.tagWrap("span", text, {
+	  "class":"tcy"
+	});
+      }
+      if(flow.isTextVertical()){
+	return Nehan.Html.tagWrap("::marker", "<word>" + text + "</word>");
+      }
     }
     return text;
   };
@@ -10222,8 +10233,8 @@ Nehan.ListStyleType = (function(){
     }
     if(this.isIncremental()){
       count = Math.max(1, count);
-      var digit = this._getMarkerCounterString(count);
-      return digit + "."; // add period as postfix.
+      var counter = this._getMarkerCounterString(count);
+      return counter + "."; // add period as postfix.
     }
     return this.type;
   };
@@ -13114,12 +13125,6 @@ Nehan.DefaultStyle = (function(){
 	},
 	"ol ul":{
 	  margin:{before:"0"}
-	},
-	//-------------------------------------------------------
-	// list marker
-	//-------------------------------------------------------
-	"li::marker":{
-	  padding:{end:"0.3em"}
 	},
 	//-------------------------------------------------------
 	// other utility classes
@@ -18542,9 +18547,9 @@ Nehan.RenderingContext = (function(){
       var marker_tag = new Nehan.Tag("::marker");
       var marker_option = this.createListMarkerOption(item_style);
       var marker_html = this.style.getListMarkerHtml(index + 1, marker_option);
+      //console.log("marker_html:%s", marker_html);
       marker_tag.setContent(marker_html);
       var marker_style = item_context.createTmpChildStyle(marker_tag);
-      //console.log("marker style:%o", marker_style);
       var marker_context = item_context.createChildContext(marker_style);
       var marker_box = new Nehan.InlineGenerator(marker_context).yield();
       var marker_measure = marker_box? marker_box.getLayoutMeasure() : 0;
@@ -18552,6 +18557,7 @@ Nehan.RenderingContext = (function(){
       indent_size = Math.max(indent_size, marker_measure);
     }.bind(this));
 
+    indent_size = Math.max(this.style.getFontSize(), Math.floor((1 + Nehan.Config.defaultListSpacingRate) * indent_size));
     //console.info("indent size:%d, body size:%d", indent_size, (this.style.contentMeasure - indent_size));
 
     return {

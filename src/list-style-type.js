@@ -77,13 +77,15 @@ Nehan.ListStyleType = (function(){
    */
   ListStyleType.prototype.getMarkerHtml = function(flow, count, opt){
     var text = this.getMarkerText(count);
-    if(this.isZenkaku()){
-      return Nehan.Html.tagWrap("span", text, {
-	"class":"tcy"
-      });
-    }
-    if(flow.isTextVertical() && this.isIncremental()){
-      return Nehan.Html.tagWrap("::marker", "<word>" + text + "</word>");
+    if(this.isIncremental()){
+      if(this.isZenkaku()){
+	return Nehan.Html.tagWrap("span", text, {
+	  "class":"tcy"
+	});
+      }
+      if(flow.isTextVertical()){
+	return Nehan.Html.tagWrap("::marker", "<word>" + text + "</word>");
+      }
     }
     return text;
   };
@@ -100,8 +102,8 @@ Nehan.ListStyleType = (function(){
     }
     if(this.isIncremental()){
       count = Math.max(1, count);
-      var digit = this._getMarkerCounterString(count);
-      return digit + "."; // add period as postfix.
+      var counter = this._getMarkerCounterString(count);
+      return counter + "."; // add period as postfix.
     }
     return this.type;
   };

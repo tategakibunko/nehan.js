@@ -215,6 +215,15 @@ Nehan.Config = {
    @default 0.5
    */
   defaultEmphaTextRate:0.5,
+
+  /**
+   default rate of text-emphasis font size.
+
+   @memberof Nehan.Config
+   @type {Float}
+   @default 0.35
+   */
+  defaultListSpacingRate:0.35,
   
   /**
    box-flow set for "vert" and "hori".

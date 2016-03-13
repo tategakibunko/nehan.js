@@ -97,6 +97,11 @@ var Snipet = {
     "<li>あいうえお</li>",
     "<li>かきくけこ</li>",
     "<li>さしすせそ</li>",
+    "</ol>",
+    "<ol class='lst-circled-digit'>",
+    "<li>あいうえお</li>",
+    "<li>かきくけこ</li>",
+    "<li>さしすせそ</li>",
     "</ol>"
   ].join("\n"),
 

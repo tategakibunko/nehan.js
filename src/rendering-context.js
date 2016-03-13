@@ -353,9 +353,9 @@ Nehan.RenderingContext = (function(){
       var marker_tag = new Nehan.Tag("::marker");
       var marker_option = this.createListMarkerOption(item_style);
       var marker_html = this.style.getListMarkerHtml(index + 1, marker_option);
+      //console.log("marker_html:%s", marker_html);
       marker_tag.setContent(marker_html);
       var marker_style = item_context.createTmpChildStyle(marker_tag);
-      //console.log("marker style:%o", marker_style);
       var marker_context = item_context.createChildContext(marker_style);
       var marker_box = new Nehan.InlineGenerator(marker_context).yield();
       var marker_measure = marker_box? marker_box.getLayoutMeasure() : 0;
@@ -363,6 +363,7 @@ Nehan.RenderingContext = (function(){
       indent_size = Math.max(indent_size, marker_measure);
     }.bind(this));
 
+    indent_size = Math.max(this.style.getFontSize(), Math.floor((1 + Nehan.Config.defaultListSpacingRate) * indent_size));
     //console.info("indent size:%d, body size:%d", indent_size, (this.style.contentMeasure - indent_size));
 
     return {
