@@ -19,6 +19,12 @@ Nehan.PseudoClassSelector = (function(){
    */
   PseudoClassSelector.prototype.test = function(style){
     switch(this.name){
+    case ":nth-child":
+      if(this.args.length === 0){
+	return false;
+      }
+      var nth = parseInt(this.args[0].name, 10);
+      return style.isNthChild(nth);
     case ":first-child": return style.isFirstChild();
     case ":last-child": return style.isLastChild();
     case ":first-of-type": return style.isFirstOfType();
