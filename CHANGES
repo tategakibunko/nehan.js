@@ -10,6 +10,7 @@ version 5.5.1
 ========================
 o Add Nehan.Config.mathjax for configuration of MathJax typesetting.
 o Support word-break for software hyphen(&shy;).
+o Support nth-child pseudo-class.
 * Fix hyphenation bug in some case.
 * Fix syntax error of shorthand css for font.
 * Fix nth-child order for some cases.
