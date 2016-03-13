@@ -93,4 +93,9 @@ describe("SelectorLexer", function(){
     expect(tokens[0].pseudo.args[1] instanceof Nehan.CompoundSelector).toBe(true);
     expect(tokens[0].pseudo.args[2] instanceof Nehan.CompoundSelector).toBe(true);
   });
+
+  it("pseudo-class and pseudo-element", function(){
+    var tokens = new Nehan.SelectorLexer("li:nth-child(1)::before").getTokens();
+    console.log(tokens);
+  });
 });

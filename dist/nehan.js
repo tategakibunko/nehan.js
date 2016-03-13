@@ -3824,10 +3824,10 @@ Nehan.CompoundSelector = (function(){
 
 Nehan.SelectorLexer = (function(){
   /**
-     @memberof Nehan
-     @class SelectorLexer
-     @classdesc lexer of css selector
-     @constructor
+   @memberof Nehan
+   @class SelectorLexer
+   @classdesc lexer of css selector
+   @constructor
   */
   function SelectorLexer(src){
     this.buff = this._normalize(src);
