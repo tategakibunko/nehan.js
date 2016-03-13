@@ -79,15 +79,15 @@ Nehan.ListStyleType = (function(){
     var text = this.getMarkerText(count);
     if(this.isIncremental()){
       if(this.isZenkaku()){
-	return Nehan.Html.tagWrap("span", text, {
+	return Nehan.Html.tagWrap("::marker", Nehan.Html.tagWrap("span", text, {
 	  "class":"tcy"
-	});
+	}));
       }
       if(flow.isTextVertical()){
-	return Nehan.Html.tagWrap("::marker", "<word>" + text + "</word>");
+	return Nehan.Html.tagWrap("::marker", Nehan.Html.tagWrap("word", text));
       }
     }
-    return text;
+    return Nehan.Html.tagWrap("::marker", text);
   };
   /**
    @memberof Nehan.ListStyleType
