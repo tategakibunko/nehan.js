@@ -36,7 +36,8 @@ Nehan.CompoundSelector = (function(){
      @param opt.id {String}
      @param opt.classes {Array<String>}
      @param opt.attrs {Array<Nehan.AttrSelector>}
-     @param opt.pseudo {Nehan.PseudoSelector}
+     @param opt.pseudoClass {Nehan.PseudoClassSelector}
+     @param opt.pseudoElement {Nehan.PseudoElementSelector}
      @description <pre>
 
      1. name selector
@@ -67,7 +68,8 @@ Nehan.CompoundSelector = (function(){
     this.id = opt.id || null;
     this.classes = opt.classes || [];
     this.attrs = opt.attrs || [];
-    this.pseudo = opt.pseudo || null;
+    this.pseudoClass = opt.pseudoClass || null;
+    this.pseudoElement = opt.pseudoElement || null;
     this.classes.sort();
   }
   
@@ -102,8 +104,8 @@ Nehan.CompoundSelector = (function(){
     if(this.attrs.length > 0 && !this._testAttrs(style)){
       return false;
     }
-    // pseudo-element, pseudo-class selector
-    if(this.pseudo && !this.pseudo.test(style)){
+    // pseudo-class selector
+    if(this.pseudoClass && !this.pseudoClass.test(style)){
       return false;
     }
     return true;
@@ -198,8 +200,8 @@ Nehan.CompoundSelector = (function(){
    @return {int}
    */
   CompoundSelector.prototype.getPseudoClassSpec = function(){
-    if(this.pseudo){
-      return this.pseudo.hasPseudoElement()? 0 : 1;
+    if(this.pseudoClass && !this.pseudoElement){
+      return 1;
     }
     return 0;
   };

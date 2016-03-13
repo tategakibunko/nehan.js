@@ -3545,48 +3545,27 @@ Nehan.AttrSelector = (function(){
 })();
 
 
-Nehan.PseudoSelector = (function(){
+Nehan.PseudoClassSelector = (function(){
   /**
    @memberof Nehan
-   @class PseudoSelector
+   @class PseudoClassSelector
    @classdesc abstraction of css pseudo element or pseudo class selector
    @constructor
    @param expr {String}
    @param args {Array.<Nehan.CompoundSelector>}
-   @example
-   * var ps = new PseudoSelector("::first-letter").hasPseudoElement(); // true
    */
-  function PseudoSelector(expr, args){
+  function PseudoClassSelector(expr, args){
     this.name = expr;
     this.args = args || [];
   }
 
   /**
-   @memberof Nehan.PseudoSelector
-   @return {boolean}
-   */
-  PseudoSelector.prototype.hasPseudoElement = function(){
-    return (this.name === "::before" ||
-	    this.name === "::after" ||
-	    this.name === "::first-letter" ||
-	    this.name === "::first-line" ||
-	    this.name === "::marker");
-  };
-  /**
-   @memberof Nehan.PseudoSelector
+   @memberof Nehan.PseudoClassSelector
    @param style {Nehan.Style}
    @return {boolean}
    */
-  PseudoSelector.prototype.test = function(style){
+  PseudoClassSelector.prototype.test = function(style){
     switch(this.name){
-      // pseudo-element
-    case "::before": return true;
-    case "::after": return true;
-    case "::first-letter": return !style.isMarkupEmpty();
-    case "::first-line": return !style.isMarkupEmpty();
-    case "::marker": return !style.isMarkupEmpty();
-
-      // pseudo-class
     case ":first-child": return style.isFirstChild();
     case ":last-child": return style.isLastChild();
     case ":first-of-type": return style.isFirstOfType();
@@ -3602,7 +3581,39 @@ Nehan.PseudoSelector = (function(){
     return false;
   };
 
-  return PseudoSelector;
+  return PseudoClassSelector;
+})();
+
+
+Nehan.PseudoElementSelector = (function(){
+  /**
+   @memberof Nehan
+   @class PseudoElementSelector
+   @classdesc abstraction of css pseudo element or pseudo class selector
+   @constructor
+   @param expr {String}
+   */
+  function PseudoElementSelector(expr){
+    this.name = expr;
+  }
+
+  /**
+   @memberof Nehan.PseudoElementSelector
+   @param style {Nehan.Style}
+   @return {boolean}
+   */
+  PseudoElementSelector.prototype.test = function(style){
+    switch(this.name){
+    case "::before": return true;
+    case "::after": return true;
+    case "::first-letter": return !style.isMarkupEmpty();
+    case "::first-line": return !style.isMarkupEmpty();
+    case "::marker": return !style.isMarkupEmpty();
+    }
+    return false;
+  };
+
+  return PseudoElementSelector;
 })();
 
 
@@ -3644,7 +3655,8 @@ Nehan.CompoundSelector = (function(){
      @param opt.id {String}
      @param opt.classes {Array<String>}
      @param opt.attrs {Array<Nehan.AttrSelector>}
-     @param opt.pseudo {Nehan.PseudoSelector}
+     @param opt.pseudoClass {Nehan.PseudoClassSelector}
+     @param opt.pseudoElement {Nehan.PseudoElementSelector}
      @description <pre>
 
      1. name selector
@@ -3675,7 +3687,8 @@ Nehan.CompoundSelector = (function(){
     this.id = opt.id || null;
     this.classes = opt.classes || [];
     this.attrs = opt.attrs || [];
-    this.pseudo = opt.pseudo || null;
+    this.pseudoClass = opt.pseudoClass || null;
+    this.pseudoElement = opt.pseudoElement || null;
     this.classes.sort();
   }
   
@@ -3710,8 +3723,8 @@ Nehan.CompoundSelector = (function(){
     if(this.attrs.length > 0 && !this._testAttrs(style)){
       return false;
     }
-    // pseudo-element, pseudo-class selector
-    if(this.pseudo && !this.pseudo.test(style)){
+    // pseudo-class selector
+    if(this.pseudoClass && !this.pseudoClass.test(style)){
       return false;
     }
     return true;
@@ -3806,8 +3819,8 @@ Nehan.CompoundSelector = (function(){
    @return {int}
    */
   CompoundSelector.prototype.getPseudoClassSpec = function(){
-    if(this.pseudo){
-      return this.pseudo.hasPseudoElement()? 0 : 1;
+    if(this.pseudoClass && !this.pseudoElement){
+      return 1;
     }
     return 0;
   };
@@ -3838,7 +3851,9 @@ Nehan.SelectorLexer = (function(){
   var __rex_id = /^#[\w-_]+/;
   var __rex_class = /^\.[\w-_]+/;
   var __rex_attr = /^\[[^\]]+\]/;
-  var __rex_pseudo_ident = /^:{1,2}[\w-_]+/;
+  //var __rex_pseudo_ident = /^:{1,2}[\w-_]+/;
+  var __rex_pseudo_class_ident = /^:[\w-_]+/;
+  var __rex_pseudo_element_ident = /^::[\w-_]+/;
   var __rex_pseudo_args = /\(.*?\)/;
 
   /**
@@ -3898,7 +3913,8 @@ Nehan.SelectorLexer = (function(){
     var id = this._getId();
     var classes = this._getClasses();
     var attrs = this._getAttrs();
-    var pseudo = this._getPseudo();
+    var pseudo_class = this._getPseudoClass();
+    var pseudo_element = this._getPseudoElement();
 
     // if size of this.buff is not changed, there is no selector element.
     if(this.buff.length === buff_len_before){
@@ -3910,7 +3926,8 @@ Nehan.SelectorLexer = (function(){
       id:id,
       classes:classes,
       attrs:attrs,
-      pseudo:pseudo
+      pseudoClass:pseudo_class,
+      pseudoElement:pseudo_element
     });
   };
 
@@ -3963,17 +3980,25 @@ Nehan.SelectorLexer = (function(){
     return attrs;
   };
 
-  SelectorLexer.prototype._getPseudo = function(){
-    var pseudo_ident = this._getByRex(__rex_pseudo_ident);
+  SelectorLexer.prototype._getPseudoClass = function(){
+    var pseudo_ident = this._getByRex(__rex_pseudo_class_ident);
     if(!pseudo_ident){
       return null;
     }
     var pseudo_args_str = this._getByRex(__rex_pseudo_args);
     if(!pseudo_args_str){
-      return new Nehan.PseudoSelector(pseudo_ident);
+      return new Nehan.PseudoClassSelector(pseudo_ident);
     }
     var pseudo_args = this._getPseudoArgs(pseudo_args_str);
-    return new Nehan.PseudoSelector(pseudo_ident, pseudo_args);
+    return new Nehan.PseudoClassSelector(pseudo_ident, pseudo_args);
+  };
+
+  SelectorLexer.prototype._getPseudoElement = function(){
+    var pseudo_ident = this._getByRex(__rex_pseudo_element_ident);
+    if(!pseudo_ident){
+      return null;
+    }
+    return new Nehan.PseudoElementSelector(pseudo_ident);
   };
 
   SelectorLexer.prototype._getPseudoArgs = function(args_str){

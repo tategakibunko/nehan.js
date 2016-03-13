@@ -78,8 +78,8 @@ describe("SelectorLexer", function(){
     //console.log("pseudo-class:%o", tokens);
     expect(tokens.length).toBe(1);
     expect(tokens[0].name).toBe("a");
-    expect(tokens[0].pseudo.name).toBe(":first-child");
-    expect(tokens[0].pseudo.args.length).toBe(0);
+    expect(tokens[0].pseudoClass.name).toBe(":first-child");
+    expect(tokens[0].pseudoClass.args.length).toBe(0);
   });
 
   it("pseudo-class with args", function(){
@@ -87,15 +87,23 @@ describe("SelectorLexer", function(){
     //console.log("pseudo-class with args:%o", tokens);
     expect(tokens.length).toBe(1);
     expect(tokens[0].name).toBe("a");
-    expect(tokens[0].pseudo.name).toBe(":not");
-    expect(tokens[0].pseudo.args.length).toBe(3);
-    expect(tokens[0].pseudo.args[0] instanceof Nehan.CompoundSelector).toBe(true);
-    expect(tokens[0].pseudo.args[1] instanceof Nehan.CompoundSelector).toBe(true);
-    expect(tokens[0].pseudo.args[2] instanceof Nehan.CompoundSelector).toBe(true);
+    expect(tokens[0].pseudoClass.name).toBe(":not");
+    expect(tokens[0].pseudoClass.args.length).toBe(3);
+    expect(tokens[0].pseudoClass.args[0] instanceof Nehan.CompoundSelector).toBe(true);
+    expect(tokens[0].pseudoClass.args[0].classes[0]).toBe("foo");
+    expect(tokens[0].pseudoClass.args[1] instanceof Nehan.CompoundSelector).toBe(true);
+    expect(tokens[0].pseudoClass.args[1].classes[0]).toBe("bar");
+    expect(tokens[0].pseudoClass.args[2] instanceof Nehan.CompoundSelector).toBe(true);
+    expect(tokens[0].pseudoClass.args[2].classes[0]).toBe("baz");
   });
 
   it("pseudo-class and pseudo-element", function(){
     var tokens = new Nehan.SelectorLexer("li:nth-child(1)::before").getTokens();
-    console.log(tokens);
+    expect(tokens.length).toBe(1);
+    expect(tokens[0].name).toBe("li");
+    expect(tokens[0].pseudoClass.name).toBe(":nth-child");
+    expect(tokens[0].pseudoClass.args.length).toBe(1);
+    expect(tokens[0].pseudoClass.args[0].name).toBe("1");
+    expect(tokens[0].pseudoElement.name).toBe("::before");
   });
 });

@@ -51,7 +51,7 @@ describe("CompoundSelector", function(){
   it("CompoundSelector.test(:pseudo-class)", function(){
     var selector = new Nehan.CompoundSelector({
       name:"div",
-      pseudo:new Nehan.PseudoSelector(":first-child")
+      pseudoClass:new Nehan.PseudoClassSelector(":first-child")
     });
     var tag = new Nehan.Tag("<div>");
     tag.setFirstChild(true); // normally, this attribute is set by Nehan.TokenStream

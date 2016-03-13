@@ -14,7 +14,9 @@ Nehan.SelectorLexer = (function(){
   var __rex_id = /^#[\w-_]+/;
   var __rex_class = /^\.[\w-_]+/;
   var __rex_attr = /^\[[^\]]+\]/;
-  var __rex_pseudo_ident = /^:{1,2}[\w-_]+/;
+  //var __rex_pseudo_ident = /^:{1,2}[\w-_]+/;
+  var __rex_pseudo_class_ident = /^:[\w-_]+/;
+  var __rex_pseudo_element_ident = /^::[\w-_]+/;
   var __rex_pseudo_args = /\(.*?\)/;
 
   /**
@@ -74,7 +76,8 @@ Nehan.SelectorLexer = (function(){
     var id = this._getId();
     var classes = this._getClasses();
     var attrs = this._getAttrs();
-    var pseudo = this._getPseudo();
+    var pseudo_class = this._getPseudoClass();
+    var pseudo_element = this._getPseudoElement();
 
     // if size of this.buff is not changed, there is no selector element.
     if(this.buff.length === buff_len_before){
@@ -86,7 +89,8 @@ Nehan.SelectorLexer = (function(){
       id:id,
       classes:classes,
       attrs:attrs,
-      pseudo:pseudo
+      pseudoClass:pseudo_class,
+      pseudoElement:pseudo_element
     });
   };
 
@@ -139,17 +143,25 @@ Nehan.SelectorLexer = (function(){
     return attrs;
   };
 
-  SelectorLexer.prototype._getPseudo = function(){
-    var pseudo_ident = this._getByRex(__rex_pseudo_ident);
+  SelectorLexer.prototype._getPseudoClass = function(){
+    var pseudo_ident = this._getByRex(__rex_pseudo_class_ident);
     if(!pseudo_ident){
       return null;
     }
     var pseudo_args_str = this._getByRex(__rex_pseudo_args);
     if(!pseudo_args_str){
-      return new Nehan.PseudoSelector(pseudo_ident);
+      return new Nehan.PseudoClassSelector(pseudo_ident);
     }
     var pseudo_args = this._getPseudoArgs(pseudo_args_str);
-    return new Nehan.PseudoSelector(pseudo_ident, pseudo_args);
+    return new Nehan.PseudoClassSelector(pseudo_ident, pseudo_args);
+  };
+
+  SelectorLexer.prototype._getPseudoElement = function(){
+    var pseudo_ident = this._getByRex(__rex_pseudo_element_ident);
+    if(!pseudo_ident){
+      return null;
+    }
+    return new Nehan.PseudoElementSelector(pseudo_ident);
   };
 
   SelectorLexer.prototype._getPseudoArgs = function(args_str){
