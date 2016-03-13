@@ -18,7 +18,7 @@ describe("ListStyleType", function(){
 
   it("ListStyleType.isIncremental", function(){
     expect(new Nehan.ListStyleType("decimal").isIncremental()).toBe(true);
-    expect(new Nehan.ListStyleType("decimal-leasing-zero").isIncremental()).toBe(true);
+    expect(new Nehan.ListStyleType("decimal-leading-zero").isIncremental()).toBe(true);
     expect(new Nehan.ListStyleType("lower-alpha").isIncremental()).toBe(true);
     expect(new Nehan.ListStyleType("none").isIncremental()).toBe(false);
     expect(new Nehan.ListStyleType("disc").isIncremental()).toBe(false);
