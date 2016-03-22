@@ -21,6 +21,18 @@ Nehan.RenderingContext = (function(){
   }
 
   // -----------------------------------------------
+  // utility functions
+  // -----------------------------------------------
+  var __char_count_of_elements = function(elements){
+    return elements.reduce(function(total, element){
+      if(!element.charCount && element.elements.length > 0){
+	return total + __char_count_of_elements(element.elements);
+      }
+      return total + (element.charCount || 0);
+    }, 0);
+  };
+
+  // -----------------------------------------------
   // [add]
   // -----------------------------------------------
   RenderingContext.prototype.addPage = function(page){
@@ -749,6 +761,8 @@ Nehan.RenderingContext = (function(){
     var elements = opt.elements || this.layoutContext.getBlockElements();
     var measure = (typeof opt.measure !== "undefined")? opt.measure : this.layoutContext.getInlineMaxMeasure();
     var extent = this.getBlockBoxOutputExtent(opt.extent || null);
+    var block_char_count = __char_count_of_elements(elements);
+
     var box = new Nehan.Box({
       display:((this.style.display === "inline-block")? this.style.display : "block"),
       type:"block",
@@ -758,9 +772,7 @@ Nehan.RenderingContext = (function(){
       elements:elements,
       content:((typeof opt.content !== "undefined")? opt.content : null),
       classes:this.createBlockBoxClasses(),
-      charCount:elements.reduce(function(total, element){
-	return total + (element.charCount || 0);
-      }, 0),
+      charCount:block_char_count,
       breakAfter:this.layoutContext.isBreakAfter(),
       pushed:this.style.isPushed(),
       pulled:this.style.isPulled()
@@ -788,6 +800,9 @@ Nehan.RenderingContext = (function(){
       return this.yieldPageBreak();
     }
     var line_size = this.style.flow.getBoxSize(measure, max_extent);
+    var line_char_count = opt.charCount || this.layoutContext.getInlineCharCount();
+    //console.log("[%s]line char count:%d", this._name, line_char_count);
+
     var line = new Nehan.Box({
       type:"line-block",
       display:"inline",
@@ -795,7 +810,7 @@ Nehan.RenderingContext = (function(){
       context:this,
       elements:elements,
       classes:this.createLineBoxClasses(),
-      charCount:(opt.charCount || this.layoutContext.getInlineCharCount()),
+      charCount:line_char_count,
       edge:((this.style.edge && !is_inline_root)? this.style.edge : null), // edge of root line is disabled because it's already included by parent block.,
       content:opt.content || null
     });
@@ -881,6 +896,9 @@ Nehan.RenderingContext = (function(){
     } else if(this.style.getMarkupName() === "ruby"){
       extent = this.style.getRubyTextBlockExtent();
     }
+    var text_char_count = this.layoutContext.getInlineCharCount();
+    //console.log("[%s]text char count:%d", this._name, text_char_count);
+
     var text_box = new Nehan.Box({
       size:this.style.flow.getBoxSize(measure, extent),
       context:this,
@@ -888,7 +906,7 @@ Nehan.RenderingContext = (function(){
       display:"inline",
       elements:elements,
       classes:["nehan-text-block"].concat(this.style.markup.getClasses()),
-      charCount:this.layoutContext.getInlineCharCount(),
+      charCount:text_char_count,
       content:(typeof opt.content !== "undefined")? opt.content : null
     });
     text_box.maxFontSize = this.layoutContext.getInlineMaxFontSize() || this.style.getFontSize();
