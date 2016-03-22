@@ -25,7 +25,7 @@ Nehan.RenderingContext = (function(){
   // -----------------------------------------------
   var __char_count_of_elements = function(elements){
     return elements.reduce(function(total, element){
-      if(!element.charCount && element.elements.length > 0){
+      if(!element.charCount && element.elements && element.elements.length > 0){
 	return total + __char_count_of_elements(element.elements);
       }
       return total + (element.charCount || 0);
