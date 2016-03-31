@@ -177,7 +177,7 @@ Nehan.VertEvaluator = (function(){
 
   // for example, if we use <div> instead, parent bg-color is not inherited.
   VertEvaluator.prototype._evalCharWithBr = function(line, chr){
-    chr.withBr = true;
+    chr.withBr = chr.withoutBr? false : true;
     return document.createTextNode(Nehan.Html.unescape(chr.getData(line.getFlow())));
   };
 
@@ -215,10 +215,14 @@ Nehan.VertEvaluator = (function(){
   };
 
   VertEvaluator.prototype._evalEmphaSrc = function(line, chr){
-    return this._createElement("span", {
-      content:chr.getData(line.getFlow()),
+    var wrap = this._createElement("span", {
+      css:{display:"inline-block"},
       className:"nehan-empha-src"
     });
+    chr.withoutBr = true;
+    var body = this._evalChar(line, chr);
+    wrap.appendChild(body);
+    return wrap;
   };
 
   VertEvaluator.prototype._evalEmphaText = function(line, chr){
