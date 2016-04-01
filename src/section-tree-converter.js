@@ -25,7 +25,7 @@
  */
 Nehan.SectionTreeConverter = (function(){
   var default_callbacks = {
-    onClickLink : function(toc){
+    onClickLink : function(toc, evt){
       return false;
     },
     createToc : function(toc_ctx, tree){
@@ -68,8 +68,8 @@ Nehan.SectionTreeConverter = (function(){
     var li = callbacks.createChild(toc);
     var link = callbacks.createLink(toc);
     if(link){
-      link.onclick = function(){
-	return callbacks.onClickLink(toc);
+      link.onclick = function(evt){
+	return callbacks.onClickLink(toc, evt);
       };
       li.appendChild(link);
     }
