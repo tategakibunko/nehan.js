@@ -55,8 +55,6 @@
 
 <h2>Install</h2>
 
-<p>Include nehan.js, nehan.css.</p>
-
 <div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-markup">&lt;link rel="stylesheet" href="/path/to/nehan.css"&gt;
 &lt;script type="text/javascript" src="/path/to/nehan.js"&gt;&lt;/script&gt;</code></pre></div></div></div>
 
@@ -125,21 +123,8 @@
 
 <p>You can set global style by <code>Nehan.setStyle</code>.</p>
 
-<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript"><span class="comment">// style for 'doc' local.</span>
-doc.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">p</span><span class="delimiter">"</span></span>, {
-  <span class="key">margin</span>:{<span class="key">after</span>:<span class="string"><span class="delimiter">"</span><span class="content">1em</span><span class="delimiter">"</span></span>}
-});
-
-<span class="comment">// define 'global' style.</span>
-Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">h1</span><span class="delimiter">"</span></span>, {
+<div class="code-container"><div class="CodeRay"><div class="code"><pre class="highlight"><code class="language-javascript">Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">h1</span><span class="delimiter">"</span></span>, {
   <span class="key"><span class="delimiter">"</span><span class="content">font-size</span><span class="delimiter">"</span></span>:<span class="string"><span class="delimiter">"</span><span class="content">3em</span><span class="delimiter">"</span></span>
-});
-
-<span class="comment">// set all width of paged-media to 80% of screen.</span>
-Nehan.setStyle(<span class="string"><span class="delimiter">"</span><span class="content">body</span><span class="delimiter">"</span></span>, {
-  <span class="key"><span class="delimiter">"</span><span class="content">width</span><span class="delimiter">"</span></span>:<span class="keyword">function</span>(){
-    <span class="keyword">return</span> Math.floor(screen.width * <span class="integer">80</span> / <span class="integer">100</span>);
-  }
 });</code></pre></div></div></div>
 
 <h2>Selector Callback</h2>
