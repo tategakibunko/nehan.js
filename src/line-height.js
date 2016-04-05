@@ -4,7 +4,7 @@
 Nehan.LineHeight = (function(){
   return {
     /**
-     @memberof Nehan.Baseline
+     @memberof Nehan.LineHeight
      @param flow {Nehan.BoxFlow}
      @param line {Nehan.Box} - target line object
      @param line_height {Number} - target line height(not px, rate only)
