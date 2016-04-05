@@ -6819,7 +6819,7 @@ Nehan.OutlineContextParser = (function(){
  */
 Nehan.SectionTreeConverter = (function(){
   var default_callbacks = {
-    onClickLink : function(toc){
+    onClickLink : function(toc, evt){
       return false;
     },
     createToc : function(toc_ctx, tree){
