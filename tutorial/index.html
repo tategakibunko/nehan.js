@@ -83,6 +83,7 @@
     <span class="comment">// called for each page output.</span>
     <span class="function">onPage</span>: <span class="keyword">function</span>(page, ctx){
       console.log(<span class="string"><span class="delimiter">"</span><span class="content">onPage:%o</span><span class="delimiter">"</span></span>, page);
+      <span class="comment">// append generated page</span>
       target.appendChild(page.element);
     },
     <span class="function">onComplete</span>: <span class="keyword">function</span>(time, ctx){
