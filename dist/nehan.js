@@ -19044,12 +19044,12 @@ Nehan.RenderingContext = (function(){
       // set line-height
       Nehan.LineHeight.set(this.style.flow, line, line_height);
 
-      // set vertical-align(currently 'baseline' only)
-      Nehan.VerticalAlign.setBaseline(this.style.flow, line);
-
       // increment line no from block level.
       this.layoutContext.incBlockLineNo();
     }
+
+    // set vertical-align(currently 'baseline' only)
+    Nehan.VerticalAlign.setBaseline(this.style.flow, line);
 
     // if <div><span>[long text]</span></div>,
     // 'span' is only-child of 'div', and responsible for text-justify of [long text].
