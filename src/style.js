@@ -570,10 +570,6 @@ Nehan.Style = (function(){
    @return {boolean}
    */
   Style.prototype.isHyphenationEnable = function(){
-    var line_break = this.getCssAttr("line-break", "strict");
-    if(line_break === "strict"){
-      return true;
-    }
     var word_break = this.getWordBreak();
     return word_break.isHyphenationEnable();
   };
