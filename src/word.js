@@ -6,7 +6,7 @@ Nehan.Word = (function(){
       var part_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, head_part));
       //console.log("original:%s, head_part:%s(%d) for %d", word.data, head_part, part_measure, measure);
       if(part_measure <= measure){
-	var head_word = new Nehan.Word(head_part + "-", true);
+	var head_word = new Nehan.Word(head_part, true);
 	head_word.bodySize = measure;
 	return head_word;
       }
