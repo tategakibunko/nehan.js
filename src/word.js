@@ -6,7 +6,7 @@ Nehan.Word = (function(){
       var part_measure = Math.ceil(Nehan.TextMetrics.getMeasure(font, head_part));
       //console.log("original:%s, head_part:%s(%d) for %d", word.data, head_part, part_measure, measure);
       if(part_measure <= measure){
-	var head_word = new Nehan.Word(head_part, true);
+	var head_word = new Nehan.Word(head_part + "-", true);
 	head_word.bodySize = measure;
 	return head_word;
       }
@@ -256,7 +256,7 @@ Nehan.Word = (function(){
       head_word = __cut_word_by_size(this, font, measure);
       //console.log("result:[%s]", head_word.getData(flow));
     }
-    var rest_str = this.data.slice(head_word.data.length);
+    var rest_str = this.data.slice(head_word.data.replace(/-$/, "").length);
     if(rest_str === ""){
       return this;
     }
