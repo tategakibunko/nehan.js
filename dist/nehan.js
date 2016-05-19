@@ -32,7 +32,7 @@
  @namespace Nehan
  */
 var Nehan = Nehan || {};
-Nehan.version = "5.5.1";
+Nehan.version = "5.5.2";
 
 /**
  system configuration
@@ -20562,7 +20562,11 @@ Nehan.Document = (function(){
    * doc.setStyle("body", {fontSize:"16px"});
    */
   Document.prototype.setStyle = function(key, value){
-    this.styles[key] = value;
+    var target = this.styles[key] || {};
+    for(var prop in value){
+      target[prop] = value[prop];
+    }
+    this.styles[key] = target;
     return this;
   };
 
