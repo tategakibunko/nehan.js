@@ -398,6 +398,7 @@ Nehan.Config = {
     ensp:0.5,   // &ensp;
     emsp:1.0    // &emsp;
   },
+
   /**
    @memberof Nehan.Config
    @type {Object}
@@ -406,6 +407,19 @@ Nehan.Config = {
     maxRetryCount:3,
     retryWait:300
   },
+
+  /**
+   lexing pattern for word token.
+
+   @memberof Nehan.Config
+   @type {RegExp}
+   */
+  // \u0021-\u007E, block = Basic Latin(without \u0026, \u003B)
+  // \u00C0-\u02A8, block = IPA Extensions
+  // \u2000-\u206F, block = General Punctuation
+  // \uFB00-\uFB06, block = Alphabetic Presentation Forms(but latin only)
+  rexWord:/^[\u0021-\u0025\u0027-\u003A\u003C-\u007E\u00C0-\u02A8\u2000-\u206F\uFB00-\uFB06]+/,
+
   /**
    format tag content(vertical only)
 

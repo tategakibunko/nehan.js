@@ -5,13 +5,6 @@ Nehan.TextLexer = (function (){
   var __rex_digit = /^\d+/;
   var __rex_digit_group = /^(?:\d+[.:/])+\d+(?!\d)/;
   var __rex_money = /^(?:\d+,)+\d+/;
-
-  // latin word range
-  // \u0021-\u007E, block = Basic Latin(without \u0026, \u003B)
-  // \u00C0-\u02A8, block = IPA Extensions
-  // \u2000-\u206F, block = General Punctuation
-  // \uFB00-\uFB06, block = Alphabetic Presentation Forms(but latin only)
-  var __rex_word = /^[\u0021-\u0025\u0027-\u003A\u003C-\u007E\u00C0-\u02A8\u2000-\u206F\uFB00-\uFB06]+/;
   var __rex_char_ref = /^&.+?;/;
   var __rex_half_single_tcy = /^[a-zA-Z0-9!?]/;
   var __typographic_ligature_refs = [
@@ -166,7 +159,7 @@ Nehan.TextLexer = (function (){
   };
 
   TextLexer.prototype._matchWord = function(buff){
-    return this._match(__rex_word, buff || null);
+    return this._match(Nehan.Config.rexWord, buff || null);
   };
 
   TextLexer.prototype._matchCharRef = function(buff){

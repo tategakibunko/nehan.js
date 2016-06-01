@@ -6,6 +6,10 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 5.5.3
+========================
+o Add Nehan.Config.rexWord(lexing rule of word token).
+
 version 5.5.2 2016/5/20
 ========================
 * Fix invalid updation(Document.setStyle).
