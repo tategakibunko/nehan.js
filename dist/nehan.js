@@ -16241,7 +16241,7 @@ Nehan.BlockGenerator = (function(){
     }
     // if break-before available, page-break but only once.
     if(this.context.isBreakBefore()){
-      //consoe.log("break before");
+      //console.log("break before");
       return null;
     }
     while(this.hasNext()){
@@ -19767,10 +19767,6 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.isBreakBefore = function(){
-    // can't break before first page
-    if(this.documentContext.getPageNo() === 0){
-      return false;
-    }
     return this.isFirstOutput() && this.style.isBreakBefore();
   };
 

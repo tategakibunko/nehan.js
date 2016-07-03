@@ -1562,10 +1562,6 @@ Nehan.RenderingContext = (function(){
   };
 
   RenderingContext.prototype.isBreakBefore = function(){
-    // can't break before first page
-    if(this.documentContext.getPageNo() === 0){
-      return false;
-    }
     return this.isFirstOutput() && this.style.isBreakBefore();
   };
 

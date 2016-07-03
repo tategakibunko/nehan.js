@@ -9,6 +9,7 @@ Mark "!": change that can break compatibility with older version
 version 5.5.3
 ========================
 o Add Nehan.Config.rexWord(lexing rule of word token).
+* Break page when break-before is set to 'always' even if DocumentContext.pageNo is zero.
 
 version 5.5.2 2016/5/20
 ========================

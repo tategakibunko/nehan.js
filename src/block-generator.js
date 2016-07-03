@@ -27,7 +27,7 @@ Nehan.BlockGenerator = (function(){
     }
     // if break-before available, page-break but only once.
     if(this.context.isBreakBefore()){
-      //consoe.log("break before");
+      //console.log("break before");
       return null;
     }
     while(this.hasNext()){
