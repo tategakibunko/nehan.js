@@ -45,6 +45,7 @@
   white-space:nowrap;
 }
 .nehan-vert-glyph {
+  height:1em; /* for MS Edge browser */
   max-height:1em; /* for MS Edge browser */
 }
 .nehan-inline.nehan-inline-tb-rl,
