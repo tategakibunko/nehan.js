@@ -44,9 +44,12 @@
 .nehan-inline span{
   white-space:nowrap;
 }
-.nehan-vert-glyph {
-  height:1em; /* for MS Edge browser */
-  max-height:1em; /* for MS Edge browser */
+/* for MS Edge brosser */
+@supports (-ms-accelerator:true) {
+  .nehan-vert-glyph {
+    height:1em;
+    max-height:1em;
+  }
 }
 .nehan-inline.nehan-inline-tb-rl,
 .nehan-inline.nehan-inline-tb-lr{
