@@ -100,12 +100,12 @@
   float:left;
 }
 .nehan-text-combine-upright{
-  -ms-writing-mode:tb-rl;
-  -webkit-writing-mode:vertical-rl;
-  writing-mode:vertical-rl;
-  -webkit-text-combine:horizontal;
+  text-combine-upright:all;
+  -webkit-text-combine-upright:all;
   -ms-text-combine-horizontal:all;
+
+  /* for backward compatibility */
+  -webkit-text-combine:horizontal;
   text-combine:horizontal;
   text-combine-horizontal:all;
-  /* text-combine-upright:all; */
 }
