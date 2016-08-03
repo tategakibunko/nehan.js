@@ -6,6 +6,10 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 5.5.4
+========================
+o Support text-combine-upright for firefox(>=48) and ie(>=11).
+
 version 5.5.3 2016/07/03
 ========================
 o Add Nehan.Config.rexWord(lexing rule of word token).

@@ -721,7 +721,8 @@ Nehan.Env = (function(){
   );
   var __is_text_combine_enable = (
     (__client.isChrome() && __version >= 47) ||
-    //(__client.isIE() && __version >= 11) ||
+    (__client.isFirefox() && __version >= 48) ||
+    (__client.isIE() && __version >= 11) ||
     (__client.isSafari() && __version >= 9)
   );
 
@@ -17841,6 +17842,8 @@ Nehan.VertEvaluator = (function(){
     }); // NOTE(or TODO):clearfix in older version after this code
   };
 
+  // TODO: support digits format
+  // text-combine-upright: none | all | [digits <integer>?]
   VertEvaluator.prototype._evalTcy = function(line, tcy){
     var classes = Nehan.Env.isTextCombineEnable? ["nehan-tcy", "nehan-text-combine-upright"] : ["nehan-tcy"];
     return this._createElement("div", {

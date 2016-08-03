@@ -118,6 +118,8 @@ Nehan.VertEvaluator = (function(){
     }); // NOTE(or TODO):clearfix in older version after this code
   };
 
+  // TODO: support digits format
+  // text-combine-upright: none | all | [digits <integer>?]
   VertEvaluator.prototype._evalTcy = function(line, tcy){
     var classes = Nehan.Env.isTextCombineEnable? ["nehan-tcy", "nehan-text-combine-upright"] : ["nehan-tcy"];
     return this._createElement("div", {
