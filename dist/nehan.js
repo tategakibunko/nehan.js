@@ -32,7 +32,7 @@
  @namespace Nehan
  */
 var Nehan = Nehan || {};
-Nehan.version = "5.5.3";
+Nehan.version = "5.5.4";
 
 /**
  system configuration
@@ -10028,6 +10028,7 @@ Nehan.Ruby = (function(){
   Ruby.prototype.getCssVertRb = function(line){
     var css = {};
     css["css-float"] = "left";
+    css["width"] = "1em";
     if(this.padding){
       Nehan.Obj.copy(css, this.padding.getCss());
     }

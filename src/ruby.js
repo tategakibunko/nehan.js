@@ -94,6 +94,7 @@ Nehan.Ruby = (function(){
   Ruby.prototype.getCssVertRb = function(line){
     var css = {};
     css["css-float"] = "left";
+    css["width"] = "1em";
     if(this.padding){
       Nehan.Obj.copy(css, this.padding.getCss());
     }
