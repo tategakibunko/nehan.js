@@ -14630,7 +14630,7 @@ Nehan.Style = (function(){
       return true;
     }
     if(this.parent && this.contentMeasure > this.getRootStyle().contentMeasure){
-      console.warn("too large content %o skipped:(measure = %d)", this, this.contentMeasure);
+      console.warn("too large content %o skipped:(measure = %d, root measure = %d)", this, this.contentMeasure, this.getRootStyle().contentMeasure);
       return true;
     }
     if(this.markup.isCloseTag()){
