@@ -6,6 +6,9 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 5.5.5
+========================
+
 version 5.5.4 2016/09/21
 ========================
 o Support text-combine-upright for firefox(>=48) and ie(>=11).
