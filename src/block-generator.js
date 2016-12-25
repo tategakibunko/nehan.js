@@ -84,6 +84,12 @@ Nehan.BlockGenerator = (function(){
     var child_style = this.context.createChildStyle(token);
     var child_gen;
 
+    // if empty anchor, store page pos.
+    if(child_style.isEmptyAnchor()){
+      this.context.addAnchor(child_style.getAnchorName());
+      return this._getNext();
+    }
+
     // if disabled style, just skip
     if(child_style.isDisabled()){
       //console.warn("disabled style:%o(%s):", child_style, child_style.getMarkupName());

@@ -188,8 +188,8 @@ Nehan.LayoutEvaluator = (function(){
     if(anchor_name){
       link.classes.push("nehan-anchor-link");
       var page_no = this.context.getAnchorPageNo(anchor_name);
-      if(page_no){
-	link.context.style.markup.setAttr("data-page", page_no);
+      if(page_no !== null){
+	link.context.style.markup.setAttr("data-page-no", page_no);
       }
     }
     return this._evalLinkElement(line, link);

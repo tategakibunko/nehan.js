@@ -2380,13 +2380,13 @@ Nehan.Tag = (function (){
    @return {boolean}
    */
   Tag.prototype.isAnchorTag = function(){
-    return this.name === "a" && this.getTagAttr("name") !== null;
+    return this.name === "a" && this.getAttr("name") !== null;
   };
   /**
    @memberof Nehan.Tag
    */
   Tag.prototype.isAnchorLinkTag = function(){
-    var href = this.getTagAttr("href");
+    var href = this.getAttr("href");
     return this.name === "a" && href && href.indexOf("#") >= 0;
   };
   /**
@@ -14793,6 +14793,13 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {boolean}
    */
+  Style.prototype.isEmptyAnchor = function(){
+    return this.markup && this.markup.isAnchorTag() && this.isMarkupEmpty();
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
   Style.prototype.isPageBreak = function(){
     switch(this.getMarkupName()){
     case "page-break": case "end-page":
@@ -15184,8 +15191,7 @@ Nehan.Style = (function(){
    @return {String}
    */
   Style.prototype.getAnchorName = function(){
-    var href = this.markup.getAttr("href") || "";
-    return new Nehan.Uri(href).getAnchorName();
+    return this.markup.getAttr("name") || "";
   };
   /**
    @memberof Nehan.Style
@@ -16300,6 +16306,12 @@ Nehan.BlockGenerator = (function(){
     var child_style = this.context.createChildStyle(token);
     var child_gen;
 
+    // if empty anchor, store page pos.
+    if(child_style.isEmptyAnchor()){
+      this.context.addAnchor(child_style.getAnchorName());
+      return this._getNext();
+    }
+
     // if disabled style, just skip
     if(child_style.isDisabled()){
       //console.warn("disabled style:%o(%s):", child_style, child_style.getMarkupName());
@@ -16459,6 +16471,12 @@ Nehan.InlineGenerator = (function(){
 
     // if not text, it's tag token, inherit style
     var child_style = this.context.createChildStyle(token);
+
+    // if empty anchor, store page pos.
+    if(child_style.isEmptyAnchor()){
+      this.context.addAnchor(child_style.getAnchorName());
+      return this._getNext();
+    }
 
     if(child_style.isDisabled()){
       //console.warn("disabled style:%o(%s)", child_style, child_style.getMarkupName());
@@ -17695,8 +17713,8 @@ Nehan.LayoutEvaluator = (function(){
     if(anchor_name){
       link.classes.push("nehan-anchor-link");
       var page_no = this.context.getAnchorPageNo(anchor_name);
-      if(page_no){
-	link.context.style.markup.setAttr("data-page", page_no);
+      if(page_no !== null){
+	link.context.style.markup.setAttr("data-page-no", page_no);
       }
     }
     return this._evalLinkElement(line, link);

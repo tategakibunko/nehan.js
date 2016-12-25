@@ -431,6 +431,13 @@ Nehan.Style = (function(){
    @memberof Nehan.Style
    @return {boolean}
    */
+  Style.prototype.isEmptyAnchor = function(){
+    return this.markup && this.markup.isAnchorTag() && this.isMarkupEmpty();
+  };
+  /**
+   @memberof Nehan.Style
+   @return {boolean}
+   */
   Style.prototype.isPageBreak = function(){
     switch(this.getMarkupName()){
     case "page-break": case "end-page":
@@ -822,8 +829,7 @@ Nehan.Style = (function(){
    @return {String}
    */
   Style.prototype.getAnchorName = function(){
-    var href = this.markup.getAttr("href") || "";
-    return new Nehan.Uri(href).getAnchorName();
+    return this.markup.getAttr("name") || "";
   };
   /**
    @memberof Nehan.Style

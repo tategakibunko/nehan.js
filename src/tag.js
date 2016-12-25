@@ -281,13 +281,13 @@ Nehan.Tag = (function (){
    @return {boolean}
    */
   Tag.prototype.isAnchorTag = function(){
-    return this.name === "a" && this.getTagAttr("name") !== null;
+    return this.name === "a" && this.getAttr("name") !== null;
   };
   /**
    @memberof Nehan.Tag
    */
   Tag.prototype.isAnchorLinkTag = function(){
-    var href = this.getTagAttr("href");
+    var href = this.getAttr("href");
     return this.name === "a" && href && href.indexOf("#") >= 0;
   };
   /**

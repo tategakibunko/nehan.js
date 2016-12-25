@@ -103,6 +103,12 @@ Nehan.InlineGenerator = (function(){
     // if not text, it's tag token, inherit style
     var child_style = this.context.createChildStyle(token);
 
+    // if empty anchor, store page pos.
+    if(child_style.isEmptyAnchor()){
+      this.context.addAnchor(child_style.getAnchorName());
+      return this._getNext();
+    }
+
     if(child_style.isDisabled()){
       //console.warn("disabled style:%o(%s)", child_style, child_style.getMarkupName());
       return this._getNext(); // just skip
