@@ -17706,16 +17706,11 @@ Nehan.LayoutEvaluator = (function(){
     });
   };
 
-  // if link uri has anchor address, add page-no to dataset where the anchor is defined.
   LayoutEvaluator.prototype._evalLink = function(line, link){
     var uri = new Nehan.Uri(link.context.style.getMarkupAttr("href"));
     var anchor_name = uri.getAnchorName();
     if(anchor_name){
       link.classes.push("nehan-anchor-link");
-      var page_no = this.context.getAnchorPageNo(anchor_name);
-      if(page_no !== null){
-	link.context.style.markup.setAttr("data-page-no", page_no);
-      }
     }
     return this._evalLinkElement(line, link);
   };
