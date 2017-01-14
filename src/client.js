@@ -11,6 +11,7 @@ Nehan.Client = (function(){
     this.name = navigator.appName.toLowerCase();
     this.version = parseInt(navigator.appVersion, 10);
     this._parseUserAgent(this.userAgent);
+    //console.info("client platform:%s, name:%s, version:%s", this.platform, this.name, this.version);
   }
 
   /**
@@ -148,6 +149,11 @@ Nehan.Client = (function(){
   };
 
   Client.prototype._parseVersionNormalClient = function(user_agent, tmp_version){
+    // Android has 'Version/xx' string for OS!!
+    // [example] Mozilla/5.0 (Linux; Android 4.4.2; ???) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36
+    if(this.isAndroid()){
+      return tmp_version;
+    }
     if(user_agent.match(/version\/([\.\d]+)/)){
       return parseInt(RegExp.$1, 10);
     }

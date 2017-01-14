@@ -9,6 +9,7 @@ Mark "!": change that can break compatibility with older version
 version 5.5.5
 ========================
 * Store anchor pos even if markup content is empty(<a name='foo'></a>).
+! Fix error of user-agent detection(chrome for android).
 
 version 5.5.4 2016/09/21
 ========================
