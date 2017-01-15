@@ -8,9 +8,10 @@ Nehan.Client = (function(){
   function Client(){
     this.platform = navigator.platform.toLowerCase();
     this.userAgent = navigator.userAgent.toLowerCase();
-    this.name = navigator.appName.toLowerCase();
-    this.version = parseInt(navigator.appVersion, 10);
-    this._parseUserAgent(this.userAgent);
+    this.appName = navigator.appName.toLowerCase();
+    this.appVersion = parseInt(navigator.appVersion, 10);
+    this.name = this._parseBrowserName(this.userAgent, this.appName);
+    this.version = this._parseBrowserVersion(this.userAgent, this.appVersion);
     //console.info("client platform:%s, name:%s, version:%s", this.platform, this.name, this.version);
   }
 
@@ -120,28 +121,40 @@ Nehan.Client = (function(){
     return this.name === "firefox";
   };
 
-  Client.prototype._parseUserAgent = function(user_agent){
-    // in latest agent style of MSIE, 'Trident' is specified but 'MSIE' is not.
-    if(user_agent.indexOf("trident") >= 0 && user_agent.indexOf("msie") < 0){
-      this.name = "msie";
-      this.version = this._parseVersionPureTrident(user_agent);
-      return;
+  Client.prototype.isTrident = function(){
+    return (this.userAgent.indexOf("trident") >= 0 && this.userAgent.indexOf("msie") < 0);
+  };
+
+  Client.prototype._parseBrowserName = function(user_agent, app_name){
+    if(this.isTrident()){
+      return "msie";
     }
-    // normal desktop agent styles
-    if(user_agent.match(/(opera|chrome|safari|firefox|msie)\/?\s*(\.?\d+(?:\.\d+)*)/)){
-      this.name = RegExp.$1.toLowerCase();
-      this.version = this._parseVersionNormalClient(user_agent, parseInt(RegExp.$2, 10));
-      return;
+    if(this.isAppleMobileFamily() && user_agent.indexOf("safari") >= 0){
+      return "safari";
+    }
+    if(user_agent.match(/(opera|chrome|safari|firefox|msie)/)){
+      return RegExp.$1.toLowerCase();
+    }
+    return app_name;
+  };
+
+  Client.prototype._parseBrowserVersion = function(user_agent, app_version){
+    // in latest agent style of MSIE, 'Trident' is specified but 'MSIE' is not.
+    if(this.isTrident()){
+      return this._parseVersionTrident(user_agent);
     }
     // if iphone/ipad/ipod, and user agent is not normal desktop style
     if(this.isAppleMobileFamily()){
-      this.name = "safari";
-      this.version = this._parseVersionAppleMobileFamily(user_agent);
-      return;
+      return this._parseVersionAppleMobileFamily(user_agent);
     }
+    // normal desktop agent styles
+    if(user_agent.match(/(opera|chrome|safari|firefox|msie)\/?\s*(\.?\d+(?:\.\d+)*)/)){
+      return this._parseVersionNormalClient(user_agent, parseInt(RegExp.$2, 10));
+    }
+    return app_version;
   };
 
-  Client.prototype._parseVersionPureTrident = function(user_agent){
+  Client.prototype._parseVersionTrident = function(user_agent){
     if(user_agent.match(/rv:([\.\d]+)/)){
       return parseInt(RegExp.$1, 10);
     }
