@@ -569,6 +569,13 @@ Nehan.Client = (function(){
    @memberof Nehan.Client
    @return {boolean}
    */
+  Client.prototype.isChromeOS = function(){
+    return this.userAgent.indexOf("cros") >= 0;
+  };
+  /**
+   @memberof Nehan.Client
+   @return {boolean}
+   */
   Client.prototype.isIphone = function(){
     return this.userAgent.indexOf("iphone") >= 0 && this.platform.indexOf("nintendo") < 0;
   };
