@@ -136,6 +136,9 @@ Nehan.Client = (function(){
     if(this.isTrident()){
       return "msie";
     }
+    if(user_agent.indexOf("crios") >= 0){
+      return "chrome"; // chrome on ios
+    }
     if(this.isAppleMobileFamily() && user_agent.indexOf("safari") >= 0){
       return "safari";
     }
@@ -150,12 +153,13 @@ Nehan.Client = (function(){
     if(this.isTrident()){
       return this._parseVersionTrident(user_agent);
     }
-    // if iphone/ipad/ipod, and user agent is not normal desktop style
-    if(this.isAppleMobileFamily()){
+    // if iphone/ipad/ipod, and user agent is not normal desktop style.
+    // but skip if chrome on ios(CriOS), because version is provided by 'CriOS/[version]').
+    if(this.isAppleMobileFamily() && this.name !== "chrome"){
       return this._parseVersionAppleMobileFamily(user_agent);
     }
     // normal desktop agent styles
-    if(user_agent.match(/(opera|chrome|safari|firefox|msie)\/?\s*(\.?\d+(?:\.\d+)*)/)){
+    if(user_agent.match(/(opera|chrome|safari|firefox|msie|crios)\/?\s*(\.?\d+(?:\.\d+)*)/)){
       return this._parseVersionNormalClient(user_agent, parseInt(RegExp.$2, 10));
     }
     return app_version;
