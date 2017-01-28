@@ -6,7 +6,7 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.5.6
+version 5.5.6 2017/01/28
 ========================
 ! Fix error of user-agent detection(chrome for ios).
 
