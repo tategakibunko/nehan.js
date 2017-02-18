@@ -9225,6 +9225,7 @@ Nehan.Char = (function(){
       this._setRotate(90);
       this.hscale = this.vscale = 0.5;
       break;
+    case 65392: // HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK(U+FF70)
     case 12540: // KATAKANA-HIRAGANA PROLONGED SOUND MARK(U+30FC)
       this._setVertImg("onbiki", 1, 1); break;
     case 65293: // FULLWIDTH HYPHEN-MINUS(U+FF0D)
