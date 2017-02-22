@@ -9,7 +9,7 @@ Nehan.Env = (function(){
   var __is_transform_enable = !(__client.isIE() && __version <= 8);
   var __is_ie_vert_glyph_enable = __client.isIE() && __version >= 10;
   var __is_chrome_vert_glyph_enable = __client.isChrome() && __version >= 24 && !__client.isNintendoBrowser();
-  var __is_safari_vert_glyph_enable = __client.isSafari() && __version >= 5;
+  var __is_safari_vert_glyph_enable = (__client.isSafari() && __version >= 5) || __client.isAppleMobileFamily();
   var __is_firefox_vert_glyph_enable = __client.isFirefox() && __version >= 41;
   var __is_vertical_glyph_enable = (
     __is_chrome_vert_glyph_enable ||

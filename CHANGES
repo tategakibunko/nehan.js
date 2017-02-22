@@ -9,6 +9,7 @@ Mark "!": change that can break compatibility with older version
 version 5.5.7
 ========================
 o Use vert glyph for "HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK"(U+77F0).
+! Force enable vert glyph if device is apple mobile family.
 
 version 5.5.6 2017/01/28
 ========================
