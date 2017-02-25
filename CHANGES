@@ -10,6 +10,7 @@ version 5.5.7
 ========================
 o Use vert glyph for "HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK"(U+77F0).
 ! Force enable vert glyph if device is apple mobile family.
+! Use 'justify' for text-align of <body> by default.
 
 version 5.5.6 2017/01/28
 ========================
