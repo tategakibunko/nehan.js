@@ -83,7 +83,8 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "flow":"lr-tb",
 	  "box-sizing":"content-box",
-	  "hanging-punctuation":"allow-end"
+	  "hanging-punctuation":"allow-end",
+	  "text-align":"justify"
 	},
 	"br":{
 	  "display":"inline"

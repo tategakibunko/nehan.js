@@ -258,7 +258,7 @@ var Script = {
     "<h4>with justify</h4>",
     "<p class='ta-justify'>" + Text["middle2"] + "</p>",
     "<h4>without justify</h4>",
-    "<p>" + Text["middle2"] + "</p>"
+    "<p class='ta-start'>" + Text["middle2"] + "</p>"
   ].join(""),
 
   "iblock":[
