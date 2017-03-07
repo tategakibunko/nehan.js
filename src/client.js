@@ -132,8 +132,12 @@ Nehan.Client = (function(){
     return (this.userAgent.indexOf("trident") >= 0 && this.userAgent.indexOf("msie") < 0);
   };
 
+  Client.prototype.isEdge = function(){
+    return (this.userAgent.indexOf("edge") >= 0);
+  };
+
   Client.prototype._parseBrowserName = function(user_agent, app_name){
-    if(this.isTrident()){
+    if(this.isTrident() || this.isEdge()){
       return "msie";
     }
     if(user_agent.indexOf("crios") >= 0){
