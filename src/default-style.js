@@ -16,15 +16,6 @@ Nehan.DefaultStyle = (function(){
     };
   };
   return {
-    setHeaderStyle : function(ctx, header_rank){
-      var header_name = "h" + header_rank;
-      ctx.getMarkup().setAlias(header_name);
-      ctx.setCssAttr("font-size", Nehan.Config.headerFontSizes[header_name]);
-      ctx.setCssAttr("font-family", Nehan.Config.gothicFontFamily);
-      ctx.setCssAttr("font-weight", "bold");
-      ctx.setCssAttr("line-height", Nehan.Config.headerLineHeight);
-      ctx.setCssAttr("margin", __header_margin(ctx));
-    },
     create : function(){
       return {
 	//-------------------------------------------------------
@@ -205,7 +196,6 @@ Nehan.DefaultStyle = (function(){
 	"h1":{
 	  "display":"block",
 	  "font-size":Nehan.Config.headerFontSizes.h1,
-	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-weight":"bold",
 	  "line-height":Nehan.Config.headerLineHeight,
 	  "margin":__header_margin
@@ -213,7 +203,6 @@ Nehan.DefaultStyle = (function(){
 	"h2":{
 	  "display":"block",
 	  "font-size":Nehan.Config.headerFontSizes.h2,
-	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-weight":"bold",
 	  "line-height":Nehan.Config.headerLineHeight,
 	  "margin":__header_margin
@@ -221,7 +210,6 @@ Nehan.DefaultStyle = (function(){
 	"h3":{
 	  "display":"block",
 	  "font-size":Nehan.Config.headerFontSizes.h3,
-	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-weight":"bold",
 	  "line-height":Nehan.Config.headerLineHeight,
 	  "margin":__header_margin
@@ -229,7 +217,6 @@ Nehan.DefaultStyle = (function(){
 	"h4":{
 	  "display":"block",
 	  "font-size":Nehan.Config.headerFontSizes.h4,
-	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-weight":"bold",
 	  "line-height":Nehan.Config.headerLineHeight,
 	  "margin":__header_margin
@@ -238,14 +225,12 @@ Nehan.DefaultStyle = (function(){
 	  "display":"block",
 	  "font-size":Nehan.Config.headerFontSizes.h5,
 	  "font-weight":"bold",
-	  "font-family":Nehan.Config.gothicFontFamily,
 	  "line-height":Nehan.Config.headerLineHeight,
 	  "margin":__header_margin
 	},
 	"h6":{
 	  "display":"block",
 	  "font-weight":"bold",
-	  "font-family":Nehan.Config.gothicFontFamily,
 	  "font-size":Nehan.Config.headerFontSizes.h6,
 	  "line-height":Nehan.Config.headerLineHeight,
 	  "margin":__header_margin
