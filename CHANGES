@@ -6,11 +6,13 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.5.7
+version 5.5.7 2017/03/09
 ========================
 o Use vert glyph for "HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK"(U+77F0).
+* Fix browser detection(Microsoft Edge).
 ! Force enable vert glyph if device is apple mobile family.
 ! Use 'justify' for text-align of <body> by default.
+! Remove some default style.
 
 version 5.5.6 2017/01/28
 ========================
