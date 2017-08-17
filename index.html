@@ -1,17 +1,14 @@
 <!DOCTYPE HTML>
 <html lang="en">
   <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <meta name="description" content="nehan.js document">
     <meta name="keywords" content="nehan.js,nehan,javascript">
     <title>nehan.js doc - dynamic and logical layout engine to generate logical paged media asyncronously.</title>
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/prism/0.0.1/prism.min.css">
-<link rel="stylesheet" href="./static/semantic/semantic.min.css">
-<link rel="stylesheet" href="./static/css/main.css">
-<link rel="stylesheet" href="./static/css/nehan.css">
-
-    <meta name="generator" content="nanoc 3.8.0">
+    <link rel="stylesheet" href="./static/semantic/semantic.min.css">
+    <link rel="stylesheet" href="./static/css/main.css">
+    <link rel="stylesheet" href="./static/css/nehan.css">
   </head>
   <body>
     <script>
@@ -24,103 +21,86 @@
       ga('send', 'pageview');
     </script>
 
-    <!--
-    <header class="global-header">
-  <div class="inner">
-    <a class="logo" href="./index.html">nehan.js</a>
-    <nav class="global-nav">
-      <ul>
-	<li><a href="./tutorial">Tutorial</a></li>
-	<li><a href="http://tb.antiscroll.com/static/nehan-demo/">Markup Demo</a></li>
-      </ul>
-    </nav>
-  </div>
-    </header>
-    -->
-
     <main class="global-main">
       <div class="inner">
 	<h2 class="ui header">nehan.js
-  <div class="sub header">dynamic and logical layout engine to generate logical paged media asynchronously.</div>
-</h2>
+	  <div class="sub header">dynamic and logical layout engine to generate logical paged media asynchronously.</div>
+	</h2>
 
-<p><a href="https://github.com/tategakibunko/nehan.js" class="ui small labeled icon button"><i class="github icon"></i>Github repository</a></p>
+	<p><a href="https://github.com/tategakibunko/nehan.js" class="ui small labeled icon button"><i class="github icon"></i>Github repository</a></p>
 
-<div class="ui hidden divider"></div>
+	<div class="ui hidden divider"></div>
 
-<h3 class="ui header">Simple Demo</h3>
-<p>You can see other demos in <a href="https://github.com/tategakibunko/nehan.js/tree/master/example">example</a> directory, so please check it out!</p>
+	<h3 class="ui header">Simple Demo</h3>
+	<p>You can see other demos in <a href="https://github.com/tategakibunko/nehan.js/tree/master/example">example</a> directory, so please check it out!</p>
 
-<p>
-  <button class="ui button" id="next">next</button>
-  <button class="ui button" id="prev">prev</button>
-  <button class="ui green button" id="flip">vert &lt;-&gt; hori</button>
-</p>
-<div id="result"></div>
+	<p>
+	  <button class="ui button" id="next">next</button>
+	  <button class="ui button" id="prev">prev</button>
+	  <button class="ui green button" id="flip">vert &lt;-&gt; hori</button>
+	</p>
+	<div id="result"></div>
 
-<div id="source-text" style="display:none">
-  <h2>Paragraph</h2>
+	<div id="source-text" style="display:none">
+	  <h2>Paragraph</h2>
 
-  <div class="drop-caps">日本国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された国会における<span class="nehan-empha-dot-filled">代表者</span>を通じて行動し、われらとわれらの子孫のために諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。</div>
+	  <div class="drop-caps">日本国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された国会における<span class="nehan-empha-dot-filled">代表者</span>を通じて行動し、われらとわれらの子孫のために諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。</div>
 
-  <h2>Table Layout</h2>
-  <table>
-    <thead>
-      <tr>
-	<th>this is header1</th>
-	<th>header2</th>
-	<th>header3</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-	<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
-	<td>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</td>
-	<td>quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</td>
-      </tr>
-      <tr>
-	<td>quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</td>
-	<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
-	<td>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</td>
-      </tr>
-    </tbody>
-  </table>
+	  <h2>Table Layout</h2>
+	  <table>
+	    <thead>
+	      <tr>
+		<th>this is header1</th>
+		<th>header2</th>
+		<th>header3</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr>
+		<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
+		<td>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</td>
+		<td>quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.</td>
+	      </tr>
+	      <tr>
+		<td>quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </td>
+		<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
+		<td>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</td>
+	      </tr>
+	    </tbody>
+	  </table>
 
-  <h2>Floated Layout</h2>
+	  <h2>Floated Layout</h2>
 
-  <img style="display:block; float:start; margin-end:0.5em;" src="./static/image/tb.png.png" width="100" height="100">
-  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-  <img style="display:block; float:end;" src="./static/image/tb.png.png" width="100" height="100">
-  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+	  <img style="display:block; float:start; margin-end:0.5em;" src="./static/image/tb.png" width="100" height="100">
+	  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+	  <img style="display:block; float:end;" src="./static/image/tb.png" width="100" height="100">
+	  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-  <h2>Bullet Listing</h2>
-  <ul>
-    <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
-    <li>sed do eiusmod tempor incididunt</li>
-    <li>ut labore et dolore magna aliqua.</li>
-    <li><ul>
-	<li>Ut enim ad minim veniam, quis nostrud exercitation ullamco</li>
-	<li>laboris nisi ut aliquip ex ea commodo consequat.</li>
-	<li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</li>
-    </ul></li>
-  </ul>
+	  <h2>Bullet Listing</h2>
+	  <ul>
+	    <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
+	    <li>sed do eiusmod tempor incididunt</li>
+	    <li>ut labore et dolore magna aliqua.</li>
+	    <li><ul>
+		<li>Ut enim ad minim veniam, quis nostrud exercitation ullamco</li>
+		<li>laboris nisi ut aliquip ex ea commodo consequat.</li>
+		<li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</li>
+	    </ul></li>
+	  </ul>
 
-  <h2>Ordered Listing</h2>
-  <ol>
-    <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
-    <li>sed do eiusmod tempor incididunt</li>
-    <li>ut labore et dolore magna aliqua.</li>
-    <li><ol>
-	<li>Ut enim ad minim veniam, quis nostrud exercitation ullamco</li>
-	<li>laboris nisi ut aliquip ex ea commodo consequat.</li>
-	<li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</li>
-    </ol></li>
-  </ol>
-</div>
+	  <h2>Ordered Listing</h2>
+	  <ol>
+	    <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
+	    <li>sed do eiusmod tempor incididunt</li>
+	    <li>ut labore et dolore magna aliqua.</li>
+	    <li><ol>
+		<li>Ut enim ad minim veniam, quis nostrud exercitation ullamco</li>
+		<li>laboris nisi ut aliquip ex ea commodo consequat.</li>
+		<li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</li>
+	    </ol></li>
+	  </ol>
+	</div>
     </main>
-
-    <div class="global-footer">
-    </div>
 
     <script type="text/javascript" src="./static/js/nehan.min.js"></script>
     <script type="text/javascript">
@@ -143,9 +123,9 @@ var build = function(state){
       "flow":state.flow,
       "color":"#505050",
       "background-color":"#f0f0f0",
-      "width":640,
-      "height":480,
-      "font-size":20
+      "width":620,
+      "height":400,
+      "font-size":18
     })
     .setContent(state.text)
     .render({
@@ -182,7 +162,7 @@ document.getElementById("flip").onclick = function(){
 };
 
 build(document_state);
-</script>
+    </script>
 
   </body>
 </html>
