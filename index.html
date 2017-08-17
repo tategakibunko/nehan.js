@@ -15,35 +15,28 @@
   </head>
   <body>
     <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-  ga('create', 'UA-399060-28', 'auto');
-  ga('send', 'pageview');
+      ga('create', 'UA-399060-28', 'auto');
+      ga('send', 'pageview');
+    </script>
 
-</script>
-
+    <!--
     <header class="global-header">
   <div class="inner">
     <a class="logo" href="./index.html">nehan.js</a>
     <nav class="global-nav">
       <ul>
 	<li><a href="./tutorial">Tutorial</a></li>
-	<li><a href="http://tb.antiscroll.com/static/nehan-demo/">Demo</a></li>
+	<li><a href="http://tb.antiscroll.com/static/nehan-demo/">Markup Demo</a></li>
       </ul>
     </nav>
   </div>
-</header>
-
-<div class="ui error icon legacy-browser-alert message" style="display:none">
-  <i class="warning sign icon"></i>
-  <div class="content">
-    <div class="header">未対応のブラウザ</div>
-    <p>当サイトはお使いのブラウザに対応していません。より新しいブラウザでアクセスして下さい。</p>
-  </div>
-</div>
+    </header>
+    -->
 
     <main class="global-main">
       <div class="inner">
@@ -55,116 +48,141 @@
 
 <div class="ui hidden divider"></div>
 
-<h3 class="ui header">Example</h3>
+<h3 class="ui header">Simple Demo</h3>
+<p>You can see other demos in <a href="https://github.com/tategakibunko/nehan.js/tree/master/example">example</a> directory, so please check it out!</p>
 
-<div class="nehan-reader" data-flow="lr-tb">
-<h2>Paragraph</h2>
+<p>
+  <button class="ui button" id="next">next</button>
+  <button class="ui button" id="prev">prev</button>
+  <button class="ui green button" id="flip">vert &lt;-&gt; hori</button>
+</p>
+<div id="result"></div>
 
-<p class="drop-caps">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<div id="source-text" style="display:none">
+  <h2>Paragraph</h2>
 
-<h2>Table Layout</h2>
+  <div class="drop-caps">日本国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された国会における<span class="nehan-empha-dot-filled">代表者</span>を通じて行動し、われらとわれらの子孫のために諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。</div>
 
-<table>
-<thead>
-<tr>
-<th>this is header1</th>
-<th>header2</th>
-<th>header3</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
-<td>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</td>
-<td>quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</td>
-</tr>
-<tr>
-<td>quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</td>
-<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
-<td>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</td>
-</tr>
-</tbody>
-</table>
+  <h2>Table Layout</h2>
+  <table>
+    <thead>
+      <tr>
+	<th>this is header1</th>
+	<th>header2</th>
+	<th>header3</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+	<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
+	<td>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</td>
+	<td>quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</td>
+      </tr>
+      <tr>
+	<td>quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</td>
+	<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
+	<td>sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</td>
+      </tr>
+    </tbody>
+  </table>
 
-<h2>Floated Layout</h2>
+  <h2>Floated Layout</h2>
 
-<img style="display:block; float:start; margin-end:0.5em;" src="./static/image/tb.png.png" width="100" height="100">
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-<img style="display:block; float:end;" src="./static/image/tb.png.png" width="100" height="100">
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+  <img style="display:block; float:start; margin-end:0.5em;" src="./static/image/tb.png.png" width="100" height="100">
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+  <img style="display:block; float:end;" src="./static/image/tb.png.png" width="100" height="100">
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-<h2>Bullet Listing</h2>
-<ul>
- <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
- <li>sed do eiusmod tempor incididunt</li>
- <li>ut labore et dolore magna aliqua.</li>
- <li><ul>
- <li>Ut enim ad minim veniam, quis nostrud exercitation ullamco</li>
- <li>laboris nisi ut aliquip ex ea commodo consequat.</li>
- <li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</li>
- </ul></li>
-</ul>
+  <h2>Bullet Listing</h2>
+  <ul>
+    <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
+    <li>sed do eiusmod tempor incididunt</li>
+    <li>ut labore et dolore magna aliqua.</li>
+    <li><ul>
+	<li>Ut enim ad minim veniam, quis nostrud exercitation ullamco</li>
+	<li>laboris nisi ut aliquip ex ea commodo consequat.</li>
+	<li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</li>
+    </ul></li>
+  </ul>
 
-<h2>Ordered Listing</h2>
-<ol>
- <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
- <li>sed do eiusmod tempor incididunt</li>
- <li>ut labore et dolore magna aliqua.</li>
- <li><ol>
- <li>Ut enim ad minim veniam, quis nostrud exercitation ullamco</li>
- <li>laboris nisi ut aliquip ex ea commodo consequat.</li>
- <li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</li>
- </ol></li>
-</ol>
-
-<h2>MathJax Support</h2>
-<h3>Euler's formula</h3>
-<p><math>\[ e^{i\theta} = \cos\theta + i\sin\theta \]</math></p>
-<page-break>
-<h3>Japanese text with ruby and emphasis</h3>
-<div class="drop-caps" style="flow:flip;">日本国民は正当に<ruby>選挙<rt>せんきょ</rt></ruby>された国会における<span class="nehan-empha-dot-filled">代表者</span>を通じて行動し、われらとわれらの子孫のために諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。あいうえおかきくけこさしすせそなにぬねのはひふへほまみむめもやゆよわをん日本国民は正当に選挙された国会における代表者を通じて行動し、われらとわれらの子孫のために、諸国民との協和による成果と、わが国全土にわたって自由のもたらす恵沢を確保し、政府の行為によって再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、この憲法を確定する。</div>
+  <h2>Ordered Listing</h2>
+  <ol>
+    <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit</li>
+    <li>sed do eiusmod tempor incididunt</li>
+    <li>ut labore et dolore magna aliqua.</li>
+    <li><ol>
+	<li>Ut enim ad minim veniam, quis nostrud exercitation ullamco</li>
+	<li>laboris nisi ut aliquip ex ea commodo consequat.</li>
+	<li>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident</li>
+    </ol></li>
+  </ol>
 </div>
-
-      </div>
     </main>
-    <script type="text/x-template" id="tmpl-reader">
-  <div class="pager">
-    <button class="ui {{leftButtonColor}} left icon button"
-	    v-on="click:onClickLeft">&larr; {{{ leftButtonLabel }}}</button>
-    <div class="progress"><span class="page-no" v-text="pageNo"></span> of <span class="page-count" v-text="pageCount"></span></div>
-    <button class="ui {{rightButtonColor}} right icon button"
-	    v-on="click:onClickRight">{{{ rightButtonLabel }}} &rarr;</button>
-    <div class="ui icon buttons">
-      <button v-class="green:!isVert()" class="ui popup-enabled button" v-on="click:onClickHori" data-content="horizontal"><i class="align left icon"></i> Horizontal</button>
-      <div class="or"></div>
-      <button v-class="green:isVert()" class="ui popup-enabled button" v-on="click:onClickVert" data-content="vertical"><i class="rotated align left icon"></i> Vertical</button>
-    </div>
-  </div>
-  <div class="screen" v-el="screen"></div>
-  <div class="outline" v-el="outline"></div>
-</script>
 
     <div class="global-footer">
-</div>
+    </div>
 
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.3/fastclick.min.js"></script>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/vue/0.11.3/vue.min.js"></script>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/prism/0.0.1/prism.min.js"></script>
-<script type="text/javascript" src="./static/semantic/semantic.min.js"></script>
-<script type="text/javascript" src="./static/js/nehan.min.js"></script>
-<!--script type="text/javascript" src="./static/js/nehan.js"></script-->
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
-  });
+    <script type="text/javascript" src="./static/js/nehan.min.js"></script>
+    <script type="text/javascript">
+var text = document.getElementById("source-text").innerHTML;
+var document_state = {
+  flow:"tb-rl",
+  text:text,
+  pageIndex:0,
+  pageCount:0,
+  flow:"tb-rl"
+};
+
+var build = function(state){
+  var target_element = document.getElementById("result");
+  var page_document = new Nehan.Document();
+  state.pageIndex = 0;
+  state.pageCount = 0;
+  page_document
+    .setStyle("body", {
+      "flow":state.flow,
+      "color":"#505050",
+      "background-color":"#f0f0f0",
+      "width":640,
+      "height":480,
+      "font-size":20
+    })
+    .setContent(state.text)
+    .render({
+      onProgress:function(tree, ctx){
+	state.pageCount++;
+      },
+      onComplete:function(time){
+	console.log("time:%f msec", time);
+      }
+    });
+
+  var setPage = function(index){
+    var page = page_document.getPage(index);
+    target_element.innerHTML = "";
+    target_element.appendChild(page.element);
+  };
+
+  document.getElementById("next").onclick = function(){
+    state.pageIndex = Math.min(state.pageIndex + 1, state.pageCount - 1);
+    setPage(state.pageIndex);
+  };
+
+  document.getElementById("prev").onclick = function(){
+    state.pageIndex = Math.max(0, state.pageIndex - 1);
+    setPage(state.pageIndex);
+  };
+
+  setPage(0);
+};
+
+document.getElementById("flip").onclick = function(){
+  document_state.flow = (document_state.flow === "tb-rl")? "lr-tb" : "tb-rl";
+  build(document_state);
+};
+
+build(document_state);
 </script>
-<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
-<script type="text/javascript" src="./static/js/nehan.math.js"></script>
-<script type="text/javascript" src="./static/js/main.min.js"></script>
-<!--script type="text/javascript" src="./static/js/main.js"></script-->
 
   </body>
 </html>
