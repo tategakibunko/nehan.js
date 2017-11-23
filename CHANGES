@@ -6,6 +6,10 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
+version 5.5.8 2017/11/23
+========================
+* Remove some controll code by preprocessor.
+
 version 5.5.7 2017/03/09
 ========================
 o Use vert glyph for "HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK"(U+77F0).

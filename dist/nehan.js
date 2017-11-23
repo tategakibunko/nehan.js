@@ -1758,6 +1758,12 @@ Nehan.Html = {
    */
   normalize : function(text){
     return text
+      .replace(/\u0008/g, "") // discard BackSpace
+      .replace(/\u000B/g, "") // vertical tab
+      .replace(/\u000C/g, "") // form feed
+      .replace(/\u200B/g, "") // zero width space
+      .replace(/\u2028/g, "") // line separator
+      .replace(/\u2029/g, "") // paragraph separator
       .replace(/\r/g, "") // discard CR
       .replace(/<!--[\s\S]*?-->/g, "") // discard comment
       .replace(/<rp>[^<]*<\/rp>/gi, "") // discard rp
