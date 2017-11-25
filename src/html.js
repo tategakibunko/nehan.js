@@ -121,7 +121,7 @@ Nehan.Html = {
    */
   normalize : function(text){
     return text
-      .replace(/\u0008/g, "") // discard BackSpace
+      .replace(/\u0008/g, "") // backspace
       .replace(/\u000B/g, "") // vertical tab
       .replace(/\u000C/g, "") // form feed
       .replace(/\u200B/g, "") // zero width space
