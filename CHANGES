@@ -6,7 +6,7 @@ Mark "*": bug fixed.
 Mark "!": change that can break compatibility with older version
 ===============================================================================
 
-version 5.5.8
+version 5.5.8 2017/11/27
 ========================
 * Remove some controll code by preprocessor.
 
