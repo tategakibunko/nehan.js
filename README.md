@@ -1,5 +1,11 @@
 # nehan.js
 
+## Caution
+
+Latest version of nehan is developed at [here](https://github.com/tategakibunko/nehan).
+
+Repository name changes from `nehan.js` to `nehan`.
+
 ## Introduction
 
 nehan.js is dynamic and logical html layout engine written in javascript, especially focused on generating **logical paged media** asynchronously.
