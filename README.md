@@ -2,7 +2,7 @@
 
 ## Caution
 
-Latest version of nehan is developed at [here](https://github.com/tategakibunko/nehan).
+Latest version of nehan is developed at [https://github.com/tategakibunko/nehan](https://github.com/tategakibunko/nehan).
 
 Repository name changes from `nehan.js` to `nehan`.
 
