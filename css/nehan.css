@@ -107,8 +107,10 @@
   float:left;
 }
 .nehan-text-combine-upright{
+  /*
   writing-mode:vertical-rl;
   -webkit-writing-mode:vertical-rl;
+*/
 
   text-combine-upright:all;
   -webkit-text-combine-upright:all;
