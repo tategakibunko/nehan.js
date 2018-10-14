@@ -44,8 +44,15 @@
 .nehan-inline span{
   white-space:nowrap;
 }
-/* for MS Edge brosser */
+/* for older MS Edge */
 @supports (-ms-accelerator:true) {
+  .nehan-vert-glyph {
+    height:1em;
+    max-height:1em;
+  }
+}
+/* for newer MS Edge */
+@supports (-ms-ime-align:auto) {
   .nehan-vert-glyph {
     height:1em;
     max-height:1em;
