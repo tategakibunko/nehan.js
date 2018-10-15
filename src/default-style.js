@@ -2,6 +2,26 @@
  @namespace Nehan.DefaultStyle
  */
 Nehan.DefaultStyle = (function(){
+  var __dropcaps = {
+    "display":"block",
+    "box-sizing":"content-box",
+    "float":"start",
+    "font-size":"4em",
+    "measure":"1em",
+    "extent":"1em",
+    "padding":{before:"0.1em"},
+    "line-height":"1",
+    "onload":function(ctx){
+      if(ctx.isTextVertical()){
+	return;
+      }
+      var markup = ctx.getMarkup();
+      var font = ctx.getFont();
+      var spacing = Math.floor(font.size * 0.1);
+      var measure = Nehan.TextMetrics.getMeasure(font, markup.getContent());
+      ctx.setCssAttr("measure", (measure + spacing) + "px");
+    }
+  };
   var __table_head_bg_color = "#f9fafb";
   var __table_border_color = "rgba(34,36,38,.15)";
   var __hr_border_color = "rgba(34,36,38,.15)";
@@ -643,11 +663,20 @@ Nehan.DefaultStyle = (function(){
 	//-------------------------------------------------------
 	// text-align classes
 	//-------------------------------------------------------
+	".text.align.start":{
+	  "text-align":"start"
+	},
 	".ta-start":{
 	  "text-align":"start"
 	},
+	".text.align.center":{
+	  "text-align":"center"
+	},
 	".ta-center":{
 	  "text-align":"center"
+	},
+	".text.align.end":{
+	  "text-align":"end"
 	},
 	".ta-end":{
 	  "text-align":"end"
@@ -658,8 +687,14 @@ Nehan.DefaultStyle = (function(){
 	//-------------------------------------------------------
 	// float classes
 	//-------------------------------------------------------
+	".float.start":{
+	  "float":"start"
+	},
 	".float-start":{
 	  "float":"start"
+	},
+	".float.end":{
+	  "float":"end"
 	},
 	".float-end":{
 	  "float":"end"
@@ -772,32 +807,62 @@ Nehan.DefaultStyle = (function(){
 	//-------------------------------------------------------
 	// text emphasis
 	//-------------------------------------------------------
+	".empha.dot.filled":{
+	  "text-emphasis-style":"filled dot"
+	},
 	".empha-dot-filled":{
 	  "text-emphasis-style":"filled dot"
+	},
+	".empha.dot.open":{
+	  "text-emphasis-style":"open dot"
 	},
 	".empha-dot-open":{
 	  "text-emphasis-style":"open dot"
 	},
+	".empha.circle.filled":{
+	  "text-emphasis-style":"filled circle"
+	},
 	".empha-circle-filled":{
 	  "text-emphasis-style":"filled circle"
+	},
+	".empha.circle.open":{
+	  "text-emphasis-style":"open circle"
 	},
 	".empha-circle-open":{
 	  "text-emphasis-style":"open circle"
 	},
+	".empha.double.circle.filled":{
+	  "text-emphasis-style":"filled double-circle"
+	},
 	".empha-double-circle-filled":{
 	  "text-emphasis-style":"filled double-circle"
+	},
+	".empha.double.circle.open":{
+	  "text-emphasis-style":"open double-circle"
 	},
 	".empha-double-circle-open":{
 	  "text-emphasis-style":"open double-circle"
 	},
+	".empha.triangle.filled":{
+	  "text-emphasis-style":"filled triangle"
+	},
 	".empha-triangle-filled":{
 	  "text-emphasis-style":"filled triangle"
+	},
+	".empha.triangle.open":{
+	  "text-emphasis-style":"open triangle"
 	},
 	".empha-triangle-open":{
 	  "text-emphasis-style":"open triangle"
 	},
+	".empha.sesame.filled":{
+	  "text-emphasis-style":"filled sesame"
+	},
 	".empha-sesame-filled":{
 	  "text-emphasis-style":"filled sesame"
+	},
+	".empha.sesame.open":{
+	  "text-emphasis-style":"open sesame"
 	},
 	".empha-sesame-open":{
 	  "text-emphasis-style":"open sesame"
@@ -841,26 +906,8 @@ Nehan.DefaultStyle = (function(){
 	//-------------------------------------------------------
 	// other utility classes
 	//-------------------------------------------------------
-	".drop-caps::first-letter":{
-	  "display":"block",
-	  "box-sizing":"content-box",
-	  "float":"start",
-	  "font-size":"4em",
-	  "measure":"1em",
-	  "extent":"1em",
-	  "padding":{before:"0.1em"},
-	  "line-height":"1",
-	  "onload":function(ctx){
-	    if(ctx.isTextVertical()){
-	      return;
-	    }
-	    var markup = ctx.getMarkup();
-	    var font = ctx.getFont();
-	    var spacing = Math.floor(font.size * 0.1);
-	    var measure = Nehan.TextMetrics.getMeasure(font, markup.getContent());
-	    ctx.setCssAttr("measure", (measure + spacing) + "px");
-	  }
-	},
+	".drop-caps::first-letter":__dropcaps,
+	".dropcaps::first-letter":__dropcaps,
 	".gap-start":{
 	  "margin":{
 	    "start":"1em"
